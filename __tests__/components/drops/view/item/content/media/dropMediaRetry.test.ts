@@ -25,9 +25,9 @@ describe("probeDropMediaFailure", () => {
     [400, "definitive"],
     [403, "definitive"],
     [404, "definitive"],
-    [500, "definitive"],
-    [502, "definitive"],
-    [504, "definitive"],
+    [500, "upstream"],
+    [502, "upstream"],
+    [504, "upstream"],
   ] as const)(
     "classifies the proxy's %i answer as %s and discards the body",
     async (status, expected) => {

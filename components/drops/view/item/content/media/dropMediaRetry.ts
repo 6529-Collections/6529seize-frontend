@@ -1,18 +1,26 @@
 /**
  * - available: the proxy now answers 2xx, so the image loaded but did not
  *   decode, or appeared since the failure. It is worth one recovery attempt.
+ * - upstream: the source host failed or timed out (5xx). Worth a couple of
+ *   attempts, since the proxy keeps such failures only for a few seconds.
  * - retryable: the proxy is busy or was unreachable; try again with backoff.
- * - definitive: any other answer is final until someone asks to retry.
+ * - definitive: the proxy refused the source (4xx); final until someone asks
+ *   to retry.
  */
-export type DropMediaFailureKind = "available" | "retryable" | "definitive";
+export type DropMediaFailureKind =
+  | "available"
+  | "upstream"
+  | "retryable"
+  | "definitive";
 
 function classifyDropMediaStatus(status: number): DropMediaFailureKind {
   if (status >= 200 && status < 300) {
     return "available";
   }
-  return status === 408 || status === 429 || status === 503
-    ? "retryable"
-    : "definitive";
+  if (status === 408 || status === 429 || status === 503) {
+    return "retryable";
+  }
+  return status >= 500 ? "upstream" : "definitive";
 }
 
 /**

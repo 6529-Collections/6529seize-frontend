@@ -16,9 +16,10 @@ import {
 const RESERVED_ASPECT_RATIO = "16 / 9";
 const NATURAL_MAX_HEIGHT = "16rem";
 
-// While playing, the control stays out of the way on hover-capable devices
-// until the media is hovered or focused; touch devices always show it.
-const PLAYING_REVEAL_CLASS =
+// While playing (or before the first frame), the control stays out of the way
+// on hover-capable devices until the media is hovered or keyboard focus enters
+// it; touch devices always show it.
+const AUTO_HIDE_CLASS =
   "desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 motion-reduce:tw-transition-none";
 
 type GiphyVideoPreviewProps = {
@@ -104,13 +105,18 @@ export function GiphyVideoPreview({
   );
 }
 
-/** Pauses and resumes the animation (WCAG 2.2.2). */
+/**
+ * Pauses and resumes the animation (WCAG 2.2.2). It is mounted with the video,
+ * so no motion can play without it.
+ */
 export function GiphyPlaybackToggle({
   videoRef,
   playing,
+  autoHide,
 }: {
   readonly videoRef: RefObject<HTMLVideoElement | null>;
   readonly playing: boolean;
+  readonly autoHide: boolean;
 }) {
   const label = t(
     DEFAULT_LOCALE,
@@ -137,7 +143,7 @@ export function GiphyPlaybackToggle({
       onClick={handleClick}
       className={clsx(
         "tw-pointer-events-auto tw-absolute tw-bottom-[5px] tw-left-[5px] tw-z-30 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950/90 tw-p-0 tw-text-iron-100 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-bg-iron-700",
-        playing && PLAYING_REVEAL_CLASS
+        autoHide && AUTO_HIDE_CLASS
       )}
     >
       {playing ? (

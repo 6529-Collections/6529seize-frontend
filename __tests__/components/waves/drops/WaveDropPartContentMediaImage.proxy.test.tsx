@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createElement, forwardRef, type ComponentProps } from "react";
 import WaveDropPartContentMediaImage from "@/components/waves/drops/WaveDropPartContentMediaImage";
 
@@ -81,7 +82,7 @@ const settleProbe = async () => {
 };
 
 const getVideo = () =>
-  screen.getByLabelText("Drop media", {
+  screen.getByLabelText("Animated GIF", {
     selector: "video",
   }) as HTMLVideoElement;
 
@@ -138,12 +139,12 @@ describe("WaveDropPartContentMediaImage Giphy video", () => {
     ).toBeInTheDocument();
   });
 
-  it("offers a pause control once the animation plays", () => {
+  it("mounts the playback control with the video, before any motion", () => {
     render(<WaveDropPartContentMediaImage src={GIPHY_GIF} />);
     const video = getVideo();
-    expect(
-      screen.queryByRole("button", { name: /animation/ })
-    ).not.toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: "Play animation" });
+    // Until the first frame it stays out of the way, like the media toolbar.
+    expect(toggle.className).toContain("desktop-hover:tw-opacity-0");
 
     fireEvent.loadedMetadata(video);
     paused = false;
@@ -152,12 +153,37 @@ describe("WaveDropPartContentMediaImage Giphy video", () => {
 
     expect(pause).toHaveBeenCalledTimes(1);
     fireEvent.pause(video);
-    expect(
-      screen.getByRole("button", { name: "Play animation" })
-    ).toBeInTheDocument();
+    const pausedToggle = screen.getByRole("button", {
+      name: "Play animation",
+    });
+    // Paused after loading, the play control is always visible.
+    expect(pausedToggle.className).not.toContain("desktop-hover:tw-opacity-0");
     expect(
       screen.queryByRole("status", { name: "Loading image" })
     ).not.toBeInTheDocument();
+  });
+
+  it("reaches the playback control by keyboard and reveals it on focus", async () => {
+    const user = userEvent.setup();
+    render(<WaveDropPartContentMediaImage src={GIPHY_GIF} />);
+    fireEvent.loadedMetadata(getVideo());
+    paused = false;
+    fireEvent.play(getVideo());
+
+    await user.tab();
+    expect(
+      screen.getByRole("button", { name: "Open drop media" })
+    ).toHaveFocus();
+    await user.tab();
+    const toggle = screen.getByRole("button", { name: "Pause animation" });
+    expect(toggle).toHaveFocus();
+    // Focus inside the media group lifts the hover-only fade.
+    expect(toggle.className).toContain(
+      "group-focus-within/media:tw-opacity-100"
+    );
+    expect(toggle.className).toContain(
+      "group-focus-within/media:tw-pointer-events-auto"
+    );
   });
 
   it("shows the still without autoplay when reduced motion is preferred", () => {
@@ -182,9 +208,13 @@ describe("WaveDropPartContentMediaImage Giphy video", () => {
 
     fireEvent.error(getVideo());
 
-    expect(screen.queryByLabelText("Drop media", { selector: "video" })).toBe(
+    expect(screen.queryByLabelText("Animated GIF", { selector: "video" })).toBe(
       null
     );
+    expect(screen.queryByText("Preview unavailable")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /animation/ })
+    ).not.toBeInTheDocument();
     expect(screen.getByAltText("Drop media")).toHaveAttribute(
       "src",
       proxyUrl({ url: GIPHY_GIF, animated: "1", w: "800" })
@@ -196,7 +226,7 @@ describe("WaveDropPartContentMediaImage proxy retries", () => {
   it("leaves other external GIFs on the guarded image proxy", () => {
     render(<WaveDropPartContentMediaImage src={EXTERNAL_GIF} />);
 
-    expect(screen.queryByLabelText("Drop media", { selector: "video" })).toBe(
+    expect(screen.queryByLabelText("Animated GIF", { selector: "video" })).toBe(
       null
     );
     expect(screen.getByAltText("Drop media")).toHaveAttribute(
@@ -205,9 +235,9 @@ describe("WaveDropPartContentMediaImage proxy retries", () => {
     );
   });
 
-  it("stops after a definitive proxy failure and keeps manual retry", async () => {
+  it("stops after a definitive proxy refusal and keeps manual retry", async () => {
     jest.useFakeTimers();
-    const fetchMock = mockProbe(502);
+    const fetchMock = mockProbe(400);
     render(<WaveDropPartContentMediaImage src={EXTERNAL_GIF} />);
     const failedSrc = screen.getByAltText("Drop media").getAttribute("src");
 
@@ -349,5 +379,34 @@ describe("WaveDropPartContentMediaImage proxy retries", () => {
     );
     fireEvent.load(screen.getByAltText("Drop media"));
     expect(screen.queryByText("Preview unavailable")).not.toBeInTheDocument();
+  });
+
+  it("gives an upstream failure two retries before showing the error", async () => {
+    jest.useFakeTimers();
+    const fetchMock = mockProbe(502);
+    render(<WaveDropPartContentMediaImage src={EXTERNAL_GIF} />);
+
+    for (const delayMs of [1500, 3000]) {
+      fireEvent.error(screen.getByAltText("Drop media"));
+      await settleProbe();
+      await act(async () => {
+        jest.advanceTimersByTime(delayMs);
+      });
+    }
+    expect(screen.getByAltText("Drop media")).toHaveAttribute(
+      "src",
+      proxyUrl({
+        url: EXTERNAL_GIF,
+        animated: "1",
+        w: "800",
+        drop_media_retry: "2",
+      })
+    );
+    fireEvent.error(screen.getByAltText("Drop media"));
+    await settleProbe();
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
   });
 });

@@ -57,6 +57,15 @@ const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
 const DEGRADED_RESULT_TTL_MS = 5 * 60 * 1000;
 // Brief, so a broken image cannot be hammered and a manual retry soon works.
 const FAILURE_TTL_MS = 30 * 1000;
+// An upstream blip is only held long enough to absorb a burst of viewers.
+const UPSTREAM_FAILURE_TTL_MS = 5 * 1000;
+const UPSTREAM_FAILURE_KINDS: ReadonlySet<string> = new Set([
+  "timeout",
+  "fetch-failed",
+  "redirect-location-missing",
+  "redirect-location-invalid",
+  "too-many-redirects",
+]);
 const IMAGE_ACCEPT_HEADER =
   "image/png,image/jpeg,image/gif,image/webp,*/*;q=0.5";
 const USER_AGENT =
@@ -139,6 +148,18 @@ const parseWidth = (value: string | null): number => {
 
   return Math.min(parsed, MAX_WIDTH);
 };
+
+/** The upstream host answered unsuccessfully; this says nothing about the image. */
+class UpstreamResponseError extends Error {
+  constructor(request: string, status: number) {
+    super(`${request} failed: ${status}`);
+    this.name = "UpstreamResponseError";
+  }
+}
+
+const isUpstreamFailure = (error: unknown): boolean =>
+  error instanceof UpstreamResponseError ||
+  (error instanceof UrlGuardError && UPSTREAM_FAILURE_KINDS.has(error.kind));
 
 const ensureDefaultHttpsPort = (url: URL): void => {
   if (url.protocol !== "https:") {
@@ -298,7 +319,7 @@ const fetchImageBuffer = async (
 
   if (!response.ok) {
     await cancelResponseBody(response);
-    throw new Error(`Image request failed: ${response.status}`);
+    throw new UpstreamResponseError("Image request", response.status);
   }
 
   const contentLength = getContentLength(response);
@@ -337,7 +358,7 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
 
   if (response.status !== 206) {
     await cancelResponseBody(response);
-    throw new Error(`Image range request failed: ${response.status}`);
+    throw new UpstreamResponseError("Image range request", response.status);
   }
 
   const contentLength = getContentLength(response);
@@ -468,9 +489,12 @@ const fetchGiphyVideo = async (url: URL): Promise<Buffer> => {
     { headers: { accept: MP4_CONTENT_TYPE } },
     GIPHY_VIDEO_FETCH_OPTIONS
   );
+  if (!response.ok) {
+    await cancelResponseBody(response);
+    throw new UpstreamResponseError("Video request", response.status);
+  }
   const contentLength = getContentLength(response);
   if (
-    !response.ok ||
     getResponseContentType(response) !== MP4_CONTENT_TYPE ||
     (contentLength !== null && contentLength > VIDEO_PASSTHROUGH_MAX_BYTES)
   ) {
@@ -520,7 +544,9 @@ const runAdmittedJob = async (
     return {
       value: { kind: "error", ...describeFailure(error) },
       bytes: 0,
-      ttlMs: FAILURE_TTL_MS,
+      ttlMs: isUpstreamFailure(error)
+        ? UPSTREAM_FAILURE_TTL_MS
+        : FAILURE_TTL_MS,
     };
   } finally {
     releaseAdmission();

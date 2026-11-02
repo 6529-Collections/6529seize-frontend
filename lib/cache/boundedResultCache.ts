@@ -133,19 +133,14 @@ export class BoundedResultCache<T> {
     job: (signal: AbortSignal) => Promise<CacheableResult<T>>
   ): Flight<T> {
     const controller = new AbortController();
-    let pending: Promise<CacheableResult<T>>;
-    try {
-      pending = job(controller.signal);
-    } catch (error) {
-      // A job that throws before returning its promise fails like any other.
-      pending = Promise.reject(
-        error instanceof Error ? error : new Error(String(error))
-      );
-    }
-    const promise = pending.then((result) => {
+    // An async wrapper starts the job synchronously and turns a job that
+    // throws before returning its promise into an ordinary rejection.
+    const run = async (): Promise<T> => {
+      const result = await job(controller.signal);
       this.store(key, result);
       return result.value;
-    });
+    };
+    const promise = run();
     const flight: Flight<T> = { controller, promise, subscribers: 0 };
     const settle = () => {
       if (this.flights.get(key) === flight) {

@@ -60,11 +60,14 @@ jest.mock("next/server", () => ({
 
 import { GIPHY_MEDIA_HOSTS } from "@/app/api/og-metadata/_lib/giphyRenditions";
 import type * as ImageRoute from "@/app/api/og-metadata/image/route";
+import type * as UrlGuard from "@/lib/security/urlGuard";
 import type { NextRequest } from "next/server";
 import type sharp from "sharp";
 
 let GET: typeof ImageRoute.GET;
 let mockFetchPublicUrl: jest.Mock;
+// The real guard from the route's own module registry, so its errors match.
+let realFetchPublicUrl: typeof UrlGuard.fetchPublicUrl;
 let mockSharp: jest.MockedFunctionDeep<typeof sharp>;
 const actualSharp = jest.requireActual<typeof sharp>("sharp");
 
@@ -166,6 +169,9 @@ describe("/api/og-metadata/image", () => {
         require("@/lib/security/urlGuard") as { fetchPublicUrl: jest.Mock }
       ).fetchPublicUrl;
       mockSharp = jest.mocked(require("sharp") as typeof sharp);
+      realFetchPublicUrl = jest.requireActual<typeof UrlGuard>(
+        "@/lib/security/urlGuard"
+      ).fetchPublicUrl;
     });
     mockFetchPublicUrl.mockReset();
     mockSharp.mockReset().mockImplementation(actualSharp);
@@ -396,16 +402,37 @@ describe("/api/og-metadata/image", () => {
       expect(mockSharp).toHaveBeenCalledTimes(1);
     });
 
-    it("keeps a definitive failure for 30 seconds", async () => {
+    it("holds an upstream failure for only 5 seconds", async () => {
       let now = 1_000_000;
       jest.spyOn(Date, "now").mockImplementation(() => now);
       jest.spyOn(console, "error").mockImplementation(() => undefined);
       mockUpstream({
-        body: Buffer.from("Missing"),
+        body: Buffer.from("Bad gateway"),
         contentType: "text/html",
-        status: 404,
+        status: 502,
       });
-      const request = () => createRequest("https://cdn.test/missing.gif");
+      const request = () => createRequest("https://cdn.test/blip.gif");
+
+      expect((await GET(request())).status).toBe(502);
+      now += 4_999;
+      expect((await GET(request())).status).toBe(502);
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+
+      now += 1;
+      mockUpstream({ body: GIF_2_FRAME, contentType: "image/gif" });
+      expect((await GET(request())).status).toBe(200);
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    });
+
+    it("keeps a failure to process the image for 30 seconds", async () => {
+      let now = 1_000_000;
+      jest.spyOn(Date, "now").mockImplementation(() => now);
+      jest.spyOn(console, "error").mockImplementation(() => undefined);
+      mockUpstream({
+        body: Buffer.from("<html></html>"),
+        contentType: "text/html",
+      });
+      const request = () => createRequest("https://cdn.test/not-an-image.gif");
 
       expect((await GET(request())).status).toBe(502);
       now += 29_999;
@@ -464,6 +491,37 @@ describe("/api/og-metadata/image", () => {
         (await GET(createRequest("https://cdn.test/full.png"))).status
       ).toBe(200);
     });
+  });
+
+  describe("URL guard on the image path", () => {
+    it.each([
+      "https://127.0.0.1/secret.png",
+      "https://169.254.169.254/latest/meta-data.gif",
+      "https://10.0.0.8/internal.gif",
+    ])(
+      "refuses the private host %s with the same guard options as before",
+      async (sourceUrl) => {
+        jest.spyOn(console, "error").mockImplementation(() => undefined);
+        mockFetchPublicUrl.mockImplementation(realFetchPublicUrl);
+
+        const response = await GET(
+          createRequest(sourceUrl, { params: { animated: "1" } })
+        );
+
+        expect(response.status).toBe(400);
+        await expect(response.json()).resolves.toEqual({
+          error: "Unsupported image host",
+        });
+        expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+        // The image path passes exactly the options it passed before this change.
+        expect(mockFetchPublicUrl.mock.calls[0]?.[2]).toEqual({
+          timeoutMs: 7000,
+          userAgent:
+            "Mozilla/5.0 (compatible; 6529-og-image/1.0; +https://6529.io)",
+        });
+        expect(mockSharp).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe("animated re-encode safety net", () => {

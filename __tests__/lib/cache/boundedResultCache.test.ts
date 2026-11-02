@@ -125,7 +125,7 @@ describe("BoundedResultCache", () => {
     expect(job).toHaveBeenCalledTimes(1);
   });
 
-  it("propagates a thrown job error to every waiter without keeping it", async () => {
+  it("clears the in-flight entry when the job rejects, without keeping the error", async () => {
     const cache = createCache();
     const pending = deferred<CacheableResult<string>>();
     const failing = jest.fn(() => pending.promise);

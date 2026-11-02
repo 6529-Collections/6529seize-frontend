@@ -45,6 +45,10 @@ const MAX_FAILED_LOAD_ATTEMPTS = MAX_AUTO_RETRY_ATTEMPTS + 1;
 // The guarded proxy is retried only while busy, with backoff.
 const MAX_PROXY_AUTO_RETRY_ATTEMPTS = 5;
 const MAX_PROXY_RETRY_DELAY_MS = 12_000;
+// Recovery attempts per failure kind. Loaded-but-undecodable bytes get one
+// attempt; an upstream failure gets two, since the proxy holds it briefly.
+const RECOVERY_RETRY_BUDGET = { available: 1, upstream: 2 } as const;
+type RecoveryKind = keyof typeof RECOVERY_RETRY_BUDGET;
 const NATURAL_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
 const NATURAL_IMAGE_MAX_HEIGHT = "16rem";
 
@@ -208,8 +212,7 @@ type ImageViewState = {
   readonly retryTick: number;
   // An image element cannot read why the proxy failed; a probe is asking.
   readonly failureCheckPending: boolean;
-  // A 2xx answer gets one recovery attempt; the same cached bytes would fail again.
-  readonly availableRetryUsed: boolean;
+  readonly recoveryRetries: Readonly<Record<RecoveryKind, number>>;
   readonly autoRetryStopped: boolean;
   readonly videoFailed: boolean;
 };
@@ -234,10 +237,30 @@ const initialImageViewState: ImageViewState = {
   retryPending: false,
   retryTick: 0,
   failureCheckPending: false,
-  availableRetryUsed: false,
+  recoveryRetries: { available: 0, upstream: 0 },
   autoRetryStopped: false,
   videoFailed: false,
 };
+
+function planRetry(
+  state: ImageViewState,
+  failure: DropMediaFailureKind
+): Pick<ImageViewState, "recoveryRetries" | "retryPending"> {
+  if (failure === "retryable" || failure === "definitive") {
+    return {
+      recoveryRetries: state.recoveryRetries,
+      retryPending: failure === "retryable",
+    };
+  }
+  const used = state.recoveryRetries[failure];
+  if (used >= RECOVERY_RETRY_BUDGET[failure]) {
+    return { recoveryRetries: state.recoveryRetries, retryPending: false };
+  }
+  return {
+    recoveryRetries: { ...state.recoveryRetries, [failure]: used + 1 },
+    retryPending: true,
+  };
+}
 
 function imageViewReducer(
   state: ImageViewState,
@@ -275,16 +298,12 @@ function imageViewReducer(
       if (!state.failureCheckPending) {
         return state;
       }
-      const isAvailable = action.failure === "available";
-      const retry =
-        action.failure === "retryable" ||
-        (isAvailable && !state.availableRetryUsed);
+      const plan = planRetry(state, action.failure);
       return {
         ...state,
+        ...plan,
         failureCheckPending: false,
-        availableRetryUsed: state.availableRetryUsed || isAvailable,
-        retryPending: retry,
-        autoRetryStopped: !retry,
+        autoRetryStopped: !plan.retryPending,
       };
     }
     case "video-failed":
@@ -296,7 +315,7 @@ function imageViewReducer(
         failedAttempts: 0,
         retryPending: false,
         failureCheckPending: false,
-        availableRetryUsed: false,
+        recoveryRetries: initialImageViewState.recoveryRetries,
         autoRetryStopped: false,
         videoFailed: false,
         retryTick: state.retryTick + 1,
@@ -508,7 +527,7 @@ function WaveDropPartContentMediaImageContent({
       videoRef={videoRef}
       videoSrc={giphyVideo.videoSrc}
       posterSrc={giphyVideo.posterSrc}
-      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+      alt={t(DEFAULT_LOCALE, "drop.media.gifAnimationAlt")}
       fillContainer={fillContainer}
       objectPosition={imageObjectPosition}
       onLoad={handleVideoLoad}
@@ -545,8 +564,12 @@ function WaveDropPartContentMediaImageContent({
             aria-label={t(DEFAULT_LOCALE, "drop.media.openMedia")}
             className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           />
-          {usesGiphyVideo && imageViewState.loaded && !showError && (
-            <GiphyPlaybackToggle videoRef={videoRef} playing={videoPlaying} />
+          {usesGiphyVideo && !showError && (
+            <GiphyPlaybackToggle
+              videoRef={videoRef}
+              playing={videoPlaying}
+              autoHide={videoPlaying || !imageViewState.loaded}
+            />
           )}
           {imageViewState.loaded || showError ? (
             <InlineMediaActions
