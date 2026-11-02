@@ -7533,7 +7533,7 @@
       ],
       "keywords": ["waves", "picture", "image", "avatar", "edit", "header"],
       "facts": [
-        "Wave picture editing is a wave header feature.",
+        "Wave picture editing is a wave header feature. Changing the picture or name leaves competition rules and identity submission settings unchanged.",
         "Availability depends on permissions and wave state.",
         "Validation and upload states are documented in the update wave picture docs."
       ],
