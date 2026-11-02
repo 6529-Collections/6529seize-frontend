@@ -65,8 +65,11 @@ schema upgrade separately from subsequent opening/input latency, plus DOM rows,
 placeholders, heap and blob requests, checks
 that log cursors do not regress, and browses older history. A separate real
 staging transport uses the same engine and OpenMLS to send 250 imported
-originals and reconnect an offline receiver. Tokens and throwaway wallet keys
+originals and reconnect an offline receiver. Importer timing includes the browser
+importer's 700 ms pacing below the 120-message/minute/device limit; receiver
+catch-up timing is separate. Tokens and throwaway wallet keys
 stay in test memory and are never artifacts.
 
-Staging run identifiers, browser measurements and screenshots will be recorded
-after the reviewed change is deployed. Production is outside this workstream.
+The PR validation section records the staging deployment and targeted run links
+when available. That run's artifacts contain browser measurements and screenshots.
+Production is outside this workstream.

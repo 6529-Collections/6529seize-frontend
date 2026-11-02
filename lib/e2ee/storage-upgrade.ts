@@ -45,6 +45,7 @@ export function backfillHistory(
   plain: (row: ProfileMessage) => StoredMessage,
   complete: () => void
 ): void {
+  // Request errors deliberately abort the whole upgrade; v1 remains intact for retry.
   const readGroups = groups.getAll() as IDBRequest<ProfileGroup[]>;
   readGroups.onsuccess = () => {
     const summaries = new Map(

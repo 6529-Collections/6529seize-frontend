@@ -188,6 +188,7 @@ export async function loadHistoryPage(
     runtime.followingLatest = true;
   } else runtime.followingLatest = false;
   trimHistory(runtime, true);
+  runtime.historyError = false;
   ctx.store.touch(runtime.record.g);
 }
 

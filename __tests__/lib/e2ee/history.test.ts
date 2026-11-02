@@ -203,7 +203,9 @@ it("retains at most two pages while browsing and preserves offscreen summary cou
     profileId: "p",
     store: { touch: jest.fn() },
   } as unknown as EngineContext;
+  runtime.historyError = true;
   await loadHistoryPage(ctx, runtime);
+  expect(runtime.historyError).toBe(false);
   expect(runtime.messages.size).toBe(100);
   for (let i = 0; i < 8; i++) {
     const first = [...runtime.messages.values()].sort(

@@ -166,7 +166,7 @@ it("resumes an interrupted backlog from the last atomic checkpoint", async () =>
   }
 });
 
-it("surfaces an initial saved-history read failure and clears it on retry", async () => {
+it("surfaces an initial saved-history read failure and clears it on background reopen", async () => {
   const world = await createWorld();
   const alice = await addUser(world, "alice");
   await addUser(world, "bob");
@@ -183,7 +183,9 @@ it("surfaces an initial saved-history read failure and clears it on retry", asyn
     engine.setOpenConversation(g);
     await engine.idle();
     expect(engine.getConversation(g)?.historyError).toBe(true);
-    await engine.loadHistory?.(g);
+    engine.setOpenConversation(null);
+    engine.setOpenConversation(g);
+    await engine.idle();
     expect(engine.getConversation(g)?.historyError).toBe(false);
   } finally {
     for (const device of [...world.devices]) {

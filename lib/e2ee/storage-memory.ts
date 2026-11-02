@@ -166,6 +166,7 @@ export class MemoryE2eeStorage implements E2eeStorage {
         .sort(compareHistory);
       this.pages.set(groupKey, rows);
     }
+    // historyKey selects ts for pending records and seq otherwise; both use key[1].
     const compareKey = (message: StoredMessage, key: HistoryKey) =>
       compareHistory(message, {
         pending: key[0] === 1,
