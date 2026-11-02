@@ -1,7 +1,16 @@
 /** @jest-environment node */
 import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
+import ranges from "@/lib/security/cloudFrontOriginFacingRanges.json";
 
 const WINDOW_MS = 60_000;
+
+/** A host inside one of the published CloudFront origin-facing networks. */
+function edgeAddress(prefixIndex: number, host: number): string {
+  const [network = ""] = (ranges.ipv4[prefixIndex] ?? "").split("/");
+  const octets = network.split(".").map(Number);
+  octets[3] = (octets[3] ?? 0) + host;
+  return octets.join(".");
+}
 
 function requestFrom(forwardedFor?: string): Pick<Request, "headers"> {
   const headers = new Headers();
@@ -206,6 +215,55 @@ describe("createClientRateLimiter", () => {
         "2a00:1450:5::4, fd00::1",
       ])
     ).toBe(1);
+  });
+
+  describe("behind a CloudFront edge", () => {
+    const EDGE_A = edgeAddress(0, 10);
+    const EDGE_B = edgeAddress(1, 20);
+
+    it("keys the viewer address the edge appended, whichever edge served it", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [
+          `8.8.8.8, ${EDGE_A}`,
+          `8.8.8.8, ${EDGE_B}`,
+          `1.1.1.1, ${EDGE_A}`,
+        ])
+      ).toBe(2);
+    });
+
+    it("ignores client-supplied entries left of the edge-appended viewer", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [
+          `9.9.9.9, 8.8.8.8, ${EDGE_A}`,
+          `1.0.0.1, 8.8.8.8, ${EDGE_A}, 172.31.4.20`,
+        ])
+      ).toBe(1);
+    });
+
+    it("trusts only one edge hop", () => {
+      const enforce = createLimiter(1);
+
+      // A viewer relayed by another CloudFront distribution is keyed on that
+      // distribution's edge, not on the address it chose to send.
+      expect(
+        allowedCount(enforce, [
+          `8.8.8.8, ${EDGE_B}, ${EDGE_A}`,
+          `1.1.1.1, ${EDGE_B}, ${EDGE_A}`,
+        ])
+      ).toBe(1);
+    });
+
+    it("keys on the edge itself when no usable viewer entry precedes it", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [EDGE_A, `not-an-address, ${EDGE_A}`, EDGE_B])
+      ).toBe(2);
+    });
   });
 
   it("gives requests without a public client address one shared, larger budget", () => {
