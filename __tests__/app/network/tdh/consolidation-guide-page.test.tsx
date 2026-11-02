@@ -134,9 +134,7 @@ describe("Your wallets", () => {
     expect(
       within(add).getByRole("figure", { name: "The safe signing order" })
     ).toHaveTextContent("D → A, B, C");
-    expect(add).toHaveTextContent(
-      "Four transactions, each with a normal network fee"
-    );
+    expect(add).toHaveTextContent("Four transactions, each with a normal fee");
     const faq = document.getElementById("faq")!;
     const details = faq.querySelectorAll("details");
     expect(details).toHaveLength(6);

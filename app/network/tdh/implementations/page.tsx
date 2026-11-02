@@ -8,7 +8,6 @@ import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
 import Mark from "@/components/explained/marks/Mark";
-import { Glyph } from "@/components/explained/marks/glyphs";
 import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
@@ -329,20 +328,19 @@ export default async function ImplementationsPage({
                     runs: m("explained.tdh.impl.lean.runs", {
                       random: p.v("programs.randomPerChange"),
                     }),
+                    // The kit's Proved mark, at the size of the column's
+                    // other marks, its counts the manifest's facts.
                     proved: (
-                      // The dot on the first line, not centred on a cell
-                      // of three.
-                      <span className="tw-inline-flex tw-items-start tw-gap-1.5">
-                        <Glyph
+                      <span data-fact="manifest.proved manifest.proved.tdh">
+                        <Mark
                           kind="proved"
-                          className="tw-mt-[5px] tw-size-3 tw-flex-none"
-                        />
-                        <span>
-                          {m("explained.tdh.impl.lean.proved", {
-                            tdh: p.v("manifest.proved.tdh"),
-                            all: p.v("manifest.proved"),
+                          locale={locale}
+                          size="sm"
+                          refText={s("explained.tdh.impl.lean.proved", {
+                            tdh: p.f("manifest.proved.tdh"),
+                            all: p.f("manifest.proved"),
                           })}
-                        </span>
+                        />
                       </span>
                     ),
                   },

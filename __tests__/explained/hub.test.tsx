@@ -91,7 +91,7 @@ describe("the hub, first version", () => {
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program and your own read of Ethereum; 6529's are private for now (D116). Your TDH is in each of those results: see yours."
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload; recomputing a day needs your own program and read of Ethereum, as 6529's are private (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
@@ -138,7 +138,7 @@ describe("the hub, first version", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector('[data-limit="limit"]')).toHaveTextContent(
-      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover the Punk itself."
+      "CC0 stops at 6529 Gradients, which are not CC0, and at other people's rights: Meme Card #1 shows a CryptoPunk, which CC0 does not cover."
     );
     expect(
       screen.getByRole("link", { name: "Open Meme #2, full size" })
