@@ -1009,6 +1009,72 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("edits shared wave metadata through v3 without rewriting its original competition", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, true);
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const configuration = await response.json();
+    configuration.wave.type = "CHAT";
+    const patches: Record<string, unknown>[] = [];
+    await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+      if (route.request().method() === "PATCH") {
+        const patch = route.request().postDataJSON() as Record<string, unknown>;
+        patches.push(patch);
+        Object.assign(configuration, patch);
+      }
+      return route.fulfill({
+        json: {
+          id: WAVE,
+          name: configuration.name,
+          picture: configuration.picture,
+          created_at: 1,
+          legacy_primary_competition_id: "alpha",
+          capabilities: { chat: true, competitions: true },
+          permissions: {
+            view: true,
+            chat: true,
+            administer: true,
+            create_competition: true,
+          },
+          configuration,
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await page
+      .getByRole("button", { name: "Edit wave name", exact: true })
+      .press("Enter");
+    const dialog = page.getByRole("dialog", {
+      name: "Rename wave",
+      exact: true,
+    });
+    await dialog
+      .getByPlaceholder("Please select a name")
+      .fill("Shared wave renamed");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect.poll(() => patches).toEqual([{ name: "Shared wave renamed" }]);
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+    await page.reload();
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("preserves Additional Action through the actual submission flow", async ({
     page,
   }, testInfo) => {
@@ -4058,10 +4124,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  for (const popup of ["artist submissions", "participant entries"]) {
-    test(`preserves Numeric votes and explanations in the ${popup} popup`, async ({
+  for (const { popup, app } of [
+    { popup: "artist submissions", app: false },
+    { popup: "artist submissions", app: true },
+    { popup: "participant entries", app: false },
+  ]) {
+    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? " in app" : ""}`, async ({
       page,
     }, testInfo) => {
+      if (app) {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      }
       const sandbox = await installCompetitionApi(page);
       const response = await page.request.get(
         `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
@@ -4189,6 +4266,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
+      // The development issue badge can cover controls at the bottom of app sheets.
+      await page.addStyleTag({
+        content: "nextjs-portal { display: none !important; }",
+      });
       const detail = page
         .getByRole("main")
         .locator("[data-video-viewport]")
@@ -4321,15 +4402,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await promiseBadge.click();
         // The dialog wrapper has fixed-position children and no box of its own.
         await expect(promiseBadge).toBeVisible();
-        await expect(
-          dialog.getByRole("button", { name: "Close Gallery", exact: true })
-        ).toBeVisible();
+        const close = dialog.getByRole("button", {
+          name:
+            app || testInfo.project.name.startsWith("capacitor-")
+              ? "Close panel"
+              : "Close Gallery",
+          exact: true,
+        });
+        await expect(close).toBeVisible();
         await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
         expect(sandbox.requests).toEqual([]);
 
-        await dialog
-          .getByRole("button", { name: "Close Gallery", exact: true })
-          .focus();
+        await close.focus();
         await expect(promiseTooltip).toBeHidden();
         const currentTotal = dialog.getByText("123,456,789", { exact: true });
         const projectedTotal = dialog.getByText("123,456,999", { exact: true });
@@ -4397,16 +4481,112 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Numeric",
         exact: true,
       });
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await numeric.tap();
-        expect((await numeric.boundingBox())!.height).toBeGreaterThanOrEqual(
-          44
-        );
+      const expectCompactCenteredTabs = async () => {
+        const label = page
+          .getByRole("dialog")
+          .last()
+          .locator(".is-mini > div > p > span:first-child");
+        const labelBox = (await label.boundingBox())!;
+        const tabsBox = (await mode.boundingBox())!;
+        expect(tabsBox.height).toBeLessThanOrEqual(32);
+        expect(labelBox.x + labelBox.width).toBeLessThan(tabsBox.x);
+        expect(
+          Math.abs(
+            labelBox.y + labelBox.height / 2 - tabsBox.y - tabsBox.height / 2
+          )
+        ).toBeLessThan(2);
+      };
+      await mode.scrollIntoViewIfNeeded();
+      await expectCompactCenteredTabs();
+      if (testInfo.project.use.hasTouch) {
+        for (const button of [
+          mode.getByRole("button", { name: "Slider", exact: true }),
+          numeric,
+        ]) {
+          expect(
+            await button.evaluate((element) =>
+              parseFloat(getComputedStyle(element, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
+        }
+        const box = (await numeric.boundingBox())!;
+        // The invisible touch target extends beyond the compact visible tab.
+        await page.touchscreen.tap(box.x + box.width / 2, box.y - 8);
       } else {
         await numeric.focus();
         await page.keyboard.press("Enter");
       }
+      await expect(numeric).toHaveAttribute("aria-pressed", "true");
+      await expectCompactCenteredTabs();
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-tabs.png"),
+      });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      if (app && testInfo.project.use.hasTouch) {
+        const originalScrollport = await dialog
+          .getByTestId("artist-preview-app-scroll")
+          .elementHandle();
+        if (!originalScrollport)
+          throw new Error("Submission scrollport missing");
+        await input.focus();
+        try {
+          for (const height of [0, 160, 300, 0]) {
+            const geometry = await input.evaluate(async (element, inset) => {
+              const root = document.documentElement;
+              // This checks layout/scrolling; physical-device QA checks native events.
+              root.style.setProperty(
+                "--native-keyboard-layout-transition-duration",
+                "0ms"
+              );
+              root.style.setProperty(
+                "--native-keyboard-inset-bottom",
+                `${inset}px`
+              );
+              // Reveal the input on layout frames, without a keyboard-settle timer.
+              for (let frame = 0; frame < 3; frame++) {
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
+              const scrollport = element.closest(
+                '[data-testid="artist-preview-app-scroll"]'
+              );
+              const panel = scrollport?.parentElement;
+              if (!scrollport || !panel)
+                throw new Error("Submission scrollport missing");
+              return {
+                clearance:
+                  scrollport.getBoundingClientRect().bottom -
+                  element.getBoundingClientRect().bottom,
+                bottomGap:
+                  innerHeight - inset - panel.getBoundingClientRect().bottom,
+              };
+            }, height);
+            expect(geometry.clearance).toBeGreaterThanOrEqual(0);
+            expect(Math.abs(geometry.bottomGap)).toBeLessThanOrEqual(1);
+            expect(
+              await originalScrollport.evaluate(
+                (element) => element.isConnected
+              )
+            ).toBe(true);
+            await expect(input).toBeFocused();
+            await expect(
+              dialog.getByRole("button", { name: "Close panel", exact: true })
+            ).toBeInViewport({ ratio: 1 });
+          }
+        } finally {
+          await input.evaluate((element) => {
+            element.blur();
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-layout-transition-duration"
+            );
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-inset-bottom"
+            );
+          });
+          await originalScrollport.dispose();
+        }
+      }
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
@@ -5383,10 +5563,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       context_profile_context: {
         ...overview.context_profile_context,
         subscribed: true,
-        pinned: false,
+        pinned: index === 44,
         followed_subwaves_count: 0,
       },
     }));
+    await page.route("**/api/v2/waves?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("pinned") !== "PINNED") {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        json: { data: [joined[44]], page: 1, next: false },
+      });
+    });
     let failContinuation = true;
     const requested: string[] = [];
     const offsets = new Map([
@@ -5467,6 +5657,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(0);
     };
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await page
+      .getByRole("button", { name: "Pinned", exact: true })
+      .filter({ visible: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: "Joined wave 45", exact: true })
+    ).toBeVisible();
     await selectJoined();
     const more = page.getByRole("button", {
       name: "Load more joined waves",
@@ -5478,6 +5675,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(retry).toBeVisible({ timeout: 30000 });
+    // The pin belongs to the final joined batch. It must not extend the first
+    // batch or make the list look complete while the continuation has failed.
+    await expect(
+      page.getByRole("link", { name: "Joined wave 45", exact: true })
+    ).toHaveCount(0);
     await expect(
       page
         .getByRole("status")
@@ -8189,17 +8391,36 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       };
       let failSave = true;
       let writes = 0;
-      await page.route(`**/api/waves/${WAVE}`, async (route) => {
-        if (route.request().method() === "POST") {
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "PATCH") {
           writes++;
+          const patch = route.request().postDataJSON();
+          expect(patch).toEqual({ chat: { links_disabled: true } });
           if (failSave)
             return route.fulfill({
               status: 500,
               json: { error: "Sandbox save failed" },
             });
-          wave.chat = { ...wave.chat, ...route.request().postDataJSON().chat };
+          wave.chat = { ...wave.chat, ...patch.chat };
         }
-        await route.fulfill({ json: wave });
+        await route.fulfill({
+          json: {
+            id: WAVE,
+            name: wave.name,
+            picture: wave.picture,
+            legacy_primary_competition_id: null,
+            default_competition_id: "alpha",
+            permissions: {
+              view: true,
+              administer: true,
+              create_competition: true,
+            },
+            configuration: wave,
+          },
+        });
       });
       await page.goto(`/waves/${WAVE}?tab=chat`);
       await openWaveInformation(page);

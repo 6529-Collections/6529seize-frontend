@@ -22,6 +22,8 @@ import {
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
 
+const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
+
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly mentionedGroups?: Array<ApiDropGroupMention> | undefined;
@@ -65,7 +67,7 @@ const WaveDropPartContentMarkdown: React.FC<
   WaveDropPartContentMarkdownProps
 > = ({
   mentionedUsers,
-  mentionedGroups = [],
+  mentionedGroups = EMPTY_MENTIONED_GROUPS,
   mentionedWaves,
   referencedNfts,
   part,

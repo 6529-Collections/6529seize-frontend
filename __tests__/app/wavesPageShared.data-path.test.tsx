@@ -1,3 +1,6 @@
+jest.mock("@/app/waves/public-wave-drop.server", () => ({
+  fetchPublicWaveDrop: jest.fn().mockResolvedValue(null),
+}));
 import { QueryClient } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
 

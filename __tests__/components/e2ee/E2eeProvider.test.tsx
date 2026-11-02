@@ -4,6 +4,7 @@ import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import type { E2eeEngineModules } from "@/components/e2ee/e2eeEngineLoader";
 import { setE2eeEnrollmentMarker } from "@/components/e2ee/e2eeLocalState";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
+import type { E2eeApiAccount } from "@/lib/e2ee/api";
 import type { E2eeEngineDeps } from "@/lib/e2ee/types";
 import { createFakeE2eeEngine, SELF_ID } from "./fakeE2eeEngine";
 
@@ -63,6 +64,7 @@ function ContextProbe() {
 const createLoader = () => {
   const engines: ReturnType<typeof createFakeE2eeEngine>[] = [];
   const deps: E2eeEngineDeps[] = [];
+  const accounts: E2eeApiAccount[] = [];
   const loadModules = jest.fn(
     async (): Promise<E2eeEngineModules> => ({
       createE2eeEngine: async (input) => {
@@ -71,10 +73,13 @@ const createLoader = () => {
         engines.push(engine);
         return engine;
       },
-      createE2eeApiClient: () => ({}) as never,
+      createE2eeApiClient: (account) => {
+        accounts.push(account);
+        return {} as never;
+      },
     })
   );
-  return { loadModules, engines, deps };
+  return { loadModules, engines, deps, accounts };
 };
 
 describe("E2eeProvider", () => {
@@ -174,7 +179,7 @@ describe("E2eeProvider", () => {
 
   it("disposes the old engine on profile switch and logout", async () => {
     mockPathname.mockReturnValue("/messages/encrypted");
-    const { loadModules, engines, deps } = createLoader();
+    const { loadModules, engines, deps, accounts } = createLoader();
     const view = render(
       <E2eeProvider loadModules={loadModules}>
         <ContextProbe />
@@ -194,6 +199,12 @@ describe("E2eeProvider", () => {
     await waitFor(() => expect(engines).toHaveLength(2));
     expect(engines[0]?.dispose).toHaveBeenCalled();
     expect(deps[1]?.profileId).toBe("profile-other");
+    // Each engine's REST client is bound to that engine's own account.
+    const wallet = "0xabcdef0000000000000000000000000000000001";
+    expect(accounts).toEqual([
+      { profileId: SELF_ID, wallet },
+      { profileId: "profile-other", wallet },
+    ]);
 
     mockAuth = { connectedProfile: null, activeProfileProxy: null };
     await act(async () => {

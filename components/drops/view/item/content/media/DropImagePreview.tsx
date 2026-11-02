@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
+import { getGiphyVideoRendition } from "@/app/api/og-metadata/_lib/giphyRenditions";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -20,6 +21,57 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
+const IMAGE_PROXY_PATH = "/api/og-metadata/image";
+/** Cache-busts a retried preview without changing the media it names. */
+export const IMAGE_RETRY_QUERY_PARAM = "drop_media_retry";
+
+export const isGuardedImageProxyUrl = (src: string): boolean =>
+  src.startsWith(`${IMAGE_PROXY_PATH}?`);
+
+// The retry marker belongs on the proxy URL: on the source URL it would reach
+// the upstream host and split the proxy's cache for one image.
+function getGuardedImageProxyUrl(
+  source: string,
+  params: Readonly<Record<string, string>>
+): string {
+  let url = source;
+  let retry: string | null = null;
+  try {
+    const parsed = new URL(source);
+    retry = parsed.searchParams.get(IMAGE_RETRY_QUERY_PARAM);
+    if (retry !== null) {
+      parsed.searchParams.delete(IMAGE_RETRY_QUERY_PARAM);
+      url = parsed.toString();
+    }
+  } catch {
+    // Callers only pass URLs the proxy policy accepted.
+  }
+  const query = new URLSearchParams({ url, ...params });
+  if (retry !== null) {
+    query.set(IMAGE_RETRY_QUERY_PARAM, retry);
+  }
+  return `${IMAGE_PROXY_PATH}?${query.toString()}`;
+}
+
+/**
+ * Giphy GIFs play from Giphy's MP4 rendition through the same-origin proxy,
+ * which passes the bytes through without re-encoding. The still is the poster
+ * for viewers who prefer reduced motion.
+ */
+export function getGiphyVideoPreviewSources(
+  src: string
+): { readonly videoSrc: string; readonly posterSrc: string } | null {
+  const rendition = getGiphyVideoRendition(src);
+  return rendition
+    ? {
+        videoSrc: getGuardedImageProxyUrl(rendition.videoUrl, {
+          format: "mp4",
+        }),
+        posterSrc: getGuardedImageProxyUrl(rendition.stillUrl, { w: "800" }),
+      }
+    : null;
+}
 
 export function getDropImagePreviewSources(
   src: string,
@@ -44,12 +96,12 @@ export function getDropImagePreviewSources(
 
   // External embeds have no CDN scale path. The existing guarded image proxy
   // returns a bounded image, never source bytes; oversized animations use a still.
-  const query = new URLSearchParams({
-    url: original,
-    animated: "1",
-    w: scale === ImageScale.AUTOx1080 ? "1200" : "800",
-  });
-  return [`/api/og-metadata/image?${query.toString()}`];
+  return [
+    getGuardedImageProxyUrl(original, {
+      animated: "1",
+      w: scale === ImageScale.AUTOx1080 ? "1200" : "800",
+    }),
+  ];
 }
 
 // Submission artwork uses the existing Next optimizer on the uploaded source,

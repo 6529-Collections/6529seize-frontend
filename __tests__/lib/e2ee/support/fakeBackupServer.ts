@@ -8,7 +8,8 @@ import { base64ToBytes } from "@/lib/e2ee/bytes";
 
 /**
  * In-memory stand-in for the backend backup routes (same rules: one active
- * and one pending generation, server-assigned seq, bucket lengths, quota).
+ * and one pending generation, server-assigned seq, the expected_seq append
+ * precondition, bucket lengths, quota).
  * Records every request body so tests can assert nothing plaintext leaves
  * the client.
  */
@@ -31,6 +32,11 @@ export interface RecordedBackupRequest {
 export interface FakeBackupServer {
   readonly requests: RecordedBackupRequest[];
   quotaBytes: number;
+  /**
+   * Honors the append precondition (409 E2EE_BACKUP_SEQ_CONFLICT). Off, it
+   * behaves like a server that predates expected_seq and ignores it.
+   */
+  supportsExpectedSeq: boolean;
   clientFor(profileId: string): E2eeBackupApi;
   generations(profileId: string): ApiE2eeBackup[];
 }
@@ -48,6 +54,7 @@ export function createFakeBackupServer(now: () => number): FakeBackupServer {
   const server: FakeBackupServer = {
     requests,
     quotaBytes: 256 * 1024 * 1024,
+    supportsExpectedSeq: true,
     generations: (profileId) =>
       [...generations.values()]
         .filter((gen) => gen.profileId === profileId)
@@ -145,6 +152,17 @@ export function createFakeBackupServer(now: () => number): FakeBackupServer {
             message: "bucket",
             status: 400,
             code: "E2EE_BAD_REQUEST",
+          });
+        }
+        if (
+          server.supportsExpectedSeq &&
+          body.expected_seq !== undefined &&
+          body.expected_seq !== gen.backup.next_seq
+        ) {
+          throw new E2eeApiError({
+            message: "seq conflict",
+            status: 409,
+            code: "E2EE_BACKUP_SEQ_CONFLICT",
           });
         }
         if (usage(profileId) + size > server.quotaBytes) {

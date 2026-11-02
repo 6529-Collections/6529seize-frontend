@@ -289,6 +289,79 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("preserves lists links and paragraphs in long chat posts", async ({
+    baseURL,
+    page,
+  }) => {
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const payload = (await response.json()) as {
+      drops: Array<Record<string, unknown>>;
+    };
+    const sourceDrop = payload.drops[0];
+    if (!sourceDrop) throw new Error("Expected a source drop in the sandbox.");
+
+    const items = Array.from(
+      { length: 16 },
+      (_, index) =>
+        `- [Task ${index + 1}](https://example.com/task-${index + 1}): Preserve the authored list structure and readable formatting in this detailed status update.`
+    );
+    const content = [
+      "## Long formatted update",
+      "",
+      "Completed work remains a separate paragraph.",
+      "",
+      ...items.slice(0, 8),
+      "",
+      "Ongoing work remains a separate paragraph.",
+      "",
+      ...items.slice(8),
+      "",
+      "End of the complete formatted update.",
+    ].join("\n");
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) =>
+        route.fulfill({
+          json: {
+            ...payload,
+            drops: [{ ...sourceDrop, content, hide_link_preview: true }],
+          },
+        })
+    );
+    await gotoSandboxWave(page);
+
+    const post = page
+      .getByRole("heading", { name: "Long formatted update", exact: true })
+      .locator("xpath=ancestor::*[@data-serial-no][1]");
+    await expect(post).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(post.getByRole("list")).toHaveCount(2);
+    await expect(post.getByRole("listitem")).toHaveCount(16);
+    await expect(
+      post.getByRole("link", { name: "Task 1", exact: true })
+    ).toHaveAttribute("href", "https://example.com/task-1");
+    for (const paragraph of [
+      "Completed work remains a separate paragraph.",
+      "Ongoing work remains a separate paragraph.",
+      "End of the complete formatted update.",
+    ]) {
+      const matchingParagraph = post
+        .getByRole("paragraph")
+        .filter({ hasText: paragraph });
+      await expect(matchingParagraph).toHaveCount(1);
+      await expect(matchingParagraph).toHaveText(paragraph);
+    }
+    await expect(
+      post.getByRole("button", { name: /Show more|Show less/ })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("restores an in-progress chat draft across a full reload", async ({
     baseURL,
     page,

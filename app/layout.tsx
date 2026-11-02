@@ -3,7 +3,6 @@
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.css";
 import "@/styles/Home.module.css";
-import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -42,13 +41,24 @@ import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
+import localFont from "next/font/local";
 import { cookies, headers } from "next/headers";
 import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
 import { getRequestOrigin } from "@/config/requestOrigin";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
-import Script from "next/script";
 
 export const fetchCache = "force-no-store";
+
+// Loaded here so every route preloads the font from the HTML instead of
+// discovering it from the stylesheet, with a size-adjusted fallback while it
+// swaps in. The variable name becomes the generated family name
+// ("Montserrat"), which font checks in tests rely on; styles use it through
+// --font-montserrat.
+const Montserrat = localFont({
+  src: "../assets/montserrat/Montserrat-VariableFont_wght.woff2",
+  display: "swap",
+  variable: "--font-montserrat",
+});
 
 export const metadata = getAppMetadata();
 const productionEnvironment = getProductionAppEnvironment();
@@ -88,13 +98,23 @@ export default async function RootLayout({
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
     // keyboard input arrives during startup. Keep that root-only mutation.
-    <html lang="en-US" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      lang="en-US"
+      className={Montserrat.variable}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
         <script
           id="native-startup-bootstrap"
           dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_SCRIPT }}
+        />
+        {/* Synchronous too: reload with the iOS marker before the app JS downloads. */}
+        <script
+          id="native-ios-platform-bootstrap"
+          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
         />
         <style dangerouslySetInnerHTML={{ __html: SMALL_WEB_STARTUP_STYLES }} />
         <script
@@ -110,11 +130,6 @@ export default async function RootLayout({
         {/* Restore reload feedback during HTML parsing, before hydration. */}
         <script
           dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_BOOTSTRAP_SCRIPT }}
-        />
-        <Script
-          id="native-ios-platform-bootstrap"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
         />
         <link
           data-runtime-favicon="png"
@@ -137,7 +152,18 @@ export default async function RootLayout({
           href={getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT)}
         />
         {isUsingStaticAssets && (
-          <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
+          <>
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+            />
+            {/* Fonts are CORS requests and cannot reuse the connection above. */}
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+              crossOrigin=""
+            />
+          </>
         )}
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}

@@ -1,3 +1,10 @@
+import {
+  findSavedImport,
+  getSavedMessage,
+  loadSavedHistory,
+  requireSavedMessage,
+} from "./history-read";
+import type { HistoryPageOptions } from "../history-order";
 import { downloadMedia, localBlobType } from "../media";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
@@ -18,9 +25,10 @@ import {
 } from "./context";
 import { EngineController } from "./controller";
 import {
+  confirmOwnRejection,
   enrollDevice,
   hasLoginGrant,
-  grantExpired,
+  needsNewDevice,
   refreshMe,
   renewalDue,
   renewGrant,
@@ -39,7 +47,8 @@ import {
   restartTargets,
   setAdmin,
 } from "./membership";
-import { searchMessages } from "./messages";
+import { searchHistory } from "./history-search";
+import { latestReadSeq } from "./history";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -103,13 +112,53 @@ class E2eeEngineImpl implements E2eeEngineExt {
    * separate grant prompt with a fresh key.
    */
   private async startEnrollmentFromLoginGrant(): Promise<void> {
-    const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
-    if (!hasLoginGrant(stored) || stored.registered) {
+    if (!(await this.takeLoginGrantDevice())) {
       return;
     }
     // Runs in the background so engine start never waits on the network;
     // the status is "enrolling" from here until it settles.
     void this.ctx.tasks.track(this.enrollFromLoginGrant());
+  }
+
+  /**
+   * Whether storage holds an unregistered device a combined sign-in stored.
+   * Any key this engine still holds from an earlier attempt is released,
+   * so enrollment loads the stored device's own key state.
+   */
+  private takeLoginGrantDevice(): Promise<boolean> {
+    return this.ctx.queue.run(async () => {
+      const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
+      if (!hasLoginGrant(stored) || stored.registered) {
+        return false;
+      }
+      if (this.ctx.device?.deviceKey !== stored.deviceKey) {
+        this.ctx.mls?.dispose();
+        this.ctx.mls = null;
+        this.ctx.device = null;
+        this.ctx.lastState = null;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * NC8: the gate's combined sign-in stored this browser's key while this
+   * engine waited for enrollment (holding the engine lock). The sign-in
+   * writes without a state version and keeps it, so this engine's next
+   * write still passes its version check.
+   */
+  async enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
+    if (
+      this.ctx.store.status === NEEDS_ENROLLMENT &&
+      (await this.takeLoginGrantDevice())
+    ) {
+      await this.enrollFromLoginGrant();
+    }
+    return this.ctx.store.status;
+  }
+
+  needsNewDevice(): Promise<boolean> {
+    return this.ctx.queue.run(() => needsNewDevice(this.ctx));
   }
 
   private async enrollFromLoginGrant(): Promise<void> {
@@ -156,28 +205,42 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
+  /** Read fresh after an await (dispose can land meanwhile). */
+  private isDisposed(): boolean {
+    return this.ctx.disposed;
+  }
+
   private async refreshMe(): Promise<void> {
     if (!this.ctx.device?.registered || this.ctx.disposed) {
       return;
     }
     const result = await refreshMe(this.ctx);
-    if (result.ownRevoked) {
+    if (result.ownRevoked && !this.isDisposed()) {
       await this.wipe();
     }
   }
 
   /**
-   * The server no longer accepts this device. An expired grant keeps the
-   * state for a renewal through enroll(); a revocation wipes it.
+   * The server refused this device (E2EE_NOT_YOUR_DEVICE, or a revocation
+   * hint). Only a revocation that /e2ee/me confirms for this profile wipes
+   * the state; an expired or unlisted device keeps it (enroll() renews or
+   * resumes it), and an unconfirmed refusal changes nothing. A disposed
+   * engine never acts: its account may already have changed.
    */
   private async onOwnRejected(): Promise<void> {
-    const device = this.ctx.device;
-    if (device && grantExpired(this.ctx, device)) {
-      this.controller.stopBackground();
-      setStatus(this.ctx, NEEDS_ENROLLMENT);
+    if (this.isDisposed()) {
       return;
     }
-    await this.wipe();
+    const verdict = await confirmOwnRejection(this.ctx);
+    if (this.isDisposed() || verdict === "unconfirmed") {
+      return;
+    }
+    if (verdict === "revoked") {
+      await this.wipe();
+      return;
+    }
+    this.controller.stopBackground();
+    setStatus(this.ctx, NEEDS_ENROLLMENT);
   }
 
   /**
@@ -327,6 +390,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
     const key = g?.toLowerCase() ?? null;
     const changed = key !== this.ctx.openConversation;
     this.ctx.openConversation = key;
+    if (key !== null && changed) {
+      // The conversation's historyError owns read failures and retry feedback.
+      this.background(() => this.loadHistory(key).catch(() => undefined));
+    }
     this.ctx.openUntil = key === null ? 0 : Number.MAX_SAFE_INTEGER;
     if (key !== null && changed && this.ctx.store.status === "ready") {
       // Contract 12: an open conversation polls every 5 s, starting now.
@@ -410,17 +477,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  private ownMessage(g: string, id: string) {
-    const message = requireGroup(this.ctx, g).messages.get(id);
-    if (message?.kind !== "message") {
-      throw new E2eeError("E2EE_NO_MESSAGE");
-    }
-    return message;
-  }
+  private ownMessage = (g: string, id: string) =>
+    requireSavedMessage(this.ctx, g, id);
 
   async edit(g: string, id: string, text: string): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     if (message.senderProfileId !== this.ctx.profileId || message.deleted) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
@@ -436,7 +498,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async remove(g: string, id: string): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     if (message.senderProfileId !== this.ctx.profileId) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
@@ -455,7 +517,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     on: boolean
   ): Promise<void> {
     this.requireReady();
-    this.ownMessage(g, id);
+    await this.ctx.queue.run(() => this.ownMessage(g, id));
     await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
       ...base,
       t: on ? "react" : "unreact",
@@ -470,19 +532,20 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!runtime) {
       return;
     }
-    const latest = Math.max(
-      0,
-      ...[...runtime.messages.values()].map((m) => (m.pending ? 0 : m.seq))
-    );
+    const latest = latestReadSeq(runtime);
     this.ctx.openConversation = runtime.record.g;
     this.ctx.openUntil = Math.max(
       this.ctx.openUntil,
       this.ctx.now() + OPEN_CONVERSATION_MS
     );
-    if (latest <= runtime.record.readSeq) {
-      return;
-    }
+    if (latest <= runtime.record.readSeq) return;
+    // Preserve the existing optimistic read intent if its background write
+    // fails. A later checkpoint saves the marker and matching zero counters.
     runtime.record.readSeq = latest;
+    if (runtime.record.history) {
+      runtime.record.history.unread = 0;
+      runtime.record.history.mentions = 0;
+    }
     this.ctx.store.touch(runtime.record.g);
     this.background(() =>
       this.ctx.queue.run(() =>
@@ -557,28 +620,61 @@ class E2eeEngineImpl implements E2eeEngineExt {
     options?: { includeOriginal?: boolean }
   ): Promise<void> {
     this.requireReady();
-    await sendReport(this.ctx, g, this.ownMessage(g, id), {
-      reason,
-      notes,
-      includeOriginal: options?.includeOriginal,
-    });
+    await sendReport(
+      this.ctx,
+      g,
+      await this.ctx.queue.run(() => this.ownMessage(g, id)),
+      {
+        reason,
+        notes,
+        includeOriginal: options?.includeOriginal,
+      }
+    );
   }
 
-  reportPreview(g: string, id: string): E2eeReportPreview {
-    return previewReport(this.ownMessage(g, id));
+  async reportPreview(g: string, id: string): Promise<E2eeReportPreview> {
+    return previewReport(
+      await this.ctx.queue.run(() => this.ownMessage(g, id))
+    );
   }
 
-  search(query: string, g?: string): Promise<E2eeMessage[]> {
-    const runtimes =
+  getMessage = (g: string, id: string) => getSavedMessage(this.ctx, g, id);
+
+  loadHistory = (
+    g: string,
+    options: HistoryPageOptions & { around?: string } = {}
+  ) => loadSavedHistory(this.ctx, g, options);
+
+  findImportedMessage = (
+    g: string,
+    waveId: string,
+    dropId: string,
+    part: number
+  ) => findSavedImport(this.ctx, g, waveId, dropId, part);
+
+  async search(
+    query: string,
+    g?: string,
+    signal?: AbortSignal
+  ): Promise<E2eeMessage[]> {
+    if (!query.trim()) return [];
+    const groups =
       g === undefined
-        ? [...this.ctx.store.groups.values()]
-        : [requireGroup(this.ctx, g)];
-    return Promise.resolve(searchMessages(runtimes, query).map(toE2eeMessage));
+        ? [...this.ctx.store.groups.keys()]
+        : [requireGroup(this.ctx, g).record.g];
+    return (await searchHistory(this.ctx, query, groups, signal)).map(
+      toE2eeMessage
+    );
   }
 
-  async getAttachment(g: string, id: string, blob: string): Promise<Blob> {
+  async getAttachment(
+    g: string,
+    id: string,
+    blob: string,
+    signal?: AbortSignal
+  ): Promise<Blob> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     const attachment = message.attachments.find(
       (att) => att.blob.toLowerCase() === blob.toLowerCase()
     );
@@ -589,6 +685,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       api: this.ctx.api,
       deviceKey: requireMls(this.ctx).deviceKey(),
       attachment,
+      ...(signal ? { signal } : {}),
     });
     return new Blob([bytes.slice().buffer], {
       type: localBlobType(attachment.mime),
@@ -597,7 +694,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   // -- encrypted history backup ---------------------------------------------
 
-  backupHistory = () => backupHistory(this.ctx);
+  backupHistory = () => this.ctx.queue.run(() => backupHistory(this.ctx));
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();

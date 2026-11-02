@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
@@ -405,7 +405,7 @@ test("falls back to link preview context for nested markdown suppression", () =>
   );
 });
 
-describe("signed-by-author seal on a quoted or previewed drop", () => {
+describe("quoted drop links and signed-by-author seal", () => {
   const signedDrop = (overrides: Record<string, unknown> = {}) =>
     ({
       id: "0982d42f-0000-4000-8000-000000000000",
@@ -419,6 +419,24 @@ describe("signed-by-author seal on a quoted or previewed drop", () => {
       is_author_signed: true,
       ...overrides,
     }) as any;
+
+  it.each(["Enter", " "])(
+    "does not intercept a quoted wave link's %s keydown",
+    (key) => {
+      const onQuoteClick = jest.fn();
+      render(
+        <WaveDropQuote
+          drop={signedDrop()}
+          partId={1}
+          onQuoteClick={onQuoteClick}
+        />
+      );
+
+      const link = screen.getByRole("link", { name: "Announcements" });
+      expect(fireEvent.keyDown(link, { key })).toBe(true);
+      expect(onQuoteClick).not.toHaveBeenCalled();
+    }
+  );
 
   it("shows the seal by the timestamp when signed messages are on", () => {
     mockSignedMessagesEnabled = true;

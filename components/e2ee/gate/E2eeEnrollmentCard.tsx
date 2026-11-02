@@ -6,7 +6,15 @@ import {
   FingerPrintIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { type ReactNode, useId, useState, useSyncExternalStore } from "react";
+import {
+  type ReactNode,
+  useContext,
+  useId,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { useAuth } from "@/components/auth/Auth";
+import { SeizeConnectContext } from "@/components/auth/seizeConnectContextValue";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -17,6 +25,7 @@ import {
   isE2eeSignatureRejection,
 } from "../e2eeErrors";
 import { isSafariBrowser } from "../e2eePlatform";
+import { turnOnWithCombinedSignIn } from "./e2eeCombinedTurnOn";
 
 const POINTS: readonly {
   readonly key: MessageKey;
@@ -58,6 +67,9 @@ export function E2eeEnrollmentCard({
 }: E2eeEnrollmentCardProps) {
   const locale = useBrowserLocale();
   const headingId = useId();
+  const { requestSignedMessagesGrant } = useAuth();
+  // Optional read: the gate renders in tests and shells without a provider.
+  const address = useContext(SeizeConnectContext)?.address;
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
   const isSafari = useSyncExternalStore(
@@ -88,7 +100,18 @@ export function E2eeEnrollmentCard({
     setPending(true);
     setErrorKey(null);
     try {
-      await engine.enroll();
+      // The website grants this device with one combined sign-in; the apps
+      // and any case it cannot cover use the separate grant prompt.
+      const outcome = await turnOnWithCombinedSignIn({
+        engine,
+        address,
+        requestGrant: requestSignedMessagesGrant,
+      });
+      if (outcome === "declined") {
+        setErrorKey(ENROLL_REJECTED_KEY);
+      } else if (outcome === "fallback") {
+        await engine.enroll();
+      }
     } catch (error) {
       setErrorKey(getEnrollErrorKey(error));
     } finally {

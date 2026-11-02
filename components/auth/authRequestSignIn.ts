@@ -42,6 +42,29 @@ interface AuthRequestSignInParams {
   readonly authRequestGuard?: AuthRequestGuard | undefined;
   /** Defaults to "auto"; "required" is the "Turn on signed messages" action. */
   readonly deviceGrantMode?: DeviceGrantMode | undefined;
+  /**
+   * "Turn on encrypted messages" (NC8, with deviceGrantMode "required"):
+   * sign only a challenge that also grants this browser's MLS key, and wait
+   * for the key handover before resolving.
+   */
+  readonly requireE2eeDevice?: boolean | undefined;
+}
+
+/** What a sign-in that required the encrypted-messages key left behind. */
+export interface LoginE2eeGrantResult {
+  /** The id of the grant the server stored (signing and MLS keys). */
+  readonly grantId: string | null;
+  /** The local copy of that grant replaced this browser's previous one. */
+  readonly grantSaved: boolean;
+  /** The MLS key is stored for the encrypted-messages engine to register. */
+  readonly adopted: boolean;
+}
+
+/** The local follow-up of a grant sign-in, filled once the login is done. */
+interface GrantHandover {
+  grantId: string | null;
+  grantSaved: Promise<boolean> | null;
+  adoption: Promise<boolean> | null;
 }
 
 interface AuthRequestSignInDependencies {
@@ -57,9 +80,11 @@ interface AuthRequestSignInDependencies {
   readonly setToast: (toast: AppToastInput) => void;
 }
 
-type AuthRequestSignIn = (
-  params: AuthRequestSignInParams
-) => Promise<{ success: boolean }>;
+type AuthRequestSignIn = (params: AuthRequestSignInParams) => Promise<{
+  readonly success: boolean;
+  /** Set on success when `requireE2eeDevice` was given. */
+  readonly e2ee?: LoginE2eeGrantResult | undefined;
+}>;
 
 type AuthSessionResponse = Awaited<ReturnType<typeof loginWithSessionV2>>;
 
@@ -159,14 +184,18 @@ const getDeviceGrantChallenge = async ({
   deviceGrant,
   deviceGrantMode,
   getNonce,
+  requireE2eeDevice,
   signerAddress,
 }: {
   readonly deviceGrant: LoginDeviceGrant;
   readonly deviceGrantMode: DeviceGrantMode;
   readonly getNonce: GetNonce;
+  readonly requireE2eeDevice: boolean;
   readonly signerAddress: string;
 }): Promise<SignInChallenge | null> => {
-  const e2eeDevice = await prepareLoginE2eeDevice();
+  const e2eeDevice = await prepareLoginE2eeDevice({
+    required: requireE2eeDevice,
+  });
   const combined = e2eeDevice
     ? await getCombinedGrantChallenge({
         deviceGrant,
@@ -177,6 +206,11 @@ const getDeviceGrantChallenge = async ({
     : null;
   if (e2eeDevice && !combined?.e2eeDevice) {
     e2eeDevice.dispose();
+  }
+  if (requireE2eeDevice) {
+    // A signing-only challenge would not turn on encrypted messages; they
+    // keep their own grant prompt instead of a second signature.
+    return combined?.e2eeDevice ? combined : null;
   }
   return (
     combined ??
@@ -197,11 +231,13 @@ const getDeviceGrantChallenge = async ({
 const getSignInChallenge = async ({
   deviceGrantMode,
   getNonce,
+  requireE2eeDevice,
   role,
   signerAddress,
 }: {
   readonly deviceGrantMode: DeviceGrantMode;
   readonly getNonce: AuthRequestSignInDependencies["getNonce"];
+  readonly requireE2eeDevice: boolean;
   readonly role: string | null;
   readonly signerAddress: string;
 }): Promise<SignInChallenge> => {
@@ -213,10 +249,14 @@ const getSignInChallenge = async ({
         deviceGrant,
         deviceGrantMode,
         getNonce,
+        requireE2eeDevice,
         signerAddress,
       })
     : null;
-  if (deviceGrantMode === "required" && !grantChallenge?.deviceGrant) {
+  if (
+    (deviceGrantMode === "required" && !grantChallenge?.deviceGrant) ||
+    (requireE2eeDevice && !grantChallenge?.e2eeDevice)
+  ) {
     grantChallenge?.e2eeDevice?.dispose();
     throw new DeviceGrantUnavailableError();
   }
@@ -248,19 +288,22 @@ const createSignInSession = async ({
   deviceGrantMode = "auto",
   getNonce,
   getSignature,
+  handover,
+  requireE2eeDevice = false,
   role,
   setToast,
   signerAddress,
 }: AuthRequestSignInDependencies &
-  AuthRequestSignInParams): Promise<AuthSessionResponse | null> => {
+  AuthRequestSignInParams & {
+    readonly handover: GrantHandover;
+  }): Promise<AuthSessionResponse | null> => {
   const { nonceResponse, deviceGrant, e2eeDevice } = await getSignInChallenge({
     deviceGrantMode,
     getNonce,
+    requireE2eeDevice,
     role,
     signerAddress,
   });
-  // The MLS key is used only by a combined sign-in that completes.
-  const handover = { adopted: false };
   try {
     return await signInWithChallenge({
       authRequestGuard,
@@ -271,10 +314,14 @@ const createSignInSession = async ({
       role,
       setToast,
       signerAddress,
-      onSignedIn: ({ storedGrantId, ownProfileId }, clientSignature) => {
+      onSignedIn: (
+        { storedGrantId, ownProfileId, grantSaved },
+        clientSignature
+      ) => {
+        handover.grantId = storedGrantId;
+        handover.grantSaved = grantSaved;
         if (e2eeDevice && storedGrantId) {
-          handover.adopted = true;
-          void adoptLoginE2eeDevice({
+          handover.adoption = adoptLoginE2eeDevice({
             e2eeDevice,
             message: nonceResponse.signable_message,
             walletSignature: clientSignature,
@@ -286,10 +333,22 @@ const createSignInSession = async ({
       },
     });
   } finally {
-    if (!handover.adopted) {
+    // The MLS key is used only by a combined sign-in that completes.
+    if (!handover.adoption) {
       e2eeDevice?.dispose();
     }
   }
+};
+
+/** Waits for the local grant copy and the MLS key handover (never throws). */
+const settleGrantHandover = async (
+  handover: GrantHandover
+): Promise<LoginE2eeGrantResult> => {
+  const [grantSaved, adopted] = await Promise.all([
+    handover.grantSaved ?? false,
+    handover.adoption ?? false,
+  ]);
+  return { grantId: handover.grantId, grantSaved, adopted };
 };
 
 const signInWithChallenge = async ({
@@ -313,6 +372,8 @@ const signInWithChallenge = async ({
     signedIn: {
       readonly storedGrantId: string | null;
       readonly ownProfileId: string | null;
+      /** Settles once the local copy of the grant is kept (or not). */
+      readonly grantSaved: Promise<boolean>;
     },
     clientSignature: string
   ) => void;
@@ -372,7 +433,7 @@ const signInWithChallenge = async ({
     // the local copy is best effort and never delays sign-in.
     // A grant sign-in never requests a proxy role, so the session role the
     // server returns is the wallet's own profile id.
-    void storeLoginDeviceGrant(
+    const grantSaved = storeLoginDeviceGrant(
       deviceGrant,
       sessionResponse.device_grant,
       sessionResponse.role ?? null
@@ -381,6 +442,7 @@ const signInWithChallenge = async ({
       {
         storedGrantId: sessionResponse.device_grant?.id ?? null,
         ownProfileId: sessionResponse.role ?? null,
+        grantSaved,
       },
       clientSignature.signature
     );
@@ -435,9 +497,15 @@ export const createAuthRequestSignIn =
   async ({
     authRequestGuard,
     deviceGrantMode,
+    requireE2eeDevice,
     role,
     signerAddress,
-  }: AuthRequestSignInParams): Promise<{ success: boolean }> => {
+  }: AuthRequestSignInParams) => {
+    const handover: GrantHandover = {
+      grantId: null,
+      grantSaved: null,
+      adoption: null,
+    };
     try {
       if (isAuthRequestStale(authRequestGuard)) {
         return { success: false };
@@ -455,6 +523,8 @@ export const createAuthRequestSignIn =
         deviceGrantMode,
         getNonce,
         getSignature,
+        handover,
+        requireE2eeDevice,
         role,
         setToast,
         signerAddress,
@@ -477,7 +547,9 @@ export const createAuthRequestSignIn =
         return { success: false };
       }
 
-      return { success: true };
+      return requireE2eeDevice === true
+        ? { success: true, e2ee: await settleGrantHandover(handover) }
+        : { success: true };
     } catch (error) {
       if (isAuthRequestStale(authRequestGuard)) {
         return { success: false };

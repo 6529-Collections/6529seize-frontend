@@ -1,4 +1,4 @@
-import type { E2eeApiClient } from "@/lib/e2ee/api";
+import type { E2eeApiAccount, E2eeApiClient } from "@/lib/e2ee/api";
 import type { E2eeBackupManager } from "@/lib/e2ee/backup";
 import type {
   E2eeEngine,
@@ -12,11 +12,12 @@ export type E2eeEngineHostDeps = E2eeEngineDeps &
 
 export interface E2eeEngineModules {
   readonly createE2eeEngine: (deps: E2eeEngineHostDeps) => Promise<E2eeEngine>;
-  readonly createE2eeApiClient: () => E2eeApiClient;
+  /** Requests go out only while the browser's session is `account`'s own. */
+  readonly createE2eeApiClient: (account: E2eeApiAccount) => E2eeApiClient;
   /** Starts encrypted history backups for a loaded engine (optional). */
   readonly startE2eeBackup?: (
     engine: E2eeEngine,
-    profileId: string
+    account: E2eeApiAccount
   ) => E2eeBackupManager | null;
 }
 

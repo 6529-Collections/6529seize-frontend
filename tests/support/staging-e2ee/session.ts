@@ -115,10 +115,12 @@ export interface StagingE2eeSession {
   /**
    * Whether the wallet already had a profile when it signed in. A combined
    * sign-in grant (NC8) enrolls only such a wallet: a new wallet has no
-   * profile to hold the key yet, so the app drops it and encrypted messages
-   * ask for their own grant once the profile exists.
+   * profile to hold the key yet, so its sign-in grants signing only and the
+   * enrollment button signs in once more with the combined grant.
    */
   hadProfileAtSignIn: boolean;
+  /** The id of the device grant the latest sign-in stored, if any. */
+  signInGrantId: string | null;
   close(): Promise<void>;
 }
 
@@ -246,6 +248,7 @@ export async function openStagingSession(
       droppedWrites,
       signInMessage: null,
       hadProfileAtSignIn: false,
+      signInGrantId: null,
       close: () => context.close(),
     };
   } catch (error) {
@@ -308,6 +311,15 @@ async function dismissCookieBanner(page: Page) {
   if (await reject.isVisible().catch(() => false)) {
     await reject.click();
   }
+}
+
+/** The device grant id a session-v2 login stored; never reads its tokens. */
+async function storedGrantId(loginResponse: Response): Promise<string | null> {
+  const body = (await loginResponse.json().catch(() => null)) as {
+    device_grant?: { id?: unknown } | null;
+  } | null;
+  const id = body?.device_grant?.id;
+  return typeof id === "string" ? id.toLowerCase() : null;
 }
 
 /**
@@ -402,6 +414,7 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
     loginResponse.ok(),
     `${session.label}: session-v2 login answered HTTP ${loginResponse.status()}`
   ).toBe(true);
+  session.signInGrantId = await storedGrantId(loginResponse);
   expect(wallet.count("personal_sign")).toBeGreaterThan(0);
   await expect
     .poll(
@@ -607,12 +620,12 @@ const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>
 
 /**
  * NC8: the combined sign-in enrolled this browser. That takes a wallet that
- * already had a profile; a new wallet's key is dropped at sign-in
- * (adoptLoginE2eeDevice), so it enrolls with its own grant prompt instead.
+ * already had a profile; a new wallet signs in with a signing-only grant
+ * (the server omits the MLS key without a profile), so it turns encrypted
+ * messages on from the enrollment button instead.
  */
-export const enrolledByCombinedSignIn = (
-  session: StagingE2eeSession
-): boolean => session.hadProfileAtSignIn && signedInWithCombinedGrant(session);
+const enrolledByCombinedSignIn = (session: StagingE2eeSession): boolean =>
+  session.hadProfileAtSignIn && signedInWithCombinedGrant(session);
 
 /**
  * NC8: a combined sign-in already enrolled this device. Encrypted messages
@@ -652,36 +665,74 @@ async function expectEnrolledBySignIn(session: StagingE2eeSession) {
 
 /**
  * Turns on encrypted messages for this device. After a combined sign-in
- * (NC8) that already happened with the sign-in signature; otherwise it takes
- * exactly one EIP-712 `MlsDeviceGrant` signature by the user's own wallet,
- * registered with the delivery service.
+ * (NC8) that already happened with the sign-in signature; otherwise the
+ * enrollment button signs in once more with the combined grant (website).
  */
 export async function enrollDevice(session: StagingE2eeSession) {
   if (enrolledByCombinedSignIn(session)) {
     await expectEnrolledBySignIn(session);
     return;
   }
-  await enrollWithGrantPrompt(session);
+  await enrollWithCombinedTurnOn(session);
 }
 
-async function enrollWithGrantPrompt(session: StagingE2eeSession) {
+const waitForPost = (page: Page, pathname: string) => {
+  const response = page.waitForResponse(
+    (candidate) =>
+      candidate.request().method() === "POST" &&
+      new URL(candidate.url()).pathname === pathname,
+    { timeout: UI_TIMEOUT_MS }
+  );
+  // Awaited by the caller; keep an earlier failure from leaving it unhandled.
+  response.catch(() => undefined);
+  return response;
+};
+
+/**
+ * NC8 on the website (owner decision: one grant per browser): the button's
+ * combined sign-in grants the signing key and the encrypted-messages key
+ * with one more personal_sign and no EIP-712 `MlsDeviceGrant`. The device
+ * registers through POST /api/e2ee/devices/login-grant with that grant, and
+ * the browser's earlier signing-only grant is revoked.
+ */
+async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
   const { page, wallet } = session;
   await gotoStaging(page, ENCRYPTED_ROUTE);
   await expectEnrollmentCard(session);
-  const grantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
-  const registration = page.waitForResponse(
-    (response) =>
-      response.request().method() === "POST" &&
-      new URL(response.url()).pathname === "/api/e2ee/devices",
-    { timeout: UI_TIMEOUT_MS }
-  );
-  registration.catch(() => undefined);
+  const signaturesBefore = wallet.count("personal_sign");
+  const typedGrantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
+  const replacedGrantId = session.signInGrantId;
+  const login = waitForPost(page, "/api/auth/session-login");
+  const registration = waitForPost(page, "/api/e2ee/devices/login-grant");
+  const revocation = replacedGrantId
+    ? waitForPost(page, `/api/device-grants/${replacedGrantId}/revoke`)
+    : null;
   await enrollmentButton(page).click();
+
+  const loginResponse = await login;
+  expect(
+    loginResponse.ok(),
+    `${session.label}: the turn-on sign-in answered HTTP ${loginResponse.status()}`
+  ).toBe(true);
+  const grantId = await storedGrantId(loginResponse);
+  expect(
+    grantId,
+    `${session.label}: the turn-on sign-in stored no grant`
+  ).not.toBeNull();
   const response = await registration;
   expect(
     response.ok(),
-    `${session.label}: device registration answered HTTP ${response.status()}`
+    `${session.label}: sign-in grant registration answered HTTP ${response.status()}`
   ).toBe(true);
+  const body = response.request().postDataJSON() as { grant_id?: string };
+  expect(body.grant_id?.toLowerCase()).toBe(grantId);
+  if (revocation) {
+    const revoked = await revocation;
+    expect(
+      revoked.ok(),
+      `${session.label}: revoking the replaced signing-only grant answered HTTP ${revoked.status()}`
+    ).toBe(true);
+  }
   await expect(enrollmentHeading(page)).toHaveCount(0, {
     timeout: UI_TIMEOUT_MS,
   });
@@ -689,24 +740,15 @@ async function enrollWithGrantPrompt(session: StagingE2eeSession) {
     page.getByRole("link", { name: "Devices for encrypted messages" }).first()
   ).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
-  const grants = wallet.typedDataSignatures("MlsDeviceGrant");
   expect(
-    grants.length,
-    `${session.label}: enrollment must take exactly one device grant signature`
-  ).toBe(grantsBefore + 1);
-  const grant = grants.at(-1)!;
-  expect(grant.domainName).toBe("6529 Encrypted Messages");
-  expect(String(grant.message["wallet"]).toLowerCase()).toBe(
-    wallet.address.toLowerCase()
-  );
-  expect(grant.message["origin"]).toBe(new URL(STAGING_ORIGIN).host);
-  // The delivery service received exactly the signature the wallet made.
-  const body = response.request().postDataJSON() as {
-    grant?: { wallet?: string };
-    wallet_signature?: string;
-  };
-  expect(body.wallet_signature).toBe(grant.signature);
-  expect(body.grant?.wallet?.toLowerCase()).toBe(wallet.address.toLowerCase());
+    wallet.count("personal_sign"),
+    `${session.label}: turning on takes exactly one more sign-in signature`
+  ).toBe(signaturesBefore + 1);
+  expect(
+    wallet.typedDataSignatures("MlsDeviceGrant"),
+    `${session.label}: the website turns on without a separate grant signature`
+  ).toHaveLength(typedGrantsBefore);
+  session.signInGrantId = grantId;
 }
 
 interface PrepareSessionOptions {

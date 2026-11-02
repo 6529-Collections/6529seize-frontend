@@ -86,10 +86,21 @@ If you signed in on this browser with the combined sign-in message (it
 mentions end-to-end encrypted messages and an encrypted messages key; see
 [Signed messages](waves/drop-actions/feature-signed-messages.md)), that one
 sign-in signature already turned encrypted messages on: this device finishes
-setting up in the background and the card does not ask again. If 6529 cannot
-use that sign-in grant (for example it was revoked), the card asks for the
-separate signature as usual. Revoking the device under **Devices that can
-post as you** also revokes it for encrypted messages, and revoking it here
+setting up in the background and the card does not ask again.
+
+Otherwise, on the website, the button asks your wallet to sign that same
+combined sign-in message. This happens, for example, when you signed in before
+your profile existed or before encrypted messages launched. The one signature
+covers signed messages and encrypted messages in this browser, with one
+180-day expiry. The browser's earlier signed-messages grant is revoked, so
+**Devices that can post as you** lists one entry for this browser. The 6529
+apps, and any case where the combined message cannot be used, ask for the
+separate encrypted-messages signature instead. For example, the wallet cannot
+sign it, or the browser cannot load encrypted messages in time.
+
+If 6529 cannot use a sign-in grant (for example it was revoked), the card asks
+for the separate signature as usual. Revoking the device under **Devices that
+can post as you** also revokes it for encrypted messages, and revoking it here
 also stops its signed messages.
 
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
@@ -102,8 +113,9 @@ never ask for a signature per message.
 ## Starting a chat
 
 1. Open `/messages/encrypted` and select **New encrypted chat**.
-2. Search for people and add them. Each person shows whether they can receive
-   encrypted messages:
+2. Search for people and tap or click a result to add them. The search clears
+   and the person appears in the selected list. Each person shows whether they
+   can receive encrypted messages:
    - **Can receive encrypted messages**
    - **Doesn’t accept messages from you**: their direct-message setting does
      not allow you.
@@ -121,6 +133,15 @@ the same people already chosen. Earlier messages are not copied.
 
 ## In a chat
 
+- In a direct chat, select the person's name or avatar in the header or chat
+  introduction to open their profile. Group titles stay as group titles.
+- Message authors have the same profile links, level, artist badges and
+  profile-wave badge as ordinary messages, where those apply. Hover over a
+  name or avatar on desktop for the profile card. Select a profile-wave badge
+  for the usual wave navigation or mobile preview.
+- Select a highlighted member mention to open that person's profile. If a
+  profile cannot be resolved, its unavailable details are omitted; messages
+  remain readable on this device.
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
@@ -131,6 +152,10 @@ the same people already chosen. Earlier messages are not copied.
   right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
+- Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
+  same limits as the attach control. Text copied together with an image is
+  pasted into the message as well. Pasting attaches images only while the
+  attach control is shown, so not while you edit a message.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
@@ -146,6 +171,26 @@ the same people already chosen. Earlier messages are not copied.
 - The timeline shows notices such as people joining, leaving or being removed,
   new devices (with the wallet that signed them) or removed devices, renames,
   admin changes and safety-code changes.
+
+### Browsing saved history
+
+A chat opens at its newest saved messages. **Load older messages** reads the
+previous part of this device's history; **Load newer messages** moves forward
+again. **New messages** returns to the latest messages. Incoming messages do
+not move you away from older history you are reading.
+
+Photos load when you approach them while scrolling. Moving away can release
+them from memory; returning to a photo may download it again. This does not
+remove its message or attachment keys from your saved history.
+
+Search covers all messages saved on this device, including older messages
+outside the current view. Use **Previous results** and **Next results** to
+browse a long result list. Replies and search results can open that older
+history. Encrypted backups also include the complete saved history.
+
+A device catching up after being offline still needs to process the messages
+it has not received yet. Opening already synced history does not repeat that
+work. Keep the app open while a large import catches up.
 
 ### Safety code
 

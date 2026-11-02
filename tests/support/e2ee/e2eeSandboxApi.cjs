@@ -166,7 +166,11 @@ function createE2eeSandboxApi({ corsHeaders }) {
       query: user.key,
       handle: user.key,
       normalised_handle: user.key,
+      display: user.key,
+      consolidation_key: wallet,
       pfp: null,
+      banner1: null,
+      banner2: null,
       banner1_color: null,
       banner2_color: null,
       cic: 0,
@@ -446,6 +450,24 @@ function createE2eeSandboxApi({ corsHeaders }) {
   }
 
   function handleIdentityRead(pathname, url, res) {
+    if (/^\/api\/+identities\/[^/]+\/subscriptions$/u.test(pathname)) {
+      reply(res, 200, { actions: [] });
+      return true;
+    }
+    if (/^\/api\/profiles\/[^/]+\/cic\/statements$/u.test(pathname)) {
+      reply(res, 200, []);
+      return true;
+    }
+    if (/^\/api\/profiles\/[^/]+\/rep\/ratings\/received$/u.test(pathname)) {
+      reply(res, 200, {
+        total_rep_rating: 0,
+        total_rep_rating_by_rater: null,
+        rep_rates_left_for_rater: null,
+        number_of_raters: 0,
+        rating_stats: [],
+      });
+      return true;
+    }
     const identityMatch = /^\/api\/identities\/([^/]+)$/u.exec(pathname);
     if (identityMatch) {
       const user = userByIdentityKey(identityMatch[1]);

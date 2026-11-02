@@ -163,6 +163,8 @@ export function createFakeE2eeEngine(
       return () => listeners.delete(listener);
     },
     enroll: jest.fn(async () => undefined),
+    needsNewDevice: jest.fn(async () => true),
+    enrollWithLoginGrant: jest.fn(async () => state.status),
     sync: jest.fn(async () => undefined),
     dispose: jest.fn(),
     checkEligibility: jest.fn(async (profileIds: string[]) =>

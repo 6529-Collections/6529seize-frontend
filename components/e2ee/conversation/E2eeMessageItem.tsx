@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ArrowUturnLeftIcon,
@@ -23,6 +25,7 @@ import type {
   E2eeConversation,
   E2eeEngine,
   E2eeMessage,
+  E2eeMember,
 } from "@/lib/e2ee/types";
 import {
   findMember,
@@ -32,7 +35,8 @@ import {
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
-import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eeProfileLink } from "../ui/E2eeProfileLink";
+import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitLinks } from "./e2eeLinks";
 import {
@@ -77,6 +81,7 @@ interface E2eeMessageItemProps {
   readonly actions: E2eeMessageActions;
   /** Arrived after the chat was opened: ease in (respects reduced motion). */
   readonly appear?: boolean | undefined;
+  readonly inViewportRow?: boolean;
 }
 
 function MessageBody({
@@ -125,11 +130,12 @@ function MessageBody({
     message.mentions
   );
   return (
-    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
+    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-md tw-leading-6 tw-text-iron-100">
       {segments.flatMap((segment) =>
         segment.kind === "mention" ? (
-          <span
+          <E2eeProfileLink
             key={segment.start}
+            member={findMember(conversation.members, segment.profileId)}
             className={`tw-rounded tw-px-0.5 tw-font-semibold ${
               segment.profileId === selfProfileId
                 ? "tw-bg-primary-500/25 tw-text-primary-300"
@@ -137,7 +143,7 @@ function MessageBody({
             }`}
           >
             {segment.value}
-          </span>
+          </E2eeProfileLink>
         ) : (
           splitLinks(segment.value, segment.start).map((part) =>
             part.kind === "link" ? (
@@ -453,15 +459,18 @@ function NoticeItem({
   message,
   conversation,
   selfProfileId,
+  inViewportRow,
 }: {
   readonly message: E2eeMessage;
   readonly conversation: E2eeConversation;
   readonly selfProfileId: string | null;
+  readonly inViewportRow: boolean;
 }) {
   const locale = useBrowserLocale();
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <li
-      id={getMessageDomId(message.id)}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
       className="tw-flex tw-justify-center tw-px-4 tw-py-1.5"
     >
       <p className="tw-m-0 tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-center tw-text-xs tw-text-iron-400">
@@ -471,7 +480,7 @@ function NoticeItem({
           {formatE2eeDateTime(locale, message.serverTs)}
         </span>
       </p>
-    </li>
+    </Container>
   );
 }
 
@@ -543,10 +552,12 @@ const hasMarkers = (message: E2eeMessage) =>
 function MessageMeta({
   message,
   name,
+  member,
   compact,
 }: {
   readonly message: E2eeMessage;
   readonly name: string;
+  readonly member: E2eeMember | null;
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -556,10 +567,16 @@ function MessageMeta({
     return <span className="tw-sr-only">{name}</span>;
   }
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-        {name}
-      </span>
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-md tw-leading-5">
+      <E2eeMessageIdentity
+        member={member}
+        fallbackName={name}
+        messageId={message.id}
+      />
+      <span
+        aria-hidden="true"
+        className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"
+      />
       <time
         dateTime={new Date(shownTs).toISOString()}
         title={formatE2eeDateTime(locale, shownTs)}
@@ -634,7 +651,25 @@ function E2eeMessageItemComponent({
   canAct,
   actions,
   appear = false,
+  inViewportRow = false,
 }: E2eeMessageItemProps) {
+  const { data: storedReply, isFetching: replyLoading } = useQuery({
+    queryKey: [
+      "e2ee-reply",
+      engine.getThisDevice()?.deviceKey,
+      message.g,
+      message.reply,
+    ],
+    queryFn: () =>
+      message.reply
+        ? (engine.getMessage?.(message.g, message.reply) ?? null)
+        : null,
+    enabled: Boolean(
+      message.reply && !replyTarget && typeof engine.getMessage === "function"
+    ),
+    gcTime: 0,
+  });
+  const resolvedReply = replyTarget ?? storedReply ?? null;
   const locale = useBrowserLocale();
   if (message.kind === "notice") {
     return (
@@ -642,6 +677,7 @@ function E2eeMessageItemComponent({
         message={message}
         conversation={conversation}
         selfProfileId={selfProfileId}
+        inViewportRow={inViewportRow}
       />
     );
   }
@@ -656,25 +692,31 @@ function E2eeMessageItemComponent({
   const showActions =
     canAct && !message.deleted && !message.undecryptable && !message.pending;
 
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <li
-      id={getMessageDomId(message.id)}
-      tabIndex={-1}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
+      tabIndex={inViewportRow ? undefined : -1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
-      <div className="tw-w-9 tw-flex-shrink-0">
+      <div className="tw-w-10 tw-flex-shrink-0">
         {compact ? null : (
-          <E2eeAvatar pfp={sender?.pfp ?? null} name={shownName} size="sm" />
+          <E2eeMessageAvatar member={sender} fallbackName={shownName} />
         )}
       </div>
       <div
         className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
       >
-        <MessageMeta message={message} name={shownName} compact={compact} />
-        {message.reply ? (
+        <MessageMeta
+          message={message}
+          name={shownName}
+          member={sender}
+          compact={compact}
+        />
+        {message.reply && !(replyLoading && !resolvedReply) ? (
           <ReplyPreview
             replyId={message.reply}
-            target={replyTarget}
+            target={resolvedReply}
             conversation={conversation}
             selfProfileId={selfProfileId}
             onJumpTo={actions.onJumpTo}
@@ -732,7 +774,7 @@ function E2eeMessageItemComponent({
           />
         </div>
       ) : null}
-    </li>
+    </Container>
   );
 }
 
