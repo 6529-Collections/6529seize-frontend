@@ -9,12 +9,13 @@
     whose animation is HTML (for example Memes cards).
 - Shared card surfaces that already have preview artwork can show that static
   preview image instead of mounting the live HTML iframe immediately.
-- Some touch-device home surfaces require `Tap to load` before HTML starts.
+- Some touch-device home and Memes quick-vote surfaces require `Tap to load`
+  before HTML starts.
 
 ## Location in the Site
 
 - Shared drop/card media surfaces that use common media renderers (including
-  home card panels and wave/drop card views).
+  home card panels, wave/drop card views, and the Memes quick-vote dialog).
 - `Submit Work to The Memes` modal (`/waves/{waveId}`), Artwork step,
   `Interactive HTML` tab preview.
 - Home `Latest Drop` artwork (`/`) when the NFT animation format is HTML.
@@ -43,8 +44,11 @@
    - iframe with `sandbox="allow-scripts"`, empty `allow`,
      `referrerPolicy="no-referrer"`, and `credentialless`.
 5. Shared renderer iframes mount only after the surface enters the viewport.
-6. Touch-gated home contexts require `Tap to load`; when preview artwork
-   exists, that image stays visible behind the gate until activation.
+   Until the frame finishes loading, a `Loading interactive media` status
+   appears over it.
+6. Touch-gated home and Memes quick-vote contexts require `Tap to load`; when
+   preview artwork exists, that image stays visible behind the gate until
+   activation.
 7. Submission preview:
    - accepts only root CID/transaction IDs (no subpaths, query strings, or
      fragments)
