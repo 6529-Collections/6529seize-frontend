@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
@@ -6,6 +12,8 @@ import {
   E2eeMessageIdentity,
 } from "@/components/e2ee/conversation/E2eeMessageIdentity";
 import { getE2eeProfileQueryOptions } from "@/components/e2ee/e2eeProfiles";
+import { E2eeProfileLink } from "@/components/e2ee/ui/E2eeProfileLink";
+import { splitMentions } from "@/components/e2ee/conversation/e2eeMentions";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ALICE_ID, member } from "./fakeE2eeEngine";
 
@@ -187,5 +195,65 @@ describe("encrypted message sender profiles", () => {
       "https://example.com/alice.png"
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([null, "", "  "])(
+    "opens a wallet-backed profile card with handle %p without repeated lookups",
+    async (handle) => {
+      const wallet = "0x0000000000000000000000000000000000000529";
+      fetchMock.mockImplementation(async ({ endpoint }) => {
+        if (endpoint === `identities/${wallet}`) {
+          return {
+            ...profile,
+            handle: null,
+            display: wallet,
+            primary_wallet: wallet,
+            profile_wave_id: null,
+          };
+        }
+        return { count: 0, data: [] };
+      });
+      const walletMember = { ...alice, handle, wallets: [wallet] };
+      renderProfile(
+        <E2eeProfileLink member={walletMember} avatar>
+          Avatar
+        </E2eeProfileLink>
+      );
+      const link = screen.getByRole("link", { name: "View profile" });
+      expect(link).toHaveAttribute("href", `/${wallet}`);
+      fireEvent.focus(link);
+      const card = await screen.findByRole("dialog", {
+        name: `User profile for ${wallet}`,
+      });
+      expect(await within(card).findByText(wallet)).toBeInTheDocument();
+      expect(
+        fetchMock.mock.calls.filter(
+          ([request]) => request.endpoint === `identities/${wallet}`
+        )
+      ).toHaveLength(1);
+    }
+  );
+
+  it("does not route to a malformed wallet fallback", () => {
+    renderProfile(
+      <E2eeProfileLink
+        member={{ ...alice, handle: null, wallets: ["invalid-wallet"] }}
+      >
+        Unknown
+      </E2eeProfileLink>
+    );
+    expect(screen.getByText("Unknown")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("does not turn a mention into a wallet link when its member has no handle", () => {
+    const segments = splitMentions(
+      "hello @alice",
+      [{ ...alice, handle: null }],
+      [ALICE_ID]
+    );
+    expect(segments).toEqual([
+      { kind: "text", start: 0, value: "hello @alice" },
+    ]);
   });
 });

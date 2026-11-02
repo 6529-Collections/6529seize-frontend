@@ -19,6 +19,7 @@ export const E2EE_MESSAGES = {
   "e2ee.you": "You",
   "e2ee.youObject": "you",
   "e2ee.profile.view": "View {name}'s profile",
+  "e2ee.profile.viewUnknown": "View profile",
   "e2ee.profile.level": "Level {level}",
   "e2ee.someone": "Someone",
   "e2ee.unknownMember": "Unknown member",

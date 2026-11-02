@@ -70,7 +70,7 @@ export function E2eeMessageIdentity({
     <>
       <E2eeProfileLink
         member={displayMember}
-        className="tw-min-w-0 tw-max-w-full tw-break-words tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-underline"
+        className="tw-min-w-0 tw-max-w-full tw-font-semibold tw-text-iron-200 [overflow-wrap:anywhere] desktop-hover:hover:tw-underline"
       >
         {profile ? (
           <ProfileNameWithAiMarker classification={profile.classification}>
@@ -83,6 +83,7 @@ export function E2eeMessageIdentity({
       {profile && (
         <>
           <span
+            role="img"
             aria-label={t(locale, "e2ee.profile.level", {
               level: formatInteger(locale, profile.level),
             })}

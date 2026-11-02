@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { isAddress } from "viem";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -22,20 +23,23 @@ export function E2eeProfileLink({
   avatar = false,
 }: E2eeProfileLinkProps) {
   const locale = useBrowserLocale();
-  const identity = (member?.handle ?? member?.wallets[0])?.trim();
+  const handle = member?.handle?.trim();
+  const hasHandle = (handle?.length ?? 0) > 0;
+  const identity = hasHandle
+    ? handle
+    : member?.wallets.find((wallet) => isAddress(wallet));
   if (!identity) {
     return <span className={className}>{children}</span>;
   }
+  const avatarLabel = hasHandle
+    ? t(locale, "e2ee.profile.view", { name: handle ?? "" })
+    : t(locale, "e2ee.profile.viewUnknown");
   return (
     <UserProfileTooltipWrapper user={identity}>
       <Link
         href={`/${encodeURIComponent(identity)}`}
         prefetch={false}
-        aria-label={
-          avatar
-            ? t(locale, "e2ee.profile.view", { name: identity })
-            : undefined
-        }
+        aria-label={avatar ? avatarLabel : undefined}
         className={`${className ?? ""} tw-rounded-sm tw-text-inherit tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300`}
       >
         {children}
