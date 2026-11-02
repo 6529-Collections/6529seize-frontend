@@ -3,15 +3,14 @@
 import { useContext, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiUpdateWaveHubRequest } from "@/generated/models/ApiUpdateWaveHubRequest";
 import { AuthContext } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { commonApiPost } from "@/services/api/common-api";
+import { updateWaveHub } from "@/services/api/wave-hub-api";
 import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
 import CreateWaveImageInput from "../../create-wave/overview/CreateWaveImageInput";
 import Button from "@/components/utils/button/Button";
@@ -33,11 +32,8 @@ export default function WaveHeaderPictureEditModal({
   const [mutating, setMutating] = useState(false);
 
   const editPictureMutation = useMutation({
-    mutationFn: async (body: ApiUpdateWaveRequest) =>
-      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
-        endpoint: `waves/${wave.id}`,
-        body,
-      }),
+    mutationFn: async (body: ApiUpdateWaveHubRequest) =>
+      await updateWaveHub(wave.id, body),
     onSuccess: () => {
       onWaveCreated();
       onClose();
@@ -97,7 +93,6 @@ export default function WaveHeaderPictureEditModal({
     }
 
     const body = {
-      ...convertWaveToUpdateWave(wave),
       picture: uploaded.url,
     };
 

@@ -2,11 +2,10 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiUpdateWaveHubRequest } from "@/generated/models/ApiUpdateWaveHubRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import { updateWaveHub } from "@/services/api/wave-hub-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -44,11 +43,8 @@ export default function WaveHeaderNameEditModal({
   };
 
   const editNameMutation = useMutation({
-    mutationFn: async (body: ApiUpdateWaveRequest) =>
-      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
-        endpoint: `waves/${wave.id}`,
-        body,
-      }),
+    mutationFn: async (body: ApiUpdateWaveHubRequest) =>
+      await updateWaveHub(wave.id, body),
     onSuccess: () => {
       onWaveCreated();
       handleClose();
@@ -78,9 +74,7 @@ export default function WaveHeaderNameEditModal({
       setMutating(false);
       return;
     }
-    const originalBody = convertWaveToUpdateWave(wave);
     const body = {
-      ...originalBody,
       name,
     };
     await editNameMutation.mutateAsync(body);

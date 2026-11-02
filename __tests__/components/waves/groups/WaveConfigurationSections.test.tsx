@@ -1,3 +1,6 @@
+jest.mock("@/hooks/waves/useWaveConfiguration", () => ({
+  useWaveConfiguration: (wave: unknown) => wave,
+}));
 import { render, screen } from "@testing-library/react";
 import WaveConfigurationSections from "@/components/waves/groups/WaveConfigurationSections";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
