@@ -13,7 +13,7 @@ export function useCompactMenuFocus(open: boolean, autoFocusItem = true) {
         const target = container.querySelector<HTMLButtonElement>(selector);
         if (!target) continue;
         requestAnimationFrame(() => {
-          if (target.isConnected && container.hasAttribute("data-open")) {
+          if (target.isConnected && container.dataset["open"] !== undefined) {
             target.focus({ preventScroll: true });
           }
         });
