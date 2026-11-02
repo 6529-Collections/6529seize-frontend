@@ -125,7 +125,7 @@ export default function Cc0Licence({
           big={ht(locale, answer.big)}
           say={
             <>
-              {answer.say.map((key) => ht(locale, key)).join(" ")}
+              {answer.say.map((key) => ht(locale, key)).join(" ")}{" "}
               {/* What the answer leaves out, beside it and at its size. */}
               <span className="tw-mt-2 tw-block tw-text-iron-400">
                 {ht(
