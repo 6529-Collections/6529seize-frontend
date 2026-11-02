@@ -26,6 +26,8 @@ export function getDesktopPlatform(
     ) ?? ua;
   if (/Windows|^Win(?:32|64)$/i.test(platform)) return "windows";
   if (/mac/i.test(platform)) {
+    // iPadOS can advertise MacIntel. Prefer leaving a rare touch-capable Mac
+    // collapsed over automatically treating a tablet as a desktop.
     return (hints.maxTouchPoints ?? 0) > 1 ? null : "mac";
   }
   if (/linux/i.test(platform)) return "linux";

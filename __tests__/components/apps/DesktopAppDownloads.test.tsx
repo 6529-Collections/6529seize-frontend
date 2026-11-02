@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { DesktopAppDownloads } from "@/components/apps/DesktopAppDownloads";
 import type { DesktopAppVersion } from "@/components/apps/appDownloads";
 
@@ -113,18 +119,16 @@ describe("DesktopAppDownloads", () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
-  it("makes closing content inert until the native disclosure opens again", () => {
+  it("tracks native open mutations without waiting for toggle events", async () => {
     render(<DesktopAppDownloads />);
     const download = screen.getByRole("link", {
       name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
     });
     const disclosure = download.closest("details")!;
     disclosure.removeAttribute("open");
-    fireEvent(disclosure, new Event("toggle"));
-    expect(download.closest("[inert]")).not.toBeNull();
+    await waitFor(() => expect(download.closest("[inert]")).not.toBeNull());
     disclosure.setAttribute("open", "");
-    fireEvent(disclosure, new Event("toggle"));
-    expect(download.closest("[inert]")).toBeNull();
+    await waitFor(() => expect(download.closest("[inert]")).toBeNull());
   });
   it("preserves available releases and exposes a retry for a partial feed failure", () => {
     query = { data: [{ ...app, hasUnavailableRelease: true }], refetch };

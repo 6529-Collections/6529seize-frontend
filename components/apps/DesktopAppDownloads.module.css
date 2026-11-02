@@ -7,22 +7,18 @@
   }
 
   .disclosure::details-content {
-    content-visibility: visible !important;
-    visibility: hidden;
     height: 0;
     overflow: clip;
     opacity: 0;
     transition:
       height 180ms ease-out,
       opacity 180ms ease-out,
-      visibility 0s linear 180ms;
+      content-visibility 180ms allow-discrete;
   }
 
   .disclosure[open]::details-content {
-    visibility: visible;
     height: auto;
     opacity: 1;
-    transition-delay: 0s;
   }
 
   @media (prefers-reduced-motion: reduce) {

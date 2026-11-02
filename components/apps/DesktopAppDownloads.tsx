@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDesktopPlatform } from "./desktopPlatform";
@@ -19,11 +19,26 @@ import {
 } from "./appDownloads";
 
 const APPS_LOCALE = DEFAULT_LOCALE;
+// Platform is stable for this document; the null server snapshot defers OS
+// detection until hydration without changing later manual accordion choices.
 const subscribeToPlatform = () => () => undefined;
 const getServerPlatform = () => null;
 const getClientPlatform = () => getDesktopPlatform(navigator);
 const FOCUS =
   "focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
+
+function observeDisclosureContent(content: HTMLDivElement | null) {
+  if (!content) return;
+  const disclosure = content.closest("details");
+  if (!disclosure) return;
+  // Attribute observers run before paint, including when native name grouping
+  // closes a sibling. Do not wait for the separately queued toggle event.
+  const syncInert = () => content.toggleAttribute("inert", !disclosure.open);
+  syncInert();
+  const observer = new MutationObserver(syncInert);
+  observer.observe(disclosure, { attributes: true, attributeFilter: ["open"] });
+  return () => observer.disconnect();
+}
 
 export function DesktopAppDownloads() {
   const platform = useSyncExternalStore(
@@ -109,15 +124,11 @@ function PlatformDownloads({
   readonly initiallyOpen: boolean;
   readonly onRetry: () => void;
 }) {
-  // Native details owns expansion; this mirrors it only for focus safety while
-  // the closing content is still visible during its CSS transition.
-  const [contentOpen, setContentOpen] = useState(initiallyOpen);
   return (
     <details
       name="desktop-download-platform"
       open={initiallyOpen}
-      onToggle={(event) => setContentOpen(event.currentTarget.open)}
-      className={`${styles["disclosure"]} tw-group/platform tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10`}
+      className={`${styles["disclosure"] ?? ""} tw-group/platform tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10`}
     >
       <summary
         className={`tw-flex tw-min-h-[70px] tw-cursor-pointer tw-list-none tw-items-center tw-gap-3 tw-px-5 tw-py-4 hover:tw-bg-iron-900/60 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden ${FOCUS}`}
@@ -140,7 +151,7 @@ function PlatformDownloads({
           className="tw-size-4 tw-shrink-0 tw-text-iron-300 group-open/platform:tw-rotate-180 motion-safe:tw-transition-transform motion-safe:tw-duration-[180ms] motion-safe:tw-ease-out"
         />
       </summary>
-      <div inert={!contentOpen}>
+      <div ref={observeDisclosureContent} inert={!initiallyOpen}>
         <div className="tw-px-5 tw-pb-5 sm:tw-pl-[76px] sm:tw-pr-6">
           {app.releases.map((release) => (
             <ReleaseDownloads

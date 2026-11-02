@@ -10,6 +10,7 @@ import {
 test.describe("About Pages @smoke @medium @large", () => {
   test("shows direct desktop downloads and independent macOS 12 recovery", async ({
     page,
+    isMobile,
   }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "userAgentData", {
@@ -54,6 +55,10 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByText("macOS", { exact: true })
       .locator("xpath=ancestor::summary");
     await expect(macSummary).toHaveText("macOS");
+    if (isMobile) {
+      await expect(mac).not.toHaveAttribute("open");
+      await macSummary.click();
+    }
     await expect(mac).toHaveAttribute("open");
     await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
     await expect(
@@ -63,16 +68,21 @@ test.describe("About Pages @smoke @medium @large", () => {
       mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
     ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
     await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
-    const panelBox = await mac.boundingBox();
-    const downloadBox = await mac
-      .getByRole("link", { name: /version 0.3.15, Apple silicon/ })
-      .boundingBox();
-    expect(panelBox).not.toBeNull();
-    expect(downloadBox).not.toBeNull();
-    if (panelBox && downloadBox) {
-      expect(
-        panelBox.x + panelBox.width - downloadBox.x - downloadBox.width
-      ).toBeLessThanOrEqual(32);
+    if (!isMobile) {
+      const download = mac.getByRole("link", {
+        name: /version 0.3.15, Apple silicon/,
+      });
+      const contentBox = await download
+        .locator("xpath=ancestor::section")
+        .boundingBox();
+      const downloadBox = await download.boundingBox();
+      expect(contentBox).not.toBeNull();
+      expect(downloadBox).not.toBeNull();
+      if (contentBox && downloadBox) {
+        expect(Math.round(downloadBox.x + downloadBox.width)).toBe(
+          Math.round(contentBox.x + contentBox.width)
+        );
+      }
     }
     const windows = page
       .getByText("Windows", { exact: true })
