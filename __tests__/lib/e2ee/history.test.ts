@@ -189,6 +189,71 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
   });
 }, 30_000);
 
+it("upgrades an indexed v2 checkpoint without rewriting its history", async () => {
+  const factory = new IDBFactory();
+  const row = message(1);
+  const history = {
+    ...emptyHistorySummary(),
+    count: 1,
+    maxSeq: 1,
+    last: row,
+    tail: row,
+  };
+  const db = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = factory.open(E2EE_DB_NAME, 2);
+    req.onupgradeneeded = () => {
+      const messages = req.result.createObjectStore("messages", {
+        keyPath: ["profileId", "g", "id"],
+      });
+      messages.createIndex("group", ["profileId", "g"]);
+      messages.createIndex("profile", "profileId");
+      for (const [name, field] of [
+        ["history-order", "historyOrder"],
+        ["last-message", "lastOrder"],
+        ["import-source", "importSource"],
+        ["unread-seq", "unreadSeq"],
+        ["mention-seq", "mentionSeq"],
+      ])
+        messages.createIndex(name!, ["profileId", "g", field!]);
+      messages.put({
+        ...row,
+        profileId: "p",
+        historyOrder: historyKey(row),
+        lastOrder: historyKey(row),
+      });
+      const groups = req.result.createObjectStore("groups", {
+        keyPath: ["profileId", "g"],
+      });
+      groups.createIndex("profile", "profileId");
+      groups.put({ g: "g", profileId: "p", readSeq: 1, history });
+      req.result.createObjectStore("wasm", { keyPath: "profileId" }).put({
+        profileId: "p",
+        version: 37,
+      });
+    };
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+  });
+  db.close();
+  const storage = createIndexedDbE2eeStorage(factory);
+  expect(await storage.getStateVersion("p")).toBe(37);
+  expect(await storage.getMessage("p", "g", row.id)).toEqual(row);
+  expect((await storage.listGroups("p"))[0]?.history).toEqual(history);
+  const current = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = factory.open(E2EE_DB_NAME);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  expect(current.version).toBe(3);
+  const indexes = current
+    .transaction("messages")
+    .objectStore("messages").indexNames;
+  expect([...indexes]).toHaveLength(5);
+  expect(indexes.contains("group")).toBe(false);
+  expect(indexes.contains("profile")).toBe(false);
+  current.close();
+});
+
 it("retains at most two pages while browsing and preserves offscreen summary counts", async () => {
   const storage = createIndexedDbE2eeStorage(new IDBFactory());
   const rows = Array.from({ length: 1500 }, (_, i) => message(i + 1));

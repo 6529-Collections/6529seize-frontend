@@ -32,6 +32,21 @@ and frame-batched notifications remove history-dependent surrounding work.
 
 ## One-time native upgrade
 
+The first targeted staging run passed the five existing encrypted journeys but
+failed its five-minute 100,000-record upgrade budget. Native Chromium diagnosis
+found substantial cost from duplicate-key legacy profile/group indexes. The
+schema-v3 correction removes those redundant indexes and uses the existing
+`[profileId, g, id]` primary key for their prefix lookups. The v1 derived-field
+backfill and five history indexes remain one atomic versionchange transaction.
+Already indexed v2 databases only drop the redundant indexes; their history,
+summaries and MLS checkpoint are not rewritten. Any application rollback must
+retain a schema-v3-compatible reader and must not delete the database.
+
+Matched 20,000-record native diagnostics took 48.3 seconds rebuilding the legacy
+indexes and 25.8 seconds using primary-key prefix ranges. Fixture creation is
+excluded. The final 100,000-record validation and staging measurements are
+recorded separately; these diagnostic timings are not device percentiles.
+
 Two isolated local Chromium runs migrated 100,000 v1 records in 90.0 seconds
 and 130.5 seconds under different concurrent machine load. Both retained all
 100,000 records, checkpoint version 42, correct unread counts and a 100-record
@@ -69,6 +84,11 @@ originals and reconnect an offline receiver. Importer timing includes the browse
 importer's 700 ms pacing below the 120-message/minute/device limit; receiver
 catch-up timing is separate. Tokens and throwaway wallet keys
 stay in test memory and are never artifacts.
+
+The Node staging helper bundles the actual engine and its dependencies into a
+temporary CommonJS module before loading it, avoiding the Node 22 ESM module
+status error observed in the initial run. Its preflight loads real OpenMLS and
+initializes the real engine without a browser or staging transport.
 
 The PR validation section records the staging deployment and targeted run links
 when available. That run's artifacts contain browser measurements and screenshots.

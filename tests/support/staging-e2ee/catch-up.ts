@@ -3,15 +3,15 @@ import { performance } from "node:perf_hooks";
 import { setTimeout as delay } from "node:timers/promises";
 import { join } from "node:path";
 import { expect } from "@playwright/test";
-import { buildE2eeApiClient } from "@/lib/e2ee/api-client";
-import { E2eeApiError } from "@/lib/e2ee/api-errors";
-import { createMemoryE2eeStorage } from "@/lib/e2ee/storage";
 import type { E2eeEngineExt, E2eeEngineOptions } from "@/lib/e2ee/types";
-import { loadMlsWasm, MLS_WASM_MANIFEST } from "@/lib/e2ee/wasm";
+import { loadNodeEngine } from "./load-node-engine";
 import type { StagingE2eeSession } from "./session";
 
 /** Authorization comes only from this run's throwaway browser, never an existing user session. */
-async function qaTransport(session: StagingE2eeSession) {
+async function qaTransport(
+  session: StagingE2eeSession,
+  { buildE2eeApiClient, E2eeApiError }: typeof import("./node-engine")
+) {
   const next = session.page.waitForRequest(
     (request) =>
       new URL(request.url()).hostname === "api.staging.6529.io" &&
@@ -72,7 +72,13 @@ export async function measureStagingCatchUp(
     IPFS_API_ENDPOINT: "https://unused.example.test",
     IPFS_GATEWAY_ENDPOINT: "https://unused.example.test",
   });
-  const { createE2eeEngine } = await import("@/lib/e2ee/engine");
+  const runtime = await loadNodeEngine();
+  const {
+    createE2eeEngine,
+    createMemoryE2eeStorage,
+    loadMlsWasm,
+    MLS_WASM_MANIFEST,
+  } = runtime;
   const wasm = await loadMlsWasm({
     bytes: new Uint8Array(
       readFileSync(join(process.cwd(), "public", MLS_WASM_MANIFEST.file))
@@ -80,7 +86,10 @@ export async function measureStagingCatchUp(
   });
   const storageA = createMemoryE2eeStorage();
   const storageB = createMemoryE2eeStorage();
-  const [apiA, apiB] = await Promise.all([qaTransport(a), qaTransport(b)]);
+  const [apiA, apiB] = await Promise.all([
+    qaTransport(a, runtime),
+    qaTransport(b, runtime),
+  ]);
   const options = (
     session: StagingE2eeSession,
     api: typeof apiA,

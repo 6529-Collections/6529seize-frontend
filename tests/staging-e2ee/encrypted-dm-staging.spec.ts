@@ -482,7 +482,17 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const dm = await ensureDm(current);
     if (!a.user.profileId) throw new Error("Missing QA profile");
     await openChat(a, dm);
+    const preparing = performance.now();
     const fixture = await seedProcessedHistory(a.page, dm, a.user.profileId);
+    await testInfo.attach("long-history-fixture.json", {
+      body: Buffer.from(
+        JSON.stringify({
+          ...fixture,
+          preparationMs: performance.now() - preparing,
+        })
+      ),
+      contentType: "application/json",
+    });
     const blobRequests: string[] = [];
     const logCursors: number[] = [];
     a.page.on("request", (request) => {
