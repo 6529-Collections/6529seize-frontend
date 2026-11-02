@@ -151,8 +151,9 @@ export const EX_LAYOUT = {
   edWide: "lg:tw-col-span-2",
   edFull: "lg:tw-col-span-3",
   /** the statement row: heading left, prose right, 6 : 5, 64 px apart, so a
-   * statement heading keeps to three lines */
-  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-gap-x-16",
+   * statement heading keeps to three lines; beside long prose the heading
+   * stays in view as the prose scrolls past it */
+  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-gap-x-16 lg:[&>*:first-child]:tw-sticky lg:[&>*:first-child]:tw-top-28",
 } as const;
 
 /** Radius (EXPLAINED.md §5.3): models 16, panels 12, controls 8, tags 4. */

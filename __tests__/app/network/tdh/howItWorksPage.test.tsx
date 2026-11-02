@@ -255,13 +255,28 @@ describe("How TDH is calculated", () => {
   it("lists every step in P26's order, each linked to its model", async () => {
     await renderPage();
     const steps = document.querySelectorAll("[data-step]");
-    expect(steps).toHaveLength(12);
+    // From reading the logs (§3) to the output and its roots (§9).
+    expect(steps).toHaveLength(14);
+    expect(steps[0]).toHaveTextContent("Reading the logs");
     expect(
-      within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
+      within(steps[steps.length - 2] as HTMLElement).getByRole("link", {
         name: "Totals",
       })
     ).toHaveAttribute("href", "#part-n");
-    expect(steps[1]).toHaveTextContent("firstMint ≤ T − 86,400");
+    expect(
+      within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
+        name: "Output and roots",
+      })
+    ).toHaveAttribute("href", "/network/tdh/specification#s9");
+    expect(steps[2]).toHaveTextContent("firstMint ≤ T − 86,400");
+    // The worked wallet holds a Gradient too: its base and its final are
+    // in the identity's, and the network's total adds both.
+    const records = document.querySelector('[data-trace="records"]');
+    expect(records?.textContent).toMatch(
+      /card and Gradient: [\d,]+ \+ [\d,]+ = [\d,]+/
+    );
+    const final = document.querySelector('[data-trace="final"]');
+    expect(final?.textContent?.split("\n")).toHaveLength(3);
   });
 
   it("prints the network from the latest day, every number a fact", async () => {

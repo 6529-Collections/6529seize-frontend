@@ -4,6 +4,7 @@ import FactValue from "@/components/explained/facts/FactValue";
 import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
+import PageContents from "@/components/explained/shell/PageContents";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import PrevNext from "@/components/explained/shell/PrevNext";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -17,7 +18,7 @@ import {
   type ExplainedParams,
 } from "@/lib/explained/locale.server";
 import BoostLens from "./BoostLens";
-import { ht } from "./copy";
+import { ht, type HowKey } from "./copy";
 import EligibilityLens from "./EligibilityLens";
 import FirstDayLens from "./FirstDayLens";
 import HowParts, { HowFormula } from "./HowParts";
@@ -93,9 +94,15 @@ export default async function TdhHowItWorksPage({
   const hFact = book.maybe<number>("engine.H");
   const capFact = book.maybe<number>("rules.editionFloorCap");
   const countFact = book.maybe<number>("memes.count");
+  const gradFact = book.maybe<number>("engine.rate.gradient");
   const trace =
-    hFact && capFact && countFact
-      ? traceOf(hFact.value, capFact.value, countFact.value)
+    hFact && capFact && countFact && gradFact
+      ? traceOf(
+          hFact.value,
+          capFact.value,
+          countFact.value,
+          Math.round(gradFact.value * 100)
+        )
       : null;
 
   const chapter = chapterById("tdh");
@@ -146,6 +153,39 @@ export default async function TdhHowItWorksPage({
             </GoLink>
           </p>
         </div>
+        {/* A long page of four ideas: the bar that follows the reader, as on
+            How sure and the Specification. */}
+        <PageContents
+          locale={locale}
+          items={[
+            {
+              href: "#part-a",
+              no: "A",
+              key: "explained.tdh.how.parts.a.title",
+            },
+            {
+              href: "#part-b",
+              no: "B",
+              key: "explained.tdh.how.parts.b.title",
+            },
+            {
+              href: "#part-c",
+              no: "C",
+              key: "explained.tdh.how.parts.c.title",
+            },
+            {
+              href: "#part-d",
+              no: "D",
+              key: "explained.tdh.how.parts.d.title",
+            },
+            { href: "#part-n", no: "·", key: "explained.tdh.how.n.label" },
+            { href: "#steps", no: "·", key: "explained.tdh.how.order.label" },
+          ].map(({ href, no, key }) => ({
+            href,
+            no,
+            title: ht(locale, key as HowKey),
+          }))}
+        />
 
         <PartA book={book} locale={locale} recentCards={recentCards} />
         <PartB

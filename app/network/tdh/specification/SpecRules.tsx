@@ -55,7 +55,12 @@ function Sub({
   return (
     <div id={id} className="tw-mt-10 tw-scroll-mt-24 first:tw-mt-0">
       <h3 className={`${EX_TEXT.h3} tw-mb-2.5`}>
-        <span className="tw-mr-2 tw-text-iron-400">{`§${no}`}</span>
+        {/* The number links to its own section, for citation; a space
+            keeps it a word apart from the title when read or copied. */}
+        <a
+          className={`tw-mr-1 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 hover:tw-underline ${EX_FOCUS}`}
+          href={`#${id}`}
+        >{`§${no}`}</a>{" "}
         {title}
       </h3>
       {children}

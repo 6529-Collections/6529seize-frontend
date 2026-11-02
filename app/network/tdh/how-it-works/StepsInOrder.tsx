@@ -35,6 +35,17 @@ interface Step {
 
 const STEPS: readonly Step[] = [
   {
+    id: "logs",
+    href: "/network/tdh/specification#s3",
+    sections: "§3",
+    rule: () =>
+      [
+        "every log of the four contracts, once, decoded strictly",
+        "in canonical order; a debit with too few copies: no result",
+      ].join("\n"),
+    summary: true,
+  },
+  {
     id: "snapshot",
     href: "#part-a",
     sections: "§4.1, §4.2",
@@ -58,9 +69,10 @@ const STEPS: readonly Step[] = [
     sections: "§5.3, §8.1",
     rule: (n) =>
       [
-        "Meme:     RATE(H, E), RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
+        "Meme:     RATE(H, E)",
         `Gradient: RATE(H, G), at least ${n(R.gradient_rate_minimum)} cents`,
         `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)}`,
+        "RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
       ].join("\n"),
   },
   {
@@ -93,7 +105,10 @@ const STEPS: readonly Step[] = [
     href: "#step-8",
     sections: "§4.3, §7.2, §8.2",
     rule: (n) =>
-      `raw = Σ (T − a) div ${n(R.day_s)}; base = (rate × raw + 50) div 100`,
+      [
+        `raw = Σ (T − a) div ${n(R.day_s)}`,
+        "base = (rate × raw + 50) div 100",
+      ].join("\n"),
   },
   {
     id: "records",
@@ -120,12 +135,25 @@ const STEPS: readonly Step[] = [
     sections: "§8.5",
     rule: () => "total = Σ identity finals",
   },
+  {
+    id: "output",
+    href: "/network/tdh/specification#s9",
+    sections: "§9",
+    rule: () =>
+      [
+        "header (N, B, hash(B), T, rule, registry hash)",
+        "records by identity key → wallet and token roots",
+      ].join("\n"),
+    summary: true,
+  },
 ];
 
 /**
- * One copy through every step (the full calculation by hand): a 310-copy
- * card held one whole hundred days, in a wallet of its own with one
- * Gradient. Every number is the engine's, on today's H.
+ * One wallet through every step (the full calculation by hand): one copy of
+ * a 310-copy card and one Gradient, each held a whole hundred days, in a
+ * wallet of its own. The Gradient earns its own base and gives the boost;
+ * each token's final is its base times the boost, and the identity's is
+ * their sum (P26 §8.4). Every number is the engine's, on today's H.
  */
 interface Trace {
   readonly h: number;
@@ -133,14 +161,25 @@ interface Trace {
   readonly days: number;
   readonly rateCents: number;
   readonly base: number;
+  /** The Gradient's rate, base and final. */
+  readonly gradRateCents: number;
+  readonly gradBase: number;
   readonly betaCents: number;
+  readonly cardFinal: number;
+  readonly gradFinal: number;
   readonly final: number;
 }
 
-export function traceOf(h: number, edition: number, nMemes: number): Trace {
+export function traceOf(
+  h: number,
+  edition: number,
+  nMemes: number,
+  gradRateCents: number
+): Trace {
   const days = 100;
   const rateCents = ENGINE.rateCents(h, edition);
   const base = ENGINE.baseTdh(rateCents, days);
+  const gradBase = ENGINE.baseTdh(gradRateCents, days);
   const betaCents = ENGINE.boostCents({
     fullSets: 0,
     gradients: 1,
@@ -149,14 +188,20 @@ export function traceOf(h: number, edition: number, nMemes: number): Trace {
     nakamoto: false,
     nMemes,
   });
+  const cardFinal = ENGINE.finalTdh(base, betaCents);
+  const gradFinal = ENGINE.finalTdh(gradBase, betaCents);
   return {
     h,
     edition,
     days,
     rateCents,
     base,
+    gradRateCents,
+    gradBase,
     betaCents,
-    final: ENGINE.finalTdh(base, betaCents),
+    cardFinal,
+    gradFinal,
+    final: cardFinal + gradFinal,
   };
 }
 
@@ -172,22 +217,41 @@ function traceLine(
     snapshot: {},
     eligible: {},
     editions: { E: n(t.edition), H: n(t.h) },
-    rates: { H: n(t.h), E: n(t.edition), cents: n(t.rateCents) },
+    rates: {
+      H: n(t.h),
+      E: n(t.edition),
+      cents: n(t.rateCents),
+      grad: n(t.gradRateCents),
+    },
     seasons: {},
     identities: {},
     stacks: { days: n(t.days) },
-    records: { base: n(t.base) },
+    records: {
+      card: n(t.base),
+      grad: n(t.gradBase),
+      base: n(t.base + t.gradBase),
+    },
     boost: { cents: n(t.betaCents), beta: c(t.betaCents) },
     totals: { final: n(t.final) },
   };
   // The base and the final are P26's notation with the trace's numbers in
   // them: code, not copy, as the rules beside them are. Beta is in cents.
   if (id === "base") {
-    return `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`;
+    // The card's line, then the Gradient's: one base per token.
+    return [
+      `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`,
+      `(${n(t.gradRateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.gradBase)}`,
+    ].join("\n");
   }
   if (id === "final") {
     // Zero-width spaces after each bracket let a narrow column break there.
-    return `HALFUP(\u200bB64(\u200b${n(t.base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(t.final)}`;
+    const one = (base: number, final: number) =>
+      `HALFUP(\u200bB64(\u200b${n(base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(final)}`;
+    return [
+      one(t.base, t.cardFinal),
+      one(t.gradBase, t.gradFinal),
+      `${n(t.cardFinal)} + ${n(t.gradFinal)} = ${n(t.final)}`,
+    ].join("\n");
   }
   const params = values[id];
   return params === undefined ? null : ht(locale, key, params);
@@ -219,11 +283,11 @@ export default function StepsInOrder({
           {STEPS.map((step, index) => (
             <li
               key={step.id}
-              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_120px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,190px)_minmax(0,1fr)_minmax(0,300px)_110px]"
+              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_120px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,170px)_minmax(0,1fr)_minmax(0,250px)_120px]"
               data-step={step.id}
             >
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-400">
-                {String(index + 1).padStart(2, "0")}
+                {String(index).padStart(2, "0")}
               </span>
               <Link
                 className={`tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-no-underline hover:tw-underline ${EX_FOCUS}`}
@@ -238,7 +302,7 @@ export default function StepsInOrder({
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-start-2 tw-whitespace-pre-line tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
                   {traceLine(step.id, trace, locale)}

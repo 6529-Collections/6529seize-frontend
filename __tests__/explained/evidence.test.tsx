@@ -399,4 +399,22 @@ describe("Copy this page as Markdown", () => {
       "Source: https://6529.io/network/tdh/verification"
     );
   });
+
+  it("keeps a code block's lines apart and leaves out what the width hides", () => {
+    // The kit draws each code line as a block span, with no newline text
+    // between them; a phone's cell label is not drawn on a desktop.
+    document.body.innerHTML = `
+      <article>
+        <pre><code><span style="display:block">floor = min(totalMax, 310)</span><span style="display:block">E = max(minted + adj, floor)</span></code></pre>
+        <table><tr><th>Field</th><th>Value</th></tr><tr><td><span style="display:none">Field</span>rule_version</td><td>tdh-v1.4</td></tr></table>
+      </article>`;
+    const markdown = pageToMarkdown(
+      document.querySelector("article") as Element,
+      "https://6529.io/network/tdh/specification"
+    );
+    expect(markdown).toContain(
+      "```\nfloor = min(totalMax, 310)\nE = max(minted + adj, floor)\n```"
+    );
+    expect(markdown).toContain("| rule_version | tdh-v1.4 |");
+  });
 });
