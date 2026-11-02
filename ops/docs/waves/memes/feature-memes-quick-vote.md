@@ -74,6 +74,11 @@ participatory submissions in the configured memes wave.
 - Video artwork starts automatically, muted and inline, when it becomes visible
   in Quick Vote on web or in the native app. Video autoplay stays off when the
   device is configured to reduce motion; playback controls remain available.
+- Interactive HTML artwork runs in the shared sandboxed frame. Without a touch
+  screen it starts loading as soon as the submission appears and shows
+  `Loading interactive media` until the piece finishes loading; large pieces
+  can take several seconds. On touch screens the submission's preview image
+  appears behind `Tap to load`, and the piece starts after you tap it.
 - Swipe chevrons appear only on touch screens in the mobile layout. In a narrow
   browser window without touch input, use the `Vote` and `Skip` buttons.
 - Custom amounts are normalized to a whole number and capped at the current

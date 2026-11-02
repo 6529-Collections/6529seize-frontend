@@ -118,8 +118,11 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     });
     await expect(active.filter({ has: thisDeviceBadge })).toHaveCount(1);
     const phoneRow = active.filter({ hasNot: thisDeviceBadge });
-    await phoneRow.getByRole("button", { name: "Revoke Device" }).click();
-    await confirmDialog(bobLaptop.page, "Revoke Device?")
+    const revokePhone = phoneRow.getByRole("button", { name: /^Revoke /u });
+    const revokeLabel = await revokePhone.getAttribute("aria-label");
+    expect(revokeLabel).toBeTruthy();
+    await revokePhone.click();
+    await confirmDialog(bobLaptop.page, `${revokeLabel}?`)
       .getByRole("button", { name: "Revoke device" })
       .click();
     await expect(activeDeviceRows(bobLaptop.page)).toHaveCount(1, {

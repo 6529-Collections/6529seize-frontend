@@ -10,28 +10,17 @@ export default function ValidatorDocPage({
   title,
   markdown,
   withContents = false,
-  notice,
 }: {
   readonly section: ValidatorSection;
   readonly eyebrow: string;
   readonly title: string;
   readonly markdown: string;
   readonly withContents?: boolean | undefined;
-  /** A problem the reader should know about before the text. */
-  readonly notice?: string | undefined;
 }) {
   const sections = withContents ? getMarkdownSections(markdown) : [];
   return (
     <ValidatorPageFrame current={section}>
       <ValidatorPageHeader eyebrow={eyebrow} title={title} />
-      {notice && (
-        <p
-          role="status"
-          className="tw-mb-8 tw-rounded-lg tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-100"
-        >
-          {notice}
-        </p>
-      )}
       {sections.length > 0 && (
         <nav
           aria-labelledby="validator-doc-contents"
