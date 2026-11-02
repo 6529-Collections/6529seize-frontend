@@ -111,9 +111,12 @@ describe("E2EE timeline names for former members", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       expect.objectContaining({ endpoint: `identities/${CAROL_ID}` })
     );
-    // Current members are never looked up again.
-    expect(fetchMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: `identities/${ALICE_ID}` })
-    );
+    // Sender decoration resolves public metadata once per profile, sharing
+    // the engine's cache rather than fetching it for every message.
+    expect(
+      fetchMock.mock.calls.filter(
+        ([request]) => request.endpoint === `identities/${ALICE_ID}`
+      )
+    ).toHaveLength(1);
   });
 });

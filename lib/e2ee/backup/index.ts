@@ -1,3 +1,4 @@
+import type { E2eeApiAccount } from "../api";
 import { createE2eeBackupApiClient } from "./api";
 import { type BackupEngine, E2eeBackupManager } from "./manager";
 import { getDefaultBackupStateStore } from "./state";
@@ -19,15 +20,15 @@ const isBackupEngine = (engine: object): engine is BackupEngine =>
  */
 export function startE2eeBackup(
   engine: object,
-  profileId: string
+  account: E2eeApiAccount
 ): E2eeBackupManager | null {
   if (!isBackupEngine(engine)) {
     return null;
   }
   const manager = new E2eeBackupManager({
-    profileId,
+    profileId: account.profileId,
     engine,
-    api: createE2eeBackupApiClient(),
+    api: createE2eeBackupApiClient(account),
     state: getDefaultBackupStateStore(),
   });
   void manager.start().catch(() => undefined);

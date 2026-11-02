@@ -5,6 +5,7 @@
  * duplicate or drop chunks, a restarted device continues the chain, and
  * compaction and multi-device writers keep a verifiable chain.
  */
+import { E2eeApiError } from "@/lib/e2ee/api";
 import type { E2eeBackupApi } from "@/lib/e2ee/backup/api";
 import { linkChunk, type ChainTip } from "@/lib/e2ee/backup/chain";
 import {
@@ -428,6 +429,68 @@ describe("backup restore verifies the chain", () => {
   });
 });
 
+const putBoth = (devices: readonly Device[], record: BackupMessageRecord) => {
+  for (const device of devices) {
+    device.engine.put(record);
+  }
+};
+
+/** expected_seq of every chunk append the server received, in order. */
+const appendedSeqs = (server: FakeBackupServer) =>
+  server.requests
+    .filter((r) => r.method === "POST" && r.path.endsWith("/chunks"))
+    .map((r) => (r.body as { expected_seq?: number }).expected_seq);
+
+/**
+ * A writes, B restores, and each follows the other's chunk: seqs 1-6 form
+ * one chain holding FINAL plus m4 and m5.
+ */
+async function twoWriters(server: FakeBackupServer) {
+  const {
+    api,
+    writer: a,
+    prepared,
+    backupId,
+  } = await backupWithHistory(server);
+  const b = deviceWith(api);
+  await b.manager.start();
+  await b.manager.restore(prepared.code);
+  b.engine.history = a.engine.backupHistory();
+  putBoth([b, a], message("m4", "four"));
+  await b.manager.backupNow();
+  putBoth([a, b], message("m5", "five"));
+  await a.manager.backupNow();
+  expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5, 6]);
+  const restored = await restoreWith(api, prepared);
+  expect(restored.code).toBeNull();
+  expect(texts(restored.engine.imported[0])).toEqual({
+    ...FINAL,
+    m4: "four",
+    m5: "five",
+  });
+  return { api, a, b, prepared, backupId };
+}
+
+/**
+ * Writer `a` on an API where each of its chunk appends first lets the next
+ * of `races` run (another device appending at the same moment).
+ */
+function racingWriter(
+  api: E2eeBackupApi,
+  a: Device,
+  races: readonly (() => Promise<void>)[]
+): Device {
+  const pending = [...races];
+  const racingApi: E2eeBackupApi = {
+    ...api,
+    appendChunk: async (id, body) => {
+      await pending.shift()?.();
+      return api.appendChunk(id, body);
+    },
+  };
+  return deviceWith(racingApi, { engine: a.engine, state: a.state });
+}
+
 describe("backup writers keep one chain", () => {
   it("persists the chain position and continues it after a restart", async () => {
     const server = createFakeBackupServer(() => 1);
@@ -575,57 +638,140 @@ describe("backup writers keep one chain", () => {
     });
   });
 
-  it("continues one chain across devices and repairs a concurrent fork", async () => {
+  it("continues one chain across devices and retries an append another device beat", async () => {
     const server = createFakeBackupServer(() => 1);
-    const {
-      api,
-      writer: a,
-      prepared,
-      backupId,
-    } = await backupWithHistory(server);
+    const { api, a, b, prepared, backupId } = await twoWriters(server);
 
-    // B restores and keeps the same backup up to date; A follows B's chunk.
-    const b = deviceWith(api);
-    await b.manager.start();
-    await b.manager.restore(prepared.code);
-    b.engine.history = a.engine.backupHistory();
-    b.engine.put(message("m4", "four"));
-    a.engine.put(message("m4", "four"));
+    // Both devices append at the same moment: B lands between A's catch-up
+    // and A's append. The server refuses A's append (409); A follows B's
+    // chunk and appends after it, so the chain never forks.
+    const racingA = racingWriter(api, a, [() => b.manager.backupNow()]);
+    await racingA.manager.start();
+    putBoth([a, b], message("m6", "six"));
+    putBoth([a, b], message("m7", "seven"));
+    await racingA.manager.backupNow();
+    expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    // B appended seq 7; A's append naming seq 7 was refused and retried as 8.
+    expect(appendedSeqs(server).slice(-3)).toEqual([7, 7, 8]);
+    expect((await a.state.get(PROFILE))?.chain).toMatchObject({
+      epoch: 0,
+      index: 7,
+      seq: 8,
+      restart: false,
+    });
+    expect(racingA.manager.getSnapshot().lastError).toBeNull();
+    const restored = await restoreWith(api, prepared);
+    expect(restored.code).toBeNull();
+    const all = { ...FINAL, m4: "four", m5: "five", m6: "six", m7: "seven" };
+    expect(texts(restored.engine.imported[0])).toEqual(all);
+
+    // No repair was needed: B keeps appending to the same chain.
+    putBoth([a, b], message("m8", "eight"));
     await b.manager.backupNow();
-    a.engine.put(message("m5", "five"));
-    b.engine.put(message("m5", "five"));
-    await a.manager.backupNow();
-    expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5, 6]);
-    let restored = await restoreWith(api, prepared);
+    expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect((await b.state.get(PROFILE))?.chain).toMatchObject({
+      epoch: 0,
+      index: 8,
+      seq: 9,
+    });
+    expect((await restoreWith(api, prepared)).code).toBeNull();
+  });
+
+  it("falls back to the fork repair when the conflict retries run out", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, a, b, prepared, backupId } = await twoWriters(server);
+
+    // B beats every one of A's attempts: the first append and 3 retries.
+    const beats = ["b1", "b2", "b3", "b4"].map((id) => async () => {
+      putBoth([a, b], message(id, id));
+      await b.manager.backupNow();
+    });
+    const racingA = racingWriter(api, a, beats);
+    await racingA.manager.start();
+    putBoth([a, b], message("m6", "six"));
+    await racingA.manager.backupNow();
+    // Only B's chunks landed (seqs 7-10): A's 4 attempts were all refused.
+    expect(await allSeqs(api, backupId)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ]);
+    expect(appendedSeqs(server).slice(-8)).toEqual([7, 7, 8, 8, 9, 9, 10, 10]);
+    expect((await a.state.get(PROFILE))?.chain.restart).toBe(true);
+    // Nothing forked, so the backup still verifies before the repair.
+    expect((await restoreWith(api, prepared)).code).toBeNull();
+
+    // A's next run starts a new chain with a full snapshot and compacts.
+    await racingA.manager.backupNow();
+    expect(await allSeqs(api, backupId)).toEqual([11]);
+    const restored = await restoreWith(api, prepared);
     expect(restored.code).toBeNull();
     expect(texts(restored.engine.imported[0])).toEqual({
       ...FINAL,
       m4: "four",
       m5: "five",
+      m6: "six",
+      b1: "b1",
+      b2: "b2",
+      b3: "b3",
+      b4: "b4",
     });
+  });
 
-    // Both devices append at the same moment: B lands between A's catch-up
-    // and A's append, so both chunks claim the same chain position.
-    let raceB: (() => Promise<void>) | null = () => b.manager.backupNow();
-    const racingApi: E2eeBackupApi = {
+  it("repairs at once when a refused append has nothing new to follow", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer, prepared, backupId } = await backupWithHistory(server);
+    // A refusal the catch-up cannot explain (no newer chunk to follow):
+    // retrying the same seq cannot succeed, so the writer repairs instead.
+    let refuse = true;
+    const refusing: E2eeBackupApi = {
       ...api,
       appendChunk: async (id, body) => {
-        const race = raceB;
-        raceB = null;
-        await race?.();
+        if (refuse) {
+          refuse = false;
+          throw new E2eeApiError({
+            message: "seq conflict",
+            status: 409,
+            code: "E2EE_BACKUP_SEQ_CONFLICT",
+          });
+        }
         return api.appendChunk(id, body);
       },
     };
-    const racingA = deviceWith(racingApi, { engine: a.engine, state: a.state });
+    const device = deviceWith(refusing, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    await device.manager.start();
+    writer.engine.put(message("m4", "four"));
+    await device.manager.backupNow();
+    expect((await writer.state.get(PROFILE))?.chain).toMatchObject({
+      seq: 4,
+      restart: true,
+    });
+    await device.manager.backupNow();
+    expect(await allSeqs(api, backupId)).toEqual([5]);
+    const restored = await restoreWith(api, prepared);
+    expect(restored.code).toBeNull();
+    expect(texts(restored.engine.imported[0])).toEqual({
+      ...FINAL,
+      m4: "four",
+    });
+  });
+
+  it("repairs a concurrent fork on a server without the append precondition", async () => {
+    const server = createFakeBackupServer(() => 1);
+    server.supportsExpectedSeq = false;
+    const { api, a, b, prepared, backupId } = await twoWriters(server);
+
+    // Both devices append at the same moment: B lands between A's catch-up
+    // and A's append, so both chunks claim the same chain position.
+    const racingA = racingWriter(api, a, [() => b.manager.backupNow()]);
     await racingA.manager.start();
-    a.engine.put(message("m6", "six"));
-    b.engine.put(message("m6", "six"));
-    b.engine.put(message("m7", "seven"));
-    a.engine.put(message("m7", "seven"));
+    putBoth([a, b], message("m6", "six"));
+    putBoth([b, a], message("m7", "seven"));
     await racingA.manager.backupNow();
     expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     // The fork fails closed until it is repaired.
-    restored = await restoreWith(api, prepared);
+    let restored = await restoreWith(api, prepared);
     expect(restored.code).toBe("E2EE_BACKUP_CORRUPT");
     expect((await a.state.get(PROFILE))?.chain.restart).toBe(true);
 
