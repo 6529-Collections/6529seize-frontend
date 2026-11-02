@@ -533,7 +533,11 @@ for (const guide of [
       ).toBeVisible();
       const expected =
         "explained" in guide &&
-        (await main.locator('[data-explained-shell="tdh"]').count()) > 0
+        (await page
+          .getByRole("main")
+          .first()
+          .locator('[data-explained-shell="tdh"]')
+          .count()) > 0
           ? guide.explained
           : guide;
       await expect(
