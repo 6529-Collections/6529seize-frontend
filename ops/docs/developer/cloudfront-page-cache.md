@@ -87,6 +87,12 @@ answers and waits until the purge completes:
   the new pages. The step is skipped until the `PRODUCTION_PAGE_DISTRIBUTION_ID`
   variable is set during the cutover.
 
+The step runs only when the version check passed. It fails the job when it
+cannot start a purge, or when the distribution does not serve the deployed
+host. It only warns when the purge is still running after ten minutes, or when
+the distribution has been deleted: the release is already live, and an
+accepted purge still completes.
+
 Why purge instead of a short TTL: prerendered pages change only when a deploy
 ships, and they embed that build's chunk URLs. A TTL short enough to bound a
 stale page after a deploy (minutes) would throw away most hits between the 5–11
@@ -232,7 +238,8 @@ stay deployed; nothing else depends on it.
 
 Apply it with `aws route53 change-resource-record-sets --hosted-zone-id
 Z034375922ON0KJSHH6TF --change-batch file://rollback.json`. The purge step in
-`Web Deploy - STAGING` keeps working while the distribution exists.
+`Web Deploy - STAGING` keeps purging while the distribution exists, and only
+warns once it is deleted.
 
 ## Production cutover
 

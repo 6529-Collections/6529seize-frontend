@@ -128,7 +128,8 @@ pre-release data through `/api/og-metadata/*`.
 
 `staging.6529.io` is served through CloudFront, which answers prerendered
 pages from the edge. Each staging deployment purges that cache after the exact
-HTTP version check, and the purge must complete before the job succeeds.
+HTTP version check; a purge that cannot start fails the job, and one still
+running after ten minutes only warns.
 Production is not behind CloudFront yet; its purge step is skipped until the
 cutover sets `PRODUCTION_PAGE_DISTRIBUTION_ID`. See
 [Page edge cache](cloudfront-page-cache.md) for what is cached, manual purges,

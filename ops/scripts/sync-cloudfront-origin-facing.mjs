@@ -39,7 +39,8 @@ function collect(entries, field, family) {
         .filter((entry) => entry.service === SERVICE)
         .map((entry) => entry[field])
     ),
-  ].sort();
+    // Code-unit order, independent of locale, so --check is stable.
+  ].sort((a, b) => (a < b ? -1 : Number(a > b)));
   const invalid = prefixes.filter((prefix) => !validPrefix(prefix, family));
   if (invalid.length > 0) {
     throw new Error(`Unexpected ${SERVICE} prefixes: ${invalid.join(", ")}`);

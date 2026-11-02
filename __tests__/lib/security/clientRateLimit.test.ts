@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
+import { isCloudFrontOriginFacingAddress } from "@/lib/security/cloudFrontOriginFacing";
 import ranges from "@/lib/security/cloudFrontOriginFacingRanges.json";
 
 const WINDOW_MS = 60_000;
@@ -9,7 +10,12 @@ function edgeAddress(prefixIndex: number, host: number): string {
   const [network = ""] = (ranges.ipv4[prefixIndex] ?? "").split("/");
   const octets = network.split(".").map(Number);
   octets[3] = (octets[3] ?? 0) + host;
-  return octets.join(".");
+  const address = octets.join(".");
+  // Keeps the edge cases honest if the published ranges change shape.
+  if (!isCloudFrontOriginFacingAddress(address)) {
+    throw new Error(`${address} is outside ${ranges.ipv4[prefixIndex]}`);
+  }
+  return address;
 }
 
 function requestFrom(forwardedFor?: string): Pick<Request, "headers"> {

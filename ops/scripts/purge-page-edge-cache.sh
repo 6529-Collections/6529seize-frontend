@@ -22,11 +22,21 @@ served_host="${2:-}"
 }
 
 # Refuse to purge a distribution that does not serve the deployed host, so a
-# wrong id fails loudly instead of leaving the real cache stale.
-aliases="$(aws cloudfront get-distribution \
+# wrong id fails loudly instead of leaving the real cache stale. A deleted
+# distribution (after a rollback) has nothing cached, so it only warns.
+errors="$(mktemp)"
+trap 'rm -f "$errors"' EXIT
+if ! aliases="$(aws cloudfront get-distribution \
   --id "$distribution_id" \
   --query 'Distribution.DistributionConfig.Aliases.Items' \
-  --output text | tr '\t' '\n')"
+  --output text 2>"$errors" | tr '\t' '\n')"; then
+  if grep -q NoSuchDistribution "$errors"; then
+    echo "::warning::Distribution $distribution_id no longer exists; nothing to purge."
+    exit 0
+  fi
+  cat "$errors" >&2
+  exit 1
+fi
 if ! grep -qxF "$served_host" <<< "$aliases"; then
   echo "::error::Distribution $distribution_id does not serve $served_host." >&2
   exit 1
@@ -39,7 +49,12 @@ invalidation_id="$(aws cloudfront create-invalidation \
   --output text)"
 echo "Purging the $served_host edge cache: invalidation $invalidation_id on $distribution_id."
 
-aws cloudfront wait invalidation-completed \
+# The waiter polls for at most 10 minutes. The release is already live and an
+# accepted invalidation still completes, so a slow one only warns.
+if aws cloudfront wait invalidation-completed \
   --distribution-id "$distribution_id" \
-  --id "$invalidation_id"
-echo "Invalidation $invalidation_id completed."
+  --id "$invalidation_id"; then
+  echo "Invalidation $invalidation_id completed."
+else
+  echo "::warning::Invalidation $invalidation_id is still in progress; the edge may serve the previous release for a few more minutes."
+fi
