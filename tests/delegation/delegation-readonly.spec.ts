@@ -499,6 +499,22 @@ for (const guide of [
     path: "/safe-collecting",
     heading: "Collectionner en sécurité",
     link: "Configurer vos portefeuilles",
+    setup: {
+      fresh: "Partir de zéro",
+      existing: "Déjà collectionneur",
+      airdrops: "Choisir la destination des airdrops",
+    },
+  },
+  {
+    locale: "de-DE",
+    path: "/safe-collecting",
+    heading: "Sicher sammeln",
+    link: "Wallets einrichten",
+    setup: {
+      fresh: "Neu anfangen",
+      existing: "Du sammelst bereits",
+      airdrops: "Airdrop-Ziel wählen",
+    },
   },
   {
     locale: "es-ES",
@@ -519,7 +535,7 @@ for (const guide of [
     },
   },
 ] as const) {
-  test.describe(`${guide.locale} collecting guide @surface @medium @large @readonly`, () => {
+  test.describe(`${guide.locale} collecting guide (${guide.path}) @surface @medium @large @readonly`, () => {
     test.use({ locale: guide.locale });
 
     test("renders translated guide copy on a narrow screen", async ({
@@ -553,9 +569,9 @@ for (const guide of [
         await expect(link).toHaveAttribute("href", expected.href);
       }
       await expectNoHorizontalOverflow(page);
-      if (guide.locale === "fr-FR") {
+      if ("setup" in guide) {
         const airdrops = page.getByRole("link", {
-          name: "Choisir la destination des airdrops",
+          name: guide.setup.airdrops,
           exact: true,
         });
         await expect(airdrops).toBeVisible();
@@ -563,11 +579,15 @@ for (const guide of [
           "href",
           "/safe-collecting/register-delegation?collection=MEMES&use_case=3"
         );
-        await page.getByRole("tab", { name: "Déjà collectionneur" }).click();
+        await page
+          .getByRole("tab", { name: guide.setup.existing, exact: true })
+          .click();
         await expectNoHorizontalOverflow(page);
         await page.setViewportSize({ width: 320, height: 850 });
         await expectNoHorizontalOverflow(page);
-        await page.getByRole("tab", { name: "Partir de zéro" }).click();
+        await page
+          .getByRole("tab", { name: guide.setup.fresh, exact: true })
+          .click();
         await expectNoHorizontalOverflow(page);
       }
     });

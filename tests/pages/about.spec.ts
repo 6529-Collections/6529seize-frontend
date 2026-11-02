@@ -8,6 +8,62 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("shows direct desktop downloads and independent macOS 12 recovery", async ({
+    page,
+  }) => {
+    await page.route(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
+      async (route) => {
+        const url = route.request().url();
+        if (url.endsWith(".json")) {
+          await route.fulfill({ json: { version: "0.3.18", files: [] } });
+          return;
+        }
+        const legacy = url.endsWith("latest-macos-12.yml");
+        const version = legacy ? "0.3.15" : "0.3.18";
+        const file = url.includes("/win/")
+          ? `6529-DESKTOP-win-x64-${version}.exe`
+          : url.includes("/linux/")
+            ? `6529-DESKTOP-linux-x86_64-${version}.AppImage`
+            : `6529-DESKTOP-mac-arm64-${version}.dmg`;
+        await route.fulfill({
+          json: {
+            version,
+            files: [{ url: file }],
+            minimumSystemVersion: legacy ? "21.0.0" : "22.0.0",
+          },
+        });
+      }
+    );
+    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const mac = page.getByRole("group").filter({
+      has: page.getByText("macOS", { exact: true }),
+    });
+    const macSummary = page
+      .getByText("macOS", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await expect(macSummary).toHaveText("macOS");
+    await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
+    await expect(mac.getByText("For macOS 12 Monterey")).toBeVisible();
+    await expect(
+      mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
+    ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
+    await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
+    const windows = page
+      .getByText("Windows", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await windows.focus();
+    await page.keyboard.press("Enter");
+    await expect(mac).not.toHaveAttribute("open");
+    await expect(
+      page.getByRole("link", { name: /Windows, version 0.3.18, x64/ })
+    ).toHaveAttribute("href", /win-x64-0\.3\.18\.exe$/);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("should load the about index page", async ({ page }) => {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -80,6 +136,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByRole("button", { name: /Open About contents navigation/i })
       .click();
     const contentsMenu = page.getByRole("menu");
+    await expect(contentsMenu).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /prenodes/i })
     ).toHaveCount(0);
@@ -93,6 +150,40 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps About contents inactive until hydration makes the first click usable", async ({
+    page,
+  }) => {
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.continue();
+    });
+    try {
+      await page.goto("/about/subscriptions", { waitUntil: "commit" });
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "Subscription Minting",
+          exact: true,
+        })
+      ).toBeVisible();
+      const contents = page.getByRole("button", {
+        name: /Open About contents navigation/i,
+      });
+      await expect(contents).toBeDisabled();
+      releaseScripts();
+      await expect(contents).toBeEnabled();
+      await contents.click();
+      await expect(page.getByRole("menu")).toBeVisible();
+      await expect(contents).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      releaseScripts();
+    }
   });
 
   test("should keep GDRC in view beside the narrow desktop menu", async ({
