@@ -7,6 +7,7 @@ import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentCont
 import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { AboutSection } from "@/types/enums";
@@ -51,6 +52,7 @@ export function AboutContentsDropdown({
   withDivider = true,
 }: AboutContentsDropdownProps) {
   const capacitor = useCapacitor();
+  const hasHydrated = useHasHydrated();
   const hasLeadingAction = Boolean(leadingAction);
   const cookieConsent = useOptionalCookieConsent();
   const headerContext = useOptionalHeaderContext();
@@ -150,6 +152,7 @@ export function AboutContentsDropdown({
         data-testid="about-contents-menu-trigger"
       >
         <CompactMenu
+          disabled={!hasHydrated}
           aria-label={t(locale, "about.contents.triggerAriaLabel", {
             page: currentLabel,
           })}
