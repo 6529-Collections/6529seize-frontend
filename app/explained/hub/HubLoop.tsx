@@ -84,8 +84,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       key: "decide",
       name: ht(locale, "station.decide"),
       sub: ht(locale, "station.decideSub"),
+      // The time and its zone stay on one line in the loop's label.
       num: ht(locale, "station.decideNum", {
-        next: f("site.mainStage.next"),
+        next: f("site.mainStage.next").replace(/ (UTC)$/, "\u00a0$1"),
       }),
       fact: "site.mainStage.next",
       say: ht(locale, "station.decideSay", {

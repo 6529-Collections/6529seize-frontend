@@ -61,7 +61,8 @@ function Sub({
         <a
           className={`tw-mr-1 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 hover:tw-underline ${EX_FOCUS}`}
           href={`#${id}`}
-        >{`§${no}`}</a>{" "}
+        >{`§${no}`}</a>
+        {"\u00a0"}
         {title}
       </h3>
       {children}

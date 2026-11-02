@@ -419,7 +419,7 @@ function RibbonCaption({
       ? "–"
       : formatUtcClock(locale, snapshotInstant(factText(latestDate)));
   return (
-    <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+    <p className="tw-m-0 tw-mt-3 tw-max-w-[760px] tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
       {rich(locale, "explained.tdh.check.ribbon.caption", {
         midnight: (
           <FactText fact={latestDate} locale={locale}>

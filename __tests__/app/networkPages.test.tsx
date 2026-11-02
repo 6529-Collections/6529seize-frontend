@@ -11,8 +11,7 @@ import NetworkWaveScorePage, {
 } from "@/app/network/wave-score/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
-import { screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
 import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/feedSource";

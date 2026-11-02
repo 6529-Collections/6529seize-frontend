@@ -294,13 +294,13 @@ export function Scoreboard({
             {typeof cell.caption === "string" ? cell.caption : ""}
           </dt>
           {/* On a phone the number sits beside its caption, one row a count. */}
-          <dd className="tw-m-0 max-md:tw-grid max-md:tw-grid-cols-[72px_minmax(0,1fr)] max-md:tw-items-baseline max-md:tw-gap-x-3">
+          <dd className="tw-m-0 max-md:tw-flex max-md:tw-flex-wrap max-md:tw-items-baseline max-md:tw-gap-x-3">
             <FactValue
               fact={cell.value}
               locale={locale}
               className="tw-block tw-text-[30px] tw-font-semibold tw-leading-9 tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[40px] md:tw-leading-[46px]"
             />
-            <span className="tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400 md:tw-mt-1.5">
+            <span className="tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400 max-md:tw-min-w-[180px] max-md:tw-flex-1 md:tw-mt-1.5">
               {cell.caption}
             </span>
           </dd>

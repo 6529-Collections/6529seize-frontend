@@ -79,7 +79,7 @@ export function Seg<V extends string>({
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
     row: "max-md:tw-flex max-md:tw-flex-wrap md:tw-inline-flex md:tw-flex-wrap",
     grid3:
-      "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 md:tw-inline-flex md:tw-flex-wrap",
+      "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 max-[359px]:tw-grid-cols-2 md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
   const button = {
     wrap: "tw-grow tw-rounded-full",
@@ -157,7 +157,7 @@ function SegList<V extends string>({
 }) {
   return (
     <div
-      className="tw-grid tw-w-full tw-max-w-[640px] tw-gap-1.5"
+      className="tw-grid tw-w-full tw-max-w-[440px] tw-gap-1.5"
       role="group"
       aria-label={label}
       data-seg-layout="list"

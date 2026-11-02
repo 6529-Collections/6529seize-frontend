@@ -465,9 +465,9 @@ export default async function TdhYourWalletsPage({
                   className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-px-[22px] tw-py-5"
                 >
                   <h3 className={EX_TEXT.h4}>{wt(locale, title)}</h3>
-                  {/* Card body at the system's card size, 15/24, as the
-                      answers and the FAQ set theirs. */}
-                  <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+                  {/* Card bodies, answers and the FAQ all read at body
+                      size, one size for the page's text. */}
+                  <p className={`${EX_TEXT.body} tw-m-0 tw-mt-2`}>
                     {wt(locale, body)}
                   </p>
                 </div>
@@ -534,7 +534,9 @@ export default async function TdhYourWalletsPage({
                     –
                   </span>
                 </summary>
-                <p className="tw-m-0 tw-hidden tw-max-w-[560px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
+                <p
+                  className={`${EX_TEXT.body} tw-m-0 tw-hidden tw-max-w-[600px] tw-pb-4 group-open:tw-block`}
+                >
                   {wt(locale, answerKey)}
                 </p>
               </details>
@@ -639,9 +641,7 @@ function WhyAnswer({
       <p className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.015em] tw-text-iron-50 md:tw-text-[26px] md:tw-leading-8">
         {verdict}
       </p>
-      <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {body}
-      </p>
+      <p className={`${EX_TEXT.body} tw-m-0 tw-mt-3`}>{body}</p>
       {extra}
     </div>
   );

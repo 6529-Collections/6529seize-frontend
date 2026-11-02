@@ -30,8 +30,10 @@ const KNOW: readonly { kind: MarkKind; note?: HubKey }[] = [
 ];
 
 /** A mark and its note side by side: a wrapped note hangs beside its mark. */
+// Below 380 px (a zoomed window) a two-column row would leave the note a
+// word a line: there the note follows its mark instead.
 const HANG =
-  "tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-items-baseline tw-gap-x-2";
+  "tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 min-[380px]:tw-grid min-[380px]:tw-grid-cols-[auto_minmax(0,1fr)]";
 
 function Column({
   title,

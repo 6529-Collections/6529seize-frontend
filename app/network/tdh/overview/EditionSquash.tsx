@@ -110,8 +110,8 @@ export default function EditionSquash({
       locale={locale}
       stage={
         <div>
-          <div className="tw-flex tw-items-center tw-gap-4">
-            <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+            <div className="tw-min-w-[200px] tw-flex-1">
               <span className="tw-block tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
                 {ot(locale, "squash.copies")}
               </span>

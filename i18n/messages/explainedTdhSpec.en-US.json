@@ -27,7 +27,7 @@
   "explained.tdh.spec.s1.title": "Scope and conventions",
   "explained.tdh.spec.s1.label": "Scope",
   "explained.tdh.spec.s1.heading": "What the rules define",
-  "explained.tdh.spec.s1.body": "TDH v1.4 defines, for one cycle, each wallet's and each identity's balance, raw days, base, boost and final TDH for every eligible token, and the network totals. Arithmetic is exact, with {binary64} only at the ties of RATE and FINAL (§8.1, §8.4), and every number and address comes from the registry (§10). Ranks, xTDH, Rep, upload files and the old Merkle root are out of scope. Two terms recur: no result, when an input breaks a rule and the cycle publishes nothing, and refused whole, when a document breaks the format and is read no further (§3.5).",
+  "explained.tdh.spec.s1.body": "TDH v1.4 defines, for one cycle, each wallet's and each identity's balance, raw days, base, boost and final TDH for every eligible token, and the network totals. Arithmetic is exact, with {binary64} only at the ties of RATE and FINAL (§8.1, §8.4), and every number and address comes from the registry (§10). Ranks, xTDH, Rep, upload files and the old Merkle root are out of scope. Two terms recur. No result: an input breaks a rule, and the cycle publishes nothing. Refused whole: a document breaks the format and is read no further (§3.5).",
   "explained.tdh.spec.s1.code": "The conventions every formula below uses",
   "explained.tdh.spec.s2.title": "Inputs and contract registry",
   "explained.tdh.spec.s2.label": "Inputs",

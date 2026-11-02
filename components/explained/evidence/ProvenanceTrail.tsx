@@ -71,7 +71,7 @@ export default function ProvenanceTrail({
             key={step.title}
             className={
               long
-                ? "tw-relative tw-pb-[18px] tw-pl-8 md:tw-grid md:tw-grid-cols-[200px_minmax(0,1fr)_minmax(0,280px)] md:tw-items-baseline md:tw-gap-x-8"
+                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[200px_minmax(0,1fr)_minmax(0,280px)] lg:tw-items-baseline lg:tw-gap-x-8"
                 : "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-pb-0 lg:tw-pl-0 lg:tw-pr-3.5"
             }
             data-who={step.who}
@@ -107,7 +107,7 @@ export default function ProvenanceTrail({
               {step.sub}
             </p>
             <span
-              className={`tw-mt-2.5 tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-semibold tw-leading-[18px] ${long ? "md:tw-mt-0" : ""} ${open ? "tw-text-iron-100" : "tw-text-iron-400"}`}
+              className={`tw-mt-2.5 tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-semibold tw-leading-[18px] ${long ? "lg:tw-mt-0" : ""} ${open ? "tw-text-iron-100" : "tw-text-iron-400"}`}
             >
               <span
                 className={`tw-inline-block tw-size-2 tw-shrink-0 tw-rounded-full ${open ? "tw-bg-iron-100" : "tw-border tw-border-solid tw-border-iron-400"}`}

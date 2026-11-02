@@ -373,7 +373,7 @@ describe("the overview", () => {
     expect(
       screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
     ).toHaveTextContent(
-      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero, fewer than the daily check compares. Read Oct 31, 09:12 UTC."
+      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero. Read Oct 31, 09:12 UTC."
     );
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(5);

@@ -39,7 +39,6 @@ import {
   caseH,
   roundTripDays,
 } from "@/app/network/tdh/how-it-works/models/netting";
-import { ENGINE } from "@/lib/explained/engine";
 
 // The worked examples of How TDH is calculated, checked against the numbers
 // the P26 Python reference printed (plan, Appendix A).

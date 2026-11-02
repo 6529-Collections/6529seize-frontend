@@ -70,7 +70,7 @@ export default function WhatItIsFor({
       >
         {/* The source, one number, as a band across the top: a side panel
             held three lines in a column four cells tall. */}
-        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-px-4 tw-py-3.5 md:tw-px-6 md:tw-py-4">
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-px-4 tw-py-3.5 md:tw-px-6 md:tw-py-4">
           <span className={EX_TEXT.label}>{ot(locale, "uses.src")}</span>
           <span className="tw-whitespace-nowrap tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.02em] tw-text-primary-300">
             {ot(locale, "uses.srcNum")}

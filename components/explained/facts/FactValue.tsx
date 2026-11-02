@@ -63,7 +63,8 @@ export default function FactValue({
   const text = fmt(fact, locale, style);
   // A short token (a rule ID such as tdh-v1.0, a commit, a date with a
   // hyphen) never breaks at its hyphen; a long hash may still wrap.
-  const token = text.length <= TOKEN_MAX && !/\s/.test(text);
+  const token =
+    text.length <= TOKEN_MAX && text.includes("-") && !/\s/.test(text);
   const classes = [className, token ? "tw-whitespace-nowrap" : ""]
     .filter(Boolean)
     .join(" ");

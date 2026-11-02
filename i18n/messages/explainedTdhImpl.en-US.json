@@ -84,7 +84,7 @@
   "explained.tdh.impl.roots.copied": "Copied",
   "explained.tdh.impl.roots.body": "Match the totals and every identity's final TDH: compare your records one by one with 6529.io's signed upload for that day, which lists every identity's TDH. The cycle root and the wallet root need encodings that are not public yet (P28, P11), so they cannot be recomputed today.",
   "explained.tdh.impl.roots.receipt": "The day's receipt",
-  "explained.tdh.impl.ask.body": "One day's canonical input file is not published; the owner decides when it is. It is chain data, not code: with it an outside program could reproduce every identity's TDH for a day from the same input, before the validator code is published.",
+  "explained.tdh.impl.ask.body": "One day's canonical input file is not published; the owner decides when. It is chain data, not code: with it, an outside program could reproduce a whole day's TDH before the validator code is out.",
   "explained.tdh.impl.rounds.label": "Checking",
   "explained.tdh.impl.rounds.title": "{rounds} rounds of differential tests",
   "explained.tdh.impl.rounds.body": "From {from} to {to}, {rounds} rounds of generated days ran through the Lean model, the Python reference, program A and program B. Each finding was settled and pinned by a new vector but one: how deep a file may nest ({open}) is still open, and P26 sets no limit yet. In CI, every change to P26 runs {random} seeded random inputs through Lean, Python and the Rust reference.",
