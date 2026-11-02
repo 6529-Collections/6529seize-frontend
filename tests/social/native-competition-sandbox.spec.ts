@@ -4457,12 +4457,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
       if (app && testInfo.project.use.hasTouch) {
+        const originalScrollport = await dialog
+          .getByTestId("artist-preview-app-scroll")
+          .elementHandle();
+        if (!originalScrollport)
+          throw new Error("Submission scrollport missing");
         await input.focus();
         try {
-          for (const height of [160, 300]) {
-            const clearance = await input.evaluate(async (element, inset) => {
+          for (const height of [0, 160, 300, 0]) {
+            const geometry = await input.evaluate(async (element, inset) => {
               const root = document.documentElement;
-              // Native keyboard events update these shared layout variables.
+              // This checks layout/scrolling; physical-device QA checks native events.
               root.style.setProperty(
                 "--native-keyboard-layout-transition-duration",
                 "0ms"
@@ -4480,13 +4485,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               const scrollport = element.closest(
                 '[data-testid="artist-preview-app-scroll"]'
               );
-              if (!scrollport) throw new Error("Submission scrollport missing");
-              return (
-                scrollport.getBoundingClientRect().bottom -
-                element.getBoundingClientRect().bottom
-              );
+              const panel = scrollport?.parentElement;
+              if (!scrollport || !panel)
+                throw new Error("Submission scrollport missing");
+              return {
+                clearance:
+                  scrollport.getBoundingClientRect().bottom -
+                  element.getBoundingClientRect().bottom,
+                bottomGap:
+                  innerHeight - inset - panel.getBoundingClientRect().bottom,
+              };
             }, height);
-            expect(clearance).toBeGreaterThanOrEqual(0);
+            expect(geometry.clearance).toBeGreaterThanOrEqual(0);
+            expect(Math.abs(geometry.bottomGap)).toBeLessThanOrEqual(1);
+            expect(
+              await originalScrollport.evaluate(
+                (element) => element.isConnected
+              )
+            ).toBe(true);
+            await expect(input).toBeFocused();
             await expect(
               dialog.getByRole("button", { name: "Close panel", exact: true })
             ).toBeInViewport({ ratio: 1 });
@@ -4501,6 +4518,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               "--native-keyboard-inset-bottom"
             );
           });
+          await originalScrollport.dispose();
         }
       }
       await input.fill("-25");
