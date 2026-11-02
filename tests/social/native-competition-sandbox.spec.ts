@@ -4058,10 +4058,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  for (const popup of ["artist submissions", "participant entries"]) {
-    test(`preserves Numeric votes and explanations in the ${popup} popup`, async ({
+  for (const { popup, app } of [
+    { popup: "artist submissions", app: false },
+    { popup: "artist submissions", app: true },
+    { popup: "participant entries", app: false },
+  ]) {
+    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? " in app" : ""}`, async ({
       page,
     }, testInfo) => {
+      if (app) {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      }
       const sandbox = await installCompetitionApi(page);
       const response = await page.request.get(
         `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
@@ -4189,6 +4200,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
+      // The development issue badge can cover controls at the bottom of app sheets.
+      await page.addStyleTag({
+        content: "nextjs-portal { display: none !important; }",
+      });
       const detail = page
         .getByRole("main")
         .locator("[data-video-viewport]")
@@ -4321,15 +4336,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await promiseBadge.click();
         // The dialog wrapper has fixed-position children and no box of its own.
         await expect(promiseBadge).toBeVisible();
-        await expect(
-          dialog.getByRole("button", { name: "Close Gallery", exact: true })
-        ).toBeVisible();
+        const close = dialog.getByRole("button", {
+          name:
+            app || testInfo.project.name.startsWith("capacitor-")
+              ? "Close panel"
+              : "Close Gallery",
+          exact: true,
+        });
+        await expect(close).toBeVisible();
         await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
         expect(sandbox.requests).toEqual([]);
 
-        await dialog
-          .getByRole("button", { name: "Close Gallery", exact: true })
-          .focus();
+        await close.focus();
         await expect(promiseTooltip).toBeHidden();
         const currentTotal = dialog.getByText("123,456,789", { exact: true });
         const projectedTotal = dialog.getByText("123,456,999", { exact: true });
@@ -4397,15 +4415,43 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Numeric",
         exact: true,
       });
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await numeric.tap();
-        expect((await numeric.boundingBox())!.height).toBeGreaterThanOrEqual(
-          44
-        );
+      const expectCompactCenteredTabs = async () => {
+        const label = dialog.locator(".is-mini > div > p > span:first-child");
+        const labelBox = (await label.boundingBox())!;
+        const tabsBox = (await mode.boundingBox())!;
+        expect(tabsBox.height).toBeLessThanOrEqual(32);
+        expect(labelBox.x + labelBox.width).toBeLessThan(tabsBox.x);
+        expect(
+          Math.abs(
+            labelBox.y + labelBox.height / 2 - tabsBox.y - tabsBox.height / 2
+          )
+        ).toBeLessThan(2);
+      };
+      await mode.scrollIntoViewIfNeeded();
+      await expectCompactCenteredTabs();
+      if (testInfo.project.use.hasTouch) {
+        for (const button of [
+          mode.getByRole("button", { name: "Slider", exact: true }),
+          numeric,
+        ]) {
+          expect(
+            await button.evaluate((element) =>
+              parseFloat(getComputedStyle(element, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
+        }
+        const box = (await numeric.boundingBox())!;
+        // The invisible touch target extends beyond the compact visible tab.
+        await page.touchscreen.tap(box.x + box.width / 2, box.y - 8);
       } else {
         await numeric.focus();
         await page.keyboard.press("Enter");
       }
+      await expect(numeric).toHaveAttribute("aria-pressed", "true");
+      await expectCompactCenteredTabs();
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-tabs.png"),
+      });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
