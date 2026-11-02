@@ -1,9 +1,28 @@
-import axios from "axios";
-import FormData from "form-data";
-
 interface IpfsServiceConfig {
   apiEndpoint: string;
   mfsPath?: string | undefined;
+}
+
+const getErrorMessage = (error: unknown): unknown =>
+  (error as { message?: unknown })?.message;
+
+// Kubo RPC accepts POST only and reports failures with non-2xx statuses.
+async function postIpfsRpc(url: string, body?: FormData): Promise<Response> {
+  const response = await fetch(url, { method: "POST", body: body ?? null });
+  if (!response.ok) {
+    throw new Error(`IPFS request failed with status ${response.status}`);
+  }
+  return response;
+}
+
+// `add` streams one JSON object per line; the last line describes the file.
+async function readAddedCid(response: Response): Promise<string> {
+  const lines = (await response.text()).trim().split("\n");
+  const added = JSON.parse(lines.at(-1) ?? "") as { Hash?: unknown };
+  if (typeof added.Hash !== "string" || !added.Hash) {
+    throw new Error("IPFS add response did not include a CID");
+  }
+  return added.Hash;
 }
 
 class IpfsService {
@@ -21,22 +40,13 @@ class IpfsService {
     if (!this.mfsEnabled) return;
 
     try {
-      await axios.post(
+      await postIpfsRpc(
         `${this.apiEndpoint}/api/v0/files/mkdir?arg=/${this.mfsPath}&parents=true`
       );
     } catch (error) {
-      console.error(
-        "Failed to configure MFS:",
-        (error as { message?: unknown })?.message
-      );
+      console.error("Failed to configure MFS:", getErrorMessage(error));
       throw error;
     }
-  }
-
-  private createFormData(file: File): FormData {
-    const formData = new FormData();
-    formData.append("file", file);
-    return formData;
   }
 
   private async validateFileName(cid: string, file: File) {
@@ -46,11 +56,11 @@ class IpfsService {
     const fileName = `${cid}.${extension}`;
 
     try {
-      await axios.post(
+      await postIpfsRpc(
         `${this.apiEndpoint}/api/v0/files/stat?arg=/${this.mfsPath}/${fileName}`
       );
     } catch {
-      await axios.post(
+      await postIpfsRpc(
         `${this.apiEndpoint}/api/v0/files/cp?arg=/ipfs/${cid}&arg=/${this.mfsPath}/${fileName}`
       );
     }
@@ -58,14 +68,15 @@ class IpfsService {
 
   async addFile(file: File): Promise<string> {
     try {
-      const formData = this.createFormData(file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const addResponse = await axios.post(
+      const addResponse = await postIpfsRpc(
         `${this.apiEndpoint}/api/v0/add?pin=true`,
         formData
       );
 
-      const cid = addResponse.data.Hash;
+      const cid = await readAddedCid(addResponse);
 
       await this.validateFileName(cid, file);
 
@@ -73,7 +84,7 @@ class IpfsService {
     } catch (error) {
       console.error(
         "Failed to add file to IPFS or MFS:",
-        (error as { message?: unknown })?.message
+        getErrorMessage(error)
       );
       throw error;
     }
