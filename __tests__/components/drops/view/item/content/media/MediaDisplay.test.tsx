@@ -290,6 +290,63 @@ describe("MediaDisplay", () => {
     );
   });
 
+  it("renders the html iframe on eager surfaces without a preview image", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="ipfs://hash"
+        loadStrategy="eager"
+      />
+    );
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://media.6529.io/ipfs/hash"
+    );
+    expect(screen.queryByTestId("image")).not.toBeInTheDocument();
+  });
+
+  it("keeps the tap-to-load gate and preview poster for eager html", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="ipfs://hash"
+        previewImageUrl="preview.png"
+        requireInteractionToLoad
+        loadStrategy="eager"
+      />
+    );
+
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-src",
+      "preview.png"
+    );
+    expect(screen.queryByTestId("iframe")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("load-gate"));
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://media.6529.io/ipfs/hash"
+    );
+  });
+
+  it("shows a loading status until the html iframe loads", () => {
+    render(
+      <MediaDisplay media_mime_type="text/html" media_url="ipfs://hash" />
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading interactive media"
+    );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onLoad?.();
+    });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("renders unknown media as a compact link", () => {
     render(<MediaDisplay media_mime_type="text/plain" media_url="file.txt" />);
 

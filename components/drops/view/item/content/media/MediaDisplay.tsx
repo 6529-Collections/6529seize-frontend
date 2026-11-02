@@ -11,7 +11,9 @@ import {
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
+import { t } from "@/i18n/messages";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
@@ -33,8 +35,26 @@ const MediaDisplayGLB = dynamic(() => import("./MediaDisplayGLB"), {
   ssr: false,
 });
 
-const DEFAULT_HTML_MEDIA_TITLE = "Interactive HTML media";
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
+
+/**
+ * Large HTML pieces can take several seconds to load inside the sandboxed
+ * iframe. Keep a visible status over the frame until it loads so the empty
+ * frame is not mistaken for broken media.
+ */
+function InteractiveHtmlLoadingStatus({ label }: { readonly label: string }) {
+  return (
+    <output className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-flex tw-items-center tw-justify-center tw-p-4">
+      <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-bg-iron-950/90 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_16px_40px_rgba(0,0,0,0.65)] tw-ring-1 tw-ring-white/10">
+        <span
+          aria-hidden="true"
+          className="tw-block tw-size-4 tw-shrink-0 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-100/30 tw-border-t-iron-100 motion-safe:tw-animate-spin"
+        />
+        <span className="tw-min-w-0">{label}</span>
+      </span>
+    </output>
+  );
+}
 
 function InteractiveHtmlMediaDisplay({
   media_url,
@@ -50,6 +70,7 @@ function InteractiveHtmlMediaDisplay({
   readonly iframeContainerClassName?: string | undefined;
 }) {
   const { isCapacitor } = useCapacitor();
+  const locale = useBrowserLocale();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
   const urls = useMemo(
@@ -134,7 +155,7 @@ function InteractiveHtmlMediaDisplay({
       />
       <SandboxedExternalIframe
         key={activeUrl}
-        title={DEFAULT_HTML_MEDIA_TITLE}
+        title={t(locale, "media.interactive.frameTitle")}
         src={activeUrl}
         className="tw-h-full tw-w-full"
         containerClassName={iframeContainerClassName}
@@ -147,6 +168,11 @@ function InteractiveHtmlMediaDisplay({
           setIsIframeVisible(true);
         }}
       />
+      {didLoadCurrentUrl ? null : (
+        <InteractiveHtmlLoadingStatus
+          label={t(locale, "media.interactive.loading")}
+        />
+      )}
     </div>
   );
 }
@@ -215,16 +241,9 @@ export default function MediaDisplay({
   const mediaType = getMediaType();
 
   if (mediaType === MediaType.HTML) {
-    if (loadStrategy === "eager") {
-      return previewImageUrl ? (
-        <MediaDisplayImage
-          src={previewImageUrl}
-          imageScale={imageScale}
-          loadStrategy={loadStrategy}
-        />
-      ) : null;
-    }
-
+    // `loadStrategy` only controls how a static preview image loads. HTML
+    // media always uses the interactive renderer below, so eager surfaces
+    // such as quick vote still mount the iframe or the tap-to-load gate.
     if (previewImageUrl && !requireInteractionToLoad) {
       return (
         <MediaDisplayImage
