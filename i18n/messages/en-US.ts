@@ -3091,13 +3091,12 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.on": "On",
   "artworkAlerts.off": "Off",
   "artworkAlerts.saving": "Please wait…",
-  "artworkAlerts.mainStage":
-    "Notify me when this artist submits new artwork to The Memes – Main Stage.",
+  "artworkAlerts.mainStage": "New artwork in The Memes – Main Stage.",
   "artworkAlerts.enabled": "Artwork alerts are on.",
   "artworkAlerts.disabled": "Artwork alerts are off.",
   "artworkAlerts.ownProfile":
     "Switch to your own profile to manage artwork alerts.",
-  "artworkAlerts.retry": "Retry artwork alerts",
+  "artworkAlerts.retry": "Try again",
   "artworkAlerts.saveFailed": "Couldn’t save artwork alerts.",
   "artworkAlerts.tryAgain": "Please try again.",
   "artworkAlerts.sessionChanged": "Your session changed. Please try again.",

@@ -11154,7 +11154,7 @@
         "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
         "Find alerts under the Artwork alerts filter in /notifications. The artwork title, or untitled artwork, opens the exact submission.",
         "Profile preferences including Essential only and Direct messages and wave activity apply. App push also requires device permission and the Wave Invites setting.",
-        "Retry artwork alerts reloads a failed preference request. Without an artist badge, the control appears only once an enabled preference is known; reopen the profile if the initial request fails. A failed save displays an error and rechecks saved state before another toggle."
+        "Artwork alerts shows Try again when the preference could not load; select it to retry. Without an artist badge, the control appears only once an enabled preference is known; reopen the profile if the initial request fails. A failed save displays an error and rechecks saved state before another toggle."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/waves"],

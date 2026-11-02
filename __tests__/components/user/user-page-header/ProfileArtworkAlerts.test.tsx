@@ -113,9 +113,7 @@ it("toggles the saved preference without changing feed subscriptions", async () 
   const button = screen.getByRole("button", { name });
   await waitFor(() => expect(button).toBeEnabled());
   expect(button).toHaveTextContent("Off");
-  expect(button).toHaveTextContent(
-    "Notify me when this artist submits new artwork to The Memes – Main Stage."
-  );
+  expect(button).toHaveTextContent("New artwork in The Memes – Main Stage.");
   await user.click(button);
   await waitFor(() => expect(button).toHaveTextContent("On"));
   expect(postPreference).toHaveBeenCalledTimes(1);
@@ -149,7 +147,7 @@ it("lets users retry a failed initial read before changing the preference", asyn
     .mockResolvedValue({ enabled: true });
   setup();
   await userEvent.click(
-    await screen.findByRole("button", { name: /^Retry artwork alerts/ })
+    await screen.findByRole("button", { name: /^Artwork alerts.*Try again/ })
   );
   await waitFor(() =>
     expect(screen.getByRole("button", { name })).toHaveTextContent("On")
@@ -229,7 +227,7 @@ it("can retry an unknown saved preference for a blocked artist", async () => {
     .mockResolvedValue({ enabled: true });
   setup({}, true);
   const retry = await screen.findByRole("button", {
-    name: /^Retry artwork alerts/,
+    name: /^Artwork alerts.*Try again/,
   });
   expect(retry).not.toHaveTextContent("Off");
   await userEvent.click(retry);
@@ -306,7 +304,7 @@ it("keeps retry available after a failed refresh of enabled alerts without activ
     await client.invalidateQueries();
   });
   const retry = await screen.findByRole("button", {
-    name: /^Retry artwork alerts/,
+    name: /^Artwork alerts.*Try again/,
   });
   expect(retry).toBeEnabled();
   expect(retry).not.toHaveTextContent("Off");

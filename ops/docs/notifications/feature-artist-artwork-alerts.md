@@ -56,7 +56,7 @@ Open the artist’s profile from a submission, search result, or profile link.
 ## Failure and Recovery
 
 When available, the control is disabled while loading or saving. If loading fails, select
-**Retry artwork alerts**. If saving fails, an error appears and the saved state
+**Artwork alerts** with **Try again**. If saving fails, an error appears and the saved state
 is checked again before another toggle is offered. On profiles without an artist
 badge, the control appears only once an enabled preference is known; if the
 initial request fails, reopen the profile to retry.

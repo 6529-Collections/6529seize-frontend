@@ -102,18 +102,16 @@ export default function useArtistArtworkAlert(
 
   const loading = fetchingProfile || (canManage && preference.isFetching);
   const failed = canManage && preference.isError;
-  const label = t(
-    locale,
-    failed ? "artworkAlerts.retry" : "artworkAlerts.label"
-  );
   const savedStateLabel = t(
     locale,
     enabled ? "artworkAlerts.on" : "artworkAlerts.off"
   );
-  const stateLabel =
-    loading || mutation.isPending
-      ? t(locale, "artworkAlerts.saving")
-      : savedStateLabel;
+  let stateLabel = savedStateLabel;
+  if (loading || mutation.isPending) {
+    stateLabel = t(locale, "artworkAlerts.saving");
+  } else if (failed) {
+    stateLabel = t(locale, "artworkAlerts.retry");
+  }
   const description = activeProfileProxy
     ? t(locale, "artworkAlerts.ownProfile")
     : t(locale, "artworkAlerts.mainStage");
@@ -136,15 +134,13 @@ export default function useArtistArtworkAlert(
     label: (
       <span className="tw-block">
         <span className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-          <span>{label}</span>
-          {!failed && (
-            <span className="tw-flex tw-items-center tw-gap-1 tw-text-xs tw-text-iron-400">
-              {enabled && (
-                <CheckIcon className="tw-size-3.5" aria-hidden="true" />
-              )}
-              {stateLabel}
-            </span>
-          )}
+          <span>{t(locale, "artworkAlerts.label")}</span>
+          <span className="tw-flex tw-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-text-iron-400">
+            {enabled && !failed && (
+              <CheckIcon className="tw-size-3.5" aria-hidden="true" />
+            )}
+            {stateLabel}
+          </span>
         </span>
         <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
           {description}
