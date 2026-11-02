@@ -30,11 +30,12 @@ current page stays in place. Compact rows show the actor, activity, a short drop
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
 
-Opening or closing this inbox does not mark notifications read. Selecting a row
-marks that notification read and opens its destination. `Mark all as read`
-explicitly clears unread notifications. Read failures show an error and can be
-retried; loading failures offer `Try again`. The empty inbox shows
-`No notifications yet`.
+Opening this inbox automatically marks notifications read for the active
+profile after the inbox loads. Closing it does not change read state. Selecting
+a row marks that notification read if needed and opens its destination.
+`Mark all as read` clears any new unread notifications and retries a failed
+automatic read request. Read failures show an error; loading failures offer
+`Try again`. The empty inbox shows `No notifications yet`.
 
 Close the inbox with its close button, Escape, another bell click, or a click
 outside. Escape returns focus to the bell. Changing accounts or routes closes
