@@ -21,8 +21,8 @@ export function GrantTokensPanel({
 }: Readonly<GrantTokensPanelProps>) {
   if (state.type === "all") {
     return (
-      <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-3">
-        <p className="tw-m-0 tw-text-sm tw-text-iron-200">
+      <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-white/[0.04] tw-bg-iron-900 tw-p-3">
+        <p className="tw-m-0 tw-text-sm tw-text-iron-200 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-300">
           This grant applies to every token in the collection.
         </p>
       </div>

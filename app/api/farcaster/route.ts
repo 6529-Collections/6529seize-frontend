@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
+import { getFarcasterWarpcastApiKey } from "@/config/serverEnv";
 import {
   BodyTooLargeError,
   UnsupportedContentTypeError,
@@ -18,7 +19,7 @@ import {
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
-import { escapeRegExp } from "@/lib/text/regex";
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import {
   parseFarcasterResource,
@@ -41,10 +42,13 @@ import {
   type WarpcastChannelResponse,
   type WarpcastUserResponse,
 } from "./warpcastMappers";
+import {
+  extractFirstMetaContent,
+  extractTitleTag,
+} from "@/app/api/open-graph/utils";
 
 const WARPCAST_API_BASE =
   publicEnv.FARCASTER_WARPCAST_API_BASE ?? "https://api.warpcast.com";
-const WARPCAST_API_KEY = publicEnv.FARCASTER_WARPCAST_API_KEY ?? undefined;
 
 const CAST_CACHE_TTL_MS = 20 * 60 * 1000;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -61,6 +65,12 @@ const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
 const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
+const FRAME_IMAGE_META_KEYS = [
+  "fc:frame:image",
+  "og:image",
+  "twitter:image",
+] as const;
+const FRAME_TITLE_META_KEYS = ["og:title", "twitter:title"] as const;
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
@@ -126,8 +136,9 @@ const buildWarpcastUrl = (
     }
   }
 
-  if (WARPCAST_API_KEY) {
-    url.searchParams.set("key", WARPCAST_API_KEY);
+  const warpcastApiKey = getFarcasterWarpcastApiKey();
+  if (warpcastApiKey) {
+    url.searchParams.set("key", warpcastApiKey);
   }
 
   return url;
@@ -228,33 +239,6 @@ const fetchChannelPreview = async (
   const mapped = mapWarpcastChannel(response, identifier.canonicalUrl);
   channelCache.set(identifier.canonicalUrl, mapped);
   return mapped;
-};
-
-const hasFrameMeta = (html: string): boolean =>
-  /<meta[^>]+(?:name|property)=["']fc:frame["'][^>]*>/i.test(html);
-
-const extractMetaContent = (html: string, name: string): string | undefined => {
-  const metaPattern = new RegExp(
-    String.raw`<meta[^>]+(?:name|property)=["']${escapeRegExp(name)}["'][^>]*>`,
-    "i"
-  );
-  const metaTag = metaPattern.exec(html)?.[0];
-  if (!metaTag) {
-    return undefined;
-  }
-  const contentMatch = /content=["']([^"']+)["']/i.exec(metaTag);
-  if (!contentMatch) {
-    return undefined;
-  }
-  return contentMatch[1]?.trim();
-};
-
-const extractTitle = (html: string): string | undefined => {
-  const rawTitle = /<title[^>]*>([^<]*)<\/title>/i.exec(html)?.[1];
-  if (!rawTitle) {
-    return undefined;
-  }
-  return rawTitle.trim();
 };
 
 const resolveUrl = (
@@ -379,33 +363,30 @@ const detectFramePreview = async (
   }
 
   const { html, finalUrl } = result;
+  const $ = loadHtmlMetadata(html);
 
-  if (!hasFrameMeta(html)) {
+  if (!extractFirstMetaContent($, ["fc:frame"])) {
     frameCache.set(url.toString(), null);
     return null;
   }
 
   const resolvedImage = resolveUrl(
     finalUrl,
-    extractMetaContent(html, "fc:frame:image") ||
-      extractMetaContent(html, "og:image") ||
-      extractMetaContent(html, "twitter:image")
+    extractFirstMetaContent($, FRAME_IMAGE_META_KEYS)
   );
 
   const buttons: string[] = [];
   for (let index = 1; index <= 4; index += 1) {
-    const label = extractMetaContent(html, `fc:frame:button:${index}`);
+    const label = extractFirstMetaContent($, [`fc:frame:button:${index}`]);
     if (label) {
       buttons.push(label);
     }
   }
 
   const title =
-    extractMetaContent(html, "og:title") ||
-    extractMetaContent(html, "twitter:title") ||
-    extractTitle(html);
+    extractFirstMetaContent($, FRAME_TITLE_META_KEYS) ?? extractTitleTag($);
 
-  const siteName = extractMetaContent(html, "og:site_name");
+  const siteName = extractFirstMetaContent($, ["og:site_name"]);
 
   const preview: FarcasterFramePreview = {
     type: "frame",

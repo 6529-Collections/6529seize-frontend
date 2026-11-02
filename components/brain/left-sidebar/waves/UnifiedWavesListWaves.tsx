@@ -1,4 +1,5 @@
 "use client";
+import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
   SidebarWaveNavigationControls,
@@ -378,9 +379,17 @@ const UnifiedWavesListWaves = forwardRef<
       [animatedAnnouncementRows]
     );
     useRevealActiveSidebarWave({
+      preserveScrollOnInteraction: !isDirectMessage,
+      // Animated rows settle one render after their source list.
+      isLoading:
+        isLoading ||
+        streamWaves.isPinnedWavesLoading === true ||
+        allRows.length !== virtualizedRows.length ||
+        allRows.some((row, index) => row.key !== virtualizedRows[index]?.key),
       activeParentWaveId: effectiveActiveParentWaveId,
       activeWaveId: navigation.searching ? null : activeWaveId,
-      filterKey: navigation.scrollKey,
+      // Restoring the account is not a user filter change.
+      filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
       scrollContainerRef,
       scrollToVirtualIndex: virtual.scrollToIndex,
       staticRows: revealStaticRows,
@@ -456,6 +465,11 @@ const UnifiedWavesListWaves = forwardRef<
           />
         )}
 
+        {!isDirectMessage &&
+          !hideHeaders &&
+          announcementRows.length === 0 &&
+          streamWaves.isAnnouncementsLoading && <SidebarAnnouncementSkeleton />}
+
         {announcementRows.length > 0 && (
           <SidebarWaveRowsSection
             ariaLabel={t(
@@ -484,7 +498,8 @@ const UnifiedWavesListWaves = forwardRef<
         )}
 
         {!hideHeaders &&
-          announcementRows.length > 0 &&
+          (announcementRows.length > 0 ||
+            (!isDirectMessage && streamWaves.isAnnouncementsLoading)) &&
           shouldShowBottomHeader && (
             <div
               className={`${firstSectionDividerSpacingClass} tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
@@ -495,6 +510,10 @@ const UnifiedWavesListWaves = forwardRef<
           <SidebarDiscovery
             scoreDetailsDisabled={navigation.searchOpen}
             previewItems={highlyRatedPreviewItems}
+            recommendationsStatus={
+              streamWaves.recommendationsStatus ?? "pending"
+            }
+            onRetryRecommendations={streamWaves.retryRecommendations}
             isTouchPreview={hasTouchScreen}
           />
         )}

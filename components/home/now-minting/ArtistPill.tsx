@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import clsx from "clsx";
 import Image from "next/image";
@@ -31,10 +31,10 @@ export default function ArtistPill({
   const labelClassName = clsx(
     "tw-min-w-0 tw-truncate tw-font-medium",
     isMinimal
-      ? "tw-text-sm tw-tracking-[-0.01em] tw-text-iron-200"
+      ? "tw-text-sm tw-tracking-[-0.01em] tw-text-iron-50 group-data-[home-next-drop]/home-next-drop:tw-text-iron-300"
       : "tw-text-sm tw-text-iron-200",
     href &&
-      "tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
+      "tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/artist:tw-text-white desktop-hover:group-hover/artist:tw-text-white motion-reduce:tw-transition-none"
   );
 
   const content = (
@@ -48,7 +48,7 @@ export default function ArtistPill({
     >
       {resolvedPfp ? (
         <Image
-          src={resolveIpfsUrl(resolvedPfp)}
+          src={getScaledImageUri(resolvedPfp, ImageScale.W_AUTO_H_50)}
           alt={label}
           width={isMinimal ? 24 : 16}
           height={isMinimal ? 24 : 16}
@@ -82,7 +82,7 @@ export default function ArtistPill({
     <Link
       data-home-action="Open artist profile"
       href={href}
-      className="tw-inline-flex tw-items-center tw-leading-none tw-no-underline"
+      className="tw-group/artist tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-sm tw-leading-none tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
     >
       {content}
     </Link>

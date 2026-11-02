@@ -8,7 +8,7 @@ import {
   MuseumStatusBadge,
 } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate, formatInteger } from "@/i18n/format";
+import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
@@ -109,7 +109,7 @@ export default async function MuseumAboutGovernanceDetailPage({
           </dt>
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
             {decision.createdAt
-              ? formatDate(DEFAULT_LOCALE, decision.createdAt)
+              ? formatUtcDate(DEFAULT_LOCALE, decision.createdAt)
               : t(DEFAULT_LOCALE, "museum.network.governance.notRecorded")}
           </dd>
         </div>

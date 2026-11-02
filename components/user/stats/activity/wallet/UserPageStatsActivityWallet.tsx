@@ -215,7 +215,7 @@ export default function UserPageStatsActivityWallet({
   return (
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+        <h3 className="tw-mb-0 tw-text-lg/7 tw-font-semibold tw-text-iron-100 md:tw-text-xl/7">
           {getWalletActivityMessage(
             "user.collected.stats.walletActivity.title",
             undefined,

@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { registerWaveTabShell } from "@/helpers/waves/wave-tab-shell";
 import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 
 const mockPush = jest.fn();
@@ -94,6 +95,52 @@ describe("useWaveTabNavigation", () => {
     expect(mockPush).toHaveBeenCalledWith(href, { scroll: false });
     expect(pushState).not.toHaveBeenCalled();
   });
+
+  it("switches canonical page paths in a mounted URL-driven shell", () => {
+    const unregister = registerWaveTabShell("wave");
+    const { result } = renderHook(useWaveTabNavigation);
+    try {
+      act(() => result.current("/waves/wave?tab=chat&competition=rank"));
+      expect(globalThis.location.pathname).toBe("/waves/wave");
+      act(() =>
+        result.current("/waves/wave/competitions/rank?tab=leaderboard")
+      );
+      expect(globalThis.location.pathname).toBe(
+        "/waves/wave/competitions/rank"
+      );
+      expect(mockPush).not.toHaveBeenCalled();
+    } finally {
+      unregister();
+    }
+    act(() => result.current("/waves/wave?tab=chat&competition=rank"));
+    expect(mockPush).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    "/waves/another?tab=chat&competition=rank",
+    "/waves/wave?tab=chat&competition=another",
+    "/waves/wave?tab=chat&competition=rank&serialNo=10",
+    "/waves/wave?tab=chat&competition=rank&drop=drop",
+    "/waves/wave?tab=chat&competition=rank&restore=1",
+    "/waves/wave/competitions/new?tab=chat",
+    "/waves/wave/?tab=chat&competition=rank",
+    "/waves/wave/competitions/rank/entries/entry?tab=chat",
+    "/waves/wave/competitions/rank?tab=chat&competition=rank",
+    "/waves/wave?tab=chat&competition=rank#target",
+    "https://example.org/waves/wave?tab=chat&competition=rank",
+  ])(
+    "keeps route and command changes server-owned with a mounted shell: %s",
+    (href) => {
+      const unregister = registerWaveTabShell("wave");
+      const { result } = renderHook(useWaveTabNavigation);
+      try {
+        act(() => result.current(href));
+        expect(mockPush).toHaveBeenCalledWith(href, { scroll: false });
+      } finally {
+        unregister();
+      }
+    }
+  );
 
   it("keeps router replacement when another parameter changes", () => {
     const { result } = renderHook(useWaveTabNavigation);

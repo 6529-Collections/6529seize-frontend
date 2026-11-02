@@ -25,4 +25,13 @@ describe('PositiveOnlyToggle', () => {
     await userEvent.click(checkbox);
     expect(setPositiveOnly).toHaveBeenCalledWith(false);
   });
+
+  it('draws the keyboard focus ring on the switch from the hidden checkbox', () => {
+    render(<PositiveOnlyToggle positiveOnly={false} setPositiveOnly={jest.fn()} />);
+    expect(screen.getByLabelText('Positive Only')).toHaveClass('tw-peer');
+    expect(screen.getByRole('switch')).toHaveClass(
+      'peer-focus-visible:tw-ring-2',
+      'peer-focus-visible:tw-ring-primary-400'
+    );
+  });
 });

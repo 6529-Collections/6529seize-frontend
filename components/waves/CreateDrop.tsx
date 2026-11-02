@@ -1,5 +1,8 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
+
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
@@ -13,10 +16,10 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import {
-  commonApiPost,
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
@@ -26,7 +29,7 @@ import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import { DropMode } from "./dropComposer.types";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
@@ -52,6 +55,9 @@ import type {
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
+import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
 export default function CreateDrop({
   activeDrop,
@@ -81,6 +87,9 @@ export default function CreateDrop({
 }: CreateDropProps) {
   const locale = useBrowserLocale();
   const { setToast, connectedProfile } = useAuth();
+  // Every composer (chat, curation, quorum) warms the device key on mount so
+  // a signed post does not wait on IndexedDB or WebCrypto at send time.
+  useDeviceSigningPrewarm();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
@@ -98,7 +107,7 @@ export default function CreateDrop({
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
-    useMyStream();
+    useMyStreamActions();
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -115,6 +124,8 @@ export default function CreateDrop({
     wave,
   });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
+  const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -441,14 +452,17 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
-      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: `drops`,
-        body: body.drop,
-        errorMode: "structured",
-      });
+      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
+      return await postDrop(body.drop, { errorMode: "structured" });
     },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       startLocalSlowModeCooldown(body);
@@ -489,6 +503,12 @@ export default function CreateDrop({
         if (!body.dropId) {
           return;
         }
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
 
         if (
           isContentModerationRejection &&
@@ -590,13 +610,16 @@ export default function CreateDrop({
         return false;
       }
 
-      const queuedDropRequest: QueuedDropMutationBody =
-        slowModeChatReservation === null
-          ? dropRequest
-          : {
-              ...dropRequest,
-              slowModeChatReservation,
-            };
+      const queuedDropRequest: QueuedDropMutationBody = {
+        ...dropRequest,
+        ...(slowModeChatReservation === null
+          ? {}
+          : { slowModeChatReservation }),
+        nativeEntrySubmit:
+          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
+            ? submitCompetitionEntry
+            : undefined,
+      };
 
       // Add to queue
       queueRef.current.push(queuedDropRequest);
@@ -628,9 +651,11 @@ export default function CreateDrop({
     },
     [
       markChatSubmitted,
+      nativeCompetition,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
+      submitCompetitionEntry,
       unreadDividerContext,
     ]
   );

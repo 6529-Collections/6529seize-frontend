@@ -1,8 +1,9 @@
 "use client";
 
-import { type ComponentProps, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
+import type { ComponentProps } from "react";
+import type { Tooltip } from "react-tooltip";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 
 interface MyStreamActionTooltipProps {
   readonly id: string;
@@ -27,25 +28,18 @@ export default function MyStreamActionTooltip({
   id,
   place = "top",
 }: MyStreamActionTooltipProps) {
-  const hydrated = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
+  const isTouchDevice = useIsTouchDevice();
+  if (isTouchDevice) return null;
 
-  if (!hydrated) {
-    return null;
-  }
-
-  return createPortal(
-    <Tooltip
+  return (
+    <BodyPortalTooltip
       id={id}
       place={place}
       offset={8}
+      globalCloseEvents={{ clickOutsideAnchor: true, scroll: true }}
+      closeEvents={{ mouseleave: true, blur: true, click: true }}
       opacity={1}
-      positionStrategy="fixed"
       style={tooltipStyle}
-    />,
-    document.body
+    />
   );
 }

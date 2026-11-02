@@ -215,6 +215,29 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(button).toHaveClass("tw-size-7");
   });
 
+  it("renders the pin tooltip outside the sidebar list so sticky filters cannot cover it", () => {
+    const { container } = setup();
+
+    const tooltip = screen.getByTestId("tooltip-wave-pin-1");
+    expect(tooltip.parentElement).toBe(document.body);
+    expect(container).not.toContainElement(tooltip);
+    expect(screen.getByRole("button", { name: "Pin wave" })).toHaveAttribute(
+      "data-tooltip-id",
+      "wave-pin-1"
+    );
+  });
+
+  it("skips the hover tooltip on touch devices", () => {
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 1,
+    });
+    setup();
+
+    expect(screen.getByRole("button", { name: "Pin wave" })).toBeVisible();
+    expect(screen.queryByTestId("tooltip-wave-pin-1")).toBeNull();
+  });
+
   it("shows tooltip and does not pin when max limit reached", async () => {
     const user = userEvent.setup();
     const maxList = Array(MAX_PINNED_WAVES).fill("x");

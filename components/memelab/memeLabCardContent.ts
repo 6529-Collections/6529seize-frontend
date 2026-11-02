@@ -1,8 +1,8 @@
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
 import {
-  formatDate,
   formatInteger,
   formatNumber,
   formatPercent,
@@ -83,7 +83,7 @@ export function printNftContent(
   switch (sort) {
     case MemeLabSort.AGE:
     case MemeLabSort.ARTISTS:
-      return formatDate(locale, nft.mint_date);
+      return formatMintDate(locale, nft.mint_date);
     case MemeLabSort.COLLECTIONS:
       return t(locale, "memeLab.card.metric.artists", {
         value: nft.artist,

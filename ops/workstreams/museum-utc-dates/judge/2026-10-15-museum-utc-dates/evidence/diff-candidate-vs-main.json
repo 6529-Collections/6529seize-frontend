@@ -1,0 +1,815 @@
+{
+  "compared": "candidate vs main",
+  "cells": [
+    {
+      "route": "/museum/network/about/governance",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "1522 vs 1522",
+      "dates": {
+        "candidate": ["Jun 2, 2026", "Jun 8, 2026"],
+        "main": ["Jun 2, 2026", "Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x1522",
+        "differingPixels": 37,
+        "differingFraction": 0.00001688,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "1704 vs 1704",
+      "dates": {
+        "candidate": ["Jun 2, 2026", "Jun 8, 2026"],
+        "main": ["Jun 2, 2026", "Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x1704",
+        "differingPixels": 37,
+        "differingFraction": 0.00002648,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "2798 vs 2798",
+      "dates": {
+        "candidate": ["Jun 2, 2026", "Jun 8, 2026"],
+        "main": ["Jun 2, 2026", "Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x2798",
+        "differingPixels": 38,
+        "differingFraction": 0.00003482,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "1140 vs 1140",
+      "dates": {
+        "candidate": ["Jun 8, 2026"],
+        "main": ["Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x1140",
+        "differingPixels": 37,
+        "differingFraction": 0.00002254,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "1182 vs 1182",
+      "dates": {
+        "candidate": ["Jun 8, 2026"],
+        "main": ["Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x1182",
+        "differingPixels": 37,
+        "differingFraction": 0.00003817,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "1442 vs 1442",
+      "dates": {
+        "candidate": ["Jun 8, 2026"],
+        "main": ["Jun 8, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x1442",
+        "differingPixels": 38,
+        "differingFraction": 0.00006757,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "9523 vs 9523",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x9523",
+        "differingPixels": 37,
+        "differingFraction": 0.000002698,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "11770 vs 11770",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x11770",
+        "differingPixels": 37,
+        "differingFraction": 0.000003834,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "19464 vs 19464",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x19464",
+        "differingPixels": 38,
+        "differingFraction": 0.000005006,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "4329 vs 4329",
+      "dates": {
+        "candidate": ["Aug 1, 2026"],
+        "main": ["Aug 1, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          },
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x4329",
+        "differingPixels": 37,
+        "differingFraction": 0.000005935,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "3972 vs 3972",
+      "dates": {
+        "candidate": ["Aug 1, 2026"],
+        "main": ["Aug 1, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          },
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x3972",
+        "differingPixels": 37,
+        "differingFraction": 0.00001136,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "4594 vs 4594",
+      "dates": {
+        "candidate": ["Aug 1, 2026"],
+        "main": ["Aug 1, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          },
+          {
+            "dateTime": "2026-08-01T15:03:35Z",
+            "text": "Aug 1, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x4594",
+        "differingPixels": 38,
+        "differingFraction": 0.00002121,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "9879 vs 9879",
+      "dates": {
+        "candidate": ["Aug 23, 2026"],
+        "main": ["Aug 23, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x9879",
+        "differingPixels": 37,
+        "differingFraction": 0.000002601,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "10979 vs 10979",
+      "dates": {
+        "candidate": ["Aug 23, 2026"],
+        "main": ["Aug 23, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x10979",
+        "differingPixels": 37,
+        "differingFraction": 0.00000411,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "16458 vs 16458",
+      "dates": {
+        "candidate": ["Aug 23, 2026"],
+        "main": ["Aug 23, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          },
+          {
+            "dateTime": "2026-08-23T09:46:57.326Z",
+            "text": "Aug 23, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x16458",
+        "differingPixels": 38,
+        "differingFraction": 0.00000592,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "54759 vs 54759",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x54759",
+        "differingPixels": 37,
+        "differingFraction": 4.692e-7,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "68062 vs 68062",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x68062",
+        "differingPixels": 37,
+        "differingFraction": 6.63e-7,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "107030 vs 107030",
+      "dates": {
+        "candidate": ["Aug 2, 2026"],
+        "main": ["Aug 2, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x107030",
+        "differingPixels": 38,
+        "differingFraction": 9.104e-7,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "6041 vs 6041",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x6041",
+        "differingPixels": 37,
+        "differingFraction": 0.000004253,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "5943 vs 5943",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x5943",
+        "differingPixels": 37,
+        "differingFraction": 0.000007592,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "8318 vs 8318",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x8318",
+        "differingPixels": 38,
+        "differingFraction": 0.00001171,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "1440 vs 1440",
+      "dates": {
+        "candidate": [],
+        "main": [],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x1440",
+        "differingPixels": 37,
+        "differingFraction": 0.00001784,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "1647 vs 1647",
+      "dates": {
+        "candidate": [],
+        "main": [],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x1647",
+        "differingPixels": 37,
+        "differingFraction": 0.0000274,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "2099 vs 2099",
+      "dates": {
+        "candidate": [],
+        "main": [],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": []
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x2099",
+        "differingPixels": 38,
+        "differingFraction": 0.00004642,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "viewport": "1440x1000",
+      "mainText": "identical",
+      "pageHeight": "7102 vs 7102",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "1440x7102",
+        "differingPixels": 37,
+        "differingFraction": 0.000003618,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "viewport": "820x1000",
+      "mainText": "identical",
+      "pageHeight": "7974 vs 7974",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "820x7974",
+        "differingPixels": 37,
+        "differingFraction": 0.000005659,
+        "rowBands": [[81, 87]]
+      },
+      "automatedChecksSame": true
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "viewport": "390x844",
+      "mainText": "identical",
+      "pageHeight": "11717 vs 11717",
+      "dates": {
+        "candidate": ["Aug 12, 2026"],
+        "main": ["Aug 12, 2026"],
+        "same": true
+      },
+      "times": {
+        "same": true,
+        "candidate": [
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-12T22:24:36.387Z",
+            "text": "Aug 12, 2026"
+          },
+          {
+            "dateTime": "2026-08-02T06:30:00Z",
+            "text": "Aug 2, 2026"
+          }
+        ]
+      },
+      "pixels": {
+        "comparable": true,
+        "size": "390x11717",
+        "differingPixels": 38,
+        "differingFraction": 0.000008316,
+        "rowBands": [[93, 99]]
+      },
+      "automatedChecksSame": true
+    }
+  ],
+  "summary": {
+    "cells": 27,
+    "identicalMainText": 27,
+    "identicalPixels": 0
+  },
+  "note": "Every cell differs only in rows 81-87 (93-99 at 390x844), x 116-121: the local-environment badge in the header reads LCL:3417 for the candidate server and LCL:3418 for the baseline server. Production does not render this badge. <main> text, page heights, rendered dates and automated-check results are identical in all 27 cells."
+}

@@ -2,6 +2,7 @@ import {
   assertGovernedMuseumMediaPath,
   assertGovernedMuseumPath,
 } from "./security";
+import { isRfc3339DateTime } from "./rfc3339";
 import type {
   MuseumPublicEntityType,
   MuseumPublicRelationType,
@@ -143,20 +144,12 @@ export function typedNameVariantArray(
   }
 }
 
-function validDateTime(value: unknown): boolean {
-  return (
-    typeof value === "string" &&
-    value.trim().length > 0 &&
-    !Number.isNaN(Date.parse(value))
-  );
-}
-
 export function assertDateTime(
   record: Record<string, unknown>,
   key: string,
   code: string
 ): void {
-  if (!validDateTime(record[key])) throw new Error(code);
+  if (!isRfc3339DateTime(record[key])) throw new Error(code);
 }
 
 export function assertStringEnum(

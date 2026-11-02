@@ -5,6 +5,7 @@ import {
   SingleWaveDropVoteSize,
 } from "@/components/waves/drop/SingleWaveDropVote";
 import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 
 let capturedProps: any;
 
@@ -13,7 +14,17 @@ jest.mock("next/dynamic", () => () => (props: any) => {
   return <div data-testid="content" />;
 });
 
-const drop: any = { id: "d1" };
+const drop: any = {
+  id: "d1",
+  wave: { id: "wave-1" },
+  drop_type: ApiDropType.Participatory,
+  competition_context: {
+    viewer: null,
+    waveId: "wave-1",
+    dropId: "d1",
+    data: { competition: null, entry: null, vote_summary: null },
+  },
+};
 
 describe("SingleWaveDropVote", () => {
   it("passes props to dynamic content component", () => {

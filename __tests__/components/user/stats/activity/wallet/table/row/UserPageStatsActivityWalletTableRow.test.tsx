@@ -1,3 +1,8 @@
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/other",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 import { render, screen } from "@testing-library/react";
 import UserPageStatsActivityWalletTableRow from "@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow";
 jest.mock(

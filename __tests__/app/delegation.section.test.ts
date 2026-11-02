@@ -20,7 +20,39 @@ describe("delegation page server", () => {
     });
     const metadata = await generateMetadata({ params });
     expect(metadata).toEqual(
-      expect.objectContaining({ title: "Delegation Center | 6529.io" })
+      expect.objectContaining({ title: "Safe Collecting | 6529.io" })
+    );
+  });
+
+  it("titles the wallet architecture route as the TAP guide", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ section: ["wallet-architecture"] }),
+    });
+    expect(metadata).toEqual(
+      expect.objectContaining({
+        title: "The Three Address Protocol (TAP) | 6529.io",
+      })
+    );
+  });
+
+  it("keeps the legacy wallet architecture article under the FAQ", async () => {
+    const section = [
+      "delegation-faq",
+      "reference-overview-wallet-architecture",
+    ];
+    const element = await DelegationPage({
+      params: Promise.resolve({ section }),
+      searchParams: Promise.resolve({}),
+    });
+    expect(element.props).toMatchObject({
+      section: DelegationCenterSection.HTML,
+      path: section,
+    });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ section }),
+    });
+    expect(metadata).toEqual(
+      expect.objectContaining({ title: "Wallet Architecture | 6529.io" })
     );
   });
 
@@ -65,7 +97,7 @@ describe("Wallet Checker canonicals", () => {
         params: Promise.resolve({ section: ["wallet-checker"] }),
         searchParams: Promise.resolve(searchParams),
       });
-      const canonical = `https://test.6529.io/delegation/wallet-checker${query}`;
+      const canonical = `https://test.6529.io/safe-collecting/wallet-checker${query}`;
       expect(metadata.alternates?.canonical).toBe(canonical);
       expect(metadata.openGraph?.url).toBe(canonical);
     }

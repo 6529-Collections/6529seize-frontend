@@ -144,7 +144,14 @@ export default function UserFollowBtn({
   readonly beforeFollowAction?: ReactNode | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const {
+    setToast,
+    requestAuth,
+    connectedProfile,
+    activeProfileProxy,
+    isAuthenticated,
+    isDirectProfileSession,
+  } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [directMessageMutating, setDirectMessageMutating] =
     useState<boolean>(false);
@@ -152,10 +159,20 @@ export default function UserFollowBtn({
 
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
-      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
-      queryFn: async () =>
+      queryKey: [
+        QueryKey.IDENTITY_FOLLOWING_ACTIONS,
+        handle,
+        {
+          identityId: connectedProfile?.id ?? null,
+          proxyId: activeProfileProxy?.id ?? null,
+          isAuthenticated: isAuthenticated === true,
+          isDirectProfileSession: isDirectProfileSession === true,
+        },
+      ],
+      queryFn: async ({ signal }) =>
         await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
+          signal,
         }),
       enabled: !blocked && !blockStateLoading && !unblockPending,
     });
@@ -288,7 +305,7 @@ export default function UserFollowBtn({
             disabled={isDirectMessagePending}
             type="button"
             aria-label="Send direct message"
-            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
+            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-800 enabled:hover:tw-ring-white/10 disabled:tw-cursor-default disabled:tw-opacity-70`}
             data-tooltip-id={directMessageTooltipId}
           >
             {isDirectMessagePending ? (
@@ -333,6 +350,9 @@ export default function UserFollowBtn({
               : "primary"
           }
           size={FOLLOW_BUTTON_SIZES[size]}
+          className={
+            size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined
+          }
         >
           <FollowStateIcon
             loading={actionLoading}

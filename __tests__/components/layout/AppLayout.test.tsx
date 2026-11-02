@@ -30,6 +30,12 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     return MockDynamicHeader;
   }
 
+  if (loaderSource.includes("AppKitModalHooks")) {
+    const MockDynamicAppKitModalHooks = () => null;
+    MockDynamicAppKitModalHooks.displayName = "MockDynamicAppKitModalHooks";
+    return MockDynamicAppKitModalHooks;
+  }
+
   if (loaderSource.includes("BrainMobileMessages")) {
     const MockDynamicMessages = () => {
       const React = require("react");

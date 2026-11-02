@@ -1,5 +1,7 @@
 "use client";
 
+import { PROFILE_ACTIVITY_EMPHASIS } from "@/components/profile-activity/profileActivityTypography";
+
 import { useSearchParams } from "next/navigation";
 import type { ProfileActivityLogProxyCreated } from "@/entities/IProfile";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
@@ -25,7 +27,7 @@ export default function ProfileActivityLogProxy({
         handleOrWallet={handleOrWallet}
         isCurrentUser={isCurrentUser}
         tabTarget={tabTarget}
-        textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
+        textClassName={`tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
       />
     </>
   );

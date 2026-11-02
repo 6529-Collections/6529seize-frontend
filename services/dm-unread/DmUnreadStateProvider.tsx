@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { getQueryErrorStatus } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot";
+import { applyDelayJitter, scheduleStaggered } from "@/helpers/jitter.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -16,7 +17,10 @@ import {
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import {
+  WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS,
+  WebSocketStatus,
+} from "@/services/websocket/WebSocketTypes";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -145,14 +149,7 @@ const getSnapshotRetryDelay = (attempt: number): number => {
     SNAPSHOT_RETRY_BASE_DELAYS_MS[
       Math.min(attempt, SNAPSHOT_RETRY_BASE_DELAYS_MS.length - 1)
     ] ?? SNAPSHOT_RECONCILIATION_INTERVAL_MS;
-  const jitterMultiplier =
-    1 -
-    SNAPSHOT_RETRY_JITTER_RATIO +
-    ((globalThis.crypto.getRandomValues(new Uint32Array(1)).at(0) ?? 0) /
-      2 ** 32) *
-      SNAPSHOT_RETRY_JITTER_RATIO *
-      2;
-  return Math.round(baseDelay * jitterMultiplier);
+  return applyDelayJitter(baseDelay, SNAPSHOT_RETRY_JITTER_RATIO);
 };
 
 const synchronizeDmUnreadSnapshot = async (
@@ -221,6 +218,8 @@ export function DmUnreadStateProvider({
     new Map<number, number>()
   );
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
+  const hasConnectedWebSocketRef = useRef(false);
+  const cancelReconnectResyncRef = useRef<(() => void) | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const pendingDropRecoveryByWaveRef = useRef(
     new Map<string, PendingDropRecovery>()
@@ -257,6 +256,8 @@ export function DmUnreadStateProvider({
       if (dropRecoveryTimerRef.current !== null) {
         clearTimeout(dropRecoveryTimerRef.current);
       }
+      cancelReconnectResyncRef.current?.();
+      cancelReconnectResyncRef.current = null;
     };
   }, []);
 
@@ -648,20 +649,41 @@ export function DmUnreadStateProvider({
     handleDropUpdateRef
   );
 
-  useEffect(() => {
-    const previousStatus = previousWebSocketStatusRef.current;
-    const currentStatus = isConnected
-      ? WebSocketStatus.CONNECTED
-      : WebSocketStatus.DISCONNECTED;
-    previousWebSocketStatusRef.current = currentStatus;
-    if (
+  const syncOnWebSocketStatus = useCallback(
+    (connected: boolean) => {
+      const previousStatus = previousWebSocketStatusRef.current;
+      const currentStatus = connected
+        ? WebSocketStatus.CONNECTED
+        : WebSocketStatus.DISCONNECTED;
+      previousWebSocketStatusRef.current = currentStatus;
+      if (currentStatus !== WebSocketStatus.CONNECTED) {
+        cancelReconnectResyncRef.current?.();
+        cancelReconnectResyncRef.current = null;
+        return;
+      }
       // The websocket hook exposes connection state, not a reconnect callback.
-      currentStatus === WebSocketStatus.CONNECTED &&
-      previousStatus !== WebSocketStatus.CONNECTED
-    ) {
-      void requestActiveSnapshot();
-    }
-  }, [isConnected, requestActiveSnapshot]);
+      if (previousStatus === WebSocketStatus.CONNECTED) {
+        return;
+      }
+      const isReconnect = hasConnectedWebSocketRef.current;
+      hasConnectedWebSocketRef.current = true;
+      if (!isReconnect) {
+        void requestActiveSnapshot();
+        return;
+      }
+      // Every client reconnects together after a deploy; stagger the resync.
+      cancelReconnectResyncRef.current?.();
+      cancelReconnectResyncRef.current = scheduleStaggered(() => {
+        cancelReconnectResyncRef.current = null;
+        void requestActiveSnapshot();
+      }, WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS);
+    },
+    [requestActiveSnapshot]
+  );
+
+  useEffect(() => {
+    syncOnWebSocketStatus(isConnected);
+  }, [isConnected, syncOnWebSocketStatus]);
 
   useEffect(() => {
     if (!isCapacitor) {

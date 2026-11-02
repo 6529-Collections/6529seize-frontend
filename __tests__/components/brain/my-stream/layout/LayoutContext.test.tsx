@@ -340,7 +340,7 @@ describe("LayoutProvider", () => {
       "- var(--native-keyboard-inset-bottom, 0px)"
     );
     expect(notifications.style.transition).toBe(
-      "height var(--native-keyboard-layout-transition-duration, 0ms) ease-out, max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+      "height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out), max-height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)"
     );
   });
 

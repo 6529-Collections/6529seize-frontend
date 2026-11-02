@@ -17,6 +17,7 @@ import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import type { GifPreviewLoadingLayout } from "./GifPreviewLoadingIndicator";
 import UnsupportedMediaLink from "./UnsupportedMediaLink";
 
 enum MediaType {
@@ -173,6 +174,7 @@ export default function MediaDisplay({
   iframeContainerClassName,
   fillVideoContainer = false,
   loadStrategy = "in-view",
+  imageLoadingLayout = "inline",
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -184,6 +186,7 @@ export default function MediaDisplay({
   readonly iframeContainerClassName?: string | undefined;
   readonly fillVideoContainer?: boolean | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
+  readonly imageLoadingLayout?: GifPreviewLoadingLayout | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -259,6 +262,7 @@ export default function MediaDisplay({
       return (
         <MediaDisplayImage
           src={media_url}
+          imageLoadingLayout={imageLoadingLayout}
           imageScale={imageScale}
           loadStrategy={loadStrategy}
         />

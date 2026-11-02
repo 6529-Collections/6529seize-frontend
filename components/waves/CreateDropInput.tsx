@@ -59,6 +59,7 @@ import NewWaveMentionsPlugin from "../drops/create/lexical/plugins/waves/WaveMen
 import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
 import EditablePlugin from "../drops/create/lexical/plugins/EditablePlugin";
+import SubmissionLockPlugin from "../drops/create/lexical/plugins/SubmissionLockPlugin";
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
@@ -249,6 +250,7 @@ const CreateDropInput = forwardRef<
     ref
   ) => {
     const { isCapacitor } = useCapacitor();
+    const preserveKeyboardOnSubmit = isCapacitor && !isDropMode;
     const locale = useBrowserLocale();
     const validationHelperTextId = useId();
     const showValidationError =
@@ -298,7 +300,7 @@ const CreateDropInput = forwardRef<
               }
             }
           : editorState,
-      editable: !submitting,
+      editable: preserveKeyboardOnSubmit || !submitting,
       onError(error: Error): void {
         throw error;
       },
@@ -510,7 +512,12 @@ const CreateDropInput = forwardRef<
                 <LinkPlugin validateUrl={validateUrl} />
                 <ClearEditorPlugin ref={clearEditorRef} />
                 <EditorCommandsPlugin ref={editorCommandsRef} />
-                <EditablePlugin editable={!submitting} />
+                <EditablePlugin
+                  editable={preserveKeyboardOnSubmit || !submitting}
+                />
+                <SubmissionLockPlugin
+                  locked={preserveKeyboardOnSubmit && submitting}
+                />
                 <InitialMarkdownPlugin
                   initialMarkdown={initialMarkdown}
                   initialMarkdownKey={initialMarkdownKey}

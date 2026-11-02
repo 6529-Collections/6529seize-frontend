@@ -1,4 +1,14 @@
 export const COMPETITION_MESSAGES = {
+  "competitions.anonymousAuthor": "Anonymous",
+  "competitions.anonymousMediaReupload":
+    "Upload your media again, then retry this anonymous submission.",
+  "competitions.anonymousSubmissions": "Anonymous submissions",
+  "competitions.anonymityDescription":
+    "Hide each submission’s author until that submission wins. Other submissions stay anonymous. This setting cannot change after publication.",
+  "competitions.anonymousSubmissionNotice":
+    "Your identity will be revealed automatically if this submission wins. Information you include in the submission or its metadata remains visible.",
+  "competitions.anonymousUntilWin": "Until the submission wins",
+  "competitions.publicAuthors": "Off",
   "competitions.metaTitle": "Competition | Waves",
   "competitions.collectionMetaTitle": "Competitions | Waves",
   "competitions.waveCreationFailure": "Couldn't create this wave.",
@@ -49,6 +59,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.title": "Competitions",
   "competitions.chat": "Shared chat",
   "competitions.new": "New competition",
+  "competitions.createAction": "Competition",
   "competitions.add": "Add competition",
   "competitions.createHub": "Create a wave",
   "competitions.first": "Configure the first competition",
@@ -60,6 +71,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.error":
     "This competition could not be loaded. It may be unavailable or you may not have access.",
   "competitions.retry": "Try again",
+  "competitions.voterProfileUnavailable": "Profile unavailable",
+  "competitions.retryVoterProfile": "Retry profile at rank {rank}",
   "competitions.empty": "No competitions here yet. Chat is always available.",
   "competitions.parallel":
     "Each competition has its own entries, voting credits, and results. All competitions share this wave’s chat.",
@@ -69,6 +82,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.all": "All",
   "competitions.entries": "Entries",
   "competitions.leaderboard": "Leaderboard",
+  "competitions.submissions": "Submissions",
+  "competitions.noSubmissions": "No submissions to show.",
   "competitions.votes": "Votes",
   "competitions.settings": "Settings",
   "competitions.myVotes": "My Votes",
@@ -78,6 +93,7 @@ export const COMPETITION_MESSAGES = {
     "This competition shares its settings with the wave. Changing its title also renames the wave. Its description remains the pinned wave drop.",
   "competitions.decisions": "Winners",
   "competitions.outcomes": "Outcomes",
+  "competitions.outcomeTab": "Outcome",
   "competitions.voters": "Voters",
   "competitions.rules": "Rules",
   "competitions.configuration": "Configuration",
@@ -95,6 +111,9 @@ export const COMPETITION_MESSAGES = {
   "competitions.available": "Available credits",
   "competitions.spent": "Spent credits",
   "competitions.remaining": "Remaining credits",
+  "competitions.creditLineRemaining": "remaining",
+  "competitions.creditLineOf": "of",
+  "competitions.creditLineSpent": "credits spent",
   "competitions.entryBudget":
     "Credits are calculated separately for each entry.",
   "competitions.saved": "Saved",
@@ -134,6 +153,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.archive": "Archive",
   "competitions.clone": "Clone as a draft",
   "competitions.edit": "Edit competition",
+  "competitions.editRules": "Edit competition rules",
   "competitions.editDetails": "Edit competition details",
   "competitions.finishSetup": "Finish draft setup",
   "competitions.guidelines": "Guidelines",
@@ -171,6 +191,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.entryTitle": "Entry title",
   "competitions.entryContent": "Entry content",
   "competitions.terms": "I agree to this competition’s terms.",
+  "competitions.termsRequired": "Accept the competition’s terms to submit.",
   "competitions.delete": "Delete",
   "competitions.openEntry": "Open entry",
   "competitions.viewDrop": "View in shared chat",
@@ -198,6 +219,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.overlap":
     "Schedules may overlap. Parallel competitions have independent voting budgets.",
   "competitions.signIn": "Connect your wallet to participate.",
+  "competitions.connectWallet": "Connect Wallet",
   "competitions.withdrawn": "Withdrawn",
   "competitions.disqualified": "Disqualified",
   "competitions.winner": "Winner",
@@ -207,6 +229,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.notification.ended": "Competition ended",
   "competitions.notification.cancelled": "Competition cancelled",
   "competitions.notification.winners": "New competition results",
+  "competitions.notification.resultsFor": "Results are in for {competition}",
   "competitions.notification.paused": "Competition decisions paused",
   "competitions.notification.resumed": "Competition decisions resumed",
   "competitions.discardTitle": "Close with unsaved changes?",
@@ -238,6 +261,16 @@ export const COMPETITION_MESSAGES = {
   "competitions.rulesLabel.media": "Required media",
   "competitions.rulesLabel.metadata": "Required information",
   "competitions.rulesLabel.terms": "Terms",
+  "competitions.noApprovedEntries": "No drops approved yet",
+  "competitions.editThresholds": "Edit approval thresholds",
+  "competitions.thresholdHoldSeconds": "Threshold hold (seconds)",
+  "competitions.thresholdHoldHelp":
+    "Use 0 for immediate approval. The hold cannot exceed the approval window.",
+  "competitions.thresholdInvalid": "Enter a positive whole number.",
+  "competitions.thresholdHoldInvalid":
+    "Enter whole seconds, or leave blank for no hold.",
+  "competitions.thresholdHoldWindow":
+    "The hold cannot exceed the competition’s approval window.",
   "competitions.rulesLabel.threshold": "Winning threshold",
   "competitions.rulesLabel.hold": "Threshold hold",
   "competitions.rulesLabel.lock": "Voting time lock",

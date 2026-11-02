@@ -290,7 +290,7 @@ export default function HeaderSearchModalItem({
       onMouseEnter={() => onHover(true)}
       className={`${
         isSelected
-          ? "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-primary-400/30"
+          ? "tw-bg-iron-800 tw-ring-2 tw-ring-inset tw-ring-primary-400"
           : "desktop-hover:hover:tw-bg-iron-900"
       } tw-w-full tw-rounded-lg tw-transition tw-duration-150 tw-ease-out`}
     >

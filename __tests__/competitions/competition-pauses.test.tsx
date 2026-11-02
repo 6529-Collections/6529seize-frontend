@@ -13,7 +13,7 @@ const mockCompetition = {
   title: "Test competition",
   lifecycle: "PUBLISHED",
   config_version: 4,
-  permissions: { administer: true },
+  permissions: { administer: true, edit_rules_after_activity: false },
 };
 const mockQuery = {
   data: {
@@ -96,12 +96,26 @@ function setup(paused = false) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockCompetition.permissions.administer = true;
+  mockCompetition.permissions.edit_rules_after_activity = false;
   mockCompetition.config_version = 4;
   mockQuery.hasNextPage = false;
   jest
     .mocked(performCompetitionAction)
     .mockResolvedValue(mockCompetition as never);
   jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
+});
+it("offers the original rule editor only with the server permission", () => {
+  mockCompetition.permissions.edit_rules_after_activity = true;
+  const onEdit = jest.fn();
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin paused={false} onEdit={onEdit} />
+    </QueryClientProvider>
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit competition rules" })
+  );
+  expect(onEdit).toHaveBeenCalledTimes(1);
 });
 it("puts Pause outside Manage competition and requires a non-blank reason in its modal", async () => {
   setup();

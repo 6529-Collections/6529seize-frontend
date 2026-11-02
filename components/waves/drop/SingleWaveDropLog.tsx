@@ -24,7 +24,7 @@ interface VoteSummaryProps {
 }
 
 interface TimeStampProps {
-  readonly createdAt: Date | string | number;
+  readonly createdAt: Date | string | number | null;
   readonly iconClassName: string;
   readonly textClassName: string;
 }
@@ -73,6 +73,7 @@ const TimeStamp = ({
   iconClassName,
   textClassName,
 }: TimeStampProps) => {
+  if (createdAt === null) return null;
   let timestamp: number;
   if (typeof createdAt === "string") {
     timestamp = new Date(createdAt).getTime();

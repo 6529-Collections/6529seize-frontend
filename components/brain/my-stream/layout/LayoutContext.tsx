@@ -58,6 +58,9 @@ const NATIVE_KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
 
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING =
+  "var(--native-keyboard-layout-transition-easing, ease-out)";
+
 const formatCssLength = (value: number | string): string =>
   typeof value === "number" ? `${value}px` : value;
 
@@ -87,7 +90,7 @@ const calculateNativeKeyboardHeightStyle = (
   if (!shouldFollowKeyboard) return style;
   return {
     ...style,
-    transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+    transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}`,
   };
 };
 

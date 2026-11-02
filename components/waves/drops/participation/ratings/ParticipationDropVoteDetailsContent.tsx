@@ -273,7 +273,7 @@ export function ParticipationDropVoteDetailsContent({
               event.stopPropagation();
               onClose();
             }}
-            className="tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
+            className="tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
           >
             <XMarkIcon className="tw-size-4" />
           </button>

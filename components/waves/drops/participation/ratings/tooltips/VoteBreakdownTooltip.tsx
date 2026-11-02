@@ -85,7 +85,7 @@ export default function VoteBreakdownTooltip({
             <div className="tw-flex tw-items-center tw-gap-2">
               {pfp ? (
                 <Image
-                  src={pfp}
+                  src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
                   alt="Profile picture"
                   width={16}
                   height={16}

@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "@/styles/swiper.css";
+import "@/styles/wave-navigation-transition.css";
 //keep this last so that we can override the styles of the above css files
 import "@/styles/animations.css";
 import "@/styles/globals.css";
@@ -18,6 +19,7 @@ import VersionReloadScreen, {
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
+import { canServerRenderNftPurchasing } from "@/components/common/nftPurchasingRequest";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
@@ -43,6 +45,7 @@ import type { Viewport } from "next";
 import { cookies, headers } from "next/headers";
 import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
 import { getRequestOrigin } from "@/config/requestOrigin";
+import { getMediaResolverSource } from "@/lib/media/decentralized-media";
 import Script from "next/script";
 
 export const fetchCache = "force-no-store";
@@ -63,18 +66,29 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+  // Routes render per request by default. A page that exports
+  // `dynamic = "force-static"` is prerendered and sees empty cookies and
+  // headers here; the shell then resolves native iOS EULA state in the
+  // browser and uses the configured origin for the environment badge.
   const [cookieStore, requestHeaders] = await Promise.all([
     cookies(),
     headers(),
   ]);
-  const initialOrigin = getRequestOrigin(requestHeaders);
+  const initialOrigin = getRequestOrigin(
+    requestHeaders,
+    publicEnv.BASE_ENDPOINT
+  );
   const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
   const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
+  const serverRendersNftPurchasing = canServerRenderNftPurchasing({
+    hasNativeIosCookie: cookieStore.has(NATIVE_IOS_COOKIE),
+    userAgent: requestHeaders.get("user-agent"),
+  });
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
     // keyboard input arrives during startup. Keep that root-only mutation.
-    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="en-US" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
@@ -118,8 +132,10 @@ export default async function RootLayout({
         />
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
-        <link rel="preconnect" href="https://media.artblocks.io" />
-        <link rel="preconnect" href="https://media-proxy.artblocks.io" />
+        <link
+          rel="preconnect"
+          href={getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT)}
+        />
         {isUsingStaticAssets && (
           <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
         )}
@@ -134,6 +150,7 @@ export default async function RootLayout({
             <Providers
               initialIsIos={initialIsIos}
               initialEulaConsentVersion={initialEulaConsentVersion}
+              canServerRenderNftPurchasing={serverRendersNftPurchasing}
             >
               <DynamicHeadTitle />
               <LayoutWrapper>{children}</LayoutWrapper>

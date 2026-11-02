@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryObserver } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   competitionQueryKey,
@@ -58,11 +58,13 @@ describe("explicit competition transport", () => {
         "entries",
       ],
       [QueryKey.DROPS, { waveId: "wave" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "wave", sort: "RANK" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "elsewhere", sort: "RANK" }],
     ];
     keys.forEach((key) => client.setQueryData(key, { value: true }));
     await invalidateCompetition(client, identity);
     expect(keys.map((key) => client.getQueryState(key)?.isInvalidated)).toEqual(
-      [true, true, false, true, false]
+      [true, true, false, true, false, true, false]
     );
   });
   it("resolves an active decision pause beyond the first history page", async () => {
@@ -117,6 +119,42 @@ describe("explicit competition transport", () => {
     expect(keys.map((key) => client.getQueryState(key)?.isInvalidated)).toEqual(
       [true, true, true, true, true, true, true, false, false, false]
     );
+  });
+  it("refetches each active leaderboard sort once without fetching inactive sorts or other waves", async () => {
+    const client = new QueryClient();
+    const keys = [
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "wave", sort: "RANK" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "wave", sort: "CREATED_AT" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "wave", sort: "TREND" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "elsewhere", sort: "RANK" }],
+    ];
+    const queries = keys.map((queryKey) => ({
+      queryKey,
+      queryFn: jest.fn(async () => ({ value: "fresh" })),
+    }));
+    const unsubscribe = queries.flatMap(({ queryKey, queryFn }, index) => {
+      client.setQueryData(queryKey, { value: "cached" });
+      client.setQueryDefaults(queryKey, { queryFn });
+      // The third sort exists only in cache; all others have mounted observers.
+      if (index === 2) return [];
+      const observer = new QueryObserver(client, {
+        queryKey,
+        queryFn,
+        staleTime: Infinity,
+      });
+      return [observer.subscribe(() => {})];
+    });
+    try {
+      await invalidateCompetitionWave(client, "wave");
+      expect(queries.map(({ queryFn }) => queryFn.mock.calls.length)).toEqual([
+        1, 1, 0, 0,
+      ]);
+      expect(client.getQueryState(keys[2]!)?.isInvalidated).toBe(true);
+      expect(client.getQueryState(keys[3]!)?.isInvalidated).toBe(false);
+    } finally {
+      unsubscribe.forEach((stop) => stop());
+      client.clear();
+    }
   });
   it("does not report unpaused when pause history cannot be resolved", async () => {
     jest

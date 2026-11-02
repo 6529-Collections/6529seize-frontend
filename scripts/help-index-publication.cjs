@@ -1,8 +1,4 @@
-const {
-  getPublishedReviewIds,
-} = require("./package-public-review-artifacts.cjs");
-
-// Keep this build-time allowlist aligned with config/publicReviews.ts.
+// Keep this build-time host mapping aligned with the deployed environments.
 function getPublicationEnvironment(baseEndpoint) {
   try {
     const hostname = new URL(baseEndpoint).hostname.toLowerCase();
@@ -18,40 +14,17 @@ function getPublicationEnvironment(baseEndpoint) {
   return "production";
 }
 
-function isHelpRecordPublished(
-  record,
-  publicationEnvironment,
-  publishedReviewIds
-) {
+function isHelpRecordPublished(record, publicationEnvironment) {
   return (
-    (record.environments === undefined ||
-      record.environments.includes(publicationEnvironment)) &&
-    (record.public_review_id === undefined ||
-      publishedReviewIds.has(record.public_review_id))
+    record.environments === undefined ||
+    record.environments.includes(publicationEnvironment)
   );
 }
 
-function getPublishedHelpRecords({
-  records,
-  publicationEnvironment,
-  repoRoot,
-}) {
-  const publishedReviewIds = getPublishedReviewIds(repoRoot);
+function getPublishedHelpRecords({ records, publicationEnvironment }) {
   return records
-    .filter((record) =>
-      isHelpRecordPublished(
-        record,
-        publicationEnvironment,
-        publishedReviewIds
-      )
-    )
-    .map(
-      ({
-        environments: _environments,
-        public_review_id: _publicReviewId,
-        ...record
-      }) => record
-    );
+    .filter((record) => isHelpRecordPublished(record, publicationEnvironment))
+    .map(({ environments: _environments, ...record }) => record);
 }
 
 module.exports = {

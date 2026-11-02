@@ -35,8 +35,10 @@ performance-tracking behavior tied to that choice.
    `policies/country-check`.
 3. If the visitor is in the EU and both consent cookies are still missing, the
    banner stays visible until the user picks an option.
-4. If the visitor is outside the EU, the app stores both consent cookies as
-   `true` for 7 days and skips the banner.
+4. If the visitor is outside the EU, the banner is skipped. When no
+   performance choice is stored yet, the app stores both consent cookies as
+   `true` for 7 days. A stored accept or reject is never replaced by this
+   default.
 5. `Accept` records consent, stores both cookies as `true` for 365 days, and
    closes the banner.
 6. `Reject Non-Essential` keeps essential cookies enabled, stores performance
@@ -44,7 +46,12 @@ performance-tracking behavior tied to that choice.
    preferences updated`.
 7. When performance consent is `true`, the site enables performance analytics.
    Current production behavior includes Google tag loading and Mixpanel
-   page-view tracking.
+   page-view tracking. The Google tag is kept out of first load: it starts
+   loading once the page has finished loading and the browser is idle, at the
+   visitor's first tap, click, key press or mouse-wheel scroll, or 10 seconds
+   after the consent decision, whichever comes first. Its first page view
+   still reports the page the visitor was on when consent was decided, and a
+   page change made before the tag was ready gets its own page view.
 8. When a connected profile exists in a consented session, Mixpanel can
    identify the session with that profile ID.
 9. If the connected profile is later cleared while performance consent stays
@@ -59,8 +66,12 @@ performance-tracking behavior tied to that choice.
   until the user accepts.
 - First non-EU visit: the banner is skipped and performance analytics are
   enabled automatically.
-- Returning visitor with `performance-cookies-consent=false`: the banner stays
-  hidden and performance analytics stay disabled.
+- Returning visitor with `performance-cookies-consent=false`, in or outside
+  the EU: the banner stays hidden, the rejection is kept, and performance
+  analytics stay disabled.
+- Returning non-EU visitor with a stored acceptance: the acceptance is kept
+  with its original expiry. The 7-day default is not extended by later visits;
+  once it expires, the next non-EU visit applies it again.
 - `/about/cookie-policy` reuses the same accept/reject flows to enable or
   disable performance cookies after the initial choice.
 - A connected user who has granted performance consent can be tracked across
@@ -83,8 +94,18 @@ performance-tracking behavior tied to that choice.
 - Clearing the connected profile after analytics identification resets the
   identified analytics session without turning off page-view tracking for the
   consented browser session.
+- Turning performance consent off before the Google tag has started loading
+  cancels the load. Once the tag has loaded, it stays loaded until the page is
+  reloaded.
+- A visit that ends before the Google tag starts loading is not recorded by
+  Google Analytics.
 - Browser cookie clearing can cause the country check and consent flow to run
   again on the next visit.
+- After a completed country check the app also stores a layout-only marker in
+  browser local storage (`6529:us-country-hint`, set when the country was US and
+  removed for any other answer). It only lets the iOS app keep blank space for
+  the Memes subscription row during the next check; it never enables
+  purchasing UI, and the app works without it when storage is unavailable.
 
 ## Failure and Recovery
 
@@ -107,6 +128,10 @@ performance-tracking behavior tied to that choice.
   the detailed policy page.
 - Mixpanel tracking only runs on production deployments that have a public
   Mixpanel token configured.
+- The Mixpanel SDK is not part of the initial page download. The browser
+  fetches it only after performance consent is `true`, so visitors without
+  that consent never download it. Page-view and profile identification resume
+  as soon as it arrives.
 - This page covers performance-consent behavior only. Other country-based UI
   rules that reuse the consent country are documented by their owning features.
 

@@ -18,6 +18,10 @@ export class ApiCompleteAttachmentMultipartUploadRequest {
     'attachment_id': string;
     'upload_id': string;
     'key': string;
+    /**
+    * Optional base64 JPEG captured on the device for a drop video, without a data URL prefix. Maximum decoded size 128 KiB and dimensions 640 by 640. Validated and stored before video upload completion; invalid or unavailable posters fall back to backend generation. Ignored for other media.
+    */
+    'video_poster_base64'?: string;
     'parts': Array<ApiCompleteMultipartUploadRequestPart>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -40,6 +44,12 @@ export class ApiCompleteAttachmentMultipartUploadRequest {
         {
             "name": "key",
             "baseName": "key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "video_poster_base64",
+            "baseName": "video_poster_base64",
             "type": "string",
             "format": ""
         },

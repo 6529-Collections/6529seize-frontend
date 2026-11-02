@@ -2,39 +2,34 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 
-jest.mock("@headlessui/react", () => {
-  const Dialog = ({ children, className }: any) => (
-    <div data-testid="dialog" className={className}>
-      {children}
-    </div>
-  );
-  const DialogPanel = ({ children, className }: any) => (
-    <div data-testid="dialog-panel" className={className}>
-      {children}
-    </div>
-  );
-  const DialogTitle = ({ children, className }: any) => (
-    <div className={className}>{children}</div>
-  );
-  const Transition = ({ show, children }: any) =>
-    show ? <div data-testid="root">{children}</div> : null;
-  const TransitionChild = ({ children, afterLeave }: any) => (
-    <div
-      data-testid={afterLeave ? "transition-after-leave" : undefined}
-      onClick={afterLeave}
-    >
-      {children}
-    </div>
-  );
-
-  return {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    Transition,
-    TransitionChild,
-  };
-});
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: ({
+    isOpen,
+    onClose,
+    onAfterLeave,
+    title,
+    closeLabel,
+    zIndexClassName,
+    children,
+  }: {
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+    readonly onAfterLeave?: () => void;
+    readonly title?: string;
+    readonly closeLabel: string;
+    readonly zIndexClassName: string;
+    readonly children: React.ReactNode;
+  }) =>
+    isOpen ? (
+      <div data-testid="dialog" className={zIndexClassName}>
+        {title}
+        <button onClick={onClose} aria-label={closeLabel} />
+        <button data-testid="transition-after-leave" onClick={onAfterLeave} />
+        {children}
+      </div>
+    ) : null,
+}));
 
 describe("CommonDropdownItemsMobileWrapper", () => {
   it("uses the default z-index class when none is provided", () => {

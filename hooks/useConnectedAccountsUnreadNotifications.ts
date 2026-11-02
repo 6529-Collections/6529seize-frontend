@@ -1,13 +1,12 @@
 "use client";
 
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useQueries, type UseQueryResult } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getQueryErrorStatus,
   isTerminalNotificationAuthQueryError,
-  shouldStopPollingRetry,
+  shouldRetryQuery,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import {
@@ -16,32 +15,26 @@ import {
 } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { commonApiFetch } from "@/services/api/common-api";
-import useCapacitor from "./useCapacitor";
+import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
+import {
+  getUnreadNotificationsRefetchInterval,
+  isProfileCoveredByNotificationSocket,
+} from "@/services/notifications/unread-notifications-polling";
 
 type ConnectedAccountUnreadCounts = Readonly<Record<string, number>>;
 
-const POLL_INTERVAL_MS = 15000;
-const REALTIME_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
-
 const toAddressKey = (address: string): string => address.toLowerCase();
-const toAccountAuthKey = (address: string): string =>
-  getAuthTokenFingerprint(toAddressKey(address));
-
-type TerminalConnectedAccountAuthFailure = {
-  readonly accountAuthKey: string;
-  readonly jwtFingerprint: string;
-};
 
 type ConnectedAccountTerminalAuthPollingError = Error & {
   readonly status: number;
   readonly terminalNotificationAuth: true;
-  readonly terminalAuthFailures: readonly TerminalConnectedAccountAuthFailure[];
+  readonly jwtFingerprint: string;
   readonly cause?: unknown;
 };
 
 const createConnectedAccountTerminalAuthPollingError = (
-  terminalAuthFailures: readonly TerminalConnectedAccountAuthFailure[],
+  jwtFingerprint: string,
   status: number,
   cause?: unknown
 ): ConnectedAccountTerminalAuthPollingError => {
@@ -56,9 +49,9 @@ const createConnectedAccountTerminalAuthPollingError = (
     value: true,
     enumerable: true,
   });
-  // Keep account/token fingerprints away from generic error serializers.
-  Object.defineProperty(error, "terminalAuthFailures", {
-    value: terminalAuthFailures,
+  // Keep token fingerprints away from generic error serializers.
+  Object.defineProperty(error, "jwtFingerprint", {
+    value: jwtFingerprint,
     enumerable: false,
   });
   if (cause !== undefined) {
@@ -70,29 +63,17 @@ const createConnectedAccountTerminalAuthPollingError = (
   return error;
 };
 
-const getTerminalAuthFailuresFromError = (
-  error: unknown
-): readonly TerminalConnectedAccountAuthFailure[] => {
-  if (!isTerminalNotificationAuthQueryError(error)) {
-    return [];
+const getTerminalJwtFingerprint = (error: unknown): string | null => {
+  if (
+    !isTerminalNotificationAuthQueryError(error) ||
+    typeof error !== "object" ||
+    error === null
+  ) {
+    return null;
   }
-  if (typeof error !== "object" || error === null) {
-    return [];
-  }
-
-  const failures = (error as { readonly terminalAuthFailures?: unknown })
-    .terminalAuthFailures;
-  return Array.isArray(failures)
-    ? failures.filter(
-        (failure): failure is TerminalConnectedAccountAuthFailure =>
-          typeof failure === "object" &&
-          failure !== null &&
-          typeof (failure as TerminalConnectedAccountAuthFailure)
-            .accountAuthKey === "string" &&
-          typeof (failure as TerminalConnectedAccountAuthFailure)
-            .jwtFingerprint === "string"
-      )
-    : [];
+  const jwtFingerprint = (error as { readonly jwtFingerprint?: unknown })
+    .jwtFingerprint;
+  return typeof jwtFingerprint === "string" ? jwtFingerprint : null;
 };
 
 const clampUnreadCount = (count: number | null | undefined): number => {
@@ -103,20 +84,12 @@ const clampUnreadCount = (count: number | null | undefined): number => {
 };
 
 const fetchUnreadCountForAccount = async (
-  account: ConnectedWalletAccount,
+  jwt: string,
   signal: AbortSignal
 ): Promise<number> => {
-  if (!account.jwt) {
-    return 0;
-  }
-  const accountAuthKey = toAccountAuthKey(account.address);
-  const jwtFingerprint = getAuthTokenFingerprint(account.jwt);
-
-  if (!isAuthJwtUsable(account.jwt)) {
-    throw createConnectedAccountTerminalAuthPollingError(
-      [{ accountAuthKey, jwtFingerprint }],
-      401
-    );
+  const jwtFingerprint = getAuthTokenFingerprint(jwt);
+  if (!isAuthJwtUsable(jwt)) {
+    throw createConnectedAccountTerminalAuthPollingError(jwtFingerprint, 401);
   }
 
   try {
@@ -124,12 +97,10 @@ const fetchUnreadCountForAccount = async (
       endpoint: "v2/notifications",
       params: {
         limit: "1",
-        ...(isMultiCompetitionEnabled()
-          ? { include_competitions: "true" }
-          : {}),
+        include_competitions: "true",
       },
       headers: {
-        Authorization: `Bearer ${account.jwt}`,
+        Authorization: `Bearer ${jwt}`,
       },
       cache: "no-store",
       errorMode: "structured",
@@ -139,7 +110,7 @@ const fetchUnreadCountForAccount = async (
   } catch (error) {
     if (isTerminalNotificationAuthQueryError(error)) {
       throw createConnectedAccountTerminalAuthPollingError(
-        [{ accountAuthKey, jwtFingerprint }],
+        jwtFingerprint,
         getQueryErrorStatus(error) ?? 401,
         error
       );
@@ -148,166 +119,97 @@ const fetchUnreadCountForAccount = async (
   }
 };
 
+/**
+ * One query per connected account, so each account keeps its own cache entry,
+ * request, error and poll cadence: an account the socket does not cover, or a
+ * change to the account list, no longer refetches every other account.
+ */
 export function useConnectedAccountsUnreadNotifications(
   accounts: readonly ConnectedWalletAccount[]
 ): ConnectedAccountUnreadCounts {
-  const { isCapacitor } = useCapacitor();
+  const isMobileEnvironment = useMobileBatterySavings();
   const notificationRealtimeState = useNotificationRealtimeState();
-  const queryClient = useQueryClient();
   const [terminalJwtFingerprintByAccount, setTerminalJwtFingerprintByAccount] =
     useState<Readonly<Record<string, string>>>({});
   const pollableAccounts = useMemo(
     () =>
-      accounts.filter((account) => {
+      accounts.flatMap((account) => {
         const jwt = account.jwt;
         if (typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
-          return false;
+          return [];
         }
 
-        return (
-          terminalJwtFingerprintByAccount[toAccountAuthKey(account.address)] !==
+        const addressKey = toAddressKey(account.address);
+        return terminalJwtFingerprintByAccount[addressKey] ===
           getAuthTokenFingerprint(jwt)
-        );
+          ? []
+          : [{ addressKey, jwt, profileId: account.profileId }];
       }),
     [accounts, terminalJwtFingerprintByAccount]
   );
-  const queryKey = [
-    QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-    "connected-account-unread-counts",
-    isMultiCompetitionEnabled() ? "v2-native-competitions" : "v2",
-    pollableAccounts.map((account) => toAddressKey(account.address)),
-  ] as const;
-  const isRealtimeCovered =
-    notificationRealtimeState.connected &&
-    pollableAccounts.every(
-      (account) =>
-        !!account.profileId &&
-        notificationRealtimeState.syncedProfileIds.includes(account.profileId)
-    );
+  const responseVersion = "v2-native-competitions";
 
-  const { data } = useQuery<ConnectedAccountUnreadCounts>({
-    queryKey,
-    queryFn: async ({ signal }) => {
-      if (pollableAccounts.length === 0) {
-        return {};
-      }
-
-      const previousCounts =
-        queryClient.getQueryData<ConnectedAccountUnreadCounts>(queryKey) ?? {};
-      const results = await Promise.allSettled(
-        pollableAccounts.map((account) =>
-          fetchUnreadCountForAccount(account, signal)
-        )
+  const blockAccountUntilNewToken = useCallback(
+    (addressKey: string, jwtFingerprint: string) => {
+      setTerminalJwtFingerprintByAccount((previous) =>
+        previous[addressKey] === jwtFingerprint
+          ? previous
+          : { ...previous, [addressKey]: jwtFingerprint }
       );
-      const nextCounts: Record<string, number> = {};
-      const terminalAuthFailures: {
-        readonly accountAuthKey: string;
-        readonly jwtFingerprint: string;
-        readonly status: number;
-        readonly error: unknown;
-      }[] = [];
+    },
+    []
+  );
 
-      pollableAccounts.forEach((account, index) => {
-        const addressKey = toAddressKey(account.address);
-        const result = results[index];
-
-        if (!result) {
-          const previousCount = previousCounts[addressKey];
-          if (typeof previousCount === "number") {
-            nextCounts[addressKey] = previousCount;
-          }
-          return;
-        }
-
-        if (result.status === "fulfilled") {
-          nextCounts[addressKey] = result.value;
-          return;
-        }
-
-        if (
-          account.jwt &&
-          isTerminalNotificationAuthQueryError(result.reason)
-        ) {
-          const nestedTerminalAuthFailures = getTerminalAuthFailuresFromError(
-            result.reason
-          );
-          if (nestedTerminalAuthFailures.length > 0) {
-            nestedTerminalAuthFailures.forEach((failure) => {
-              terminalAuthFailures.push({
-                ...failure,
-                status: getQueryErrorStatus(result.reason) ?? 401,
-                error: result.reason,
-              });
-            });
-            return;
-          }
-
-          terminalAuthFailures.push({
-            accountAuthKey: toAccountAuthKey(account.address),
-            jwtFingerprint: getAuthTokenFingerprint(account.jwt),
-            status: getQueryErrorStatus(result.reason) ?? 401,
-            error: result.reason,
-          });
-          return;
-        }
-
-        const previousCount = previousCounts[addressKey];
-        if (typeof previousCount === "number") {
-          nextCounts[addressKey] = previousCount;
+  const combineUnreadCounts = useCallback(
+    (
+      results: readonly UseQueryResult<number>[]
+    ): ConnectedAccountUnreadCounts => {
+      const counts: Record<string, number> = {};
+      results.forEach((result, index) => {
+        const addressKey = pollableAccounts[index]?.addressKey;
+        if (addressKey !== undefined && typeof result.data === "number") {
+          counts[addressKey] = result.data;
         }
       });
-
-      const firstTerminalAuthFailure = terminalAuthFailures[0];
-      if (firstTerminalAuthFailure) {
-        throw createConnectedAccountTerminalAuthPollingError(
-          terminalAuthFailures.map(({ accountAuthKey, jwtFingerprint }) => ({
-            accountAuthKey,
-            jwtFingerprint,
-          })),
-          firstTerminalAuthFailure.status,
-          firstTerminalAuthFailure.error
-        );
-      }
-
-      return nextCounts;
+      return counts;
     },
-    enabled: pollableAccounts.length > 0,
-    refetchInterval: isRealtimeCovered
-      ? REALTIME_RECONCILIATION_INTERVAL_MS
-      : POLL_INTERVAL_MS,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-    refetchIntervalInBackground: !isCapacitor,
-    retry: (failureCount: number, error: unknown) => {
-      const terminalAuthFailures = getTerminalAuthFailuresFromError(error);
-      if (terminalAuthFailures.length > 0) {
-        setTerminalJwtFingerprintByAccount((previous) => {
-          let didChange = false;
-          const next = { ...previous };
-          for (const failure of terminalAuthFailures) {
-            if (next[failure.accountAuthKey] !== failure.jwtFingerprint) {
-              next[failure.accountAuthKey] = failure.jwtFingerprint;
-              didChange = true;
-            }
+    [pollableAccounts]
+  );
+
+  return useQueries({
+    queries: pollableAccounts.map(({ addressKey, jwt, profileId }) => {
+      const isRealtimeCovered = isProfileCoveredByNotificationSocket(
+        notificationRealtimeState,
+        profileId
+      );
+      return {
+        queryKey: [
+          QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
+          { account: addressKey, version: responseVersion },
+        ],
+        queryFn: ({ signal }: { readonly signal: AbortSignal }) =>
+          fetchUnreadCountForAccount(jwt, signal),
+        refetchInterval: (query: {
+          readonly state: { readonly error: unknown };
+        }) => getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        refetchIntervalInBackground: !isMobileEnvironment,
+        retry: (failureCount: number, error: unknown) => {
+          const terminalJwtFingerprint = getTerminalJwtFingerprint(error);
+          if (terminalJwtFingerprint !== null) {
+            blockAccountUntilNewToken(addressKey, terminalJwtFingerprint);
+            return false;
           }
-          return didChange ? next : previous;
-        });
-        return false;
-      }
-      if (isTerminalNotificationAuthQueryError(error)) {
-        return false;
-      }
-      if (shouldStopPollingRetry(error)) {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
-    retryDelay: (failureCount: number) => {
-      return failureCount * 1000;
-    },
+          return (
+            !isTerminalNotificationAuthQueryError(error) &&
+            shouldRetryQuery(failureCount, error)
+          );
+        },
+        retryDelay: (failureCount: number) => failureCount * 1000,
+      };
+    }),
+    combine: combineUnreadCounts,
   });
-
-  return data ?? {};
 }

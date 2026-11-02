@@ -126,7 +126,9 @@ export default function XtdhReceivedSection({
         />
       ) : (
         <>
-          {(collections.length > 0 || searchTerm) && (
+          {((isEnabled && isLoading) ||
+            collections.length > 0 ||
+            searchTerm) && (
             <XtdhCollectionsControls
               activeSortField={activeSortField}
               activeSortDirection={activeSortDirection}

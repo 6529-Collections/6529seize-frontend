@@ -3,7 +3,7 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { WaveMessages } from "@/contexts/wave/hooks/types";
 import type { Listener as WaveMessagesListener } from "@/contexts/wave/hooks/useWaveMessagesStore";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useCallback, useEffect, useState } from "react";
 import { getLatestEditableChatDrop } from "../utils/getLatestEditableChatDrop";
 
@@ -63,7 +63,7 @@ export function useLatestEditableChatDropTarget({
   readonly connectedProfile: ConnectedProfile;
   readonly isProxyMode: boolean;
 }): LatestEditableChatDropTarget | null {
-  const { waveMessagesStore } = useMyStream();
+  const { waveMessagesStore } = useMyStreamActions();
   const { getData, subscribe, unsubscribe } = waveMessagesStore;
   const connectedProfileId = connectedProfile?.id ?? null;
   const connectedProfileHandle = connectedProfile?.handle ?? null;

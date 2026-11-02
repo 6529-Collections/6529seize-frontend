@@ -1,5 +1,5 @@
-import { Fragment, useCallback } from "react";
-import { MenuHeading, MenuItem, MenuSection } from "@headlessui/react";
+import { useCallback } from "react";
+import { MenuHeading, MenuSection } from "@headlessui/react";
 import clsx from "clsx";
 import type { CompactMenuActionItem, CompactMenuProps } from "../types";
 import { CompactMenuItemButton } from "./CompactMenuItemButton";
@@ -82,21 +82,17 @@ export function CompactMenuItemsPanel({
         const isActive = item.active ?? activeItemId === item.id;
 
         return (
-          <MenuItem key={item.id} as={Fragment} disabled={!!item.disabled}>
-            {({ focus }) => (
-              <CompactMenuItemButton
-                item={item}
-                isActive={isActive}
-                menuActive={focus}
-                onClick={() => handleItemClick(item)}
-                itemClassName={itemClassName}
-                activeItemClassName={activeItemClassName}
-                inactiveItemClassName={inactiveItemClassName}
-                focusItemClassName={focusItemClassName}
-                unstyledItems={unstyledItems}
-              />
-            )}
-          </MenuItem>
+          <CompactMenuItemButton
+            key={item.id}
+            item={item}
+            isActive={isActive}
+            onClick={() => handleItemClick(item)}
+            itemClassName={itemClassName}
+            activeItemClassName={activeItemClassName}
+            inactiveItemClassName={inactiveItemClassName}
+            focusItemClassName={focusItemClassName}
+            unstyledItems={unstyledItems}
+          />
         );
       })}
     </div>

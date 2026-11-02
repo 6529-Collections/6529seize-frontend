@@ -4,8 +4,20 @@ import {
   getCompetitionIdFromPathname,
   isCompetitionPathname,
 } from "@/helpers/competition.helpers";
-import { getWavePathRoute } from "@/helpers/navigation.helpers";
+import {
+  getWavePathRoute,
+  getWaveIdFromPathname,
+} from "@/helpers/navigation.helpers";
 import { MyStreamWaveTab } from "@/types/waves.types";
+
+export function getSharedWaveTabRoute(pathname: string, tab: MyStreamWaveTab) {
+  const waveId = getWaveIdFromPathname(pathname);
+  if (!waveId) return null;
+  const params = new URLSearchParams({ tab: tab.toLowerCase() });
+  const competitionId = getCompetitionIdFromPathname(pathname);
+  if (competitionId) params.set("competition", competitionId);
+  return `${getWavePathRoute(waveId)}?${params}`;
+}
 
 export const waveCompetitionTabs: Partial<Record<MyStreamWaveTab, string>> = {
   [MyStreamWaveTab.LEADERBOARD]: "leaderboard",

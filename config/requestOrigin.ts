@@ -1,7 +1,14 @@
-import { PRODUCTION_APP_ORIGIN } from "./appEnvironment";
+import { getConfiguredAppOrigin } from "./appEnvironment";
 
-/** Presentation only: never use this request-derived origin for authorization. */
-export function getRequestOrigin(headers: Pick<Headers, "get">): string {
+/**
+ * Presentation only: never use this request-derived origin for authorization.
+ * Prerendered pages (`dynamic = "force-static"`) receive empty request headers
+ * and use the deployment's configured base URL instead.
+ */
+export function getRequestOrigin(
+  headers: Pick<Headers, "get">,
+  configuredBaseUrl: string
+): string {
   const forwardedProtocol = headers
     .get("x-forwarded-proto")
     ?.split(",")[0]
@@ -17,5 +24,5 @@ export function getRequestOrigin(headers: Pick<Headers, "get">): string {
       // An invalid forwarded host may still have a usable Host header.
     }
   }
-  return PRODUCTION_APP_ORIGIN;
+  return getConfiguredAppOrigin(configuredBaseUrl);
 }

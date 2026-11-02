@@ -3,6 +3,8 @@
 ## Overview
 
 Use the touch drop menu to run drop actions without leaving the thread.
+If the keyboard is open, the actions sheet slides into its resting position
+while the keyboard closes. Reaction search still stays above the keyboard.
 
 ## Location in the Site
 
@@ -41,6 +43,9 @@ actions` in the drop header.
 - Hybrid touchscreen desktops/laptops use desktop drop action controls when
   their browser reports hover support.
 - If a chat drop is in edit mode, touch-menu entry is blocked for that drop.
+  Press and hold inside the editor to position the cursor, select text, or paste
+  without closing the editor or losing unsaved changes. This also applies to
+  direct messages and the active part of a storm drop.
 
 ## What the Menu Can Show
 

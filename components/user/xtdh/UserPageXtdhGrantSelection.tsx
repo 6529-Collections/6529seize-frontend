@@ -16,6 +16,7 @@ export default function UserPageXtdhGrantSelection({
   return (
     <NftPicker
       variant="flat"
+      className="[&_input]:tw-text-[16px] [&_input]:tw-font-normal [&_input]:tw-text-iron-100 [&_textarea]:tw-text-[16px] [&_textarea]:tw-font-normal md:desktop-hover:[&_input]:tw-text-[14px] md:desktop-hover:[&_textarea]:tw-text-[14px]"
       onChange={onSelectionChange}
       onContractChange={onContractChange}
       allowRanges

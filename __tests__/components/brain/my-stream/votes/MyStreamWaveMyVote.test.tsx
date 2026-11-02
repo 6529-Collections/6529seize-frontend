@@ -1,6 +1,12 @@
 import MyStreamWaveMyVote from "@/components/brain/my-stream/votes/MyStreamWaveMyVote";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const mockMediaDisplay = jest.fn();
 const mockIsCurationWave = jest.fn(() => false);
@@ -149,6 +155,37 @@ describe("MyStreamWaveMyVote", () => {
     fireEvent.click(bob);
     expect(onToggleCheck).not.toHaveBeenCalled();
     expect(onDropClick).not.toHaveBeenCalled();
+  });
+
+  it("requests AUTOx50 derivatives for the author and voter avatars", () => {
+    const voter = {
+      profile: {
+        id: "bob",
+        handle: "bob",
+        primary_address: "address-bob",
+        pfp: CDN_AVATAR_URL,
+      },
+      rating: 10,
+    };
+    const { container } = render(
+      <MyStreamWaveMyVote
+        drop={{
+          ...drop,
+          author: { ...drop.author, pfp: CDN_AVATAR_URL },
+          top_raters: [voter],
+        }}
+        onDropClick={jest.fn()}
+        onToggleCheck={jest.fn()}
+      />
+    );
+    const avatarSources = Array.from(
+      container.querySelectorAll("img"),
+      getRequestedImageSrc
+    );
+    expect(avatarSources).toEqual([
+      expect.stringContaining(scaledAvatarPath(ImageScale.W_AUTO_H_50)),
+      expect.stringContaining(scaledAvatarPath(ImageScale.W_AUTO_H_50)),
+    ]);
   });
 
   it("does not toggle or open the row when text is selected", () => {

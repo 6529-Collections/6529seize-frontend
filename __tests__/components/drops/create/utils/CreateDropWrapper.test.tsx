@@ -4,12 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateDropWrapper, {
   type CreateDropWrapperHandles,
 } from "@/components/drops/create/utils/CreateDropWrapper";
-import { WalletValidationError } from "@/errors/wallet";
 import {
   CreateDropType,
   CreateDropViewType,
 } from "@/components/drops/create/types";
 import type { CreateDropConfig } from "@/entities/IDrop";
+import { getWaveQueryKey } from "@/services/api/wave-query";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 
 // Mock the SeizeConnectContext
 const mockUseSeizeConnectContext = jest.fn();
@@ -64,7 +65,7 @@ jest.mock(
 
 // Mock components
 jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
-  return React.forwardRef((props: any, ref: any) => {
+  return React.forwardRef(function MockCompact(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({
       clearEditorState: jest.fn(),
     }));
@@ -104,7 +105,7 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
 });
 
 jest.mock("@/components/drops/create/full/CreateDropFull", () => {
-  return React.forwardRef((props: any, ref: any) => {
+  return React.forwardRef(function MockFull(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({
       clearEditorState: jest.fn(),
     }));
@@ -151,7 +152,13 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
 });
 
 jest.mock("@/components/utils/animation/CommonAnimationHeight", () => {
-  return ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  return function MockAnimationHeight({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return <div>{children}</div>;
+  };
 });
 
 describe("CreateDropWrapper Authentication Validation", () => {
@@ -227,6 +234,38 @@ describe("CreateDropWrapper Authentication Validation", () => {
       </QueryClientProvider>
     );
   };
+
+  it("preserves an HTTP access rejection from the composer metadata read in the shared wave cache", async () => {
+    mockUseSeizeConnectContext.mockReturnValue({
+      isAuthenticated: true,
+      address: "0x1234567890123456789012345678901234567890",
+      isSafeWallet: false,
+    });
+    const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      headers: new Headers(),
+      text: async () => JSON.stringify({ message: "Wave access denied" }),
+    } as Response);
+    try {
+      renderComponent({
+        wave: { id: "composer-wave" },
+        waveId: "composer-wave",
+      });
+      const key = getWaveQueryKey("composer-wave");
+      await waitFor(() =>
+        expect(queryClient.getQueryState(key)?.status).toBe("error")
+      );
+      expect(
+        getStructuredApiErrorStatus(queryClient.getQueryState(key)?.error)
+      ).toBe(403);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      fetchSpy.mockRestore();
+      queryClient.clear();
+    }
+  });
 
   describe("Authentication validation - fail-fast behavior", () => {
     it("throws when wallet is not authenticated", () => {

@@ -8,7 +8,8 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { AuthContext } from "@/components/auth/Auth";
+import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   commonApiDeleteWithBody,
@@ -35,6 +36,65 @@ describe("UserFollowBtn", () => {
     jest.clearAllMocks();
     commonApiPostMock.mockResolvedValue(undefined);
     commonApiDeleteWithBodyMock.mockResolvedValue(undefined);
+  });
+
+  it("isolates follow status when the authenticated identity or acting-as role changes", () => {
+    useQueryMock.mockReturnValue({ data: { actions: [] }, isFetching: false });
+    const queryClient = new QueryClient();
+    const viewer = (
+      identityId: string,
+      proxyId: string | null,
+      authenticated = true,
+      direct = true
+    ) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: identityId },
+            activeProfileProxy: proxyId ? { id: proxyId } : null,
+            isAuthenticated: authenticated,
+            isDirectProfileSession: direct,
+          } as AuthContextType
+        }
+      >
+        <UserFollowBtn handle="bob" showMuteButton={false} />
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(viewer("alice", null), {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
+    });
+    const expectViewerKey = (
+      identityId: string,
+      proxyId: string | null,
+      isAuthenticated = true,
+      isDirectProfileSession = true
+    ) => {
+      expect(useQueryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryKey: [
+            QueryKey.IDENTITY_FOLLOWING_ACTIONS,
+            "bob",
+            {
+              identityId,
+              proxyId,
+              isAuthenticated,
+              isDirectProfileSession,
+            },
+          ],
+        })
+      );
+    };
+    expectViewerKey("alice", null);
+    rerender(viewer("carol", null));
+    expectViewerKey("carol", null);
+    rerender(viewer("carol", "proxy", true, false));
+    expectViewerKey("carol", "proxy", true, false);
+    rerender(viewer("carol", null, false, false));
+    expectViewerKey("carol", null, false, false);
   });
 
   function setup({
@@ -221,8 +281,8 @@ describe("UserFollowBtn", () => {
 
     expect(dmButton).toHaveClass(
       "tw-size-8",
-      "tw-bg-iron-800",
-      "tw-ring-iron-700"
+      "tw-bg-iron-900",
+      "tw-ring-white/5"
     );
     expect(dmButton).not.toHaveClass("tw-min-w-[4rem]");
     expect(dmButton.querySelector("svg")).toHaveClass("tw-size-3");
@@ -243,8 +303,8 @@ describe("UserFollowBtn", () => {
 
     expect(dmButton).toHaveClass(
       "tw-size-9",
-      "tw-bg-iron-800",
-      "tw-ring-iron-700"
+      "tw-bg-iron-900",
+      "tw-ring-white/5"
     );
     expect(dmButton).not.toHaveClass("md:tw-size-10");
     expect(dmButton).not.toHaveClass("tw-min-w-[4.75rem]");

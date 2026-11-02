@@ -49,7 +49,7 @@ export default function UserPageBrainSidebarCreated({
     <section aria-labelledby="brain-created-waves-heading">
       <h2
         id="brain-created-waves-heading"
-        className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
+        className="tw-m-0 tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500"
       >
         {getUserPageBrainSidebarMessage(
           locale,
@@ -101,7 +101,7 @@ export default function UserPageBrainSidebarCreated({
                   buttonClassName={BRAIN_SIDEBAR_ACTION_BUTTON_CLASS}
                   completionClassName={BRAIN_SIDEBAR_COMPLETION_CLASS}
                   containerClassName="tw-contents"
-                  errorClassName="tw-m-0 tw-text-xs tw-text-red-300/80"
+                  errorClassName="tw-m-0 tw-text-[15px]/4 tw-font-normal tw-text-red-300/80"
                   showErrorMessage
                 />
               )}

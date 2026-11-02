@@ -1,5 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatAddress } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { Metadata } from "next";
 import AppWalletPageClient from "./page.client";
 
@@ -20,6 +22,6 @@ export async function generateMetadata({
   const { "app-wallet-address": address } = await params;
   return getAppMetadata({
     title: `${formatAddress(address)} | App Wallets | 6529.io`,
-    description: "Tools",
+    description: t(DEFAULT_LOCALE, "pageMetadata.appWallet.description"),
   });
 }

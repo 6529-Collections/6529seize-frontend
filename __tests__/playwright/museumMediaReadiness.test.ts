@@ -20,15 +20,21 @@ function mediaImage(
   options: {
     loaded?: boolean;
     decodeOnVisit?: boolean;
+    visitsBeforeDecode?: number;
     onVisit?: () => void;
+    attributes?: Record<string, string>;
+    currentSrc?: string;
   } = {}
 ) {
   const source = `https://example.com/${encodeURIComponent(alt)}.png`;
   let loaded = options.loaded ?? false;
   let complete = loaded;
+  let visits = 0;
   return {
     alt,
-    getAttribute: (name: string) => (name === "src" ? source : null),
+    getAttribute: (name: string) =>
+      options.attributes?.[name] ?? (name === "src" ? source : null),
+    currentSrc: options.currentSrc ?? source,
     get complete() {
       return complete;
     },
@@ -36,8 +42,9 @@ function mediaImage(
       return loaded ? 100 : 0;
     },
     scrollIntoView: jest.fn(() => {
-      complete = true;
-      loaded = options.decodeOnVisit ?? true;
+      visits += 1;
+      complete = visits >= (options.visitsBeforeDecode ?? 1);
+      loaded = complete && (options.decodeOnVisit ?? true);
       options.onVisit?.();
     }),
   };
@@ -144,12 +151,93 @@ describe("Museum rendered media readiness", () => {
     ).rejects.toThrow("Media disappeared or was replaced: first work");
   });
 
+  it("keeps a pending lazy image in view instead of leaving it behind after one visit", async () => {
+    const pending = mediaImage("responsive work", { visitsBeforeDecode: 3 });
+    const next = mediaImage("next work");
+    main.append(pending, next);
+    await expect(
+      expectNoUnresolvedMuseumMedia(mediaPage(main))
+    ).resolves.toBeUndefined();
+    expect(pending.scrollIntoView).toHaveBeenCalledTimes(3);
+    expect(next.scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(pending.complete && pending.naturalWidth > 0).toBe(true);
+  });
+
   it("rejects a failed native decode", async () => {
     main.append(mediaImage("failed work", { decodeOnVisit: false }));
 
     await expect(
       expectNoUnresolvedMuseumMedia(mediaPage(main))
     ).rejects.toThrow("Image failed to decode: failed work");
+  });
+
+  it.each([
+    "data:image/png;base64,PRIVATE_INLINE_PAYLOAD 1x, /museum/other.webp 2x",
+    "/museum/work.webp 1x, data:image/svg+xml,<svg>PRIVATE_INLINE_PAYLOAD</svg> 2x",
+    "DATA:image/png;base64,PRIVATE_INLINE_PAYLOAD,WITH_COMMAS 1x",
+  ])(
+    "redacts inline srcset payloads before diagnostic candidate parsing: %s",
+    async (srcset) => {
+      main.append(
+        mediaImage("failed work", {
+          decodeOnVisit: false,
+          attributes: { srcset },
+        })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      expect((failure as Error).message).toContain("[inline srcset redacted]");
+      expect((failure as Error).message).not.toContain(
+        "PRIVATE_INLINE_PAYLOAD"
+      );
+      expect((failure as Error).message).not.toContain("WITH_COMMAS");
+    }
+  );
+
+  it.each([
+    "data:image/png;base64,PRIVATE_CURRENT_SOURCE",
+    "blob:https://example.com/PRIVATE_CURRENT_SOURCE",
+    "file:///PRIVATE_CURRENT_SOURCE",
+  ])(
+    "rejects non-HTTP selected sources in diagnostics: %s",
+    async (currentSrc) => {
+      main.append(
+        mediaImage("failed work", { decodeOnVisit: false, currentSrc })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      expect((failure as Error).message).toContain("[non-HTTP URL]");
+      expect((failure as Error).message).not.toContain(
+        "PRIVATE_CURRENT_SOURCE"
+      );
+    }
+  );
+
+  it("retains HTTP responsive candidates with credentials, queries and fragments removed", async () => {
+    main.append(
+      mediaImage("failed work", {
+        decodeOnVisit: false,
+        attributes: {
+          srcset:
+            "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT 1x, /museum/large.webp?key=PRIVATE_QUERY 2x",
+        },
+        currentSrc:
+          "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT",
+      })
+    );
+    const failure = await expectNoUnresolvedMuseumMedia(mediaPage(main)).catch(
+      (error: unknown) => error
+    );
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toContain(
+      '"url":"https://example.com/work.webp","descriptor":"1x"'
+    );
+    expect((failure as Error).message).toContain('"descriptor":"2x"');
+    expect((failure as Error).message).not.toContain("PRIVATE_");
   });
 
   it("requires both occurrences of the same source and alternative text", async () => {
@@ -162,6 +250,29 @@ describe("Museum rendered media readiness", () => {
       expectNoUnresolvedMuseumMedia(mediaPage(main))
     ).rejects.toThrow("Media disappeared or was replaced: repeated work");
   });
+
+  it.each(["signed work", ""])(
+    "redacts a failed image's original src in the poll error and its cause: %s",
+    async (alt) => {
+      main.append(
+        mediaImage(alt, {
+          decodeOnVisit: false,
+          attributes: {
+            src: "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT",
+          },
+        })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      const error = failure as Error;
+      expect(error.message).toContain("Image failed to decode:");
+      expect(error.message).toContain('"src":"https://example.com/work.webp"');
+      expect(error.message).not.toContain("PRIVATE_");
+      expect(String(error.cause)).not.toContain("PRIVATE_");
+    }
+  );
 
   it("waits for loading text to clear after the native image has loaded", async () => {
     main.append(mediaImage("loaded work", { loaded: true }));

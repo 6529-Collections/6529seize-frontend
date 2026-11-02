@@ -198,6 +198,70 @@ describe("session-v2.utils", () => {
     });
   });
 
+  it("adds device grant parameters to web session nonces only", async () => {
+    const deviceGrant = {
+      device_key: `0x${"aa".repeat(32)}`,
+      device_key_type: "ed25519" as const,
+      device_scopes: "post,edit,delete,react",
+    };
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      signable_message: "message",
+      server_signature: "server-signature",
+    });
+
+    await getSessionNonce({ signerAddress: "0xabc", deviceGrant });
+    expect(commonApiFetch).toHaveBeenLastCalledWith({
+      endpoint: "auth/session-nonce",
+      params: {
+        signer_address: "0xabc",
+        client_type: "web",
+        chain_id: "1",
+        ...deviceGrant,
+      },
+    });
+
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    await getSessionNonce({ signerAddress: "0xabc", deviceGrant });
+    expect(commonApiFetch).toHaveBeenLastCalledWith({
+      endpoint: "auth/session-nonce",
+      params: {
+        signer_address: "0xabc",
+        client_type: "native",
+        chain_id: "1",
+      },
+    });
+  });
+
+  it("sends the device label with session-login when a grant was requested", async () => {
+    (commonApiPost as jest.Mock).mockResolvedValueOnce({
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    });
+
+    await loginWithSessionV2({
+      serverSignature: "server-signature",
+      clientSignature: "client-signature",
+      signerAddress: "0xabc",
+      role: null,
+      deviceLabel: "Chrome on macOS",
+    });
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-login",
+      body: {
+        client_type: "web",
+        server_signature: "server-signature",
+        client_signature: "client-signature",
+        client_address: "0xabc",
+        device_label: "Chrome on macOS",
+      },
+      credentials: "include",
+    });
+  });
+
   it("requests native session nonce with client_type native", async () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     const nonceResponse = {

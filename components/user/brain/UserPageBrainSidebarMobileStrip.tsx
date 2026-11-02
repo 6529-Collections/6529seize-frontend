@@ -101,7 +101,7 @@ function MobileSectionState({
 
   if (state.waves.length === 0) {
     return (
-      <span className="tw-flex tw-h-9 tw-items-center tw-px-1 tw-text-xs tw-text-iron-600">
+      <span className="tw-flex tw-h-9 tw-items-center tw-px-1 tw-text-meta/4 tw-font-normal tw-text-iron-500">
         {getUserPageBrainSidebarMessage(locale, emptyMessageKey)}
       </span>
     );
@@ -141,7 +141,7 @@ export default function UserPageBrainSidebarMobileStrip({
         {showCreatedSection && (
           <>
             <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
-              <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              <span className="tw-px-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {getUserPageBrainSidebarMessage(
                   locale,
                   "user.brain.sidebar.createdMobileHeading"
@@ -189,7 +189,7 @@ export default function UserPageBrainSidebarMobileStrip({
         )}
 
         <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
-          <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <span className="tw-px-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
             {getUserPageBrainSidebarMessage(
               locale,
               "user.brain.sidebar.recentlyActiveHeading"
@@ -211,7 +211,7 @@ export default function UserPageBrainSidebarMobileStrip({
               <UserPageBrainSidebarLoadMore
                 state={recentState}
                 buttonClassName={PILL_BUTTON_CLASS}
-                completionClassName="tw-m-0 tw-flex tw-h-9 tw-shrink-0 tw-items-center tw-rounded-lg tw-px-1 tw-text-xs tw-font-semibold tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                completionClassName="tw-m-0 tw-flex tw-h-9 tw-shrink-0 tw-items-center tw-rounded-lg tw-px-1 tw-text-meta/4 tw-font-normal tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 containerClassName="tw-contents"
               />
             )}

@@ -17,20 +17,6 @@ export const DOWNLOADS_TABLE_CELL_CLASS_NAME =
 
 const DOWNLOADS_TABLE_HEADER_CELL_CLASS_NAME = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-align-middle tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
-export function formatDate(dateString: string): string {
-  const isYYYYMMDDFormat = (str: string): boolean => /^\d{8}$/.test(str);
-  if (isYYYYMMDDFormat(dateString)) {
-    const year = Number(dateString.substring(0, 4));
-    const month = Number(dateString.substring(4, 6)) - 1;
-    const day = Number(dateString.substring(6, 8));
-    const d = new Date(year, month, day);
-    return d.toDateString();
-  }
-
-  const d = new Date(dateString);
-  return d.toDateString();
-}
-
 export function DownloadsLayout({
   title,
   children,

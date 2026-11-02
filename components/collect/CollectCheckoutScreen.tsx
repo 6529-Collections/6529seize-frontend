@@ -37,9 +37,9 @@ export default function CollectCheckoutScreen({
         className="tailwind-scope tw-relative tw-z-[1000]"
       >
         <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950 tw-scrollbar-thin tw-scrollbar-track-iron-950 tw-scrollbar-thumb-iron-700">
-          <DialogPanel className="tw-min-h-dvh tw-pb-[env(safe-area-inset-bottom)]">
+          <DialogPanel className="tw-flex tw-min-h-dvh tw-flex-col tw-pb-[env(safe-area-inset-bottom)]">
             <header className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-backdrop-blur">
-              <div className="tw-mx-auto tw-flex tw-max-w-6xl tw-items-center tw-gap-4 tw-px-5 tw-py-3 sm:tw-px-8">
+              <div className="tw-mx-auto tw-flex tw-max-w-4xl tw-items-center tw-gap-4 tw-px-5 tw-py-3 sm:tw-px-8">
                 <button
                   type="button"
                   disabled={busy}
@@ -54,7 +54,7 @@ export default function CollectCheckoutScreen({
                 </DialogTitle>
               </div>
             </header>
-            <div className="tw-mx-auto tw-max-w-6xl tw-px-5 tw-py-6 sm:tw-px-8 sm:tw-py-10">
+            <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-4xl tw-flex-1 tw-px-5 tw-pt-6 sm:tw-px-8 sm:tw-pt-10">
               {children}
             </div>
           </DialogPanel>

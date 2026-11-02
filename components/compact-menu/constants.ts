@@ -1,7 +1,7 @@
 import type { MenuItemsProps } from "@headlessui/react";
 
 export const DEFAULT_TRIGGER_CLASSES =
-  "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+  "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 export const DEFAULT_MENU_CLASSES =
   "tw-z-50 tw-mt-2 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none";
@@ -16,5 +16,21 @@ export const DEFAULT_INACTIVE_ITEM_CLASSES =
 
 export const DEFAULT_FOCUS_ITEM_CLASSES = "tw-bg-iron-800 tw-text-iron-50";
 
+/**
+ * Headless UI marks the active item for keyboard and pointer alike, and a tint
+ * of iron-800 over iron-900 is only about 1.2:1, so the active item also draws
+ * an inset primary ring. It replaces the browser outline on the same item.
+ */
+export const FOCUS_ITEM_RING_CLASSES =
+  "tw-outline-none tw-ring-2 tw-ring-inset tw-ring-primary-400";
+
 export const DEFAULT_ANCHOR: NonNullable<MenuItemsProps["anchor"]> =
   "bottom end";
+
+export const MOBILE_ACTION_ITEM_CLASSES =
+  "tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none";
+
+export const MOBILE_ACTION_ICON_CLASSES =
+  "tw-flex tw-h-6 tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none";
+
+export const ACTION_LABEL_CLASSES = "tw-font-semibold tw-text-iron-100";

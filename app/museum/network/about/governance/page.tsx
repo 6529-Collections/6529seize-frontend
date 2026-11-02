@@ -7,7 +7,7 @@ import {
   MuseumStatusBadge,
 } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
 import {
@@ -55,7 +55,7 @@ export default async function MuseumAboutGovernancePage() {
                 description={displayGovernanceEffect(decision.governanceEffect)}
                 meta={
                   decision.createdAt
-                    ? formatDate(DEFAULT_LOCALE, decision.createdAt)
+                    ? formatUtcDate(DEFAULT_LOCALE, decision.createdAt)
                     : undefined
                 }
               >

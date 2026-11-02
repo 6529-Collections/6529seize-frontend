@@ -20,6 +20,15 @@ jest.mock("wagmi", () => ({
   }),
 }));
 
+const mockWaitForReady = jest.fn((): Promise<void> => Promise.resolve());
+let mockIsWalletStackReady = true;
+jest.mock("@/components/providers/AppKitBootstrapContext", () => ({
+  useAppKitBootstrap: () => ({
+    isReady: mockIsWalletStackReady,
+    waitForReady: mockWaitForReady,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
@@ -139,6 +148,8 @@ describe("CapacitorConnectFlow", () => {
     mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
     mockConnectAsync.mockResolvedValue(undefined);
     mockIsQRScannerCancellation.mockReturnValue(false);
+    mockIsWalletStackReady = true;
+    mockWaitForReady.mockReset().mockResolvedValue(undefined);
   });
 
   it("hands external-wallet selection to the external-only Reown callback", async () => {
@@ -252,6 +263,41 @@ describe("CapacitorConnectFlow", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to open the shared connection. Please try again."
     );
+  });
+
+  it("waits for the wallet stack before connecting an app wallet", async () => {
+    mockIsWalletStackReady = false;
+    mockConnectors = [];
+    let rerenderFlow = (): void => undefined;
+    mockWaitForReady.mockImplementation(async () => {
+      mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
+      rerenderFlow();
+    });
+    const view = render(<FlowHarness />);
+    rerenderFlow = () => view.rerender(<FlowHarness />);
+
+    await userEvent.click(screen.getByRole("button", { name: "App Wallet" }));
+
+    await waitFor(() =>
+      expect(mockConnectAsync).toHaveBeenCalledWith({
+        connector: { id: mockAppWalletAddress, type: "app-wallet" },
+      })
+    );
+    expect(mockWaitForReady).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a failure when the wallet stack cannot load", async () => {
+    mockIsWalletStackReady = false;
+    mockConnectors = [];
+    mockWaitForReady.mockRejectedValue(new Error("chunk failed"));
+    render(<FlowHarness />);
+
+    await userEvent.click(screen.getByRole("button", { name: "App Wallet" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Wallet connection failed. Please try again."
+    );
+    expect(mockConnectAsync).not.toHaveBeenCalled();
   });
 
   it("keeps the app-wallet view open when its connector is unavailable", async () => {

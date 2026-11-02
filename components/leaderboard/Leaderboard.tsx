@@ -170,9 +170,14 @@ export default function Leaderboard(
 
     commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
+    })
+      .then((response) => {
+        setSeasons(response);
+      })
+      .catch((reason: unknown) => {
+        console.error("Failed to fetch Meme seasons", reason);
+        setSeasons([]);
+      });
   }, []);
 
   useEffect(() => {

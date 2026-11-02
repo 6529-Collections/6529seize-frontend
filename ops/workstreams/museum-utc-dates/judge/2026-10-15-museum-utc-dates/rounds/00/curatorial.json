@@ -1,0 +1,348 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475",
+  "coverage": [
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-1440x1000-02.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-1440x1000-03.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-1440x1000-02.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-1440x1000-02.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9,
+      "evidence": [
+        "evidence/candidate/governance-1440x1000-full.png",
+        "evidence/candidate/governance-decision-1440x1000-full.png",
+        "evidence/candidate/work-w-0008-1440x1000-full.png",
+        "evidence/diff-candidate-vs-main.json",
+        "evidence/zone-comparison.json"
+      ],
+      "findings": ["C-006"],
+      "note": "Every route leads with its record and, where the record carries a status or decision date, shows it as the same UTC calendar day as the record; the candidate renders text, heights and dates identical to the baseline in all 27 cells."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/work-w-0008-1440x1000-full.png",
+        "evidence/candidate/research-conflict-at-its-edges-1440x1000-02.png",
+        "evidence/candidate/artist-david-seymour-1440x1000-02.png",
+        "evidence/candidate/program-gift-acquisitions-1440x1000-03.png"
+      ],
+      "findings": ["C-001", "C-002", "C-003", "C-004", "C-005"],
+      "note": "Credible museum publication with large, credited art and attributed scholarship; held at 8.5 by pre-existing items recorded as P3 (a cropped principal photograph, in-route repeats, an ambiguous governance date label, uneven captioning, soft upscaled derivatives). The candidate introduces none of them."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M1", "J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists/david-seymour and /museum/network/acquisition-programs/gift-acquisitions · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/artist-david-seymour-1440x1000-02.png",
+      "observation": "Pre-existing on main: the David Seymour photograph (604x910, 2:3, vertical) is drawn inside a square tw-aspect-square tw-overflow-hidden frame on the artist route (1152 px square at 1440, 692 px at 820) and in the 377 px square program grid card (evidence/candidate/program-gift-acquisitions-1440x1000-03.png), so about a third of the picture (the figure's torso and shoulder and the rest of the rifle) is cut off. A measurement of every principal image across all nine routes and three widths found this the only cropped image (shown fraction 0.664); the same photograph is shown whole on the research hero (896x1349). The baseline build on port 3418 is identical. Judged without the baseline rule this would fail M1.",
+      "consequence": "A visitor sees a different composition from the one the caption, the credit and the artist profile describe (the profile says the figure occupies the lower foreground, which is the cropped part), and sees the same work two ways across the section.",
+      "change": "Give the media frame on the artist route and the program grid card the work's own aspect ratio, as the research hero does with an inline aspect ratio, or keep the square frame and letterbox the whole image with object-contain sized to the frame's height.",
+      "acceptance_check": "At 1440, 820 and 390 the Seymour photograph on the artist route and in the program grid is fully visible, with the same composition as the research hero and no overflow-hidden clipping of the image.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["M4", "J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/research/conflict-at-its-edges and /museum/network/acquisitions/a-gift-of-themes-and-variations-210 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/acquisition-themes-variations-1440x1000-10.png",
+      "observation": "Pre-existing on main: within a single route the lead image is repeated. The acquisition route shows Themes and Variations #210 at 1024 px as the lead and again as a 279 px thumbnail in Acquisition context; the research route shows the Seymour photograph as the essay lead (896x1349) and again as the first of five Works in this study cards (evidence/candidate/research-conflict-at-its-edges-1440x1000-03.png). The run record names the cross-record appearance of works as a curatorial decision, but not a repeat inside one route. No other primary image repeats without a record link; the only cross-route repeats are the named ones (CENTURY, Seymour, Themes and Variations #210), and the 18 px social icons are footer chrome.",
+      "consequence": "On a single-work acquisition the context card adds a second copy of the picture the reader has just seen at full size, and it adds an empty three-column block beside it.",
+      "change": "Omit the thumbnail in the single-work acquisition context card, and either keep the research hero as the essay's lead with a record note naming it as a curatorial decision, or start the card list after the lead work.",
+      "acceptance_check": "No lead image repeats within one route, or the run record names each remaining in-route repeat as a curatorial decision.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["M2", "J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about/governance and /museum/network/about/governance/6529NM-GOV-1069256 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/governance-1440x1000-full.png",
+      "observation": "Pre-existing on main: each governance card ends with a bare date (Jun 2, 2026, or Jun 8, 2026 for the last) directly under 'Adopted by the Museum Wave.', and the detail page labels the same value 'Recorded' beside 'Wave status: Open proposal'. The displayed values equal the register's created_at in UTC for all eight decisions (2026-06-02T13:24:57Z to 15:45:27Z, and 2026-06-08T17:23:19Z), so the candidate's date values are correct. In the register (read from the pinned publication commit) created_at is the Wave proposal's creation time, and the register's own snapshot_at is 2026-08-01, so the field is neither an adoption date nor the date the Museum recorded the decision.",
+      "consequence": "A reader can take the date as the day the decision was adopted, or the day the Museum recorded it, when it is the day the proposal was posted. This is the date the run's primary task asks the visitor to read.",
+      "change": "Label the date with the event it dates (for example 'Proposal posted' on the cards and on the detail page) through the existing message keys, or label it 'Wave proposal created'.",
+      "acceptance_check": "The governance list and the decision record each name the event the date refers to, and the label matches the register field it comes from.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisition-programs/gift-acquisitions and /museum/network/acquisitions/a-gift-of-themes-and-variations-210 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/program-gift-acquisitions-1440x1000-02.png",
+      "observation": "Pre-existing on main: captioning depth varies across cards. In the program grid the five Magnum photographs carry an artist line and a credit and rights line, while CENTURY #31, #724, #401, Pre-Process #63, Phototaxis #308, 923 EMPTY ROOMS #713, Ex Nihilo (Cosmos) #248 and Themes and Variations #210 show a title and a status only. On the acquisition route the lead card credits 'Vera Molnár' alone, while the Curatorial reading credit and Acquisition context name Martin Grasser as collaborator.",
+      "consequence": "Credit appears for some works and not others in one gallery, and the collaborator on the single-work acquisition is missing from the lead caption.",
+      "change": "Show the artist (and collaborator) and the short credit line the record already holds on every work card, using the same card pattern for generative and photographic works.",
+      "acceptance_check": "Every work card in the program grid and the acquisition lead caption shows the artist or artists from the record and a credit line.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210 and /museum/network/artists/david-seymour · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/acquisition-themes-variations-1440x1000-02.png",
+      "observation": "Pre-existing on main: the principal images are small derivatives enlarged beyond their pixels. The Themes and Variations #210 lead is a 432x432 file shown at 1024x1024 (2.4 times), and the Seymour image on the artist route is 604x910 shown at 1152 wide (1.9 times). Letterform edges and film grain are visibly soft at 1440. The record holds larger renditions (the 2,400 px preview named in the page text; the research route loads an 864x1300 file).",
+      "consequence": "The art, which should lead, is the softest thing on the page.",
+      "change": "Request the 1280 px derivative for lead images, or cap the lead width at the derivative's natural width.",
+      "acceptance_check": "At 1440 each lead image's natural width is at least 80 percent of its rendered width.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-006",
+      "targets": ["J01"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/organizations/art-blocks · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png",
+      "observation": "Pre-existing on main: the organization record shows no status or date. The run record says the publication has no date for it, but the publication snapshot's entity graph carries statusAsOf 2026-08-02T06:30:00Z for 6529NM-ORG-0001; the page template does not render it. The artist route shows only the related acquisition's date (Aug 12, 2026), not the artist record's own 2026-08-09.",
+      "consequence": "Organization and artist records do not state when their own status was recorded, unlike work, program and acquisition records. Nothing wrong is shown; a date the record holds is not.",
+      "change": "Render the entity context status date on organization and artist records, or correct the run record's note if the omission is intended.",
+      "acceptance_check": "The organization record shows its status date as the UTC calendar day of its record, or the Museum backlog records the omission as intended.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "UTC-formatted dates: every rendered date equals the UTC calendar day of its record (governance Jun 2 and Jun 8; CENTURY works Aug 2; work W-0008 Aug 1; Themes and Variations #210 Aug 23; Gift Acquisitions Aug 2; Conflict at Its Edges Aug 12), and the candidate renders identically under UTC, Pacific/Auckland and America/Los_Angeles across 117 pages while the baseline shifts a day on 67 and 23 pages.",
+    "The work record for 6529NM-W-0008: the whole 2:3 photograph at about 1180x1770, caption and credit line from the media record, and status language 'Selected; not yet minted or accessioned; not in the permanent Collection' with its as-of date.",
+    "The research route's lead photograph shown whole with its credit line, display-and-rights note and attributed essay.",
+    "Credit and rights lines on the Magnum photographs in the program grid and artist route.",
+    "Record-faithful status wording: 'Accessioned into the permanent Collection', 'Program open', 'No adopted effect', 'Open proposal' all match the publication and governance register.",
+    "Governance register values: ratings, rater counts and dispositions match the register."
+  ]
+}

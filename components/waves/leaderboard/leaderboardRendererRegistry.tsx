@@ -1,5 +1,6 @@
 "use client";
 
+import type { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import React, { useMemo } from "react";
 import type { ComponentType } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -7,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   resolveWaveParticipationVariant,
+  competitionParticipationVariant,
   type WaveParticipationVariant,
 } from "@/helpers/waves/wave-participation-presentation.helpers";
 import { MemesLeaderboardDrop } from "@/components/memes/drops/MemesLeaderboardDrop";
@@ -22,6 +24,8 @@ interface WaveLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly onOpenDrop?: (() => void) | undefined;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onSourceDropDeleted?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -72,6 +76,8 @@ const DefaultLeaderboardDropRenderer: React.FC<
 > = ({
   drop,
   onDropClick,
+  onDropContentClick,
+  onOpenDrop,
   onVoteClick,
   isVotingClosed,
   isVotingControlsLocked,
@@ -82,6 +88,8 @@ const DefaultLeaderboardDropRenderer: React.FC<
     <DefaultWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
+      onOpenDrop={onOpenDrop}
       onVoteClick={onVoteClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
@@ -97,6 +105,8 @@ const ProposalCardLeaderboardDropRenderer: React.FC<
 > = ({
   drop,
   onDropClick,
+  onDropContentClick,
+  onOpenDrop,
   onVoteClick,
   isVotingClosed,
   isVotingControlsLocked,
@@ -107,6 +117,8 @@ const ProposalCardLeaderboardDropRenderer: React.FC<
     <DefaultWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
+      onOpenDrop={onOpenDrop}
       onVoteClick={onVoteClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
@@ -132,6 +144,8 @@ const QuorumLeaderboardDropRenderer: React.FC<
 > = ({
   drop,
   onDropClick,
+  onDropContentClick,
+  onOpenDrop,
   onVoteClick,
   isVotingClosed,
   isVotingControlsLocked,
@@ -142,6 +156,8 @@ const QuorumLeaderboardDropRenderer: React.FC<
     <QuorumWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
+      onOpenDrop={onOpenDrop}
       onVoteClick={onVoteClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
@@ -214,19 +230,22 @@ const WAVE_LEADERBOARD_RENDERERS: Readonly<
 };
 
 export const useWaveLeaderboardRendererSet = (
-  waveId: string | null | undefined
+  waveId: string | null | undefined,
+  capabilities?: readonly ApiCompetitionCapability[]
 ): ResolvedWaveLeaderboardRendererSet => {
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
   const proposalCardPresentation = useWaveProposalCardPresentation(waveId);
 
   return useMemo(() => {
-    const variant = resolveWaveParticipationVariant({
-      waveId,
-      overrides: WAVE_LEADERBOARD_VARIANT_OVERRIDES,
-      isMemesWave,
-      isCurationWave,
-      isQuorumWave,
-    });
+    const variant = capabilities
+      ? competitionParticipationVariant(capabilities)
+      : resolveWaveParticipationVariant({
+          waveId,
+          overrides: WAVE_LEADERBOARD_VARIANT_OVERRIDES,
+          isMemesWave,
+          isCurationWave,
+          isQuorumWave,
+        });
 
     const rendererSet = WAVE_LEADERBOARD_RENDERERS[variant];
 
@@ -243,6 +262,7 @@ export const useWaveLeaderboardRendererSet = (
       ...rendererSet,
     };
   }, [
+    capabilities,
     isCurationWave,
     isMemesWave,
     isQuorumWave,

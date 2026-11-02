@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import {
   ManifoldClaimStatus,
   ManifoldPhase,
@@ -77,15 +78,7 @@ export function useMintCountdownState(
 
   const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
 
-  useEffect(() => {
-    const interval = globalThis.window.setInterval(() => {
-      setNow(Time.now());
-    }, 1000);
-
-    return () => {
-      globalThis.window.clearInterval(interval);
-    };
-  }, []);
+  useVisibleInterval(() => setNow(Time.now()), 1000);
 
   return useMemo((): MintCountdownState => {
     if (isError) {

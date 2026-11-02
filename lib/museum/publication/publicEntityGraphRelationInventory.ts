@@ -7,6 +7,7 @@ import {
   PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION,
 } from "./publicEntityGraphSchema";
 import { requiredString } from "./publicEntityGraphPrimitives";
+import { isRfc3339DateTime } from "./rfc3339";
 import type {
   MuseumPublicRelationIdentityInventory,
   MuseumPublicRelationRecord,
@@ -187,7 +188,7 @@ function parseRetiredBindings(
     );
     const supersededBy = binding["superseded_by"];
     if (
-      !Number.isFinite(Date.parse(retiredAt)) ||
+      !isRfc3339DateTime(retiredAt) ||
       (supersededBy !== null &&
         (typeof supersededBy !== "string" ||
           !RELATION_ID_PATTERN.test(supersededBy)))

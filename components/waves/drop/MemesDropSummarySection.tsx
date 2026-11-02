@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
@@ -20,6 +21,7 @@ interface MemesDropSummarySectionProps {
   readonly nicTotal: number;
   readonly repTotal: number;
   readonly onVoteClick: () => void;
+  readonly collaborationControls?: ReactNode;
 }
 
 export function MemesDropSummarySection({
@@ -34,6 +36,7 @@ export function MemesDropSummarySection({
   nicTotal,
   repTotal,
   onVoteClick,
+  collaborationControls,
 }: MemesDropSummarySectionProps) {
   const memeCardId = drop.submission_context?.meme_card_id;
   const hasMemeCard = isValidMemeCardId(memeCardId);
@@ -119,6 +122,7 @@ export function MemesDropSummarySection({
             <MainStageMemeCardLink memeCardId={memeCardId} />
           </div>
         )}
+        {collaborationControls}
       </div>
     </div>
   );

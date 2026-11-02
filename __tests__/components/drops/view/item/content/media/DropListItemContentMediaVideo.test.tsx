@@ -1,7 +1,9 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import * as videoConfig from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
+import * as touchFirst from "@/helpers/touch-first.helpers";
 
 const downloadMediaUrlMock = jest.fn();
 let mockIsApp = false;
@@ -43,6 +45,28 @@ function mockPrefersReducedMotion(matches: boolean) {
 }
 
 describe("DropListItemContentMediaVideo", () => {
+  it("uses the visible viewport boundary in a mobile browser", () => {
+    const mobile = jest
+      .spyOn(touchFirst, "isTouchFirstEnvironment")
+      .mockReturnValue(true);
+    mockUseInView.mockReturnValue([{ current: null }, false]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+    try {
+      render(<DropListItemContentMediaVideo src="foo.mp4" />);
+      expect(mockUseInView).toHaveBeenCalledWith(
+        expect.objectContaining({ rootMargin: "0px" })
+      );
+      expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
+        "foo.mp4",
+        expect.objectContaining({ enabled: false })
+      );
+    } finally {
+      mobile.mockRestore();
+    }
+  });
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
@@ -223,6 +247,7 @@ describe("DropListItemContentMediaVideo", () => {
   });
 
   it("starts an opted-in app video when it enters view after setup", () => {
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
     mockIsApp = true;
     mockPrefersReducedMotion(false);
     const ref = {

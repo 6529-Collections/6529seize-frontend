@@ -8,6 +8,7 @@ import {
   type MuseumPublicationCatalogDocument,
   type MuseumPublicationCatalogPointer,
 } from "./catalog-contract";
+import { isRfc3339DateTime } from "./rfc3339";
 import { isExactGitCommit } from "./security";
 
 export function parseMuseumPublicationJson(text: string): unknown {
@@ -311,8 +312,7 @@ export function decodePublicationCatalogPointer(
     record.pointer_version !== "1.0.0" ||
     typeof activation.actor_id !== "string" ||
     activation.actor_id.length === 0 ||
-    typeof activation.activated_at !== "string" ||
-    !Number.isFinite(Date.parse(activation.activated_at)) ||
+    !isRfc3339DateTime(activation.activated_at) ||
     (activation.mode !== "activate" && activation.mode !== "rollback") ||
     (activation.prior_catalog_id !== null &&
       typeof activation.prior_catalog_id !== "string")

@@ -146,6 +146,17 @@ describe("WaveLeaderboardGalleryItem", () => {
     author: { handle: "alice" },
   };
 
+  it("labels anonymous authors even without a profile handle", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{ ...drop, author: { handle: null, is_anonymous: true } }}
+        onDropClick={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Anonymous", { exact: true })).toBeVisible();
+    expect(screen.queryByRole("link", { name: /Anonymous/ })).toBeNull();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockVotingModalInline = false;

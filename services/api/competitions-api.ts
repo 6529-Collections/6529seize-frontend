@@ -29,6 +29,8 @@ import {
   commonApiPut,
 } from "@/services/api/common-api";
 import type { QueryClient } from "@tanstack/react-query";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { scheduleDropCompetitionContext } from "./competition-context-scheduler";
 
 export interface CompetitionIdentity {
   readonly waveId: string;
@@ -47,17 +49,25 @@ export const competitionQueryKey = (
   identity: CompetitionIdentity,
   viewer: string | null
 ) => [QueryKey.COMPETITION, { ...competitionScope(identity), viewer }] as const;
+export const defaultCompetitionQueryKey = (
+  waveId: string,
+  viewer: string | null
+) => [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }] as const;
 
 export async function fetchDropCompetitionContext(
   waveId: string,
   dropId: string,
   signal?: AbortSignal
 ) {
-  const context = await commonApiFetch<ApiDropCompetitionContext>({
-    endpoint: `v3/waves/${encodeURIComponent(waveId)}/drops/${encodeURIComponent(dropId)}/competition-context`,
-    signal,
-    errorMode: "structured",
-  });
+  const context = await scheduleDropCompetitionContext(
+    () =>
+      commonApiFetch<ApiDropCompetitionContext>({
+        endpoint: `v3/waves/${encodeURIComponent(waveId)}/drops/${encodeURIComponent(dropId)}/competition-context`,
+        signal,
+        errorMode: "structured",
+      }),
+    signal
+  );
   if (context.competition === null && context.entry === null) return context;
   if (
     !context.competition ||
@@ -312,12 +322,39 @@ export async function invalidateCompetitionWave(
   await invalidateCompetitionScope(client, waveId, { wave_id: waveId });
 }
 
+/** Winner decisions also change public author identity on ordinary drop views. */
+export async function invalidateCompetitionAuthors(
+  client: QueryClient,
+  waveId: string
+) {
+  await Promise.all([
+    client.invalidateQueries({
+      queryKey: [QueryKey.DROPS, { waveId }],
+      refetchType: "active",
+    }),
+    client.invalidateQueries({
+      queryKey: [QueryKey.DROP],
+      predicate: (query) => {
+        const drop = query.state.data as
+          | Partial<Pick<ApiDrop, "wave">>
+          | undefined;
+        return drop?.wave?.id === waveId;
+      },
+      refetchType: "active",
+    }),
+  ]);
+}
+
 async function invalidateCompetitionScope(
   client: QueryClient,
   waveId: string,
   scope: { wave_id: string; competition_id?: string }
 ) {
   await Promise.all([
+    client.invalidateQueries({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+      refetchType: "active",
+    }),
     client.invalidateQueries({
       queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     }),

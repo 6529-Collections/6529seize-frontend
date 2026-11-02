@@ -10,6 +10,7 @@ interface TabOption {
   readonly hasIndicator?: boolean | undefined;
   readonly panelId: string;
   readonly action?: React.ReactNode | undefined;
+  readonly onIntent?: (() => void) | undefined;
 }
 
 interface TabToggleProps {
@@ -36,6 +37,8 @@ export const TabToggle: React.FC<TabToggleProps> = ({
     <Button
       key={option.key}
       onClick={() => onSelect(option.key)}
+      onPointerEnter={option.onIntent}
+      onFocus={option.onIntent}
       role="tab"
       data-wave-tab-value={option.key.toLowerCase()}
       aria-selected={activeKey === option.key}

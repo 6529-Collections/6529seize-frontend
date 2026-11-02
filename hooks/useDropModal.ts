@@ -1,4 +1,5 @@
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
+import { useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -11,8 +12,6 @@ import {
 
 export function useDropModal() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
 
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
@@ -35,13 +34,8 @@ export function useDropModal() {
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || "/";
-    router.replace(newUrl, { scroll: false });
-  }, [dropId, beginClosingDrop, searchParams, pathname, router]);
+    closeDropInCurrentUrl();
+  }, [dropId, beginClosingDrop]);
 
   const isDropMatch = Boolean(
     effectiveDropId && drop?.id.toLowerCase() === effectiveDropId.toLowerCase()

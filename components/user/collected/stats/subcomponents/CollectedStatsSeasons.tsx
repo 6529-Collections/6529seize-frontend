@@ -125,10 +125,10 @@ export function CollectedStatsSeasons({
   return (
     <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-3 tw-pb-2 tw-pt-3 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
       <div className="tw-flex tw-items-baseline tw-gap-2 tw-px-1">
-        <span className="tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-400">
+        <span className="tw-text-[15px]/4 tw-font-semibold tw-tracking-tight tw-text-iron-100">
           {title}
         </span>
-        <span className="tw-ml-auto tw-text-[10px] tw-font-medium tw-text-iron-500">
+        <span className="tw-ml-auto tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
           {startedCount}
         </span>
       </div>
@@ -199,7 +199,7 @@ export function CollectedStatsSeasons({
 
       {notStartedSeasons.length > 0 && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-px-1 tw-pt-2">
-          <span className="tw-mr-0.5 tw-text-[8px] tw-font-medium tw-text-iron-500">
+          <span className="tw-mr-0.5 tw-text-meta tw-font-normal tw-text-iron-500">
             {unseizedLabel}
           </span>
           {notStartedSeasons.map((season) => (

@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { WaveWinnersTimeline } from "@/components/waves/winners/WaveWinnersTimeline";
-import { format } from "date-fns";
 
 jest.mock("@/components/waves/winners/WaveWinnersTimelineLoading", () => ({
   WaveWinnersTimelineLoading: () => <div data-testid="loading" />,
@@ -64,11 +63,39 @@ it("sorts decision points and renders drops", () => {
     />
   );
   expect(dropsOrder).toEqual(["2", "1"]);
-  const formatted = format(
-    new Date(points[0].decision_time),
-    "EEE, MMM d, yyyy"
+  const decisionTime = new Date(points[0].decision_time);
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(decisionTime);
+  const formattedTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(decisionTime);
+  expect(screen.getByText(formattedDate)).toBeInTheDocument();
+  // Both decisions share a time of day, so the time appears once per entry.
+  expect(screen.getAllByText(formattedTime)).toHaveLength(2);
+});
+
+it("shows each decision in the requested pattern for the viewer zone", () => {
+  // Built from local parts so the expected text holds in any host zone.
+  const decisionTime = new Date(2026, 9, 12, 16, 5).getTime();
+  const points = [
+    { decision_time: decisionTime, winners: [{ drop: { id: "1" } }] },
+  ] as any;
+  render(
+    <WaveWinnersTimeline
+      decisionPoints={points}
+      wave={wave}
+      onDropClick={jest.fn()}
+      isLoading={false}
+    />
   );
-  expect(screen.getByText(formatted)).toBeInTheDocument();
+  expect(screen.getByText("Mon, Oct 12, 2026")).toBeInTheDocument();
+  // ICU separates the time and the day period with a (narrow) no-break space.
+  expect(screen.getByText(/^4:05\sPM$/)).toBeInTheDocument();
 });
 
 it("passes content presentation to rendered drops", () => {

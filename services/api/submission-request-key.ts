@@ -1,4 +1,6 @@
 import { sha256 } from "js-sha256";
+import { omitDeviceSignature } from "@/lib/device-signing/device-signature-body";
+import { v4 as uuidv4 } from "uuid";
 
 const pendingKeys = new Map<string, string>();
 const MAX_PENDING_SUBMISSIONS = 128;
@@ -23,10 +25,14 @@ export function prepareSubmissionRequestKey(
     return null;
   const scope = getScope();
   if (!scope) return null;
-  const fingerprint = sha256(JSON.stringify([scope, endpoint, body]));
+  // A re-signed retry of the same content keeps its request key.
+  const fingerprint = sha256(
+    JSON.stringify([scope, endpoint, omitDeviceSignature(body)])
+  );
   let key = pendingKeys.get(fingerprint);
   if (!key) {
-    key = globalThis.crypto.randomUUID();
+    // UUIDs must also work on HTTP LAN origins used by native device testing.
+    key = uuidv4();
     if (pendingKeys.size >= MAX_PENDING_SUBMISSIONS) {
       const oldest = pendingKeys.keys().next().value;
       if (oldest) pendingKeys.delete(oldest);

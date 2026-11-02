@@ -98,9 +98,7 @@ it("requires explicit acknowledgement for a fren's exact address", () => {
       draft={{ ...draft, acknowledgeExternalRecipient: true }}
     />
   );
-  fireEvent.click(
-    screen.getByRole("button", { name: /Collect 0\.1 ETH/ })
-  );
+  fireEvent.click(screen.getByRole("button", { name: /Collect 0\.1 ETH/ }));
   expect(p.onPrepare).toHaveBeenCalledWith(
     expect.objectContaining({
       recipient: fren,
@@ -111,15 +109,11 @@ it("requires explicit acknowledgement for a fren's exact address", () => {
 it("does not prepare an absent price or a disabled trading capability", () => {
   const p = props();
   const { rerender } = render(<CollectInlineBuyForm {...p} amountWei={null} />);
-  expect(
-    screen.getByRole("button", { name: /^Collect$/ })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: /^Collect$/ })).toBeDisabled();
   rerender(
     <CollectInlineBuyForm {...p} disabledReason="Trading unavailable" />
   );
-  fireEvent.click(
-    screen.getByRole("button", { name: /Collect 0\.1 ETH/ })
-  );
+  fireEvent.click(screen.getByRole("button", { name: /Collect 0\.1 ETH/ }));
   expect(p.onPrepare).not.toHaveBeenCalled();
 });
 it("keeps quantity editable for editions and rejects an excess quantity", () => {
@@ -132,9 +126,31 @@ it("keeps quantity editable for editions and rejects an excess quantity", () => 
     />
   );
   expect(screen.getByRole("textbox", { name: "Quantity" })).toHaveValue("3");
-  fireEvent.click(
-    screen.getByRole("button", { name: /Collect 0\.1 ETH/ })
-  );
+  fireEvent.click(screen.getByRole("button", { name: /Collect 0\.1 ETH/ }));
   expect(screen.getByRole("alert")).toBeVisible();
   expect(p.onPrepare).not.toHaveBeenCalled();
+});
+
+it("hides delivery while connection is required without changing the saved draft", () => {
+  const p = props();
+  const { rerender } = render(
+    <CollectInlineBuyForm
+      {...p}
+      showDelivery={false}
+      disabledReason="Connect a wallet in this profile to prepare this action."
+    />
+  );
+  expect(screen.queryByText("Deliver to")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Change" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /Collect 0\.1 ETH/ }));
+  expect(p.onPrepare).not.toHaveBeenCalled();
+  expect(p.onChange).not.toHaveBeenCalled();
+
+  rerender(<CollectInlineBuyForm {...p} showDelivery />);
+  expect(screen.getByText("collector.eth")).toHaveAttribute("title", payer);
+  expect(screen.getByRole("button", { name: "Change" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: /Collect 0\.1 ETH/ }));
+  expect(p.onPrepare).toHaveBeenCalledWith(p.draft);
 });

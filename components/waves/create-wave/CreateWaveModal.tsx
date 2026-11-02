@@ -96,11 +96,13 @@ export default function CreateWaveModal({
     ? getCreateSubwaveTitle(locale, parentWaveName)
     : t(locale, "waves.create.dialog.waveTitle");
 
+  // Unsaved drafts request confirmation before this form can leave.
   return (
     <MobileWrapperDialog
       title={title}
       isOpen={isOpen}
       onClose={requestClose}
+      enableDragToClose={false}
       preserveFocusOnEscape
       closeLabel={t(locale, "common.close")}
       noPadding

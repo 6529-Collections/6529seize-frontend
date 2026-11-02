@@ -17,7 +17,7 @@ export default function UserPageCombinedActivityLog({
       : { ...initialActivityLogParams, matter };
 
   return (
-    <div>
+    <div className="tw-group/profile-activity" data-typography="identity">
       <ProfileActivityLogs
         initialParams={params}
         withFilters={true}

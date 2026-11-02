@@ -13,6 +13,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { CompetitionVotesSkeleton } from "./CompetitionVotesSkeleton";
 
 export default function CompetitionVoteActivity() {
   const { competition } = useCompetition();
@@ -41,7 +42,7 @@ export default function CompetitionVoteActivity() {
         : undefined,
     refetchInterval: 30_000,
   });
-  if (query.isPending) return <CompetitionState />;
+  if (query.isPending) return <CompetitionVotesSkeleton variant="activity" />;
   if (query.isError)
     return (
       <CompetitionState
@@ -54,7 +55,7 @@ export default function CompetitionVoteActivity() {
   const logs = query.data.pages.flat();
   if (!logs.length) return <CompetitionState empty />;
   return (
-    <div className="tw-space-y-3">
+    <div className="tw-w-full tw-max-w-6xl">
       {logs.map((log) => (
         <WaveLeaderboardRightSidebarActivityLog
           key={log.id}
@@ -66,7 +67,7 @@ export default function CompetitionVoteActivity() {
       {query.hasNextPage && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-mt-4`}
           disabled={query.isFetchingNextPage}
           onClick={() => {
             void query.fetchNextPage();

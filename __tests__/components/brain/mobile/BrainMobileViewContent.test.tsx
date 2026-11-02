@@ -252,6 +252,35 @@ describe("BrainMobileViewContent", () => {
     expect(screen.getByTestId("children")).toBeInTheDocument();
   });
 
+  it.each([
+    BrainView.COMPETITIONS,
+    BrainView.CONFIGURATION,
+    BrainView.LEADERBOARD,
+    BrainView.POLLS,
+    BrainView.FAQ,
+  ])(
+    "keeps the shared pending content visible before metadata loads for %s",
+    (activeView) => {
+      render(
+        <BrainMobileViewContent
+          activeView={activeView}
+          activeWaveId="wave-123"
+          isCurationWave={false}
+          isMemesWave={false}
+          isRankWave={false}
+          onDropClick={jest.fn()}
+          onOpenQuickVote={jest.fn()}
+          wave={null}
+        >
+          <div role="status">Loading the requested wave</div>
+        </BrainMobileViewContent>
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Loading the requested wave"
+      );
+    }
+  );
+
   it("renders the about view with the active wave id", () => {
     render(
       <BrainMobileViewContent
@@ -353,7 +382,7 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
-  it("renders leaderboard and forwards wave props when available", () => {
+  it("delegates rank leaderboards to the shared competition content", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
 
@@ -372,16 +401,11 @@ describe("BrainMobileViewContent", () => {
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(mockMyStreamWaveLeaderboard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        onDropClick,
-        wave,
-      })
-    );
+    expect(screen.getByText("child")).toBeInTheDocument();
+    expect(mockMyStreamWaveLeaderboard).not.toHaveBeenCalled();
   });
 
-  it("renders leaderboard for approve waves", () => {
+  it("delegates approve leaderboards to the shared competition content", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
 
@@ -401,16 +425,11 @@ describe("BrainMobileViewContent", () => {
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(mockMyStreamWaveLeaderboard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        onDropClick,
-        wave,
-      })
-    );
+    expect(screen.getByText("child")).toBeInTheDocument();
+    expect(mockMyStreamWaveLeaderboard).not.toHaveBeenCalled();
   });
 
-  it("renders submissions and forwards wave props when available", () => {
+  it("delegates submissions to the shared competition content", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
 
@@ -429,16 +448,11 @@ describe("BrainMobileViewContent", () => {
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("submissions")).toBeInTheDocument();
-    expect(mockMyStreamWaveSubmissions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        onDropClick,
-        wave,
-      })
-    );
+    expect(screen.getByText("child")).toBeInTheDocument();
+    expect(mockMyStreamWaveSubmissions).not.toHaveBeenCalled();
   });
 
-  it("remounts submissions when the active wave changes", () => {
+  it("updates the shared submissions content when the active wave changes", () => {
     const onDropClick = jest.fn();
     const { rerender } = render(
       <BrainMobileViewContent
@@ -451,14 +465,11 @@ describe("BrainMobileViewContent", () => {
         onOpenQuickVote={jest.fn()}
         wave={{ id: "wave-1" } as any}
       >
-        <div>child</div>
+        <div>Submissions for wave one</div>
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("submissions")).toHaveAttribute(
-      "data-instance-id",
-      "1"
-    );
+    expect(screen.getByText("Submissions for wave one")).toBeInTheDocument();
 
     rerender(
       <BrainMobileViewContent
@@ -471,15 +482,13 @@ describe("BrainMobileViewContent", () => {
         onOpenQuickVote={jest.fn()}
         wave={{ id: "wave-2" } as any}
       >
-        <div>child</div>
+        <div>Submissions for wave two</div>
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("submissions")).toHaveAttribute(
-      "data-instance-id",
-      "2"
-    );
-    expect(mockSubmissionsUnmount).toHaveBeenCalledWith(1);
+    expect(screen.getByText("Submissions for wave two")).toBeInTheDocument();
+    expect(screen.queryByText("Submissions for wave one")).toBeNull();
+    expect(mockMyStreamWaveSubmissions).not.toHaveBeenCalled();
   });
 
   it("renders sales when the wave is curation-enabled", () => {
@@ -504,7 +513,7 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
-  it("renders winners with the padded wrapper", () => {
+  it("retains the shared native winners and their layout", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
     const { container } = render(
@@ -518,18 +527,18 @@ describe("BrainMobileViewContent", () => {
         onOpenQuickVote={jest.fn()}
         wave={wave}
       >
-        <div>child</div>
+        <div data-testid="native-winners" className="tw-px-2 sm:tw-px-4">
+          child
+        </div>
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("winners")).toBeInTheDocument();
+    expect(screen.getByTestId("native-winners")).toBeInTheDocument();
     expect(container.firstChild).toHaveClass("tw-px-2", "sm:tw-px-4");
-    expect(mockWaveWinners).toHaveBeenCalledWith(
-      expect.objectContaining({ onDropClick, wave })
-    );
+    expect(mockWaveWinners).not.toHaveBeenCalled();
   });
 
-  it("renders outcome, my votes, and faq when their prerequisites are met", () => {
+  it("delegates outcome and votes while retaining the shared FAQ view", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
     const { rerender } = render(
@@ -547,10 +556,8 @@ describe("BrainMobileViewContent", () => {
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByTestId("outcome")).toBeInTheDocument();
-    expect(mockMyStreamWaveOutcome).toHaveBeenCalledWith(
-      expect.objectContaining({ wave })
-    );
+    expect(screen.getByText("child")).toBeInTheDocument();
+    expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
 
     rerender(
       <BrainMobileViewContent
@@ -566,10 +573,8 @@ describe("BrainMobileViewContent", () => {
         <div>child</div>
       </BrainMobileViewContent>
     );
-    expect(screen.getByTestId("my-votes")).toBeInTheDocument();
-    expect(mockMyStreamWaveMyVotes).toHaveBeenCalledWith(
-      expect.objectContaining({ onDropClick, wave })
-    );
+    expect(screen.getByText("child")).toBeInTheDocument();
+    expect(mockMyStreamWaveMyVotes).not.toHaveBeenCalled();
 
     rerender(
       <BrainMobileViewContent
@@ -621,9 +626,9 @@ describe("BrainMobileViewContent", () => {
     { isRankWave: true, isApproveWave: false },
     { isRankWave: false, isApproveWave: true },
   ])(
-    "does not render outcome for curation competition waves",
+    "delegates outcome eligibility independently of the parent wave type",
     ({ isRankWave, isApproveWave }) => {
-      const { container } = render(
+      render(
         <BrainMobileViewContent
           activeView={BrainView.OUTCOME}
           activeWaveId="1"
@@ -639,13 +644,13 @@ describe("BrainMobileViewContent", () => {
         </BrainMobileViewContent>
       );
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
       expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
     }
   );
 
-  it("does not render outcome content when outcomes are hidden", () => {
-    const { container } = render(
+  it("retains the shared outcome gate without mounting legacy content", () => {
+    render(
       <BrainMobileViewContent
         activeView={BrainView.OUTCOME}
         activeWaveId="1"
@@ -657,11 +662,11 @@ describe("BrainMobileViewContent", () => {
         onOpenQuickVote={jest.fn()}
         wave={{ id: "wave-1" } as any}
       >
-        <div>child</div>
+        <div role="status">Outcome unavailable</div>
       </BrainMobileViewContent>
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent("Outcome unavailable");
     expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
   });
 
@@ -734,7 +739,7 @@ describe("BrainMobileViewContent", () => {
       wave: null,
     },
   ])(
-    "returns null when $activeView is unavailable",
+    "keeps pending content for $activeView until availability is known",
     ({ activeView, isCurationWave, isMemesWave, isRankWave, wave }) => {
       const { container } = render(
         <BrainMobileViewContent
@@ -751,7 +756,12 @@ describe("BrainMobileViewContent", () => {
         </BrainMobileViewContent>
       );
 
-      expect(container.firstChild).toBeNull();
+      const resolvesCompetition = [
+        BrainView.LEADERBOARD,
+        BrainView.SUBMISSIONS,
+      ].includes(activeView);
+      if (wave && !resolvesCompetition) expect(container.firstChild).toBeNull();
+      else expect(screen.getByText("child")).toBeInTheDocument();
     }
   );
 });

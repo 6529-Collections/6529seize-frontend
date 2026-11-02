@@ -9,7 +9,7 @@ import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAc
 
 const MINT_STAT_LOADING_LABEL = "loading...";
 const PAY_ARTIST_INPUT_CLASS_NAME =
-  "tw-block tw-h-auto tw-w-full !tw-rounded-none !tw-border-0 !tw-bg-transparent !tw-p-0 !tw-text-base !tw-font-normal !tw-leading-6 !tw-text-white !tw-shadow-none [color-scheme:dark] placeholder:!tw-text-iron-500 focus:!tw-border-0 focus:!tw-bg-transparent focus:!tw-text-white focus:!tw-shadow-none focus:!tw-outline-none focus:!tw-ring-0";
+  "tw-block tw-h-auto tw-w-full !tw-rounded-none !tw-border-0 !tw-bg-transparent !tw-p-0 !tw-text-base !tw-font-normal !tw-leading-6 !tw-text-white !tw-shadow-none [color-scheme:dark] placeholder:!tw-text-iron-500 focus:!tw-border-0 focus:!tw-bg-transparent focus:!tw-text-white focus:!tw-shadow-none focus:!tw-outline-none focus:!tw-ring-0 focus-visible:!tw-rounded-sm focus-visible:!tw-ring-2 focus-visible:!tw-ring-primary-400";
 
 function getPayArtistSalesLabel(mintStat: ApiMemesMintStat | null): string {
   if (!mintStat) {

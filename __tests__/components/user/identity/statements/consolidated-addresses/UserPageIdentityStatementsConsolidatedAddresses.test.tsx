@@ -1,8 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import UserPageIdentityStatementsConsolidatedAddresses from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ConsolidationLimits } from "@/helpers/consolidationPolicy";
+import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+
+let mockLimits: ConsolidationLimits | null = {
+  maxWallets: 4,
+  ungatedMaxWallets: 3,
+};
+
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({ limits: mockLimits }),
+}));
 
 let mockIsOwner = true;
 let mockAddress: string | undefined = "0x2";
@@ -30,6 +41,8 @@ jest.mock("@tanstack/react-query", () => ({ useQueries: () => [] }));
 jest.mock("@/helpers/Helpers", () => ({
   amIUser: () => mockIsOwner,
   formatNumberWithCommasOrDash: (x: number) => String(x),
+  createPossessionStr:
+    jest.requireActual("@/helpers/Helpers").createPossessionStr,
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: mockAddress }),
@@ -37,11 +50,13 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 
 describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
   beforeEach(() => {
+    mockLimits = { maxWallets: 4, ungatedMaxWallets: 3 };
     mockIsOwner = true;
     mockAddress = "0x2";
   });
 
   const profile: ApiIdentity = {
+    handle: "alice",
     primary_wallet: null,
     wallets: [
       { wallet: "0x1", tdh: 1 } as any,
@@ -49,7 +64,124 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     ],
   } as any;
 
-  it("links owners to the existing consolidation form without prefills", () => {
+  it.each([
+    ["prxt0", "prxt0's Wallet"],
+    ["James", "James' Wallet"],
+    ["A".repeat(100), `${"A".repeat(100)}'s Wallet`],
+    [null, "Wallet"],
+    ["", "Wallet"],
+  ] as const)(
+    "uses the viewed profile identity %s for a single-address wallet",
+    (handle, heading) => {
+      mockIsOwner = false;
+      render(
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={{
+            ...profile,
+            handle,
+            wallets: [profile.wallets![0]!],
+          }}
+        />
+      );
+      expect(
+        screen.getByRole("heading", { name: heading })
+      ).toBeInTheDocument();
+      expect(screen.getByText("1 of 4 addresses")).toBeInTheDocument();
+    }
+  );
+
+  it.each(SUPPORTED_LOCALES)(
+    "uses English fallback wallet copy for %s",
+    (locale) => {
+      const languages = jest
+        .spyOn(navigator, "languages", "get")
+        .mockReturnValue([locale]);
+      try {
+        render(
+          <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+        );
+        expect(
+          screen.getByRole("heading", { name: "alice's Wallet" })
+        ).toBeInTheDocument();
+        expect(screen.getByText("2 of 4 addresses")).toBeInTheDocument();
+      } finally {
+        languages.mockRestore();
+      }
+    }
+  );
+
+  it("does not flash a bare count before limits load, and keeps the viewed count current", () => {
+    mockLimits = null;
+    const { rerender } = render(
+      <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+    );
+    const header = screen.getByRole("heading", {
+      name: "alice's Wallet",
+    }).parentElement!;
+    expect(header).toHaveTextContent(/^alice's Wallet$/);
+    expect(screen.getByRole("list").children).toHaveLength(2);
+    expect(
+      screen.getByRole("link", { name: "Wallet Checker" })
+    ).toBeInTheDocument();
+
+    mockLimits = { maxWallets: 4, ungatedMaxWallets: 3 };
+    rerender(
+      <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+    );
+    expect(screen.getByText("2 of 4 addresses")).toBeInTheDocument();
+
+    rerender(
+      <UserPageIdentityStatementsConsolidatedAddresses
+        profile={{
+          ...profile,
+          handle: "prxt0",
+          wallets: [profile.wallets![0]!],
+        }}
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "prxt0's Wallet" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("1 of 4 addresses")).toBeInTheDocument();
+    expect(screen.queryByText("2 of 4 addresses")).not.toBeInTheDocument();
+
+    mockLimits = null;
+    rerender(
+      <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+    );
+    expect(header).toHaveTextContent(/^alice's Wallet$/);
+  });
+
+  it("uses the policy maximum instead of hardcoding four", () => {
+    mockLimits = { maxWallets: 6, ungatedMaxWallets: 3 };
+    render(
+      <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+    );
+    expect(screen.getByText("2 of 6 addresses")).toBeInTheDocument();
+  });
+
+  it.each([[], undefined])(
+    "omits the count when wallet data is empty or unavailable",
+    (wallets) => {
+      const viewedProfile = { ...profile };
+      if (wallets) {
+        viewedProfile.wallets = wallets;
+      } else {
+        delete viewedProfile.wallets;
+      }
+      render(
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={viewedProfile}
+        />
+      );
+      expect(
+        screen.getByRole("heading", { name: "alice's Wallet" }).parentElement
+      ).toHaveTextContent(/^alice's Wallet$/);
+      expect(screen.getByRole("list").children).toHaveLength(0);
+    }
+  );
+
+  it("links owners to the guided consolidation flow and shows the wallet count", () => {
     render(
       <AuthContext.Provider
         value={{ activeProfileProxy: null } as AuthContextType}
@@ -59,13 +191,125 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     );
 
     expect(
+      screen.queryByRole("button", { name: "About identity statements" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "alice's Wallet" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Consolidated Addresses")
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-tooltip-id="statements-help"]')
+    ).toBeNull();
+    expect(
       screen.getByRole("link", { name: "Add another wallet" })
-    ).toHaveAttribute("href", "/delegation/register-consolidation");
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     expect(
       screen.getByText(
         "Link another wallet you control. Your NFTs stay in their wallets."
       )
     ).toBeInTheDocument();
+    expect(screen.getByText("2 of 4 addresses")).toBeInTheDocument();
+    expect(
+      screen.queryByText("This consolidation has the maximum of 4 wallets.")
+    ).not.toBeInTheDocument();
+  });
+
+  it("still offers a fourth wallet when the profile already has three", () => {
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={{
+            ...profile,
+            wallets: [
+              ...profile.wallets!,
+              { wallet: "0x3", display: "c.eth", tdh: 3 },
+            ],
+          }}
+        />
+      </AuthContext.Provider>
+    );
+    expect(screen.getByText("3 of 4 addresses")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Add another wallet" })
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
+  });
+
+  it("replaces the wallet entry with a limit note at four wallets", () => {
+    const fullProfile = {
+      ...profile,
+      wallets: [
+        { wallet: "0x1", tdh: 1 },
+        { wallet: "0x2", tdh: 2 },
+        { wallet: "0x3", tdh: 3 },
+        { wallet: "0x4", tdh: 4 },
+      ],
+    } as ApiIdentity;
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={fullProfile}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("4 of 4 addresses")).toBeInTheDocument();
+    const walletRows = within(screen.getByRole("list")).getAllByRole(
+      "listitem"
+    );
+    expect(walletRows).toHaveLength(4);
+    for (const wallet of fullProfile.wallets!) {
+      expect(
+        within(screen.getByRole("list")).getByTestId(`item-${wallet.wallet}`)
+      ).toBeInTheDocument();
+    }
+    fireEvent.click(screen.getByRole("button", { name: "toggle-0x4" }));
+    expect(screen.getByTestId("state-0x4")).toHaveTextContent("open");
+    expect(
+      screen.queryByRole("link", { name: "Add another wallet" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("This consolidation has the maximum of 4 wallets.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Wallet Checker" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows the limit note only to the owner", () => {
+    mockIsOwner = false;
+    const fullProfile = {
+      ...profile,
+      wallets: [
+        { wallet: "0x1", tdh: 1 },
+        { wallet: "0x2", tdh: 2 },
+        { wallet: "0x3", tdh: 3 },
+        { wallet: "0x4", tdh: 4 },
+      ],
+    } as ApiIdentity;
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={fullProfile}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("4 of 4 addresses")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list")).getAllByRole("listitem")
+    ).toHaveLength(4);
+    expect(screen.getByTestId("item-0x4")).toBeInTheDocument();
+    expect(
+      screen.queryByText("This consolidation has the maximum of 4 wallets.")
+    ).not.toBeInTheDocument();
   });
 
   it.each(["visitor", "disconnected", "proxy"] as const)(
@@ -81,6 +325,10 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
         </AuthContext.Provider>
       );
 
+      expect(
+        screen.getByRole("heading", { name: "alice's Wallet" })
+      ).toBeInTheDocument();
+      expect(screen.getByText("2 of 4 addresses")).toBeInTheDocument();
       expect(
         screen.queryByRole("link", { name: "Add another wallet" })
       ).not.toBeInTheDocument();
@@ -105,7 +353,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     expect(firstItem).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Wallet Checker" })
-    ).toHaveAttribute("href", "/delegation/wallet-checker?address=0x2");
+    ).toHaveAttribute("href", "/safe-collecting/wallet-checker?address=0x2");
   });
 
   it("omits wallet actions when the profile has no wallets", () => {

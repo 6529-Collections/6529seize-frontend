@@ -80,6 +80,7 @@ export default function WavesOutcome({
   dates,
   display,
   maxWinners,
+  lockDefinitions = false,
   setOutcomeType,
   setOutcomes,
   setDisplay,
@@ -92,6 +93,7 @@ export default function WavesOutcome({
   readonly dates: CreateWaveDatesConfig;
   readonly display: CreateWaveDisplayConfig;
   readonly maxWinners: number | null;
+  readonly lockDefinitions?: boolean;
   readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;
   readonly setDisplay: (display: CreateWaveDisplayConfig) => void;
@@ -104,6 +106,7 @@ export default function WavesOutcome({
   const isAdvancedCustomized = isApproveWave && maxWinners !== null;
 
   const onOutcome = (outcome: CreateWaveOutcomeConfig) => {
+    if (lockDefinitions) return;
     setOutcomes([...outcomes, outcome]);
     setOutcomeType(null);
   };
@@ -162,33 +165,38 @@ export default function WavesOutcome({
     <div className="tw-mx-auto tw-w-full">
       <CreateWaveStepHeader title={t(locale, "waves.create.outcomes.title")} />
       <div className="tw-mt-6 tw-space-y-6">
-        <section aria-labelledby="create-wave-outcome-type-heading">
-          <h3
-            id="create-wave-outcome-type-heading"
-            className={`tw-mb-3 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
-          >
-            {t(locale, "waves.create.outcomes.chooseType")}
-          </h3>
-          <CreateWaveOutcomeTypes
-            outcomeType={outcomeType}
-            setOutcomeType={setOutcomeType}
-          />
-        </section>
-        <div>
-          {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
-          <CommonAnimationHeight>
-            {outcomeType ? (
-              components[outcomeType]
-            ) : (
-              <CreateWaveOutcomesRows
-                waveType={waveType}
-                errors={errors}
-                outcomes={outcomes}
-                setOutcomes={setOutcomes}
-              />
-            )}
-          </CommonAnimationHeight>
-        </div>
+        <fieldset
+          disabled={lockDefinitions}
+          className="tw-m-0 tw-min-w-0 tw-space-y-6 tw-border-0 tw-p-0 disabled:tw-opacity-60"
+        >
+          <section aria-labelledby="create-wave-outcome-type-heading">
+            <h3
+              id="create-wave-outcome-type-heading"
+              className={`tw-mb-3 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
+            >
+              {t(locale, "waves.create.outcomes.chooseType")}
+            </h3>
+            <CreateWaveOutcomeTypes
+              outcomeType={outcomeType}
+              setOutcomeType={setOutcomeType}
+            />
+          </section>
+          <div>
+            {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
+            <CommonAnimationHeight>
+              {outcomeType !== null ? (
+                components[outcomeType]
+              ) : (
+                <CreateWaveOutcomesRows
+                  waveType={waveType}
+                  errors={errors}
+                  outcomes={outcomes}
+                  setOutcomes={lockDefinitions ? () => undefined : setOutcomes}
+                />
+              )}
+            </CommonAnimationHeight>
+          </div>
+        </fieldset>
         {isApproveWave && (
           <CreateWaveOutcomeWarning
             waveType={waveType}

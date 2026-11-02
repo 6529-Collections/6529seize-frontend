@@ -1,20 +1,20 @@
 "use client";
 
-import {
-  ChevronLeftIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useMessageSearch } from "@/hooks/useMessageSearch";
+import AdvancedWaveSearchInput from "@/components/waves/drops/search/AdvancedWaveSearchInput";
+import HeaderSearchInput from "./HeaderSearchInput";
 import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -23,6 +23,7 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useAuth } from "@/components/auth/Auth";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -46,7 +47,6 @@ import {
   type SidebarPageEntry,
   useSidebarSections,
 } from "@/hooks/useSidebarSections";
-import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -63,7 +63,6 @@ import {
   EMPTY_PROFILE_RESULTS,
   FILTERABLE_CATEGORIES,
   HEADER_SEARCH_LABELS,
-  HEADER_SEARCH_RESULTS_LISTBOX_ID,
   MIN_SEARCH_LENGTH,
   NFT_SEARCH_MIN_LENGTH,
   SEARCH_ONLY_PAGES,
@@ -83,7 +82,9 @@ import {
 } from "./pageSearch";
 
 const HEADER_SEARCH_DIALOG_TITLE_ID = "header-search-dialog-title";
-const HEADER_SEARCH_INPUT_DESCRIPTION_ID = "header-search-input-description";
+const MessageSearchResults = dynamic(
+  () => import("@/components/waves/drops/search/MessageSearchResults")
+);
 const HEADER_SEARCH_SESSION_QUERY_KEY = "headerSearchLastQuery";
 const HEADER_SEARCH_RECENT_QUERIES_KEY = "headerSearchRecentQueries";
 const MAX_RECENT_SEARCHES = 5;
@@ -232,6 +233,8 @@ function ScopedHeaderSearchModal({
   useLayoutViewportLock(true);
   useBodyScrollLock({ reserveScrollbarGap: true });
   const pathname = usePathname();
+  const router = useRouter();
+  const myStream = useMyStreamOptional();
   const initialPathnameRef = useRef(pathname);
   const sessionQueryStorageKey = getScopedStorageKey(
     HEADER_SEARCH_SESSION_QUERY_KEY,
@@ -269,6 +272,11 @@ function ScopedHeaderSearchModal({
       (Object.values(CATEGORY) as CATEGORY[]).includes(value as CATEGORY)
   );
 
+  const isMessagesCategory = selectedCategory === CATEGORY.MESSAGES;
+  const messageSearch = useMessageSearch({
+    query: searchValue,
+    enabled: isMessagesCategory,
+  });
   useDebounce(() => setDebouncedValue(searchValue), 350, [searchValue]);
 
   const trimmedSearchValue = searchValue.trim();
@@ -278,14 +286,16 @@ function ScopedHeaderSearchModal({
   const isLiveNumericSearch =
     trimmedSearchValue.length > 0 && !Number.isNaN(Number(trimmedSearchValue));
   const isLiveSearchEligible = meetsCharacterThreshold || isLiveNumericSearch;
-  const shouldSearchDefault = trimmedDebouncedValue.length >= MIN_SEARCH_LENGTH;
+  const shouldSearchDefault =
+    !isMessagesCategory && trimmedDebouncedValue.length >= MIN_SEARCH_LENGTH;
   const shouldSearchNfts =
-    trimmedDebouncedValue.length >= NFT_SEARCH_MIN_LENGTH ||
-    (trimmedDebouncedValue.length > 0 &&
-      !Number.isNaN(Number(trimmedDebouncedValue)));
+    !isMessagesCategory &&
+    (trimmedDebouncedValue.length >= NFT_SEARCH_MIN_LENGTH ||
+      (trimmedDebouncedValue.length > 0 &&
+        !Number.isNaN(Number(trimmedDebouncedValue))));
   const isQuerySettled = trimmedSearchValue === trimmedDebouncedValue;
-  const isAwaitingDebouncedSearch = isLiveSearchEligible && !isQuerySettled;
-  const formattedInputMinLength = formatInteger(locale, MIN_SEARCH_LENGTH);
+  const isAwaitingDebouncedSearch =
+    !isMessagesCategory && isLiveSearchEligible && !isQuerySettled;
   const { appWalletsSupported } = useAppWallets();
   const { country } = useCookieConsent();
   const capacitor = useCapacitor();
@@ -412,7 +422,7 @@ function ScopedHeaderSearchModal({
         endpoint: "community-members",
         params: { param: trimmedDebouncedValue, sort: "level" },
       }),
-    enabled: shouldSearchDefault,
+    enabled: !isMessagesCategory && shouldSearchDefault,
   });
 
   const {
@@ -427,7 +437,7 @@ function ScopedHeaderSearchModal({
         endpoint: "nfts_search",
         params: { search: trimmedDebouncedValue },
       }),
-    enabled: shouldSearchNfts,
+    enabled: !isMessagesCategory && shouldSearchNfts,
   });
 
   const {
@@ -435,7 +445,10 @@ function ScopedHeaderSearchModal({
     isFetching: isFetchingWaves,
     error: wavesError,
     refetch: refetchWaves,
-  } = useHeaderSearchWaves(trimmedDebouncedValue, shouldSearchDefault);
+  } = useHeaderSearchWaves(
+    trimmedDebouncedValue,
+    !isMessagesCategory && shouldSearchDefault
+  );
 
   const pageResults = useMemo(
     () =>
@@ -514,9 +527,7 @@ function ScopedHeaderSearchModal({
     ]
   );
 
-  const selectedSearchCategory = isFilterableCategory(selectedCategory)
-    ? selectedCategory
-    : CATEGORY.ALL;
+  const selectedSearchCategory = selectedCategory;
 
   const derivedState = useMemo(() => {
     if (!isLiveSearchEligible) return STATE.INITIAL;
@@ -570,9 +581,6 @@ function ScopedHeaderSearchModal({
     globalThis.setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
-  };
   const charactersRemaining = Math.max(
     MIN_SEARCH_LENGTH - trimmedSearchValue.length,
     0
@@ -631,58 +639,32 @@ function ScopedHeaderSearchModal({
               </div>
 
               <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">
-                <div className="tw-relative">
-                  <MagnifyingGlassIcon
-                    className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
-                    aria-hidden="true"
+                {isMessagesCategory ? (
+                  <AdvancedWaveSearchInput
+                    query={searchValue}
+                    onQueryChange={setSearchValue}
+                    wave={messageSearch.selectedWave}
+                    onWaveChange={messageSearch.setSelectedWave}
+                    author={messageSearch.authorFilter}
+                    onAuthorChange={messageSearch.setAuthorFilter}
+                    inputRef={inputRef}
+                    enabled
+                    readContext={messageSearch.readContext}
                   />
-                  <label className="tw-sr-only" htmlFor="header-search-input">
-                    {t(locale, "headerSearch.inputLabel")}
-                  </label>
-                  <p
-                    id={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
-                    className="tw-sr-only"
-                  >
-                    {t(locale, "headerSearch.inputDescription.site", {
-                      minLength: formattedInputMinLength,
-                    })}
-                  </p>
-                  <input
-                    id="header-search-input"
-                    ref={inputRef}
-                    type="text"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    aria-haspopup="listbox"
-                    aria-controls={
-                      derivedState === STATE.SUCCESS
-                        ? HEADER_SEARCH_RESULTS_LISTBOX_ID
-                        : undefined
-                    }
-                    aria-expanded={derivedState === STATE.SUCCESS}
-                    aria-describedby={HEADER_SEARCH_INPUT_DESCRIPTION_ID}
-                    autoComplete="off"
-                    value={searchValue}
-                    onChange={handleInputChange}
+                ) : (
+                  <HeaderSearchInput
+                    inputRef={inputRef}
+                    searchValue={searchValue}
+                    derivedState={derivedState}
+                    onChange={setSearchValue}
+                    onClear={handleClearSearch}
                     onKeyDown={(event) => inputKeyHandlerRef.current?.(event)}
-                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
-                    placeholder={t(locale, "headerSearch.placeholder.site")}
                   />
-                  {searchValue.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleClearSearch}
-                      aria-label={t(locale, "headerSearch.clear")}
-                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
-                    >
-                      {t(locale, "headerSearch.clearShort")}
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
 
               <HeaderSearchSiteResults
-                key={`${trimmedDebouncedValue}:${selectedSearchCategory}`}
+                key={trimmedDebouncedValue}
                 selectedCategory={selectedSearchCategory}
                 setSelectedCategory={setSelectedCategory}
                 resultsByCategory={resultsByCategory}
@@ -705,6 +687,36 @@ function ScopedHeaderSearchModal({
                 }
                 charactersRemaining={charactersRemaining}
                 resultsPanelRef={resultsPanelRef}
+                messagesLoading={messageSearch.showLoading}
+                messagesError={messageSearch.isError}
+                messageCount={messageSearch.visibleResults.length}
+                messagesContent={
+                  isMessagesCategory ? (
+                    <MessageSearchResults
+                      search={messageSearch}
+                      onSelect={(drop) => {
+                        const isDirectMessage =
+                          "is_dm_wave" in drop.wave &&
+                          drop.wave.is_dm_wave === true;
+                        if (myStream) {
+                          myStream.activeWave.set(drop.wave.id, {
+                            isDirectMessage,
+                            serialNo: drop.serial_no,
+                          });
+                        } else
+                          router.push(
+                            getWaveRoute({
+                              waveId: drop.wave.id,
+                              serialNo: drop.serial_no,
+                              isDirectMessage,
+                              isApp: false,
+                            })
+                          );
+                        onClose();
+                      }}
+                    />
+                  ) : null
+                }
               />
             </div>
           </div>

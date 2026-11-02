@@ -4,6 +4,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useParams, useRouter } from "next/navigation";
+import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
+jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -33,7 +37,7 @@ describe("Drops", () => {
     dropsListSpy.mockClear();
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useParams as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string) => (key === "user" ? "alice" : null)),
+      user: "alice",
     });
     (useInfiniteQuery as jest.Mock).mockReturnValue({
       data: { pages: [] },
@@ -79,7 +83,7 @@ describe("Drops", () => {
     const push = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push });
     (useParams as jest.Mock).mockReturnValue({
-      get: jest.fn((key: string) => (key === "user" ? "alice" : null)),
+      user: "alice",
     });
     (useInfiniteQuery as jest.Mock).mockReturnValue({
       data: { pages: [drops] },
@@ -107,4 +111,40 @@ describe("Drops", () => {
     );
   });
 
+  it.each([null, { handle: "viewer" }])(
+    "requests public-only drops on every page while preserving viewer authentication",
+    async (connectedProfile) => {
+      render(
+        <AuthContext.Provider value={{ connectedProfile } as any}>
+          <Drops />
+        </AuthContext.Provider>
+      );
+      const options = jest.mocked(useInfiniteQuery).mock.calls.at(-1)![0];
+      expect(options.queryKey).toEqual([
+        QueryKey.PROFILE_DROPS,
+        {
+          handleOrWallet: "alice",
+          context_profile: connectedProfile?.handle ?? null,
+          public_only: true,
+        },
+      ]);
+      const queryFn = options.queryFn as (context: {
+        pageParam: number | null;
+      }) => Promise<unknown>;
+      for (const pageParam of [null, 123]) {
+        await queryFn({ pageParam });
+        expect(commonApiFetch).toHaveBeenLastCalledWith({
+          endpoint: "/drops",
+          params: {
+            limit: "10",
+            author: "alice",
+            include_replies: "true",
+            public_only: "true",
+            ...(pageParam ? { serial_no_less_than: "123" } : {}),
+            ...(connectedProfile ? { context_profile: "viewer" } : {}),
+          },
+        });
+      }
+    }
+  );
 });

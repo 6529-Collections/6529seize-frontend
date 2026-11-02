@@ -47,7 +47,7 @@ export function FaqAccordion({
             <button
               aria-controls={panelId}
               aria-expanded={isOpen}
-              className="tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-6 tw-py-5 tw-text-left tw-text-[15px] tw-font-medium tw-leading-6 tw-text-iron-300 tw-transition-colors group-hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
+              className="tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-6 tw-py-5 tw-text-left tw-text-[15px] tw-font-medium tw-leading-6 tw-text-iron-300 tw-transition-colors group-hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={() => toggleItem(item.id)}
               type="button"
             >

@@ -2,16 +2,33 @@
 
 import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
 import { STREAM_INDEX_ROUTES } from "@/contexts/title.helpers";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef } from "react";
 
 function normalizeDocumentTitle(title: string): string {
   return title.replace(/\s+/g, " ").trim();
 }
 
-export default function DynamicHeadTitle() {
+function hasWaveDropMetadata(
+  pathname: string,
+  searchParams: Pick<URLSearchParams, "get">
+): boolean {
+  return (
+    getWaveIdFromPathname(pathname) !== null &&
+    /^\/waves\/[^/]+\/?$/.test(pathname) &&
+    ["drop", "serialNo"].some((key) => Boolean(searchParams.get(key)?.trim()))
+  );
+}
+
+function DynamicHeadTitleContent() {
   const { title, isTitleOwned, titlePathname } = useTitle();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  // Wave metadata already describes the linked drop. The background chat
+  // must not replace that title, including while metadata is streaming.
+  const hasDropMetadata = hasWaveDropMetadata(pathname, searchParams);
   const normalizedTitle = normalizeDocumentTitle(title);
   const shouldApplyDefaultTitle = pathname === "/" && title === DEFAULT_TITLE;
   const isTitleForCurrentRoute = titlePathname === pathname;
@@ -21,6 +38,17 @@ export default function DynamicHeadTitle() {
   } | null>(null);
 
   useEffect(() => {
+    // A background update may commit before the router's search params catch
+    // up with the browser URL. Never re-arm a wave observer over that drop.
+    if (
+      hasDropMetadata ||
+      hasWaveDropMetadata(
+        window.location.pathname,
+        new URLSearchParams(window.location.search)
+      )
+    )
+      return;
+
     const previousObservation = previousObservationRef.current;
     if (isTitleForCurrentRoute) {
       previousObservationRef.current = { title: normalizedTitle, pathname };
@@ -68,11 +96,11 @@ export default function DynamicHeadTitle() {
     // MutationObserver callbacks are microtasks and can fire between an SPA
     // navigation's head commit and this effect's cleanup, so a stale
     // observer would re-assert the previous route's title over the new
-    // route's metadata. Bail once the live location moves off the pathname
-    // this observation was armed for.
-    const ownedLocationPathname = window.location.pathname;
+    // route's metadata. Bail once the live location moves off the pathname or query
+    // this observation was armed for, including opening a drop in this wave.
+    const ownedLocation = window.location.pathname + window.location.search;
     const reassertTitle = () => {
-      if (window.location.pathname !== ownedLocationPathname) {
+      if (window.location.pathname + window.location.search !== ownedLocation) {
         return;
       }
       if (normalizeDocumentTitle(document.title) !== normalizedTitle) {
@@ -105,6 +133,8 @@ export default function DynamicHeadTitle() {
       textObserver.disconnect();
     };
   }, [
+    hasDropMetadata,
+    search,
     isTitleForCurrentRoute,
     isTitleOwned,
     pathname,
@@ -113,4 +143,12 @@ export default function DynamicHeadTitle() {
   ]);
 
   return null;
+}
+
+export default function DynamicHeadTitle() {
+  return (
+    <Suspense fallback={null}>
+      <DynamicHeadTitleContent />
+    </Suspense>
+  );
 }

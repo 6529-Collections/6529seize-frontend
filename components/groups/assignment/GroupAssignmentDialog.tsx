@@ -35,6 +35,7 @@ export default function GroupAssignmentDialog({
   allowGroupClear = true,
   showChooseGroup = true,
   isWaveAccessEditor = false,
+  embedded = false,
   onRetry,
   onClose,
   onChange,
@@ -59,6 +60,8 @@ export default function GroupAssignmentDialog({
   readonly allowGroupClear?: boolean;
   readonly showChooseGroup?: boolean;
   readonly isWaveAccessEditor?: boolean;
+  /** The containing sheet supplies the title, scrolling and focus boundary. */
+  readonly embedded?: boolean;
   readonly onRetry?: (() => void) | undefined;
   readonly onClose: () => void;
   readonly onChange: (
@@ -74,12 +77,12 @@ export default function GroupAssignmentDialog({
   const descriptionId = useId();
 
   useClickAway(modalRef, () => {
-    if (!paused) {
+    if (!paused && !embedded) {
       onClose();
     }
   });
   useKeyPressEvent("Escape", (event: KeyboardEvent) => {
-    if (paused || event.defaultPrevented) {
+    if (embedded || paused || event.defaultPrevented) {
       return;
     }
 
@@ -149,6 +152,18 @@ export default function GroupAssignmentDialog({
         <CircleLoader />
         <span>{t(locale, "waves.create.groups.editAccess.loading")}</span>
       </output>
+    );
+  }
+
+  if (embedded) {
+    return (
+      <div className="tw-flex tw-flex-col tw-gap-4 tw-px-4">
+        <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {description}
+        </p>
+        {beforePanel}
+        {panelContent}
+      </div>
     );
   }
 

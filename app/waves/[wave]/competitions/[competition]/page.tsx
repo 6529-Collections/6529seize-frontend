@@ -8,15 +8,10 @@ export const metadata = getAppMetadata(
   { title: t(DEFAULT_LOCALE, "competitions.metaTitle") },
   { robots: { index: false, follow: true } }
 );
-export default async function CompetitionPage({
-  params,
-}: {
-  readonly params: Promise<{ wave: string; competition: string }>;
-}) {
-  const { wave, competition } = await params;
+export default function CompetitionPage() {
   return (
     <Suspense fallback={null}>
-      <CompetitionRoute waveId={wave} competitionId={competition} />
+      <CompetitionRoute />
     </Suspense>
   );
 }

@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
+import { VideoPlaybackMemoryProvider } from "@/components/drops/view/item/content/media/VideoPlaybackMemory";
 import {
   clearWaveDropNearViewport,
   setWaveDropNearViewport,
@@ -127,7 +128,7 @@ export default function VirtualScrollWrapper({
   rootMargin = "5000px 0px 5000px 0px",
   enableLongContentCollapse = false,
 }: VirtualScrollWrapperProps) {
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
 
   /**
    * isInView: Tracks if the component is currently in the viewport.
@@ -301,15 +302,19 @@ export default function VirtualScrollWrapper({
         enabled={enableLongContentCollapse}
         scrollContainerRef={scrollContainerRef}
       >
-        {shouldRenderChildren ? (
-          children
-        ) : (
-          <div
-            style={{
-              height: getPlaceholderHeight(measuredHeight),
-            }}
-          />
-        )}
+        <VideoPlaybackMemoryProvider
+          key={`${waveId}:${dropId ?? dropSerialNo}`}
+        >
+          {shouldRenderChildren ? (
+            children
+          ) : (
+            <div
+              style={{
+                height: getPlaceholderHeight(measuredHeight),
+              }}
+            />
+          )}
+        </VideoPlaybackMemoryProvider>
       </WaveDropContentExpansionProvider>
     </div>
   );

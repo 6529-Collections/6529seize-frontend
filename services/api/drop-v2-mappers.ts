@@ -49,6 +49,7 @@ export const mapIdentityOverviewToProfileMin = (
 
   return {
     id: identity.id,
+    ...(identity.is_anonymous ? { is_anonymous: true } : {}),
     handle: identity.handle ?? null,
     pfp: identity.pfp ?? null,
     banner1_color: null,
@@ -98,6 +99,12 @@ export const mapApiWaveOverviewToApiWaveMin = (
   authenticated_user_eligible_to_participate: true,
   authenticated_user_eligible_to_chat:
     wave.context_profile_context?.can_chat ?? true,
+  authenticated_user_eligible_to_reply:
+    wave.context_profile_context?.can_reply ??
+    wave.context_profile_context?.can_chat ??
+    true,
+  authenticated_user_can_delete_replies:
+    wave.context_profile_context?.can_delete_replies ?? false,
   authenticated_user_admin: false,
   visibility_group_id: wave.is_private ? "private" : null,
   participation_group_id: null,
@@ -126,6 +133,8 @@ export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
   authenticated_user_eligible_to_vote: true,
   authenticated_user_eligible_to_participate: true,
   authenticated_user_eligible_to_chat: true,
+  authenticated_user_eligible_to_reply: true,
+  authenticated_user_can_delete_replies: false,
   authenticated_user_admin: false,
   visibility_group_id: null,
   participation_group_id: null,
@@ -208,6 +217,7 @@ const mapReplyToDropPreview = (
   rank: null,
   author: {
     id: replyToDrop.author?.handle ?? "",
+    ...(replyToDrop.author?.is_anonymous ? { is_anonymous: true } : {}),
     handle: replyToDrop.author?.handle ?? null,
     pfp: replyToDrop.author?.pfp ?? null,
     banner1_color: null,

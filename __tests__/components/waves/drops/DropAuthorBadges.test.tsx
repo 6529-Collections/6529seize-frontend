@@ -1,7 +1,8 @@
-import React from "react";
+import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
@@ -83,7 +84,7 @@ jest.mock("@/components/waves/drops/ArtistActivityBadge", () => ({
       data-testid="artist-activity-badge"
       data-submission-count={submissionCount}
       data-trophy-count={trophyCount}
-      data-tooltip-id={tooltipId}
+      {...(tooltipId === undefined ? {} : { "data-tooltip-id": tooltipId })}
       onClick={() => onBadgeClick("active")}
     >
       Artist Activity
@@ -103,7 +104,7 @@ jest.mock("@/components/waves/drops/CurationWaveBadge", () => ({
       type="button"
       data-testid="profile-wave-badge"
       data-wave-id={waveId}
-      data-tooltip-id={tooltipId}
+      {...(tooltipId === undefined ? {} : { "data-tooltip-id": tooltipId })}
       data-wave-name={waveName ?? ""}
       data-wave-pfp={wavePfp ?? ""}
       onClick={onBadgeClick}
@@ -171,11 +172,13 @@ const baseProfile = {
   handle: "artist",
   pfp: null,
   primary_address: "0xabc",
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
   active_main_stage_submission_ids: [],
   winner_main_stage_drop_ids: [],
   artist_of_prevote_cards: [],
   is_wave_creator: false,
-};
+} satisfies ComponentProps<typeof DropAuthorBadges>["profile"];
 
 const competitionWave = {
   id: "wave-1",
@@ -198,6 +201,23 @@ describe("DropAuthorBadges", () => {
 
   it("returns null when profile has no activity and no profile wave", () => {
     const { container } = render(<DropAuthorBadges profile={baseProfile} />);
+    expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
+    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
+  });
+
+  it("does not expose badges or profile previews for an anonymous author", () => {
+    const { container } = render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          is_anonymous: true,
+          active_main_stage_submission_ids: ["entry"],
+          winner_main_stage_drop_ids: ["winner"],
+          profile_wave_id: "private-author-wave",
+        }}
+      />
+    );
     expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
     expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
@@ -452,6 +472,8 @@ describe("DropAuthorBadges", () => {
           id: "identity-1",
           handle: "identity-user",
           primary_wallet: "0xwallet",
+          classification: ApiProfileClassification.Pseudonym,
+          sub_classification: null,
           active_main_stage_submission_ids: ["submission-1"],
           winner_main_stage_drop_ids: [],
           artist_of_prevote_cards: [],

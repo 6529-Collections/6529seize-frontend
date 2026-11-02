@@ -1,10 +1,38 @@
 import {
+  areSameProfileIdentity,
   getProfileConnectedStatus,
   getProfileViewerContext,
   isOwnProfileRoute,
   profileAndConsolidationsToProfileMin,
 } from "@/helpers/ProfileHelpers";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
+
+it("does not equate separate anonymous entries or a real Anonymous handle", () => {
+  const author = {
+    id: "anonymous-entry-one",
+    handle: "Anonymous",
+    is_anonymous: true,
+  };
+  expect(
+    areSameProfileIdentity({
+      left: author,
+      right: {
+        id: "anonymous-entry-two",
+        handle: "Anonymous",
+        is_anonymous: true,
+      },
+    })
+  ).toBe(false);
+  expect(
+    areSameProfileIdentity({
+      left: author,
+      right: { id: "real-profile", handle: "Anonymous" },
+    })
+  ).toBe(false);
+  expect(areSameProfileIdentity({ left: author, right: { ...author } })).toBe(
+    true
+  );
+});
 
 describe("getProfileConnectedStatus", () => {
   it("returns NOT_CONNECTED when profile missing", () => {

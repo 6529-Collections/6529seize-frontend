@@ -12,7 +12,10 @@ const getEarliestValidEndTimestamp = (timestamp: number) => {
   return nextValidMinute.getTime();
 };
 
-let mockSelectedDayTimestamp = new Date("2035-05-10T00:00:00.000Z").getTime();
+// The calendar and time picker work in the creator's wall-clock time, and the
+// component clamps in that time. Fixtures are therefore built from local
+// wall-clock parts, so "9:15 on May 1" means the same in every time zone.
+let mockSelectedDayTimestamp = new Date(2035, 4, 10).getTime();
 let mockTimeSelection = { hours: 15, minutes: 30 };
 const mockCommonCalendar = jest.fn((props: any) => (
   <button
@@ -50,7 +53,7 @@ jest.mock(
 jest.mock("@/components/common/TooltipIconButton", () => () => <div />);
 
 describe("CreateWaveDatesApproveEnd", () => {
-  const submissionStartDate = new Date("2035-05-01T09:15:00.000Z").getTime();
+  const submissionStartDate = new Date(2035, 4, 1, 9, 15).getTime();
   const baseDates: CreateWaveDatesConfig = {
     submissionStartDate,
     votingStartDate: submissionStartDate,
@@ -63,7 +66,7 @@ describe("CreateWaveDatesApproveEnd", () => {
   beforeEach(() => {
     mockCommonCalendar.mockClear();
     mockTimePicker.mockClear();
-    mockSelectedDayTimestamp = new Date("2035-05-10T00:00:00.000Z").getTime();
+    mockSelectedDayTimestamp = new Date(2035, 4, 10).getTime();
     mockTimeSelection = { hours: 15, minutes: 30 };
   });
 
@@ -98,7 +101,7 @@ describe("CreateWaveDatesApproveEnd", () => {
   });
 
   it("clamps same-day calendar selection to the next valid minute", async () => {
-    mockSelectedDayTimestamp = new Date("2035-05-01T00:00:00.000Z").getTime();
+    mockSelectedDayTimestamp = new Date(2035, 4, 1).getTime();
     const setDates = jest.fn();
     const user = userEvent.setup();
     render(
@@ -118,9 +121,14 @@ describe("CreateWaveDatesApproveEnd", () => {
   });
 
   it("keeps same-day calendar selection strictly after starts with seconds", async () => {
-    mockSelectedDayTimestamp = new Date("2035-05-01T00:00:00.000Z").getTime();
+    mockSelectedDayTimestamp = new Date(2035, 4, 1).getTime();
     const submissionStartDateWithSeconds = new Date(
-      "2035-05-01T09:15:45.000Z"
+      2035,
+      4,
+      1,
+      9,
+      15,
+      45
     ).getTime();
     const setDates = jest.fn();
     const user = userEvent.setup();
@@ -177,7 +185,12 @@ describe("CreateWaveDatesApproveEnd", () => {
   it("clamps same-day time selection to the next valid minute", async () => {
     mockTimeSelection = { hours: 9, minutes: 15 };
     const submissionStartDateWithSeconds = new Date(
-      "2035-05-01T09:15:45.000Z"
+      2035,
+      4,
+      1,
+      9,
+      15,
+      45
     ).getTime();
     const datesWithEnd = {
       ...baseDates,
@@ -204,9 +217,7 @@ describe("CreateWaveDatesApproveEnd", () => {
   });
 
   it("derives the displayed time from the latest dates props", () => {
-    const updatedSubmissionStartDate = new Date(
-      "2035-05-03T12:45:00.000Z"
-    ).getTime();
+    const updatedSubmissionStartDate = new Date(2035, 4, 3, 12, 45).getTime();
     const { rerender } = render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}

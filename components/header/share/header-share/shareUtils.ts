@@ -494,3 +494,52 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
       element.getAttribute("aria-hidden") !== "true"
   );
 }
+
+export function trapFocusInDialog(
+  event: KeyboardEvent,
+  dialog: HTMLDialogElement | null
+): void {
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  if (!dialog) {
+    return;
+  }
+
+  const focusableElements = getFocusableElements(dialog);
+  if (focusableElements.length === 0) {
+    event.preventDefault();
+    dialog.focus();
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements.at(-1);
+  if (!firstElement || !lastElement) {
+    event.preventDefault();
+    dialog.focus();
+    return;
+  }
+  const activeElement = document.activeElement as HTMLElement | null;
+  const activeInsideDialog = activeElement
+    ? dialog.contains(activeElement)
+    : false;
+
+  if (event.shiftKey) {
+    if (
+      !activeInsideDialog ||
+      activeElement === firstElement ||
+      activeElement === dialog
+    ) {
+      event.preventDefault();
+      lastElement.focus();
+    }
+    return;
+  }
+
+  if (!activeInsideDialog || activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
+}

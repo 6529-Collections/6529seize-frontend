@@ -21,3 +21,6 @@ export const DELEGATION_FIELD_CLASS_NAME =
 
 export const DELEGATION_FIELD_LABEL_CLASS_NAME =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200";
+
+export const DELEGATION_INLINE_LINK_CLASS_NAME =
+  "tw-rounded-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 tw-transition-colors hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";

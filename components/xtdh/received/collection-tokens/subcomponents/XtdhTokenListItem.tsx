@@ -48,10 +48,10 @@ export function XtdhTokenListItem({
           hasError={hasMetadataError}
         />
         <div className="tw-flex tw-flex-col tw-gap-0.5">
-          <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+          <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100">
             {metadata?.name ?? tokenLabel}
           </p>
-          <p className="tw-m-0 tw-text-xs tw-text-iron-500">{tokenLabel}</p>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">{tokenLabel}</p>
         </div>
       </div>
       <XtdhContributorSummary

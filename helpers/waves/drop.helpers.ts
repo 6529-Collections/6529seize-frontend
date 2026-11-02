@@ -1,11 +1,11 @@
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
-import { sha256 } from "ethereum-cryptography/sha256.js";
-import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+import { bytesToHex, sha256, stringToBytes } from "viem";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 
 export enum DropSize {
@@ -26,6 +26,15 @@ export interface ExtendedDrop extends ApiDropV2View {
   clientDeliveryState?: DropClientDeliveryState | undefined;
   competition_id?: string | undefined;
   competition_title?: string | undefined;
+  // Scope permissions to the account and proxy that resolved this association.
+  competition_context?:
+    | {
+        readonly viewer: string | null;
+        readonly waveId: string;
+        readonly dropId: string;
+        readonly data: ApiDropCompetitionContext;
+      }
+    | undefined;
   over_threshold_since_ms?: number | null | undefined;
 }
 
@@ -57,7 +66,9 @@ export const getStableDropKey = (
     wave_id: drop.wave.id,
     reply_to_id: drop.reply_to?.drop_id ?? null,
     reply_to_part_id: drop.reply_to?.drop_part_id ?? null,
-    author_handle: drop.author.handle,
+    author_handle: drop.author.is_anonymous
+      ? drop.author.id
+      : drop.author.handle,
     title: drop.title,
     parts_content: drop.parts.map((part) => part.content).join(""),
     metadata: drop.metadata
@@ -66,11 +77,12 @@ export const getStableDropKey = (
     stable_created_at: stableCreatedAt,
   };
 
-  const hash = sha256(utf8ToBytes(JSON.stringify(input)));
+  const hash = sha256(stringToBytes(JSON.stringify(input)), "bytes");
   const decoder = new TextDecoder("utf-8");
   const key = decoder.decode(hash);
 
-  return { key, hash: Buffer.from(hash).toString("hex") };
+  // viem prefixes hex with "0x"; the stable hash has always been bare hex.
+  return { key, hash: bytesToHex(hash).slice(2) };
 };
 
 const findClosestMatch = (
@@ -83,6 +95,12 @@ const findClosestMatch = (
   return existingDrops.reduce(
     (closest, current) => {
       if (current.type === DropSize.LIGHT) {
+        return closest;
+      }
+      if (
+        (current.author.is_anonymous || newDrop.author.is_anonymous) &&
+        current.author.id !== newDrop.author.id
+      ) {
         return closest;
       }
       if (

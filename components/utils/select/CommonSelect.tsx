@@ -14,6 +14,7 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly mobileLabel?: string | undefined;
   readonly value: T;
   readonly key: string;
+  readonly panelId?: string | undefined;
   readonly childrenProps?: U | undefined;
   readonly badge?: number | undefined;
 }
@@ -33,7 +34,13 @@ interface CommonSelectDefaultProps<T, U> {
   readonly disabled?: boolean | undefined;
   readonly theme?: "dark" | "light" | undefined;
   readonly size?: "sm" | "md" | "tabs" | undefined;
-  readonly variant?: "default" | "editorial" | "toolbar" | undefined;
+  readonly variant?:
+    | "default"
+    | "editorial"
+    | "toolbar"
+    | "filter"
+    | "sub-view"
+    | undefined;
   readonly menuMinWidth?: number | undefined;
   readonly containerRef?: RefObject<HTMLDivElement | null> | undefined; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;

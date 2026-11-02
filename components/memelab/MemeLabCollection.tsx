@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
+import Button from "@/components/utils/button/Button";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
@@ -14,7 +15,7 @@ import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getInitialRouterValues, sortChanged } from "./MemeLab";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
@@ -29,6 +30,23 @@ const MEME_LAB_COLLECTION_SORT_OPTIONS = Object.values(MemeLabSort).filter(
 const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
+
+// A card's website field may hold several space-separated sites. The header
+// renders one link per site, so keep each distinct site once, space-separated.
+function getCollectionWebsites(nftMetas: LabExtendedData[]): string {
+  const websites = new Set<string>();
+  for (const nftMeta of nftMetas) {
+    if (!nftMeta.website) {
+      continue;
+    }
+    for (const website of nftMeta.website.split(/\s+/)) {
+      if (website) {
+        websites.add(website);
+      }
+    }
+  }
+  return Array.from(websites).join(" ");
+}
 
 export default function LabCollection({
   collectionName,
@@ -50,6 +68,9 @@ export default function LabCollection({
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
@@ -64,41 +85,50 @@ export default function LabCollection({
   }, [initialSort, initialSortDirection]);
 
   useEffect(() => {
-    if (collectionName) {
-      const nftsUrl = `${
-        publicEnv.API_ENDPOINT
-      }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
-      fetchAllPages<LabExtendedData>(nftsUrl).then((responseNftMetas) => {
-        setNftMetas(responseNftMetas);
-        if (responseNftMetas.length > 0) {
-          const collectionTokenIds = responseNftMetas.map(
-            (n: LabExtendedData) => n.id
-          );
-          fetchAllPages<LabNFT>(
-            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${collectionTokenIds.join(
-              ","
-            )}`
-          ).then((responseNfts) => {
-            setNfts(responseNfts);
-            setNftsLoaded(true);
-          });
-          let collectionSecondaryLink = "";
-          responseNftMetas.map((nftm) => {
-            if (
-              nftm.website &&
-              !collectionSecondaryLink.includes(nftm.website)
-            ) {
-              collectionSecondaryLink += nftm.website;
-            }
-          });
-          setWebsite(collectionSecondaryLink);
-        } else {
-          setNfts([]);
-          setNftsLoaded(true);
-        }
-      });
+    if (!collectionName) {
+      return;
     }
-  }, [collectionName]);
+    let cancelled = false;
+    const nftsUrl = `${
+      publicEnv.API_ENDPOINT
+    }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
+
+    async function loadCollection() {
+      setLoadFailed(false);
+      try {
+        const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
+        const responseNfts =
+          responseNftMetas.length > 0
+            ? await fetchAllPages<LabNFT>(
+                `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${responseNftMetas
+                  .map((n: LabExtendedData) => n.id)
+                  .join(",")}`
+              )
+            : [];
+        if (cancelled) {
+          return;
+        }
+        setNftMetas(responseNftMetas);
+        setNfts(responseNfts);
+        if (responseNftMetas.length > 0) {
+          setWebsite(getCollectionWebsites(responseNftMetas));
+        }
+        setNftsLoaded(true);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        console.error("Failed to load Meme Lab collection", error);
+        setLoadFailed(true);
+      }
+    }
+
+    void loadCollection();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [collectionName, loadAttempt]);
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
@@ -149,6 +179,28 @@ export default function LabCollection({
   }
 
   function printNftsContent() {
+    if (loadFailed) {
+      return (
+        <div
+          role="alert"
+          className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-6"
+        >
+          <p className="tw-mt-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "collect.error.catalog")}
+          </p>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              resultsRef.current?.focus({ preventScroll: true });
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+          >
+            {t(locale, "collect.retry")}
+          </Button>
+        </div>
+      );
+    }
+
     if (!nftsLoaded) {
       return null;
     }
@@ -212,7 +264,13 @@ export default function LabCollection({
             volumeType={volumeType}
             locale={locale}
           />
-          {printNftsContent()}
+          <div
+            ref={resultsRef}
+            tabIndex={-1}
+            className="focus:tw-outline-none"
+          >
+            {printNftsContent()}
+          </div>
         </div>
       </div>
     </NftBalancesProvider>

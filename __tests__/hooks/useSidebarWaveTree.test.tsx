@@ -165,6 +165,7 @@ describe("useSidebarWaveTree", () => {
         parentWaveId: "parent",
         createdAt: 10,
         unreadDropsCount: 1,
+        isFollowing: true,
       }),
     ];
     const { result, rerender } = renderHook(
@@ -227,11 +228,13 @@ describe("useSidebarWaveTree", () => {
         id: "first-child",
         parentWaveId: "parent",
         unreadDropsCount: 9,
+        isFollowing: true,
       }),
       createMockMinimalWave({
         id: "second-child",
         parentWaveId: "parent",
         unreadDropsCount: 4,
+        isFollowing: true,
       }),
     ];
     const { result } = renderHook(() =>
@@ -255,6 +258,132 @@ describe("useSidebarWaveTree", () => {
       hasUnreadSubwaves: true,
       unreadSubwaveDropsCount: 13,
     });
+  });
+
+  it("counts only followed, unmuted subwaves toward the parent aggregate", () => {
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [
+          createMockMinimalWave({
+            id: "parent",
+            hasSubwaves: true,
+          }),
+          createMockMinimalWave({
+            id: "followed-child",
+            parentWaveId: "parent",
+            unreadDropsCount: 4,
+            isFollowing: true,
+          }),
+          createMockMinimalWave({
+            id: "unfollowed-child",
+            parentWaveId: "parent",
+            unreadDropsCount: 9,
+          }),
+          createMockMinimalWave({
+            id: "followed-muted-child",
+            parentWaveId: "parent",
+            unreadDropsCount: 6,
+            isFollowing: true,
+            isMuted: true,
+          }),
+        ],
+        activeWaveId: null,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[0]).toMatchObject({
+      hasUnreadSubwaves: true,
+      unreadSubwaveDropsCount: 4,
+    });
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      unreadSubwaveDropsCount: 4,
+    });
+  });
+
+  it("does not flag unread activity that only exists in unfollowed subwaves", () => {
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [
+          createMockMinimalWave({
+            id: "parent",
+            hasSubwaves: true,
+          }),
+          createMockMinimalWave({
+            id: "unfollowed-child",
+            parentWaveId: "parent",
+            unreadDropsCount: 3,
+            newDropsCount: {
+              count: 2,
+              latestDropTimestamp: 100,
+              firstUnreadSerialNo: null,
+            },
+          }),
+        ],
+        activeWaveId: null,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[0]).toMatchObject({
+      hasUnreadSubwaves: false,
+      unreadSubwaveDropsCount: 0,
+    });
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      hasUnreadSubwaves: false,
+      unreadSubwaveDropsCount: 0,
+    });
+  });
+
+  it("sorts muted subwaves after unmuted ones, newest activity first in each group", () => {
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [
+          createMockMinimalWave({
+            id: "parent",
+            hasSubwaves: true,
+          }),
+          createMockMinimalWave({
+            id: "muted-newest",
+            parentWaveId: "parent",
+            isMuted: true,
+            newDropsCount: createNewDropsCount(400),
+          }),
+          createMockMinimalWave({
+            id: "unmuted-older",
+            parentWaveId: "parent",
+            newDropsCount: createNewDropsCount(100),
+          }),
+          createMockMinimalWave({
+            id: "muted-older",
+            parentWaveId: "parent",
+            isMuted: true,
+            newDropsCount: createNewDropsCount(50),
+          }),
+          createMockMinimalWave({
+            id: "unmuted-newer",
+            parentWaveId: "parent",
+            newDropsCount: createNewDropsCount(300),
+          }),
+        ],
+        activeWaveId: "unmuted-older",
+      })
+    );
+
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual([
+      "parent",
+      "parent:subwaves-toggle",
+      "parent:unmuted-newer",
+      "parent:unmuted-older",
+      "parent:muted-newest",
+      "parent:muted-older",
+    ]);
   });
 
   it("auto-expands the active subwave parent without local storage", () => {

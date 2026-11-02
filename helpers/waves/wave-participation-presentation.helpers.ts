@@ -1,3 +1,4 @@
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { normalizeOptionalWaveId } from "./wave.helpers";
 
 export type WaveParticipationVariant =
@@ -50,3 +51,13 @@ export const resolveWaveParticipationVariant = ({
 
   return "default";
 };
+
+export function competitionParticipationVariant(
+  capabilities: readonly ApiCompetitionCapability[]
+): WaveParticipationVariant {
+  if (capabilities.includes(ApiCompetitionCapability.MainStage)) return "memes";
+  if (capabilities.includes(ApiCompetitionCapability.Curation))
+    return "curation";
+  if (capabilities.includes(ApiCompetitionCapability.Quorum)) return "quorum";
+  return "default";
+}

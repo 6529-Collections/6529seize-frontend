@@ -7,6 +7,21 @@ import {
 } from "@/helpers/navigation.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getAccessVerdict, isStagingDeployment } from "@/lib/proxy/accessProbe";
+import {
+  plainNotFoundResponse,
+  plainServiceUnavailableResponse,
+} from "@/lib/proxy/plainResponses";
+import {
+  isRetiredReviewDataPath,
+  isStaticAssetPath,
+  isUnservableDotPath,
+} from "@/lib/proxy/publicPaths";
+import {
+  hasMalformedWaveId,
+  MALFORMED_WAVE_ROUTE,
+} from "@/lib/proxy/waveRoutes";
+import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -75,34 +90,27 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STATIC_PATH_PREFIXES = [
-  "/api",
-  "/_next",
-  "/pdfjs/",
-  "/sitemap",
-  "/robots.txt",
-  "/error",
-] as const;
-const STATIC_PATHS = new Set<string>([
-  "/help-index.json",
-  "/llms.txt",
-  "/glossary.json",
-]);
-const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
-const STATIC_PATH_SUFFIXES = [
-  "favicon.ico",
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".svg",
-  ".webp",
-] as const;
+// The access gate runs only on staging deployments, decided from the baked
+// BASE_ENDPOINT so request headers such as Host cannot switch it off.
+// Production and local development never call the API from proxy.
+const ACCESS_GATE_ENABLED = isStagingDeployment(publicEnv.BASE_ENDPOINT);
 
-function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
-  const rawPathname = new URL(req.url).pathname;
+/**
+ * Proxy runs before Next serves `public/` and `_next/static`, so it cannot tell
+ * whether a `/_next/*` file exists. Real `_next/static` and `_next/image`
+ * requests skip proxy entirely; missing `/_next/*` files get a plain 404 from
+ * the `afterFiles` rewrite in `next.config.ts`, which runs after real files.
+ */
+export const config = {
+  matcher: ["/((?!_next/static|_next/image).*)"],
+};
+
+// `/review-data` held the removed Stream review's generated files. Old links
+// get a plain 404 here instead of falling through to the profile catch-all.
+function isRetiredReviewDataRequest(req: NextRequest): boolean {
   return (
-    rawPathname === pathname && pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+    isRetiredReviewDataPath(req.nextUrl.pathname) ||
+    isRetiredReviewDataPath(new URL(req.url).pathname)
   );
 }
 
@@ -289,31 +297,38 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
 async function enforceAccessControl(
   req: NextRequest,
   normalizedPathname: string
-): Promise<NextResponse> {
+): Promise<Response> {
   if (
+    !ACCESS_GATE_ENABLED ||
     normalizedPathname === "/access" ||
     normalizedPathname === "/restricted"
   ) {
     return NextResponse.next();
   }
 
-  const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
-    value: publicEnv.STAGING_API_KEY ?? "",
-  };
-  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/`, {
-    headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
+  // Only the visitor's own access cookie decides the gate; no server-held
+  // credential stands in for it.
+  const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
+  const verdict = await getAccessVerdict({
+    apiEndpoint: publicEnv.API_ENDPOINT,
+    authValue,
   });
 
-  if (response.status === 401) {
+  if (verdict === "unauthorized") {
     req.nextUrl.pathname = "/access";
     req.nextUrl.search = "";
     return NextResponse.redirect(req.nextUrl);
   }
 
-  if (response.status === 403) {
+  if (verdict === "restricted") {
     req.nextUrl.pathname = "/restricted";
     req.nextUrl.search = "";
     return NextResponse.redirect(req.nextUrl);
+  }
+
+  // Fail closed: without a definitive answer the gate must not let pages through.
+  if (verdict === "unavailable") {
+    return plainServiceUnavailableResponse();
   }
 
   return NextResponse.next();
@@ -321,6 +336,13 @@ async function enforceAccessControl(
 
 export default async function proxy(req: NextRequest) {
   try {
+    if (
+      isUnservableDotPath(req.nextUrl.pathname) ||
+      isRetiredReviewDataRequest(req)
+    ) {
+      return plainNotFoundResponse();
+    }
+
     const redirectResponse = handleRedirects(req);
     if (redirectResponse) {
       return redirectResponse;
@@ -331,6 +353,18 @@ export default async function proxy(req: NextRequest) {
       pathname.length > 1 && pathname.endsWith("/")
         ? pathname.slice(0, -1)
         : pathname;
+
+    // Wave routes stream their shell with a 200 before a page can call
+    // notFound(), so an id that cannot be a wave id is answered here: a
+    // rewrite to a route outside those boundaries renders the branded
+    // not-found page with a real 404 and keeps the visitor's URL. The query
+    // stays on the rewritten URL so Next's `_rsc` cache-busting check still
+    // matches on client navigations.
+    if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
+      const notFoundUrl = req.nextUrl.clone();
+      notFoundUrl.pathname = MALFORMED_WAVE_ROUTE;
+      return NextResponse.rewrite(notFoundUrl);
+    }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
@@ -344,19 +378,20 @@ export default async function proxy(req: NextRequest) {
       return NextResponse.redirect(clone, 301);
     }
 
-    if (
-      STATIC_PATHS.has(normalizedPathname) ||
-      isPublicStreamReviewDataPath(req, pathname) ||
-      STATIC_PATH_PREFIXES.some((prefix) =>
-        normalizedPathname.startsWith(prefix)
-      ) ||
-      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix))
-    ) {
+    if (isStaticAssetPath(normalizedPathname)) {
       return NextResponse.next();
     }
 
-    return enforceAccessControl(req, normalizedPathname);
-  } catch (error) {
+    const validatorGateResponse = handleValidatorPageGate(
+      req,
+      normalizedPathname
+    );
+    if (validatorGateResponse) {
+      return validatorGateResponse;
+    }
+
+    return await enforceAccessControl(req, normalizedPathname);
+  } catch {
     return NextResponse.redirect(new URL("/error", req.url));
   }
 }

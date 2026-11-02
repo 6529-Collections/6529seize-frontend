@@ -25,8 +25,10 @@ import {
   type WaveCompetitionPreviewTab,
 } from "./WaveCompetitionBadges";
 import { WaveCompetitionPreviewModal } from "./WaveCompetitionPreviewModal";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 
 interface DropAuthorBadgesProfile {
+  readonly is_anonymous?: boolean;
   readonly id?: string | null;
   readonly handle?: string | null;
   readonly pfp?: string | null;
@@ -227,7 +229,10 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     setIsWaveCompetitionPreviewOpen(false);
   }, []);
 
-  if (!hasActivityBadge && !hasProfileWaveBadge && !hasWaveCompetitionBadge) {
+  if (
+    isAnonymousAuthor(profile) ||
+    (!hasActivityBadge && !hasProfileWaveBadge && !hasWaveCompetitionBadge)
+  ) {
     return null;
   }
 

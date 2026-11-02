@@ -45,6 +45,7 @@ import {
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
   ArweaveAttribute,
@@ -238,6 +239,7 @@ function ArtistInfoStrip({
 }
 
 export default function ManifoldMinting(props: Readonly<Props>) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [isError, setIsError] = useState<boolean>(false);
 
   const [isLocalTimezone, setIsLocalTimezone] = useState<boolean>(true);
@@ -373,7 +375,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }, [instance, descriptionClamped]);
 
   function printMint() {
-    if (!manifoldClaim) {
+    // Restricted iOS never mounts the widget, its contract reads or SEIZE.
+    if (!manifoldClaim || hideNftPurchasing) {
       return <></>;
     }
 

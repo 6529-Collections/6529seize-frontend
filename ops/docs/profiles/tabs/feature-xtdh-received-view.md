@@ -92,7 +92,9 @@ Shared tab routing and owner-mode rules are documented in:
 ## Failure and Recovery
 
 - Collections:
-  - initial load shows skeleton cards,
+  - initial load shows full-width skeleton rows with the same responsive metric
+    columns as the loaded cards; search and sort controls remain in place and
+    disabled while loading,
   - initial fetch failure shows `Retry`,
   - later page failures keep current rows and show inline retry.
 - Tokens:
@@ -115,10 +117,10 @@ Shared tab routing and owner-mode rules are documented in:
 ### Localization fallback debt
 
 - Surface: `XtdhCollectionsList` under `/{user}/xtdh?tab=received` and `/xtdh`.
-- Current fallback: the touched collection-search empty state uses the `en-US`
-  catalog and falls back to that source copy in locales without these keys.
-- Remaining untranslated surface: legacy collection loading, failure, generic
-  empty-state, and pagination copy is still embedded in the component.
+- Current fallback: the touched collection loading and search-empty states use the
+  `en-US` catalog and falls back to that source copy in locales without these keys.
+- Remaining untranslated surface: legacy collection failure, generic empty-state,
+  controls, and pagination copy is still embedded in the component.
 - User impact: non-English locales can see English fallback copy while search,
   retry, selection, and pagination remain functional.
 - Owner/follow-up: xTDH frontend maintainers should move the remaining legacy

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueries";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
@@ -24,10 +25,7 @@ export default function CompetitionPauseHistory({
   );
   const pauses = query.data?.pages.flatMap((page) => page.data) ?? [];
   const [now, setNow] = useState(Date.now);
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(timer);
-  }, []);
+  useVisibleInterval(() => setNow(Date.now()), 30_000);
   const date = (value: number) => (
     <time dateTime={new Date(value).toISOString()}>
       {formatDate(locale, value, { dateStyle: "medium", timeStyle: "short" })}

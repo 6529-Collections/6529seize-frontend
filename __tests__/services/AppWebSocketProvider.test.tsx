@@ -17,6 +17,9 @@ jest.mock("@/services/websocket/MarketplacePreviewWebSocketSync", () => ({
 jest.mock("@/services/websocket/NotificationWebSocketSync", () => ({
   NotificationWebSocketSync: () => null,
 }));
+jest.mock("@/services/websocket/WebSocketRecoverySync", () => ({
+  WebSocketRecoverySync: () => null,
+}));
 jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   DmUnreadStateProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>

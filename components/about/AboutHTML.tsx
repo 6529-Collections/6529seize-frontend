@@ -3,6 +3,11 @@
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import {
+  DOCUMENT_HTML_PROFILE,
+  sanitizeHtml,
+  type HtmlSanitizeProfile,
+} from "@/lib/security/sanitizeHtml";
+import {
   AboutCol as Col,
   AboutContainer as Container,
   ABOUT_PAGE_TITLE_CLASS_NAME,
@@ -21,6 +26,10 @@ const ENS_DOMAINS_LINK_CLASS =
   "tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 tw-transition-colors hover:tw-text-primary-400 hover:tw-decoration-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none";
 const ENS_INLINE_LABEL_PATTERN =
   /&apos;My\s+Names&apos;|&apos;Set as\s+primary name&apos;|Open\s+Safe App|Subdomains\s+Tab|New\s+subname|Edit\s+Records|Set as\s+primary name|Add\s+more info|Skip\s+profile|Available|Finish|Records|Apps|My\s+Names|More/g;
+const ENS_REGISTRATION_SUCCESS_CLASS =
+  "tw-flex tw-items-start tw-gap-2.5 tw-font-medium tw-text-emerald-400";
+const ENS_REGISTRATION_SUCCESS_ICON_CLASS =
+  "tw-mt-1.5 tw-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-400/60 tw-bg-emerald-400/10 tw-text-[10px] tw-font-bold tw-leading-none";
 const ENS_PAYMENT_METHOD_NOTES = [
   "When you select the Ethereum payment method it's recommended to enable the Use of the domain name as a primary name.",
   "If you select the Credit or debit card method, then you will need to revisit your profile and set the primary domain name.",
@@ -41,7 +50,7 @@ function formatEnsHtml(html: string) {
   );
   const htmlWithRegistrationSuccess = htmlWithPaymentMethodNotes.replace(
     ENS_REGISTRATION_SUCCESS_PATTERN,
-    `<span data-ens-registration-success class="tw-flex tw-items-start tw-gap-2.5 tw-font-medium tw-text-emerald-400"><span aria-hidden="true" class="tw-mt-1.5 tw-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-400/60 tw-bg-emerald-400/10 tw-text-[10px] tw-font-bold tw-leading-none">✓</span><span>${ENS_REGISTRATION_SUCCESS}</span></span>`
+    `<span data-ens-registration-success class="${ENS_REGISTRATION_SUCCESS_CLASS}"><span aria-hidden="true" class="${ENS_REGISTRATION_SUCCESS_ICON_CLASS}">✓</span><span>${ENS_REGISTRATION_SUCCESS}</span></span>`
   );
   const htmlWithSafeAppAccent = htmlWithRegistrationSuccess.replace(
     "app.safe.global",
@@ -72,6 +81,30 @@ function formatEnsHtml(html: string) {
   );
 }
 
+// formatEnsHtml adds presentation markup around the fetched document, so the
+// formatted result is sanitized last. Only the class tokens and flags that the
+// formatter itself emits survive; `class` on fetched markup is otherwise dropped.
+const ENS_CLASS_TOKENS: ReadonlySet<string> = new Set(
+  [
+    ENS_INLINE_LABEL_CLASS,
+    ENS_ACCENTED_TEXT_CLASS,
+    ENS_DOMAINS_LINK_CLASS,
+    ENS_REGISTRATION_SUCCESS_CLASS,
+    ENS_REGISTRATION_SUCCESS_ICON_CLASS,
+  ].flatMap((classNames) => classNames.split(" "))
+);
+
+const ENS_HTML_PROFILE: HtmlSanitizeProfile = {
+  ...DOCUMENT_HTML_PROFILE,
+  attributes: {
+    ...DOCUMENT_HTML_PROFILE.attributes,
+    a: [...(DOCUMENT_HTML_PROFILE.attributes?.["a"] ?? []), "class"],
+    span: ["class", "aria-hidden", "data-ens-registration-success"],
+    ul: ["data-ens-payment-notes"],
+  },
+  classTokens: ENS_CLASS_TOKENS,
+};
+
 const ENS_HTML_CONTENT_CLASS = [
   "tw-mx-auto tw-w-full tw-max-w-3xl tw-pb-12 tw-pt-4 tw-text-[0px] tw-font-normal tw-leading-none tw-text-iron-300 sm:tw-pt-4",
   "[&>p:first-child]:tw-mb-8 [&>p:first-child]:tw-mt-0 [&>p:first-child]:tw-text-left [&>p:first-child]:tw-text-sm [&>p:first-child]:tw-leading-6 [&>p:first-child]:tw-text-iron-400",
@@ -101,9 +134,26 @@ interface Props {
 export default function AboutHTML(props: Readonly<Props>) {
   const [html, setHtml] = useState<string>("");
   const isEns = props.path === "ens";
-  const renderedHtml = isEns ? formatEnsHtml(html) : html;
   useEffect(() => {
-    fetchAboutSectionFile(props.path).then(setHtml);
+    let ignore = false;
+    fetchAboutSectionFile(props.path)
+      .then((content) => {
+        if (!ignore) {
+          setHtml(
+            props.path === "ens"
+              ? sanitizeHtml(formatEnsHtml(content), ENS_HTML_PROFILE)
+              : sanitizeHtml(content)
+          );
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setHtml("");
+        }
+      });
+    return () => {
+      ignore = true;
+    };
   }, [props.path]);
 
   let titleLighter = "";
@@ -149,7 +199,7 @@ export default function AboutHTML(props: Readonly<Props>) {
             isEns && "max-sm:tw-px-1"
           )}
           dangerouslySetInnerHTML={{
-            __html: renderedHtml,
+            __html: html,
           }}
         ></Col>
       </Row>

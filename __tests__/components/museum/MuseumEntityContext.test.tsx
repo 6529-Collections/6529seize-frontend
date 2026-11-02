@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MuseumEntityContext } from "@/components/museum/MuseumEntityContext";
 import type { MuseumEntityContextModel } from "@/lib/museum/publication/ia";
+import { withHostTimeZone } from "../../utils/timeZoneHarness";
 
 const context: MuseumEntityContextModel = {
   kind: "work",
@@ -48,4 +49,28 @@ describe("MuseumEntityContext", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Institutional record")).not.toBeInTheDocument();
   });
+
+  it.each(["America/Los_Angeles", "Pacific/Auckland", "Pacific/Kiritimati"])(
+    "prints the status date in UTC whatever the host zone is (%s)",
+    (zone) => {
+      for (const statusAsOf of ["2026-08-09T12:00:00Z", "2026-08-09"]) {
+        const { unmount } = withHostTimeZone(zone, () =>
+          render(
+            <MuseumEntityContext
+              context={{ ...context, statusAsOf }}
+              labels={{
+                ariaLabel: "Museum context",
+                status: "Status",
+                statusAsOf: "Status as of",
+                source: "Institutional record",
+              }}
+            />
+          )
+        );
+
+        expect(screen.getByText("Aug 9, 2026")).toBeInTheDocument();
+        unmount();
+      }
+    }
+  );
 });

@@ -41,7 +41,9 @@ export default function CommonProfileSearchItem({
         onClick={onProfileClick}
         tabIndex={-1}
         className={`tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
+          isHighlighted
+            ? "tw-bg-iron-700 tw-ring-2 tw-ring-inset tw-ring-primary-400"
+            : "tw-bg-transparent"
         }`}
       >
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
@@ -64,11 +66,11 @@ export default function CommonProfileSearchItem({
               </div>
             )}
             <div className="tw-w-[12rem] tw-truncate">
-              <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
+              <p className="tw-m-0 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
                 {title}
               </p>
               {secondaryText && (
-                <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+                <p className="tw-m-0 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
                   {secondaryText}
                 </p>
               )}

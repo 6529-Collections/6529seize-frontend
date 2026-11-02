@@ -24,6 +24,7 @@ interface UseClientNavigationOptions<T, TOptions = undefined> {
    * Return true for fast client-side nav, false for router.push
    */
   readonly canUsePushState: (targetUrl: string, options?: TOptions) => boolean;
+  readonly deferRouteState?: boolean;
 }
 
 interface UseClientNavigationResult<T, TOptions = undefined> {
@@ -43,6 +44,7 @@ export function useClientNavigation<T, TOptions = undefined>({
   buildUrl,
   parseUrl,
   canUsePushState,
+  deferRouteState = false,
 }: UseClientNavigationOptions<T, TOptions>): UseClientNavigationResult<
   T,
   TOptions
@@ -91,8 +93,9 @@ export function useClientNavigation<T, TOptions = undefined>({
         browserWindow.history[method](null, "", target);
         setState(newState);
       } else {
-        // Set state immediately to avoid flash, then navigate
-        setState(newState);
+        // Route-owned views must remain on their committed wave until the new
+        // URL commits, otherwise destination content renders under the old tabs.
+        if (!deferRouteState) setState(newState);
         if (options?.replace) {
           router.replace(target);
         } else {
@@ -100,7 +103,7 @@ export function useClientNavigation<T, TOptions = undefined>({
         }
       }
     },
-    [buildUrl, canUsePushState, router]
+    [buildUrl, canUsePushState, deferRouteState, router]
   );
 
   return {

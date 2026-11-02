@@ -13,7 +13,7 @@ metrics.
 - Metrics and references: `/network/health`, `/network/health/network-tdh`,
   `/network/tdh`, `/network/tdh/historic-boosts`, `/network/definitions`,
   `/network/levels`, `/network/xtdh`
-- Utility route: `/network/prenodes`
+- Saved Prenodes route: `/network/prenodes`
 - Related live dashboard: `/xtdh`
 
 ## Entry Points
@@ -50,8 +50,9 @@ metrics.
   refresh the route. There is no inline retry button on this page.
 - `/network/health/network-tdh` shows only heading content:
   TDH history data is empty or unavailable. Refresh or retry later.
-- `/network/prenodes` shows only title and UTC note:
-  prenodes payload is empty or failed. Refresh or retry later.
+- `/network/prenodes` shows a deprecation notice:
+  this is the expected page. Use `Explore 6529 Desktop` to open
+  `/about/6529-apps`; the page no longer requests a Prenodes registry.
 - `/xtdh` shows `Unable to load xTDH stats`:
   use `Retry`. If it keeps failing, refresh the route.
 
@@ -69,8 +70,7 @@ metrics.
 ## Limitations / Notes
 
 - Live API-dependent routes include `/network`, `/network/activity`,
-  `/network/health`, `/network/health/network-tdh`, `/network/prenodes`,
-  and `/xtdh`.
+  `/network/health`, `/network/health/network-tdh`, and `/xtdh`.
 - Retry controls are route-specific.
   `/xtdh` has inline retry for top stats; most Network routes recover by refresh
   or reopen.
@@ -82,5 +82,5 @@ metrics.
 - [Network Activity Feed](feature-network-activity-feed.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
-- [Prenodes Status](feature-prenodes-status.md)
+- [Prenodes Deprecation](feature-prenodes-status.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)

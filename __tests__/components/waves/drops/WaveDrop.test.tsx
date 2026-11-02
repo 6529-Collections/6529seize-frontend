@@ -5,8 +5,12 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
-import { EditingDropProvider } from "@/contexts/EditingDropContext";
+import {
+  EditingDropProvider,
+  useEditingDrop,
+} from "@/contexts/EditingDropContext";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
@@ -74,6 +78,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
 });
 
 jest.mock("@/hooks/isMobileDevice");
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
 jest.mock("@/hooks/useHasTouchInput", () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -618,6 +625,47 @@ describe("WaveDrop", () => {
     expect(onDropContentClick).not.toHaveBeenCalled();
   });
 
+  it("cancels pending row holds and ignores child long presses while editing", () => {
+    jest.useFakeTimers();
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    function StartEditing() {
+      const { setEditingDropId } = useEditingDrop();
+      return (
+        <button onClick={() => setEditingDropId(drop.id)}>Start editing</button>
+      );
+    }
+    renderWithEditingDropProvider(
+      <>
+        <StartEditing />
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      </>
+    );
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Start editing" }));
+    act(() => jest.advanceTimersByTime(1000));
+    expect(getLastMockProps(mockWaveDropContent).isEditing).toBe(true);
+    act(() => getLastMockProps(mockWaveDropContent).onLongPress());
+    expect(getLastMockProps(mockWaveDropContent).isEditing).toBe(true);
+    expect(screen.queryByTestId("mobile")).not.toBeInTheDocument();
+  });
+
   it("keeps normal short clicks on touch layouts", () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
@@ -695,6 +743,54 @@ describe("WaveDrop", () => {
     expect(timestamp).toHaveClass("tw-w-[9.25rem]");
     expect(timestamp).toHaveClass("desktop-hover:group-hover:tw-opacity-100");
     expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
+  });
+
+  it("shows the labelled author signed seal beside a grouped message's timestamp", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const renderGrouped = (isAuthorSigned: boolean) =>
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={{
+            ...drop,
+            id: "current-grouped",
+            created_at: 1_700_000_040_000,
+            stableHash: "current-grouped",
+            is_author_signed: isAuthorSigned,
+          }}
+          previousDrop={previousGroupedDrop}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+    const { unmount } = renderGrouped(true);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).getByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).toBeInTheDocument();
+    unmount();
+
+    renderGrouped(false);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).queryByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("does not hijack mouse drags for the timestamp swipe on desktop", () => {

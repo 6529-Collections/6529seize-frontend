@@ -21,10 +21,10 @@ export default function ProfileProxyCredit({
   const isOwner = connectedProfile?.id === profileProxy.created_by.id;
 
   return (
-    <div className="tw-flex tw-items-center lg:tw-justify-center">
-      <p className="tw-mb-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-md tw-font-normal tw-text-iron-500">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-start">
+      <p className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-text-meta tw-leading-5 tw-font-normal tw-text-iron-500">
         <span className="tw-font-normal tw-text-iron-500">Credit:</span>
-        <span className="tw-font-medium tw-text-iron-300">
+        <span className="tw-break-all tw-font-medium tw-tabular-nums tw-text-iron-200">
           {formatNumberWithCommas(profileProxyAction.credit_amount ?? 0)}
         </span>
       </p>

@@ -283,7 +283,7 @@ export default function AnimationSection({
           setLinkError(null);
         }}
         placeholder="ipfs://... or ar://..."
-        className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
+        className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       />
       {linkError && (
         <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">

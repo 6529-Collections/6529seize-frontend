@@ -9,7 +9,8 @@ export default function NftPurchasingGate({
   redirectTo,
 }: {
   readonly children: ReactNode;
-  readonly redirectTo?: string;
+  // App-internal path only.
+  readonly redirectTo?: `/${string}`;
 }) {
   const { hideNftPurchasing, shouldRedirect } = useNftPurchasingVisibility();
   if (hideNftPurchasing) {

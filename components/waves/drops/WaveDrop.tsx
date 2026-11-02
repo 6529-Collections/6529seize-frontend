@@ -28,7 +28,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import {
   GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX,
   GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO,
-  GroupedDropTimestamp,
   type TimestampSwipeStart,
   clampGroupedTimestampSwipeOffset,
   clearLongPressTimeout,
@@ -59,6 +58,8 @@ import {
 import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
+import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
+import GroupedDropTimestamp from "./GroupedDropTimestamp";
 
 const WaveDropInner = ({
   drop,
@@ -88,6 +89,7 @@ const WaveDropInner = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  signatureGroup,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -174,13 +176,19 @@ const WaveDropInner = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
-  const showGroupedTimestamp = shouldShowGroupedDropTimestamp({
-    shouldGroupWithPreviousDrop,
-    showAuthorInfo,
-    identityMode,
-    isProfileView,
-    location,
-  });
+  // Boolean() hands React Compiler a primitive. A plain helper result may
+  // alias showAuthorInfo, which later helpers receive, and the touch/pointer
+  // callbacks below depend on this value, so the compiler would otherwise
+  // skip memoizing this whole component.
+  const showGroupedTimestamp = Boolean(
+    shouldShowGroupedDropTimestamp({
+      shouldGroupWithPreviousDrop,
+      showAuthorInfo,
+      identityMode,
+      isProfileView,
+      location,
+    })
+  );
   const {
     canUseMobileActionsSheet,
     showActionsButton,
@@ -218,7 +226,7 @@ const WaveDropInner = ({
   }, []);
 
   const handleLongPress = useCallback(() => {
-    if (!allowLongPress) return;
+    if (!allowLongPress || isEditing) return;
     markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
@@ -228,6 +236,7 @@ const WaveDropInner = ({
     setIsSlideUp(true);
   }, [
     allowLongPress,
+    isEditing,
     editingDropId,
     setEditingDropId,
     markNextClickForSuppression,
@@ -476,6 +485,8 @@ const WaveDropInner = ({
     showAuthorInfo,
     identityMode,
     drop,
+    // Profile views show a header on every post; each keeps its own seal.
+    signatureGroup: isProfileView ? undefined : signatureGroup,
     showWaveInfo,
     isStorm,
     activePartIndex,
@@ -569,7 +580,7 @@ const WaveDropInner = ({
   }, []);
 
   useEffect(() => {
-    if (canUseMobileActionsSheet) {
+    if (canUseMobileActionsSheet && !isEditing) {
       return;
     }
 
@@ -582,6 +593,7 @@ const WaveDropInner = ({
     clearSuppression();
   }, [
     canUseMobileActionsSheet,
+    isEditing,
     clearSuppression,
     mobileMenu,
     resetTimestampSwipe,
@@ -724,6 +736,7 @@ const WaveDropInner = ({
             timestamp={drop.created_at}
             variant={canUseTouchActionSheet ? "swipe" : "hover"}
             forceVisible={isRowPointerHovered}
+            authorSigned={isDropAuthorSigned(drop)}
           />
         )}
         <div

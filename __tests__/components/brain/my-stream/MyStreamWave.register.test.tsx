@@ -1,9 +1,45 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import type * as ContentTabContext from "@/components/brain/ContentTabContext";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+import { useWaveData } from "@/hooks/useWaveData";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
+const mockUseCompetitionSubmissionWave = jest.fn(
+  (wave: ApiWave | null | undefined, enabled = true) => ({
+    wave:
+      wave && enabled
+        ? {
+            ...wave,
+            competition: Object.assign(new ApiCompetition(), {
+              id: "primary",
+              wave_id: wave.id,
+              presentation: [],
+              capabilities: [],
+            }),
+          }
+        : null,
+    pending: false,
+    retry: jest.fn(),
+  })
+);
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
+  useCompetitionSubmissionWave: (
+    wave: ApiWave | null | undefined,
+    enabled?: boolean
+  ) => mockUseCompetitionSubmissionWave(wave, enabled),
+}));
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
@@ -23,6 +59,8 @@ const mockEditingDropState: {
   setEditingDropId: jest.fn(),
 };
 
+let mockActiveContentTab = "CHAT";
+
 jest.mock("@/contexts/EditingDropContext", () => ({
   useEditingDrop: () => mockEditingDropState,
   EditingDropProvider: ({ children }: { children: React.ReactNode }) =>
@@ -38,14 +76,18 @@ const mockSetViewMode = jest.fn();
 const mockToggleViewMode = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSharedWaveTabs = jest.fn((_props: { showGalleryToggle: boolean }) => (
+  <div data-testid="tabs" />
+));
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
 let mockSearchParams = new URLSearchParams();
+let mockPathname = "/waves/wave-1";
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
-  chat: { authenticated_user_eligible: true },
+  chat: { authenticated_user_eligible: true, scope: { group: null } },
   voting: { authenticated_user_eligible: true },
   participation: {
     authenticated_user_eligible: true,
@@ -54,6 +96,7 @@ const mockWave = {
   wave: { authenticated_user_eligible_for_admin: false },
   metrics: {},
 } as any;
+let mockResolvedWave = mockWave;
 let mockIsApp = false;
 let mockWaveInfo: any;
 
@@ -90,7 +133,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves/wave-1",
+  usePathname: () => mockPathname,
   useRouter: () => ({
     push: mockPush,
     replace: mockReplace,
@@ -124,7 +167,7 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
     "@/components/brain/ContentTabContext"
   ),
   useContentTab: () => ({
-    activeContentTab: "CHAT",
+    activeContentTab: mockActiveContentTab,
     updateAvailableTabs: mockUpdateAvailableTabs,
   }),
 }));
@@ -150,9 +193,9 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 }));
 
 jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: () => ({
-    data: mockWave,
-  }),
+  useWaveData: jest.fn(() => ({
+    data: mockResolvedWave,
+  })),
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -233,7 +276,8 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
-  MyStreamWaveTabs: () => <div data-testid="tabs" />,
+  MyStreamWaveTabs: (props: { showGalleryToggle: boolean }) =>
+    mockSharedWaveTabs(props),
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
@@ -294,8 +338,12 @@ describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockActiveContentTab = "CHAT";
     mockWaveInfo = getDefaultMockWaveInfo();
+    mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
+    mockPathname = "/waves/wave-1";
+    window.history.replaceState(null, "", mockPathname);
   });
 
   it("registers the mounted wave for direct URL loads", async () => {
@@ -304,12 +352,125 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
       expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
         expect.objectContaining({ waveId: "wave-1" })
       );
     });
   });
+
+  it.each([
+    { pathname: "/waves/wave-1", visible: true },
+    { pathname: "/waves/wave-1/competitions/alpha", visible: false },
+  ])(
+    "scopes the shared Chat gallery action on $pathname with a native submission target",
+    ({ pathname, visible }) => {
+      mockPathname = pathname;
+      mockResolvedWave = {
+        ...mockWave,
+        wave: { ...mockWave.wave, type: ApiWaveType.Chat },
+      };
+      renderWave();
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
+      expect(mockSharedWaveTabs).toHaveBeenCalledWith(
+        expect.objectContaining({ showGalleryToggle: visible })
+      );
+    }
+  );
+
+  it.each([
+    "/waves/wave-1/competitions",
+    "/waves/wave-1/competitions/alpha",
+    "/waves/wave-1/competitions/new",
+  ])(
+    "keeps the competition error route available on a missing wave (%s)",
+    (pathname) => {
+      mockPathname = pathname;
+      renderWave();
+      const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
+      expect(options.onWaveNotFound).toBeUndefined();
+      act(() => options.onWaveNotFound?.());
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  );
+
+  it("renders the competition error and Retry without wave metadata", () => {
+    mockPathname = "/waves/wave-1/competitions/alpha";
+    mockResolvedWave = undefined;
+    const retry = jest.fn();
+    render(
+      <HeaderProvider>
+        <MyStreamWave
+          waveId="wave-1"
+          competitionContent={<CompetitionState error retry={retry} />}
+        />
+      </HeaderProvider>
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This competition could not be loaded"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(retry).toHaveBeenCalledTimes(1);
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("shows loading identity without mounting chat or unrelated competition content", () => {
+    mockResolvedWave = undefined;
+    render(
+      <HeaderProvider>
+        <MyStreamWave
+          waveId="wave-1"
+          competitionContent={<CompetitionState error retry={jest.fn()} />}
+        />
+      </HeaderProvider>
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Loading wave…");
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByTestId("chat")).toBeNull();
+  });
+
+  it.each([
+    ["/waves/wave-1", "/waves"],
+    ["/messages/wave-1", "/messages"],
+  ])(
+    "still clears an ordinary missing-wave route (%s)",
+    (pathname, destination) => {
+      mockPathname = pathname;
+      mockSearchParams = new URLSearchParams("wave=wave-1&serialNo=23");
+      window.history.replaceState(null, "", `${pathname}?${mockSearchParams}`);
+      renderWave();
+      const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
+      expect(options.onWaveNotFound).toBeDefined();
+      act(() => options.onWaveNotFound?.());
+      expect(mockPush).toHaveBeenCalledWith(`${destination}?serialNo=23`, {
+        scroll: false,
+      });
+    }
+  );
+
+  it.each([
+    "/waves/wave-1/competitions/alpha?tab=leaderboard",
+    "/waves/wave-2?tab=chat",
+    "/network?wave=wave-1",
+  ])(
+    "ignores a captured missing-wave callback after moving to %s",
+    (target) => {
+      renderWave();
+      const callback = jest.mocked(useWaveData).mock.calls.at(-1)![0]
+        .onWaveNotFound;
+      expect(callback).toBeDefined();
+      window.history.replaceState(null, "", target);
+      act(() => callback?.());
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  );
 
   it("renders embedded competition tabs without a second wave header", () => {
     render(
@@ -362,23 +523,29 @@ describe("MyStreamWave registration", () => {
     });
   });
 
-  it("exposes the app header memes submit action", async () => {
-    mockIsApp = true;
-    mockWaveInfo = {
-      ...getDefaultMockWaveInfo(),
-      isMemesWave: true,
-    };
+  it.each(["CHAT", "LEADERBOARD"])(
+    "exposes the app header memes submit action on %s",
+    async (tab) => {
+      mockIsApp = true;
+      mockActiveContentTab = tab;
+      mockWaveInfo = {
+        ...getDefaultMockWaveInfo(),
+        isMemesWave: true,
+      };
 
-    renderWave();
+      renderWave();
 
-    await waitFor(() => {
-      expect(screen.getByTestId("header-action")).toHaveTextContent(
-        "Submit Work to The Memes"
+      await waitFor(() => {
+        expect(screen.getByTestId("header-action")).toHaveTextContent(
+          "Submit Work to The Memes"
+        );
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open header action" })
       );
-    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Open header action" }));
-
-    expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
-  });
+      expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
+    }
+  );
 });

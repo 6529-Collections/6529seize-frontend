@@ -64,19 +64,6 @@ const MORE_RULES = [
   CreateWaveInlineGroupRuleType.XTDH_GRANT,
 ] as const;
 
-export const CREATE_WAVE_INLINE_GROUP_RULE_LABELS: Record<
-  CreateWaveInlineGroupRuleType,
-  string
-> = {
-  [CreateWaveInlineGroupRuleType.LEVEL]: "Level",
-  [CreateWaveInlineGroupRuleType.TDH]: "TDH",
-  [CreateWaveInlineGroupRuleType.CIC]: "NIC",
-  [CreateWaveInlineGroupRuleType.REP]: "Rep",
-  [CreateWaveInlineGroupRuleType.NFTS]: "Required NFTs",
-  [CreateWaveInlineGroupRuleType.COLLECTIONS]: "Collection Access",
-  [CreateWaveInlineGroupRuleType.XTDH_GRANT]: "xTDH Grant",
-};
-
 export const CREATE_WAVE_INLINE_GROUP_QUICK_RULES = QUICK_RULES;
 export const CREATE_WAVE_INLINE_GROUP_MORE_RULES = MORE_RULES;
 
@@ -209,8 +196,8 @@ const createInlineGroupIdentityFromWallet = (
   wallet: string
 ): CommunityMemberMinimal => ({
   profile_id: null,
-  handle: wallet,
-  normalised_handle: wallet.toLowerCase(),
+  handle: null,
+  normalised_handle: null,
   primary_wallet: wallet,
   display: wallet,
   tdh: 0,

@@ -68,6 +68,20 @@ describe("useDmWavesList", () => {
     );
   });
 
+  it("exposes the same viewer identity used by the cached DM list", () => {
+    const { result, rerender } = renderHook(() => useDmWavesList());
+    expect(result.current.viewerIdentityKey).toBe("0xabc:primary");
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: { id: "proxy-1" },
+      connectedProfile: { handle: "me" },
+      fetchingProfile: false,
+      isAuthenticated: true,
+    });
+    rerender();
+    expect(result.current.viewerIdentityKey).toBe("0xabc:proxy:proxy-1");
+    expect(result.current.waves).toHaveLength(2);
+  });
+
   it("disables the DM query while wallet auth is invalid", () => {
     const fetchNextPage = jest.fn();
     const refetch = jest.fn();
@@ -148,6 +162,62 @@ describe("useDmWavesList", () => {
 
     expect(fetchNextPage).not.toHaveBeenCalled();
     expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("refreshes stale DMs on resync only while the DM query is enabled", () => {
+    const refetch = jest.fn();
+    const refetchIfStale = jest.fn();
+    useWavesV2Mock.mockReturnValue({
+      waves: [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch,
+      refetchIfStale,
+    });
+
+    const { result, rerender } = renderHook(
+      ({ enabled }: { readonly enabled: boolean }) =>
+        useDmWavesList({ enabled }),
+      { initialProps: { enabled: false } }
+    );
+
+    result.current.refreshStaleWaves();
+    expect(refetchIfStale).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+    result.current.refreshStaleWaves();
+
+    expect(refetchIfStale).toHaveBeenCalledTimes(1);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps its own guard for resync while the profile is still loading", () => {
+    const refetchIfStale = jest.fn();
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { handle: "me" },
+      fetchingProfile: true,
+      isAuthenticated: true,
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      refetchIfStale,
+    });
+
+    // The provider may already treat the DM list as requested here.
+    const { result } = renderHook(() => useDmWavesList({ enabled: true }));
+    result.current.refreshStaleWaves();
+
+    expect(refetchIfStale).not.toHaveBeenCalled();
   });
 
   it("re-enables the DM query after profile loading settles", () => {

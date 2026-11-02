@@ -40,10 +40,10 @@ export default function ProxyList({
 
   return (
     <div className="tailwind-scope tw-space-y-6">
-      <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-4">
+      <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3">
         <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
         {isSelf && (
-          <CommonAnimationOpacity>
+          <CommonAnimationOpacity elementClasses="tw-ml-auto tw-shrink-0">
             <Button
               variant="primary"
               size="md"
@@ -72,10 +72,10 @@ export default function ProxyList({
         proxyType
       ) && (
         <div>
-          <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">
+          <p className="tw-mt-5 tw-mb-[18px] tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50">
             Received proxies
           </p>
-          <div className="tw-space-y-8">
+          <div className="tw-flex tw-flex-col tw-gap-6">
             {receivedProfileProxies.length ? (
               receivedProfileProxies.map((profileProxy) => (
                 <ProxyListItem
@@ -96,11 +96,11 @@ export default function ProxyList({
       {[ProfileProxyListType.ALL, ProfileProxyListType.GRANTED].includes(
         proxyType
       ) && (
-        <div>
-          <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-lg">
+        <div className="tw-pt-4">
+          <p className="tw-mt-5 tw-mb-[18px] tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50">
             Granted proxies
           </p>
-          <div className="tw-space-y-8">
+          <div className="tw-flex tw-flex-col tw-gap-6">
             {grantedProfileProxies.length ? (
               grantedProfileProxies.map((profileProxy) => (
                 <ProxyListItem

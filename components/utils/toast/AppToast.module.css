@@ -1,7 +1,7 @@
 .toastContainer {
   right: 16px;
   left: auto;
-  z-index: 100000;
+  z-index: 1000010;
   width: min(420px, calc(100vw - 32px));
 }
 

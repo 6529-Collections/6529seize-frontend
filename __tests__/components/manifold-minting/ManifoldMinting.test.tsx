@@ -1,5 +1,7 @@
 import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
+import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMintingWidget";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { render, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
@@ -19,7 +21,13 @@ jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
 }));
 jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   __esModule: true,
-  default: () => <div data-testid="widget" />,
+  default: jest.fn(() => <div data-testid="widget" />),
+}));
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: jest.fn(() => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  })),
 }));
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
@@ -379,5 +387,39 @@ describe("Mint artwork source", () => {
     );
 
     expect(getResolvedAnimationSrc(renderedArtwork())).toBe(metadataAnimation);
+  });
+});
+
+describe("Purchasing visibility", () => {
+  const visibility = jest.mocked(useNftPurchasingVisibility);
+  const widget = jest.mocked(ManifoldMintingWidget);
+
+  afterEach(() => {
+    visibility.mockImplementation(() => ({
+      hideNftPurchasing: false,
+      shouldRedirect: false,
+    }));
+  });
+
+  it("never mounts the mint widget or a fee from it on restricted iOS", () => {
+    visibility.mockImplementation(() => ({
+      hideNftPurchasing: true,
+      shouldRedirect: true,
+    }));
+    useManifoldClaim.mockReturnValue(createMockClaimState());
+
+    render(
+      <ManifoldMinting
+        {...defaultProps}
+        abi={[]}
+        mintMetadata={{ tokenId: 123, metadata: {} }}
+      />
+    );
+
+    expect(widget).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("widget")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Manifold Fee (Public)").closest("tr")
+    ).toHaveTextContent("Manifold Fee (Public)-");
   });
 });

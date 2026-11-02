@@ -1,0 +1,564 @@
+{
+  "pagesCompared": 117,
+  "pagesWithDates": 95,
+  "comparisons": {
+    "main/UTC vs candidate/UTC": {
+      "differingPages": 0
+    },
+    "candidate/Pacific/Auckland vs candidate/UTC": {
+      "differingPages": 0
+    },
+    "main/Pacific/Auckland vs candidate/UTC": {
+      "differingPages": 67
+    },
+    "candidate/America/Los_Angeles vs candidate/UTC": {
+      "differingPages": 0
+    },
+    "main/America/Los_Angeles vs candidate/UTC": {
+      "differingPages": 23
+    }
+  },
+  "mainShifts": [
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance",
+      "utc": "Jun 2, 2026 | Jun 8, 2026",
+      "shown": "Jun 3, 2026 | Jun 9, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0008",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0024",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0026",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0028",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0011",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0014",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0025",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0027",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0009",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0010",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0012",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0013",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0015",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0019",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0016",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0022",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0017",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0023",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0021",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0018",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/works/6529NM-W-0020",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/acquisitions/keys-and-gates",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/acquisitions/conflict-at-its-edges",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/david-seymour",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/larry-towell",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/micha-bar-am",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/moises-saman",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/lorenzo-meloni",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/gulyildiz",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/hugofaz",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/nasimghanizadeh",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/intrepid",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/ikertje",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/giant",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/priyanka",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/rakesh",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/pandelic",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/minalisa",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/teyhu",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/arsonic",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/zoku",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/shamspranto",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/artists/veerendra",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052148",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052156",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052401",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052437",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052604",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052714",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1052812",
+      "utc": "Jun 2, 2026",
+      "shown": "Jun 3, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "utc": "Jun 8, 2026",
+      "shown": "Jun 9, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/projects/magnum-photos-75",
+      "utc": "Aug 12, 2026",
+      "shown": "Aug 13, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/acquisition-programs/keys-and-gates",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/conflict-at-its-edges",
+      "utc": "Aug 12, 2026 | Aug 2, 2026",
+      "shown": "Aug 13, 2026 | Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/access-control-and-exit",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/arsonic",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/artem-humilevskiy-giant",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/gul-y-ld-z-gulyildiz",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/hugo-faz-hugofaz",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/ikertje-ikertje",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/intrepid",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/minalisa",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/nasim-ghanizadeh-nasimghanizadeh",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/pandelic",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/priyanka",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "Pacific/Auckland",
+      "path": "/museum/network/research/rakesh-pulapa-rakesh",
+      "utc": "Aug 1, 2026",
+      "shown": "Aug 2, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0001",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0004",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0005",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0002",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0003",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0006",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/works/6529NM-W-0007",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/acquisitions/the-system-in-seven-states",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/artists/casey-reas",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/projects/century",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/projects/pre-process",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/projects/phototaxis",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/projects/923-empty-rooms",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/projects/ex-nihilo-cosmos",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/acquisition-programs/gift-acquisitions",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/the-system-in-seven-states",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/conflict-at-its-edges",
+      "utc": "Aug 12, 2026 | Aug 2, 2026",
+      "shown": "Aug 12, 2026 | Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/casey-reas-the-conditions-for-an-image",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/century-the-cut-that-keeps-happening",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/pre-process-an-unfinished-origin-in-motion",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/a-line-remembers-microimage-and-phototaxis",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/the-room-is-an-algorithm-atomism-and-923-empty-rooms",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    },
+    {
+      "zone": "America/Los_Angeles",
+      "path": "/museum/network/research/an-ideal-form-cannot-hold-still-still-life-and-ex-nihilo-cosmos",
+      "utc": "Aug 2, 2026",
+      "shown": "Aug 1, 2026"
+    }
+  ],
+  "method": "Each build (candidate 37dfd8e285, main 3f33da5c7e; Museum publication 92966f2836) was served with next start under host zone UTC, Pacific/Auckland and America/Los_Angeles. A crawler fetched the Museum index pages and the detail pages they link to (117 pages, 95 with a rendered date) and recorded every rendered en-US date string. Each run is compared page by page with candidate/UTC."
+}

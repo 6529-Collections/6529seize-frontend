@@ -238,3 +238,20 @@ it("blocks a custom expiry that became too soon while the form stayed open", () 
     clock.mockRestore();
   }
 });
+
+it("preserves the wallet requirement when its guidance is shown above the order chooser", () => {
+  const p = props();
+  const { container } = render(
+    <CollectTradeForm
+      {...p}
+      action="accept"
+      connectionHeader
+      disabledReason="Connect a wallet in this profile to prepare this action."
+    />
+  );
+  expect(
+    screen.getByRole("button", { name: "Review exact terms" })
+  ).toBeDisabled();
+  fireEvent.submit(container.querySelector("form")!);
+  expect(p.onPrepare).not.toHaveBeenCalled();
+});

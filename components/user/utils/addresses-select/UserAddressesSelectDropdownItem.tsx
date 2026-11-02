@@ -28,7 +28,7 @@ export default function UserAddressesSelectDropdownItem({
         onClick={copyAddress}
         title="Copy address"
         aria-label="Copy address"
-        className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
+        className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-group tw-cursor-pointer"
       >
         <svg
           className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
@@ -49,7 +49,7 @@ export default function UserAddressesSelectDropdownItem({
         onClick={openOpensea}
         title="Open in OpenSea"
         aria-label="Open in OpenSea"
-        className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
+        className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-group tw-cursor-pointer"
       >
         <svg
           className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"

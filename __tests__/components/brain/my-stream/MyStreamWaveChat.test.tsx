@@ -15,7 +15,10 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
-const replaceMock = jest.fn();
+const replaceMock = jest
+  .spyOn(globalThis.history, "replaceState")
+  .mockImplementation(() => {});
+const mockRouterReplace = jest.fn();
 const searchParamsMock = { get: jest.fn(), toString: jest.fn() };
 const mockSetUnreadDividerSerialNo = jest.fn();
 const mockRemoveWaveDeliveredNotifications = jest
@@ -85,9 +88,9 @@ jest.mock("next/dynamic", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: replaceMock }),
+  useRouter: () => ({ replace: mockRouterReplace }),
   useSearchParams: () => searchParamsMock,
-  usePathname: jest.fn(),
+  usePathname: () => "/waves/10",
 }));
 
 let mockIsMemesWave = false;
@@ -126,6 +129,12 @@ jest.mock("@/components/waves/drops/wave-drops-all", () => ({
     capturedPropsHolder.current = props;
     return <div data-testid="drops" />;
   },
+}));
+
+const mockFetchDropReplyThreadTarget = jest.fn();
+jest.mock("@/services/api/drop-reply-thread-target-api", () => ({
+  fetchDropReplyThreadTarget: (params: unknown) =>
+    mockFetchDropReplyThreadTarget(params),
 }));
 
 jest.mock("@/components/waves/CreateDropWaveWrapper", () => ({
@@ -183,7 +192,7 @@ jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     fetchAroundSerialNo: mockFetchAroundSerialNo,
   }),
 }));
@@ -249,6 +258,7 @@ describe("MyStreamWaveChat", () => {
     capturedCreatorPropsHolder.current = {};
     capturedCreatorPropsHolder.all = [];
     replaceMock.mockClear();
+    mockRouterReplace.mockClear();
     searchParamsMock.get.mockReset();
     searchParamsMock.toString.mockReset();
     searchParamsMock.toString.mockReturnValue("");
@@ -263,6 +273,7 @@ describe("MyStreamWaveChat", () => {
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
     mockFetchAroundSerialNo.mockClear();
+    mockFetchDropReplyThreadTarget.mockReset();
     mockSetToast.mockClear();
     mockUseWebSocketMessage.mockReset();
     mockUseWebSocketMessage.mockReturnValue({ isConnected: true });
@@ -387,9 +398,153 @@ describe("MyStreamWaveChat", () => {
         />
       );
     });
-    expect(replaceMock).toHaveBeenCalled();
+    expect(replaceMock).toHaveBeenCalledWith(null, "", "/waves/10");
+    expect(mockRouterReplace).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBe(5);
     expect(screen.queryByRole("button", { name: /submit work/i })).toBeNull();
+  });
+
+  it("cleans only jump parameters while preserving other query values and the hash", async () => {
+    const params = new URLSearchParams("serialNo=5&divider=3&tab=chat&foo=bar");
+    searchParamsMock.get.mockImplementation((key: string) => params.get(key));
+    searchParamsMock.toString.mockReturnValue(params.toString());
+    globalThis.location.hash = "message";
+    const historyState = jest
+      .spyOn(globalThis.history, "state", "get")
+      .mockReturnValueOnce({
+        waveTabSelection: { waveId: "10", value: "CHAT" },
+        __NA: true,
+        __PRIVATE_NEXTJS_INTERNALS_TREE: "previous-tree",
+      })
+      .mockReturnValue({
+        __NA: true,
+        __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
+      });
+    try {
+      await act(async () => {
+        renderWithProvider(
+          <MyStreamWaveChat
+            wave={wave}
+            firstUnreadSerialNo={null}
+            viewMode="chat"
+            onDropClick={mockOnDropClick}
+          />
+        );
+      });
+      expect(replaceMock).toHaveBeenCalledWith(
+        null,
+        "",
+        "/waves/10?tab=chat&foo=bar#message"
+      );
+      expect(mockRouterReplace).not.toHaveBeenCalled();
+      expect(replaceMock).toHaveBeenLastCalledWith(
+        {
+          waveTabSelection: { waveId: "10", value: "CHAT" },
+          __NA: true,
+          __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
+        },
+        ""
+      );
+    } finally {
+      historyState.mockRestore();
+      globalThis.location.hash = "";
+    }
+  });
+
+  it("opens the parent thread when a link targets a collapsed reply", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "5" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+    mockFetchDropReplyThreadTarget.mockResolvedValue({
+      parentDropId: "parent-drop",
+      parentSerialNo: 4,
+    });
+    const collapsedWave = {
+      ...wave,
+      chat: {
+        replies: {
+          open: true,
+          collapsed: true,
+          authenticated_user_eligible: true,
+        },
+      },
+    };
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={collapsedWave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    await waitFor(() => {
+      expect(capturedPropsHolder.current.initialDrop).toBe(4);
+    });
+    expect(mockFetchDropReplyThreadTarget).toHaveBeenCalledWith(
+      expect.objectContaining({ serialNo: 5 })
+    );
+    expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 4);
+  });
+
+  it("keeps the original target when a collapsed-wave link is not a reply", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "5" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+    mockFetchDropReplyThreadTarget.mockResolvedValue(null);
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={{
+            ...wave,
+            chat: {
+              replies: {
+                open: true,
+                collapsed: true,
+                authenticated_user_eligible: true,
+                authenticated_user_can_delete: false,
+              },
+            },
+          }}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockFetchDropReplyThreadTarget).toHaveBeenCalled();
+    });
+    expect(capturedPropsHolder.current.initialDrop).toBe(5);
+    expect(mockFetchAroundSerialNo).not.toHaveBeenCalledWith("10", 4);
+  });
+
+  it("does not resolve reply targets in waves that keep replies inline", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "5" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    expect(capturedPropsHolder.current.initialDrop).toBe(5);
+    expect(mockFetchDropReplyThreadTarget).not.toHaveBeenCalled();
   });
 
   it("sets initialDrop null when no param", async () => {
@@ -888,7 +1043,7 @@ describe("MyStreamWaveChat", () => {
     );
 
     await waitFor(() => {
-      expect(replaceMock).toHaveBeenCalledTimes(1);
+      expect(replaceMock).toHaveBeenCalledTimes(2);
       expect(capturedPropsHolder.current.initialDrop).toBe(5);
       expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 5);
     });

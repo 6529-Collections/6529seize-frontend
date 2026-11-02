@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { ReadableStream } from "node:stream/web";
 import {
   GRADIENT_CONTRACT,
@@ -9,16 +11,19 @@ import {
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.6529.test",
-    STAGING_API_KEY: void 0,
   },
 }));
 
-import { fetchNftCardMetadata } from "@/app/api/og-metadata/nfts/[contract]/[id]/metadata";
+import {
+  fetchNftCardMetadata,
+  getFallbackNftCardMetadata,
+} from "@/app/api/og-metadata/nfts/[contract]/[id]/metadata";
 import { publicEnv } from "@/config/env";
 
 const mockFetch = jest.fn();
 const originalFetch = globalThis.fetch;
 const imageUrl = "https://d3lqz0a4bldqgf.cloudfront.net/card.png";
+const REMEME_CONTRACT = "0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2";
 const jsonResponse = (data: unknown) => ({
   ok: true,
   headers: new Headers({ "content-type": "application/json" }),
@@ -38,13 +43,14 @@ describe("NFT preview metadata fallback", () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.restoreAllMocks();
+    delete process.env["STAGING_API_KEY"];
   });
   afterAll(() => {
     globalThis.fetch = originalFetch;
   });
 
   it("uses configured staging access only on the trusted API request", async () => {
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch.mockResolvedValue(jsonResponse({ data: [] }));
     await fetchNftCardMetadata(MEMES_CONTRACT, "542");
     expect(mockFetch).toHaveBeenCalledWith(
@@ -67,7 +73,7 @@ describe("NFT preview metadata fallback", () => {
         "API_ENDPOINT",
         "https://api.staging.6529.io"
       );
-      jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+      process.env["STAGING_API_KEY"] = "test-staging-key";
       const cancel = jest.fn().mockResolvedValue(undefined);
       mockFetch
         .mockResolvedValueOnce({ ok: false, status, body: { cancel } })
@@ -128,7 +134,7 @@ describe("NFT preview metadata fallback", () => {
       "API_ENDPOINT",
       "https://api.staging.6529.io"
     );
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch.mockResolvedValue({ ok: false, status: 401, body: null });
     await expect(
       fetchNftCardMetadata(MEMES_CONTRACT, "542")
@@ -147,7 +153,7 @@ describe("NFT preview metadata fallback", () => {
       "API_ENDPOINT",
       "https://api.staging.6529.io"
     );
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch
       .mockResolvedValueOnce({ ok: false, status: 401, body: null })
       .mockResolvedValueOnce(
@@ -305,6 +311,21 @@ describe("NFT preview metadata fallback", () => {
     [MEMES_CONTRACT, "542?contract=other"],
     [MEMES_CONTRACT, "-1"],
     [MEMES_CONTRACT, "9007199254740992"],
+    [MEMES_CONTRACT, "..%2f"],
+    [MEMES_CONTRACT, "1@evil.com"],
+    [MEMES_CONTRACT, "https://evil.test/1"],
+    [MEMES_CONTRACT, "//evil.test"],
+    [MEMES_CONTRACT, "1&contract=other"],
+    [REMEME_CONTRACT, "..%2f"],
+    [REMEME_CONTRACT, "1@evil.com"],
+    [REMEME_CONTRACT, "1/../2"],
+    [REMEME_CONTRACT, "https://evil.test/1"],
+    [NEXTGEN_CONTRACT, "1/../2"],
+    [`${REMEME_CONTRACT}%2f..`, "1"],
+    [`${REMEME_CONTRACT}@evil.com`, "1"],
+    ["https://evil.test/0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2", "1"],
+    ["//evil.test", "1"],
+    ["@evil.com", "1"],
   ])("does not fetch unsupported identity %s / %s", async (contract, id) => {
     await expect(fetchNftCardMetadata(contract, id)).resolves.toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
@@ -401,5 +422,166 @@ describe("NFT preview metadata fallback", () => {
     );
     controller.abort();
     await expect(result).resolves.toBeNull();
+  });
+
+  describe("ReMeme lookups", () => {
+    const rememe = (overrides: Record<string, unknown> = {}) => ({
+      contract: REMEME_CONTRACT,
+      id: "39",
+      metadata: { name: "GDRC #2" },
+      contract_opensea_data: {
+        collectionName: "SEIZING",
+        imageUrl: "https://cdn.test/collection.png",
+      },
+      ...overrides,
+    });
+
+    it("loads the matching ReMeme from the fixed rememes endpoint", async () => {
+      mockFetch.mockResolvedValue(
+        jsonResponse({ data: [rememe({ s3_image_scaled: imageUrl })] })
+      );
+
+      await expect(
+        fetchNftCardMetadata(
+          REMEME_CONTRACT.toUpperCase().replace("0X", "0x"),
+          "39"
+        )
+      ).resolves.toEqual({
+        title: "GDRC #2",
+        artist: null,
+        collection: "SEIZING",
+        badge: "ReMemes",
+        displayId: null,
+        imageUrl,
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(
+        `https://api.6529.test/api/rememes?contract=${REMEME_CONTRACT}&id=39`,
+        expect.objectContaining({
+          redirect: "error",
+          headers: { Accept: "application/json" },
+          next: { revalidate: 3600 },
+        })
+      );
+    });
+
+    it("prefers stored artwork and skips empty image fields", async () => {
+      mockFetch.mockResolvedValue(
+        jsonResponse({
+          data: [
+            rememe({
+              s3_image_scaled: "  ",
+              s3_image_original: "https://cdn.test/original.png",
+              image: "https://cdn.test/raw.png",
+              media: [{ gateway: "https://cdn.test/gateway.png" }],
+            }),
+          ],
+        })
+      );
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, "39")
+      ).resolves.toMatchObject({ imageUrl: "https://cdn.test/original.png" });
+    });
+
+    it.each([
+      [
+        "an array of media gateways",
+        { media: [{ gateway: "" }, { gateway: "https://cdn.test/gw.png" }] },
+        "https://cdn.test/gw.png",
+      ],
+      [
+        "Alchemy-style media objects",
+        {
+          media: {
+            cachedUrl: "https://cdn.test/cached.gif",
+            pngUrl: "https://cdn.test/converted.png",
+            thumbnailUrl: "https://cdn.test/thumb.gif",
+          },
+        },
+        "https://cdn.test/thumb.gif",
+      ],
+      [
+        "the collection image",
+        { media: [], image: "" },
+        "https://cdn.test/collection.png",
+      ],
+    ])("falls back to %s", async (_name, overrides, expected) => {
+      mockFetch.mockResolvedValue(
+        jsonResponse({ data: [rememe({ image: "", ...overrides })] })
+      );
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, "39")
+      ).resolves.toMatchObject({ imageUrl: expected });
+    });
+
+    it("uses neutral text when the ReMeme has no name or collection", async () => {
+      mockFetch.mockResolvedValue(
+        jsonResponse({
+          data: [rememe({ metadata: {}, contract_opensea_data: null })],
+        })
+      );
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, "39")
+      ).resolves.toMatchObject({
+        title: "0x869a...8cf2 #39",
+        collection: "ReMemes",
+        badge: "ReMemes",
+        imageUrl: null,
+      });
+    });
+
+    it("accepts full-width ERC-721 token IDs", async () => {
+      const id = "9".repeat(78);
+      mockFetch.mockResolvedValue(jsonResponse({ data: [rememe({ id })] }));
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, id)
+      ).resolves.toMatchObject({ title: "GDRC #2" });
+    });
+
+    it.each([
+      { data: [] },
+      { data: [rememe({ id: "40" })] },
+      { data: [rememe({ contract: MEMES_CONTRACT })] },
+      { data: "invalid" },
+      null,
+    ])("does not substitute unrelated ReMeme data (%j)", async (data) => {
+      mockFetch.mockResolvedValue(jsonResponse(data));
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, "39")
+      ).resolves.toBeNull();
+    });
+
+    it("does not look up ReMemes for malformed identities", async () => {
+      await expect(
+        fetchNftCardMetadata(REMEME_CONTRACT, "9".repeat(79))
+      ).resolves.toBeNull();
+      await expect(
+        fetchNftCardMetadata(`${REMEME_CONTRACT}00`, "39")
+      ).resolves.toBeNull();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("fallback card details", () => {
+    it.each([
+      [MEMES_CONTRACT, "The Memes"],
+      [MEMES_CONTRACT.toLowerCase(), "The Memes"],
+      [GRADIENT_CONTRACT, "6529 Gradient"],
+      [MEMELAB_CONTRACT, "Meme Lab"],
+      [NEXTGEN_CONTRACT, "NextGen"],
+    ])("names the known collection for %s", (contract, name) => {
+      expect(getFallbackNftCardMetadata(contract, "7")).toEqual({
+        title: `${name} #7`,
+        artist: null,
+        collection: name,
+        badge: name,
+        displayId: null,
+        imageUrl: null,
+      });
+    });
+
+    it("has no details for other contracts", () => {
+      expect(getFallbackNftCardMetadata(REMEME_CONTRACT, "7")).toBeNull();
+    });
   });
 });

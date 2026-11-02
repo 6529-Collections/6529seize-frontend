@@ -12,8 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "NextGen Admin",
       description: "NextGen",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
-        subtitle: "Manage NextGen collections",
-        title: "NextGen Admin",
+        variant: "admin",
       }),
       ogImageAlt: "NextGen Admin social card",
     })

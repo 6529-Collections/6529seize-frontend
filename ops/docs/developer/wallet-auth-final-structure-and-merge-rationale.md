@@ -247,6 +247,14 @@ then returns a legacy Desktop `deep_link_path`. Desktop accepts the link through
 its existing `/auth/redeem-refresh-token` path. This compatibility path should
 be removed only after Desktop ships a v2 auth receiver.
 
+`/accept-connection-sharing` redeems a legacy `token` only inside the 6529
+Desktop shell (an `Electron` user agent). Web browsers and the Capacitor app
+show a Desktop-only message and never redeem or store the token. On every
+surface the page removes `token` and `connection_share_code` from the address
+bar on mount with `history.replaceState`, reusing Next.js history state so no
+navigation or request starts; the route also sends
+`Referrer-Policy: no-referrer` and is `noindex`.
+
 ## Frontend Configuration
 
 The frontend no longer gates this implementation behind session-v2, legacy-refresh, or structured-signature rollout flags. Backend settings from `/api/settings.auth` decide when legacy v1 sessions should prompt for migration, and backend environment controls still decide which origins are allowed, whether connection sharing is explicitly disabled server-side, and when structured signatures become mandatory.

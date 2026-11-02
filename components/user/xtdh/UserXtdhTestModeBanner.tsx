@@ -1,8 +1,8 @@
 export function UserXtdhTestModeBanner() {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/20 tw-bg-primary-500/10 tw-px-4 tw-py-3">
-      <div className="tw-flex tw-items-center tw-gap-3">
-        <div className="tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400">
+    <div className="tw-text-[13px] tw-leading-5 tw-text-iron-400">
+      <div className="tw-block">
+        <div className="tw-hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -18,10 +18,10 @@ export function UserXtdhTestModeBanner() {
             />
           </svg>
         </div>
-        <div className="tw-text-sm tw-text-blue-100/80">
-          <span className="tw-font-semibold">xTDH Beta:</span> This feature is
-          currently in test/demo mode. All data will be reset after the test
-          period. Please test it out and give us feedback!
+        <div className="tw-text-[13px] tw-text-iron-400">
+          <span className="tw-font-medium tw-text-iron-300">xTDH Beta:</span>{" "}
+          This feature is currently in test/demo mode. All data will be reset
+          after the test period. Please test it out and give us feedback!
         </div>
       </div>
     </div>

@@ -1,9 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createTestQueryClient } from "@/__tests__/utils/reactQuery";
+import { render as renderComponent, screen } from "@testing-library/react";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
 import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 
 // Mock dependencies
-jest.mock("@/components/utils/Spinner", () => () => <div data-testid="spinner" />);
+jest.mock("@/components/utils/Spinner", () => () => (
+  <div data-testid="spinner" />
+));
 jest.mock("@/contexts/ScrollPositionContext", () => ({
   useScrollPositionContext: () => ({
     getPosition: jest.fn(),
@@ -27,6 +32,14 @@ jest.mock("@tanstack/react-virtual", () => ({
   }),
 }));
 
+function render(element: ReactElement) {
+  return renderComponent(
+    <QueryClientProvider client={createTestQueryClient()}>
+      {element}
+    </QueryClientProvider>
+  );
+}
+
 describe("VirtualizedTokenList", () => {
   const defaultProps = {
     chain: ApiXTdhGrantTargetChain.EthereumMainnet as any, // Cast to any to avoid type mismatch in tests
@@ -42,10 +55,7 @@ describe("VirtualizedTokenList", () => {
 
   it("renders grid layout when layout prop is 'grid'", () => {
     const { container } = render(
-      <VirtualizedTokenList
-        {...defaultProps}
-        layout="grid"
-      />
+      <VirtualizedTokenList {...defaultProps} layout="grid" />
     );
     // In grid mode, we still use ul but the items inside are different
     expect(container.querySelector("ul")).toBeInTheDocument();
@@ -57,11 +67,7 @@ describe("VirtualizedTokenList", () => {
       { tokenId: BigInt(2), xtdh: 200 },
     ];
     render(
-      <VirtualizedTokenList
-        {...defaultProps}
-        layout="grid"
-        tokens={tokens}
-      />
+      <VirtualizedTokenList {...defaultProps} layout="grid" tokens={tokens} />
     );
     expect(screen.getByText("100")).toBeInTheDocument();
     expect(screen.getByText("200")).toBeInTheDocument();

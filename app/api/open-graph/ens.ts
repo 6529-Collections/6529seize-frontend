@@ -13,6 +13,7 @@ import { stripHtmlTags } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { publicEnv } from "@/config/env";
 import { getEthereumMainnetClient } from "@/lib/ethereum/mainnetClient";
+import { fetchEnsAvatarUrl } from "./ensAvatar";
 import {
   normalizeDecentralizedMediaUrl,
   parseDecentralizedMediaRef,
@@ -469,10 +470,7 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
         .getEnsAddress({ name: normalized })
         .then((resolved) => ensureChecksumAddress(resolved))
         .catch(() => null),
-      getEthereumMainnetClient()
-        .getEnsAvatar({ name: normalized })
-        .then((avatar) => sanitizeUrl(avatar))
-        .catch(() => null),
+      fetchEnsAvatarUrl(normalized),
       fetchTextRecords(normalized),
       (async () => {
         if (!resolver) {
@@ -553,10 +551,7 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
     }
 
     if (forwardMatch) {
-      avatarUrl = await getEthereumMainnetClient()
-        .getEnsAvatar({ name: primaryName })
-        .then((value) => sanitizeUrl(value))
-        .catch(() => null);
+      avatarUrl = await fetchEnsAvatarUrl(primaryName);
     }
   }
 

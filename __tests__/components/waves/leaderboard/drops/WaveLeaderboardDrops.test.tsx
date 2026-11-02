@@ -127,7 +127,7 @@ const authValue: AuthContextType = {
   sessionUpgradeRequired: false,
   requestAuth: async () => ({ success: false }),
   setToast: jest.fn(),
-  setActiveProfileProxy: async () => {},
+  setActiveProfileProxy: () => Promise.resolve(false),
 };
 const makeDrop = (id: string): ExtendedDrop => ({ id }) as ExtendedDrop;
 

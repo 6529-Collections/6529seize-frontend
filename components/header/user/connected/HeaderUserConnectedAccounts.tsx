@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -41,7 +41,9 @@ function ConnectedAccountRow({
   });
 
   const [failedPfpSrc, setFailedPfpSrc] = useState<string | null>(null);
-  const resolvedPfp = profile?.pfp ? resolveIpfsUrlSync(profile.pfp) : null;
+  const resolvedPfp = profile?.pfp
+    ? getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)
+    : null;
   const hasPfpError = Boolean(resolvedPfp && resolvedPfp === failedPfpSrc);
   const shouldShowFallbackPfp =
     hasPfpError || (!isProfileLoading && !resolvedPfp);

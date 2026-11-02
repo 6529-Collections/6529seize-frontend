@@ -7,16 +7,16 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 export const STATS_SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100";
+  "tw-m-0 tw-text-lg/7 tw-font-semibold tw-text-iron-100 md:tw-text-xl/7";
 
 export const STATS_TABLE_CLASS =
   "tw-w-full tw-border-collapse tw-whitespace-nowrap tw-text-left tw-text-sm [&_:is(thead,tbody,tr)::before]:tw-content-none [&_:is(thead,tbody,tr)::after]:tw-content-none";
 
 export const STATS_TABLE_HEAD_CLASS =
-  "tw-bg-white/[0.04] tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-normal tw-text-iron-400 md:tw-tracking-wide";
+  "tw-bg-white/[0.04] tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-normal tw-text-iron-500 md:tw-tracking-wide";
 
 export const STATS_TABLE_HEADER_CELL_CLASS =
-  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-semibold";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-medium";
 
 export const STATS_TABLE_ROW_CLASS =
   "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] last:tw-border-b-0";
@@ -25,13 +25,13 @@ export const STATS_TABLE_GROUP_START_ROW_CLASS =
   "tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-white/[0.08] last:tw-border-b-0";
 
 export const STATS_TABLE_ROW_HEADER_CLASS =
-  "tw-sticky tw-left-0 tw-z-[1] tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-medium tw-text-iron-400";
+  "tw-sticky tw-left-0 tw-z-[1] tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-medium tw-text-iron-300";
 
 export const STATS_TABLE_VALUE_CELL_CLASS =
   "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-100";
 
 export const STATS_TABLE_MUTED_VALUE_CELL_CLASS =
-  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-text-right tw-tabular-nums tw-text-iron-500";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300";
 
 /** Keeps Details subsections collapsed initially on compact screens. */
 export function UserPageStatsDisclosure({

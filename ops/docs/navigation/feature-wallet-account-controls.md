@@ -242,6 +242,14 @@ action.
   malformed connection links, duplicate parameters, and unexpected parameters.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
   and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
+- Wallet connection services load only when needed: right after page load for
+  a browser with a stored profile session or a wallet connection to restore,
+  and always in the native app. Signed-out web visitors load them on their
+  first connect action, so that first connect can take a moment. Until the
+  wallet dialog opens, the web sidebar `Connect Wallet` control shows a spinner
+  and `Connect` buttons in the app footer and on page prompts show a busy
+  spinner. If loading fails, an error message appears and connecting again
+  retries.
 
 ## Signing In
 
@@ -299,6 +307,9 @@ account-dependent controls load. No additional account cache is used.
   the account dropdown.
 - Unread dots/badges are notification-count indicators only; they do not show
   notification category.
+- Unread counts for every connected account update live while the realtime
+  connection is up, with a background check every 5 minutes. While it is down,
+  they refresh about every 30 seconds and when you return to the tab.
 - A connection-share QR restores an authenticated profile session; it does not
   provide a live signer for actions that require wallet signatures.
 

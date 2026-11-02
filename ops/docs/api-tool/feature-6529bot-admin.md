@@ -71,8 +71,8 @@ The route shows:
 - top-cost requestor, PR author, and PR analysis with spend-share percentages;
 - requestor, PR-author, repository, provider/model, review-kind, and
   pull-request usage tables;
-- pull-request rows with PR author, latest head SHA, latest review timestamp,
-  total spend, and average spend per review run;
+- pull-request rows with PR author, latest head SHA, latest review timestamp
+  (UTC, labelled `UTC`), total spend, and average spend per review run;
 - budget policy status;
 - alert configuration status;
 - model price catalog health;

@@ -10,6 +10,7 @@ import {
   normalizeNextgenTokenID,
 } from "@/components/nextGen/nextgen_helpers";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import Button from "@/components/utils/button/Button";
 import type { NFT } from "@/entities/INFT";
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { ApiNftActivityEvent } from "@/generated/models/ApiNftActivityEvent";
@@ -78,6 +79,14 @@ const ACTION_KEYS: Partial<Record<string, MessageKey>> = {
 };
 
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
+
+const HEAD_CELL = "tw-px-3 tw-py-2.5 tw-font-medium first:tw-pl-0 last:tw-pr-0";
+const CELL =
+  "tw-block tw-min-w-0 tw-p-0 tw-align-middle @4xl:tw-table-cell @4xl:tw-px-3 @4xl:tw-py-4 @4xl:first:tw-pl-0 @4xl:last:tw-pr-0";
+const PARTY_CELL =
+  "tw-text-sm tw-leading-5 tw-text-iron-500 [overflow-wrap:anywhere] [&_span]:tw-max-w-full [&_a]:tw-inline-flex [&_a]:tw-min-h-11 [&_a]:tw-min-w-11 [&_a]:tw-max-w-full [&_a]:tw-items-center [&_a]:tw-rounded-lg [&_a]:tw-text-sm [&_a]:tw-font-normal [&_a]:tw-text-iron-300 [&_a]:tw-no-underline [&_a]:hover:tw-text-iron-100 [&_a]:focus-visible:tw-outline [&_a]:focus-visible:tw-outline-2 [&_a]:focus-visible:tw-outline-offset-2 [&_a]:focus-visible:tw-outline-primary-400 [&_a]:motion-reduce:tw-transition-none";
+const MOBILE_LABEL =
+  "tw-mb-0.5 tw-block tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500 @4xl:tw-hidden";
 
 function isZeroDecimal(value: string): boolean {
   return (
@@ -241,11 +250,13 @@ function WalletIdentity({
   }
   if (!ADDRESS_PATTERN.test(wallet)) return <span>{wallet}</span>;
   return (
-    <Address
-      wallets={[wallet as `0x${string}`]}
-      display={display ?? undefined}
-      hideCopy
-    />
+    <span title={display ? `${display} (${wallet})` : wallet}>
+      <Address
+        wallets={[wallet as `0x${string}`]}
+        display={display ?? undefined}
+        hideCopy
+      />
+    </span>
   );
 }
 
@@ -300,11 +311,11 @@ function EventItem({
   };
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
       {imageSrc && itemHref && (
         <Link
           href={itemHref}
-          className="tw-shrink-0"
+          className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center"
           aria-hidden="true"
           tabIndex={-1}
         >
@@ -313,7 +324,7 @@ function EventItem({
             alt=""
             width={36}
             height={36}
-            className="tw-h-9 tw-w-9 tw-rounded-md tw-object-cover"
+            className="tw-h-9 tw-w-9 tw-rounded-lg tw-object-cover"
             unoptimized
             onError={imageErrorHandler}
           />
@@ -323,14 +334,18 @@ function EventItem({
         {itemHref ? (
           <Link
             href={itemHref}
-            className="tw-font-semibold tw-text-white tw-underline tw-underline-offset-2 hover:tw-text-iron-300"
+            className="tw-inline-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-rounded-lg tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300 tw-no-underline tw-underline-offset-4 [overflow-wrap:anywhere] hover:tw-text-iron-100 hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
             {itemLabel}
           </Link>
         ) : (
-          <span className="tw-font-semibold tw-text-white">{itemLabel}</span>
+          <span className="tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300 [overflow-wrap:anywhere]">
+            {itemLabel}
+          </span>
         )}
-        <div className="tw-mt-0.5 tw-text-xs tw-text-iron-400">{detail}</div>
+        <div className="tw-text-xs tw-leading-4 tw-text-iron-500 [overflow-wrap:anywhere]">
+          {detail}
+        </div>
       </div>
     </div>
   );
@@ -365,9 +380,15 @@ function EventRow({
   const fromDisplay = event.transaction_details?.from_display;
   const toDisplay = event.transaction_details?.to_display;
   return (
-    <tr className="tw-border-b tw-border-solid tw-border-white/10 last:tw-border-b-0">
-      <td className="tw-px-3 tw-py-3 tw-align-top">
-        <span className="tw-inline-flex tw-rounded-full tw-bg-white/5 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100">
+    <tr
+      role="row"
+      className="tw-grid tw-grid-cols-[fit-content(6rem)_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0 @4xl:tw-table-row @4xl:tw-py-0"
+    >
+      <td
+        role="cell"
+        className={`${CELL} tw-col-start-1 tw-row-start-1 tw-self-center`}
+      >
+        <span className="tw-inline-flex tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 [overflow-wrap:anywhere] @4xl:tw-whitespace-nowrap">
           {actionLabel}
         </span>
         {evidenceLabel && (
@@ -376,7 +397,7 @@ function EventRow({
           </span>
         )}
       </td>
-      <td className="tw-px-3 tw-py-3 tw-align-top">
+      <td role="cell" className={`${CELL} tw-col-span-2 tw-row-start-2`}>
         <EventItem
           event={event}
           nfts={nfts}
@@ -384,21 +405,36 @@ function EventRow({
           locale={locale}
         />
       </td>
-      <td className="tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-200">
+      <td
+        role="cell"
+        className={`${CELL} ${PARTY_CELL} tw-col-span-2 tw-col-start-1 tw-row-start-3 tw-w-[calc(50%-0.25rem)] tw-justify-self-start @4xl:tw-w-auto`}
+      >
+        <span aria-hidden="true" className={MOBILE_LABEL}>
+          {t(locale, "nftActivity.maker")}
+        </span>
         <WalletIdentity
           wallet={event.maker}
           display={fromDisplay}
           locale={locale}
         />
       </td>
-      <td className="tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-200">
+      <td
+        role="cell"
+        className={`${CELL} ${PARTY_CELL} tw-col-span-2 tw-col-start-1 tw-row-start-3 tw-w-[calc(50%-0.25rem)] tw-justify-self-end @4xl:tw-w-auto`}
+      >
+        <span aria-hidden="true" className={MOBILE_LABEL}>
+          {t(locale, "nftActivity.recipient")}
+        </span>
         <WalletIdentity
           wallet={event.taker}
           display={toDisplay}
           locale={locale}
         />
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-align-top tw-font-medium tw-text-iron-100">
+      <td
+        role="cell"
+        className={`${CELL} tw-col-start-2 tw-row-start-1 tw-self-center tw-whitespace-normal tw-text-right tw-font-mono tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] @4xl:tw-text-sm @4xl:[overflow-wrap:normal] [&>[aria-hidden=true]]:tw-font-normal [&>[aria-hidden=true]]:tw-text-iron-500`}
+      >
         {totalPrice ?? (
           <>
             <span aria-hidden="true">—</span>
@@ -408,7 +444,10 @@ function EventRow({
           </>
         )}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-300">
+      <td
+        role="cell"
+        className={`${CELL} tw-col-span-2 tw-row-start-4 tw-text-xs tw-leading-5 tw-text-iron-500`}
+      >
         <div className="tw-flex tw-items-center tw-gap-2">
           {occurredAtDateTime ? (
             <time dateTime={occurredAtDateTime}>{occurredAt}</time>
@@ -421,7 +460,7 @@ function EventRow({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t(locale, "nftActivity.transactionLink")}
-              className="tw-inline-flex tw-rounded-md tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               <ArrowTopRightOnSquareIcon
                 aria-hidden="true"
@@ -498,7 +537,7 @@ export default function NftMarketActivity({
   }
 
   return (
-    <>
+    <div className="tailwind-scope tw-min-h-80 tw-min-w-0 tw-@container">
       <div
         role="status"
         aria-live="polite"
@@ -518,13 +557,14 @@ export default function NftMarketActivity({
           className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
         >
           <span>{t(locale, "nftActivity.error")}</span>
-          <button
-            type="button"
+          <Button
+            variant="tertiary"
+            size="lg"
+            className="motion-reduce:tw-transition-none"
             onClick={() => void query.refetch()}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-3 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "nftActivity.retry")}
-          </button>
+          </Button>
         </div>
       )}
       {isEmpty && (
@@ -538,35 +578,58 @@ export default function NftMarketActivity({
             role="region"
             aria-label={t(locale, "nftActivity.scrollRegion")}
             tabIndex={0}
-            className="tw-relative tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+            className="tw-relative tw-overflow-x-auto before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
           >
+            {/* Explicit roles preserve table semantics when narrow layouts use block/grid display. */}
             <table
-              className="tw-w-full tw-min-w-[980px] tw-border-collapse"
+              role="table"
+              className="tw-block tw-w-full tw-table-fixed tw-border-collapse @4xl:tw-table @4xl:tw-table-auto"
               aria-label={t(locale, "nftActivity.tableLabel")}
             >
-              <thead className="tw-bg-black/20">
-                <tr className="tw-border-b tw-border-solid tw-border-white/20 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                  <th scope="col" className="tw-px-3 tw-py-2">
+              <colgroup>
+                <col className="tw-w-[12%]" />
+                <col className="tw-w-[24%]" />
+                <col className="tw-w-[15%]" />
+                <col className="tw-w-[15%]" />
+                <col className="tw-w-[15%]" />
+                <col className="tw-w-[19%]" />
+              </colgroup>
+              <thead
+                role="rowgroup"
+                className="tw-sr-only @4xl:tw-not-sr-only @4xl:tw-table-header-group"
+              >
+                <tr
+                  role="row"
+                  className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-text-left tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500"
+                >
+                  <th role="columnheader" scope="col" className={HEAD_CELL}>
                     {t(locale, "nftActivity.action")}
                   </th>
-                  <th scope="col" className="tw-px-3 tw-py-2">
+                  <th role="columnheader" scope="col" className={HEAD_CELL}>
                     {t(locale, "nftActivity.item")}
                   </th>
-                  <th scope="col" className="tw-px-3 tw-py-2">
+                  <th role="columnheader" scope="col" className={HEAD_CELL}>
                     {t(locale, "nftActivity.maker")}
                   </th>
-                  <th scope="col" className="tw-px-3 tw-py-2">
+                  <th role="columnheader" scope="col" className={HEAD_CELL}>
                     {t(locale, "nftActivity.recipient")}
                   </th>
-                  <th scope="col" className="tw-px-3 tw-py-2">
+                  <th
+                    role="columnheader"
+                    scope="col"
+                    className={`${HEAD_CELL} tw-text-right`}
+                  >
                     {t(locale, "nftActivity.totalPrice")}
                   </th>
-                  <th scope="col" className="tw-px-3 tw-py-2">
+                  <th role="columnheader" scope="col" className={HEAD_CELL}>
                     {t(locale, "nftActivity.date")}
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody
+                role="rowgroup"
+                className="tw-block @4xl:tw-table-row-group"
+              >
                 {events.map((event) => (
                   <EventRow
                     key={event.event_id}
@@ -585,27 +648,29 @@ export default function NftMarketActivity({
               className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-py-3 tw-text-error"
             >
               <span>{t(locale, "nftActivity.moreError")}</span>
-              <button
-                type="button"
+              <Button
+                variant="tertiary"
+                size="lg"
+                className="motion-reduce:tw-transition-none"
                 onClick={() => void query.fetchNextPage()}
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-3 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "nftActivity.retry")}
-              </button>
+              </Button>
             </div>
           )}
           {query.hasNextPage && !query.isFetchNextPageError && (
-            <div className="tw-py-3 tw-text-center">
-              <button
-                type="button"
+            <div className="tw-pt-4 tw-text-center">
+              <Button
+                variant="tertiary"
+                size="lg"
                 disabled={query.isFetchingNextPage}
                 onClick={() => void query.fetchNextPage()}
-                className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+                className="tw-w-full disabled:tw-cursor-wait disabled:tw-opacity-60 @4xl:tw-w-auto @4xl:tw-min-w-48 motion-reduce:tw-transition-none"
               >
                 {query.isFetchingNextPage
                   ? t(locale, "nftActivity.loadingMore")
                   : t(locale, "nftActivity.loadMore")}
-              </button>
+              </Button>
             </div>
           )}
           {historyStartedAt && (
@@ -619,6 +684,6 @@ export default function NftMarketActivity({
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }

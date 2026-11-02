@@ -28,14 +28,12 @@ const DIRECTION_STYLES: Record<
 > = {
   left: {
     button: "tw-left-0",
-    gradient:
-      "tw-left-0 tw-bg-gradient-to-r tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent",
+    gradient: "tw-left-0 tw-bg-gradient-to-r tw-to-transparent",
     icon: "-tw-translate-x-1.5 group-active:-tw-translate-x-2",
   },
   right: {
     button: "tw-right-0",
-    gradient:
-      "tw-right-0 tw-bg-gradient-to-l tw-from-iron-950 tw-via-iron-950/80 tw-to-transparent",
+    gradient: "tw-right-0 tw-bg-gradient-to-l tw-to-transparent",
     icon: "tw-translate-x-1.5 group-active:tw-translate-x-2",
   },
 };
@@ -67,6 +65,8 @@ interface ScrollControlProps {
   readonly isAvailable: boolean;
   readonly label: string;
   readonly onClick: () => void;
+  readonly showButton: boolean;
+  readonly fadeColorClassName: string;
 }
 
 function ScrollControl({
@@ -75,6 +75,8 @@ function ScrollControl({
   isAvailable,
   label,
   onClick,
+  showButton,
+  fadeColorClassName,
 }: ScrollControlProps) {
   const styles = DIRECTION_STYLES[direction];
   const ChevronIcon = direction === "left" ? ChevronLeftIcon : ChevronRightIcon;
@@ -83,35 +85,42 @@ function ScrollControl({
     <>
       <div
         aria-hidden="true"
-        className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-z-10 tw-w-12 tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none ${styles.gradient} ${
+        data-wave-tabs-fade={direction}
+        className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-z-10 ${showButton ? "tw-w-12" : "tw-w-10"} tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none ${styles.gradient} ${fadeColorClassName} ${
           isAvailable ? "tw-opacity-100" : "tw-opacity-0"
         }`}
       />
-      <button
-        ref={buttonRef}
-        type="button"
-        aria-label={label}
-        tabIndex={isAvailable ? 0 : -1}
-        onClick={onClick}
-        className={`tw-group tw-absolute tw-inset-y-0 tw-z-20 tw-flex tw-w-11 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-opacity tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${styles.button} ${
-          isAvailable
-            ? "tw-opacity-100"
-            : "tw-pointer-events-none tw-invisible tw-opacity-0"
-        }`}
-      >
-        <ChevronIcon
-          aria-hidden="true"
-          className={`tw-size-5 tw-drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] motion-reduce:tw-transform-none ${styles.icon}`}
-        />
-      </button>
+      {showButton && (
+        <button
+          ref={buttonRef}
+          type="button"
+          aria-label={label}
+          tabIndex={isAvailable ? 0 : -1}
+          onClick={onClick}
+          className={`tw-group tw-absolute tw-inset-y-0 tw-z-20 tw-flex tw-w-11 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-opacity tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${styles.button} ${
+            isAvailable
+              ? "tw-opacity-100"
+              : "tw-pointer-events-none tw-invisible tw-opacity-0"
+          }`}
+        >
+          <ChevronIcon
+            aria-hidden="true"
+            className={`tw-size-5 tw-drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] motion-reduce:tw-transform-none ${styles.icon}`}
+          />
+        </button>
+      )}
     </>
   );
 }
 
 export default function MobileTabsScrollControls({
   scrollerRef,
+  showButtons = true,
+  fadeColorClassName = "tw-from-iron-950 tw-via-iron-950/80",
 }: {
   readonly scrollerRef: RefObject<HTMLDivElement | null>;
+  readonly showButtons?: boolean;
+  readonly fadeColorClassName?: string;
 }) {
   const locale = useBrowserLocale();
   const leftButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -179,7 +188,6 @@ export default function MobileTabsScrollControls({
           });
         }
       };
-      const content = scroller.firstElementChild;
       const resizeObserver =
         typeof ResizeObserver === "undefined"
           ? null
@@ -187,10 +195,21 @@ export default function MobileTabsScrollControls({
 
       scroller.addEventListener("scroll", notify, { passive: true });
       globalThis.window.addEventListener("resize", notify);
-      resizeObserver?.observe(scroller);
-      if (content) {
-        resizeObserver?.observe(content);
-      }
+      const observeContent = () => {
+        resizeObserver?.disconnect();
+        resizeObserver?.observe(scroller);
+        for (const child of scroller.children) {
+          resizeObserver?.observe(child);
+        }
+        notify();
+      };
+      const mutationObserver = new MutationObserver(observeContent);
+      mutationObserver.observe(scroller, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+      observeContent();
 
       return () => {
         if (focusFrame !== null) {
@@ -199,6 +218,7 @@ export default function MobileTabsScrollControls({
         scroller.removeEventListener("scroll", notify);
         globalThis.window.removeEventListener("resize", notify);
         resizeObserver?.disconnect();
+        mutationObserver.disconnect();
       };
     },
     [scrollerRef]
@@ -231,6 +251,8 @@ export default function MobileTabsScrollControls({
       <ScrollControl
         buttonRef={leftButtonRef}
         direction="left"
+        showButton={showButtons}
+        fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollLeft}
         label={getWaveTabsScrollLabel(locale, "left")}
         onClick={() => scrollTabs(-1)}
@@ -238,6 +260,8 @@ export default function MobileTabsScrollControls({
       <ScrollControl
         buttonRef={rightButtonRef}
         direction="right"
+        showButton={showButtons}
+        fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollRight}
         label={getWaveTabsScrollLabel(locale, "right")}
         onClick={() => scrollTabs(1)}

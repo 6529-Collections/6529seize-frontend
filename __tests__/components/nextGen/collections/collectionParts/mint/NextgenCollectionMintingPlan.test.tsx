@@ -81,4 +81,29 @@ describe("NextgenCollectionMintingPlan", () => {
       );
     });
   });
+
+  it("labels phase start and end times as UTC", async () => {
+    (commonApiFetch as jest.Mock).mockImplementation(
+      ({ endpoint }: { endpoint: string }) =>
+        endpoint.startsWith("nextgen/allowlist_phases")
+          ? Promise.resolve([
+              {
+                phase: "Allowlist",
+                // Seconds, as the API returns them.
+                start_time: Date.UTC(2026, 9, 12, 11, 27, 11) / 1000,
+                end_time: Date.UTC(2026, 9, 13, 23, 30, 0) / 1000,
+              },
+            ])
+          : Promise.resolve({ count: 0, page: 1, next: null, data: [] })
+    );
+
+    render(<NextgenCollectionMintingPlan collection={collection} />);
+
+    expect(
+      await screen.findByText("2026-10-12 11:27:11 UTC")
+    ).toBeInTheDocument();
+    expect(screen.getByText("2026-10-13 23:30:00 UTC")).toBeInTheDocument();
+    // A phase without a time still reads N/A, with no zone attached.
+    expect(screen.getAllByText("N/A").length).toBeGreaterThan(0);
+  });
 });

@@ -41,13 +41,18 @@ import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscription
 import { formatAddress } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import styles from "./UserPageSubscriptions.module.css";
-import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import UserPageSubscriptionsSection, {
+  getUserPageSubscriptionsSectionTitleId,
+} from "./UserPageSubscriptionsSection";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
 const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
+// Hash target of the notification and header top-up links.
+const TOP_UP_SECTION_ID = "profile-subscriptions-top-up";
 
 function getEthForCards(count: number): string {
   return formatEther(BigInt(Math.trunc(count)) * MEMES_MINT_PRICE_WEI);
@@ -297,6 +302,12 @@ export default function UserPageSubscriptionsTopUp({
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
     country,
+  });
+  // Revealed only where purchasing is allowed; restricted platforms render
+  // nothing, so there is nothing to scroll to.
+  useScrollToHashOnMount(TOP_UP_SECTION_ID, {
+    enabled: !hideSubscriptions,
+    focusId: getUserPageSubscriptionsSectionTitleId(TOP_UP_SECTION_ID),
   });
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
@@ -577,7 +588,7 @@ export default function UserPageSubscriptionsTopUp({
                   placeholder="count"
                   aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-sm tw-text-iron-100 tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
+                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-base tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-100 md:desktop-hover:tw-text-sm tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -632,9 +643,9 @@ export default function UserPageSubscriptionsTopUp({
   return (
     <>
       <UserPageSubscriptionsSection
-        id="profile-subscriptions-top-up"
+        id={TOP_UP_SECTION_ID}
         title={t(locale, "subscriptions.page.topUpTitle")}
-        className="tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
         action={
           <span className="tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-rounded-full tw-bg-iron-900/60 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-500 tw-ring-1 tw-ring-white/10">
             <span>{t(locale, "subscriptions.topUp.sendingTo")}</span>

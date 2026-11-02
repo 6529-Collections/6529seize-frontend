@@ -24,11 +24,15 @@ export function useDropForgePermissions() {
     () => JSON.parse(claimsAdminWalletsKey) as string[],
     [claimsAdminWalletsKey]
   );
+  const isClaimsAdmin =
+    !!address && claimsAdminWallets.some((w) => areEqualAddresses(w, address));
+  // A claims admin can already launch and manage contract admins, so the
+  // on-chain admin/owner reads cannot change any derived permission.
   const {
     isDropForgeAdmin,
     isDropForgeOwner,
     isFetching: isDropForgeAdminFetching,
-  } = useIsDropForgeAdmin();
+  } = useIsDropForgeAdmin({ skip: isClaimsAdmin });
 
   return useMemo(() => {
     const hasWallet = !!address;
@@ -36,9 +40,6 @@ export function useDropForgePermissions() {
     const isDistributionAdmin =
       hasWallet &&
       distributionAdminWallets.some((w) => areEqualAddresses(w, address));
-    const isClaimsAdmin =
-      hasWallet &&
-      claimsAdminWallets.some((w) => areEqualAddresses(w, address));
     const permissionsLoading =
       isWalletInitializing ||
       (hasWallet && !isLoaded) ||
@@ -75,6 +76,6 @@ export function useDropForgePermissions() {
     isDropForgeOwner,
     isDropForgeAdminFetching,
     distributionAdminWallets,
-    claimsAdminWallets,
+    isClaimsAdmin,
   ]);
 }

@@ -20,7 +20,7 @@ const stubs = new Map([
   ],
   [
     "@/config/env",
-    'export const publicEnv = { NODE_ENV: "production", NEXT_PUBLIC_MIXPANEL_TOKEN: "synthetic-wave-feature-pilot" };',
+    'export const publicEnv = { NODE_ENV: "production", NEXT_PUBLIC_MIXPANEL_TOKEN: "synthetic-wave-feature-pilot" }; export const getNodeEnv = () => publicEnv.NODE_ENV;',
   ],
   ["@/components/auth/Auth", fixtureExport("AuthContext, useAuth")],
   ["@/components/auth/authContext", fixtureExport("AuthContext, useAuth")],
@@ -119,6 +119,12 @@ async function start() {
               };
             if (args.path === "./useDeviceInfo")
               return { path: "@/hooks/useDeviceInfo", namespace: "fixture" };
+            // config/devAuth.ts reads the env module through a relative path.
+            if (
+              args.path === "./env" &&
+              path.dirname(args.importer) === path.join(root, "config")
+            )
+              return { path: "@/config/env", namespace: "fixture" };
             if (stubs.has(args.path))
               return { path: args.path, namespace: "fixture" };
             if (
@@ -128,7 +134,7 @@ async function start() {
             ) {
               return { path: "null-component", namespace: "fixture" };
             }
-            if (args.path === "mixpanel-browser")
+            if (args.path === "mixpanel-browser/dist/mixpanel-core.cjs.js")
               return { path: "sdk", namespace: "fixture" };
             return undefined;
           });
@@ -137,7 +143,9 @@ async function start() {
             if (args.path === "null-component")
               contents = "export default function Component() { return null; }";
             if (args.path === "sdk") {
-              const sdkPath = require.resolve("mixpanel-browser");
+              const sdkPath = require.resolve(
+                "mixpanel-browser/dist/mixpanel-core.cjs.js"
+              );
               contents = `import sdk from ${JSON.stringify(sdkPath)};
             const init = sdk.init.bind(sdk);
             sdk.init = (token, options) => init(token, {...options,

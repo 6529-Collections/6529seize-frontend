@@ -49,6 +49,26 @@ describe("TitleContext", () => {
     document.title = "";
   });
 
+  it("keeps a deep-linked submission title after wave hydration and unread updates", () => {
+    mockSearchParams = new URLSearchParams("drop=submission");
+    document.title = "TestIntern by @phoebeum";
+    const ui = (newItemsCount: number) => (
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Main Stage", newItemsCount }}
+        />
+      </TitleProvider>
+    );
+    const view = render(ui(0));
+    expect(document.title).toBe("TestIntern by @phoebeum");
+    view.rerender(ui(3));
+    expect(document.title).toBe("TestIntern by @phoebeum");
+    mockSearchParams = new URLSearchParams();
+    view.rerender(ui(3));
+    expect(document.title).toBe("(3 new messages) Main Stage | Brain");
+  });
+
   it("resets the client title when leaving a wave for the meme calendar", async () => {
     const view = render(
       <TitleProvider>

@@ -21,6 +21,7 @@ export default function NftNavigation(
     endIndex: number;
     fullscreenElementId?: string | undefined;
     params?: SearchParamsSource | undefined;
+    square?: boolean;
   }>
 ) {
   const locale = useBrowserLocale();
@@ -55,7 +56,9 @@ export default function NftNavigation(
 
   function printNavigation() {
     return (
-      <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
+      <span
+        className={`tw-flex tw-items-center tw-justify-center tw-gap-2 ${props.square ? "[&>*]:tw-rounded-lg [&>*]:tw-border-iron-800 [&>*]:tw-bg-iron-950 [&>*]:tw-shadow-none" : ""}`}
+      >
         {isFirst ? (
           <span
             role="link"

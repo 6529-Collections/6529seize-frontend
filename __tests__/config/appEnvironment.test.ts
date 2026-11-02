@@ -3,6 +3,7 @@ import {
   getBrowserAppEnvironment,
   getBrowserOrigin,
   getProductionAppEnvironment,
+  isLocalAppEnvironment,
   PRODUCTION_APP_ORIGIN,
 } from "@/config/appEnvironment";
 
@@ -198,5 +199,26 @@ describe("browser environment identity", () => {
     expect(getBrowserAppEnvironment(read)).toEqual(
       getProductionAppEnvironment()
     );
+  });
+});
+
+describe("isLocalAppEnvironment", () => {
+  it.each(["http://localhost:3001", "http://127.0.0.1:3001"])(
+    "treats %s as local",
+    (baseEndpoint) => {
+      expect(isLocalAppEnvironment(baseEndpoint)).toBe(true);
+    }
+  );
+
+  it.each([
+    "https://6529.io",
+    "https://staging.6529.io",
+    "https://alicestaging.6529.io",
+    "http://192.168.1.20:3001",
+    "http://localhost.example.com",
+    "not a url",
+    "",
+  ])("does not treat %s as local", (baseEndpoint) => {
+    expect(isLocalAppEnvironment(baseEndpoint)).toBe(false);
   });
 });

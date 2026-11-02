@@ -16,6 +16,9 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import { WaveSettingEditorContext } from "./WaveSettingEditorContext";
 
 interface WaveSettingRowProps {
   readonly canEdit: boolean;
@@ -69,7 +72,8 @@ export default function WaveSettingRow({
   variant = "row",
 }: WaveSettingRowProps) {
   const editorId = useId();
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const panel = useWaveInformationPanel(editLabel);
+  const { isOpen: isEditorOpen, close: closeEditor, open: openPanel } = panel;
   const [useBottomSheet, setUseBottomSheet] = useState(() =>
     shouldUseBottomSheet()
   );
@@ -80,12 +84,8 @@ export default function WaveSettingRow({
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const closeEditor = useCallback(() => {
-    setIsEditorOpen(false);
-  }, []);
-
   useEffect(() => {
-    if (!isEditorOpen) {
+    if (!isEditorOpen || useBottomSheet || panel.isInSheet) {
       return;
     }
 
@@ -118,13 +118,13 @@ export default function WaveSettingRow({
       globalThis.document.removeEventListener("touchstart", handlePointerDown);
       globalThis.document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [closeEditor, isEditorOpen]);
+  }, [closeEditor, isEditorOpen, useBottomSheet, panel.isInSheet]);
 
   const openEditor = useCallback(() => {
     onOpen();
     setPopoverPosition(null);
-    setIsEditorOpen(true);
-  }, [onOpen]);
+    openPanel(editButtonRef.current);
+  }, [onOpen, openPanel]);
 
   const toggleEditor = () => {
     if (isEditorOpen) {
@@ -136,7 +136,7 @@ export default function WaveSettingRow({
   };
 
   const updatePopoverPosition = useCallback(() => {
-    if (!isEditorOpen || useBottomSheet) {
+    if (!isEditorOpen || useBottomSheet || panel.isInSheet) {
       return;
     }
 
@@ -184,7 +184,7 @@ export default function WaveSettingRow({
     const top = Math.min(Math.max(unclampedTop, VIEWPORT_PADDING_PX), maxTop);
 
     setPopoverPosition({ left, top });
-  }, [isEditorOpen, useBottomSheet]);
+  }, [isEditorOpen, useBottomSheet, panel.isInSheet]);
 
   useEffect(() => {
     const updateSurfaceMode = () => {
@@ -203,7 +203,7 @@ export default function WaveSettingRow({
   }, [updatePopoverPosition]);
 
   useEffect(() => {
-    if (!isEditorOpen || useBottomSheet) {
+    if (!isEditorOpen || useBottomSheet || panel.isInSheet) {
       return;
     }
 
@@ -219,27 +219,27 @@ export default function WaveSettingRow({
       globalThis.removeEventListener("scroll", updatePopoverPosition, true);
       observer.disconnect();
     };
-  }, [isEditorOpen, updatePopoverPosition, useBottomSheet]);
+  }, [isEditorOpen, updatePopoverPosition, useBottomSheet, panel.isInSheet]);
 
-  const editorForm = isEditorOpen ? renderEditor({ closeEditor }) : null;
+  const editorContent = isEditorOpen ? renderEditor({ closeEditor }) : null;
+  const editorForm = (
+    <WaveSettingEditorContext.Provider
+      value={panel.isInSheet || useBottomSheet ? "sheet" : "popover"}
+    >
+      {editorContent}
+    </WaveSettingEditorContext.Provider>
+  );
   const bottomSheetSurface = (
-    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1200] tw-flex tw-items-end tw-bg-black/60 tw-px-3 tw-pb-3 tw-pt-10">
-      <dialog
-        open
-        aria-modal="true"
-        aria-label={editLabel}
-        className="tw-relative tw-m-0 tw-w-full tw-max-w-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit"
-      >
-        <div
-          id={editorId}
-          ref={editorRef}
-          tabIndex={-1}
-          className="tw-max-h-[calc(100dvh-4rem)] tw-w-full tw-overflow-y-auto tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
-        >
-          {editorForm}
-        </div>
-      </dialog>
-    </div>
+    <MobileWrapperDialog
+      isOpen={isEditorOpen}
+      title={editLabel}
+      onClose={closeEditor}
+      fitVisualViewport
+    >
+      <div id={editorId} className="tw-px-4">
+        {editorForm}
+      </div>
+    </MobileWrapperDialog>
   );
   const popoverSurface = (
     <div
@@ -263,25 +263,32 @@ export default function WaveSettingRow({
       </div>
     </div>
   );
-  const selectedEditorSurface = useBottomSheet
-    ? bottomSheetSurface
-    : popoverSurface;
-  const editorSurface = isEditorOpen
-    ? createPortal(
-        <FocusTrap
-          active={useBottomSheet || popoverPosition !== null}
-          focusTrapOptions={{
-            escapeDeactivates: false,
-            clickOutsideDeactivates: true,
-            fallbackFocus: () => editorRef.current!,
-            setReturnFocus: () => editButtonRef.current ?? false,
-          }}
-        >
-          {selectedEditorSurface}
-        </FocusTrap>,
-        globalThis.document.body
-      )
-    : null;
+  let editorSurface: ReactNode = null;
+  if (isEditorOpen && panel.isInSheet) {
+    editorSurface =
+      panel.container &&
+      createPortal(
+        <div className="tw-px-4">{editorForm}</div>,
+        panel.container
+      );
+  } else if (useBottomSheet) {
+    editorSurface = bottomSheetSurface;
+  } else if (isEditorOpen) {
+    editorSurface = createPortal(
+      <FocusTrap
+        active={popoverPosition !== null}
+        focusTrapOptions={{
+          escapeDeactivates: false,
+          clickOutsideDeactivates: true,
+          fallbackFocus: () => editorRef.current!,
+          setReturnFocus: () => editButtonRef.current ?? false,
+        }}
+      >
+        {popoverSurface}
+      </FocusTrap>,
+      globalThis.document.body
+    );
+  }
   const rowGridClasses = canEdit
     ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]"
     : "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)]";
@@ -296,9 +303,9 @@ export default function WaveSettingRow({
       ref={editButtonRef}
       type="button"
       aria-label={editLabel}
-      aria-controls={editorId}
+      aria-controls={panel.isInSheet ? panel.contentId : editorId}
       aria-expanded={isEditorOpen}
-      aria-haspopup="dialog"
+      aria-haspopup={panel.isInSheet ? undefined : "dialog"}
       title={editLabel}
       onClick={toggleEditor}
       className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
@@ -326,7 +333,7 @@ export default function WaveSettingRow({
 
   return (
     <div
-      className={`tw-group tw-grid tw-min-h-9 tw-w-full ${rowGridClasses} tw-items-start tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm`}
+      className={`tw-group tw-grid tw-min-h-9 tw-w-full ${rowGridClasses} tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm`}
     >
       <span className="tw-min-w-0 tw-py-0.5 tw-font-normal tw-leading-5 tw-text-iron-500">
         {label}

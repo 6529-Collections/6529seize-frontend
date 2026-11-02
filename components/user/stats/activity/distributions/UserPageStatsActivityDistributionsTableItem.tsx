@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatDistributionRelativeTime,
@@ -31,43 +31,44 @@ export default function UserPageStatsActivityDistributionsTableItem({
 
   return (
     <tr>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pr-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pr-4">
         {collectionLabel}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
-        <Link
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
+        <ProfileCollectedActivityLink
+          activityKey={`distribution-${item.collection}-${item.tokenId}-${item.walletAddress}`}
           aria-label={getDistributionTokenLinkLabel({
             collection: item.collection,
             tokenId: item.tokenId,
             locale,
           })}
-          className="tw-text-iron-50 tw-no-underline hover:tw-underline"
+          className="tw-text-iron-100 tw-no-underline hover:tw-underline"
           href={`${getCollectionPath(item.collection)}/${item.tokenId}`}
         >
           # {item.tokenId}
-        </Link>
+        </ProfileCollectedActivityLink>
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-50 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
         {item.name}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
         {item.wallet}
       </td>
       {item.phases.map((phase) => (
         <td
           key={`${item.collection}-${item.tokenId}-${item.wallet}-phase-${phase.phase}`}
-          className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4"
+          className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
         >
           {formatNumber(phase.amount)}
         </td>
       ))}
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
         {formatNumber(item.amountMinted)}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
         {formatNumber(item.amountTotal)}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
+      <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-meta/5 tw-font-normal tw-tabular-nums tw-text-iron-500 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4">
         {timeAgo}
       </td>
     </tr>

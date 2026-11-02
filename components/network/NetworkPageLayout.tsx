@@ -35,7 +35,7 @@ export default function NetworkPageLayout({
   }, [searchParams, activeGroupId, setActiveGroupId]);
 
   if (isApp) {
-    return <NetworkPageLayoutApp>{children}</NetworkPageLayoutApp>;
+    return <NetworkPageLayoutApp>{isReady && children}</NetworkPageLayoutApp>;
   }
 
   return (

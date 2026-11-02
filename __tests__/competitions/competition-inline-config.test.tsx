@@ -1,3 +1,4 @@
+import CompetitionApprovalThresholds from "@/components/competitions/CompetitionApprovalThresholds";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CompetitionOverview from "@/components/competitions/CompetitionOverview";
@@ -9,7 +10,15 @@ import {
 } from "@/services/api/competitions-api";
 import { WAVE_DISPLAY_METADATA_KEYS as keys } from "@/helpers/waves/wave-metadata.helpers";
 import type { ReactNode } from "react";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/i18n/locales";
+import { loadLocaleMessages, t } from "@/i18n/messages";
 
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+
+let mockLegacyPrimary: string | null = null;
 const mockCompetition = {
   id: "competition",
   wave_id: "wave",
@@ -20,7 +29,16 @@ const mockCompetition = {
   computed_phase: "VOTING_OPEN",
   config_version: 4,
   permissions: { administer: true },
-  decisions: { strategy: {} },
+  decisions: {
+    strategy: {},
+    winning_min_threshold: 10,
+    winning_threshold_min_duration_ms: 5000,
+  },
+  participation: {
+    starts_at: 0 as number | null,
+    ends_at: 100000 as number | null,
+  },
+  voting: { ends_at: 100000 as number | null },
   presentation: [
     { data_key: keys.customRules, data_value: "Current guidelines" },
     { data_key: keys.submissionButtonLabel, data_value: "Submit art" },
@@ -41,7 +59,7 @@ const config = {
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     competition: mockCompetition,
-    hub: { legacy_primary_competition_id: null },
+    hub: { legacy_primary_competition_id: mockLegacyPrimary },
   }),
 }));
 jest.mock("@/components/auth/Auth", () => ({
@@ -74,6 +92,11 @@ function setup(component: ReactNode) {
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockLegacyPrimary = null;
+  mockLocale = "en-US";
+  mockCompetition.participation.starts_at = 0;
+  mockCompetition.participation.ends_at = 100000;
+  mockCompetition.voting.ends_at = 100000;
   mockCompetition.permissions.administer = true;
   mockCompetition.config_version = 4;
   mockCompetition.type = "RANK";
@@ -81,43 +104,49 @@ beforeEach(() => {
   jest.mocked(updateCompetition).mockResolvedValue(mockCompetition as never);
   jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
 });
-it("edits name, description and guidelines in place while preserving execution rules and appearance", async () => {
-  setup(<CompetitionOverview />);
-  fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
-  );
-  fireEvent.change(screen.getByLabelText("Competition name"), {
-    target: { value: "New name" },
-  });
-  fireEvent.change(screen.getByLabelText("Description"), {
-    target: { value: "New description" },
-  });
-  fireEvent.change(screen.getByLabelText("Guidelines"), {
-    target: { value: "New guidelines" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-  await waitFor(() =>
-    expect(updateCompetition).toHaveBeenCalledWith(
-      { waveId: "wave", competitionId: "competition" },
-      {
-        idempotency_key: "request-key",
-        config_version: 4,
-        config: {
-          ...config,
-          title: "New name",
-          description: "New description",
-          presentation: [
-            config.presentation[1],
-            { data_key: keys.customRules, data_value: "New guidelines" },
-          ],
-        },
-      }
-    )
-  );
-  await waitFor(() =>
-    expect(screen.queryByLabelText("Competition name")).not.toBeInTheDocument()
-  );
-});
+it.each([null, "competition"])(
+  "edits name, description and guidelines using the same competition configuration for original primary %s",
+  async (primary) => {
+    mockLegacyPrimary = primary;
+    setup(<CompetitionOverview />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit competition details" })
+    );
+    fireEvent.change(screen.getByLabelText("Competition name"), {
+      target: { value: "New name" },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "New description" },
+    });
+    fireEvent.change(screen.getByLabelText("Guidelines"), {
+      target: { value: "New guidelines" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() =>
+      expect(updateCompetition).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        {
+          idempotency_key: "request-key",
+          config_version: 4,
+          config: {
+            ...config,
+            title: "New name",
+            description: "New description",
+            presentation: [
+              config.presentation[1],
+              { data_key: keys.customRules, data_value: "New guidelines" },
+            ],
+          },
+        }
+      )
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByLabelText("Competition name")
+      ).not.toBeInTheDocument()
+    );
+  }
+);
 it("requires a non-blank title and cancels without saving", () => {
   setup(<CompetitionOverview />);
   fireEvent.click(
@@ -239,4 +268,142 @@ it("saves custom Approve tab labels in the competition presentation", async () =
       { data_key: keys.approvedTabLabel, data_value: "Accepted" },
     ])
   );
+});
+
+it.each([null, "competition"])(
+  "edits approval thresholds through the native config for primary %s",
+  async (primary) => {
+    mockLegacyPrimary = primary;
+    mockCompetition.type = "APPROVE";
+    setup(<CompetitionApprovalThresholds />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit approval thresholds" })
+    );
+    fireEvent.change(screen.getByLabelText("Winning threshold"), {
+      target: { value: "25" },
+    });
+    fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+      target: { value: "10" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() =>
+      expect(updateCompetition).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        expect.objectContaining({
+          config_version: 4,
+          config: {
+            ...config,
+            rules: {
+              ...config.rules,
+              winning_threshold: 25,
+              winning_threshold_min_duration_ms: 10000,
+            },
+          },
+        })
+      )
+    );
+  }
+);
+it("keeps approval thresholds invalid when fractional or longer than the approval window", async () => {
+  setup(<CompetitionApprovalThresholds />);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit approval thresholds" })
+  );
+  const save = screen.getByRole("button", { name: "Save changes" });
+  fireEvent.change(screen.getByLabelText("Winning threshold"), {
+    target: { value: "1.5" },
+  });
+  expect(save).toBeDisabled();
+  expect(screen.getByLabelText("Winning threshold")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  expect(
+    screen.getByLabelText("Winning threshold")
+  ).toHaveAccessibleDescription("Enter a positive whole number.");
+  fireEvent.change(screen.getByLabelText("Winning threshold"), {
+    target: { value: "1" },
+  });
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "101" },
+  });
+  expect(save).toBeDisabled();
+  expect(screen.getByLabelText("Winning threshold")).toHaveAttribute(
+    "aria-invalid",
+    "false"
+  );
+  expect(screen.getByLabelText("Threshold hold (seconds)")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  expect(
+    screen.getByLabelText("Threshold hold (seconds)")
+  ).toHaveAccessibleDescription(
+    /The hold cannot exceed the competition’s approval window/
+  );
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "" },
+  });
+  expect(save).toBeEnabled();
+  expect(screen.getByLabelText("Threshold hold (seconds)")).toHaveAttribute(
+    "aria-invalid",
+    "false"
+  );
+  fireEvent.click(save);
+  await waitFor(() =>
+    expect(updateCompetition).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "competition" },
+      expect.objectContaining({
+        config: expect.objectContaining({
+          rules: expect.objectContaining({
+            winning_threshold: 1,
+            winning_threshold_min_duration_ms: 0,
+          }),
+        }),
+      })
+    )
+  );
+});
+
+it.each(SUPPORTED_LOCALES)(
+  "names the threshold controls and terms in supported locale %s",
+  async (locale) => {
+    await loadLocaleMessages(locale);
+    mockLocale = locale;
+    setup(<CompetitionApprovalThresholds />);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: t(locale, "competitions.editThresholds"),
+      })
+    );
+    for (const key of [
+      "competitions.rulesLabel.threshold",
+      "competitions.thresholdHoldSeconds",
+      "competitions.terms",
+    ] as const)
+      expect(t(locale, key).trim()).not.toBe("");
+    expect(
+      screen.getByRole("textbox", {
+        name: t(locale, "competitions.rulesLabel.threshold"),
+      })
+    ).toHaveAccessibleName(t(locale, "competitions.rulesLabel.threshold"));
+    expect(
+      screen.getByRole("textbox", {
+        name: t(locale, "competitions.thresholdHoldSeconds"),
+      })
+    ).toHaveAccessibleName(t(locale, "competitions.thresholdHoldSeconds"));
+  }
+);
+
+it("allows a safe whole-second hold when the approval window has no end", () => {
+  mockCompetition.participation.ends_at = null;
+  mockCompetition.voting.ends_at = null;
+  setup(<CompetitionApprovalThresholds />);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit approval thresholds" })
+  );
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "86400" },
+  });
+  expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
 });

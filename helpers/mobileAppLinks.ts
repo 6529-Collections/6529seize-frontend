@@ -5,7 +5,8 @@ export const DeepLinkScope = {
   SHARE_CONNECTION: "share-connection",
 } as const;
 
-const EXCLUDED_ROUTES = [
+/** Routes that stay in the browser for app links and universal links alike. */
+export const MOBILE_APP_EXCLUDED_ROUTES = [
   "/open-mobile",
   "/access",
   "/restricted",
@@ -14,7 +15,7 @@ const EXCLUDED_ROUTES = [
   "/tools/app-wallets",
   "/auth",
   "/api",
-];
+] as const;
 
 export function isMobileAppDestination(path: string): boolean {
   let pathname: string;
@@ -23,7 +24,7 @@ export function isMobileAppDestination(path: string): boolean {
   } catch {
     return false;
   }
-  return !EXCLUDED_ROUTES.some(
+  return !MOBILE_APP_EXCLUDED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 }
@@ -82,6 +83,67 @@ export function getMobileAppLink({
   return `intent://${DeepLinkScope.NAVIGATE}${path}#Intent;scheme=${appScheme};package=com.core6529.app;S.browser_fallback_url=${encodeURIComponent(fallback.href)};end`;
 }
 
+/** Hosts whose https links 6529 Mobile opens as universal links or App Links. */
+const UNIVERSAL_LINK_HOSTS = new Set(["6529.io", "www.6529.io"]);
+
+/**
+ * Besides the excluded app routes, the apple-app-site-association file keeps
+ * these in the browser: routes that never render a page, and file links. Only
+ * file extensions match, because profile paths can be ENS names.
+ */
+const UNIVERSAL_LINK_NON_PAGE_ROUTES = [
+  "/_next",
+  "/.well-known",
+  "/review-data",
+];
+const UNIVERSAL_LINK_FILE_EXTENSION =
+  /\.(?:avif|csv|gif|html|ico|jpe?g|json|md|pdf|png|svg|txt|webp|xml|zip)$/i;
+
+/** Query parameter that makes a repeated link to the same page navigate again. */
+const NATIVE_LINK_TIMESTAMP_PARAM = "_t";
+
+function isUniversalLinkPath(pathname: string): boolean {
+  if (!isMobileAppDestination(pathname)) return false;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return false;
+  }
+  return (
+    !UNIVERSAL_LINK_NON_PAGE_ROUTES.some(
+      (route) => decoded === route || decoded.startsWith(`${route}/`)
+    ) && !UNIVERSAL_LINK_FILE_EXTENSION.test(decoded)
+  );
+}
+
+function getNativeLinkPathname(url: URL, scheme: string): string | null {
+  if (url.protocol === "https:") {
+    return UNIVERSAL_LINK_HOSTS.has(url.hostname) &&
+      isUniversalLinkPath(url.pathname)
+      ? url.pathname
+      : null;
+  }
+
+  const allowedSchemes = [getMobileAppScheme(scheme), "mobile6529"];
+  if (
+    !allowedSchemes.some(
+      (allowed) => url.protocol === `${allowed.toLowerCase()}:`
+    )
+  )
+    return null;
+  if (url.hostname === DeepLinkScope.NAVIGATE) return url.pathname || "/";
+  if (url.hostname === DeepLinkScope.SHARE_CONNECTION)
+    return "/accept-connection-sharing";
+  return null;
+}
+
+/**
+ * Maps a link the app was opened with to a root-relative destination, or null
+ * to ignore it. Accepts `<scheme>://navigate/<path>`,
+ * `<scheme>://share-connection?...` and https universal links / App Links on
+ * the 6529.io hosts, except paths the association file keeps in the browser.
+ */
 export function getNativeLinkDestination(
   value: string,
   scheme: string,
@@ -90,30 +152,52 @@ export function getNativeLinkDestination(
 ): string | null {
   try {
     const url = new URL(value);
-    const allowedSchemes = [getMobileAppScheme(scheme), "mobile6529"];
-    if (
-      !allowedSchemes.some(
-        (allowed) => url.protocol === `${allowed.toLowerCase()}:`
-      ) ||
-      url.username ||
-      url.password ||
-      url.port
-    )
-      return null;
-
-    let pathname: string;
-    if (url.hostname === DeepLinkScope.NAVIGATE) {
-      pathname = url.pathname || "/";
-    } else if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
-      pathname = "/accept-connection-sharing";
-    } else {
-      return null;
-    }
+    if (url.username || url.password || url.port) return null;
+    const pathname = getNativeLinkPathname(url, scheme);
+    if (!pathname) return null;
 
     // URLSearchParams preserves repeated parameters; fragments stay outside the query.
-    url.searchParams.set("_t", String(timestamp));
+    url.searchParams.set(NATIVE_LINK_TIMESTAMP_PARAM, String(timestamp));
     return getMobileDestination(`${pathname}${url.search}${url.hash}`, origin);
   } catch {
     return null;
+  }
+}
+
+function getComparableLocation(value: string, origin: string): string {
+  const url = new URL(value, origin);
+  url.searchParams.delete(NATIVE_LINK_TIMESTAMP_PARAM);
+  // Stable: keeps the order of repeated values of one parameter.
+  url.searchParams.sort();
+  let pathname = url.pathname;
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
+  try {
+    pathname = decodeURI(pathname);
+  } catch {
+    // Compare the encoded form.
+  }
+  return `${url.origin}${pathname}?${url.searchParams.toString()}${url.hash}`;
+}
+
+/**
+ * Whether `destination` (from getNativeLinkDestination) is the page `current`
+ * already shows: same pathname (ignoring a trailing slash and equivalent
+ * percent-encoding), same query parameters (ignoring the navigation timestamp
+ * and the order of different parameters) and same fragment.
+ */
+export function isCurrentNativeLinkLocation(
+  destination: string,
+  current: string,
+  origin: string
+): boolean {
+  try {
+    return (
+      getComparableLocation(destination, origin) ===
+      getComparableLocation(current, origin)
+    );
+  } catch {
+    return false;
   }
 }

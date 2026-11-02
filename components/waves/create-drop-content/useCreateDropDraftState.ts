@@ -14,7 +14,7 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { EditorState } from "lexical";
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   mergeMentionedUsers,
   type EditorMentionedUser,
@@ -346,17 +346,14 @@ export const useCreateDropDraftState = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
       return;
     }
 
     shouldRefocusAfterChatSubmitRef.current = false;
-    const frameId = requestAnimationFrame(() => {
-      createDropInputRef.current?.focus();
-    });
-
-    return () => cancelAnimationFrame(frameId);
+    // Refocus the refreshed editor before iOS can dismiss its input session.
+    createDropInputRef.current?.focus();
   }, [dropEditorRefreshKey, submitting]);
 
   return {

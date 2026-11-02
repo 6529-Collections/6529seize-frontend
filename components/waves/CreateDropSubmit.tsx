@@ -25,6 +25,17 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
 
   const button = (
     <Button
+      onMouseDown={(event) => {
+        // iOS synthesizes mousedown after a tap even when pointerdown is cancelled.
+        if (
+          !isDropMode &&
+          event.button === 0 &&
+          document.activeElement instanceof HTMLElement &&
+          document.activeElement.isContentEditable
+        ) {
+          event.preventDefault();
+        }
+      }}
       onClick={onDrop}
       loading={submitting}
       disabled={!canSubmit}

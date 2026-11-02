@@ -263,6 +263,68 @@ it("exposes the current recommendation to accessibility and telemetry across sel
   });
 });
 
+it("runs the highly rated preview hover prefetch only after hover intent", () => {
+  jest.useFakeTimers();
+  try {
+    const item = {
+      ...createPreviewItem({ id: "hover-recommendation" }),
+      onMouseEnter: jest.fn(),
+    };
+    render(
+      <HighlyRatedWavesToggle
+        previewItems={[item]}
+        paddingClassName="tw-px-0"
+        scoreDetailsDisabled
+      />
+    );
+    const link = screen.getByRole("link");
+
+    fireEvent.mouseEnter(link);
+    act(() => {
+      jest.advanceTimersByTime(149);
+    });
+    expect(item.onMouseEnter).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(item.onMouseEnter).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("drops the highly rated preview hover prefetch when the pointer leaves or the preview is clicked", () => {
+  jest.useFakeTimers();
+  try {
+    const item = {
+      ...createPreviewItem({ id: "hover-recommendation" }),
+      onMouseEnter: jest.fn(),
+    };
+    render(
+      <HighlyRatedWavesToggle
+        previewItems={[item]}
+        paddingClassName="tw-px-0"
+        scoreDetailsDisabled
+      />
+    );
+    const link = screen.getByRole("link");
+
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+    fireEvent.mouseEnter(link);
+    fireEvent.click(link);
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(item.onMouseEnter).not.toHaveBeenCalled();
+    expect(item.onClick).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 it("keeps the active highly rated preview visible within the capped strip", () => {
   const previewItems = Array.from({ length: 11 }, (_, index) =>
     createPreviewItem({
@@ -595,7 +657,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(scoreBadgePaths).toHaveLength(1);
   expect(scoreBadgePaths?.[0]).toHaveClass(
     "tw-fill-iron-900",
-    "tw-stroke-white/25"
+    "tw-stroke-iron-800"
   );
   fireEvent.click(scoreBadgeText);
   expect(
@@ -898,10 +960,12 @@ it("shows the worth checking out description when no profile is connected", () =
   );
 
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).not.toBeInTheDocument();
 });
@@ -964,6 +1028,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
           hasSubwaves: true,
           createdAt: 10,
           unreadDropsCount: 1,
+          isFollowing: true,
         }),
       ]}
       onHover={jest.fn()}

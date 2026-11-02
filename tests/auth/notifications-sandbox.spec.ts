@@ -106,9 +106,19 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     });
     await expect(page.getByText("mentioned you")).toHaveCount(0);
 
+    const invitesRequest = page.waitForRequest((request) => {
+      const url = new URL(request.url());
+      return (
+        url.pathname.endsWith("/v2/notifications") &&
+        (url.searchParams.get("cause") ?? "")
+          .split(",")
+          .includes("MEME_COLLABORATION")
+      );
+    });
     await page
       .getByRole("menuitemcheckbox", { name: "Invites", exact: true })
       .click();
+    await invitesRequest;
     await expect(page.getByText("created a wave you can access:")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });

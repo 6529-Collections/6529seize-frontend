@@ -1,0 +1,21 @@
+export const BOOKMARK_MESSAGES = {
+  "bookmarks.title": "Bookmarks",
+  "bookmarks.private": "Only you can see your bookmarks.",
+  "bookmarks.add": "Bookmark",
+  "bookmarks.remove": "Remove bookmark",
+  "bookmarks.saved": "Bookmarked",
+  "bookmarks.removed": "Bookmark removed",
+  "bookmarks.view": "View bookmarks",
+  "bookmarks.open": "Open in conversation",
+  "bookmarks.empty": "No bookmarks yet",
+  "bookmarks.emptyDescription":
+    "Bookmark a message from its menu to find it here later.",
+  "bookmarks.loaded": "Your bookmarks are ready.",
+  "bookmarks.loading": "Loading bookmarks…",
+  "bookmarks.error": "Couldn't load bookmarks. Please try again.",
+  "bookmarks.saveError": "Couldn't update your bookmark. Please try again.",
+  "bookmarks.retry": "Retry",
+  "bookmarks.more": "Load more",
+  "bookmarks.signIn": "Connect your profile to view your bookmarks.",
+  "bookmarks.connect": "Connect profile",
+} as const;

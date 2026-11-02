@@ -1,5 +1,5 @@
 import React, { createRef, forwardRef, type ComponentProps } from "react";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: jest.fn(() => "scaled-url"),
@@ -7,12 +7,10 @@ jest.mock("@/helpers/image.helpers", () => ({
 }));
 
 jest.mock("@/hooks/useInView", () => ({
-  useInView: jest.fn(
-    (): [React.RefObject<HTMLDivElement | null>, boolean] => [
-      createRef<HTMLDivElement>(),
-      true,
-    ]
-  ),
+  useInView: jest.fn((): [React.RefObject<HTMLDivElement | null>, boolean] => [
+    createRef<HTMLDivElement>(),
+    true,
+  ]),
 }));
 
 type MockNextImageProps = ComponentProps<"img"> & {
@@ -40,9 +38,7 @@ describe("MediaDisplayImage", () => {
       <MediaDisplayImage src="test.jpg" />
     );
 
-    expect(
-      container.querySelector(".tw-bg-iron-800")
-    ).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-iron-800")).toBeInTheDocument();
 
     const img = container.querySelector("img");
 
@@ -59,4 +55,22 @@ describe("MediaDisplayImage", () => {
     expect(container.querySelector(".tw-bg-iron-800")).not.toBeInTheDocument();
     expect(queryByRole("img", { name: "Media content" })).toBeInTheDocument();
   });
+});
+
+it("fills inert artwork cards with a centered GIF loader while keeping bounded sources", () => {
+  render(
+    <MediaDisplayImage
+      src="https://example.com/art.gif"
+      imageLoadingLayout="artwork"
+    />
+  );
+  expect(screen.getByRole("status", { name: "Loading image" })).toHaveClass(
+    "tw-inset-0",
+    "tw-items-center",
+    "tw-justify-center"
+  );
+  const preview = screen.getByRole("img", { name: "Media content" });
+  expect(preview).not.toHaveAttribute("src", "https://example.com/art.gif");
+  fireEvent.error(preview);
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
 });

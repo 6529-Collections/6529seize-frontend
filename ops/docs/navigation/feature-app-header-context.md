@@ -50,7 +50,7 @@ menu stays disabled. Search and menu controls become available after hydration.
    - Tap opens [App Sidebar Menu](feature-app-sidebar-menu.md).
 4. Title resolves in this order:
    - `/waves/create` -> `Waves`
-   - `/messages/create` -> `Messages`
+   - `/messages/create` -> `New message`
    - `/waves*` with no active wave -> `Waves`
    - `/messages*` with no active wave -> `Messages`
    - active wave -> loading spinner, then wave name

@@ -50,6 +50,25 @@ These rules apply to non-curation thread composer flows in both `Post` and
 - In `Drop` mode, required media/metadata can still block submit even when
   length checks pass.
 
+## Server Payload Limits
+
+The server also checks the structure of new drops and edits, including wave
+description drops and competition submissions:
+
+- At most `250` parts per drop.
+- At most `20` media items and `20` attachments per part, with at most `100`
+  media items and `100` attachments across the whole drop.
+- At most `100` metadata entries, `500` user mentions, `100` wave mentions,
+  and `500` NFT references per drop.
+- Media URLs are limited to `2,000` characters; MIME types, media upload IDs,
+  and attachment IDs to `100`; NFT tokens to `250`; NFT names to `500`; and
+  mentioned wave names to `250`.
+
+Requests above these limits are rejected before the drop is saved. Existing
+drops remain readable; editing them applies the current limits. The composer
+file tray still allows eight files across all Storm parts, which is below the
+server's media and attachment limits.
+
 ## Failure and Recovery
 
 - If storm add is disabled, shorten current draft text or keep it as a
@@ -60,10 +79,14 @@ These rules apply to non-curation thread composer flows in both `Post` and
   and retry.
 - If auth/signature/upload fails, fix the error and retry from the current
   draft state.
+- If the server reports too many parts, media, attachments, metadata entries,
+  mentions, or NFT references, reduce that field and retry. Split a large Storm
+  into separate posts if needed.
 
 ## Limitations / Notes
 
-- Limits here are text-only. Media limits are separate.
+- Composer text limits and server payload limits both apply. Upload file-size
+  and format limits are separate.
 - This page covers standard thread composer behavior, not curation URL-only
   composer behavior.
 - Thread and DM submissions from this composer send `title: null`.

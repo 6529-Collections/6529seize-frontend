@@ -6,6 +6,7 @@ jest.mock("@/config/env", () => ({
 
 import { renderProfileOgImage } from "@/app/api/og-metadata/profiles/[identity]/image";
 import React from "react";
+import { withHostTimeZone } from "../../utils/timeZoneHarness";
 
 const collectImageSrcs = (node: React.ReactNode): string[] => {
   if (!React.isValidElement(node)) {
@@ -178,4 +179,28 @@ describe("renderProfileOgImage", () => {
 
     expect(collectActivityBadgeTypes(element)).toEqual([]);
   });
+
+  it.each(["America/Los_Angeles", "Pacific/Auckland", "Pacific/Kiritimati"])(
+    "prints the profile-enabled month in UTC whatever the server zone is (%s)",
+    (zone) => {
+      const enabledLabel = (enabledAt: number) =>
+        collectTextNodes(
+          withHostTimeZone(zone, () =>
+            renderProfileOgImage({
+              identity: "phoebeum",
+              profile: createProfile({ profile_enabled_at: enabledAt }),
+            })
+          )
+        ).join("");
+
+      // Just after and just before a UTC month boundary: each is a different
+      // month in at least one of the zones above.
+      expect(enabledLabel(Date.UTC(2023, 9, 1, 0, 30))).toContain(
+        "Profile enabled: October 2023"
+      );
+      expect(enabledLabel(Date.UTC(2023, 8, 30, 23, 30))).toContain(
+        "Profile enabled: September 2023"
+      );
+    }
+  );
 });

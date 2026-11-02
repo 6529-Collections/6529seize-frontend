@@ -16,7 +16,7 @@ let mockConsentContext = {
   saveError: null as string | null,
 };
 
-jest.mock("@/components/eula/EULAConsentContext", () => ({
+jest.mock("@/components/eula/useEULAConsent", () => ({
   useEULAConsent: () => mockConsentContext,
 }));
 

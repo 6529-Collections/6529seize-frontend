@@ -42,6 +42,7 @@ export default function UserPageCollectedFiltersNativeDropdown({
       )}
       setSelected={setSelected}
       size="sm"
+      variant="filter"
     />
   );
 }

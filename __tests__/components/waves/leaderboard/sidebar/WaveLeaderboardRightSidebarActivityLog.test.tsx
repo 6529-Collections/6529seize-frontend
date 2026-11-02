@@ -4,6 +4,18 @@ import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardRightSidebarActivityLog } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog";
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import * as messages from "@/i18n/messages";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 
 // Mock dependencies
 jest.mock("@/helpers/Helpers", () => ({
@@ -81,6 +93,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useBrowserLocale).mockReturnValue("en-US");
   });
 
   const renderComponent = (props = {}) => {
@@ -94,32 +107,42 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
     const activityRow = container.querySelector(".tw-border-b");
     expect(activityRow).toBeInTheDocument();
-    expect(activityRow).toHaveClass(
-      "tw-border-white/5",
-      "tw-px-1",
-      "tw-py-[13px]"
-    );
+    expect(activityRow).toHaveClass("tw-border-iron-900", "tw-py-3");
   });
 
   it("keeps the timestamp beside the voter without uppercase styling", () => {
     renderComponent();
 
     const timestamp = screen.getByText("5m");
-    const header = screen.getByTitle("Voter: voter_user").parentElement;
-    expect(header).toContainElement(timestamp);
-    expect(header).toHaveClass("tw-items-center", "tw-justify-between");
+    const controls = screen.getByTestId("drop-click-button").parentElement;
+    expect(controls).toContainElement(timestamp);
     expect(timestamp).toHaveClass("tw-text-xs", "tw-text-iron-400");
     expect(timestamp).not.toHaveClass("tw-uppercase");
   });
 
-  it("indents the recipient below the vote details with a decorative arrow", () => {
+  it("retains a historical activity row without inventing an epoch timestamp", () => {
+    renderComponent({
+      log: {
+        ...mockLog,
+        created_at: null,
+        invoker_proxy: { id: "original-proxy" },
+      },
+    });
+    expect(screen.getByText("voter_user")).toBeInTheDocument();
+    expect(screen.getByTitle("Drop creator: author_user")).toBeInTheDocument();
+    expect(getByExactTextContent("1,000 Rep")).toBeInTheDocument();
+    expect(screen.getByTestId("drop-click-button")).toBeInTheDocument();
+    expect(screen.queryByText("5m")).toBeNull();
+  });
+
+  it("groups the recipient with the vote details and a decorative arrow", () => {
     renderComponent();
 
     const recipientRow = screen.getByTitle(
       "Drop creator: author_user"
     ).parentElement;
     const arrow = recipientRow?.querySelector("svg");
-    expect(recipientRow?.parentElement).toHaveClass("tw-pl-7");
+    expect(recipientRow?.parentElement).toHaveClass("tw-pl-8");
     expect(arrow).toHaveAttribute("aria-hidden", "true");
     expect(arrow).toHaveClass("tw-size-3.5", "tw-text-iron-500");
   });
@@ -141,6 +164,18 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(mockOnDropClick).toHaveBeenCalledWith();
   });
 
+  it("preserves keyboard order from voter to drop button to creator", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.tab();
+    expect(screen.getByTitle("Voter: voter_user")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("drop-click-button")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTitle("Drop creator: author_user")).toHaveFocus();
+  });
+
   it("displays voter information with profile picture", () => {
     renderComponent();
 
@@ -154,7 +189,30 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
       "src",
       expect.stringContaining("voter.jpg")
     );
-    expect(voterPfp).toHaveClass("tw-size-5", "tw-rounded-full");
+    expect(voterPfp).toHaveClass("tw-size-6", "tw-rounded-full");
+  });
+
+  it("requests scaled derivatives for the voter and drop creator avatars", () => {
+    renderComponent({
+      log: {
+        ...mockLog,
+        invoker: { ...mockLog.invoker, pfp: CDN_AVATAR_URL },
+        drop_author: { ...mockLog.drop_author, pfp: CDN_AVATAR_URL },
+      },
+    });
+
+    const voterPfp = screen
+      .getByTitle("Voter: voter_user")
+      .querySelector("img");
+    const authorPfp = screen
+      .getByTitle("Drop creator: author_user")
+      .querySelector("img");
+    expect(getRequestedImageSrc(voterPfp)).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
+    expect(getRequestedImageSrc(authorPfp)).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
   });
 
   it("displays voter information without profile picture", () => {
@@ -166,7 +224,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     renderComponent({ log: logWithoutVoterPfp });
 
     const voterLink = screen.getByTitle("Voter: voter_user");
-    const placeholderDiv = voterLink.querySelector("div.tw-size-5");
+    const placeholderDiv = voterLink.querySelector("div.tw-size-6");
     expect(placeholderDiv).toBeInTheDocument();
     expect(placeholderDiv).toHaveClass("tw-bg-iron-800");
   });
@@ -183,6 +241,54 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(authorPfp).toHaveAttribute(
       "src",
       expect.stringContaining("author.jpg")
+    );
+  });
+
+  it("uses the browser locale for the anonymous name and creator title", () => {
+    jest.mocked(useBrowserLocale).mockReturnValue("fr-FR");
+    const originalTranslate = messages.t;
+    const translate = jest
+      .spyOn(messages, "t")
+      .mockImplementation((locale, key, params) =>
+        locale === "fr-FR" && key === "competitions.anonymousAuthor"
+          ? "Anonyme"
+          : originalTranslate(locale, key, params)
+      );
+    try {
+      renderComponent({
+        log: {
+          ...mockLog,
+          drop_author: { ...mockLog.drop_author, is_anonymous: true },
+        },
+      });
+      expect(screen.getByText("Anonyme")).toBeVisible();
+      expect(screen.getByTitle("Drop creator: Anonyme")).toBeVisible();
+    } finally {
+      translate.mockRestore();
+    }
+  });
+
+  it("keeps anonymous drop attribution noninteractive while preserving the voter's profile", () => {
+    const { container } = renderComponent({
+      log: {
+        ...mockLog,
+        drop_author: {
+          ...mockLog.drop_author,
+          id: "anonymous-entry-author",
+          handle: "Anonymous",
+          is_anonymous: true,
+        },
+      },
+    });
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(container.querySelector('a[href="/Anonymous"]')).toBeNull();
+    const creator = screen.getByTitle("Drop creator: Anonymous");
+    expect(creator.tagName).toBe("DIV");
+    expect(creator.querySelector("img")).toBeNull();
+    expect(creator.querySelector("a")).toBeNull();
+    expect(screen.getByTitle("Voter: voter_user")).toHaveAttribute(
+      "href",
+      "/voter_user"
     );
   });
 
@@ -325,16 +431,16 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
     const oldVoteSpan = screen.getByText("1,000 →");
     expect(oldVoteSpan).toHaveClass(
-      "tw-text-sm",
+      "tw-text-xs",
       "tw-text-iron-400",
-      "tw-whitespace-nowrap"
+      "tw-tabular-nums"
     );
 
     const newVoteSpan = getByExactTextContent("1,000 Rep");
     expect(newVoteSpan).toHaveClass(
-      "tw-text-sm",
+      "tw-text-xs",
       "tw-font-semibold",
-      "tw-whitespace-nowrap"
+      "tw-tabular-nums"
     );
   });
 

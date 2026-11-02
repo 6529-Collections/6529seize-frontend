@@ -1,8 +1,10 @@
+import { MEMES_QUICK_VOTE_LOOKAHEAD_COUNT } from "@/hooks/memesQuickVote.query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   getQuickVoteAbsoluteRemainingPower,
   getQuickVoteRatingRange,
+  isMemesQuickVoteVoteableDrop,
 } from "@/hooks/memesQuickVote.helpers";
 
 export type KeyedOptimisticRemainingVotePowerState = {
@@ -19,6 +21,7 @@ export type MemesQuickVoteSessionState = {
   readonly leftThisRoundCount: number;
   readonly lookaheadDrops: readonly ApiDrop[];
   readonly recentlyHandledDropIds: readonly string[];
+  readonly recentlyVotedDropIds: readonly string[];
   readonly unratedCount: number;
 };
 
@@ -49,6 +52,7 @@ export const createInitialSessionState = (): MemesQuickVoteSessionState => ({
   leftThisRoundCount: 0,
   lookaheadDrops: [],
   recentlyHandledDropIds: [],
+  recentlyVotedDropIds: [],
   unratedCount: 0,
 });
 
@@ -83,6 +87,8 @@ export const applyFetchedWindowState = ({
   primaryDrop,
   rawLeftThisRoundCount,
   rawUnratedCount,
+  isPartial = false,
+  handledDropIdsAtRequest = [],
 }: {
   readonly current: MemesQuickVoteSessionState;
   readonly fetchedDrops: readonly ApiDrop[];
@@ -90,6 +96,8 @@ export const applyFetchedWindowState = ({
   readonly primaryDrop: ApiDrop | null;
   readonly rawLeftThisRoundCount: number;
   readonly rawUnratedCount: number;
+  readonly isPartial?: boolean;
+  readonly handledDropIdsAtRequest?: readonly string[];
 }): MemesQuickVoteSessionState => {
   const returnedDropIds = new Set(fetchedDrops.map((drop) => drop.id));
   const resurfacedHandledDropIds = current.recentlyHandledDropIds.filter(
@@ -100,8 +108,17 @@ export const applyFetchedWindowState = ({
       !pendingDropIds.includes(drop.id) &&
       !resurfacedHandledDropIds.includes(drop.id)
   );
-  const recentlyHandledDropIds = resurfacedHandledDropIds;
-  const hiddenDropIds = new Set([...recentlyHandledDropIds, ...pendingDropIds]);
+  const handledDuringRequest = current.recentlyHandledDropIds.filter(
+    (id) => !handledDropIdsAtRequest.includes(id)
+  );
+  const recentlyHandledDropIds = isPartial
+    ? current.recentlyHandledDropIds
+    : [...new Set([...resurfacedHandledDropIds, ...handledDuringRequest])];
+  const hiddenDropIds = new Set([
+    ...recentlyHandledDropIds,
+    ...current.recentlyVotedDropIds,
+    ...pendingDropIds,
+  ]);
   let currentDrop = current.currentDrop;
 
   if (currentDrop) {
@@ -114,34 +131,52 @@ export const applyFetchedWindowState = ({
     }
   }
 
-  if (currentDrop && hiddenDropIds.has(currentDrop.id)) {
+  if (
+    currentDrop &&
+    (rawUnratedCount === 0 ||
+      hiddenDropIds.has(currentDrop.id) ||
+      !isMemesQuickVoteVoteableDrop(currentDrop))
+  ) {
     currentDrop = null;
   }
 
-  const safeFetchedDrops = fetchedDrops.filter(
-    (drop) => !hiddenDropIds.has(drop.id)
+  const safeFetchedDrops = getUniqueDrops([
+    ...current.lookaheadDrops.map(
+      (drop) => fetchedDrops.find((fresh) => fresh.id === drop.id) ?? drop
+    ),
+    ...fetchedDrops,
+  ]).filter(
+    (drop) =>
+      rawUnratedCount > 0 &&
+      !hiddenDropIds.has(drop.id) &&
+      isMemesQuickVoteVoteableDrop(drop)
   );
   currentDrop ??= safeFetchedDrops[0] ?? null;
 
-  const lookaheadDrops = safeFetchedDrops.filter(
-    (drop) => drop.id !== currentDrop?.id
-  );
+  const lookaheadDrops = safeFetchedDrops
+    .filter((drop) => drop.id !== currentDrop?.id)
+    .slice(0, MEMES_QUICK_VOTE_LOOKAHEAD_COUNT - 1);
   const leftThisRoundCount = getDisplayLeftThisRoundCount({
-    hiddenDropIds,
+    hiddenDropIds: new Set([...resurfacedHandledDropIds, ...pendingDropIds]),
     rawLeftThisRoundCount,
   });
   const isRestartingRound =
+    !isPartial &&
     currentDrop === null &&
     lookaheadDrops.length === 0 &&
     rawLeftThisRoundCount === 0 &&
     rawUnratedCount > 0 &&
     safeFetchedDropsWithoutHandled.length === 0;
   const isExhausted =
+    !isPartial &&
     currentDrop === null &&
     lookaheadDrops.length === 0 &&
-    hiddenDropIds.size === 0 &&
-    primaryDrop === null &&
-    rawUnratedCount === 0;
+    pendingDropIds.length === 0 &&
+    (rawUnratedCount === 0 ||
+      (primaryDrop?.context_profile_context?.rating === 0 &&
+        getQuickVoteAbsoluteRemainingPower(
+          getQuickVoteRatingRange(primaryDrop)
+        ) === 0));
 
   return {
     currentDrop,
@@ -149,10 +184,23 @@ export const applyFetchedWindowState = ({
     isExhausted,
     isLoading: currentDrop === null && !isExhausted && !isRestartingRound,
     isRestartingRound,
-    leftThisRoundCount,
+    leftThisRoundCount:
+      handledDuringRequest.length > 0
+        ? Math.min(leftThisRoundCount, current.leftThisRoundCount)
+        : leftThisRoundCount,
     lookaheadDrops,
     recentlyHandledDropIds: isRestartingRound ? [] : recentlyHandledDropIds,
-    unratedCount: rawUnratedCount,
+    recentlyVotedDropIds: current.recentlyVotedDropIds,
+    unratedCount: Math.min(
+      handledDuringRequest.length > 0 ? current.unratedCount : rawUnratedCount,
+      Math.max(
+        0,
+        rawUnratedCount -
+          current.recentlyVotedDropIds.filter(
+            (id) => returnedDropIds.has(id) || pendingDropIds.includes(id)
+          ).length
+      )
+    ),
   };
 };
 
@@ -203,8 +251,10 @@ export const applyOptimisticAdvanceState = ({
   current,
   dropId,
   pendingDropIds,
+  isVote = false,
 }: {
   readonly current: MemesQuickVoteSessionState;
+  readonly isVote?: boolean;
   readonly dropId: string;
   readonly pendingDropIds: readonly string[];
 }): MemesQuickVoteSessionState => {
@@ -230,7 +280,10 @@ export const applyOptimisticAdvanceState = ({
     leftThisRoundCount: Math.max(0, current.leftThisRoundCount - 1),
     lookaheadDrops: nextLookaheadDrops.slice(1),
     recentlyHandledDropIds,
-    unratedCount: current.unratedCount,
+    recentlyVotedDropIds: isVote
+      ? [...current.recentlyVotedDropIds, dropId]
+      : current.recentlyVotedDropIds,
+    unratedCount: Math.max(0, current.unratedCount - (isVote ? 1 : 0)),
   };
 };
 
@@ -257,7 +310,41 @@ export const applyFailedDropRestoreState = ({
       ? current.leftThisRoundCount + 1
       : current.leftThisRoundCount,
     recentlyHandledDropIds,
-    unratedCount: current.unratedCount,
+    recentlyVotedDropIds: current.recentlyVotedDropIds.filter(
+      (id) => id !== failedDrop.id
+    ),
+    unratedCount:
+      current.unratedCount +
+      (current.recentlyVotedDropIds.includes(failedDrop.id) ? 1 : 0),
+  };
+};
+
+// A successful vote from another surface must also retire a buffered candidate.
+export const applyKnownRatedDrop = (
+  current: MemesQuickVoteSessionState,
+  drop: ApiDrop
+): MemesQuickVoteSessionState => {
+  const rating = drop.context_profile_context?.rating;
+  if (typeof rating !== "number" || rating === 0) return current;
+  if (current.currentDrop?.id === drop.id) {
+    return applyOptimisticAdvanceState({
+      current,
+      dropId: drop.id,
+      pendingDropIds: [],
+      isVote: true,
+    });
+  }
+  if (!current.lookaheadDrops.some((candidate) => candidate.id === drop.id)) {
+    return current;
+  }
+  return {
+    ...current,
+    lookaheadDrops: current.lookaheadDrops.filter(
+      (candidate) => candidate.id !== drop.id
+    ),
+    recentlyVotedDropIds: [...current.recentlyVotedDropIds, drop.id],
+    leftThisRoundCount: Math.max(0, current.leftThisRoundCount - 1),
+    unratedCount: Math.max(0, current.unratedCount - 1),
   };
 };
 

@@ -142,11 +142,13 @@ export const fetchMyContentModerationReports = ({
 export const fetchContentModerationQueue = ({
   limit = 50,
   before,
+  case_id,
   signal,
   view = "OPEN",
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly case_id?: string | undefined;
   readonly signal?: AbortSignal;
   readonly view?: "OPEN" | "RESOLVED" | undefined;
 } = {}): Promise<ApiContentModerationQueueItem[]> =>
@@ -155,6 +157,7 @@ export const fetchContentModerationQueue = ({
     params: {
       limit: String(limit),
       view,
+      ...(case_id === undefined ? {} : { case_id }),
       ...(before === undefined ? {} : { before: String(before) }),
     },
     signal,

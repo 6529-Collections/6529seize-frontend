@@ -52,7 +52,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   const module = require("@/contexts/wave/MyStreamContext");
-  (module.useMyStream as jest.Mock).mockReturnValue({
+  (module.useMyStreamActions as jest.Mock).mockReturnValue({
     fetchAroundSerialNo: jest.fn(),
   });
 });
@@ -72,7 +72,7 @@ afterEach(() => {
 });
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
+  useMyStreamActions: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
 function setup(size: DropSize, dropId?: string, rootMargin?: string) {
@@ -163,7 +163,9 @@ test("preserves long-content expansion while children are virtualized", () => {
 test("fetches light drop when entering view", () => {
   const fetchAroundSerialNo = jest.fn();
   const module = require("@/contexts/wave/MyStreamContext");
-  (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+  (module.useMyStreamActions as jest.Mock).mockReturnValue({
+    fetchAroundSerialNo,
+  });
   setup(DropSize.LIGHT);
   act(() => {
     intersectionCb([{ isIntersecting: true } as any]);
@@ -258,7 +260,9 @@ describe("Drop Size Behavior", () => {
   test("does not fetch when FULL drop enters view", () => {
     const fetchAroundSerialNo = jest.fn();
     const module = require("@/contexts/wave/MyStreamContext");
-    (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+    (module.useMyStreamActions as jest.Mock).mockReturnValue({
+      fetchAroundSerialNo,
+    });
 
     setup(DropSize.FULL);
     act(() => {
@@ -271,7 +275,9 @@ describe("Drop Size Behavior", () => {
   test("does not fetch when LIGHT drop leaves view", () => {
     const fetchAroundSerialNo = jest.fn();
     const module = require("@/contexts/wave/MyStreamContext");
-    (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+    (module.useMyStreamActions as jest.Mock).mockReturnValue({
+      fetchAroundSerialNo,
+    });
 
     setup(DropSize.LIGHT);
     act(() => {

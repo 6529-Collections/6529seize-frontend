@@ -1,3 +1,7 @@
+import type { ComponentProps } from "react";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type CommunityMembersGroupFilter from "@/components/community/CommunityMembersGroupFilter";
+import type MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommunityMembers from "@/components/community/CommunityMembers";
 import { useAuth } from "@/components/auth/Auth";
 import { TitleProvider } from "@/contexts/TitleContext";
@@ -47,11 +51,23 @@ jest.mock(
 jest.mock(
   "@/components/community/CommunityMembersGroupFilter",
   () =>
-    ({ activeGroupId, onGroupChange }: any) => (
+    ({
+      activeGroupId,
+      onGroupChange,
+      onViewChange,
+    }: ComponentProps<typeof CommunityMembersGroupFilter>) => (
       <div data-testid="network-group-filter" data-group-id={activeGroupId}>
+        <button onClick={() => onViewChange("identities")}>
+          Open Identities
+        </button>
         <button
           type="button"
-          onClick={() => onGroupChange({ id: "new-group", name: "New group" })}
+          onClick={() =>
+            onGroupChange({
+              id: "new-group",
+              name: "New group",
+            } as ApiGroupFull)
+          }
         >
           Apply group filter
         </button>
@@ -74,13 +90,22 @@ jest.mock(
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>
-    ({ children, headerClassName, isOpen, title }: any) =>
+    ({
+      children,
+      headerClassName,
+      isOpen,
+      title,
+      onBack,
+      ariaLabel,
+    }: ComponentProps<typeof MobileWrapperDialog>) =>
       isOpen ? (
         <div
           data-testid="mobile-dialog"
           data-header-class={headerClassName}
           data-title={title}
+          aria-label={ariaLabel}
         >
+          {onBack && <button onClick={onBack}>Back</button>}
           {children}
         </div>
       ) : null
@@ -301,7 +326,7 @@ describe("CommunityMembers", () => {
     expect(push).toHaveBeenCalledWith("/network/nerd");
   });
 
-  it("opens group filters with top-padded dialog header", () => {
+  it("opens the mobile filter list with a compact header and Back from an editor", () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       isFetching: false,
@@ -313,7 +338,7 @@ describe("CommunityMembers", () => {
 
     expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
       "data-header-class",
-      expect.stringContaining("tw-pt-4")
+      expect.stringContaining("tw-py-2")
     );
     expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
       "data-title",
@@ -324,6 +349,22 @@ describe("CommunityMembers", () => {
       "1"
     );
 
+    expect(
+      screen.queryByRole("button", { name: "Back" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Open Identities" }));
+    expect(screen.getByTestId("mobile-dialog")).not.toHaveAttribute(
+      "data-title"
+    );
+    expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
+      "aria-label",
+      "Filter Network"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
+      "data-title",
+      "Filter Network"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Apply group filter" }));
     expect(setActiveGroupId).toHaveBeenCalledWith("new-group");
   });

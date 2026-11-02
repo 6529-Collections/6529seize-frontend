@@ -98,7 +98,7 @@ export function SidebarWaveNavigationControls({
                 type="button"
                 onClick={closeSearch}
                 aria-label={t(locale, "waves.sidebar.closeSearch")}
-                className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
+                className="tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
               >
                 <XMarkIcon className="tw-size-4" />
               </button>

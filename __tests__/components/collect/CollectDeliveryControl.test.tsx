@@ -2,9 +2,10 @@ import CollectDeliveryControl from "@/components/collect/CollectDeliveryControl"
 import CollectTradeForm from "@/components/collect/CollectTradeForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { getAddress } from "viem";
@@ -13,6 +14,7 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
+jest.mock("@/hooks/useMediaQuery", () => ({ useMediaQuery: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/server.helpers", () => ({ getUserProfile: jest.fn() }));
 jest.mock("@/components/nft-transfer/TransferModalPfp", () => () => null);
@@ -30,7 +32,7 @@ const profile = {
     { wallet: custody, display: "custody.collector.eth", tdh: 500 },
   ],
 } as ApiIdentity;
-function setup(disabled = false) {
+function setup(disabled = false, mobileSheet = false) {
   const props: ComponentProps<typeof CollectDeliveryControl> = {
     profile,
     payingWallet: payer,
@@ -38,6 +40,7 @@ function setup(disabled = false) {
     onChange: jest.fn(),
     errorId: "delivery-error",
     disabled,
+    mobileSheet,
   };
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -51,8 +54,40 @@ function setup(disabled = false) {
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useMediaQuery).mockReturnValue(false);
   jest.mocked(useIdentity).mockReturnValue({ profile: null, isLoading: false });
   jest.mocked(commonApiFetch).mockResolvedValue([]);
+});
+
+it("uses a mobile sheet for the same wallet selection and returns focus after Done", async () => {
+  jest.mocked(useMediaQuery).mockReturnValue(true);
+  const user = userEvent.setup();
+  const props = setup(false, true);
+  const change = screen.getByRole("button", { name: "Change" });
+  expect(change).toHaveAttribute("aria-haspopup", "dialog");
+  await user.click(change);
+  const dialog = await screen.findByRole("dialog", { name: "Deliver to" });
+  expect(dialog).toHaveAttribute("id", change.getAttribute("aria-controls"));
+  await user.click(
+    within(dialog).getByRole("button", { name: /^custody.collector.eth / })
+  );
+  expect(props.onChange).toHaveBeenCalledWith(getAddress(custody));
+  await user.click(within(dialog).getByRole("button", { name: "Done" }));
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  expect(change).toHaveFocus();
+});
+
+it("dismisses the mobile picker with Escape without changing the destination", async () => {
+  jest.mocked(useMediaQuery).mockReturnValue(true);
+  const user = userEvent.setup();
+  const props = setup(false, true);
+  const change = screen.getByRole("button", { name: "Change" });
+  await user.click(change);
+  const dialog = await screen.findByRole("dialog", { name: "Deliver to" });
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  expect(change).toHaveFocus();
+  expect(props.onChange).not.toHaveBeenCalled();
 });
 
 it("uses the same compact profile and wallet context before review and restores Change focus", async () => {

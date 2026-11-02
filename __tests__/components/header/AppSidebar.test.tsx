@@ -8,7 +8,7 @@ let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
 let mockModeratorAccess = {
-  data: { moderator: false, has_open_reports: false },
+  data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
@@ -115,7 +115,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       mockModeratorAccess = {
-        data: { moderator: false, has_open_reports: false },
+        data: {
+          moderator: false,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
       setCookieCountry("US");
     });
@@ -155,6 +159,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "NextGen", path: "/nextgen" },
         { label: "Meme Lab", path: "/meme-lab" },
         { label: "ReMemes", path: "/rememes" },
+        { label: "6529 Stream", path: "/stream" },
         { label: "NFT Activity", path: "/nft-activity" },
         { label: "Memes Calendar", path: "/meme-calendar" },
       ]);
@@ -175,7 +180,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             section: true,
           }),
           expect.objectContaining({
-            label: "Delegation & Wallets",
+            label: "Safe Collecting",
             section: true,
           }),
           expect.objectContaining({
@@ -201,6 +206,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Meme Lab", path: "/about/meme-lab" },
         { label: "6529 Gradient", path: "/about/6529-gradient" },
         { label: "Minting", path: "/about/minting" },
+        { label: "GDRC", path: "/about/gdrc1" },
       ]);
       expect(
         getChildGroup(aboutChildren, "Network & Reputation").children
@@ -211,7 +217,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           { label: "xTDH Allocations Dashboard", path: "/xtdh" },
           { label: "Wave Score", path: "/network/wave-score" },
           { label: "Network Nerd", path: "/network/nerd" },
-          { label: "Prenodes", path: "/network/prenodes" },
           {
             label: "TDH Historic Boosts",
             path: "/network/tdh/historic-boosts",
@@ -219,11 +224,15 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(
-        getChildGroup(aboutChildren, "Delegation & Wallets").children
-      ).toEqual(
+        flattenMenuChildren(aboutChildren).some(
+          (item) => item.path === "/network/prenodes"
+        )
+      ).toBe(false);
+      expect(getChildGroup(aboutChildren, "Safe Collecting").children).toEqual(
         expect.arrayContaining([
-          { label: "Delegation Center", path: "/delegation/delegation-center" },
+          { label: "Safe Collecting", path: "/safe-collecting" },
           { label: "App Wallets", path: "/tools/app-wallets" },
+          { label: "Primary Address", path: "/about/primary-address" },
         ])
       );
       expect(
@@ -276,7 +285,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
     it("adds WatchTower with the open-report indicator for moderators", () => {
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: true },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 1,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -288,7 +301,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect.objectContaining({
           path: "/content-moderation",
           hasIndicator: true,
-          indicatorLabel: "Open reports need review",
+          indicatorLabel: "Cases need manual review",
         })
       );
     });
@@ -299,7 +312,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         canAccessLanding: true,
       };
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: false },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,

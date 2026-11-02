@@ -1,0 +1,14 @@
+{
+  "account_id": "987989283142",
+  "role_name": "gha-frontend-docs-publish",
+  "source_commit": "6a2bf8685b473f4da8962dec5b6c1969162a46ce",
+  "max_session_duration": 3600,
+  "policies": [
+    {
+      "name": "FrontendDelegationDocsPublish",
+      "file": "FrontendDelegationDocsPublish.json",
+      "characters": 706,
+      "sha256": "16b9ab3bb76a865eafbd895d9d870ba8eedcadc4f93202f48cf817d49a29b485"
+    }
+  ]
+}

@@ -9,6 +9,12 @@ import {
   buildDirectMessageIdentityCandidates,
   normalizeDirectMessageIdentity,
 } from "@/helpers/waves/direct-message-profile.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
+// Wave avatars are square-cropped at up to 64 CSS px. The 200x200 derivative is
+// the same center crop and stays sharp at 3x; the original remains the fallback.
+const getWaveAvatarSrc = (src: string) =>
+  getScaledImageUri(src, ImageScale.W_200_H_200);
 
 interface WavePictureProps {
   readonly name: string;
@@ -92,7 +98,7 @@ export default function WavePicture({
         className={`tw-relative tw-h-full tw-w-full tw-overflow-hidden ${roundedClassName}`}
       >
         <FallbackImage
-          primarySrc={picture}
+          primarySrc={getWaveAvatarSrc(picture)}
           fallbackSrc={picture}
           alt={name}
           fill
@@ -159,7 +165,7 @@ export default function WavePicture({
             style={{ clipPath: clip }}
           >
             <FallbackImage
-              primarySrc={pfp}
+              primarySrc={getWaveAvatarSrc(pfp)}
               fallbackSrc={pfp}
               alt={`Contributor-${i}`}
               fill

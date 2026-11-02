@@ -48,7 +48,6 @@ async function openStudy(page: Page, slug: string, title: string) {
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     const response = await gotoDocumentWithTransientRetry(page, path);
-    expect(response?.status()).toBe(200);
     await waitForRouteReady(page);
     await expectMuseumPath(page, path, {
       timeout: STUDY_READY_TIMEOUT_MS,
@@ -59,6 +58,9 @@ async function openStudy(page: Page, slug: string, title: string) {
     });
 
     if (await studyHeading.isVisible()) {
+      // A transient not-found document now carries a real 404 status, so the
+      // 200 guarantee applies once the study itself has rendered.
+      expect(response?.status()).toBe(200);
       const comparisonRegion = page.getByRole("region", {
         name: "Hold the Museum work. Choose what sits beside it.",
         exact: true,
@@ -347,14 +349,21 @@ test.describe("Museum Inside the System @surface @readonly", () => {
       );
       await link.click();
       await expect
-        .poll(() => {
-          const url = new URL(page.url());
-          return {
-            pathname: url.pathname,
-            work: url.searchParams.get("work"),
-            hash: url.hash,
-          };
-        })
+        .poll(
+          () => {
+            const url = new URL(page.url());
+            return {
+              pathname: url.pathname,
+              work: url.searchParams.get("work"),
+              hash: url.hash,
+            };
+          },
+          {
+            timeout: STUDY_READY_TIMEOUT_MS,
+            message:
+              "Expected the accession's full-system route and work anchor",
+          }
+        )
         .toEqual({
           pathname: "/museum/network/projects/century/system",
           work: "6529NM.2026.001.01",

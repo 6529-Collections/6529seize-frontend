@@ -3,7 +3,7 @@
 import React from "react";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Link from "next/link";
 import Image from "next/image";
 import UserCICAndLevel, {
@@ -11,6 +11,8 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import AnonymousDropAuthor from "@/components/waves/drops/AnonymousDropAuthor";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -19,9 +21,10 @@ interface SingleWaveDropAuthorProps {
 export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
   drop,
 }) => {
+  if (isAnonymousAuthor(drop.author)) return <AnonymousDropAuthor />;
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const resolvedPfp = drop.author.pfp
-    ? resolveIpfsUrlSync(drop.author.pfp)
+    ? getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)
     : null;
   const avatarAlt = drop.author.handle
     ? `${drop.author.handle}'s profile picture`

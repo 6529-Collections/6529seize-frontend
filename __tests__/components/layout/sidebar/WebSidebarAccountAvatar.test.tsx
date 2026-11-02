@@ -1,5 +1,11 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import WebSidebarAccountAvatar from "@/components/layout/sidebar/WebSidebarAccountAvatar";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 afterEach(() => jest.useRealTimers());
 
@@ -12,6 +18,15 @@ it("keeps the shimmer until the actual PFP loads, without a fallback image flash
   fireEvent.load(image);
   await waitFor(() => expect(image).toHaveClass("tw-opacity-100"));
   expect(container.querySelector("span")).not.toBeInTheDocument();
+});
+
+it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+  const { container } = render(
+    <WebSidebarAccountAvatar src={CDN_AVATAR_URL} />
+  );
+  expect(getRequestedImageSrc(container.querySelector("img"))).toContain(
+    scaledAvatarPath(ImageScale.W_AUTO_H_50)
+  );
 });
 
 it("uses the default icon for a missing or broken PFP", () => {

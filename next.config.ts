@@ -22,6 +22,8 @@ import {
   persistBakedArtifacts,
 } from "@/config/runtimeConfig";
 import { sharedConfig } from "@/config/nextConfig";
+import { assertNoDevAuthInDeployableBuild } from "@/config/devAuthBuildGuard";
+import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 
@@ -64,6 +66,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const parsed = publicEnvSchema.safeParse(publicRuntime);
     if (!parsed.success) throw parsed.error; // FAIL-FAST at build
     const publicEnv = parsed.data;
+    if (phase === PHASE_PRODUCTION_BUILD) {
+      assertNoDevAuthInDeployableBuild(publicEnv); // FAIL-FAST at build
+    }
 
     // Persist baked artifacts for runtime
     persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
@@ -74,6 +79,13 @@ const nextConfigFactory = (phase: string): NextConfig => {
       phase === PHASE_DEVELOPMENT_SERVER
         ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
         : undefined;
+    // CI browser lanes boot `next dev` from a fresh checkout, so Turbopack's
+    // dev filesystem cache is never reused there. Its background persistence
+    // writes ~10 GB and adds multi-GB memory spikes on 16 GB runners.
+    const disableDevFileSystemCache =
+      phase === PHASE_DEVELOPMENT_SERVER &&
+      process.env["NEXT_DEV_TURBOPACK_FS_CACHE"]?.trim() === "0";
+    const baseConfig = sharedConfig(publicEnv, assetPrefix);
 
     // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
     // /_next/* dev assets; without this Next 403s them and pages render as
@@ -84,12 +96,20 @@ const nextConfigFactory = (phase: string): NextConfig => {
       .filter(Boolean);
 
     return {
-      ...sharedConfig(publicEnv, assetPrefix),
+      ...baseConfig,
       ...standaloneOutput,
       ...(phase === PHASE_DEVELOPMENT_SERVER && allowedDevOrigins?.length
         ? { allowedDevOrigins }
         : {}),
       ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
+      ...(disableDevFileSystemCache
+        ? {
+            experimental: {
+              ...baseConfig.experimental,
+              turbopackFileSystemCacheForDev: false,
+            },
+          }
+        : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
@@ -113,10 +133,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
         DEV_MODE_CURATION_WAVE_ID: publicEnv.DEV_MODE_CURATION_WAVE_ID,
         DEV_MODE_QUORUM_WAVE_ID: publicEnv.DEV_MODE_QUORUM_WAVE_ID,
-        DEV_MODE_WALLET_ADDRESS: publicEnv.DEV_MODE_WALLET_ADDRESS,
-        DEV_MODE_AUTH_JWT: publicEnv.DEV_MODE_AUTH_JWT,
-        USE_DEV_AUTH: publicEnv.USE_DEV_AUTH,
-        STAGING_API_KEY: publicEnv.STAGING_API_KEY,
         AWS_RUM_APP_ID: publicEnv.AWS_RUM_APP_ID,
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
@@ -131,11 +147,15 @@ const nextConfigFactory = (phase: string): NextConfig => {
         PEPE_CACHE_TTL_MINUTES: publicEnv.PEPE_CACHE_TTL_MINUTES,
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
         FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
-        FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
+        // Inlined into the client bundle so Sentry Replay is compiled out unless opted in.
+        SENTRY_REPLAY_ENABLED:
+          publicEnv.SENTRY_REPLAY_ENABLED === "true" ? "true" : "false",
       },
       async generateBuildId() {
         return VERSION;
       },
+      // Production builds only; runs after real files, before dynamic routes.
+      ...getMissingNextAssetRewriteConfig(phase),
     };
   }
 

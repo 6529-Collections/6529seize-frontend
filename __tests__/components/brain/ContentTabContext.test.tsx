@@ -8,7 +8,6 @@ import {
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import * as competitionHelpers from "@/helpers/competition.helpers";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
@@ -96,7 +95,7 @@ describe("ContentTabContext", () => {
     mockPathname = "/waves/chat-wave/competitions/first";
     const { result, rerender } = setup();
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
-    expect(result.current.availableTabs).toContain(
+    expect(result.current.availableTabs).not.toContain(
       MyStreamWaveTab.COMPETITIONS
     );
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.CHAT));
@@ -404,6 +403,18 @@ describe("ContentTabContext", () => {
     });
   });
 
+  it("routes the collection from the explicit competition URL before wave registration", () => {
+    mockPathname = "/waves/hub/competitions/older";
+    mockSearch = new URLSearchParams("tab=decisions");
+    const { result } = setup();
+
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
+
+    expect(mockPush).toHaveBeenCalledWith("/waves/hub/competitions", {
+      scroll: false,
+    });
+  });
+
   it("keeps legacy competition tabs separate from the wave's remembered collection tab", () => {
     mockPathname = "/waves/legacy/competitions/primary";
     localStorage.setItem(
@@ -468,6 +479,7 @@ describe("ContentTabContext", () => {
   });
 
   it("places competitions beside chat and falls back when access disappears", () => {
+    mockPathname = "/waves/chat-wave";
     const { result } = setup();
     const params = {
       waveId: "chat-wave",
@@ -1277,6 +1289,81 @@ describe("remembered wave entries", () => {
     mockReplace.mockClear();
   });
 
+  it("shows a remembered competition section on the first destination render before tabs register", () => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        "main-stage": {
+          tab: MyStreamWaveTab.LEADERBOARD,
+          competitionId: "primary",
+        },
+      })
+    );
+    mockPathname = "/waves/chat";
+    const { result, rerender } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "chat",
+        isChatWave: true,
+      })
+    );
+    mockPathname = "/waves/main-stage";
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        tabsReady: false,
+        defaultSelectionEnabled: true,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    jest.restoreAllMocks();
+  });
+
+  it("honors a deliberate Chat selection while the destination tabs are still registering", () => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        "main-stage": {
+          tab: MyStreamWaveTab.LEADERBOARD,
+          competitionId: "primary",
+        },
+      })
+    );
+    mockPathname = "/waves/chat";
+    const { result, rerender } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "chat",
+        isChatWave: true,
+      })
+    );
+    mockPathname = "/waves/main-stage";
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.CHAT));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+    mockPathname = "/waves/another";
+    rerender();
+    mockPathname = "/waves/main-stage";
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    jest.restoreAllMocks();
+  });
+
+  it("honors an explicit pending leaderboard before wave registration without selecting Chat", () => {
+    mockPathname = "/waves/main-stage";
+    mockSearch = new URLSearchParams("tab=leaderboard");
+    const { result } = setup();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+  });
+
   it("keeps Main Stage Leaderboard and Maybes Bar Chat independent across visits and remounts", () => {
     const { result, rerender, unmount } = setup();
     act(() =>
@@ -1436,9 +1523,6 @@ describe("remembered wave entries", () => {
   });
 
   it("keeps a serial-message visit in Chat after URL cleanup without losing remembered Leaderboard", () => {
-    const enabled = jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     try {
       const saved = {
         "main-stage": {
@@ -1486,7 +1570,7 @@ describe("remembered wave entries", () => {
         JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
       ).toEqual(saved);
     } finally {
-      enabled.mockRestore();
+      localStorage.clear();
     }
   });
 });

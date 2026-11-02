@@ -92,8 +92,9 @@ export default function UserPageRepHeader({
 
   return (
     <>
-      <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-gradient-to-br tw-from-[#0f1014] tw-via-[#0A0A0C] tw-to-[#08090b] tw-shadow-2xl">
-        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-blue-500/[0.05] tw-via-transparent tw-to-transparent tw-opacity-100" />
+      <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-gradient-to-br tw-from-[#0f1014] tw-via-[#0A0A0C] tw-to-[#08090b] tw-shadow-2xl">
+        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[radial-gradient(120%_90%_at_0%_0%,rgba(59,130,246,0.06),transparent_60%)]" />
+        <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/40 tw-to-transparent" />
         <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
         <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/10 tw-to-transparent" />
         <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/10 tw-to-transparent" />
@@ -104,7 +105,7 @@ export default function UserPageRepHeader({
               <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
                 Rep
               </h2>
-              <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+              <p className="tw-m-0 tw-text-[15px] tw-font-normal tw-leading-[22.75px] tw-text-iron-300">
                 {repDirection === "received"
                   ? "What others recognize this identity for."
                   : "What this identity recognizes others for."}
@@ -118,7 +119,7 @@ export default function UserPageRepHeader({
             </div>
 
             <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-text-right">
-              <div className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              <div className="tw-mb-1 tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
@@ -150,7 +151,7 @@ export default function UserPageRepHeader({
                       )}
                     </button>
                   ) : (
-                    <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                    <span className="tw-text-meta/5 tw-font-normal tw-text-iron-500">
                       {formatNumberWithCommas(overview.contributor_count)}{" "}
                       {getContributorLabel(
                         repDirection,
@@ -166,33 +167,33 @@ export default function UserPageRepHeader({
           {(visibleCategories.length > 0 ||
             (canEditRep && repDirection === "received")) && (
             <div className="tw-mt-5 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
-              <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
-                <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                  Rep Categories
+              <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+                <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
+                  <div className="tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+                    Rep Categories
+                  </div>
+                  {overview !== null &&
+                    overview.authenticated_user_contribution !== null &&
+                    overview.authenticated_user_contribution !== 0 && (
+                      <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
+                        <span className="tw-text-meta/4 tw-font-normal tw-text-iron-500">
+                          {repDirection === "given"
+                            ? "Assigned To You:"
+                            : "You Assigned:"}
+                        </span>
+                        <span className="tw-text-meta/4 tw-font-medium tw-text-iron-300">
+                          {overview.authenticated_user_contribution > 0 && "+"}
+                          {formatNumberWithCommas(
+                            overview.authenticated_user_contribution
+                          )}
+                        </span>
+                      </div>
+                    )}
                 </div>
-                {overview !== null &&
-                  overview.authenticated_user_contribution !== null &&
-                  overview.authenticated_user_contribution !== 0 && (
-                    <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-                      <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-                        {repDirection === "given"
-                          ? "Assigned To You:"
-                          : "You Assigned:"}
-                      </span>
-                      <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
-                        {overview.authenticated_user_contribution > 0 && "+"}
-                        {formatNumberWithCommas(
-                          overview.authenticated_user_contribution
-                        )}
-                      </span>
-                    </div>
-                  )}
-              </div>
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {canEditRep && repDirection === "received" && (
                   <Button
                     variant="action"
-                    size="md"
+                    size="sm"
                     onClick={() => setIsGrantRepOpen(true)}
                   >
                     <PlusIcon
@@ -202,6 +203,8 @@ export default function UserPageRepHeader({
                     <span>Add new</span>
                   </Button>
                 )}
+              </div>
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {visibleCategories.map((cat) => (
                   <RepCategoryPill
                     key={cat.category}
@@ -230,7 +233,7 @@ export default function UserPageRepHeader({
             !loading &&
             !(canEditRep && repDirection === "received") && (
               <div className="tw-mt-4 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
-                <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+                <p className="tw-mb-0 tw-text-meta/5 tw-font-normal tw-text-iron-500">
                   {repDirection === "given"
                     ? "This identity hasn't given any rep yet."
                     : "This identity hasn't received any rep yet."}

@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { fetchTweetPreview } from "@/lib/twitter/fetcher";
 
 const createSyndicationResponse = () =>
@@ -34,6 +36,44 @@ const createSyndicationResponse = () =>
       },
     }),
   }) as Response;
+
+const createOEmbedFallbackResponses = (pageResponse: unknown) => [
+  { ok: false, status: 404 },
+  {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      author_name: "Mayudrops",
+      author_url: "https://twitter.com/Mayudropsphotos",
+      html: '<blockquote><p>Post text</p><a href="https://twitter.com/Mayudropsphotos/status/1">May 21, 2026</a></blockquote>',
+    }),
+  },
+  { ok: false, status: 404 },
+  pageResponse,
+];
+
+const createPageResponse = (
+  html: string,
+  headers: Record<string, string> = {}
+) => ({
+  ok: true,
+  status: 200,
+  headers: new Headers({ "content-type": "text/html", ...headers }),
+  body: new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode(html));
+      controller.close();
+    },
+  }),
+});
+
+const mockFetchSequence = (responses: readonly unknown[]): jest.Mock => {
+  const fetchImpl = jest.fn();
+  for (const response of responses) {
+    fetchImpl.mockResolvedValueOnce(response);
+  }
+  return fetchImpl;
+};
 
 describe("fetchTweetPreview", () => {
   it("fetches Twitter syndication metadata and caches by tweet ID", async () => {
@@ -596,5 +636,46 @@ describe("fetchTweetPreview", () => {
 
     expect(preview.text).toMatch(/\.\.\.$/u);
     expect(Array.from(preview.text ?? "").length).toBeLessThanOrEqual(263);
+  });
+
+  it("reads the tweet page image metadata when syndication has no media", async () => {
+    const fetchImpl = mockFetchSequence(
+      createOEmbedFallbackResponses(
+        createPageResponse(
+          '<html><head><meta content="https://pbs.twimg.com/media/page.jpg" property="og:image"></head><body><div><div></div></div></body></html>'
+        )
+      )
+    );
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554410",
+      { fetchImpl }
+    );
+
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+    expect(preview).toMatchObject({
+      text: "Post text",
+      mediaImageUrl: "https://pbs.twimg.com/media/page.jpg",
+    });
+  });
+
+  it("skips tweet page image metadata from oversized pages", async () => {
+    const fetchImpl = mockFetchSequence(
+      createOEmbedFallbackResponses(
+        createPageResponse(
+          '<meta property="og:image" content="https://pbs.twimg.com/media/page.jpg">',
+          { "content-length": `${3 * 1024 * 1024}` }
+        )
+      )
+    );
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554411",
+      { fetchImpl }
+    );
+
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+    expect(preview.text).toBe("Post text");
+    expect(preview.mediaImageUrl).toBeUndefined();
   });
 });

@@ -1,7 +1,5 @@
-import type {
-  CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
-import CommonSelect from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ProfileProxyListType } from "../ProxyList";
 
 export default function ProxyListFilters({
@@ -41,11 +39,14 @@ export default function ProxyListFilters({
   }));
 
   return (
-    <CommonSelect
-      items={items}
-      activeItem={selected}
-      filterLabel="Proxy Type"
-      setSelected={setSelected}
-    />
+    <div className="tw-min-w-0 tw-flex-1 tw-basis-52 [&_[role=tab][aria-selected=false]]:tw-bg-transparent [&_[role=tab][aria-selected=true]]:tw-bg-iron-900 [&_[role=tab]]:tw-min-h-8 [&_[role=tab]]:tw-px-2 [&_[role=tab]]:tw-text-[13px] [&_[role=tablist]]:-tw-m-1 [&_[role=tablist]]:tw-p-1 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0">
+      <CommonTabs
+        items={items}
+        activeItem={selected}
+        filterLabel="Proxy Type"
+        setSelected={setSelected}
+        fill={false}
+      />
+    </div>
   );
 }

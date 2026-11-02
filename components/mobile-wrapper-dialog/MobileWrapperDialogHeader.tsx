@@ -37,7 +37,7 @@ export default function MobileWrapperDialogHeader({
   readonly backLabel: string;
   readonly closeLabel: string;
 }) {
-  const hasHeaderDivider = !!onBack || !!showHeaderDivider;
+  const hasHeaderDivider = showHeaderDivider ?? !!onBack;
 
   return (
     <div
