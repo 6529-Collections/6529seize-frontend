@@ -8096,6 +8096,7 @@
       "keywords": ["meme", "lab", "card", "tabs", "distribution"],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
+        "Timeline previews try the recorded media URL first. Failed Arweave previews can use alternate gateways for that same historical file. They never substitute the card's current artwork or infer an Arweave archive for a file without a recorded Arweave reference.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
         "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top.",
         "Meme Lab cards use the same marketplace controls as The Memes. Collect shows the lowest supported listing and Other listings exposes alternatives. Make an offer opens a WETH offer for the exact card. List requires the wallet holding the editions. In Listings & offers, Collect selects an exact listing and Sell opens an eligible offer; orders sharing a price require an explicit choice. Edition quantities are supported. Collection-wide and trait offers are checked for this exact Meme Lab card before review.",

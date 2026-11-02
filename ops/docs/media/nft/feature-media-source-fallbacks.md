@@ -27,6 +27,7 @@
 - `/6529-gradient/{id}` detail artwork
 - `/` home `Latest Drop` artwork when the home panel is in `Now Minting` mode
 - `/the-memes/mint` artwork panel
+- `/the-memes/{id}` and `/meme-lab/{id}` historical Timeline previews
 
 ## Entry Points
 
@@ -49,6 +50,23 @@
    reloaded or the component remounts.
 
 ## Fallback Order
+
+### Historical Timeline previews
+
+- Each image, video, or interactive HTML preview starts with its recorded
+  historical media URL.
+- For recognized Arweave references, a failed preview can try the 6529 media
+  resolver and approved gateways for the same transaction and file path. Each
+  candidate is tried at most once. Changing the historical preview resets that
+  list.
+- HTML previews can advance if the frame reports an error or has not loaded
+  after roughly eight seconds. A loaded cross-origin error page may be
+  indistinguishable from a successful document and does not guarantee recovery.
+- If all candidates fail, the preview keeps its existing unavailable behavior.
+  It never substitutes the card's current artwork or another historical version.
+- Sources without a recognized Arweave reference have no inferred archive
+  fallback. An unavailable HTTPS or IPFS file needs a verified matching archive
+  before it can use an Arweave fallback.
 
 ### Standard NFT image surfaces (`NFTImageRenderer`)
 
