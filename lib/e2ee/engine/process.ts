@@ -1,3 +1,4 @@
+import { preparePayload, loadMessage } from "./history";
 import type { ApiE2eeLogItem } from "../api-types";
 import { base64ToBytes } from "../bytes";
 import { MlsError } from "../mls-adapter";
@@ -368,15 +369,15 @@ async function processEntryItem(
   }
 }
 
-function markOutboxSent(
+async function markOutboxSent(
   ctx: EngineContext,
   runtime: GroupRuntime,
   item: ApiE2eeLogItem
-): boolean {
+): Promise<boolean> {
   for (const entry of runtime.outbox.values()) {
     if (entry.sealed?.data === item.data) {
       runtime.outbox.delete(entry.id);
-      const message = runtime.messages.get(entry.id);
+      const message = await loadMessage(ctx, runtime, entry.id);
       if (message && entry.payload.t === "msg") {
         message.pending = false;
         message.seq = item.seq;
@@ -413,7 +414,7 @@ async function processMessageItem(
     return null;
   }
   if (
-    markOutboxSent(ctx, runtime, item) ||
+    (await markOutboxSent(ctx, runtime, item)) ||
     runtime.messages.has(undecryptableId(item.seq))
   ) {
     return null;
@@ -448,6 +449,7 @@ async function processMessageItem(
     return placeholder();
   }
   const senderDeviceKey = decrypted.sender.device_key.toLowerCase();
+  if (!(await preparePayload(ctx, runtime, payload))) return payload.id;
   applyPayload(runtime, payload, {
     g: record.g,
     seq: item.seq,

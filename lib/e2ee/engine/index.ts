@@ -1,3 +1,10 @@
+import {
+  findSavedImport,
+  getSavedMessage,
+  loadSavedHistory,
+  requireSavedMessage,
+} from "./history-read";
+import type { HistoryPageOptions } from "../history-order";
 import { downloadMedia, localBlobType } from "../media";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
@@ -40,7 +47,7 @@ import {
   restartTargets,
   setAdmin,
 } from "./membership";
-import { searchMessages } from "./messages";
+import { searchHistory } from "./history-search";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -382,6 +389,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     const key = g?.toLowerCase() ?? null;
     const changed = key !== this.ctx.openConversation;
     this.ctx.openConversation = key;
+    if (key !== null && changed) this.background(() => this.loadHistory(key));
     this.ctx.openUntil = key === null ? 0 : Number.MAX_SAFE_INTEGER;
     if (key !== null && changed && this.ctx.store.status === "ready") {
       // Contract 12: an open conversation polls every 5 s, starting now.
@@ -465,17 +473,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  private ownMessage(g: string, id: string) {
-    const message = requireGroup(this.ctx, g).messages.get(id);
-    if (message?.kind !== "message") {
-      throw new E2eeError("E2EE_NO_MESSAGE");
-    }
-    return message;
-  }
+  private ownMessage = (g: string, id: string) =>
+    requireSavedMessage(this.ctx, g, id);
 
   async edit(g: string, id: string, text: string): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     if (message.senderProfileId !== this.ctx.profileId || message.deleted) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
@@ -491,7 +494,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async remove(g: string, id: string): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     if (message.senderProfileId !== this.ctx.profileId) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
@@ -510,7 +513,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     on: boolean
   ): Promise<void> {
     this.requireReady();
-    this.ownMessage(g, id);
+    await this.ctx.queue.run(() => this.ownMessage(g, id));
     await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
       ...base,
       t: on ? "react" : "unreact",
@@ -525,19 +528,18 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!runtime) {
       return;
     }
-    const latest = Math.max(
-      0,
-      ...[...runtime.messages.values()].map((m) => (m.pending ? 0 : m.seq))
-    );
+    const latest = runtime.record.history?.maxSeq ?? runtime.record.cursor;
     this.ctx.openConversation = runtime.record.g;
     this.ctx.openUntil = Math.max(
       this.ctx.openUntil,
       this.ctx.now() + OPEN_CONVERSATION_MS
     );
-    if (latest <= runtime.record.readSeq) {
-      return;
-    }
+    if (latest <= runtime.record.readSeq) return;
     runtime.record.readSeq = latest;
+    if (runtime.record.history) {
+      runtime.record.history.unread = 0;
+      runtime.record.history.mentions = 0;
+    }
     this.ctx.store.touch(runtime.record.g);
     this.background(() =>
       this.ctx.queue.run(() =>
@@ -612,28 +614,61 @@ class E2eeEngineImpl implements E2eeEngineExt {
     options?: { includeOriginal?: boolean }
   ): Promise<void> {
     this.requireReady();
-    await sendReport(this.ctx, g, this.ownMessage(g, id), {
-      reason,
-      notes,
-      includeOriginal: options?.includeOriginal,
-    });
+    await sendReport(
+      this.ctx,
+      g,
+      await this.ctx.queue.run(() => this.ownMessage(g, id)),
+      {
+        reason,
+        notes,
+        includeOriginal: options?.includeOriginal,
+      }
+    );
   }
 
-  reportPreview(g: string, id: string): E2eeReportPreview {
-    return previewReport(this.ownMessage(g, id));
+  async reportPreview(g: string, id: string): Promise<E2eeReportPreview> {
+    return previewReport(
+      await this.ctx.queue.run(() => this.ownMessage(g, id))
+    );
   }
 
-  search(query: string, g?: string): Promise<E2eeMessage[]> {
-    const runtimes =
+  getMessage = (g: string, id: string) => getSavedMessage(this.ctx, g, id);
+
+  loadHistory = (
+    g: string,
+    options: HistoryPageOptions & { around?: string } = {}
+  ) => loadSavedHistory(this.ctx, g, options);
+
+  findImportedMessage = (
+    g: string,
+    waveId: string,
+    dropId: string,
+    part: number
+  ) => findSavedImport(this.ctx, g, waveId, dropId, part);
+
+  async search(
+    query: string,
+    g?: string,
+    signal?: AbortSignal
+  ): Promise<E2eeMessage[]> {
+    if (!query.trim()) return [];
+    const groups =
       g === undefined
-        ? [...this.ctx.store.groups.values()]
-        : [requireGroup(this.ctx, g)];
-    return Promise.resolve(searchMessages(runtimes, query).map(toE2eeMessage));
+        ? [...this.ctx.store.groups.keys()]
+        : [requireGroup(this.ctx, g).record.g];
+    return (await searchHistory(this.ctx, query, groups, signal)).map(
+      toE2eeMessage
+    );
   }
 
-  async getAttachment(g: string, id: string, blob: string): Promise<Blob> {
+  async getAttachment(
+    g: string,
+    id: string,
+    blob: string,
+    signal?: AbortSignal
+  ): Promise<Blob> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
+    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
     const attachment = message.attachments.find(
       (att) => att.blob.toLowerCase() === blob.toLowerCase()
     );
@@ -644,6 +679,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       api: this.ctx.api,
       deviceKey: requireMls(this.ctx).deviceKey(),
       attachment,
+      ...(signal ? { signal } : {}),
     });
     return new Blob([bytes.slice().buffer], {
       type: localBlobType(attachment.mime),
@@ -652,7 +688,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   // -- encrypted history backup ---------------------------------------------
 
-  backupHistory = () => backupHistory(this.ctx);
+  backupHistory = () => this.ctx.queue.run(() => backupHistory(this.ctx));
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();

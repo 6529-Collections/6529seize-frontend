@@ -1,3 +1,13 @@
+import { MemoryE2eeStorage } from "./storage-memory";
+import { nextVersion } from "./storage-version";
+import { backfillHistory } from "./storage-upgrade";
+import {
+  historyKey,
+  isUnread,
+  type HistoryPageOptions,
+  type HistorySummary,
+} from "./history-order";
+import type { ImportedPayload } from "./imported-payload";
 import { randomBytes, toArrayBuffer, utf8Encode } from "./bytes";
 import type {
   StoredDevice,
@@ -5,6 +15,8 @@ import type {
   StoredMessage,
   StoredOutboxItem,
 } from "./records";
+
+export { isE2eeStateConflict } from "./storage-version";
 
 /**
  * Contract 8.7 local storage. One IndexedDB database per origin; every record
@@ -17,18 +29,6 @@ import type {
  * loaded it, or the state was cleared. Writing would put older state over
  * newer state, so the write is refused and the engine must stop.
  */
-class E2eeStateConflictError extends Error {
-  readonly code = "E2EE_STATE_CONFLICT";
-
-  constructor() {
-    super("E2EE_STATE_CONFLICT");
-    this.name = "E2eeStateConflictError";
-  }
-}
-
-export const isE2eeStateConflict = (error: unknown): boolean =>
-  error instanceof E2eeStateConflictError;
-
 /** Writes applied atomically (one IndexedDB transaction). */
 export interface E2eeStorageBatch {
   /**
@@ -66,6 +66,27 @@ export interface E2eeStorage {
   getStateVersion(profileId: string): Promise<number>;
   listGroups(profileId: string): Promise<StoredGroup[]>;
   listMessages(profileId: string, g: string): Promise<StoredMessage[]>;
+  getMessage(
+    profileId: string,
+    g: string,
+    id: string
+  ): Promise<StoredMessage | null>;
+  pageMessages(
+    profileId: string,
+    g: string,
+    options?: HistoryPageOptions
+  ): Promise<StoredMessage[]>;
+  findImported(
+    profileId: string,
+    g: string,
+    imp: ImportedPayload
+  ): Promise<StoredMessage[]>;
+  historySummary(
+    profileId: string,
+    g: string,
+    readSeq: number
+  ): Promise<HistorySummary>;
+
   listOutbox(profileId: string): Promise<StoredOutboxItem[]>;
   /**
    * Deletes the profile's records. The state version survives and goes up by
@@ -75,147 +96,7 @@ export interface E2eeStorage {
   clearProfile(profileId: string, expectedVersion?: number): Promise<void>;
 }
 
-/** The version a write stores; throws on a failed compare-and-swap. */
-function nextVersion(
-  stored: number,
-  expectedVersion: number | undefined,
-  bump: boolean
-): number {
-  if (expectedVersion === undefined) {
-    return bump ? stored + 1 : stored;
-  }
-  if (stored !== expectedVersion) {
-    throw new E2eeStateConflictError();
-  }
-  return expectedVersion + 1;
-}
-
-const clone = <T>(value: T): T => structuredClone(value);
-
-const joinKey = (...parts: string[]): string => parts.join("|");
-
-class MemoryE2eeStorage implements E2eeStorage {
-  readonly kind = "memory" as const;
-  private readonly devices = new Map<string, StoredDevice>();
-  private readonly wasm = new Map<string, Uint8Array>();
-  private readonly versions = new Map<string, number>();
-  private readonly groups = new Map<string, StoredGroup>();
-  private readonly messages = new Map<string, StoredMessage>();
-  private readonly outbox = new Map<string, StoredOutboxItem>();
-
-  writeBatch(profileId: string, batch: E2eeStorageBatch): Promise<void> {
-    const k = joinKey;
-    let version: number;
-    try {
-      version = nextVersion(
-        this.versions.get(profileId) ?? 0,
-        batch.expectedVersion,
-        false
-      );
-    } catch (error) {
-      return Promise.reject(error as Error);
-    }
-    this.versions.set(profileId, version);
-    if (batch.device) {
-      this.devices.set(profileId, clone(batch.device));
-    }
-    if (batch.wasmState) {
-      this.wasm.set(profileId, new Uint8Array(batch.wasmState));
-    }
-    for (const g of batch.deleteGroups ?? []) {
-      this.groups.delete(k(profileId, g));
-      this.dropMessages(profileId, g);
-    }
-    for (const group of batch.groups ?? []) {
-      this.groups.set(k(profileId, group.g), clone(group));
-    }
-    for (const item of batch.deleteMessages ?? []) {
-      this.messages.delete(k(profileId, item.g, item.id));
-    }
-    for (const message of batch.messages ?? []) {
-      this.messages.set(k(profileId, message.g, message.id), clone(message));
-    }
-    for (const id of batch.deleteOutbox ?? []) {
-      this.outbox.delete(k(profileId, id));
-    }
-    for (const item of batch.outbox ?? []) {
-      this.outbox.set(k(profileId, item.id), clone(item));
-    }
-    return Promise.resolve();
-  }
-
-  private dropMessages(profileId: string, g: string): void {
-    const prefix = joinKey(profileId, g, "");
-    for (const key of [...this.messages.keys()]) {
-      if (key.startsWith(prefix)) {
-        this.messages.delete(key);
-      }
-    }
-  }
-
-  getDevice(profileId: string): Promise<StoredDevice | null> {
-    return Promise.resolve(clone(this.devices.get(profileId) ?? null));
-  }
-
-  getWasmState(profileId: string): Promise<Uint8Array | null> {
-    const state = this.wasm.get(profileId);
-    return Promise.resolve(state ? new Uint8Array(state) : null);
-  }
-
-  getStateVersion(profileId: string): Promise<number> {
-    return Promise.resolve(this.versions.get(profileId) ?? 0);
-  }
-
-  private listByPrefix<T>(map: Map<string, T>, prefix: string): T[] {
-    const out: T[] = [];
-    for (const [key, value] of map) {
-      if (key.startsWith(prefix)) {
-        out.push(clone(value));
-      }
-    }
-    return out;
-  }
-
-  listGroups(profileId: string): Promise<StoredGroup[]> {
-    return Promise.resolve(this.listByPrefix(this.groups, `${profileId}|`));
-  }
-
-  listMessages(profileId: string, g: string): Promise<StoredMessage[]> {
-    return Promise.resolve(
-      this.listByPrefix(this.messages, joinKey(profileId, g, ""))
-    );
-  }
-
-  listOutbox(profileId: string): Promise<StoredOutboxItem[]> {
-    return Promise.resolve(this.listByPrefix(this.outbox, `${profileId}|`));
-  }
-
-  clearProfile(profileId: string, expectedVersion?: number): Promise<void> {
-    try {
-      this.versions.set(
-        profileId,
-        nextVersion(this.versions.get(profileId) ?? 0, expectedVersion, true)
-      );
-    } catch (error) {
-      return Promise.reject(error as Error);
-    }
-    this.devices.delete(profileId);
-    this.wasm.delete(profileId);
-    for (const map of [this.groups, this.messages, this.outbox] as Map<
-      string,
-      unknown
-    >[]) {
-      for (const key of [...map.keys()]) {
-        if (key.startsWith(`${profileId}|`)) {
-          map.delete(key);
-        }
-      }
-    }
-    return Promise.resolve();
-  }
-}
-
-/** In-memory storage for tests and for browsers without IndexedDB. */
+/** In-memory storage for tests and browsers without IndexedDB. */
 export const createMemoryE2eeStorage = (): E2eeStorage =>
   new MemoryE2eeStorage();
 
@@ -224,7 +105,7 @@ export const createMemoryE2eeStorage = (): E2eeStorage =>
 // ---------------------------------------------------------------------------
 
 export const E2EE_DB_NAME = "6529-e2ee";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const S_DEVICES = "devices";
 const S_WASM = "wasm";
 const S_KEYS = "keys";
@@ -233,6 +114,34 @@ const S_MESSAGES = "messages";
 const S_OUTBOX = "outbox";
 const IDX_PROFILE = "profile";
 const IDX_GROUP = "group";
+const IDX_ORDER = "history-order";
+const IDX_IMPORT = "import-source";
+const IDX_LAST = "last-message";
+const IDX_UNREAD = "unread-seq";
+const IDX_MENTION = "mention-seq";
+
+function indexedMessage(profileId: string, message: StoredMessage) {
+  const unread = isUnread(message, profileId, -1);
+  return {
+    ...message,
+    profileId,
+    historyOrder: historyKey(message),
+    ...(message.kind === "message" ? { lastOrder: historyKey(message) } : {}),
+    ...(message.imported
+      ? {
+          importSource: [
+            message.imported.w,
+            message.imported.d,
+            message.imported.p,
+          ],
+        }
+      : {}),
+    ...(unread ? { unreadSeq: message.seq } : {}),
+    ...(unread && message.mentions.includes(profileId)
+      ? { mentionSeq: message.seq }
+      : {}),
+  };
+}
 const ALL_STORES = [S_DEVICES, S_WASM, S_KEYS, S_GROUPS, S_MESSAGES, S_OUTBOX];
 
 /**
@@ -297,7 +206,7 @@ function createStore(
   }
 }
 
-function upgrade(db: IDBDatabase): void {
+function upgrade(db: IDBDatabase, tx: IDBTransaction): void {
   createStore(db, S_DEVICES, "profileId", []);
   createStore(db, S_WASM, "profileId", []);
   createStore(db, S_KEYS, "profileId", []);
@@ -312,6 +221,27 @@ function upgrade(db: IDBDatabase): void {
     ]
   );
   createStore(db, S_OUTBOX, ["profileId", "id"], [[IDX_PROFILE, "profileId"]]);
+  const messages = tx.objectStore(S_MESSAGES);
+  // Populate indexes after the rewrite to avoid five index updates per put.
+  // Both steps remain in the same atomic versionchange transaction.
+  backfillHistory(
+    messages,
+    tx.objectStore(S_GROUPS),
+    indexedMessage,
+    (row) => strip(row),
+    () => {
+      for (const [name, path] of [
+        [IDX_ORDER, "historyOrder"],
+        [IDX_LAST, "lastOrder"],
+        [IDX_IMPORT, "importSource"],
+        [IDX_UNREAD, "unreadSeq"],
+        [IDX_MENTION, "mentionSeq"],
+      ]) {
+        if (!messages.indexNames.contains(name!))
+          messages.createIndex(name!, ["profileId", "g", path!]);
+      }
+    }
+  );
 }
 
 export const isIndexedDbAvailable = (): boolean =>
@@ -324,7 +254,7 @@ function openDatabase(
   return new Promise<IDBDatabase>((resolve, reject) => {
     const req = factory.open(E2EE_DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
-      upgrade(req.result);
+      upgrade(req.result, req.transaction!);
     };
     req.onsuccess = () => {
       const db = req.result;
@@ -346,7 +276,21 @@ function openDatabase(
 }
 
 const strip = <T extends object>(record: WithProfile<T>): T => {
-  const { profileId: _profileId, ...rest } = record;
+  const {
+    profileId: _profileId,
+    historyOrder: _order,
+    lastOrder: _last,
+    importSource: _source,
+    unreadSeq: _unread,
+    mentionSeq: _mention,
+    ...rest
+  } = record as WithProfile<T> & {
+    historyOrder?: unknown;
+    lastOrder?: unknown;
+    importSource?: unknown;
+    unreadSeq?: unknown;
+    mentionSeq?: unknown;
+  };
   return rest as unknown as T;
 };
 
@@ -391,7 +335,7 @@ function applyBatch(
     tx.objectStore(S_MESSAGES).delete([profileId, item.g, item.id]);
   }
   for (const message of batch.messages ?? []) {
-    tx.objectStore(S_MESSAGES).put({ ...message, profileId });
+    tx.objectStore(S_MESSAGES).put(indexedMessage(profileId, message));
   }
   for (const id of batch.deleteOutbox ?? []) {
     tx.objectStore(S_OUTBOX).delete([profileId, id]);
@@ -598,6 +542,130 @@ class IndexedDbE2eeStorage implements E2eeStorage {
       (os) => os.index(IDX_GROUP).getAll(IDBKeyRange.only([profileId, g]))
     );
     return rows.map((row) => strip(row));
+  }
+
+  async getMessage(
+    profileId: string,
+    g: string,
+    id: string
+  ): Promise<StoredMessage | null> {
+    const row = await this.read<WithProfile<StoredMessage> | undefined>(
+      S_MESSAGES,
+      (os) => os.get([profileId, g, id])
+    );
+    return row ? strip(row) : null;
+  }
+
+  private async cursorMessages(
+    index: string,
+    range: IDBKeyRange,
+    direction: IDBCursorDirection,
+    limit: number
+  ): Promise<StoredMessage[]> {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const result: StoredMessage[] = [];
+      const req = db
+        .transaction(S_MESSAGES, "readonly")
+        .objectStore(S_MESSAGES)
+        .index(index)
+        .openCursor(range, direction);
+      req.onerror = () => reject(req.error ?? new Error("History read failed"));
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) {
+          resolve(result);
+          return;
+        }
+        result.push(strip(cursor.value as WithProfile<StoredMessage>));
+        if (result.length >= limit) resolve(result);
+        else cursor.continue();
+      };
+    });
+  }
+
+  async pageMessages(
+    profileId: string,
+    g: string,
+    options: HistoryPageOptions = {}
+  ): Promise<StoredMessage[]> {
+    const lower = options.after
+      ? [profileId, g, options.after]
+      : [profileId, g];
+    const upper = options.before
+      ? [profileId, g, options.before]
+      : [profileId, g, [2]];
+    const range = IDBKeyRange.bound(
+      lower,
+      upper,
+      Boolean(options.after),
+      Boolean(options.before)
+    );
+    const rows = await this.cursorMessages(
+      IDX_ORDER,
+      range,
+      options.after ? "next" : "prev",
+      Math.min(200, Math.max(1, options.limit ?? 100))
+    );
+    return options.after ? rows : rows.reverse();
+  }
+
+  async findImported(
+    profileId: string,
+    g: string,
+    imp: ImportedPayload
+  ): Promise<StoredMessage[]> {
+    const rows = await this.cursorMessages(
+      IDX_IMPORT,
+      IDBKeyRange.only([profileId, g, [imp.w, imp.d, imp.p]]),
+      "next",
+      Number.MAX_SAFE_INTEGER
+    );
+    return rows.filter((message) => !message.deleted);
+  }
+
+  async historySummary(
+    profileId: string,
+    g: string,
+    readSeq: number
+  ): Promise<HistorySummary> {
+    const unreadRange = IDBKeyRange.bound(
+      [profileId, g, readSeq],
+      [profileId, g, []],
+      true
+    );
+    const [last, newest, count, unread, mentions] = await Promise.all([
+      this.cursorMessages(
+        IDX_LAST,
+        IDBKeyRange.bound([profileId, g], [profileId, g, [1]]),
+        "prev",
+        1
+      ),
+      this.cursorMessages(
+        IDX_ORDER,
+        IDBKeyRange.bound([profileId, g], [profileId, g, [1]]),
+        "prev",
+        1
+      ),
+      this.read<number>(S_MESSAGES, (os) =>
+        os.index(IDX_GROUP).count(IDBKeyRange.only([profileId, g]))
+      ),
+      this.read<number>(S_MESSAGES, (os) =>
+        os.index(IDX_UNREAD).count(unreadRange)
+      ),
+      this.read<number>(S_MESSAGES, (os) =>
+        os.index(IDX_MENTION).count(unreadRange)
+      ),
+    ]);
+    // Pending messages sort last; sequenced max is stored separately by the engine cursor.
+    return {
+      last: last[0] ?? null,
+      tail: newest[0] ?? null,
+      count,
+      unread,
+      mentions,
+      maxSeq: newest[0]?.pending ? 0 : (newest[0]?.seq ?? 0),
+    };
   }
 
   async listOutbox(profileId: string): Promise<StoredOutboxItem[]> {

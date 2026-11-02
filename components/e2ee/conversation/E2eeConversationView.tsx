@@ -17,7 +17,6 @@ import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { findMember, getMemberName } from "../e2eeFormat";
 import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
-import { getScrollBehavior } from "../e2eeMotion";
 import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeConversationInfo } from "../info/E2eeConversationInfo";
 import { E2eeBanner } from "../ui/E2eeBanner";
@@ -32,7 +31,7 @@ import { E2eeComposer } from "./E2eeComposer";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
-import { type E2eeMessageActions, getMessageDomId } from "./E2eeMessageItem";
+import type { E2eeMessageActions } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
 import { E2eeSearchPanel } from "./E2eeSearchPanel";
 import { E2eeTimeline } from "./E2eeTimeline";
@@ -130,6 +129,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   useOpenConversation(engine, g, conversation !== null, lastSeq);
   const synced = useInitialSync(engine, conversation === null);
 
+  const [jumpTarget, setJump] = useState<{
+    id: string;
+    request: number;
+  } | null>(null);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
@@ -186,15 +189,18 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         void react(message, reaction, on);
       },
       onJumpTo: (id) => {
-        const element = document.getElementById(getMessageDomId(id));
-        if (!element) {
-          return;
-        }
-        element.scrollIntoView({
-          block: "center",
-          behavior: getScrollBehavior(),
-        });
-        element.focus({ preventScroll: true });
+        const jump = async () => {
+          try {
+            await engine.loadHistory?.(g, { around: id });
+            setJump((previous) => ({
+              id,
+              request: (previous?.request ?? 0) + 1,
+            }));
+          } catch {
+            setActionErrorKey("e2ee.conversation.historyFailed");
+          }
+        };
+        void jump();
       },
     };
   }, [engine, g, muted, profileId]);
@@ -278,6 +284,8 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         selfProfileId={profileId}
         canAct={canAct}
         actions={actions}
+        jumpToId={jumpTarget?.id ?? null}
+        jumpRequest={jumpTarget?.request ?? 0}
       />
       {actionErrorKey ? (
         <p
