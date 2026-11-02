@@ -358,7 +358,7 @@ describe("testing strategy CI plan", () => {
 
   it("builds when the first-load budget or its checker changes", () => {
     for (const file of ["scripts/perf-budget.json", "scripts/perf-budget.cjs"]) {
-      expect(createCiPlan([file]).checks.build.required).toBe(true);
+      expect(createCiPlan([file]).checks["build"]!.required).toBe(true);
     }
   });
 

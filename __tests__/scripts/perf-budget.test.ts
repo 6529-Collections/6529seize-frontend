@@ -31,6 +31,7 @@ const {
   measure,
   normalizeAssetPath,
   parseArgs,
+  rootLayoutEntryKey,
   run,
   toleranceFor,
   updateBudget,
@@ -46,6 +47,10 @@ const {
   };
   measure: (options: { nextDir: string; budget: Budget }) => Measurement;
   normalizeAssetPath: (file: string) => string;
+  rootLayoutEntryKey: (
+    entryJSFiles: Record<string, string[]>,
+    route: string
+  ) => string;
   parseArgs: (argv: string[]) => {
     update: boolean;
     report: string | null;
@@ -127,11 +132,14 @@ function createBuild(): string {
     "[project]/app/error": [layout],
     "[project]/app/(home)/page": [`/_next/${layout}`, `/_next/${home}`],
   });
-  // A Turbopack root above the project prefixes the project folder.
+  const nestedLayout = writeChunk(nextDir, "nested-layout.js", "n".repeat(900));
+  // A Turbopack root above the project prefixes the project folder(s). The
+  // nested `.../app/layout` belongs to this route, not to the root layout.
   writeRouteManifest(nextDir, "waves/[wave]", {
-    "[project]/frontend/app/layout": [layout],
-    "[project]/frontend/app/waves/layout": [wave],
-    "[project]/frontend/app/waves/[wave]/page": [wave],
+    "[project]/repos/frontend/app/layout": [layout],
+    "[project]/repos/frontend/app/waves/layout": [wave],
+    "[project]/repos/frontend/app/waves/app/layout": [nestedLayout],
+    "[project]/repos/frontend/app/waves/[wave]/page": [wave],
   });
   return root;
 }
@@ -164,7 +172,7 @@ describe("first-load JavaScript budget", () => {
       expect(measurement.targets["root"]!.chunks).toBe(2);
       // home adds its page chunk; the duplicate layout chunk counts once.
       expect(measurement.targets["home"]!.chunks).toBe(3);
-      expect(measurement.targets["wave"]!.chunks).toBe(3);
+      expect(measurement.targets["wave"]!.chunks).toBe(4);
       for (const id of ["home", "wave"]) {
         expect(measurement.targets[id]!.brotli_bytes).toBeGreaterThan(
           measurement.targets["root"]!.brotli_bytes
@@ -183,6 +191,49 @@ describe("first-load JavaScript budget", () => {
     }
   });
 
+  it("derives the exact root layout entry from the page entry's prefix", () => {
+    expect(
+      rootLayoutEntryKey(
+        { "[project]/app/layout": [], "[project]/app/museum/page": [] },
+        "museum"
+      )
+    ).toBe("[project]/app/layout");
+    expect(
+      rootLayoutEntryKey(
+        {
+          "[project]/a/b/app/layout": [],
+          "[project]/a/b/app/x/app/layout": [],
+          "[project]/a/b/app/[user]/(profile)/page": [],
+        },
+        "[user]/(profile)"
+      )
+    ).toBe("[project]/a/b/app/layout");
+    expect(() =>
+      rootLayoutEntryKey({ "[project]/app/layout": [] }, "museum")
+    ).toThrow('has no page entry ending in app/museum/page');
+  });
+
+  it("fails clearly when a manifest has no root layout entry", () => {
+    const root = createBuild();
+    try {
+      const nextDir = path.join(root, ".next");
+      writeRouteManifest(nextDir, "museum", {
+        "[project]/app/museum/page": ["static/chunks/home.js"],
+      });
+      expect(() =>
+        measure({
+          nextDir,
+          budget: {
+            ...BASE_BUDGET,
+            targets: [BASE_BUDGET.targets[0]!, { id: "museum", route: "museum" }],
+          },
+        })
+      ).toThrow('"museum" has no root layout entry [project]/app/layout');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("finds the root layout entry when Turbopack prefixes the project folder", () => {
     const root = createBuild();
     try {
@@ -193,6 +244,7 @@ describe("first-load JavaScript budget", () => {
           targets: BASE_BUDGET.targets.filter((target) => target.id !== "home"),
         },
       });
+      // runtime + root layout; the nested app/.../layout is not counted.
       expect(measurement.targets["root"]!.chunks).toBe(2);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -310,9 +362,9 @@ describe("first-load JavaScript budget", () => {
           env: { GITHUB_STEP_SUMMARY: summaryPath },
         })
       ).toBe(0);
-      expect(fs.readFileSync(summaryPath, "utf8")).toContain(
-        "## First-load JavaScript budget"
-      );
+      const summary = fs.readFileSync(summaryPath, "utf8");
+      expect(summary).toContain("## First-load JavaScript budget");
+      expect(summary).toMatch(/Compressed \d+ files in [\d.]+s\./);
       const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Measurement;
       expect(Object.keys(report.targets)).toEqual(["root", "home", "wave"]);
     } finally {

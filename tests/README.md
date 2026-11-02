@@ -305,9 +305,13 @@ App PR CI:
 - After that production build, `6529 run perf:budget` sums the gzip and
   brotli bytes of first-load JavaScript for the root layout and a few key
   routes, and fails when one grows past `scripts/perf-budget.json` plus a small
-  tolerance. When a change shrinks them, run `6529 run perf:budget:update`
-  after a local `6529 run base-build` and commit the lower budget. Raise a
-  budget only in a reviewed change that explains the new bytes.
+  tolerance. Each file is compressed on its own and the sizes are added, so the
+  numbers are a stable gate for comparing builds, not the bytes a visitor
+  receives. The check evaluates the build's client reference manifests, so run
+  it only on builds of this repository. When a change shrinks the numbers, run
+  `6529 run perf:budget:update` after a local `6529 run base-build` and commit
+  the lower budget. Raise a budget only in a reviewed change that explains the
+  new bytes.
 - Selected quality/contracts, production-build, smoke-Playwright, and
   critical-shell-Playwright lanes run in parallel. The lightweight final
   `Installed app checks` job preserves the required branch-protection gate and

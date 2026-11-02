@@ -14,11 +14,18 @@
 //
 // What is measured:
 //   - root: build-manifest `rootMainFiles` plus the root layout's client entry
-//     files. Every page downloads these.
+//     files. Every page downloads these. Turbopack writes client reference
+//     manifests per page only; the root layout is an entry inside each one,
+//     named with the same project prefix as that page's own entry.
 //   - each route: `rootMainFiles` plus every client entry file listed in the
 //     route's `page_client-reference-manifest.js` (root layout, boundaries,
 //     nested layouts and the page). Lazy `import()`/`next/dynamic` chunks are
 //     not first-load and are not counted.
+//
+// What the numbers mean: each file is compressed on its own (gzip level 9,
+// brotli quality 11) and the sizes are summed. That is a stable, repeatable
+// gate for comparing builds, not the bytes a visitor receives: the CDN's
+// compression level, HTTP framing and the browser cache all differ.
 //
 // Rules enforced by the check:
 //   - gzip or brotli bytes above budget + tolerance fail the check.
@@ -37,9 +44,7 @@ const zlib = require("node:zlib");
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_BUDGET_PATH = path.join(__dirname, "perf-budget.json");
-// Turbopack names client entries by project-relative path. A build whose
-// Turbopack root is a parent directory prefixes the project folder.
-const ROOT_LAYOUT_ENTRY = /^\[project\]\/(?:[^/]+\/)?app\/layout$/u;
+const PROJECT_ENTRY_PREFIX = "[project]/";
 const ROOT_TARGET_ID = "root";
 const MEASURED_FIELDS = Object.freeze(["gzip_bytes", "brotli_bytes"]);
 
@@ -100,7 +105,9 @@ function readClientReferenceManifest(nextDir, route) {
     );
   }
   // The manifest is a script that assigns globalThis.__RSC_MANIFEST[...].
-  // Evaluate it in an isolated context so it cannot touch this process.
+  // It is this repository's own build output, so it is trusted input. The vm
+  // context only keeps its globals out of this process; vm is not a security
+  // boundary, so never point this script at a build from an untrusted source.
   const sandbox = {};
   sandbox.globalThis = sandbox;
   vm.runInNewContext(fs.readFileSync(manifestPath, "utf8"), sandbox, {
@@ -116,9 +123,30 @@ function readClientReferenceManifest(nextDir, route) {
   return manifests[0];
 }
 
+// Turbopack names client entries by project-relative path, prefixed with the
+// project folder(s) when its root is a parent directory. The page's own entry
+// carries the same prefix as the root layout, so the root layout key is exact
+// and a nested `app/.../layout` can never be mistaken for it.
+function rootLayoutEntryKey(entryJSFiles, route) {
+  const pageSuffix = `app/${route}/page`;
+  const pageKey = Object.keys(entryJSFiles).find(
+    (key) =>
+      key.startsWith(PROJECT_ENTRY_PREFIX) &&
+      (key === `${PROJECT_ENTRY_PREFIX}${pageSuffix}` ||
+        key.endsWith(`/${pageSuffix}`))
+  );
+  if (!pageKey) {
+    throw new Error(
+      `Client reference manifest for "${route}" has no page entry ending in ${pageSuffix}.`
+    );
+  }
+  return `${pageKey.slice(0, pageKey.length - pageSuffix.length)}app/layout`;
+}
+
 function createAssetSizer(nextDir) {
+  // Each file is compressed once per run, however many targets include it.
   const cache = new Map();
-  return function sizeOf(relativePath) {
+  const sizeOf = function sizeOf(relativePath) {
     const cached = cache.get(relativePath);
     if (cached) {
       return cached;
@@ -141,6 +169,8 @@ function createAssetSizer(nextDir) {
     cache.set(relativePath, size);
     return size;
   };
+  sizeOf.fileCount = () => cache.size;
+  return sizeOf;
 }
 
 function sumFiles(files, sizeOf) {
@@ -213,12 +243,21 @@ function measure({ nextDir, budget }) {
       continue;
     }
     const manifest = readClientReferenceManifest(nextDir, target.route);
+    const rootLayoutKey = rootLayoutEntryKey(
+      manifest.entryJSFiles,
+      target.route
+    );
+    if (!manifest.entryJSFiles[rootLayoutKey]) {
+      throw new Error(
+        `Client reference manifest for "${target.route}" has no root layout entry ${rootLayoutKey}.`
+      );
+    }
     const files = new Set(rootMainFiles);
     for (const [entry, list] of Object.entries(manifest.entryJSFiles)) {
       for (const file of list) {
         const normalized = normalizeAssetPath(file);
         files.add(normalized);
-        if (ROOT_LAYOUT_ENTRY.test(entry)) {
+        if (entry === rootLayoutKey) {
           rootFiles.add(normalized);
         }
       }
@@ -232,7 +271,7 @@ function measure({ nextDir, budget }) {
       target.route === null ? rootFiles : routeFiles.get(target.id);
     targets[target.id] = sumFiles(files, sizeOf);
   }
-  return { targets };
+  return { targets, files: sizeOf.fileCount() };
 }
 
 function toleranceFor(budgetBytes, tolerance) {
@@ -381,7 +420,9 @@ function run(argv, { cwd = process.cwd(), stdout = process.stdout, env = process
   const budgetPath = path.resolve(cwd, options.budgetPath);
   const budget = readJson(budgetPath, "Performance budget");
   validateBudget(budget);
+  const startedAt = Date.now();
   const measurement = measure({ nextDir, budget });
+  const elapsedSeconds = ((Date.now() - startedAt) / 1000).toFixed(1);
 
   if (options.report) {
     const reportPath = path.resolve(cwd, options.report);
@@ -406,7 +447,9 @@ function run(argv, { cwd = process.cwd(), stdout = process.stdout, env = process
   }
 
   const result = compare(budget, measurement);
-  const markdown = renderMarkdown(result);
+  const markdown = `${renderMarkdown(result)}
+Compressed ${measurement.files} files in ${elapsedSeconds}s.
+`;
   stdout.write(markdown);
   if (env.GITHUB_STEP_SUMMARY) {
     fs.appendFileSync(env.GITHUB_STEP_SUMMARY, markdown);
@@ -424,7 +467,7 @@ if (require.main === module) {
 }
 
 module.exports = {
-  ROOT_LAYOUT_ENTRY,
+  rootLayoutEntryKey,
   SCHEMA_VERSION,
   compare,
   measure,
