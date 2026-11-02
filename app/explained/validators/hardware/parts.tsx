@@ -60,7 +60,7 @@ export function CardHead({
 /** A spec as the card shows it: "16 GB RAM". A soft tile, never a bordered pill. */
 export function Chip({ children }: { readonly children: string }) {
   return (
-    <li className="tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 [&:not(:last-child)]:after:tw-ml-2 [&:not(:last-child)]:after:tw-font-normal [&:not(:last-child)]:after:tw-text-iron-600 [&:not(:last-child)]:after:tw-content-['·']">
+    <li className="tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 [&:not(:last-child)]:after:tw-ml-2 [&:not(:last-child)]:after:tw-font-normal [&:not(:last-child)]:after:tw-text-iron-400 [&:not(:last-child)]:after:tw-content-['·']">
       {nb(children)}
     </li>
   );

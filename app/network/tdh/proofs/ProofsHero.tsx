@@ -252,6 +252,7 @@ function RealVerdict({
           hours: facts.print("site.proofA.provedHours"),
           minutes: facts.print("site.proofA.provedMinutes"),
           seconds: facts.print("proofs.day.nativeSeconds"),
+          block: facts.print("site.proofA.ethCallBlock"),
         })
       )}
       {p(

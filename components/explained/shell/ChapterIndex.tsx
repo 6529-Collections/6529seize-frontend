@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
+import { withCc0 } from "../marks/Cc0";
 import { Icon } from "../marks/glyphs";
 import Track, { type Maturity } from "../marks/Track";
 import { EX_FOCUS } from "../tokens";
@@ -53,7 +54,7 @@ export default function ChapterIndex({
               <span
                 className={`tw-block tw-text-[21px] tw-font-semibold tw-leading-[27px] tw-tracking-[-0.015em] md:tw-text-[26px] md:tw-leading-8 ${live ? "tw-text-iron-50" : "tw-text-iron-300"}`}
               >
-                {row.title}
+                {withCc0(row.title)}
               </span>
               <span className="tw-mt-1 tw-block tw-text-base tw-leading-6 tw-text-iron-400">
                 {row.question}

@@ -153,7 +153,7 @@
   "explained.tdh.overview.rung.recordedRef": "D128",
   "explained.tdh.overview.rung.signed": "Signed by validators",
   "explained.tdh.overview.rung.signedBody": "Each validator would run the Rust core and program B's code natively and sign a day only if they agree (D125).",
-  "explained.tdh.overview.rung.signedRef": "D112",
+  "explained.tdh.overview.rung.signedRef": "D112, D125",
   "explained.tdh.overview.rung.builtRef": "{version}, built and being tested",
   "explained.tdh.overview.zk.lead": "A proof can be checked without rerunning its program. The proof files are not public yet.",
   "explained.tdh.overview.zk.lineA": "Proof A, program A in SP1: proved the day of {date} under {version}, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call, one that changes nothing on chain. One day under retired rules does not move the blue line.",

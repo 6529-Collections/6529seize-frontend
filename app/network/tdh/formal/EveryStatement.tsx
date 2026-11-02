@@ -62,10 +62,13 @@ function Entry({
   ctx,
   entry,
   factId,
+  repeats = false,
 }: {
   readonly ctx: SureContext;
   readonly entry: StatementRow;
   readonly factId: string;
+  /** The manifest gives it the same sentence as the entry before it. */
+  readonly repeats?: boolean;
 }) {
   const { s, locale } = ctx;
   const file = entry.file ? (entry.file.split("/").pop() ?? entry.file) : null;
@@ -103,7 +106,12 @@ function Entry({
         </span>
         <span className="tw-block sm:tw-inline">{checkedBy(ctx, entry)}</span>
       </span>
-      {entry.statement && (
+      {entry.statement && repeats && (
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
+          {s("explained.tdh.sure.check.sameStatement")}
+        </p>
+      )}
+      {entry.statement && !repeats && (
         <p
           className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]"
           data-fact={factId}
@@ -201,12 +209,17 @@ function Group({
         className="tw-m-0 tw-hidden tw-list-none tw-p-0 tw-pb-4 group-open:tw-block"
         aria-label={s("explained.tdh.sure.check.caption", { title })}
       >
-        {section.entries.map((entry) => (
+        {section.entries.map((entry, index) => (
           <Entry
             key={entry.id}
             ctx={ctx}
             entry={entry}
             factId={section.fact.id}
+            repeats={
+              index > 0 &&
+              Boolean(entry.statement) &&
+              entry.statement === section.entries[index - 1]?.statement
+            }
           />
         ))}
       </ol>

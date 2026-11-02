@@ -153,7 +153,7 @@
   "explained.tdh.overview.rung.recordedRef": "D128",
   "explained.tdh.overview.rung.signed": "Von Validatoren signiert",
   "explained.tdh.overview.rung.signedBody": "Jeder Validator würde den Rust-Kern und den Code von Programm B nativ ausführen und einen Tag nur signieren, wenn sie übereinstimmen (D125).",
-  "explained.tdh.overview.rung.signedRef": "D112",
+  "explained.tdh.overview.rung.signedRef": "D112, D125",
   "explained.tdh.overview.rung.builtRef": "{version}, gebaut und im Test",
   "explained.tdh.overview.zk.lead": "Ein Beweis lässt sich prüfen, ohne sein Programm erneut auszuführen. Die Beweisdateien sind noch nicht öffentlich.",
   "explained.tdh.overview.zk.lineA": "Beweis A, Programm A in SP1: hat den Tag vom {date} unter {version} bewiesen, der früheren Version der Regeln, und der SP1-Verifier im Mainnet akzeptiert ihn in einem schreibgeschützten Aufruf, der on-chain nichts ändert. Ein Tag unter ausgemusterten Regeln verschiebt die blaue Linie nicht.",

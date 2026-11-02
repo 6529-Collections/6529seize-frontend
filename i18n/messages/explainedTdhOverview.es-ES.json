@@ -153,7 +153,7 @@
   "explained.tdh.overview.rung.recordedRef": "D128",
   "explained.tdh.overview.rung.signed": "Firmado por validadores",
   "explained.tdh.overview.rung.signedBody": "Cada validador ejecutaría de forma nativa el núcleo en Rust y el código del programa B, y firmaría un día solo si coinciden (D125).",
-  "explained.tdh.overview.rung.signedRef": "D112",
+  "explained.tdh.overview.rung.signedRef": "D112, D125",
   "explained.tdh.overview.rung.builtRef": "{version}, construido y en pruebas",
   "explained.tdh.overview.zk.lead": "Una prueba se puede comprobar sin volver a ejecutar su programa. Los archivos de prueba aún no son públicos.",
   "explained.tdh.overview.zk.lineA": "Prueba A, el programa A en SP1: probó el día del {date} bajo {version}, la versión anterior de las reglas, y el verificador SP1 de mainnet la acepta en una llamada de solo lectura, que no cambia nada en la cadena. Un día bajo reglas retiradas no mueve la línea azul.",

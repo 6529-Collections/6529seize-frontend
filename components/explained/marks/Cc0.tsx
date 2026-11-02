@@ -27,10 +27,10 @@ export function withCc0(text: string): ReactNode {
     // The pieces are one string's fixed segments, in order.
     <Fragment key={index}>
       {index > 0 && (
-        <>
+        <span className="tw-whitespace-nowrap">
           CC
           <SlashedZero />
-        </>
+        </span>
       )}
       {piece}
     </Fragment>

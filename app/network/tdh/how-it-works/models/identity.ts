@@ -16,7 +16,7 @@ import {
  */
 const R = REGISTRY_V14;
 
-export const IDENTITY_EXAMPLE = {
+const IDENTITY_EXAMPLE = {
   /** The season the two wallets share. */
   season: 13,
   /** Cards of that season in wallet B (its last ones); wallet A holds the rest. */
@@ -25,7 +25,7 @@ export const IDENTITY_EXAMPLE = {
   days: 100,
 } as const;
 
-export interface IdentityValues {
+interface IdentityValues {
   readonly season: number;
   readonly days: number;
   readonly cards: number;

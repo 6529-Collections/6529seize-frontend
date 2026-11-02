@@ -106,7 +106,9 @@ export default function RecordStrip({
             className="tw-flex tw-flex-col"
             data-record={tile.id}
           >
-            <span className="tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
+            {/* The date masks the axis behind it, so the line runs
+                between the dates, never through them. */}
+            <span className="tw-relative tw-z-[1] tw-flex tw-items-center tw-gap-2 tw-self-start tw-bg-[#0D0D0F] tw-pr-2.5 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
               <span
                 className={`tw-relative tw-z-[1] tw-size-[9px] tw-flex-none tw-rounded-full tw-ring-4 tw-ring-[#0D0D0F] ${tile.next ? "tw-border tw-border-dashed tw-border-iron-500 tw-bg-[#0D0D0F]" : "tw-bg-iron-300"}`}
                 aria-hidden="true"
@@ -116,7 +118,7 @@ export default function RecordStrip({
             <div
               className={`tw-mt-2.5 tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-px-4 tw-py-3.5 ${tile.next ? "tw-border-dashed tw-border-iron-700" : "tw-border-solid tw-border-iron-800 tw-bg-iron-950"}`}
             >
-              <span className="lg:tw-min-h-10">{tile.mark}</span>
+              <span className="lg:tw-min-h-12">{tile.mark}</span>
               <b className="tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50 lg:tw-min-h-[44px]">
                 {tile.title}
               </b>

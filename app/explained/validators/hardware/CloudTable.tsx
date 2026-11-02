@@ -76,7 +76,12 @@ function cheapest(provider: CloudProvider, arch: ArchFilter): CloudRow | null {
   );
 }
 
-/** The rows a view shows: one per provider in the summary, sorted by price. */
+/**
+ * The rows a view shows: one per provider in the summary, sorted by price.
+ * Exported for the page's tests.
+ *
+ * @api
+ */
 export function shownRows(
   providers: readonly CloudProvider[],
   tab: string,

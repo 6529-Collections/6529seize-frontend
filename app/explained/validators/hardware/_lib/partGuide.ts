@@ -18,6 +18,7 @@ export interface Said {
   readonly source: SourceId;
 }
 
+/** A part of the guide; exported for the page's tests. @api */
 export type PartId =
   | "cpu"
   | "gpu"
@@ -428,7 +429,7 @@ export const IDLE: readonly IdleRow[] = [
  * signing while it is plugged in. The setting moved in Windows 11 24H2, so
  * it has a path for each.
  */
-export interface MenuPath {
+interface MenuPath {
   /** Which Windows: "Windows 11, version 24H2 or newer". */
   readonly where: string;
   /** The names to click, in order. */

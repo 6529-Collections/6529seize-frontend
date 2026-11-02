@@ -46,9 +46,13 @@ function claimRow(ctx: SureContext, section: SureSection): ClaimRow {
       ? s(what, { cap })
       : (section.title ??
         s("explained.tdh.sure.check.untitled", { id: section.id })),
-    detail: detail
-      ? s(detail, { cap })
-      : s("explained.tdh.sure.claim.other.detail"),
+    detail:
+      (detail
+        ? s(detail, { cap })
+        : s("explained.tdh.sure.claim.other.detail")) +
+      (what && section.title
+        ? ` ${s("explained.tdh.sure.claims.manifestTitle", { title: section.title })}`
+        : ""),
     limit: limit
       ? m(limit, {
           wallet: p.v("cases.F.wallet"),

@@ -76,8 +76,8 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways with each other one,`,
-        `  every link registered at or after ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways to all others,`,
+        `  all from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC on (D136)`,
       ].join("\n"),
     summary: true,
   },
@@ -127,7 +127,7 @@ const STEPS: readonly Step[] = [
  * card held one whole hundred days, in a wallet of its own with one
  * Gradient. Every number is the engine's, on today's H.
  */
-export interface Trace {
+interface Trace {
   readonly h: number;
   readonly edition: number;
   readonly days: number;
@@ -259,8 +259,11 @@ export default function StepsInOrder({
                     </Link>
                   </span>
                 ))}
-                {step.summary === true &&
-                  ` · ${ht(locale, "explained.tdh.how.order.summary")}`}
+                {step.summary === true && (
+                  <span className="tw-block">
+                    {ht(locale, "explained.tdh.how.order.summary")}
+                  </span>
+                )}
               </span>
             </li>
           ))}

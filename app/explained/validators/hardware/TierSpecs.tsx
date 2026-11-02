@@ -67,7 +67,7 @@ function SpecTable({ locale }: { readonly locale: SupportedLocale }) {
           >
             <th
               scope="row"
-              className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-pr-4 tw-text-left tw-align-top tw-text-sm tw-font-semibold tw-text-iron-400"
+              className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-pr-4 tw-text-left tw-align-top tw-text-[15px] tw-font-semibold tw-text-iron-400"
             >
               {hw(locale, `spec.row.${row.id}`)}
             </th>
