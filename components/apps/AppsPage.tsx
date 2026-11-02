@@ -46,13 +46,13 @@ export default function AppsPage() {
           </h1>
         </header>
 
-        <div className="tw-grid tw-gap-5 lg:tw-grid-cols-2">
+        <div className="tw-grid tw-gap-5">
           <AppPanel
             id="6529-mobile"
             icon={DevicePhoneMobileIcon}
             title={t(APPS_LOCALE, "apps.mobile.title")}
             description={t(APPS_LOCALE, "apps.mobile.description")}
-            contentClassName="tw-flex tw-flex-1 tw-items-start tw-justify-center"
+            mobile
           >
             <MobileAppDownloads />
           </AppPanel>
@@ -77,14 +77,14 @@ function AppPanel({
   title,
   description,
   children,
-  contentClassName = "tw-mt-auto",
+  mobile = false,
 }: {
   readonly id: string;
   readonly icon: typeof DevicePhoneMobileIcon;
   readonly title: string;
   readonly description: string;
   readonly children: ReactNode;
-  readonly contentClassName?: string | undefined;
+  readonly mobile?: boolean;
 }) {
   const headingId = `${id}-heading`;
 
@@ -92,9 +92,11 @@ function AppPanel({
     <section
       id={id}
       aria-labelledby={headingId}
-      className={`tw-flex tw-h-full tw-flex-col ${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-8`}
+      className={`${ABOUT_CARD_CLASS_NAME} ${mobile ? "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-5 tw-p-5 sm:tw-p-6" : "tw-overflow-hidden"}`}
     >
-      <div className="tw-mb-5 tw-flex tw-items-start tw-gap-3">
+      <div
+        className={`tw-flex tw-items-center tw-gap-3 ${mobile ? "" : "tw-p-5 sm:tw-p-6"}`}
+      >
         <span className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-primary-300">
           <Icon aria-hidden="true" className="tw-size-6" />
         </span>
@@ -107,7 +109,9 @@ function AppPanel({
           </p>
         </div>
       </div>
-      <div className={contentClassName}>{children}</div>
+      <div className={mobile ? "tw-min-w-0 tw-max-w-full" : undefined}>
+        {children}
+      </div>
     </section>
   );
 }
