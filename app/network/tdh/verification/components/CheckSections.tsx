@@ -517,7 +517,7 @@ export function CheckItYourself({
           <span className={EX_TEXT.label}>
             {pt(locale, "explained.tdh.check.build.label")}
           </span>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[660px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
             {rich(locale, "explained.tdh.check.build.body", {
               specification: (
                 <Link className={EX_LINK} href="/network/tdh/specification">

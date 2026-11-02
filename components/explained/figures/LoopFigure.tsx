@@ -53,20 +53,36 @@ const TOKEN_H = 38;
  * each with its pictogram, the selected one blue. The list under it says
  * the rest.
  */
+/** A station whose name sits beside its circle, not above or below it; and a 15 px character's width. */
+const SIDE_MIN_COS = 0.3;
+const CHAR_UNITS = 8.2;
+
 function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
   // Wide enough for each station's name outside its circle, at 15 px, which
   // stays legible (12 px on a phone, 9 at 400% zoom) when the ring scales.
-  // Wider than tall, so a long name (German "Entscheiden") fits beside its
-  // circle on either side.
+  // As wide as the longest side name needs beside its circle: square in
+  // English, wider for German "Entscheiden", so no name is cut and English
+  // keeps its size.
   const size = 320;
-  const width = 400;
+  const r = 78;
+  // Each side station's name, from its circle to its last letter.
+  const half = Math.max(
+    size / 2,
+    ...stations.map((station, index) => {
+      const cos = Math.abs(Math.cos(((ANGLES[index] ?? 0) * Math.PI) / 180));
+      return cos > SIDE_MIN_COS
+        ? Math.round((r + 34) * cos + station.name.length * CHAR_UNITS + 6)
+        : 0;
+    })
+  );
+  const width = half * 2;
   const c = size / 2;
   const cx = width / 2;
-  const r = 78;
   return (
     <svg
       viewBox={`0 0 ${width} ${size}`}
-      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[400px]"
+      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full"
+      style={{ maxWidth: width }}
       aria-hidden="true"
       data-loop-mini=""
     >

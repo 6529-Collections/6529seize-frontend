@@ -36,7 +36,7 @@ export default function Predict({
   const right = picked !== null && options[picked]?.right === true;
   return (
     <div
-      className="tw-mt-[18px] tw-grid tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-[18px] tw-py-4"
+      className="tw-mt-[18px] tw-grid tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-[18px] tw-py-4 md:tw-w-fit md:tw-max-w-full"
       data-predict={id}
       data-done={picked === null ? "0" : "1"}
     >
