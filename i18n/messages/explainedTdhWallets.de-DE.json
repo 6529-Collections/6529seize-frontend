@@ -53,7 +53,7 @@
   "explained.tdh.wallets.lens.saySplit": "bis die letzte Verknüpfung von D bestätigt ist. Die neueste bestätigte Verknüpfung gruppiert zuerst, also fällt eine Wallet, die noch nicht mit D verknüpft ist, aus der Gruppe: Ein Snapshot jetzt zählt zwei Identitäten, jede mit ihrem eigenen Boost.",
   "explained.tdh.wallets.lens.sayBatchLead": "Keine Trennung.",
   "explained.tdh.wallets.lens.sayBatch": "Die drei Verknüpfungen von D gehen in einer Batch-Transaktion, also werden sie in einem Block bestätigt, und kein Snapshot sieht je eine kleinere Gruppe.",
-  "explained.tdh.wallets.lens.sayOldFour": "Nur drei zählen zusammen. Eine Gruppe wächst über drei nur hinaus, wenn eine Wallet mit jeder der anderen in beide Richtungen verknüpft ist, angelegt am {date} oder später (D136).",
+  "explained.tdh.wallets.lens.sayOldFour": "Nur drei zählen zusammen. Eine Gruppe wächst über drei nur hinaus, wenn eine Wallet mit jeder der anderen in beide Richtungen verknüpft ist, angelegt am {date} oder später (D136). Um die vierte aufzunehmen, verknüpfen Sie sie neu: Sie signiert zuletzt, in einem Batch.",
   "explained.tdh.wallets.lens.sayOne": "Eine Identität: ein TDH, ein Boost, eine Stimme.",
   "explained.tdh.wallets.lens.ruleBoth": "ein Paar zählt, sobald es in beide Richtungen verknüpft ist",
   "explained.tdh.wallets.lens.ruleNewest": "neueste bestätigte Verknüpfung zuerst; Verknüpfungen in einem Block nach Paarschlüssel (die zwei Adressen, sortiert)",

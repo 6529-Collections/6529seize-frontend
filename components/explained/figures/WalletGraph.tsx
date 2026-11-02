@@ -32,6 +32,9 @@ export interface GraphLink {
 
 const NONE_EXCLUDED: readonly string[] = [];
 
+/** The least height of the drawing, in px. */
+const MIN_HEIGHT = 180;
+
 export default function WalletGraph({
   wallets,
   links,
@@ -48,11 +51,34 @@ export default function WalletGraph({
   readonly locale: SupportedLocale;
 }) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(420);
-  const height = width < 400 ? 250 : 270;
+  const base = width < 400 ? 250 : 270;
+  // The drawing fits the wallets drawn: no empty half when three sit in a
+  // row, and no identity's outline past the frame's edge on a phone. A
+  // wallet's circle and its group's outline need this much room around it.
+  const pad = 46;
+  const raw = wallets.map((wallet) => ({
+    id: wallet.id,
+    x: wallet.x * width,
+    y: wallet.y * base,
+  }));
+  const xs = raw.map((point) => point.x);
+  const ys = raw.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const spanX = maxX - minX;
+  const scale = spanX > width - 2 * pad ? (width - 2 * pad) / spanX : 1;
+  const centreX = (minX + maxX) / 2;
+  // At least this tall, the wallets centred in it, so a model does not
+  // jump in height as a wallet joins a row.
+  const height =
+    raw.length === 0 ? base : Math.max(maxY - minY + 2 * pad, MIN_HEIGHT);
+  const top = (height - (maxY - minY)) / 2;
   const at = new Map(
-    wallets.map((wallet) => [
-      wallet.id,
-      [wallet.x * width, wallet.y * height] as const,
+    raw.map((point) => [
+      point.id,
+      [width / 2 + (point.x - centreX) * scale, point.y - minY + top] as const,
     ])
   );
   const grouped = new Set(groups.flat());

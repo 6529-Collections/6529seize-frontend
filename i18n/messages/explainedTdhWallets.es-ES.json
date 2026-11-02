@@ -53,7 +53,7 @@
   "explained.tdh.wallets.lens.saySplit": "hasta que se confirma el último vínculo de D. El vínculo confirmado más reciente agrupa primero, así que una wallet aún no vinculada con D queda fuera del grupo: una instantánea tomada ahora cuenta dos identidades, cada una con su propio boost.",
   "explained.tdh.wallets.lens.sayBatchLead": "Sin separación.",
   "explained.tdh.wallets.lens.sayBatch": "Los tres vínculos de D van en una sola transacción por lotes, así que se confirman en un mismo bloque y ninguna instantánea ve nunca un grupo más pequeño.",
-  "explained.tdh.wallets.lens.sayOldFour": "Solo tres cuentan juntas. Un grupo solo pasa de tres cuando una wallet tiene vínculos en ambos sentidos con cada una de las demás, creados el {date} o después (D136).",
+  "explained.tdh.wallets.lens.sayOldFour": "Solo tres cuentan juntas. Un grupo solo pasa de tres cuando una wallet tiene vínculos en ambos sentidos con cada una de las demás, creados el {date} o después (D136). Para sumar la cuarta, vincúlala de nuevo: firma la última, en un lote.",
   "explained.tdh.wallets.lens.sayOne": "Una identidad: un TDH, un boost, un voto.",
   "explained.tdh.wallets.lens.ruleBoth": "un par cuenta una vez vinculado en ambos sentidos",
   "explained.tdh.wallets.lens.ruleNewest": "primero el vínculo confirmado más reciente; los vínculos de un mismo bloque por clave de par (las dos direcciones, ordenadas)",

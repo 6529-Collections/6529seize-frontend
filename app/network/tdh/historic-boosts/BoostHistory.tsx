@@ -152,7 +152,7 @@ export default function BoostHistory({
           const next = steps[index + 1];
           const tone = step.current ? EX_HEX.you : EX_HEX.ink2;
           // Steps in a row at one value share one label, set on the first:
-          // "before TDH v1.1, v1.1 · 1.20", not two labels for one level.
+          // one value for one level.
           const prevStep = index > 0 ? steps[index - 1] : undefined;
           const sameAsPrev =
             prevStep !== undefined &&
@@ -169,7 +169,9 @@ export default function BoostHistory({
             const member = steps[after];
             if (member) run.push(member);
           }
-          const tag = `${run.map(stepName).join(", ")} · ${formatCents(locale, step.fullSet)}`;
+          // The line carries its value only; the versions are named once,
+          // on the axis under each step's start, so no label names two.
+          const tag = formatCents(locale, step.fullSet);
           // A short step's label sits at its start; the current one ends at
           // the right edge, so its label is anchored there.
           const anchor = step.current ? "end" : "start";

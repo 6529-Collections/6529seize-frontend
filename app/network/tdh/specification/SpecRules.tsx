@@ -14,22 +14,23 @@ import { FactText } from "@/components/explained/facts/FactText";
 import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import {
   ARITHMETIC,
+  BASE_LINE,
+  boost,
+  clusters,
+  conventions,
+  cutoff,
   DAILY_RATE,
+  editions,
   NETTING,
   ORDER,
   PAIR_STATE,
   RANGE,
+  rates,
   REPLAY,
   TOKEN_VALUES,
   TOPICS,
   UNDERFLOW,
   VALUES,
-  boost,
-  clusters,
-  conventions,
-  cutoff,
-  editions,
-  rates,
 } from "./specCode";
 import type { SpecContext } from "./specShared";
 import { ENGINE } from "@/lib/explained/engine";
@@ -540,6 +541,11 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       </Sub>
       <Sub id="s8-2" no="8.2" title={m("explained.tdh.spec.s8-2.title")}>
         <Prose>{m("explained.tdh.spec.s8-2.body")}</Prose>
+        <CodeBlock
+          className="tw-mt-4"
+          code={BASE_LINE}
+          label={s("explained.tdh.spec.s8-2.code")}
+        />
       </Sub>
       <Sub id="s8-3" no="8.3" title={m("explained.tdh.spec.s8-3.title")}>
         <Prose>{m("explained.tdh.spec.s8-3.body")}</Prose>

@@ -114,7 +114,7 @@ export function editions(v: Values): string {
 
 export function rates(v: Values): string {
   return [
-    "Meme i           RATE(H, E[i]) when E[i] > 0; no rate when E[i] = 0",
+    "Meme i           RATE(H, E[i]) when E[i] > 0; no rate when E[i] = 0   # RATE: §8.1",
     `Gradient         RATE(H, G), at least ${v.gradientMin} cents`,
     "                 G = Gradient ids minted at or before B",
     `NextGen token t  RATE(H, Nc), c = t div ${grouped(v.divisor)}`,
@@ -238,6 +238,11 @@ export const TOKEN_VALUES = [
   "raw     = sum(days(a) for a in stack if days(a) > 0)",
   "rate    = §5.3",
   "base    = BASE(rate, raw)                        # §8.2",
+].join("\n");
+
+/** §8.2 on its own line, so the section reads without going back to §8.1. */
+export const BASE_LINE = [
+  "BASE(r, raw) = (r × raw + 50) div 100   # r in cents, per token per wallet",
 ].join("\n");
 
 export const ARITHMETIC = [

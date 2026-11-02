@@ -53,7 +53,7 @@
   "explained.tdh.wallets.lens.saySplit": "until D's last link confirms. The newest confirmed link groups first, so a wallet not yet linked with D falls out of the group: a snapshot taken now counts two identities, each with its own boost.",
   "explained.tdh.wallets.lens.sayBatchLead": "No split.",
   "explained.tdh.wallets.lens.sayBatch": "D's three links go in one batch transaction, so they confirm in one block and no snapshot ever sees a smaller group.",
-  "explained.tdh.wallets.lens.sayOldFour": "Only three count together. A group grows past three only when one wallet has links both ways with each of the others, made on or after {date} (D136).",
+  "explained.tdh.wallets.lens.sayOldFour": "Only three count together. A group grows past three only when one wallet has links both ways with each of the others, made on or after {date} (D136). To bring the fourth in, link it afresh: it signs last, in one batch.",
   "explained.tdh.wallets.lens.sayOne": "One identity: one TDH, one boost, one vote.",
   "explained.tdh.wallets.lens.ruleBoth": "a pair counts once linked both ways",
   "explained.tdh.wallets.lens.ruleNewest": "newest confirmed link first; links in one block by pair key (the two addresses, sorted)",
