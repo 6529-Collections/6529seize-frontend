@@ -134,11 +134,19 @@ async function getPublicChatMessageTarget(page: Page) {
     candidate.total_drops_count > 1;
   let overview = (await response.json()) as ApiWaveOverviewPage;
   let wave = overview.data.find(isEligibleChat);
+  const stagingAccess = await response.request().headerValue("x-6529-auth");
   while (!wave && overview.next) {
     const nextPage = overview.page + 1;
     const nextPageUrl = new URL(response.url());
     nextPageUrl.searchParams.set("page", String(nextPage));
-    const nextResponse = await page.request.get(nextPageUrl.toString());
+    // Transport errors can include private request headers.
+    const nextResponse = await page.request
+      .get(nextPageUrl.toString(), {
+        ...(stagingAccess ? { headers: { "x-6529-auth": stagingAccess } } : {}),
+      })
+      .catch(() => {
+        throw new Error("Wave discovery pagination transport failed");
+      });
     expect(nextResponse.ok()).toBe(true);
     overview = (await nextResponse.json()) as ApiWaveOverviewPage;
     expect(overview.page).toBe(nextPage);
