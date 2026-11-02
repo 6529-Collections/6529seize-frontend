@@ -89,8 +89,15 @@ it("runs as a synchronous inline head script, not a queued next/script", () => {
     path.join(process.cwd(), "app/layout.tsx"),
     "utf8"
   );
-  expect(layout).toMatch(
-    /<script\s+id="native-ios-platform-bootstrap"\s+dangerouslySetInnerHTML=\{\{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT \}\}/
+  // Locate the element by its id so attribute order and formatting don't matter.
+  const idIndex = layout.indexOf('id="native-ios-platform-bootstrap"');
+  expect(idIndex).toBeGreaterThan(-1);
+  const element = layout.slice(
+    layout.lastIndexOf("<", idIndex),
+    layout.indexOf("/>", idIndex)
   );
-  expect(layout).not.toMatch(/<Script\s+id="native-ios-platform-bootstrap"/);
+  // Lowercase <script> is plain HTML; <Script> would be next/script.
+  expect(element).toMatch(/^<script\b/);
+  expect(element).toContain("NATIVE_IOS_BOOTSTRAP_SCRIPT");
+  expect(element).not.toContain("strategy=");
 });
