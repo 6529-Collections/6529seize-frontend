@@ -65,6 +65,9 @@
   identified; it does not assume an image or use today's card format. Header
   checks stop after roughly eight seconds. Other sources without a recorded
   format keep the `Open` link without an automatic header request.
+- `Open` links support HTTP and HTTPS. Native Arweave references open through a
+  matching HTTPS gateway. Malformed or unsupported media URLs show preview
+  unavailable text instead of a link.
 - For recognized Arweave references, a failed preview can try the 6529 media
   resolver and approved gateways for the same transaction and file path. Each
   candidate is tried at most once. Changing the historical preview resets that

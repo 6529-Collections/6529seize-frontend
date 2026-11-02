@@ -63,6 +63,24 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
   return <TimelineMediaPreview key={`${props.type}:${props.url}`} {...props} />;
 }
 
+function getHistoricalMediaHref(url: string): string | null {
+  for (const source of getHistoricalMediaSources(url)) {
+    try {
+      const parsed = new URL(source);
+      if (
+        (parsed.protocol === "https:" || parsed.protocol === "http:") &&
+        !parsed.username &&
+        !parsed.password
+      ) {
+        return parsed.href;
+      }
+    } catch {
+      // Malformed metadata is text, never a navigable URL.
+    }
+  }
+  return null;
+}
+
 async function detectHistoricalMediaType(
   url: string,
   signal: AbortSignal
@@ -124,8 +142,12 @@ function DetectedTimelineMedia(props: Readonly<Props>) {
   const locale = props.locale ?? DEFAULT_LOCALE;
   const label = props.label ?? t(locale, "timeline.media.defaultLabel");
   if (type === MediaType.UNKNOWN) {
+    const href = getHistoricalMediaHref(props.url);
+    if (!href) {
+      return <span>{t(locale, "timeline.media.unavailable", { label })}</span>;
+    }
     return (
-      <a href={props.url} target="_blank" rel="noopener noreferrer">
+      <a href={href} target="_blank" rel="noopener noreferrer">
         {t(locale, "timeline.media.openMedia", { label })}
       </a>
     );

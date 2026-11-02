@@ -150,11 +150,7 @@ describe("TimelineMedia", () => {
     "http://127.0.0.1/private",
     "https://localhost/private",
     "http://192.168.1.1/private",
-    "ftp://archive.example/old",
-    "data:text/html,example",
-    "javascript:void(0)",
     `https://arweave.net.evil.example/${HISTORICAL_TX}`,
-    `ar://${HISTORICAL_TX}/../ifosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY/old`,
   ])("does not probe an unapproved historical source: %s", async (url) => {
     const fetch = jest
       .spyOn(globalThis, "fetch")
@@ -162,8 +158,62 @@ describe("TimelineMedia", () => {
     render(<TimelineMedia url={url} type={MediaType.UNKNOWN} />);
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
     expect(fetch).not.toHaveBeenCalled();
-    expect(screen.getByRole("link")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", url);
     expect(screen.queryByRole("img")).toBeNull();
+  });
+
+  it.each([
+    "javascript:void(0)",
+    "JaVaScRiPt:alert(1)",
+    "java\nscript:alert(1)",
+    "data:text/html,example",
+    "vbscript:msgbox(1)",
+    "file:///etc/passwd",
+    "ftp://archive.example/old",
+    "/relative",
+    "not-a-url",
+    "",
+    `ar://${HISTORICAL_TX}/../ifosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY/old`,
+  ])(
+    "never emits a navigable fallback for unsupported metadata: %s",
+    async (url) => {
+      const fetch = jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue(headResponse("application/json"));
+      const { container } = render(
+        <TimelineMedia
+          url={url}
+          type={MediaType.UNKNOWN}
+          label="Removed Animation"
+        />
+      );
+      await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+      expect(fetch).not.toHaveBeenCalled();
+      expect(screen.queryByRole("link")).toBeNull();
+      expect(container.querySelector("[href]")).toBeNull();
+      expect(
+        screen.getByText(
+          t("en-US", "timeline.media.unavailable", {
+            label: "Removed Animation",
+          })
+        )
+      ).toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    `ar://${HISTORICAL_TX}/Original.png`,
+    `https://user:password@arweave.net/${HISTORICAL_TX}/Original.png`,
+  ])("keeps a safe matching gateway link for %s", async (url) => {
+    jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(headResponse("application/octet-stream"));
+    render(<TimelineMedia url={url} type={MediaType.UNKNOWN} />);
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    const link = screen.getByRole("link");
+    expect(link).toHaveAttribute("href", RESOLVER_URL);
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAttribute("target", "_blank");
   });
 
   it("uses a trusted configured resolver for a recognized historical reference", async () => {
