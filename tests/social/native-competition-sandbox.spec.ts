@@ -4416,7 +4416,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       const expectCompactCenteredTabs = async () => {
-        const label = dialog.locator(".is-mini > div > p > span:first-child");
+        const label = page
+          .getByRole("dialog")
+          .last()
+          .locator(".is-mini > div > p > span:first-child");
         const labelBox = (await label.boundingBox())!;
         const tabsBox = (await mode.boundingBox())!;
         expect(tabsBox.height).toBeLessThanOrEqual(32);
