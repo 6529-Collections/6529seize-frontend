@@ -23,7 +23,7 @@ Each order covers all eligible votes, including pages not loaded yet. Your choic
 is remembered in this browser for the current competition and connected profile.
 Changing sort clears the reset selection and starts the selected order from its
 first page; it does not change a vote. The selector stays available during loading
-and retry, and is disabled while a bulk reset is running.
+and retry, and is disabled while a vote is saving or a bulk reset is running.
 Saving a vote refreshes the loaded pages to reflect its new position before more
 rows load.
 You can update votes one row at a time, reset selected rows to `0`, or open a

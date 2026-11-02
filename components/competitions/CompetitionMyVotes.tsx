@@ -12,6 +12,7 @@ import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -21,6 +22,8 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useCompetitionSignatureFor } from "@/hooks/competitions/useCompetitionSignature";
 import {
@@ -69,8 +72,10 @@ function UnavailableVote({
   vote,
   retry,
   disabled,
+  onSubmittingChange,
 }: {
   readonly vote: ApiCompetitionMyVote;
+  readonly onSubmittingChange: (submitting: boolean) => void;
   readonly retry: () => void;
   readonly disabled: boolean;
 }) {
@@ -103,6 +108,7 @@ function UnavailableVote({
         dropId={vote.drop_id}
         disabled={disabled}
         budgetEnabled={visible}
+        onSubmittingChange={onSubmittingChange}
       />
     </article>
   );
@@ -253,8 +259,12 @@ function ScopedCompetitionMyVotes({
   });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [resetting, setResetting] = useState(false);
+  const [submittingVotes, setSubmittingVotes] = useState(0);
+  const onSubmittingChange = useCallback((submitting: boolean) => {
+    setSubmittingVotes((count) => count + (submitting ? 1 : -1));
+  }, []);
   const client = useQueryClient();
-  const { requestAuth } = useAuth();
+  const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
   const sign = useCompetitionSignatureFor(competition);
   const pendingResets = useRef(new Map<string, ApiSetCompetitionVoteRequest>());
   const activeScope = useRef(true);
@@ -276,10 +286,22 @@ function ScopedCompetitionMyVotes({
       !competition.permissions.vote
     )
       throw new Error("Vote cannot be reset");
+    const address = getWalletAddress();
+    const assertCurrentActor = () => {
+      assertActiveScope();
+      if (
+        !isAuthSessionForProfile({
+          address,
+          profileId: connectedProfile?.id,
+          proxyProfileId: activeProfileProxy?.created_by.id,
+        })
+      )
+        throw new Error("Voting session changed");
+    };
     assertActiveScope();
     if (!viewer || !(await requestAuth()).success)
       throw new Error("Authentication required");
-    assertActiveScope();
+    assertCurrentActor();
     const key = `${viewer}:${competition.config_version}:${vote.entry_id}`;
     let body = pendingResets.current.get(key);
     if (!body) {
@@ -297,7 +319,7 @@ function ScopedCompetitionMyVotes({
         );
       pendingResets.current.set(key, body);
     }
-    assertActiveScope();
+    assertCurrentActor();
     try {
       await setCompetitionVote(identity, vote.entry_id, body);
       pendingResets.current.delete(key);
@@ -320,7 +342,7 @@ function ScopedCompetitionMyVotes({
       toolbarContent={
         <CompetitionMyVotesSort
           sort={sort}
-          disabled={resetting}
+          disabled={resetting || submittingVotes > 0}
           onChange={(value) => {
             if (value === sort) return;
             setSelected(new Set());
@@ -395,6 +417,7 @@ function ScopedCompetitionMyVotes({
               key={vote.entry_id}
               vote={vote}
               disabled={!competition.permissions.vote || resetting}
+              onSubmittingChange={onSubmittingChange}
               retry={() => {
                 void result.refetch();
                 void query.refetch();
@@ -436,6 +459,7 @@ function ScopedCompetitionMyVotes({
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
+                  onSubmittingChange={onSubmittingChange}
                   onExplainVote={
                     entryDrop.wave.authenticated_user_eligible_to_chat !==
                       true || entryDrop.parts.at(0)?.part_id === undefined

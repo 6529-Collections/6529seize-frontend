@@ -2505,6 +2505,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       artworks.map((drop, index) => [drop.id, 53 - index])
     );
     const mutations: number[] = [];
+    let releaseVote: (() => void) | undefined;
     await page.route(
       "**/v3/waves/*/competitions/alpha/credits/me**",
       (route) => {
@@ -2533,7 +2534,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await page.route(
       "**/v3/waves/*/competitions/alpha/entries/*/votes/me",
-      (route) => {
+      async (route) => {
         const entryId = new URL(route.request().url()).pathname
           .split("/")
           .at(-3);
@@ -2541,6 +2542,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           (item) => resources.entry(item.id).id === entryId
         )!;
         const { value } = route.request().postDataJSON() as { value: number };
+        if (value !== 0)
+          await new Promise<void>((resolve) => {
+            releaseVote = resolve;
+          });
         mutations.push(value);
         values.set(drop.id, value);
         orders["last_voted"] = [
@@ -2650,7 +2655,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     };
     await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
     const readsBeforeSameSort = reads.length;
-    for (let repeat = 0; repeat < 3; repeat++) await selectSort("vote_amount");
+    for (let repeat = 0; repeat < 8; repeat++) await selectSort("vote_amount");
     expect(reads).toHaveLength(readsBeforeSameSort);
     const selectAll = panel.getByRole("button", {
       name: "Select all",
@@ -2766,6 +2771,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await edited
       .getByRole("button", { name: "Save vote", exact: true })
       .click();
+    await expect.poll(() => releaseVote !== undefined).toBe(true);
+    await expect(sort).toBeDisabled();
+    releaseVote?.();
+    await expect(sort).toBeEnabled();
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 51"
     );
