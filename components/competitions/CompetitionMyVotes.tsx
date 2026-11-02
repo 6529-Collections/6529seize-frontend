@@ -163,7 +163,9 @@ export default function CompetitionMyVotes() {
 }
 
 const isMyVotesSort = (value: unknown): value is ApiCompetitionMyVotesSort =>
-  Object.values(ApiCompetitionMyVotesSort).some((sort) => sort === value);
+  value === ApiCompetitionMyVotesSort.VoteAmount ||
+  value === ApiCompetitionMyVotesSort.Leaderboard ||
+  value === ApiCompetitionMyVotesSort.LastVoted;
 
 function ScopedCompetitionMyVotes({
   viewer,

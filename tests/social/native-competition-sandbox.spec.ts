@@ -2472,6 +2472,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("sorts complete My Votes pages, recovers errors and ignores a late previous order", async ({
     page,
   }, testInfo) => {
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|did not match|maximum update depth|too many re-renders/i.test(
+          message.text()
+        )
+      )
+        runtimeErrors.push(message.text());
+    });
     const sandbox = await installCompetitionApi(page);
     const response = await page.request.get(
       `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
@@ -2738,6 +2749,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.getByRole("tab", { name: "All votes", exact: true }).click();
     await page.getByRole("tab", { name: "My Votes", exact: true }).click();
     await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await page.reload();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
     expect(sandbox.requests).toHaveLength(0);
     expect(mutations).toHaveLength(0);
     await selectSort("last_voted");
@@ -2823,6 +2839,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         path: testInfo.outputPath("my-votes-sorting-narrow-es.png"),
       });
     }
+    expect(runtimeErrors).toEqual([]);
   });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
