@@ -44,6 +44,7 @@ const proxyUrl = (params: Record<string, string>) =>
   `/api/og-metadata/image?${new URLSearchParams(params).toString()}`;
 
 const originalMatchMedia = globalThis.matchMedia;
+let reduceMotion = false;
 let paused = true;
 const pause = jest.fn(() => {
   paused = true;
@@ -67,6 +68,7 @@ const renderMarkdownImage = (
   );
 
 beforeEach(() => {
+  reduceMotion = false;
   paused = true;
   pause.mockClear();
   Object.defineProperty(HTMLMediaElement.prototype, "play", {
@@ -84,7 +86,7 @@ beforeEach(() => {
     get: () => paused,
   });
   globalThis.matchMedia = jest.fn((query: string) => ({
-    matches: false,
+    matches: reduceMotion && query === "(prefers-reduced-motion: reduce)",
     media: query,
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
@@ -158,6 +160,48 @@ describe("DropListItemContentMediaImage Giphy video", () => {
     fireEvent.click(screen.getByRole("button", { name: "Pause animation" }));
 
     expect(pause).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the still with a Play control when reduced motion is preferred", () => {
+    reduceMotion = true;
+    renderMarkdownImage();
+
+    const video = getVideo();
+    expect(video.autoplay).toBe(false);
+    expect(video).toHaveAttribute(
+      "poster",
+      proxyUrl({ url: `${GIPHY_DIRECTORY}480w_s.jpg`, w: "800" })
+    );
+    fireEvent.loadedMetadata(video);
+    expect(
+      screen.getByRole("button", { name: "Play animation" })
+    ).toBeInTheDocument();
+  });
+
+  it("names the video with a caller-supplied description", () => {
+    renderMarkdownImage({ alt: "Dancing cat" });
+
+    expect(
+      screen.getByLabelText("Dancing cat", { selector: "video" })
+    ).toBeInTheDocument();
+  });
+
+  it("forgets the playing state when a playing video fails", () => {
+    renderMarkdownImage();
+    const video = getVideo();
+    fireEvent.loadedMetadata(video);
+    fireEvent.play(video);
+    expect(
+      screen.getByRole("button", { name: "Pause animation" })
+    ).toBeInTheDocument();
+
+    fireEvent.error(video);
+    fireEvent.error(screen.getByAltText("Drop media"));
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    expect(
+      screen.getByRole("button", { name: "Play animation" })
+    ).toBeInTheDocument();
   });
 
   it("falls back to the GIF preview when the video fails", () => {
