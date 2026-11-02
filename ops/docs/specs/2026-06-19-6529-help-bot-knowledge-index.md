@@ -122,6 +122,12 @@ loading announcements, section-specific loading, and destination-bound competiti
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
+The `messages.encrypted-chats` record covers profile links in DM headers and
+introductions, sender names and avatars, desktop profile cards, level and public
+author badges, profile-wave navigation, and linked member mentions. Those
+details come from public profile data; chat contents stay encrypted. Missing
+profile details do not prevent reading messages stored on the device.
+
 The `waves.leaderboard.sort-group-filters` record covers Main Stage's one-tap
 Additional Action checkbox, independent sorting and view selection, complete-result
 filtering including promises without plans, reset behavior, and empty/error recovery.
