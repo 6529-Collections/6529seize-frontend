@@ -59,6 +59,39 @@ describe("TimelineMedia", () => {
     } as Response;
   }
 
+  it.each<[string, MediaType]>([
+    ["Removed Animation", MediaType.VIDEO],
+    ["Added Animation", MediaType.VIDEO],
+    ["From", MediaType.VIDEO],
+    ["To", MediaType.VIDEO],
+    ["Removed Animation", MediaType.UNKNOWN],
+  ])(
+    "starts Timeline videos paused until Play is selected (%s, type %s)",
+    async (label, type) => {
+      jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue(headResponse("video/mp4"));
+      const play = jest
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockResolvedValue(undefined);
+      const { container } = render(
+        <TimelineMedia url={opaqueVideoUrl} type={type} label={label} />
+      );
+      const buttons = await screen.findAllByRole("button", {
+        name: "Play video",
+      });
+      const video = container.querySelector("video")!;
+      fireEvent.loadedMetadata(video);
+      fireEvent.canPlay(video);
+      expect(video.autoplay).toBe(false);
+      expect(video.muted).toBe(true);
+      expect(video.loop).toBe(true);
+      expect(play).not.toHaveBeenCalled();
+      fireEvent.click(buttons[0]!);
+      expect(play).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it.each([
     ["video/mp4", "video"],
     ["video/quicktime", "video"],

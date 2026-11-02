@@ -910,7 +910,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   });
 
   for (const recordedFormat of [true, false]) {
-    test(`plays a removed Timeline video with ${recordedFormat ? "recorded" : "missing"} historical format`, async ({
+    test(`keeps a removed Timeline video paused until Play with ${recordedFormat ? "recorded" : "missing"} historical format`, async ({
       page,
     }) => {
       const primary =
@@ -949,18 +949,26 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         name: "The Memes card timeline",
       });
       const video = timeline.getByLabel("Removed Animation preview video");
+      // Mobile attaches a never-opened video source only once it is in view.
+      await video.scrollIntoViewIfNeeded();
       await expect(video).toHaveAttribute("src", primary);
       await expect(video).toHaveAttribute(
         "aria-label",
         "Removed Animation preview video"
       );
       await expect(timeline.getByRole("img")).toHaveCount(0);
-      await video.scrollIntoViewIfNeeded();
       await expect
         .poll(() =>
           video.evaluate((element: HTMLVideoElement) => element.videoWidth)
         )
         .toBeGreaterThan(0);
+      await expect(video).toHaveJSProperty("autoplay", false);
+      await expect(video).toHaveJSProperty("paused", true);
+      await timeline
+        .getByRole("button", { name: "Play video", exact: true })
+        .first()
+        .click();
+      await expect(video).toHaveJSProperty("paused", false);
       await expectNoHorizontalOverflow(page);
     });
   }

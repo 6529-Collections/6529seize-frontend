@@ -55,6 +55,9 @@
 
 - Each image, video, or interactive HTML preview starts with its recorded
   historical media URL.
+- Timeline videos start paused. Use the Play control to watch added, removed,
+  or before/after video previews. This applies only to the Timeline; the card's
+  main artwork playback is unchanged.
 - Historical animations use the format recorded for that side of the change.
   A removed video stays a video even if today's card has no animation, and the
   before and after previews can use different formats. Current artwork continues
