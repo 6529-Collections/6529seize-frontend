@@ -65,8 +65,13 @@ const components: Components = {
       {children}
     </ul>
   ),
-  ol: ({ children }) => (
-    <ol className="tw-mb-5 tw-list-decimal tw-space-y-3 tw-pl-6 tw-text-iron-300">
+  // Keep the source's numbers: known issues run 1 to 22 across sections,
+  // and testers cite them by number.
+  ol: ({ children, start }) => (
+    <ol
+      start={start}
+      className="tw-mb-5 tw-list-decimal tw-space-y-3 tw-pl-6 tw-text-iron-300"
+    >
       {children}
     </ol>
   ),
