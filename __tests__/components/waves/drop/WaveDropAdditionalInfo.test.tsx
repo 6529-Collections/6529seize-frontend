@@ -11,6 +11,7 @@ import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submi
 import type SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChatVideoPoster } from "@/hooks/useChatVideoPoster";
 import { downloadMediaUrl } from "@/helpers/media-download.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -54,6 +55,9 @@ jest.mock(
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: jest.fn(() => "en-US"),
 }));
+jest.mock("@/hooks/useChatVideoPoster", () => ({
+  useChatVideoPoster: jest.fn(),
+}));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
@@ -87,6 +91,7 @@ describe("WaveDropAdditionalInfo", () => {
     jest.mocked(downloadMediaUrl).mockClear();
     mockVideoPlayer.mockClear();
     jest.mocked(useBrowserLocale).mockReturnValue("en-US");
+    jest.mocked(useChatVideoPoster).mockReset();
   });
 
   it("does not render when there is no commentary or media", () => {
@@ -284,8 +289,48 @@ describe("WaveDropAdditionalInfo", () => {
     );
 
     expect(mockVideoPlayer).toHaveBeenCalledWith(
-      expect.objectContaining({ preload: "none", layout: "fill" })
+      expect.objectContaining({
+        preload: "none",
+        layout: "fill",
+        poster: "/video-preview-placeholder.svg",
+      })
     );
+  });
+
+  it("uses image-only posters for supporting and promo videos without changing preload", () => {
+    const additionalUrl = "https://example.com/process.MP4";
+    const promoUrl = "https://example.com/promo.mp4";
+    jest.mocked(useChatVideoPoster).mockImplementation((url) => ({
+      url: `${url}.jpg`,
+      aspectRatio: 2 / 3,
+    }));
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: JSON.stringify({
+              artwork_commentary_media: [additionalUrl],
+              promo_video: promoUrl,
+            }),
+          },
+        ])}
+      />
+    );
+    for (const [src, preload] of [
+      [additionalUrl, "none"],
+      [promoUrl, "metadata"],
+    ]) {
+      expect(useChatVideoPoster).toHaveBeenCalledWith(src, true);
+      expect(mockVideoPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          src,
+          preload,
+          poster: `${src}.jpg`,
+          aspectRatioHint: 2 / 3,
+        })
+      );
+    }
   });
 
   it("does not render promo video section when not provided", () => {
