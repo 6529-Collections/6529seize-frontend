@@ -54,6 +54,11 @@ Badge state decides which section opens first.
 - `Active Submissions` loading state shows `Loading submissions...`.
 - `Active Submissions` cards show artwork preview, optional title, position,
   current score, submission date, and mini vote control.
+- In competition-backed submissions, `Slider` and `Numeric` stay compact and
+  vertically centered beside `Your vote`, with larger invisible tap areas on
+  touch screens.
+- In the native app, the focused vote field stays visible as the keyboard opens,
+  and the close button remains above the submission panel.
 - The active card's top row shows the media-format indicator and optional
   `Additional Action` badge on the left, with the leaderboard-style position
   badge on the right. The title appears below this row. Hover or focus the
