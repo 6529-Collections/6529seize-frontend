@@ -44,10 +44,8 @@ import {
   measureMobileLaunchAsync,
 } from "@/utils/monitoring/mobileLaunchTiming";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
-import {
-  APP_WALLET_CONNECTOR_TYPE,
-  createAppWalletConnector,
-} from "@/wagmiConfig/wagmiAppWalletConnector";
+import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
+import type { createAppWalletConnector as CreateAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { Chain } from "viem";
 
@@ -434,7 +432,24 @@ function startAppKitInitializationOnce(
 type InjectAppWalletConnectorsInput = {
   readonly currentAdapter: WagmiAdapter | null;
   readonly appWallets: readonly AppWallet[];
+  readonly createAppWalletConnector: typeof CreateAppWalletConnector;
 };
+
+// App wallets exist only in the Capacitor app. Their connector (viem account
+// signing) loads when there is an app-wallet change to apply.
+const loadAppWalletConnector = () =>
+  import("@/wagmiConfig/wagmiAppWalletConnector");
+
+function haveAppWalletsChanged(appWallets: readonly AppWallet[]): boolean {
+  const { processedWallets } = getWagmiAppKitFastPathStore();
+  const currentAddresses = new Set(appWallets.map((w) => w.address));
+  return !(
+    processedWallets.current.size === currentAddresses.size &&
+    Array.from(processedWallets.current).every((addr) =>
+      currentAddresses.has(addr)
+    )
+  );
+}
 
 type AppKitAdapterManagerPublicShape = Pick<
   AppKitAdapterManager,
@@ -481,24 +496,19 @@ function markAdapterReadyForLaunchTiming(
 function injectAppWalletConnectors({
   currentAdapter,
   appWallets,
+  createAppWalletConnector,
 }: InjectAppWalletConnectorsInput): void {
   if (currentAdapter === null) {
     return;
   }
 
-  const { processedWallets } = getWagmiAppKitFastPathStore();
-
   // Check if wallets have actually changed to prevent unnecessary re-injection
-  const currentAddresses = new Set(appWallets.map((w) => w.address));
-  const addressesEqual =
-    processedWallets.current.size === currentAddresses.size &&
-    Array.from(processedWallets.current).every((addr) =>
-      currentAddresses.has(addr)
-    );
-
-  if (addressesEqual) {
+  if (!haveAppWalletsChanged(appWallets)) {
     return;
   }
+
+  const { processedWallets } = getWagmiAppKitFastPathStore();
+  const currentAddresses = new Set(appWallets.map((w) => w.address));
 
   try {
     // Create connectors for current wallets
@@ -762,10 +772,33 @@ export default function WagmiSetup({
 
   // Inject wallet connectors dynamically using hooks (simplified approach)
   useEffect(() => {
-    injectAppWalletConnectors({
-      currentAdapter,
-      appWallets,
-    });
+    if (currentAdapter === null || !haveAppWalletsChanged(appWallets)) {
+      return;
+    }
+
+    let cancelled = false;
+    loadAppWalletConnector()
+      .then((connectorModule) => {
+        if (cancelled) {
+          return;
+        }
+        injectAppWalletConnectors({
+          currentAdapter,
+          appWallets,
+          createAppWalletConnector: connectorModule.createAppWalletConnector,
+        });
+      })
+      .catch((error: unknown) => {
+        noteWalletChunkFailure(error);
+        logErrorSecurely(
+          "[WagmiSetup] App-wallet connector failed to load",
+          error
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentAdapter, appWallets]);
 
   // A new task gives React a paint opportunity after the Wagmi provider and
