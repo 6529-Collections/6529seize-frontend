@@ -263,7 +263,7 @@ export default function StepsInOrder({
             className="tw-mb-5 tw-grid tw-max-w-[860px] tw-gap-3"
             data-lens="trace"
           >
-            <p className="tw-m-0 tw-max-w-[620px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0 tw-max-w-[580px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
               {ht(locale, "explained.tdh.how.trace.caption", {
                 edition: n(trace.edition),
                 threshold: n(R.edition_floor_threshold),

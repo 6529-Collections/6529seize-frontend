@@ -30,7 +30,7 @@ export default function ReaderPaths({
       aria-label={kt(locale, "explained.kit.paths.label")}
       // Two short tiles a row on a phone, each who and time only, so the
       // eight paths take two screens less; the route shows from a tablet.
-      className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2.5 tw-p-0 md:tw-gap-3.5 ${
+      className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 min-[360px]:tw-grid-cols-2 md:tw-gap-3.5 ${
         paths.length === 7
           ? // Seven paths: four, then three that fill the row, never an empty slot.
             "xl:tw-grid-cols-12 xl:[&>li:nth-child(-n+4)]:tw-col-span-3 xl:[&>li:nth-child(n+5)]:tw-col-span-4"
@@ -54,7 +54,11 @@ export default function ReaderPaths({
               {kt(locale, "explained.kit.paths.minutes", {
                 minutes: path.minutes,
               })}
-              {path.more ? ` · ${path.more}` : ""}
+              {path.more ? (
+                // What the path gains later, from a tablet up: on a phone's
+                // short tile the time stands alone.
+                <span className="max-md:tw-hidden">{` · ${path.more}`}</span>
+              ) : null}
             </span>
           </Link>
         </li>

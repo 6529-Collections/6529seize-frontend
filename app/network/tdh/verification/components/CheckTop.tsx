@@ -451,7 +451,14 @@ function LateList({
                   </td>
                   <td className={`${cell} tw-text-iron-300`}>
                     <FactText fact={daysFact} locale={locale}>
-                      {`${formatUtcDay(locale, at)}, ${formatUtcClock(locale, at)}`}
+                      {/* The day and the time each hold together, so a narrow
+                          column breaks between them, never inside one. */}
+                      <span className="tw-whitespace-nowrap">
+                        {`${formatUtcDay(locale, at)},`}
+                      </span>{" "}
+                      <span className="tw-whitespace-nowrap">
+                        {formatUtcClock(locale, at)}
+                      </span>
                     </FactText>
                   </td>
                 </tr>
