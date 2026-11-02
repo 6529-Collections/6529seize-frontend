@@ -117,6 +117,32 @@ describe("DropListItemContentMediaImage Giphy video", () => {
     expect(video.loop).toBe(true);
     expect(video).toHaveAttribute("playsinline");
     expect(screen.queryByAltText("Drop media")).toBeNull();
+    // Hidden media may never autoplay; the video is visible before it loads.
+    expect(video.closest("[data-drop-image-content]")).not.toHaveAttribute(
+      "hidden"
+    );
+  });
+
+  it("offers the media toolbar once the video loads and fullscreens the video", () => {
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+    renderMarkdownImage();
+    expect(
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
+
+    const video = getVideo();
+    fireEvent.loadedMetadata(video);
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /full screen/i }));
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(requestFullscreen.mock.contexts[0]).toBe(video);
   });
 
   it("mounts the playback control with the video and pauses it", () => {
