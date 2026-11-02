@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import Hash from "@/components/explained/marks/Hash";
+import Mark, { type MarkKind } from "@/components/explained/marks/Mark";
 import DriftNote from "@/components/explained/marks/DriftNote";
 import { Scoreboard } from "@/components/explained/evidence/claims";
 import { EX_LINK } from "@/components/explained/tokens";
@@ -9,6 +11,61 @@ import {
   Trap,
 } from "@/components/explained/reference/parts";
 import type { SureContext } from "./sureShared";
+
+/**
+ * The page at a glance, beside its title: what Lean proves, what the daily
+ * check tests, and what nothing proves yet, each with its mark. The
+ * journalist's sentence before the counts.
+ */
+function Glance({ ctx }: { readonly ctx: SureContext }) {
+  const { m, p, locale } = ctx;
+  const rows: readonly {
+    readonly mark: MarkKind;
+    readonly lead: ReactNode;
+    readonly text: ReactNode;
+  }[] = [
+    {
+      mark: "proved",
+      lead: m("explained.tdh.sure.glance.leanLead"),
+      text: m("explained.tdh.sure.glance.lean", {
+        count: p.v("manifest.proved"),
+      }),
+    },
+    {
+      mark: "tested",
+      lead: m("explained.tdh.sure.glance.daysLead"),
+      text: m("explained.tdh.sure.glance.days", {
+        equal: p.v("tdh.days.equal"),
+        days: p.v("tdh.days.compared"),
+      }),
+    },
+    {
+      mark: "notProved",
+      lead: m("explained.tdh.sure.glance.notLead"),
+      text: m("explained.tdh.sure.glance.not"),
+    },
+  ];
+  return (
+    <ul
+      className="tw-m-0 tw-list-none tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0"
+      aria-label={ctx.s("explained.tdh.sure.glance.label")}
+      data-sure-glance=""
+    >
+      {rows.map((row, index) => (
+        <li
+          key={row.mark}
+          className={`tw-px-5 tw-py-4 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800" : ""}`}
+        >
+          <Mark kind={row.mark} locale={locale} size="sm" />
+          <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <b className="tw-font-semibold tw-text-iron-50">{row.lead}</b>{" "}
+            {row.text}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /**
  * How sure's head (TDH-DESIGN.md §4.6 §0): the title and lede, the drift
@@ -38,6 +95,7 @@ export default function SureHead({
         })}
         title={m("explained.tdh.sure.title")}
         lede={m("explained.tdh.sure.lede")}
+        aside={<Glance ctx={ctx} />}
       />
       {ctx.olderRules && (
         <div className="tw-mt-8">

@@ -16,15 +16,18 @@ export function PageHead({
   lede,
   id,
   children,
+  aside,
 }: {
   readonly eyebrow: ReactNode;
   readonly title: ReactNode;
   readonly lede: ReactNode;
   readonly id?: string;
   readonly children?: ReactNode;
+  /** The page's subject at a glance, beside the opening from a desktop up. */
+  readonly aside?: ReactNode;
 }) {
-  return (
-    <header className="tw-scroll-mt-24 tw-pt-[30px] md:tw-pt-[52px]" id={id}>
+  const opening = (
+    <>
       <p className={`${EX_TEXT.label} tw-m-0 tw-mb-4`}>{eyebrow}</p>
       <h1
         className={`${EX_TEXT.h1r} tw-max-w-[900px] max-[359px]:tw-text-[23px] max-[359px]:tw-leading-[28px]`}
@@ -34,6 +37,18 @@ export function PageHead({
       <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
         {lede}
       </p>
+    </>
+  );
+  return (
+    <header className="tw-scroll-mt-24 tw-pt-[30px] md:tw-pt-[52px]" id={id}>
+      {aside === undefined ? (
+        opening
+      ) : (
+        <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-end lg:tw-gap-x-12">
+          <div className="tw-min-w-0">{opening}</div>
+          <div className="tw-hidden tw-min-w-0 lg:tw-block">{aside}</div>
+        </div>
+      )}
       {children}
     </header>
   );

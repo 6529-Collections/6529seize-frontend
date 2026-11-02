@@ -138,7 +138,7 @@ describe("How sure", () => {
       )
     ).toEqual(["9", "84", "11", "12"]);
     expect(board?.textContent).toMatch(
-      /84named theorems proved, main results, helper lemmas and worked examples among them: 56 about TDH, 28 about the validator rules/
+      /84named theorems proved, lemmas and examples included: 56 about TDH, 28 about the validator rules/
     );
     for (const id of [
       "why",

@@ -13,7 +13,7 @@
   "explained.tdh.sure.score.claims": "claims: {tdh} about TDH, {p53} about the proposed validator rules ({link})",
   "explained.tdh.sure.score.claimsLink": "§03",
   "explained.tdh.sure.score.proved": "named theorems proved ({distinct} distinct): {tdh} about TDH, {p53} about the validator rules",
-  "explained.tdh.sure.score.provedAll": "named theorems proved, main results, helper lemmas and worked examples among them: {tdh} about TDH, {p53} about the validator rules",
+  "explained.tdh.sure.score.provedAll": "named theorems proved, lemmas and examples included: {tdh} about TDH, {p53} about the validator rules",
   "explained.tdh.sure.score.false": "statements shown false: {kernel} in Lean's kernel, {evaluation} by evaluation",
   "explained.tdh.sure.score.limits": "limits the manifest names, which it lists as deferred ({link})",
   "explained.tdh.sure.score.limitsLink": "§06",
@@ -293,5 +293,12 @@
   "explained.tdh.sure.hwk.proofABody": "From {record}. Proved in {hours} h {minutes} min; the call was made at block {block}.",
   "explained.tdh.sure.theorems.scrollHint": "Scroll sideways for the whole line",
   "explained.tdh.sure.claims.all": "All {count} claims",
-  "explained.tdh.sure.claims.fewer": "Fewer claims"
+  "explained.tdh.sure.claims.fewer": "Fewer claims",
+  "explained.tdh.sure.glance.label": "How sure, at a glance",
+  "explained.tdh.sure.glance.leanLead": "The rules:",
+  "explained.tdh.sure.glance.lean": "{count} statements about them are checked by Lean's kernel.",
+  "explained.tdh.sure.glance.daysLead": "Each day:",
+  "explained.tdh.sure.glance.days": "6529.io equals two recomputations in {equal} of {days} results, tested, not proved.",
+  "explained.tdh.sure.glance.notLead": "Not proved:",
+  "explained.tdh.sure.glance.not": "that a day under TDH v1.4 followed the rules; no proof of one exists yet."
 }
