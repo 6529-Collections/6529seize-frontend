@@ -22,10 +22,7 @@ export function E2eeProfileLink({
   avatar = false,
 }: E2eeProfileLinkProps) {
   const locale = useBrowserLocale();
-  let identity = member?.handle?.trim();
-  if (!identity) {
-    identity = member?.wallets[0];
-  }
+  const identity = (member?.handle ?? member?.wallets[0])?.trim();
   if (!identity) {
     return <span className={className}>{children}</span>;
   }
