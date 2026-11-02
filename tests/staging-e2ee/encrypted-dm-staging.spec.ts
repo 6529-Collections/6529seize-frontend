@@ -499,7 +499,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       const url = new URL(request.url());
       if (request.method() === "GET" && /e2ee\/blobs\//u.test(url.pathname))
         blobRequests.push(url.pathname);
-      if (/e2ee\/groups\/.*\/log$/u.test(url.pathname))
+      if (url.pathname === `/api/e2ee/groups/${dm}/log`)
         logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
     });
     const upgrading = performance.now();
@@ -543,6 +543,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(snapshot.renderedRows).toBeLessThan(60);
     expect(blobRequests.length).toBeLessThan(10);
     expect(typingMs).toBeLessThan(2000);
+    await expect
+      .poll(() => logCursors.length, { timeout: UI_TIMEOUT_MS })
+      .toBeGreaterThan(0);
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
