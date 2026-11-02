@@ -6,10 +6,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDesktopPlatform } from "./desktopPlatform";
+import styles from "./DesktopAppDownloads.module.css";
 import {
   fetchDesktopAppVersions,
   type DesktopAppVersion,
@@ -108,11 +109,15 @@ function PlatformDownloads({
   readonly initiallyOpen: boolean;
   readonly onRetry: () => void;
 }) {
+  // Native details owns expansion; this mirrors it only for focus safety while
+  // the closing content is still visible during its CSS transition.
+  const [contentOpen, setContentOpen] = useState(initiallyOpen);
   return (
     <details
       name="desktop-download-platform"
       open={initiallyOpen}
-      className="tw-group/platform tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10"
+      onToggle={(event) => setContentOpen(event.currentTarget.open)}
+      className={`${styles["disclosure"]} tw-group/platform tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10`}
     >
       <summary
         className={`tw-flex tw-min-h-[70px] tw-cursor-pointer tw-list-none tw-items-center tw-gap-3 tw-px-5 tw-py-4 hover:tw-bg-iron-900/60 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden ${FOCUS}`}
@@ -132,21 +137,23 @@ function PlatformDownloads({
         </span>
         <ChevronDownIcon
           aria-hidden="true"
-          className="tw-size-4 tw-shrink-0 tw-text-iron-300 group-open/platform:tw-rotate-180"
+          className="tw-size-4 tw-shrink-0 tw-text-iron-300 group-open/platform:tw-rotate-180 motion-safe:tw-transition-transform motion-safe:tw-duration-[180ms] motion-safe:tw-ease-out"
         />
       </summary>
-      <div className="tw-px-5 tw-pb-5 sm:tw-pl-[76px] sm:tw-pr-6">
-        {app.releases.map((release) => (
-          <ReleaseDownloads
-            key={`${release.version}-${release.legacyMac}`}
-            app={app}
-            release={release}
-          />
-        ))}
+      <div inert={!contentOpen}>
+        <div className="tw-px-5 tw-pb-5 sm:tw-pl-[76px] sm:tw-pr-6">
+          {app.releases.map((release) => (
+            <ReleaseDownloads
+              key={`${release.version}-${release.legacyMac}`}
+              app={app}
+              release={release}
+            />
+          ))}
+        </div>
+        {app.hasUnavailableRelease && (
+          <DownloadError partial={app.releases.length > 0} onRetry={onRetry} />
+        )}
       </div>
-      {app.hasUnavailableRelease && (
-        <DownloadError partial={app.releases.length > 0} onRetry={onRetry} />
-      )}
     </details>
   );
 }

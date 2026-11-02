@@ -85,6 +85,9 @@ choose a platform before asking.
   Compact download rows show architectures for Windows/macOS and package names
   for Linux, with a quieter optional mirror link. macOS 12 compatibility is
   explained once below its version, without a duplicate badge.
+- Accordions use a short height/fade and chevron transition in supporting
+  browsers. Reduced-motion preferences disable it; older browsers retain the
+  native disclosure behavior.
 - Download and store destinations are external and can have their own regional
   or device restrictions.
 - The site footer opens this page in the same tab; it does not link directly to

@@ -81,6 +81,14 @@ test.describe("About Pages @smoke @medium @large", () => {
     await page.keyboard.press("Enter");
     await expect(mac).not.toHaveAttribute("open");
     await expect(
+      mac
+        .getByRole("link", {
+          name: /version 0.3.15, Apple silicon/,
+          includeHidden: true,
+        })
+        .locator("xpath=ancestor::*[@inert]")
+    ).toHaveCount(1);
+    await expect(
       page.getByRole("link", { name: /Windows, version 0.3.18, x64/ })
     ).toHaveAttribute("href", /win-x64-0\.3\.18\.exe$/);
     await expectNoHorizontalOverflow(page);
