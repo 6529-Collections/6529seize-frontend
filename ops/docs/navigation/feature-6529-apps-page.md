@@ -45,6 +45,9 @@ choose a platform before asking.
 
 ## Edge Cases
 
+- The shared About contents button stays disabled until the page is interactive,
+  so an early click is not lost while JavaScript loads.
+
 - Desktop releases are loaded independently, so available platforms can still
   appear when one platform's release manifest is temporarily unavailable.
 - The page shows a loading state while desktop release versions are resolved.
