@@ -41,9 +41,13 @@ const MAIN_THEOREM: Readonly<Record<string, string>> = {
 
 /** A label in the theorem's facts list. */
 const TERM = "tw-font-semibold tw-text-iron-400";
-/** A note under the Lean, at most about 75 characters a line. */
+/**
+ * A note under the Lean, at most about 75 characters a line. Notes are 16 px
+ * apart, two thirds of a line, so the gloss and "Does not cover" read as two
+ * paragraphs.
+ */
 const NOTE =
-  "tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300";
+  "tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300";
 /** The validator cap a claim's words print (P53 §6.3). */
 const CAP = "validators.cap";
 

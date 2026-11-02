@@ -4,7 +4,7 @@
   "explained.tdh.design.eyebrow.shelf": "Rayon",
   "explained.tdh.design.eyebrow.kind": "Référence",
   "explained.tdh.design.title": "Pourquoi chaque paire de wallets se lie dans les deux sens",
-  "explained.tdh.design.lede": "Qui vole un de vos wallets ne peut pas faire entrer un wallet à lui dans votre identité : chaque paire se lie dans les deux sens, pour quelques transactions de plus.",
+  "explained.tdh.design.lede": "Quelqu'un qui vole l'un de vos wallets ne peut pas faire entrer un wallet à lui dans votre identité, car chaque paire se lie dans les deux sens, pour quelques transactions de plus ; chaque wallet lié reste une clé complète de votre profil.",
   "explained.tdh.design.rule.label": "La règle",
   "explained.tdh.design.rule.title": "Les enregistrements, paire par paire",
   "explained.tdh.design.rule.body": "Chaque paire de wallets enregistre une consolidation dans les deux sens dans le contrat de délégation de 6529. Le contrat numérote chaque type de délégation, et la consolidation est le cas d'usage {useCase} (P26 §6.1), sur Any Collection ou The Memes. Deux wallets demandent {two} enregistrements, trois en demandent {three}, et quatre en demandent {four}. Les enregistrements n'expirent pas : un lien dure jusqu'à ce que l'un de ses wallets le révoque.",

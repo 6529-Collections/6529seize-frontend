@@ -73,7 +73,7 @@ export default function Predict({
         })}
       </div>
       <p
-        className="tw-m-0 tw-text-[15px] tw-leading-[23px] tw-text-iron-300"
+        className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300"
         aria-live="polite"
         hidden={picked === null}
       >

@@ -371,9 +371,9 @@ describe("the overview", () => {
     expect(screen.getByText("top 10")).toBeInTheDocument();
     expect(screen.getByText("the other 100")).toBeInTheDocument();
     expect(
-      screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
+      screen.getByText(/The top 100 identities hold 70\.0% of all TDH, read/)
     ).toHaveTextContent(
-      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero. Read Oct 31, 09:12 UTC."
+      "read Oct 31, 09:12 UTC. An identity is one to four linked wallets, not always one person. The figure does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
     );
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(5);
@@ -381,7 +381,7 @@ describe("the overview", () => {
       within(table).getByRole("rowheader", { name: "next 900" })
     ).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveAccessibleName(
-      "Today's TDH as one area, split by rank: the top identities' share of the total, and their share of the identities."
+      "All TDH as one area, split by rank: the top identities' share of the total, and their share of the identities."
     );
   });
 });

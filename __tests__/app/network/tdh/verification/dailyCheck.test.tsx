@@ -154,10 +154,14 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
     ]);
     expect(ribbon.querySelectorAll('[data-day="equal"]')).toHaveLength(5);
     expect(ribbon.querySelector('[data-day="open"]')).not.toBeNull();
-    // The caption says which results were written late or re-run, and when, from the facts.
+    // The caption counts the results written late or re-run; a list under
+    // it says which, and when, from the facts.
     expect(container.querySelector("#history")).toHaveTextContent(
-      "↻ marks a result written later than its day's usual run: Oct 14, Oct 15, and Oct 16 on Oct 16 at 15:59 UTC."
+      "↻ marks a result written later than its day's usual run, 3 so far"
     );
+    const late = container.querySelector("[data-late-list]");
+    expect(late).toHaveTextContent("Oct 14, Oct 15, and Oct 16");
+    expect(late).toHaveTextContent("Oct 16, 15:59 UTC");
   });
 
   it("draws a day the index skips as a day with no file, and opens every day below", async () => {

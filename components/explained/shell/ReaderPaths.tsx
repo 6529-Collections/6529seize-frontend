@@ -44,7 +44,7 @@ export default function ReaderPaths({
             <span className="tw-block tw-text-lg tw-font-semibold tw-leading-[25px] tw-text-iron-50">
               {path.who}
             </span>
-            <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+            <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300">
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}

@@ -113,8 +113,17 @@ export const EX_TEXT = {
   body: "tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-text-[18px] md:tw-leading-[29px]",
   /** cards, answers, tables: 15/24 */
   small: "tw-text-[15px] tw-leading-6",
-  /** captions: 15/23, ink-3 */
-  cap: "tw-text-[15px] tw-leading-[23px] tw-text-iron-400",
+  /**
+   * captions: 15/24, ink-3, for what a figure is and where it came from.
+   * One line height with `small`, so the chapter keeps to one 15 px size.
+   */
+  cap: "tw-text-[15px] tw-leading-6 tw-text-iron-400",
+  /**
+   * A short line that states a claim (a figure's finding, a card's answer,
+   * a check's limit): `small`, in ink-2. Grey ink-3 is for meta and
+   * sources; a claim set in it reads as a footnote.
+   */
+  claim: "tw-text-[15px] tw-leading-6 tw-text-iron-300",
   /** source lines only: 13/20 */
   meta: "tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400",
   /** label and eyebrow: 12/16 capitals */
@@ -182,6 +191,14 @@ export const EX_MOTION = {
   model:
     "tw-transition-all tw-duration-150 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
   live: "tw-transition-all tw-duration-[400ms] tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
+  /**
+   * A model's geometry (a bar's width, a dot's place): 160 ms on the 6529
+   * easing, instant under reduced motion. Inside a lens, elements with
+   * inline geometry and SVG shapes get it from the global rule in
+   * styles/globals.css; this class is for one outside a lens.
+   */
+  geometry:
+    "tw-transition-[left,top,width,height,transform] tw-duration-[160ms] tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
 } as const;
 
 /** The focus ring: 2 px blue, everywhere. */

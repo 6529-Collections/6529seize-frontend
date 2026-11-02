@@ -110,7 +110,7 @@ export default function ThePicture({
         ) : (
           <Fact book={book} id="memes.editions" locale={locale} />
         )}
-        <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
+        <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
           {bold(ot(locale, "picture.captionLead"))}{" "}
           {orich(locale, "picture.caption", {
             h: <Fact book={book} id="engine.H" locale={locale} />,

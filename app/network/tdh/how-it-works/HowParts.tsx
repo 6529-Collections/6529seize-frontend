@@ -16,28 +16,28 @@ const PARTS: readonly {
   readonly drawing: "time" | "rarity" | "collections" | "you";
 }[] = [
   {
-    letter: "A",
+    letter: "I",
     id: "part-a",
     title: "explained.tdh.how.parts.a.title",
     line: "explained.tdh.how.parts.a.line",
     drawing: "time",
   },
   {
-    letter: "B",
+    letter: "II",
     id: "part-b",
     title: "explained.tdh.how.parts.b.title",
     line: "explained.tdh.how.parts.b.line",
     drawing: "rarity",
   },
   {
-    letter: "C",
+    letter: "III",
     id: "part-c",
     title: "explained.tdh.how.parts.c.title",
     line: "explained.tdh.how.parts.c.line",
     drawing: "collections",
   },
   {
-    letter: "D",
+    letter: "IV",
     id: "part-d",
     title: "explained.tdh.how.parts.d.title",
     line: "explained.tdh.how.parts.d.line",
@@ -154,9 +154,11 @@ function Term({
 
 /**
  * The whole calculation on the first screen, in one line, each term
- * lettered with the part below that explains it: TDH is the sum, over every
- * card an identity holds (D), of whole days held (A) × rate (B) × boost (C),
- * each card rounded on its own.
+ * numbered with the part below that explains it: TDH is the sum, over every
+ * card an identity holds (IV), of whole days held (I) × rate (II) × boost
+ * (III), each card rounded on its own. The parts are numbered in Roman
+ * numerals, not lettered: A and B are the models' wallets, and B is P26's
+ * snapshot block.
  */
 export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -175,19 +177,19 @@ export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
         <span className="tw-text-iron-400">
           {ht(locale, "explained.tdh.how.formula.over")}
         </span>{" "}
-        <Term href="#part-d" letter="D">
+        <Term href="#part-d" letter="IV">
           {ht(locale, "explained.tdh.how.formula.cards")}
         </Term>
         {" : "}
-        <Term href="#part-a" letter="A">
+        <Term href="#part-a" letter="I">
           {ht(locale, "explained.tdh.how.formula.days")}
         </Term>
         {" × "}
-        <Term href="#part-b" letter="B">
+        <Term href="#part-b" letter="II">
           {ht(locale, "explained.tdh.how.formula.rate")}
         </Term>
         {" × "}
-        <Term href="#part-c" letter="C">
+        <Term href="#part-c" letter="III">
           {ht(locale, "explained.tdh.how.formula.boost")}
         </Term>
         {", "}

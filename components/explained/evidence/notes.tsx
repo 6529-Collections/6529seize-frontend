@@ -65,7 +65,7 @@ export function FailureSentence({
           // The conditions are fixed copy in a fixed order.
           <li
             key={index}
-            className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-[15px] tw-leading-[23px] tw-text-iron-300"
+            className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-[15px] tw-leading-6 tw-text-iron-300"
           >
             <Glyph kind="notGuaranteed" className="tw-mt-[5px] tw-size-3.5" />
             <span>{item}</span>
@@ -73,7 +73,7 @@ export function FailureSentence({
         ))}
       </ul>
       {closedBy !== undefined && (
-        <p className="tw-m-0 tw-mt-3.5 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-3.5 tw-text-[15px] tw-leading-6 tw-text-iron-400">
           <b className="tw-font-semibold tw-text-iron-300">
             {kt(locale, "explained.kit.failure.closedBy")}:{" "}
           </b>

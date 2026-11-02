@@ -197,7 +197,7 @@ function Track1({
               >
                 {rung.what}
                 {rung.detail !== undefined && (
-                  <span className="tw-mt-[3px] tw-block tw-text-[15px] tw-font-normal tw-leading-[23px] tw-text-iron-400">
+                  <span className="tw-mt-[3px] tw-block tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-300">
                     {rung.detail}
                   </span>
                 )}

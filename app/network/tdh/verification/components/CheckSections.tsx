@@ -32,7 +32,7 @@ import {
  * runs (01), how far a green day goes (02), and who can repeat each step
  * today (03). Every count, hash and time is a fact of the latest day.
  */
-const CAPTION = "tw-m-0 tw-text-[15px] tw-leading-[23px] tw-text-iron-400";
+const CAPTION = "tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-400";
 const MONO = "tw-font-mono tw-text-[13px] tw-normal-case tw-text-iron-300";
 
 /** A section's statement row: the number and label, the heading, the prose beside it. */

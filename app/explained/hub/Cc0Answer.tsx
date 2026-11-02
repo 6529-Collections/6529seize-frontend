@@ -55,13 +55,18 @@ const ARTIST: readonly {
   readonly body: HubKey;
   readonly mark: "absolute" | "decided" | "open";
   readonly refText?: string;
+  /** A source in words, translated, in place of a decision number. */
+  readonly refKey?: HubKey;
 }[] = [
   {
+    // That the dedication cannot be withdrawn is the CC0 legal code's own
+    // word ("irrevocably", §2), not a decision of 6529's: D89 is the
+    // policy that The Memes stay CC0.
     id: "give",
     label: "cc0.giveLabel",
     body: "cc0.give",
     mark: "absolute",
-    refText: "D89",
+    refKey: "cc0.giveRef",
   },
   {
     id: "keep",
@@ -88,7 +93,9 @@ export default function Cc0Answer({
   return (
     <section id="cc0" className={`${EX_LAYOUT.section} tw-scroll-mt-24`}>
       <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-5 lg:tw-grid-cols-[500px_minmax(0,1fr)] lg:tw-gap-16">
-        <figure className="tw-m-0">
+        {/* On a phone the heading and its answer come first, then the art
+            with its credits under it. */}
+        <figure className="tw-m-0 max-lg:tw-order-last">
           <div
             className="tw-relative tw-aspect-[350/270] tw-w-full lg:tw-aspect-[500/400]"
             // The three cards overlap as a fan by design.
@@ -223,6 +230,7 @@ export default function Cc0Answer({
                   locale={locale}
                   size="sm"
                   {...(box.refText ? { refText: box.refText } : {})}
+                  {...(box.refKey ? { refText: ht(locale, box.refKey) } : {})}
                 />
               </span>
             </li>

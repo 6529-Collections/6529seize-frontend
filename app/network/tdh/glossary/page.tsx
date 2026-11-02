@@ -47,26 +47,11 @@ function StatusCell({
   readonly comparisonRef?: string;
 }): ReactNode {
   if ("word" in status) {
-    // A status in words, not a claim: a plain open ring, the size of a
-    // mark's glyph, so it reads as a glyph and a word like every mark, and
-    // its word lines up with theirs down the table.
+    // A status in words, not a claim ("Convention", "Renamed"): no glyph,
+    // since every glyph is a claim mark and the open ring means Not yet.
+    // An indent the width of a glyph keeps its word in line with theirs.
     return (
-      <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
-        <svg
-          viewBox="0 0 12 12"
-          className="tw-size-3 tw-shrink-0 tw-text-iron-400"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <circle
-            cx="6"
-            cy="6"
-            r="4.25"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-        </svg>
+      <span className="tw-inline-flex tw-items-center tw-pl-[18px] tw-text-[13px] tw-font-medium tw-text-iron-300">
         {t(locale, status.word)}
       </span>
     );
@@ -142,7 +127,7 @@ export default async function GlossaryPage({
         />
       ),
       source: (
-        <span className="tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+        <span className="tw-text-[13px] tw-leading-5 tw-text-iron-400">
           {m(key(term.id, "src"))}
         </span>
       ),

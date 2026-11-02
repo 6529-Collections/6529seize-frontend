@@ -193,10 +193,11 @@ describe("what a proof guarantees", () => {
       LAYERS.forEach((layer, index) => {
         let expected = "unreached";
         if (index < stop) {
-          // Program B's honest output differs: B is why the contract refuses.
+          // Program B's layer: its honest output differs, or the forger has
+          // no valid proof of the wrong words for it.
           expected =
-            layer === "second" && scenario.secondDiffers === true
-              ? "differs"
+            layer === "second" && scenario.second !== undefined
+              ? scenario.second
               : "passed";
         }
         if (index === stop) expected = "stops";
@@ -208,6 +209,13 @@ describe("what a proof guarantees", () => {
       });
       expect(RULE_LINES).toContain(scenario.line);
     }
+  });
+
+  it("stops a forged SP1 proof at RISC Zero's verifier, not at the outputs", () => {
+    // Two equal wrong outputs pass the second check; the eighth refuses B.
+    const flaw = scenarioById("flaw");
+    expect(flaw.line).toBe("proofs");
+    expect(layerStates(flaw, false).second).toBe("unproved");
   });
 
   it("records a mistake in the rules, since every layer lets it through", () => {
@@ -338,7 +346,7 @@ describe("the page's sections", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Proofs of a day: Ethereum checks that a program ran, not that the rules are right.",
+        name: "Proofs of a day: Ethereum can check that a program ran, not that the rules are right.",
       })
     ).toBeInTheDocument();
     expect(container.querySelector("[data-ex-lede]")).toBeInTheDocument();
@@ -394,7 +402,7 @@ describe("the page's sections", () => {
     expect(container.querySelectorAll("[data-phase]")).toHaveLength(7);
     expect(container.querySelectorAll("[data-row]")).toHaveLength(7);
     expect(
-      screen.getByText("Not deployed, and not audited.")
+      screen.getByText("Not deployed, and no outside audit.")
     ).toBeInTheDocument();
     // the record so far, under Where it stands: five steps, the last one not
     // dated, and the two test pairs marked as test cycles

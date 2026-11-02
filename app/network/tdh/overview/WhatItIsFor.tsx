@@ -109,7 +109,7 @@ export default function WhatItIsFor({
                   kind="decided"
                   locale={locale}
                   size="sm"
-                  refText="D112, D148"
+                  refText="D96, D112, D148"
                 />
               )}
             </li>

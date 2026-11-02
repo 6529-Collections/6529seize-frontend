@@ -58,7 +58,7 @@ export default function ChapterIndex({
               >
                 {withCc0(row.title)}
               </span>
-              <span className="tw-mt-1 tw-block tw-text-base tw-leading-6 tw-text-iron-400">
+              <span className="tw-mt-1 tw-block tw-text-base tw-leading-6 tw-text-iron-300">
                 {row.question}
               </span>
             </span>

@@ -233,7 +233,7 @@ export const TERMS: readonly Term[] = [
   },
   {
     id: "validator",
-    status: { mark: "decided", ref: "D112, D137" },
+    status: { mark: "decided", ref: "D112, D137, D149" },
     values: (p) => ({ version: p.v("site.validator.version") }),
   },
   {

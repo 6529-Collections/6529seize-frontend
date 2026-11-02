@@ -3,6 +3,7 @@ import { chapterById } from "@/components/explained/shell/chapters";
 import type { PageIndexRow } from "@/components/explained/shell/PageIndex";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
+import { formatCount } from "@/lib/explained/format";
 import ChapterPages from "./ChapterPages";
 import SectionLabel from "./SectionLabel";
 import { orich, ot, type OverviewKey } from "./copy";
@@ -73,7 +74,9 @@ export default function InThisChapter({
         <div>
           <SectionLabel no="05" label={ot(locale, "index.label")} />
           <h2 className={EX_TEXT.stmt} id="tdh-deeper-title">
-            {ot(locale, "index.title")}
+            {ot(locale, "index.title", {
+              count: formatCount(locale, spine.length),
+            })}
           </h2>
         </div>
         <p className={`${EX_TEXT.body} tw-m-0 lg:tw-pt-1.5`}>

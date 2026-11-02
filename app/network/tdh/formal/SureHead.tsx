@@ -110,6 +110,20 @@ export default function SureHead({
             },
           ]}
         />
+        {/* The band's limit, under it: who reported these counts, and who
+            can repeat them today. */}
+        <p
+          className="tw-m-0 tw-mt-3 tw-max-w-[760px] tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-600 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+          data-score-limit=""
+        >
+          {m("explained.tdh.sure.score.limit", {
+            link: (
+              <a className={EX_LINK} href="#yourself">
+                {m("explained.tdh.sure.score.limitLink")}
+              </a>
+            ),
+          })}
+        </p>
       </div>
       <ul
         className="tw-m-0 tw-mt-3.5 tw-flex tw-list-none tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-1 tw-p-0 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400"
@@ -138,7 +152,19 @@ export default function SureHead({
           })}
         </li>
       </ul>
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      {/* The three theorem counts of this page, tied together once. */}
+      <p className="tw-m-0 tw-mt-5 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        {m(
+          book.maybe("manifest.audit.wholeTheorems")
+            ? "explained.tdh.sure.score.counts"
+            : "explained.tdh.sure.score.countsShort",
+          {
+            proved: p.v("manifest.proved"),
+            kernel: p.v("manifest.shownFalse.kernel"),
+            audited: p.v("manifest.audited"),
+            theorems: p.v("manifest.audit.wholeTheorems"),
+          }
+        )}{" "}
         {m("explained.tdh.sure.score.terms")}
       </p>
       <SplitTable ctx={ctx} />

@@ -265,7 +265,7 @@ describe("How TDH is calculated", () => {
     ).toHaveAttribute("href", "#part-n");
     expect(
       within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
-        name: "Output and roots",
+        name: "The output",
       })
     ).toHaveAttribute("href", "/network/tdh/specification#s9");
     expect(steps[2]).toHaveTextContent("firstMint ≤ T − 86,400");

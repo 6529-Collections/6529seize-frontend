@@ -136,7 +136,7 @@ export function ClaimInParts({
               </p>
             )}
             {part.cap !== undefined && (
-              <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
                 {part.cap}
               </p>
             )}
@@ -228,7 +228,7 @@ export function ClaimTable({
               {row.detail}
             </span>
           </span>
-          <span className="tw-col-start-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-300 lg:tw-col-start-3">
+          <span className="tw-col-start-2 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-col-start-3">
             <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
               {kt(locale, "explained.kit.claimTable.limit")}
             </span>

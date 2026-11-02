@@ -140,8 +140,8 @@ function secondaryText(props: DayTileProps): string | null {
     return open.minutesLeft <= 0
       ? kt(locale, "explained.kit.day.due")
       : kt(locale, "explained.kit.day.openIn", {
-          time: ageText(locale, open.minutesLeft).replaceAll(" ", "\u00a0"),
-        });
+          time: ageTextShort(locale, open.minutesLeft),
+        }).replaceAll(" ", "\u00a0");
   }
   if (!written) {
     return null;
@@ -170,7 +170,9 @@ export function DayTile(props: DayTileProps) {
     >
       {snapshot && (
         <span
-          className={`tw-absolute -tw-right-px tw-bottom-2 tw-top-2 tw-w-0.5 tw-rounded-sm md:tw-bottom-3 md:tw-top-3 ${snapshot}`}
+          // The snapshot's edge: the tile's whole right side, flush over
+          // its border, corners included, so it reads as the edge itself.
+          className={`tw-absolute -tw-bottom-px -tw-right-px -tw-top-px tw-w-[3px] tw-rounded-r-lg ${snapshot}`}
           aria-hidden="true"
         />
       )}
@@ -192,24 +194,15 @@ export function DayTile(props: DayTileProps) {
         {primary}
         {written?.late && <span className="tw-ml-1 md:tw-hidden">↻</span>}
         {/* Every tile keeps two lines for its note, written or not, so the
-            counts in a row of tiles sit at one height; a time never breaks
-            inside itself ("17 h 32 min" stays whole). */}
-        {secondary && open && open.minutesLeft > 0 ? (
-          <span className="tw-block tw-min-h-8 tw-text-xs md:tw-min-h-9">
-            <span className="md:tw-hidden">
-              {kt(locale, "explained.kit.day.openIn", {
-                time: ageTextShort(locale, open.minutesLeft),
-              })}
-            </span>
-            <span className="max-md:tw-hidden">{secondary}</span>
-          </span>
-        ) : (
-          <span
-            className={`tw-block tw-min-h-8 tw-text-xs md:tw-min-h-9 ${written && !open ? "max-md:tw-hidden" : ""}`}
-          >
-            {secondary}
-          </span>
-        )}
+            counts in a row of tiles sit at one height. The open day's
+            countdown is rounded to the hour on the tile ("in 14 h"), so it
+            never breaks after "in"; its name for a screen reader keeps the
+            minutes. */}
+        <span
+          className={`tw-block tw-min-h-8 tw-text-xs md:tw-min-h-9 ${written && !open ? "max-md:tw-hidden" : ""}`}
+        >
+          {secondary}
+        </span>
       </span>
       {open && (
         <span

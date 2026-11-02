@@ -119,7 +119,7 @@ export default function NewBuyerExample({
           })}
         </span>
       </div>
-      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {ot(locale, "explain.timeline")}
       </p>
     </div>

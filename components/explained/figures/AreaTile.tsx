@@ -56,7 +56,13 @@ export default function AreaTile({
   const axis = dayAxisFor(Math.max(days, lostDays ?? 0));
   const rate = rateCents / 100;
   // What is drawn moves to each new value; the labels say the value itself.
-  const drawnDays = useTween(days);
+  // A sale drains the area over the live duration, so the loss is seen.
+  const drawnDays = useTween(
+    days,
+    lostDays !== undefined && lostDays > 0
+      ? EX_MOTION.liveMs
+      : EX_MOTION.modelMs
+  );
   const drawnRate = useTween(rate);
   const drawnBeta = useTween(betaCents);
   // The scale's top: the rate axis's 14, or more when rate × boost needs it,
@@ -133,7 +139,12 @@ export default function AreaTile({
   }
 
   return (
-    <div ref={ref} className="tw-w-full tw-min-w-0" data-fig="area">
+    <div
+      ref={ref}
+      className="tw-w-full tw-min-w-0"
+      data-fig="area"
+      data-tweened=""
+    >
       <SvgFrame width={width} height={HEIGHT} label={label}>
         <Hatch id={hatchId} />
         <line

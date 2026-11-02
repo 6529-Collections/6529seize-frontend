@@ -147,22 +147,21 @@ export default function ContractSection({
                     horizon: facts.print("proofs.contract.horizon"),
                   })}
                 </span>
-                {/* Every cell ends on its refusal, so the grid's lower edge
-                    lines up; the record names no error for two checks. */}
-                <span className="tw-mt-auto tw-flex tw-flex-col tw-gap-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                {/* Every cell ends on its refusals, so the grid's lower
+                    edge lines up: the errors the contract, or its two
+                    verifiers, revert with for that check. */}
+                <span className="tw-mt-auto tw-flex tw-flex-col tw-gap-1 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
                   <span>{fill(locale, k("check.refusal"))}</span>
-                  {check.refusals.length > 0 ? (
-                    check.refusals.map((name) => (
+                  <span className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5">
+                    {check.refusals.map((name) => (
                       <code
                         key={name}
                         className="tw-font-mono tw-text-[13px] tw-text-iron-50"
                       >
                         {name}
                       </code>
-                    ))
-                  ) : (
-                    <span>{fill(locale, k("check.refusalUnnamed"))}</span>
-                  )}
+                    ))}
+                  </span>
                 </span>
               </li>
             ))}

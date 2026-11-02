@@ -327,7 +327,7 @@ export function AllResults({
           items={slots.map((slot) => slotTile(slot, locale, null, true))}
         />
         {missing && (
-          <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-400">
             {pt(locale, "explained.tdh.check.ribbon.missing")}
           </p>
         )}

@@ -259,7 +259,7 @@ function ShareTable({
     </td>
   );
   return (
-    <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-[23px] tw-text-iron-300 max-sm:tw-block">
+    <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-6 tw-text-iron-300 max-sm:tw-block">
       <thead className="max-sm:tw-sr-only">
         <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
           <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
@@ -359,7 +359,7 @@ export default function NetworkDistribution({
         </div>
         <ShareTable items={items} locale={locale} />
       </div>
-      <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
+      <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
         {ot(locale, "network.caption", {
           count: formatCount(locale, top100.count),
           share: percent(locale, top100.tdh / data.total),

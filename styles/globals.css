@@ -392,6 +392,24 @@ code {
   color: inherit;
 }
 
+/* 6529 Explained models move their geometry, not only their colour
+   (EXPLAINED.md §5.4): a bar's width, a dot's place, an area's height ease
+   over 160 ms on the 6529 easing. A model draws them with inline styles
+   or SVG shapes, so only those, and only geometry, ease; text and colour
+   change at once. A figure that tweens its own numbers (data-tweened) is
+   left to them. A reader who asks for reduced motion sees every change
+   instantly. :where keeps the rule weaker than any utility class. */
+@media (prefers-reduced-motion: no-preference) {
+  :where([data-explained-shell] [data-lens])
+    :where([style], rect, circle, ellipse, path):not(:where([data-tweened] *)) {
+    transition-property:
+      left, right, top, bottom, width, height, transform, x, y, cx, cy, r, rx,
+      ry, d;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
 /* Links drop the UA outline for pointer focus only. Keyboard focus
    (:focus-visible) must stay visible (WCAG 2.4.7) so a link either shows its
    own focus-visible:tw-outline-* style or the browser default ring. :where()

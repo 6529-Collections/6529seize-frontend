@@ -61,7 +61,12 @@ const STEPS: readonly Step[] = [
     id: "editions",
     href: "#part-b",
     sections: "§5.2",
-    rule: () => "E = max(minted + adj, floor), H = max(E)",
+    rule: (n) =>
+      [
+        "E = max(minted + adj, floor), H = max(E)",
+        `floor = min(totalMax, ${n(R.edition_floor_cap)}) if minted + adj < ${n(R.edition_floor_threshold)}`,
+        "  and totalMax > 0, else 0",
+      ].join("\n"),
   },
   {
     id: "rates",
@@ -71,7 +76,8 @@ const STEPS: readonly Step[] = [
       [
         "Meme:     RATE(H, E)",
         `Gradient: RATE(H, G), at least ${n(R.gradient_rate_minimum)} cents`,
-        `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)}`,
+        `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)},`,
+        "          Nc = tokens in collection c",
         "RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
       ].join("\n"),
   },
@@ -136,13 +142,16 @@ const STEPS: readonly Step[] = [
     rule: () => "total = Σ identity finals",
   },
   {
+    // P26 §9 defines the result, not its roots: their encoding and hashing
+    // are P28's and P53's (§4.1, §4.2), as the rule's last line says.
     id: "output",
     href: "/network/tdh/specification#s9",
     sections: "§9",
     rule: () =>
       [
-        "header (N, B, hash(B), T, rule, registry hash)",
-        "records by identity key → wallet and token roots",
+        "header (N, B, hash(B), T, rule version, registry hash)",
+        "per identity: key, wallets, beta, final, per-token values",
+        "roots: P28 and P53 §4.1–§4.2, not P26",
       ].join("\n"),
     summary: true,
   },
@@ -279,6 +288,16 @@ export default function StepsInOrder({
         <Para>{ht(locale, "explained.tdh.how.order.body")}</Para>
       </Statement>
       <figure className="tw-m-0 tw-mt-12" data-fig="steps">
+        {trace !== null && (
+          // The worked holder is a new example, so it is introduced before
+          // step 00 and the blue column reads as one story from the start.
+          <p className="tw-m-0 tw-mb-4 tw-max-w-[760px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            {ht(locale, "explained.tdh.how.trace.caption", {
+              edition: n(trace.edition),
+              threshold: n(R.edition_floor_threshold),
+            })}
+          </p>
+        )}
         <ol className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0">
           {STEPS.map((step, index) => (
             <li
@@ -297,7 +316,7 @@ export default function StepsInOrder({
               </Link>
               {/* An operator stays with what follows it, so a formula
                   breaks between terms, never inside one. */}
-              <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
+              <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
                 {step.rule(n).replace(/([≤−×÷=+→]) /g, "$1\u00a0")}
               </code>
               {trace !== null && (
@@ -338,17 +357,6 @@ export default function StepsInOrder({
             halfup: <code className={CODE}>HALFUP</code>,
             b64: <code className={CODE}>B64</code>,
           })}
-          {trace !== null && (
-            <>
-              {" "}
-              <span className="tw-text-iron-400">
-                {ht(locale, "explained.tdh.how.trace.caption", {
-                  edition: n(trace.edition),
-                  threshold: n(R.edition_floor_threshold),
-                })}
-              </span>
-            </>
-          )}
         </figcaption>
       </figure>
     </Section>

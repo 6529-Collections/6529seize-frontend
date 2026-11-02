@@ -160,22 +160,22 @@ export default async function TdhHowItWorksPage({
           items={[
             {
               href: "#part-a",
-              no: "A",
+              no: "I",
               key: "explained.tdh.how.parts.a.title",
             },
             {
               href: "#part-b",
-              no: "B",
+              no: "II",
               key: "explained.tdh.how.parts.b.title",
             },
             {
               href: "#part-c",
-              no: "C",
+              no: "III",
               key: "explained.tdh.how.parts.c.title",
             },
             {
               href: "#part-d",
-              no: "D",
+              no: "IV",
               key: "explained.tdh.how.parts.d.title",
             },
             { href: "#part-n", no: "·", key: "explained.tdh.how.n.label" },
@@ -200,7 +200,7 @@ export default async function TdhHowItWorksPage({
           <span id="tdh-1-4" />
           <Statement
             label={
-              <StatementLabel mark="C">
+              <StatementLabel mark="III">
                 {ht(locale, "explained.tdh.how.parts.c.title")}
               </StatementLabel>
             }
@@ -229,7 +229,7 @@ export default async function TdhHowItWorksPage({
           <span id="step-12" />
           <Statement
             label={
-              <StatementLabel mark="D">
+              <StatementLabel mark="IV">
                 {ht(locale, "explained.tdh.how.parts.d.title")}
               </StatementLabel>
             }
@@ -290,7 +290,7 @@ function PartA({
       <span id="step-2" />
       <Statement
         label={
-          <StatementLabel mark="A">
+          <StatementLabel mark="I">
             {ht(locale, "explained.tdh.how.parts.a.title")}
           </StatementLabel>
         }
@@ -354,7 +354,7 @@ function PartB({
       <span id="step-7" />
       <Statement
         label={
-          <StatementLabel mark="B">
+          <StatementLabel mark="II">
             {ht(locale, "explained.tdh.how.parts.b.title")}
           </StatementLabel>
         }
@@ -390,7 +390,7 @@ function PartB({
         {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
       <EdRow
-        no="B"
+        no="II"
         label={ht(locale, "explained.tdh.how.base.label")}
         className="tw-mt-16"
       >
@@ -425,7 +425,7 @@ function PartB({
         {rate !== null && cents !== null && (
           <figure className="tw-m-0 tw-mt-4" data-fig="base">
             <code
-              className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300"
+              className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300"
               data-fact={rate.id}
               data-fact-derived=""
             >

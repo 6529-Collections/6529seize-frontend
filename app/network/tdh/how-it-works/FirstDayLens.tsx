@@ -86,12 +86,13 @@ export default function FirstDayLens({
         : null,
     [arrived, day]
   );
+  // Guess first: the model opens on the case the guess asks about, drawn
+  // neutral, with no arrival picked and no snapshot lit, so nothing on the
+  // stage gives the answer away. A guess, or a pick, shows it.
   const model = useBreakable<{ arrival: ArrivalKey; sold: boolean }>(
-    { arrival: "example", sold: false },
+    { arrival: "beforeMidnight", sold: false },
     (state) => ({ ...state, sold: true })
   );
-  // Guess first: the answer stays hidden until the reader guesses or moves
-  // the model, and a guess moves the model to the case it asked about.
   const [shown, setShown] = useState(false);
   if (!world) {
     return null;
@@ -148,7 +149,7 @@ export default function FirstDayLens({
             <Seg
               label={ht(locale, "explained.tdh.how.firstday.arrivesGroup")}
               attr="at"
-              value={model.state.arrival}
+              value={shown ? model.state.arrival : null}
               onChange={(key) => {
                 const picked = options.find((o) => o.key === key);
                 if (picked) {
@@ -167,6 +168,7 @@ export default function FirstDayLens({
           </div>
           <FirstDayTimeline
             result={result}
+            reveal={shown}
             locale={locale}
             label={ht(locale, "explained.tdh.how.firstday.aria", {
               say: said.lead ? `${said.lead} ${said.rest}` : said.rest,

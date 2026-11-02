@@ -334,14 +334,14 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
               >
                 {station.num}
               </span>
-              <span className="tw-col-span-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400 max-[359px]:tw-col-span-1">
+              <span className="tw-col-span-2 tw-text-[15px] tw-leading-6 tw-text-iron-400 max-[359px]:tw-col-span-1">
                 {station.sub}
               </span>
             </li>
           );
         })}
       </ol>
-      <p className="tw-m-0 tw-mt-2.5 tw-rounded-[10px] tw-border tw-border-dashed tw-border-iron-700 tw-px-3.5 tw-py-3 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2.5 tw-rounded-[10px] tw-border tw-border-dashed tw-border-iron-700 tw-px-3.5 tw-py-3 tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {kt(locale, "explained.kit.loop.listVerify", {
           identities: verify.identities,
         })}

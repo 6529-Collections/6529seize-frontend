@@ -139,8 +139,10 @@ describe("Your wallets", () => {
     );
     const faq = document.getElementById("faq")!;
     const details = faq.querySelectorAll("details");
-    expect(details).toHaveLength(5);
+    expect(details).toHaveLength(6);
     expect(details[0]).toHaveAttribute("open");
+    // The question D136 raised is open too.
+    expect(details[2]).toHaveAttribute("open");
     expect(details[2]).toHaveTextContent(
       "I set up four wallets before Oct 15."
     );

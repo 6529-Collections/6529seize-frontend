@@ -1,8 +1,9 @@
 /**
  * The D128 contract's checks on a submission, in the order it runs them
  * (the validator's contracts record, "What a submission must satisfy"),
- * with the refusals the record names for each. Code names, not copy: the
- * page prints them as code.
+ * with the errors the contract names for each (TStatementV1.sol and
+ * TdhProvenRoots.sol at d49ffc7). Code names, not copy: the page prints
+ * them as code.
  */
 type CheckId =
   | "decoding"
@@ -16,7 +17,7 @@ type CheckId =
 
 interface ContractCheck {
   readonly id: CheckId;
-  /** The refusals the record names; empty where it names none. */
+  /** The errors the contract reverts with for this check. */
   readonly refusals: readonly string[];
   /**
    * The check's line in the exact rule, in the contract's own terms. `{…}`
@@ -28,7 +29,7 @@ interface ContractCheck {
 export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   {
     id: "decoding",
-    refusals: [],
+    refusals: ["StatementLength", "StatementTag", "StatementFieldTooWide"],
     rule: "len(A) = len(B) = {bytes}; {words} words, each in its width",
   },
   {
@@ -38,7 +39,7 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   },
   {
     id: "network",
-    refusals: ["WrongRule", "PastHorizon"],
+    refusals: ["WrongNetwork", "WrongRule", "PastHorizon"],
     rule: "networkId = NETWORK_ID; tdhRuleId = TDH_RULE_ID; cycleDay ≤ LAST_CYCLE_DAY",
   },
   {
@@ -48,8 +49,15 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   },
   {
     id: "time",
-    refusals: [],
-    rule: "t_N = the midnight, UTC, that closes cycleDay; t_N ≤ block.timestamp; cutTimestamp < t_N",
+    refusals: [
+      "CycleNotOver",
+      "CutoffNotBeforeBoundary",
+      "CutoffBeforeCycle",
+      "CutBeforePrevious",
+      "HistoryShrank",
+      "EmptyCycleMismatch",
+    ],
+    rule: "t_N = the midnight, UTC, that closes cycleDay; t_N ≤ block.timestamp; t_(N−1) ≤ cutTimestamp < t_N, or a day with no block repeats the last cut and history",
   },
   {
     id: "cycleRoot",
@@ -58,12 +66,19 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   },
   {
     id: "anchors",
-    refusals: ["AnchorMismatch"],
+    refusals: ["AnchorNotAfterCut", "AnchorUnavailable", "AnchorMismatch"],
     rule: "anchorHash = BLOCKHASH | EIP-2935 | recordAnchor, for A and for B",
   },
   {
     id: "proofs",
-    refusals: ["ProofInvalid", "VerificationFailed"],
+    // The selectors are the contract's; ProofInvalid and VerificationFailed
+    // are SP1's and RISC Zero's verifiers' own.
+    refusals: [
+      "WrongSp1Selector",
+      "WrongRisc0Selector",
+      "ProofInvalid",
+      "VerificationFailed",
+    ],
     rule: "SP1.verifyProof(PROGRAM_A_VKEY, A, proofA); RiscZero.verify(sealB, PROGRAM_B_IMAGE_ID, sha256(B)); pinned selectors only",
   },
 ];

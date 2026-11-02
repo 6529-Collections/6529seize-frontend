@@ -380,12 +380,16 @@ export function CodeBlock({
   // cut reads as more to scroll, not as the end of the line.
   const scrollCue =
     "max-md:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]";
-  // Lean wraps too, on a phone as well: each line hangs under its own
-  // indent, so a hypothesis that runs on reads as one, and none is cut off
-  // in a sideways scroll.
-  const wrap = aligned
-    ? "tw-whitespace-pre"
-    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+  // Lean wraps from a tablet up, each line hanging under its own indent. On
+  // a phone its lines keep their shape and scroll sideways, with the fade
+  // that says there is more: hanging indents in a 350 px column turn a
+  // statement into a staircase.
+  const lean = marker === "--";
+  let wrap = "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+  if (aligned) wrap = "tw-whitespace-pre";
+  else if (lean)
+    wrap =
+      "max-md:tw-whitespace-pre md:tw-whitespace-pre-wrap md:[overflow-wrap:anywhere]";
   return (
     <div
       className={`tw-relative tw-min-w-0 tw-max-w-[924px] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
@@ -400,7 +404,7 @@ export function CodeBlock({
         </span>
       )}
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned ? scrollCue : ""} ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned || lean ? scrollCue : ""} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"

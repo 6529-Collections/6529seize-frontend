@@ -43,7 +43,7 @@ function Item({
       <span className="tw-mt-2 tw-block tw-text-[22px] tw-font-semibold tw-tabular-nums tw-leading-7 tw-tracking-[-0.01em] max-[359px]:tw-text-base max-[359px]:tw-leading-6 lg:tw-mt-0 lg:tw-self-end">
         {head}
       </span>
-      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300 lg:tw-mt-0">
+      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
         {children}
       </span>
     </li>
@@ -145,7 +145,7 @@ export default function CheckableToday({
         </Item>
       </ul>
       <p
-        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[560px] lg:tw-mt-6`}
+        className={`${EX_TEXT.claim} tw-m-0 tw-mt-4 tw-max-w-[560px] lg:tw-mt-6`}
       >
         {ht(locale, "check.candour")}{" "}
         <Link className={EX_LINK} href="/network/tdh#explain">

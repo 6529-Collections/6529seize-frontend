@@ -282,6 +282,36 @@ function useMachineLink(
   }, [state, broken, saved]);
 }
 
+/**
+ * Send the machine's link: the phone's share sheet where there is one,
+ * else the clipboard. Either can be refused (no permission, an insecure
+ * page, the sheet closed); the button then says so instead of failing
+ * quietly.
+ */
+async function shareLink(title: string): Promise<"copied" | "failed" | "idle"> {
+  const url = globalThis.location.href;
+  const nav = globalThis.navigator;
+  const touch = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
+  if (touch && typeof nav.share === "function") {
+    try {
+      await nav.share({ title, url });
+      return "idle";
+    } catch (error) {
+      // The reader closed the sheet: nothing to report.
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return "idle";
+      }
+    }
+  }
+  try {
+    if (!nav.clipboard) return "failed";
+    await nav.clipboard.writeText(url);
+    return "copied";
+  } catch {
+    return "failed";
+  }
+}
+
 export default function Machine({
   cards,
   locale,
@@ -295,8 +325,9 @@ export default function Machine({
     (state) => ({ ...state, days: 0 })
   );
   useMachineLink(model, cards);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle");
   const card = cards.find((entry) => String(entry.id) === model.state.card);
+
   if (facts === null || card === undefined) {
     return (
       <div
@@ -445,16 +476,14 @@ export default function Machine({
           type="button"
           className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
           onClick={() => {
-            void globalThis.navigator.clipboard
-              ?.writeText(globalThis.location.href)
-              .then(() => setCopied(true));
+            void shareLink(ot(locale, "machine.label")).then(setCopied);
           }}
           data-copy-link=""
           aria-live="polite"
         >
-          {copied
-            ? ot(locale, "machine.copied")
-            : ot(locale, "machine.copyLink")}
+          {copied === "idle" && ot(locale, "machine.copyLink")}
+          {copied === "copied" && ot(locale, "machine.copied")}
+          {copied === "failed" && ot(locale, "machine.copyFailed")}
         </button>
       </div>
     </section>

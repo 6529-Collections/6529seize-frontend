@@ -247,6 +247,10 @@ export default async function SpecificationPage({
                   )}
                 />
               </span>
+              {/* The Live mark's limit, in the panel it qualifies. */}
+              <span className="tw-basis-full tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                {s("explained.tdh.spec.version.liveLimit")}
+              </span>
             </div>
           </aside>
         </div>

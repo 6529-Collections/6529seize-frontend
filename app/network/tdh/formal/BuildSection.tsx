@@ -22,6 +22,12 @@ interface Row {
   readonly body: ReactNode;
   readonly mark: MarkKind;
   readonly refText: string;
+  /**
+   * A word in place of the mark's: the kernel's check is reported by the
+   * build, which no reader can rerun yet. "Tested" there would read as
+   * "tested, not proved", which is not what it says.
+   */
+  readonly label?: string;
 }
 
 export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
@@ -40,6 +46,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
       // A build report no reader can rerun while the source is private:
       // tested, as the audit beside it, never the green Proved.
       mark: "tested",
+      label: s("explained.tdh.sure.build.kernelMark"),
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
     {
@@ -148,6 +155,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
                   locale={locale}
                   size="sm"
                   refText={row.refText}
+                  {...(row.label ? { label: row.label } : {})}
                 />
               </span>
             </li>

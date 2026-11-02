@@ -13,7 +13,12 @@ import {
 } from "@/components/explained/evidence/Simulation";
 import FactValue from "@/components/explained/facts/FactValue";
 import Hash from "@/components/explained/marks/Hash";
-import { EX_BUTTON, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import {
+  EX_BUTTON,
+  EX_FOCUS,
+  EX_LINK,
+  EX_TEXT,
+} from "@/components/explained/tokens";
 import { formatList, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { factText, type Fact, type FactBook } from "@/lib/explained/facts";
@@ -29,7 +34,7 @@ import CheckRibbon, {
   type RibbonInput,
 } from "./CheckRibbon";
 import { pt } from "./copy";
-import { FactText } from "@/components/explained/facts/FactText";
+import { FactScope, FactText } from "@/components/explained/facts/FactText";
 import { rich } from "@/components/explained/rich";
 import {
   VERDICT_FRAME,
@@ -347,9 +352,22 @@ function simulatedFace(
   };
 }
 
+/** The late results, grouped by the minute their files were written. */
+function lateGroups(days: readonly ResultDay[]): [string, ResultDay[]][] {
+  const groups = new Map<string, ResultDay[]>();
+  for (const day of days) {
+    if (day.late && day.writtenAt) {
+      const minute = day.writtenAt.slice(0, 16);
+      groups.set(minute, [...(groups.get(minute) ?? []), day]);
+    }
+  }
+  return [...groups.entries()];
+}
+
 /**
- * "↻ marks a result written later than its day's usual run: Oct 14 and
- * Oct 15 on Oct 16 at 15:59 UTC." Every late result, not only the shown ones.
+ * "↻ marks a result written later than its day's usual run, 7 so far": one
+ * sentence in the caption. Which results, and when each was written, are a
+ * two-column list under it, behind a disclosure: data, not prose.
  */
 function LateLine({
   days,
@@ -360,44 +378,94 @@ function LateLine({
   readonly daysFact: Fact | null;
   readonly locale: SupportedLocale;
 }) {
-  const groups = new Map<string, ResultDay[]>();
-  for (const day of days) {
-    if (day.late && day.writtenAt) {
-      const minute = day.writtenAt.slice(0, 16);
-      groups.set(minute, [...(groups.get(minute) ?? []), day]);
-    }
-  }
-  if (groups.size === 0) {
+  const late = days.filter((day) => day.late && day.writtenAt).length;
+  if (late === 0) {
     return null;
   }
-  const items = [...groups.entries()].map(([minute, group]) => {
-    const at = `${minute}:00Z`;
-    return (
-      <FactText key={minute} fact={daysFact} locale={locale}>
-        {pt(locale, "explained.tdh.check.ribbon.lateGroup", {
-          dates: formatList(
-            locale,
-            group.map((day) => formatUtcDay(locale, day.date))
-          ),
-          date: formatUtcDay(locale, at),
-          time: formatUtcClock(locale, at),
-        })}
-      </FactText>
-    );
-  });
-  const joined: ReactNode[] = [];
-  items.forEach((item, index) => {
-    if (index > 0) joined.push("; ");
-    joined.push(item);
-  });
   return (
     <>
       {" "}
-      {rich(locale, "explained.tdh.check.ribbon.late", {
-        groups: joined,
-      })}{" "}
-      {pt(locale, "explained.tdh.check.ribbon.lateWhy")}
+      {rich(locale, "explained.tdh.check.ribbon.lateShort", {
+        count: (
+          <FactText fact={daysFact} locale={locale}>
+            {formatCount(locale, late)}
+          </FactText>
+        ),
+      })}
     </>
+  );
+}
+
+function LateList({
+  days,
+  daysFact,
+  locale,
+}: {
+  readonly days: readonly ResultDay[];
+  readonly daysFact: Fact | null;
+  readonly locale: SupportedLocale;
+}) {
+  const groups = lateGroups(days);
+  if (groups.length === 0) {
+    return null;
+  }
+  const cell =
+    "tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 tw-pr-4 tw-text-left tw-align-top tw-text-[15px] tw-font-normal tw-leading-6";
+  return (
+    <details className="tw-group tw-mt-3 tw-max-w-[560px]" data-late-list="">
+      <summary
+        className={`tw-inline-flex tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-primary-300 hover:tw-underline [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
+      >
+        <span
+          className="tw-inline-block tw-transition-transform group-open:tw-rotate-90 motion-reduce:tw-transition-none"
+          aria-hidden="true"
+        >
+          ›
+        </span>
+        {pt(locale, "explained.tdh.check.ribbon.lateListTitle")}
+      </summary>
+      <FactScope ids={["tdh.days"]}>
+        <table className="tw-mt-2 tw-w-full tw-border-collapse">
+          <thead>
+            <tr>
+              <th scope="col" className={`${cell} ${EX_TEXT.label}`}>
+                {pt(locale, "explained.tdh.check.ribbon.lateColDays")}
+              </th>
+              <th scope="col" className={`${cell} ${EX_TEXT.label}`}>
+                {pt(locale, "explained.tdh.check.ribbon.lateColWritten")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map(([minute, group]) => {
+              const at = `${minute}:00Z`;
+              return (
+                <tr key={minute}>
+                  <td className={`${cell} tw-text-iron-50`}>
+                    <FactText fact={daysFact} locale={locale}>
+                      {formatList(
+                        locale,
+                        group.map((day) => formatUtcDay(locale, day.date))
+                      )}
+                    </FactText>
+                  </td>
+                  <td
+                    className={`${cell} tw-whitespace-nowrap tw-text-iron-300`}
+                  >
+                    <FactText fact={daysFact} locale={locale}>
+                      {`${formatUtcDay(locale, at)}, ${formatUtcClock(locale, at)} UTC`}
+                    </FactText>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </FactScope>
+      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        {pt(locale, "explained.tdh.check.ribbon.lateWhy")}
+      </p>
+    </details>
   );
 }
 
@@ -419,7 +487,7 @@ function RibbonCaption({
       ? "–"
       : formatUtcClock(locale, snapshotInstant(factText(latestDate)));
   return (
-    <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+    <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
       {rich(locale, "explained.tdh.check.ribbon.caption", {
         midnight: (
           <FactText fact={latestDate} locale={locale}>
@@ -539,6 +607,11 @@ export default function CheckTop({
           input={input}
           daysFact={book.maybe("tdh.days")}
           latestDate={day.fact("date")}
+          locale={locale}
+        />
+        <LateList
+          days={input.days}
+          daysFact={book.maybe("tdh.days")}
           locale={locale}
         />
         <AllResults

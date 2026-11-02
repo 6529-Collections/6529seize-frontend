@@ -9,6 +9,7 @@ import {
   utcDay,
   utcWeekday,
 } from "@/components/explained/layout/time";
+import { EX_MOTION } from "@/components/explained/tokens";
 import { ht } from "./copy";
 import type { FirstDayResult } from "./models/firstDay";
 
@@ -27,8 +28,15 @@ export default function FirstDayTimeline({
   label,
   locale,
   startText,
+  reveal = true,
 }: {
   readonly result: FirstDayResult;
+  /**
+   * Whether to light the answer: the first snapshot that counts, in blue,
+   * and the held span. False while a guess waits, so the figure stays
+   * neutral until the reader has answered.
+   */
+  readonly reveal?: boolean;
   /** What the figure shows, for a screen reader. */
   readonly label: string;
   readonly locale: SupportedLocale;
@@ -66,7 +74,7 @@ export default function FirstDayTimeline({
         aria-hidden="true"
       />
       <div
-        className={`tw-absolute tw-top-[51px] tw-h-2 tw-rounded tw-bg-primary-400/[0.35] ${result.sold === null ? "" : "tw-border-0 tw-border-r-2 tw-border-solid tw-border-error"}`}
+        className={`tw-absolute tw-top-[51px] tw-h-2 tw-rounded ${reveal ? "tw-bg-primary-400/[0.35]" : "tw-bg-iron-500/40"} ${result.sold === null ? "" : "tw-border-0 tw-border-r-2 tw-border-solid tw-border-error"} ${EX_MOTION.geometry}`}
         style={{
           left: `${arrivedAt}%`,
           width: `${Math.max(0, at(heldEnd) - arrivedAt)}%`,
@@ -75,7 +83,7 @@ export default function FirstDayTimeline({
         data-held=""
       />
       {result.snapshots.map((snap, index) => {
-        const first = snap.T === result.first;
+        const first = reveal && snap.T === result.first;
         const last = index === result.snapshots.length - 1;
         let text = utcWeekday(locale, snap.T);
         if (tight)
@@ -101,7 +109,7 @@ export default function FirstDayTimeline({
         );
       })}
       <div
-        className="tw-absolute tw-top-[46px] -tw-ml-[9px] tw-size-[18px] tw-rounded-full tw-bg-primary-400 tw-shadow-[0_0_0_5px_rgba(82,139,255,0.25)]"
+        className={`tw-absolute tw-top-[46px] -tw-ml-[9px] tw-size-[18px] tw-rounded-full tw-bg-primary-400 tw-shadow-[0_0_0_5px_rgba(82,139,255,0.25)] ${EX_MOTION.geometry}`}
         style={{ left: `${arrivedAt}%` }}
         aria-hidden="true"
       />
