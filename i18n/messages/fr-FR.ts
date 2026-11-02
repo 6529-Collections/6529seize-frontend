@@ -22,7 +22,7 @@ import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 const LOADING_LABEL = "Chargement…";

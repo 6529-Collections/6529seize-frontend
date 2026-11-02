@@ -4819,5 +4819,3 @@ export const EN_US_ROOT_MESSAGES = {
   "waves.sidebar.allWaves": "All Waves",
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
-
-export type { MessageKey } from "@/i18n/messages/en-US.complete";
