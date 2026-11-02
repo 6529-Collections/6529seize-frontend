@@ -47,6 +47,17 @@ it("edits, reacts, replies, searches, reports and backs up records outside the a
       latest: { text: "edited oldest target" },
       original: { text: "oldest target" },
     });
+    const evictedTail = a.getConversation(g)!.lastMessage!;
+    await a.loadHistory?.(g, { around: id });
+    expect(
+      a.getMessages(g).some((message) => message.id === evictedTail.id)
+    ).toBe(false);
+    await a.remove(g, evictedTail.id);
+    expect(a.getConversation(g)?.lastMessage).toMatchObject({
+      id: evictedTail.id,
+      deleted: true,
+      text: "",
+    });
     await b.send(g, { text: "reply to evicted history", reply: id });
     expect(world.ds.state.notifyLog.at(-1)?.hints).toContainEqual({
       profile_id: "alice",

@@ -153,8 +153,50 @@ export async function seedProcessedHistory(
       };
       for (let offset = 0; offset < total; offset += 1000)
         await appendBatch(offset);
+      const verification = legacy.transaction(
+        ["devices", "wasm", "keys"],
+        "readonly"
+      );
+      const verified = finished(verification);
+      const [device, state, sealingKey] = await Promise.all([
+        read<{ registered: boolean } | undefined>(
+          verification.objectStore("devices").get(profile)
+        ),
+        read<{ iv: Uint8Array; ciphertext: ArrayBuffer } | undefined>(
+          verification.objectStore("wasm").get(profile)
+        ),
+        read<{ key: CryptoKey } | undefined>(
+          verification.objectStore("keys").get(profile)
+        ),
+      ]);
+      await verified;
+      if (
+        !device?.registered ||
+        !state?.iv ||
+        !state.ciphertext ||
+        !sealingKey?.key
+      )
+        throw new Error("QA device or sealed state was not preserved");
+      const restoredState = await crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: new Uint8Array(state.iv),
+          additionalData: new TextEncoder().encode(profile),
+        },
+        sealingKey.key,
+        state.ciphertext
+      );
+      if (restoredState.byteLength === 0)
+        throw new Error("QA sealed state is empty");
       legacy.close();
-      return { total, originalCursor, photos: 9000, schemaVersion: 1 };
+      return {
+        total,
+        originalCursor,
+        photos: 9000,
+        schemaVersion: 1,
+        devicePreserved: true,
+        sealedStateReadable: true,
+      };
     },
     { groupId: g, profile: profileId }
   );

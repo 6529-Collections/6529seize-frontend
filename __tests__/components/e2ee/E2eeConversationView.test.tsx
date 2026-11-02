@@ -161,6 +161,17 @@ describe("E2eeConversationView", () => {
       "status"
     );
     expect(older).toBeEnabled();
+    fireEvent.click(older);
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
     engine.loadHistory = jest.fn().mockRejectedValue(new Error("Read failed"));
     fireEvent.click(older);
     await waitFor(() =>
