@@ -367,10 +367,10 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call, which changes nothing. One day under retired rules does not move the blue line."
+      "Proof A, in SP1: the day of Oct 11, under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it. Retired rules do not move the blue line."
     );
     expect(zk).toHaveTextContent(
-      "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, both programs proved one synthetic test cycle."
+      "Proof B, in RISC Zero, from code written apart: no mainnet day yet; under TDH v1.4, one test cycle."
     );
     expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
       "data-proved",

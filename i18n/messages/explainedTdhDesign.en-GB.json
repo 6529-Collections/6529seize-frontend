@@ -4,7 +4,7 @@
   "explained.tdh.design.eyebrow.shelf": "Shelf",
   "explained.tdh.design.eyebrow.kind": "Reference",
   "explained.tdh.design.title": "Why every pair of wallets links both ways",
-  "explained.tdh.design.lede": "If someone steals one of your wallets, can they pull a wallet of theirs into your identity? Under this rule, no: every pair links both ways, so no smaller group of your wallets can add an outside wallet, for a few transactions more.",
+  "explained.tdh.design.lede": "Under this rule, someone who steals one of your wallets cannot pull a wallet of theirs into your identity: every pair links both ways, so no smaller group of your wallets can add an outside wallet, for a few transactions more.",
   "explained.tdh.design.rule.label": "The rule",
   "explained.tdh.design.rule.title": "Registrations, pair by pair",
   "explained.tdh.design.rule.body": "Each pair of wallets registers a consolidation in both directions in 6529's delegation contract, which numbers each kind of delegation; consolidation is use case {useCase} (P26 §6.1), on Any Collection or The Memes. Two wallets need {two} registrations, three need {three}, and four need {four}. Registrations do not expire: a link lasts until one of its wallets revokes it.",

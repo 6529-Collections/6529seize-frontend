@@ -82,12 +82,12 @@ describe("the hub, first version", () => {
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
     );
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules, each checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules: Lean proves things about the rules, never about a day. ${book.num("manifest.shownFalse.tdh")} earlier statements about TDH were shown false and stay on record, ${book.num("manifest.shownFalse.never")} of them properties the rules never had.`
+      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules: Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} earlier statements were shown false and stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "A zero-knowledge proof lets a contract check a program's result without running it again. Proof A proved Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and mainnet's SP1 verifier accepts it in a read-only call; nothing is recorded. Proof B is not done; under TDH v1.4 both proved only made-up test blocks, a pair mainnet's verifiers also accept."
+      "A zero-knowledge proof lets a contract check a program's result without running it again. Proof A proved Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call, recording nothing. Proof B is not done; under TDH v1.4 both proved only made-up test blocks."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(

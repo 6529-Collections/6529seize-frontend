@@ -4,7 +4,7 @@
   "explained.tdh.design.eyebrow.shelf": "Estante",
   "explained.tdh.design.eyebrow.kind": "Referencia",
   "explained.tdh.design.title": "Por qué cada par de wallets se vincula en ambos sentidos",
-  "explained.tdh.design.lede": "Si alguien roba una de tus wallets, ¿puede meter una wallet suya en tu identidad? Con esta regla, no: cada par se vincula en ambos sentidos, así que ningún grupo menor de tus wallets puede añadir una wallet ajena, a cambio de unas pocas transacciones más.",
+  "explained.tdh.design.lede": "Con esta regla, quien robe una de tus wallets no puede meter una wallet suya en tu identidad: cada par se vincula en ambos sentidos, así que ningún grupo menor de tus wallets puede añadir una wallet ajena, a cambio de unas pocas transacciones más.",
   "explained.tdh.design.rule.label": "La regla",
   "explained.tdh.design.rule.title": "Registros, par por par",
   "explained.tdh.design.rule.body": "Cada par de wallets registra una consolidación en ambos sentidos en el contrato de delegación de 6529, que numera cada tipo de delegación; la consolidación es el caso de uso {useCase} (P26 §6.1), en Any Collection o The Memes. Dos wallets necesitan {two} registros, tres necesitan {three} y cuatro necesitan {four}. Los registros no caducan: un vínculo dura hasta que una de sus wallets lo revoca.",

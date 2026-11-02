@@ -11,7 +11,7 @@
   "explained.tdh.proofs.cast.python": "Die Python-Referenz",
   "explained.tdh.proofs.cast.pythonBody": "Das zweite Programm der täglichen Prüfung. Es rechnet jeden Tag neu und wird nie bewiesen.",
   "explained.tdh.proofs.h1": "Beweise eines Tages: Ethereum prüft, dass ein Programm lief, nicht, dass die Regeln stimmen.",
-  "explained.tdh.proofs.lede": "Ein Vertrag könnte das TDH eines Tages annehmen, ohne dem zu vertrauen, der es berechnet hat, wohl aber den beiden Beweissystemen und seinem ersten Tag: Ein Zero-Knowledge-Beweis, auf Ethereum günstig zu prüfen, zeigt, dass ein Programm die Ausgaben des Tages erzeugt hat. Die Lean-Beweise unter „Wie sicher“ handeln von den Regeln.",
+  "explained.tdh.proofs.lede": "Ein Zero-Knowledge-Beweis, auf Ethereum günstig zu prüfen, zeigt, dass ein Programm die Ausgaben eines Tages erzeugt hat, also könnte ein Vertrag den Tag annehmen, ohne dem zu vertrauen, der ihn berechnet hat, wohl aber den Beweissystemen und seinem ersten Tag.",
   "explained.tdh.proofs.verdict.headline": "Ein echter Tag ist zur Hälfte bewiesen, und auf Ethereum ist noch nichts festgehalten.",
   "explained.tdh.proofs.verdict.retired": "Regeln {version}, außer Dienst",
   "explained.tdh.proofs.verdict.body": "Programm A, der eigene Code des Validators, rechnete den Tag des {date} unter den außer Dienst gestellten Regeln {version} und bewies ihn. Der SP1-Verifier von Mainnet akzeptierte den Beweis in einem reinen Leseaufruf bei Block {block}. Eine GPU arbeitete {hours} h {minutes} min, um zu beweisen, was derselbe Code in {seconds} s berechnet.",

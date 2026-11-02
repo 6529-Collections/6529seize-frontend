@@ -197,7 +197,7 @@ export default function Cc0Answer({
               data-cc0={box.id}
             >
               <span className={EX_TEXT.label}>{ht(locale, box.label)}</span>
-              <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              <p className={`${EX_TEXT.body} tw-m-0`}>
                 {box.id === "keep"
                   ? hrich(locale, box.body, {
                       own: (

@@ -34,7 +34,16 @@
       "mockup": "tdh-overview.html",
       "lane": "P1",
       "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
-      "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
+      "dependsOn": [
+        "D112",
+        "D119",
+        "D125",
+        "D128",
+        "D136",
+        "D137",
+        "D142",
+        "D148"
+      ],
       "checkedThrough": "D158",
       "budget": {
         "words": 1175,
@@ -66,17 +75,14 @@
       "id": "tdh-how-it-works",
       "route": "/network/tdh/how-it-works",
       "title": "How TDH is calculated",
-      "genre": "E",
+      "genre": "E-deep",
       "mockup": "tdh-how-it-works.html",
       "lane": "P2",
       "sources": ["app/network/tdh/how-it-works/**"],
       "dependsOn": ["D89", "D131", "D132", "D136"],
       "checkedThrough": "D158",
       "budget": {
-        "words": 2150,
-        "firstScreen": 120,
-        "figuresPer1000": 6,
-        "wordsPerScreen": 190
+        "firstScreen": 120
       },
       "states": [
         {
@@ -183,7 +189,7 @@
       "dependsOn": ["D116", "D121", "D131", "D132"],
       "checkedThrough": "D158",
       "budget": {
-        "words": 1000,
+        "words": 1100,
         "firstScreenMin": 150,
         "firstScreen": 285
       },
@@ -214,7 +220,7 @@
       "dependsOn": ["D116", "D136", "D137", "D144"],
       "checkedThrough": "D158",
       "budget": {
-        "words": 520,
+        "words": 560,
         "firstScreenMin": 150,
         "firstScreen": 285
       },
@@ -224,17 +230,15 @@
       "id": "tdh-how-sure",
       "route": "/network/tdh/formal",
       "title": "What is proved, what is tested, and what is not.",
-      "genre": "V",
+      "genre": "V-long",
       "mockup": "tdh-how-sure.html",
       "lane": "P4",
       "sources": ["app/network/tdh/formal/**"],
       "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137", "D148"],
       "checkedThrough": "D158",
       "budget": {
-        "words": 2800,
         "firstScreenMin": 150,
-        "firstScreen": 285,
-        "wordsPerScreen": 300
+        "firstScreen": 285
       },
       "states": [
         {
@@ -258,17 +262,15 @@
       "id": "tdh-proofs",
       "route": "/network/tdh/proofs",
       "title": "Zero-knowledge proofs",
-      "genre": "V",
+      "genre": "V-long",
       "mockup": null,
       "lane": "P5",
       "sources": ["app/network/tdh/proofs/**"],
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
       "checkedThrough": "D158",
       "budget": {
-        "words": 3200,
         "firstScreenMin": 150,
-        "firstScreen": 285,
-        "wordsPerScreen": 300
+        "firstScreen": 285
       },
       "states": [
         {

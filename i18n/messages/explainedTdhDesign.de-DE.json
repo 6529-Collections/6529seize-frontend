@@ -4,7 +4,7 @@
   "explained.tdh.design.eyebrow.shelf": "Regal",
   "explained.tdh.design.eyebrow.kind": "Referenz",
   "explained.tdh.design.title": "Warum jedes Paar von Wallets in beide Richtungen verknüpft wird",
-  "explained.tdh.design.lede": "Wenn jemand eine Ihrer Wallets stiehlt, kann er eine eigene Wallet in Ihre Identität holen? Mit dieser Regel nicht: Jedes Paar verknüpft sich in beide Richtungen, also kann keine kleinere Gruppe Ihrer Wallets eine fremde Wallet hinzufügen, für ein paar Transaktionen mehr.",
+  "explained.tdh.design.lede": "Mit dieser Regel kann niemand, der eine Ihrer Wallets stiehlt, eine eigene Wallet in Ihre Identität holen: Jedes Paar verknüpft sich in beide Richtungen, also kann keine kleinere Gruppe Ihrer Wallets eine fremde Wallet hinzufügen, für ein paar Transaktionen mehr.",
   "explained.tdh.design.rule.label": "Die Regel",
   "explained.tdh.design.rule.title": "Registrierungen, Paar für Paar",
   "explained.tdh.design.rule.body": "Jedes Paar von Wallets registriert eine Konsolidierung in beide Richtungen im Delegationsvertrag von 6529, der jede Art von Delegation nummeriert; Konsolidierung ist Use Case {useCase} (P26 §6.1), auf Any Collection oder The Memes. Zwei Wallets brauchen {two} Registrierungen, drei brauchen {three} und vier brauchen {four}. Registrierungen laufen nicht ab: Eine Verknüpfung gilt, bis eine ihrer Wallets sie widerruft.",

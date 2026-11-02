@@ -11,7 +11,7 @@
   "explained.tdh.proofs.cast.python": "La référence Python",
   "explained.tdh.proofs.cast.pythonBody": "Le second programme de la vérification quotidienne. Il recalcule chaque jour et n'est jamais prouvé.",
   "explained.tdh.proofs.h1": "Preuves d'une journée : Ethereum vérifie qu'un programme a tourné, pas que les règles sont justes.",
-  "explained.tdh.proofs.lede": "Un contrat pourrait accepter le TDH d'une journée sans faire confiance à qui l'a calculé, mais en faisant toujours confiance aux deux systèmes de preuve et à sa première journée : une preuve à divulgation nulle, peu coûteuse à vérifier sur Ethereum, montre qu'un programme a produit les sorties de la journée. Les preuves Lean de « Quelle certitude » portent sur les règles.",
+  "explained.tdh.proofs.lede": "Une preuve à divulgation nulle, peu coûteuse à vérifier sur Ethereum, montre qu'un programme a produit les sorties d'une journée, donc un contrat pourrait accepter la journée sans faire confiance à qui l'a calculée, mais en faisant confiance aux systèmes de preuve et à sa première journée.",
   "explained.tdh.proofs.verdict.headline": "Une vraie journée est à moitié prouvée, et rien n'est encore enregistré sur Ethereum.",
   "explained.tdh.proofs.verdict.retired": "règles {version}, retirées",
   "explained.tdh.proofs.verdict.body": "Le programme A, le code propre du validateur, a calculé la journée du {date} sous les règles retirées {version} et l'a prouvée. Le vérificateur SP1 de mainnet a accepté la preuve en un appel en lecture seule au bloc {block}. Un GPU a travaillé {hours} h {minutes} min pour prouver ce que le même code calcule en {seconds} s.",

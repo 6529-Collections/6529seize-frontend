@@ -11,7 +11,7 @@
   "explained.tdh.proofs.cast.python": "The Python reference",
   "explained.tdh.proofs.cast.pythonBody": "The daily check's second program. It recomputes every day and is never proved.",
   "explained.tdh.proofs.h1": "Proofs of a day: Ethereum checks that a program ran, not that the rules are right.",
-  "explained.tdh.proofs.lede": "A contract could accept a day's TDH without trusting whoever computed it, though still trusting the two proof systems and its first day: a zero-knowledge proof, cheap to check on Ethereum, shows that a program produced the day's outputs. The Lean proofs on How sure are about the rules.",
+  "explained.tdh.proofs.lede": "A zero-knowledge proof, cheap to check on Ethereum, shows that a program produced a day's outputs, so a contract could accept the day without trusting whoever computed it, though still trusting the proof systems and its first day.",
   "explained.tdh.proofs.verdict.headline": "One real day is half proved, and nothing is recorded on Ethereum yet.",
   "explained.tdh.proofs.verdict.retired": "rules {version}, retired",
   "explained.tdh.proofs.verdict.body": "Program A, the validator's own code, ran the day of {date} under the retired {version} rules and proved it. Mainnet's SP1 verifier accepted the proof in a read-only call at block {block}. One GPU worked {hours} h {minutes} min to prove what the same code computes in {seconds} s.",

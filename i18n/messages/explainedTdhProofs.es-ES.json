@@ -11,7 +11,7 @@
   "explained.tdh.proofs.cast.python": "La referencia en Python",
   "explained.tdh.proofs.cast.pythonBody": "El segundo programa de la comprobación diaria. Recalcula cada día y nunca se prueba.",
   "explained.tdh.proofs.h1": "Pruebas de un día: Ethereum comprueba que un programa se ejecutó, no que las reglas sean correctas.",
-  "explained.tdh.proofs.lede": "Un contrato podría aceptar el TDH de un día sin confiar en quien lo calculó, aunque sí en los dos sistemas de prueba y en su primer día: una prueba de conocimiento cero, barata de comprobar en Ethereum, muestra que un programa produjo las salidas del día. Las pruebas en Lean de «Qué tan seguro» tratan de las reglas.",
+  "explained.tdh.proofs.lede": "Una prueba de conocimiento cero, barata de comprobar en Ethereum, muestra que un programa produjo las salidas de un día, así que un contrato podría aceptar el día sin confiar en quien lo calculó, aunque sí en los sistemas de prueba y en su primer día.",
   "explained.tdh.proofs.verdict.headline": "Un día real está probado a medias, y aún no hay nada registrado en Ethereum.",
   "explained.tdh.proofs.verdict.retired": "reglas {version}, retiradas",
   "explained.tdh.proofs.verdict.body": "El programa A, el código propio del validador, ejecutó el día del {date} bajo las reglas retiradas {version} y lo probó. El verificador SP1 de mainnet aceptó la prueba en una llamada de solo lectura en el bloque {block}. Una GPU trabajó {hours} h {minutes} min para probar lo que el mismo código calcula en {seconds} s.",

@@ -19,6 +19,20 @@ const GENRES = {
     figuresPer1000: 6,
     body: "18/29",
   },
+  /**
+   * A deep explainer: the full calculation, every step in the specification's
+   * order, a model for each idea. Longer than E, so it must carry the
+   * following contents bar (PageContents) and keep its figures dense.
+   */
+  "E-deep": {
+    firstScreen: [0, 130],
+    firstScreenPhone: 100,
+    wordsPerScreen: [130, 200],
+    figuresPer1000: 5,
+    body: "18/29",
+    words: 2400,
+    contents: true,
+  },
   "E-guide": {
     firstScreen: [0, 130],
     firstScreenPhone: 100,
@@ -46,6 +60,20 @@ const GENRES = {
     wordsPerScreen: [150, 300],
     figuresPer1000: 0,
     body: "min15",
+  },
+  /**
+   * A long evidence page: what is proved and how, at a mathematician's or an
+   * engineer's depth. Its verdict and limits stay on the first screen; past
+   * that, it must carry the following contents bar.
+   */
+  "V-long": {
+    firstScreen: [150, 285],
+    firstScreenPhone: 285,
+    wordsPerScreen: [150, 300],
+    figuresPer1000: 0,
+    body: "min15",
+    words: 3500,
+    contents: true,
   },
   R: {
     firstScreen: [90, 285],
@@ -161,8 +189,12 @@ export function evaluate(genreName, budget, view, m) {
       `${m.wordsPerScreen} (${genre.wordsPerScreen[0]} to ${wpsMax})`
     );
   }
-  if (budget?.words && !phone && m.words > budget.words)
-    fail("clarity", "words", `${m.words} (≤ ${budget.words})`);
+  const wordsMax = budget?.words ?? genre.words;
+  if (wordsMax && !phone && m.words > wordsMax)
+    fail("clarity", "words", `${m.words} (≤ ${wordsMax})`);
+  // A long genre is read with the page's contents bar beside it.
+  if (genre.contents && m.contents === false)
+    fail("clarity", "contents bar", "a long page needs PageContents");
   const figures = budget?.figuresPer1000 ?? genre.figuresPer1000;
   if (!phone && figures && m.figuresPer1000 < figures)
     fail(
