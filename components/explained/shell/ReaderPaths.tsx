@@ -41,14 +41,15 @@ export default function ReaderPaths({
         <li key={path.who}>
           <Link
             href={path.href}
-            className={`tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-3.5 tw-pt-3.5 tw-no-underline hover:tw-border-iron-700 md:tw-px-5 md:tw-pb-[18px] md:tw-pt-5 ${EX_FOCUS}`}
+            className={`tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-3.5 tw-pt-3.5 tw-no-underline tw-@container hover:tw-border-iron-700 md:tw-px-5 md:tw-pb-[18px] md:tw-pt-5 ${EX_FOCUS}`}
           >
             <span className="tw-block tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-text-lg md:tw-leading-[25px]">
               {path.who}
             </span>
-            {/* The route shows at every width: on a phone a card that names
-                only its reader and its time does not say where it goes. */}
-            <span className="tw-mt-1.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-300 max-[359px]:tw-hidden md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
+            {/* The route shows on a phone too: a card that names only its
+                reader and its time does not say where it goes. It hides only
+                in a card too narrow to hold it (7.5rem). */}
+            <span className="tw-mt-1.5 tw-hidden tw-text-sm tw-leading-5 tw-text-iron-300 @[7.5rem]:tw-block md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}
