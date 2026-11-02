@@ -10,7 +10,6 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -170,9 +169,8 @@ export default function HeaderUserMenuDropdown({
 
   return (
     <div>
-      <AnimatePresence mode="wait" initial={false}>
-        {isOpen && (
-          <motion.div
+      {isOpen && (
+        <div
             className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
             style={{
               left: "calc(var(--layout-margin, 0px) + 1.5rem)",
@@ -500,9 +498,8 @@ export default function HeaderUserMenuDropdown({
                 </ul>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
