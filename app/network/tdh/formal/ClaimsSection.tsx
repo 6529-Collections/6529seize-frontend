@@ -51,8 +51,11 @@ function claimRow(ctx: SureContext, section: SureSection): ClaimRow {
       : s("explained.tdh.sure.claim.other.detail"),
     limit: limit
       ? m(limit, {
+          base: p.v("cases.F.base"),
           wallet: p.v("cases.F.wallet"),
           identity: p.v("cases.F.identity"),
+          firstRule: p.v("manifest.shownFalse.firstRule"),
+          day: p.v("netting.day"),
         })
       : m("explained.tdh.sure.claim.other.limit"),
     counts: {

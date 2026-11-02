@@ -3,7 +3,7 @@
   "explained.tdh.day.metaDescription": "La comparación de un día en un recibo, con cada hash necesario para comprobarla.",
   "explained.tdh.day.eyebrow": "La comprobación diaria · el recibo de un día",
   "explained.tdh.day.title": "El resultado con fecha {date}",
-  "explained.tdh.day.lede": "La comparación de un día en un recibo, en orden fijo: cada valor de su archivo, cada hash para comprobarla y el hash del archivo calculado en tu navegador.",
+  "explained.tdh.day.lede": "La comparación de un día en un recibo, en orden fijo: cada valor en que se basa su veredicto, cada hash para comprobarla y el hash del archivo calculado en tu navegador.",
   "explained.tdh.day.nav.label": "Otros días",
   "explained.tdh.day.nav.previous": "El resultado anterior: {date}",
   "explained.tdh.day.nav.next": "El resultado siguiente: {date}",

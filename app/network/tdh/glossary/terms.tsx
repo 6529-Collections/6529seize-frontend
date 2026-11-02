@@ -212,7 +212,10 @@ export const TERMS: readonly Term[] = [
   { id: "root", status: { mark: "decided", ref: "D112" } },
   { id: "comparison", status: { mark: "tested" } },
   { id: "classes", status: LIVE },
-  { id: "knowncause", status: { word: "explained.tdh.glossary.renamed" } },
+  {
+    id: "knowncause",
+    status: { word: "explained.tdh.glossary.convention" },
+  },
   { id: "simulated", status: { word: "explained.tdh.glossary.convention" } },
   {
     id: "cutover",

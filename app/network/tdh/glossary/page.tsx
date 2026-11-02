@@ -47,11 +47,15 @@ function StatusCell({
   readonly comparisonRef?: string;
 }): ReactNode {
   if ("word" in status) {
-    // A status in words, not a claim ("Convention", "Renamed"): no glyph,
-    // since every glyph is a claim mark and the open ring means Not yet.
-    // An indent the width of a glyph keeps its word in line with theirs.
+    // A status in words, not a claim ("Convention"): a neutral dash in the
+    // glyph's slot, since every glyph is a claim mark and the open ring
+    // means Not yet. The same box as a mark's, so its word lines up.
     return (
-      <span className="tw-inline-flex tw-items-center tw-pl-[18px] tw-text-[13px] tw-font-medium tw-text-iron-300">
+      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300">
+        <i
+          className="tw-inline-block tw-h-0.5 tw-w-3 tw-rounded-sm tw-bg-iron-500"
+          aria-hidden="true"
+        />
         {t(locale, status.word)}
       </span>
     );

@@ -67,7 +67,7 @@ describe("Consolidation design", () => {
     expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
       "A + B + C + D"
     );
-    await user.click(within(model).getByRole("button", { name: "D–A first" }));
+    await user.click(within(model).getByRole("button", { name: "Step 1 · D–A first" }));
     expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
       "A + D, B + C"
     );

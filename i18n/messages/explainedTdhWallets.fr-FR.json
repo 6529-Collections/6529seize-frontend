@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Liez vos wallets dans les deux sens, et leurs exemplaires, leurs jours et un seul boost comptent ensemble ; un quatrième demande des liens neufs, créés le {date} ou après.",
   "explained.tdh.wallets.liveOn": "En service sur 6529.io",
   "explained.tdh.wallets.since": "depuis le {date}",
-  "explained.tdh.wallets.heroCaption": "Gris : liés avant le {date}. Bleu : liés à partir du {date}.",
+  "explained.tdh.wallets.heroCaption": "Gris : liés avant le {date}. Bleu : liés à partir du {date}. D, le quatrième, a besoin de liens nouveaux avec les trois.",
   "explained.tdh.wallets.setup": "Lancer la configuration guidée",
   "explained.tdh.wallets.explain": "Expliquer mon TDH",
   "explained.tdh.wallets.why.label": "Première question",
@@ -46,9 +46,9 @@
   "explained.tdh.wallets.lens.oldfour": "Quatre, liés avant le {date}",
   "explained.tdh.wallets.lens.addD": "Ajouter D",
   "explained.tdh.wallets.lens.adding": "Ajouter un quatrième wallet",
-  "explained.tdh.wallets.lens.step1": "risqué : d'abord {step}",
-  "explained.tdh.wallets.lens.then": "puis {step}",
-  "explained.tdh.wallets.lens.batch": "sûr : D en dernier, un lot",
+  "explained.tdh.wallets.lens.step1": "Étape {n} · d'abord {step}",
+  "explained.tdh.wallets.lens.then": "Étape {n} · {step}",
+  "explained.tdh.wallets.lens.batch": "Ou, sûr : D en dernier, un lot",
   "explained.tdh.wallets.lens.caption": "Lignes grises : liés dans les deux sens avant le {date}. Lignes bleues : liés dans les deux sens à partir du {date}. Un wallet en pointillé compte seul.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups} ; {alone}",
   "explained.tdh.wallets.lens.sayFiveLead": "Quatre au plus.",
@@ -113,5 +113,5 @@
   "explained.tdh.wallets.hwk.model": "Le modèle",
   "explained.tdh.wallets.hwk.modelBody": "Le regroupement du moteur de TDH v1.4, exécuté dans votre navigateur ; il passe les {pass} vecteurs de regroupement de P26.",
   "explained.tdh.wallets.hwk.setup": "La configuration guidée",
-  "explained.tdh.wallets.hwk.setupBody": "Les outils de consolidation de 6529.io et leurs textes (coût, ordre, managers)."
+  "explained.tdh.wallets.hwk.setupBody": "Les outils de consolidation de 6529.io et leurs textes : coût, ordre et managers ; que les profils des wallets fusionnent définitivement et que celui au CIC le plus élevé garde son nom ; et qu'un wallet d'une autre consolidation la quitte."
 }

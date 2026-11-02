@@ -174,8 +174,19 @@ export default function BoostLens({
     });
   } else if ((state.genesis || state.nakamoto) && state.seasons < 1) {
     say = ht(locale, "explained.tdh.how.boost.saySingles");
+  } else if (state.gradients > 0 && state.seasons === 0) {
+    // Gradients alone: say why the boost is what it is.
+    say = ht(locale, "explained.tdh.how.boost.sayGradOnly", {
+      gradient: formatCents(locale, bonus.value),
+      count: formatCount(locale, state.gradients),
+      cents: formatCount(locale, result.beta),
+      boost: formatCents(locale, result.beta / 100),
+    });
   } else {
-    say = ht(locale, "explained.tdh.how.boost.say");
+    say = ht(locale, "explained.tdh.how.boost.say", {
+      cents: formatCount(locale, result.beta),
+      boost: formatCents(locale, result.beta / 100),
+    });
   }
 
   return (

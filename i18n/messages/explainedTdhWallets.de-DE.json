@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Verknüpfen Sie Ihre Wallets in beide Richtungen, dann zählen ihre Exemplare, Tage und ein Boost zusammen; eine vierte braucht frische Verknüpfungen, angelegt am {date} oder später.",
   "explained.tdh.wallets.liveOn": "Live auf 6529.io",
   "explained.tdh.wallets.since": "seit {date}",
-  "explained.tdh.wallets.heroCaption": "Grau: verknüpft vor dem {date}. Blau: verknüpft ab dem {date}.",
+  "explained.tdh.wallets.heroCaption": "Grau: verknüpft vor dem {date}. Blau: verknüpft ab dem {date}. D, die vierte, braucht frische Verknüpfungen mit allen drei.",
   "explained.tdh.wallets.setup": "Geführte Einrichtung starten",
   "explained.tdh.wallets.explain": "Mein TDH erklären",
   "explained.tdh.wallets.why.label": "Erste Frage",
@@ -46,9 +46,9 @@
   "explained.tdh.wallets.lens.oldfour": "Vier, verknüpft vor dem {date}",
   "explained.tdh.wallets.lens.addD": "D hinzufügen",
   "explained.tdh.wallets.lens.adding": "Eine vierte Wallet hinzufügen",
-  "explained.tdh.wallets.lens.step1": "riskant: zuerst {step}",
-  "explained.tdh.wallets.lens.then": "dann {step}",
-  "explained.tdh.wallets.lens.batch": "sicher: D zuletzt, ein Batch",
+  "explained.tdh.wallets.lens.step1": "Schritt {n} · zuerst {step}",
+  "explained.tdh.wallets.lens.then": "Schritt {n} · {step}",
+  "explained.tdh.wallets.lens.batch": "Oder sicher: D zuletzt, ein Batch",
   "explained.tdh.wallets.lens.caption": "Graue Linien: in beide Richtungen verknüpft vor dem {date}. Blaue Linien: in beide Richtungen verknüpft ab dem {date}. Eine gestrichelte Wallet zählt allein.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",
   "explained.tdh.wallets.lens.sayFiveLead": "Höchstens vier.",
@@ -113,5 +113,5 @@
   "explained.tdh.wallets.hwk.model": "Das Modell",
   "explained.tdh.wallets.hwk.modelBody": "Die Gruppierung der Engine von TDH v1.4, ausgeführt in Ihrem Browser; sie besteht alle {pass} Gruppierungsvektoren von P26.",
   "explained.tdh.wallets.hwk.setup": "Die geführte Einrichtung",
-  "explained.tdh.wallets.hwk.setupBody": "Die Konsolidierungswerkzeuge von 6529.io und ihre Texte (Kosten, Reihenfolge, Manager)."
+  "explained.tdh.wallets.hwk.setupBody": "Die Konsolidierungswerkzeuge von 6529.io und ihre Texte: Kosten, Reihenfolge und Manager; dass die Profile der Wallets dauerhaft zusammengeführt werden und das mit dem höchsten CIC seinen Handle behält; und dass eine Wallet aus einer anderen Konsolidierung diese verlässt."
 }

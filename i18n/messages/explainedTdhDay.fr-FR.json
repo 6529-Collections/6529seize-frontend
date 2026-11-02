@@ -3,7 +3,7 @@
   "explained.tdh.day.metaDescription": "La comparaison d'un jour sur un reçu, avec chaque hash nécessaire pour la vérifier.",
   "explained.tdh.day.eyebrow": "La vérification quotidienne · le reçu d'un jour",
   "explained.tdh.day.title": "Le résultat daté du {date}",
-  "explained.tdh.day.lede": "La comparaison d'un jour sur un reçu, dans un ordre fixe : chaque valeur du fichier, chaque hash pour la vérifier, et le hash du fichier calculé par votre navigateur.",
+  "explained.tdh.day.lede": "La comparaison d'un jour sur un reçu, dans un ordre fixe : chaque valeur sur laquelle repose son verdict, chaque hash pour la vérifier, et le hash du fichier calculé par votre navigateur.",
   "explained.tdh.day.nav.label": "Autres jours",
   "explained.tdh.day.nav.previous": "Le résultat précédent : {date}",
   "explained.tdh.day.nav.next": "Le résultat suivant : {date}",

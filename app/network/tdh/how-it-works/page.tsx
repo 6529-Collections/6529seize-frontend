@@ -231,6 +231,7 @@ export default async function TdhHowItWorksPage({
                 todayMax: f("engine.boost.todayMax"),
                 ceiling: f("engine.boost.ceiling"),
                 last: f("rules.lastBoostedSeason"),
+                read: f("memes.readAt"),
               })}
             </Para>
           </Statement>
@@ -390,12 +391,6 @@ function PartB({
             threshold: v("rules.editionThreshold"),
           })}
         </Para>
-        <Para>
-          {rich(locale, "explained.tdh.how.b.others", {
-            H: v("engine.H"),
-            rateGradient: v("engine.rate.gradient"),
-          })}
-        </Para>
       </Statement>
       <div className="tw-mt-12">
         {ready ? null : (
@@ -405,6 +400,14 @@ function PartB({
         )}
         {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
+      {/* The other two collections follow the model, so the statement's
+          prose ends with its heading. */}
+      <Para className="tw-mt-8 tw-max-w-[660px]">
+        {rich(locale, "explained.tdh.how.b.others", {
+          H: v("engine.H"),
+          rateGradient: v("engine.rate.gradient"),
+        })}
+      </Para>
       <EdRow
         no="II"
         label={ht(locale, "explained.tdh.how.base.label")}

@@ -21,7 +21,6 @@ import ImplAnchors from "./ImplAnchors";
 import RunVectors from "./RunVectors";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
-  Caption,
   CodeBlock,
   CodeName,
   Contents,
@@ -357,17 +356,30 @@ export default async function ImplementationsPage({
               ]}
             />
           </div>
-          <Caption className="tw-mt-3">
-            {m("explained.tdh.impl.cast.note", {
-              time: p.v("programs.rustReference.time"),
-              day: p.v("model.replayDay"),
-              runtime: p.v("tdh.latest.builds.rust.runtime"),
-            })}{" "}
-            {m("explained.tdh.impl.lean.runsNote", {
-              day: p.v("model.replayDay"),
-              all: p.v("model.randomInputs"),
-            })}
-          </Caption>
+          {/* Two short notes, each with its lead, in place of one grey
+              block: the run times, then where these facts come from. */}
+          <div className="tw-mt-5 tw-grid tw-max-w-[660px] tw-gap-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.impl.cast.noteTimesLead")}
+              </b>{" "}
+              {m("explained.tdh.impl.cast.noteTimes", {
+                time: p.v("programs.rustReference.time"),
+                day: p.v("model.replayDay"),
+                runtime: p.v("tdh.latest.builds.rust.runtime"),
+              })}
+            </p>
+            <p className="tw-m-0">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.impl.cast.noteSourceLead")}
+              </b>{" "}
+              {m("explained.tdh.impl.cast.noteSource")}{" "}
+              {m("explained.tdh.impl.lean.runsNote", {
+                day: p.v("model.replayDay"),
+                all: p.v("model.randomInputs"),
+              })}
+            </p>
+          </div>
         </EdSection>
 
         <EdSection

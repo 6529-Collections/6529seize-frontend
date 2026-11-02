@@ -289,6 +289,8 @@ export default function TwoPrograms({
                 ),
                 r0Id: facts.print("proofs.risc0Advisory.id"),
                 r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+                selector: facts.print("proofs.verifiers.sp1Selector"),
+                frozen: facts.print("proofs.sp1Advisory.frozen"),
                 r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
                 zkvmA: facts.print("proofs.a.zkvm"),
                 zkvmB: facts.print("proofs.b.zkvm"),

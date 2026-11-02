@@ -102,8 +102,11 @@ function Panel({
     six: <CodeName>h6</CodeName>,
     cap: p.v(CAP),
     ungated: p.v("rules.ungatedMaxWallets"),
+    base: p.v("cases.F.base"),
     wallet: p.v("cases.F.wallet"),
     identity: p.v("cases.F.identity"),
+    firstRule: p.v("manifest.shownFalse.firstRule"),
+    day: p.v("netting.day"),
   };
   const where = entry.file
     ? breakAfter(`${entry.file}:${entry.line ?? ""}`, "/")
@@ -169,6 +172,7 @@ function Panel({
               className="tw-mt-3"
               code={entry.lean}
               comment="--"
+              hint={s("explained.tdh.sure.theorems.scrollHint")}
               label={s("explained.tdh.sure.theorems.codeLabel", {
                 name: entry.name ?? entry.id,
               })}

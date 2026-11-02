@@ -145,7 +145,7 @@
   "explained.tdh.how.netting.ruleSource": "P26 §7.1, D131. Probado para transferencias reproducidas tal como vienen, cuando las dos reproducciones tienen resultado: los pasos dentro de una transacción no cambian ninguna pila. Sí pueden cambiar una edición.",
   "explained.tdh.how.b.title": "Las cartas más raras cuentan más por copia, y cada carta aporta más o menos lo mismo.",
   "explained.tdh.how.b.body": "La tasa de una carta es H dividido por su edición. H, como la llama P26, es la mayor edición, {H} hoy, la de FirstGM (Meme #8), así que la tasa de FirstGM es {rateFirstGM} y la de una carta de {cap} copias es {rate310}.",
-  "explained.tdh.how.b.floor": "Mientras haya menos de {threshold} copias minteadas, una carta cuenta con el límite de su claim, el máximo de copias que permite su mint, hasta {cap}: un lanzamiento que termina por debajo de {threshold} se completa con un último airdrop. Desde {threshold} minteadas, las copias minteadas son la edición. The Memes fijan {threshold} como la edición final más pequeña (D89); una carta cuyo mint no fija límite de claim no tiene suelo.",
+  "explained.tdh.how.b.floor": "Mientras haya menos de {threshold} copias minteadas, una carta cuenta con el límite de su claim: el máximo de copias que permite su mint, hasta {cap}. Un lanzamiento que termina por debajo de {threshold} se completa con un último airdrop. Desde {threshold} minteadas, las copias minteadas son la edición. The Memes fijan {threshold} como la edición final más pequeña (D89); una carta cuyo mint no fija límite de claim no tiene suelo.",
   "explained.tdh.how.b.others": "Otras dos colecciones de 6529 cuentan igual. La tasa de un 6529 Gradient es {H} dividido por los Gradients minteados, nunca menos de un TDH al día: cada uno aporta {rateGradient}. La de un token de NextGen es {H} dividido por los tokens de su colección.",
   "explained.tdh.how.rates.label": "La tasa y el suelo de edición",
   "explained.tdh.how.rates.question": "¿Por qué una carta rara rinde más por copia, y aun así cada carta aporta más o menos lo mismo?",
@@ -189,7 +189,7 @@
   "explained.tdh.how.base.body": "El TDH base de una carta es copias × días completos × tasa, redondeado a un número entero una vez por carta en cada wallet. Dos copias de una carta de {cap} copias conservadas {days} días aportan {sum}, redondeado a {rounded}. Ese redondeo es la razón por la que un traslado entre tus propias wallets vinculadas puede cambiar tu total: en torno a un TDH por carta movida, más con boost.",
   "explained.tdh.how.base.ruleSource": "P26 §8.2: la tasa en céntimos, redondeada una vez por carta en cada wallet.",
   "explained.tdh.how.c.title": "Un solo boost multiplica todo lo que tienes.",
-  "explained.tdh.how.c.body": "Una temporada que tienes completa suma {season}, en cuanto empieza la siguiente. Con un set completo, el {season} de cada temporada que paga cuenta a la vez, más un bono decreciente por cada set adicional. Si no tienes completa la primera temporada, Genesis (#1 a #3) suma {single} y Nakamoto (#4) suma {single}. Cada 6529 Gradient suma {gradient}, hasta {max}. Con temporadas, sets adicionales y Gradients juntos, el boost más alto hoy es de unos {todayMax}; el techo de la regla es de unos {ceiling}, cuando la temporada {last} esté completa.",
+  "explained.tdh.how.c.body": "Una temporada que tienes completa suma {season}, en cuanto empieza la siguiente. Con un set completo, el {season} de cada temporada que paga cuenta a la vez, más un bono decreciente por cada set adicional. Si no tienes completa la primera temporada, Genesis (#1 a #3) suma {single} y Nakamoto (#4) suma {single}. Cada 6529 Gradient suma {gradient}, hasta {max}. Con temporadas, sets adicionales y Gradients juntos, el boost más alto hoy es de unos {todayMax}, según las temporadas leídas {read}; el techo de la regla es de unos {ceiling}, cuando la temporada {last} esté completa.",
   "explained.tdh.how.boost.label": "La escalera del boost",
   "explained.tdh.how.boost.question": "¿Qué multiplica todo lo que tiene un coleccionista, y dónde se detiene?",
   "explained.tdh.how.boost.seasons": "Temporadas completas",
@@ -208,7 +208,7 @@
   "explained.tdh.how.boost.sayGrad": "Los Gradients suman {gradient} cada uno, hasta {max}, así que con seis el boost es el de {max}; el sexto es una copia normal que gana su propia tasa.",
   "explained.tdh.how.boost.saySets": "Con un set completo, cada temporada que paga cuenta a la vez ({count} hoy), más un bono decreciente por cada set adicional, nunca más de unos {extra} en total.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 a #3) y Nakamoto (#4) solo cuentan para quien no tiene completa la primera temporada.",
-  "explained.tdh.how.boost.say": "Un solo boost multiplica todo lo que tienes. La temporada más reciente cuenta en cuanto empieza la siguiente.",
+  "explained.tdh.how.boost.say": "Un solo boost multiplica todo lo que tienes: aquí beta es {cents} céntimos, un boost de {boost}. La temporada más reciente cuenta en cuanto empieza la siguiente.",
   "explained.tdh.how.boost.break": "añadir un sexto Gradient",
   "explained.tdh.how.boost.guess": "Cada 6529 Gradient sube el boost. ¿Lo sube también el Gradient número {next}?",
   "explained.tdh.how.boost.guessYes": "Sí, un poco",
@@ -312,7 +312,7 @@
   "explained.tdh.how.trace.records": "la base de la identidad, carta y Gradient: {card} + {grad} = {base}",
   "explained.tdh.how.trace.boost": "un Gradient: beta = {cents} céntimos, un boost de {beta}",
   "explained.tdh.how.trace.totals": "suma {final} al total de la red",
-  "explained.tdh.how.trace.caption": "En azul junto a cada regla, un ejemplo nuevo calculado paso a paso: una copia de una carta de {edition} copias, con {threshold} o más minteadas, así que sin suelo, y un Gradient, cada uno conservado {days} días enteros, en una cartera propia. Cambia la carta o los días, y cada línea azul se recalcula.",
+  "explained.tdh.how.trace.caption": "Junto a cada regla, en una línea azul, un ejemplo nuevo calculado paso a paso: una copia de una carta de {edition} copias, con {threshold} o más minteadas, así que sin suelo, y un Gradient. Cada uno se conserva {days} días enteros, en una cartera propia. Cambia la carta o los días, y cada línea azul se recalcula.",
   "explained.tdh.how.trace.edition": "La edición de la carta",
   "explained.tdh.how.trace.editionOption": "{copies} copias",
   "explained.tdh.how.trace.days": "Días enteros conservados",
@@ -329,5 +329,6 @@
   "explained.tdh.how.hwk.decisions": "Decisiones",
   "explained.tdh.how.hwk.decisionsBody": "D89 (el umbral de {threshold}), D131 (la compensación), D132 (el cambio), D136 (cuatro wallets).",
   "explained.tdh.how.hwk.totals": "Totales",
-  "explained.tdh.how.hwk.totalsBody": "La comparación diaria, escrita {written}."
+  "explained.tdh.how.hwk.totalsBody": "La comparación diaria, escrita {written}.",
+  "explained.tdh.how.boost.sayGradOnly": "Cada Gradient suma {gradient}: con {count}, beta es {cents} céntimos, un boost de {boost}."
 }

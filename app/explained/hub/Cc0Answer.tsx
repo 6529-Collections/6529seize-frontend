@@ -97,7 +97,7 @@ export default function Cc0Answer({
             with its credits under it. */}
         <figure className="tw-m-0 max-lg:tw-order-last">
           <div
-            className="tw-relative tw-aspect-[350/270] tw-w-full lg:tw-aspect-[500/400]"
+            className="tw-relative tw-aspect-[350/262] tw-w-full lg:tw-aspect-[500/350]"
             // The three cards overlap as a fan by design.
             data-tdh-check-ignore="card-gap"
             role="group"
@@ -121,7 +121,7 @@ export default function Cc0Answer({
             <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
               {FAN.map(({ art }) => (
                 <li key={art.id} className="tw-flex tw-items-center tw-gap-2">
-                  <span className="tw-inline-flex tw-h-5 tw-items-center tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-px-1.5 tw-text-xs tw-font-semibold tw-text-iron-200">
+                  <span className="tw-text-xs tw-font-semibold tw-tracking-[0.04em] tw-text-iron-200">
                     CC0
                   </span>
                   <a
@@ -219,6 +219,14 @@ export default function Cc0Answer({
                           book={book}
                           id="memes.artistChoice"
                           locale={locale}
+                        />
+                      ),
+                      from: (
+                        <Fact
+                          book={book}
+                          id="memes.artistOnlyFrom"
+                          locale={locale}
+                          style="long"
                         />
                       ),
                     })

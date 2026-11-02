@@ -138,7 +138,7 @@ describe("How sure", () => {
       )
     ).toEqual(["9", "84", "11", "12"]);
     expect(board?.textContent).toMatch(
-      /84named theorems proved, each a distinct statement: 56 about TDH, 28 about the validator rules/
+      /84named theorems proved, main results, helper lemmas and worked examples among them: 56 about TDH, 28 about the validator rules/
     );
     for (const id of [
       "why",
@@ -256,7 +256,7 @@ describe("the specification", () => {
       /Settled by D136/
     );
     expect(container.textContent).toMatch(
-      /21 deviations from 6529\.io's old code/
+      /21 deviations from the code 6529\.io runs/
     );
     expect(container.textContent).toMatch(/adj\[i\] {5}= -2,588 if i = 8/);
     expect(container.textContent).toMatch(/consolidation_max_wallets \(4\)/);

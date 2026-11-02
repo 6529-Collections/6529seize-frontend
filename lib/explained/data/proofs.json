@@ -48,8 +48,8 @@
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-p7v2-jjv3-8p8f"
     },
     "risc0Cve": {
-      "ref": "GitHub's advisory database, GHSA-g3qg-6746-3mg9 (CVE-2025-52484), published 2025-06-20: an underconstrained rv32im circuit in RISC Zero's zkVM, risc0-zkvm 2.0.0 to 2.0.2, fixed in 2.1.0",
-      "url": "https://github.com/advisories/GHSA-g3qg-6746-3mg9"
+      "ref": "RISC Zero's security advisory GHSA-g3qg-6746-3mg9 (CVE-2025-52484), published in risc0/risc0 on 2025-06-18 (GitHub's advisory database lists it from 2025-06-20): an underconstrained rv32im circuit in RISC Zero's zkVM, risc0-zkvm 2.0.0 to 2.0.2, fixed in 2.1.0",
+      "url": "https://github.com/risc0/risc0/security/advisories/GHSA-g3qg-6746-3mg9"
     }
   },
   "statement": {
@@ -229,6 +229,7 @@
     "unitTests": 109,
     "forkTests": 42,
     "testedOn": "2026-10-31",
+    "auditedOn": "2026-10-15",
     "horizon": "2026-12-01T00:00:00Z",
     "retiredRuleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22"
   },
@@ -236,6 +237,7 @@
     "id": "CVE-2026-40323",
     "published": "2026-04-11",
     "fixed": "6.1.0",
+    "frozen": "6.0.0",
     "earlier": "2025-01-15",
     "latestId": "GHSA-p7v2-jjv3-8p8f",
     "latestPublished": "2026-10-11",
@@ -243,7 +245,7 @@
   },
   "risc0Advisory": {
     "id": "CVE-2025-52484",
-    "published": "2025-06-20",
+    "published": "2025-06-18",
     "fixed": "2.1.0"
   },
   "catchup": {

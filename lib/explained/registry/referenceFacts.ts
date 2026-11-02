@@ -579,6 +579,12 @@ export const REFERENCE_FACTS = {
     casesRef,
     (d) => d.cases.I.finalAfter
   ),
+  "cases.F.base": fromReference<number>(
+    "count",
+    "manifest",
+    casesRef,
+    (d) => d.cases.F.base
+  ),
   "cases.F.wallet": fromReference<number>(
     "count",
     "manifest",
@@ -628,6 +634,13 @@ export const REFERENCE_FACTS = {
     "decision",
     (d) => d.artistCopies.source,
     (d) => d.artistCopies.choice
+  ),
+  // D91: from this day the artist's copies are a card's only free copies.
+  "memes.artistOnlyFrom": fromReference<string>(
+    "day",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.onlyFrom
   ),
   "validators.cap": fromReference<string>(
     "text",

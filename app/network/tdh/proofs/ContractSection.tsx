@@ -146,10 +146,11 @@ export default function ContractSection({
                     horizon: facts.print("proofs.contract.horizon"),
                   })}
                 </span>
-                {/* Every cell ends on its refusals, so the grid's lower
-                    edge lines up: the errors the contract, or its two
-                    verifiers, revert with for that check. */}
-                <span className="tw-mt-auto tw-flex tw-flex-col tw-gap-1 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                {/* The refusals follow the check's own text: the errors
+                    the contract, or its two verifiers, revert with for that
+                    check. Pinned to the cell's foot, they left holes in the
+                    shorter cells of a row. */}
+                <span className="tw-flex tw-flex-col tw-gap-1 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
                   <span>{fill(locale, k("check.refusal"))}</span>
                   <span className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5">
                     {check.refusals.map((name) => (
@@ -183,7 +184,9 @@ export default function ContractSection({
             </span>
           </div>
           <LimitNote title={rich(locale, k("s4.limitTitle"))}>
-            {rich(locale, k("s4.limitBody"))}
+            {rich(locale, k("s4.limitBody"), {
+              audited: facts.print("proofs.contract.auditedOn", "long"),
+            })}
           </LimitNote>
         </div>
       }

@@ -80,16 +80,16 @@ describe("the hub, first version", () => {
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
     );
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules, from before D144, D148 and D150. Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} counterexamples stay on record.`
+      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules, from before three later decisions on those rules. Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} counterexamples about TDH (${book.num("manifest.shownFalse")} with the validator rules) stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "A zero-knowledge proof lets a contract check a program's result without running it again; each day needs one from each of two programs. One real day, Oct 11, has the first, under rules since retired. Nothing is on Ethereum yet, and only 6529 holds the proof file (D116)."
+      "A zero-knowledge proof lets a contract check a program's result without running it again; each day needs one from each of two programs. One real day, Oct 11, has the first, under rules since retired. Nothing is on Ethereum yet. The proof file is not published: it is kept with the private validator code (D116)."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day needs your own program and read of Ethereum: 6529's are private (D116). Your TDH is in each of those results: see yours."
+      "Anyone can check each day's file against the index, which is hashed, not signed, and add up 6529.io's signed upload. 6529 runs all three programs today. Recomputing a day needs your own program and your own copy of Ethereum's logs: 6529's programs are private (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
@@ -147,7 +147,7 @@ describe("the hub, first version", () => {
     expect(screen.getAllByRole("img", { name: /^Meme #\d+/ })).toHaveLength(3);
     // The artist's three boxes, the copies read from the facts (D91).
     expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
-      "5 copies of each card plus 15 for people you choose"
+      "5 copies of each of your cards, and 15 more to give to people you choose"
     );
     expect(container.querySelector('[data-cc0="unstated"]')).not.toBeNull();
     // The model: a Meme card may be sold; a Gradient may not, and the lens

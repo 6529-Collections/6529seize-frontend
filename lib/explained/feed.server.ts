@@ -287,8 +287,21 @@ function largestServed(
   return largest > 0 ? largest : null;
 }
 
-/** This server's last good read of the editions, for a read that fails. */
-let lastEditions: EditionsInput | null = null;
+/**
+ * This server's last good read of the editions, for a read that fails. It
+ * lives on the process, not the module: a dev server compiles each route
+ * with its own copy of this module, and a reload replaces it, so a module
+ * variable fell back to the ship-time snapshot on a page whose own copy had
+ * never read the API, though another page had read it minutes before.
+ */
+const LAST_EDITIONS = Symbol.for("6529.explained.lastEditions");
+type EditionsHolder = { [LAST_EDITIONS]?: EditionsInput };
+function lastGoodEditions(): EditionsInput | null {
+  return (globalThis as EditionsHolder)[LAST_EDITIONS] ?? null;
+}
+function keepEditions(read: EditionsInput): void {
+  (globalThis as EditionsHolder)[LAST_EDITIONS] = read;
+}
 
 /** The editions as the API gave them at ship time (`data/editionsSnapshot.json`). */
 function snapshotEditions(): EditionsInput {
@@ -335,7 +348,7 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
       typeof row.edition_size === "number"
   );
   if (rows === null || valid.length === 0) {
-    return lastEditions ?? snapshotEditions();
+    return lastGoodEditions() ?? snapshotEditions();
   }
   const { mints, art, rates } = await firstMints;
   const largest = largestServed(
@@ -378,7 +391,10 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
   // that read chose, when it is still one of the two counts served.
   if (mints.size === 0) {
     const known = new Map(
-      (lastEditions ?? snapshotEditions()).cards.map((card) => [card.id, card])
+      (lastGoodEditions() ?? snapshotEditions()).cards.map((card) => [
+        card.id,
+        card,
+      ])
     );
     const served = new Map(
       valid.map((row) => [row.id, row.edition_size] as const)
@@ -400,7 +416,7 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
       }),
     };
   }
-  lastEditions = read;
+  keepEditions(read);
   return read;
 }
 

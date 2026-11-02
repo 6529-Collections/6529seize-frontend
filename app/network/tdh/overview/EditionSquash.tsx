@@ -320,7 +320,12 @@ export default function EditionSquash({
       stamp={
         <StampLine
           locale={locale}
-          marks={[{ kind: "proposed", refText: "P26 §5.2, §8.1" }]}
+          // Two true marks, as How it works gives the rate rule: proposed as
+          // the consensus rule, and live as 6529.io's rules today.
+          marks={[
+            { kind: "proposed", refText: "P26 §5.2, §8.1" },
+            { maturity: "live" },
+          ]}
           {...(broken && minting
             ? {
                 tag: {

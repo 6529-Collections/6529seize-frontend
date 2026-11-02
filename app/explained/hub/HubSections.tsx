@@ -12,7 +12,7 @@ import { hrich, ht } from "./copy";
  * replaces the descriptive line by changing `explained.hub.mission`.
  */
 const HUB_LEDE =
-  "tw-m-0 tw-mt-4 tw-max-w-[660px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px] xl:tw-max-w-[760px]";
+  "tw-m-0 tw-mt-4 tw-max-w-[660px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px] xl:tw-mt-0 xl:tw-pb-1.5 xl:tw-text-[19px] xl:tw-leading-[29px]";
 
 /**
  * On a wide screen the title and the descriptive line sit side by side, so
@@ -32,12 +32,12 @@ export function HubOpener({
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <div>
-        {/* The title across the page's width, the line under it: at 84/88
-            from xl it keeps to two lines, and the front door's title is
-            never smaller than a chapter's. */}
+      {/* From xl the line sits beside the title, its last line on the
+          title's baseline, so the whole loop fits the first screen at
+          1440 × 900; under it on narrower windows. */}
+      <div className="xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_460px] xl:tw-items-end xl:tw-gap-x-14">
         <h1
-          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] xl:tw-text-[84px] xl:tw-leading-[88px]`}
+          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px]`}
         >
           {ht(locale, "title")}
         </h1>

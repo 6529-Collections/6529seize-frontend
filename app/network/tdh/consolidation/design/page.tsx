@@ -182,15 +182,21 @@ export default async function TdhConsolidationDesignPage({
                   options: [
                     {
                       value: "step1",
-                      label: dt(locale, "explained.tdh.design.order.first"),
+                      label: dt(locale, "explained.tdh.design.order.first", {
+                        n: "1",
+                      }),
                     },
                     {
                       value: "step2",
-                      label: dt(locale, "explained.tdh.design.order.second"),
+                      label: dt(locale, "explained.tdh.design.order.second", {
+                        n: "2",
+                      }),
                     },
                     {
                       value: "step3",
-                      label: dt(locale, "explained.tdh.design.order.third"),
+                      label: dt(locale, "explained.tdh.design.order.third", {
+                        n: "3",
+                      }),
                     },
                     {
                       value: "batch",

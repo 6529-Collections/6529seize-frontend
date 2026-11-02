@@ -364,6 +364,7 @@ export function CodeBlock({
   className = "",
   comment: marker = "#",
   showLabel = false,
+  hint,
 }: {
   readonly code: string;
   /** What the block is, for screen readers. */
@@ -373,6 +374,11 @@ export function CodeBlock({
   readonly comment?: string;
   /** Print the label above the code, for blocks that read as steps. */
   readonly showLabel?: boolean;
+  /**
+   * Words under a block that scrolls sideways on a phone ("Scroll for the
+   * whole line"), so its cut edge never reads as the line's end.
+   */
+  readonly hint?: string;
 }) {
   const lines = code.split("\n");
   const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
@@ -443,6 +449,16 @@ export function CodeBlock({
           className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-[#0a0a0c] tw-to-transparent md:tw-hidden"
           aria-hidden="true"
         />
+      )}
+      {hint !== undefined && (aligned || lean) && (
+        <span
+          className="tw-flex tw-items-center tw-gap-1.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 md:tw-hidden"
+          aria-hidden="true"
+          data-code-hint=""
+        >
+          {hint}
+          <span className="tw-text-iron-300">→</span>
+        </span>
       )}
     </div>
   );

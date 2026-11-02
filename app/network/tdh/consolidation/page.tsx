@@ -121,12 +121,14 @@ export default async function TdhYourWalletsPage({
         </>,
         <div>
           {[
-            <div key="picture" className="tw-mt-3">
-              <PairPicture locale={locale} />
-            </div>,
+            // The colon's answer first, as the picture's legend, then the
+            // picture it describes.
             <p key="caption" className={`tw-m-0 tw-mt-2 ${EX_TEXT.claim}`}>
               {wt(locale, "explained.tdh.wallets.why.movedCaption")}
             </p>,
+            <div key="picture" className="tw-mt-3">
+              <PairPicture locale={locale} />
+            </div>,
             <p key="linked" className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
               <b className={B}>
                 {wt(locale, "explained.tdh.wallets.why.movedLinkedLead")}
@@ -339,18 +341,21 @@ export default async function TdhYourWalletsPage({
                     {
                       value: "step1",
                       label: wt(locale, "explained.tdh.wallets.lens.step1", {
+                        n: "1",
                         step: "D–A",
                       }),
                     },
                     {
                       value: "step2",
                       label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        n: "2",
                         step: "D–B",
                       }),
                     },
                     {
                       value: "step3",
                       label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        n: "3",
                         step: "D–C",
                       }),
                     },

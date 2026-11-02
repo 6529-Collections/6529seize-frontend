@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Hash from "@/components/explained/marks/Hash";
 import { formatInteger, formatList } from "@/i18n/format";
-import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import {
   CodeBlock,
   CodeName,
@@ -517,6 +517,15 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       label={m("explained.tdh.spec.s8.label")}
       title={m("explained.tdh.spec.s8.title")}
     >
+      <Prose className="tw-mb-6">
+        {m("explained.tdh.spec.s8.worked", {
+          link: (
+            <a className={EX_LINK} href="/network/tdh/how-it-works#steps">
+              {m("explained.tdh.spec.s8.workedLink")}
+            </a>
+          ),
+        })}
+      </Prose>
       <Sub id="s8-1" no="8.1" title={m("explained.tdh.spec.s8-1.title")}>
         <CodeBlock
           code={ARITHMETIC}

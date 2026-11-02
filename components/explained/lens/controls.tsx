@@ -31,9 +31,9 @@ function labelLength(option: SegOption<string>): number {
 
 /**
  * Segmented buttons. On a phone, a group whose labels would wrap into
- * ragged rows becomes separate chips, each with its own edge, that wrap
- * onto as many rows as they need: every label is whole and every option is
- * in view, with nothing scrolled off-screen. `phone` forces a layout
+ * ragged rows becomes a grid of equal cells, each with its own edge, two a
+ * row (three for a long set): every label is whole and every option is in
+ * view, with nothing scrolled off-screen. `phone` forces a layout
  * ("stack" lists one option a row, "wrap" lets short labels wrap); "list"
  * lists one option a row at every width, each with its radio dot, for a
  * long set of long labels that would wrap raggedly anywhere.
@@ -77,7 +77,10 @@ export function Seg<V extends string>({
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
-    row: "max-md:tw-flex max-md:tw-flex-wrap md:tw-inline-flex md:tw-flex-wrap",
+    // Equal cells on a phone, two a row (three for a long set), so a group
+    // never breaks into ragged rows of pills: an odd last option takes the
+    // whole row.
+    row: `max-md:tw-grid max-md:tw-w-full ${options.length >= MANY_OPTIONS ? "max-md:tw-grid-cols-3" : "max-md:tw-grid-cols-2"} md:tw-inline-flex md:tw-flex-wrap`,
     grid3:
       "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 max-[359px]:tw-grid-cols-2 md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
@@ -85,7 +88,7 @@ export function Seg<V extends string>({
     wrap: "tw-grow tw-rounded-full",
     stack:
       "max-md:tw-w-full max-md:tw-rounded-lg max-md:tw-px-3.5 max-md:tw-text-left md:tw-rounded-full",
-    row: "tw-rounded-full max-md:tw-text-left",
+    row: "tw-rounded-full max-md:tw-rounded-xl max-md:tw-text-center",
     grid3: "tw-rounded-full",
   }[layout];
   // Seven options or more can take two rows on a wide screen, and a phone's
@@ -121,8 +124,18 @@ export function Seg<V extends string>({
     >
       {/* Options keep their whole label on one line and move to the next
           row first; one wider than the whole control wraps inside it. */}
-      {options.map((option) => {
+      {options.map((option, index) => {
         const on = option.value === value;
+        const cols = options.length >= MANY_OPTIONS ? 3 : 2;
+        // The last row's leftover cells: one option spans what is left.
+        const spare = options.length % cols;
+        const last = index === options.length - 1;
+        let span = "";
+        if (layout === "row" && last && spare === 1) {
+          span = cols === 3 ? "max-md:tw-col-span-3" : "max-md:tw-col-span-2";
+        } else if (layout === "row" && last && spare === 2 && cols === 3) {
+          span = "max-md:tw-col-span-2";
+        }
         return (
           <button
             key={option.value}
@@ -131,7 +144,7 @@ export function Seg<V extends string>({
             onClick={() => onChange(option.value)}
             {...(option.name ? { "aria-label": option.name } : {})}
             {...(attr ? { [`data-${attr}`]: option.value } : {})}
-            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 ${chip} tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 ${chip} ${span} tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
           >
             {option.label}
           </button>

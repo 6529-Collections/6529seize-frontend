@@ -145,7 +145,7 @@
   "explained.tdh.how.netting.ruleSource": "P26 §7.1, D131. Proved for transfers replayed as given, when both replays have a result: the steps inside a transaction change no stack. They can still change an edition.",
   "explained.tdh.how.b.title": "Rarer cards count more per copy, and every card adds about the same.",
   "explained.tdh.how.b.body": "A card's rate is H divided by its edition. H, as P26 calls it, is the largest edition, {H} today, FirstGM's (Meme #8), so FirstGM's rate is {rateFirstGM} and a {cap}-copy card's is {rate310}.",
-  "explained.tdh.how.b.floor": "While fewer than {threshold} copies are minted, a card counts at its claim limit, the most copies its mint allows, up to {cap}: a release that ends below {threshold} is topped up by a last airdrop. From {threshold} minted on, the minted count is the edition. The Memes lock {threshold} as the smallest final edition (D89); a card whose mint sets no claim limit has no floor.",
+  "explained.tdh.how.b.floor": "While fewer than {threshold} copies are minted, a card counts at its claim limit: the most copies its mint allows, up to {cap}. A release that ends below {threshold} is topped up by a last airdrop. From {threshold} minted on, the minted count is the edition. The Memes lock {threshold} as the smallest final edition (D89); a card whose mint sets no claim limit has no floor.",
   "explained.tdh.how.b.others": "Two other 6529 collections count the same way. A 6529 Gradient's rate is {H} divided by the Gradients minted, never below one TDH a day: each adds {rateGradient}. A NextGen token's is {H} divided by its collection's tokens.",
   "explained.tdh.how.rates.label": "The rate and the edition floor",
   "explained.tdh.how.rates.question": "Why does a rare card earn more per copy, yet every card adds about the same?",
@@ -189,7 +189,7 @@
   "explained.tdh.how.base.body": "Each card's base TDH is its copies × whole days × rate, rounded to a whole number once per card in each wallet. Two copies of a {cap}-copy card held {days} days add {sum}, rounded to {rounded}. That rounding is why a move between your own linked wallets can change your total, by about one TDH a card moved, more with a boost.",
   "explained.tdh.how.base.ruleSource": "P26 §8.2: the rate in cents, rounded once per card in each wallet.",
   "explained.tdh.how.c.title": "One boost multiplies everything you hold.",
-  "explained.tdh.how.c.body": "A season you hold all of pays {season}, once the next season has begun. Hold a full set and every paying season's {season} counts at once, plus a shrinking bonus for each extra set. If you do not hold all of the first season, Genesis (#1 to #3) adds {single} and Nakamoto (#4) adds {single}. Each 6529 Gradient adds {gradient}, up to {max}. With seasons, extra sets and Gradients together, today's highest boost is about {todayMax}; the rule's ceiling is about {ceiling}, once season {last} is complete.",
+  "explained.tdh.how.c.body": "A season you hold all of pays {season}, once the next season has begun. Hold a full set and every paying season's {season} counts at once, plus a shrinking bonus for each extra set. If you do not hold all of the first season, Genesis (#1 to #3) adds {single} and Nakamoto (#4) adds {single}. Each 6529 Gradient adds {gradient}, up to {max}. With seasons, extra sets and Gradients together, today's highest boost is about {todayMax}, from the seasons read {read}; the rule's ceiling is about {ceiling}, once season {last} is complete.",
   "explained.tdh.how.boost.label": "The boost ladder",
   "explained.tdh.how.boost.question": "What multiplies everything a collector holds, and where does it stop?",
   "explained.tdh.how.boost.seasons": "Complete seasons",
@@ -208,7 +208,7 @@
   "explained.tdh.how.boost.sayGrad": "Gradients add {gradient} each, up to {max}, so with six the boost is what {max} give; the sixth is a plain copy that earns its own rate.",
   "explained.tdh.how.boost.saySets": "Hold a full set and every paying season counts at once ({count} today), plus a shrinking bonus for each extra set, never more than about {extra} in all.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 to #3) and Nakamoto (#4) count only for a collector who does not hold all of the first season.",
-  "explained.tdh.how.boost.say": "One boost multiplies everything you hold. The newest season counts once the next one begins.",
+  "explained.tdh.how.boost.say": "One boost multiplies everything you hold: here beta is {cents} cents, a boost of {boost}. The newest season counts once the next one begins.",
   "explained.tdh.how.boost.break": "add a sixth Gradient",
   "explained.tdh.how.boost.guess": "Each 6529 Gradient raises the boost. Does Gradient number {next} raise it too?",
   "explained.tdh.how.boost.guessYes": "Yes, a little",
@@ -312,7 +312,7 @@
   "explained.tdh.how.trace.records": "the identity's base, card and Gradient: {card} + {grad} = {base}",
   "explained.tdh.how.trace.boost": "one Gradient: beta = {cents} cents, a boost of {beta}",
   "explained.tdh.how.trace.totals": "adds {final} to the network's total",
-  "explained.tdh.how.trace.caption": "In blue beside each rule, one new example worked through every step: one copy of a {edition}-copy card, {threshold} or more minted so no floor, and one Gradient, each held {days} whole days, in a wallet of its own. Change the card or the days, and every blue line recomputes.",
+  "explained.tdh.how.trace.caption": "Beside each rule, on a blue line, one new example worked through every step: one copy of a {edition}-copy card, {threshold} or more minted so no floor, and one Gradient. Each is held {days} whole days, in a wallet of its own. Change the card or the days, and every blue line recomputes.",
   "explained.tdh.how.trace.edition": "The card's edition",
   "explained.tdh.how.trace.editionOption": "{copies} copies",
   "explained.tdh.how.trace.days": "Whole days held",
@@ -329,5 +329,6 @@
   "explained.tdh.how.hwk.decisions": "Decisions",
   "explained.tdh.how.hwk.decisionsBody": "D89 (the {threshold} threshold), D131 (netting), D132 (the cutover), D136 (four wallets).",
   "explained.tdh.how.hwk.totals": "Totals",
-  "explained.tdh.how.hwk.totalsBody": "The daily comparison, written {written}."
+  "explained.tdh.how.hwk.totalsBody": "The daily comparison, written {written}.",
+  "explained.tdh.how.boost.sayGradOnly": "Each Gradient adds {gradient}: with {count}, beta is {cents} cents, a boost of {boost}."
 }

@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Link your wallets both ways, and their copies, days and one boost count together; a fourth needs fresh links, made on or after {date}.",
   "explained.tdh.wallets.liveOn": "Live on 6529.io",
   "explained.tdh.wallets.since": "since {date}",
-  "explained.tdh.wallets.heroCaption": "Grey: linked before {date}. Blue: linked from {date}.",
+  "explained.tdh.wallets.heroCaption": "Grey: linked before {date}. Blue: linked from {date}. D, the fourth, needs fresh links to all three.",
   "explained.tdh.wallets.setup": "Start guided setup",
   "explained.tdh.wallets.explain": "Explain my TDH",
   "explained.tdh.wallets.why.label": "First question",
@@ -46,9 +46,9 @@
   "explained.tdh.wallets.lens.oldfour": "Four, linked before {date}",
   "explained.tdh.wallets.lens.addD": "Add D",
   "explained.tdh.wallets.lens.adding": "Adding a fourth wallet",
-  "explained.tdh.wallets.lens.step1": "risky: {step} first",
-  "explained.tdh.wallets.lens.then": "then {step}",
-  "explained.tdh.wallets.lens.batch": "safe: D last, one batch",
+  "explained.tdh.wallets.lens.step1": "Step {n} · {step} first",
+  "explained.tdh.wallets.lens.then": "Step {n} · {step}",
+  "explained.tdh.wallets.lens.batch": "Or, safe: D last, one batch",
   "explained.tdh.wallets.lens.caption": "Grey lines: linked both ways before {date}. Blue lines: linked both ways from {date}. A dashed wallet counts alone.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",
   "explained.tdh.wallets.lens.sayFiveLead": "Four at most.",
@@ -113,5 +113,5 @@
   "explained.tdh.wallets.hwk.model": "The model",
   "explained.tdh.wallets.hwk.modelBody": "The TDH v1.4 engine's grouping, run in your browser; it passes all {pass} of P26's grouping vectors.",
   "explained.tdh.wallets.hwk.setup": "The guided setup",
-  "explained.tdh.wallets.hwk.setupBody": "6529.io's consolidation tools and their copy (cost, order, managers)."
+  "explained.tdh.wallets.hwk.setupBody": "6529.io's consolidation tools and their copy: cost, order and managers; that the wallets' profiles merge permanently and the one with the highest CIC keeps its handle; and that a wallet in another consolidation leaves it."
 }

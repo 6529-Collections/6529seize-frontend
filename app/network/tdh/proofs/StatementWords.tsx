@@ -142,24 +142,31 @@ function WordStrip({
   lit,
   differs,
   label,
+  groupLabel,
 }: {
   readonly words: readonly DecodedWord[];
   readonly lit: (word: DecodedWord) => boolean;
   readonly differs: readonly number[];
   readonly label: string;
+  /** The group's name under each word, as the picker names it. */
+  readonly groupLabel: (group: WordGroup) => string;
 }) {
   return (
     <div
-      // Five rows of five at every width: one row of 25 squeezed each word
-      // to a 22 px box beside the rule rail.
-      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5"
+      // Five rows of five at every width. From md each cell names its word
+      // and its group, so the grid is a picture of the statement before any
+      // click; on a phone the cells keep their numbers, the table names them.
+      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5 md:tw-max-w-[760px]"
       role="img"
       aria-label={label}
       data-word-strip=""
     >
-      {words.map((word) => {
+      {words.map((word, at) => {
         const on = lit(word);
         const off = differs.includes(word.index);
+        // A word that opens a new group, in the statement's order, starts
+        // with a heavier edge: the groups read as runs along the rows.
+        const opens = at === 0 || words[at - 1]?.word.group !== word.word.group;
         let tone = "tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400";
         if (on)
           tone = "tw-border-primary-400 tw-bg-primary-400/25 tw-text-iron-50";
@@ -167,11 +174,22 @@ function WordStrip({
         return (
           <span
             key={word.word.name}
-            className={`tw-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums md:tw-h-11 md:tw-text-sm ${EX_MOTION.model} ${tone}`}
+            className={`tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums md:tw-h-auto md:tw-min-h-[58px] md:tw-flex-col md:tw-items-start md:tw-justify-center md:tw-gap-0.5 md:tw-px-2.5 md:tw-py-1.5 md:tw-text-left ${opens ? "md:tw-border-l-[3px]" : ""} ${EX_MOTION.model} ${tone}`}
             data-strip-word={word.index}
             aria-hidden="true"
           >
-            {word.index}
+            <span className="md:tw-hidden">{word.index}</span>
+            <span className="tw-hidden tw-w-full tw-truncate tw-font-mono tw-text-xs tw-font-medium md:tw-block">
+              <span className="tw-mr-1.5 tw-font-sans tw-font-semibold">
+                {word.index}
+              </span>
+              {word.word.name}
+            </span>
+            <span
+              className={`tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal md:tw-block ${on || off ? "tw-text-iron-200" : "tw-text-iron-400"}`}
+            >
+              {groupLabel(word.word.group)}
+            </span>
           </span>
         );
       })}
@@ -302,6 +320,7 @@ export default function StatementWords({
               lit={lit}
               differs={compare ? differs : flip ? [FLIPPED_WORD] : []}
               label={fill(locale, k("words.stripLabel"), { words })}
+              groupLabel={(value) => fill(locale, k(`words.group.${value}`))}
             />
           )}
           {decoded.a ? (

@@ -3,7 +3,7 @@
   "explained.tdh.day.metaDescription": "Der Vergleich eines Tages auf einem Beleg, mit jedem Hash, den man zum Prüfen braucht.",
   "explained.tdh.day.eyebrow": "Die tägliche Prüfung · der Beleg eines Tages",
   "explained.tdh.day.title": "Das Ergebnis vom {date}",
-  "explained.tdh.day.lede": "Der Vergleich eines Tages auf einem Beleg, in fester Reihenfolge: jeder Wert seiner Datei, jeder Hash zum Prüfen und der Hash der Datei, berechnet in Ihrem Browser.",
+  "explained.tdh.day.lede": "Der Vergleich eines Tages auf einem Beleg, in fester Reihenfolge: jeder Wert, auf dem sein Urteil beruht, jeder Hash zum Prüfen und der Hash der Datei, berechnet in Ihrem Browser.",
   "explained.tdh.day.nav.label": "Andere Tage",
   "explained.tdh.day.nav.previous": "Das Ergebnis davor: {date}",
   "explained.tdh.day.nav.next": "Das Ergebnis danach: {date}",

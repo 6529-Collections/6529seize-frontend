@@ -23,9 +23,9 @@ interface Row {
   readonly mark: MarkKind;
   readonly refText: string;
   /**
-   * A word in place of the mark's: the kernel's check is reported by the
-   * build, which no reader can rerun yet. "Tested" there would read as
-   * "tested, not proved", which is not what it says.
+   * A word in place of the mark's: the kernel's check and the axiom audit
+   * are reported by the build, which no reader can rerun yet. "Tested"
+   * there would read as "tested, not proved", which is not what they say.
    */
   readonly label?: string;
 }
@@ -44,8 +44,9 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         jobs: p.v("manifest.build.jobs"),
       }),
       // A build report no reader can rerun while the source is private:
-      // tested, as the audit beside it, never the green Proved.
-      mark: "tested",
+      // provenance the reader takes on 6529's word, as the audit beside it,
+      // never the green Proved nor the Tested circle of the vectors.
+      mark: "assumed",
       label: s("explained.tdh.sure.build.kernelMark"),
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
@@ -70,7 +71,8 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
           native: code("native_decide"),
         }
       ),
-      mark: "tested",
+      mark: "assumed",
+      label: s("explained.tdh.sure.build.kernelMark"),
       refText: s("explained.tdh.sure.build.auditRef"),
     },
     {

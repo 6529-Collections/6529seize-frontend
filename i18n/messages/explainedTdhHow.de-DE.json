@@ -145,7 +145,7 @@
   "explained.tdh.how.netting.ruleSource": "P26 §7.1, D131. Bewiesen für Transfers, die so wiedergegeben werden, wie sie gegeben sind, wenn beide Wiedergaben ein Ergebnis haben: Die Schritte in einer Transaktion ändern keinen Bestand. Eine Auflage können sie noch ändern.",
   "explained.tdh.how.b.title": "Seltenere Karten zählen pro Exemplar mehr, und jede Karte bringt etwa gleich viel.",
   "explained.tdh.how.b.body": "Die Rate einer Karte ist H geteilt durch ihre Auflage. H, wie P26 sie nennt, ist die größte Auflage, heute {H}, die von FirstGM (Meme #8), also ist die Rate von FirstGM {rateFirstGM} und die einer Karte mit {cap} Exemplaren {rate310}.",
-  "explained.tdh.how.b.floor": "Solange weniger als {threshold} Exemplare gemintet sind, zählt eine Karte mit ihrem Claim-Limit, den meisten Exemplaren, die ihr Mint erlaubt, bis {cap}: Eine Ausgabe, die unter {threshold} endet, wird durch einen letzten Airdrop aufgefüllt. Ab {threshold} geminteten sind die geminteten Exemplare die Auflage. The Memes legen {threshold} als kleinste Endauflage fest (D89); eine Karte, deren Mint kein Claim-Limit setzt, hat keine Untergrenze.",
+  "explained.tdh.how.b.floor": "Solange weniger als {threshold} Exemplare gemintet sind, zählt eine Karte mit ihrem Claim-Limit: den meisten Exemplaren, die ihr Mint erlaubt, bis {cap}. Eine Ausgabe, die unter {threshold} endet, wird durch einen letzten Airdrop aufgefüllt. Ab {threshold} geminteten sind die geminteten Exemplare die Auflage. The Memes legen {threshold} als kleinste Endauflage fest (D89); eine Karte, deren Mint kein Claim-Limit setzt, hat keine Untergrenze.",
   "explained.tdh.how.b.others": "Zwei weitere 6529-Sammlungen zählen genauso. Die Rate eines 6529 Gradient ist {H} geteilt durch die geminteten Gradients, nie unter einem TDH am Tag: Jeder bringt {rateGradient}. Die eines NextGen-Tokens ist {H} geteilt durch die Tokens seiner Sammlung.",
   "explained.tdh.how.rates.label": "Die Rate und die Auflagenuntergrenze",
   "explained.tdh.how.rates.question": "Warum bringt eine seltene Karte pro Exemplar mehr, und doch bringt jede Karte etwa gleich viel?",
@@ -189,7 +189,7 @@
   "explained.tdh.how.base.body": "Das Basis-TDH einer Karte ist Exemplare × volle Tage × Rate, einmal pro Karte und Wallet auf eine ganze Zahl gerundet. Zwei Exemplare einer Karte mit {cap} Exemplaren, {days} Tage gehalten, bringen {sum}, gerundet {rounded}. Diese Rundung ist der Grund, warum ein Umzug zwischen Ihren eigenen verknüpften Wallets Ihre Summe ändern kann: um etwa ein TDH je bewegter Karte, mit Boost um mehr.",
   "explained.tdh.how.base.ruleSource": "P26 §8.2: die Rate in Cent, einmal pro Karte und Wallet gerundet.",
   "explained.tdh.how.c.title": "Ein Boost multipliziert alles, was Sie halten.",
-  "explained.tdh.how.c.body": "Eine Season, die Sie vollständig halten, bringt {season}, sobald die nächste Season begonnen hat. Mit einem Full Set zählt das {season} jeder zahlenden Season auf einmal, plus ein kleiner werdender Bonus für jedes weitere Set. Wenn Sie die erste Season nicht vollständig halten, bringt Genesis (#1 bis #3) {single} und Nakamoto (#4) {single}. Jeder 6529 Gradient bringt {gradient}, bis zu {max}. Mit Seasons, weiteren Sets und Gradients zusammen liegt der höchste Boost heute bei etwa {todayMax}; die Obergrenze der Regel bei etwa {ceiling}, sobald Season {last} vollständig ist.",
+  "explained.tdh.how.c.body": "Eine Season, die Sie vollständig halten, bringt {season}, sobald die nächste Season begonnen hat. Mit einem Full Set zählt das {season} jeder zahlenden Season auf einmal, plus ein kleiner werdender Bonus für jedes weitere Set. Wenn Sie die erste Season nicht vollständig halten, bringt Genesis (#1 bis #3) {single} und Nakamoto (#4) {single}. Jeder 6529 Gradient bringt {gradient}, bis zu {max}. Mit Seasons, weiteren Sets und Gradients zusammen liegt der höchste Boost heute bei etwa {todayMax}, aus den Seasons, gelesen {read}; die Obergrenze der Regel bei etwa {ceiling}, sobald Season {last} vollständig ist.",
   "explained.tdh.how.boost.label": "Die Boost-Leiter",
   "explained.tdh.how.boost.question": "Was multipliziert alles, was ein Sammler hält, und wo endet es?",
   "explained.tdh.how.boost.seasons": "Vollständige Seasons",
@@ -208,7 +208,7 @@
   "explained.tdh.how.boost.sayGrad": "Gradients bringen je {gradient}, bis zu {max}; mit sechs ist der Boost also so groß wie mit {max}, und der sechste ist ein gewöhnliches Exemplar, das seine eigene Rate verdient.",
   "explained.tdh.how.boost.saySets": "Mit einem Full Set zählt jede zahlende Season auf einmal (heute {count}), plus ein kleiner werdender Bonus für jedes weitere Set, insgesamt nie mehr als etwa {extra}.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 bis #3) und Nakamoto (#4) zählen nur für Sammler, die die erste Season nicht vollständig halten.",
-  "explained.tdh.how.boost.say": "Ein Boost multipliziert alles, was Sie halten. Die neueste Season zählt, sobald die nächste beginnt.",
+  "explained.tdh.how.boost.say": "Ein Boost multipliziert alles, was Sie halten: hier ist Beta {cents} Cent, ein Boost von {boost}. Die neueste Season zählt, sobald die nächste beginnt.",
   "explained.tdh.how.boost.break": "einen sechsten Gradient hinzufügen",
   "explained.tdh.how.boost.guess": "Jeder 6529 Gradient erhöht den Boost. Erhöht ihn auch Gradient Nummer {next}?",
   "explained.tdh.how.boost.guessYes": "Ja, ein wenig",
@@ -312,7 +312,7 @@
   "explained.tdh.how.trace.records": "die Basis der Identität, Karte und Gradient: {card} + {grad} = {base}",
   "explained.tdh.how.trace.boost": "ein Gradient: beta = {cents} Cent, ein Boost von {beta}",
   "explained.tdh.how.trace.totals": "fügt der Summe des Netzwerks {final} hinzu",
-  "explained.tdh.how.trace.caption": "Blau neben jeder Regel ein neues Beispiel, durch jeden Schritt gerechnet: ein Exemplar einer Karte mit {edition} Exemplaren, {threshold} oder mehr gemintet, also ohne Untergrenze, und ein Gradient, jeder {days} ganze Tage gehalten, in einem eigenen Wallet. Ändern Sie die Karte oder die Tage, und jede blaue Zeile rechnet neu.",
+  "explained.tdh.how.trace.caption": "Neben jeder Regel, auf einer blauen Linie, ein neues Beispiel, durch jeden Schritt gerechnet: ein Exemplar einer Karte mit {edition} Exemplaren, {threshold} oder mehr gemintet, also ohne Untergrenze, und ein Gradient. Jeder wird {days} ganze Tage gehalten, in einem eigenen Wallet. Ändern Sie die Karte oder die Tage, und jede blaue Zeile rechnet neu.",
   "explained.tdh.how.trace.edition": "Die Auflage der Karte",
   "explained.tdh.how.trace.editionOption": "{copies} Exemplare",
   "explained.tdh.how.trace.days": "Ganze gehaltene Tage",
@@ -329,5 +329,6 @@
   "explained.tdh.how.hwk.decisions": "Entscheidungen",
   "explained.tdh.how.hwk.decisionsBody": "D89 (die Schwelle von {threshold}), D131 (Verrechnung), D132 (die Umstellung), D136 (vier Wallets).",
   "explained.tdh.how.hwk.totals": "Summen",
-  "explained.tdh.how.hwk.totalsBody": "Der tägliche Vergleich, geschrieben {written}."
+  "explained.tdh.how.hwk.totalsBody": "Der tägliche Vergleich, geschrieben {written}.",
+  "explained.tdh.how.boost.sayGradOnly": "Jeder Gradient bringt {gradient}: mit {count} ist Beta {cents} Cent, ein Boost von {boost}."
 }

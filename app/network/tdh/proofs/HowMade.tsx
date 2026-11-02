@@ -132,6 +132,7 @@ function BlocksFigure({
           <span className="tw-mt-1.5 tw-block tw-text-[13px] tw-leading-5 tw-text-iron-300">
             {rich(locale, k("blocks.zoom"), {
               receipts: facts.print("proofs.day.receiptBlocks"),
+              held: facts.print("proofs.day.txBlocks"),
               ratio: (
                 <span data-ex-allow-number="ratio">
                   {formatCount(locale, Math.round(receipts / held))}

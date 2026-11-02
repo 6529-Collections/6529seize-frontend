@@ -248,6 +248,13 @@ export const PROOF_FACTS = {
     "day",
     proofs.contract.testedOn
   ),
+  // 6529's own audit, of the contract's first version: the run log of that
+  // day. The contract has changed in several rounds since.
+  "proofs.contract.auditedOn": fact(
+    "runLog",
+    "day",
+    proofs.contract.auditedOn
+  ),
   "proofs.contract.horizon": fact("contracts", "day", proofs.contract.horizon),
   "proofs.contract.retiredRuleId": fact(
     "contracts",
@@ -262,6 +269,13 @@ export const PROOF_FACTS = {
     proofs.sp1Advisory.published
   ),
   "proofs.sp1Advisory.fixed": fact("sp1Cve", "text", proofs.sp1Advisory.fixed),
+  // The version whose routes Succinct froze on mainnet after the flaw, as
+  // the contracts record found them on its fork.
+  "proofs.sp1Advisory.frozen": fact(
+    "contracts",
+    "text",
+    proofs.sp1Advisory.frozen
+  ),
   "proofs.sp1Advisory.earlier": fact(
     "sp1Update",
     "day",
