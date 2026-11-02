@@ -549,6 +549,20 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
+    await testInfo.attach("long-history-opening.json", {
+      body: Buffer.from(
+        JSON.stringify({
+          fixture,
+          migrationMs,
+          openingMs,
+          typingMs,
+          ...snapshot,
+          blobRequests: blobRequests.length,
+          logCursors,
+        })
+      ),
+      contentType: "application/json",
+    });
     const scroll = a.page.getByRole("list", { name: "Messages" });
     await scroll.evaluate((element) => {
       const container = element.closest<HTMLElement>("[data-e2ee-scroll]")!;
@@ -601,10 +615,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await a.page.getByText("performance fixture 0", { exact: true }).click();
     const oldestRow = messageRow(a.page, "performance fixture 0");
     await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
-    await expect(oldestRow.getByRole("img")).toBeVisible({
+    const oldestPhoto = oldestRow.getByRole("img", { name: /^Image:/u });
+    await expect(oldestPhoto).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(oldestRow.getByRole("img")).toHaveAttribute("src", /^blob:/u);
+    await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
     const searchJumpMs = performance.now() - searching;
     await testInfo.attach("long-history-performance.json", {
       body: Buffer.from(
