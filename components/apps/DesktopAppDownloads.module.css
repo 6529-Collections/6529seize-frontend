@@ -1,0 +1,29 @@
+/* Native details keeps keyboard, grouping and closed-content behavior intact.
+   Older browsers retain the functional native disclosure without animation. */
+@supports (interpolate-size: allow-keywords) and
+  selector(details::details-content) {
+  .disclosure {
+    interpolate-size: allow-keywords;
+  }
+
+  .disclosure::details-content {
+    height: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      height 180ms ease-out,
+      opacity 180ms ease-out,
+      content-visibility 180ms allow-discrete;
+  }
+
+  .disclosure[open]::details-content {
+    height: auto;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .disclosure::details-content {
+      transition: none;
+    }
+  }
+}
