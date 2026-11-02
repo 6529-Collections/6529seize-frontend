@@ -30,6 +30,13 @@ describe("E2eeConversationIntro", () => {
       )
     ).toBeVisible();
     expect(screen.getByText("No messages yet. Say hello.")).toBeVisible();
+    expect(screen.getByRole("link", { name: "bob" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
+    expect(
+      screen.getByRole("link", { name: "View bob's profile" })
+    ).toHaveAttribute("href", "/bob");
   });
 
   it("titles a group by name and drops the invitation once messages exist", () => {
@@ -44,5 +51,6 @@ describe("E2eeConversationIntro", () => {
       screen.getByRole("heading", { level: 2, name: "Collectors" })
     ).toBeVisible();
     expect(screen.queryByText("No messages yet. Say hello.")).toBeNull();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });

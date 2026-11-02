@@ -28,6 +28,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "e2ee.profile.view": "Profil von {name} ansehen",
+  "e2ee.profile.viewUnknown": "Profil ansehen",
+  "e2ee.profile.level": "Stufe {level}",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
