@@ -8,6 +8,7 @@ import type { ApiConsolidatedTdh } from "@/generated/models/ApiConsolidatedTdh";
 import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import {
   commonApiFetch,
   getStructuredApiErrorStatus,
