@@ -4058,10 +4058,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  for (const popup of ["artist submissions", "participant entries"]) {
-    test(`preserves Numeric votes and explanations in the ${popup} popup`, async ({
+  for (const { popup, app } of [
+    { popup: "artist submissions", app: false },
+    { popup: "artist submissions", app: true },
+    { popup: "participant entries", app: false },
+  ]) {
+    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? " in app" : ""}`, async ({
       page,
     }, testInfo) => {
+      if (app) {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      }
       const sandbox = await installCompetitionApi(page);
       const response = await page.request.get(
         `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
@@ -4189,6 +4200,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
+      // The development issue badge can cover controls at the bottom of app sheets.
+      await page.addStyleTag({
+        content: "nextjs-portal { display: none !important; }",
+      });
       const detail = page
         .getByRole("main")
         .locator("[data-video-viewport]")
@@ -4321,15 +4336,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await promiseBadge.click();
         // The dialog wrapper has fixed-position children and no box of its own.
         await expect(promiseBadge).toBeVisible();
-        await expect(
-          dialog.getByRole("button", { name: "Close Gallery", exact: true })
-        ).toBeVisible();
+        const close = dialog.getByRole("button", {
+          name:
+            app || testInfo.project.name.startsWith("capacitor-")
+              ? "Close panel"
+              : "Close Gallery",
+          exact: true,
+        });
+        await expect(close).toBeVisible();
         await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
         expect(sandbox.requests).toEqual([]);
 
-        await dialog
-          .getByRole("button", { name: "Close Gallery", exact: true })
-          .focus();
+        await close.focus();
         await expect(promiseTooltip).toBeHidden();
         const currentTotal = dialog.getByText("123,456,789", { exact: true });
         const projectedTotal = dialog.getByText("123,456,999", { exact: true });
@@ -4397,16 +4415,112 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Numeric",
         exact: true,
       });
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await numeric.tap();
-        expect((await numeric.boundingBox())!.height).toBeGreaterThanOrEqual(
-          44
-        );
+      const expectCompactCenteredTabs = async () => {
+        const label = page
+          .getByRole("dialog")
+          .last()
+          .locator(".is-mini > div > p > span:first-child");
+        const labelBox = (await label.boundingBox())!;
+        const tabsBox = (await mode.boundingBox())!;
+        expect(tabsBox.height).toBeLessThanOrEqual(32);
+        expect(labelBox.x + labelBox.width).toBeLessThan(tabsBox.x);
+        expect(
+          Math.abs(
+            labelBox.y + labelBox.height / 2 - tabsBox.y - tabsBox.height / 2
+          )
+        ).toBeLessThan(2);
+      };
+      await mode.scrollIntoViewIfNeeded();
+      await expectCompactCenteredTabs();
+      if (testInfo.project.use.hasTouch) {
+        for (const button of [
+          mode.getByRole("button", { name: "Slider", exact: true }),
+          numeric,
+        ]) {
+          expect(
+            await button.evaluate((element) =>
+              parseFloat(getComputedStyle(element, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
+        }
+        const box = (await numeric.boundingBox())!;
+        // The invisible touch target extends beyond the compact visible tab.
+        await page.touchscreen.tap(box.x + box.width / 2, box.y - 8);
       } else {
         await numeric.focus();
         await page.keyboard.press("Enter");
       }
+      await expect(numeric).toHaveAttribute("aria-pressed", "true");
+      await expectCompactCenteredTabs();
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-tabs.png"),
+      });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      if (app && testInfo.project.use.hasTouch) {
+        const originalScrollport = await dialog
+          .getByTestId("artist-preview-app-scroll")
+          .elementHandle();
+        if (!originalScrollport)
+          throw new Error("Submission scrollport missing");
+        await input.focus();
+        try {
+          for (const height of [0, 160, 300, 0]) {
+            const geometry = await input.evaluate(async (element, inset) => {
+              const root = document.documentElement;
+              // This checks layout/scrolling; physical-device QA checks native events.
+              root.style.setProperty(
+                "--native-keyboard-layout-transition-duration",
+                "0ms"
+              );
+              root.style.setProperty(
+                "--native-keyboard-inset-bottom",
+                `${inset}px`
+              );
+              // Reveal the input on layout frames, without a keyboard-settle timer.
+              for (let frame = 0; frame < 3; frame++) {
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
+              const scrollport = element.closest(
+                '[data-testid="artist-preview-app-scroll"]'
+              );
+              const panel = scrollport?.parentElement;
+              if (!scrollport || !panel)
+                throw new Error("Submission scrollport missing");
+              return {
+                clearance:
+                  scrollport.getBoundingClientRect().bottom -
+                  element.getBoundingClientRect().bottom,
+                bottomGap:
+                  innerHeight - inset - panel.getBoundingClientRect().bottom,
+              };
+            }, height);
+            expect(geometry.clearance).toBeGreaterThanOrEqual(0);
+            expect(Math.abs(geometry.bottomGap)).toBeLessThanOrEqual(1);
+            expect(
+              await originalScrollport.evaluate(
+                (element) => element.isConnected
+              )
+            ).toBe(true);
+            await expect(input).toBeFocused();
+            await expect(
+              dialog.getByRole("button", { name: "Close panel", exact: true })
+            ).toBeInViewport({ ratio: 1 });
+          }
+        } finally {
+          await input.evaluate((element) => {
+            element.blur();
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-layout-transition-duration"
+            );
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-inset-bottom"
+            );
+          });
+          await originalScrollport.dispose();
+        }
+      }
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
