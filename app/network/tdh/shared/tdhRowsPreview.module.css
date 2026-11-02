@@ -1,8 +1,0 @@
-/*
- * A reference table shown as its first rows: while collapsed, rows marked
- * `data-tdh-more-row` are hidden; they stay in the document. A row an
- * address names (`#bug-7`) still shows, so the browser can scroll to it.
- */
-.collapsed [data-tdh-more-row]:not(:target) {
-  display: none;
-}

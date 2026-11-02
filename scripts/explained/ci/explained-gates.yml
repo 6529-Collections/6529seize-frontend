@@ -1,0 +1,173 @@
+# To install: copy this file to .github/workflows/explained-gates.yml. It is
+# kept here because the lane's push token cannot create workflow files (that
+# needs the GitHub `workflow` scope); an owner adds it with one commit.
+name: 6529 Explained gates
+
+# SCORECARD.md §3 in CI for 6529 Explained: the facts layer (an unknown key
+# fails), the drift check against the decision record's snapshot, the voice
+# and number lints, the kit's tests and the engine's conformance tests; then
+# the rendered gates (render, measure, states, axe and the readers' checks)
+# on every registered page built on the kit, at 1440 and 390, and in de-DE
+# at 390.
+
+on:
+  pull_request:
+    branches:
+      - main
+      - claude/6529-explained
+    paths:
+      - "components/explained/**"
+      - "lib/explained/**"
+      - "app/explained/**"
+      - "app/network/tdh/**"
+      - "i18n/messages/explained*.json"
+      - "scripts/explained/**"
+      - "__tests__/explained/**"
+      - "__tests__/components/explained/**"
+      - ".github/workflows/explained-gates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: explained-gates-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Explained / facts, drift, voice, kit and engine tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Facts, drift check, voice and number lints, kit and engine tests
+        run: ./bin/6529 run explained:check
+
+  rendered:
+    name: Explained / render, measure, states, axe, readers
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Restore Playwright browser
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browser and its dependencies
+        timeout-minutes: 10
+        run: ./bin/6529 exec playwright install --with-deps chromium
+
+      - name: Start the app
+        env:
+          PORT: "3001"
+          PORT_SEARCH_LIMIT: "1"
+          API_ENDPOINT: "https://api.6529.io"
+          ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+          BASE_ENDPOINT: "http://localhost:3001"
+          IPFS_API_ENDPOINT: "https://ipfs.io"
+          IPFS_GATEWAY_ENDPOINT: "https://ipfs.io/ipfs/"
+        run: |
+          set -euo pipefail
+          nohup ./bin/6529 run dev > "$RUNNER_TEMP/explained-dev.log" 2>&1 &
+          for attempt in $(seq 1 90); do
+            if curl -fsS -o /dev/null "http://localhost:3001/explained/kit"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          tail -50 "$RUNNER_TEMP/explained-dev.log"
+          exit 1
+
+      - name: Render, measure, states, axe and readers at 1440 and 390
+        run: ./bin/6529 run explained:gates -- --base http://localhost:3001 --built-only --out "$RUNNER_TEMP/explained-gates"
+
+      - name: Render and measure in de-DE at 390
+        run: ./bin/6529 run explained:gates -- --base http://localhost:3001 --built-only --widths 390 --locale de-DE --checks render,measure,states --out "$RUNNER_TEMP/explained-gates-de"
+
+      - name: Upload the gates' renders and report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: explained-gates-${{ github.event.pull_request.number || github.run_id }}
+          path: |
+            ${{ runner.temp }}/explained-gates
+            ${{ runner.temp }}/explained-gates-de
+          retention-days: 14

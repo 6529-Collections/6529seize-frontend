@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
+import { cycleDayOfDate } from "@/components/explained/engine/tdh";
 
 /**
  * The public TDH verification files, published every day by 6529's daily
@@ -287,17 +287,6 @@ export type VerificationIndex = z.infer<typeof verificationIndexSchema>;
 export type VerificationIndexDay = VerificationIndex["days"][number];
 export type VerificationCutover = NonNullable<VerificationIndex["cutover"]>;
 export type VerificationDay = z.infer<typeof verificationDaySchema>;
-export type VerificationImplementation =
-  VerificationDay["implementations"]["rust"];
-export type VerificationLive = NonNullable<
-  VerificationDay["implementations"]["live"]
->;
-export type VerificationRunFiles = NonNullable<
-  NonNullable<VerificationDay["sources"]>["rust"]
->;
-export type VerificationAgreement = NonNullable<
-  VerificationDay["agreement"]["rustVsLive"]
->;
 
 export function parseVerificationIndex(value: unknown) {
   return verificationIndexSchema.safeParse(value);

@@ -1,92 +1,95 @@
-jest.mock("@/hooks/useConsolidationPolicy", () => ({
-  useConsolidationPolicy: () => ({
-    limits: { maxWallets: 4, ungatedMaxWallets: 3 },
-    policy: {
-      activationMs: Date.parse("2026-10-12T00:00:00Z"),
-      signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),
-    },
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import TdhConsolidationDesignPage, {
+  generateMetadata,
+} from "@/app/network/tdh/consolidation/design/page";
+import { createFactBook } from "@/lib/explained/facts";
+import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
+
+/**
+ * Shelf S3, Consolidation design (TDH-DESIGN.md §4.7): registrations pair
+ * by pair, the signing order starting on "D signs last", what the rule
+ * protects and does not, and the old anchors.
+ */
+jest.mock("@/lib/explained/feed.server", () => ({
+  loadFactBook: async () => createFactBook(fixtureFactInputs()),
+}));
+
+// The pages read the reader's language from Accept-Language (the kit's
+// resolveExplainedLocale); these tests read as an English browser.
+jest.mock("next/headers", () => ({
+  headers: async () => ({
+    get: (name: string) => (name === "accept-language" ? "en-US" : null),
   }),
 }));
-import TDHConsolidationDesignPage from "@/app/network/tdh/consolidation/design/page.client";
-import { generateMetadata } from "@/app/network/tdh/consolidation/design/page";
-import { render, screen, within } from "@testing-library/react";
 
-jest.mock("@/components/about/AboutContentsDropdown", () => ({
-  AboutContentsDropdown: () => <div data-testid="contents-dropdown" />,
-}));
-
-jest.mock("@/contexts/TitleContext", () => ({
-  useSetTitle: jest.fn(),
-}));
-
-describe("TDHConsolidationDesignPage", () => {
-  it("renders the rules, the analysis tables and the simulator", () => {
-    render(<TDHConsolidationDesignPage />);
-
+describe("Consolidation design", () => {
+  it("counts the registrations pair by pair from the registry", async () => {
+    render(
+      await TdhConsolidationDesignPage({ searchParams: Promise.resolve({}) })
+    );
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "How consolidation works",
+        name: "Why every pair of wallets links both ways",
       })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 2, name: "The rules" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/October 12, 2026 at 00:00 UTC/).length
-    ).toBeGreaterThan(0);
-
-    const matrix = screen.getByRole("table", {
-      name: /Whether an outside wallet can be added/,
-    });
-    const meshRow = within(matrix).getByRole("row", {
-      name: /Every pair links both ways/,
-    });
-    // One compact grid at every width: a column per number of wallets the
-    // attacker controls, 0 to 3.
-    for (const count of [0, 1, 2, 3]) {
-      expect(
-        within(matrix).getByRole("columnheader", {
-          name: `Attacker controls ${count} of your wallets`,
-        })
-      ).toBeInTheDocument();
-    }
-    expect(
-      within(meshRow)
-        .getAllByRole("cell")
-        .map((cell) => cell.textContent)
-    ).toEqual(["No", "No", "No", "Yes"]);
-
-    expect(
-      screen.getByRole("button", { name: "D signs last" })
-    ).toBeInTheDocument();
-  });
-
-  it("points collectors back to the guide and the guided setup", () => {
-    render(<TDHConsolidationDesignPage />);
-
-    expect(
-      screen.getByRole("link", { name: "Read the collector’s guide" })
-    ).toHaveAttribute("href", "/network/tdh/consolidation");
-    expect(
-      screen.getByRole("link", { name: "Open the guided setup" })
-    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
-  });
-
-  it("links every on-page navigation item to a section", () => {
-    render(<TDHConsolidationDesignPage />);
-    const nav = screen.getByRole("navigation", { name: "On this page" });
-    for (const link of within(nav).getAllByRole("link")) {
-      const id = link.getAttribute("href")?.slice(1) ?? "";
+    expect(document.querySelector("[data-ex-lede]")?.textContent).not.toMatch(
+      /\.\s+\S/
+    );
+    const article = document.querySelector<HTMLElement>("[data-ex-article]")!;
+    expect(article).toHaveTextContent(
+      "registers a consolidation in both directions in 6529's delegation contract, where consolidation is use case 999, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6, and four need 12."
+    );
+    expect(article).toHaveTextContent("for four, the fourth's from Oct 15");
+    expect(within(article).getByText("S3")).toBeInTheDocument();
+    for (const id of [
+      "consolidation-rules",
+      "consolidation-add",
+      "consolidation-order",
+      "consolidation-remove",
+      "consolidation-why",
+      "consolidation-protects",
+      "consolidation-start",
+      "consolidation-tested",
+    ]) {
       expect(document.getElementById(id)).not.toBeNull();
     }
   });
 
-  it("uses its own canonical path in its metadata", () => {
-    const metadata = generateMetadata();
-    expect(metadata.title).toContain("How wallet consolidation works");
-    expect(JSON.stringify(metadata)).toContain(
-      "/network/tdh/consolidation/design"
+  it("starts the signing order on D's batch, and one link at a time splits", async () => {
+    const user = userEvent.setup();
+    render(
+      await TdhConsolidationDesignPage({ searchParams: Promise.resolve({}) })
     );
+    const model = document.querySelector<HTMLElement>('[data-lens="wallets"]')!;
+    expect(model).toHaveAccessibleName("The signing order");
+    expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
+      "A + B + C + D"
+    );
+    await user.click(within(model).getByRole("button", { name: "D–A first" }));
+    expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
+      "A + D, B + C"
+    );
+  });
+
+  it("names what the rule protects and what it does not", async () => {
+    render(
+      await TdhConsolidationDesignPage({ searchParams: Promise.resolve({}) })
+    );
+    const box = document.querySelector<HTMLElement>("[data-honest]")!;
+    expect(box).toHaveTextContent("It protects");
+    expect(box).toHaveTextContent("It does not");
+    expect(box.querySelectorAll('[data-glyph="tested"]')).toHaveLength(2);
+    expect(box.querySelectorAll('[data-glyph="notGuaranteed"]')).toHaveLength(
+      2
+    );
+    expect(screen.getByText(/100,000/).closest("[data-fact]")).not.toBeNull();
+  });
+
+  it("sets its metadata", () => {
+    expect(generateMetadata()).toMatchObject({
+      title: expect.stringContaining("Consolidation design"),
+    });
   });
 });

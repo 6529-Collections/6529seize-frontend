@@ -1,76 +1,40 @@
-import { BY_HAND_VECTORS } from "@/app/network/tdh/implementations/byHandVectors";
-import { VECTORS } from "@/app/network/tdh/implementations/vectors";
+import { PUBLIC_VECTORS_JSON } from "@/components/explained/engine/publicVectors";
 import {
-  additionalSetsMicro,
-  baseTdh,
-  finalTdh,
-} from "@/lib/tdh/tdhV1Arithmetic";
+  canonicalJson,
+  isObject,
+  parseJsonExact,
+} from "@/components/explained/engine/json";
+import { runVector } from "@/components/explained/engine/vectors";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { createFactBook } from "@/lib/explained/facts";
+import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
 
 /**
- * The three vectors the implementations page restates in full (04, 06 and
- * 23, generated from their files at 6529chain f840096) agree with the
- * port's arithmetic wherever a value can be recomputed from the others.
+ * The vectors the Implementations page restates for checking by hand: the
+ * five public ones it lists, each described on the page, each served whole
+ * at /network/tdh/public-vectors.json, and each reproduced by the TDH v1.4
+ * engine from that file's own text.
  */
+const book = createFactBook(fixtureFactInputs());
+const listed = book.get<string[]>("vectors.public").value;
+const doc = parseJsonExact(PUBLIC_VECTORS_JSON);
+const served = isObject(doc) && isObject(doc["vectors"]) ? doc["vectors"] : {};
+
 describe("vectors restated for checking by hand", () => {
-  it("are three of P26's 89 conformance vectors", () => {
-    const ids = new Set(VECTORS.map((vector) => vector.id));
-    expect(BY_HAND_VECTORS.map((vector) => vector.id)).toEqual([
-      "04-mid-period-transfer",
-      "06-consolidation-age-carry",
-      "23-identity-sums",
-    ]);
-    for (const vector of BY_HAND_VECTORS) {
-      expect(ids.has(vector.id)).toBe(true);
+  it("are the public vectors the file serves, each with its line on the page", () => {
+    expect(listed).toEqual(Object.keys(served));
+    for (const id of listed) {
+      expect(
+        Object.hasOwn(EN_US_MESSAGES, `explained.tdh.impl.public.${id}`)
+      ).toBe(true);
     }
   });
 
-  it("names every wallet a transfer or a record uses", () => {
-    for (const vector of BY_HAND_VECTORS) {
-      for (const transfer of vector.transfers) {
-        for (const end of [transfer.from, transfer.to]) {
-          expect(end === "mint" || end in vector.names).toBe(true);
-        }
-      }
-      for (const record of vector.records) {
-        for (const wallet of record.wallets) {
-          expect(wallet in vector.names).toBe(true);
-        }
-      }
-    }
-  });
-
-  it("recomputes 04 and 06: last in, first out, and the age carried inside an identity", () => {
-    const [v04, v06] = BY_HAND_VECTORS;
-    // 04: rate 1.00; A keeps two copies of 30 days after selling its last.
-    const a04 = v04?.records.find((record) => record.wallets[0] === "a1");
-    expect(a04?.raw).toBe(2 * 30);
-    expect(a04?.base).toBe(baseTdh(100, 60));
-    expect(100 + Math.round(additionalSetsMicro(2) / 10_000)).toBe(a04?.boostC);
-    expect(finalTdh(a04?.base ?? 0, a04?.boostC ?? 0)).toBe(a04?.final);
-    // 06: B's copy keeps its 200 days inside the identity.
-    const identity = v06?.records.find((record) => record.kind === "identity");
-    expect(identity?.raw).toBe(100 + 80 + 200);
-    expect(finalTdh(identity?.base ?? 0, identity?.boostC ?? 0)).toBe(
-      identity?.final
-    );
-    expect(identity?.final).toBe(410);
-  });
-
-  it("recomputes 23's per-token finals and the identity's sum", () => {
-    const v23 = BY_HAND_VECTORS[2];
-    const identity = v23?.records.find(
-      (record) => record.kind === "identity" && record.wallets.length === 2
-    );
-    expect(identity?.tokens.map((token) => token.token)).toEqual([
-      "memes#2",
-      "memes#4",
-    ]);
-    for (const token of identity?.tokens ?? []) {
-      expect(finalTdh(token.base, identity?.boostC ?? 0)).toBe(token.final);
-    }
-    // Meme 4: the identity's FINAL(20, 105) = 21, not 11 + 11.
-    expect(finalTdh(20, 105)).toBe(21);
-    expect(2 * finalTdh(10, 105)).toBe(22);
-    expect(identity?.final).toBe(60);
+  it.each(listed)("%s passes on the TDH v1.4 engine, as served", (id) => {
+    const vector = served[id];
+    expect(vector).toBeDefined();
+    const run = runVector(id, canonicalJson(vector ?? null));
+    expect(run.failures).toEqual([]);
+    expect(run.status).not.toBe("fail");
   });
 });

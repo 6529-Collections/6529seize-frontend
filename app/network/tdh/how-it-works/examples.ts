@@ -1,21 +1,39 @@
 import {
-  EXAMPLE_NETWORK,
+  REGISTRY_V14,
   baseTdh,
-  boost,
+  boostOfHoldings,
   dailyRateE4,
   effectiveEdition,
   finalTdh,
   rateCents,
+  type BoostHoldings,
   type CopyHolding,
-} from "@/lib/tdh/tdhV1Arithmetic";
+} from "@/components/explained/engine/tdh";
+import { EXAMPLE_NETWORK } from "./exampleNetwork";
 
 /**
  * Worked examples for How TDH is calculated. Every value is computed with the
- * TDH-v1 arithmetic from the network of the 2026-10-11 cycle, and Jest checks
+ * TDH v1.4 engine from the network of the 2026-10-11 cycle, and Jest checks
  * each against the numbers the P26 Python reference printed (plan, Appendix A).
  */
 
 const H = EXAMPLE_NETWORK.largestEdition;
+const GRADIENT_MINIMUM = REGISTRY_V14.gradient_rate_minimum;
+
+/** The boost, in cents, of a record holding `holdings` on that cycle. */
+function boostCents(holdings: Partial<BoostHoldings>): number {
+  return boostOfHoldings(
+    {
+      fullSets: holdings.fullSets ?? 0,
+      completeSeasons: holdings.completeSeasons ?? [],
+      genesis: holdings.genesis ?? false,
+      nakamoto: holdings.nakamoto ?? false,
+      gradients: holdings.gradients ?? 0,
+    },
+    EXAMPLE_NETWORK.eligibleMemes,
+    REGISTRY_V14
+  ).beta;
+}
 
 export const RATE_EXAMPLES = [
   { id: "firstgm", edition: 3_941, cents: rateCents(H, 3_941) },
@@ -29,7 +47,7 @@ export const RATE_EXAMPLES = [
   {
     id: "gradient",
     edition: EXAMPLE_NETWORK.gradients,
-    cents: rateCents(H, EXAMPLE_NETWORK.gradients, true),
+    cents: rateCents(H, EXAMPLE_NETWORK.gradients, GRADIENT_MINIMUM),
   },
 ] as const;
 
@@ -43,7 +61,7 @@ export const EDITION_EXAMPLES = (
     [309, 329],
   ] as const
 ).map(([minted, claimLimit]) => {
-  const { edition } = effectiveEdition(minted, claimLimit);
+  const { edition } = effectiveEdition(minted, claimLimit, REGISTRY_V14);
   return { minted, claimLimit, edition, cents: rateCents(H, edition) ?? 0 };
 });
 
@@ -80,17 +98,9 @@ const BOOST_EXAMPLE_INPUTS: readonly BoostExample[] = [
   { id: "highest", fullSets: 8, gradients: 5 },
 ];
 
-export const BOOST_EXAMPLES = BOOST_EXAMPLE_INPUTS.map((example) => ({
-  id: example.id,
-  betaCents: boost({
-    fullSets: example.fullSets ?? 0,
-    gradients: example.gradients ?? 0,
-    completeSeasons: example.completeSeasons ?? [],
-    genesis: example.genesis ?? false,
-    nakamoto: example.nakamoto ?? false,
-    nMemes: EXAMPLE_NETWORK.eligibleMemes,
-  }).betaCents,
-}));
+export const BOOST_EXAMPLES = BOOST_EXAMPLE_INPUTS.map(
+  ({ id, ...holdings }) => ({ id, betaCents: boostCents(holdings) })
+);
 
 /**
  * The highest boost on the 2026-10-11 cycle, reached from 8 full sets and five
@@ -98,14 +108,7 @@ export const BOOST_EXAMPLES = BOOST_EXAMPLE_INPUTS.map((example) => ({
  * rounds to the same cents. With 17 seasons listed, 16 pay, so it is 2.04, not
  * the 2.24 that 20 paying seasons would allow (P26 §5.4, §8.3, §10).
  */
-export const MAX_BOOST_CENTS = boost({
-  fullSets: 33,
-  gradients: 5,
-  completeSeasons: [],
-  genesis: false,
-  nakamoto: false,
-  nMemes: EXAMPLE_NETWORK.eligibleMemes,
-}).betaCents;
+export const MAX_BOOST_CENTS = boostCents({ fullSets: 33, gradients: 5 });
 
 /** The household of step 12: one collector, two consolidated wallets. */
 type HouseholdCardId =
@@ -133,12 +136,12 @@ const HOUSEHOLD_CARDS: readonly HouseholdCardId[] = [
 const HOUSEHOLD_RATES: Record<HouseholdCardId, number> = {
   firstgm: rateCents(H, 3_941) ?? 0,
   meme310: rateCents(H, 310) ?? 0,
-  gradient1: rateCents(H, EXAMPLE_NETWORK.gradients, true) ?? 0,
-  gradient2: rateCents(H, EXAMPLE_NETWORK.gradients, true) ?? 0,
+  gradient1: rateCents(H, EXAMPLE_NETWORK.gradients, GRADIENT_MINIMUM) ?? 0,
+  gradient2: rateCents(H, EXAMPLE_NETWORK.gradients, GRADIENT_MINIMUM) ?? 0,
   nextgen: rateCents(H, EXAMPLE_NETWORK.nextgenCollectionSize) ?? 0,
 };
 
-export const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
+const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
   { wallet: "A", card: "firstgm", days: [200, 120] },
   { wallet: "A", card: "meme310", days: [0] },
   { wallet: "A", card: "gradient1", days: [400] },
@@ -147,14 +150,7 @@ export const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
   { wallet: "B", card: "nextgen", days: [365] },
 ];
 
-export type HouseholdScenario = "identity" | "wallets" | "tomorrow" | "sell";
-
-export const HOUSEHOLD_SCENARIOS: readonly HouseholdScenario[] = [
-  "identity",
-  "wallets",
-  "tomorrow",
-  "sell",
-];
+type HouseholdScenario = "identity" | "wallets" | "tomorrow" | "sell";
 
 interface HouseholdRow {
   readonly card: HouseholdCardId;
@@ -178,14 +174,7 @@ interface HouseholdResult {
 }
 
 function householdBoost(gradients: number): number {
-  return boost({
-    fullSets: 0,
-    gradients,
-    completeSeasons: [],
-    genesis: false,
-    nakamoto: false,
-    nMemes: EXAMPLE_NETWORK.eligibleMemes,
-  }).betaCents;
+  return boostCents({ gradients });
 }
 
 function scoreRecord(

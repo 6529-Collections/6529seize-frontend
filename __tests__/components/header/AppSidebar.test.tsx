@@ -190,7 +190,9 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           expect.objectContaining({ label: "Legal", section: true }),
         ])
       );
-      expect(aboutChildren.slice(0, 3)).toEqual([
+      // 6529 Explained is the About flyout's first row (MAP.md 1.1).
+      expect(aboutChildren.slice(0, 4)).toEqual([
+        { label: "6529 Explained", path: "/explained" },
         { label: "Overview", path: "/about" },
         expect.objectContaining({ label: "Overview", section: true }),
         expect.objectContaining({

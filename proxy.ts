@@ -23,6 +23,14 @@ import {
   possibleTdhVerificationDay,
   tdhDayNotFoundTarget,
 } from "@/lib/proxy/tdhVerificationDay";
+import {
+  isUnknownTdhChapterPath,
+  tdhUnknownTarget,
+} from "@/lib/proxy/tdhChapterPaths";
+import {
+  explainedUnknownTarget,
+  isUnknownExplainedPath,
+} from "@/lib/proxy/explainedPaths";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { resolveVerificationSource } from "@/lib/tdh/verification/feedSource";
 import {
@@ -409,6 +417,26 @@ export default async function proxy(req: NextRequest) {
           tdhDayNotFoundTarget(req.nextUrl, normalizedPathname),
           { status: 404 }
         )
+      );
+    }
+
+    // The TDH chapter's pages stream under app/network/loading.tsx too, so an
+    // address under /network/tdh that names no page is answered here: the
+    // chapter's own not-found view, with a real 404 status.
+    if (isUnknownTdhChapterPath(normalizedPathname)) {
+      return (
+        (await accessDenial(req, normalizedPathname)) ??
+        NextResponse.rewrite(tdhUnknownTarget(req.nextUrl), { status: 404 })
+      );
+    }
+
+    // The same for 6529 Explained's own addresses under /explained.
+    if (isUnknownExplainedPath(normalizedPathname)) {
+      return (
+        (await accessDenial(req, normalizedPathname)) ??
+        NextResponse.rewrite(explainedUnknownTarget(req.nextUrl), {
+          status: 404,
+        })
       );
     }
 

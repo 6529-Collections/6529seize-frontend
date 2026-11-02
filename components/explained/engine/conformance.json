@@ -1,0 +1,897 @@
+{
+  "format": "6529.explained.tdh-engine-conformance.v2",
+  "specification": {
+    "repository": "6529chain",
+    "commit": "a731bca37981708d2160dbaf4aca7e7acb1c4b6a",
+    "path": "design/tdh-reference/vectors",
+    "noVectorPath": "design/tdh-reference/no-vector"
+  },
+  "engine": {
+    "sha256": "1da37032cffb182d3c84ae0382b5eef37a048a92c3fcca2af65e1bdbfe586131",
+    "files": [
+      "components/explained/engine/arithmetic.ts",
+      "components/explained/engine/consolidation.ts",
+      "components/explained/engine/holdings.ts",
+      "components/explained/engine/json.ts",
+      "components/explained/engine/logs.ts",
+      "components/explained/engine/registry.ts",
+      "components/explained/engine/registryHash.ts",
+      "components/explained/engine/tdh.ts",
+      "components/explained/engine/time.ts",
+      "components/explained/engine/vectorFormat.ts",
+      "components/explained/engine/vectors.ts"
+    ]
+  },
+  "summary": {
+    "vectors": 108,
+    "inScope": 108,
+    "pass": 108,
+    "fail": 0,
+    "outOfScope": 0,
+    "checks": 1267,
+    "noVectors": 17,
+    "noVectorsRefused": 17
+  },
+  "vectors": [
+    {
+      "id": "01-zero",
+      "digest": "d9b32125bb5f00e7236c95252fdd3d342f85d4e1710b2a2f9d799d0848767120",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 9
+    },
+    {
+      "id": "02-single-erc721",
+      "digest": "07ed31d97448e45523e50b3ed573ee9b84e7a3b9550390e56de745d7692f29d0",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 13
+    },
+    {
+      "id": "03-erc1155-editions",
+      "digest": "8cb048c8806ed83b4283dd300664e191e3c1e8908a016db23d86086b07e50677",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 13
+    },
+    {
+      "id": "04-mid-period-transfer",
+      "digest": "5f9af30d7cea10300225b1c0e3a31436ce88ae87e833b8124bd2a400cf8736b5",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 10
+    },
+    {
+      "id": "05-same-block-out-then-in",
+      "digest": "60ad7a1cb629fc5c84c4c31ac98415646b36d2940fc6b3b4e8375c8881448b0f",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 10
+    },
+    {
+      "id": "06-consolidation-age-carry",
+      "digest": "83b7a495397a16e11cdf144aba760542f3dd9d1db982effdd5ed8bf4218e7aed",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 15
+    },
+    {
+      "id": "07-consolidation-lifo-from-end",
+      "digest": "acb69a2a731c1b5c26bee35e5fef46503369af574f15adc2fd9ec64a397eb93f",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 10
+    },
+    {
+      "id": "08-burns",
+      "digest": "44163cfeaadd9bbd2d213d3f852218f11eba4b4c3235fa5a3ca99bd8fed53c0d",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 16
+    },
+    {
+      "id": "09-firstgm",
+      "digest": "6c08e8ae967761fd9b2b42a3d9a5471c69e54fe803438fda4fa17f582e6bdae7",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 11
+    },
+    {
+      "id": "10-boost-tiers",
+      "digest": "44d2b627adbb6b8fb10acc7170ea51d6a78a5cfe5e336705b3274ab1b91750b2",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 30
+    },
+    {
+      "id": "100-invalid-delegation-event-after-cutoff",
+      "digest": "f00da74a6f24a70d92981c984c61e7d2dffeab2d422b2fb679713705e3ca57dc",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "101-invalid-ungated-max-wallets",
+      "digest": "8f1e5ac3b5d6ae734ccde8c5701207a5a6e4ebe80335841f0cdad86a53a76995",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "102-registry-gate-activation",
+      "digest": "4208d772cd9d47a4215f0b35233bc57f8c07cb43b1c7d13d9bbd482cce8a2c07",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "103-registry-five-wallets",
+      "digest": "67871fbe60d5f15c77bf4ec9613c9581d17aafc391e371d9aa52b99bb995a4ce",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "104-reregistration-without-time",
+      "digest": "41347a2ad23b0c1a7af68a5f18c36cd6e1513678c7a3029944bf6be3463ef2ad",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "105-raw-log-clusters",
+      "digest": "d57d695d41116e8de4bcbb376bfc1d99891b89db0e4936df7bd4a5edd0983f80",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 5
+    },
+    {
+      "id": "106-format-members",
+      "digest": "467ac524526b6d5d0fa094317cfe2c5371b235bacf0ff981f5f7d9fab81e3aa8",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 14
+    },
+    {
+      "id": "107-unicode-strings",
+      "digest": "89b9f58d874347da489d12f73907ee38afa024f05c0edf2ce196c18d99dd6c8c",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 9
+    },
+    {
+      "id": "11-edition-floors",
+      "digest": "da66f3059f44bc9639d3d70da5638ba021e3e6256239be3c882f7b7ecd7979b9",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 18
+    },
+    {
+      "id": "12-rounding-boundaries",
+      "digest": "459ca308790418083e39bf5efd4b62f8f10114caf619bd058cc1ac37d662c842",
+      "scope": "arithmetic",
+      "status": "pass",
+      "checks": 24
+    },
+    {
+      "id": "12b-final-ties",
+      "digest": "b7fbe4f00b31bdfd244ba74f40520bd7f145c4dd80c7bd8db5a908ec36b9e59a",
+      "scope": "arithmetic",
+      "status": "pass",
+      "checks": 31
+    },
+    {
+      "id": "13-log-decoding",
+      "digest": "c94515970e60ff6579231ac42c11123a10e70241544c6d595cfaaafcd41a4417",
+      "scope": "decoding",
+      "status": "pass",
+      "checks": 2
+    },
+    {
+      "id": "14-consolidation-clusters",
+      "digest": "9266ee2b3201e424efe5c611435e15ff0481644332b0770413d7fb89e595a3f9",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 7
+    },
+    {
+      "id": "15-cutoff-and-days",
+      "digest": "c7a949c513b7dbb0a93c6889def7aebb8306de4694f1548ebae8c05289f44d42",
+      "scope": "cutoff",
+      "status": "pass",
+      "checks": 7
+    },
+    {
+      "id": "16-cluster-same-block",
+      "digest": "7ea87e28cde767399fee3409b162c298cc62eecfd48095eef15b6d04ff83822e",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 11
+    },
+    {
+      "id": "17-creation-mint-eligibility",
+      "digest": "12c32b6c302824489bedef03c346c16b11ef4a48f95c286aa88e2a3e1872baa6",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 13
+    },
+    {
+      "id": "18-erc721-round-trip",
+      "digest": "e74113e3559834ad3f823c5a81540c94545381d0547fb1e0b56687527acfac5a",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 6
+    },
+    {
+      "id": "19-season-count",
+      "digest": "138cecaae156e36aac055787c4e4d9ad6b42fb77564d291677264a12543f6dab",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 23
+    },
+    {
+      "id": "20-held-zero-day",
+      "digest": "2bc01004411c1b56cc4b64865b66d4a150099cce8d5f3a34a74b8a37f49a2407",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 34
+    },
+    {
+      "id": "21-zero-edition",
+      "digest": "ab4c2bd825945273c141d8a8cd3d9335cc93dabaeeb104718138a21275d6e2b6",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 11
+    },
+    {
+      "id": "22-no-eligible-meme",
+      "digest": "0e4f67cab9dbef9e77daa4cef099b710c84dc39f71eefb52af8c8a34fe506691",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 11
+    },
+    {
+      "id": "23-identity-sums",
+      "digest": "f64f1902e05f0e6b900a6c049848602778638f9652cdde5d45b5f4fb24d67bc6",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 58
+    },
+    {
+      "id": "24-ages-and-counts",
+      "digest": "31914567f9de01c7e9a823615914350c51c2c30345718e421f0f50543319032a",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 49
+    },
+    {
+      "id": "25-raw-log-cycle",
+      "digest": "6e042512e07b6e0144d65c05016a9f74daa808b2463c3ea26a0ae1fd36cb7b1e",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 34
+    },
+    {
+      "id": "26-delegation-decoding",
+      "digest": "d83166c94c85906346d0c76b092170134c8a65c05bb35d6aa81896f45f3d7eaa",
+      "scope": "decoding",
+      "status": "pass",
+      "checks": 8
+    },
+    {
+      "id": "27-malformed-transfer-logs",
+      "digest": "a73d61054e863ca244d94c53d2b38e949c9e15e5061c00cc8b227fefbe1c87a8",
+      "scope": "decoding",
+      "status": "pass",
+      "checks": 12
+    },
+    {
+      "id": "28-registry-hash",
+      "digest": "aba86abd70da7d09561879c21af2f9eac46b023ab7bd209a741417a326ca2524",
+      "scope": "registry",
+      "status": "pass",
+      "checks": 4
+    },
+    {
+      "id": "29-invalid-underflow",
+      "digest": "0b35af8d74c4dacf78896da847be530bf995b3061fbba4dbd78fb930d06b0d1b",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "30-invalid-duplicate-transfer",
+      "digest": "fd570d8144596ca74bf2d63630893dfbb0ef7424968bf1bdd5b4c503efff98fc",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "31-invalid-zero-edition-holder",
+      "digest": "3ec28161e9e9f1ff7258885a557bb0522603c268596dd91261365c4446e4a819",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "32-invalid-rate-range",
+      "digest": "0291012f3377bee25320b2735ccf341572ac2c9e86fdf065555b911b56bc74c8",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "33-invalid-final-range",
+      "digest": "36dced5b50e55c06ed4aa2eeb76b002ded97dd10895ab1d8685a36d508fe7b39",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "34-cutoff-edges",
+      "digest": "d0fc24dc8a373df8f28564f412b1ade8ce07a26a9da62c5f4a3717d9de2dd0ac",
+      "scope": "cutoff",
+      "status": "pass",
+      "checks": 4
+    },
+    {
+      "id": "35-edition-floor-threshold",
+      "digest": "df398e4d3b713cdba87831453282a4d24b9f05eb8146ce92b791e93199e4cea7",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 33
+    },
+    {
+      "id": "36-erc1155-send-and-return",
+      "digest": "efc9973880cb9a43ac57f1dd0a52ce0a322e91b6a88ad6deeb174660f8598b3f",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 32
+    },
+    {
+      "id": "37-pass-through-cluster-carry",
+      "digest": "2f231140b0c495db02a1c8159a943aceb5d3e6b0fbeecee7af49a5eb08c368f0",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 36
+    },
+    {
+      "id": "38-pairing-order",
+      "digest": "1d94f2e0eadc0ec280b6cea76161444289e940f76b71756d29a44173547ff16b",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 45
+    },
+    {
+      "id": "39-mint-forwarded",
+      "digest": "58d3be1339c208328b0073899d958553ed66d387e6308944d714589f4fb62193",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 45
+    },
+    {
+      "id": "40-mint-and-burn-in-one-transaction",
+      "digest": "1d46e011639952ba990e624128ca0aaba3b120567ac80ab87f2b8fe921b2c09b",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 25
+    },
+    {
+      "id": "41-firstgm-netting",
+      "digest": "5116269d406a31fb6a6a640081f4c3f856863f7253d18fd646f292f844517458",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 24
+    },
+    {
+      "id": "42-batch-repeated-id",
+      "digest": "725786976fe6141e36ca5866927333fdf246bdac84ca3f3c89475dd9d66aadb3",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 28
+    },
+    {
+      "id": "43-different-transactions",
+      "digest": "77888538012324399bd75a44b758235bb7f1bbfa860c63118e605addbbac0a87",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 26
+    },
+    {
+      "id": "44-invalid-underflow-before-netting",
+      "digest": "1cbbde26b097bea72481af4ab90ac968c04a389851033143e3f066407f918cea",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "45-inserted-round-trip",
+      "digest": "838695c81f77ec9e0f607d9a5c3e679420ddb220bd0f71672cec310b13ddb17f",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 35
+    },
+    {
+      "id": "46-round-trip-before-sale",
+      "digest": "ddaa82fb76ed4e9088225e9baeb715f3c52f66ee5c43e5119c19dfc78739f508",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 32
+    },
+    {
+      "id": "47-sink-round-trip",
+      "digest": "e57c9f5b7e038c39b69a3d2d81d912f7ac803af8d5634a78d490c296e7e83523",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 35
+    },
+    {
+      "id": "48-invalid-transaction-hash",
+      "digest": "e6a4067329183f8890ce49fb961af851d00c24a0302ff253a973669944433ade",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "49-invalid-transaction-timestamp",
+      "digest": "b424876d104345b75b4b1f3303f50e004021d8d2a3ca12f71c92834457459e1d",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "50-invalid-net-amount",
+      "digest": "8718950d4df54efe549508bf0a26e6e5128930da8d5f48c81ea5fe4f4b00a94f",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "51-invalid-duplicate-delegation-event",
+      "digest": "61226bdd36f202c420926cebcd38fdeb8aef5f02b0608253d5f3521543ad9de3",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "52-invalid-duplicate-ignored-log",
+      "digest": "662e4ce35e3f76ae85a1f984dfd49aca8a58e69f9c69ee217ca5a988f04bf6ef",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "53-invalid-log-order",
+      "digest": "229c87fa834d18c690bbb2ce9fc6a138c79f95dc9372c7a22ea6ad62ec117e6b",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "54-invalid-transfer-after-cutoff",
+      "digest": "ce2ee7d658ee92eeb2eff9dffa9b133c22d166ce4030ffaa162376b9fb94e45d",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "55-cutoff-header-order",
+      "digest": "5f09d72260093fdd8ef013612a6de59e85d244b15c26f68df0db4a8e0d1da895",
+      "scope": "cutoff",
+      "status": "pass",
+      "checks": 5
+    },
+    {
+      "id": "56-zero-to-zero",
+      "digest": "2b0ffea1dc3c6ce377a7fac417a8e5b5beb7b95ea2ccb19862d5ca1eab426d64",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 31
+    },
+    {
+      "id": "57-consolidated-sink",
+      "digest": "2f028babdf4cd2fb1cc08f3d9d05e55d5ffb72368f1f805a8e8fc5d91d2c5b95",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 25
+    },
+    {
+      "id": "58-invalid-balance-range",
+      "digest": "3681e4f058d7049cf0c138c724dcae40029348a58d21f4d22b9bbe7fa4581e16",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "59-registry-overrides",
+      "digest": "897ecb1dfeede662d079d4918a9fbb8587aeec3650696f9c79a96d6b19a3a0f3",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 51
+    },
+    {
+      "id": "60-invalid-registry",
+      "digest": "193cbbcdaec43e176cf606b2f1f0b359db54f59ad7e666c2163d9a3fcca59310",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "61-invalid-log-stamped-at-cutoff",
+      "digest": "63847db0a60ad23252d5a9820ca458942f64c990efd158d09867c7469fc23738",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "62-invalid-cutoff-block-timestamp",
+      "digest": "ab114d9b767c790ae46848cee317627e3e92c369a5a6b96d4b95c3f8be2accc7",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "63-invalid-transfer-at-ignored-log",
+      "digest": "e531747088ef74a506838fd5f08f90b4fbfbd8e60caa9966c9771c3c7d4bbfe1",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "64-invalid-ignored-log-order",
+      "digest": "721bc98e7d0a577ee8f8ca51e3504f9783cebcc5999294ceafc5241530fbc8fb",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "65-registry-lists",
+      "digest": "85013cc130278dac159e941cdd42d4fac521643f2a9fa2b274e1995c506407a6",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 79
+    },
+    {
+      "id": "66-invalid-registry-list-order",
+      "digest": "d24ffde0f75afd62b6a5a9b0b2e7205280a78f85b255db4fd79620c693f0f9cf",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "67-removed-logs",
+      "digest": "ecacd569b6500d6a6f4e00ebb95ddac4a6ee34324f5d1b01d88d702c4f7729c4",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 11
+    },
+    {
+      "id": "68-invalid-registry-out-of-type",
+      "digest": "9161b5f3232e04caba37bdb50c5e4105c6a656992227a14f0b93852d38a2480a",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "69-invalid-removed-not-boolean",
+      "digest": "2a456efd2e24d37a8a3e13c5d240b52df8212fec374c61846e21050df7f1367c",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "70-invalid-day-s-out-of-type",
+      "digest": "b122b314f6420e87f902696421b1b803b2ce4116858c1185af707fe27fd5657a",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "71-invalid-timestamp-out-of-range",
+      "digest": "cbc5f3bd3b2f2deca8ae9fa3686471ddbfe2ca228f625bdb5a156971678e895c",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "72-invalid-transfer-at-raw-transfer-log",
+      "digest": "40f8dcd77b5c0bb6b311d10b6c114d62510f7c0bef192ce0daab636341ac1024",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "73-registry-uint256",
+      "digest": "280652a7f359fff294e5c27f943880469efb0c752faf7895b1cde3bf53d63baf",
+      "scope": "registry",
+      "status": "pass",
+      "checks": 3
+    },
+    {
+      "id": "74-cutoff-dates-and-top-block",
+      "digest": "444da76735065952f88af728cd88d42e25d18e7b90d2d42000ab51dd63375e8d",
+      "scope": "cutoff",
+      "status": "pass",
+      "checks": 9
+    },
+    {
+      "id": "75-invalid-day-s-uint32",
+      "digest": "a4abb1940e8d16edac9297836699771824bfb437b33ad2f4313b5dd28c453079",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "76-amounts-after-cutoff",
+      "digest": "8c299193c4a941b51c457b00b204eb28b70d7542fcc9f6d771dff95e4cdeb34c",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 27
+    },
+    {
+      "id": "77-invalid-amount-out-of-type",
+      "digest": "a7ddc8a907fa47a158f9235e1d16a087d0969ebf31c6fb4f04985bdc7c1ae7f0",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "78-invalid-timestamp-with-empty-raw-logs",
+      "digest": "35db7da9a2dba70e1d1e055fa68a5f8a0dd58c1f9d67762218906645dbd829ad",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "79-invalid-timestamp-without-raw-logs",
+      "digest": "e3cb8338000677e3f891791df0a2b877866874a756e34180bde4bf4af7d26824",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "80-invalid-negative-zero",
+      "digest": "e5e932f35d96f46d4f504ea40d796f49274d84d599843310aa575b12f512d638",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "81-invalid-token-id-string",
+      "digest": "d9c4fd850cc0899afd15fd32a8cf879fa0b096be99f6bd2206fd4c0aa77aa49e",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "82-invalid-timestamps-key-leading-zero",
+      "digest": "d18d3a36d53677d44330cb0e02878d54522498e8c94973816afdaef078742b4e",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "83-invalid-claim-max-out-of-type",
+      "digest": "274bfb26d45264058e1f04d64e1fb2d79d0946f106e6a29c9cca19ea5ac1ad74",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "84-invalid-claim-max-key-leading-zero",
+      "digest": "18155ddcc879e13e43c7402ff445e26d88d18e0464a563c89c24b2862064ec95",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "85-invalid-transfers-at-one-position-recipient",
+      "digest": "bfcaf01506d550055cd10567d13ad4c6fac149a574aebf03f3acf95fe10037bc",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "86-invalid-transfers-at-one-position-sender",
+      "digest": "22f9ac08f244bfe8a39ef31da30e1ccbccc87e437e17edd08ed9efcf54a7bb4d",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "87-invalid-transfers-at-one-position-contract",
+      "digest": "5d2354af56584ca58d56f22ace461b82b0e9a23af6a5065152f0073401815fbd",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "88-cutoff-header-keys",
+      "digest": "ed596ba51b1d08f3b8e9771ea77cf9f5e806973c305e903456ee49505c9db8d6",
+      "scope": "cutoff",
+      "status": "pass",
+      "checks": 7
+    },
+    {
+      "id": "89-four-wallet-fresh-links",
+      "digest": "a7ac5c054f47b68da132f5ea20060e497f47d86fe05ee5679e8e7045b6a41192",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "90-four-wallet-gate-fails",
+      "digest": "be824980ace1115bbdc9fc8c790ef4ddfcede7829ae99d2d01bd1cb521b16390",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "91-gate-boundary-second",
+      "digest": "246112b5a4fb6a436d55fbcba61b79333f2ca093d9a6ff9bbc68d3dcc2d4ad73",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "92-reregistration-refreshes-time",
+      "digest": "3611a7c328d44f7f1af4403e50ff76cb28ca6e783ca49ad075c099d6b6c839d1",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "93-revoke-clears-time",
+      "digest": "966d9881e5e7781cb8ac24b33b88ac6172c878483d0be97d6b7ee736dcb6975a",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "94-gate-member-m",
+      "digest": "985477e5bef68e60f681243c6e82c765d8be1289b28d6c2bf5b3413ca6d9f72f",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "95-same-block-pair-key-order",
+      "digest": "e31c9f4dbada6a45c97f77f7d5cb6afc5237a795824f53dbbebf5c696a506098",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "96-fifth-wallet-refused",
+      "digest": "bb35ca0393162e07fbb5b38411d3c37d7825baa5c8d6e5bb579d9b64e94d10d1",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "97-four-wallet-age-carry",
+      "digest": "c7d8fb3e3d23c3651cc2bdd990c67e3c27f0dc7d7fdce8db72a1f8ff3b798092",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 33
+    },
+    {
+      "id": "98-raw-log-four-wallet",
+      "digest": "774ebac48c699c170bf8cc51c6cf560b5262efe067dc28527f9fb03432797706",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 7
+    },
+    {
+      "id": "99-event-without-timestamp",
+      "digest": "f0c061e98ef7030393aef72630ca13383e6d56779f1f40e2346cd3d9ff9027a3",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    }
+  ],
+  "noVectors": [
+    {
+      "id": "nv01-duplicate-member",
+      "sha256": "b9a99af741611071095a615f336511a0e7fd876f39a8e0838503773376f155bb",
+      "refused": true,
+      "reason": "the member \"amount\" named twice at offset 578"
+    },
+    {
+      "id": "nv02-missing-field",
+      "sha256": "c737fbfa5c2acfb44d41b0d4d770a5452237e689204a9d03f3e18e24d901490e",
+      "refused": true,
+      "reason": "an entry of consolidation_events has no collection"
+    },
+    {
+      "id": "nv03-container-of-the-wrong-kind",
+      "sha256": "0c455edf64fb6c0030d2a9cd49f4d5c600a0c5ea40d5ff459c9b36dcec82d8a4",
+      "refused": true,
+      "reason": "claim_max is not a JSON object"
+    },
+    {
+      "id": "nv04-unknown-top-level-key",
+      "sha256": "894af1566d1982dd9d482c0c218c4037fd918fcd4bd4e3bc2ae10c1ee0273364",
+      "refused": true,
+      "reason": "unknown vector key transfer"
+    },
+    {
+      "id": "nv05-nan",
+      "sha256": "1e3f928fbd986a6a58abde96ce26f36123f35af00fd19cd78ecd9d1a5dedef10",
+      "refused": true,
+      "reason": "not JSON at offset 1200"
+    },
+    {
+      "id": "nv06-no-cycle",
+      "sha256": "4d1626ba8c600f5a83a74c2c78d960e80344c15637a57932fbd1e4b74e13ef22",
+      "refused": true,
+      "reason": "a vector with cycle inputs or expected values needs cycle"
+    },
+    {
+      "id": "nv07-member-of-a-transfer",
+      "sha256": "ef8d02a1c4425fa154c7b29487556c21d9cf8eff546461ac926f35768cb5803c",
+      "refused": true,
+      "reason": "an entry of transfers has the member removed, which the format does not name (E13)"
+    },
+    {
+      "id": "nv08-member-of-a-consolidation-event",
+      "sha256": "2c57cecaeea109c2b735b982808fb356b2dd2328020a3c725ca3ae69cf2c3dc7",
+      "refused": true,
+      "reason": "an entry of consolidation_events has the member expiry, which the format does not name (E13)"
+    },
+    {
+      "id": "nv09-member-of-the-cycle",
+      "sha256": "ae081a3ed1977a57512c9d2827ee7728f95f4994450b6c2dbf5e9ee9013a5bd2",
+      "refused": true,
+      "reason": "cycle has the member hash, which the format does not name (E13)"
+    },
+    {
+      "id": "nv10-lone-high-surrogate",
+      "sha256": "35b1788afab1626692b7a7508bfc7e2a95cec0be95026c25c56fee4c7ba63e86",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv11-lone-low-surrogate",
+      "sha256": "e0fd1aa77126dd46c4d757578f129716a9559809d6872da661136fe14a1c0808",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+DC00 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv12-reversed-surrogate-pair",
+      "sha256": "c873d2c4013c181d1953293d1446bc078d1402c87750b0962d217723d2c9a5f4",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+DC00 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv13-high-surrogate-before-another-escape",
+      "sha256": "f269123da799877ee9935a73a0a9a8c927cf42adab8d4322861dbfec321429a9",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv14-lone-surrogates-as-member-names",
+      "sha256": "a6962fd5c3f7f004e5c49f447181d10953ddbe4a84e3bd8907d1e0221ee54997",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 1302"
+    },
+    {
+      "id": "nv15-not-utf-8",
+      "sha256": "bd5668c1b0d0f13ec58827af2ef94272a057f5b2daf71a6ad6c0a952bd1d6aa1",
+      "refused": true,
+      "reason": "the file is not UTF-8 (P26 §3.2, E14)"
+    },
+    {
+      "id": "nv16-utf-8-encoded-surrogate",
+      "sha256": "1da71d5392933e3ebb5262f79fdf3a6696b2ab58c65a8738d12765804952fc8b",
+      "refused": true,
+      "reason": "the file is not UTF-8 (P26 §3.2, E14)"
+    },
+    {
+      "id": "nv17-byte-order-mark",
+      "sha256": "94e47c0018fa56c63cdd520d6699990329853603bc362e9fdbe1b906a7f9d1de",
+      "refused": true,
+      "reason": "the file starts with a byte order mark (P26 §3.2, E14)"
+    }
+  ]
+}

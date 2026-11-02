@@ -4,7 +4,7 @@
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
-  "term_count": 28,
+  "term_count": 29,
   "terms": [
     {
       "id": "about.license",
@@ -257,11 +257,12 @@
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
-        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. See Current boosts at /network/tdh#tdh-1-4 for the current API-derived amount."
+        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. How it works, part C (/network/tdh/how-it-works#part-c), computes the current amount from the TDH v1.4 registry."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
         "/network/definitions",
+        "/network/tdh/how-it-works",
         "/network/tdh/historic-boosts",
         "/about/nakamoto-threshold"
       ],
@@ -627,11 +628,11 @@
         "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
         "An edition-size floor is a minimum count used for TDH: when fewer copies were minted, the calculation uses the floor instead. The exact calculation section explains how floors are set and gives a worked example.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
-        "The TDH page at /network/tdh opens with the sentence \"Total Days Held: the art you hold, and how long you have held it\" as its heading, under a TDH eyebrow shown from tablet width up, and the formula Days × Rate × Boost = TDH worked for one card (100 days × 12.71 × 1.02 = 1,296), with a strip under it: the record (recomputed independently every day: equal to 6529.io on so many of the published days), the latest day and a link to the comparison. Then come TDH in a minute (hold, weigh, boost; the same card factor by factor, where the reader changes what else the collector holds and sees the card's TDH: 1,271 with no Gradient, 1,296 with one, 2,288 with a full set instead; its sources in one closed disclosure), Explain my TDH (profile lookup of 6529.io's stored calculation, the values the daily comparison tests against TDH-v1), Checked daily, in public (the latest day's agreed total, identity records and wallet records in one row, every published day as a dated chip, the Not yet fully checked label with its meaning, how the day was checked and its builds in a disclosure, how to check your own record with Explain my TDH or the day's side-by-side comparison with 6529.io's files on Arweave, signed by its upload key; one line on what is not public yet, P26, its vectors and the programs' code, with a link to what anyone can check today; three short rows (written separately, specified in Lean, compared every day), and Fixed before the cutover, one line each with the detail under More: the edition-floor text corrected on October 15, the flaw program B found in the first netting rule, what the Lean model showed netting does not guarantee, and five rounds of differential tests with 22 findings, all but one settled; with a link to the Lean proof manifest), Current boosts, When your holdings change (six questions in one group), a Glossary (six terms needed to read your own TDH, the rest one click away) and Go deeper links, with Explore the network in two columns. The step-by-step calculation lives at /network/tdh/how-it-works; the old anchors #tdh-exact, #tdh-how and #tdh-example lead there. A section navigation links How it works, Specification, Formal model, Implementations, Verification, Wallet consolidation, Historic boosts and the Glossary; on phones it is one menu.",
-        "Profile lookup (Explain my TDH) accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states. The values are 6529.io's stored ones; when the profile's snapshot block is the latest compared day's and all three computations agreed on every record, the result says that this record was reproduced by two separately written programs from one input, and by 6529.io, with a link to that day. Each collection's row says how many cards it holds. A single wallet's list is labelled Wallet (1), and a burn address (the zero address or 0x…dead) is said to be one of the registry's two sinks: its record counts in the network total, but it is never a participant.",
+        "The TDH page at /network/tdh is chapter 01 of 6529 Explained. It opens on the title Total Days Held, a one-sentence lede, two marks (Live on 6529.io, TDH v1.4; Recomputed daily, equal on so many of the published results), the buttons Explain my TDH and How it is calculated, and Today on the network: the latest total TDH, the number of identities, Rust core = Python reference = 6529.io, and the last five results with today open. Beside it, the machine draws one copy of a real card (Meme #2, #4, #3, and the newest card while it is still minting, or Meme #562) as an area: whole days held × rate × boost = TDH, with a days slider, three boost choices and Break it: sell it. Then come 01 The picture (a copy's TDH is an area; every edition has the same area; and Everyone's TDH, the whole network as one area split by rank against each group's share of the identities, read from 6529.io's API), 02 What it is for (votes on the next card, the Rep and NIC (Network Identity Check) ratings you can give, your Level, validators later, their software built and being tested), 03 Your number (Explain my TDH), 04 How we know (a seven-rung ladder of the evidence with a line where it stops today; rung 5 shows program A, the Rust core, proved in SP1 for one real day and program B in RISC Zero not yet, and rung 6 the D128 contract, built and not deployed), 05 In this chapter (How it works, Your wallets, The daily check, How sure, Zero-knowledge proofs, and the shelf), and the sources.",
+        "Explain my TDH (/network/tdh#explain) looks up a profile, ENS name or address in 6529.io's stored calculation without wallet authentication. It lists each card as copies × whole days × rate = base TDH, then base × boost = total; when the record's snapshot block is the latest compared day's and every identity agreed, it says the record was included and links to that day, otherwise that it is not in a comparison yet. Before a lookup, three labelled example records show a record found, a card bought this week (it first counts in the result after next) and a name not found.",
         "The daily snapshot uses the last Ethereum block before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
         "The current boost is deterministic for a particular snapshot once eligible cards, ownership history, rates, and season configuration are known; future inputs can still change the result.",
-        "The Current boosts section at /network/tdh#tdh-1-4 loads configured bonus amounts, boosted-season limits, additional-set decay and Gradient limits from GET /tdh/rules (6529.io's current rule, boost schedule 1.4). Consult that section for current values and the future schedule. It links to the four boost figures the pages quote, drawn on one scale on the Historic boosts page (/network/tdh/historic-boosts#boost-figures): a full set on the rules' latest cycle (1.80× in October 2026), a full set once seasons 1 to 20 pay (2.00×), the highest on that cycle with extra full sets and five Gradients (2.04×) and the schedule's highest (2.24×).",
+        "Old links still land: #tdh-minute opens the first screen, #tdh-example and #tdh-reference section 01, #tdh-profile and #explain section 03, #tdh-verified section 04, #tdh-deeper and #tdh-explore section 05; #tdh-changes goes to /network/tdh/consolidation#why, #tdh-1-4 to How it works, part C, #tdh-exact to How it works, and #glossary-<term> to the TDH glossary. Current boost values are on /network/tdh/historic-boosts.",
         "The highest eligible season is excluded from season boosts; later seasons do not automatically extend the configured boosted-season limit.",
         "A full eligible Meme collection uses the configured season sum plus geometrically diminishing bonuses for additional full sets, with no hard set-count cap; the extra-set bonus grows toward 0.05 ÷ (1 − 0.6529), about +0.14405 (0.1440507…), and rounded to millionths it reaches +0.144051 at 33 full sets, so further sets add nothing.",
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
@@ -653,7 +654,8 @@
         "/network/health/network-tdh",
         "/network/levels",
         "/network/tdh/how-it-works",
-        "/network/tdh/verification"
+        "/network/tdh/verification",
+        "/explained"
       ],
       "tags": [
         "network",
@@ -714,6 +716,33 @@
         "glossary",
         "concept",
         "tdh"
+      ]
+    },
+    {
+      "id": "network.tdh-glossary",
+      "term": "TDH glossary",
+      "aliases": [
+        "tdh glossary",
+        "tdh terms",
+        "what does known cause mean",
+        "what is a cycle root",
+        "what is an identity in tdh",
+        "tdh definitions"
+      ],
+      "facts": [
+        "The TDH glossary, at /network/tdh/glossary, gives every term the TDH chapter uses with one meaning, its status mark and its source: TDH, TDH v1.4, P26, editions, rates, boosts, seasons, cycles, identities, consolidation, netting, the registry, vectors, roots, the daily comparison, Known cause, programs A and B, the validator and more.",
+        "Each term's anchor is its name in the overview's old glossary (#tdh, #cycle, #firstgm); a term merged into another keeps its anchor in that row (#sink, #rust, #versions)."
+      ],
+      "canonical_path": "/network/tdh/glossary",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/specification",
+        "/network/definitions"
+      ],
+      "tags": [
+        "network",
+        "tdh",
+        "glossary"
       ]
     },
     {

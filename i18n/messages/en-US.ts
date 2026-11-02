@@ -38,18 +38,25 @@ import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
-import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
-import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
-import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
-import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
 import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
-import networkTdhHowMessages from "@/i18n/messages/networkTdhHow.en-US.json";
-import networkTdhSpecMessages from "@/i18n/messages/networkTdhSpec.en-US.json";
-import networkTdhFormalMessages from "@/i18n/messages/networkTdhFormal.en-US.json";
-import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
+import explainedKitMessages from "@/i18n/messages/explainedKit.en-US.json";
+import explainedHubMessages from "@/i18n/messages/explainedHub.en-US.json";
+import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.en-US.json";
+import explainedTdhCheckMessages from "@/i18n/messages/explainedTdhCheck.en-US.json";
+import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.en-US.json";
+import explainedTdhSureMessages from "@/i18n/messages/explainedTdhSure.en-US.json";
+import explainedTdhSpecMessages from "@/i18n/messages/explainedTdhSpec.en-US.json";
+import explainedTdhImplMessages from "@/i18n/messages/explainedTdhImpl.en-US.json";
+import explainedTdhVersionsMessages from "@/i18n/messages/explainedTdhVersions.en-US.json";
+import explainedTdhGlossaryMessages from "@/i18n/messages/explainedTdhGlossary.en-US.json";
+import explainedTdhHowMessages from "@/i18n/messages/explainedTdhHow.en-US.json";
+import explainedTdhWalletsMessages from "@/i18n/messages/explainedTdhWallets.en-US.json";
+import explainedTdhDesignMessages from "@/i18n/messages/explainedTdhDesign.en-US.json";
+import explainedTdhProofsMessages from "@/i18n/messages/explainedTdhProofs.en-US.json";
+import explainedValidatorsHardwareMessages from "@/i18n/messages/explainedValidatorsHardware.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -4641,18 +4648,25 @@ export const EN_US_MESSAGES = {
   ...emmaMessages,
   ...museumMessages,
   ...networkMetricsMessages,
-  ...networkTdhMessages,
-  ...networkTdhExplainerMessages,
   ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
-  ...networkTdhProfileMessages,
-  ...networkTdhRulesMessages,
   ...networkTdhSharedMessages,
   ...networkTdhVerifyMessages,
-  ...networkTdhHowMessages,
-  ...networkTdhSpecMessages,
-  ...networkTdhFormalMessages,
-  ...networkTdhImplMessages,
+  ...explainedKitMessages,
+  ...explainedHubMessages,
+  ...explainedTdhOverviewMessages,
+  ...explainedTdhCheckMessages,
+  ...explainedTdhDayMessages,
+  ...explainedTdhSureMessages,
+  ...explainedTdhSpecMessages,
+  ...explainedTdhImplMessages,
+  ...explainedTdhVersionsMessages,
+  ...explainedTdhGlossaryMessages,
+  ...explainedTdhHowMessages,
+  ...explainedTdhWalletsMessages,
+  ...explainedTdhDesignMessages,
+  ...explainedTdhProofsMessages,
+  ...explainedValidatorsHardwareMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,

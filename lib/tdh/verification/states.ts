@@ -1,4 +1,4 @@
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
+import { cycleDayOfDate } from "@/components/explained/engine/tdh";
 import type {
   DifferenceClass,
   VerificationCutover,
@@ -18,7 +18,7 @@ export const DEFAULT_CUTOVER: VerificationCutover = {
  * D132: the daily runs start on 16 October 2026, and the cutover follows
  * "one week later". The cutover week is measured from here.
  */
-export const FIRST_REPORT_DATE = "2026-10-16";
+const FIRST_REPORT_DATE = "2026-10-16";
 
 /**
  * The feed's first two days (October 14 and 15, 2026) were first computed
@@ -51,7 +51,7 @@ const FIRST_RUN_BUILDS = {
 } as const;
 
 /** The builds a day's file names: the Rust core's and the Python reference's commits. */
-export interface DayBuilds {
+interface DayBuilds {
   readonly rust: string | null;
   readonly python: string | null;
 }
@@ -125,17 +125,14 @@ export function reportsAreLate(now: Date): boolean {
 }
 
 /** How the page shows a day's verdict. */
-export const VERDICT_STATES = [
-  "equal",
-  "explained",
-  "investigating",
-  "mismatch",
-  "liveUnavailable",
-  "pending",
-  "unknown",
-] as const;
-
-export type VerdictState = (typeof VERDICT_STATES)[number];
+type VerdictState =
+  | "equal"
+  | "explained"
+  | "investigating"
+  | "mismatch"
+  | "liveUnavailable"
+  | "pending"
+  | "unknown";
 
 /**
  * The daily job's verdict as a page state. `OK` is "equal" when no record
@@ -168,7 +165,7 @@ export function verdictState(
 }
 
 /** Whether an index entry has any identity that differs from 6529.io. */
-export function indexDayHasDifferences(day: VerificationIndexDay): boolean {
+function indexDayHasDifferences(day: VerificationIndexDay): boolean {
   return (
     day.identitiesEqual !== null &&
     day.identitiesTotal !== null &&
@@ -180,10 +177,10 @@ export function indexDayVerdict(day: VerificationIndexDay): VerdictState {
   return verdictState(day.verdict, indexDayHasDifferences(day));
 }
 
-export type ClassCounts = Record<DifferenceClass, number>;
+type ClassCounts = Record<DifferenceClass, number>;
 
 /** A day's differences as the page shows them: counts only, never records. */
-export interface DayDifferences {
+interface DayDifferences {
   /** Identity and wallet records that differ anywhere. */
   readonly identities: number;
   readonly wallets: number;
@@ -277,23 +274,11 @@ export function dayVerdict(day: VerificationDay): VerdictState {
   return verdictState(day.verdict, dayHasDifferences(day));
 }
 
-export type PillTone = "success" | "primary" | "warning" | "error" | "neutral";
-
-export const VERDICT_TONE: Record<VerdictState, PillTone> = {
-  equal: "success",
-  explained: "primary",
-  investigating: "warning",
-  mismatch: "error",
-  liveUnavailable: "warning",
-  pending: "neutral",
-  unknown: "neutral",
-};
-
 /**
  * The cutover as the pages show it. D132 plans it for about a date, never on
  * one, so the pages show the date with "about" and never count the days.
  */
-export type CutoverState =
+type CutoverState =
   | {
       readonly kind: "countdown";
       readonly plannedDate: string;
@@ -331,9 +316,7 @@ export function cutoverState(
 }
 
 /** Days of the index, newest first. */
-export function sortedIndexDays(
-  index: VerificationIndex
-): VerificationIndexDay[] {
+function sortedIndexDays(index: VerificationIndex): VerificationIndexDay[] {
   return [...index.days].sort((left, right) => right.cycleDay - left.cycleDay);
 }
 
@@ -343,7 +326,7 @@ export function latestIndexDay(
   return sortedIndexDays(index)[0] ?? null;
 }
 
-export interface DayNeighbours {
+interface DayNeighbours {
   readonly previous: number | null;
   readonly next: number | null;
   readonly latest: number | null;
@@ -384,7 +367,7 @@ export function missingCycleDays(
   return missing;
 }
 
-export type Freshness =
+type Freshness =
   | { readonly kind: "current"; readonly latest: number }
   | {
       readonly kind: "late";

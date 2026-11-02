@@ -4,109 +4,90 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh` explains how Total Days Held is built from whole holding days,
-edition weighting, and the collection boost. It is a user-facing guide and
-profile lookup, with links to the current calculation details and historic
-boost rules.
+`/network/tdh` is chapter 01 of 6529 Explained ([the hub](../explained/feature-explained-hub.md)):
+what Total Days Held is, what it is for, and how it is checked every day. It
+explains TDH as an area (whole days held × the card's rate × one boost),
+runs the TDH v1.4 rules in the browser, looks up a reader's own record, and
+shows how far the evidence reaches today. Every number on the page comes from
+the 6529 Explained facts layer: the daily comparison feed, the Lean manifest,
+6529.io's editions and the decision record.
 
 ## Location in the Site
 
-- Route: `/network/tdh`
-- Sidebar path: `Network -> TDH`
-- Page sections, in order: `#tdh-minute`, `#tdh-verified`, `#tdh-profile`,
-  `#tdh-1-4`, `#tdh-changes`, `#glossary`, `#tdh-deeper`, and `#tdh-explore`.
-- Older anchors still land in the right place: `#tdh-exact` and `#tdh-how`
-  open [How TDH Is Calculated](feature-tdh-how-it-works.md), `#tdh-example`
-  opens its step 12 worked example, and `#tdh-reference` scrolls to
-  `#tdh-minute`.
-- The TDH tab row links the overview to How it works, Specification, Formal
-  model, Implementations and Verification; its `More` menu adds Historic boosts,
-  Consolidation and the glossary. A previous/next pager ends every TDH page.
+- Route: `/network/tdh`; `/explained/tdh` redirects here.
+- Sidebar path: `About -> Network & Reputation -> TDH`; the hub is
+  `About -> 6529 Explained`.
+- The chapter bar under the crumbs links Overview, 1 How it works, 2 Your
+  wallets, 3 The daily check and 4 How sure, with the shelf (Specification,
+  Implementations and vectors, Consolidation design, Versions and boosts,
+  Glossary) in a menu; on a phone it scrolls sideways.
+- Sections, in order: the hero (`#tdh-minute`), 01 The picture
+  (`#tdh-example`, figure `#tdh-reference`), 02 What it is for
+  (`#tdh-weight`), 03 Your number (`#your-number`, `#tdh-profile`,
+  `#explain`), 04 How we know (`#tdh-verified`), 05 In this chapter
+  (`#tdh-deeper`, `#tdh-explore`), and How we know (the sources).
+- Older anchors that moved still land: `#tdh-changes` opens Your wallets'
+  `#why`, `#tdh-1-4` How it works part C, `#tdh-exact` and `#tdh-how` How it
+  works, and `#glossary` or `#glossary-<term>` the TDH glossary.
+- The page renders in the reader's language (en-US, en-GB, fr-FR, es-ES,
+  de-DE); `?locale=` picks one.
 
 ## What Users Can Do
 
-1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
-   you hold, and how long you have held it), the formula Days × Rate × Boost
-   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a strip:
-   the track record in bold (`Recomputed independently every day: equal to
-   6529.io on 3 of 3 published days`) with the latest day and `See the
-   comparison`. The history's limit and the builds are in the section
-   below, not in the first screen. The `TDH` eyebrow shows from `md` up, so
-   on a phone the heading starts high on the screen.
-2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
-   largest edition over its own; a Gradient's divides by the number of
-   Gradients, 101, and a NextGen token's by its collection's size) and boost
-   (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
-   collector with one Gradient, the hero's card factor by factor; the
-   Gradient earns TDH of its own on top. The example is captioned with its
-   cycle (`The card above, factor by factor · the October 11, 2026 cycle`,
-   the day the specification was replayed against 6529.io), and the weigh
-   step says the largest edition is FirstGM's 3,941 on that cycle. Its
-   days panel draws ten blocks of ten days in one colour, labelled.
-   The rate is drawn as two bars on one scale, and the boost as a scale from
-   1.00 to 2.04, the highest boost possible on the October 11, 2026 cycle.
-   The boost panel is where the reader changes the example: three buttons
-   (`What else the collector holds`: no Gradient, one Gradient, a full set)
-   move the boost, and the line under the three panels gives the card's
-   TDH: 1,271, 1,296 or 2,288. FirstGM (Meme #8) is introduced there as the
-   reference card.
-3. Use `Explain my TDH`, right after the minute: it looks up 6529.io's
-   stored calculation for a profile or wallet, card by card, the values
-   the daily comparison tests against TDH-v1 (described below).
-4. Read `Checked daily, in public`: first the latest day from the feed, as
-   figures (the total TDH identical in all three, identity records and
-   wallet records equal), how they were read (the Python reference on the
-   Rust run's input; 6529.io's backend from its own indexer, its files
-   fetched from Arweave and accepted only when its upload key's signature,
-   size and data root verify; in one closed disclosure), the builds the
-   day's file names (`Builds: Rust core validator@…, Python reference
-   6529chain@…`), every published day as a dated chip, the `Not yet fully
-   checked` label, which links to the latest day's provenance, with its
-   meaning beside it (taken as reported until the daily run checks the
-   full history against 6529's own node, with no date), and a link to the
-   dashboard;
-   one line on what is not public yet (P26, its vectors and the programs'
-   code) with a link to what anyone can check today; then three points
-   (written separately, each reproducing every conformance vector;
-   specified in Lean as a proposal, with the netting theorem's hypotheses:
-   every address's net movement, the burn addresses' included, and both
-   versions of the day with a result; compared every day, scheduled from
-   October 16); then `Fixed before the cutover`, four dated items of one
-   line each with the detail under `More` (the edition-floor text,
-   measured on the October 11, 2026 cycle and corrected on October 15, the
-   flaw program B found in the first netting rule, what the Lean model
-   showed netting does not guarantee, and five rounds of differential
-   tests, all settled but E13, in P26 or, for E8, the vector format and the
-   references), and a link to the
-   Lean proof manifest on the daily feed.
-5. In `Explain my TDH`, enter a profile handle or wallet-like identity.
-   Its results use the same words as the other TDH pages (raw days, base
-   TDH, boost, final TDH).
-   Public lookups can be submitted without wallet authentication. The page
-   shows an empty state before submission, loading, not-found, and retryable
-   error states, followed by the stored snapshot when available. When the
-   snapshot is the latest compared day's and all three computations agreed
-   on every record, a line says this record was reproduced by two
-   separately written programs from one input, and by 6529.io. Each
-   collection's row says how many cards it holds.
-6. Expand collection holdings, boost details, and wallet information in a
-   profile result. Holdings tables show token, copies, whole days, rate, base,
-   and final TDH; collections with more than 20 tokens use Previous/Next
-   pagination.
-7. Open `Current boosts` for today's values (read on the server, so they
-   render with the page; a failed refresh in the browser keeps them): the
-   full-set boost and the Gradient bonus, an arrow link to the four boost
-   figures these pages quote, drawn on one scale on the Historic boosts
-   page (`#boost-figures`), the season bonuses as ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
-   Nakamoto, and how the bonuses combine in a disclosure. Then `When your
-holdings change` for common questions about sales, transfers and new
-   cards, and `Glossary` for the terms the TDH pages use (six to read your
-   own TDH, ending with final TDH, then the rest, including netting,
-   the underflow test, conformance vectors, roots, the cutover, classes A to
-   D and program A and B).
-8. Follow `Go deeper` to How it works (every step, with examples you can
-   change), the specification, the formal model, the implementations and the
-   verification dashboard.
+1. Read the first screen: the title `Total Days Held`, one sentence (every
+   card you hold adds its rate for each whole day held, one boost multiplies
+   the total, and the result weighs your votes on the next Meme card), two
+   marks (`Live on 6529.io` TDH v1.4; `Recomputed daily`, equal on so many of
+   the published results), `Explain my TDH` and `How it is calculated`, and
+   `Today on the network`: the latest total TDH, the identities, `Rust core =
+Python reference = 6529.io`, and the last five results with today open.
+2. Use the machine beside it: pick a card (Meme #2, #4, #3, and the newest card
+   while it is still minting, counted at its claim floor; Meme #562 when the
+   newest card has finished minting or its floor is not on record), move the whole days
+   held, and choose no boost, one Gradient or a full set. The rows show the
+   rate (3,941 ÷ the edition) and the boost, the copy's TDH, and its area
+   (width days, height rate, the boost a hatched band); `Tomorrow's result
+adds n.` `Break it: sell it` takes the days with the copy; pressing it again
+   restores them.
+3. Read 01 `A copy's TDH is an area.` and its figure: four real editions
+   drawn to scale on one baseline (a rare card, a 310-copy card, Meme #2 and
+   FirstGM), each about 3,941 TDH a day before boosts. Under it, `Everyone's
+   TDH` draws the whole network as one area split by rank (the top 10, the
+   next 90, the next 900 and everyone else), against each group's share of
+   the identities, with a table of the same shares and the time 6529.io's API
+   was read. It streams in after the page; if the API does not answer, one
+   line says so. `?distribution=off` hides it for a review.
+4. Read 02 `Your TDH is your weight here.`: TDH is not money; it weighs votes
+   on the next card, the Rep and NIC (Network Identity Check) ratings you
+   can give, your Level, and later validators (decided, D112; the software,
+   0.1.0, is built and being tested; so far only 6529's own validators sign, in testing). The art itself is CC0, with a link to the hub's one-minute
+   answer.
+5. Use 03 `Explain my TDH`: enter a profile, ENS name or address. 6529.io's
+   stored calculation is shown card by card (copies × whole days × rate =
+   base TDH), then base × boost = total. When the record's snapshot block is
+   the latest compared day's and every identity agreed, the page says the
+   record was included and links to that day; otherwise it says the record is
+   not in a comparison yet. Public lookups need no wallet authentication; a
+   name that is not found and a failed request each have their own answer,
+   with `Try again`. Before a lookup, three labelled example records show a
+   record found, a card bought this week (it counts from the result after
+   next, with the snapshots drawn) and a name not found. `Why did my TDH
+change? Pick what happened` opens Your wallets' first section.
+6. Read 04 `Checked every day, and published with the files to check it.`:
+   seven rungs from written down to signed by validators, each with its
+   marks, and a blue line after the third where today's evidence stops. The
+   daily rung counts the published results since the first, and names any day
+   inside that range with no result yet. Rung 5 shows the zero-knowledge
+   proofs in full: program A (the Rust core) in SP1, with the day it proved
+   and mainnet's read-only acceptance, and program B in RISC Zero, not yet;
+   rung 6 the D128 contract, built and not deployed; rung 7 the validator
+   software, built and being tested. Then `This number would be wrong if`
+   with what would close each gap, and the candour line with links to the
+   daily check and How sure.
+7. Use 05 `In this chapter` to open the four spine pages or the shelf (side
+   by side on a desktop), and How we know to copy the page as Markdown, cite
+   it, report an error, open the corrections log, or download every number's
+   source as JSON.
 
 ## Calculation Timing and Eligibility
 
@@ -133,8 +114,8 @@ consolidate wallets.
 
 FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held
 for one complete day earns one base TDH before boosts. Its open-mint design is
-central to this role. `TDH in a minute` introduces FirstGM as the reference
-card; the old `#tdh-reference` anchor scrolls there.
+central to this role. The overview's `Every edition has the same area` figure
+draws FirstGM as the unit; the old `#tdh-reference` anchor scrolls there.
 
 The implementation derives edition rates from the largest eligible effective
 Meme edition. FirstGM's intended reference role and this implementation rule are

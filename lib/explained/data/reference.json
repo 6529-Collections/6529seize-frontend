@@ -1,0 +1,146 @@
+{
+  "note": "Values the TDH reference pages (How sure and the shelf) print from 6529's design record and 6529.io's own records, each with its source and commit. History does not change; a value that can change is read from the feed, the manifest or the record instead. __tests__/explained/referenceFacts.test.ts checks each value against the source that ships with the site, where one does. No person is named.",
+  "versions": {
+    "source": "6529.io's boost schedules: the Historic boosts page's table and its current rules",
+    "current": {
+      "id": "tdh-1-4",
+      "version": "1.4",
+      "since": "2025-10-10"
+    },
+    "past": [
+      {
+        "id": "tdh-1-3",
+        "version": "1.3",
+        "from": "2024-03-29",
+        "to": "2025-10-09",
+        "fullSet": 1.55,
+        "maxSeason": 11
+      },
+      {
+        "id": "tdh-1-2",
+        "version": "1.2",
+        "from": "2023-12-30",
+        "to": "2024-03-28",
+        "fullSet": 1.25,
+        "maxSeason": 5
+      },
+      {
+        "id": "tdh-1-1",
+        "version": "1.1",
+        "from": "2023-07-14",
+        "to": "2023-12-29",
+        "fullSet": 1.2,
+        "maxSeason": 4
+      }
+    ],
+    "before": {
+      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards",
+      "id": "tdh-before-1-1",
+      "from": "2022-12-16",
+      "to": "2023-07-13",
+      "fullSet": 1.2,
+      "fullSetMax": 1.3,
+      "partialHigh": 1.05,
+      "partialLow": 1.01
+    },
+    "inVersion": {
+      "source": "D136: 6529.io's four-wallet consolidation, live from 2026-10-15 inside TDH v1.4",
+      "fourWallets": "2026-10-15"
+    }
+  },
+  "names": {
+    "source": "P26's history in 6529chain: the rule version tdh-v1.0 until 3bfa7b0, then tdh-v1.4 (D136, D137)",
+    "renamedCommit": "3bfa7b052202e40b0f178ee6de7f75f86ba5261c",
+    "renamedAt": "2026-10-18T07:04:34Z",
+    "v10": {
+      "ruleVersion": "tdh-v1.0",
+      "commit": "f8400962310de6636b256c3b53bbfddbdec8f329",
+      "registryHash": "0x74b4a8f96e3f1fbc3f44167bb42f0a18effb7a0f49d12bc8b88cdb3784c663d3",
+      "ruleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22",
+      "maxWallets": 3
+    }
+  },
+  "firstgm": {
+    "source": "P26 §5.2 and §10 at 6529chain 3bfa7b0: FirstGM (Meme 8) minted 6,529 copies; its edition is 6,529 minus 2,588, 3,941",
+    "minted": 6529
+  },
+  "netting": {
+    "source": "P26 §7.1's history in 6529chain, 2026-10-15: the sentence at 0621ed4, narrowed at 16d70d0, narrowed to the stacks at 1c69528, stated in the theorem's exact form at a4db4ae",
+    "first": {
+      "commit": "0621ed4651e7a3be37bfa1862648d0d0291215d5",
+      "at": "2026-10-15T11:32:54Z"
+    },
+    "narrowed": {
+      "commit": "16d70d0fbf364fe6194efdc8fba4671cb6b22b13",
+      "at": "2026-10-15T15:35:35Z"
+    },
+    "proved": {
+      "commit": "1c695283f38c5067e164ae674377599b978469ff",
+      "at": "2026-10-15T18:18:13Z"
+    },
+    "exact": {
+      "commit": "a4db4ae1c00df82f23b1a4dc4566acb8c3bdea69",
+      "at": "2026-10-15T20:53:47Z"
+    }
+  },
+  "cases": {
+    "source": "the Lean model's counterexamples, cases F, H and I, as the manifest's sections 1 and 3 state them (PROOFS.md)",
+    "H": {
+      "copies": 10,
+      "mintedBefore": 10,
+      "mintedAfter": 20,
+      "rateBefore": 2,
+      "rateAfter": 4,
+      "finalBefore": 800,
+      "finalAfter": 1600
+    },
+    "I": {
+      "hBefore": 3,
+      "hAfter": 6,
+      "finalBefore": 32,
+      "finalAfter": 60
+    },
+    "F": {
+      "wallet": 102,
+      "identity": 208
+    }
+  },
+  "model": {
+    "source": "the Lean model's PROOFS.md at 6529chain 2694e72: the model and P26 agree on every vector, on the 2026-10-11 cycle and on 6,000 random inputs under both rules",
+    "randomInputs": 6000,
+    "replayDay": "2026-10-11"
+  },
+  "replay": {
+    "source": "P26 §13 at 6529chain 3bfa7b0: the 2026-10-11 cycle from raw logs, read by the validator's own ingestion",
+    "day": "2026-10-11",
+    "total": 2061888816,
+    "withoutSinks": 2060802863
+  },
+  "validatorCap": {
+    "source": "decision D96; P53 §6.3 and §6.4",
+    "percent": "19.99"
+  },
+  "programs": {
+    "source": "6529's design record: P52 §3.4 (the run times of the 2026-10-11 cycle), the second implementation's findings of 2026-10-11, and 6529chain's tdh-formal workflow",
+    "rustReferenceSeconds": 0.6,
+    "cleanRoomChoices": 23,
+    "randomPerChange": 1000
+  },
+  "publicVectors": {
+    "source": "the five public vectors served as /network/tdh/public-vectors.json (components/explained/engine/publicVectors.ts); a test checks the two lists agree",
+    "ids": [
+      "04-mid-period-transfer",
+      "06-consolidation-age-carry",
+      "23-identity-sums",
+      "28-registry-hash",
+      "36-erc1155-send-and-return"
+    ]
+  },
+  "difftest": {
+    "source": "the validator's differential test record (tools/difftest/README.md): seven rounds from 2026-10-15 to 2026-10-18, the seventh at 6529chain e252d5f, with one finding (E15, how deep a file may nest) still open",
+    "rounds": 7,
+    "from": "2026-10-15",
+    "to": "2026-10-18",
+    "open": "E15"
+  }
+}

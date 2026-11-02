@@ -30,9 +30,8 @@ export const tdhProfileSchema = z.object({
 });
 
 export type TdhProfile = z.infer<typeof tdhProfileSchema>;
-export type TdhProfileToken = z.infer<typeof tokenSchema>;
-export type TdhCollection = "memes" | "gradients" | "nextgen";
-export const TDH_COLLECTIONS: readonly TdhCollection[] = [
+type TdhCollection = "memes" | "gradients" | "nextgen";
+const TDH_COLLECTIONS: readonly TdhCollection[] = [
   "memes",
   "gradients",
   "nextgen",

@@ -17,12 +17,7 @@ import { z } from "zod";
  */
 
 const FORMAL_MANIFEST_FORMAT = "6529chain.tdh-lean-manifest.v1";
-export const FORMAL_STATUSES = [
-  "proved",
-  "counterexample",
-  "deferred",
-] as const;
-export type FormalStatus = (typeof FORMAL_STATUSES)[number];
+const FORMAL_STATUSES = ["proved", "counterexample", "deferred"] as const;
 
 /** Lean's three standard axioms, the only ones the audit allows. */
 const STANDARD_AXIOMS = ["propext", "Classical.choice", "Quot.sound"] as const;
@@ -66,12 +61,20 @@ const theorem = z.object({
 const vectorRun = z
   .object({
     id: z.string().min(1).max(40),
+    description: nullish(z.string().max(400)),
     passed: count,
     total: count,
     failed: count,
     checks: count,
   })
   .refine((run) => run.passed <= run.total, "more passed than total");
+
+/** A PROOFS.md section as the manifest titles it, with the rules it is about; its prose is not read. */
+const manifestSection = z.object({
+  id: z.string().min(1).max(20),
+  title: z.string().min(1).max(200),
+  refs: nullish(z.array(z.string().min(1).max(40)).max(16)),
+});
 
 const documentChange = z.object({
   path: z.string().max(200),
@@ -83,6 +86,8 @@ export const formalManifestSchema = z
   .object({
     format: z.literal(FORMAL_MANIFEST_FORMAT),
     generatedAt: timestamp,
+    /** The script that wrote the file: it builds, audits and runs the vectors first. */
+    generator: nullish(z.string().regex(/^[\w./-]{1,120}$/)),
     source: z.object({
       repository: z.string().min(1).max(64),
       commit: fullCommit,
@@ -102,6 +107,10 @@ export const formalManifestSchema = z
     }),
     build: z.object({
       ok: z.boolean().nullable(),
+      /** Lake's jobs for the whole model, its audit and its vector runner. */
+      jobs: nullish(count),
+      /** How the build checks each kind of entry, in the manifest's words. */
+      howChecked: nullish(z.array(z.string().min(1).max(1_000)).max(16)),
       audit: z.object({
         ok: z.boolean().nullable(),
         allowedAxioms: z.array(axiomName).max(16),
@@ -109,6 +118,7 @@ export const formalManifestSchema = z
       }),
     }),
     vectors: z.array(vectorRun).max(32),
+    sections: nullish(z.array(manifestSection).max(64)),
     facts: z.object({ checks: count }),
     summary: z.object({
       proved: count,
@@ -162,10 +172,7 @@ export function parseFormalManifest(value: unknown) {
  * Lean name.
  */
 /** Whether a manifest entry is the one a name gives: its id, or its Lean name in full or short. */
-export function formalEntryMatches(
-  entry: FormalTheorem,
-  name: string
-): boolean {
+function formalEntryMatches(entry: FormalTheorem, name: string): boolean {
   return (
     entry.id === name ||
     entry.leanName === name ||

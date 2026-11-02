@@ -1,5 +1,6 @@
 import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import { explainedNavItem } from "@/components/navigation/explainedNavEntry";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import {
@@ -127,6 +128,7 @@ function getAboutSection(
     name: t(DEFAULT_LOCALE, "navigation.primary.about"),
     icon: DocumentTextIcon,
     items: [
+      explainedNavItem(),
       {
         name: t(DEFAULT_LOCALE, "navigation.about.overview"),
         href: "/about",

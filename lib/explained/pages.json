@@ -1,0 +1,652 @@
+{
+  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust. Round 3 (2026-11-01): the overview, How sure and Zero-knowledge proofs to 1,150, 2,750 and 3,100 words, for the corrections the fact-check and the judges asked for (xTDH defined, the model named as a model, the contract's immutability and verifier routes, the two random-input runs), and the hub to 155 words a screen for TDH spelled out on first use, the CC0 tool named, the proved items' limits and the schedule from its fact. Round 4 (2026-11-01): the overview to 1,175 words for the ladder's limits named in place and a line under each shelf page; How it works to 2,150 words and 190 a screen for every collection's rate in the full calculation (Memes, Gradients, NextGen) and beta in cents; a day's receipt to 520 for 6529.io's two uploads linked for diffing; Zero-knowledge proofs to 3,200 for a plain definition of a zero-knowledge proof and glosses of its terms. Round 5 (2026-11-02): the hub to 160 words a screen for the zero-knowledge proof defined in one clause, the theorem counts split between TDH and the validator rules, and Gradients named where CC0 stops; How sure to 2,800 words for the counts split the same way, the netting limit stated as the printed Lean states it, D144 named on the validator claims and the jargon in its limits glossed.",
+  "pages": [
+    {
+      "id": "hub",
+      "route": "/explained",
+      "title": "How 6529 works, and how we know.",
+      "genre": "H",
+      "mockup": "hub.html",
+      "lane": "P1",
+      "sources": [
+        "app/explained/page.tsx",
+        "app/explained/hub/**",
+        "app/explained/_lib/**"
+      ],
+      "dependsOn": ["D89", "D116", "D142"],
+      "checkedThrough": "D157",
+      "budget": {
+        "wordsPerScreen": 160
+      },
+      "states": [
+        {
+          "name": "loop-votes",
+          "clicks": ["[data-step=\"4\"]"],
+          "el": "[data-lens=\"loop\"]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-overview",
+      "route": "/network/tdh",
+      "title": "Total Days Held",
+      "genre": "E",
+      "mockup": "tdh-overview.html",
+      "lane": "P1",
+      "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
+      "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 1175,
+        "firstScreen": 120,
+        "figuresPer1000": 6
+      },
+      "states": [
+        {
+          "name": "machine-card4-gradient",
+          "clicks": [
+            "[data-lens=\"machine\"] [data-card=\"4\"]",
+            "[data-lens=\"machine\"] [data-beta=\"102\"]"
+          ],
+          "el": "[data-lens=\"machine\"]"
+        },
+        {
+          "name": "machine-break-sell",
+          "clicks": ["[data-break=\"sell\"]"],
+          "el": "[data-lens=\"machine\"]"
+        },
+        {
+          "name": "explain-new-buyer",
+          "clicks": ["[data-pick=\"new\"]"],
+          "el": "#your-number"
+        }
+      ]
+    },
+    {
+      "id": "tdh-how-it-works",
+      "route": "/network/tdh/how-it-works",
+      "title": "How TDH is calculated",
+      "genre": "E",
+      "mockup": "tdh-how-it-works.html",
+      "lane": "P2",
+      "sources": ["app/network/tdh/how-it-works/**"],
+      "dependsOn": ["D89", "D131", "D132", "D136"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 2150,
+        "firstScreen": 120,
+        "figuresPer1000": 6,
+        "wordsPerScreen": 190
+      },
+      "states": [
+        {
+          "name": "firstday-2359",
+          "clicks": ["[data-at=\"beforeMidnight\"]"],
+          "el": "[data-lens=\"firstday\"]"
+        },
+        {
+          "name": "firstday-break-sell",
+          "clicks": ["[data-break=\"sellearly\"]"],
+          "el": "[data-lens=\"firstday\"]"
+        },
+        {
+          "name": "rates-break-152",
+          "clicks": ["[data-break=\"floor\"]"],
+          "el": "[data-lens=\"rates\"]"
+        },
+        {
+          "name": "boost-break-sixth",
+          "clicks": ["[data-break=\"gradient\"]"],
+          "el": "[data-lens=\"boost\"]"
+        },
+        {
+          "name": "netting-break-mintburn",
+          "clicks": ["[data-break=\"mintburn\"]"],
+          "el": "[data-lens=\"netting\"]"
+        },
+        {
+          "name": "eligible-break-mintearly",
+          "clicks": ["[data-break=\"mintearly\"]"],
+          "el": "[data-lens=\"eligible\"]"
+        },
+        {
+          "name": "stacks-sell",
+          "clicks": ["[data-act=\"sell\"]"],
+          "el": "[data-lens=\"stacks\"]"
+        },
+        {
+          "name": "stacks-break-movesell",
+          "clicks": ["[data-break=\"movesell\"]"],
+          "el": "[data-lens=\"stacks\"]"
+        },
+        {
+          "name": "identity-break-oneway",
+          "clicks": ["[data-break=\"oneway\"]"],
+          "el": "[data-lens=\"identity\"]"
+        },
+        {
+          "name": "totals-break-wallets",
+          "clicks": ["[data-break=\"wallets\"]"],
+          "el": "[data-lens=\"totals\"]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-wallets",
+      "route": "/network/tdh/consolidation",
+      "title": "Up to four wallets count as one collector.",
+      "genre": "E-guide",
+      "mockup": "tdh-wallets.html",
+      "lane": "P2",
+      "sources": ["app/network/tdh/consolidation/*"],
+      "dependsOn": ["D136"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 900,
+        "firstScreen": 130,
+        "figuresPer1000": 3
+      },
+      "states": [
+        {
+          "name": "why-moved",
+          "clicks": ["[data-pick=\"moved\"]"],
+          "el": "#why"
+        },
+        {
+          "name": "wallets-step1-split",
+          "clicks": ["[data-preset=\"step1\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        },
+        {
+          "name": "wallets-batch",
+          "clicks": ["[data-preset=\"batch\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        },
+        {
+          "name": "wallets-break-five",
+          "clicks": ["[data-break=\"five\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-daily-check",
+      "route": "/network/tdh/verification",
+      "title": "The daily check",
+      "genre": "V",
+      "mockup": "tdh-daily-check.html",
+      "lane": "P3",
+      "sources": [
+        "app/network/tdh/verification/*",
+        "app/network/tdh/verification/components/**"
+      ],
+      "dependsOn": ["D116", "D121", "D131", "D132"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 1000,
+        "firstScreenMin": 150,
+        "firstScreen": 285
+      },
+      "states": [
+        {
+          "name": "break-fail",
+          "clicks": ["[data-break=\"fail\"]"],
+          "el": "[data-lens=\"failday\"]"
+        },
+        {
+          "name": "all-results",
+          "clicks": ["[data-all-results] > summary"],
+          "el": "[data-all-results]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-day",
+      "route": "/network/tdh/verification/{latestDay}",
+      "title": "A day's receipt",
+      "genre": "V",
+      "mockup": "tdh-day-20744.html",
+      "lane": "P3",
+      "sources": [
+        "app/network/tdh/verification/[cycleDay]/**",
+        "app/network/tdh/verification/day-not-found/**"
+      ],
+      "dependsOn": ["D116", "D136", "D137", "D144"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 520,
+        "firstScreenMin": 150,
+        "firstScreen": 285
+      },
+      "states": []
+    },
+    {
+      "id": "tdh-how-sure",
+      "route": "/network/tdh/formal",
+      "title": "What is proved, what is tested, and what is not.",
+      "genre": "V",
+      "mockup": "tdh-how-sure.html",
+      "lane": "P4",
+      "sources": ["app/network/tdh/formal/**"],
+      "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137", "D148"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 2800,
+        "firstScreenMin": 150,
+        "firstScreen": 285,
+        "wordsPerScreen": 300
+      },
+      "states": [
+        {
+          "name": "theorem-groups",
+          "clicks": ["[data-claim=\"7\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "theorem-cap",
+          "clicks": ["[data-claim=\"5a\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "group-open",
+          "clicks": ["#contains details > summary"],
+          "el": "#contains"
+        }
+      ]
+    },
+    {
+      "id": "tdh-proofs",
+      "route": "/network/tdh/proofs",
+      "title": "Zero-knowledge proofs",
+      "genre": "V",
+      "mockup": null,
+      "lane": "P5",
+      "sources": ["app/network/tdh/proofs/**"],
+      "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
+      "checkedThrough": "D157",
+      "budget": {
+        "words": 3200,
+        "firstScreenMin": 150,
+        "firstScreen": 285,
+        "wordsPerScreen": 300
+      },
+      "states": [
+        {
+          "name": "pair-fails",
+          "clicks": ["[data-break=\"pairfails\"]"],
+          "el": "[data-lens=\"pairfails\"]"
+        },
+        {
+          "name": "words-start",
+          "clicks": ["[data-group=\"start\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "words-program-b",
+          "clicks": ["[data-group=\"b\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "words-break-flip",
+          "clicks": ["[data-break=\"flip\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "guard-blocks",
+          "clicks": ["[data-scenario=\"blocks\"]"],
+          "el": "[data-lens=\"guard\"]"
+        },
+        {
+          "name": "guard-flaw",
+          "clicks": ["[data-scenario=\"flaw\"]"],
+          "el": "[data-lens=\"guard\"]"
+        },
+        {
+          "name": "guard-break-rules",
+          "clicks": ["[data-break=\"rules\"]"],
+          "el": "[data-lens=\"guard\"]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-specification",
+      "route": "/network/tdh/specification",
+      "title": "Specification",
+      "genre": "R",
+      "mockup": "tdh-specification.html",
+      "lane": "P4",
+      "sources": ["app/network/tdh/specification/**"],
+      "dependsOn": ["D30", "D89", "D116", "D121", "D131", "D136", "D137"],
+      "checkedThrough": "D157",
+      "states": []
+    },
+    {
+      "id": "tdh-implementations",
+      "route": "/network/tdh/implementations",
+      "title": "Implementations and vectors",
+      "genre": "R",
+      "mockup": "tdh-implementations.html",
+      "lane": "P4",
+      "sources": ["app/network/tdh/implementations/**"],
+      "dependsOn": ["D116", "D119", "D125", "D132"],
+      "checkedThrough": "D157",
+      "states": []
+    },
+    {
+      "id": "tdh-consolidation-design",
+      "route": "/network/tdh/consolidation/design",
+      "title": "Consolidation design",
+      "genre": "R",
+      "mockup": "tdh-consolidation-design.html",
+      "lane": "P2",
+      "sources": ["app/network/tdh/consolidation/design/**"],
+      "dependsOn": ["D136"],
+      "checkedThrough": "D157",
+      "states": [
+        {
+          "name": "order-step1-split",
+          "clicks": ["[data-preset=\"step1\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        },
+        {
+          "name": "order-break-five",
+          "clicks": ["[data-break=\"five\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        }
+      ]
+    },
+    {
+      "id": "tdh-versions",
+      "route": "/network/tdh/historic-boosts",
+      "title": "Versions and boosts",
+      "genre": "R",
+      "mockup": "tdh-versions.html",
+      "lane": "P4",
+      "sources": ["app/network/tdh/historic-boosts/**"],
+      "dependsOn": ["D136", "D137"],
+      "checkedThrough": "D157",
+      "states": []
+    },
+    {
+      "id": "tdh-glossary",
+      "route": "/network/tdh/glossary",
+      "title": "Glossary",
+      "genre": "R",
+      "mockup": "tdh-glossary.html",
+      "lane": "P4",
+      "sources": ["app/network/tdh/glossary/**"],
+      "dependsOn": [
+        "D30",
+        "D41",
+        "D89",
+        "D112",
+        "D119",
+        "D121",
+        "D125",
+        "D131",
+        "D132",
+        "D136",
+        "D137"
+      ],
+      "checkedThrough": "D157",
+      "states": []
+    },
+    {
+      "id": "validators-hardware",
+      "route": "/explained/validators/hardware",
+      "title": "Validator hardware",
+      "genre": "R",
+      "mockup": null,
+      "lane": "VH",
+      "sources": ["app/explained/validators/hardware/**"],
+      "dependsOn": ["D118", "D144", "D146", "D147", "D149", "D156", "D157"],
+      "checkedThrough": "D157",
+      "states": [
+        {
+          "name": "chooser-cloud",
+          "clicks": ["[data-q=\"where\"] [data-answer=\"no\"]"],
+          "el": "[data-lens=\"chooser\"]"
+        },
+        {
+          "name": "cloud-arm",
+          "clicks": ["[data-lens=\"cloud\"] [data-arch=\"arm\"]"],
+          "el": "[data-lens=\"cloud\"]"
+        },
+        {
+          "name": "part-storage",
+          "clicks": ["[data-part=\"storage\"] summary"],
+          "el": "[data-part=\"storage\"]"
+        },
+        {
+          "name": "part-power",
+          "clicks": ["[data-part=\"power\"] summary"],
+          "el": "[data-part=\"power\"]"
+        }
+      ]
+    },
+    {
+      "id": "kit",
+      "route": "/explained/kit",
+      "title": "The 6529 Explained kit",
+      "genre": "kit",
+      "mockup": null,
+      "lane": "K",
+      "sources": ["app/explained/kit/**"],
+      "dependsOn": [],
+      "checkedThrough": "D141",
+      "states": [
+        {
+          "name": "lens-break",
+          "clicks": ["[data-lens=\"kit-area\"] [data-break=\"sell\"]"],
+          "el": "[data-lens=\"kit-area\"]"
+        },
+        {
+          "name": "lens-clock",
+          "clicks": ["[data-clock=\"kit\"] [data-clock-step=\"-1\"]"],
+          "el": "[data-kit-section=\"lens\"]"
+        },
+        {
+          "name": "verdict-simulated",
+          "clicks": ["[data-lens=\"kit-failday\"] [data-break=\"fail\"]"],
+          "el": "[data-lens=\"kit-failday\"]"
+        },
+        {
+          "name": "loop-step",
+          "clicks": ["[data-lens=\"kit-loop\"] [data-step=\"4\"]"],
+          "el": "[data-lens=\"kit-loop\"]"
+        },
+        {
+          "name": "predict-answer",
+          "clicks": ["[data-predict=\"kit\"] [data-right=\"1\"]"],
+          "el": "[data-predict=\"kit\"]"
+        },
+        {
+          "name": "shelf-open",
+          "clicks": ["[data-shelf] summary"],
+          "el": "[data-kit-section=\"shell\"]",
+          "widths": ["1440"]
+        },
+        {
+          "name": "switcher-open",
+          "clicks": ["[data-switcher] button"],
+          "el": "[data-kit-section=\"shell\"]",
+          "widths": ["1440"]
+        }
+      ]
+    }
+  ],
+  "readers": [
+    {
+      "persona": "newcomer",
+      "task": "TDH and why it matters",
+      "budget": "60 s, first screen",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh",
+        "selector": "#tdh-minute"
+      },
+      "firstScreen": true
+    },
+    {
+      "persona": "newcomer",
+      "task": "What CC0 means for my card",
+      "budget": "2 clicks",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/explained",
+        "anchor": "cc0"
+      },
+      "clicks": 2
+    },
+    {
+      "persona": "newcomer",
+      "task": "Do I trust my number?",
+      "budget": "2 min",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh",
+        "anchor": "explain"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "collector",
+      "task": "Why my TDH changed after a move",
+      "budget": "1 click from the overview, first section",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/consolidation",
+        "anchor": "why"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "collector",
+      "task": "Add a fourth wallet, safely",
+      "budget": "3 min",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/consolidation"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "collector",
+      "task": "Today's check",
+      "budget": "first screen, phone included",
+      "start": "/network/tdh/verification",
+      "target": {
+        "route": "/network/tdh/verification",
+        "selector": "#side"
+      },
+      "firstScreen": true
+    },
+    {
+      "persona": "engineer",
+      "task": "Rate formula and floor, exact",
+      "budget": "1 screen",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/how-it-works",
+        "anchor": "part-b"
+      },
+      "clicks": 2
+    },
+    {
+      "persona": "engineer",
+      "task": "Vectors and how to run them",
+      "budget": "2 clicks",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/implementations"
+      },
+      "clicks": 2
+    },
+    {
+      "persona": "engineer",
+      "task": "Reproduce a day",
+      "budget": "the receipt and the pin block",
+      "start": "/network/tdh/verification",
+      "target": {
+        "route": "/network/tdh/verification/{latestDay}"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "mathematician",
+      "task": "What is proved, where, what not",
+      "budget": "one page",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/formal"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "mathematician",
+      "task": "A counterexample told honestly",
+      "budget": "one section",
+      "start": "/network/tdh/formal",
+      "target": {
+        "route": "/network/tdh/formal",
+        "anchor": "featured"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "operator",
+      "task": "What a validator computes, why two",
+      "budget": "1 page",
+      "start": "/network/tdh",
+      "target": {
+        "route": "/network/tdh/verification",
+        "anchor": "classes"
+      },
+      "clicks": 2
+    },
+    {
+      "persona": "operator",
+      "task": "What the check shows and not",
+      "budget": "1 section",
+      "start": "/network/tdh/verification",
+      "target": {
+        "route": "/network/tdh/verification",
+        "anchor": "diff"
+      },
+      "clicks": 1
+    },
+    {
+      "persona": "journalist",
+      "task": "6529 in two sentences",
+      "budget": "the hub's first screen",
+      "start": "/explained",
+      "target": {
+        "route": "/explained",
+        "selector": "[data-ex-lede]"
+      },
+      "firstScreen": true
+    },
+    {
+      "persona": "journalist",
+      "task": "The most impressive thing",
+      "budget": "the hub",
+      "start": "/explained",
+      "target": {
+        "route": "/explained",
+        "selector": "[data-ex-checkable]"
+      },
+      "clicks": 0
+    },
+    {
+      "persona": "artist",
+      "task": "CC0, what I give and keep",
+      "budget": "2 clicks",
+      "start": "/explained",
+      "target": {
+        "route": "/explained",
+        "anchor": "cc0"
+      },
+      "clicks": 1
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "note": "A snapshot of 6529.io's public API (tdh/consolidated_metrics), summed by rank, for when the API cannot be read. Only the sums are kept: no identity, wallet or name. Refresh with the loader's own rules at ship time.",
+  "source": "6529.io public API: tdh/consolidated_metrics",
+  "readAt": "2026-11-01T09:09:32Z",
+  "total": 2117049715,
+  "identities": 10205,
+  "groups": [
+    {
+      "key": "top",
+      "count": 10,
+      "tdh": 806051316
+    },
+    {
+      "key": "next",
+      "count": 90,
+      "tdh": 648029260
+    },
+    {
+      "key": "next2",
+      "count": 900,
+      "tdh": 538916501
+    },
+    {
+      "key": "rest",
+      "count": 9205,
+      "tdh": 124052638
+    }
+  ]
+}

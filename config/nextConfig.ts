@@ -130,6 +130,13 @@ export function sharedConfig(
     poweredByHeader: false,
     redirects() {
       return Promise.resolve([
+        // CC0 in one minute lives on the 6529 Explained hub until The Memes
+        // and CC0 has its own page; a guessed /explained/cc0 goes there.
+        {
+          source: "/explained/cc0",
+          destination: "/explained#cc0",
+          permanent: false,
+        },
         {
           source: "/delegation/delegation-center",
           destination: "/safe-collecting",
@@ -153,6 +160,19 @@ export function sharedConfig(
         {
           source: "/about/nft-delegation",
           destination: "/safe-collecting",
+          permanent: true,
+        },
+        {
+          // 6529 Explained's TDH chapter stays at /network/tdh (MAP.md §1).
+          source: "/explained/tdh",
+          destination: "/network/tdh",
+          permanent: true,
+        },
+        // Versions and boosts, 6529 Explained's TDH shelf page, keeps the
+        // Historic boosts route; its own name leads there too.
+        {
+          source: "/network/tdh/versions",
+          destination: "/network/tdh/historic-boosts",
           permanent: true,
         },
         // The 6529 Stream public contract review was removed; its section is

@@ -12,6 +12,8 @@ generated
 *.generated.*
 native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
+# byte-exact copies of published files, checked by SHA-256
+lib/explained/fixtures
 coverage
 content/delegation
 public/delegation-content

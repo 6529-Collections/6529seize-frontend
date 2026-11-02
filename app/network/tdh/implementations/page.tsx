@@ -1,307 +1,588 @@
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import { loadFormalManifest } from "@/lib/tdh/formal/loadFormalManifest.server";
-import { conformanceRun } from "@/lib/tdh/formal/manifest";
+import { kt } from "@/components/explained/i18n";
+import Mark from "@/components/explained/marks/Mark";
+import { Glyph } from "@/components/explained/marks/glyphs";
+import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
+import ExplainedShell from "@/components/explained/shell/ExplainedShell";
+import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import { EX_BUTTON, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+import { loadFactBook } from "@/lib/explained/feed.server";
+import { factText, type FactBook } from "@/lib/explained/facts";
+import CopyButton from "@/components/explained/reference/CopyButton";
+import ImplAnchors from "./ImplAnchors";
+import RunVectors from "./RunVectors";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
-  loadVerificationSummary,
-  type VerificationSummary,
-} from "@/lib/tdh/verification/summary.server";
-import { leanRound } from "../formal/formalStatus";
-import { LEAN_LATEST_ROUND, LEAN_ROUND_5 } from "../formal/leanResults";
-import DifftestRounds from "../shared/DifftestRounds";
-import TdhArrowLink from "../shared/TdhArrowLink";
-import TdhPageShell from "../shared/TdhPageShell";
-import TdhPager from "../shared/TdhPager";
-import TdhSection from "../shared/TdhSection";
-import TdhDisclosure from "../shared/TdhDisclosure";
-import TdhStatusPill, { TdhStatusLegend } from "../shared/TdhStatusPill";
-import { TDH_CARD, TDH_FOCUS_RING } from "../shared/tdhStyles";
-import { formatCycleDate } from "../verification/components/verificationFormat";
-import { CheckMatrix, LineageDiagram } from "./ImplementationDiagrams";
-import ProgramCards, { type DailyBuilds } from "./ProgramCards";
-import VectorAnatomy from "./VectorAnatomy";
-import VectorBrowser from "./VectorBrowser";
-import VectorsByHand from "./VectorsByHand";
-import VectorFormat from "./VectorFormat";
-import { VECTOR_COUNT } from "./vectors";
-import { P26 } from "../shared/tdhFacts";
+  Caption,
+  CodeBlock,
+  CodeName,
+  Contents,
+  EdSection,
+  PageHead,
+  Prose,
+  StackTable,
+} from "@/components/explained/reference/parts";
+import { FactScope, FactText } from "@/components/explained/facts/FactText";
+import {
+  isMessageKey,
+  plain,
+  rich,
+  type RichValues,
+} from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 
-// The agreement card reads the latest daily verification files.
+/**
+ * Shelf S2, Implementations and vectors (TDH-DESIGN.md §4.7): the six
+ * programs, the vectors (P26's count and the served manifest's, labelled),
+ * the five public vectors as JSON, how to run one, the pin block of the
+ * latest day with its roots, the owner ask, and the difftest rounds.
+ */
 export const revalidate = 600;
 
-const TABLE_SOURCES = [
-  "P26 §13",
-  "D112",
-  "D119",
-  "D125",
-  "D132",
-  "D116",
-  "P52 §3.4",
-] as const;
-const CHECKS = [
-  { key: "vectors", refs: ["P26 §13"] },
-  { key: "replays", refs: ["Replay 2026-10-11", "P26 §13"] },
-  { key: "difftest", refs: ["P26 §13", "Difftest Oct 15–16"] },
-  { key: "dual", refs: ["D125", "P53 §4.5"] },
-  { key: "daily", refs: ["D132"] },
-  { key: "lean", refs: [] },
-  { key: "proofs", refs: ["D119", "D128"] },
-] as const;
-const PROSE =
-  "tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-200";
+type ImplKey = Extract<MessageKey, `explained.tdh.impl.${string}`>;
 
-function LatestAgreement({
-  locale,
-  summary,
+const SERVED_VECTORS = "manifest.vectors.total";
+const P26_VECTORS = "rules.vectors";
+const LATEST_CYCLE = "tdh.latest.cycle";
+const REPORTED_RULE_VERSION = "tdh.latest.ruleVersion";
+
+/** The public vectors' download (app/network/tdh/public-vectors.json). */
+const PUBLIC_VECTORS_HREF = "/network/tdh/public-vectors.json";
+
+function pinBlock(book: FactBook, comment: string, retired: string | null) {
+  const raw = (id: Parameters<FactBook["text"]>[0]) =>
+    book.maybe(id) ? factText(book.get(id)) : "-";
+  const contracts = [
+    `memes ${raw("rules.contract.memes")}`,
+    `gradients ${raw("rules.contract.gradients")}`,
+    `nextgen ${raw("rules.contract.nextgen")}`,
+    // The fourth contract whose logs count, and the fifth whose state is
+    // read (P26 §2): links between wallets, and the Memes' claim limits.
+    `delegation ${raw("rules.contract.delegation")}`,
+    `claim ${raw("rules.contract.claim")}`,
+  ];
+  const line = (name: string, value: string) => `${name.padEnd(15)}${value}`;
+  return [
+    `# ${comment}`,
+    retired
+      ? `${line("rule_version", raw(REPORTED_RULE_VERSION))}   # ${retired}`
+      : line("rule_version", raw(REPORTED_RULE_VERSION)),
+    line("registry_hash", raw("tdh.latest.registry")),
+    line("rule_id", raw("tdh.latest.ruleId")),
+    line("cutoff_block", raw("tdh.latest.cutoff")),
+    line("contracts", contracts.join("\n               ")),
+    line("cycle_root", raw("tdh.latest.roots.cycle")),
+    line("wallet_root", raw("tdh.latest.roots.wallet")),
+    line("input_sha256", raw("tdh.latest.inputSha")),
+  ].join("\n");
+}
+
+export default async function ImplementationsPage({
+  searchParams,
 }: {
-  readonly locale: SupportedLocale;
-  readonly summary: VerificationSummary | null;
-}) {
-  if (summary === null || summary.kind === "awaiting") {
-    return null;
-  }
-  const values = {
-    date: formatCycleDate(locale, summary.date),
-    live: formatInteger(locale, summary.liveEqual ?? 0),
-    total: formatInteger(locale, summary.liveTotal ?? 0),
-    python: formatInteger(locale, summary.pythonEqual ?? 0),
-  };
-  return (
-    <Link
-      href={`/network/tdh/verification/${summary.cycleDay}`}
-      className={`${TDH_CARD} tw-group tw-flex tw-flex-col tw-gap-3 tw-p-5 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none sm:tw-flex-row sm:tw-items-center sm:tw-justify-between ${TDH_FOCUS_RING}`}
-    >
-      <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2">
-        <span className="tw-flex tw-flex-wrap tw-gap-2">
-          <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
-        </span>
-        <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
-          {/* The record on its own line, then the latest day's counts. */}
-          <span className="tw-block tw-font-semibold tw-text-iron-50">
-            {t(locale, "network.tdh.explainer.verified.record", {
-              allEqual: formatInteger(locale, summary.record.allEqual),
-              days: formatInteger(locale, summary.record.days),
-              first: formatCycleDate(locale, summary.record.firstDate),
-            })}
-          </span>
-          {summary.pythonEqual === null
-            ? t(locale, "network.tdh.impl.latest.noPython", values)
-            : t(locale, "network.tdh.impl.latest.body", values)}
-        </span>
-      </span>
-      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300">
-        {t(locale, "network.tdh.impl.latest.link")}
-        <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-      </span>
-    </Link>
-  );
-}
-
-export default async function TdhImplementationsPage() {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
-  const [summary, formal] = await Promise.all([
-    loadVerificationSummary(),
-    loadFormalManifest(),
-  ]);
-  const leanRun = conformanceRun(formal.manifest);
-  // The builds the daily comparison ran, from its latest day's file.
-  const daily: DailyBuilds | null =
-    summary?.kind === "data"
-      ? {
-          rust: summary.rustCommit,
-          python: summary.pythonCommit,
-          date: summary.date,
-        }
-      : null;
-  const round = leanRound(formal.manifest);
-  const lean = {
-    passed: leanRun?.passed ?? 0,
-    total: leanRun?.total ?? 0,
-    checks: leanRun?.checks ?? 0,
-    spec: (
-      formal.manifest.documents?.specification?.lastChange ??
-      formal.manifest.source.commit
-    ).slice(0, 7),
-    round,
-    newer:
-      round < LEAN_LATEST_ROUND
-        ? {
-            passed: LEAN_ROUND_5.vectorsPassed,
-            total: LEAN_ROUND_5.vectorsTotal,
-            spec: LEAN_ROUND_5.specCommit,
-            commit: LEAN_ROUND_5.commit,
-          }
-        : null,
-  };
-  return (
-    <TdhPageShell
-      locale={locale}
-      current="/network/tdh/implementations"
-      dropdownHref="/network/tdh/implementations"
-      documentTitle={t(locale, "network.tdh.impl.pageTitle")}
-      title={t(locale, "network.tdh.impl.title")}
-      lede={<p className="tw-m-0">{t(locale, "network.tdh.impl.lede")}</p>}
-    >
-      <TdhSection
-        id="programs"
-        title={t(locale, "network.tdh.impl.programs.title")}
-        locale={locale}
-        wide
-        sources={TABLE_SOURCES}
-      >
-        <div className="tw-space-y-4">
-          <p className={PROSE}>
-            {t(locale, "network.tdh.impl.programs.intro")}
-          </p>
-          <ProgramCards locale={locale} lean={lean} daily={daily} />
-          <TdhStatusLegend
-            locale={locale}
-            tones={["success", "primary", "warning"]}
-          />
-          <TdhDisclosure summary={t(locale, "network.tdh.impl.notesSummary")}>
-            <div className="tw-max-w-[34rem] tw-space-y-2 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
-              <p className="tw-m-0">{t(locale, "network.tdh.impl.names")}</p>
-              <p className="tw-m-0">
-                {t(locale, "network.tdh.impl.conformanceNote")}
-              </p>
-              <p className="tw-m-0">
-                {t(locale, "network.tdh.impl.checksNote", {
-                  python: formatInteger(locale, P26.pythonChecks),
-                  rust: formatInteger(locale, P26.rustReferenceChecks),
-                  lean: formatInteger(locale, lean.checks),
-                })}
-              </p>
-              <p className="tw-m-0">
-                {t(locale, "network.tdh.impl.speedNote")}
-              </p>
-              <p className="tw-m-0">
-                {t(locale, "network.tdh.impl.illustration")}
-              </p>
-            </div>
-          </TdhDisclosure>
-        </div>
-      </TdhSection>
-
-      <TdhSection
-        id="written"
-        title={t(locale, "network.tdh.impl.written.title")}
-        locale={locale}
-        sources={["Clean room 2026-10-11", "D119", "P53 §11.3"]}
-      >
-        <div className="tw-space-y-4">
-          <p className={PROSE}>{t(locale, "network.tdh.impl.written.body")}</p>
-          <p className={PROSE}>{t(locale, "network.tdh.impl.written.body2")}</p>
-          <LineageDiagram locale={locale} />
-        </div>
-      </TdhSection>
-
-      {/* A matrix of seven columns: a full-width figure, like the
-          programs table. */}
-      <TdhSection
-        id="where"
-        title={t(locale, "network.tdh.impl.where.title")}
-        locale={locale}
-        wide
-      >
-        <CheckMatrix locale={locale} lean={lean} />
-      </TdhSection>
-
-      <TdhSection
-        id="checked"
-        title={t(locale, "network.tdh.impl.checked.title")}
-        locale={locale}
-        sources={[...CHECKS.flatMap((check) => check.refs), "P53 §4.5"]}
-      >
-        <div className="tw-space-y-6">
-          <ol className="tw-m-0 tw-max-w-3xl tw-list-none tw-space-y-4 tw-p-0">
-            {CHECKS.map((check, index) => (
-              <li
-                key={check.key}
-                className="tw-grid tw-grid-cols-[1.75rem_minmax(0,1fr)] tw-gap-3"
-              >
-                <span className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-200">
-                  {formatInteger(locale, index + 1)}
-                </span>
-                <div className="tw-min-w-0">
-                  {/* Two lines each; the counts and the detail one click
-                      away. */}
-                  <p className="tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-300">
-                    <strong className="tw-font-semibold tw-text-iron-50">
-                      {t(locale, `network.tdh.impl.checked.${check.key}.title`)}
-                    </strong>{" "}
-                    {t(locale, `network.tdh.impl.checked.${check.key}.short`)}
-                  </p>
-                  <TdhDisclosure
-                    summary={t(locale, "network.tdh.impl.checked.more")}
-                  >
-                    <p className="tw-m-0 tw-max-w-[34rem] tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
-                      {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
-                    </p>
-                  </TdhDisclosure>
-                  {check.key === "daily" && (
-                    <TdhArrowLink href="/network/tdh/verification">
-                      {t(locale, "network.tdh.impl.checked.daily.link")}
-                    </TdhArrowLink>
-                  )}
-                  {check.key === "lean" && (
-                    <TdhArrowLink href="/network/tdh/formal">
-                      {t(locale, "network.tdh.impl.checked.lean.link")}
-                    </TdhArrowLink>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-          <div id="difftest-rounds" className="tw-scroll-mt-28">
-            <DifftestRounds locale={locale} />
-          </div>
-          <p className="tw-m-0 tw-max-w-[34rem] tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-200">
-            {t(locale, "network.tdh.impl.checked.after")}
-          </p>
-        </div>
-      </TdhSection>
-
-      {summary !== null && summary.kind !== "awaiting" && (
-        <TdhSection
-          id="latest"
-          title={t(locale, "network.tdh.impl.latest.title")}
-          locale={locale}
-        >
-          <LatestAgreement locale={locale} summary={summary} />
-        </TdhSection>
+  const book = await loadFactBook();
+  const place = pagePlace("tdh", "impl", locale);
+  const p = printers(book, locale);
+  const m = (key: ImplKey, values?: RichValues) => rich(locale, key, values);
+  const s = (
+    key: ImplKey,
+    params?: Readonly<Record<string, string | number>>
+  ) => plain(locale, key, params);
+  const served = p.num(SERVED_VECTORS);
+  const p26 = p.num(P26_VECTORS);
+  let servedLine = m("explained.tdh.impl.vectors.servedAll");
+  if (served !== null && p26 !== null && served < p26) {
+    servedLine = m("explained.tdh.impl.vectors.servedBehind", {
+      served: p.v(SERVED_VECTORS),
+      spec: <CodeName>{p.v("manifest.specCommit")}</CodeName>,
+    });
+  } else if (served !== null && p26 !== null && served > p26) {
+    servedLine = m("explained.tdh.impl.vectors.servedAhead", {
+      served: p.v(SERVED_VECTORS),
+      spec: <CodeName>{p.v("manifest.specCommit")}</CodeName>,
+    });
+  }
+  const publicIds = book.maybe<string[]>("vectors.public")?.value ?? [];
+  const reported = p.text(REPORTED_RULE_VERSION);
+  const current = p.text("rules.version");
+  const block = pinBlock(
+    book,
+    s("explained.tdh.impl.roots.comment", {
+      date: p.f("tdh.latest.date", "long"),
+      cycle: p.f(LATEST_CYCLE),
+    }),
+    reported !== null && current !== null && reported !== current
+      ? s("explained.tdh.impl.roots.retired", { current })
+      : null
+  );
+  const programsFact = book.maybe("site.proofA.cycle");
+  const code = (name: string) => <CodeName wrap>{name}</CodeName>;
+  // Every row of the "Proved as" column leads with a mark, so the column
+  // scans: the half pair, Proved, or a dotted ring for none.
+  const notProved = (
+    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-400">
+      <span
+        className="tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
+        aria-hidden="true"
+      />
+      {s("explained.tdh.impl.notProved")}
+    </span>
+  );
+  const program = (name: ImplKey, sub?: ImplKey) => (
+    <>
+      {m(name)}
+      {sub && (
+        <span className={`tw-block tw-font-normal ${EX_TEXT.cap}`}>
+          {m(sub)}
+        </span>
       )}
+    </>
+  );
+  return (
+    <ExplainedShell
+      chapter="tdh"
+      page="impl"
+      crumbs={[
+        { label: kt(locale, "explained.kit.map.hub"), href: "/explained" },
+        {
+          label: kt(locale, "explained.kit.map.chapterTitle", {
+            number: place.chapterNumber,
+            title: kt(locale, "explained.kit.map.tdh"),
+          }),
+          href: "/network/tdh",
+        },
+        { label: t(locale, "explained.tdh.impl.crumb") },
+      ]}
+      live={{ fact: book.maybe("feed.writtenAt"), kind: "feed" }}
+      facts={book.snapshot()}
+      locale={locale}
+    >
+      <ImplAnchors />
+      <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
+        <PageHead
+          eyebrow={m("explained.tdh.impl.eyebrow", {
+            n: <span>{place.n}</span>,
+          })}
+          title={m("explained.tdh.impl.title")}
+          lede={m("explained.tdh.impl.lede")}
+        >
+          <div className="tw-mt-8 tw-max-w-[760px]">
+            <Contents
+              label={s("explained.tdh.impl.toc.label")}
+              items={[
+                {
+                  href: "#cast",
+                  no: "1",
+                  title: m("explained.tdh.impl.toc.cast"),
+                },
+                {
+                  href: "#vectors",
+                  no: "2",
+                  title: m("explained.tdh.impl.toc.vectors"),
+                },
+                {
+                  href: "#roots",
+                  no: "3",
+                  title: m("explained.tdh.impl.toc.roots"),
+                },
+                {
+                  href: "#difftest-rounds",
+                  no: "4",
+                  title: m("explained.tdh.impl.toc.rounds"),
+                },
+              ]}
+            />
+          </div>
+        </PageHead>
 
-      <TdhSection
-        id="vectors"
-        title={t(locale, "network.tdh.impl.vectors.title", {
-          count: formatInteger(locale, VECTOR_COUNT),
-        })}
-        locale={locale}
-        wide
-        sources={["P26 §13", "D116"]}
-      >
-        <div className="tw-space-y-4">
-          <p className={PROSE}>{t(locale, "network.tdh.impl.vectors.intro")}</p>
-          <VectorFormat locale={locale} />
-          <VectorAnatomy locale={locale} />
-          <VectorsByHand locale={locale} />
-          <VectorBrowser locale={locale} />
-        </div>
-      </TdhSection>
-      <TdhPager current="/network/tdh/implementations" locale={locale} />
-    </TdhPageShell>
+        <EdSection
+          id="cast"
+          no="1"
+          label={m("explained.tdh.impl.cast.label")}
+          title={m("explained.tdh.impl.cast.title")}
+        >
+          <Prose>{m("explained.tdh.impl.cast.body")}</Prose>
+          <div className="tw-mt-6">
+            <StackTable
+              from="lg"
+              caption={s("explained.tdh.impl.cast.caption")}
+              columns={[
+                {
+                  key: "program",
+                  label: s("explained.tdh.impl.col.program"),
+                  width: "lg:tw-w-[170px]",
+                },
+                {
+                  key: "written",
+                  label: s("explained.tdh.impl.col.written"),
+                  width: "lg:tw-w-[230px]",
+                },
+                { key: "runs", label: s("explained.tdh.impl.col.runs") },
+                {
+                  key: "proved",
+                  label: s("explained.tdh.impl.col.proved"),
+                  width: "lg:tw-w-[170px]",
+                },
+              ]}
+              rows={[
+                {
+                  key: "a",
+                  cells: {
+                    program: program(
+                      "explained.tdh.impl.a.name",
+                      "explained.tdh.impl.a.sub"
+                    ),
+                    written: m("explained.tdh.impl.a.written"),
+                    runs:
+                      book.maybe("tdh.cutover.checkedAt") === null
+                        ? m("explained.tdh.impl.a.runs")
+                        : m("explained.tdh.impl.a.runsLate", {
+                            checked: p.v("tdh.cutover.checkedAt"),
+                          }),
+                    proved: programsFact ? (
+                      // One of the day's two proofs: the half-pair mark, as
+                      // on the overview and the proofs page.
+                      <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                        <HalfPair a b={false} locale={locale} />
+                        <span className={EX_TEXT.cap}>
+                          {m("explained.tdh.impl.a.proofRef", {
+                            day: p.v("proofs.day.date"),
+                          })}
+                        </span>
+                      </span>
+                    ) : (
+                      <Mark
+                        kind="notYet"
+                        locale={locale}
+                        size="sm"
+                        label={s("explained.tdh.impl.a.proof")}
+                        refText={s("explained.tdh.impl.a.proofRefNoDay")}
+                      />
+                    ),
+                  },
+                },
+                {
+                  key: "b",
+                  cells: {
+                    program: program("explained.tdh.impl.b.name"),
+                    written: m("explained.tdh.impl.b.written"),
+                    runs: m("explained.tdh.impl.b.runs"),
+                    proved: (
+                      <Mark
+                        kind="notYet"
+                        locale={locale}
+                        size="sm"
+                        label={s("explained.tdh.impl.b.proof")}
+                        refText={s("explained.tdh.impl.b.proofRef")}
+                      />
+                    ),
+                  },
+                },
+                {
+                  key: "python",
+                  cells: {
+                    program: program("explained.tdh.impl.python.name"),
+                    written: m("explained.tdh.impl.python.written"),
+                    runs: m("explained.tdh.impl.python.runs"),
+                    proved: notProved,
+                  },
+                },
+                {
+                  key: "rustRef",
+                  cells: {
+                    program: program("explained.tdh.impl.rustRef.name"),
+                    written: m("explained.tdh.impl.rustRef.written", {
+                      choices: p.v("programs.cleanRoomChoices"),
+                    }),
+                    runs: m("explained.tdh.impl.rustRef.runs"),
+                    proved: notProved,
+                  },
+                },
+                {
+                  key: "lean",
+                  cells: {
+                    program: program("explained.tdh.impl.lean.name"),
+                    written: m("explained.tdh.impl.lean.written"),
+                    runs: m("explained.tdh.impl.lean.runs", {
+                      random: p.v("programs.randomPerChange"),
+                    }),
+                    proved: (
+                      <span className="tw-inline-flex tw-items-baseline tw-gap-1.5">
+                        <Glyph
+                          kind="proved"
+                          className="tw-size-3 tw-self-center"
+                        />
+                        <span>
+                          {m("explained.tdh.impl.lean.proved", {
+                            tdh: p.v("manifest.proved.tdh"),
+                            all: p.v("manifest.proved"),
+                          })}
+                        </span>
+                      </span>
+                    ),
+                  },
+                },
+                {
+                  key: "live",
+                  cells: {
+                    program: program("explained.tdh.impl.live.name"),
+                    written: m("explained.tdh.impl.live.written"),
+                    runs: m("explained.tdh.impl.live.runs"),
+                    proved: notProved,
+                  },
+                },
+              ]}
+            />
+          </div>
+          <Caption className="tw-mt-3">
+            {m("explained.tdh.impl.cast.note", {
+              time: p.v("programs.rustReference.time"),
+              day: p.v("model.replayDay"),
+              runtime: p.v("tdh.latest.builds.rust.runtime"),
+            })}{" "}
+            {m("explained.tdh.impl.lean.runsNote", {
+              day: p.v("model.replayDay"),
+              all: p.v("model.randomInputs"),
+            })}
+          </Caption>
+        </EdSection>
+
+        <EdSection
+          id="vectors"
+          no="2"
+          label={m("explained.tdh.impl.vectors.label")}
+          title={m("explained.tdh.impl.vectors.title", {
+            count: p.v(P26_VECTORS),
+          })}
+        >
+          <Prose>
+            {m("explained.tdh.impl.vectors.body", {
+              count: p.v(P26_VECTORS),
+              date: p.v("rules.p26Date"),
+              served: servedLine,
+              public: p.v("vectors.public.count"),
+            })}
+          </Prose>
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2">
+            <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-px-[22px] tw-py-5">
+              <span className={EX_TEXT.label}>
+                {m("explained.tdh.impl.public.label")}
+              </span>
+              <dl
+                className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-[36px_minmax(0,1fr)] tw-text-[15px] tw-leading-6"
+                aria-label={s("explained.tdh.impl.public.list")}
+              >
+                {publicIds.map((id) => {
+                  const key = `explained.tdh.impl.public.${id}`;
+                  return (
+                    <div key={id} className="tw-contents">
+                      <dt className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-font-semibold tw-text-iron-400">
+                        {id.split("-")[0]}
+                      </dt>
+                      <dd className="tw-m-0 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-iron-50">
+                        {isMessageKey(key) ? (
+                          m(key as ImplKey)
+                        ) : (
+                          <CodeName>{id}</CodeName>
+                        )}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
+              <a
+                className={`${EX_BUTTON.secondary} tw-mt-4`}
+                href={PUBLIC_VECTORS_HREF}
+                download
+                aria-label={s("explained.tdh.impl.public.downloadLabel")}
+              >
+                {m("explained.tdh.impl.public.download")}
+              </a>
+            </div>
+            <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-px-[22px] tw-py-5">
+              <span className={EX_TEXT.label}>
+                {m("explained.tdh.impl.run.label")}
+              </span>
+              <ol className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-gap-2.5 tw-p-0">
+                {[
+                  m("explained.tdh.impl.run.read", {
+                    params: code("params"),
+                    cycle: code("cycle"),
+                    transfers: code("transfers"),
+                    events: code("consolidation_events"),
+                    logs: code("raw_logs"),
+                  }),
+                  m("explained.tdh.impl.run.compare", {
+                    expected: code("expected"),
+                    boost: code("boost_c"),
+                    legacy: code("legacy_expected"),
+                  }),
+                  m("explained.tdh.impl.run.invalid", {
+                    invalid: code("expected_invalid"),
+                  }),
+                ].map((step, index) => (
+                  <li
+                    // The steps are fixed copy in a fixed order.
+                    key={index}
+                    className="tw-relative tw-pl-[42px] tw-text-[15px] tw-leading-6 tw-text-iron-300"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="tw-absolute tw-left-0 tw-top-0 tw-grid tw-size-[30px] tw-place-items-center tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-primary-400 tw-text-sm tw-font-bold tw-text-primary-300"
+                    >
+                      {index + 1}
+                    </span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+          <RunVectors locale={locale} />
+        </EdSection>
+
+        <EdSection
+          id="roots"
+          no="3"
+          label={m("explained.tdh.impl.roots.label")}
+          title={m("explained.tdh.impl.roots.title", {
+            date: p.v("tdh.latest.date"),
+          })}
+        >
+          <FactScope
+            ids={[
+              REPORTED_RULE_VERSION,
+              "tdh.latest.registry",
+              "tdh.latest.ruleId",
+              "tdh.latest.cutoff",
+              "tdh.latest.roots.cycle",
+              "tdh.latest.roots.wallet",
+              "tdh.latest.inputSha",
+            ]}
+          >
+            <CodeBlock
+              code={block}
+              label={s("explained.tdh.impl.roots.blockLabel", {
+                date: p.f("tdh.latest.date", "long"),
+              })}
+            />
+          </FactScope>
+          <div className="tw-mt-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
+            <CopyButton
+              text={block}
+              label={s("explained.tdh.impl.roots.copy")}
+              copiedLabel={s("explained.tdh.impl.roots.copied")}
+            />
+            <Link
+              className={EX_BUTTON.link}
+              href={`/network/tdh/verification/${p.num(LATEST_CYCLE) ?? ""}`}
+            >
+              {m("explained.tdh.impl.roots.receipt")}
+            </Link>
+          </div>
+          <Prose className="tw-mt-6">
+            {m("explained.tdh.impl.roots.body")}
+          </Prose>
+          {/* A status, not a request: what is not published yet, and what
+              it would let an outside program do. */}
+          <p className="tw-m-0 tw-mt-5 tw-max-w-[660px] tw-text-base tw-leading-[26px] tw-text-iron-300">
+            <Mark kind="notYet" locale={locale} size="sm" />{" "}
+            {m("explained.tdh.impl.ask.body")}
+          </p>
+        </EdSection>
+
+        <EdSection
+          id="difftest-rounds"
+          no="4"
+          label={m("explained.tdh.impl.rounds.label")}
+          title={m("explained.tdh.impl.rounds.title", {
+            rounds: p.v("difftest.rounds"),
+          })}
+        >
+          <Prose>
+            {m("explained.tdh.impl.rounds.body", {
+              from: p.v("difftest.from"),
+              to: p.v("difftest.to"),
+              rounds: p.v("difftest.rounds"),
+              open: p.v("difftest.open"),
+              random: p.v("programs.randomPerChange"),
+            })}
+          </Prose>
+        </EdSection>
+
+        <PlaceLinks place={place} locale={locale} />
+        <HowWeKnow
+          locale={locale}
+          title={t(locale, "explained.tdh.impl.title")}
+          slug="tdh-implementations"
+          rows={[
+            {
+              title: s("explained.tdh.impl.hwk.programs"),
+              body: m("explained.tdh.impl.hwk.programsBody", {
+                source: (
+                  <FactText
+                    fact={book.maybe("programs.cleanRoomChoices")}
+                    locale={locale}
+                  >
+                    {book.maybe("programs.cleanRoomChoices")?.source.ref}
+                  </FactText>
+                ),
+              }),
+            },
+            {
+              title: s("explained.tdh.impl.hwk.vectors"),
+              body: m("explained.tdh.impl.hwk.vectorsBody", {
+                commit: p.v("rules.p26Commit"),
+                count: p.v(P26_VECTORS),
+                passed: p.v("manifest.vectors.passed"),
+                total: p.v(SERVED_VECTORS),
+              }),
+            },
+            {
+              title: s("explained.tdh.impl.hwk.day"),
+              body: m("explained.tdh.impl.hwk.dayBody", {
+                file: (
+                  <a
+                    className={EX_LINK}
+                    href={p.text("tdh.latest.file.url") ?? "#roots"}
+                  >
+                    <FactText fact={book.maybe(LATEST_CYCLE)} locale={locale}>
+                      {`days/${p.num(LATEST_CYCLE) ?? ""}.json`}
+                    </FactText>
+                  </a>
+                ),
+                written: p.v("tdh.latest.writtenAt", "long"),
+              }),
+            },
+          ]}
+        />
+      </article>
+    </ExplainedShell>
   );
 }
 
-export function generateMetadata() {
+export function generateMetadata(): Metadata {
   return getAppMetadata(
     {
-      title: t(DEFAULT_LOCALE, "network.tdh.impl.pageTitle"),
-      description: t(DEFAULT_LOCALE, "network.tdh.impl.metadataDescription"),
+      title: t(DEFAULT_LOCALE, "explained.tdh.impl.meta.title"),
+      description: t(DEFAULT_LOCALE, "explained.tdh.impl.meta.description"),
     },
     { canonicalPath: "/network/tdh/implementations" }
   );

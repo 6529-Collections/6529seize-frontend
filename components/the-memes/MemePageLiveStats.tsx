@@ -584,6 +584,11 @@ export function MemeNftLivePanel({
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
         <MemeDistributionPlanLink nft={nft} locale={locale} />
+        {/* 6529 Explained's door for artists and newcomers (MAP.md §1.1):
+            every Meme card is CC0, explained in one minute. */}
+        <ButtonLink href="/explained#cc0" variant="tertiary" size="xs">
+          <span>{t(locale, "explained.kit.doors.cc0Card")}</span>
+        </ButtonLink>
         <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
       </div>
     </section>

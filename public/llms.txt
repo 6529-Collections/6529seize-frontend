@@ -17,6 +17,7 @@ The help index, glossary, and this entry point are regenerated at build time. Fe
 - [NextGen](https://6529.io/nextgen): the on-chain generative art platform, including collection and artwork browsing.
 - [Waves](https://6529.io/waves): community spaces for conversations, sharing drops, and voting.
 - [Network](https://6529.io/network): member discovery, reputation, and network metrics such as TDH, xTDH, and Levels.
+- [6529 Explained](https://6529.io/explained): how 6529 works, chapter by chapter, and how to check it; chapter 01, [TDH](https://6529.io/network/tdh), is live, and [CC0 in one minute](https://6529.io/explained#cc0) says what the art license gives and keeps.
 - [Tools](https://6529.io/tools): developer and utility tools, including the API guides linked below.
 
 ## Machine-readable files

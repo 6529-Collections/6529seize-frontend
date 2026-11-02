@@ -1,0 +1,44 @@
+{
+  "note": "Values the pages print that come from 6529.io and from records outside the feed, each with its source and when it was read. Refresh at ship time (PLAYBOOK.md section 8). No person is named.",
+  "mainStage": {
+    "decisions": 221,
+    "through": "2026-10-16",
+    "readAt": "2026-10-18T09:40:00Z",
+    "source": "6529.io public API: Main Stage wave outcomes",
+    "weekdaysUtc": [1, 3, 5],
+    "hourUtc": 16,
+    "scheduleSource": "Main Stage schedule: Monday, Wednesday and Friday at 16:00 UTC"
+  },
+  "memes": {
+    "mintPriceEth": "0.06529",
+    "since": "2022-06-09",
+    "source": "6529.io: The Memes",
+    "readAt": "2026-10-18T06:35:38Z"
+  },
+  "claimLimits": {
+    "values": { "562": 332 },
+    "source": "the card's claim on 6529.io (its mint limit), as recorded in the design data of 2026-10-18",
+    "readAt": "2026-10-18T06:35:38Z"
+  },
+  "cutover": {
+    "about": "2026-10-23",
+    "source": "decision D132: the website cuts over to the Rust result about one week after 2026-10-16",
+    "made": false,
+    "checkedAt": "2026-11-01",
+    "statusSource": "6529.io's TDH backend as of 2026-11-01: still its own computation; the cutover has not been made"
+  },
+  "proofA": {
+    "cycle": 20737,
+    "provedHours": 10,
+    "provedMinutes": 57,
+    "totalWithoutBurn": 2060802863,
+    "totalWithBurn": 2061888816,
+    "ethCallBlock": 26206630,
+    "source": "the validator's contracts record at d49ffc7: cycle 20,737 proved under tdh-v1.0, accepted by mainnet's SP1 gateway in an eth_call",
+    "totalsSource": "P26 section 13 (6529chain 25734b7), the conformance replay of 2026-10-11: the live total with the burn addresses, and the total without them, which proof A's statement (word 20) also holds"
+  },
+  "validator": {
+    "version": "0.1.0",
+    "source": "decision D137: the validator software is numbered below 1.0; its code is at 0.1.0"
+  }
+}

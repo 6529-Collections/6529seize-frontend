@@ -134,7 +134,17 @@
       "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
       "utils/sentry-client-filters.ts": ["exports", "types"],
       "lib/fetch/ssrFetch.ts": ["exports"],
-      "config/serverEnv.ts": ["exports"]
+      "config/serverEnv.ts": ["exports"],
+      // 6529 Explained kit: the shared components and the facts layer. The
+      // TDH chapter (release 1) imports most of them; the rest of each module
+      // is the kit's API for the chapters that follow (MAP.md §6.1), so an
+      // export no page uses yet is not dead code. Files are not exempt.
+      "components/explained/**": ["exports", "types"],
+      "lib/explained/**": ["exports", "types"],
+      // The layout gate's remedy for a hash set in capitals
+      // (scripts/tdh-pages-check.mjs); release 1 sets none, and MAP.md §2
+      // keeps it.
+      "components/explained/marks/CaseSafe.tsx": ["files"]
     },
     "ignoreFiles": [
       "__mocks__/**",

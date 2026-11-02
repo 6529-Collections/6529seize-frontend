@@ -99,133 +99,33 @@ describe("network pages render", () => {
     jest.clearAllMocks();
   });
 
-  it("renders TDH page", async () => {
-    renderWithAuth(await TDHPage());
-    // The promise is the heading; "TDH" is the eyebrow above it.
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: "Total Days Held: the art you hold, and how long you have held it.",
+  it("renders the TDH overview, chapter 01 of 6529 Explained", async () => {
+    // The fixture facts render without the network; the distribution figure
+    // streams from 6529.io's API, so a review link turns it off here.
+    renderWithAuth(
+      await TDHPage({
+        searchParams: Promise.resolve({
+          facts: "fixture",
+          distribution: "off",
+          locale: "en-US",
+        }),
       })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
-    ).toBeInTheDocument();
-    // The boost is the factor the reader changes: the card's TDH with one
-    // Gradient, then with none and with a full set instead.
-    const user = userEvent.setup();
-    const choice = screen.getByRole("group", {
-      name: "What else the collector holds",
-    });
-    expect(
-      within(choice).getByRole("button", { name: "One Gradient" })
-    ).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("= 1,296 TDH")).toBeInTheDocument();
-    await user.click(
-      within(choice).getByRole("button", { name: "No Gradient" })
     );
-    expect(screen.getByText("= 1,271 TDH")).toBeInTheDocument();
-    await user.click(
-      within(choice).getByRole("button", { name: "A full set" })
-    );
-    expect(screen.getByText("= 2,288 TDH")).toBeInTheDocument();
     expect(
-      screen.getByText("With a full set instead, boost 1.80")
+      screen.getByRole("heading", { level: 1, name: "Total Days Held" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/The Gradient earns TDH of its own on top/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Explain my TDH" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Glossary" })
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole("navigation", { name: "TDH pages" })).getByRole(
-        "link",
-        { name: "Glossary" }
-      )
-    ).toHaveAttribute("href", "/network/tdh#glossary");
-    expect(
-      screen.getByText(/It counts toward your Level, and is checked in public/)
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/votes in waves/)).not.toBeInTheDocument();
-  });
-
-  it("links the step-by-step calculation and shows the checked-daily section", async () => {
-    renderWithAuth(await TDHPage());
-    expect(screen.getAllByText(/Total Days Held/i).length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("link", {
-        name: /Every step, with examples you can change/,
-      })
-    ).toHaveAttribute("href", "/network/tdh/how-it-works");
-    expect(
-      screen.getAllByRole("link", { name: /How TDH is calculated/ })[0]
+      screen.getAllByRole("link", { name: /How it is calculated/ })[0]
     ).toHaveAttribute("href", "/network/tdh/how-it-works");
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "Checked daily, in public",
+        name: "Checked every day, with the files to check it.",
       })
     ).toBeInTheDocument();
-    // The strip near the top: the track record in bold, saying what is
-    // equal to what, with the latest day and the comparison one link away;
-    // the history's limit is said once, in the section below.
     expect(
-      screen.getByText(
-        "Recomputed independently every day: equal to 6529.io on 2 of 2 published days"
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByText("· latest Oct 15")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", {
-        name: "History read from public servers, taken as reported",
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "See the comparison" })
-    ).toHaveAttribute("href", "/network/tdh/verification");
-    // The proof panel: the latest day's figures and every published day as
-    // a dot.
-    expect(
-      screen.getByText("Latest day: October 15, 2026")
-    ).toBeInTheDocument();
-    expect(screen.getAllByText("10,282 of 10,282").length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("list", { name: "Every published day, oldest first" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        level: 3,
-        name: "Fixed before the cutover",
-      })
-    ).toBeInTheDocument();
-    expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
-      0
-    );
-    expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/reproduce all 89 conformance vectors/)
-    ).toBeInTheDocument();
-    // The Lean card says where the property stops: a mint and its burn
-    // inside one transaction (P26 §7.1, counterexamples H and I).
-    expect(
-      screen.getByText(
-        /cannot change who holds which copies since when\. A mint and its burn there can still change eligibility/
-      )
-    ).toBeInTheDocument();
-    // The day's builds come from its file, in the section's "How"
-    // disclosure, not in the newcomer's first screen.
-    expect(
-      screen.getAllByText(
-        /Builds: Rust core validator@e127676, Python reference 6529chain@0621ed4/
-      )
-    ).toHaveLength(1);
-    expect(
-      screen.queryByRole("heading", { name: "The exact calculation has moved" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: /Why did my TDH change\?/ })
+    ).toHaveAttribute("href", "/network/tdh/consolidation#why");
   });
 
   it("renders Definitions page", () => {
@@ -268,10 +168,12 @@ describe("network pages render", () => {
   });
 
   it("generates metadata for TDH page", async () => {
-    const metadata = await generateTDHMetadata();
-    expect(metadata.title).toEqual("TDH: Total Days Held | Network");
+    const metadata = await generateTDHMetadata({
+      searchParams: Promise.resolve({ locale: "en-US" }),
+    });
+    expect(metadata.title).toEqual("Total Days Held · 6529 Explained");
     expect(metadata.description).toEqual(
-      `What TDH is, how to read your own, and how it is calculated, specified, proved and checked against 6529.io every day. | ${domain}`
+      `What TDH is, what it is for, and how it is checked every day. | ${domain}`
     );
   });
 

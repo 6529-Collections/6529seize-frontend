@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -16,6 +18,17 @@ export default function AboutLicense() {
       <Row>
         <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: February 23, 2023
+        </Col>
+      </Row>
+      {/* 6529 Explained's door (MAP.md §1.1): the legal text stays as it is,
+          and a first line points to the plain-words answer. */}
+      <Row className="tw-pt-2">
+        <Col>
+          <p>
+            <Link href="/explained#cc0">
+              {t(DEFAULT_LOCALE, "explained.kit.doors.cc0License")}
+            </Link>
+          </p>
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">

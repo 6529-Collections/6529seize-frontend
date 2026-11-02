@@ -123,6 +123,10 @@ On web layouts, route switching is sidebar-first.
 - Open `Join 6529`:
   use the primary `Join 6529` row for the shareable onboarding guide at
   `/join-6529`.
+- Open `About > 6529 Explained` for the hub at `/explained`: the first row of
+  the `About` menu, above `Overview` and the groups. The entry is defined once
+  (`components/navigation/explainedNavEntry.ts`) so it can move to the main
+  menu without changing.
 - Open `About > Network & Reputation` routes:
   `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),

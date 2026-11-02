@@ -1,209 +1,313 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
+import type { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
-import { loadVerificationSummary } from "@/lib/tdh/verification/summary.server";
-import TdhPageShell from "../shared/TdhPageShell";
-import TdhCopyButton from "../shared/TdhCopyButton";
-import TdhDisclosure from "../shared/TdhDisclosure";
-import TdhPager from "../shared/TdhPager";
-import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
-import TdhSource from "../shared/TdhSource";
-import TdhStatusPill from "../shared/TdhStatusPill";
-import { middleTruncate } from "../verification/components/verificationFormat";
-import { SectionMap } from "./SpecDiagrams";
-import SpecSectionsA from "./SpecSectionsA";
-import SpecSectionsB from "./SpecSectionsB";
+import { kt } from "@/components/explained/i18n";
+import DriftNote from "@/components/explained/marks/DriftNote";
+import Hash from "@/components/explained/marks/Hash";
+import Mark from "@/components/explained/marks/Mark";
+import Track from "@/components/explained/marks/Track";
+import ExplainedShell from "@/components/explained/shell/ExplainedShell";
+import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import PageContents from "@/components/explained/shell/PageContents";
+import { EX_TEXT } from "@/components/explained/tokens";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { loadFactBook } from "@/lib/explained/feed.server";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
+import {
+  Caption,
+  CodeName,
+  Contents,
+  FactsList,
+  PageHead,
+} from "@/components/explained/reference/parts";
+import SpecificationAnchors from "./SpecificationAnchors";
+import SpecReference from "./SpecReference";
+import SpecRules from "./SpecRules";
+import { specContext, type SpecKey } from "./specShared";
 
 /**
- * SHA-256 of design/tdh-v1-specification.md at 6529chain f840096, the text
- * this page restates.
+ * Shelf S1, the TDH v1.4 specification (TDH-DESIGN.md §4.7): contents at
+ * the top, "This version" with both of P26's true marks, the rules' change
+ * of name, then every section of P26 restated: §5.2 with the exact floor
+ * and FirstGM's adjustment, §8.1 with the half-cent trap, §9's roots as the
+ * target, §10's registry with D136's two fields, §11 and §12 by ID, §13
+ * conformance. Every registry number is read from the registry.
  */
-const P26_SHA256 =
-  "c7918b6d3275b8058401a166bf81f4880bbf072d11ce01b1525b21207cabb28d";
-
-const VERSION_ROWS = ["rule", "text", "sha", "where", "status"] as const;
-
-/**
- * The version of the text this page restates: one line (rule version, P26
- * commit and date), and a disclosure with its SHA-256, where the text is
- * and what its status is.
- */
-function SpecVersion({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <section aria-labelledby="spec-version-heading" className="tw-mt-1">
-      <h2 id="spec-version-heading" className="tw-sr-only">
-        {t(locale, "network.tdh.spec.versionRow.title")}
-      </h2>
-      {/* A quiet disclosure under the lede: the version line itself sits
-          beside the pills. */}
-      <TdhDisclosure summary={t(locale, "network.tdh.spec.versionRow.summary")}>
-        <dl className="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-x-6 tw-gap-y-2 tw-pb-3 tw-pl-6 tw-text-sm tw-leading-6 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
-          {VERSION_ROWS.map((row) => (
-            <div key={row} className="tw-contents">
-              <dt className="tw-font-medium tw-text-iron-300">
-                {t(locale, `network.tdh.spec.versionRow.${row}` as MessageKey)}
-              </dt>
-              <dd className="tw-m-0 tw-mb-2 tw-min-w-0 tw-text-iron-200 sm:tw-mb-0">
-                {row === "sha" ? (
-                  <>
-                    <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1">
-                      <code
-                        className="tw-min-w-0 tw-break-all tw-font-mono tw-text-[13px] tw-text-iron-100"
-                        title={P26_SHA256}
-                      >
-                        {P26_SHA256}
-                      </code>
-                      <TdhCopyButton
-                        value={P26_SHA256}
-                        label={t(locale, "network.tdh.shared.copyNamed", {
-                          name: t(locale, "network.tdh.spec.versionRow.sha"),
-                        })}
-                        copiedLabel={t(locale, "network.tdh.shared.copied")}
-                        failedLabel={t(locale, "network.tdh.shared.copyFailed")}
-                      />
-                    </span>
-                    <span className="tw-block tw-text-iron-400">
-                      {t(locale, "network.tdh.spec.versionRow.shaNote")}
-                    </span>
-                  </>
-                ) : (
-                  t(
-                    locale,
-                    `network.tdh.spec.versionRow.${row}Value` as MessageKey
-                  )
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <TdhSource
-          refs={["P26 header", "D116", "D121"]}
-          locale={locale}
-          block
-          className="tw-pb-3 tw-pl-6"
-        />
-      </TdhDisclosure>
-    </section>
-  );
-}
-
-const SECTION_IDS = [
-  "s1",
-  "s2",
-  "s3",
-  "s4",
-  "s5",
-  "s6",
-  "s7",
-  "s8",
-  "s9",
-  "s10",
-  "s11",
-  "s12",
-  "s13",
-] as const;
-
-// The evidence gives the daily comparison as of its latest day, from the feed.
 export const revalidate = 600;
 
-export default async function TdhSpecificationPage() {
-  const locale = DEFAULT_LOCALE;
-  const summary = await loadVerificationSummary();
-  const record =
-    summary?.kind === "data"
-      ? {
-          latestDate: summary.date,
-          days: summary.record.days,
-          allEqual: summary.record.allEqual,
-        }
-      : null;
-  const titles: Record<string, string> = Object.fromEntries(
-    SECTION_IDS.map((id) => [
-      id,
-      t(locale, `network.tdh.spec.${id}.title` as MessageKey),
-    ])
-  );
-  const tocItems = [
-    { id: "symbols", label: t(locale, "network.tdh.spec.symbols.title") },
-    ...SECTION_IDS.map((id) => ({ id, label: titles[id] ?? id })),
-    { id: "decisions", label: t(locale, "network.tdh.spec.decisions.title") },
-    { id: "evidence", label: t(locale, "network.tdh.spec.evidence.title") },
-    { id: "changes", label: t(locale, "network.tdh.spec.changes.title") },
-  ];
+/** P26 changes with a new text, not on a schedule. */
+const P26_CADENCE_MINUTES = 60 * 24 * 30;
 
-  return (
-    <TdhPageShell
-      locale={locale}
-      current="/network/tdh/specification"
-      dropdownHref="/network/tdh/specification"
-      documentTitle={t(locale, "network.tdh.spec.pageTitle")}
-      title={t(locale, "network.tdh.spec.title")}
-      pills={
-        <>
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
-            tdh-v1.0
-          </span>
-          <TdhStatusPill pill="proposal" locale={locale} />
-          <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
-            {t(locale, "network.tdh.spec.versionRow.meta")}
-          </span>
-          {/* The hash that pins the text, beside the version it pins. */}
-          <span className="tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-text-iron-400 sm:tw-text-sm">
-            {t(locale, "network.tdh.spec.versionRow.shaShort")}
-            <code
-              className="tw-font-mono tw-text-xs tw-text-iron-200"
-              title={P26_SHA256}
-            >
-              {middleTruncate(P26_SHA256, 8)}
-            </code>
-            <TdhCopyButton
-              value={P26_SHA256}
-              label={t(locale, "network.tdh.shared.copyNamed", {
-                name: t(locale, "network.tdh.spec.versionRow.sha"),
-              })}
-              copiedLabel={t(locale, "network.tdh.shared.copied")}
-              failedLabel={t(locale, "network.tdh.shared.copyFailed")}
-            />
-          </span>
-        </>
-      }
-      lede={
-        <>
-          <p className="tw-m-0">{t(locale, "network.tdh.spec.lede")}</p>
-          {/* What an implementer needs to know before investing time. */}
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
-            {t(locale, "network.tdh.spec.heroFacts")}
-          </p>
-          <SpecVersion locale={locale} />
-        </>
-      }
-      headerExtra={
-        // On phones the Contents menu is the map; the flow needs the width.
-        <div className="tw-mt-8 tw-hidden md:tw-block">
-          <SectionMap locale={locale} />
-        </div>
-      }
-    >
-      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 lg:tw-grid lg:tw-grid-cols-[14rem_minmax(0,1fr)] lg:tw-gap-10">
-        <TdhScrollSpyNav
-          label={t(locale, "network.tdh.spec.contents")}
-          items={tocItems}
+const SECTIONS: readonly (readonly [string, SpecKey])[] = [
+  ["s1", "explained.tdh.spec.s1.title"],
+  ["s2", "explained.tdh.spec.s2.title"],
+  ["s3", "explained.tdh.spec.s3.title"],
+  ["s4", "explained.tdh.spec.s4.title"],
+  ["s5", "explained.tdh.spec.s5.title"],
+  ["s6", "explained.tdh.spec.s6.title"],
+  ["s7", "explained.tdh.spec.s7.title"],
+  ["s8", "explained.tdh.spec.s8.title"],
+  ["s9", "explained.tdh.spec.s9.title"],
+  ["s10", "explained.tdh.spec.s10.title"],
+  ["s11", "explained.tdh.spec.s11.title"],
+  ["s12", "explained.tdh.spec.s12.title"],
+  ["s13", "explained.tdh.spec.s13.title"],
+];
+
+export default async function SpecificationPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
+  const locale = DEFAULT_LOCALE;
+  const book = await loadFactBook();
+  const ctx = specContext(book, locale);
+  const place = pagePlace("tdh", "spec", locale);
+  const { m, s, p } = ctx;
+  const reported = p.text("tdh.latest.ruleVersion");
+  const current = p.text("rules.version");
+  const hash = (id: "rules.registry" | "rules.ruleId", name: string) => {
+    const fact = book.maybe<string>(id);
+    return fact ? (
+      <span data-fact={id}>
+        <Hash
+          value={fact.value}
+          locale={locale}
+          short={[4, 2]}
+          copy
+          name={name}
         />
-        <div className="tw-min-w-0">
-          <SpecSectionsA locale={locale} />
-          <SpecSectionsB locale={locale} record={record} />
-          <TdhPager current="/network/tdh/specification" locale={locale} />
+      </span>
+    ) : (
+      p.v(id)
+    );
+  };
+  return (
+    <ExplainedShell
+      chapter="tdh"
+      page="spec"
+      crumbs={[
+        { label: kt(locale, "explained.kit.map.hub"), href: "/explained" },
+        {
+          label: kt(locale, "explained.kit.map.chapterTitle", {
+            number: place.chapterNumber,
+            title: kt(locale, "explained.kit.map.tdh"),
+          }),
+          href: "/network/tdh",
+        },
+        { label: t(locale, "explained.tdh.spec.crumb") },
+      ]}
+      live={{
+        fact: book.maybe("rules.p26Date"),
+        kind: "record",
+        lead: t(locale, "explained.tdh.spec.liveLead"),
+        cadenceMinutes: P26_CADENCE_MINUTES,
+      }}
+      facts={book.snapshot()}
+      locale={locale}
+    >
+      <SpecificationAnchors />
+      <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
+        <PageHead
+          eyebrow={m("explained.tdh.spec.eyebrow", {
+            n: <span>{place.n}</span>,
+          })}
+          title={m("explained.tdh.spec.title")}
+          lede={m("explained.tdh.spec.lede")}
+        />
+        <PageContents
+          locale={locale}
+          items={SECTIONS.map(([id, title], index) => ({
+            href: `#${id}`,
+            no: String(index + 1),
+            title: s(title, { count: p.f("spec.deviations.inForce") }),
+          }))}
+        />
+
+        <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-10 lg:tw-mt-12 lg:tw-grid-cols-[minmax(0,1fr)_360px]">
+          <div>
+            <span className={`${EX_TEXT.label} tw-mb-3 tw-block`}>
+              {m("explained.tdh.spec.contents")}
+            </span>
+            <Contents
+              label={s("explained.tdh.spec.contents")}
+              items={[
+                ...SECTIONS.map(([id, title], index) => ({
+                  href: `#${id}`,
+                  no: String(index + 1),
+                  title: m(title, {
+                    count: p.v("spec.deviations.inForce"),
+                  }),
+                })),
+                {
+                  href: "/network/tdh/implementations#vectors",
+                  no: "→",
+                  title: m("explained.tdh.spec.toc.vectors"),
+                },
+              ]}
+            />
+            {/* Where P26 lives, under the contents: the panel keeps to its
+                rows and marks, and the column beside it does not stand
+                empty. */}
+            <Caption className="tw-mt-6 tw-max-w-[540px]">
+              {m("explained.tdh.spec.version.private")}
+            </Caption>
+          </div>
+          <aside
+            id="this-version"
+            className="tw-scroll-mt-24 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6"
+            aria-label={s("explained.tdh.spec.version.label")}
+          >
+            <span className={`${EX_TEXT.label} tw-block`}>
+              {m("explained.tdh.spec.version.label")}
+            </span>
+            <div className="tw-mt-3">
+              <FactsList
+                rows={[
+                  {
+                    key: "rule",
+                    term: m("explained.tdh.spec.version.rule"),
+                    value: <CodeName>{p.v("rules.version")}</CodeName>,
+                  },
+                  {
+                    key: "registry",
+                    term: m("explained.tdh.spec.version.registry"),
+                    value: hash(
+                      "rules.registry",
+                      s("explained.tdh.spec.version.registry")
+                    ),
+                  },
+                  {
+                    key: "ruleId",
+                    term: m("explained.tdh.spec.version.ruleId"),
+                    value: hash(
+                      "rules.ruleId",
+                      s("explained.tdh.spec.version.ruleId")
+                    ),
+                  },
+                  {
+                    key: "vectors",
+                    term: m("explained.tdh.spec.version.vectors"),
+                    value: m("explained.tdh.spec.version.vectorsValue", {
+                      count: p.v("rules.vectors"),
+                      public: p.v("vectors.public"),
+                    }),
+                  },
+                  {
+                    key: "source",
+                    term: m("explained.tdh.spec.version.source"),
+                    value: m("explained.tdh.spec.version.sourceValue", {
+                      commit: <CodeName>{p.v("rules.p26Commit")}</CodeName>,
+                      date: p.v("rules.p26Date"),
+                    }),
+                  },
+                ]}
+              />
+            </div>
+            <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-2">
+              <Mark
+                kind="proposed"
+                locale={locale}
+                size="sm"
+                refText={s("explained.tdh.spec.version.proposed")}
+              />
+              <Track
+                maturity="live"
+                locale={locale}
+                size="sm"
+                refText={s("explained.tdh.spec.version.liveRule")}
+              />
+              {/* How we know it runs as written: tested, a separate question;
+                  its counts and date are the daily comparison's facts. */}
+              <span data-fact="tdh.days.equal">
+                <Mark
+                  kind="tested"
+                  locale={locale}
+                  size="sm"
+                  refText={s(
+                    p.num("tdh.days.equal") !== null &&
+                      p.num("tdh.days.equal") === p.num("tdh.days.compared")
+                      ? "explained.tdh.spec.version.live"
+                      : "explained.tdh.spec.version.liveSome",
+                    {
+                      equal: p.f("tdh.days.equal"),
+                      compared: p.f("tdh.days.compared"),
+                      date: p.f("tdh.latest.date"),
+                    }
+                  )}
+                />
+              </span>
+            </div>
+          </aside>
         </div>
-      </div>
-    </TdhPageShell>
+
+        <div className="tw-mt-8">
+          <DriftNote by={["D136", "D137"]} locale={locale}>
+            {m(
+              reported === null || current === null
+                ? "explained.tdh.spec.transitionUnread"
+                : reported !== current
+                  ? "explained.tdh.spec.transition"
+                  : "explained.tdh.spec.transitionDone",
+              {
+                date: p.v("names.renamedAt", "long"),
+                old: <CodeName>{p.v("names.v10.name")}</CodeName>,
+                wallets: p.v("names.v10.maxWallets"),
+                registry: <CodeName wrap>{p.v("names.v10.registry")}</CodeName>,
+                current: <CodeName>{p.v("rules.version")}</CodeName>,
+              }
+            )}
+          </DriftNote>
+        </div>
+
+        <SpecRules ctx={ctx} />
+        <SpecReference ctx={ctx} />
+
+        <PlaceLinks place={place} locale={locale} />
+        <HowWeKnow
+          locale={locale}
+          title={t(locale, "explained.tdh.spec.title")}
+          slug="tdh-specification"
+          rows={[
+            {
+              title: s("explained.tdh.spec.hwk.p26"),
+              body: m("explained.tdh.spec.hwk.p26Body", {
+                commit: p.v("rules.p26Commit"),
+                date: p.v("rules.p26Date", "long"),
+              }),
+            },
+            {
+              title: s("explained.tdh.spec.hwk.standing"),
+              body: m("explained.tdh.spec.hwk.standingBody"),
+            },
+            {
+              title: s("explained.tdh.spec.hwk.registry"),
+              body: m("explained.tdh.spec.hwk.registryBody", {
+                vector: <CodeName>28-registry-hash</CodeName>,
+              }),
+            },
+          ]}
+        />
+      </article>
+    </ExplainedShell>
   );
 }
 
-export function generateMetadata() {
+export function generateMetadata(): Metadata {
   return getAppMetadata(
     {
-      title: t(DEFAULT_LOCALE, "network.tdh.spec.pageTitle"),
-      description: t(DEFAULT_LOCALE, "network.tdh.spec.metadataDescription"),
+      title: t(DEFAULT_LOCALE, "explained.tdh.spec.meta.title"),
+      description: t(DEFAULT_LOCALE, "explained.tdh.spec.meta.description"),
     },
     { canonicalPath: "/network/tdh/specification" }
   );
