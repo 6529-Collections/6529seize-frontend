@@ -180,7 +180,7 @@ function Machines({ locale }: { readonly locale: SupportedLocale }) {
           },
         }))}
       />
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-sm tw-leading-[22px] tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-sm tw-leading-[22px] tw-text-iron-400">
         {hw(locale, "machines.note")}
       </p>
     </Disclosure>

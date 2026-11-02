@@ -66,7 +66,7 @@ function OptionCard({
       <CardText
         id={`${id}.what`}
         locale={locale}
-        className={`tw-mt-2 tw-block tw-text-iron-300 md:tw-min-h-[52px] ${READ}`}
+        className={`tw-mt-2 tw-block tw-text-iron-300 lg:tw-min-h-[52px] ${READ}`}
       >
         {nb(what)}
       </CardText>
@@ -119,7 +119,7 @@ function TierCost({
           {hw(locale, "tier.buy")}
         </span>
       </p>
-      <p className={`${COST_LINE} md:tw-min-h-[52px]`}>
+      <p className={`${COST_LINE} lg:tw-min-h-[52px]`}>
         {tier === "acceptable"
           ? hwRich(locale, "tier.acceptableMonth", { month })
           : hwRich(locale, "tier.month", { month })}
@@ -278,7 +278,7 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
         note={CARD.home.note}
       />
       <WhyHome locale={locale} />
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3 md:tw-gap-[18px]">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-[18px]">
         {tiers.map((tier) => {
           const def = CARD.tiers[tier];
           return (
@@ -306,7 +306,7 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
         })}
       </div>
       <Terms locale={locale} />
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[520px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
         <CardText id="fine" locale={locale}>
           {CARD.fine}
         </CardText>{" "}

@@ -397,7 +397,7 @@ function OwnNode({ locale }: { readonly locale: SupportedLocale }) {
                 </Sourced>
               ))}
             </ul>
-            <p className="tw-m-0 tw-mt-2.5 tw-max-w-[760px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-mt-2.5 tw-max-w-[520px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
               {hw(locale, "cloud.source")}:{" "}
               <SourceLink id="rented" locale={locale} />
               ; <SourceLink id="awsNode" locale={locale} />;{" "}
