@@ -18,9 +18,9 @@ const NATURAL_MAX_HEIGHT = "16rem";
 
 // While playing (or before the first frame), the control stays out of the way
 // on hover-capable devices until the media is hovered or keyboard focus enters
-// it; touch devices always show it.
+// it; touch devices (and hybrids that report no fine hover) always show it.
 const AUTO_HIDE_CLASS =
-  "desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 motion-reduce:tw-transition-none";
+  "desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100 motion-reduce:tw-transition-none";
 
 type GiphyVideoPreviewProps = {
   readonly videoRef: RefObject<HTMLVideoElement | null>;
