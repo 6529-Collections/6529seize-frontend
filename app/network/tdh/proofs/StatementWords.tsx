@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import { fill } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
@@ -153,10 +153,10 @@ function WordStrip({
 }) {
   return (
     <div
-      // Five rows of five at every width. From md each cell names its word
+      // Five rows of five at every width. From xl each cell names its word
       // and its group, so the grid is a picture of the statement before any
-      // click; on a phone the cells keep their numbers, the table names them.
-      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5 md:tw-max-w-[760px]"
+      // click; narrower, the cells keep their numbers, the table names them.
+      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5 xl:tw-max-w-[760px]"
       role="img"
       aria-label={label}
       data-word-strip=""
@@ -174,19 +174,26 @@ function WordStrip({
         return (
           <span
             key={word.word.name}
-            className={`tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums md:tw-h-auto md:tw-min-h-[58px] md:tw-flex-col md:tw-items-start md:tw-justify-center md:tw-gap-0.5 md:tw-px-2.5 md:tw-py-1.5 md:tw-text-left ${opens ? "md:tw-border-l-[3px]" : ""} ${EX_MOTION.model} ${tone}`}
+            className={`tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums xl:tw-h-auto xl:tw-min-h-[58px] xl:tw-flex-col xl:tw-items-start xl:tw-justify-center xl:tw-gap-0.5 xl:tw-px-2 xl:tw-py-1.5 xl:tw-text-left ${opens ? "xl:tw-border-l-[3px]" : ""} ${EX_MOTION.model} ${tone}`}
             data-strip-word={word.index}
             aria-hidden="true"
           >
-            <span className="md:tw-hidden">{word.index}</span>
-            <span className="tw-hidden tw-w-full tw-truncate tw-font-mono tw-text-xs tw-font-medium md:tw-block">
-              <span className="tw-mr-1.5 tw-font-sans tw-font-semibold">
+            <span className="xl:tw-hidden">{word.index}</span>
+            <span className="tw-hidden tw-w-full tw-font-mono tw-text-xs tw-font-medium xl:tw-block">
+              <span className="tw-font-sans tw-font-semibold">
                 {word.index}
-              </span>
-              {word.word.name}
+              </span>{" "}
+              {/* A long name breaks where its words join (prevHistory|Count),
+                  never inside one. */}
+              {word.word.name.split(/(?=[A-Z])/).map((part, at) => (
+                <Fragment key={`${part}-${String(at)}`}>
+                  {at > 0 && <wbr />}
+                  {part}
+                </Fragment>
+              ))}
             </span>
             <span
-              className={`tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal md:tw-block ${on || off ? "tw-text-iron-200" : "tw-text-iron-400"}`}
+              className={`tw-hidden tw-w-full tw-text-xs tw-font-normal xl:tw-block ${on || off ? "tw-text-iron-200" : "tw-text-iron-400"}`}
             >
               {groupLabel(word.word.group)}
             </span>

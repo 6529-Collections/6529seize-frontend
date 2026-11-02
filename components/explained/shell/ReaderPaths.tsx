@@ -48,7 +48,7 @@ export default function ReaderPaths({
             </span>
             {/* The route shows at every width: on a phone a card that names
                 only its reader and its time does not say where it goes. */}
-            <span className="tw-mt-1.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-300 md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
+            <span className="tw-mt-1.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-300 max-[359px]:tw-hidden md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}

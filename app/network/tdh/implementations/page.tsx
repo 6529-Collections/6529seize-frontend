@@ -358,7 +358,7 @@ export default async function ImplementationsPage({
           </div>
           {/* Two short notes, each with its lead, in place of one grey
               block: the run times, then where these facts come from. */}
-          <div className="tw-mt-5 tw-grid tw-max-w-[660px] tw-gap-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          <div className="tw-mt-5 tw-grid tw-max-w-[600px] tw-gap-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
             <p className="tw-m-0">
               <b className="tw-font-semibold tw-text-iron-50">
                 {m("explained.tdh.impl.cast.noteTimesLead")}

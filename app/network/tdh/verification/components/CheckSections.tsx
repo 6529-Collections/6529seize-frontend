@@ -289,7 +289,7 @@ export function HowTheCheckRuns({
       </figure>
       <div className="tw-mt-12">
         <AgreementBars pairs={agreementPairs(day, locale)} locale={locale} />
-        <p className={`${CAPTION} tw-mt-3`}>
+        <p className={`${CAPTION} tw-mt-3 tw-max-w-[640px]`}>
           {pt(locale, "explained.tdh.check.agree.caption")}
           {records !== null && (
             <>

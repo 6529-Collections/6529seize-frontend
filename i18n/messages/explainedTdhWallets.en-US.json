@@ -87,7 +87,7 @@
   "explained.tdh.wallets.add.setupNote": "The guided setup walks you through this order. Read {before} first: the profile merge cannot be undone.",
   "explained.tdh.wallets.before.label": "Before you start",
   "explained.tdh.wallets.before.profileTitle": "Profiles merge for good",
-  "explained.tdh.wallets.before.profile": "Linking merges your wallets' 6529.io profiles for good, even if you unlink later; the one with the highest NIC rating (CIC in the guided setup) keeps its handle. A wallet in another consolidation leaves it.",
+  "explained.tdh.wallets.before.profile": "Linking merges your wallets' 6529.io profiles for good; the one with the highest NIC rating (CIC in the guided setup) keeps its handle. A wallet in another consolidation leaves it.",
   "explained.tdh.wallets.before.keyTitle": "Every wallet is a key",
   "explained.tdh.wallets.before.key": "Each linked wallet can sign in as your profile. If one is compromised, revoke its links from your other wallets straight away.",
   "explained.tdh.wallets.before.votesTitle": "Wave votes can shrink",

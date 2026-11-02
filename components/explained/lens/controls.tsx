@@ -32,7 +32,7 @@ function labelLength(option: SegOption<string>): number {
 /**
  * Segmented buttons. On a phone, a group whose labels would wrap into
  * ragged rows becomes a grid of equal cells, each with its own edge, two a
- * row (three for a long set): every label is whole and every option is in
+ * row (one below 360 px): every label is whole and every option is in
  * view, with nothing scrolled off-screen. `phone` forces a layout
  * ("stack" lists one option a row, "wrap" lets short labels wrap); "list"
  * lists one option a row at every width, each with its radio dot, for a
@@ -77,10 +77,9 @@ export function Seg<V extends string>({
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
-    // Equal cells on a phone, two a row (three for a long set), so a group
-    // never breaks into ragged rows of pills: an odd last option takes the
-    // whole row.
-    row: `max-md:tw-grid max-md:tw-w-full ${options.length >= MANY_OPTIONS ? "max-md:tw-grid-cols-3" : "max-md:tw-grid-cols-2"} md:tw-inline-flex md:tw-flex-wrap`,
+    // Equal cells on a phone, two a row, so a group never breaks into
+    // ragged rows of pills.
+    row: "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-2 max-[359px]:tw-grid-cols-1 md:tw-inline-flex md:tw-flex-wrap",
     grid3:
       "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 max-[359px]:tw-grid-cols-2 md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
@@ -126,16 +125,14 @@ export function Seg<V extends string>({
           row first; one wider than the whole control wraps inside it. */}
       {options.map((option, index) => {
         const on = option.value === value;
-        const cols = options.length >= MANY_OPTIONS ? 3 : 2;
-        // The last row's leftover cells: one option spans what is left.
-        const spare = options.length % cols;
-        const last = index === options.length - 1;
-        let span = "";
-        if (layout === "row" && last && spare === 1) {
-          span = cols === 3 ? "max-md:tw-col-span-3" : "max-md:tw-col-span-2";
-        } else if (layout === "row" && last && spare === 2 && cols === 3) {
-          span = "max-md:tw-col-span-2";
-        }
+        // An odd last option takes the whole row; below 360 px every
+        // option has a row of its own.
+        const span =
+          layout === "row" &&
+          index === options.length - 1 &&
+          options.length % 2 === 1
+            ? "max-md:tw-col-span-2 max-[359px]:tw-col-span-1"
+            : "";
         return (
           <button
             key={option.value}

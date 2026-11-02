@@ -39,7 +39,6 @@ const PATHS: readonly PathDef[] = [
     route: "path.artRoute",
     minutes: 7,
     href: "#cc0",
-    more: true,
   },
   {
     who: "path.code",
