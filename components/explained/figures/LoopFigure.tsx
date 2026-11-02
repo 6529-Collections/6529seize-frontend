@@ -127,9 +127,9 @@ function MiniRing({
       <path d={`M${cx} ${c - 14}a7 7 0 0 1 0 14z`} fill={EX_HEX.holds} />
       <text
         x={cx}
-        y={c + 15}
+        y={c + 17}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={15}
         fontWeight={600}
         fill={EX_HEX.ink1}
       >

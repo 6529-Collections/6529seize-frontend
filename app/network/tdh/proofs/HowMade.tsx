@@ -125,7 +125,7 @@ function BlocksFigure({
             {Array.from({ length: Math.round(receipts / held) }, (_, cell) => (
               <i
                 key={cell}
-                className={`tw-block tw-h-full tw-min-w-px tw-flex-1 ${cell === 0 ? "tw-bg-iron-50" : "tw-bg-iron-600"}`}
+                className={`tw-block tw-h-full tw-min-w-px tw-flex-1 ${cell === Math.floor(receipts / held / 2) ? "tw-min-w-[3px] tw-bg-iron-50" : "tw-bg-iron-700"}`}
               />
             ))}
           </div>

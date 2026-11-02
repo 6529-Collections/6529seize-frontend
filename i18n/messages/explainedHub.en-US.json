@@ -28,7 +28,7 @@
   "explained.hub.station.decideSay": "Main Stage weighs votes by TDH and picks a card {perWeek} times a week.",
   "explained.hub.station.execute": "Execute",
   "explained.hub.station.executeSub": "admin keys today",
-  "explained.hub.station.executeNum": "minted by admin keys today",
+  "explained.hub.station.executeNum": "by admin keys today",
   "explained.hub.station.executeSay": "Today 6529's admin keys mint the winner. Minting by the network is decided (D67), not built.",
   "explained.hub.chapterCta": "Chapter {number}: {title}",
   "explained.hub.chapterComing": "Explained in {title}, a chapter still coming.",

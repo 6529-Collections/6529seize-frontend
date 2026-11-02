@@ -163,7 +163,7 @@
   "explained.tdh.overview.rung.writtenVectors": "{vectors} vectors",
   "explained.tdh.overview.rung.proved": "Proved about",
   "explained.tdh.overview.rung.provedBody": "Lean proofs about a model of P26's rules, each with its limits; the vectors test the model against P26. {p53} more are about the proposed validator rules (P53), from before D144, D148 and D150.",
-  "explained.tdh.overview.rung.provedMark": "Proved · {proved} theorems about TDH",
+  "explained.tdh.overview.rung.provedMark": "{proved} theorems about TDH",
   "explained.tdh.overview.rung.provedRef": "{shownFalse} counterexamples about TDH kept on record ({all} with the validator rules)",
   "explained.tdh.overview.rung.daily": "Recomputed every day",
   "explained.tdh.overview.rung.dailyBody": "Two separately written programs, the Rust core and the Python reference, equal 6529.io on every identity. The Rust core is the TDH part of program A below; the Python reference is never proved.",

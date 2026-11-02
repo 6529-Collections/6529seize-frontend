@@ -163,7 +163,7 @@
   "explained.tdh.overview.rung.writtenVectors": "{vectors} Vektoren",
   "explained.tdh.overview.rung.proved": "Darüber bewiesen",
   "explained.tdh.overview.rung.provedBody": "Lean-Beweise über ein Modell der Regeln von P26, jeder mit seinen Grenzen; die Vektoren testen das Modell gegen P26. {p53} weitere betreffen die vorgeschlagenen Validator-Regeln (P53), aus der Zeit vor D144, D148 und D150.",
-  "explained.tdh.overview.rung.provedMark": "Bewiesen · {proved} Theoreme über TDH",
+  "explained.tdh.overview.rung.provedMark": "{proved} Theoreme über TDH",
   "explained.tdh.overview.rung.provedRef": "{shownFalse} Gegenbeispiele zu TDH festgehalten ({all} mit den Validator-Regeln)",
   "explained.tdh.overview.rung.daily": "Jeden Tag neu berechnet",
   "explained.tdh.overview.rung.dailyBody": "Zwei getrennt geschriebene Programme, der Rust-Kern und die Python-Referenz, stimmen bei jeder Identität mit 6529.io überein. Der Rust-Kern ist der TDH-Teil von Programm A unten; die Python-Referenz wird nie bewiesen.",

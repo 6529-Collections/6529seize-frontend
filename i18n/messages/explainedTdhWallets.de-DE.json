@@ -19,7 +19,7 @@
   "explained.tdh.wallets.why.newcard": "Nichts, aber eine neue Karte ist erschienen",
   "explained.tdh.wallets.why.movedVerdict": "Es behält sein Alter nur innerhalb einer Identität.",
   "explained.tdh.wallets.why.movedApartLead": "Nicht verknüpft:",
-  "explained.tdh.wallets.why.movedApart": "Das Exemplar begann wieder bei null, und wenn es eine Season oder Ihr Full Set vervollständigte, sinkt auch der Boost dieser Identität. Verknüpfen in beide Richtungen gibt ihm seine Tage zurück. Eine häufige Ursache ist ein Paar, das nur in eine Richtung verknüpft ist:",
+  "explained.tdh.wallets.why.movedApart": "Das Exemplar begann wieder bei null, und wenn es eine Season oder Ihr Full Set vervollständigte, sinkt auch der Boost dieser Identität. Verknüpfen in beide Richtungen gibt ihm seine Tage zurück. Eine häufige Ursache ist ein Paar, das nicht in beide Richtungen verknüpft ist:",
   "explained.tdh.wallets.why.movedLinkedLead": "In beide Richtungen verknüpft:",
   "explained.tdh.wallets.why.movedBody": "Das Exemplar behielt seine Tage, und Ihre Summe ändert sich nur durch Rundung, um etwa ein TDH je bewegter Karte, mit Boost um mehr.",
   "explained.tdh.wallets.why.movedCaption": "A–B und B–C, aber kein A–C: B und C zählen zusammen, A allein.",

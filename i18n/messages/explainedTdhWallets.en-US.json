@@ -19,7 +19,7 @@
   "explained.tdh.wallets.why.newcard": "Nothing, but a new card came out",
   "explained.tdh.wallets.why.movedVerdict": "It keeps its age only inside one identity.",
   "explained.tdh.wallets.why.movedApartLead": "Not linked:",
-  "explained.tdh.wallets.why.movedApart": "the copy restarted at zero, and if it completed a season or your full set, that identity's boost drops too. Linking both ways gives its days back. A common cause is one pair linked one way only:",
+  "explained.tdh.wallets.why.movedApart": "the copy restarted at zero, and if it completed a season or your full set, that identity's boost drops too. Linking both ways gives its days back. A common cause is one pair not linked both ways:",
   "explained.tdh.wallets.why.movedLinkedLead": "Linked both ways:",
   "explained.tdh.wallets.why.movedBody": "the copy kept its days, and your total moves only by rounding, about one TDH for each card moved, more with a boost.",
   "explained.tdh.wallets.why.movedCaption": "A–B and B–C, but no A–C: B and C count together, A alone.",

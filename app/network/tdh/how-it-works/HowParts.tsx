@@ -208,6 +208,7 @@ export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
             {
               maturity: "live",
               label: ht(locale, "explained.tdh.how.formula.live"),
+              refText: "TDH v1.4",
             },
           ]}
         />

@@ -61,14 +61,9 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
       assumption: s("explained.tdh.sure.ledger.rerun"),
       mark: "notYet",
       covers: m("explained.tdh.sure.ledger.rerunCovers", {
-        // A commitment is the whole hash, so the row prints all of it.
-        commit: (
-          <CodeName>
-            <span className="tw-break-all">
-              {p.v("manifest.commit", "long")}
-            </span>
-          </CodeName>
-        ),
+        // A commitment is the whole hash, so the row prints all of it,
+        // free to wrap anywhere in a narrow column.
+        commit: <CodeName wrap>{p.v("manifest.commit", "long")}</CodeName>,
       }),
     },
   ];

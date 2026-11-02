@@ -22,7 +22,7 @@
   "explained.tdh.how.formula.boost": "boost",
   "explained.tdh.how.formula.round": "chaque carte arrondie à part",
   "explained.tdh.how.formula.over": "sur",
-  "explained.tdh.how.formula.live": "En service sur 6529.io, comme TDH v1.4",
+  "explained.tdh.how.formula.live": "En service sur 6529.io",
   "explained.tdh.how.a.title": "Un jour ne compte que s'il est entier.",
   "explained.tdh.how.a.body": "Une fois par jour, le TDH prend un instantané d'Ethereum : le dernier bloc avant {midnight}. Un résultat porte la date de son instantané et compte la veille. Un exemplaire ajoute un jour pour chaque tranche entière de {hours} heures pendant laquelle il a été détenu à cet instantané.",
   "explained.tdh.how.firstday.label": "Une carte vieillit",

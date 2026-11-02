@@ -22,7 +22,7 @@
   "explained.tdh.how.formula.boost": "boost",
   "explained.tdh.how.formula.round": "cada carta redondeada por separado",
   "explained.tdh.how.formula.over": "sobre",
-  "explained.tdh.how.formula.live": "En vivo en 6529.io, como TDH v1.4",
+  "explained.tdh.how.formula.live": "En vivo en 6529.io",
   "explained.tdh.how.a.title": "Un día solo cuenta si está completo.",
   "explained.tdh.how.a.body": "Una vez al día, el TDH toma una instantánea de Ethereum: el último bloque antes de las {midnight}. Un resultado lleva la fecha de su instantánea y cuenta el día anterior. Una copia suma un día por cada {hours} horas completas que lleva en tu poder en esa instantánea.",
   "explained.tdh.how.firstday.label": "Una carta envejece",

@@ -19,7 +19,7 @@
   "explained.tdh.wallets.why.newcard": "Rien, mais une nouvelle carte est sortie",
   "explained.tdh.wallets.why.movedVerdict": "Il ne garde son âge qu'au sein d'une même identité.",
   "explained.tdh.wallets.why.movedApartLead": "Non liés :",
-  "explained.tdh.wallets.why.movedApart": "l'exemplaire est reparti de zéro, et s'il complétait une saison ou votre set complet, le boost de cette identité baisse aussi. Lier dans les deux sens lui rend ses jours. Une cause fréquente est une paire liée dans un seul sens :",
+  "explained.tdh.wallets.why.movedApart": "l'exemplaire est reparti de zéro, et s'il complétait une saison ou votre set complet, le boost de cette identité baisse aussi. Lier dans les deux sens lui rend ses jours. Une cause fréquente est une paire qui n'est pas liée dans les deux sens :",
   "explained.tdh.wallets.why.movedLinkedLead": "Liés dans les deux sens :",
   "explained.tdh.wallets.why.movedBody": "l'exemplaire a gardé ses jours, et votre total ne bouge que par l'arrondi, d'environ un TDH par carte déplacée, davantage avec un boost.",
   "explained.tdh.wallets.why.movedCaption": "A–B et B–C, mais pas A–C : B et C comptent ensemble, A seul.",

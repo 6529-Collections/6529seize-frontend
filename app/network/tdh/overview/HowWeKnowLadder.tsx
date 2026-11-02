@@ -95,15 +95,16 @@ function rungs(book: FactBook, locale: SupportedLocale): Rung[] {
         p53: f("manifest.proved.p53"),
       }),
       marks: [
+        // The mark's own word, Proved, printed; the counts in its
+        // reference, which wraps on a narrow phone.
         {
           kind: "proved",
-          label: ot(locale, "rung.provedMark", {
+          refText: `${ot(locale, "rung.provedMark", {
             proved: f("manifest.proved.tdh"),
-          }),
-          refText: ot(locale, "rung.provedRef", {
+          })}; ${ot(locale, "rung.provedRef", {
             shownFalse: f("manifest.shownFalse.tdh"),
             all: f("manifest.shownFalse"),
-          }),
+          })}`,
         },
       ],
     },

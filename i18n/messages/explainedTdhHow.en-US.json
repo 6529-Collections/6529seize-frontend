@@ -22,7 +22,7 @@
   "explained.tdh.how.formula.boost": "boost",
   "explained.tdh.how.formula.round": "each card rounded on its own",
   "explained.tdh.how.formula.over": "over",
-  "explained.tdh.how.formula.live": "Live on 6529.io, as TDH v1.4",
+  "explained.tdh.how.formula.live": "Live on 6529.io",
   "explained.tdh.how.a.title": "A day counts only when it is whole.",
   "explained.tdh.how.a.body": "Once a day TDH takes a snapshot of Ethereum: the last block before {midnight}. A result is dated by its snapshot and counts the day before it. A copy adds one day for every whole {hours} hours it has been held at that snapshot.",
   "explained.tdh.how.firstday.label": "A card ages",

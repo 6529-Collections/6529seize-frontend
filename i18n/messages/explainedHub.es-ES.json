@@ -28,7 +28,7 @@
   "explained.hub.station.decideSay": "Main Stage pondera los votos por TDH y elige una carta {perWeek} veces por semana.",
   "explained.hub.station.execute": "Ejecutar",
   "explained.hub.station.executeSub": "claves de admin hoy",
-  "explained.hub.station.executeNum": "acuñada hoy con claves de administración",
+  "explained.hub.station.executeNum": "con claves de admin, hoy",
   "explained.hub.station.executeSay": "Hoy las claves de admin de 6529 acuñan la ganadora. Que la acuñe la red está decidido (D67), no construido.",
   "explained.hub.chapterCta": "Capítulo {number}: {title}",
   "explained.hub.chapterComing": "Se explica en {title}, un capítulo que aún llega.",

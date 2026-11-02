@@ -19,7 +19,7 @@
   "explained.tdh.wallets.why.newcard": "Nada, pero salió una carta nueva",
   "explained.tdh.wallets.why.movedVerdict": "Solo conserva su antigüedad dentro de una identidad.",
   "explained.tdh.wallets.why.movedApartLead": "Sin vincular:",
-  "explained.tdh.wallets.why.movedApart": "la copia volvió a cero, y si completaba una temporada o tu set completo, el boost de esa identidad también baja. Vincular en ambos sentidos le devuelve sus días. Una causa frecuente es un par vinculado en un solo sentido:",
+  "explained.tdh.wallets.why.movedApart": "la copia volvió a cero, y si completaba una temporada o tu set completo, el boost de esa identidad también baja. Vincular en ambos sentidos le devuelve sus días. Una causa frecuente es un par que no está vinculado en ambos sentidos:",
   "explained.tdh.wallets.why.movedLinkedLead": "Vinculadas en ambos sentidos:",
   "explained.tdh.wallets.why.movedBody": "la copia conservó sus días, y tu total solo cambia por redondeo, en torno a un TDH por carta movida, más con boost.",
   "explained.tdh.wallets.why.movedCaption": "A–B y B–C, pero no A–C: B y C cuentan juntas, A sola.",

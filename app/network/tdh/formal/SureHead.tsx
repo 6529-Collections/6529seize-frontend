@@ -153,7 +153,7 @@ export default function SureHead({
         </li>
       </ul>
       {/* The three theorem counts of this page, tied together once. */}
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-5 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
         {m(
           book.maybe("manifest.audit.wholeTheorems")
             ? "explained.tdh.sure.score.counts"
