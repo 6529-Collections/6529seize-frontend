@@ -134,6 +134,7 @@ describe("apple-app-site-association route", () => {
   );
 
   it("preserves route exclusions and cache headers on staging", async () => {
+    publicEnv.BASE_ENDPOINT = "https://6529.io";
     const production = await readAssociation();
     publicEnv.BASE_ENDPOINT = "https://staging.6529.io";
 
