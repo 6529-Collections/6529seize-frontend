@@ -79,7 +79,6 @@ describe("TimelineMedia", () => {
       );
       const buttons = await screen.findAllByRole("button", {
         name: "Play video",
-        exact: true,
       });
       const video = container.querySelector("video")!;
       fireEvent.loadedMetadata(video);
