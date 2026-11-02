@@ -84,6 +84,10 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
             JSON.stringify(current[key as keyof WaveChatUpdate] ?? null)
         )
       );
+      if (Object.keys(chat).length === 0) {
+        closeEditor();
+        return;
+      }
       updateWave({ chat }, closeEditor).catch(() => undefined);
     },
     [mutating, updateWave, wave]

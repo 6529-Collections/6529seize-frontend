@@ -78,3 +78,16 @@ it("clears slow mode explicitly while preserving omitted settings", async () => 
     })
   );
 });
+
+it("closes an unchanged chat edit without authenticating or sending a patch", () => {
+  const wave = createMockApiWave({
+    author: auth.connectedProfile as ApiWave["author"],
+    chat: { scope: { group: null }, enabled: true } as ApiWave["chat"],
+  });
+  const { result } = renderHook(() => useWaveSettingUpdater(wave), { wrapper });
+  const close = jest.fn();
+  act(() => result.current.saveChatUpdate(close, (chat) => chat));
+  expect(updateWaveHub).not.toHaveBeenCalled();
+  expect(auth.requestAuth).not.toHaveBeenCalled();
+  expect(close).toHaveBeenCalled();
+});

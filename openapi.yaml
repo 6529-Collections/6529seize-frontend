@@ -31020,7 +31020,7 @@ components:
         picture:
           type: string
           format: uri
-          pattern: ^https://
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
           description: HTTPS URL for the wave picture, or null.
           nullable: true
         description_drop:
@@ -42249,6 +42249,7 @@ components:
         picture:
           type: string
           format: uri
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
           nullable: true
         visibility:
           $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"

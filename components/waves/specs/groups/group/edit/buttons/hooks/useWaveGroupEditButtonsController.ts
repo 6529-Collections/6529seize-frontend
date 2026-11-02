@@ -57,11 +57,12 @@ export const useWaveGroupEditButtonsController = ({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
       await updateWaveHub(wave.id, {
         ...(type === WaveGroupType.VIEW ? { visibility: body.visibility } : {}),
-        ...(body.chat.scope.group_id !== (wave.chat.scope.group?.id ?? null)
+        ...(body.chat?.scope &&
+        body.chat.scope.group_id !== (wave.chat.scope.group?.id ?? null)
           ? { chat: { scope: body.chat.scope } }
           : {}),
         ...(type === WaveGroupType.ADMIN
-          ? { admin_group: body.wave.admin_group }
+          ? { admin_group: body.wave.admin_group ?? { group_id: null } }
           : {}),
       }),
     onSuccess: () => {
@@ -90,6 +91,9 @@ export const useWaveGroupEditButtonsController = ({
       body: ApiUpdateWaveRequest,
       opts?: { readonly skipAuth?: boolean | undefined }
     ): Promise<boolean> => {
+      // Competition roles are edited through CompetitionAccess and its API.
+      if (type === WaveGroupType.DROP || type === WaveGroupType.VOTE)
+        return false;
       setMutating(true);
       if (!opts?.skipAuth) {
         const { success } = await requestAuth();

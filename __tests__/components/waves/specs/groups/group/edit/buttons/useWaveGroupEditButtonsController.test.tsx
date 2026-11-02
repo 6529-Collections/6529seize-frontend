@@ -107,6 +107,31 @@ describe("useWaveGroupEditButtonsController", () => {
     }
   );
 
+  it("preserves omitted chat settings when clearing an administrator group", async () => {
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        wave: buildWave(),
+        type: WaveGroupType.ADMIN,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+    await act(async () => {
+      await expect(
+        result.current.updateWave({
+          visibility: { scope: { group_id: null } },
+          wave: { admin_group: null },
+        } as never)
+      ).resolves.toBe(true);
+    });
+    expect(mockCommonApiPatch).toHaveBeenCalledWith({
+      endpoint: "v3/waves/wave-1",
+      body: { admin_group: { group_id: null } },
+      errorMode: "structured",
+    });
+  });
+
   it("blocks a wave update when a privilege group is outside visibility", async () => {
     mockValidateWaveGroups.mockResolvedValue({
       valid: false,
