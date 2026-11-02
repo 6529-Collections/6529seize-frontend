@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import { NftPurchasingServerRenderProvider } from "@/components/common/NftPurchasingServerRender";
 
 let mockIsIos = false;
 let mockCountry: string | undefined = "US";
@@ -76,6 +77,19 @@ it("omits purchasing children from server HTML before the platform is known", ()
     )
   ).toBe("");
   expect(mockMount).not.toHaveBeenCalled();
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("includes purchasing children in server HTML when the request is clearly not the iOS app", () => {
+  expect(
+    renderToString(
+      <NftPurchasingServerRenderProvider enabled>
+        <NftPurchasingGate redirectTo="/about">
+          <PurchasingContent />
+        </NftPurchasingGate>
+      </NftPurchasingServerRenderProvider>
+    )
+  ).toBe("<button>Mint</button>");
   expect(mockReplace).not.toHaveBeenCalled();
 });
 

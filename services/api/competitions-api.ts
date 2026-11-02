@@ -29,6 +29,7 @@ import {
   commonApiPut,
 } from "@/services/api/common-api";
 import type { QueryClient } from "@tanstack/react-query";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { scheduleDropCompetitionContext } from "./competition-context-scheduler";
 
 export interface CompetitionIdentity {
@@ -319,6 +320,29 @@ export async function invalidateCompetitionWave(
   waveId: string
 ) {
   await invalidateCompetitionScope(client, waveId, { wave_id: waveId });
+}
+
+/** Winner decisions also change public author identity on ordinary drop views. */
+export async function invalidateCompetitionAuthors(
+  client: QueryClient,
+  waveId: string
+) {
+  await Promise.all([
+    client.invalidateQueries({
+      queryKey: [QueryKey.DROPS, { waveId }],
+      refetchType: "active",
+    }),
+    client.invalidateQueries({
+      queryKey: [QueryKey.DROP],
+      predicate: (query) => {
+        const drop = query.state.data as
+          | Partial<Pick<ApiDrop, "wave">>
+          | undefined;
+        return drop?.wave?.id === waveId;
+      },
+      refetchType: "active",
+    }),
+  ]);
 }
 
 async function invalidateCompetitionScope(

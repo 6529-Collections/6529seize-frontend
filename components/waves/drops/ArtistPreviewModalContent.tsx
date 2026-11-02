@@ -17,6 +17,8 @@ import {
   getTrophyArtworkCount,
 } from "@/helpers/artist-activity.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -39,6 +41,8 @@ export const ArtistPreviewModalContent: React.FC<
   onTabChange,
   hasTrophyArtworks,
 }) => {
+  const locale = useBrowserLocale();
+  const panelId = React.useId();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,6 +77,12 @@ export const ArtistPreviewModalContent: React.FC<
     hasTrophyArtworks || hydratedTrophyCount > 0;
 
   const showTabs = hasActiveSubmissions && hasHydratedTrophyArtworks;
+  const activeTabLabel = t(
+    locale,
+    activeTab === "active"
+      ? "waves.artistPreview.activeSubmissions"
+      : "waves.artistPreview.mintedMemes"
+  );
 
   // Extract nested ternary for better readability
   let currentContentType: "active" | "winners";
@@ -116,51 +126,58 @@ export const ArtistPreviewModalContent: React.FC<
           <ArtistPreviewModalTabs
             activeTab={activeTab}
             onTabChange={onTabChange}
+            panelId={panelId}
           />
         )}
 
-        {(() => {
-          if (isHydratingArtistActivity) {
-            return <ArtistActivityLoadingState />;
-          }
+        <div
+          id={panelId}
+          role={showTabs ? "tabpanel" : undefined}
+          aria-label={showTabs ? activeTabLabel : undefined}
+        >
+          {(() => {
+            if (isHydratingArtistActivity) {
+              return <ArtistActivityLoadingState />;
+            }
 
-          // Extract nested ternary logic for better readability
-          if (showTabs) {
-            return activeTab === "active" ? (
+            // Extract nested ternary logic for better readability
+            if (showTabs) {
+              return activeTab === "active" ? (
+                <ArtistActiveSubmissionContent
+                  user={hydratedUser}
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  isApp={isApp}
+                />
+              ) : (
+                <ArtistWinningArtworksContent
+                  user={hydratedUser}
+                  isOpen={isOpen}
+                  onDropClick={handleDropClick}
+                />
+              );
+            }
+
+            if (hasHydratedTrophyArtworks) {
+              return (
+                <ArtistWinningArtworksContent
+                  user={hydratedUser}
+                  isOpen={isOpen}
+                  onDropClick={handleDropClick}
+                />
+              );
+            }
+
+            return (
               <ArtistActiveSubmissionContent
                 user={hydratedUser}
                 isOpen={isOpen}
                 onClose={onClose}
                 isApp={isApp}
               />
-            ) : (
-              <ArtistWinningArtworksContent
-                user={hydratedUser}
-                isOpen={isOpen}
-                onDropClick={handleDropClick}
-              />
             );
-          }
-
-          if (hasHydratedTrophyArtworks) {
-            return (
-              <ArtistWinningArtworksContent
-                user={hydratedUser}
-                isOpen={isOpen}
-                onDropClick={handleDropClick}
-              />
-            );
-          }
-
-          return (
-            <ArtistActiveSubmissionContent
-              user={hydratedUser}
-              isOpen={isOpen}
-              onClose={onClose}
-              isApp={isApp}
-            />
-          );
-        })()}
+          })()}
+        </div>
       </div>
     </div>
   );

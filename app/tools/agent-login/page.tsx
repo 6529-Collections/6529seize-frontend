@@ -1,5 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import { getNodeEnv } from "@/config/env";
+import { isDevLikeEnv } from "@/config/devAuth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -27,18 +27,13 @@ function isLocalHostname(hostname: string): boolean {
   return LOCAL_HOSTNAMES.has(hostname) || hostname.endsWith(".local");
 }
 
-function isDevLikeRuntime(): boolean {
-  const nodeEnv = getNodeEnv();
-  return nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
-}
-
 export default async function AgentLoginPage() {
   const headersList = await headers();
   const hostname = getHostnameFromHostHeader(
     headersList.get("host") ?? headersList.get("x-forwarded-host")
   );
 
-  if (!hostname || !isLocalHostname(hostname) || !isDevLikeRuntime()) {
+  if (!hostname || !isLocalHostname(hostname) || !isDevLikeEnv()) {
     notFound();
   }
 

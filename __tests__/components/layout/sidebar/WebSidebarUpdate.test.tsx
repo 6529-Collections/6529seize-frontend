@@ -185,7 +185,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   const utilities = update.closest('[data-sidebar-section="utilities"]');
   expect(utilities?.firstElementChild).toBe(utilityRow);
   expect(
-    screen.queryByRole("link", { name: "Notifications" })
+    screen.queryByRole("button", { name: "Notifications" })
   ).not.toBeInTheDocument();
 
   jest.mocked(useSeizeConnectContext).mockReturnValue({
@@ -193,7 +193,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
     hasValidWalletAuth: true,
   } as unknown as ReturnType<typeof useSeizeConnectContext>);
   rerender(<WebSidebar {...sidebarProps} />);
-  const notifications = screen.getByRole("link", { name: "Notifications" });
+  const notifications = screen.getByRole("button", { name: "Notifications" });
   expect(
     notifications.closest('[data-sidebar-section="account"]')
   ).not.toBeNull();
@@ -207,7 +207,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   } as unknown as ReturnType<typeof useSeizeConnectContext>);
   rerender(<WebSidebar {...sidebarProps} />);
   expect(
-    screen.queryByRole("link", { name: "Notifications" })
+    screen.queryByRole("button", { name: "Notifications" })
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Update" })).toBe(update);
   expect(utilities?.firstElementChild).toBe(utilityRow);

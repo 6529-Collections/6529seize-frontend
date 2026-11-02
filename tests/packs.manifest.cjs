@@ -35,6 +35,14 @@ const PRODUCTION_READONLY_ENV = {
   PLAYWRIGHT_READONLY: "1",
 };
 
+// Writes throwaway QA data to staging, so the read-only guard is off.
+const STAGING_STATEFUL_ENV = {
+  PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  PLAYWRIGHT_ENV: "staging",
+  PLAYWRIGHT_READONLY: "0",
+};
+
 const COMPOSER_SANDBOX_ENV = {
   PLAYWRIGHT_ENV: "local",
   PLAYWRIGHT_COMPOSER_SANDBOX: "1",
@@ -51,12 +59,20 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
-const PUBLIC_REVIEW_SANDBOX_ENV = {
-  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
+// End-to-end encrypted DMs and groups (D109): several local browsers, each
+// a different dev-auth user, against the fake E2EE delivery service mounted
+// in the composer sandbox mock API.
+const E2EE_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
+  PLAYWRIGHT_E2EE_SANDBOX: "1",
+  PLAYWRIGHT_BASE_URL: "http://localhost:3299",
+  PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+  PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
+  NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
 };
 
 const READONLY_SPECS = {
+  bookmarks: ["tests/social/bookmarks-readonly.spec.ts"],
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
   media: [
@@ -176,6 +192,41 @@ function museumPack(pack) {
 }
 
 const PACKS = [
+  {
+    ...sandboxPack(
+      "test:e2e:bookmarks-sandbox",
+      "Private bookmark menus, account isolation, and saved-page flow.",
+      ["tests/social/bookmarks-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/bookmarksSandboxServer.cjs",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  stagingPack(
+    "bookmarks",
+    "bookmarks",
+    "Private bookmarks route authentication guard.",
+    READONLY_SPECS.bookmarks,
+    { env: { ...STAGING_READONLY_ENV, USE_DEV_AUTH: "false" } }
+  ),
+  {
+    ...productionPack(
+      "bookmarks",
+      "Private bookmarks route authentication guard.",
+      READONLY_SPECS.bookmarks,
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    ),
+    env: { ...PRODUCTION_READONLY_ENV, USE_DEV_AUTH: "false" },
+  },
+
   {
     scriptKey: "test:e2e",
     description: "Full local suite on the desktop web shell.",
@@ -402,13 +453,6 @@ const PACKS = [
     [DESKTOP, MOBILE]
   ),
   sandboxPack(
-    "test:e2e:public-review-sandbox",
-    "Stream review feedback sandbox against the local mock API.",
-    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
-    PUBLIC_REVIEW_SANDBOX_ENV,
-    [DESKTOP, MOBILE]
-  ),
-  sandboxPack(
     "test:e2e:reaction-sandbox",
     "Drop reaction sandbox against the local mock API.",
     ["tests/social/wave-reaction-sandbox.spec.ts"],
@@ -492,11 +536,27 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  sandboxPack(
+    "test:e2e:notifications-inbox-sandbox",
+    "Desktop notification preview, explicit read actions, and mobile navigation.",
+    ["tests/auth/notifications-inbox-sandbox.spec.ts"],
+    {
+      ...AUTH_SANDBOX_ENV,
+      NEXT_DEV_DIST_DIR: ".next-playwright-notifications-inbox",
+      PLAYWRIGHT_BASE_URL: "http://localhost:3309",
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3309",
+      PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4309",
+    },
+    [DESKTOP, MOBILE]
+  ),
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
-      "Own-profile Following dialog, pagination, navigation and recovery.",
-      ["tests/social/profile-following-sandbox.spec.ts"],
+      "Profile Following and REP editing dialogs, permissions and recovery.",
+      [
+        "tests/social/profile-following-sandbox.spec.ts",
+        "tests/social/profile-rep-edit-sandbox.spec.ts",
+      ],
       {
         ...AUTH_SANDBOX_ENV,
         USE_DEV_AUTH: "false",
@@ -521,6 +581,16 @@ const PACKS = [
       [DESKTOP, MOBILE]
     ),
     triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
+      "test:e2e:e2ee-sandbox",
+      "Encrypted DMs and groups across several local browsers against the fake delivery service.",
+      ["tests/e2ee"],
+      E2EE_SANDBOX_ENV,
+      [DESKTOP, MOBILE]
+    ),
+    timeoutMinutes: 30,
   },
 
   localPack(
@@ -707,6 +777,24 @@ const PACKS = [
       READONLY_SPECS.museumRights
     )
   ),
+  // Opt-in and stateful: throwaway QA wallets sign in, create test-only
+  // profiles and exchange encrypted messages (D109). Manual trigger only, so
+  // the post-deploy `all` selection never runs it; dispatch it by alias.
+  {
+    scriptKey: "test:e2e:staging:e2ee",
+    alias: "e2ee-staging",
+    description:
+      "Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).",
+    safety: "stateful",
+    environments: ["staging"],
+    triggers: ["manual"],
+    env: { ...STAGING_STATEFUL_ENV, PLAYWRIGHT_E2EE_STAGING: "1" },
+    specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+    projects: [DESKTOP],
+    workers: 1,
+    traceOff: true,
+    timeoutMinutes: 60,
+  },
 
   productionPack(
     "home-readonly",
@@ -830,6 +918,7 @@ const PACKS = [
     "Combined production-safe release validation.",
     [
       "tests/home/home.spec.ts",
+      ...READONLY_SPECS.bookmarks,
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,

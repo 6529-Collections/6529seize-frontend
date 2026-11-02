@@ -13,12 +13,14 @@
 
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
+import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateDropRequest {
+    'device_signature'?: ApiDeviceSignature;
     'title'?: string | null;
     /**
     * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart. A drop may have at most 250 parts, and at most 100 media items and 100 attachments in total across all parts.
@@ -44,6 +46,12 @@ export class ApiUpdateDropRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "device_signature",
+            "baseName": "device_signature",
+            "type": "ApiDeviceSignature",
+            "format": ""
+        },
         {
             "name": "title",
             "baseName": "title",

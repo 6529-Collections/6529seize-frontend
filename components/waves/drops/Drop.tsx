@@ -69,6 +69,8 @@ interface DropProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly moderationPresentation?: "default" | "profile-activity" | undefined;
+  /** For a chat header: the posts grouped under it (header first). */
+  readonly signatureGroup?: readonly ExtendedDrop[] | undefined;
 }
 
 function CompetitionDrop(props: DropProps) {
@@ -116,6 +118,7 @@ function DropContent({
   embedDepth,
   maxEmbedDepth,
   moderationPresentation = "default",
+  signatureGroup,
 }: DropProps) {
   const canOpenDrop =
     drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
@@ -186,6 +189,7 @@ function DropContent({
     [ApiDropType.Chat]: (
       <WaveDrop
         drop={drop}
+        signatureGroup={signatureGroup}
         previousDrop={
           previousDrop?.type === DropSize.FULL ? previousDrop : null
         }

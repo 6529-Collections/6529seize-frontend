@@ -105,7 +105,10 @@ export function MemeCollaboratorPicker({
           </span>
         ) : (
           <>
-            <PlusIcon aria-hidden="true" className="tw-size-4" />
+            <PlusIcon
+              aria-hidden="true"
+              className="-tw-ml-2 tw-size-4 tw-shrink-0"
+            />
             <span>{t(locale, "memes.collaborations.add")}</span>
           </>
         )}

@@ -112,6 +112,9 @@ function DraftForm({
     readCompetitionEditorDraft(storageKey, Boolean(competition))
   );
   const seed = restored?.input ?? initial;
+  const anonymityLocked =
+    competition !== undefined &&
+    competition.lifecycle !== ApiCompetitionLifecycle.Draft;
   const controller = useWaveConfig({
     initialViewGroupId: wave.visibility.scope.group?.id ?? null,
     initialWaveType: ApiWaveType.Rank,
@@ -130,6 +133,10 @@ function DraftForm({
   const [description, setDescription] = useState(seed?.description ?? "");
   const [voteSignature, setVoteSignature] = useState(
     seed?.voting.signature_required ?? false
+  );
+  const [anonymousSubmissions, setAnonymousSubmissions] = useState(
+    (anonymityLocked ? initial : seed)?.participation.anonymous_submissions ??
+      false
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<"conflict" | "failure" | null>(null);
@@ -154,6 +161,9 @@ function DraftForm({
   });
   const input = useMemo(() => {
     const draft = competitionFormToDraft(config, description);
+    draft.participation.anonymous_submissions = anonymityLocked
+      ? (initial?.participation.anonymous_submissions ?? false)
+      : anonymousSubmissions;
     if (lockedRules && initial)
       return {
         ...initial,
@@ -206,6 +216,8 @@ function DraftForm({
     initial,
     preservePublishedRules,
     lockVotingCredits,
+    anonymousSubmissions,
+    anonymityLocked,
   ]);
   const fingerprint = JSON.stringify(input);
   const [initialFingerprint] = useState(initial ? fingerprint : "");
@@ -415,6 +427,27 @@ function DraftForm({
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
+        <div className="tw-space-y-2">
+          <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
+            <input
+              type="checkbox"
+              checked={anonymousSubmissions}
+              onChange={(event) =>
+                setAnonymousSubmissions(event.target.checked)
+              }
+              disabled={anonymityLocked}
+              aria-describedby="competition-anonymity-description"
+              className="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            />
+            {t(locale, "competitions.anonymousSubmissions")}
+          </label>
+          <p
+            id="competition-anonymity-description"
+            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+          >
+            {t(locale, "competitions.anonymityDescription")}
+          </p>
+        </div>
         {!lockedRules && config.overview.type === ApiWaveType.Rank && (
           <RankScheduleModeSelector
             isCompetition

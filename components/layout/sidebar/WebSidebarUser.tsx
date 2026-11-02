@@ -1,5 +1,7 @@
 "use client";
 
+import { useBookmarkStatus } from "@/hooks/drops/useDropBookmarks";
+
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { memo, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
@@ -88,6 +90,7 @@ function WebSidebarUser({
   // Stay subscribed while the account UI is mounted, including while its menu
   // is closed. No persistent cache or menu-triggered request is needed.
   const artworkAccess = useArtworkDocumentationAccess();
+  useBookmarkStatus();
   const accountScope = JSON.stringify([
     address,
     connectedProfile?.id,

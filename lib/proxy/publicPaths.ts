@@ -6,6 +6,9 @@
  * `__tests__/lib/proxy/publicPaths.test.ts` fails when they drift.
  */
 
+// Relative import, like other modules reachable from next.config.
+import { VERSION_RELOAD_IMAGE_SRC } from "../../components/version-update/versionReloadImage";
+
 /** Every committed root-level file in `public/`. */
 export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/6529-black.svg",
@@ -72,6 +75,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/help-index.json",
   "/home.png",
   "/home.svg",
+  "/icon-192.png",
+  "/icon-512-maskable.png",
+  "/icon-512.png",
   "/intern-no-bg.png",
   "/intern.png",
   "/jump.svg",
@@ -121,6 +127,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/watermark.png",
   "/windows.png",
   "/x_black.png",
+  // Content-hashed reload cover artwork; the generator renames it, so the
+  // entry follows its constant instead of a hand-copied file name.
+  VERSION_RELOAD_IMAGE_SRC,
 ]);
 
 /**
@@ -133,9 +142,15 @@ export const SERVED_WELL_KNOWN_PATHS: ReadonlySet<string> = new Set([
   "/.well-known/apple-app-site-association",
 ]);
 
-/** Root-level paths kept ungated although no committed `public/` file backs them. */
+/**
+ * Root-level paths kept ungated although no committed `public/` file backs
+ * them: the generated favicon and Next's `app/apple-icon.png` and
+ * `app/manifest.ts` metadata routes. All three carry public branding only.
+ */
 const GENERATED_ROOT_STATIC_PATHS: ReadonlySet<string> = new Set([
+  "/apple-icon.png",
   "/favicon.ico",
+  "/manifest.webmanifest",
 ]);
 
 const SITEMAP_PREFIX = "/sitemap";
@@ -152,6 +167,7 @@ export const PUBLIC_IMAGE_DIRECTORIES: ReadonlySet<string> = new Set([
   "artwork-documentation",
   "delegation-content",
   "emojis",
+  "home",
   "museum",
   "nextgen",
   "pebbles",
@@ -167,8 +183,19 @@ const PUBLIC_IMAGE_EXTENSIONS = [
   ".webp",
 ] as const;
 
-/** Route families that bypass the staging gate as a whole segment. */
-const STATIC_SEGMENT_PREFIXES = ["/api", "/_next", "/pdfjs", "/error"] as const;
+/**
+ * Route families that bypass the staging gate as a whole segment. `/e2ee`
+ * holds the content-hashed OpenMLS WebAssembly module of encrypted chats
+ * (built by `6529 run build:mls-wasm`); it is public code the loader checks
+ * against a bundled SHA-256 before use.
+ */
+const STATIC_SEGMENT_PREFIXES = [
+  "/api",
+  "/_next",
+  "/pdfjs",
+  "/e2ee",
+  "/error",
+] as const;
 
 /** `next-sitemap` writes `/sitemap.xml` and `/sitemap-<n>.xml` after builds. */
 function isGeneratedSitemapPath(pathname: string): boolean {
@@ -220,6 +247,28 @@ export function isUnservableDotPath(pathname: string): boolean {
     !SERVED_WELL_KNOWN_PATHS.has(pathname) &&
     pathname.split("/").some(isDotPrefixedSegment)
   );
+}
+
+const RETIRED_REVIEW_DATA_SEGMENT = "/review-data";
+
+function decodePathname(pathname: string): string {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
+}
+
+/**
+ * True for `/review-data`, the namespace of the removed public contract
+ * review's generated files. The path is decoded, lower-cased and stripped of
+ * repeated slashes first, so every spelling of an old link gets the same 404.
+ */
+export function isRetiredReviewDataPath(pathname: string): boolean {
+  const normalized = decodePathname(pathname)
+    .toLowerCase()
+    .replaceAll(/\/{2,}/g, "/");
+  return hasSegmentPrefix(normalized, RETIRED_REVIEW_DATA_SEGMENT);
 }
 
 /**

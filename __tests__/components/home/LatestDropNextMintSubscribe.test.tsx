@@ -161,7 +161,7 @@ describe("LatestDropNextMintSubscribe", () => {
       "tw-border-primary-400/25",
       "tw-bg-primary-500/10",
       "tw-px-4",
-      "tw-py-3.5"
+      "tw-py-3"
     );
     expect(awarenessRow).not.toHaveClass(
       "tw-rounded-2xl",

@@ -148,12 +148,7 @@ const portability =
   require("../../ops/scripts/artifact-portability.cjs") as PortabilityModule;
 const SOURCE_SHA = "a".repeat(40);
 const EXPECTED_VERSION = "b".repeat(40);
-const CONTENT_ROOTS = [
-  "public",
-  "content/public-reviews",
-  "config/public-reviews",
-  "public/review-data",
-];
+const CONTENT_ROOTS = ["public"];
 const FIXTURE_RUNTIME = {
   API_ENDPOINT: "https://api.staging.6529.io",
   WS_ENDPOINT: "wss://ws.staging.6529.io",
@@ -241,15 +236,6 @@ function makeArtifactFixture(
     fs.mkdirSync(path.join(root, relativeRoot), { recursive: true });
   }
   fs.writeFileSync(path.join(root, "public", "index.html"), "museum\n");
-  fs.writeFileSync(
-    path.join(root, "content/public-reviews", "source.md"),
-    "source\n"
-  );
-  fs.writeFileSync(
-    path.join(root, "config/public-reviews", "publication.json"),
-    "{}\n"
-  );
-  fs.writeFileSync(path.join(root, "public/review-data", "index.json"), "{}\n");
   fs.writeFileSync(
     path.join(root, "package.json"),
     '{"packageManager":"pnpm@10.12.1"}\n'
@@ -741,10 +727,57 @@ describe("artifact-portability.v1", () => {
     expect(comparison.comparison.baked_input_differences).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "API_ENDPOINT" }),
-        expect.objectContaining({ name: "PUBLIC_REVIEW_PROFILE" }),
       ])
     );
   });
+
+  it.each([
+    {
+      environment: "staging" as const,
+      flags: [
+        "NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES",
+        "NEXT_PUBLIC_E2EE_DM_ENABLED",
+      ],
+    },
+    {
+      environment: "production" as const,
+      flags: ["NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES"],
+    },
+  ])(
+    "classifies $environment messaging flags without authorizing artifact reuse",
+    ({ environment, flags }) => {
+      const fixture = makeArtifactFixture(
+        environment,
+        Object.fromEntries(flags.map((name) => [name, "true"]))
+      );
+      fixtures.push(fixture);
+      const inventory = fixture.build();
+
+      expect(inventory).toMatchObject({ environment });
+      expect(inventory.unclassified_runtime_keys).toEqual([]);
+      for (const name of flags) {
+        expect(inventory.baked_inputs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name,
+              classification: "known_runtime_fail_closed",
+              environment_bound: true,
+              present: true,
+            }),
+          ])
+        );
+        expect(inventory.portability.blockers).toContain(
+          `baked environment input: ${name}`
+        );
+      }
+      expect(inventory.portability).toMatchObject({
+        status: "NOT_PORTABLE",
+        portable: false,
+        reuse_authorized: false,
+        promotion_authorized: false,
+      });
+    }
+  );
 
   it("records unknown baked runtime keys for fail-closed review", () => {
     const fixture = makeArtifactFixture("staging", {

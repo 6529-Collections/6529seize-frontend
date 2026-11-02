@@ -149,8 +149,8 @@
   - Non-`US` or unknown country: the mint page does not render. Direct and
     deep-linked visits return to `/the-memes` without loading mint details,
     recipient selection, mint count, or `SEIZE`, and without an unavailable
-    message. The server HTML and first hydration render omit the mint flow on
-    every platform until the client can check the native platform.
+    message. The mint flow itself always loads in the browser, so the server
+    HTML never contains it.
   - While the iOS country check is still loading, the page stays empty and
     does not redirect, so a US cold deep link opens the mint page once `US`
     resolves. A failed or empty country check, or one that takes longer than

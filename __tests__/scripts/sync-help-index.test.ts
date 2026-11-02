@@ -7,51 +7,32 @@ const {
 } = require("../../scripts/help-index-publication.cjs");
 const helpIndex = require("../../ops/help/help-index.json");
 
-const STREAM_SUMMARY_RECORD_IDS = [
-  "public-reviews.stream",
-  "public-reviews.stream.feedback-status",
-] as const;
-
 function getPublishedRecordIds(baseEndpoint: string): Set<string> {
   const records = getPublishedHelpRecords({
     records: helpIndex.records,
     publicationEnvironment: getPublicationEnvironment(baseEndpoint),
-    repoRoot: process.cwd(),
   });
   return new Set(records.map((record: { id: string }) => record.id));
 }
 
 describe("sync-help-index publication policy", () => {
-  const publicReviewRecord = {
-    environments: ["local", "staging", "production"],
-    public_review_id: "6529-stream",
-  };
-
-  it("publishes a review record only when both environment and lifecycle allow it", () => {
+  it("publishes records by environment", () => {
     expect(
-      isHelpRecordPublished(
-        publicReviewRecord,
-        "staging",
-        new Set(["6529-stream"])
-      )
+      isHelpRecordPublished({ environments: ["staging"] }, "staging")
     ).toBe(true);
     expect(
-      isHelpRecordPublished(publicReviewRecord, "staging", new Set())
+      isHelpRecordPublished({ environments: ["staging"] }, "production")
     ).toBe(false);
-    expect(
-      isHelpRecordPublished(
-        publicReviewRecord,
-        "production",
-        new Set(["6529-stream"])
-      )
-    ).toBe(true);
+    expect(isHelpRecordPublished({}, "production")).toBe(true);
   });
 
-  it("leaves unrelated records governed only by their environment", () => {
+  it("strips the environment list from published records", () => {
     expect(
-      isHelpRecordPublished({ environments: ["staging"] }, "staging", new Set())
-    ).toBe(true);
-    expect(isHelpRecordPublished({}, "production", new Set())).toBe(true);
+      getPublishedHelpRecords({
+        records: [{ id: "a", environments: ["production"] }],
+        publicationEnvironment: "production",
+      })
+    ).toEqual([{ id: "a" }]);
   });
 
   it("fails closed when resolving an unknown publication environment", () => {
@@ -62,19 +43,14 @@ describe("sync-help-index publication policy", () => {
     expect(getPublicationEnvironment("invalid")).toBe("production");
   });
 
-  it("generates the staging help corpus with the published Stream summaries", () => {
-    const publishedRecordIds = getPublishedRecordIds("https://staging.6529.io");
+  it("publishes the /stream rebuild notice and no Stream review records", () => {
+    for (const baseEndpoint of ["https://6529.io", "https://staging.6529.io"]) {
+      const publishedRecordIds = getPublishedRecordIds(baseEndpoint);
 
-    for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
-      expect(publishedRecordIds.has(recordId)).toBe(true);
-    }
-  });
-
-  it("generates the production help corpus with the published Stream summaries", () => {
-    const publishedRecordIds = getPublishedRecordIds("https://6529.io");
-
-    for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
-      expect(publishedRecordIds.has(recordId)).toBe(true);
+      expect(publishedRecordIds.has("stream.rebuild-notice")).toBe(true);
+      expect(
+        [...publishedRecordIds].filter((id) => id.startsWith("public-reviews."))
+      ).toEqual([]);
     }
   });
 });

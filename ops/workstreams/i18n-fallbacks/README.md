@@ -19,12 +19,14 @@ fallback dictionaries.
 | [Museum data architecture](museum-data-architecture.md)             | The data-architecture reading room and profile interface currently resolve through the reviewed `en-US` fallback              |
 | [Share and connect controls](share-connect-controls.md)             | Page-sharing, social-action, device-connection, and account-menu messages currently fall back to `en-US` outside the source locale |
 | [Sidebar navigation](sidebar-navigation.md)                         | `useSidebarSections` still resolves shared navigation through `DEFAULT_LOCALE` and retains residual hardcoded labels          |
+| [Desktop notifications inbox](notifications-inbox.md) | The desktop inbox's `notifications.inbox.*` controls, states, and summaries use `en-US` fallback outside the source locale |
 | [Wallet and profile setup controls](wallet-profile-setup-controls.md) | App-wallet dialogs, profile-setup gates, and app-sidebar feedback remain source-locale English                               |
 | [Wave competition badges](wave-competition-badges.md)               | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
 | [Wave navigation](wave-navigation.md) | About and Configuration use locale dictionaries with source-locale fallback; other desktop section labels retain existing English copy |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
+| [Direct-message admission](direct-message-admission.md) | The Preferences group option, its controls, and new-DM refusal notices exist only in `en-US` and fall back to it in other locales |
 
 Remove a debt record only in the same change that completes its remediation and
 verifies the supported locale and accessible-name behavior described by the

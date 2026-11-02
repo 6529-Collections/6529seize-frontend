@@ -1,7 +1,7 @@
 "use client";
 
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
-import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
+import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -10,10 +10,14 @@ import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 import { useLatestDropTransitionReady } from "./useLatestDropTransitionReady";
 
-export default function LatestDropSection() {
+export default function LatestDropSection({
+  mintStatus,
+}: {
+  readonly mintStatus: NowMintingStatus;
+}) {
   const locale = useBrowserLocale();
   const { nft, isFetching, isDropComplete, isStatusLoading, error, refetch } =
-    useNowMintingStatus();
+    mintStatus;
   const { nextMint, isLoading: isNextMintLoading } = useNextMintDrop();
   const isLatestDropTransitionReady = useLatestDropTransitionReady({
     isDropComplete,

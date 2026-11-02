@@ -29,7 +29,9 @@ describe('StepHeader', () => {
 
   it('downloads operations when button clicked', async () => {
     const createObjectURL = jest.fn().mockReturnValue('blob:url');
+    const revokeObjectURL = jest.fn();
     Object.defineProperty(window.URL, 'createObjectURL', { value: createObjectURL });
+    Object.defineProperty(window.URL, 'revokeObjectURL', { value: revokeObjectURL });
     const fetchOperations = jest.fn().mockResolvedValue(undefined);
     const { container } = renderComponent(DistributionPlanToolStep.REVIEW, { fetchOperations });
     const link = document.createElement('a');
@@ -44,5 +46,6 @@ describe('StepHeader', () => {
 
     expect(fetchOperations).toHaveBeenCalledWith('id1');
     expect(link.click).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:url');
   });
 });

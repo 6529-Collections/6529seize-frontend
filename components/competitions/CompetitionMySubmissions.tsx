@@ -25,7 +25,7 @@ export default function CompetitionMySubmissions() {
     { waveId: competition.wave_id, competitionId: competition.id },
     "entries",
     { submitter: authorId ?? "", sort: "submitted_at", direction: "DESC" },
-    isOpen
+    !!authorId && !activeProfileProxy
   );
   if (!authorId || activeProfileProxy) return null;
   const loadedEntries = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -39,9 +39,16 @@ export default function CompetitionMySubmissions() {
   const hasEntries = entries.length > 0;
   return (
     <>
-      <MySubmissionsButton onClick={() => setOpenScope(scope)}>
-        {t(locale, "waves.submissions.mine")}
-      </MySubmissionsButton>
+      {(isOpen || hasEntries || query.isError || invalidEntries) && (
+        <MySubmissionsButton
+          onClick={() => {
+            setOpenScope(scope);
+            if (query.isStale) void query.refetch();
+          }}
+        >
+          {t(locale, "waves.submissions.mine")}
+        </MySubmissionsButton>
+      )}
       <MySubmissionsDialog
         isOpen={isOpen}
         onClose={() => setOpenScope(null)}
@@ -63,7 +70,7 @@ export default function CompetitionMySubmissions() {
               !query.isError &&
               !invalidEntries &&
               !hasEntries && (
-                <output className="tw-block tw-text-sm tw-text-iron-300">
+                <output className="tw-block tw-text-sm tw-font-light tw-text-iron-500">
                   {t(locale, "waves.submissions.empty")}
                 </output>
               )}

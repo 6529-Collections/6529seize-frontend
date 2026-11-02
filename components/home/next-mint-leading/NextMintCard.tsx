@@ -52,9 +52,9 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
   return (
     <div className="tw-group tw-min-w-0 tw-text-left">
-      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
-        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-px-2">
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-py-4">
+          <div className="tw-flex tw-items-center tw-gap-2">
             <span
               aria-hidden="true"
               className="tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-emerald-500"
@@ -63,7 +63,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               NEXT MINT
             </span>
           </div>
-          <span className="tw-px-2 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-500">
+          <span className="tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
             {timestamp}
           </span>
         </div>
@@ -75,7 +75,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
           )}
         >
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0 [&>div]:tw-justify-center">
             {media ? (
               <DropListItemContentMedia
                 media_mime_type={media.mime_type}
@@ -93,7 +93,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
             )}
           </div>
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-2.5 tw-px-4 tw-pb-4 tw-pt-3.5 md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-pb-5 tw-pt-5">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <MediaTypeBadge
               mimeType={media?.mime_type}
@@ -108,7 +108,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
                 isDirectMessage: false,
                 isApp: false,
               })}
-              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[1.3] tw-tracking-[-0.015em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-rounded-sm focus-visible:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-lg"
+              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[1.3] tw-tracking-[-0.015em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-rounded-sm focus-visible:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
             >
               {title}
             </Link>

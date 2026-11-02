@@ -31,6 +31,7 @@ export enum WaveDropsLeaderboardSort {
 }
 
 interface UseWaveDropsLeaderboardProps {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly waveId: string;
   readonly pageSize?: number | undefined;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
@@ -62,6 +63,7 @@ interface CanonicalPriceFilters {
 }
 
 interface LeaderboardQueryKeyInput {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly waveId: string;
   readonly pageSize: number;
   readonly sort: WaveDropsLeaderboardSort;
@@ -133,6 +135,7 @@ const getCanonicalPriceFilters = ({
 };
 
 const buildLeaderboardQueryKey = ({
+  additionalActionOnly,
   waveId,
   pageSize,
   sort,
@@ -144,6 +147,7 @@ const buildLeaderboardQueryKey = ({
     QueryKey.DROPS_LEADERBOARD,
     {
       waveId,
+      ...(additionalActionOnly ? { is_additional_action_promised: true } : {}),
       page_size: pageSize,
       sort,
       sort_direction: sortDirection,
@@ -155,6 +159,7 @@ const buildLeaderboardQueryKey = ({
   ] as const;
 
 const buildLeaderboardParams = ({
+  additionalActionOnly,
   pageParam,
   pageSize,
   sort,
@@ -162,6 +167,7 @@ const buildLeaderboardParams = ({
   priceFilters,
 }: LeaderboardParamsInput): Record<string, string> => {
   const params: Record<string, string> = {
+    ...(additionalActionOnly ? { is_additional_action_promised: "true" } : {}),
     page_size: pageSize.toString(),
     sort,
   };
@@ -186,6 +192,7 @@ const buildLeaderboardParams = ({
 };
 
 const fetchLeaderboardPage = ({
+  additionalActionOnly,
   waveId,
   pageParam,
   pageSize,
@@ -197,6 +204,7 @@ const fetchLeaderboardPage = ({
   fetchWaveLeaderboardV2({
     waveId,
     params: buildLeaderboardParams({
+      additionalActionOnly,
       waveId,
       pageParam,
       pageSize,
@@ -308,6 +316,7 @@ const useRemoveDropsQueryOnUnmount = ({
 };
 
 export function useWaveDropsLeaderboard({
+  additionalActionOnly = false,
   waveId,
   pageSize = WAVE_DROPS_PARAMS.limit,
   sort = WaveDropsLeaderboardSort.RANK,
@@ -331,6 +340,7 @@ export function useWaveDropsLeaderboard({
   const queryKey = useMemo(
     () =>
       buildLeaderboardQueryKey({
+        additionalActionOnly,
         waveId,
         pageSize,
         sort,
@@ -338,7 +348,15 @@ export function useWaveDropsLeaderboard({
         maxPages,
         priceFilters: canonicalPriceFilters,
       }),
-    [canonicalPriceFilters, maxPages, pageSize, sort, sortDirection, waveId]
+    [
+      additionalActionOnly,
+      canonicalPriceFilters,
+      maxPages,
+      pageSize,
+      sort,
+      sortDirection,
+      waveId,
+    ]
   );
 
   const {
@@ -364,6 +382,7 @@ export function useWaveDropsLeaderboard({
       readonly signal?: AbortSignal | undefined;
     }) =>
       fetchLeaderboardPage({
+        additionalActionOnly,
         waveId,
         pageParam,
         pageSize,

@@ -3,6 +3,8 @@ import CompetitionLeaderboard from "@/components/competitions/CompetitionLeaderb
 let mockType = "RANK";
 let mockCapabilities: string[] = [];
 const mockResource = jest.fn();
+const latestLeaderboardParams = () =>
+  mockResource.mock.calls.filter((call) => call[1] === "leaderboard").at(-1)[2];
 let mockDropError: { status: number } | null = null;
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
@@ -83,8 +85,12 @@ jest.mock(
     WaveLeaderboardHeader: ({
       onSortChange,
       onPriceRangeChange,
+      additionalActionOnly,
+      onAdditionalActionChange,
     }: {
       onSortChange: (sort: string) => void;
+      additionalActionOnly: boolean;
+      onAdditionalActionChange?: (checked: boolean) => void;
       onPriceRangeChange?: (range: {
         minPrice: number;
         maxPrice: number;
@@ -92,6 +98,14 @@ jest.mock(
     }) => (
       <div>
         Existing toolbar
+        {onAdditionalActionChange && (
+          <input
+            type="checkbox"
+            aria-label="Additional Action"
+            checked={additionalActionOnly}
+            onChange={(event) => onAdditionalActionChange(event.target.checked)}
+          />
+        )}
         <button onClick={() => onSortChange("PRICE")}>Price</button>
         {onPriceRangeChange && (
           <button
@@ -152,6 +166,38 @@ it("uses the existing Rank schedule, controls and cards", () => {
   expect(screen.getByText("Rank schedule")).toBeVisible();
   expect(screen.getByText("Existing toolbar")).toBeVisible();
   expect(screen.getByText("Rich card rank 5000")).toBeVisible();
+  expect(
+    screen.queryByRole("checkbox", { name: "Additional Action" })
+  ).toBeNull();
+});
+it("scopes Additional Action filtering to Main Stage without changing sorting", () => {
+  mockCapabilities = ["MAIN_STAGE"];
+  render(<CompetitionLeaderboard />);
+  const toggle = screen.getByRole("checkbox", { name: "Additional Action" });
+  expect(toggle).not.toBeChecked();
+  fireEvent.click(toggle);
+  expect(mockResource).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "comp" },
+    "leaderboard",
+    expect.objectContaining({
+      is_additional_action_promised: "true",
+      sort: "rating",
+    })
+  );
+  fireEvent.click(screen.getByRole("button", { name: /^Price$/ }));
+  expect(mockResource).toHaveBeenCalledWith(
+    expect.anything(),
+    "leaderboard",
+    expect.objectContaining({
+      is_additional_action_promised: "true",
+      sort: "price",
+    })
+  );
+  fireEvent.click(toggle);
+  expect(latestLeaderboardParams()).not.toHaveProperty(
+    "is_additional_action_promised"
+  );
+  expect(latestLeaderboardParams().sort).toBe("price");
 });
 it("retains loaded artwork during a temporary refresh failure but hides it when access is revoked", () => {
   const { rerender } = render(<CompetitionLeaderboard />);

@@ -111,7 +111,7 @@ async function expectTradingPanelLayout(page: Page) {
   await expect(
     panel.getByRole("button", { name: /^Review offers:/ })
   ).toHaveCount(0);
-  await expect(more).toHaveCSS("background-color", "rgb(19, 19, 22)");
+  await expect(more).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(
     page
       .getByTestId("collect-detail-panel")
@@ -139,6 +139,40 @@ async function expectTradingPanelLayout(page: Page) {
       guidanceBox.y + guidanceBox.height + 12
     );
   }
+}
+
+async function expectDetailActionHover(page: Page, button: Locator) {
+  await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(button).toHaveCSS("border-color", "rgb(55, 55, 62)");
+  const supportsHover = await page.evaluate(
+    () => matchMedia("(hover: hover) and (pointer: fine)").matches
+  );
+  if (!supportsHover) return;
+  await button.hover();
+  await expect(button).toHaveCSS("background-color", "rgb(28, 28, 33)");
+  await expect(button).toHaveCSS("border-color", "rgb(76, 76, 85)");
+  await expect(button).toHaveCSS("color", "rgb(255, 255, 255)");
+  if ((await button.getAttribute("aria-haspopup")) === "menu") {
+    await expect
+      .poll(() =>
+        button.evaluate((element) =>
+          getComputedStyle(element.querySelector("svg")!).getPropertyValue(
+            "color"
+          )
+        )
+      )
+      .toBe("rgb(255, 255, 255)");
+  }
+  await page.mouse.down();
+  try {
+    await expect(button).toHaveCSS("background-color", "rgb(19, 19, 22)");
+  } finally {
+    // Release outside; dismiss a menu that opens on the trigger press.
+    await page.mouse.move(0, 0);
+    await page.mouse.up();
+    await page.keyboard.press("Escape");
+  }
+  await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
 }
 
 async function expectNavigation(page: Page, name: string) {
@@ -399,7 +433,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 
   test("keeps Meme Collect labels complete and actions clear of the desktop rail", async ({
     page,
+    context,
+    baseURL,
   }, info) => {
+    // Keep the consent overlay from covering the sticky action targets.
+    await context.addCookies([
+      { name: "essential-cookies-consent", value: "true", url: baseURL! },
+      { name: "performance-cookies-consent", value: "false", url: baseURL! },
+    ]);
     await gotoReady(page, "/the-memes/1");
     const panel = page.getByTestId("collect-detail-panel");
     const sticky = page.getByTestId("collect-sticky-actions");
@@ -439,6 +480,23 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           name: /^Make an offer:/,
         });
         await expectFullCollectLabel(stickyCollect);
+        // Measure both controls in one frame while the sticky bar slides in.
+        const stickyRow = await sticky.evaluate((element) => {
+          const collectBox = element
+            .querySelector('button[type="submit"]')!
+            .getBoundingClientRect();
+          const offerBox = element
+            .querySelector('button[type="button"]')!
+            .getBoundingClientRect();
+          return {
+            yOffset: offerBox.y - collectBox.y,
+            gap: offerBox.x - collectBox.right,
+            offerWidth: offerBox.width,
+          };
+        });
+        expect(stickyRow.yOffset).toBeCloseTo(0, 0);
+        expect(stickyRow.gap).toBeCloseTo(8, 0);
+        expect(stickyRow.offerWidth).toBeGreaterThanOrEqual(44);
         await expect(stickyOffer).toHaveCSS("overflow", "hidden");
         await expect(stickyOffer).toHaveCSS("text-overflow", "ellipsis");
         const sidebar = page.getByLabel("Primary sidebar", { exact: true });
@@ -461,13 +519,35 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           path: info.outputPath(`trading-panel-${width}.png`),
         });
       }
+      if (width === 390) {
+        await expectDetailActionHover(
+          page,
+          sticky.getByRole("button", { name: /^Make an offer:/ })
+        );
+      }
+      if (width === 1024) {
+        await expectDetailActionHover(
+          page,
+          panel.getByRole("button", { name: /^Make an offer:/ })
+        );
+        await expectDetailActionHover(
+          page,
+          panel.getByRole("button", { name: /^More trading actions for/ })
+        );
+      }
     }
   });
 
   for (const listed of [true, false]) {
     test(`keeps one Meme trading placeholder throughout initial loading (${listed ? "listed" : "unlisted"})`, async ({
       page,
+      context,
+      baseURL,
     }, info) => {
+      await context.addCookies([
+        { name: "essential-cookies-consent", value: "true", url: baseURL! },
+        { name: "performance-cookies-consent", value: "false", url: baseURL! },
+      ]);
       let releaseAsset!: () => void;
       let releaseOrders!: () => void;
       let releaseCapabilities!: () => void;
@@ -518,19 +598,25 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           const rows = page
             .getByTestId("collect-detail-panel")
             .locator('[data-collect-detail-loading] > [aria-hidden="true"]');
-          await expect(rows).toHaveCount(3);
-          const textBox = (await rows.nth(0).boundingBox())!;
-          const connectBox = (await rows.nth(1).boundingBox())!;
-          const actionsBox = (await rows.nth(2).boundingBox())!;
+          await expect(rows).toHaveCount(2);
+          const actionsBox = (await rows.nth(0).boundingBox())!;
+          const detailBox = (await rows.nth(1).boundingBox())!;
           const panelBox = (await panel.boundingBox())!;
-          expect(connectBox.y - textBox.y - textBox.height).toBeCloseTo(12, 0);
-          expect(actionsBox.y - connectBox.y - connectBox.height).toBeCloseTo(
-            12,
+          expect(actionsBox.height).toBe(44);
+          expect(detailBox.height).toBe(16);
+          expect(detailBox.y - actionsBox.y - actionsBox.height).toBeCloseTo(
+            16,
             0
           );
-          expect(
-            panelBox.y + panelBox.height - actionsBox.y - actionsBox.height
-          ).toBeCloseTo(17, 0);
+          // Reserve the compact action + delivery layout, without temporary rows or padding.
+          expect(panelBox.height).toBeCloseTo(76, 0);
+          await expect(panel).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+          await expect(panel).toHaveCSS("border-width", "0px");
+          if (width === 360 || width === 1024) {
+            await panel.screenshot({
+              path: info.outputPath(`trading-loading-${width}.png`),
+            });
+          }
         }
         await page.setViewportSize(viewport);
         const initialBox = (await panel.boundingBox())!;
@@ -608,7 +694,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
                 panelBox.y + panelBox.height - actionsBox.y - actionsBox.height
               );
             })
-            .toBeCloseTo(17, 0);
+            .toBeCloseTo(0, 0);
           await expectNoHorizontalOverflow(page);
           if (width === 360 || width === 1024) {
             await panel.screenshot({

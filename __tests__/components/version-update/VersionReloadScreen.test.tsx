@@ -1,20 +1,52 @@
 /** @jest-environment node */
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { checkCustomRoutes } from "next/dist/lib/load-custom-routes";
 import { renderToStaticMarkup } from "react-dom/server";
 import sharp from "sharp";
 import VersionReloadScreen from "@/components/version-update/VersionReloadScreen";
-import { VERSION_RELOAD_IMAGE_DATA } from "@/components/version-update/versionReloadImage";
+import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
+import { sharedConfig } from "@/config/nextConfig";
+import type { PublicEnv } from "@/config/env.schema";
+import { createSecurityHeaders } from "@/config/securityHeaders";
 
-it("ships a complete, small rocket in the initial cover HTML without an image request", async () => {
+const PUBLIC_DIR = path.join(process.cwd(), "public");
+const artworkPath = path.join(PUBLIC_DIR, VERSION_RELOAD_IMAGE_SRC);
+
+it("references the rocket as a short static URL instead of embedding the image bytes", () => {
   const html = renderToStaticMarkup(<VersionReloadScreen />);
-  expect(html).toContain(`src="${VERSION_RELOAD_IMAGE_DATA}"`);
+
+  expect(html).toContain(`src="${VERSION_RELOAD_IMAGE_SRC}"`);
+  expect(html).not.toContain("data:");
+  expect(html).not.toContain("base64");
   expect(html).not.toContain("/rocket-refresh-small.png");
   expect(html).not.toContain('rel="preload"');
+  // The cover ships in every HTML response, so it must stay a few KB at most.
+  expect(html.length).toBeLessThan(4_000);
+});
 
-  const bytes = Buffer.from(VERSION_RELOAD_IMAGE_DATA.split(",")[1]!, "base64");
+it("keeps the cover image decorative, eager, and layout-stable", () => {
+  const html = renderToStaticMarkup(<VersionReloadScreen />);
+  const image = /<img[^>]*>/.exec(html)?.[0] ?? "";
+
+  expect(image).toContain('alt=""');
+  expect(image).toContain('width="60"');
+  expect(image).toContain('height="60"');
+  expect(image).toContain('loading="eager"');
+  expect(image).toContain('decoding="sync"');
+  // Without a low priority React hoists a preload for the hidden image into every page.
+  expect(image).toContain('fetchPriority="low"');
+});
+
+it("serves a complete, small, transparent rocket from a hash-named public file", async () => {
+  expect(VERSION_RELOAD_IMAGE_SRC).toMatch(
+    /^\/version-reload-rocket\.[0-9a-f]{12}\.webp$/
+  );
+  expect(existsSync(artworkPath)).toBe(true);
+
+  const bytes = readFileSync(artworkPath);
   expect(bytes.length).toBeLessThan(25_000);
   const metadata = await sharp(bytes).metadata();
   expect(metadata).toMatchObject({
@@ -22,11 +54,26 @@ it("ships a complete, small rocket in the initial cover HTML without an image re
     width: 180,
     hasAlpha: true,
   });
+
+  // The immutable cache header is only safe while the name tracks the content.
+  const digest = createHash("sha256").update(bytes).digest("hex");
+  expect(path.basename(artworkPath)).toBe(
+    `version-reload-rocket.${digest.slice(0, 12)}.webp`
+  );
 });
 
-it("keeps the embedded artwork synchronized with the current public rocket", () => {
+it("leaves no stale hash-named rocket files behind in public", () => {
+  const artwork = readdirSync(PUBLIC_DIR).filter(
+    (name) =>
+      name.startsWith("version-reload-rocket.") && name.endsWith(".webp")
+  );
+  expect(artwork).toEqual([path.basename(VERSION_RELOAD_IMAGE_SRC)]);
+  expect(statSync(artworkPath).isFile()).toBe(true);
+});
+
+it("keeps the rocket synchronized with the current public source artwork", () => {
   const source = readFileSync(
-    path.join(process.cwd(), "public/rocket-refresh-small.png")
+    path.join(PUBLIC_DIR, "rocket-refresh-small.png")
   );
   const hash = createHash("sha256").update(source).digest("hex");
   const generated = readFileSync(
@@ -34,4 +81,38 @@ it("keeps the embedded artwork synchronized with the current public rocket", () 
     "utf8"
   );
   expect(generated).toContain(`Source SHA-256: ${hash}`);
+});
+
+describe("deployment delivery", () => {
+  const publicEnv = {
+    API_ENDPOINT: "https://api.6529.io",
+    BASE_ENDPOINT: "https://6529.io",
+    IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",
+  } as PublicEnv;
+
+  it.each(["", "https://dnclu2fna0b2b.cloudfront.net/web_build/1.2.3"])(
+    "caches the rocket as immutable on the page origin with asset prefix %j",
+    async (assetPrefix) => {
+      const rules =
+        (await sharedConfig(publicEnv, assetPrefix).headers?.()) ?? [];
+      const rule = rules.find(
+        (entry) => entry.source === VERSION_RELOAD_IMAGE_SRC
+      );
+
+      expect(rule?.headers).toEqual([
+        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+      ]);
+      // Next validates header sources at build time; reject a rule it would refuse.
+      expect(() => checkCustomRoutes(rules, "header")).not.toThrow();
+    }
+  );
+
+  it("is allowed by the same-origin image policy", () => {
+    const csp = createSecurityHeaders(
+      publicEnv.API_ENDPOINT,
+      publicEnv.IPFS_GATEWAY_ENDPOINT
+    ).find((header) => header.key === "Content-Security-Policy")?.value;
+
+    expect(csp).toMatch(/img-src [^;]*'self'/);
+  });
 });

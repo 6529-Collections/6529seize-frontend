@@ -15,6 +15,7 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useLatestRequestSignal } from "@/hooks/useLatestRequestSignal";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -36,6 +37,33 @@ const SUBSCRIBE_GROUP_CLASS =
   "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-all tw-duration-500 tw-ease-out max-md:tw-p-4 max-md:tw-shadow-none max-md:tw-bg-iron-900 md:tw-grid md:tw-grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]";
 const SUBSCRIBE_GROUP_CONTENT_CLASS =
   "tw-min-w-0 md:tw-flex md:tw-h-full md:tw-flex-col";
+
+function createEmptyPage<T>(): Page<T> {
+  return { count: 0, page: 1, next: false, data: [] };
+}
+
+/**
+ * Applies a request's outcome only while it is still the latest request of its
+ * kind. An aborted (superseded or unmounted) request changes nothing.
+ */
+function settleLatest<T>(
+  signal: AbortSignal,
+  request: Promise<T>,
+  onData: (data: T) => void,
+  onError: () => void,
+  onSettled: () => void
+): void {
+  request
+    .then((data) => {
+      if (!signal.aborted) onData(data);
+    })
+    .catch(() => {
+      if (!signal.aborted) onError();
+    })
+    .finally(() => {
+      if (!signal.aborted) onSettled();
+    });
+}
 
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
@@ -70,23 +98,15 @@ export default function UserPageSubscriptions(
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
     useState<boolean>(true);
 
-  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>(
+    createEmptyPage
+  );
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
     useState<boolean>(true);
 
   const [redeemedHistory, setRedeemedHistory] = useState<
     Page<RedeemedSubscription>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  >(createEmptyPage);
   const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
@@ -97,136 +117,131 @@ export default function UserPageSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscriptionLogs, setSubscriptionLogs] = useState<
-    Page<SubscriptionLog>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  const [subscriptionLogs, setSubscriptionLogs] =
+    useState<Page<SubscriptionLog>>(createEmptyPage);
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
+
+  // Each request kind keeps only its latest request: a newer request (a page
+  // change or another profile) aborts the previous one, so a superseded
+  // success, failure or loading update cannot overwrite the current state.
+  const startDetailsRequest = useLatestRequestSignal();
+  const startAirdropRequest = useLatestRequestSignal();
+  const startTopUpRequest = useLatestRequestSignal();
+  const startRedeemedRequest = useLatestRequestSignal();
+  const startUpcomingRequest = useLatestRequestSignal();
+  const startLogsRequest = useLatestRequestSignal();
 
   function fetchDetails() {
     if (!profileKey) {
       return;
     }
+    const signal = startDetailsRequest();
     setFetchingDetails(true);
-    commonApiFetch<SubscriptionDetails>({
-      endpoint: `subscriptions/consolidation/details/${profileKey}`,
-    })
-      .then((data) => {
-        setDetails(data);
-      })
-      .catch(() => {
-        setDetails(undefined);
-      })
-      .finally(() => {
-        setFetchingDetails(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<SubscriptionDetails>({
+        endpoint: `subscriptions/consolidation/details/${profileKey}`,
+        signal,
+      }),
+      setDetails,
+      () => setDetails(undefined),
+      () => setFetchingDetails(false)
+    );
   }
 
   function fetchAirdropAddress() {
     if (!profileKey) {
       return;
     }
+    const signal = startAirdropRequest();
     setFetchingAirdropAddress(true);
-    commonApiFetch<AirdropAddressResult>({
-      endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
-    })
-      .then((data) => {
-        setAirdropResult(data);
-      })
-      .catch(() => {
-        setAirdropResult(undefined);
-      })
-      .finally(() => {
-        setFetchingAirdropAddress(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<AirdropAddressResult>({
+        endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
+        signal,
+      }),
+      setAirdropResult,
+      () => setAirdropResult(undefined),
+      () => setFetchingAirdropAddress(false)
+    );
   }
 
   function fetchTopUpHistory(page: number) {
     if (!profileKey) {
       return;
     }
+    const signal = startTopUpRequest();
     setFetchingTopUpHistory(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionTopUp[];
-    }>({
-      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setTopUpHistory(data);
-      })
-      .finally(() => {
-        setFetchingTopUpHistory(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<Page<SubscriptionTopUp>>({
+        endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
+        signal,
+      }),
+      setTopUpHistory,
+      () => setTopUpHistory(createEmptyPage()),
+      () => setFetchingTopUpHistory(false)
+    );
   }
 
   function fetchRedeemHistory(page: number) {
     if (!profileKey) {
       return;
     }
+    const signal = startRedeemedRequest();
     setFetchingRedeemedHistory(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: RedeemedSubscription[];
-    }>({
-      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setRedeemedHistory(data);
-      })
-      .finally(() => {
-        setFetchingRedeemedHistory(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<Page<RedeemedSubscription>>({
+        endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
+        signal,
+      }),
+      setRedeemedHistory,
+      () => setRedeemedHistory(createEmptyPage()),
+      () => setFetchingRedeemedHistory(false)
+    );
   }
 
   function fetchMemeSubscriptions() {
     if (!profileKey) {
       return;
     }
+    const signal = startUpcomingRequest();
     setFetchingMemeSubscriptions(true);
     let upcomingLimit: number = remainingMintsForSeason;
     if (isMintingToday()) {
       upcomingLimit += 1;
     }
-    commonApiFetch<NFTSubscription[]>({
-      endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
-    })
-      .then((data) => {
-        setMemeSubscriptions(data);
-      })
-      .finally(() => {
-        setFetchingMemeSubscriptions(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<NFTSubscription[]>({
+        endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
+        signal,
+      }),
+      setMemeSubscriptions,
+      () => setMemeSubscriptions([]),
+      () => setFetchingMemeSubscriptions(false)
+    );
   }
 
   function fetchLogs(page: number) {
     if (!profileKey) {
       return;
     }
+    const signal = startLogsRequest();
     setFetchingSubscriptionLogs(true);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionLog[];
-    }>({
-      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setSubscriptionLogs(data);
-      })
-      .finally(() => {
-        setFetchingSubscriptionLogs(false);
-      });
+    settleLatest(
+      signal,
+      commonApiFetch<Page<SubscriptionLog>>({
+        endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
+        signal,
+      }),
+      setSubscriptionLogs,
+      () => setSubscriptionLogs(createEmptyPage()),
+      () => setFetchingSubscriptionLogs(false)
+    );
   }
 
   const fetchSubscriptionData = (): void => {

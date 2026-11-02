@@ -32,6 +32,7 @@ describe("useUserPrevoteCards", () => {
           {
             id: 2,
             name: "Meme #2",
+            metadata: { image_details: { format: "PNG" } },
             scaled: "/2.png",
             thumbnail: "/2-thumb.png",
             image: null,
@@ -41,6 +42,8 @@ describe("useUserPrevoteCards", () => {
           {
             id: 3,
             name: "Meme #3",
+            metadata: { animation_details: { format: "MP4" } },
+            animation: "https://example.com/art.mp4",
             scaled: "/3.png",
             thumbnail: "/3-thumb.png",
             image: null,
@@ -79,6 +82,9 @@ describe("useUserPrevoteCards", () => {
     expect(result.current.prevoteCards.map((card) => card.token_id)).toEqual([
       3, 2, 1,
     ]);
+    expect(result.current.prevoteCards[0]?.mediaMimeType).toBe("video/mp4");
+    expect(result.current.prevoteCards[1]?.mediaMimeType).toBe("image/png");
+    expect(result.current.prevoteCards[2]?.mediaMimeType).toBeUndefined();
     expect(result.current.prevoteCards[0]?.collection).toBe(
       CollectedCollectionType.MEMES
     );

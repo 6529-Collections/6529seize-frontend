@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 const mockImageResponse = jest.fn((element, init) => ({
   element,
   init,
@@ -56,11 +58,18 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/profiles/[identity]/route";
-import { publicEnv } from "@/config/env";
+
+const setServerStagingApiKey = (key: string | undefined): void => {
+  if (key === undefined) {
+    delete process.env["STAGING_API_KEY"];
+  } else {
+    process.env["STAGING_API_KEY"] = key;
+  }
+};
 
 describe("/api/og-metadata/profiles/[identity]", () => {
   beforeEach(() => {
-    delete publicEnv.STAGING_API_KEY;
+    setServerStagingApiKey(undefined);
     mockGetCookie.mockReset();
     jest.spyOn(console, "error").mockImplementation(() => undefined);
     mockImageResponse.mockClear();
@@ -77,6 +86,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    setServerStagingApiKey(undefined);
   });
 
   it("fetches profile metadata from the backend and returns an image response", async () => {
@@ -143,7 +153,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
   ])(
     "forwards available staging access and isolates authenticated images (%s, %s)",
     async (cookie, key, headers) => {
-      publicEnv.STAGING_API_KEY = key;
+      setServerStagingApiKey(key);
       mockGetCookie.mockReturnValue(cookie ? { value: cookie } : undefined);
       (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,

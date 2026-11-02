@@ -1,0 +1,1484 @@
+{
+  "label": "candidate",
+  "baseUrl": "http://localhost:3319",
+  "capturedAt": "2026-10-15T13:46:25.296Z",
+  "routes": {
+    "/museum/network": {
+      "slug": "home",
+      "viewports": {
+        "1440x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network",
+          "full": "home-1440x1000-full.png",
+          "tiles": [
+            "home-1440x1000-01.png",
+            "home-1440x1000-02.png",
+            "home-1440x1000-03.png",
+            "home-1440x1000-04.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "6529 Network Museum",
+          "robots": null,
+          "horizontalOverflowPx": -30,
+          "pageHeight": 3877,
+          "imageCount": 8,
+          "principalImage": {
+            "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+            "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+            "complete": true,
+            "naturalWidth": 432,
+            "naturalHeight": 432,
+            "renderedWidth": 679,
+            "renderedHeight": 679,
+            "top": 149,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "271x271"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "A public museum for a network state",
+            "Acquisitions",
+            "The System in Seven States",
+            "Keys and Gates",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Explore the collection",
+            "Casey Reas",
+            "Keys and Gates",
+            "Art, evidence, and institutional practice",
+            "How the Network Museum works",
+            "Public record",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 47
+        },
+        "820x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network",
+          "full": "home-820x1000-full.png",
+          "tiles": [
+            "home-820x1000-01.png",
+            "home-820x1000-02.png",
+            "home-820x1000-03.png",
+            "home-820x1000-04.png",
+            "home-820x1000-05.png",
+            "home-820x1000-06.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "6529 Network Museum",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 5807,
+          "imageCount": 8,
+          "principalImage": {
+            "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+            "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+            "complete": true,
+            "naturalWidth": 410,
+            "naturalHeight": 410,
+            "renderedWidth": 692,
+            "renderedHeight": 692,
+            "top": 193,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "330x330"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "A public museum for a network state",
+            "Acquisitions",
+            "The System in Seven States",
+            "Keys and Gates",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Explore the collection",
+            "Casey Reas",
+            "Keys and Gates",
+            "Art, evidence, and institutional practice",
+            "How the Network Museum works",
+            "Public record",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 47
+        },
+        "390x844": {
+          "status": 200,
+          "finalUrl": "/museum/network",
+          "full": "home-390x844-full.png",
+          "tiles": [
+            "home-390x844-01.png",
+            "home-390x844-02.png",
+            "home-390x844-03.png",
+            "home-390x844-04.png",
+            "home-390x844-05.png",
+            "home-390x844-06.png",
+            "home-390x844-07.png",
+            "home-390x844-08.png",
+            "home-390x844-09.png",
+            "home-390x844-10.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "6529 Network Museum",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 7620,
+          "imageCount": 8,
+          "principalImage": {
+            "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+            "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+            "complete": true,
+            "naturalWidth": 390,
+            "naturalHeight": 586,
+            "renderedWidth": 358,
+            "renderedHeight": 539,
+            "top": 3153,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "358x358"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "A public museum for a network state",
+            "Acquisitions",
+            "The System in Seven States",
+            "Keys and Gates",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Explore the collection",
+            "Casey Reas",
+            "Keys and Gates",
+            "Art, evidence, and institutional practice",
+            "How the Network Museum works",
+            "Public record",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 47
+        }
+      }
+    },
+    "/museum/network/artists": {
+      "slug": "artists",
+      "viewports": {
+        "1440x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/artists",
+          "full": "artists-1440x1000-full.png",
+          "tiles": [
+            "artists-1440x1000-01.png",
+            "artists-1440x1000-02.png",
+            "artists-1440x1000-03.png",
+            "artists-1440x1000-04.png",
+            "artists-1440x1000-05.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Artists",
+          "robots": null,
+          "horizontalOverflowPx": -30,
+          "pageHeight": 4446,
+          "imageCount": 26,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 343,
+            "renderedHeight": 249,
+            "top": 557,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x910",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0025%2Fe60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x405",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0026%2Fa59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x397",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0027%2Fcf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x403",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0028%2F49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x483",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "432x432",
+              "rendered": "343x249"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "432x432",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-002/e3d4f538d4c9d3aa79a1d7ed11e93819a806fad85dbed4b8b38e9c62528d55fe/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-003/4efc4651598006e212d159710714181c61dc3dfdc80719b7ae8a573f382d9eca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-004/30e39b61e696cdab4b3a54beec5b33c2152f7440343479a45bc7bfe2175b0782/webp-v2-q82-m6-fixed-icc/640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "640x640",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-005/5df39d20ceb215cc93831e52bf9a8b27f332e5e94f613fb3c8f377200ea5daca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x830",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-006/29db1bb746118e074cf6cbad247be4874ada7840fd3b025c37903bd87082a233/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-007/02a8ce8495cbea2bce1475a940a436310abc0fd979ff42114f9bf7a1953e9103/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x720",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-008/03950568f8819a8209f4931380e05b28b17408679a838f8043987b93d2e7fc3b/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1686",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-009/c6d7f689d7e532cedeaba69270c0775ccf619bbfbbd0f0c5bd9c182e1eb64314/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x851",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-010/f7445ec2e3d716ac8878ee7538001c1b45a2e29baf6f49fd090b86140ecb8162/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-013/dab5b9e0e5c82cff338f9f75c401cffe6a8b2a2f13e0b875526753cbc438d541/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1280",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-014/caff170b0ba35c185f75c6e436c2557a9ef1743c399ca07dbb08848777239d03/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x900",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-015/2e2a0c1d7ace2f24a15d5a0e2c448b38756c86fab8e31b66a04d797ba3d22a12/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1829",
+              "rendered": "343x249"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-016/6f2e18606cc3fc4c3af0fadb3a275ef0a739c00463481bfb5fa511be238f5b73/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1024",
+              "rendered": "343x249"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Artists",
+            "Artists in the Collection",
+            "Casey Reas",
+            "David Seymour",
+            "Larry Towell",
+            "Micha Bar-Am",
+            "Moisés Saman",
+            "Lorenzo Meloni",
+            "Vera Molnár",
+            "Martin Grasser",
+            "Artists in current acquisitions",
+            "GulYildiz",
+            "HugoFaz",
+            "nasimghanizadeh",
+            "intrepid",
+            "ikertje",
+            "GIANT",
+            "priyanka",
+            "Rakesh",
+            "pandelic",
+            "Minalisa",
+            "Teyhu",
+            "arsonic",
+            "Zoku",
+            "shamspranto",
+            "Veerendra",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 44
+        },
+        "820x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/artists",
+          "full": "artists-820x1000-full.png",
+          "tiles": [
+            "artists-820x1000-01.png",
+            "artists-820x1000-02.png",
+            "artists-820x1000-03.png",
+            "artists-820x1000-04.png",
+            "artists-820x1000-05.png",
+            "artists-820x1000-06.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Artists",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 5938,
+          "imageCount": 26,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 300,
+            "renderedHeight": 217,
+            "top": 617,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x863",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0025%2Fe60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x384",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0026%2Fa59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x377",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0027%2Fcf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x382",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0028%2F49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x459",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "410x410",
+              "rendered": "300x217"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "410x410",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-002/e3d4f538d4c9d3aa79a1d7ed11e93819a806fad85dbed4b8b38e9c62528d55fe/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-003/4efc4651598006e212d159710714181c61dc3dfdc80719b7ae8a573f382d9eca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-004/30e39b61e696cdab4b3a54beec5b33c2152f7440343479a45bc7bfe2175b0782/webp-v2-q82-m6-fixed-icc/640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "640x640",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-005/5df39d20ceb215cc93831e52bf9a8b27f332e5e94f613fb3c8f377200ea5daca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x830",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-006/29db1bb746118e074cf6cbad247be4874ada7840fd3b025c37903bd87082a233/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-007/02a8ce8495cbea2bce1475a940a436310abc0fd979ff42114f9bf7a1953e9103/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x720",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-008/03950568f8819a8209f4931380e05b28b17408679a838f8043987b93d2e7fc3b/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1686",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-009/c6d7f689d7e532cedeaba69270c0775ccf619bbfbbd0f0c5bd9c182e1eb64314/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x851",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-010/f7445ec2e3d716ac8878ee7538001c1b45a2e29baf6f49fd090b86140ecb8162/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-013/dab5b9e0e5c82cff338f9f75c401cffe6a8b2a2f13e0b875526753cbc438d541/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1280",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-015/2e2a0c1d7ace2f24a15d5a0e2c448b38756c86fab8e31b66a04d797ba3d22a12/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1829",
+              "rendered": "300x217"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-016/6f2e18606cc3fc4c3af0fadb3a275ef0a739c00463481bfb5fa511be238f5b73/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1024",
+              "rendered": "300x217"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Artists",
+            "Artists in the Collection",
+            "Casey Reas",
+            "David Seymour",
+            "Larry Towell",
+            "Micha Bar-Am",
+            "Moisés Saman",
+            "Lorenzo Meloni",
+            "Vera Molnár",
+            "Martin Grasser",
+            "Artists in current acquisitions",
+            "GulYildiz",
+            "HugoFaz",
+            "nasimghanizadeh",
+            "intrepid",
+            "ikertje",
+            "GIANT",
+            "priyanka",
+            "Rakesh",
+            "pandelic",
+            "Minalisa",
+            "Teyhu",
+            "arsonic",
+            "Zoku",
+            "shamspranto",
+            "Veerendra",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 44
+        },
+        "390x844": {
+          "status": 200,
+          "finalUrl": "/museum/network/artists",
+          "full": "artists-390x844-full.png",
+          "tiles": [
+            "artists-390x844-01.png",
+            "artists-390x844-02.png",
+            "artists-390x844-03.png",
+            "artists-390x844-04.png",
+            "artists-390x844-05.png",
+            "artists-390x844-06.png",
+            "artists-390x844-07.png",
+            "artists-390x844-08.png",
+            "artists-390x844-09.png",
+            "artists-390x844-10.png",
+            "artists-390x844-11.png",
+            "artists-390x844-12.png",
+            "artists-390x844-13.png",
+            "artists-390x844-14.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Artists",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 11233,
+          "imageCount": 26,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 332,
+            "renderedHeight": 243,
+            "top": 925,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x586",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0025%2Fe60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x261",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0026%2Fa59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x256",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0027%2Fcf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x260",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0028%2F49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x312",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x390",
+              "rendered": "332x243"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.003%2F6529NM-W-0029%2Fc1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x390",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-002/e3d4f538d4c9d3aa79a1d7ed11e93819a806fad85dbed4b8b38e9c62528d55fe/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-003/4efc4651598006e212d159710714181c61dc3dfdc80719b7ae8a573f382d9eca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-004/30e39b61e696cdab4b3a54beec5b33c2152f7440343479a45bc7bfe2175b0782/webp-v2-q82-m6-fixed-icc/640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "640x640",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-005/5df39d20ceb215cc93831e52bf9a8b27f332e5e94f613fb3c8f377200ea5daca/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x830",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-006/29db1bb746118e074cf6cbad247be4874ada7840fd3b025c37903bd87082a233/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x853",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-007/02a8ce8495cbea2bce1475a940a436310abc0fd979ff42114f9bf7a1953e9103/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x720",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-008/03950568f8819a8209f4931380e05b28b17408679a838f8043987b93d2e7fc3b/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1686",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-009/c6d7f689d7e532cedeaba69270c0775ccf619bbfbbd0f0c5bd9c182e1eb64314/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x851",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-010/f7445ec2e3d716ac8878ee7538001c1b45a2e29baf6f49fd090b86140ecb8162/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-012/4c9f68e4eee9cdf87f59cb960cac072dab8ec23e2b60a94095c38969412fa45b/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x904",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-013/dab5b9e0e5c82cff338f9f75c401cffe6a8b2a2f13e0b875526753cbc438d541/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1280",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-014/caff170b0ba35c185f75c6e436c2557a9ef1743c399ca07dbb08848777239d03/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x900",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-015/2e2a0c1d7ace2f24a15d5a0e2c448b38756c86fab8e31b66a04d797ba3d22a12/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1829",
+              "rendered": "332x243"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-016/6f2e18606cc3fc4c3af0fadb3a275ef0a739c00463481bfb5fa511be238f5b73/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1024",
+              "rendered": "332x243"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Artists",
+            "Artists in the Collection",
+            "Casey Reas",
+            "David Seymour",
+            "Larry Towell",
+            "Micha Bar-Am",
+            "Moisés Saman",
+            "Lorenzo Meloni",
+            "Vera Molnár",
+            "Martin Grasser",
+            "Artists in current acquisitions",
+            "GulYildiz",
+            "HugoFaz",
+            "nasimghanizadeh",
+            "intrepid",
+            "ikertje",
+            "GIANT",
+            "priyanka",
+            "Rakesh",
+            "pandelic",
+            "Minalisa",
+            "Teyhu",
+            "arsonic",
+            "Zoku",
+            "shamspranto",
+            "Veerendra",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 44
+        }
+      }
+    },
+    "/museum/network/acquisitions": {
+      "slug": "acquisitions",
+      "viewports": {
+        "1440x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/acquisitions",
+          "full": "acquisitions-1440x1000-full.png",
+          "tiles": [
+            "acquisitions-1440x1000-01.png",
+            "acquisitions-1440x1000-02.png",
+            "acquisitions-1440x1000-03.png",
+            "acquisitions-1440x1000-04.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Acquisitions",
+          "robots": null,
+          "horizontalOverflowPx": -30,
+          "pageHeight": 3443,
+          "imageCount": 7,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 372,
+            "renderedHeight": 465,
+            "top": 814,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "372x465"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "604x910",
+              "rendered": "372x465"
+            },
+            {
+              "src": "https://sothebys-gen-art-mainnet.s3.amazonaws.com/210.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "372x465"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "372x465"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Acquisitions",
+            "Current acquisitions",
+            "The System in Seven States",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Keys and Gates",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 36
+        },
+        "820x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/acquisitions",
+          "full": "acquisitions-820x1000-full.png",
+          "tiles": [
+            "acquisitions-820x1000-01.png",
+            "acquisitions-820x1000-02.png",
+            "acquisitions-820x1000-03.png",
+            "acquisitions-820x1000-04.png",
+            "acquisitions-820x1000-05.png",
+            "acquisitions-820x1000-06.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Acquisitions",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 5373,
+          "imageCount": 7,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 692,
+            "renderedHeight": 519,
+            "top": 858,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "692x519"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "574x863",
+              "rendered": "692x519"
+            },
+            {
+              "src": "https://sothebys-gen-art-mainnet.s3.amazonaws.com/210.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "692x519"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "692x519"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Acquisitions",
+            "Current acquisitions",
+            "The System in Seven States",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Keys and Gates",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 36
+        },
+        "390x844": {
+          "status": 200,
+          "finalUrl": "/museum/network/acquisitions",
+          "full": "acquisitions-390x844-full.png",
+          "tiles": [
+            "acquisitions-390x844-01.png",
+            "acquisitions-390x844-02.png",
+            "acquisitions-390x844-03.png",
+            "acquisitions-390x844-04.png",
+            "acquisitions-390x844-05.png",
+            "acquisitions-390x844-06.png",
+            "acquisitions-390x844-07.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Acquisitions",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 5123,
+          "imageCount": 7,
+          "principalImage": {
+            "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+            "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+            "complete": true,
+            "naturalWidth": 2400,
+            "naturalHeight": 2400,
+            "renderedWidth": 358,
+            "renderedHeight": 269,
+            "top": 1077,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [
+            {
+              "src": "https://artblocks-mainnet.s3.amazonaws.com/100000031.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "358x269"
+            },
+            {
+              "src": "http://localhost:3319/api/museum/media?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fmuseum%2Faccessions%2F6529NM.2026.002%2F6529NM-W-0024%2F65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453%2Fwebp-v2-q82-m6-fixed-icc%2F640.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "390x586",
+              "rendered": "358x269"
+            },
+            {
+              "src": "https://sothebys-gen-art-mainnet.s3.amazonaws.com/210.png",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "2400x2400",
+              "rendered": "358x269"
+            },
+            {
+              "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+              "objectFit": "contain",
+              "distorted": false,
+              "natural": "1280x1920",
+              "rendered": "358x269"
+            }
+          ],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Acquisitions",
+            "Current acquisitions",
+            "The System in Seven States",
+            "Conflict at Its Edges",
+            "A Gift of Themes and Variations #210",
+            "Keys and Gates",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 36
+        }
+      }
+    },
+    "/museum/network/works/6529NM-W-0008": {
+      "slug": "work-w-0008",
+      "viewports": {
+        "1440x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/works/6529NM-W-0008",
+          "full": "work-w-0008-1440x1000-full.png",
+          "tiles": [
+            "work-w-0008-1440x1000-01.png",
+            "work-w-0008-1440x1000-02.png",
+            "work-w-0008-1440x1000-03.png",
+            "work-w-0008-1440x1000-04.png",
+            "work-w-0008-1440x1000-05.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Take the Key! by GulYildiz — 6529 Network Museum",
+          "robots": "index, follow",
+          "horizontalOverflowPx": -30,
+          "pageHeight": 4329,
+          "imageCount": 4,
+          "principalImage": {
+            "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+            "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+            "complete": true,
+            "naturalWidth": 1280,
+            "naturalHeight": 1920,
+            "renderedWidth": 1180,
+            "renderedHeight": 1770,
+            "top": 377,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Take the Key!",
+            "Works",
+            "About this work",
+            "Object data",
+            "Caption",
+            "Close looking",
+            "Artist’s account",
+            "Curatorial interpretation",
+            "Context",
+            "Status and source note",
+            "Browse",
+            "Collection context",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 39
+        },
+        "820x1000": {
+          "status": 200,
+          "finalUrl": "/museum/network/works/6529NM-W-0008",
+          "full": "work-w-0008-820x1000-full.png",
+          "tiles": [
+            "work-w-0008-820x1000-01.png",
+            "work-w-0008-820x1000-02.png",
+            "work-w-0008-820x1000-03.png",
+            "work-w-0008-820x1000-04.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Take the Key! by GulYildiz — 6529 Network Museum",
+          "robots": "index, follow",
+          "horizontalOverflowPx": 0,
+          "pageHeight": 3972,
+          "imageCount": 4,
+          "principalImage": {
+            "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+            "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+            "complete": true,
+            "naturalWidth": 1280,
+            "naturalHeight": 1920,
+            "renderedWidth": 692,
+            "renderedHeight": 1038,
+            "top": 421,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Take the Key!",
+            "Works",
+            "About this work",
+            "Object data",
+            "Caption",
+            "Close looking",
+            "Artist’s account",
+            "Curatorial interpretation",
+            "Context",
+            "Status and source note",
+            "Browse",
+            "Collection context",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 39
+        },
+        "390x844": {
+          "status": 200,
+          "finalUrl": "/museum/network/works/6529NM-W-0008",
+          "full": "work-w-0008-390x844-full.png",
+          "tiles": [
+            "work-w-0008-390x844-01.png",
+            "work-w-0008-390x844-02.png",
+            "work-w-0008-390x844-03.png",
+            "work-w-0008-390x844-04.png",
+            "work-w-0008-390x844-05.png",
+            "work-w-0008-390x844-06.png"
+          ],
+          "consoleErrors": [],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Take the Key! by GulYildiz — 6529 Network Museum",
+          "robots": "index, follow",
+          "horizontalOverflowPx": 0,
+          "pageHeight": 4594,
+          "imageCount": 4,
+          "principalImage": {
+            "src": "https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/92966f2836ebf2af06edfe0fe2cff25041307c92/media/programs/6529NM-AP-01/6529NM-AP-01-OUT-001/898df24ecb82ac0b32ca99e995e5c1b027c47d6b1bef8d636eb2b06640d9ea66/webp-v2-q82-m6-fixed-icc/1280.webp",
+            "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+            "complete": true,
+            "naturalWidth": 1280,
+            "naturalHeight": 1920,
+            "renderedWidth": 358,
+            "renderedHeight": 537,
+            "top": 532,
+            "objectFit": "contain"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Take the Key!",
+            "Works",
+            "About this work",
+            "Object data",
+            "Caption",
+            "Close looking",
+            "Artist’s account",
+            "Curatorial interpretation",
+            "Context",
+            "Status and source note",
+            "Browse",
+            "Collection context",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 39
+        }
+      }
+    },
+    "/museum/network/works/does-not-exist": {
+      "slug": "work-not-found",
+      "viewports": {
+        "1440x1000": {
+          "status": 404,
+          "finalUrl": "/museum/network/works/does-not-exist",
+          "full": "work-not-found-1440x1000-full.png",
+          "tiles": [
+            "work-not-found-1440x1000-01.png",
+            "work-not-found-1440x1000-02.png"
+          ],
+          "consoleErrors": [
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+          ],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Museum object record",
+          "robots": "noindex, follow",
+          "horizontalOverflowPx": -30,
+          "pageHeight": 1140,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3319/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 1040,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Record not found",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 20
+        },
+        "820x1000": {
+          "status": 404,
+          "finalUrl": "/museum/network/works/does-not-exist",
+          "full": "work-not-found-820x1000-full.png",
+          "tiles": [
+            "work-not-found-820x1000-01.png",
+            "work-not-found-820x1000-02.png"
+          ],
+          "consoleErrors": [
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+          ],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Museum object record",
+          "robots": "noindex, follow",
+          "horizontalOverflowPx": 0,
+          "pageHeight": 1182,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3319/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 1040,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Record not found",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 20
+        },
+        "390x844": {
+          "status": 404,
+          "finalUrl": "/museum/network/works/does-not-exist",
+          "full": "work-not-found-390x844-full.png",
+          "tiles": [
+            "work-not-found-390x844-01.png",
+            "work-not-found-390x844-02.png"
+          ],
+          "consoleErrors": [
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Failed to load resource: the server responded with a status of 404 (Not Found)",
+            "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+          ],
+          "frames": {
+            "probes": [],
+            "childFrames": []
+          },
+          "title": "Museum object record",
+          "robots": "noindex, follow",
+          "horizontalOverflowPx": 0,
+          "pageHeight": 1243,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3319/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 1016,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "Record not found",
+            "Source and contribute"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 20
+        }
+      }
+    }
+  },
+  "contactSheets": {
+    "1440x1000": "contact-sheet-1440x1000.png",
+    "820x1000": "contact-sheet-820x1000.png",
+    "390x844": "contact-sheet-390x844.png"
+  },
+  "principalImageRepeats": {
+    "1440x1000": {
+      "https://artblocks-mainnet.s3.amazonaws.com/100000031.png": [
+        "/museum/network/artists",
+        "/museum/network/acquisitions"
+      ]
+    },
+    "820x1000": {
+      "https://artblocks-mainnet.s3.amazonaws.com/100000031.png": [
+        "/museum/network/artists",
+        "/museum/network/acquisitions"
+      ]
+    },
+    "390x844": {
+      "https://artblocks-mainnet.s3.amazonaws.com/100000031.png": [
+        "/museum/network/artists",
+        "/museum/network/acquisitions"
+      ]
+    }
+  }
+}

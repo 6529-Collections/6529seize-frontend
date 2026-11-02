@@ -1,5 +1,7 @@
 import { generateMetadata as generateArtMetadata } from "@/app/nextgen/collection/[collection]/art/page";
-import { generateMetadata as generateNextGenCollectionMetadata } from "@/app/nextgen/collection/[collection]/[[...view]]/page";
+import NextGenCollectionPage, {
+  generateMetadata as generateNextGenCollectionMetadata,
+} from "@/app/nextgen/collection/[collection]/[[...view]]/page";
 import { generateNextgenCollectionMetadata } from "@/app/nextgen/collection/[collection]/page-utils";
 import { generateMetadata as generateNextGenMetadata } from "@/app/nextgen/[[...view]]/page";
 import { generateMetadata as generateNextGenAdminMetadata } from "@/app/nextgen/manager/page";
@@ -11,6 +13,7 @@ import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage",
@@ -21,11 +24,23 @@ jest.mock("@/app/nextgen/collection/[collection]/CollectionPageShell", () => ({
   default: () => null,
 }));
 
+// A stable stand-in for Next's not-found signal, so these tests do not depend
+// on the framework's internal error digest format.
+jest.mock("next/navigation", () => ({
+  ...jest.requireActual("next/navigation"),
+  notFound: jest.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
+}));
+
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
 }));
 
-jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 
 jest.mock("@/app/nextgen/[[...view]]/NextGenPageClient", () => ({
   __esModule: true,
@@ -144,6 +159,9 @@ const token: NextGenToken = {
   updated_at: "2024-01-01T00:00:00Z",
 };
 
+const apiError = (status: number) =>
+  Object.assign(new Error(`HTTP ${status}`), { status });
+
 const getSocialImage = (metadata: Metadata) => {
   const [image] = metadata.openGraph?.images as {
     alt: string;
@@ -186,13 +204,13 @@ describe("NextGen metadata", () => {
   });
 
   it.each([
-    [undefined, "NextGen"],
-    ["collections", "Collections | NextGen"],
-    ["artists", "Artists | NextGen"],
-    ["about", "About | NextGen"],
+    [undefined, "NextGen", ""],
+    ["collections", "Collections | NextGen", "?view=Collections"],
+    ["artists", "Artists | NextGen", "?view=Artists"],
+    ["about", "About | NextGen", "?view=About"],
   ])(
     "uses consistent metadata for the %s landing view",
-    async (view, title) => {
+    async (view, title, cardQuery) => {
       const metadata = await generateNextGenMetadata({
         params: Promise.resolve({ view: view ? [view] : undefined }),
       });
@@ -208,10 +226,8 @@ describe("NextGen metadata", () => {
         width: 1200,
       });
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("subtitle")).toBe(
-        "Generative art collections from 6529"
-      );
-      expect(url.searchParams.get("title")).toBe(title);
+      // The card selects a fixed page label; its text is never in the query.
+      expect(url.search).toBe(cardQuery);
     }
   );
 
@@ -223,19 +239,33 @@ describe("NextGen metadata", () => {
     expect(metadata.title).toBe("NextGen Admin");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("subtitle")).toBe("Manage NextGen collections");
-    expect(url.searchParams.get("title")).toBe("NextGen Admin");
+    expect(url.search).toBe("?variant=admin");
   });
 
   it.each([
-    [undefined, "Pebbles | NextGen", "Pebbles"],
-    ["about", "About | Pebbles", "About | Pebbles"],
-    ["provenance", "Provenance | Pebbles", "Provenance | Pebbles"],
-    ["rarity", "Rarity | Pebbles", "Rarity | Pebbles"],
-    ["top-trait-sets", "Trait Sets | Pebbles", "Trait Sets | Pebbles"],
+    [undefined, "Pebbles | NextGen", "Pebbles", "?collection=1"],
+    ["about", "About | Pebbles", "About | Pebbles", "?collection=1&view=About"],
+    [
+      "provenance",
+      "Provenance | Pebbles",
+      "Provenance | Pebbles",
+      "?collection=1&view=Provenance",
+    ],
+    [
+      "rarity",
+      "Rarity | Pebbles",
+      "Rarity | Pebbles",
+      "?collection=1&view=Rarity",
+    ],
+    [
+      "top-trait-sets",
+      "Trait Sets | Pebbles",
+      "Trait Sets | Pebbles",
+      "?collection=1&view=Trait+Sets",
+    ],
   ])(
     "uses collection facts in the %s collection view card",
-    async (view, documentTitle, cardTitle) => {
+    async (view, documentTitle, cardTitle, cardQuery) => {
       mockNextgenFetches();
 
       const metadata = await generateNextGenCollectionMetadata({
@@ -259,11 +289,8 @@ describe("NextGen metadata", () => {
         width: 1200,
       });
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("image")).toBe(
-        "https://cdn.test/pebbles-banner.png"
-      );
-      expect(url.searchParams.get("subtitle")).toBe("Pebbles | NextGen");
-      expect(url.searchParams.get("title")).toBe(cardTitle);
+      // The card resolves the collection name and artwork from the backend.
+      expect(url.search).toBe(cardQuery);
     }
   );
 
@@ -294,10 +321,12 @@ describe("NextGen metadata", () => {
       expect(metadata.openGraph?.title).toBe(title);
       expect(image.alt).toBe(`${title} social card`);
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("image")).toBe(
-        "https://cdn.test/pebbles-banner.png"
-      );
-      expect(url.searchParams.get("title")).toBe(title);
+      expect(url.searchParams.get("collection")).toBe("1");
+      expect(url.searchParams.get("view")).toBe(page);
+      expect([...url.searchParams.keys()].sort()).toEqual([
+        "collection",
+        "view",
+      ]);
     }
   );
 
@@ -330,20 +359,16 @@ describe("NextGen metadata", () => {
     expect(url.pathname).toBe(
       `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
     );
-    expect(url.searchParams.get("artist")).toBe("6529er");
-    expect(url.searchParams.get("badge")).toBe("NextGen");
-    expect(url.searchParams.get("collection")).toBe("Pebbles");
-    expect(url.searchParams.get("displayId")).toBe("42");
-    expect(url.searchParams.get("image")).toBe("https://cdn.test/token.png");
+    // Card text and artwork are resolved from backend data, never the query.
+    expect(url.search).toBe("");
     expect(metadata.description).toContain("Pebble #42 · 6529er · NextGen");
     const canonical = `https://test.6529.io/nextgen/token/10000000042${view ? `/${view}` : ""}`;
     expect(metadata.alternates?.canonical).toBe(canonical);
     expect(metadata.openGraph?.url).toBe(canonical);
-    expect(url.searchParams.get("title")).toBe(title);
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {
-    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("missing"));
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
 
     const metadata = await generateNextGenTokenMetadata({
       params: Promise.resolve({ token: "999" }),
@@ -353,10 +378,58 @@ describe("NextGen metadata", () => {
 
     expect(metadata.title).toBe("NextGen Token");
     expect(url.pathname).toBe(`/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/999`);
-    expect(url.searchParams.get("badge")).toBe("NextGen");
-    expect(url.searchParams.get("collection")).toBe("NextGen");
-    expect(url.searchParams.get("image")).toBeNull();
-    expect(url.searchParams.get("title")).toBe("NextGen #999");
+    expect(url.search).toBe("");
+  });
+
+  it("does not turn a backend failure into the missing-token card", async () => {
+    const error = apiError(503);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+
+    await expect(
+      generateNextGenTokenMetadata({
+        params: Promise.resolve({ token: "10000000042" }),
+      })
+    ).rejects.toBe(error);
+  });
+
+  it("renders not found for a token that is a real 404", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
+
+    await expect(
+      NextGenTokenPage({
+        params: Promise.resolve({ token: "10000000042" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets a token page backend failure reach the error boundary", async () => {
+    const error = apiError(500);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+
+    await expect(
+      NextGenTokenPage({
+        params: Promise.resolve({ token: "10000000042" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toBe(error);
+    expect(notFound).not.toHaveBeenCalled();
+  });
+
+  it("renders not found only for a real 404 on the collection page", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
+    await expect(
+      NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
+
+    const error = apiError(502);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+    await expect(
+      NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
+    ).rejects.toBe(error);
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("normalizes short token links to the indexed token identity", async () => {

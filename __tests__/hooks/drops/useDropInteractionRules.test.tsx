@@ -37,6 +37,28 @@ describe("useDropInteractionRules", () => {
     expect(result.current.voteState).toBe("NOT_LOGGED_IN");
   });
 
+  it("does not grant ownership or deletion for a real user sharing the Anonymous placeholder handle", () => {
+    const anonymousDrop = {
+      ...baseDrop,
+      author: {
+        id: "anonymous-entry-author",
+        handle: "Anonymous",
+        is_anonymous: true,
+      },
+    };
+    const { result } = renderHook(
+      () => useDropInteractionRules(anonymousDrop),
+      {
+        wrapper: wrapper({
+          connectedProfile: { id: "real-profile", handle: "Anonymous" },
+          activeProfileProxy: null,
+        }),
+      }
+    );
+    expect(result.current.isAuthor).toBe(false);
+    expect(result.current.canDelete).toBe(false);
+  });
+
   it("handles winner drops", () => {
     const drop = {
       ...baseDrop,

@@ -120,15 +120,80 @@ export const useWaveDropsSerialScroll = ({
   scrollToVisualBottom,
 }: UseWaveDropsSerialScrollParams): UseWaveDropsSerialScrollResult => {
   const [serialTarget, setSerialTarget] = useState<number | null>(initialDrop);
+  const [previousInitialDrop, setPreviousInitialDrop] = useState(initialDrop);
+
+  if (previousInitialDrop !== initialDrop) {
+    setPreviousInitialDrop(initialDrop);
+    // A new same-wave link is a new request; URL cleanup must not cancel it.
+    if (initialDrop !== null) {
+      setSerialTarget(initialDrop);
+    }
+  }
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
+  const scrollAnchorRef = useRef<{
+    readonly target: HTMLDivElement;
+    readonly isActive: () => boolean;
+    readonly release: () => void;
+  } | null>(null);
+
+  const holdScrollTarget = useCallback(
+    (container: HTMLDivElement, target: HTMLDivElement) => {
+      if (scrollAnchorRef.current?.target === target)
+        return scrollAnchorRef.current;
+      scrollAnchorRef.current?.release();
+      const controls = container.parentElement ?? container;
+      let active = true;
+      // Placeholder hydration and media loading can move a settled target. Keep
+      // it visible until the reader interacts; never hold ordinary wave entry.
+      const observer =
+        typeof IntersectionObserver === "undefined"
+          ? null
+          : new IntersectionObserver(
+              () => {
+                if (!active) return;
+                if (!container.contains(target)) {
+                  release();
+                  return;
+                }
+                if (!isElementVisibleInContainer({ container, target })) {
+                  scrollElementIntoContainerCenter({
+                    behavior: "auto",
+                    container,
+                    target,
+                  });
+                }
+              },
+              { root: container, threshold: [0, 1] }
+            );
+      function release() {
+        active = false;
+        observer?.disconnect();
+        for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
+          controls.removeEventListener(event, release, true);
+        }
+        if (scrollAnchorRef.current?.target === target)
+          scrollAnchorRef.current = null;
+      }
+      const anchor = { target, release, isActive: () => active };
+      scrollAnchorRef.current = anchor;
+      observer?.observe(target);
+      for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
+        controls.addEventListener(event, release, {
+          capture: true,
+          passive: true,
+        });
+      }
+      return anchor;
+    },
+    []
+  );
 
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollOperationAbortController = useRef<AbortController | null>(null);
   const scrollOperationLockRef = useRef(false);
   const activeScrollTargetRef = useRef<number | null>(null);
 
-  const latestWaveMessagesRef = useRef(waveMessages);
   const smallestSerialNo = useRef<number | null>(null);
   const lastScrolledToSerialRef = useRef<number | null>(null);
   const lastAutoPinnedNewestDropKeyRef = useRef<string | null>(null);
@@ -176,6 +241,7 @@ export const useWaveDropsSerialScroll = ({
 
   useEffect(() => {
     return () => {
+      scrollAnchorRef.current?.release();
       if (scrollOperationAbortController.current) {
         scrollOperationAbortController.current.abort();
         scrollOperationAbortController.current = null;
@@ -186,8 +252,6 @@ export const useWaveDropsSerialScroll = ({
   }, []);
 
   useEffect(() => {
-    latestWaveMessagesRef.current = waveMessages;
-
     if (waveMessages && waveMessages.drops.length > 0) {
       const minSerialNo = Math.min(
         ...waveMessages.drops.map((drop) => drop.serial_no)
@@ -199,7 +263,7 @@ export const useWaveDropsSerialScroll = ({
   }, [waveMessages]);
 
   useEffect(() => {
-    const currentMessages = latestWaveMessagesRef.current;
+    const currentMessages = waveMessages;
     if (currentMessages && currentMessages.drops.length > 0) {
       const newestDrop = currentMessages.drops[0];
       const newestDropKey = newestDrop
@@ -213,19 +277,34 @@ export const useWaveDropsSerialScroll = ({
 
       const shouldAutoPinNewestDrop =
         shouldPinToBottom &&
+        serialTarget === null &&
+        scrollAnchorRef.current === null &&
+        !isScrolling &&
         newestDropKey !== null &&
         newestDropKey !== previousNewestDropKey &&
-        (init || previousNewestDropKey !== null || newestDrop?.id.startsWith("temp-"));
-
-      lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
+        (init ||
+          previousNewestDropKey !== null ||
+          newestDrop?.id.startsWith("temp-"));
 
       if (shouldAutoPinNewestDrop) {
-        setTimeout(() => {
+        // A cancelled timer must leave this key eligible for the next render.
+        const timeoutId = setTimeout(() => {
+          lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
           scrollToVisualBottom();
         }, 100);
+        return () => clearTimeout(timeoutId);
       }
+      lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
     }
-  }, [waveMessages, shouldPinToBottom, scrollToVisualBottom, init]);
+    return undefined;
+  }, [
+    waveMessages,
+    shouldPinToBottom,
+    scrollToVisualBottom,
+    init,
+    serialTarget,
+    isScrolling,
+  ]);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior, targetSerialNo?: number) => {
@@ -246,6 +325,7 @@ export const useWaveDropsSerialScroll = ({
       const target = resolveTarget(container);
 
       if (target && container) {
+        const anchor = holdScrollTarget(container, target);
         scrollElementIntoContainerCenter({
           behavior,
           container,
@@ -253,6 +333,7 @@ export const useWaveDropsSerialScroll = ({
         });
 
         setTimeout(() => {
+          if (!anchor.isActive()) return;
           const retryContainer = scrollContainerRef.current;
           const retryTarget = resolveTarget(retryContainer);
           const isInContainer =
@@ -271,6 +352,7 @@ export const useWaveDropsSerialScroll = ({
             });
 
             setTimeout(() => {
+              if (!anchor.isActive()) return;
               const finalContainer = scrollContainerRef.current;
               const finalTarget = resolveTarget(finalContainer);
               const stillInContainer =
@@ -282,8 +364,10 @@ export const useWaveDropsSerialScroll = ({
                 });
 
               if (!stillInContainer && finalTarget && finalContainer) {
+                // Some engines do not finish smooth scrolling in reverse flex
+                // lists. The final attempt must actually reach the target.
                 scrollElementIntoContainerCenter({
-                  behavior,
+                  behavior: "auto",
                   container: finalContainer,
                   target: finalTarget,
                 });
@@ -295,7 +379,7 @@ export const useWaveDropsSerialScroll = ({
       }
       return false;
     },
-    [scrollContainerRef]
+    [scrollContainerRef, holdScrollTarget]
   );
 
   const smoothScrollWithRetries = useCallback(
@@ -365,7 +449,12 @@ export const useWaveDropsSerialScroll = ({
         return;
       }
 
-      const didReveal = await waitAndRevealDrop(activeSerialTarget);
+      // An existing page request can still be filling the cache. Give target
+      // data the same readiness window as its rendered row.
+      const didReveal = await waitAndRevealDrop(
+        activeSerialTarget,
+        TARGET_RENDER_TIMEOUT
+      );
 
       if (signal.aborted) {
         scrollOperationLockRef.current = false;

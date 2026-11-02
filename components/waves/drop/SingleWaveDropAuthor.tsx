@@ -11,6 +11,8 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import AnonymousDropAuthor from "@/components/waves/drops/AnonymousDropAuthor";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -19,6 +21,7 @@ interface SingleWaveDropAuthorProps {
 export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
   drop,
 }) => {
+  if (isAnonymousAuthor(drop.author)) return <AnonymousDropAuthor />;
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const resolvedPfp = drop.author.pfp
     ? getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)

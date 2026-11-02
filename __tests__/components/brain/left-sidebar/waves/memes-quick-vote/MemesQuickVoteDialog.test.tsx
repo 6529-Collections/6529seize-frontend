@@ -107,6 +107,7 @@ const createDialogProps = (
   activeDrop: createDrop(),
   hasDiscoveryError: false,
   isExhausted: false,
+  submissionError: null,
   isOpen: true,
   isRestartingRound: false,
   latestUsedAmount: 250,
@@ -563,5 +564,17 @@ describe("MemesQuickVoteDialog", () => {
     });
 
     expect(screen.getByRole("textbox")).toHaveValue("250");
+  });
+  it("announces rejected votes inside the open dialog", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          submissionError: "Voting is closed in this wave",
+        })}
+      />
+    );
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Voting is closed in this wave");
+    expect(screen.getByRole("dialog")).toContainElement(alert);
   });
 });

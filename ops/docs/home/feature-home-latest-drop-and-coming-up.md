@@ -63,17 +63,24 @@ Use this page for visibility rules, state switches, and route targets.
    - `Next Drop` when the current mint is complete, its grace period has
      elapsed, and a next winner exists.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
-   stats with `Edition Details` directly below; `Your allowance` followed by
-   subscription awareness; and the countdown and mint action at the bottom.
+   stats with `Edition Details` directly below; `Your allowance` when a wallet is
+   connected; subscription awareness; then the countdown and mint action.
    `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
    wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
-   The countdown keeps each unit directly beside its number, for example `8m`
-   and `5s`. Days appear first when at least 24 hours remain. Zero
-   days, hours, and minutes are omitted; seconds always remain visible. The
-   timer strip keeps the same height across screen sizes.
+   The homepage countdown keeps the complete phase heading, such as
+   `Public Phase Ends In`, beside its status pill and the existing allowlist
+   information icon when applicable. A separate dark row below centers the
+   segmented timer. The panel and timer row use background contrast without
+   outlines. Each number is zero-padded, such as `08m` and `05s`, with
+   smaller unit labels. Days appear first when at least 24 hours remain. Zero
+   days, hours, and minutes are still omitted; seconds always remain visible.
+   A four-part timer uses two balanced rows in the narrowest content slots.
+   The pill's slow ping stops under reduced motion. `Mint` remains below the
+   box. Desktop keeps the previous reserved countdown height, with any extra
+   space below the controls so the subscription row and countdown stay together.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
@@ -100,6 +107,16 @@ proportions without cropping. On phones, loaded still images use their natural
 height at the card width, like Latest Drop. Tablet and desktop keep the 3:4
 artwork frame. Keyboard users can tab through the links to
 bring each card into view.
+
+The Coming up subtitle keeps “Next in queue and current vote leaders.” and
+adds the next scheduled decision when available. Times use the viewer's device
+time zone, including daylight-saving changes, in 24-hour format. Decisions on
+the viewer's current day say “Next decision today at …”; the following day uses
+“tomorrow.” Decisions two to six calendar days away show the weekday; decisions
+seven or more days away show the short month and day, without a year. The full
+local date, time, and timezone remain available on hover. The time appears after the page loads and is omitted when the
+schedule is missing or the decision time has passed, until updated wave data
+provides another future decision. It describes the voting decision, not minting.
 
 ## Common Scenarios
 
@@ -170,9 +187,9 @@ bring each card into view.
   row, and a non-US, unknown, or failed result leaves nothing. The remembered
   result only keeps the blank space; the row and its requests always wait for
   the current check. The space holds no text, icons, links, or controls.
-- Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
-  wallet is connected, the row prompts the user to connect to view it. Once
-  connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
+- Latest Drop and mapped Next Drop cards omit `Your allowance` while no wallet
+  address is available, including during initial connection. Once connected,
+  compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
   or Public allocation, spelling out Airdrop and Allowlist counts; Public can
   contain Airdrop only.
 - The allowance row distinguishes loading, an unpublished distribution, a
@@ -195,10 +212,10 @@ bring each card into view.
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
   `xN subscribers` total, a contextual profile-subscriptions action, and a
-  right-edge question-mark info link. Below 640px, the title and toggle have
-  their own row, the coverage and subscription count use the full width below,
-  and the profile action and info link share the bottom row. Wider layouts keep
-  the profile action beside the title.
+  question-mark info link. The toggle stays beside the title and the contextual
+  profile action is aligned at the far right. Counts, coverage, and the info
+  link use the full width below. Labels can wrap; the narrowest cards place the
+  action below the details, still aligned right, to avoid squeezing controls.
 - For a connected non-proxy profile, the awareness row can also show the
   compact runway summary, for example
   `Automatic · 0.18 ETH · 4 drops funded`. Its action follows the coverage
@@ -296,13 +313,28 @@ bring each card into view.
   `about.subscriptions.*` message family to each partial locale dictionary and
   repeat the responsive and assistive-technology QA pass.
 
+## Homepage Presentation
+
+- The homepage Next Drop card uses the same solid surface as the Waves cards,
+  with quiet separators. The same panel on the upcoming Meme page retains its
+  existing appearance.
+- Both homepage Next Drop and Latest Drop states use the refined subscription
+  row: a subtle background and border, a neutral title, and no shadow. Its
+  controls, spacing, and behavior remain the same in both states.
+- Artwork dimensions, grid proportions, details spacing, and type sizes are
+  unchanged. Desktop image height follows the details column, so this refinement
+  changes colour and decoration without changing that column's geometry.
+- Wave, Submitted, Rating, and Mint date labels remain uppercase. All artist and
+  collaborator information, media actions, allowance information, subscription
+  controls, and existing disclosure behavior remain available.
+
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Home Header and Mission Block](feature-home-header-and-mission.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Now Minting Countdown](../media/memes/feature-now-minting-countdown.md)
 - [Latest Drop Stats Grid](../media/memes/feature-latest-drop-stats-grid.md)
 - [Wave Sort and Price Filters](../waves/leaderboard/feature-sort-and-group-filters.md)

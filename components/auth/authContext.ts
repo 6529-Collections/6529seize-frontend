@@ -18,7 +18,7 @@ export const AuthContext = createContext<AuthContextType>({
   requestSessionUpgrade: async () => ({ success: false }),
   ensureActiveSessionV2WebSession: async () => false,
   setToast: () => {},
-  setActiveProfileProxy: async () => {},
+  setActiveProfileProxy: () => Promise.resolve(false),
 });
 
 export const useAuth = () => {

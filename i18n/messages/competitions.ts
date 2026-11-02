@@ -1,4 +1,14 @@
 export const COMPETITION_MESSAGES = {
+  "competitions.anonymousAuthor": "Anonymous",
+  "competitions.anonymousMediaReupload":
+    "Upload your media again, then retry this anonymous submission.",
+  "competitions.anonymousSubmissions": "Anonymous submissions",
+  "competitions.anonymityDescription":
+    "Hide each submission’s author until that submission wins. Other submissions stay anonymous. This setting cannot change after publication.",
+  "competitions.anonymousSubmissionNotice":
+    "Your identity will be revealed automatically if this submission wins. Information you include in the submission or its metadata remains visible.",
+  "competitions.anonymousUntilWin": "Until the submission wins",
+  "competitions.publicAuthors": "Off",
   "competitions.metaTitle": "Competition | Waves",
   "competitions.collectionMetaTitle": "Competitions | Waves",
   "competitions.waveCreationFailure": "Couldn't create this wave.",

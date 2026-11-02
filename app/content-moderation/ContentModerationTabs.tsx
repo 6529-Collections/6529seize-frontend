@@ -26,6 +26,7 @@ export default function ContentModerationTabs({
     { id: "REVIEW", key: "needsReview", count: reviewCount },
     { id: "CHECKS", key: "checks", count: undefined },
     { id: "RESOLVED", key: "resolved", count: resolvedCount },
+    { id: "ENCRYPTED_REPORTS", key: "encryptedReports", count: undefined },
     { id: "SUSPENDED", key: "suspended", count: suspendedCount },
     { id: "BLOCK_ACTIVITY", key: "blockActivity", count: undefined },
   ] as const;

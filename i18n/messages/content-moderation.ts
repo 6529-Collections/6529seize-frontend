@@ -164,6 +164,66 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.tabs.suspendedCompact": "Suspended",
   "contentModeration.moderator.tabs.blockActivity": "Block activity",
   "contentModeration.moderator.tabs.blockActivityCompact": "Blocks",
+  "contentModeration.moderator.tabs.encryptedReports": "Encrypted reports",
+  "contentModeration.moderator.tabs.encryptedReportsCompact": "Encrypted",
+  "contentModeration.moderator.encryptedReports.intro":
+    "Reports of severe or illegal harm from end-to-end encrypted chats. Each one holds only the single message the reporter chose to share. Opening a report is recorded in an access log.",
+  "contentModeration.moderator.encryptedReports.loading":
+    "Loading encrypted reports…",
+  "contentModeration.moderator.encryptedReports.empty": "No encrypted reports.",
+  "contentModeration.moderator.encryptedReports.reportedAt": "Reported {time}",
+  "contentModeration.moderator.encryptedReports.reported": "Reported",
+  "contentModeration.moderator.encryptedReports.verified": "Sender verified",
+  "contentModeration.moderator.encryptedReports.unverified":
+    "Sender not verified",
+  "contentModeration.moderator.encryptedReports.onHold": "On hold",
+  "contentModeration.moderator.encryptedReports.deletesOn":
+    "Deleted {date} unless held",
+  "contentModeration.moderator.encryptedReports.review": "Review evidence",
+  "contentModeration.moderator.encryptedReports.reviewLabel":
+    "Review evidence: {category}, reported {time}",
+  "contentModeration.moderator.encryptedReports.back":
+    "Back to encrypted reports",
+  "contentModeration.moderator.encryptedReports.detailLoading":
+    "Loading evidence…",
+  "contentModeration.moderator.encryptedReports.detailError":
+    "Couldn’t load this report.",
+  "contentModeration.moderator.encryptedReports.scopeTitle":
+    "Only what the reporter chose to share",
+  "contentModeration.moderator.encryptedReports.scope":
+    "This is one message, as the reporter decrypted it on their device. It is not the chat: 6529 can’t read anything else in the conversation, and the other people in it can’t see this report.",
+  "contentModeration.moderator.encryptedReports.evidence": "Reported message",
+  "contentModeration.moderator.encryptedReports.evidenceEmpty":
+    "The reported message has no text.",
+  "contentModeration.moderator.encryptedReports.evidenceUnreadable":
+    "The reported message couldn’t be read as text.",
+  "contentModeration.moderator.encryptedReports.attachments":
+    "Attachments named in the message (their contents are not part of the report): {names}",
+  "contentModeration.moderator.encryptedReports.signatureVerified":
+    "Signature verified: the sender’s device signed this exact message, and the sender was in the chat at the time.",
+  "contentModeration.moderator.encryptedReports.signatureUnverified":
+    "Signature not verified: the server couldn’t confirm that the sender’s device signed this message. Treat it as unconfirmed.",
+  "contentModeration.moderator.encryptedReports.details": "Report details",
+  "contentModeration.moderator.encryptedReports.category": "Category",
+  "contentModeration.moderator.encryptedReports.sender": "Sender profile",
+  "contentModeration.moderator.encryptedReports.reporter": "Reporter profile",
+  "contentModeration.moderator.encryptedReports.unknownSender": "Unknown",
+  "contentModeration.moderator.encryptedReports.notes": "Reporter’s note",
+  "contentModeration.moderator.encryptedReports.retention": "Retention",
+  "contentModeration.moderator.encryptedReports.retentionHeld":
+    "On hold: kept until released",
+  "contentModeration.moderator.encryptedReports.retentionUntil":
+    "Deleted {date} unless placed on hold",
+  "contentModeration.moderator.encryptedReports.hold": "Place on hold",
+  "contentModeration.moderator.encryptedReports.release": "Release hold",
+  "contentModeration.moderator.encryptedReports.holdHelp":
+    "A report on hold is kept past its 180-day retention until you release it.",
+  "contentModeration.moderator.encryptedReports.holdFailed":
+    "Couldn’t change the hold. Please try again.",
+  "contentModeration.moderator.encryptedReports.heldStatus":
+    "Report placed on hold.",
+  "contentModeration.moderator.encryptedReports.releasedStatus":
+    "Hold released.",
   "contentModeration.moderator.blockActivity.blocked": "Blocked",
   "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
   "contentModeration.moderator.accessRequirement":

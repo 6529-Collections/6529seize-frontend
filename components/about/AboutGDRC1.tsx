@@ -3,6 +3,10 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
+import {
+  sanitizeHtml,
+  type HtmlSanitizeProfile,
+} from "@/lib/security/sanitizeHtml";
 import clsx from "clsx";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,39 +16,25 @@ import { fetchAboutSectionFile } from "./about.helpers";
 
 type GdrcMessageKey = Extract<MessageKey, `about.gdrc.${string}`>;
 
-const GDRC_ALLOWED_TAG_NAMES = new Set([
-  "BR",
-  "DIV",
-  "EM",
-  "H2",
-  "H3",
-  "H4",
-  "H5",
-  "LI",
-  "OL",
-  "P",
-  "STRONG",
-  "UL",
-]);
+// Structural text only: no attributes, links or media survive sanitizing.
+const GDRC_HTML_PROFILE: HtmlSanitizeProfile = {
+  tags: new Set([
+    "br",
+    "div",
+    "em",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "li",
+    "ol",
+    "p",
+    "strong",
+    "ul",
+  ]),
+};
 
 const m = (locale: SupportedLocale, key: GdrcMessageKey) => t(locale, key);
-
-function sanitizeGdrcHtml(value: string): string {
-  const document = new DOMParser().parseFromString(value, "text/html");
-
-  for (const element of Array.from(document.body.querySelectorAll("*"))) {
-    if (!GDRC_ALLOWED_TAG_NAMES.has(element.tagName)) {
-      element.remove();
-      continue;
-    }
-
-    for (const attribute of Array.from(element.attributes)) {
-      element.removeAttribute(attribute.name);
-    }
-  }
-
-  return document.body.innerHTML;
-}
 
 export default function AboutGDRC1() {
   const locale = useBrowserLocale();
@@ -53,7 +43,7 @@ export default function AboutGDRC1() {
   useEffect(() => {
     void fetchAboutSectionFile("gdrc1")
       .then((content) => {
-        setHtml(sanitizeGdrcHtml(content));
+        setHtml(sanitizeHtml(content, GDRC_HTML_PROFILE));
       })
       .catch(() => {
         setHtml("");

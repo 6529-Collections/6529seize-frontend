@@ -42,6 +42,7 @@ import {
   getSnapshotContent,
 } from "./content-moderation-page.helpers";
 import BlockActivityFeed from "./BlockActivityFeed";
+import E2eeReportsPanel from "./E2eeReportsPanel";
 import ContentModerationHistory from "./ContentModerationHistory";
 import SuspendedProfileCard from "./SuspendedProfileCard";
 import ContentModerationTabs from "./ContentModerationTabs";
@@ -91,6 +92,7 @@ function getActiveDataState(
   if (
     !enabled ||
     tab === "BLOCK_ACTIVITY" ||
+    tab === "ENCRYPTED_REPORTS" ||
     tab === "CHECKS" ||
     tab === "REVIEW"
   ) {
@@ -550,6 +552,11 @@ export default function ContentModerationPageClient() {
             <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
               {t(locale, "contentModeration.moderator.emptySuspended")}
             </p>
+          )}
+        {moderatorContentReady &&
+          profileId &&
+          activeTab === "ENCRYPTED_REPORTS" && (
+            <E2eeReportsPanel key={profileId} profileId={profileId} />
           )}
         {moderatorContentReady &&
           profileId &&

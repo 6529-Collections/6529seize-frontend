@@ -526,9 +526,9 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${
+        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-w-6 lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${
           isActive
-            ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-white/[0.12]"
+            ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-transparent"
             : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:tw-text-iron-600 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-300"
         }`}
       >
@@ -676,12 +676,12 @@ export default function TheMemesComponent({
             aria-label={t(locale, "theMemes.sorting.regionLabel")}
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4 max-sm:tw-sticky max-sm:tw-top-0 max-sm:tw-z-30 max-sm:-tw-mx-4 max-sm:tw-mb-3.5 max-sm:tw-border-iron-800/90 max-sm:tw-bg-[#0D0D0F] max-sm:tw-py-2.5 max-sm:tw-pl-4"
           >
-            <div className="tw-flex tw-items-center tw-gap-2.5">
-              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
-                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+            <div className="tw-flex tw-items-center tw-gap-5">
+              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5 lg:[body:not(.capacitor-native)_&]:tw-gap-1">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-ml-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
+                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-gap-0 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>

@@ -5,7 +5,7 @@ import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDial
 import MemesQuickVoteDialog from "./MemesQuickVoteDialog";
 
 export type MemesQuickVoteRuntimeIntent = {
-  readonly action: "open";
+  readonly action: "open" | "idle";
   readonly id: number;
 };
 
@@ -24,7 +24,7 @@ export default function MemesQuickVoteRuntime({
   const hasObservedOpenRef = useRef(false);
 
   useEffect(() => {
-    if (intent.id <= handledIntentIdRef.current) {
+    if (intent.action !== "open" || intent.id <= handledIntentIdRef.current) {
       return;
     }
 

@@ -9,7 +9,7 @@ import {
   recordReactionRequestSent,
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
-  recordReactionTimeoutReconciled,
+  recordReactionFailureReconciled,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { DropReactionRequestTimeoutError } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
@@ -91,42 +91,50 @@ describe("dropReactionMonitoring", () => {
     expect(mutation.realtimeReconciledAt).toBe(1_000);
   });
 
-  it("keeps timeout telemetry and protects intent from old websocket reads during recovery", () => {
-    const mutation = beginReactionMutation({
-      dropId: "timeout-drop",
-      waveId: "wave",
-      source: "picker",
-      action: "add",
-      previousReaction: null,
-      intendedReaction: ":smile:",
-      optimisticReaction: ":smile:",
-      profileId: "profile",
-    });
-    dateNowSpy.mockReturnValue(16_000);
-    recordReactionRequestFailed(
-      mutation,
-      new DropReactionRequestTimeoutError()
-    );
-    expect(mockSetExtras).toHaveBeenCalledWith(
-      expect.objectContaining({ error_kind: "timeout", status_code: undefined })
-    );
-    const reconcile = (reaction: string | null) =>
-      recordReactionRealtimeReconciliation({
-        drop: {
-          id: "timeout-drop",
-          wave: { id: "wave" },
-          context_profile_context: { reaction } as ApiDropContextProfileContext,
-        },
+  it.each([
+    ["timeout", new DropReactionRequestTimeoutError()],
+    ["network", new TypeError("Failed to fetch")],
+  ])(
+    "keeps %s telemetry and protects intent during recovery",
+    (errorKind, error) => {
+      const mutation = beginReactionMutation({
+        dropId: "timeout-drop",
+        waveId: "wave",
+        source: "picker",
+        action: "add",
+        previousReaction: null,
+        intendedReaction: ":smile:",
+        optimisticReaction: ":smile:",
+        profileId: "profile",
       });
-    dateNowSpy.mockReturnValue(20_000);
-    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
-    expect(reconcile(":smile:").shouldApplyCanonicalDrop).toBe(true);
-    recordReactionTimeoutReconciled(mutation, "confirmed");
-    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
-    dateNowSpy.mockReturnValue(36_000);
-    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(true);
-    expect(captureExceptionMock).toHaveBeenCalledTimes(1);
-  });
+      dateNowSpy.mockReturnValue(16_000);
+      recordReactionRequestFailed(mutation, error);
+      expect(mockSetExtras).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error_kind: errorKind,
+          status_code: undefined,
+        })
+      );
+      const reconcile = (reaction: string | null) =>
+        recordReactionRealtimeReconciliation({
+          drop: {
+            id: "timeout-drop",
+            wave: { id: "wave" },
+            context_profile_context: {
+              reaction,
+            } as ApiDropContextProfileContext,
+          },
+        });
+      dateNowSpy.mockReturnValue(20_000);
+      expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
+      expect(reconcile(":smile:").shouldApplyCanonicalDrop).toBe(true);
+      recordReactionFailureReconciled(mutation, "confirmed");
+      expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
+      dateNowSpy.mockReturnValue(36_000);
+      expect(reconcile(null).shouldApplyCanonicalDrop).toBe(true);
+      expect(captureExceptionMock).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("does not let a previous account's intent filter the new account's websocket state", () => {
     const isCurrentOwner = jest.fn(() => true);

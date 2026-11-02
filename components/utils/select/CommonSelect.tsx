@@ -14,6 +14,7 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly mobileLabel?: string | undefined;
   readonly value: T;
   readonly key: string;
+  readonly panelId?: string | undefined;
   readonly childrenProps?: U | undefined;
   readonly badge?: number | undefined;
 }

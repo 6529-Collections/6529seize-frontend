@@ -77,6 +77,26 @@ describe("SingleWaveDropAuthor", () => {
     ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
+  it("shows an anonymous author without a profile link, image, tooltip or identity badges, and restores them after reveal", () => {
+    const original = createDrop("alice", "0xabc");
+    const anonymous = {
+      ...original,
+      author: { ...original.author, is_anonymous: true },
+    };
+    const { rerender } = render(<SingleWaveDropAuthor drop={anonymous} />);
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("tooltip-wrapper")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("user-cic-level")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("drop-author-badges")).not.toBeInTheDocument();
+    rerender(<SingleWaveDropAuthor drop={original} />);
+    expect(screen.getByRole("link", { name: "alice" })).toHaveAttribute(
+      "href",
+      "/alice"
+    );
+    expect(screen.getByTestId("tooltip-wrapper")).toBeInTheDocument();
+  });
+
   it("renders the handle when present and uses it for the tooltip lookup", () => {
     render(<SingleWaveDropAuthor drop={createDrop("alice", "0xabc")} />);
 

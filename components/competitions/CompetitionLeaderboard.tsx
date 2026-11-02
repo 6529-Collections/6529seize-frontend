@@ -156,6 +156,12 @@ export default function CompetitionLeaderboard({
   const isMainStage = competition.capabilities.includes(
     ApiCompetitionCapability.MainStage
   );
+  const filterScope = `${wave.id}:${competition.id}`;
+  const [additionalActionScope, setAdditionalActionScope] = useState<
+    string | null
+  >(null);
+  const additionalActionOnly =
+    isMainStage && additionalActionScope === filterScope;
   const [viewMode, setViewMode] = useLocalPreference<LeaderboardViewMode>(
     `competitionViewMode_${wave.id}_${competition.id}`,
     isMainStage ? "grid" : "list",
@@ -173,6 +179,7 @@ export default function CompetitionLeaderboard({
   );
   const query = useCompetitionResource(identity, "leaderboard", {
     include: "cards",
+    ...(additionalActionOnly ? { is_additional_action_promised: "true" } : {}),
     sort: sorts[sort] ?? "rating",
     ...(sort === WaveDropsLeaderboardSort.PRICE ? { direction: "ASC" } : {}),
     ...(isCuration && priceRange.minPrice !== undefined
@@ -221,6 +228,20 @@ export default function CompetitionLeaderboard({
   if (maxReached) closeStatus = "max_reached";
   let layout: "list" | "gallery" | "grid" = "list";
   if (viewMode !== "list") layout = isMainStage ? "gallery" : "grid";
+  let emptyState = <CompetitionState empty />;
+  if (additionalActionOnly) {
+    emptyState = (
+      <output className="tw-block tw-p-6 tw-text-sm tw-font-light tw-text-iron-500">
+        {t(locale, "memes.additionalAction.empty")}
+      </output>
+    );
+  } else if (isCompetitionSubmissionHistory(competition)) {
+    emptyState = (
+      <output className="tw-block tw-p-6 tw-text-sm tw-font-light tw-text-iron-500">
+        {t(locale, "competitions.noSubmissions")}
+      </output>
+    );
+  }
   let content;
   if (query.isPending) content = <CompetitionState />;
   else if (query.isError && !entries.length) {
@@ -243,19 +264,12 @@ export default function CompetitionLeaderboard({
             }}
           />
         )}
-        {!entries.length &&
-          (isCompetitionSubmissionHistory(competition) ? (
-            <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-500">
-              {t(locale, "competitions.noSubmissions")}
-            </output>
-          ) : (
-            <CompetitionState empty />
-          ))}
+        {!entries.length && emptyState}
         <WaveLeaderboardVirtualizedRows
           items={entries}
           getItemId={(entry) => entry.drop_id}
           leadingItemCount={0}
-          windowKey={`${competition.id}:${sort}:${JSON.stringify(priceRange)}`}
+          windowKey={`${competition.id}:${sort}:${additionalActionOnly}:${JSON.stringify(priceRange)}`}
           layout={layout}
           scrollContainerRef={scrollContainerRef}
           fetchNextPage={query.fetchNextPage}
@@ -300,9 +314,16 @@ export default function CompetitionLeaderboard({
           retryApprovalCount={() => void winners.refetch()}
         />
       ) : (
-        <WaveLeaderboardTime wave={presentation} />
+        <WaveLeaderboardTime wave={presentation} withTopMargin={!isMainStage} />
       )}
       <WaveLeaderboardHeader
+        additionalActionOnly={additionalActionOnly}
+        onAdditionalActionChange={
+          isMainStage
+            ? (checked) =>
+                setAdditionalActionScope(checked ? filterScope : null)
+            : undefined
+        }
         wave={presentation}
         viewMode={viewMode}
         onViewModeChange={setViewMode}

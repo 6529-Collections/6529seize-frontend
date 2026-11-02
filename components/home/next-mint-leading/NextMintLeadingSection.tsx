@@ -12,11 +12,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { ComingUpNextDecision } from "./ComingUpNextDecision";
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
 import {
   HOME_ACTION_ARROW_CLASSES,
-  HOME_VIEW_ALL_CLASSES,
+  HOME_TEXT_LINK_CLASSES,
+  HOME_SECTION_TITLE_CLASSES,
 } from "../homeInteractionStyles";
 
 const SKELETON_KEYS = [
@@ -38,6 +40,7 @@ export function NextMintLeadingSection() {
   const {
     nextMint,
     nextMintTitle,
+    nextDecisionTime,
     waveId,
     isReady,
     isFetching: isWinnersFetching,
@@ -78,18 +81,16 @@ export function NextMintLeadingSection() {
   if (!hasCards && !isFetching) return null;
 
   const sectionClassName =
-    "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
+    "tw-relative tw-z-10 tw-px-4 tw-@container md:tw-px-6 lg:tw-px-8";
   const header = (
-    <div className="tw-relative tw-mb-5 tw-block md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4">
+    <div className="tw-mb-7 tw-flex tw-flex-col tw-items-start tw-gap-3 md:tw-mb-8 md:tw-flex-row md:tw-items-end md:tw-justify-between md:tw-gap-6">
       <div className="tw-min-w-0">
-        <h2
-          id="coming-up-heading"
-          className="tw-m-0 tw-pr-24 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-pr-0 md:tw-text-[22px] lg:tw-text-2xl"
-        >
+        <h2 id="coming-up-heading" className={HOME_SECTION_TITLE_CLASSES}>
           {t(locale, "home.comingUp.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-[1.55] tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-3 tw-text-pretty tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]">
           {t(locale, "home.comingUp.subtitle")}
+          <ComingUpNextDecision timestamp={nextDecisionTime} locale={locale} />
         </p>
       </div>
       <Link
@@ -99,7 +100,7 @@ export function NextMintLeadingSection() {
           isDirectMessage: false,
           isApp: false,
         })}
-        className={`${HOME_VIEW_ALL_CLASSES} tw-absolute tw-right-0 tw-top-0 tw-inline-flex md:tw-static`}
+        className={HOME_TEXT_LINK_CLASSES}
       >
         <span>{t(locale, "home.comingUp.viewAll")}</span>
         <ArrowRightIcon className={HOME_ACTION_ARROW_CLASSES} aria-hidden />
@@ -142,13 +143,13 @@ const NextMintLeadingSkeletonCard = () => {
       data-testid="coming-up-loading-card"
       className="tw-min-w-0 tw-text-left motion-reduce:[&_*]:tw-animate-none"
     >
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
-        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-py-4">
           <div className="tw-h-4 tw-w-20 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
           <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
         </div>
         <div className="tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-animate-pulse tw-bg-iron-900/70" />
-        <div className="tw-flex tw-flex-col tw-gap-2.5 tw-px-4 tw-pb-4 tw-pt-3.5 md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-pb-5 tw-pt-5">
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-h-4 tw-w-10 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />

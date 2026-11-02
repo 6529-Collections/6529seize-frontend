@@ -27,7 +27,7 @@ jest.mock("@/services/api/common-api", () => ({
 // Mock the MyStreamContext
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   MyStreamProvider: ({ children }: any) => children,
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     processIncomingDrop: jest.fn(),
   }),
 }));

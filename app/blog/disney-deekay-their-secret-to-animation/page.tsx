@@ -6,6 +6,8 @@ import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import { getMigratedWordPressPageMetadata } from "@/components/migrated-wordpress/metadata";
 import { disneyDeekayMigratedWordPressArticle as article } from "./content";
 
+export const dynamic = "force-static";
+
 export default function BlogDisneyDeekayTheirSecretToAnimationPage() {
   return (
     <>

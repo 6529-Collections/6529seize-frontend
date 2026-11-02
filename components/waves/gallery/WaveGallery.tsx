@@ -17,8 +17,14 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
   wave,
   onDropClick,
 }) => {
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveGalleryDrops(wave.id);
+  const {
+    drops,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+  } = useWaveGalleryDrops(wave.id);
 
   const handleIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -31,7 +37,12 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
     [hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
-  if (isFetching && drops.length === 0) {
+  // A page scans a bounded number of feed requests for media, so it can end
+  // empty while older drops remain. Keep paging rather than reporting an empty
+  // gallery; a failed request stops the scan.
+  const isScanningForMedia = hasNextPage && drops.length === 0 && !isError;
+
+  if ((isFetching || isScanningForMedia) && drops.length === 0) {
     return (
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
@@ -39,6 +50,9 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
           <span className="tw-text-sm tw-text-iron-400">
             Loading gallery...
           </span>
+          {!isFetching && (
+            <InfiniteScrollTrigger onIntersection={handleIntersection} />
+          )}
         </div>
       </div>
     );

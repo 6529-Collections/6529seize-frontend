@@ -42,7 +42,11 @@ const rqContext = { onDropRateChange: jest.fn() } as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+  useQueryClientMock.mockReturnValue({
+    invalidateQueries,
+    setQueriesData,
+    getQueryData: jest.fn(),
+  });
   useMutationMock.mockImplementation((config: any) => ({
     mutateAsync: async (param: any) => {
       const result = { id: param.dropId, wave: { id: "wave-1" } };

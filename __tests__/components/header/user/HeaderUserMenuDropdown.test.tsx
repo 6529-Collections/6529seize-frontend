@@ -25,6 +25,7 @@ import {
   getRequestedImageSrc,
   scaledAvatarPath,
 } from "@/__tests__/utils/avatarSrc";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 jest.mock(
   "@/hooks/artwork-documentation/useArtworkDocumentationAccess",
@@ -33,9 +34,15 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
-  <div data-testid="item" />
-));
+jest.mock(
+  "@/components/header/user/HeaderUserProxyDropdownItem",
+  () =>
+    ({ disabled }: { readonly disabled?: boolean }) => (
+      <button data-testid="item" disabled={disabled}>
+        Proxy profile
+      </button>
+    )
+);
 jest.mock(
   "@/components/header/user/connected/HeaderUserConnectedAccounts",
   () =>
@@ -265,7 +272,7 @@ function createAuthContext(
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     requestSessionUpgrade: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
-    setActiveProfileProxy: jest.fn().mockResolvedValue(undefined),
+    setActiveProfileProxy: jest.fn().mockResolvedValue(true),
     ...overrides,
   };
 }
@@ -375,6 +382,34 @@ function renderDropdown(options: RenderOptions) {
 afterEach(() => jest.clearAllMocks());
 
 describe("HeaderUserMenuDropdown", () => {
+  it("disables primary and proxy rows until a failed switch finishes", async () => {
+    const pending = createDeferredPromise<boolean>();
+    const { setActiveProfileProxy, onClose } = renderDropdown({});
+    jest.mocked(setActiveProfileProxy).mockReturnValueOnce(pending.promise);
+    const primary = screen.getByRole("button", { name: /alice/ });
+    fireEvent.click(primary);
+    expect(primary).toBeDisabled();
+    expect(screen.getByTestId("item")).toBeDisabled();
+    await act(async () => pending.resolve(false));
+    await waitFor(() => expect(primary).toBeEnabled());
+    expect(screen.getByTestId("item")).toBeEnabled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it.each([true, false])(
+    "closes the profile menu only when switching succeeds (%s)",
+    async (success) => {
+      const { setActiveProfileProxy, onClose } = renderDropdown({});
+      jest.mocked(setActiveProfileProxy).mockResolvedValueOnce(success);
+      fireEvent.click(screen.getByRole("button", { name: /alice/ }));
+      await waitFor(() => {
+        expect(setActiveProfileProxy).toHaveBeenCalledWith(null);
+        expect(screen.getByRole("button", { name: /alice/ })).toBeEnabled();
+      });
+      expect(onClose).toHaveBeenCalledTimes(success ? 1 : 0);
+    }
+  );
+
   it("shows profile handle as label", () => {
     renderDropdown({
       profile: profileBase,

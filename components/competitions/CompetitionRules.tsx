@@ -146,6 +146,14 @@ export default function CompetitionRules() {
           <RuleRow label={t(locale, "competitions.rulesLabel.maxEntries")}>
             {number(participation.max_entries_per_participant)}
           </RuleRow>
+          <RuleRow label={t(locale, "competitions.anonymousSubmissions")}>
+            {t(
+              locale,
+              participation.anonymous_submissions
+                ? "competitions.anonymousUntilWin"
+                : "competitions.publicAuthors"
+            )}
+          </RuleRow>
           {period(participation.starts_at, participation.ends_at)}
           {participation.required_media.length > 0 && (
             <RuleRow label={t(locale, "competitions.rulesLabel.media")}>

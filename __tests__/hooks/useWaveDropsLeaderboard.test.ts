@@ -4,6 +4,7 @@ import {
   WAVE_DROPS_LEADERBOARD_MAX_PAGES,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
 
 jest.mock("@tanstack/react-query", () => ({
   useInfiniteQuery: jest.fn(),
@@ -166,5 +167,38 @@ describe("useWaveDropsLeaderboard", () => {
     const options = getLatestInfiniteQueryOptions();
     expect(options).not.toHaveProperty("maxPages");
     expect(options.queryKey[1].page_window).toBeNull();
+  });
+
+  it("isolates filter pages and sends the filter with each request", async () => {
+    const { rerender } = renderHook(
+      ({ additionalActionOnly }) =>
+        useWaveDropsLeaderboard({ waveId: "1", additionalActionOnly }),
+      { initialProps: { additionalActionOnly: false } }
+    );
+    const allKey = getLatestInfiniteQueryOptions().queryKey;
+    expect(allKey[1]).not.toHaveProperty("is_additional_action_promised");
+    rerender({ additionalActionOnly: true });
+    const filtered = getLatestInfiniteQueryOptions();
+    expect(filtered.queryKey).not.toEqual(allKey);
+    const signal = new AbortController().signal;
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      wave: { id: "1" },
+      drops: [],
+      page: 2,
+      next: false,
+      count: 0,
+    });
+    await filtered.queryFn({ pageParam: 2, signal });
+    expect(commonApiFetch).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          page: "2",
+          is_additional_action_promised: "true",
+        }),
+        signal,
+      })
+    );
+    rerender({ additionalActionOnly: false });
+    expect(getLatestInfiniteQueryOptions().queryKey).toEqual(allKey);
   });
 });

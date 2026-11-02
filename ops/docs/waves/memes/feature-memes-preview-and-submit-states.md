@@ -88,6 +88,11 @@ these can differ between wallets.
 
 - `Preview` is optional; direct submit from `Additional Information` is
   supported.
+- Both finish paths show the `Additional Action` summary and saved plan text.
+  An unchecked action says `No additional action marked.`; a checked action
+  with a blank plan remains valid and says no separate plan was provided.
+  See [Additional Action](feature-memes-submission.md#additional-action) for editing
+  and saved-drop behavior.
 - Both finish paths show the authenticated submitting profile on the left and
   grouped action buttons on the right in one desktop footer row. On smaller
   screens, the buttons sit below the identity and can wrap when needed. There is
@@ -116,6 +121,7 @@ these can differ between wallets.
 - `Preview` and `Submit Artwork` also stay disabled if any `Additional Information`
   metadata value exceeds `5000` characters.
 - `Back to Edit` returns to the same draft values.
+- Selected image uploads appear in the preview cards before upload or signing.
 - Preview uses temporary drop values (ID/score/rater data) for layout checks.
 - Main preview-card click handlers are inert, so card-body clicks do not open a
   drop.

@@ -15,6 +15,7 @@ const isDropAuthoredByConnectedProfile = ({
 }): boolean =>
   Boolean(
     connectedProfile &&
+    !drop.author.is_anonymous &&
     ((!!connectedProfile.id && connectedProfile.id === drop.author.id) ||
       areHandlesEqual(connectedProfile.handle, drop.author.handle))
   );

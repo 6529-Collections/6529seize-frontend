@@ -9,6 +9,22 @@ import {
 } from "@/__tests__/utils/avatarSrc";
 
 describe("WaveLeaderboardDropAuthorAvatar", () => {
+  it("uses a neutral non-interactive avatar for an anonymous submission", () => {
+    const drop = {
+      author: {
+        is_anonymous: true,
+        handle: "alice",
+        primary_address: "0x1",
+        pfp: CDN_AVATAR_URL,
+      },
+    } as ExtendedDrop;
+    const { container } = render(
+      <WaveLeaderboardDropAuthorAvatar drop={drop} />
+    );
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("svg")).not.toBeNull();
+  });
   it("requests the AUTOx50 derivative of a CDN profile picture", () => {
     const drop = {
       author: { handle: "alice", primary_address: "0x1", pfp: CDN_AVATAR_URL },

@@ -54,6 +54,22 @@ function getContentSecurityPolicyFor(
   return header.value;
 }
 
+function getHeaderValue(
+  key: string,
+  options?: Parameters<typeof createSecurityHeaders>[3]
+): string | undefined {
+  return createSecurityHeaders(
+    "https://api.6529.io",
+    "https://ipfs.6529.io",
+    "",
+    options
+  ).find((candidate) => candidate.key === key)?.value;
+}
+
+const SENTRY_PUBLIC_KEY = "0123456789abcdef0123456789abcdef";
+const SENTRY_DSN = `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456`;
+const SENTRY_SECURITY_ENDPOINT = `https://o123.ingest.us.sentry.io/api/456/security/?sentry_key=${SENTRY_PUBLIC_KEY}`;
+
 function getPermissionsPolicy(): string {
   const header = createSecurityHeaders(
     "https://api.6529.io",
@@ -118,6 +134,114 @@ describe("createSecurityHeaders CSP", () => {
     ).toEqual(["'none'"]);
   });
 
+  it("restricts base URIs, form targets and framing ancestors to the same origin", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(getDirectiveSources(policy, "base-uri")).toEqual(["'self'"]);
+    expect(getDirectiveSources(policy, "form-action")).toEqual(["'self'"]);
+    expect(getDirectiveSources(policy, "frame-ancestors")).toEqual(["'self'"]);
+  });
+
+  it("keeps the legacy same-origin framing header aligned with frame-ancestors", () => {
+    expect(getHeaderValue("X-Frame-Options")).toBe("SAMEORIGIN");
+  });
+
+  it("limits Google and YouTube frame sources to the hosts that are embedded", () => {
+    const frameSrc = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "frame-src"
+    );
+
+    expect(frameSrc).toEqual(
+      expect.arrayContaining([
+        "https://docs.google.com",
+        "https://www.youtube-nocookie.com",
+        "https://www.youtube.com",
+      ])
+    );
+    expect(frameSrc).not.toContain("https://*.google.com");
+    expect(frameSrc).not.toContain("https://drive.google.com");
+    expect(frameSrc).not.toContain("https://*.youtube.com");
+    expect(
+      frameSrc.filter((source) => /google|youtube/.test(source)).sort()
+    ).toEqual([
+      "https://docs.google.com",
+      "https://www.youtube-nocookie.com",
+      "https://www.youtube.com",
+    ]);
+  });
+
+  it("omits violation reporting when no Sentry DSN is configured", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(policy).not.toContain("report-uri");
+    expect(policy).not.toContain("report-to");
+    expect(getHeaderValue("Reporting-Endpoints")).toBeUndefined();
+    expect(
+      getHeaderValue("Reporting-Endpoints", { sentryDsn: "" })
+    ).toBeUndefined();
+  });
+
+  it("reports violations to the Sentry security endpoint derived from the public DSN", () => {
+    const options = { sentryDsn: SENTRY_DSN };
+    const policy = getContentSecurityPolicy(options);
+
+    expect(getDirectiveSources(policy, "report-uri")).toEqual([
+      SENTRY_SECURITY_ENDPOINT,
+    ]);
+    expect(getDirectiveSources(policy, "report-to")).toEqual(["csp-endpoint"]);
+    expect(getHeaderValue("Reporting-Endpoints", options)).toBe(
+      `csp-endpoint="${SENTRY_SECURITY_ENDPOINT}"`
+    );
+  });
+
+  it("reports the security endpoint for regional Sentry ingest hosts", () => {
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({
+          sentryDsn: `https://${SENTRY_PUBLIC_KEY}@o123.ingest.de.sentry.io/789`,
+        }),
+        "report-uri"
+      )
+    ).toEqual([
+      `https://o123.ingest.de.sentry.io/api/789/security/?sentry_key=${SENTRY_PUBLIC_KEY}`,
+    ]);
+  });
+
+  it.each([
+    "not a url",
+    `http://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456`,
+    "https://o123.ingest.us.sentry.io/456",
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/project`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/prefix/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456/extra`,
+    "https://short@o123.ingest.us.sentry.io/456",
+    `https://${SENTRY_PUBLIC_KEY};x@o123.ingest.us.sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io;script-src/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io:8443/456`,
+    // Only Sentry's hosted ingest hosts: the read-only E2E guard ignores CSP
+    // report POSTs to those hosts and would block any other.
+    `https://${SENTRY_PUBLIC_KEY}@telemetry.example/456`,
+    `https://${SENTRY_PUBLIC_KEY}@sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.eu.sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io.example/456`,
+  ])(
+    "ignores a Sentry DSN that cannot form a safe report endpoint: %s",
+    (dsn) => {
+      const options = { sentryDsn: dsn };
+
+      expect(getContentSecurityPolicy(options)).not.toContain("report-uri");
+      expect(getHeaderValue("Reporting-Endpoints", options)).toBeUndefined();
+    }
+  );
+
+  it("lets the page load its own web app manifest and nothing else", () => {
+    expect(
+      getDirectiveSources(getContentSecurityPolicy(), "manifest-src")
+    ).toEqual(["'self'"]);
+  });
+
   it("allows passive artwork previews only from the two archive buckets without broadening active content", () => {
     const policy = getContentSecurityPolicy();
     const mediaSrc = getDirectiveSources(policy, "media-src");
@@ -146,6 +270,28 @@ describe("createSecurityHeaders CSP", () => {
         "script-src"
       )
     ).toContain("'unsafe-eval'");
+  });
+
+  it("adds wasm-unsafe-eval only when encrypted messages need WebAssembly", () => {
+    const defaultSources = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "script-src"
+    );
+    expect(defaultSources).not.toContain("'wasm-unsafe-eval'");
+
+    const e2eeSources = getDirectiveSources(
+      getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+      "script-src"
+    );
+    expect(e2eeSources).toContain("'wasm-unsafe-eval'");
+    // WebAssembly compilation must not widen JavaScript eval.
+    expect(e2eeSources).not.toContain("'unsafe-eval'");
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+        "connect-src"
+      )
+    ).not.toContain("'wasm-unsafe-eval'");
   });
 
   it("keeps inline script and style exceptions explicit", () => {

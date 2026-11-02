@@ -35,6 +35,7 @@ const context = {
     status: "ACTIVE",
     competition_id: "comp",
     wave_id: "wave",
+    submitter: { id: "author", handle: "Alice" },
   },
   vote_summary: {
     rating: 39,
@@ -67,6 +68,7 @@ beforeEach(() => {
     awards: [],
     original: {
       id: "drop",
+      author: context.entry.submitter,
       wave: { id: "wave" },
       parts: [{ content: "Immutable art" }],
       context_profile_context: { rating: 0 },
@@ -109,20 +111,23 @@ it("preserves scoped awards on hydrated winner cards", async () => {
     rep_category: null,
     amount: null,
   };
-  jest
-    .mocked(fetchCompetitionEntryDrop)
-    .mockResolvedValue({
-      ...context,
-      entry: {
-        ...context.entry,
-        status: "WINNER",
-        rank: 1,
-        won_at: 100,
-        decision_id: "decision",
-      },
-      awards: [award],
-      original: { id: "drop", wave: { id: "wave" }, parts: [] },
-    } as never);
+  jest.mocked(fetchCompetitionEntryDrop).mockResolvedValue({
+    ...context,
+    entry: {
+      ...context.entry,
+      status: "WINNER",
+      rank: 1,
+      won_at: 100,
+      decision_id: "decision",
+    },
+    awards: [award],
+    original: {
+      id: "drop",
+      author: context.entry.submitter,
+      wave: { id: "wave" },
+      parts: [],
+    },
+  } as never);
   const { result } = setup();
   await waitFor(() => expect(result.current[0]?.isSuccess).toBe(true));
   expect(result.current[0]?.data?.drop.winning_context?.awards).toEqual([

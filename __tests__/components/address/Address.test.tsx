@@ -76,6 +76,15 @@ describe("Address component", () => {
     expect(screen.getByText("d.eth")).toBeInTheDocument();
   });
 
+  it("renders consolidated display text as text, not markup", () => {
+    const display = '<img src="x" onerror="alert(1)"> a.eth';
+    const { container } = render(
+      <Address wallets={["0x1", "0x2"]} display={display} isUserPage />
+    );
+    expect(screen.getAllByText(display).length).toBeGreaterThan(0);
+    expect(container.querySelector('img[src="x"]')).toBeNull();
+  });
+
   it("shows rank tag when expandedTags true", () => {
     render(
       <Address

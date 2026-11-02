@@ -93,20 +93,26 @@ describe("buildMediaUrl", () => {
 });
 
 describe("buildLiveUrl", () => {
-  it("builds flagship live viewer URLs", () => {
+  it("builds flagship generator URLs", () => {
     expect(buildLiveUrl({ tokenId: "99" })).toBe(
-      "https://live.artblocks.io/token/flagship-99"
+      "https://generator.artblocks.io/99"
     );
   });
 
-  it("builds contract live viewer URLs", () => {
+  it("builds contract generator URLs", () => {
     expect(
       buildLiveUrl({
-        contract: "0x1234567890abcdef1234567890abcdef12345678",
+        contract: "0x1234567890ABCDEF1234567890abcdef12345678",
         tokenId: "99",
       })
     ).toBe(
-      "https://live.artblocks.io/token/0x1234567890abcdef1234567890abcdef12345678-99"
+      "https://generator.artblocks.io/0x1234567890abcdef1234567890abcdef12345678/99"
+    );
+  });
+
+  it("ignores an invalid contract", () => {
+    expect(buildLiveUrl({ contract: "not-a-contract", tokenId: "99" })).toBe(
+      "https://generator.artblocks.io/99"
     );
   });
 });

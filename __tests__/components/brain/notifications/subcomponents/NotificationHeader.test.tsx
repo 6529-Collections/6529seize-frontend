@@ -50,6 +50,41 @@ jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
 }));
 
 describe("NotificationHeader", () => {
+  it("renders an unlinked fallback for historical notifications without a profile target", () => {
+    render(
+      <NotificationHeader
+        author={
+          { id: "missing" } as ComponentProps<
+            typeof NotificationHeader
+          >["author"]
+        }
+      >
+        <span>posted</span>
+      </NotificationHeader>
+    );
+    expect(screen.getByText("Unknown profile")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+  it("keeps anonymous notification authors unlinked and hides profile actions", () => {
+    const author = {
+      id: "anonymous-entry-author",
+      handle: "Anonymous",
+      pfp: "ipfs://gelato",
+      is_anonymous: true,
+    } as ComponentProps<typeof NotificationHeader>["author"];
+    render(
+      <NotificationHeader author={author} actions={<button>Follow</button>}>
+        <span>posted</span>
+      </NotificationHeader>
+    );
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.getByText("posted")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Follow" })
+    ).not.toBeInTheDocument();
+  });
   it("prefers the 6529 resolver and falls back to ipfs.io on failure", () => {
     render(
       <NotificationHeader

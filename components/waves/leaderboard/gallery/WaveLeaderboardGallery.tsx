@@ -24,6 +24,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardGalleryProps {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly isVotingClosed?: boolean | undefined;
@@ -48,6 +49,7 @@ const SORT_ANIMATION_KEYS: Record<WaveDropsLeaderboardSort, number> = {
 };
 
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
+  additionalActionOnly = false,
   wave,
   sort,
   isVotingClosed = false,
@@ -81,6 +83,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
     isFetchNextPageError,
     isFetchPreviousPageError,
   } = useWaveDropsLeaderboard({
+    additionalActionOnly,
     waveId: wave.id,
     sort,
     maxPages: WAVE_DROPS_LEADERBOARD_MAX_PAGES,
@@ -132,9 +135,14 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
       );
     }
     return (
-      <div className="tw-flex tw-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-500">
-        {t(locale, "waves.leaderboard.empty")}
-      </div>
+      <output className="tw-block tw-p-6 tw-text-sm tw-font-light tw-text-iron-500">
+        {t(
+          locale,
+          additionalActionOnly
+            ? "memes.additionalAction.empty"
+            : "waves.leaderboard.empty"
+        )}
+      </output>
     );
   }
 
