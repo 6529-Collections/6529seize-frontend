@@ -42,7 +42,7 @@ function readData(
 }
 
 function mockClaim(data: ReturnType<typeof readData>) {
-  // Keep the exact same data reference, as unchanged background reads do.
+  // Reads retain this data reference until the test supplies a replacement.
   mockRead.mockReturnValue({ data, isFetching: false, error: null, refetch });
 }
 
@@ -93,6 +93,9 @@ test("advances an ended allowlist to the next phase and waits for its onchain co
   const [phase0, phase1] = buildMemesPhases(
     Time.fromString("2024-07-03T00:00:00Z")
   );
+  if (!phase0 || !phase1) {
+    throw new Error("The mint schedule must include Phase 0 and Phase 1");
+  }
   jest.setSystemTime(phase0.start.toMillis() - 500);
   mockClaim(
     readData(
@@ -151,6 +154,30 @@ test("advances an ended allowlist to the next phase and waits for its onchain co
       showMintBtn: true,
     },
   });
+});
+
+test("keeps one boundary timer while active and stops it when the claim ends", () => {
+  mockClaim(readData(150, 200));
+  const { result } = renderHook(() =>
+    useManifoldClaim({ ...options, proxy: "0x2", abi: [], identifier: 1 })
+  );
+  expect(jest.getTimerCount()).toBe(1);
+  expect(mockRead.mock.lastCall?.[0].query.refetchInterval).toBe(10_000);
+
+  act(() => jest.advanceTimersByTime(500));
+  expect(result.current.claim?.status).toBe("active");
+  expect(jest.getTimerCount()).toBe(1);
+  expect(mockRead.mock.lastCall?.[0].query.refetchInterval).toBe(5_000);
+
+  act(() => jest.advanceTimersByTime(50_000));
+  expect(result.current.claim?.status).toBe("ended");
+  expect(result.current.claim?.isFinalized).toBe(true);
+  expect(jest.getTimerCount()).toBe(0);
+  expect(mockRead.mock.lastCall?.[0].query.refetchInterval).toBe(10_000);
+  expect(mockRead.mock.lastCall?.[0].query.enabled).toBe(false);
+  act(() => jest.runOnlyPendingTimers());
+  expect(jest.getTimerCount()).toBe(0);
+  expect(refetch).not.toHaveBeenCalled();
 });
 
 test("catches up after hidden time and cancels boundary timers on unmount", () => {
