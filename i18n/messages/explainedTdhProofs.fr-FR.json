@@ -9,7 +9,7 @@
   "explained.tdh.proofs.verdict.retired": "règles {version}, retirées",
   "explained.tdh.proofs.verdict.body": "Le programme A, le code propre du validateur, a calculé la journée du {date} sous les règles retirées {version} et l'a prouvée : le vérificateur SP1 de mainnet accepte la preuve en un appel en lecture seule. Un GPU a travaillé {hours} h {minutes} min pour prouver ce que le même code calcule en {seconds} s.",
   "explained.tdh.proofs.verdict.bodyB": "Le programme B, écrit séparément, a exécuté la même journée et obtenu les mêmes mots, sauf l'ancre. Il ne les a pas prouvés.",
-  "explained.tdh.proofs.verdict.limitTitle": "Vous ne pouvez pas encore refaire cet appel.",
+  "explained.tdh.proofs.verdict.limitTitle": "Vous ne pouvez pas encore refaire l'appel sur mainnet.",
   "explained.tdh.proofs.verdict.limitBody": "Le fichier de preuve et les programmes sont privés jusqu'à ce que le propriétaire les publie (D116) ; le contrat qui enregistrerait une journée est construit, testé sur une copie locale de mainnet et non déployé ({decision}).",
   "explained.tdh.proofs.verdict.toWords": "Lire les {words} mots",
   "explained.tdh.proofs.verdict.toGuarantees": "Ce que garantit une preuve",

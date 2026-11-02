@@ -9,7 +9,7 @@
   "explained.tdh.proofs.verdict.retired": "Regeln {version}, außer Dienst",
   "explained.tdh.proofs.verdict.body": "Programm A, der eigene Code des Validators, rechnete den Tag des {date} unter den außer Dienst gestellten Regeln {version} und bewies ihn: Der SP1-Verifier von Mainnet akzeptiert den Beweis in einem reinen Leseaufruf. Eine GPU arbeitete {hours} h {minutes} min, um zu beweisen, was derselbe Code in {seconds} s berechnet.",
   "explained.tdh.proofs.verdict.bodyB": "Programm B, getrennt geschrieben, hat denselben Tag ausgeführt und dieselben Wörter erhalten, bis auf den Anker. Bewiesen hat es sie nicht.",
-  "explained.tdh.proofs.verdict.limitTitle": "Diesen Aufruf können Sie noch nicht wiederholen.",
+  "explained.tdh.proofs.verdict.limitTitle": "Den Mainnet-Aufruf können Sie noch nicht wiederholen.",
   "explained.tdh.proofs.verdict.limitBody": "Die Beweisdatei und die Programme sind privat, bis der Eigentümer sie veröffentlicht (D116); der Vertrag, der einen Tag festhalten würde, ist gebaut, auf einer lokalen Kopie von Mainnet getestet und nicht bereitgestellt ({decision}).",
   "explained.tdh.proofs.verdict.toWords": "Die {words} Wörter lesen",
   "explained.tdh.proofs.verdict.toGuarantees": "Was ein Beweis garantiert",

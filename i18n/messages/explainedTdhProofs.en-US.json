@@ -9,7 +9,7 @@
   "explained.tdh.proofs.verdict.retired": "rules {version}, retired",
   "explained.tdh.proofs.verdict.body": "Program A, the validator's own code, ran the day of {date} under the retired {version} rules and proved it: mainnet's SP1 verifier accepts the proof in a read-only call. One GPU worked {hours} h {minutes} min to prove what the same code computes in {seconds} s.",
   "explained.tdh.proofs.verdict.bodyB": "Program B, written separately, ran the same day and got the same words, all but the anchor. It has not proved them.",
-  "explained.tdh.proofs.verdict.limitTitle": "You cannot repeat that call yet.",
+  "explained.tdh.proofs.verdict.limitTitle": "You cannot repeat the mainnet call yet.",
   "explained.tdh.proofs.verdict.limitBody": "The proof file and the programs are private until the owner publishes them (D116); the contract that would record a day is built, tested on a local copy of mainnet, and not deployed ({decision}).",
   "explained.tdh.proofs.verdict.toWords": "Read the {words} words",
   "explained.tdh.proofs.verdict.toGuarantees": "What a proof guarantees",

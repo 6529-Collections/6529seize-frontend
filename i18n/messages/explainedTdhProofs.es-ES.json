@@ -9,7 +9,7 @@
   "explained.tdh.proofs.verdict.retired": "reglas {version}, retiradas",
   "explained.tdh.proofs.verdict.body": "El programa A, el código propio del validador, ejecutó el día del {date} bajo las reglas retiradas {version} y lo probó: el verificador SP1 de mainnet acepta la prueba en una llamada de solo lectura. Una GPU trabajó {hours} h {minutes} min para probar lo que el mismo código calcula en {seconds} s.",
   "explained.tdh.proofs.verdict.bodyB": "El programa B, escrito por separado, ejecutó el mismo día y obtuvo las mismas palabras, salvo el ancla. No las ha probado.",
-  "explained.tdh.proofs.verdict.limitTitle": "Aún no puede repetir esa llamada.",
+  "explained.tdh.proofs.verdict.limitTitle": "Aún no puede repetir la llamada a mainnet.",
   "explained.tdh.proofs.verdict.limitBody": "El archivo de la prueba y los programas son privados hasta que el propietario los publique (D116); el contrato que registraría un día está construido, probado en una copia local de mainnet y no desplegado ({decision}).",
   "explained.tdh.proofs.verdict.toWords": "Leer las {words} palabras",
   "explained.tdh.proofs.verdict.toGuarantees": "Qué garantiza una prueba",

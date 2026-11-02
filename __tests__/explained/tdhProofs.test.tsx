@@ -337,7 +337,7 @@ describe("the page's sections", () => {
     expect(container.querySelector('[data-verdict="halfpair"]')).not.toBeNull();
     expect(container.querySelector('[data-halfpair="10"]')).not.toBeNull();
     expect(
-      screen.getByText("You cannot repeat that call yet.")
+      screen.getByText("You cannot repeat the mainnet call yet.")
     ).toBeInTheDocument();
     // three computations of the total agree
     expect(container.querySelectorAll('[data-relation="equal"]')).toHaveLength(
