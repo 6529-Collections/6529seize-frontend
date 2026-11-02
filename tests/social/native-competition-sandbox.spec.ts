@@ -5387,10 +5387,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       context_profile_context: {
         ...overview.context_profile_context,
         subscribed: true,
-        pinned: false,
+        pinned: index === 44,
         followed_subwaves_count: 0,
       },
     }));
+    await page.route("**/api/v2/waves?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("pinned") !== "PINNED") {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        json: { data: [joined[44]], page: 1, next: false },
+      });
+    });
     let failContinuation = true;
     const requested: string[] = [];
     const offsets = new Map([
@@ -5471,6 +5481,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(0);
     };
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await page
+      .getByRole("button", { name: "Pinned", exact: true })
+      .filter({ visible: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: "Joined wave 45", exact: true })
+    ).toBeVisible();
     await selectJoined();
     const more = page.getByRole("button", {
       name: "Load more joined waves",
@@ -5482,6 +5499,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(retry).toBeVisible({ timeout: 30000 });
+    // The pin belongs to the final joined batch. It must not extend the first
+    // batch or make the list look complete while the continuation has failed.
+    await expect(
+      page.getByRole("link", { name: "Joined wave 45", exact: true })
+    ).toHaveCount(0);
     await expect(
       page
         .getByRole("status")

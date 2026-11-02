@@ -59,6 +59,9 @@ Wave and DM rows in the left list control which thread is open.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
   unmuted subwaves. Muting a wave removes its own activity from the ordering.
+- In `Joined`, pinned waves appear when their batch loads in activity order.
+  Older pins do not appear ahead of unloaded joined waves. Use `Pinned` to see
+  saved pins without loading more of `Joined`.
 - More joined waves load near the bottom. `Load more joined waves` is also
   available below the loaded rows. If loading fails, the existing rows stay
   available and `Retry` resumes loading. An expired list refreshes automatically
