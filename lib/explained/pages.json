@@ -23,6 +23,11 @@
           "name": "loop-votes",
           "clicks": ["[data-step=\"4\"]"],
           "el": "[data-lens=\"loop\"]"
+        },
+        {
+          "name": "licence-break-punk",
+          "clicks": ["[data-break=\"punk\"]"],
+          "el": "[data-lens=\"licence\"]"
         }
       ]
     },
@@ -68,6 +73,11 @@
           "name": "explain-new-buyer",
           "clicks": ["[data-pick=\"new\"]"],
           "el": "#your-number"
+        },
+        {
+          "name": "squash-break-minting",
+          "clicks": ["[data-break=\"minting\"]"],
+          "el": "[data-lens=\"squash\"]"
         }
       ]
     },
@@ -134,6 +144,11 @@
           "name": "totals-break-wallets",
           "clicks": ["[data-break=\"wallets\"]"],
           "el": "[data-lens=\"totals\"]"
+        },
+        {
+          "name": "trace-edition-rarest",
+          "clicks": ["[data-lens=\"trace\"] [data-edition]:nth-child(2)"],
+          "el": "#steps"
         }
       ]
     },

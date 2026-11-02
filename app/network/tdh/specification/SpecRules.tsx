@@ -111,7 +111,21 @@ function Section1({ ctx }: { readonly ctx: SpecContext }) {
       label={m("explained.tdh.spec.s1.label")}
       title={m("explained.tdh.spec.s1.heading")}
     >
-      <Prose>{m("explained.tdh.spec.s1.body")}</Prose>
+      {/* The two terms the page leans on, set as defined terms. */}
+      <Prose>
+        {m("explained.tdh.spec.s1.body", {
+          noResult: (
+            <b className="tw-font-semibold tw-text-iron-50">
+              {s("explained.tdh.spec.s1.noResult")}
+            </b>
+          ),
+          refusedWhole: (
+            <b className="tw-font-semibold tw-text-iron-50">
+              {s("explained.tdh.spec.s1.refusedWhole")}
+            </b>
+          ),
+        })}
+      </Prose>
       {registry && (
         <CodeBlock
           className="tw-mt-5"
