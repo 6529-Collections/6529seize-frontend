@@ -20,7 +20,6 @@ export interface WaveEligibility {
   authenticated_user_eligible_to_vote: boolean;
   authenticated_user_eligible_to_participate: boolean;
   authenticated_user_admin: boolean;
-  lastUpdated: number;
 }
 
 interface WaveEligibilityContextType {
@@ -80,9 +79,7 @@ const changesEligibility = (
 ): boolean => {
   if (!current) return true;
   return Object.entries(update).some(
-    ([key, value]) =>
-      key !== "lastUpdated" &&
-      !Object.is(current[key as keyof WaveEligibility], value)
+    ([key, value]) => !Object.is(current[key as keyof WaveEligibility], value)
   );
 };
 
@@ -93,15 +90,15 @@ export const WaveEligibilityProvider: React.FC<
     Record<string, WaveEligibility>
   >({});
   const refreshingRef = useRef<Set<string>>(new Set());
-  // When server eligibility was last confirmed, even if it did not change.
+  // When the server last confirmed each wave's eligibility, changed or not.
+  // The only freshness record: kept out of state so confirmations alone do
+  // not re-render consumers. One entry per visited wave, like `eligibility`.
   const confirmedAtRef = useRef<Map<string, number>>(new Map());
 
   const updateEligibility = useCallback(
     (waveId: string, newEligibility: EligibilityUpdate) => {
-      const isRawUpdate = updatesRawEligibility(newEligibility);
-      const now = Date.now();
-      if (isRawUpdate) {
-        confirmedAtRef.current.set(waveId, now);
+      if (updatesRawEligibility(newEligibility)) {
+        confirmedAtRef.current.set(waveId, Date.now());
       }
 
       setEligibility((prev) => {
@@ -111,11 +108,7 @@ export const WaveEligibilityProvider: React.FC<
         }
         return {
           ...prev,
-          [waveId]: {
-            ...current,
-            ...newEligibility,
-            lastUpdated: isRawUpdate ? now : (current?.lastUpdated ?? 0),
-          } as WaveEligibility,
+          [waveId]: { ...current, ...newEligibility } as WaveEligibility,
         };
       });
     },
@@ -130,8 +123,7 @@ export const WaveEligibilityProvider: React.FC<
       }
 
       // Check if data is recent (less than 5 minutes old)
-      const confirmedAt =
-        confirmedAtRef.current.get(waveId) ?? eligibility[waveId]?.lastUpdated;
+      const confirmedAt = confirmedAtRef.current.get(waveId);
       if (
         confirmedAt !== undefined &&
         Date.now() - confirmedAt < ELIGIBILITY_FRESH_MS
@@ -168,7 +160,7 @@ export const WaveEligibilityProvider: React.FC<
         refreshingRef.current.delete(waveId);
       }
     },
-    [eligibility, updateEligibility]
+    [updateEligibility]
   );
 
   const getEligibility = useCallback(
