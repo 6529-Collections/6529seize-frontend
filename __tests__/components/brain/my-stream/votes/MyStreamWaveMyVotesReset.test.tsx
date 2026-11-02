@@ -1,4 +1,5 @@
 import {
+  act,
   render,
   screen,
   fireEvent,
@@ -124,6 +125,10 @@ test("shows wave available votes when provided", () => {
 
   expect(screen.getByText(/Available in wave/)).toBeInTheDocument();
   expect(screen.getByText("10,463")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /^Reset / })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Select all" })).toBeEnabled();
 });
 
 test("hides available votes when missing", () => {
@@ -376,3 +381,66 @@ test.each([
     ).not.toBeInTheDocument();
   }
 );
+
+test("keeps reset progress visible until completion when the last selection disappears", async () => {
+  let finishReset: (() => void) | undefined;
+  useMutationMock.mockReturnValue({
+    mutateAsync: () =>
+      new Promise<void>((resolve) => {
+        finishReset = resolve;
+      }),
+  });
+  const props = {
+    waveId: "wave-1",
+    allItemsSelected: false,
+    toolbarContent: <button type="button">Your vote amount</button>,
+    onToggleSelectAll: jest.fn(),
+    removeSelected: jest.fn(),
+    onResettingChange: jest.fn(),
+  };
+  const { rerender } = render(
+    <AuthContext.Provider value={auth}>
+      <MyStreamWaveMyVotesReset
+        {...props}
+        haveDrops
+        selected={new Set(["a"])}
+      />
+    </AuthContext.Provider>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Reset 1 vote" }));
+  const dialog = await screen.findByRole("dialog", { name: "Reset 1 vote?" });
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset vote" }));
+  await waitFor(() => expect(finishReset).toBeDefined());
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  );
+
+  rerender(
+    <AuthContext.Provider value={auth}>
+      <MyStreamWaveMyVotesReset
+        {...props}
+        haveDrops={false}
+        selected={new Set()}
+      />
+    </AuthContext.Provider>
+  );
+  expect(screen.getByRole("button", { name: "Reset votes" })).toBeDisabled();
+  expect(screen.getByText("Resetting…")).toBeInTheDocument();
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-is-resetting",
+    "true"
+  );
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-total-count",
+    "1"
+  );
+
+  await act(async () => finishReset?.());
+  expect(
+    screen.queryByRole("button", { name: /^Reset / })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Your vote amount" })
+  ).toBeEnabled();
+  expect(props.onResettingChange).toHaveBeenLastCalledWith(false);
+});

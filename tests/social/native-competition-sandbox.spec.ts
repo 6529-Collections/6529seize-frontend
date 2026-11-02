@@ -2373,7 +2373,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
       const createStyle = await page
         .getByRole("button", { name: "Open create menu", exact: true })
         .evaluate((button) => {
@@ -2392,7 +2392,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             ].map((property) => [property, style.getPropertyValue(property)])
           );
         });
-      for (const name of ["Select all", "Reset votes"]) {
+      await selectAll.click();
+      for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
         for (const [property, value] of Object.entries(createStyle)) {
           await expect(
@@ -2404,7 +2405,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
         );
       }
-      await selectAll.click();
       await expect(
         panel.getByRole("button", { name: "Deselect all", exact: true })
       ).toBeVisible();
@@ -2427,7 +2427,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await panel
         .getByRole("button", { name: "Deselect all", exact: true })
         .click();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("my-votes-full-width.png"),
@@ -2661,9 +2661,38 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "Select all",
       exact: true,
     });
-    const reset = panel.getByRole("button", {
-      name: "Reset votes",
-      exact: true,
+    const reset = panel.getByRole("button", { name: /^Reset / });
+    await expect(reset).toHaveCount(0);
+    const sortBeforeSelection = (await sort.boundingBox())!;
+    const selectBeforeSelection = (await selectAll.boundingBox())!;
+    const firstCheckbox = panel
+      .getByRole("article")
+      .first()
+      .getByRole("checkbox");
+    await firstCheckbox.check();
+    await expect(reset).toBeEnabled();
+    const selectedCount = panel
+      .getByRole("status")
+      .filter({ hasText: "1 selected" });
+    await expect(selectedCount).toHaveText("1 selected");
+    const resetBounds = (await reset.boundingBox())!;
+    const countBounds = (await selectedCount.boundingBox())!;
+    expect(
+      Math.abs(
+        resetBounds.y +
+          resetBounds.height / 2 -
+          countBounds.y -
+          countBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
+    expect((await sort.boundingBox())!.x).toBe(sortBeforeSelection.x);
+    expect((await sort.boundingBox())!.y).toBe(sortBeforeSelection.y);
+    expect((await selectAll.boundingBox())!.x).toBe(selectBeforeSelection.x);
+    expect((await selectAll.boundingBox())!.y).toBe(selectBeforeSelection.y);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-selected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
     });
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
       const controls = await Promise.all([
@@ -2695,6 +2724,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page.keyboard.press("Escape");
       await expect(sortOptions).toHaveCount(0);
     }
+    await firstCheckbox.uncheck();
+    await expect(reset).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-unselected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
     await sort.focus();
     await sort.press(isMobile ? "Enter" : "ArrowDown");
     await expect(
@@ -2804,9 +2840,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 51"
     );
-    await expect(
-      panel.getByRole("button", { name: "Reset votes", exact: true })
-    ).toBeDisabled();
+    await expect(panel.getByRole("button", { name: /^Reset / })).toHaveCount(0);
     await edited.getByRole("checkbox").check();
     await panel
       .getByRole("button", { name: "Reset 1 vote", exact: true })
@@ -2816,6 +2850,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Reset vote", exact: true })
       .click();
     await expect(edited).toHaveCount(0);
+    await expect(reset).toHaveCount(0);
     await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
     expect(mutations).toEqual([99, 0]);
     if ((page.viewportSize()?.width ?? 0) < 1024) {

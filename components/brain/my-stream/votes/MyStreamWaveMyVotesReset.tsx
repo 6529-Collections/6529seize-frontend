@@ -144,7 +144,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     void handleReset();
   };
 
-  const showResetControls = haveDrops && !isVotingClosed;
+  const showResetControls = (haveDrops && !isVotingClosed) || isResetting;
   if (
     !showResetControls &&
     (toolbarContent === undefined || toolbarContent === null)
@@ -173,6 +173,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4">
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+            {toolbarContent}
             {showResetControls && (
               <>
                 <button
@@ -190,27 +191,30 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                     )}
                   </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={handleResetClick}
-                  className={buttonClassName}
-                  disabled={!selectedCount || isResetting}
-                  aria-label={resetButtonAriaLabel}
-                >
-                  <span className={COMPACT_ACTION_CONTENT_CLASS}>
-                    {isResetting
-                      ? t(locale, "waves.myVotes.resetting")
-                      : resetButtonLabel}
-                  </span>
-                </button>
-                {selectedCount > 0 && (
-                  <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
-                    {selectedLabel}
-                  </output>
+                {(selectedCount > 0 || isResetting) && (
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <button
+                      type="button"
+                      onClick={handleResetClick}
+                      className={buttonClassName}
+                      disabled={isResetting}
+                      aria-label={resetButtonAriaLabel}
+                    >
+                      <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                        {isResetting
+                          ? t(locale, "waves.myVotes.resetting")
+                          : resetButtonLabel}
+                      </span>
+                    </button>
+                    {selectedCount > 0 && (
+                      <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
+                        {selectedLabel}
+                      </output>
+                    )}
+                  </div>
                 )}
               </>
             )}
-            {toolbarContent}
           </div>
           {typeof availableVotes === "number" && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500">
