@@ -1,3 +1,6 @@
+jest.mock("@/app/waves/public-wave-drop.server", () => ({
+  fetchPublicWaveDrop: jest.fn().mockResolvedValue(null),
+}));
 import WavesPage, { generateMetadata } from "@/app/waves/page";
 import { redirect } from "next/navigation";
 import {

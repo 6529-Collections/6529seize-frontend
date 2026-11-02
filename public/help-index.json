@@ -5,6 +5,20 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.selected-post-preview",
+      "kind": "workflow",
+      "title": "Read a selected public Wave post without JavaScript",
+      "aliases": ["selected drop preview", "public drop link"],
+      "keywords": ["waves", "drop", "serialNo", "preview", "JavaScript"],
+      "facts": [
+        "Without JavaScript, a public Wave link containing drop or serialNo shows the selected post's author, UTC publication date, text, images and links to other media instead of the latest feed. Storm previews include at most ten parts.",
+        "Private, direct-message, moderated, unavailable and wrong-wave posts have no public post preview. The preview never uses wallet-only access. Interactive post overlays still require connecting a wallet."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "preview"],
+      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+    },
+    {
       "id": "waves.artist-submissions-popup",
       "kind": "ui_affordance",
       "title": "Artist Submissions popup and Additional Action badge",
@@ -1216,6 +1230,9 @@
         "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "The matching desktop OS expands automatically when detected; phones, tablets and unknown devices start collapsed. Expand Windows, macOS or Linux to see versions and download installers directly. Arweave mirrors appear when published. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
+        "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
+        "Versions and installer links are feed-driven and update without a frontend deployment. If one feed is unavailable, other downloads remain usable and Try again retries the failed requests.",
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
@@ -5708,6 +5725,7 @@
       "keywords": ["mobile", "app", "banner", "open", "install", "dismiss"],
       "facts": [
         "A dismissible 6529 Mobile banner above the small-screen mobile website header offers Open and Get the app. It is hidden inside 6529 Mobile and 6529 Desktop and on authentication, access, app-wallet and handoff routes.",
+        "Supported iOS website links on staging.6529.io are associated with 6529 Staging; production website links use the production app. Whether a link opens in the app depends on installation and iOS link preferences.",
         "Open attempts to launch the current wave, drop, profile or supported page directly in the app, preserving query parameters and fragments. Browser authentication is not transferred; app access and regional restrictions still apply.",
         "Dismissing the banner hides it for seven days in the same browser, including reloads and visits. Clearing website data resets it; blocked storage permits only in-memory dismissal.",
         "Get the app opens the App Store on iOS or Google Play on Android. After installation, return to the browser page and tap Open to reach the destination; installation alone does not preserve it through the store.",
@@ -5719,6 +5737,7 @@
       "source_refs": [
         "components/mobile-app/MobileAppBanner.tsx",
         "helpers/mobileAppLinks.ts",
+        "helpers/appleAppSiteAssociation.ts",
         "hooks/useMobileAppBannerDismissal.ts",
         "ops/docs/navigation/feature-mobile-app-landing.md"
       ]
@@ -7241,9 +7260,6 @@
         "read drop",
         "drop display",
         "drop media",
-        "show more",
-        "show less",
-        "long post",
         "ordered list",
         "numbered list"
       ],
@@ -7255,17 +7271,12 @@
         "media",
         "text",
         "markdown",
-        "preview",
-        "expand",
-        "collapse",
         "list",
         "numbered"
       ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
-        "Long Wave and direct-message timeline posts start as a short plain-text preview. Select Show more for the complete markdown body and Show less to shorten it again.",
-        "Expanding or collapsing a long post keeps the reader's place in the reverse-scrolling chat. Short posts and single-drop views remain fully visible.",
-        "Media and file attachments outside the text body remain visible while a long text preview is collapsed. Content display is separate from composer submission behavior.",
+        "Content display is separate from composer submission behavior.",
         "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
@@ -7884,6 +7895,7 @@
       ],
       "facts": [
         "Individual Meme Card pages live at /the-memes/{id}.",
+        "Timeline videos start paused; use the Play control to watch them. Main artwork playback is unchanged. Timeline previews try the recorded media URL first. Failed Arweave previews can use alternate gateways for that same historical file. They never substitute the card's current artwork or infer an Arweave archive for a file without a recorded Arweave reference. Historical animations use their own before/after formats, so removed videos remain videos. If the format is missing, Arweave previews check that historical file's content type through supported HTTPS gateways and keep an Open link if it cannot be identified. Other sources without a historical format keep the Open link without an automatic header request. Open links support HTTP and HTTPS; native Arweave references open through a matching gateway. Malformed or unsupported media URLs show preview unavailable text instead of a link. Current artwork uses the current card's media and format.",
         "On desktop, the artwork stays in the left column while the adjacent card details scroll. It stops at the end of that section, before the tabs. On smaller screens the artwork scrolls normally with the page.",
         "Meme Card market actions sit in a bordered panel at every screen size. When a wallet connection is required, the existing guidance and white Connect wallet lead the panel, separated from the trading actions by a divider. Connect fills its own row in narrow panels. Collect keeps its complete label and price visible in its 44px button; Make an offer uses the remaining width and can truncate visually. The square more-actions menu stays alongside. In very narrow panels, Collect fills its own row above Make an offer and the menu. The bottom bar also keeps the complete Collect label visible. When Collect is present, the available List action moves into that menu. Without Collect, Make an offer shares the row with List when available, or fills both labelled slots otherwise. Delivery controls appear below when a wallet is connected. Review offers remains available in that menu. View listings & offers has its own navigation row below Supply details & rankings and still opens the existing market tab. Make an offer and List keep their tertiary button treatment. All actions share one panel background. Disabled Collect stays dimmed blue and non-interactive in both the panel and the bottom bar. Below 1024px the bottom bar starts after the desktop left rail when visible; on phones it spans the screen. The purchase review, action availability and wallet requirements are unchanged.",
         "On phones and tablets, the latest Meme Card's countdown and Subscription Minting panel appear above the artwork. Ownership, format switching and media actions stay below the artwork. Below 1024px, tabs stay at the top while scrolling. Below 1024px, when inline market actions are off screen, a bottom bar repeats the available Collect and Make an offer actions above app navigation. While listings are selected in the active Listings & offers tab, the selection review bar takes its place; the card actions return when selection is cleared or another tab opens. Delivery, owner actions and the additional-actions menu remain available in the inline section.",
@@ -8105,6 +8117,7 @@
       "keywords": ["meme", "lab", "card", "tabs", "distribution"],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
+        "Timeline videos start paused; use the Play control to watch them. Main artwork playback is unchanged. Timeline previews try the recorded media URL first. Failed Arweave previews can use alternate gateways for that same historical file. They never substitute the card's current artwork or infer an Arweave archive for a file without a recorded Arweave reference. Historical animations use their own before/after formats, so removed videos remain videos. If the format is missing, Arweave previews check that historical file's content type through supported HTTPS gateways and keep an Open link if it cannot be identified. Other sources without a historical format keep the Open link without an automatic header request. Open links support HTTP and HTTPS; native Arweave references open through a matching gateway. Malformed or unsupported media URLs show preview unavailable text instead of a link. Current artwork uses the current card's media and format.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
         "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top.",
         "Meme Lab cards use the same marketplace controls as The Memes. Collect shows the lowest supported listing and Other listings exposes alternatives. Make an offer opens a WETH offer for the exact card. List requires the wallet holding the editions. In Listings & offers, Collect selects an exact listing and Sell opens an eligible offer; orders sharing a price require an explicit choice. Edition quantities are supported. Collection-wide and trait offers are checked for this exact Meme Lab card before review.",
