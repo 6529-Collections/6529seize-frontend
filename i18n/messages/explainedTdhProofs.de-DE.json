@@ -192,7 +192,7 @@
   "explained.tdh.proofs.isNot.certificate": "Beweise neben dem täglichen Zertifikat der Validatoren. Die Validator-Software ist bei Version {version}, gebaut und im Test.",
   "explained.tdh.proofs.s6.label": "Was ein Beweis garantiert",
   "explained.tdh.proofs.s6.heading": "Jede Schicht stoppt eine Art von Fehler. Keine stoppt einen Fehler in den Regeln.",
-  "explained.tdh.proofs.s6.p1": "Wähle, was schiefgeht. Das Modell verfolgt es durch die Schichten, die ein Tag bis zur Aufzeichnung durchlaufen würde, und zeigt, wo es gestoppt wird, mit dem Test, der es zeigt. Die Schichten sind nicht die Reihenfolge des Vertrags: Er vergleicht die Ausgaben bei Prüfung {outputs} und verifiziert die Beweise bei Prüfung {proofs}. Der Vertrag ist gebaut und getestet, nicht bereitgestellt.",
+  "explained.tdh.proofs.s6.p1": "Wählen Sie, was schiefgeht. Das Modell verfolgt es durch die Schichten, die ein Tag bis zur Aufzeichnung durchlaufen würde, und zeigt, wo es gestoppt wird, mit dem Test, der es zeigt. Die Schichten sind nicht die Reihenfolge des Vertrags: Er vergleicht die Ausgaben bei Prüfung {outputs} und verifiziert die Beweise bei Prüfung {proofs}. Der Vertrag ist gebaut und getestet, nicht bereitgestellt.",
   "explained.tdh.proofs.guard.label": "Was ein Beweis garantiert",
   "explained.tdh.proofs.guard.question": "Etwas geht schief. Was stoppt es?",
   "explained.tdh.proofs.guard.pick": "Was schiefgeht",

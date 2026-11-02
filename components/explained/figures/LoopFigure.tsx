@@ -56,18 +56,22 @@ const TOKEN_H = 38;
 function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
   // Wide enough for each station's name outside its circle, at 15 px, which
   // stays legible (12 px on a phone, 9 at 400% zoom) when the ring scales.
+  // Wider than tall, so a long name (German "Entscheiden") fits beside its
+  // circle on either side.
   const size = 320;
+  const width = 400;
   const c = size / 2;
+  const cx = width / 2;
   const r = 78;
   return (
     <svg
-      viewBox={`0 0 ${size} ${size}`}
-      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[320px]"
+      viewBox={`0 0 ${width} ${size}`}
+      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[400px]"
       aria-hidden="true"
       data-loop-mini=""
     >
       <circle
-        cx={c}
+        cx={cx}
         cy={c}
         r={r}
         fill="none"
@@ -75,7 +79,7 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
         strokeWidth={1.5}
       />
       <circle
-        cx={c}
+        cx={cx}
         cy={c}
         r={r + 24}
         fill="none"
@@ -83,7 +87,7 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
         strokeDasharray="3 6"
       />
       <circle
-        cx={c}
+        cx={cx}
         cy={c}
         r={30}
         fill={EX_HEX.panel}
@@ -91,7 +95,7 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
         strokeWidth={1.5}
       />
       <path
-        d={`M${c - 9} ${c}l6 6l12 -12`}
+        d={`M${cx - 9} ${c}l6 6l12 -12`}
         fill="none"
         stroke={EX_HEX.holds}
         strokeWidth={2}
@@ -100,7 +104,7 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
       />
       {stations.map((station, index) => {
         const angle = ((ANGLES[index] ?? 0) * Math.PI) / 180;
-        const x = round2(c + r * Math.cos(angle));
+        const x = round2(cx + r * Math.cos(angle));
         const y = round2(c + r * Math.sin(angle));
         const on = station.key === focus;
         return (
@@ -126,7 +130,7 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
             <MiniLabel
               name={station.name}
               angle={angle}
-              x={round2(c + (r + 34) * Math.cos(angle))}
+              x={round2(cx + (r + 34) * Math.cos(angle))}
               y={round2(c + (r + 34) * Math.sin(angle))}
               on={on}
             />

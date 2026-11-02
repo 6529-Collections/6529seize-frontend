@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
 import Mark from "@/components/explained/marks/Mark";
+import { Glyph } from "@/components/explained/marks/glyphs";
 import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
@@ -132,8 +133,14 @@ export default async function ImplementationsPage({
   );
   const programsFact = book.maybe("site.proofA.cycle");
   const code = (name: string) => <CodeName wrap>{name}</CodeName>;
+  // Every row of the "Proved as" column leads with a mark, so the column
+  // scans: the half pair, Proved, or a dotted ring for none.
   const notProved = (
-    <span className="tw-text-iron-400">
+    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-400">
+      <span
+        className="tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
+        aria-hidden="true"
+      />
       {s("explained.tdh.impl.notProved")}
     </span>
   );
@@ -316,10 +323,20 @@ export default async function ImplementationsPage({
                     runs: m("explained.tdh.impl.lean.runs", {
                       random: p.v("programs.randomPerChange"),
                     }),
-                    proved: m("explained.tdh.impl.lean.proved", {
-                      tdh: p.v("manifest.proved.tdh"),
-                      all: p.v("manifest.proved"),
-                    }),
+                    proved: (
+                      <span className="tw-inline-flex tw-items-baseline tw-gap-1.5">
+                        <Glyph
+                          kind="proved"
+                          className="tw-size-3 tw-self-center"
+                        />
+                        <span>
+                          {m("explained.tdh.impl.lean.proved", {
+                            tdh: p.v("manifest.proved.tdh"),
+                            all: p.v("manifest.proved"),
+                          })}
+                        </span>
+                      </span>
+                    ),
                   },
                 },
                 {
