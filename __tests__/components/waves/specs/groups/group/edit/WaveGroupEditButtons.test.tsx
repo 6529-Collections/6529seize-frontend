@@ -383,23 +383,18 @@ describe("WaveGroupEditButtons", () => {
     );
   });
 
-  it("restricts every public non-admin access row when Visibility changes", async () => {
+  it("restricts public chat with Visibility while preserving competition access", async () => {
     const fullyPublicWave = {
       ...wave,
       visibility: { scope: { group: null } },
-      participation: {
-        ...wave.participation,
-        scope: { group: null },
-      },
-      voting: { ...wave.voting, scope: { group: null } },
       chat: { ...wave.chat, scope: { group: null } },
     };
     mockConvertWaveToUpdateWave.mockReturnValue({
       name: "Wave 1",
       picture: null,
       visibility: { scope: { group_id: null } },
-      participation: { scope: { group_id: null } },
-      voting: { scope: { group_id: null } },
+      participation: { scope: { group_id: "drop-group" } },
+      voting: { scope: { group_id: "vote-group" } },
       chat: { enabled: true, scope: { group_id: null } },
       wave: { type: "RANK", admin_group: { group_id: "admin-group" } },
     });
@@ -417,8 +412,8 @@ describe("WaveGroupEditButtons", () => {
     expect(mutateAsync.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         visibility: { scope: { group_id: "selected-group" } },
-        participation: { scope: { group_id: "selected-group" } },
-        voting: { scope: { group_id: "selected-group" } },
+        participation: { scope: { group_id: "drop-group" } },
+        voting: { scope: { group_id: "vote-group" } },
         chat: {
           enabled: true,
           scope: { group_id: "selected-group" },
@@ -431,7 +426,7 @@ describe("WaveGroupEditButtons", () => {
     );
   });
 
-  it("changes only Visibility when another non-admin row is restricted", async () => {
+  it("changes only Visibility when chat is already restricted", async () => {
     render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
       wrapper,
     });
@@ -526,11 +521,11 @@ describe("WaveGroupEditButtons", () => {
     expect(mutateAsync.mock.calls[0][0].chat.scope.group_id).toBe("chat-group");
   });
 
-  it("matches a non-admin access row to Visibility only after confirmation", async () => {
-    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.DROP} />, {
+  it("matches chat access to Visibility only after confirmation", async () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.CHAT} />, {
       wrapper,
     });
-    fireEvent.click(screen.getByRole("button", { name: "Edit Drop access" }));
+    fireEvent.click(screen.getByRole("button", { name: "Edit Chat access" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Use visibility criteria" })
     );
@@ -546,8 +541,11 @@ describe("WaveGroupEditButtons", () => {
     );
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(mutateAsync.mock.calls[0][0].participation.scope.group_id).toBe(
+    expect(mutateAsync.mock.calls[0][0].chat.scope.group_id).toBe(
       "visibility-group"
+    );
+    expect(mutateAsync.mock.calls[0][0].participation.scope.group_id).toBe(
+      "drop-group"
     );
     expect(mutateAsync.mock.calls[0][0].voting.scope.group_id).toBe(
       "vote-group"

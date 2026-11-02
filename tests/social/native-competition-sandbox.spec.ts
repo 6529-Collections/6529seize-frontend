@@ -1009,6 +1009,72 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("edits shared wave metadata through v3 without rewriting its original competition", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, true);
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const configuration = await response.json();
+    configuration.wave.type = "CHAT";
+    const patches: Record<string, unknown>[] = [];
+    await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+      if (route.request().method() === "PATCH") {
+        const patch = route.request().postDataJSON() as Record<string, unknown>;
+        patches.push(patch);
+        Object.assign(configuration, patch);
+      }
+      return route.fulfill({
+        json: {
+          id: WAVE,
+          name: configuration.name,
+          picture: configuration.picture,
+          created_at: 1,
+          legacy_primary_competition_id: "alpha",
+          capabilities: { chat: true, competitions: true },
+          permissions: {
+            view: true,
+            chat: true,
+            administer: true,
+            create_competition: true,
+          },
+          configuration,
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await page
+      .getByRole("button", { name: "Edit wave name", exact: true })
+      .press("Enter");
+    const dialog = page.getByRole("dialog", {
+      name: "Rename wave",
+      exact: true,
+    });
+    await dialog
+      .getByPlaceholder("Please select a name")
+      .fill("Shared wave renamed");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect.poll(() => patches).toEqual([{ name: "Shared wave renamed" }]);
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+    await page.reload();
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("preserves Additional Action through the actual submission flow", async ({
     page,
   }, testInfo) => {
@@ -8325,17 +8391,36 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       };
       let failSave = true;
       let writes = 0;
-      await page.route(`**/api/waves/${WAVE}`, async (route) => {
-        if (route.request().method() === "POST") {
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "PATCH") {
           writes++;
+          const patch = route.request().postDataJSON();
+          expect(patch).toEqual({ chat: { links_disabled: true } });
           if (failSave)
             return route.fulfill({
               status: 500,
               json: { error: "Sandbox save failed" },
             });
-          wave.chat = { ...wave.chat, ...route.request().postDataJSON().chat };
+          wave.chat = { ...wave.chat, ...patch.chat };
         }
-        await route.fulfill({ json: wave });
+        await route.fulfill({
+          json: {
+            id: WAVE,
+            name: wave.name,
+            picture: wave.picture,
+            legacy_primary_competition_id: null,
+            default_competition_id: "alpha",
+            permissions: {
+              view: true,
+              administer: true,
+              create_competition: true,
+            },
+            configuration: wave,
+          },
+        });
       });
       await page.goto(`/waves/${WAVE}?tab=chat`);
       await openWaveInformation(page);
