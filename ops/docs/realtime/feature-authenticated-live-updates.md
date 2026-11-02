@@ -56,7 +56,7 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Temporary disconnects retry automatically while auth is still valid, using
   exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`) with +/-25%
   random jitter on every delay so clients do not reconnect in lockstep.
-- After reconnect, foreground resume, or a server request to recover missed updates, active data queries refresh after a short staggered delay. Repeated requests are combined; background tabs wait until visible. Inactive queries refresh when needed.
+- After reconnect, a return to the app from the background, a return to a browser tab that was hidden for at least 30 seconds, or a server request to recover missed updates, active data queries refresh after a short staggered delay. Switching windows or briefly switching tabs does not refresh them. Repeated requests are combined; background tabs wait until visible. Inactive queries refresh when needed.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.

@@ -3,8 +3,10 @@ import {
   TitleProvider,
   useSetWaveData,
   useTitle,
+  useTitleActions,
 } from "@/contexts/TitleContext";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useMemo, useState } from "react";
 
 let mockPathname = "/waves/wave-1";
 let mockSearchParams = new URLSearchParams("divider=841669");
@@ -354,4 +356,66 @@ describe("TitleContext", () => {
       });
     }
   );
+});
+
+describe("TitleContext setters", () => {
+  beforeEach(() => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = "wave-1";
+  });
+
+  it("does not re-render setter-only consumers when new messages change the title", () => {
+    let setterRenders = 0;
+    function SetterOnly() {
+      useTitleActions();
+      setterRenders += 1;
+      return null;
+    }
+    // Like the open wave, a component inside the tree pushes new counts.
+    function UnreadHarness() {
+      const [newItemsCount, setNewItemsCount] = useState(0);
+      const waveData = useMemo(
+        () => ({ id: "wave-1", name: "Main Stage", newItemsCount }),
+        [newItemsCount]
+      );
+      useSetWaveData(waveData);
+      const { title } = useTitle();
+      return (
+        <button
+          type="button"
+          onClick={() => setNewItemsCount((count) => count + 1)}
+        >
+          {title}
+        </button>
+      );
+    }
+    render(
+      <TitleProvider>
+        <SetterOnly />
+        <UnreadHarness />
+      </TitleProvider>
+    );
+    const rendersAfterMount = setterRenders;
+
+    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(screen.getByRole("button")).toHaveTextContent(
+      "(2 new messages) Main Stage | Brain"
+    );
+    expect(setterRenders).toBe(rendersAfterMount);
+  });
+
+  it("requires a TitleProvider", () => {
+    function Orphan() {
+      useTitleActions();
+      return null;
+    }
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    expect(() => render(<Orphan />)).toThrow(
+      "useTitleActions must be used within a TitleProvider"
+    );
+    jest.mocked(console.error).mockRestore();
+  });
 });

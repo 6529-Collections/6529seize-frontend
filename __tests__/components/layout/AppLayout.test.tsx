@@ -17,7 +17,6 @@ let mockLayoutSpaces = {
   spacerSpace: 0,
   mobileTabsSpace: 0,
   mobileNavSpace: 0,
-  contentSpace: 0,
   measurementsComplete: false,
 };
 
@@ -193,7 +192,6 @@ describe("AppLayout", () => {
       spacerSpace: 0,
       mobileTabsSpace: 0,
       mobileNavSpace: 0,
-      contentSpace: 0,
       measurementsComplete: false,
     };
   });

@@ -6090,7 +6090,7 @@
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
         "The realtime troubleshooting docs cover connection recovery and expected limitations.",
-        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
+        "After the connection recovers, the app returns from the background, a browser tab returns after being hidden for at least 30 seconds, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Briefly switching tabs or windows does not refresh it. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
