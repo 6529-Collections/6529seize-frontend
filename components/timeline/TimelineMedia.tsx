@@ -196,7 +196,7 @@ function TimelineMediaPreview(props: Readonly<Props>) {
         className={styles["timelineMediaImage"]}
         src={props.url}
         fallbackSources={sources}
-        autoPlay
+        autoPlay={false}
         muted
         loop
         align="center"

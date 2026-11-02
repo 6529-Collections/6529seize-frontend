@@ -910,7 +910,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   });
 
   for (const recordedFormat of [true, false]) {
-    test(`plays a removed Timeline video with ${recordedFormat ? "recorded" : "missing"} historical format`, async ({
+    test(`keeps a removed Timeline video paused until Play with ${recordedFormat ? "recorded" : "missing"} historical format`, async ({
       page,
     }) => {
       const primary =
@@ -961,6 +961,13 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           video.evaluate((element: HTMLVideoElement) => element.videoWidth)
         )
         .toBeGreaterThan(0);
+      await expect(video).toHaveJSProperty("autoplay", false);
+      await expect(video).toHaveJSProperty("paused", true);
+      await timeline
+        .getByRole("button", { name: "Play video", exact: true })
+        .first()
+        .click();
+      await expect(video).toHaveJSProperty("paused", false);
       await expectNoHorizontalOverflow(page);
     });
   }
