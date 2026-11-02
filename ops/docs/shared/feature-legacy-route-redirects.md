@@ -165,6 +165,9 @@ Rules:
   The one exception is `/.well-known/apple-app-site-association`, which returns
   the 6529 Mobile iOS app association JSON on every deployment, including
   staging without an access cookie.
+  On the shared staging website, supported links are associated with
+  `6529 Staging`; production website links use the production app. Whether a
+  link opens in the app also depends on installation and iOS link preferences.
 - Wave links with a malformed wave id show the not-found page. Copy a fresh
   link from the wave: a link cut short when pasted is the usual cause.
 - If the destination route fails, use

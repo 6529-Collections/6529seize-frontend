@@ -3,7 +3,12 @@
  */
 
 import * as route from "@/app/.well-known/apple-app-site-association/route";
+import { publicEnv } from "@/config/env";
 import { isMobileAppDestination } from "@/helpers/mobileAppLinks";
+
+jest.mock("@/config/env", () => ({
+  publicEnv: { BASE_ENDPOINT: "https://6529.io" },
+}));
 
 interface Component {
   readonly "/": string;
@@ -90,6 +95,10 @@ const BROWSER_FILES = [
 ];
 
 describe("apple-app-site-association route", () => {
+  beforeEach(() => {
+    publicEnv.BASE_ENDPOINT = "https://6529.io";
+  });
+
   it("is prerendered as JSON for the iOS app only", async () => {
     expect(route.dynamic).toBe("force-static");
 
@@ -103,6 +112,40 @@ describe("apple-app-site-association route", () => {
     const { details } = (association as unknown as Association).applinks;
     expect(details).toHaveLength(1);
     expect(details[0]!.appIDs).toEqual(["4962266Y3D.com.core6529.app"]);
+  });
+
+  it.each([
+    ["https://6529.io", "4962266Y3D.com.core6529.app"],
+    ["https://www.6529.io", "4962266Y3D.com.core6529.app"],
+    ["https://staging.6529.io", "4962266Y3D.com.core6529staging.app"],
+    ["https://STAGING.6529.IO/", "4962266Y3D.com.core6529staging.app"],
+    ["https://prxtstaging.6529.io", "4962266Y3D.com.core6529.app"],
+    ["https://staging.6529.io.example.com", "4962266Y3D.com.core6529.app"],
+    ["http://localhost:3001", "4962266Y3D.com.core6529.app"],
+  ])(
+    "associates the configured deployment %s with %s",
+    async (endpoint, appId) => {
+      publicEnv.BASE_ENDPOINT = endpoint;
+
+      const { details } = (await readAssociation()).applinks;
+      expect(details).toHaveLength(1);
+      expect(details[0]!.appIDs).toEqual([appId]);
+    }
+  );
+
+  it("preserves route exclusions and cache headers on staging", async () => {
+    publicEnv.BASE_ENDPOINT = "https://6529.io";
+    const production = await readAssociation();
+    publicEnv.BASE_ENDPOINT = "https://staging.6529.io";
+
+    const response = route.GET();
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/json");
+    expect(response.headers.get("cache-control")).toBe("public, max-age=3600");
+    const staging = (await response.json()) as Association;
+    expect(staging.applinks.details[0]!.components).toEqual(
+      production.applinks.details[0]!.components
+    );
   });
 
   it("puts every exclusion before the catch-all", async () => {

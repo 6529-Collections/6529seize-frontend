@@ -5727,6 +5727,7 @@
       "keywords": ["mobile", "app", "banner", "open", "install", "dismiss"],
       "facts": [
         "A dismissible 6529 Mobile banner above the small-screen mobile website header offers Open and Get the app. It is hidden inside 6529 Mobile and 6529 Desktop and on authentication, access, app-wallet and handoff routes.",
+        "Supported iOS website links on staging.6529.io are associated with 6529 Staging; production website links use the production app. Whether a link opens in the app depends on installation and iOS link preferences.",
         "Open attempts to launch the current wave, drop, profile or supported page directly in the app, preserving query parameters and fragments. Browser authentication is not transferred; app access and regional restrictions still apply.",
         "Dismissing the banner hides it for seven days in the same browser, including reloads and visits. Clearing website data resets it; blocked storage permits only in-memory dismissal.",
         "Get the app opens the App Store on iOS or Google Play on Android. After installation, return to the browser page and tap Open to reach the destination; installation alone does not preserve it through the store.",
@@ -5738,6 +5739,7 @@
       "source_refs": [
         "components/mobile-app/MobileAppBanner.tsx",
         "helpers/mobileAppLinks.ts",
+        "helpers/appleAppSiteAssociation.ts",
         "hooks/useMobileAppBannerDismissal.ts",
         "ops/docs/navigation/feature-mobile-app-landing.md"
       ]
