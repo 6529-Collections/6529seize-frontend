@@ -197,6 +197,7 @@ describe("DropListItemContentMediaImage Giphy video", () => {
       "src",
       proxyUrl({ url: `${GIPHY_DIRECTORY}giphy.mp4`, format: "mp4" })
     );
+    fireEvent.loadedMetadata(expanded!);
     fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
 
     expect(requestFullscreen).toHaveBeenCalledTimes(1);

@@ -3,6 +3,10 @@
 import { usePrefersReducedMotion } from "./SeizeVideoPlayer.config";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  PauseIcon as PauseOutlineIcon,
+  PlayIcon as PlayOutlineIcon,
+} from "@heroicons/react/24/outline";
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import {
@@ -23,13 +27,27 @@ const NATURAL_MAX_HEIGHT = "16rem";
 const AUTO_HIDE_CLASS =
   "desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100 motion-reduce:tw-transition-none";
 
-// Inline, the control sits in the media's corner. The expanded popup keeps its
-// controls at the viewport edges, outside the zoomed media, like its gallery
-// buttons and counter.
-const TOGGLE_PLACEMENT_CLASS = {
-  inline: "tw-absolute tw-bottom-[5px] tw-left-[5px] tw-z-30",
-  expanded:
-    "tw-fixed tw-bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] tw-left-3 tw-z-[1102] sm:tw-left-4",
+const TOGGLE_BASE_CLASS =
+  "tw-pointer-events-auto tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-p-0 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 desktop-hover:hover:tw-bg-iron-700";
+
+// Inline, the control floats in the media's corner. In the expanded popup it is
+// the first toolbar button, styled like its neighbours, so its Tab position
+// matches where it sits and it cannot crowd the gallery controls.
+const TOGGLE_PLACEMENT = {
+  inline: {
+    className:
+      "tw-absolute tw-bottom-[5px] tw-left-[5px] tw-z-30 tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white",
+    iconClassName: "tw-size-4",
+    PlayGlyph: PlayIcon,
+    PauseGlyph: PauseIcon,
+  },
+  toolbar: {
+    className:
+      "tw-bg-transparent tw-transition tw-duration-200 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+    iconClassName: "tw-size-5",
+    PlayGlyph: PlayOutlineIcon,
+    PauseGlyph: PauseOutlineIcon,
+  },
 } as const;
 
 type GiphyVideoPreviewProps = {
@@ -134,8 +152,11 @@ export function GiphyPlaybackToggle({
   readonly videoRef: RefObject<HTMLVideoElement | null>;
   readonly playing: boolean;
   readonly autoHide: boolean;
-  readonly placement?: keyof typeof TOGGLE_PLACEMENT_CLASS | undefined;
+  readonly placement?: keyof typeof TOGGLE_PLACEMENT | undefined;
 }) {
+  const { className, iconClassName, PlayGlyph, PauseGlyph } =
+    TOGGLE_PLACEMENT[placement];
+  const Glyph = playing ? PauseGlyph : PlayGlyph;
   const label = t(
     DEFAULT_LOCALE,
     playing ? "drop.media.pauseAnimation" : "drop.media.playAnimation"
@@ -160,16 +181,12 @@ export function GiphyPlaybackToggle({
       title={label}
       onClick={handleClick}
       className={clsx(
-        TOGGLE_PLACEMENT_CLASS[placement],
-        "tw-pointer-events-auto tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950/90 tw-p-0 tw-text-iron-100 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-bg-iron-700",
+        TOGGLE_BASE_CLASS,
+        className,
         autoHide && AUTO_HIDE_CLASS
       )}
     >
-      {playing ? (
-        <PauseIcon className="tw-size-4" aria-hidden="true" />
-      ) : (
-        <PlayIcon className="tw-size-4" aria-hidden="true" />
-      )}
+      <Glyph className={iconClassName} aria-hidden="true" />
     </button>
   );
 }

@@ -270,6 +270,7 @@ describe("DropImageGalleryProvider", () => {
     expect(
       screen.getByRole("button", { name: "Play animation" })
     ).toBeInTheDocument();
+    fireEvent.loadedMetadata(video);
     fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
     expect(requestFullscreen.mock.contexts[0]).toBe(video);
 
@@ -285,6 +286,36 @@ describe("DropImageGalleryProvider", () => {
       "src",
       "upload.png" + "?preview"
     );
+  });
+
+  it("tries a failed Giphy video again after moving away and back", () => {
+    renderGallery({
+      items: [
+        {
+          id: "body-1",
+          src: "https://media.giphy.com/media/88EhKlGzXuhBfStCds/giphy.gif",
+          source: "body",
+        },
+        galleryItems[1]!,
+      ],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Open body" }));
+    fireEvent.error(
+      screen.getByLabelText("Expanded GIF animation", { selector: "video" })
+    );
+    expect(
+      screen.queryByLabelText("Expanded GIF animation", { selector: "video" })
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next image" }));
+    fireEvent.click(screen.getByRole("button", { name: "Previous image" }));
+
+    expect(
+      screen.getByLabelText("Expanded GIF animation", { selector: "video" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByAltText("Expanded image preview")
+    ).not.toBeInTheDocument();
   });
 });
 

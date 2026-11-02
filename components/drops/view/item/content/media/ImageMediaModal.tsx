@@ -105,21 +105,62 @@ function isPointInsideRenderedMedia(
 }
 
 // Giphy GIFs play from Giphy's MP4 rendition, like the inline preview, until
-// the video fails; every other image keeps the optimized preview.
-function getExpandedGiphyVideo(src: string, failedVideoSource: string | null) {
-  return failedVideoSource === src ? null : getGiphyVideoPreviewSources(src);
+// the video fails; every other image keeps the optimized preview. An original
+// the viewer asked for replaces the video once it loads.
+function useExpandedGiphyVideo(
+  src: string,
+  retry: number,
+  playingOriginal: boolean
+) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [failure, setFailure] = useState({ src, failed: false });
+  // A gallery move tries each item's video afresh, even one that failed before.
+  if (failure.src !== src) setFailure({ src, failed: false });
+  const failed = failure.src === src && failure.failed;
+  const sources = failed ? null : getGiphyVideoPreviewSources(src);
+  const showsVideo = sources !== null && !playingOriginal;
+  const [playing, setPlaying] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  // A new item, a retry, a video error or a return from the original mounts a
+  // fresh element (or none), which starts paused and without metadata.
+  const mountKey = showsVideo ? `${src}:${retry}` : null;
+  const [mountedKey, setMountedKey] = useState(mountKey);
+  if (mountedKey !== mountKey) {
+    setMountedKey(mountKey);
+    setPlaying(false);
+    setLoaded(false);
+  }
+
+  return {
+    videoRef,
+    sources,
+    showsVideo,
+    playing,
+    setPlaying,
+    loaded,
+    onLoad: () => {
+      setLoaded(true);
+      // Sync with the element in case playback began before the listener.
+      setPlaying(videoRef.current ? !videoRef.current.paused : false);
+    },
+    // A failed MP4 rendition falls back to the existing GIF preview.
+    onError: () => setFailure({ src, failed: true }),
+    clearFailure: () => setFailure({ src, failed: false }),
+  };
 }
 
 function ExpandedGiphyVideo({
   sources,
   videoRef,
   alt,
+  onLoad,
   onError,
   onPlayingChange,
 }: {
   readonly sources: GiphyVideoSources;
   readonly videoRef: React.RefObject<HTMLVideoElement | null>;
   readonly alt: string;
+  readonly onLoad: () => void;
   readonly onError: () => void;
   readonly onPlayingChange: (playing: boolean) => void;
 }) {
@@ -132,10 +173,7 @@ function ExpandedGiphyVideo({
         alt={alt}
         fillContainer
         objectPosition="center"
-        // Sync with the element in case playback began before this listener.
-        onLoad={() =>
-          onPlayingChange(videoRef.current ? !videoRef.current.paused : false)
-        }
+        onLoad={onLoad}
         onError={onError}
         onPlayingChange={onPlayingChange}
       />
@@ -193,26 +231,21 @@ export function ImageMediaModal({
     DEFAULT_LOCALE,
     isGif ? "drop.media.loadingOriginalGif" : "drop.media.loadingOriginalImage"
   );
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoPlaying, setVideoPlaying] = useState(false);
-  const [failedVideoSource, setFailedVideoSource] = useState<string | null>(
-    null
-  );
   const [zoomState, setZoomState] = useState({ src, isZoomed: false });
-  if (zoomState.src !== src) {
-    setZoomState({ src, isZoomed: false });
-    setVideoPlaying(false);
-  }
+  if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
-  const giphyVideo = getExpandedGiphyVideo(src, failedVideoSource);
-  // An original the viewer asked for replaces the video once it loads.
-  const showsVideo = giphyVideo !== null && !playingOriginal;
+  const video = useExpandedGiphyVideo(src, retry, playingOriginal);
+  const { showsVideo, videoRef, sources: videoSources } = video;
   const previewUnavailable =
-    giphyVideo === null &&
+    videoSources === null &&
     (failedSource === src ||
       getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0);
+  // Like the inline video, the expanded one goes full screen once it loads.
+  const fullscreenReady = showsVideo
+    ? video.loaded
+    : playingOriginal || !previewUnavailable;
   const showGalleryControls = Boolean(gallery && gallery.total > 1);
 
   const goToPrevious = useCallback(() => {
@@ -231,25 +264,18 @@ export function ImageMediaModal({
   useKeyPressEvent("ArrowLeft", goToPrevious);
   useKeyPressEvent("ArrowRight", goToNext);
 
-  // A failed MP4 rendition falls back to the existing GIF preview.
-  const handleVideoError = () => {
-    setFailedVideoSource(src);
-    setVideoPlaying(false);
-  };
-
   const retryPreview = () => {
     setFailedSource(null);
-    setFailedVideoSource(null);
-    setVideoPlaying(false);
+    video.clearFailure();
     setRetry((value) => value + 1);
   };
 
   // The video is the expanded media, so it is what goes full screen; callers
   // only know the image elements they passed in.
   const handleFullscreen = () => {
-    const video = showsVideo ? videoRef.current : null;
-    if (video) {
-      requestCenteredImageFullscreen(video);
+    const videoElement = showsVideo ? videoRef.current : null;
+    if (videoElement) {
+      requestCenteredImageFullscreen(videoElement);
       return;
     }
     onFullscreen();
@@ -332,10 +358,10 @@ export function ImageMediaModal({
                         style={EXPANDED_MEDIA_STYLE}
                       />
                     )}
-                    {showsVideo && (
+                    {showsVideo && videoSources && (
                       <ExpandedGiphyVideo
                         key={`${src}:${retry}`}
-                        sources={giphyVideo}
+                        sources={videoSources}
                         videoRef={videoRef}
                         alt={
                           videoAlt ??
@@ -344,11 +370,12 @@ export function ImageMediaModal({
                             "drop.media.expandedGifAnimationAlt"
                           )
                         }
-                        onError={handleVideoError}
-                        onPlayingChange={setVideoPlaying}
+                        onLoad={video.onLoad}
+                        onError={video.onError}
+                        onPlayingChange={video.setPlaying}
                       />
                     )}
-                    {giphyVideo === null && (
+                    {videoSources === null && (
                       <span
                         className="tw-absolute tw-inset-0"
                         hidden={playingOriginal}
@@ -378,14 +405,6 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
-      {showsVideo && (
-        <GiphyPlaybackToggle
-          videoRef={videoRef}
-          playing={videoPlaying}
-          autoHide={false}
-          placement="expanded"
-        />
-      )}
       {quality.loading && (
         <output
           aria-label={loadingOriginalLabel}
@@ -453,11 +472,17 @@ export function ImageMediaModal({
         onDownload={onDownload}
         isDownloading={isDownloading}
         onFullscreen={handleFullscreen}
-        fullscreenTargetAvailable={
-          fullscreenTargetAvailable && (playingOriginal || !previewUnavailable)
-        }
+        fullscreenTargetAvailable={fullscreenTargetAvailable && fullscreenReady}
         onClose={onClose}
       >
+        {showsVideo && (
+          <GiphyPlaybackToggle
+            videoRef={videoRef}
+            playing={video.playing}
+            autoHide={false}
+            placement="toolbar"
+          />
+        )}
         {quality.canViewOriginal && (
           <ImageQualityToggle
             showingOriginal={originalRequested}

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
   createElement,
   createRef,
@@ -55,16 +56,22 @@ const renderModal = (
     onDownload: jest.fn(),
     onFullscreen: jest.fn(),
   };
-  render(
+  const modal = (overrides: typeof props = {}) => (
     <ImageMediaModal
       src={GIPHY_GIF}
       imageRef={imageRef}
       isDownloading={false}
       {...handlers}
       {...props}
+      {...overrides}
     />
   );
-  return { imageRef, ...handlers };
+  const { rerender } = render(modal());
+  return {
+    imageRef,
+    ...handlers,
+    rerender: (overrides: typeof props) => rerender(modal(overrides)),
+  };
 };
 
 const getVideo = (name = "Expanded GIF animation") =>
@@ -124,10 +131,16 @@ describe("ImageMediaModal Giphy video", () => {
     expect(screen.queryByAltText("Expanded image preview")).toBeNull();
     expect(document.querySelector('img[src*="animated=1"]')).toBeNull();
 
+    // The control is the first toolbar button, always visible, never revealed
+    // on hover, and clear of the gallery controls.
     const toggle = screen.getByRole("button", { name: "Play animation" });
-    // The control stays visible in the popup instead of revealing on hover.
+    const toolbar = toggle.parentElement!;
+    expect(within(toolbar).getAllByRole("button")[0]).toBe(toggle);
+    expect(toolbar).toContainElement(
+      screen.getByRole("button", { name: "View original" })
+    );
     expect(toggle.className).not.toContain("tw-opacity-0");
-    expect(toggle.className).toContain("tw-fixed");
+    expect(toggle.className).not.toMatch(/tw-(fixed|absolute)/);
 
     fireEvent.loadedMetadata(video);
     paused = false;
@@ -187,15 +200,87 @@ describe("ImageMediaModal Giphy video", () => {
     ).toBeInTheDocument();
   });
 
-  it("puts the video, not the caller's image target, in full screen", () => {
+  it("offers full screen once the video loads and puts the video, not the caller's image target, in it", () => {
     const { onFullscreen } = renderModal();
     const video = getVideo();
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
 
+    fireEvent.loadedMetadata(video);
     fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
 
     expect(videoFullscreen).toHaveBeenCalledTimes(1);
     expect(videoFullscreen.mock.contexts[0]).toBe(video);
     expect(onFullscreen).not.toHaveBeenCalled();
+  });
+
+  it("withdraws full screen while a retried video loads", () => {
+    renderModal();
+    fireEvent.loadedMetadata(getVideo());
+    fireEvent.error(getVideo());
+    fireEvent.error(screen.getByAltText("Expanded image preview"));
+    fireEvent.click(screen.getByRole("button", { name: "Retry preview" }));
+
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
+    fireEvent.loadedMetadata(getVideo());
+    expect(
+      screen.getByRole("button", { name: "Full screen" })
+    ).toBeInTheDocument();
+  });
+
+  it("tries a failed video again after moving away and back in the gallery", () => {
+    const { rerender } = renderModal();
+    fireEvent.error(getVideo());
+    expect(queryVideo()).toBeNull();
+
+    rerender({ src: CDN_GIF });
+    expect(queryVideo()).toBeNull();
+    rerender({ src: GIPHY_GIF });
+
+    expect(getVideo()).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Play animation" })
+    ).toBeInTheDocument();
+    expect(screen.queryByAltText("Expanded image preview")).toBeNull();
+  });
+
+  it("reaches the playback control in the toolbar's place in Tab order", async () => {
+    const user = userEvent.setup();
+    renderModal({
+      onOpen: jest.fn(),
+      openLabel: "Open in tab",
+      gallery: {
+        canGoNext: true,
+        canGoPrevious: true,
+        currentIndex: 1,
+        onNext: jest.fn(),
+        onPrevious: jest.fn(),
+        total: 3,
+      },
+    });
+    fireEvent.loadedMetadata(getVideo());
+
+    const order: (string | null)[] = [];
+    for (let step = 0; step < 10; step++) {
+      await user.tab();
+      order.push(document.activeElement!.getAttribute("aria-label"));
+    }
+
+    expect(order).toEqual([
+      "Close modal",
+      "Close modal",
+      "Previous image",
+      "Next image",
+      "Play animation",
+      "View original",
+      "Full screen",
+      "Open in tab",
+      "Download media",
+      "Close media",
+    ]);
   });
 
   it("keeps the popup open for a click on the video and closes on keyboard activation", () => {
