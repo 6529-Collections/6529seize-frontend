@@ -898,7 +898,9 @@ test("keeps older pins behind the joined pagination boundary and retains a searc
   expect(result.current.waves.map((wave) => wave.id)).toEqual(
     firstPage.map((wave) => wave.id)
   );
-  expect(result.current.waves[0]?.isPinned).toBe(true);
+  expect(result.current.waves[0]).toEqual(
+    expect.objectContaining({ isPinned: true })
+  );
   expect(result.current.pinnedWaves.map((wave) => wave.id)).toContain(
     olderPin.id
   );
