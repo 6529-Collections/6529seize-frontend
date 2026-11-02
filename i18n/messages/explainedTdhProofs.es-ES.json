@@ -305,6 +305,9 @@
   "explained.tdh.proofs.door.overview": "Probar un día a partir de los propios bloques de Ethereum: los programas A y B, y el contrato que exige ambos.",
   "explained.tdh.proofs.words.more": "{count} palabras más; elige un grupo para verlas.",
   "explained.tdh.proofs.words.moreSame": "Las otras {count} palabras son iguales en ambos.",
+  "explained.tdh.proofs.words.stripLabel": "Las {words} palabras del enunciado en orden, con el grupo que se lee iluminado",
+  "explained.tdh.proofs.words.showAll": "Mostrar las {words} palabras",
+  "explained.tdh.proofs.words.showLit": "Mostrar solo el grupo",
   "explained.tdh.proofs.raw.summary": "Los {bytes} bytes, tal como los lee el verificador",
   "explained.tdh.proofs.raw.cap": "Los valores públicos de la prueba A para el {date}: una palabra por línea, en el orden del enunciado.",
   "explained.tdh.proofs.raw.copy": "Copiar los bytes"

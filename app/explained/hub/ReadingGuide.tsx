@@ -29,6 +29,10 @@ const KNOW: readonly { kind: MarkKind; note?: HubKey }[] = [
   { kind: "notYet" },
 ];
 
+/** A mark and its note side by side: a wrapped note hangs beside its mark. */
+const HANG =
+  "tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-items-baseline tw-gap-x-2";
+
 function Column({
   title,
   children,
@@ -69,9 +73,9 @@ export default function ReadingGuide({
       <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 xl:tw-grid-cols-4 xl:tw-gap-5">
         <Column title={ht(locale, "guide.rule")}>
           {RULE.map((item) => (
-            <li key={item.kind} className={NOTE}>
-              <Mark kind={item.kind} locale={locale} size="md" />{" "}
-              {ht(locale, item.note)}
+            <li key={item.kind} className={`${NOTE} ${HANG}`}>
+              <Mark kind={item.kind} locale={locale} size="md" />
+              <span>{ht(locale, item.note)}</span>
             </li>
           ))}
         </Column>
@@ -84,24 +88,25 @@ export default function ReadingGuide({
         </Column>
         <Column title={ht(locale, "guide.know")}>
           {KNOW.map((item) => (
-            <li key={item.kind} className={NOTE}>
+            <li key={item.kind} className={`${NOTE} ${HANG}`}>
               <Mark kind={item.kind} locale={locale} size="md" />
-              {item.note ? ` ${ht(locale, item.note)}` : ""}
+              <span>{item.note ? ht(locale, item.note) : ""}</span>
             </li>
           ))}
-          <li className={NOTE}>
-            <HalfPair a b={false} locale={locale} />{" "}
-            {ht(locale, "guide.halfPair")}
+          <li className={`${NOTE} ${HANG}`}>
+            <HalfPair a b={false} locale={locale} />
+            <span>{ht(locale, "guide.halfPair")}</span>
           </li>
         </Column>
         <Column title={ht(locale, "guide.since")}>
           <li className={NOTE}>{ht(locale, "guide.sinceLive")}</li>
-          <li className={NOTE}>
-            <Mark kind="drift" locale={locale} size="md" />{" "}
-            {ht(locale, "guide.drift")}
+          <li className={`${NOTE} ${HANG}`}>
+            <Mark kind="drift" locale={locale} size="md" />
+            <span>{ht(locale, "guide.drift")}</span>
           </li>
-          <li className={NOTE}>
-            <Tag kind="example" locale={locale} /> {ht(locale, "guide.example")}
+          <li className={`${NOTE} ${HANG}`}>
+            <Tag kind="example" locale={locale} />
+            <span>{ht(locale, "guide.example")}</span>
           </li>
         </Column>
       </div>

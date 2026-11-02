@@ -305,6 +305,9 @@
   "explained.tdh.proofs.door.overview": "Proving a day from Ethereum's own blocks: programs A and B, and the contract that needs both.",
   "explained.tdh.proofs.words.more": "{count} other words; pick a group to see them.",
   "explained.tdh.proofs.words.moreSame": "The other {count} words are the same in both.",
+  "explained.tdh.proofs.words.stripLabel": "The statement's {words} words in order, the group being read lit",
+  "explained.tdh.proofs.words.showAll": "Show all {words} words",
+  "explained.tdh.proofs.words.showLit": "Show only the group",
   "explained.tdh.proofs.raw.summary": "The {bytes} bytes, as the verifier reads them",
   "explained.tdh.proofs.raw.cap": "Proof A's public values for {date}: one word a line, in the statement's order.",
   "explained.tdh.proofs.raw.copy": "Copy the bytes"

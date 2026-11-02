@@ -305,6 +305,9 @@
   "explained.tdh.proofs.door.overview": "Prouver une journée à partir des propres blocs d'Ethereum : les programmes A et B, et le contrat qui exige les deux.",
   "explained.tdh.proofs.words.more": "{count} autres mots ; choisissez un groupe pour les voir.",
   "explained.tdh.proofs.words.moreSame": "Les {count} autres mots sont identiques dans les deux.",
+  "explained.tdh.proofs.words.stripLabel": "Les {words} mots de l'énoncé dans l'ordre, le groupe lu éclairé",
+  "explained.tdh.proofs.words.showAll": "Afficher les {words} mots",
+  "explained.tdh.proofs.words.showLit": "N'afficher que le groupe",
   "explained.tdh.proofs.raw.summary": "Les {bytes} octets, tels que le vérificateur les lit",
   "explained.tdh.proofs.raw.cap": "Les valeurs publiques de la preuve A pour le {date} : un mot par ligne, dans l'ordre de l'énoncé.",
   "explained.tdh.proofs.raw.copy": "Copier les octets"

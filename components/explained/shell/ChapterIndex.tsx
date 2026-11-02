@@ -26,8 +26,10 @@ export interface ChapterIndexRow {
   readonly href?: string;
 }
 
+// On a phone one column: the order as an eyebrow over the title, top
+// down; from lg up, four columns with the order beside the title.
 const ROW =
-  "tw-grid tw-grid-cols-[40px_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-py-5 lg:tw-grid-cols-[72px_minmax(0,1fr)_280px_140px] lg:tw-gap-x-6 md:tw-py-6";
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-2 tw-py-5 md:tw-py-6 lg:tw-grid-cols-[72px_minmax(0,1fr)_280px_140px] lg:tw-items-center lg:tw-gap-x-6";
 
 export default function ChapterIndex({
   rows,
@@ -46,7 +48,7 @@ export default function ChapterIndex({
         const body = (
           <>
             <span
-              className={`tw-text-[17px] tw-font-semibold ${live ? "tw-text-primary-300" : "tw-text-iron-400"}`}
+              className={`tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] lg:tw-text-[17px] lg:tw-normal-case lg:tw-leading-normal lg:tw-tracking-normal ${live ? "tw-text-primary-300" : "tw-text-iron-400"}`}
             >
               {row.order}
             </span>
@@ -60,7 +62,7 @@ export default function ChapterIndex({
                 {row.question}
               </span>
             </span>
-            <span className="tw-col-start-2 tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 lg:tw-col-start-3">
+            <span className="tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 lg:tw-col-start-3">
               {/* The status answers the legend's question; the first row
                   names it, as a column's head. */}
               {index === 0 && (
@@ -76,7 +78,9 @@ export default function ChapterIndex({
               />
               <span>{row.note}</span>
             </span>
-            <span className="tw-col-start-2 tw-justify-self-start lg:tw-col-start-4 lg:tw-justify-self-end">
+            <span
+              className={`tw-justify-self-start lg:tw-col-start-4 lg:tw-justify-self-end ${live ? "" : "max-lg:tw-hidden"}`}
+            >
               {live ? (
                 <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-base tw-font-semibold tw-text-primary-300">
                   {kt(locale, "explained.kit.chapters.read")}

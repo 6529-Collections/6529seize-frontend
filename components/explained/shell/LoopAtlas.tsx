@@ -148,7 +148,7 @@ export default function LoopAtlas({
             <Seg
               label={kt(locale, "explained.kit.loop.follow")}
               attr="step"
-              phone="row"
+              phone={steps.length === 6 ? "grid3" : "row"}
               value={String(step)}
               onChange={(value) => {
                 touched.current = true;

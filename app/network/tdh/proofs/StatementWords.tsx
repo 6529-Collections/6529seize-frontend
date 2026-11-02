@@ -131,6 +131,52 @@ function BColumn({
   );
 }
 
+/**
+ * The statement at a glance: its words as a strip of cells in their order,
+ * the group being read lit, and any word that differs (program B's anchor,
+ * a flipped bit) edged in rose. A picture of the table under it, so it is
+ * drawn, not read aloud: the table and the readout say the same.
+ */
+function WordStrip({
+  words,
+  lit,
+  differs,
+  label,
+}: {
+  readonly words: readonly DecodedWord[];
+  readonly lit: (word: DecodedWord) => boolean;
+  readonly differs: readonly number[];
+  readonly label: string;
+}) {
+  return (
+    <div
+      className="tw-mt-5 tw-grid tw-grid-cols-5 tw-gap-1 md:[grid-template-columns:repeat(25,minmax(0,1fr))]"
+      role="img"
+      aria-label={label}
+      data-word-strip=""
+    >
+      {words.map((word) => {
+        const on = lit(word);
+        const off = differs.includes(word.index);
+        let tone = "tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400";
+        if (on)
+          tone = "tw-border-primary-400 tw-bg-primary-400/25 tw-text-iron-50";
+        if (off) tone = "tw-border-error tw-bg-error/15 tw-text-iron-50";
+        return (
+          <span
+            key={word.word.name}
+            className={`tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-text-xs tw-font-semibold tw-tabular-nums md:tw-h-11 ${tone}`}
+            data-strip-word={word.index}
+            aria-hidden="true"
+          >
+            {word.index}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function StatementWords({
   locale,
 }: {
@@ -140,6 +186,8 @@ export default function StatementWords({
   const facts = pageFacts(snapshot, locale);
   const [pick, setPick] = useState<WordPick>("result");
   const [flip, setFlip] = useState(false);
+  // The table lists the lit words; every word on request.
+  const [showAll, setShowAll] = useState(false);
   const compare = !flip && pick === "b";
   const group: WordGroup = pick === "b" ? "anchor" : pick;
 
@@ -246,6 +294,14 @@ export default function StatementWords({
               {fill(locale, k("words.group.b"))}
             </button>
           </div>
+          {decoded.a && (
+            <WordStrip
+              words={decoded.a}
+              lit={lit}
+              differs={compare ? differs : flip ? [FLIPPED_WORD] : []}
+              label={fill(locale, k("words.stripLabel"), { words })}
+            />
+          )}
           {decoded.a ? (
             <table
               className="tw-mt-5 tw-w-full tw-border-collapse max-lg:tw-block"
@@ -288,7 +344,7 @@ export default function StatementWords({
                   return (
                     <tr
                       key={word.word.name}
-                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on ? "" : "max-lg:tw-hidden"}`}
+                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on || showAll ? "" : "tw-hidden"}`}
                       data-word={word.index}
                       data-lit={on ? "1" : "0"}
                     >
@@ -353,12 +409,24 @@ export default function StatementWords({
           ) : null}
           {decoded.a ? (
             <p
-              className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 lg:tw-hidden"
+              className="tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400"
               data-words-more=""
             >
-              {fill(locale, k(compare ? "words.moreSame" : "words.more"), {
-                count: formatCount(locale, STATEMENT_WORDS.length - litCount),
-              })}
+              {!showAll &&
+                fill(locale, k(compare ? "words.moreSame" : "words.more"), {
+                  count: formatCount(locale, STATEMENT_WORDS.length - litCount),
+                })}
+              <button
+                type="button"
+                aria-pressed={showAll}
+                onClick={() => setShowAll((value) => !value)}
+                className={`tw-inline-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+                data-words-all=""
+              >
+                {showAll
+                  ? fill(locale, k("words.showLit"))
+                  : fill(locale, k("words.showAll"), { words })}
+              </button>
             </p>
           ) : (
             <p className="tw-m-0 tw-mt-5 tw-text-iron-400">

@@ -53,7 +53,8 @@ export function Seg<V extends string>({
   readonly onChange: (value: V) => void;
   /** A data attribute carrying each option's value: "card" gives data-card="4". */
   readonly attr?: string;
-  readonly phone?: "auto" | "stack" | "row" | "wrap" | "list";
+  /** "grid3": three chips a row on a phone, for six short steps (3 × 2). */
+  readonly phone?: "auto" | "stack" | "row" | "wrap" | "list" | "grid3";
 }) {
   const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
   let layout = phone;
@@ -77,18 +78,21 @@ export function Seg<V extends string>({
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
     row: "max-md:tw-flex max-md:tw-flex-wrap md:tw-inline-flex md:tw-flex-wrap",
+    grid3:
+      "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
   const button = {
     wrap: "tw-grow tw-rounded-full",
     stack:
       "max-md:tw-w-full max-md:tw-rounded-lg max-md:tw-px-3.5 max-md:tw-text-left md:tw-rounded-full",
     row: "tw-rounded-full max-md:tw-text-left",
+    grid3: "tw-rounded-full",
   }[layout];
   // Seven options or more can take two rows on a wide screen, and a phone's
   // long labels always can: there they are separate chips, each with its
   // own edge, not one pill that breaks.
   const many = options.length >= MANY_OPTIONS;
-  const phoneChips = layout === "row";
+  const phoneChips = layout === "row" || layout === "grid3";
   let frame =
     "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full";
   if (many) {

@@ -305,6 +305,9 @@
   "explained.tdh.proofs.door.overview": "Einen Tag aus Ethereums eigenen Blöcken beweisen: die Programme A und B und der Vertrag, der beide verlangt.",
   "explained.tdh.proofs.words.more": "{count} weitere Wörter; wählen Sie eine Gruppe, um sie zu sehen.",
   "explained.tdh.proofs.words.moreSame": "Die übrigen {count} Wörter sind in beiden gleich.",
+  "explained.tdh.proofs.words.stripLabel": "Die {words} Wörter der Aussage in ihrer Reihenfolge, die gelesene Gruppe hervorgehoben",
+  "explained.tdh.proofs.words.showAll": "Alle {words} Wörter zeigen",
+  "explained.tdh.proofs.words.showLit": "Nur die Gruppe zeigen",
   "explained.tdh.proofs.raw.summary": "Die {bytes} Bytes, wie der Verifier sie liest",
   "explained.tdh.proofs.raw.cap": "Die öffentlichen Werte von Beweis A für den {date}: ein Wort pro Zeile, in der Reihenfolge der Aussage.",
   "explained.tdh.proofs.raw.copy": "Die Bytes kopieren"

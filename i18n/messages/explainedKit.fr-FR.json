@@ -144,7 +144,7 @@
   "explained.kit.day.simulated": "simulé",
   "explained.kit.liveStrip.today": "Aujourd'hui sur le réseau",
   "explained.kit.liveStrip.legend": "En pointillé : aujourd'hui, encore ouverte.",
-  "explained.kit.liveStrip.legendOpen": "En pointillé : le résultat du {date}, qui compte aujourd'hui.",
+  "explained.kit.liveStrip.legendOpen": "En pointillé : aujourd'hui, encore en cours. Un résultat porte la date du minuit qui clôt sa journée, donc celui d'aujourd'hui indiquera le {date}.",
   "explained.kit.contents.label": "Sur cette page",
   "explained.kit.receipt.label": "Le reçu du cycle {cycle}",
   "explained.kit.receipt.result": "Résultat",
