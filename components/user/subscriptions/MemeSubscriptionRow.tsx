@@ -9,7 +9,7 @@ import { formatAddress } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -426,12 +426,11 @@ export default function MemeSubscriptionRow(
                   />
                 ) : (
                   <span className="tw-text-iron-500">
-                    {new Intl.DateTimeFormat(locale, {
+                    {formatUtcDate(locale, props.date.utcDay, {
                       weekday: "short",
                       month: "short",
                       day: "numeric",
-                      timeZone: "UTC",
-                    }).format(props.date.utcDay)}
+                    })}
                   </span>
                 )}
                 <span className="tw-text-iron-600" aria-hidden="true">

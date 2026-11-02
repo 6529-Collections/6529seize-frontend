@@ -15,7 +15,7 @@ import {
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
   formatSubscriptionCoverageDate,
@@ -131,11 +131,10 @@ export default function SubscriptionCoverageSummary({
   const presentation = getSubscriptionCoveragePresentation(locale, status);
   const description = t(locale, getDescriptionKey(status, isOwner));
   const fundedDate = coverage?.funded_through
-    ? new Intl.DateTimeFormat(locale, {
+    ? formatUtcDate(locale, coverage.funded_through.mint_at, {
         month: "short",
         day: "numeric",
-        timeZone: "UTC",
-      }).format(new Date(coverage.funded_through.mint_at))
+      })
     : null;
   let headline = presentation.label;
   if (

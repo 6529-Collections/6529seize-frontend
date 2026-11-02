@@ -523,10 +523,15 @@ export default function UserPageSubscriptionsTopUp({
       </div>
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-flex-col max-md:tw-items-stretch max-md:tw-text-center">
         <p
+          role="status"
           aria-live="polite"
+          aria-atomic="true"
           className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300"
         >
           {selectedDescription}
+          {selectedOption === "other" && selectedTopUp !== null && (
+            <span className="tw-sr-only">{submitLabel}</span>
+          )}
         </p>
         <div className="tw-flex tw-flex-wrap tw-gap-2 max-md:tw-w-full">
           {onCancel && (

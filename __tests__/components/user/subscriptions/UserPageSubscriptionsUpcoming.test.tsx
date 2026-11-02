@@ -3,6 +3,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import * as localeFormat from "@/i18n/format";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -212,11 +213,12 @@ describe("UserPageSubscriptionsUpcoming", () => {
   });
 
   it("formats upcoming mint days as UTC calendar days", () => {
-    const format = jest.spyOn(Intl, "DateTimeFormat");
+    const format = jest.spyOn(localeFormat, "formatUtcDate");
     renderComponent();
     expect(format).toHaveBeenCalledWith(
       "en-US",
-      expect.objectContaining({ timeZone: "UTC" })
+      mockUpcomingRows[0].utcDay,
+      { weekday: "short", month: "short", day: "numeric" }
     );
     format.mockRestore();
   });
