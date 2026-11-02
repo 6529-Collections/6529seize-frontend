@@ -3,6 +3,7 @@
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChatVideoPoster } from "@/hooks/useChatVideoPoster";
 import { t } from "@/i18n/messages";
 
 export function WaveDropAdditionalInfoVideo({
@@ -15,6 +16,7 @@ export function WaveDropAdditionalInfoVideo({
   readonly layout: "prominent" | "fill";
 }) {
   const locale = useBrowserLocale();
+  const poster = useChatVideoPoster(src, true);
   const { downloadMedia, isDownloading, openMedia, openLabel } =
     useMediaActions({
       url: src,
@@ -32,6 +34,8 @@ export function WaveDropAdditionalInfoVideo({
       src={src}
       template="watch-media"
       preload={preload}
+      poster={poster?.url ?? "/video-preview-placeholder.svg"}
+      aspectRatioHint={poster?.aspectRatio}
       layout={layout}
       align="center"
       locale={locale}
