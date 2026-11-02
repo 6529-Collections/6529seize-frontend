@@ -530,6 +530,10 @@ for (const guide of [
         );
         await page.getByRole("tab", { name: "Déjà collectionneur" }).click();
         await expectNoHorizontalOverflow(page);
+        await page.setViewportSize({ width: 320, height: 850 });
+        await expectNoHorizontalOverflow(page);
+        await page.getByRole("tab", { name: "Partir de zéro" }).click();
+        await expectNoHorizontalOverflow(page);
       }
     });
   });

@@ -178,9 +178,15 @@ export default function SafeCollecting({
               href={`#${SAFE_SETUP_ANCHOR}`}
               variant="primary"
               size="lg"
+              className="tw-max-w-full"
             >
-              {t(locale, "safeCollecting.cta")}
-              <ArrowDownIcon aria-hidden="true" className="tw-size-4" />
+              <span className="tw-whitespace-normal">
+                {t(locale, "safeCollecting.cta")}
+              </span>
+              <ArrowDownIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-shrink-0"
+              />
             </ButtonLink>
             <Link
               className={`${SC_LINK} tw-text-sm`}
