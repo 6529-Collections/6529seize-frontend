@@ -13,6 +13,7 @@ import type { E2eeConversation } from "@/lib/e2ee/types";
 import { getConversationTitle, getDmPeer, tCount } from "../e2eeFormat";
 import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
 import { E2eeBadge } from "../ui/E2eeBadge";
+import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 
 const ICON_BUTTON =
   "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 aria-expanded:tw-bg-white/10";
@@ -55,17 +56,23 @@ export function E2eeConversationHeader({
         <ArrowLeftIcon aria-hidden="true" className="tw-size-5" />
       </Link>
       {peer || conversation.kind === "dm" ? (
-        <E2eeAvatar
-          pfp={peer?.pfp ?? null}
-          name={peer?.handle ?? title}
-          size="md"
-        />
+        <E2eeProfileLink
+          member={peer}
+          avatar
+          className="tw-inline-flex tw-flex-shrink-0"
+        >
+          <E2eeAvatar
+            pfp={peer?.pfp ?? null}
+            name={peer?.handle ?? title}
+            size="md"
+          />
+        </E2eeProfileLink>
       ) : (
         <E2eeAvatarStack people={others} max={3} size="sm" />
       )}
       <div className="tw-min-w-0 tw-flex-1">
         <h1 className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 lg:tw-text-lg">
-          {title}
+          <E2eeProfileLink member={peer}>{title}</E2eeProfileLink>
         </h1>
         <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <E2eeBadge

@@ -18,6 +18,8 @@ export const E2EE_MESSAGES = {
   "e2ee.loading": "Loading encrypted messages…",
   "e2ee.you": "You",
   "e2ee.youObject": "you",
+  "e2ee.profile.view": "View {name}'s profile",
+  "e2ee.profile.level": "Level {level}",
   "e2ee.someone": "Someone",
   "e2ee.unknownMember": "Unknown member",
 
