@@ -4456,6 +4456,53 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath("compact-vote-tabs.png"),
       });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      if (app && testInfo.project.use.hasTouch) {
+        await input.focus();
+        try {
+          for (const height of [160, 300]) {
+            const clearance = await input.evaluate(async (element, inset) => {
+              const root = document.documentElement;
+              // Native keyboard events update these shared layout variables.
+              root.style.setProperty(
+                "--native-keyboard-layout-transition-duration",
+                "0ms"
+              );
+              root.style.setProperty(
+                "--native-keyboard-inset-bottom",
+                `${inset}px`
+              );
+              // Reveal the input on layout frames, without a keyboard-settle timer.
+              for (let frame = 0; frame < 3; frame++) {
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
+              const scrollport = element.closest(
+                '[data-testid="artist-preview-app-scroll"]'
+              );
+              if (!scrollport) throw new Error("Submission scrollport missing");
+              return (
+                scrollport.getBoundingClientRect().bottom -
+                element.getBoundingClientRect().bottom
+              );
+            }, height);
+            expect(clearance).toBeGreaterThanOrEqual(0);
+            await expect(
+              dialog.getByRole("button", { name: "Close panel", exact: true })
+            ).toBeInViewport({ ratio: 1 });
+          }
+        } finally {
+          await input.evaluate((element) => {
+            element.blur();
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-layout-transition-duration"
+            );
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-inset-bottom"
+            );
+          });
+        }
+      }
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
