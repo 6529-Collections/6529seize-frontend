@@ -80,7 +80,6 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
-import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
@@ -3177,6 +3176,10 @@ export const EN_US_ROOT_MESSAGES = {
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
+  // The header and the drop actions menu link to artwork documentation from
+  // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
+  "artworkDocumentation.title": "Artwork documentation",
+  "artworkDocumentation.myWorks": "My artwork documentation",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,
@@ -4774,7 +4777,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
-  ...ARTWORK_DOCUMENTATION_MESSAGES,
   ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
