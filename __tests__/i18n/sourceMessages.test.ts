@@ -192,6 +192,26 @@ describe("browser source messages", () => {
     expect(reportUnregisteredMessageKey).toHaveBeenCalledWith(UNREGISTERED_KEY);
   });
 
+  it("warns when the monitoring chunk fails instead of dropping the report", async () => {
+    const consoleWarn = jest
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
+    jest.doMock(MONITORING_MODULE, () => {
+      throw new Error("chunk request failed");
+    });
+    mockCompleteDictionary({});
+    const { messages } = loadBrowserModules();
+
+    expect(() => messages.t("en-US", UNREGISTERED_KEY)).not.toThrow();
+    await waitFor(() => {
+      expect(consoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining(`"${UNREGISTERED_KEY}"`)
+      );
+    });
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    consoleWarn.mockRestore();
+  });
+
   it("stops asking for the complete dictionary after one retry", async () => {
     let attempts = 0;
     jest.doMock(COMPLETE_MODULE, () => {
