@@ -343,11 +343,9 @@ function WebSidebarUser({
             ? `${accountDescriptionId} ${deviceStatusId}`
             : accountDescriptionId
         }
-        data-tooltip-id={
-          isDeviceSecurityStatusEnabled()
-            ? `${deviceStatusId}-tooltip`
-            : undefined
-        }
+        {...(isDeviceSecurityStatusEnabled() && {
+          "data-tooltip-id": `${deviceStatusId}-tooltip`,
+        })}
         aria-controls="user-menu"
       >
         <span id={accountDescriptionId} className="tw-sr-only">

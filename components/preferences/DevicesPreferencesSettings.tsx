@@ -189,7 +189,7 @@ function DeviceGrantRow({
       )}
       {canRename &&
         grant.revoked_at === null &&
-        (!linkedDevice || linkedDevice.revoked_at === null) && (
+        (linkedDevice?.revoked_at ?? null) === null && (
           <details className="tw-basis-full">
             <summary className="tw-cursor-pointer tw-text-sm tw-text-primary-300">
               {t(locale, "e2ee.devices.rename.action")}

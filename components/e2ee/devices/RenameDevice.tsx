@@ -73,12 +73,9 @@ export function RenameDevice({
       >
         {t(locale, "e2ee.devices.rename.save")}
       </Button>
-      <span
-        role="status"
-        className="tw-text-xs tw-text-iron-400 sm:tw-self-center"
-      >
+      <output className="tw-text-xs tw-text-iron-400 sm:tw-self-center">
         {resultKey ? t(locale, resultKey) : null}
-      </span>
+      </output>
     </form>
   );
 }

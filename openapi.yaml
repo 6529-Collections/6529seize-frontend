@@ -3391,7 +3391,7 @@ paths:
     post:
       tags:
         - Authentication
-      summary: Rename an device signing grant owned by the caller
+      summary: Rename a device signing grant owned by the caller
       operationId: renameDeviceGrant
       security:
         - bearerAuth: []
