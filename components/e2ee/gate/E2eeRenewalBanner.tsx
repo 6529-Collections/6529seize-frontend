@@ -42,18 +42,24 @@ export function E2eeRenewalBanner(props: RenewalBannerProps) {
 }
 
 function RenewalBannerRoute(props: RenewalBannerProps) {
-  const pathname = usePathname() ?? "";
+  const pathname = usePathname();
   const search = useSearchParams();
-  const inMessages =
-    pathname === "/messages" || pathname.startsWith("/messages/");
-  const inWaves = pathname === "/waves" || pathname.startsWith("/waves/");
+  const inMessages = isRenewalRoute(pathname, "/messages");
+  const inWaves = isRenewalRoute(pathname, "/waves");
   if (!inMessages && !inWaves) return null;
   return (
     <RenewalBannerContent
       {...props}
-      inMessages={Boolean(inMessages)}
+      inMessages={inMessages}
       preview={search.get("showRenewal") === "true"}
     />
+  );
+}
+
+function isRenewalRoute(pathname: string | null, route: string) {
+  return (
+    pathname !== null &&
+    (pathname === route || pathname.startsWith(`${route}/`))
   );
 }
 
