@@ -2,7 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDistributionAirdropsCsvUploadRequest } from "@/generated/models/ApiDistributionAirdropsCsvUploadRequest";
@@ -339,7 +339,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
       try {
         const data = await fetchAllPages<DistributionPhoto>(
-          `${publicEnv.API_ENDPOINT}/api/distribution_photos/${contract}/${tokenId}`
+          apiUrl(`/api/distribution_photos/${contract}/${tokenId}`)
         );
         if (photosViewerRequestIdRef.current !== requestId) {
           return;
@@ -430,7 +430,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       }));
       try {
         await downloadAirdropsCsv(
-          `${publicEnv.API_ENDPOINT}/api/distributions/${contract}/${tokenId}/${phase}-airdrops`,
+          apiUrl(`/api/distributions/${contract}/${tokenId}/${phase}-airdrops`),
           `${phase}_airdrops_${tokenId}.csv`,
           undefined,
           {

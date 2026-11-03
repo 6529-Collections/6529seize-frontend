@@ -55,6 +55,12 @@ export default function RememeImage(props: Readonly<Props>) {
   const imageFallbackUrls = getImageFallbackUrls();
   const videoFallbackUrls = getVideoFallbackUrls();
   const imageAlt = getImageAlt(props.nft);
+  // Only the single-rememe page (650px) shows one large image above the fold.
+  // Grid cards load as they approach the viewport instead of all competing
+  // for bandwidth with the page's main image.
+  const isProminent = props.height === 650;
+  const imageLoading = isProminent ? "eager" : "lazy";
+  const imageFetchPriority = isProminent ? "high" : "auto";
 
   function getImageFallbackUrls() {
     const urls: string[] = [];
@@ -133,8 +139,8 @@ export default function RememeImage(props: Readonly<Props>) {
       >
         <Image
           unoptimized
-          loading="eager"
-          priority
+          loading={imageLoading}
+          fetchPriority={imageFetchPriority}
           width="0"
           height="0"
           style={{
@@ -160,8 +166,8 @@ export default function RememeImage(props: Readonly<Props>) {
     >
       <Image
         unoptimized
-        loading="eager"
-        priority
+        loading={imageLoading}
+        fetchPriority={imageFetchPriority}
         width="0"
         height="0"
         style={{

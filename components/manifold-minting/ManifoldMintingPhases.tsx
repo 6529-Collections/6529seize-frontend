@@ -3,6 +3,7 @@
 import type { Distribution } from "@/entities/IDistribution";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
+import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import {
   buildMemesPhases,
   ManifoldClaimStatus,
@@ -180,7 +181,7 @@ export default function ManifoldMemesMintingPhases(
           search: address,
         });
         const response = await fetch(
-          `https://api.6529.io/api/distributions?${query.toString()}`,
+          `${PUBLIC_PRODUCTION_API_BASE}/api/distributions?${query.toString()}`,
           { signal: controller.signal }
         );
         if (!response.ok) {

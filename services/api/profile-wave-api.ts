@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
@@ -14,7 +14,7 @@ type SetProfileWaveRequestBody = {
 };
 
 const buildProfileWaveUrl = (identity: string): string =>
-  `${publicEnv.API_ENDPOINT}/api/profiles/${encodeURIComponent(identity)}/wave`;
+  apiUrl(`/api/profiles/${encodeURIComponent(identity)}/wave`);
 
 const buildProfileWaveHeaders = (): HeadersInit => {
   const apiAuth = getStagingAuth();

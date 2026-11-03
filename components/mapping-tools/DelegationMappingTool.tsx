@@ -4,7 +4,7 @@ import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -40,7 +40,9 @@ export default function DelegationMappingTool() {
 
     const useCaseFilter = `&use_case=1,${useCase}`;
     const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
-    const initialUrl = `${publicEnv.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
+    const initialUrl = apiUrl(
+      `/api/delegations?${useCaseFilter}${collectionFilter}`
+    );
 
     fetchAllPages<Delegation>(initialUrl)
       .then((loadedDelegations) => {
