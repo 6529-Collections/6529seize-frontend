@@ -2,7 +2,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE_ADDRESSES,
 } from "@/components/nextGen/nextgen_addresses";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -105,7 +105,7 @@ export function useActivityData(
 
     let isCurrentRequest = true;
     setFetching(true);
-    let url = `${publicEnv.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
+    let url = apiUrl(`/api/transactions?page_size=${pageSize}&page=${page}`);
 
     switch (typeFilter) {
       case TypeFilter.SALES:

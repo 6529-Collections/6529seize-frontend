@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { BaseNFT } from "@/entities/INFT";
@@ -24,7 +24,7 @@ export const resolveMemeLabRoute = cache(
     try {
       const params = new URLSearchParams({ contract: MEMELAB_CONTRACT, id });
       const response = await fetchUrl<DBResponse<BaseNFT>>(
-        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?${params.toString()}`,
+        apiUrl(`/api/nfts_memelab?${params.toString()}`),
         { cache: "no-store" }
       );
       if (!Array.isArray(response.data)) {
