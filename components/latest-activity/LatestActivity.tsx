@@ -10,8 +10,8 @@ import {
 } from "@/constants/constants";
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import { usePathname } from "next/navigation";
 import ActivityFilters from "./ActivityFilters";
 import ActivityHeader from "./ActivityHeader";
@@ -34,7 +34,7 @@ export default function LatestActivity(props: Readonly<Props>) {
     [ContractFilter.ALL]: undefined,
     [ContractFilter.MEMES]: MEMES_CONTRACT,
     [ContractFilter.MEMELAB]: MEMELAB_CONTRACT,
-    [ContractFilter.NEXTGEN]: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+    [ContractFilter.NEXTGEN]: NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID],
     [ContractFilter.GRADIENTS]: GRADIENT_CONTRACT,
   }[selectedContract];
   const filter = getNftActivityFilter(typeFilter);

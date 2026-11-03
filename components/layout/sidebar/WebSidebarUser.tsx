@@ -10,7 +10,10 @@ import { getConnectionProfileIndicator } from "@/components/auth/connection-stat
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
+import {
+  HeaderConnectModal,
+  preloadHeaderQRModal,
+} from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
@@ -42,6 +45,8 @@ function WebSidebarUser({
 }: WebSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [hasRequestedConnectModal, setHasRequestedConnectModal] =
+    useState(false);
   const hasHydrated = useHasHydrated();
   const accountDescriptionId = useId();
   const capacitor = useCapacitor();
@@ -245,6 +250,11 @@ function WebSidebarUser({
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const toggleUserMenu = () => {
+    if (!showUserMenu && canUseDesktopConnect) {
+      // The account menu holds "Connect Device"; fetch the modal as it opens
+      // so the dialog appears without a network wait.
+      preloadHeaderQRModal();
+    }
     setShowUserMenu((current) => !current);
   };
 
@@ -303,6 +313,7 @@ function WebSidebarUser({
 
   const onOpenConnect = () => {
     setShowUserMenu(false);
+    setHasRequestedConnectModal(true);
     setShowConnectModal(true);
   };
 
@@ -394,10 +405,12 @@ function WebSidebarUser({
           />
         </div>
       )}
-      <HeaderConnectModal
-        show={canUseDesktopConnect && showConnectModal}
-        onClose={() => setShowConnectModal(false)}
-      />
+      {hasRequestedConnectModal && (
+        <HeaderConnectModal
+          show={canUseDesktopConnect && showConnectModal}
+          onClose={() => setShowConnectModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -8,27 +8,18 @@ jest.mock("@/components/waves/specs/WaveCustomRules", () => ({
     <div data-testid="guidelines" data-display={display} />
   ),
 }));
-jest.mock("@/components/waves/specs/WaveBindingRules", () => ({
-  __esModule: true,
-  default: ({ display }: { readonly display?: string }) => (
-    <div data-testid="acceptance-rules" data-display={display} />
-  ),
-}));
 
 const makeWave = (type: ApiWaveType): any => ({ wave: { type } });
 
 describe("WaveConfigurationRules", () => {
-  it("shows guidelines and acceptance rules in Configuration", () => {
+  it("keeps competition acceptance rules out of wave Configuration", () => {
     render(<WaveConfigurationRules wave={makeWave(ApiWaveType.Rank)} />);
 
     expect(screen.getByTestId("guidelines")).toHaveAttribute(
       "data-display",
       "configuration"
     );
-    expect(screen.getByTestId("acceptance-rules")).toHaveAttribute(
-      "data-display",
-      "configuration"
-    );
+    expect(screen.queryByTestId("acceptance-rules")).not.toBeInTheDocument();
   });
 
   it("shows guidelines without acceptance rules for chat waves", () => {

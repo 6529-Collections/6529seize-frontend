@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type {
   AlchemyContractMetadataResponse,
   AlchemyGetNftsForOwnerResponse,
@@ -36,7 +36,7 @@ const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
 
 function getBackendAlchemyProxyUrl(path: string): string {
-  return `${publicEnv.API_ENDPOINT}/alchemy-proxy${path}`;
+  return apiUrl(`/alchemy-proxy${path}`);
 }
 
 function isAbortError(error: unknown): boolean {

@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { DropHasher } from "@/utils/drop-hasher";
 import { sha256 } from "js-sha256";
@@ -52,7 +53,7 @@ export function isStructuredSignaturesEnabled(): boolean {
 }
 
 export function getWalletSignatureAudience(): string {
-  return new URL(publicEnv.API_ENDPOINT).host.toLowerCase();
+  return new URL(getApiBase()).host.toLowerCase();
 }
 
 export function getWalletSignatureDomain(): string {

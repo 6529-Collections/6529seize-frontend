@@ -125,6 +125,8 @@ criteria.` even when unfiltered distribution data exists.
 
 ## Failure and Recovery
 
+- Timeline previews use [historical media fallbacks](../nft/feature-media-source-fallbacks.md#historical-timeline-previews)
+  when a recorded Arweave source fails.
 - If card content does not appear, reopen the card from `/meme-lab` or refresh
   `/meme-lab/{id}`.
 - If a deep link opens the wrong tab, replace `focus` with a supported key or

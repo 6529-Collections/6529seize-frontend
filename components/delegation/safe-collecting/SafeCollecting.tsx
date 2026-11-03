@@ -156,7 +156,7 @@ export default function SafeCollecting({
   useSectionHashFocus();
 
   return (
-    <div className="tw-w-full">
+    <div className="tw-w-full tw-break-words">
       <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 lg:tw-grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:tw-gap-12">
         <div>
           <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
@@ -178,9 +178,15 @@ export default function SafeCollecting({
               href={`#${SAFE_SETUP_ANCHOR}`}
               variant="primary"
               size="lg"
+              className="tw-max-w-full"
             >
-              {t(locale, "safeCollecting.cta")}
-              <ArrowDownIcon aria-hidden="true" className="tw-size-4" />
+              <span className="tw-whitespace-normal">
+                {t(locale, "safeCollecting.cta")}
+              </span>
+              <ArrowDownIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-shrink-0"
+              />
             </ButtonLink>
             <Link
               className={`${SC_LINK} tw-text-sm`}

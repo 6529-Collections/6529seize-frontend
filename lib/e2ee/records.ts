@@ -1,3 +1,4 @@
+import type { HistorySummary } from "./history-order";
 import type {
   ApiE2eeDeviceGrant,
   ApiE2eeNotifyHint,
@@ -110,6 +111,8 @@ export interface StoredGroup {
   /** Seqs of our own messages (we cannot decrypt our own ciphertext). */
   sentSeqs: number[];
   readSeq: number;
+  /** Incremental summary of processed, persisted local history. */
+  history?: HistorySummary;
   createdAt: number;
   joinedAt: number;
   updatedAt: number;

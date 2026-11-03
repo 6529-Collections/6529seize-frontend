@@ -19,7 +19,7 @@ import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
@@ -408,7 +408,7 @@ export default function SubscriptionsReportComponent() {
   const csvDownloadUrl = useMemo(() => {
     const downloadUrl = new URL(
       "/api/subscriptions/redeemed-memes-counts/download",
-      publicEnv.API_ENDPOINT
+      getApiBase()
     );
 
     if (selectedSeason) {

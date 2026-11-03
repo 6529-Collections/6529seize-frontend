@@ -3285,11 +3285,11 @@ paths:
             pattern: ^0x[0-9a-f]{64}$
           description: >-
             Web only, with device_key and mls_ciphersuite. The device's MLS
-            Ed25519 signature public key (0x + 64 lowercase hex), different
-            from device_key. When encrypted messages are on and mls_ciphersuite
-            is the server's ciphersuite, the SIWE message is a combined grant:
-            it also grants this key for end-to-end encrypted messages with the
-            same expiry (a second urn:6529:mls-device-grant:v1 resource and a
+            Ed25519 signature public key (0x + 64 lowercase hex), different from
+            device_key. When encrypted messages are on and mls_ciphersuite is
+            the server's ciphersuite, the SIWE message is a combined grant: it
+            also grants this key for end-to-end encrypted messages with the same
+            expiry (a second urn:6529:mls-device-grant:v1 resource and a
             combined statement). Otherwise the challenge grants device_key only.
         - name: mls_ciphersuite
           in: query
@@ -5793,6 +5793,48 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}:
+    patch:
+      tags:
+        - CompetitionsV3
+      summary: Update shared wave settings without changing any competition
+      operationId: updateWaveHubV3
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/waves/wave-hub.handlers"
+          name: handleUpdateWaveHubV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateWaveHubRequest"
+      responses:
+        "200":
+          description: Updated shared wave and configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveV3"
+        "400":
+          description: Invalid wave settings
+        "403":
+          description: Wave administration is not permitted
+        "404":
+          description: Wave is absent or unavailable
     get:
       tags:
         - CompetitionsV3
@@ -9022,8 +9064,8 @@ paths:
         current_event_id is the event whose body is the drop's current content,
         or null when the current content is not author signed. Returns 404 when
         the caller cannot read the drop. When moderation hides the drop's
-        content from the caller or its author is anonymous to the caller, returns
-        the empty result of an unsigned drop (no events, no grants,
+        content from the caller or its author is anonymous to the caller,
+        returns the empty result of an unsigned drop (no events, no grants,
         current_event_id null).
       operationId: getDropSignedEvents
       security:
@@ -10362,13 +10404,13 @@ paths:
       summary: Register or renew an encrypted-messaging device from a sign-in grant
       description: >-
         Registers the MLS device key that a combined sign-in grant (NC8) also
-        granted, without a separate wallet signature. The grant must be one
-        this server stored at a Sign-In with Ethereum login, unrevoked and
-        unexpired, carrying an urn:6529:mls-device-grant:v1 resource for the
-        current ciphersuite, and its wallet must belong to the caller's
-        profile. Same device limit and renewal rules as POST /e2ee/devices.
-        Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
-        feature flag is off.
+        granted, without a separate wallet signature. The grant must be one this
+        server stored at a Sign-In with Ethereum login, unrevoked and unexpired,
+        carrying an urn:6529:mls-device-grant:v1 resource for the current
+        ciphersuite, and its wallet must belong to the caller's profile. Same
+        device limit and renewal rules as POST /e2ee/devices. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
       operationId: e2eeRegisterLoginGrantDevice
       security:
         - bearerAuth: []
@@ -11410,8 +11452,8 @@ paths:
       summary: Delete all of the caller's encrypted backups
       description: >-
         Deletes every backup generation and chunk of the caller's profile
-        (turning backup off and making every recovery code useless).
-        Idempotent. Requires a profile; proxies are rejected.
+        (turning backup off and making every recovery code useless). Idempotent.
+        Requires a profile; proxies are rejected.
       operationId: e2eeDeleteBackups
       security:
         - bearerAuth: []
@@ -11445,8 +11487,8 @@ paths:
         Creates a pending generation with a client-chosen random backup_id and
         the opaque envelope (the backup key wrapped by the user's recovery
         method). Any other pending generation of the profile is deleted. The
-        generation replaces the active one only when activated. The device
-        must be an active device of the caller's profile.
+        generation replaces the active one only when activated. The device must
+        be an active device of the caller's profile.
       operationId: e2eeCreateBackup
       security:
         - bearerAuth: []
@@ -11489,8 +11531,8 @@ paths:
         - Encrypted Messages
       summary: Get one of the caller's backup generations
       description: >-
-        Active or pending. 404 E2EE_NOT_FOUND when the generation does not
-        exist (deleted, replaced or pruned) or belongs to another profile.
+        Active or pending. 404 E2EE_NOT_FOUND when the generation does not exist
+        (deleted, replaced or pruned) or belongs to another profile.
       operationId: e2eeGetBackup
       security:
         - bearerAuth: []
@@ -11635,13 +11677,13 @@ paths:
       summary: Append one ciphertext chunk to a backup generation
       description: >-
         The server assigns the next sequence number. With `expected_seq` the
-        append succeeds only when that is the generation's next sequence
-        number; otherwise nothing is stored and the response is 409
+        append succeeds only when that is the generation's next sequence number;
+        otherwise nothing is stored and the response is 409
         E2EE_BACKUP_SEQ_CONFLICT with the current `next_seq` (another device
-        appended first). The ciphertext length must be one of the backup
-        chunk buckets (4, 16, 64 or 256 KiB, or 1 MiB). Each profile may
-        store at most 256 MiB of backup ciphertext across its generations
-        (413 E2EE_BACKUP_QUOTA) and at most 10,000 chunks per generation (413
+        appended first). The ciphertext length must be one of the backup chunk
+        buckets (4, 16, 64 or 256 KiB, or 1 MiB). Each profile may store at most
+        256 MiB of backup ciphertext across its generations (413
+        E2EE_BACKUP_QUOTA) and at most 10,000 chunks per generation (413
         E2EE_TOO_LARGE).
       operationId: e2eeAppendBackupChunk
       security:
@@ -11743,9 +11785,9 @@ paths:
         - Encrypted Messages
       summary: Delete the older chunks of a backup generation
       description: >-
-        Deletes the generation's chunks with seq <= through_seq. Clients call
-        it after re-uploading a full snapshot so superseded ciphertext (for
-        example of deleted messages) does not linger.
+        Deletes the generation's chunks with seq <= through_seq. Clients call it
+        after re-uploading a full snapshot so superseded ciphertext (for example
+        of deleted messages) does not linger.
       operationId: e2eeCompactBackup
       security:
         - bearerAuth: []
@@ -12042,13 +12084,13 @@ paths:
         - Encrypted Messages
       summary: Report a decrypted encrypted message
       description: >-
-        For severe or illegal harm only. The reporter discloses one message
-        body and the sender's inner signature, which the server verifies.
-        Reports are readable only by content moderators (and the optional
-        E2EE_TRUST_AND_SAFETY_GROUP_ID group), are never sent to an AI
-        provider or to wave moderators, and are
-        deleted after 180 days unless placed on hold. Requires a profile;
-        proxies are rejected; 404 E2EE_DISABLED while the feature flag is off.
+        For severe or illegal harm only. The reporter discloses one message body
+        and the sender's inner signature, which the server verifies. Reports are
+        readable only by content moderators (and the optional
+        E2EE_TRUST_AND_SAFETY_GROUP_ID group), are never sent to an AI provider
+        or to wave moderators, and are deleted after 180 days unless placed on
+        hold. Requires a profile; proxies are rejected; 404 E2EE_DISABLED while
+        the feature flag is off.
       operationId: e2eeReportMessage
       security:
         - bearerAuth: []
@@ -12121,8 +12163,8 @@ paths:
           in: query
           required: false
           description: >-
-            Return reports created before this time (ms). With `before_id`,
-            also reports created at exactly this time whose id sorts before
+            Return reports created before this time (ms). With `before_id`, also
+            reports created at exactly this time whose id sorts before
             `before_id`.
           schema:
             type: integer
@@ -12165,9 +12207,9 @@ paths:
         - Encrypted Messages
       summary: Read one reported encrypted message (trust and safety)
       description: >-
-        Only content moderators and, when it is set, members of the group
-        named by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every read is
-        recorded in an access log. Proxies are rejected.
+        Only content moderators and, when it is set, members of the group named
+        by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every read is recorded
+        in an access log. Proxies are rejected.
       operationId: e2eeGetTrustAndSafetyReport
       security:
         - bearerAuth: []
@@ -12207,10 +12249,10 @@ paths:
         - Encrypted Messages
       summary: Place a reported encrypted message on hold or release it
       description: >-
-        A report on hold is kept past the 180-day retention until released.
-        Only content moderators and, when it is set, members of the group
-        named by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every change is
-        recorded in an access log. Proxies are rejected.
+        A report on hold is kept past the 180-day retention until released. Only
+        content moderators and, when it is set, members of the group named by
+        E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every change is recorded
+        in an access log. Proxies are rejected.
       operationId: e2eeSetTrustAndSafetyReportHold
       security:
         - bearerAuth: []
@@ -19190,6 +19232,10 @@ paths:
       tags:
         - Waves
       summary: Create or edit wave decision pause
+      deprecated: true
+      description: >-
+        Legacy compatibility command; accepted without changing competition
+        pauses.
       operationId: updateWaveDecisionPause
       parameters:
         - name: id
@@ -19218,9 +19264,10 @@ paths:
       tags:
         - Waves
       summary: Delete wave decision pause
+      deprecated: true
       description: >-
-        Pause can only be deleted if no past decisions have already been skipped
-        based on it.
+        Legacy compatibility command; accepted without changing competition
+        pauses.
       operationId: deleteWaveDecisionPause
       parameters:
         - name: waveId
@@ -19512,7 +19559,9 @@ paths:
       tags:
         - Waves
       summary: Create new wave
-      description: Requires the user to be authenticated
+      description: >-
+        Applies shared wave fields only. Legacy competition settings are
+        accepted and ignored. Requires permission to create a wave.
       operationId: createWave
       requestBody:
         required: true
@@ -19643,6 +19692,9 @@ paths:
       tags:
         - Waves
       summary: Update wave by ID
+      description: >-
+        Applies shared wave fields only. Legacy competition settings are
+        accepted and ignored. Use competition endpoints to edit competitions.
       operationId: updateWaveById
       parameters:
         - name: id
@@ -30971,7 +31023,9 @@ components:
           type: string
     ApiCreateWaveHubRequest:
       type: object
-      additionalProperties: false
+      description: >-
+        Creates a shared wave. Legacy competition settings are accepted and
+        ignored.
       required:
         - idempotency_key
         - name
@@ -30989,7 +31043,7 @@ components:
         picture:
           type: string
           format: uri
-          pattern: ^https://
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
           description: HTTPS URL for the wave picture, or null.
           nullable: true
         description_drop:
@@ -32770,8 +32824,8 @@ components:
     ApiE2eeBackup:
       type: object
       description: >-
-        One generation of an encrypted message-history backup. The server
-        sees only ciphertext sizes and times.
+        One generation of an encrypted message-history backup. The server sees
+        only ciphertext sizes and times.
       required:
         - backup_id
         - envelope
@@ -32789,8 +32843,8 @@ components:
         envelope:
           type: string
           description: >-
-            Standard base64 of the opaque key envelope (the backup key
-            wrapped by the user's recovery method)
+            Standard base64 of the opaque key envelope (the backup key wrapped
+            by the user's recovery method)
         active:
           type: boolean
         chunk_count:
@@ -32868,17 +32922,17 @@ components:
         data:
           type: string
           description: >-
-            Standard base64 of the chunk ciphertext; its length must be a
-            backup chunk bucket
+            Standard base64 of the chunk ciphertext; its length must be a backup
+            chunk bucket
         expected_seq:
           type: integer
           minimum: 1
           description: >-
-            Optional precondition: the sequence number this chunk must get.
-            When the generation's next sequence number differs (another
-            device appended first) the append is refused with 409
-            E2EE_BACKUP_SEQ_CONFLICT. Omitted, the chunk gets the next
-            sequence number.
+            Optional precondition: the sequence number this chunk must get. When
+            the generation's next sequence number differs (another device
+            appended first) the append is refused with 409
+            E2EE_BACKUP_SEQ_CONFLICT. Omitted, the chunk gets the next sequence
+            number.
     ApiE2eeBackupDeviceRequest:
       type: object
       required:
@@ -32915,36 +32969,6 @@ components:
           items:
             type: integer
           description: Allowed chunk ciphertext lengths in bytes
-    ApiE2eeCompactBackupRequest:
-      type: object
-      required:
-        - device_key
-        - through_seq
-      properties:
-        device_key:
-          type: string
-          description: The caller's active device (0x + 64 lowercase hex)
-        through_seq:
-          type: integer
-          minimum: 1
-          description: Chunks with seq <= through_seq are deleted
-    ApiE2eeCreateBackupRequest:
-      type: object
-      required:
-        - backup_id
-        - envelope
-        - device_key
-      properties:
-        backup_id:
-          type: string
-          description: 0x + 32 lowercase hex, random
-        envelope:
-          type: string
-          description: >-
-            Standard base64 of the opaque key envelope (at most 8 KiB raw)
-        device_key:
-          type: string
-          description: The caller's active device (0x + 64 lowercase hex)
     ApiE2eeBlob:
       type: object
       required:
@@ -33051,6 +33075,35 @@ components:
           description: Only these devices; default all active devices of the profile
           items:
             type: string
+    ApiE2eeCompactBackupRequest:
+      type: object
+      required:
+        - device_key
+        - through_seq
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+        through_seq:
+          type: integer
+          minimum: 1
+          description: Chunks with seq <= through_seq are deleted
+    ApiE2eeCreateBackupRequest:
+      type: object
+      required:
+        - backup_id
+        - envelope
+        - device_key
+      properties:
+        backup_id:
+          type: string
+          description: 0x + 32 lowercase hex, random
+        envelope:
+          type: string
+          description: Standard base64 of the opaque key envelope (at most 8 KiB raw)
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
     ApiE2eeCreateBlobRequest:
       type: object
       required:
@@ -33173,7 +33226,9 @@ components:
           description: 0x + 64 hex
         ciphersuite:
           type: integer
-          description: 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft code point)
+          description: >-
+            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft
+            code point)
         issued_at:
           type: integer
           format: int64
@@ -33552,6 +33607,24 @@ components:
         created_at:
           type: integer
           format: int64
+    ApiE2eeReportCategory:
+      type: string
+      description: >-
+        Severe or illegal harm only: child sexual abuse material, a credible
+        threat of violence, non-consensual intimate imagery, or doxxing (exposed
+        personal data)
+      enum:
+        - CHILD_SEXUAL_ABUSE_MATERIAL
+        - CREDIBLE_THREAT_OF_VIOLENCE
+        - NON_CONSENSUAL_INTIMATE_IMAGERY
+        - DOXXING
+    ApiE2eeReportHoldRequest:
+      type: object
+      required:
+        - on_hold
+      properties:
+        on_hold:
+          type: boolean
     ApiE2eeReportRequest:
       type: object
       required:
@@ -33583,110 +33656,6 @@ components:
         notes:
           type: string
           maxLength: 1000
-    ApiE2eeReportCategory:
-      type: string
-      description: >-
-        Severe or illegal harm only: child sexual abuse material, a credible
-        threat of violence, non-consensual intimate imagery, or doxxing
-        (exposed personal data)
-      enum:
-        - CHILD_SEXUAL_ABUSE_MATERIAL
-        - CREDIBLE_THREAT_OF_VIOLENCE
-        - NON_CONSENSUAL_INTIMATE_IMAGERY
-        - DOXXING
-    ApiE2eeReportHoldRequest:
-      type: object
-      required:
-        - on_hold
-      properties:
-        on_hold:
-          type: boolean
-    ApiE2eeTrustAndSafetyReport:
-      type: object
-      required:
-        - id
-        - group
-        - epoch
-        - category
-        - body
-        - signature
-        - sender_device_key
-        - sender_profile_id
-        - reporter_device_key
-        - reporter_profile_id
-        - notes
-        - verified
-        - on_hold
-        - created_at
-        - expires_at
-      properties:
-        id:
-          type: string
-        group:
-          type: string
-        epoch:
-          type: integer
-          format: int64
-        category:
-          type: string
-          description: >-
-            An ApiE2eeReportCategory value (reports filed before categories
-            were restricted may hold an older reason)
-        body:
-          type: string
-          description: Standard base64 of the reported message body (UTF-8 JSON)
-        signature:
-          type: string
-        sender_device_key:
-          type: string
-        sender_profile_id:
-          type: string
-          nullable: true
-        reporter_device_key:
-          type: string
-        reporter_profile_id:
-          type: string
-        notes:
-          type: string
-          nullable: true
-        verified:
-          type: boolean
-          description: >-
-            The sender's device signature verified and the sender was in the
-            group
-        on_hold:
-          type: boolean
-        created_at:
-          type: integer
-          format: int64
-        expires_at:
-          type: integer
-          format: int64
-          nullable: true
-          description: When retention deletes the report (ms); null while on hold
-    ApiE2eeTrustAndSafetyReportPage:
-      type: object
-      required:
-        - items
-        - next_before
-        - next_before_id
-      properties:
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
-        next_before:
-          type: integer
-          format: int64
-          nullable: true
-          description: Pass as `before` for the next page; null on the last page
-        next_before_id:
-          type: string
-          nullable: true
-          description: >-
-            Pass as `before_id` with `before` for the next page, so reports
-            sharing a timestamp are neither skipped nor repeated; null on the
-            last page
     ApiE2eeRevokeDeviceRequest:
       type: object
       required:
@@ -33821,6 +33790,92 @@ components:
             type: string
         welcome:
           $ref: "#/components/schemas/ApiE2eeWelcomeUpload"
+    ApiE2eeTrustAndSafetyReport:
+      type: object
+      required:
+        - id
+        - group
+        - epoch
+        - category
+        - body
+        - signature
+        - sender_device_key
+        - sender_profile_id
+        - reporter_device_key
+        - reporter_profile_id
+        - notes
+        - verified
+        - on_hold
+        - created_at
+        - expires_at
+      properties:
+        id:
+          type: string
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        category:
+          type: string
+          description: >-
+            An ApiE2eeReportCategory value (reports filed before categories were
+            restricted may hold an older reason)
+        body:
+          type: string
+          description: Standard base64 of the reported message body (UTF-8 JSON)
+        signature:
+          type: string
+        sender_device_key:
+          type: string
+        sender_profile_id:
+          type: string
+          nullable: true
+        reporter_device_key:
+          type: string
+        reporter_profile_id:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+          description: >-
+            The sender's device signature verified and the sender was in the
+            group
+        on_hold:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+        expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: When retention deletes the report (ms); null while on hold
+    ApiE2eeTrustAndSafetyReportPage:
+      type: object
+      required:
+        - items
+        - next_before
+        - next_before_id
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        next_before:
+          type: integer
+          format: int64
+          nullable: true
+          description: Pass as `before` for the next page; null on the last page
+        next_before_id:
+          type: string
+          nullable: true
+          description: >-
+            Pass as `before_id` with `before` for the next page, so reports
+            sharing a timestamp are neither skipped nor repeated; null on the
+            last page
     ApiE2eeUploadKeyPackagesRequest:
       type: object
       required:
@@ -41094,8 +41149,7 @@ components:
         mls_device_key:
           type: string
           pattern: ^0x[0-9a-f]{64}$
-          description: >-
-            Combined grant: the MLS device key to grant for encrypted messages.
+          description: "Combined grant: the MLS device key to grant for encrypted messages."
         mls_ciphersuite:
           type: integer
           minimum: 1
@@ -42188,6 +42242,46 @@ components:
             Decisions before this time will not be made. Should not overlap with
             other pauses. Needs to be after start_time, after now and after
             wave.next_decision_time
+    ApiUpdateWaveHubChat:
+      type: object
+      properties:
+        scope:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        enabled:
+          type: boolean
+        links_disabled:
+          type: boolean
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
+          nullable: true
+        replies:
+          $ref: "#/components/schemas/ApiCreateNewWaveChatRepliesConfig"
+    ApiUpdateWaveHubRequest:
+      type: object
+      description: >-
+        Partial shared-wave edit. Omitted fields remain unchanged. Legacy
+        competition fields are accepted and ignored, including explicit nulls.
+        This command never changes competition configuration.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 250
+        picture:
+          type: string
+          format: uri
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
+          nullable: true
+        visibility:
+          $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
+        chat:
+          $ref: "#/components/schemas/ApiUpdateWaveHubChat"
+        admin_group:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiUpdateWaveNotificationPreferencesRequest:
       type: object
       properties:
@@ -44049,6 +44143,9 @@ components:
         - capabilities
         - permissions
       properties:
+        configuration:
+          description: Shared wave settings independent of the original competition.
+          $ref: "#/components/schemas/ApiWave"
         legacy_primary_competition_id:
           type: string
           nullable: true

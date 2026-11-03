@@ -5,6 +5,20 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.selected-post-preview",
+      "kind": "workflow",
+      "title": "Read a selected public Wave post without JavaScript",
+      "aliases": ["selected drop preview", "public drop link"],
+      "keywords": ["waves", "drop", "serialNo", "preview", "JavaScript"],
+      "facts": [
+        "Without JavaScript, a public Wave link containing drop or serialNo shows the selected post's author, UTC publication date, text, images and links to other media instead of the latest feed. Storm previews include at most ten parts.",
+        "Private, direct-message, moderated, unavailable and wrong-wave posts have no public post preview. The preview never uses wallet-only access. Interactive post overlays still require connecting a wallet."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "preview"],
+      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+    },
+    {
       "id": "waves.artist-submissions-popup",
       "kind": "ui_affordance",
       "title": "Artist Submissions popup and Additional Action badge",
@@ -1216,6 +1230,9 @@
         "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "The matching desktop OS expands automatically when detected; phones, tablets and unknown devices start collapsed. Expand Windows, macOS or Linux to see versions and download installers directly. Arweave mirrors appear when published. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
+        "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
+        "Versions and installer links are feed-driven and update without a frontend deployment. If one feed is unavailable, other downloads remain usable and Try again retries the failed requests.",
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
@@ -3526,7 +3543,8 @@
         "report encrypted message",
         "encrypted backup",
         "recovery code",
-        "restore encrypted messages"
+        "restore encrypted messages",
+        "paste image in encrypted chat"
       ],
       "keywords": [
         "encrypted",
@@ -3539,18 +3557,20 @@
         "trust and safety",
         "backup",
         "restore",
-        "recovery code"
+        "recovery code",
+        "paste"
       ],
       "facts": [
         "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
         "To start an encrypted chat, search for a person and tap or click their search result. The search clears and the person appears in the selected list with their encrypted-message eligibility. A new chat requires everyone selected to be eligible. If the encrypted direct message already exists, choose Open chat instead.",
         "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
         "Where it is offered, the wallet sign-in on a web browser can turn on signed messages and encrypted messages with the same single signature; that browser then becomes an encrypted-messages device without a second prompt. On the website, Turn on encrypted messages (one signature) asks for that same combined sign-in signature when the sign-in did not cover encrypted messages (for example the profile did not exist yet), and replaces the browser's earlier signed-messages grant, so the browser keeps one grant. The 6529 apps use a separate encrypted-messages signature. Revoking that device, from Devices that can post as you or from encrypted devices, turns off both.",
+        "Encrypted chats open at their newest saved messages. Load older messages and Load newer messages browse this device's saved history, and New messages returns to the latest. Photos load near the visible part of a chat. Search, replies and encrypted backups still include older saved messages outside the current view. Previous results and Next results browse long search result lists. A device catching up after being offline must still process messages it has not received yet.",
         "Encrypted backup is optional. In /messages/encrypted/devices select Turn on backup to get a recovery code (shown once; copy or download it). Your history is then backed up encrypted and incrementally; 6529 cannot read it or recover the code.",
         "On a new device turn on encrypted messages, then in Devices select Restore messages and enter the recovery code. Restored chats show From backup and are read-only until someone in the chat adds the new device. Without backup, losing all devices or clearing browser data loses that history.",
         "Create new recovery code replaces the backup and makes the old code stop working (do this after revoking a device that had backup on). Turn off backup deletes the encrypted backup from 6529.",
         "In encrypted DMs, the person’s name and avatar in the header and introduction open their profile. Message authors have ordinary profile links, desktop profile hover cards, levels, artist badges and profile-wave badges where applicable. Highlighted member mentions also open profiles. Public profile details use ordinary profile data; message contents stay encrypted. Unavailable profile details are omitted without hiding local messages.",
-        "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
+        "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. To attach images you can also paste them (Ctrl+V or Cmd+V) into the encrypted message box; the same limits apply, and text copied with an image is pasted too. If attachments are switched off, the attach control is hidden and pasted images are not attached.",
         "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Encrypted messages trust each person's wallets the first time your device sees them (trust on first use). A member's later device is added automatically only when one of those wallets signed it. A device signed by a new wallet, or by a contract wallet whose signature could not be checked, is not added: the chat shows a notice naming the wallet with Add device and Ignore. Add it only if you know whose wallet it is. Chat info shows the wallet that signed each member's device.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
@@ -3567,6 +3587,7 @@
       "tags": ["messages", "encryption", "safety"],
       "source_refs": [
         "ops/docs/encrypted-messages.md",
+        "components/e2ee/conversation/E2eeComposer.tsx",
         "components/e2ee/conversation/E2eeReportDialog.tsx",
         "components/e2ee/backup/E2eeBackupPanel.tsx",
         "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx"
@@ -5710,6 +5731,7 @@
       "keywords": ["mobile", "app", "banner", "open", "install", "dismiss"],
       "facts": [
         "A dismissible 6529 Mobile banner above the small-screen mobile website header offers Open and Get the app. It is hidden inside 6529 Mobile and 6529 Desktop and on authentication, access, app-wallet and handoff routes.",
+        "Supported iOS website links on staging.6529.io are associated with 6529 Staging; production website links use the production app. Whether a link opens in the app depends on installation and iOS link preferences.",
         "Open attempts to launch the current wave, drop, profile or supported page directly in the app, preserving query parameters and fragments. Browser authentication is not transferred; app access and regional restrictions still apply.",
         "Dismissing the banner hides it for seven days in the same browser, including reloads and visits. Clearing website data resets it; blocked storage permits only in-memory dismissal.",
         "Get the app opens the App Store on iOS or Google Play on Android. After installation, return to the browser page and tap Open to reach the destination; installation alone does not preserve it through the store.",
@@ -5721,6 +5743,7 @@
       "source_refs": [
         "components/mobile-app/MobileAppBanner.tsx",
         "helpers/mobileAppLinks.ts",
+        "helpers/appleAppSiteAssociation.ts",
         "hooks/useMobileAppBannerDismissal.ts",
         "ops/docs/navigation/feature-mobile-app-landing.md"
       ]
@@ -6096,7 +6119,7 @@
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
         "The realtime troubleshooting docs cover connection recovery and expected limitations.",
-        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
+        "After the connection recovers, the app returns from the background, a browser tab returns after being hidden for at least 30 seconds, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Briefly switching tabs or windows does not refresh it. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
@@ -7225,7 +7248,7 @@
       ],
       "keywords": ["waves", "picture", "image", "avatar", "edit", "header"],
       "facts": [
-        "Wave picture editing is a wave header feature.",
+        "Wave picture editing is a wave header feature. Changing the picture or name leaves competition rules and identity submission settings unchanged.",
         "Availability depends on permissions and wave state.",
         "Validation and upload states are documented in the update wave picture docs."
       ],
@@ -7243,9 +7266,6 @@
         "read drop",
         "drop display",
         "drop media",
-        "show more",
-        "show less",
-        "long post",
         "ordered list",
         "numbered list"
       ],
@@ -7257,17 +7277,12 @@
         "media",
         "text",
         "markdown",
-        "preview",
-        "expand",
-        "collapse",
         "list",
         "numbered"
       ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
-        "Long Wave and direct-message timeline posts start as a short plain-text preview. Select Show more for the complete markdown body and Show less to shorten it again.",
-        "Expanding or collapsing a long post keeps the reader's place in the reverse-scrolling chat. Short posts and single-drop views remain fully visible.",
-        "Media and file attachments outside the text body remain visible while a long text preview is collapsed. Content display is separate from composer submission behavior.",
+        "Content display is separate from composer submission behavior.",
         "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
@@ -7888,6 +7903,7 @@
       ],
       "facts": [
         "Individual Meme Card pages live at /the-memes/{id}.",
+        "Timeline videos start paused; use the Play control to watch them. Main artwork playback is unchanged. Timeline previews try the recorded media URL first. Failed Arweave previews can use alternate gateways for that same historical file. They never substitute the card's current artwork or infer an Arweave archive for a file without a recorded Arweave reference. Historical animations use their own before/after formats, so removed videos remain videos. If the format is missing, Arweave previews check that historical file's content type through supported HTTPS gateways and keep an Open link if it cannot be identified. Other sources without a historical format keep the Open link without an automatic header request. Open links support HTTP and HTTPS; native Arweave references open through a matching gateway. Malformed or unsupported media URLs show preview unavailable text instead of a link. Current artwork uses the current card's media and format.",
         "On desktop, the artwork stays in the left column while the adjacent card details scroll. It stops at the end of that section, before the tabs. On smaller screens the artwork scrolls normally with the page.",
         "Meme Card market actions sit in a bordered panel at every screen size. When a wallet connection is required, the existing guidance and white Connect wallet lead the panel, separated from the trading actions by a divider. Connect fills its own row in narrow panels. Collect keeps its complete label and price visible in its 44px button; Make an offer uses the remaining width and can truncate visually. The square more-actions menu stays alongside. In very narrow panels, Collect fills its own row above Make an offer and the menu. The bottom bar also keeps the complete Collect label visible. When Collect is present, the available List action moves into that menu. Without Collect, Make an offer shares the row with List when available, or fills both labelled slots otherwise. Delivery controls appear below when a wallet is connected. Review offers remains available in that menu. View listings & offers has its own navigation row below Supply details & rankings and still opens the existing market tab. Make an offer and List keep their tertiary button treatment. All actions share one panel background. Disabled Collect stays dimmed blue and non-interactive in both the panel and the bottom bar. Below 1024px the bottom bar starts after the desktop left rail when visible; on phones it spans the screen. The purchase review, action availability and wallet requirements are unchanged.",
         "On phones and tablets, the latest Meme Card's countdown and Subscription Minting panel appear above the artwork. Ownership, format switching and media actions stay below the artwork. Below 1024px, tabs stay at the top while scrolling. Below 1024px, when inline market actions are off screen, a bottom bar repeats the available Collect and Make an offer actions above app navigation. While listings are selected in the active Listings & offers tab, the selection review bar takes its place; the card actions return when selection is cleared or another tab opens. Delivery, owner actions and the additional-actions menu remain available in the inline section.",
@@ -8109,6 +8125,7 @@
       "keywords": ["meme", "lab", "card", "tabs", "distribution"],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
+        "Timeline videos start paused; use the Play control to watch them. Main artwork playback is unchanged. Timeline previews try the recorded media URL first. Failed Arweave previews can use alternate gateways for that same historical file. They never substitute the card's current artwork or infer an Arweave archive for a file without a recorded Arweave reference. Historical animations use their own before/after formats, so removed videos remain videos. If the format is missing, Arweave previews check that historical file's content type through supported HTTPS gateways and keep an Open link if it cannot be identified. Other sources without a historical format keep the Open link without an automatic header request. Open links support HTTP and HTTPS; native Arweave references open through a matching gateway. Malformed or unsupported media URLs show preview unavailable text instead of a link. Current artwork uses the current card's media and format.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
         "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top.",
         "Meme Lab cards use the same marketplace controls as The Memes. Collect shows the lowest supported listing and Other listings exposes alternatives. Make an offer opens a WETH offer for the exact card. List requires the wallet holding the editions. In Listings & offers, Collect selects an exact listing and Sell opens an eligible offer; orders sharing a price require an explicit choice. Edition quantities are supported. Collection-wide and trait offers are checked for this exact Meme Lab card before review.",

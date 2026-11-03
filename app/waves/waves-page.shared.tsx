@@ -14,6 +14,8 @@ import {
 import { toMetadataExcerpt } from "@/helpers/metadataText";
 import WavesPageClient from "./page.client";
 import { fetchPublicWaveFeed } from "./public-wave-feed.server";
+import { fetchPublicWaveDrop } from "./public-wave-drop.server";
+import PublicWaveDrop from "@/components/waves/PublicWaveDrop";
 import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
 import PublicWaveFeed from "@/components/waves/PublicWaveFeed";
 import WaveServerFeedSeed, {
@@ -28,7 +30,7 @@ import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfi
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { formatAddress } from "@/helpers/Helpers";
 import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, normalizeLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   getWaveRouteWithSearchParams,
@@ -286,13 +288,20 @@ export async function renderWavesPageContent({
           waveId: context.waveId,
         })
       : null;
-  const publicFeedPromise =
+  const selectedDrop = getStructuredDataDropParam(searchParams);
+  const canPreviewPublicWave =
     includePublicPreview &&
     routeContext === "waves" &&
-    context.waveId &&
-    context.wave &&
-    isPublicNonDirectMessageWave(context.wave)
+    context.waveId !== null &&
+    context.wave !== null &&
+    isPublicNonDirectMessageWave(context.wave);
+  const publicFeedPromise =
+    canPreviewPublicWave && context.waveId && !selectedDrop
       ? fetchPublicWaveFeed(context.waveId)
+      : null;
+  const publicDropPromise =
+    canPreviewPublicWave && context.waveId && selectedDrop
+      ? fetchPublicWaveDrop(context.waveId, selectedDrop)
       : null;
 
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
@@ -304,14 +313,24 @@ export async function renderWavesPageContent({
         )
       : null;
   const publicFeed = publicFeedPromise ? await publicFeedPromise : null;
-  const publicFeedFallback =
-    publicFeed?.ok && publicFeed.items.length > 0 ? (
-      <PublicWaveFeed feed={publicFeed} />
-    ) : null;
+  const publicDrop = publicDropPromise ? await publicDropPromise : null;
+  let publicFeedFallback = null;
+  if (publicDrop) {
+    publicFeedFallback = (
+      <PublicWaveDrop
+        drop={publicDrop}
+        locale={normalizeLocale(
+          getFirstSearchParamValue(searchParams, "locale")
+        )}
+      />
+    );
+  } else if (publicFeed?.ok && publicFeed.items.length > 0) {
+    publicFeedFallback = <PublicWaveFeed feed={publicFeed} />;
+  }
   const wavesPageClient = (
     <WavesPageClient
       publicFeedFallback={publicFeedFallback}
-      publicFeedWaveId={publicFeed?.ok ? publicFeed.waveId : null}
+      publicFeedWaveId={publicFeedFallback ? context.waveId : null}
       waveName={context.wave?.name}
     />
   );
