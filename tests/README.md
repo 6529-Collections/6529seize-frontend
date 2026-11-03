@@ -91,6 +91,9 @@ false: the lock explains closure and its date, shows a compact public group,
 and keeps keyboard navigation to the selected competition's rules usable.
 The fixture also checks closed-submission and open-voting schedule sections,
 inline status/detail alignment, and viewport containment on desktop and mobile.
+Closing-date expectations are literal in UTC, Los Angeles, Auckland, and
+Honolulu. Each timezone also checks that a manual closure date takes precedence
+over a distinct future scheduled deadline.
 The leaderboard card fixture also checks the gap between author and post text
 at phone, medium, and both sides of the desktop action-button breakpoint.
 The open-card deadline case advances the browser clock without navigation and

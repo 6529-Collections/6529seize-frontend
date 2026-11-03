@@ -128,7 +128,7 @@ function getSubmissionStatus(
  * @returns An object containing processed wave information and state
  */
 export function useWave(wave: ApiWave | null | undefined): WaveInfo {
-  // Current time for all timestamp comparisons (consistent throughout the hook)
+  // Stable fallback timestamp for unset boundaries and pause calculations.
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
@@ -258,7 +258,10 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   );
 
   const participationEndTime = useMemo(() => {
-    const closure = wave ? getWaveSubmissionClosure(wave, now) : null;
+    // A refreshed API snapshot may have ended after this hook was mounted.
+    const closure = wave
+      ? getWaveSubmissionClosure(wave, Time.currentMillis())
+      : null;
     if (closure) return closure.closedAt ?? 0;
     return wave?.participation.period?.max ?? now;
   }, [wave, now]);
@@ -288,8 +291,8 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
    * Determine the current status of the submission period
    */
   const submissionStatus = useMemo(
-    () => getSubmissionStatus(wave, now),
-    [wave, now]
+    () => getSubmissionStatus(wave, Time.currentMillis()),
+    [wave]
   );
 
   /**

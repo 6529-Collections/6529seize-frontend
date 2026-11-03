@@ -363,7 +363,7 @@ const competition = (id: string, title: string) => ({
   created_at: 1,
   updated_at: 1,
   published_at: 1,
-  ended_at: null,
+  ended_at: null as number | null,
   cancelled_at: null,
   archived_at: null,
 });
@@ -2116,101 +2116,134 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("explains ended submissions with a date and compact public group", async ({
-    page,
-    baseURL,
-  }, testInfo) => {
-    const sandbox = await installCompetitionApi(
-      page,
-      false,
-      false,
-      ACCESS_WAVE
-    );
-    await sandbox.legacyPrimary("alpha");
-    const beta = competition("beta", "Beta");
-    const closesAt = Date.UTC(2024, 11, 3, 8, 33);
-    const expectedDates = await page.evaluate((timestamp) => {
-      const date = new Date(timestamp);
-      return {
-        full: date.toLocaleDateString("en-US", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
-        short: date.toLocaleDateString("en-US", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }),
-      };
-    }, closesAt);
-    sandbox.setCompetition("beta", {
-      participation: {
-        ...beta.participation,
-        ends_at: closesAt,
-      },
-      permissions: { ...beta.permissions, submit: false },
+  for (const { timezoneId, fullDate, shortDate } of [
+    {
+      timezoneId: "UTC",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "America/Los_Angeles",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "Pacific/Auckland",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "Pacific/Honolulu",
+      fullDate: "December 2, 2024",
+      shortDate: "Dec 2, 2024",
+    },
+  ]) {
+    test.describe(`ended submission dates in ${timezoneId}`, () => {
+      test.use({ timezoneId });
+
+      test("explains ended submissions with a date and compact public group", async ({
+        page,
+        baseURL,
+      }, testInfo) => {
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          false,
+          ACCESS_WAVE
+        );
+        await sandbox.legacyPrimary("alpha");
+        const beta = competition("beta", "Beta");
+        const closesAt = Date.UTC(2024, 11, 3, 8, 33);
+        sandbox.setCompetition("beta", {
+          participation: {
+            ...beta.participation,
+            ends_at: closesAt,
+          },
+          permissions: { ...beta.permissions, submit: false },
+        });
+        await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+        await dismissNextDevTools(page);
+        const action = page.getByRole("button", {
+          name: "Enter Beta",
+          exact: true,
+        });
+        await expect(action).toHaveAccessibleDescription(
+          "Submission period has ended"
+        );
+        await action.press("Enter");
+        const details = page.getByRole("dialog", { name: "Enter Beta" });
+        await expect(details).toBeFocused();
+        await expect(details).toContainText("Submission period has ended");
+        await expect(details).toContainText(`Closed ${fullDate}`);
+        await expect(
+          details.getByText("Public", { exact: true })
+        ).toBeVisible();
+        await expect(details).not.toContainText("don't have permission");
+        await expect(details).not.toContainText(
+          "Other submission rules still apply"
+        );
+        await expect(details).not.toContainText("Chat access is separate");
+        await expectNoHorizontalOverflow(page);
+        await page.keyboard.press("Tab");
+        const rules = details.getByRole("link", {
+          name: "View submission rules",
+        });
+        await expect(rules).toBeFocused();
+        await rules.press("Enter");
+        await expect(
+          page.getByRole("tab", { name: "Settings", exact: true }).first()
+        ).toHaveAttribute("aria-selected", "true");
+        await page.goto(
+          `/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`
+        );
+        const submissions = page.getByText("Submissions closed", {
+          exact: true,
+        });
+        const voting = page.getByText("Voting open", { exact: true });
+        const submissionsRow = page
+          .getByText("Submissions closed", { exact: true })
+          .locator("..");
+        const votingRow = page
+          .getByText("Voting open", { exact: true })
+          .locator("..");
+        await expect(submissions).toBeInViewport({ ratio: 1 });
+        await expect(voting).toBeInViewport({ ratio: 1 });
+        await expect(submissionsRow).toContainText(shortDate);
+        await expect(votingRow).toContainText("No end date");
+        for (const [status, detail] of [
+          [submissions, submissionsRow.getByText(shortDate)],
+          [voting, votingRow.getByText("No end date")],
+        ] as const) {
+          await expect
+            .poll(async () => {
+              const statusBox = await status.boundingBox();
+              const detailBox = await detail.boundingBox();
+              if (!statusBox || !detailBox) return Number.POSITIVE_INFINITY;
+              return Math.abs(statusBox.y - detailBox.y);
+            })
+            .toBeLessThanOrEqual(3);
+        }
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("submission-statuses.png"),
+        });
+        sandbox.setCompetition("beta", {
+          lifecycle: "ENDED",
+          ended_at: closesAt,
+          participation: {
+            ...beta.participation,
+            ends_at: Date.UTC(2099, 11, 3, 8, 33),
+          },
+          permissions: { ...beta.permissions, submit: false },
+        });
+        await page.reload();
+        await expect(submissions).toBeInViewport({ ratio: 1 });
+        await expect(submissionsRow).toContainText(shortDate);
+        await expect(submissionsRow).not.toContainText("2099");
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
     });
-    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
-    await dismissNextDevTools(page);
-    const action = page.getByRole("button", {
-      name: "Enter Beta",
-      exact: true,
-    });
-    await expect(action).toHaveAccessibleDescription(
-      "Submission period has ended"
-    );
-    await action.press("Enter");
-    const details = page.getByRole("dialog", { name: "Enter Beta" });
-    await expect(details).toBeFocused();
-    await expect(details).toContainText("Submission period has ended");
-    await expect(details).toContainText(`Closed ${expectedDates.full}`);
-    await expect(details.getByText("Public", { exact: true })).toBeVisible();
-    await expect(details).not.toContainText("don't have permission");
-    await expect(details).not.toContainText(
-      "Other submission rules still apply"
-    );
-    await expect(details).not.toContainText("Chat access is separate");
-    await expectNoHorizontalOverflow(page);
-    await page.keyboard.press("Tab");
-    const rules = details.getByRole("link", { name: "View submission rules" });
-    await expect(rules).toBeFocused();
-    await rules.press("Enter");
-    await expect(
-      page.getByRole("tab", { name: "Settings", exact: true }).first()
-    ).toHaveAttribute("aria-selected", "true");
-    await page.goto(`/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`);
-    const submissions = page.getByText("Submissions closed", { exact: true });
-    const voting = page.getByText("Voting open", { exact: true });
-    const submissionsRow = page
-      .getByText("Submissions closed", { exact: true })
-      .locator("..");
-    const votingRow = page
-      .getByText("Voting open", { exact: true })
-      .locator("..");
-    await expect(submissions).toBeInViewport({ ratio: 1 });
-    await expect(voting).toBeInViewport({ ratio: 1 });
-    await expect(submissionsRow).toContainText(expectedDates.short);
-    await expect(votingRow).toContainText("No end date");
-    for (const [status, detail] of [
-      [submissions, submissionsRow.getByText(expectedDates.short)],
-      [voting, votingRow.getByText("No end date")],
-    ] as const) {
-      await expect
-        .poll(async () => {
-          const statusBox = await status.boundingBox();
-          const detailBox = await detail.boundingBox();
-          if (!statusBox || !detailBox) return Number.POSITIVE_INFINITY;
-          return Math.abs(statusBox.y - detailBox.y);
-        })
-        .toBeLessThanOrEqual(3);
-    }
-    await expectNoHorizontalOverflow(page);
-    await page.screenshot({
-      path: testInfo.outputPath("submission-statuses.png"),
-    });
-    await expectNoUnsafeSandboxMutations(baseURL);
-  });
+  }
 
   test("updates an open restriction card when submissions end", async ({
     page,
