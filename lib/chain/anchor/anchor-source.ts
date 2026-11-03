@@ -24,6 +24,19 @@
  *    fails closed.
  * 4. The source never returns a lower anchor than one it returned before.
  *
+ * The threshold is an absolute count of agreeing operators, never a share
+ * of those that answered: a provider that fails, times out or answers
+ * badly counts as non-agreement, so failures cannot lower the bar. This
+ * follows the design's nearest rule, P41 §5.2 ("equal at one height from
+ * two gateways of different operators"), and DN12's acceptance test
+ * ("with any one provider down or lying"), which three providers meet.
+ *
+ * P33's guarantee that `anchor` never decreases is per signing key and
+ * belongs to the Signer, which persists (seq, anchor) before signing. The
+ * guard in step 4 only keeps this source from reporting a regression. It
+ * lives in memory unless an `AnchorFloorStore` is passed; the desktop core
+ * passes one to carry the floor across restarts.
+ *
  * The native-height source (P33 §3.6) plugs in beside this one once the
  * gateway read API exists; consumers switch on `Anchor.kind`.
  */
@@ -52,7 +65,17 @@ export type Anchor = EthereumFinalizedAnchor;
 export type AnchorFailure = "too-few-sources" | "conflict" | "wrong-chain";
 
 export type AnchorResult =
-  | { readonly ok: true; readonly anchor: Anchor }
+  | {
+      readonly ok: true;
+      /** Frozen; its provenance is that of the fetch that produced it. */
+      readonly anchor: Anchor;
+      /**
+       * True when providers now report a lower block and the source holds
+       * an earlier anchor instead. `anchor.reportedBy` is then the earlier
+       * fetch's, not today's.
+       */
+      readonly held: boolean;
+    }
   | { readonly ok: false; readonly reason: AnchorFailure; readonly detail: string };
 
 export interface AnchorSource {
@@ -66,12 +89,21 @@ export interface EthereumRpcEndpoint {
   readonly url: string;
 }
 
+/** Where the never-move-backwards floor is kept between instances. */
+export interface AnchorFloorStore {
+  read(): Promise<EthereumFinalizedAnchor | null>;
+  write(anchor: EthereumFinalizedAnchor): Promise<void>;
+}
+
 export interface EthereumAnchorOptions {
   readonly endpoints: readonly EthereumRpcEndpoint[];
+  /** Agreeing operators required, counted absolutely (at least 2). */
   readonly minAgreement?: number;
   readonly expectedChainId?: bigint;
   readonly fetch?: typeof fetch;
   readonly timeoutMs?: number;
+  /** Persists the floor; without it the floor lives in this instance only. */
+  readonly floor?: AnchorFloorStore;
 }
 
 interface BlockRef {
@@ -137,6 +169,14 @@ function timeoutSignal(
   };
 }
 
+function frozenAnchor(anchor: EthereumFinalizedAnchor): EthereumFinalizedAnchor {
+  return Object.freeze({
+    ...anchor,
+    reportedBy: Object.freeze([...anchor.reportedBy]),
+    dissent: Object.freeze([...anchor.dissent]),
+  });
+}
+
 function operatorsOf(reports: readonly Report[]): string[] {
   return [...new Set(reports.map((report) => report.endpoint.operator))];
 }
@@ -176,7 +216,6 @@ export function createEthereumFinalizedAnchorSource(options: EthereumAnchorOptio
   const expectedChainId = options.expectedChainId ?? 1n;
   const doFetch = options.fetch ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const chainIds = new Map<string, bigint>();
   let requestId = 0;
   let last: EthereumFinalizedAnchor | null = null;
 
@@ -214,14 +253,10 @@ export function createEthereumFinalizedAnchorSource(options: EthereumAnchorOptio
     }
   }
 
+  // Asked on every fetch, never cached: a provider that changes chain must
+  // stop counting at once.
   async function chainIdOf(endpoint: EthereumRpcEndpoint, signal?: AbortSignal): Promise<bigint> {
-    const known = chainIds.get(endpoint.id);
-    if (known !== undefined) {
-      return known;
-    }
-    const id = quantity(await rpc(endpoint, "eth_chainId", [], signal), "chain ID");
-    chainIds.set(endpoint.id, id);
-    return id;
+    return quantity(await rpc(endpoint, "eth_chainId", [], signal), "chain ID");
   }
 
   async function reportOf(
@@ -253,12 +288,23 @@ export function createEthereumFinalizedAnchorSource(options: EthereumAnchorOptio
     }
   }
 
-  function keepMonotonic(anchor: EthereumFinalizedAnchor): AnchorResult {
-    if (last !== null && anchor.number < last.number) {
-      return { ok: true, anchor: last };
+  async function floorAnchor(): Promise<EthereumFinalizedAnchor | null> {
+    if (last === null && options.floor !== undefined) {
+      const stored = await options.floor.read();
+      last = stored !== null && stored.chainId === expectedChainId ? frozenAnchor(stored) : null;
     }
+    return last;
+  }
+
+  async function keepMonotonic(fresh: EthereumFinalizedAnchor): Promise<AnchorResult> {
+    const floor = await floorAnchor();
+    if (floor !== null && fresh.number < floor.number) {
+      return { ok: true, anchor: floor, held: true };
+    }
+    const anchor = frozenAnchor(fresh);
     last = anchor;
-    return { ok: true, anchor };
+    await options.floor?.write(anchor);
+    return { ok: true, anchor, held: false };
   }
 
   return {
@@ -282,6 +328,14 @@ export function createEthereumFinalizedAnchorSource(options: EthereumAnchorOptio
         const block = blocks[i];
         return block === null || block === undefined ? [] : [{ operator: r.endpoint.operator, block }];
       });
+      const answering = new Set(entries.map((entry) => entry.operator)).size;
+      if (answering < minAgreement) {
+        return {
+          ok: false,
+          reason: "too-few-sources",
+          detail: `${answering} of ${minAgreement} operators answered at block ${number.toString()}`,
+        };
+      }
       const [top, second] = groupByHash(entries);
       if (top === undefined || top.operators.length < minAgreement || top.operators.length === second?.operators.length) {
         return { ok: false, reason: "conflict", detail: `no hash at block ${number.toString()} has ${minAgreement} operators` };
