@@ -93,7 +93,13 @@ import {
 } from "./fixtures/design-vectors";
 
 const ZERO32: Hex = `0x${"00".repeat(32)}`;
-const SECP256K1_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const SECP256K1_N: bigint = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+/** A uint256 as 64 hex digits, so every signature vector has a fixed width. */
+const hex32 = (value: bigint): string => value.toString(16).padStart(64, "0");
+const N_HEX = hex32(SECP256K1_N);
+const N_MINUS_1_HEX = hex32(SECP256K1_N - 1n);
+const HALF_N_HEX = hex32(SECP256K1_N >> 1n);
+const HALF_N_PLUS_1_HEX = hex32((SECP256K1_N >> 1n) + 1n);
 const kc =(text: string): Hex => keccak256(stringToBytes(text));
 const cidRaw = (text: string): Hex =>
   `0x01551220${createHash("sha256").update(text).digest("hex")}`;
@@ -668,15 +674,15 @@ describe("SignedTx admission checks", () => {
   it.each([
     ["r = 0", `0x${"00".repeat(32)}${"11".repeat(32)}1b`],
     ["s = 0", `0x${"11".repeat(32)}${"00".repeat(32)}1b`],
-    ["r = n", `0x${SECP256K1_N.toString(16)}${"11".repeat(32)}1b`],
-    ["s = n/2 + 1", `0x${"11".repeat(32)}${((SECP256K1_N >> 1n) + 1n).toString(16)}1c`],
+    ["r = n", `0x${N_HEX}${"11".repeat(32)}1b`],
+    ["s = n/2 + 1", `0x${"11".repeat(32)}${HALF_N_PLUS_1_HEX}1c`],
   ])("refuses a keyType-1 signature with %s", (_name, sig) => {
     const entry: TxSignature = { role: 0, keyType: 1, sig: sig as Hex, proof: "0x" };
     expect(checkSignatureList(e1Header, [entry])?.code).toBe(ChainResultCode.NONCANONICAL_SIGNATURE);
   });
 
   it("accepts the boundary values r = n - 1 and s = n/2", () => {
-    const sig = `0x${(SECP256K1_N - 1n).toString(16)}${(SECP256K1_N >> 1n).toString(16).padStart(64, "0")}1c`;
+    const sig = `0x${N_MINUS_1_HEX}${HALF_N_HEX}1c`;
     const entry: TxSignature = { role: 0, keyType: 1, sig: sig as Hex, proof: "0x" };
     expect(checkSignatureList(e1Header, [entry])).toBeNull();
   });

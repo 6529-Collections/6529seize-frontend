@@ -438,9 +438,9 @@ export function checkHeaderRules(header: TxHeader, opType: number): ChainCodecEr
   return identityRules(header, opType) ?? windowAndFeeRules(header);
 }
 
-const SECP256K1_ORDER =
-  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
-const SECP256K1_HALF_ORDER = SECP256K1_ORDER >> 1n;
+/** secp256k1's group order n. */
+const SECP256K1_ORDER: bigint = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const SECP256K1_HALF_ORDER: bigint = SECP256K1_ORDER >> 1n;
 const SECP256K1_SIGNATURE_BYTES = 65;
 
 function signatureLengthFor(keyType: number): number | null {
@@ -463,7 +463,7 @@ function listRule(reason: string, item: number): ChainCodecError {
 }
 
 function bigFromBytes(raw: Uint8Array): bigint {
-  let value = 0n;
+  let value: bigint = 0n;
   for (const byte of raw) {
     value = (value << 8n) | BigInt(byte);
   }
@@ -481,8 +481,8 @@ function secp256k1Canonical(sig: Hex): boolean {
   if (raw.length !== SECP256K1_SIGNATURE_BYTES) {
     return false;
   }
-  const r = bigFromBytes(raw.subarray(0, 32));
-  const s = bigFromBytes(raw.subarray(32, 64));
+  const r: bigint = bigFromBytes(raw.subarray(0, 32));
+  const s: bigint = bigFromBytes(raw.subarray(32, 64));
   const v = raw[64];
   return (
     (v === 27 || v === 28) &&
