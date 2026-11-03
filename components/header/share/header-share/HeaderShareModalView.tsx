@@ -2,16 +2,12 @@
 
 import { ConnectionShareNotice } from "./ConnectionShareNotice";
 import {
+  ConnectDeviceChoices,
   ConnectDeviceContent,
   ConnectDeviceFooter,
 } from "./ConnectDeviceContent";
 import { DesktopConnectionLink } from "./DesktopConnectionLink";
 import DeviceConnectionShare from "./DeviceConnectionShare";
-import {
-  isAppDeviceGrantsEnabled,
-  isSignedMessagesEnabled,
-} from "@/lib/device-signing/feature";
-import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { faCopy, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -39,7 +35,6 @@ import {
   PageShareTarget,
   SubMode,
 } from "./constants";
-import { ModalMenu } from "./HeaderShareMenu";
 import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
 import { buildSocialShareUrls, type ConnectionShareStatus } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
@@ -616,36 +611,13 @@ export function HeaderShareModalView({
 
     if (!connectionMode) {
       return (
-        <>
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
-            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.chooseApp")}
-          </p>
-          <ModalMenu
-            activeSubTab={activeSubTab}
-            isElectron={isElectron}
-            onSubTabChange={setActiveSubTab}
-          />
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => setConnectionMode("only")}
-          >
-            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.only")}
-          </Button>
-          {account.canSetUp &&
-            isAppDeviceGrantsEnabled() &&
-            isSignedMessagesEnabled() &&
-            isE2eeEnabled() && (
-              <Button
-                variant="primary"
-                size="md"
-                className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2"
-                onClick={() => setConnectionMode("secure")}
-              >
-                {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
-              </Button>
-            )}
-        </>
+        <ConnectDeviceChoices
+          activeSubTab={activeSubTab}
+          isElectron={isElectron}
+          setActiveSubTab={setActiveSubTab}
+          canSetUp={account.canSetUp}
+          setConnectionMode={setConnectionMode}
+        />
       );
     }
 

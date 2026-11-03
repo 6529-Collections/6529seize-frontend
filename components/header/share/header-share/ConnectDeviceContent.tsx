@@ -1,3 +1,10 @@
+import {
+  isAppDeviceGrantsEnabled,
+  isSignedMessagesEnabled,
+} from "@/lib/device-signing/feature";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { ModalMenu } from "./HeaderShareMenu";
+import type { SubMode } from "./constants";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
@@ -79,5 +86,52 @@ export function ConnectDeviceFooter({
         {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.oneTime")}
       </p>
     </div>
+  );
+}
+
+export function ConnectDeviceChoices({
+  activeSubTab,
+  isElectron,
+  setActiveSubTab,
+  canSetUp,
+  setConnectionMode,
+}: {
+  readonly activeSubTab: SubMode;
+  readonly isElectron: boolean;
+  readonly setActiveSubTab: (tab: SubMode) => void;
+  readonly canSetUp: boolean;
+  readonly setConnectionMode: (mode: "only" | "secure") => void;
+}) {
+  return (
+    <>
+      <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+        {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.chooseApp")}
+      </p>
+      <ModalMenu
+        activeSubTab={activeSubTab}
+        isElectron={isElectron}
+        onSubTabChange={setActiveSubTab}
+      />
+      <Button
+        variant="secondary"
+        size="md"
+        onClick={() => setConnectionMode("only")}
+      >
+        {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.only")}
+      </Button>
+      {canSetUp &&
+        isAppDeviceGrantsEnabled() &&
+        isSignedMessagesEnabled() &&
+        isE2eeEnabled() && (
+          <Button
+            variant="primary"
+            size="md"
+            className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2"
+            onClick={() => setConnectionMode("secure")}
+          >
+            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
+          </Button>
+        )}
+    </>
   );
 }

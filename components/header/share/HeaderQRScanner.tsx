@@ -156,6 +156,16 @@ export default function HeaderQRScanner({
     router.push(route);
   };
 
+  const handleConnectionShareQRCode = (content: string) => {
+    const route = getConnectionShareRoute({ content, appScheme });
+    if (!route) {
+      setToast({ message: invalidQRCodeMessage, type: "error" });
+      return;
+    }
+    onScanSuccess();
+    router.push(route);
+  };
+
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
@@ -171,13 +181,7 @@ export default function HeaderQRScanner({
         router.push(resolvedPath);
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
-          const route = getConnectionShareRoute({ content, appScheme });
-          if (!route) {
-            setToast({ message: invalidQRCodeMessage, type: "error" });
-            return;
-          }
-          onScanSuccess();
-          router.push(route);
+          handleConnectionShareQRCode(content);
           return;
         }
         const resolvedUrl = content.replace(`${appScheme}://`, "");
