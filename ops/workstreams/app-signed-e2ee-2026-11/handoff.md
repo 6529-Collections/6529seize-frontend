@@ -128,7 +128,7 @@ staging by hand (below) with that secret.
 Staging has app grants on. Use a throwaway wallet with a profile.
 
 1. Phone: use mobile #26's `claude/release-1.4` branch. Run
-   `npm run prepare:ios:staging`, open Xcode and select `mobileStaging6529`,
+   `npm run prepare:ios`, open Xcode and select `mobileStaging6529`,
    then sign and run on a physical iPhone. For Android use
    `npm run prepare:android:staging` and the `stagingDebug` variant. Do not
    edit tracked `capacitor.config.json`; the schemes/flavors select staging.
