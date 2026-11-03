@@ -120,12 +120,12 @@ describe("SignedMessagesNotice", () => {
     };
   });
 
-  it("offers to turn on signed messages with one signature while the composer is empty", async () => {
+  it("offers to turn on signed posts with one signature while the composer is empty", async () => {
     render(<SignedMessagesNotice composerEmpty />);
 
     expect(
       screen.getByRole("region", {
-        name: "Turn on signed messages (one signature)",
+        name: "Turn on signed posts (one signature)",
       })
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
@@ -133,7 +133,7 @@ describe("SignedMessagesNotice", () => {
     expect(mockRequestGrant).toHaveBeenCalledTimes(1);
     await waitFor(() =>
       expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Signed messages are on in this browser.",
+        message: "Signed posts are on in this browser.",
         type: "success",
       })
     );
@@ -165,13 +165,13 @@ describe("SignedMessagesNotice", () => {
   it("reminds in the grant's last 14 days and after it expires", () => {
     mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW + 5 * DAY }) };
     const { rerender } = render(<SignedMessagesNotice composerEmpty />);
-    expect(screen.getByText(/^Signed messages end on/)).toBeVisible();
+    expect(screen.getByText(/^Signed posts end on/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Renew" })).toBeVisible();
 
     mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW - DAY }) };
     rerender(<SignedMessagesNotice composerEmpty />);
     expect(
-      screen.getByText("Signed messages have ended in this browser")
+      screen.getByText("Signed posts have ended in this browser")
     ).toBeVisible();
   });
 
@@ -247,7 +247,7 @@ describe("SignedMessagesNotice", () => {
       );
       await waitFor(() =>
         expect(mockSetToast).toHaveBeenCalledWith({
-          message: "Signed messages are on in this browser.",
+          message: "Signed posts are on in this browser.",
           type: "success",
         })
       );

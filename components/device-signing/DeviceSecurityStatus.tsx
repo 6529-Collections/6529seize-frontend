@@ -169,13 +169,11 @@ export function DeviceSecurityDetails({
   );
 }
 
-function DeviceSecurityStatusContent({
-  descriptionId,
-  menuOpen,
-}: {
-  readonly descriptionId: string;
-  readonly menuOpen: boolean;
-}) {
+type DeviceSecurityStatusProps =
+  | { readonly descriptionId: string; readonly menuOpen: boolean }
+  | { readonly presentation: "mobile-badge" | "inline" };
+
+function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
   const details = useDeviceSecurityState();
   const { proof, encrypted, proofRenewal, encryptionRenewal } = details;
   const isTouchDevice = useIsTouchDevice();
@@ -188,17 +186,33 @@ function DeviceSecurityStatusContent({
   if (healthy) statusColor = "tw-text-green-400";
   if (attention) statusColor = "tw-text-amber-300";
   const Icon = healthy ? ShieldCheckIcon : ShieldExclamationIcon;
+  if ("presentation" in props && props.presentation === "inline") {
+    return (
+      <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300">
+        <Icon
+          aria-hidden="true"
+          className={`tw-size-4 tw-shrink-0 ${statusColor}`}
+        />
+        <div className="tw-min-w-0">
+          <DeviceSecurityDetails {...details} />
+        </div>
+      </div>
+    );
+  }
+  const desktop = "descriptionId" in props ? props : null;
   return (
     <span
       className={`tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-2 tw-ring-iron-950 ${statusColor}`}
     >
       <Icon aria-hidden="true" className="tw-size-4" />
-      <span id={descriptionId} className="tw-sr-only">
-        <DeviceSecurityDetails {...details} />
-      </span>
-      {!isTouchDevice && !menuOpen && (
+      {desktop && (
+        <span id={desktop.descriptionId} className="tw-sr-only">
+          <DeviceSecurityDetails {...details} />
+        </span>
+      )}
+      {desktop && !isTouchDevice && !desktop.menuOpen && (
         <BodyPortalTooltip
-          id={`${descriptionId}-tooltip`}
+          id={`${desktop.descriptionId}-tooltip`}
           place="right"
           opacity={1}
           openEvents={{ mouseenter: true, focus: true }}
@@ -219,10 +233,7 @@ export const isDeviceSecurityStatusEnabled = (): boolean =>
   isSignedMessagesEnabled() || isE2eeEnabled();
 
 /** Describes this app/browser, independently of whether its wallet is connected. */
-export default function DeviceSecurityStatus(props: {
-  readonly descriptionId: string;
-  readonly menuOpen: boolean;
-}) {
+export default function DeviceSecurityStatus(props: DeviceSecurityStatusProps) {
   if (!isDeviceSecurityStatusEnabled()) return null;
   return <DeviceSecurityStatusContent {...props} />;
 }

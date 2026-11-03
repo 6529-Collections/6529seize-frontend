@@ -312,7 +312,7 @@ describe("sign-in with a device grant", () => {
     ).resolves.toEqual({ success: false });
     expect(getSignature).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith({
-      message: "Couldn't turn on signed messages. Please try again.",
+      message: "Couldn't turn on signed posts. Please try again.",
       type: "error",
     });
   });
@@ -404,7 +404,7 @@ describe("sign-in with a device grant", () => {
       await expectOrdinaryNextSignIn(subject, signer);
     });
 
-    it("still asks for a grant when signed messages are turned on", async () => {
+    it("still asks for a grant when signed posts are turned on", async () => {
       const signer = walletOf("5");
       const subject = createSubject();
       subject.getSignature.mockResolvedValueOnce(declined);

@@ -32,6 +32,7 @@ export default function AppUserConnect({
 }) {
   const {
     address,
+    hasValidWalletAuth,
     isConnected,
     connectedAccounts,
     seizeConnectFresh,
@@ -39,7 +40,7 @@ export default function AppUserConnect({
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
   } = useSeizeConnectContext();
-  const { setToast } = useContext(AuthContext);
+  const { activeProfileProxy, setToast } = useContext(AuthContext);
   const locale = useBrowserLocale();
   const [isPushSettingsOpen, setIsPushSettingsOpen] = useState(false);
   const [isOpeningConnection, setIsOpeningConnection] = useState(false);
@@ -153,7 +154,10 @@ export default function AppUserConnect({
         <span>{t(locale, "profilePreferences.button")}</span>
       </Link>
       {isDeviceSecurityStatusEnabled() && (
-        <DeviceSetupMenuAction onClose={onNavigate} />
+        <DeviceSetupMenuAction
+          onClose={onNavigate}
+          showStatus={!hasValidWalletAuth || Boolean(activeProfileProxy)}
+        />
       )}
       <button
         type="button"

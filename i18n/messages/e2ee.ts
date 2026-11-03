@@ -113,14 +113,14 @@ export const E2EE_MESSAGES = {
 
   "e2ee.renew.body":
     "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
-  "e2ee.renew.inboxButton": "Renew encryption",
+  "e2ee.renew.inboxButton": "Renew encrypted DMs",
   "e2ee.renew.inboxCombined":
-    "Author proof and encrypted DMs expire on {date}.",
+    "Signed posts and encrypted DMs expire on {date}.",
   "e2ee.renew.dismiss": "Dismiss renewal reminder",
-  "e2ee.renew.proofBody": "Author proof expires on {date}.",
-  "e2ee.renew.proofButton": "Renew author proof",
+  "e2ee.renew.proofBody": "Signed posts expire on {date}.",
+  "e2ee.renew.proofButton": "Renew signed posts",
   "e2ee.renew.preview":
-    "Preview of the author proof and encryption renewal reminder.",
+    "Preview of the signed posts and encrypted DMs renewal reminder.",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
@@ -625,19 +625,19 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
-  "e2ee.deviceStatus.proofLine": "Author proof: {status}",
+  "e2ee.deviceStatus.proofLine": "Signed posts: {status}",
   "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
-  "e2ee.deviceStatus.enableBoth": "Enable author proof and encryption",
-  "e2ee.deviceStatus.enableProof": "Enable author proof",
-  "e2ee.deviceStatus.enableEncryption": "Enable encryption",
-  "e2ee.devices.managePermission": "Manage encrypted DM access",
+  "e2ee.deviceStatus.enableBoth": "Set up device security",
+  "e2ee.deviceStatus.enableProof": "Enable signed posts",
+  "e2ee.deviceStatus.enableEncryption": "Enable encrypted DMs",
+  "e2ee.devices.managePermission": "Manage access to encrypted DMs",
   "e2ee.devices.permission": "Encrypted DMs",
   "e2ee.devices.combinedPermissions":
-    "Author proof and encrypted DMs (shared grant)",
+    "Signed posts and encrypted DMs (shared grant)",
   "e2ee.devices.revokeCombinedTitle":
-    "Revoke author proof and encrypted DM access for {label}?",
+    "Revoke access to signed posts and encrypted DMs for {label}?",
   "e2ee.devices.revokeEncryptionTitle":
-    "Revoke encrypted DM access for {label}?",
+    "Revoke access to encrypted DMs for {label}?",
   "e2ee.devices.revokeHistory":
     "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
   "e2ee.deviceStatus.summary":
