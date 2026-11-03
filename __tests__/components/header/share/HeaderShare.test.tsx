@@ -1311,6 +1311,10 @@ describe("HeaderShare", () => {
     it("keeps keyboard focus inside the connection dialog", async () => {
       renderWithProviders(<HeaderShare />);
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      const first = screen.getByRole("link", {
+        name: "Open 6529 app downloads",
+      });
+      await waitFor(() => expect(first).toHaveFocus());
       await chooseConnectOnly();
       const refresh = await screen.findByRole("button", {
         name: "Generate new code",
@@ -1318,10 +1322,6 @@ describe("HeaderShare", () => {
       await waitFor(() =>
         expect(refresh).toHaveAttribute("aria-disabled", "false")
       );
-      const first = screen.getByRole("link", {
-        name: "Open 6529 app downloads",
-      });
-      await waitFor(() => expect(first).toHaveFocus());
       const back = screen.getByRole("button", { name: "Back" });
       back.focus();
       await userEvent.tab();

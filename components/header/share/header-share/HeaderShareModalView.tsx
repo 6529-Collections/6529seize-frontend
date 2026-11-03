@@ -1,33 +1,31 @@
 "use client";
 
 import { ConnectionShareNotice } from "./ConnectionShareNotice";
+import {
+  ConnectDeviceContent,
+  ConnectDeviceFooter,
+} from "./ConnectDeviceContent";
+import { DesktopConnectionLink } from "./DesktopConnectionLink";
 import DeviceConnectionShare from "./DeviceConnectionShare";
 import {
   isAppDeviceGrantsEnabled,
   isSignedMessagesEnabled,
 } from "@/lib/device-signing/feature";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
-import {
-  faCopy,
-  faExternalLink,
-  faRotate,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowDownTrayIcon,
-  ArrowLeftIcon,
   ComputerDesktopIcon,
   EllipsisHorizontalIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   type CSSProperties,
   type ReactNode,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -39,7 +37,6 @@ import {
   HEADER_SHARE_LOCALE,
   Mode,
   PageShareTarget,
-  squareStyle,
   SubMode,
 } from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
@@ -106,20 +103,6 @@ export function HeaderShareModalView({
     setPreviousOpen(open);
     if (open || connectionMode === "secure") setConnectionMode(null);
   }
-  const contentFrame = useRef<HTMLDivElement>(null);
-  const contentBody = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const frame = contentFrame.current;
-    const body = contentBody.current;
-    if (!frame || !body || typeof ResizeObserver === "undefined") return;
-    const measure = () => {
-      frame.style.height = `${body.offsetHeight}px`;
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(body);
-    return () => observer.disconnect();
-  }, [shouldRender]);
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
@@ -185,34 +168,6 @@ export function HeaderShareModalView({
     );
   };
 
-  const renderCoreLink = (url: string) => {
-    return (
-      <a
-        data-testid="desktop-connection-panel"
-        href={url}
-        className="tw-group tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-4 tw-text-center tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
-        style={squareStyle}
-      >
-        <Image
-          unoptimized
-          priority
-          loading="eager"
-          src="/6529Core.png"
-          alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
-          width={124}
-          height={124}
-          className="tw-unselectable"
-        />
-        <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
-          <FontAwesomeIcon icon={faExternalLink} aria-hidden="true" />
-          <span className="tw-whitespace-nowrap">
-            {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
-          </span>
-        </span>
-      </a>
-    );
-  };
-
   const getNavigateContent = () => {
     if (pageShareTarget === PageShareTarget.APP) {
       return {
@@ -247,7 +202,7 @@ export function HeaderShareModalView({
 
     if (activeSubTab === SubMode.DESKTOP) {
       return {
-        content: renderCoreLink(shareConnectionCoreUrl),
+        content: <DesktopConnectionLink url={shareConnectionCoreUrl} />,
         url: shareConnectionCoreUrl,
       };
     }
@@ -625,17 +580,7 @@ export function HeaderShareModalView({
       setUrlCopied(false);
       setConnectionMode(null);
     };
-    const footer = (
-      <div className="tw-flex tw-items-center tw-gap-3">
-        <Button variant="secondary" size="sm" onClick={goBack}>
-          <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
-          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.back")}
-        </Button>
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.oneTime")}
-        </p>
-      </div>
-    );
+    const footer = <ConnectDeviceFooter onBack={goBack} />;
     const name = account.handle ?? account.address;
     if (connectionMode === "secure") {
       return (
@@ -650,7 +595,9 @@ export function HeaderShareModalView({
                 })}
               </h3>
               {activeSubTab === SubMode.DESKTOP ? (
-                <div className="tw-h-56">{renderCoreLink(link.url)}</div>
+                <div className="tw-h-56">
+                  <DesktopConnectionLink url={link.url} />
+                </div>
               ) : (
                 <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
                   {renderQRCodeImage(
@@ -836,41 +783,9 @@ export function HeaderShareModalView({
           className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-3"
         >
           {isConnectMode ? (
-            <div
-              ref={contentFrame}
-              className="tw-shrink-0 tw-overflow-hidden tw-transition-[height] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
-            >
-              <div ref={contentBody} className="tw-flex tw-flex-col tw-gap-3">
-                {account.address && (
-                  <div className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-p-3">
-                    {account.pfp && (
-                      <Image
-                        unoptimized
-                        src={getScaledImageUri(
-                          account.pfp,
-                          ImageScale.W_200_H_200
-                        )}
-                        alt=""
-                        width={36}
-                        height={36}
-                        className="tw-size-9 tw-shrink-0 tw-rounded-full tw-object-cover"
-                      />
-                    )}
-                    <div className="tw-min-w-0">
-                      {account.handle && (
-                        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
-                          {account.handle}
-                        </p>
-                      )}
-                      <p className="tw-m-0 tw-break-all tw-text-xs tw-text-iron-400">
-                        {account.address}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {renderActiveContent()}
-              </div>
-            </div>
+            <ConnectDeviceContent account={account}>
+              {renderActiveContent()}
+            </ConnectDeviceContent>
           ) : (
             renderActiveContent()
           )}

@@ -142,22 +142,25 @@ export default function HeaderQRScanner({
     }
   };
 
+  const handleDeviceSetupQRCode = (
+    url: URL,
+    content: string,
+    address: string
+  ) => {
+    const route = getDeviceSetupRoute(url, content, appScheme, address);
+    if (!route) {
+      setToast({ message: invalidQRCodeMessage, type: "error" });
+      return;
+    }
+    onScanSuccess();
+    router.push(route);
+  };
+
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
       if (deviceSetupAddress !== undefined) {
-        const route = getDeviceSetupRoute(
-          url,
-          content,
-          appScheme,
-          deviceSetupAddress
-        );
-        if (!route) {
-          setToast({ message: invalidQRCodeMessage, type: "error" });
-          return;
-        }
-        onScanSuccess();
-        router.push(route);
+        handleDeviceSetupQRCode(url, content, deviceSetupAddress);
         return;
       }
       let queryParams: Record<string, string | number> = {};
