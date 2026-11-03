@@ -777,24 +777,28 @@ export default function WagmiSetup({
     }
 
     let cancelled = false;
-    loadAppWalletConnector()
-      .then((connectorModule) => {
-        if (cancelled) {
-          return;
-        }
-        injectAppWalletConnectors({
-          currentAdapter,
-          appWallets,
-          createAppWalletConnector: connectorModule.createAppWalletConnector,
-        });
-      })
-      .catch((error: unknown) => {
+    const injectLoadedConnectors = async () => {
+      let connectorModule: Awaited<ReturnType<typeof loadAppWalletConnector>>;
+      try {
+        connectorModule = await loadAppWalletConnector();
+      } catch (error: unknown) {
         noteWalletChunkFailure(error);
         logErrorSecurely(
           "[WagmiSetup] App-wallet connector failed to load",
           error
         );
+        return;
+      }
+      if (cancelled) {
+        return;
+      }
+      injectAppWalletConnectors({
+        currentAdapter,
+        appWallets,
+        createAppWalletConnector: connectorModule.createAppWalletConnector,
       });
+    };
+    void injectLoadedConnectors();
 
     return () => {
       cancelled = true;
