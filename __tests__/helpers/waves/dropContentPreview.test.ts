@@ -4,7 +4,7 @@ describe("long drop detection", () => {
   it("keeps short messages and image-only posts complete", () => {
     expect(getDropContentPreview("A short post.").isLong).toBe(false);
     const images = Array.from(
-      { length: 15 },
+      { length: 21 },
       (_, i) => `![Image ${i}](https://example.com/${i}.png)`
     ).join("\n");
     expect(getDropContentPreview(images).isLong).toBe(false);
@@ -27,5 +27,11 @@ describe("long drop detection", () => {
         `[A link](https://example.com/${"path/".repeat(250)})`
       ).isLong
     ).toBe(false);
+  });
+
+  it("keeps short readable text complete despite long markdown source", () => {
+    const content = "**word** ".repeat(130);
+    expect(content.length).toBeGreaterThan(1100);
+    expect(getDropContentPreview(content).isLong).toBe(false);
   });
 });

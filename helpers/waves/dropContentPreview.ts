@@ -1,7 +1,7 @@
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 
-export const LONG_DROP_CONTENT_CHARACTER_THRESHOLD = 1100;
-export const LONG_DROP_CONTENT_LINE_THRESHOLD = 20;
+const LONG_DROP_CONTENT_CHARACTER_THRESHOLD = 1100;
+const LONG_DROP_CONTENT_LINE_THRESHOLD = 20;
 export const LONG_DROP_PREVIEW_CHARACTER_LIMIT = 900;
 
 interface DropContentPreview {
