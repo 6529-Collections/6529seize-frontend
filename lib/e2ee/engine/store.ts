@@ -339,7 +339,7 @@ export class EngineStore {
       this.ownProfileId
     );
     const profile = peerId ? this.profiles.get(peerId) : null;
-    const dmPeer = peerId
+    return peerId
       ? (members.find((member) => member.profileId === peerId) ?? {
           profileId: peerId,
           handle: profile?.handle ?? null,
@@ -349,7 +349,6 @@ export class EngineStore {
           devices: [],
         })
       : null;
-    return dmPeer;
   }
 
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
