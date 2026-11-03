@@ -1,6 +1,27 @@
 import DevicesPreferencesSettings from "@/components/preferences/DevicesPreferencesSettings";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+
+const mockRenameDevice = jest.fn();
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: (...args: unknown[]) => mockRenameDevice(...args),
+}));
+
+const mockEncryptionQuery = jest.fn();
+let mockEncryptionEnabled = false;
+jest.mock("@/config/e2eeEnv", () => ({
+  isE2eeEnabled: () => mockEncryptionEnabled,
+}));
+jest.mock("@tanstack/react-query", () => ({
+  useQuery: () => mockEncryptionQuery(),
+}));
 
 const NOW = Date.UTC(2026, 9, 12, 12, 0);
 const DAY = 86_400_000;
@@ -119,6 +140,8 @@ const phone = grant({
 
 describe("DevicesPreferencesSettings", () => {
   beforeEach(() => {
+    mockEncryptionEnabled = false;
+    mockEncryptionQuery.mockReset().mockReturnValue({});
     mockAccount = ADDRESS;
     mockLocalGrant = null;
     mockGrantsAddress = undefined;
@@ -178,7 +201,9 @@ describe("DevicesPreferencesSettings", () => {
     expect(within(rows[0]!).getByText("This device")).toBeVisible();
     expect(within(rows[0]!).getByText("Active")).toBeVisible();
     expect(
-      within(rows[0]!).getByText("Can post, edit, delete, and react")
+      within(rows[0]!).getByText(
+        "Author proof · Can post, edit, delete, and react"
+      )
     ).toBeVisible();
     expect(within(rows[0]!).getByText(/Last used/)).toBeVisible();
     expect(within(rows[1]!).queryByText("This device")).toBeNull();
@@ -200,6 +225,73 @@ describe("DevicesPreferencesSettings", () => {
     expect(mockGrantsAddress).toBe(ADDRESS);
   });
 
+  it("warns about both permissions and local history for a linked grant", () => {
+    mockEncryptionEnabled = true;
+    mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+    mockQuery = { ...mockQuery, data: [phone] };
+    mockEncryptionQuery.mockReturnValue({
+      isSuccess: true,
+      data: [
+        {
+          grant_id: phone.id,
+          grant_message: "combined grant",
+          revoked_at: null,
+          grant: { expires_at: (NOW + DAY) / 1000 },
+        },
+      ],
+    });
+
+    render(<DevicesPreferencesSettings />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+    );
+
+    const dialog = screen.getByRole("dialog", {
+      name: "Revoke author proof and encrypted DM access for Safari on iPhone?",
+    });
+    expect(
+      within(dialog).getByText(
+        /clears this device’s local encrypted chat history/
+      )
+    ).toBeVisible();
+  });
+
+  it("renames a linked grant through the same device record Mobile uses", async () => {
+    mockEncryptionEnabled = true;
+    mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+    mockQuery = { ...mockQuery, data: [phone] };
+    const deviceKey = `0x${"cc".repeat(32)}`;
+    const refetch = jest.fn();
+    mockRenameDevice.mockResolvedValueOnce({ label: "My phone" });
+    mockEncryptionQuery.mockReturnValue({
+      isSuccess: true,
+      refetch,
+      data: [
+        {
+          device_key: deviceKey,
+          grant_id: phone.id,
+          grant_message: "combined grant",
+          label: "6529 app on iOS",
+          revoked_at: null,
+          grant: { expires_at: (NOW + DAY) / 1000 },
+        },
+      ],
+    });
+
+    render(<DevicesPreferencesSettings />);
+    fireEvent.click(screen.getByText("Rename device"));
+    fireEvent.change(screen.getByLabelText("Device name"), {
+      target: { value: "My phone" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+
+    await waitFor(() => expect(refetch).toHaveBeenCalled());
+    expect(mockRenameDevice).toHaveBeenCalledWith({
+      endpoint: `e2ee/devices/${deviceKey}/label`,
+      body: { label: "My phone" },
+    });
+  });
+
   it("revokes a device after confirmation", async () => {
     mockQuery = { ...mockQuery, data: [grant(), phone] };
     mockRevoke.mockResolvedValue(true);
@@ -209,7 +301,7 @@ describe("DevicesPreferencesSettings", () => {
       screen.getByRole("button", { name: "Revoke Safari on iPhone" })
     );
     const dialog = screen.getByRole("dialog", {
-      name: "Revoke Safari on iPhone",
+      name: "Revoke author proof for Safari on iPhone?",
     });
     await act(async () => {
       fireEvent.click(within(dialog).getByRole("button", { name: "Revoke" }));
@@ -222,7 +314,7 @@ describe("DevicesPreferencesSettings", () => {
   it("explains an empty list and offers to turn on signed messages here", async () => {
     render(<DevicesPreferencesSettings />);
 
-    expect(screen.getByText("No device can post as you yet.")).toBeVisible();
+    expect(screen.getByText("No authorized devices yet.")).toBeVisible();
     await act(async () => {
       fireEvent.click(
         screen.getByRole("button", {

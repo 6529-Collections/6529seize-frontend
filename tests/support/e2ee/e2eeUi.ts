@@ -32,7 +32,7 @@ export function enrollmentHeading(page: Page): Locator {
 
 export function enrollButton(page: Page): Locator {
   return page.getByRole("button", {
-    name: "Turn on encrypted messages (one signature)",
+    name: "Enable encryption (one signature)",
   });
 }
 

@@ -19,6 +19,8 @@ export function buildE2eeApiClient({
   put,
 }: E2eeRequestTransport): E2eeApiClient {
   return {
+    renameDevice: (deviceKey, name) =>
+      post(`e2ee/devices/${enc(deviceKey)}/label`, { label: name }),
     getMe: () => get<ApiE2eeMe>("e2ee/me"),
     registerDevice: (body) => post(`e2ee/devices`, body),
     registerLoginGrantDevice: (body) => post(`e2ee/devices/login-grant`, body),

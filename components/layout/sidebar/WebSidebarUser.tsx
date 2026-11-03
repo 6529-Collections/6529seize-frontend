@@ -343,6 +343,9 @@ function WebSidebarUser({
             ? `${accountDescriptionId} ${deviceStatusId}`
             : accountDescriptionId
         }
+        {...(isDeviceSecurityStatusEnabled() && {
+          "data-tooltip-id": `${deviceStatusId}-tooltip`,
+        })}
         aria-controls="user-menu"
       >
         <span id={accountDescriptionId} className="tw-sr-only">
@@ -372,7 +375,10 @@ function WebSidebarUser({
                 />
               )}
             </div>
-            <DeviceSecurityStatus descriptionId={deviceStatusId} />
+            <DeviceSecurityStatus
+              descriptionId={deviceStatusId}
+              menuOpen={showUserMenu}
+            />
             {hasUnreadOnOtherConnectedProfiles && (
               <div
                 className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"

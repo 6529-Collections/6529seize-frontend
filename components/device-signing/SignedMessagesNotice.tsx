@@ -63,10 +63,12 @@ function getNoticeCopy(
 interface SignedMessagesNoticeProps {
   /** Enable and renewal prompts only show while the composer is empty. */
   readonly composerEmpty: boolean;
+  readonly hideRenewal?: boolean;
 }
 
 function SignedMessagesNoticeContent({
   composerEmpty,
+  hideRenewal,
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
   const titleId = useId();
@@ -82,7 +84,7 @@ function SignedMessagesNoticeContent({
     isRevoking,
   } = useSignedMessagesNotice({ composerEmpty });
 
-  if (!model) {
+  if (!model || (hideRenewal && model.kind === "renew")) {
     return null;
   }
   const isAlert = model.kind === "new-device";
@@ -103,7 +105,7 @@ function SignedMessagesNoticeContent({
     <section
       aria-labelledby={titleId}
       data-testid="signed-messages-notice"
-      className={`tw-mb-2 tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${
+      className={`tw-mb-2 tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2 sm:tw-px-2.5 ${
         isAlert
           ? "tw-border-red/30 tw-bg-red/10"
           : "tw-border-white/10 tw-bg-iron-950"
@@ -111,7 +113,7 @@ function SignedMessagesNoticeContent({
     >
       <Icon
         aria-hidden="true"
-        className={`tw-mt-0.5 tw-size-5 tw-flex-shrink-0 ${
+        className={`tw-col-start-1 tw-row-start-1 tw-size-5 tw-flex-shrink-0 ${
           isAlert ? "tw-text-red" : "tw-text-iron-400"
         }`}
       />
@@ -123,7 +125,7 @@ function SignedMessagesNoticeContent({
           {copy.title}
         </p>
         {copy.body && (
-          <p className="tw-col-span-2 tw-col-start-2 tw-m-0 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-col-span-3 tw-col-start-1 tw-row-start-2 tw-m-0 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400 sm:tw-col-span-2 sm:tw-col-start-2">
             {copy.body}
           </p>
         )}

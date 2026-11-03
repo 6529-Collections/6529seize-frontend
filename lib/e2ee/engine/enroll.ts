@@ -422,12 +422,15 @@ function toDeviceInfo(
       : "web";
   return {
     deviceKey: record.device_key.toLowerCase(),
-    label: own && ctx.device ? ctx.device.label : record.label,
+    label: record.label,
     platform,
     createdAt: record.created_at,
     lastSeenAt: record.last_seen_at,
     expiresAt: record.grant.expires_at * 1000,
     revokedAt: record.revoked_at,
+    linkedAuthorProof:
+      record.grant_message !== null && record.grant_message !== undefined,
+    ...(record.grant_message ? { authorProofGrantId: record.grant_id } : {}),
     isThisDevice: own,
     verified,
   };

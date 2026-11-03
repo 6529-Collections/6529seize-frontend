@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/auth/Auth";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import SignedMessagesNotice from "@/components/device-signing/SignedMessagesNotice";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
@@ -214,7 +215,12 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
       className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col"
       onFocusCapture={prewarmSigning}
     >
-      {showComposer && <SignedMessagesNotice composerEmpty={isComposerEmpty} />}
+      {showComposer && (
+        <SignedMessagesNotice composerEmpty={isComposerEmpty} hideRenewal />
+      )}
+      {showComposer && isComposerEmpty && (
+        <E2eeRenewalBanner className="tw-mb-2" />
+      )}
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
         submitting={submitting}

@@ -1,3 +1,5 @@
+import DeviceSetupMenuAction from "@/components/device-signing/DeviceSetupMenuAction";
+import { isDeviceSecurityStatusEnabled } from "@/components/device-signing/DeviceSecurityStatus";
 import HeaderBookmarksLink from "./user/HeaderBookmarksLink";
 import {
   faPlugCircleMinus,
@@ -150,6 +152,9 @@ export default function AppUserConnect({
         />
         <span>{t(locale, "profilePreferences.button")}</span>
       </Link>
+      {isDeviceSecurityStatusEnabled() && (
+        <DeviceSetupMenuAction onClose={onNavigate} />
+      )}
       <button
         type="button"
         onClick={() => setIsPushSettingsOpen(true)}

@@ -31,7 +31,7 @@ jest.mock("@/components/e2ee/gate/e2eeCombinedTurnOn", () => ({
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
-const BUTTON = { name: "Turn on encrypted messages (one signature)" };
+const BUTTON = { name: "Enable encryption (one\u00a0signature)" };
 
 const renderCard = () => {
   const engine = createFakeE2eeEngine({ status: "needs-enrollment" });

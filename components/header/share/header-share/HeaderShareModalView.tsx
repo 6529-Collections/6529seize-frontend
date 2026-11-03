@@ -628,7 +628,7 @@ export function HeaderShareModalView({
           <Button
             variant="secondary"
             size="sm"
-            className="tw-mt-3 tw-w-full !tw-whitespace-normal"
+            className="tw-mt-3 tw-w-full !tw-whitespace-normal !tw-text-sm !tw-font-medium"
             onClick={() => setSecureSetup(true)}
           >
             {t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.action")}
@@ -666,55 +666,57 @@ export function HeaderShareModalView({
         aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
-        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${modalMaxWidthClassName} ${
+        className={`tw-relative tw-flex tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${modalMaxWidthClassName} ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
       >
+        <div className="tw-flex tw-shrink-0 tw-items-start tw-justify-between tw-gap-3 tw-px-5 tw-pt-5">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
+            <h2
+              id="header-share-title"
+              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+            >
+              {secureSetup
+                ? t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.title")
+                : modalTitle}
+            </h2>
+            {isConnectMode && (
+              <Link
+                href="/about/6529-apps"
+                onClick={onClose}
+                aria-label={t(
+                  HEADER_SHARE_LOCALE,
+                  "headerShare.connectModal.downloadAppsAriaLabel"
+                )}
+                className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                <ArrowDownTrayIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-shrink-0"
+                />
+                {t(
+                  HEADER_SHARE_LOCALE,
+                  "headerShare.connectModal.downloadApps"
+                )}
+              </Link>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label={closeAriaLabel}
+            title={closeAriaLabel}
+            onClick={onClose}
+            className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            <XMarkIcon className="tw-size-5" aria-hidden="true" />
+          </button>
+        </div>
         <div
           data-testid="header-share-modal-content"
-          className="tw-flex tw-flex-col tw-gap-3 tw-p-5"
+          className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-3"
         >
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
-              <h2
-                id="header-share-title"
-                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
-              >
-                {modalTitle}
-              </h2>
-              {isConnectMode && (
-                <Link
-                  href="/about/6529-apps"
-                  onClick={onClose}
-                  aria-label={t(
-                    HEADER_SHARE_LOCALE,
-                    "headerShare.connectModal.downloadAppsAriaLabel"
-                  )}
-                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  <ArrowDownTrayIcon
-                    aria-hidden="true"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  />
-                  {t(
-                    HEADER_SHARE_LOCALE,
-                    "headerShare.connectModal.downloadApps"
-                  )}
-                </Link>
-              )}
-            </div>
-            <button
-              type="button"
-              aria-label={closeAriaLabel}
-              title={closeAriaLabel}
-              onClick={onClose}
-              className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
-          </div>
           {isConnectMode && (
             <ModalMenu
               activeSubTab={activeSubTab}

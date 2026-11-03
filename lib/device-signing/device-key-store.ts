@@ -5,7 +5,7 @@ import { writeDeviceGrantHint } from "./grant-hint";
 
 const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
+export const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
 /** Grants this close to expiry are not used, so the server never sees one expire mid-write. */
 const SIGNING_EXPIRY_MARGIN_MS = 60 * 1000;
 

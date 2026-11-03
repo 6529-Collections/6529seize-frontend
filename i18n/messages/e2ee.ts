@@ -4,17 +4,23 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
-  "e2ee.connectionSetup.action":
-    "Set up signed posts and encrypted DMs on this device",
+  "e2ee.connectionSetup.title": "Set up device",
+  "e2ee.connectionSetup.scan":
+    "Scan this code with the QR scanner in the 6529 mobile app.",
+  "e2ee.connectionSetup.openInstruction":
+    "Open the setup link in 6529 Desktop.",
+  "e2ee.connectionSetup.restore":
+    "Restore an encrypted backup to read earlier chats on this device.",
+  "e2ee.connectionSetup.action": "Set up signed posts and encrypted DMs",
   "e2ee.connectionSetup.description":
-    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs. Your existing chat history stays on your current devices; restore a backup to read it there.",
+    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs.",
   "e2ee.connectionSetup.compatibility":
     "On iPhone, encrypted messages need iOS 16.4 or later; signed posts need iOS 17 or later.",
   "e2ee.connectionSetup.approve": "Approve receiving device (one signature)",
   "e2ee.connectionSetup.qr": "Private device setup QR code",
   "e2ee.connectionSetup.open": "Open in 6529 Desktop",
   "e2ee.connectionSetup.keepPrivate":
-    "Only open or scan this link on your own device. It signs in and authorizes that device to post as you and read encrypted messages. The link expires shortly and can be used once.",
+    "Use this only on a device you own. It signs you in and enables signed posts and encrypted DMs. It expires shortly and works once.",
   "e2ee.connectionSetup.back": "Back to connection sharing",
   "e2ee.connectionSetup.failed":
     "Signed in, but device setup could not finish. Create a new setup link from your source browser to try again. Your existing keys have been kept.",
@@ -99,7 +105,7 @@ export const E2EE_MESSAGES = {
     "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
-  "e2ee.enroll.button": "Turn on encrypted messages (one signature)",
+  "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
@@ -114,6 +120,14 @@ export const E2EE_MESSAGES = {
 
   "e2ee.renew.body":
     "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
+  "e2ee.renew.inboxButton": "Renew encryption",
+  "e2ee.renew.inboxCombined":
+    "Author proof and encrypted DMs expire on {date}.",
+  "e2ee.renew.dismiss": "Dismiss renewal reminder",
+  "e2ee.renew.proofBody": "Author proof expires on {date}.",
+  "e2ee.renew.proofButton": "Renew author proof",
+  "e2ee.renew.preview":
+    "Preview of the author proof and encryption renewal reminder.",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
@@ -150,7 +164,8 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeDone": "Device revoked.",
   "e2ee.devices.empty": "No devices yet.",
   "e2ee.devices.revokedSection": "Revoked devices",
-  "e2ee.devices.rename.label": "Name for this device",
+  "e2ee.devices.rename.action": "Rename device",
+  "e2ee.devices.rename.label": "Device name",
   "e2ee.devices.rename.save": "Save name",
   "e2ee.devices.rename.saved": "Device name saved.",
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
@@ -617,8 +632,25 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
+  "e2ee.deviceStatus.proofLine": "Author proof: {status}",
+  "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
+  "e2ee.deviceStatus.enableBoth": "Enable author proof and encryption",
+  "e2ee.deviceStatus.enableProof": "Enable author proof",
+  "e2ee.deviceStatus.enableEncryption": "Enable encryption",
+  "e2ee.devices.managePermission": "Manage encrypted DM access",
+  "e2ee.devices.permission": "Encrypted DMs",
+  "e2ee.devices.combinedPermissions":
+    "Author proof and encrypted DMs (shared grant)",
+  "e2ee.devices.revokeCombinedTitle":
+    "Revoke author proof and encrypted DM access for {label}?",
+  "e2ee.devices.revokeEncryptionTitle":
+    "Revoke encrypted DM access for {label}?",
+  "e2ee.devices.revokeHistory":
+    "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
+  "e2ee.deviceStatus.expiring": " · expires {time}",
+  "e2ee.deviceStatus.expired": "expired",
   "e2ee.deviceStatus.on": "on",
   "e2ee.deviceStatus.off": "off",
   "e2ee.deviceStatus.checking": "checking",

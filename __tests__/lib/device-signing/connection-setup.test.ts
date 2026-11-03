@@ -41,8 +41,8 @@ jest.mock("@/lib/device-signing/device-key-storage", () => ({
     },
   },
 }));
-jest.mock("@/services/api/device-grants-api", () => ({
-  registerAppDeviceGrant: async (request: ApiRegisterDeviceGrantRequest) => {
+const mockRegister = jest.fn(
+  async ({ body: request }: { body: ApiRegisterDeviceGrantRequest }) => {
     mockGrant = {
       id: mockGrantId,
       wallet: request.grant.wallet,
@@ -54,11 +54,11 @@ jest.mock("@/services/api/device-grants-api", () => ({
       revoked_at: null,
     } as ApiDeviceGrant;
     return mockGrant;
-  },
-  revokeDeviceGrant: jest.fn(),
-}));
+  }
+);
 jest.mock("@/services/api/common-api", () => ({
-  commonApiPost: async () => mockGrant,
+  commonApiPost: (input: { body: ApiRegisterDeviceGrantRequest }) =>
+    mockRegister(input),
   commonApiFetch: async () => ({ id: profileId }),
 }));
 jest.mock("@/components/e2ee/e2eeLocalState", () => ({
@@ -66,6 +66,7 @@ jest.mock("@/components/e2ee/e2eeLocalState", () => ({
 }));
 
 beforeEach(() => {
+  mockRegister.mockClear();
   mockRecord = null;
   mockStorage = createMemoryE2eeStorage();
 });
@@ -91,6 +92,7 @@ it("transfers a new MLS identity and non-extractable signing key without touchin
   });
   expect(prepared).not.toBeNull();
   expect(signing).toHaveBeenCalledTimes(1);
+  expect(mockRegister).not.toHaveBeenCalled();
   expect(mockRecord).toBeNull();
   expect(await mockStorage.getDevice(profileId)).toBeNull();
   await acceptConnectionDeviceSetup({
@@ -100,6 +102,7 @@ it("transfers a new MLS identity and non-extractable signing key without touchin
     accessToken: "test-session",
     target: "native",
   });
+  expect(mockRegister).toHaveBeenCalledTimes(1);
   const record = mockRecord as StoredDeviceKey | null;
   expect(record?.keyPair.privateKey.extractable).toBe(false);
   const challenge = new Uint8Array([1, 2, 3]);
@@ -192,6 +195,7 @@ it("keeps existing signing keys and registered MLS history when another setup li
     accessToken: "test-session",
     target: "native",
   });
+  expect(mockRegister).toHaveBeenCalledTimes(1);
   expect(mockRecord).toBe(beforeRecord);
   expect((await mockStorage.getDevice(profileId))?.deviceKey).toBe(
     beforeDevice?.deviceKey

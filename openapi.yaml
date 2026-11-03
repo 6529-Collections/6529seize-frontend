@@ -3387,6 +3387,50 @@ paths:
           description: Authentication required
         "403":
           description: Not available to proxies, or not the signed-in wallet
+  /device-grants/{grantId}/label:
+    post:
+      tags:
+        - Authentication
+      summary: Rename a device signing grant owned by the caller
+      operationId: renameDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRenameDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRenameDeviceRequest"
+      responses:
+        "200":
+          description: Updated device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "400":
+          description: Invalid device label
+        "401":
+          description: Unauthorized
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant is missing, revoked or belongs to another profile
   /device-grants/{grantId}/revoke:
     post:
       tags:
@@ -10589,6 +10633,49 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/label:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Rename an encrypted-messaging device owned by the caller
+      operationId: e2eeRenameDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRenameDevice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRenameDeviceRequest"
+      responses:
+        "200":
+          description: Updated device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: Invalid device label
+        "401":
+          description: Unauthorized
+        "403":
+          description: Device is revoked or belongs to another profile
+        "404":
+          description: Encrypted messaging is disabled
   /e2ee/devices/{device_key}/revoke:
     post:
       tags:
@@ -40952,6 +41039,16 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiRenameDeviceRequest:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 48
+          pattern: ^[A-Za-z0-9 ._()-]+$
     ApiRepCategoriesPage:
       type: object
       required:

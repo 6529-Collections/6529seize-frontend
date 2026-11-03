@@ -23,6 +23,8 @@ export type E2eeEngineStatus =
   | "error";
 
 export interface E2eeDeviceInfo {
+  linkedAuthorProof?: boolean;
+  authorProofGrantId?: string;
   deviceKey: string;
   label: string;
   platform: "web" | "desktop" | "phone";
