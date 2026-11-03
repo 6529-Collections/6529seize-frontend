@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";

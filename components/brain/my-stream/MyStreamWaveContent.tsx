@@ -28,7 +28,7 @@ import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import BrainRightSidebarConfiguration from "@/components/brain/right-sidebar/BrainRightSidebarConfiguration";
 import MyStreamWaveAbout from "./MyStreamWaveAbout";

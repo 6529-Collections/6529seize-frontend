@@ -61,8 +61,6 @@ const RULES: readonly Rule[] = [
     matches: (source) => /\bAPI_ENDPOINT\b/u.test(source),
     exemptions: {
       [HELPER]: "The endpoint list reads the configured value here.",
-      "app/layout.tsx":
-        "Preconnect hint in the root layout, which the static-shell work owns; switch it to getApiBase() there.",
     },
   },
   {

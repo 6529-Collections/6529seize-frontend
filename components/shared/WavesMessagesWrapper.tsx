@@ -25,7 +25,7 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
-import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
+import CreateWaveModal from "../waves/create-wave/LazyCreateWaveModal";
 import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
