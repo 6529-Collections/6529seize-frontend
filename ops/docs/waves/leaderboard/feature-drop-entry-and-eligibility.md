@@ -108,7 +108,8 @@ Entry behavior differs by wave type:
   `View submission rules`. This explains closure without claiming that the
   viewer fails the group requirements; a public group does not reopen submissions.
   An early competition end uses the earlier closing date. If no closing date is
-  available, the card omits the date.
+  available, the card omits the date. An already-open card updates when the
+  submission deadline passes and catches up when the page becomes visible again.
 - Available Memes desktop submit labels are responsive: compact desktop widths
   can show `Submit Work`, while extra-wide desktop shows
   `Submit Work to The Memes`.

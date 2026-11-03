@@ -25,6 +25,7 @@ fallback dictionaries.
 | [Wave navigation](wave-navigation.md) | About and Configuration use locale dictionaries with source-locale fallback; other desktop section labels retain existing English copy |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
 | [Wave submission access](wave-submission-access.md) | Submission-access details and organizer audience summaries use browser-locale messages with `en-US` fallback |
+| [Wave compact phase status](wave-compact-phase-status.md) | Submission/voting statuses use browser-locale messages with `en-US` fallback and localized dates/countdowns |
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
 | [Direct-message admission](direct-message-admission.md) | The Preferences group option, its controls, and new-DM refusal notices exist only in `en-US` and fall back to it in other locales |

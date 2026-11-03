@@ -2128,10 +2128,26 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await sandbox.legacyPrimary("alpha");
     const beta = competition("beta", "Beta");
+    const closesAt = Date.UTC(2024, 11, 3, 8, 33);
+    const expectedDates = await page.evaluate((timestamp) => {
+      const date = new Date(timestamp);
+      return {
+        full: date.toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        short: date.toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+      };
+    }, closesAt);
     sandbox.setCompetition("beta", {
       participation: {
         ...beta.participation,
-        ends_at: Date.UTC(2024, 11, 3, 8, 33),
+        ends_at: closesAt,
       },
       permissions: { ...beta.permissions, submit: false },
     });
@@ -2148,7 +2164,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const details = page.getByRole("dialog", { name: "Enter Beta" });
     await expect(details).toBeFocused();
     await expect(details).toContainText("Submission period has ended");
-    await expect(details).toContainText("Closed December 3, 2024");
+    await expect(details).toContainText(`Closed ${expectedDates.full}`);
     await expect(details.getByText("Public", { exact: true })).toBeVisible();
     await expect(details).not.toContainText("don't have permission");
     await expect(details).not.toContainText(
@@ -2174,10 +2190,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .locator("..");
     await expect(submissions).toBeInViewport({ ratio: 1 });
     await expect(voting).toBeInViewport({ ratio: 1 });
-    await expect(submissionsRow).toContainText("Dec 3, 2024");
+    await expect(submissionsRow).toContainText(expectedDates.short);
     await expect(votingRow).toContainText("No end date");
     for (const [status, detail] of [
-      [submissions, submissionsRow.getByText("Dec 3, 2024")],
+      [submissions, submissionsRow.getByText(expectedDates.short)],
       [voting, votingRow.getByText("No end date")],
     ] as const) {
       await expect
@@ -2193,6 +2209,52 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("submission-statuses.png"),
     });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("updates an open restriction card when submissions end", async ({
+    page,
+    baseURL,
+  }) => {
+    const startsAt = Date.UTC(2026, 10, 3, 12);
+    await page.clock.install({ time: new Date(startsAt) });
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    await sandbox.legacyPrimary("alpha");
+    const beta = competition("beta", "Beta");
+    sandbox.setCompetition("beta", {
+      participation: { ...beta.participation, ends_at: startsAt + 60_000 },
+      permissions: { ...beta.permissions, submit: false },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+    await dismissNextDevTools(page);
+    const action = page.getByRole("button", {
+      name: "Enter Beta",
+      exact: true,
+    });
+    await action.press("Enter");
+    const details = page.getByRole("dialog", { name: "Enter Beta" });
+    await expect(details).toContainText("don't have permission");
+    await expect(details).toContainText("Other submission rules still apply");
+
+    await page.clock.fastForward(61_000);
+
+    await expect(action).toHaveAccessibleDescription(
+      "Submission period has ended"
+    );
+    await expect(details).toBeVisible();
+    await expect(details).toContainText("Submission period has ended");
+    await expect(details).not.toContainText("don't have permission");
+    await expect(details).not.toContainText(
+      "Other submission rules still apply"
+    );
+    await expect(
+      details.getByRole("link", { name: "View submission rules" })
+    ).toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 

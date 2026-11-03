@@ -1,12 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import { Suspense, useId, useMemo, type ReactNode } from "react";
+import { Suspense, useId, useState, type ReactNode } from "react";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveSubmissionClosure } from "@/helpers/waves/submission-closure";
 import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
@@ -35,12 +36,11 @@ export default function WaveHeaderRestrictionButton({
 }: WaveHeaderRestrictionButtonProps) {
   const reasonId = useId();
   const locale = useBrowserLocale();
-  const closure = useMemo(
-    () =>
-      accessWave
-        ? getWaveSubmissionClosure(accessWave, Time.currentMillis())
-        : null,
-    [accessWave]
+  const [now, setNow] = useState(() => Time.currentMillis());
+  const closure = accessWave ? getWaveSubmissionClosure(accessWave, now) : null;
+  useVisibleInterval(
+    () => setNow(Time.currentMillis()),
+    accessWave && !closure ? 1000 : null
   );
   const displayedReason = closure
     ? t(locale, "waves.dropEligibility.ended")

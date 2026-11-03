@@ -8,6 +8,7 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 }));
 const useWave = jest.fn();
 jest.mock("@/hooks/useWave", () => ({
+  ...jest.requireActual("@/hooks/useWave"),
   useWave: (...args: any[]) => useWave(...args),
 }));
 
@@ -74,3 +75,32 @@ test("shows open state instead of a countdown for open-ended submissions", () =>
   expect(screen.getByText("No end date")).toBeInTheDocument();
   expect(screen.queryByText(/close in/)).toBeNull();
 });
+
+test.each([null, Date.UTC(2099, 0, 1)])(
+  "shows closed submissions after a manual end with scheduled deadline %s",
+  (scheduledEnd) => {
+    useWaveTimers.mockReturnValue({
+      participation: {
+        isCompleted: false,
+        isUpcoming: false,
+        timeLeft: { days: 99999, hours: 0, minutes: 0 },
+      },
+    });
+    useWave.mockReturnValue({
+      participation: { startTime: 0, endTime: 0, status: "ENDED" },
+    });
+    const { container } = render(
+      <CompactDroppingPhaseCard
+        wave={{
+          ...perpetualWave,
+          participation: { period: { min: 1, max: scheduledEnd } },
+        }}
+      />
+    );
+    expect(screen.getByText("Submissions closed")).toBeInTheDocument();
+    expect(screen.queryByText("Submissions open")).not.toBeInTheDocument();
+    expect(screen.queryByText("No end date")).not.toBeInTheDocument();
+    expect(screen.queryByText(/99999/)).not.toBeInTheDocument();
+    expect(container.querySelector("time")).toBeNull();
+  }
+);

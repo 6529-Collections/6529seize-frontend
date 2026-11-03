@@ -93,6 +93,8 @@ The fixture also checks closed-submission and open-voting schedule sections,
 inline status/detail alignment, and viewport containment on desktop and mobile.
 The leaderboard card fixture also checks the gap between author and post text
 at phone, medium, and both sides of the desktop action-button breakpoint.
+The open-card deadline case advances the browser clock without navigation and
+checks that the restriction and supporting copy switch to the ended state.
 
 PR selection for `test:e2e:native-competition-sandbox` is owned by
 `scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover

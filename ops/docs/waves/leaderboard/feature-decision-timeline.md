@@ -57,6 +57,8 @@ into a horizontal decision strip.
     `Voting closes in`, followed by a countdown
   - ended phases say `Submissions closed` or `Voting closed`; known dates appear
     inline beside the status in the viewer's locale, including the year
+  - manually ended competitions show `Submissions closed` even if submissions
+    originally had no end date or a later scheduled deadline
   - open-ended phases say `Submissions open` or `Voting open`, with `No end date`
   - when a future winner announcement is scheduled, `Next winners announced in`
     shows a live countdown and local calendar date beside those phase cards
