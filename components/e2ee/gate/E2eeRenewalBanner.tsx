@@ -42,7 +42,7 @@ export function E2eeRenewalBanner(props: RenewalBannerProps) {
 }
 
 function RenewalBannerRoute(props: RenewalBannerProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const search = useSearchParams();
   const inMessages =
     pathname === "/messages" || pathname.startsWith("/messages/");
