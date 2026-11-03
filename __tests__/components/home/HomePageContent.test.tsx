@@ -35,11 +35,6 @@ jest.mock("@/components/home/newcomer/HomeNewcomerIntro", () => ({
   default: () => <div>Newcomer intro</div>,
 }));
 
-jest.mock("@/components/home/newcomer/HomeWhatIs6529", () => ({
-  __esModule: true,
-  default: () => <div>What is 6529?</div>,
-}));
-
 jest.mock("@/components/home/now-minting", () => ({
   LatestDropSection: jest.fn(() => <div>Latest drop</div>),
 }));
@@ -72,7 +67,7 @@ describe("HomePageContent", () => {
     ["for a logged-out visitor", "disconnected", false, true],
     ["after a connection error", "error", false, true],
   ] as const)(
-    "shows newcomer actions and explanation only %s",
+    "shows newcomer actions and steps only %s",
     (_description, connectionState, hasValidWalletAuth, expected) => {
       useSeizeConnectContextMock.mockReturnValue({
         connectionState,
@@ -82,20 +77,18 @@ describe("HomePageContent", () => {
       render(<HomePageContent />);
 
       const intro = screen.queryByText("Newcomer intro");
-      const explanation = screen.queryByText("What is 6529?");
       const steps = screen.queryByText("How to start");
       if (expected) {
         expect(intro).toBeInTheDocument();
-        expect(explanation).toBeInTheDocument();
         expect(steps).toBeInTheDocument();
       } else {
         expect(intro).not.toBeInTheDocument();
-        expect(explanation).not.toBeInTheDocument();
         expect(steps).not.toBeInTheDocument();
-        expect(screen.getByText("Latest drop").previousElementSibling).toBe(
-          screen.getByText("Hero")
-        );
       }
+      // Latest drop follows the hero directly for visitors and members alike.
+      expect(screen.getByText("Latest drop").previousElementSibling).toBe(
+        screen.getByText("Hero")
+      );
       expect(screen.getByText("Explore waves")).toBeInTheDocument();
       expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();

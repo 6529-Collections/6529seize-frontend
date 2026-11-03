@@ -255,19 +255,16 @@ it("counts middle-clicked links but not middle-clicked buttons or context menus"
   expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1);
 });
 
-it.each(["What is 6529?", "How to start"] as const)(
-  "observes the new %s section with the existing consent and dwell rules",
-  (sectionName) => {
-    const { rerender } = render(<Fixture sectionName={sectionName} />);
-    intersect(0.5);
-    advance();
-    expect(trackAnalyticsEvent).toHaveBeenCalledWith(
-      "Homepage section seen",
-      expect.objectContaining({ section: sectionName })
-    );
-    consent = false;
-    rerender(<Fixture sectionName={sectionName} />);
-    fireEvent.click(screen.getByText("Private wave title"));
-    expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1);
-  }
-);
+it("observes the How to start section with the existing consent and dwell rules", () => {
+  const { rerender } = render(<Fixture sectionName="How to start" />);
+  intersect(0.5);
+  advance();
+  expect(trackAnalyticsEvent).toHaveBeenCalledWith(
+    "Homepage section seen",
+    expect.objectContaining({ section: "How to start" })
+  );
+  consent = false;
+  rerender(<Fixture sectionName="How to start" />);
+  fireEvent.click(screen.getByText("Private wave title"));
+  expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1);
+});
