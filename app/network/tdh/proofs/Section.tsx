@@ -58,7 +58,12 @@ export default function Section({
             <span className="tw-text-primary-300">{number}</span>
             {` · ${label}`}
           </span>
-          <h2 id={`${id}-heading`} className={EX_TEXT.stmt}>
+          {/* At 400% zoom (a 320 px window) a short heading steps down a
+              size, so its words keep two to a line. */}
+          <h2
+            id={`${id}-heading`}
+            className={`${EX_TEXT.stmt} max-[359px]:tw-text-[24px] max-[359px]:tw-leading-[30px]`}
+          >
             {heading}
           </h2>
         </div>
