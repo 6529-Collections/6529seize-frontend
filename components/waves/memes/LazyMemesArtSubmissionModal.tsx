@@ -12,6 +12,4 @@ const memesArtSubmissionModal = createLazyDialog<
   ComponentProps<typeof MemesArtSubmissionModalComponent>
 >(() => import("./MemesArtSubmissionModal"));
 
-export const preloadMemesArtSubmissionModal = memesArtSubmissionModal.preload;
-
 export default memesArtSubmissionModal.Dialog;

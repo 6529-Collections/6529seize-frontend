@@ -12,6 +12,4 @@ const createWaveModal = createLazyDialog<
   ComponentProps<typeof CreateWaveModalComponent>
 >(() => import("./CreateWaveModal"));
 
-export const preloadCreateWaveModal = createWaveModal.preload;
-
 export default createWaveModal.Dialog;
