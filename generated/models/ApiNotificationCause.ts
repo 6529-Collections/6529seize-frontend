@@ -14,6 +14,7 @@
 import { HttpFile } from '../http/http';
 
 export enum ApiNotificationCause {
+    E2EeMessage = 'E2EE_MESSAGE',
     IdentitySubscribed = 'IDENTITY_SUBSCRIBED',
     IdentityMentioned = 'IDENTITY_MENTIONED',
     IdentityRep = 'IDENTITY_REP',

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
@@ -23,8 +25,14 @@ export default function NotificationInboxRow({
   const locale = useBrowserLocale();
   const identity =
     "related_identity" in notification ? notification.related_identity : null;
+  const encryptedPreview = useEncryptedNotificationPreview(
+    notification.cause === ApiNotificationCause.E2EeMessage
+      ? (notification.additional_context.encrypted_group ?? null)
+      : null
+  );
   const drop = getInboxDrop(notification);
   const preview =
+    encryptedPreview ??
     drop?.title ??
     drop?.parts
       .map((part) => part.content ?? "")

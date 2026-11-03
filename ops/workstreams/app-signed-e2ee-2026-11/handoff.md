@@ -9,8 +9,7 @@ are deployed. Live GitHub and deployment state override this note.
 Backend before frontend before testing the updated app builds.
 
 1. Backend: 6529-Collections/6529seize-backend#2287 (`POST /device-grants`,
-   app grants in `POST /e2ee/devices/login-grant`). Deploy `api` only. No
-   migration.
+   app grants in `POST /e2ee/devices/login-grant`, encrypted connection-share setup, and in-app encrypted notifications). Deploy `dbMigrationsLoop` then `api` for the nullable ciphertext column. No migration file or new service.
 2. Frontend: 6529-Collections/6529seize-frontend#4541 (this branch's app
    grants, author proof, desktop notifications and phone wake navigation),
    plus #4544 (the notice for unsupported browsers). The Capacitor shell
@@ -40,17 +39,20 @@ Backend before frontend before testing the updated app builds.
 - Production app grants use `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` in
   `.github/workflows/production-build-artifact.yml` and the desktop live
   build (`scripts/desktop-build-target.cjs` in 6529-core). Staging has it on.
-- Connection sharing must support encrypted messages and author proof on
-  Mobile and Core without connecting a wallet there. Treat that setup work,
-  encrypted-message in-app notification entries and a visible device-status
-  indicator as remaining implementation; the existing app-grant flow does
-  not establish that they are delivered.
+- This follow-up implements source-browser-approved setup links for Mobile
+  and Core, generic encrypted in-app notifications with local previews, and
+  a device-status shield. The target app never connects the wallet for this
+  setup. Existing local keys are preserved; historical messages need backup.
+  These additions still need acceptance on signed staging app builds.
 - The iOS compatibility decision is implemented by mobile #26 (minimum
   16.4) and frontend #4544 (update notice). Signed messages still additionally
   require iOS 17's Ed25519 support; iOS 16.4 supports encrypted messages.
-- The reported disconnected-wallet setup, repeated authentication update,
-  activation inconsistencies and warning/banner layouts remain separate
-  product fixes. PR synchronization alone does not resolve them.
+- Disconnected-wallet encryption setup now shares the connect-then-sign
+  flow; Connect Device authentication update resumes after connection. The
+  encryption provider adopts a signing-first combined grant on an already
+  open setup page. The mobile/quick-DM warning and composer banner layouts
+  are fixed, and browser auth explains SIWE Version 1 separately from auth v2.
+
 
 ## What was verified, and where
 

@@ -4952,6 +4952,21 @@ paths:
             type: string
             enum:
               - cards
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Sort the complete eligible personal vote set before pagination.
+            vote_amount preserves signed value descending, allocation update
+            time ascending and drop ID ascending. leaderboard uses the
+            competition's authoritative rank ascending, unranked entries last,
+            with the leaderboard's stable identity tie-breaker. last_voted uses
+            the most recent confirmed user vote change (including retained
+            history), newest first, excluding automatic adjustments and
+            unchanged votes; unknown times sort last, ties by drop ID ascending.
+            Cursors are bound to the sort.
+          schema:
+            $ref: "#/components/schemas/ApiCompetitionMyVotesSort"
         - name: limit
           in: query
           required: false
@@ -4972,9 +4987,10 @@ paths:
       responses:
         "200":
           description: >-
-            Paged active nonzero personal votes, ordered by vote value
-            descending and vote time ascending; include=cards adds authorized
-            lightweight entry content and summaries.
+            Paged active nonzero personal votes in the requested order. The
+            default is vote_amount; include=cards adds authorized lightweight
+            entry content and summaries. These are live pages; refresh from the
+            first page after a vote changes.
           content:
             application/json:
               schema:
@@ -28919,6 +28935,13 @@ components:
           nullable: true
         has_more:
           type: boolean
+    ApiCompetitionMyVotesSort:
+      type: string
+      default: vote_amount
+      enum:
+        - vote_amount
+        - leaderboard
+        - last_voted
     ApiCompetitionOutcome:
       type: object
       additionalProperties: false
@@ -30215,6 +30238,13 @@ components:
       required:
         - target_client_type
       properties:
+        encrypted_device_setup:
+          type: string
+          maxLength: 32768
+          pattern: ^v1\.[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]+$
+          description: >-
+            Encrypted fresh target-device keys and wallet grant. The unlock
+            secret is never sent to this API. Not supported for proxy sessions.
         target_client_type:
           type: string
           enum:
@@ -38205,6 +38235,11 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        encrypted_group:
+          type: string
+          description: >-
+            Opaque encrypted-chat handle. No sender or message content is stored
+            in the notification.
         reason:
           $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:
@@ -38346,6 +38381,7 @@ components:
     ApiNotificationCause:
       type: string
       enum:
+        - E2EE_MESSAGE
         - IDENTITY_SUBSCRIBED
         - IDENTITY_MENTIONED
         - IDENTITY_REP
@@ -40620,6 +40656,12 @@ components:
         - native_refresh_token
         - refresh_token_expires_at
       properties:
+        encrypted_device_setup:
+          type: string
+          nullable: true
+          description: >-
+            One-time encrypted device setup, unlocked locally using the link
+            fragment.
         address:
           type: string
         role:

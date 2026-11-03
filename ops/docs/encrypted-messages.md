@@ -33,7 +33,7 @@ can export them or move them into an encrypted chat.
 - On in production and staging, behind the `NEXT_PUBLIC_E2EE_DM_ENABLED`
   build flag. A build with the flag off returns 404 on the encrypted routes
   and shows none of the controls below.
-- A signed-in profile with a connected wallet is required.
+- A signed-in own profile is required. Setup may connect a wallet for approval, or use a source-browser-approved connection-sharing link in the apps. Once enrolled, a live wallet connection is not needed.
 - Not available while acting as a proxy. Encrypted chats belong to your own
   profile; the pages explain this and show nothing else.
 - The browser needs WebAssembly, IndexedDB and Web Crypto. Browsers without
@@ -82,7 +82,10 @@ happens:
   Devices (see [Encrypted backup](#encrypted-backup)).
 
 Select **Turn on encrypted messages (one signature)** and approve the signature
-in your wallet. Cancelling the signature changes nothing.
+in your wallet. If your wallet is disconnected, the button connects it first
+and continues to the signature automatically. Cancelling the signature changes
+nothing. A signing-first combined grant is handed to the encryption engine
+without another signature, including when the setup page was already open.
 
 If you signed in on this browser with the combined sign-in message (it
 mentions end-to-end encrypted messages and an encrypted messages key; see
@@ -363,7 +366,7 @@ encrypted copy of your message history so you can restore it on a new device.
   signing-only grant of the app is revoked, as on the website. Otherwise,
   turning on signed messages can grant signing only; encrypted messages
   require their separate signature when combined setup is unavailable. Where they are
-  off (production until the grant wording is approved), or the app cannot
+  off (as currently configured in production), or the app cannot
   hold a signing key (iOS before 17), the card asks for the separate
   encrypted-messages signature. The grant's origin is "6529 Desktop" in the
   desktop app and the site host in the phone app.
@@ -476,3 +479,34 @@ without images**. Images and files too large for one encrypted attachment
   **Turn on this device**.
 - **Encrypted messages are open in another tab.**: select **Use here** to move
   them to this tab, or keep using the other tab.
+
+## Setup through connection sharing
+
+From **Connect Device**, select Mobile or Desktop, then **Set up signed posts
+and encrypted DMs on this device**. Approve the receiving device with the
+wallet on the source browser. Open or scan the new private link on your own
+receiving app; it signs in and installs fresh device keys without connecting
+that wallet in the app. The short-lived link can be redeemed once and must
+not be shared with anyone else. Proxy sessions cannot authorize this setup.
+
+Existing source keys and history are not copied. Already usable keys and
+registered encrypted-message history on the receiving app are preserved.
+Restore an encrypted backup to read earlier history on a new device. iOS
+16.4 supports encryption; signed posts still need iOS 17's Ed25519 support.
+If sign-in succeeds but setup fails, a message asks you to create a new link
+from the source browser; it does not silently claim setup succeeded.
+
+## Encrypted in-app notifications and device status
+
+Encrypted messages create an entry in Notifications even on an authenticated
+device without local encryption keys. The entry says **New encrypted
+message**; a ready device may preview the latest readable incoming local
+message. No sender, chat name or message text is stored in the server's
+notification entry. Opening the entry goes to the encrypted chat/setup.
+These entries follow Direct messages notification preferences. Existing
+content-free phone pushes and desktop notices keep their separate behavior.
+
+A shield on the web sidebar avatar describes this browser's signed-post and
+encrypted-DM states. Green means both are ready; amber means one is ready.
+Hover or focus the account button to read the status. Disconnected wallets
+do not themselves turn the device's stored keys off.

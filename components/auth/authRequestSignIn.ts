@@ -547,8 +547,9 @@ export const createAuthRequestSignIn =
         return { success: false };
       }
 
+      const e2ee = await settleGrantHandover(handover);
       return requireE2eeDevice === true
-        ? { success: true, e2ee: await settleGrantHandover(handover) }
+        ? { success: true, e2ee }
         : { success: true };
     } catch (error) {
       if (isAuthRequestStale(authRequestGuard)) {

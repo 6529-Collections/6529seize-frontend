@@ -1,3 +1,12 @@
+"use client";
+
+import { ConnectionShareNotice } from "./ConnectionShareNotice";
+import DeviceConnectionShare from "./DeviceConnectionShare";
+import {
+  isAppDeviceGrantsEnabled,
+  isSignedMessagesEnabled,
+} from "@/lib/device-signing/feature";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import {
   faCopy,
   faExternalLink,
@@ -12,7 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { type CSSProperties, useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
@@ -70,7 +79,7 @@ export function HeaderShareModalView({
   mobileConnectionShareStatus,
   desktopConnectionShareStatus,
   terminalConnectionShareFailuresRef,
-  requestSessionUpgrade,
+  updateAuthentication,
   refreshConnectionShare,
   isConnectionShareLoading,
   urlCopied,
@@ -78,6 +87,7 @@ export function HeaderShareModalView({
   isMobile,
   isElectron,
 }: HeaderShareModalViewProps) {
+  const [secureSetup, setSecureSetup] = useState(false);
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
@@ -230,112 +240,17 @@ export function HeaderShareModalView({
     };
   };
 
-  const requestAuthenticationUpgrade = async () => {
-    try {
-      await requestSessionUpgrade?.();
-    } catch (error) {
-      console.error("Failed to request session upgrade", error);
-    }
-  };
-
-  const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
-    const isLegacyAuth = status === "legacy-auth";
-    const title = (() => {
-      if (isLegacyAuth) {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.legacyTitle"
-        );
-      }
-      if (status === "loading") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.loadingTitle"
-        );
-      }
-      if (status === "error") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.errorTitle"
-        );
-      }
-      return t(
-        HEADER_SHARE_LOCALE,
-        "headerShare.connectionNotice.unauthenticatedTitle"
-      );
-    })();
-    const message = (() => {
-      if (isLegacyAuth) {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.legacyMessage"
-        );
-      }
-      if (status === "loading") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.loadingMessage"
-        );
-      }
-      if (status === "error") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.errorMessage"
-        );
-      }
-      return t(
-        HEADER_SHARE_LOCALE,
-        "headerShare.connectionNotice.unauthenticatedMessage"
-      );
-    })();
-
-    return (
-      <div
-        data-testid="connection-share-notice"
-        data-status={status}
-        className={`tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-p-8 tw-text-center ${
-          status === "loading"
-            ? ""
-            : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50"
-        }`}
-      >
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
-            {title}
-          </div>
-          <div className="tw-text-sm tw-leading-6 tw-text-iron-300">
-            {message}
-          </div>
-        </div>
-        {isLegacyAuth && (
-          <div className="tw-flex tw-w-full tw-gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              className="tw-flex-1"
-              onClick={onClose}
-            >
-              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.cancel")}
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              className="tw-flex-1"
-              onClick={() => {
-                onClose();
-                terminalConnectionShareFailuresRef.current.clear();
-                void requestAuthenticationUpgrade();
-              }}
-            >
-              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.update")}
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderConnectionShareNotice = (status: ConnectionShareStatus) => (
+    <ConnectionShareNotice
+      status={status}
+      onClose={onClose}
+      onUpdate={() => {
+        onClose();
+        terminalConnectionShareFailuresRef.current.clear();
+        updateAuthentication();
+      }}
+    />
+  );
 
   const getDisplayContent = () => {
     if (mode === Mode.PAGE_SHARE) {
@@ -655,6 +570,15 @@ export function HeaderShareModalView({
       );
     }
 
+    if (secureSetup)
+      return (
+        <DeviceConnectionShare
+          key={activeSubTab}
+          target={activeSubTab === SubMode.DESKTOP ? "desktop" : "native"}
+          onBack={() => setSecureSetup(false)}
+        />
+      );
+
     const connectionStatusKey =
       CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
     const showConnectionControls =
@@ -663,39 +587,54 @@ export function HeaderShareModalView({
       activeConnectionShareStatus === "error";
 
     return (
-      <div
-        data-testid="connection-share-content"
-        className="tw-relative tw-w-full"
-      >
-        <span
-          className="tw-sr-only"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {connectionStatusKey
-            ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
-            : ""}
-        </span>
+      <>
         <div
-          data-testid="connection-share-reserved-space"
-          aria-hidden="true"
-          className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+          data-testid="connection-share-content"
+          className="tw-relative tw-w-full"
         >
-          <div className="tw-aspect-square tw-w-full" />
-          <div className="tw-h-10 tw-w-full" />
+          <span
+            className="tw-sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {connectionStatusKey
+              ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
+              : ""}
+          </span>
+          <div
+            data-testid="connection-share-reserved-space"
+            aria-hidden="true"
+            className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+          >
+            <div className="tw-aspect-square tw-w-full" />
+            <div className="tw-h-10 tw-w-full" />
+          </div>
+          <div className="tw-absolute tw-inset-0">
+            {showConnectionControls ? (
+              <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2">
+                {qrContent}
+                {renderConnectionUrl(url)}
+              </div>
+            ) : (
+              content
+            )}
+          </div>
         </div>
-        <div className="tw-absolute tw-inset-0">
-          {showConnectionControls ? (
-            <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2">
-              {qrContent}
-              {renderConnectionUrl(url)}
-            </div>
-          ) : (
-            content
-          )}
-        </div>
-      </div>
+        {activeConnectionShareStatus === "ready" &&
+        isAppDeviceGrantsEnabled() &&
+        isSignedMessagesEnabled() &&
+        isE2eeEnabled() ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="tw-mt-3 tw-w-full !tw-whitespace-normal"
+            onClick={() => setSecureSetup(true)}
+          >
+            {t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.action")}
+          </Button>
+        ) : null}
+      </>
     );
   }
 

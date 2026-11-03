@@ -118,6 +118,7 @@ function LegacyDmBanner({
       <E2eeBanner
         tone="warning"
         live={false}
+        stackActions
         action={
           isProxy ? null : (
             <>

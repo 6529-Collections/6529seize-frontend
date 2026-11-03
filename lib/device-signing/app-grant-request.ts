@@ -71,7 +71,7 @@ const failed = (reason: AppGrantFailure): AppGrantResult => ({
   reason,
 });
 
-const toRequest = (
+export const appGrantToRequest = (
   fields: AppGrantFields,
   signature: string,
   deviceLabel: string
@@ -161,7 +161,7 @@ export async function requestAppDeviceGrant(
     let grant: ApiDeviceGrant;
     try {
       grant = await request.registerGrant(
-        toRequest(fields, signature, request.deviceLabel)
+        appGrantToRequest(fields, signature, request.deviceLabel)
       );
       // The server must have stored exactly what the wallet signed.
       if (

@@ -209,7 +209,16 @@ export type INotificationMemeCollaboration = Omit<
   };
 };
 
+export type INotificationEncryptedMessage = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.E2EeMessage;
+  readonly additional_context: { readonly encrypted_group?: string };
+};
+
 export type TypedNotification =
+  | INotificationEncryptedMessage
   | INotificationVotingCreditsReturned
   | INotificationMemeCollaboration
   | INotificationCompetitionLifecycle

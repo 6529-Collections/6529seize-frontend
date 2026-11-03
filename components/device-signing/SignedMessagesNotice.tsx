@@ -103,7 +103,7 @@ function SignedMessagesNoticeContent({
     <section
       aria-labelledby={titleId}
       data-testid="signed-messages-notice"
-      className={`tw-mb-2 tw-flex tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${
+      className={`tw-mb-2 tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${
         isAlert
           ? "tw-border-red/30 tw-bg-red/10"
           : "tw-border-white/10 tw-bg-iron-950"
@@ -115,15 +115,15 @@ function SignedMessagesNoticeContent({
           isAlert ? "tw-text-red" : "tw-text-iron-400"
         }`}
       />
-      <div className="tw-min-w-0 tw-flex-1 tw-basis-48">
+      <div className="tw-contents">
         <p
           id={titleId}
-          className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100"
+          className="tw-col-start-2 tw-row-start-1 tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100"
         >
           {copy.title}
         </p>
         {copy.body && (
-          <p className="tw-m-0 tw-mt-0.5 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-col-span-2 tw-col-start-2 tw-m-0 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
             {copy.body}
           </p>
         )}
@@ -131,11 +131,11 @@ function SignedMessagesNoticeContent({
           <SignedMessagesEnableStatus
             status={enableStatus}
             onReconnect={reconnect}
-            className="tw-mt-1"
+            className="tw-col-span-2 tw-col-start-2 tw-mt-1"
           />
         )}
       </div>
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1">
+      <div className="tw-col-start-3 tw-row-start-1 tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1">
         <Button
           size="sm"
           variant={isAlert ? "destructive" : "secondary"}

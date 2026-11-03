@@ -937,6 +937,7 @@ describe("HeaderShare", () => {
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
         hasValidWalletAuth: true,
+        canSignActiveWallet: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: "0x1234567890123456789012345678901234567890",
@@ -1551,6 +1552,52 @@ describe("HeaderShare", () => {
       expect(requestSessionUpgrade).toHaveBeenCalledTimes(1);
     });
 
+    it("connects once and automatically resumes the latest authentication upgrade", async () => {
+      const auth = require("@/components/auth/Auth");
+      const beforeConnectUpgrade = jest
+        .fn()
+        .mockResolvedValue({ success: false });
+      const afterConnectUpgrade = jest
+        .fn()
+        .mockResolvedValue({ success: true });
+      let canSign = false;
+      let connectOpen = false;
+      const connect = jest.fn(() => {
+        connectOpen = true;
+      });
+      mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
+        address: "0x1234567890123456789012345678901234567890",
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        canSignActiveWallet: canSign,
+        seizeConnectOpen: connectOpen,
+        seizeConnect: connect,
+      }));
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession: jest.fn(async () => false),
+        requestSessionUpgrade: beforeConnectUpgrade,
+      });
+      const view = renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await screen.findByText("Update Authentication");
+      await userEvent.click(screen.getByRole("button", { name: "Update" }));
+      expect(connect).toHaveBeenCalledTimes(1);
+      expect(beforeConnectUpgrade).not.toHaveBeenCalled();
+      canSign = true;
+      connectOpen = false;
+      auth.useAuth.mockReturnValue({
+        ensureActiveSessionV2WebSession: jest.fn(async () => false),
+        requestSessionUpgrade: afterConnectUpgrade,
+      });
+      view.rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+      await waitFor(() => expect(afterConnectUpgrade).toHaveBeenCalledTimes(1));
+      expect(beforeConnectUpgrade).not.toHaveBeenCalled();
+    });
+
     it("shows an upgrade action without calling the share endpoint when the web session is missing", async () => {
       const auth = require("@/components/auth/Auth");
       const requestSessionUpgrade = jest.fn().mockResolvedValue({
@@ -2070,6 +2117,7 @@ describe("HeaderShare", () => {
       mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
         isAuthenticated: true,
         hasValidWalletAuth: true,
+        canSignActiveWallet: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: activeAddress,
@@ -2167,6 +2215,7 @@ describe("HeaderShare", () => {
       mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
         isAuthenticated: true,
         hasValidWalletAuth: true,
+        canSignActiveWallet: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: activeAddress,

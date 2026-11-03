@@ -3516,6 +3516,8 @@ export const EN_US_MESSAGES = {
     "Your wallet, profile, or network changed. Select the profile again to continue.",
   "auth.proxySwitch.failed":
     "Couldn't switch profiles. Your current profile is still selected. Please try again.",
+  "auth.signModal.messageVersion":
+    "Your wallet may show Version 1. That is the sign-in message format, not the version of your 6529 authentication.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",

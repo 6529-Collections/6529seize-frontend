@@ -4,6 +4,25 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.connectionSetup.action":
+    "Set up signed posts and encrypted DMs on this device",
+  "e2ee.connectionSetup.description":
+    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs. Your existing chat history stays on your current devices; restore a backup to read it there.",
+  "e2ee.connectionSetup.compatibility":
+    "On iPhone, encrypted messages need iOS 16.4 or later; signed posts need iOS 17 or later.",
+  "e2ee.connectionSetup.approve": "Approve receiving device (one signature)",
+  "e2ee.connectionSetup.qr": "Private device setup QR code",
+  "e2ee.connectionSetup.open": "Open in 6529 Desktop",
+  "e2ee.connectionSetup.keepPrivate":
+    "Only open or scan this link on your own device. It signs in and authorizes that device to post as you and read encrypted messages. The link expires shortly and can be used once.",
+  "e2ee.connectionSetup.back": "Back to connection sharing",
+  "e2ee.connectionSetup.failed":
+    "Signed in, but device setup could not finish. Create a new setup link from your source browser to try again. Your existing keys have been kept.",
+
+  "e2ee.notification.newMessage": "New encrypted message",
+  "e2ee.notification.open": "Open encrypted chat",
+  "e2ee.notification.locked":
+    "Set up encrypted messages on this device to read it.",
   "e2ee.badge.encrypted": "End-to-end encrypted",
   "e2ee.badge.encryptedShort": "Encrypted",
   "e2ee.title": "Encrypted messages",
@@ -591,4 +610,13 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
+  "e2ee.deviceStatus.summary":
+    "This device: signed posts {proof}; encrypted DMs {encryption}.",
+  "e2ee.deviceStatus.on": "on",
+  "e2ee.deviceStatus.off": "off",
+  "e2ee.deviceStatus.checking": "checking",
+  "e2ee.deviceStatus.unknown": "could not verify",
+  "e2ee.deviceStatus.unavailable": "unavailable",
+  "e2ee.deviceStatus.elsewhere": "open in another tab",
+  "e2ee.deviceStatus.attention": "needs attention",
 } as const;

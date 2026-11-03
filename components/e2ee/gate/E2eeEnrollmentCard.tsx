@@ -8,13 +8,16 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   type ReactNode,
-  useContext,
+  useCallback,
   useId,
   useState,
   useSyncExternalStore,
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import { SeizeConnectContext } from "@/components/auth/seizeConnectContextValue";
+import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
+import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
+import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -68,8 +71,7 @@ export function E2eeEnrollmentCard({
   const locale = useBrowserLocale();
   const headingId = useId();
   const { requestSignedMessagesGrant } = useAuth();
-  // Optional read: the gate renders in tests and shells without a provider.
-  const address = useContext(SeizeConnectContext)?.address;
+  const { address } = useSeizeConnectContext();
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
   const isSafari = useSyncExternalStore(
@@ -77,47 +79,61 @@ export function E2eeEnrollmentCard({
     isSafariBrowser,
     () => false
   );
-  const waiting = pending || enrolling;
+  const requestEnrollment = useCallback<RequestSignedMessagesGrant>(
+    async (options) => {
+      if (!engine) return { success: false, reason: "unavailable" };
+      setPending(true);
+      setErrorKey(null);
+      try {
+        const outcome = await turnOnWithCombinedSignIn({
+          engine,
+          address,
+          requestGrant: requestSignedMessagesGrant
+            ? (input) =>
+                requestSignedMessagesGrant({
+                  ...input,
+                  onSignatureRequested: options?.onSignatureRequested,
+                })
+            : undefined,
+        });
+        if (outcome === "declined") {
+          setErrorKey(ENROLL_REJECTED_KEY);
+          return { success: false, reason: "rejected" };
+        }
+        if (outcome === "stopped")
+          return { success: false, reason: "context-changed" };
+        if (outcome === "fallback") await engine.enroll();
+        return { success: true };
+      } catch (error) {
+        setErrorKey(getEnrollErrorKey(error));
+        return {
+          success: false,
+          reason: isE2eeSignatureRejection(error)
+            ? "rejected"
+            : "signature-failed",
+        };
+      } finally {
+        setPending(false);
+      }
+    },
+    [address, engine, requestSignedMessagesGrant]
+  );
+  const onEnabled = useCallback(() => undefined, []);
+  const flow = useEnableSignedMessages({
+    requestGrant: requestEnrollment,
+    onEnabled,
+  });
+  const waiting = pending || enrolling || flow.isEnabling;
   const visibleErrorKey =
     errorKey ??
     (!waiting && engineError === E2EE_SIGNATURE_REJECTED
       ? ENROLL_REJECTED_KEY
       : null);
-
   const declined = visibleErrorKey === ENROLL_REJECTED_KEY;
   const failureKey = declined ? null : visibleErrorKey;
   let statusKey: MessageKey | null = null;
-  if (waiting) {
-    statusKey = "e2ee.enroll.waiting";
-  } else if (declined) {
-    statusKey = ENROLL_REJECTED_KEY;
-  }
-
-  const enroll = async () => {
-    if (!engine || waiting) {
-      return;
-    }
-    setPending(true);
-    setErrorKey(null);
-    try {
-      // One combined grant for this device (a sign-in on the website, an app
-      // grant in the apps); any case it cannot cover uses the grant prompt.
-      const outcome = await turnOnWithCombinedSignIn({
-        engine,
-        address,
-        requestGrant: requestSignedMessagesGrant,
-      });
-      if (outcome === "declined") {
-        setErrorKey(ENROLL_REJECTED_KEY);
-      } else if (outcome === "fallback") {
-        await engine.enroll();
-      }
-    } catch (error) {
-      setErrorKey(getEnrollErrorKey(error));
-    } finally {
-      setPending(false);
-    }
-  };
+  if (declined) statusKey = ENROLL_REJECTED_KEY;
+  else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
 
   return (
     <section
@@ -157,13 +173,19 @@ export function E2eeEnrollmentCard({
           <Button
             variant="action"
             size="lg"
-            onClick={() => void enroll()}
+            onClick={() => flow.enable("encrypted-messages")}
             loading={waiting}
             disabled={!engine}
             className="!tw-whitespace-normal tw-text-center"
           >
             {t(locale, "e2ee.enroll.button")}
           </Button>
+          {!visibleErrorKey ? (
+            <SignedMessagesEnableStatus
+              status={flow.status}
+              onReconnect={flow.reconnect}
+            />
+          ) : null}
           {/* One polite region for waiting and for declining (a choice). */}
           <output
             className={`tw-block tw-text-center tw-text-sm tw-text-iron-300 ${

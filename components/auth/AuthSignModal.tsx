@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getSessionClientType } from "@/services/auth/session-v2.utils";
 import { useEffect, useId, useMemo, useRef } from "react";
 import type { MouseEvent } from "react";
 import { createPortal } from "react-dom";
@@ -250,6 +251,12 @@ export function AuthSignModal({
               </p>
             </>
           )}
+          {!isConnectionShareUpgradePrompt &&
+            getSessionClientType() === "web" && (
+              <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(locale, "auth.signModal.messageVersion")}
+              </p>
+            )}
           {isSessionUpgradePrompt && (
             <p className={styles["signModalLearnMore"]}>
               <Link
@@ -281,31 +288,32 @@ export function AuthSignModal({
               ? t(locale, "auth.signModal.confirmInWallet")
               : ""}
           </output>
-          {!isConnectionShareUpgradePrompt && (
-            <Button
-              type="button"
-              data-auth-sign-primary
-              onClick={onConfirmSignRequest}
-              disabled={isSignRequestInProgress}
-              aria-busy={isSignRequestInProgress}
-              aria-label={
-                isSigningPending
-                  ? t(locale, "auth.signModal.confirmInWallet")
-                  : signModalConfirmText
-              }
-              variant="action"
-              size="lg"
-              className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
-            >
-              {isSigningPending ? (
-                <span className={styles["signModalButtonContent"]}>
-                  {t(locale, "auth.signModal.confirmInWallet")} <DotLoader />
-                </span>
-              ) : (
-                signModalConfirmText
-              )}
-            </Button>
-          )}
+          {!isConnectionShareUpgradePrompt &&
+            getSessionClientType() === "web" && (
+              <Button
+                type="button"
+                data-auth-sign-primary
+                onClick={onConfirmSignRequest}
+                disabled={isSignRequestInProgress}
+                aria-busy={isSignRequestInProgress}
+                aria-label={
+                  isSigningPending
+                    ? t(locale, "auth.signModal.confirmInWallet")
+                    : signModalConfirmText
+                }
+                variant="action"
+                size="lg"
+                className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
+              >
+                {isSigningPending ? (
+                  <span className={styles["signModalButtonContent"]}>
+                    {t(locale, "auth.signModal.confirmInWallet")} <DotLoader />
+                  </span>
+                ) : (
+                  signModalConfirmText
+                )}
+              </Button>
+            )}
         </div>
       </div>
     </dialog>,

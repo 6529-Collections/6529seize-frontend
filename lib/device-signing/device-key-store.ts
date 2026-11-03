@@ -213,3 +213,19 @@ export async function listLocalDevicePublicKeys(): Promise<string[]> {
   const records = await deviceKeyStorage.readAll();
   return records.map((record) => record.publicKeyHex.toLowerCase());
 }
+
+/** Imports a freshly granted app key, preserving an existing usable local grant. */
+export async function installSharedDeviceKey(
+  record: StoredDeviceKey
+): Promise<void> {
+  const address = normalizeAddress(record.address);
+  await withDeviceKeyLock(address, async () => {
+    const existing = await deviceKeyStorage.read(address);
+    if (existing && getUsableGrant(existing, Date.now())) return;
+    if (!record.grant || !getUsableGrant(record, Date.now()))
+      throw new Error("Invalid shared signing grant");
+    await deviceKeyStorage.write({ ...record, address });
+    writeDeviceGrantHint(address, record.grant, record.ownProfileId);
+  });
+  notifyDeviceGrantChanged(address);
+}

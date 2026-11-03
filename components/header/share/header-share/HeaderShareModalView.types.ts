@@ -29,7 +29,7 @@ export interface HeaderShareModalViewProps {
   readonly terminalConnectionShareFailuresRef: MutableRef<
     Map<string, TerminalConnectionShareStatus>
   >;
-  readonly requestSessionUpgrade: (() => Promise<unknown>) | undefined;
+  readonly updateAuthentication: () => void;
   readonly refreshConnectionShare: () => void;
   readonly isConnectionShareLoading: boolean;
   readonly urlCopied: boolean;

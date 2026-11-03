@@ -253,6 +253,7 @@ export * from '../models/ApiCompetitionLeaderboardPage';
 export * from '../models/ApiCompetitionLifecycle';
 export * from '../models/ApiCompetitionMyVote';
 export * from '../models/ApiCompetitionMyVotePage';
+export * from '../models/ApiCompetitionMyVotesSort';
 export * from '../models/ApiCompetitionOutcome';
 export * from '../models/ApiCompetitionOutcomePage';
 export * from '../models/ApiCompetitionPage';
@@ -1233,6 +1234,7 @@ import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboa
 import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
 import { ApiCompetitionMyVote      } from '../models/ApiCompetitionMyVote';
 import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
+import { ApiCompetitionMyVotesSort } from '../models/ApiCompetitionMyVotesSort';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
@@ -1284,7 +1286,7 @@ import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreate
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateCompetitionEntryRequest } from '../models/ApiCreateCompetitionEntryRequest';
 import { ApiCreateCompetitionRequest } from '../models/ApiCreateCompetitionRequest';
-import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
+import { ApiCreateConnectionShareRequest , ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
 import { ApiCreateConnectionShareResponse    , ApiCreateConnectionShareResponseTargetClientTypeEnum    } from '../models/ApiCreateConnectionShareResponse';
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
@@ -1616,7 +1618,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                             } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                              } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -1701,7 +1703,7 @@ import { ApiRateMatter } from '../models/ApiRateMatter';
 import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
 import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithProfileInfoAndLevelPage';
 import { ApiRedeemConnectionShareRequest , ApiRedeemConnectionShareRequestTargetClientTypeEnum   } from '../models/ApiRedeemConnectionShareRequest';
-import { ApiRedeemConnectionShareResponse    , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
+import { ApiRedeemConnectionShareResponse     , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRefreshPushInstallationBadgeRequest } from '../models/ApiRefreshPushInstallationBadgeRequest';
@@ -2062,6 +2064,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCompetitionDecisionStatus",
     "ApiCompetitionEntryStatus",
     "ApiCompetitionLifecycle",
+    "ApiCompetitionMyVotesSort",
     "ApiCompetitionParticipationConfigRequiredMediaEnum",
     "ApiCompetitionRulesInputTypeEnum",
     "ApiCompetitionSortDirection",

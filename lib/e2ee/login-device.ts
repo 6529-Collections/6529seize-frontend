@@ -45,6 +45,7 @@ export interface PreparedLoginE2eeDevice {
 }
 
 interface LoginE2eeDeviceDeps {
+  readonly state?: Uint8Array | undefined;
   readonly loadWasm?: (() => Promise<WasmModule>) | undefined;
   readonly storage?: E2eeStorage | undefined;
   readonly now?: (() => number) | undefined;
@@ -63,7 +64,9 @@ export async function createLoginE2eeDevice(
   deps: LoginE2eeDeviceDeps = {}
 ): Promise<PreparedLoginE2eeDevice> {
   const wasm = await (deps.loadWasm ?? loadDefaultWasm)();
-  const mls = MlsClient.create(wasm);
+  const mls = deps.state
+    ? MlsClient.load(wasm, deps.state)
+    : MlsClient.create(wasm);
   const deviceKeyHex = mls.deviceKey();
   let released = false;
   const release = () => {
