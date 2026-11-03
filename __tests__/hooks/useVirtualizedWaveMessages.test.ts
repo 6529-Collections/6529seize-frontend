@@ -209,15 +209,15 @@ describe("useVirtualizedWaveMessages", () => {
       useVirtualizedWaveMessages("wave-1", null, 2)
     );
 
-    currentWaveMessages = createWaveData("wave-1", [2, 1]);
+    currentWaveMessages = createWaveData("wave-1", [8, 7]);
     rerender();
 
-    expect(getSerials(result.current)).toEqual([2, 1]);
+    expect(getSerials(result.current)).toEqual([8, 7]);
 
-    currentWaveMessages = createWaveData("wave-1", [4, 3, 2, 1]);
+    currentWaveMessages = createWaveData("wave-1", [8, 7, 6, 5]);
     rerender();
 
-    expect(getSerials(result.current)).toEqual([4, 3, 2, 1]);
+    expect(getSerials(result.current)).toEqual([8, 7, 6, 5]);
 
     currentWaveMessages = createWaveData("wave-1", [8, 7, 6, 5, 4, 3, 2, 1]);
     rerender();
@@ -231,6 +231,49 @@ describe("useVirtualizedWaveMessages", () => {
 
     expect(getSerials(result.current)).toEqual([8, 7, 6, 5, 4, 3, 2, 1]);
     expect(result.current?.hasMoreLocal).toBe(false);
+  });
+
+  it("keeps rendered drops when more than a page of newer drops arrives", () => {
+    const { result, rerender } = renderHook(() =>
+      useVirtualizedWaveMessages("wave-1", null, 2)
+    );
+
+    currentWaveMessages = createWaveData("wave-1", [2, 1]);
+    rerender();
+
+    expect(getSerials(result.current)).toEqual([2, 1]);
+
+    // A catch-up page of newer drops lands ahead of the rendered rows.
+    currentWaveMessages = createWaveData("wave-1", [8, 7, 6, 5, 4, 3, 2, 1]);
+    rerender();
+
+    expect(getSerials(result.current)).toEqual([8, 7, 6, 5, 4, 3, 2, 1]);
+    expect(result.current?.hasMoreLocal).toBe(false);
+  });
+
+  it("keeps a revealed serial target rendered when newer drops arrive", async () => {
+    const around = Array.from({ length: 38 }, (_, index) => 39 - index);
+    currentWaveMessages = createWaveData("wave-1", around);
+
+    const { result, rerender } = renderHook(() =>
+      useVirtualizedWaveMessages("wave-1", null, 25)
+    );
+
+    expect(getSerials(result.current)).not.toContain(2);
+
+    await act(async () => {
+      const reveal = result.current!.waitAndRevealDrop(2, 100, 10);
+      jest.runAllTimers();
+      await expect(reveal).resolves.toBe(true);
+    });
+
+    expect(getSerials(result.current)).toContain(2);
+
+    const newer = Array.from({ length: 50 }, (_, index) => 151 - index);
+    currentWaveMessages = createWaveData("wave-1", [...newer, ...around]);
+    rerender();
+
+    expect(getSerials(result.current)).toEqual([...newer, ...around]);
   });
 
   it("expands appended drop messages and resets when the drop scope changes", () => {
