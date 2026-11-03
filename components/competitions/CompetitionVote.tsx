@@ -76,7 +76,8 @@ export function useCompetitionVoteBudget(
     queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
     enabled: enabled && Boolean(connectedProfile),
     retry: false,
-    staleTime: 0,
+    // Reuse fresh limits when sorting remounts rows; votes and events invalidate them.
+    staleTime: 15_000,
   });
 }
 
