@@ -185,7 +185,7 @@ export default function HeaderUserMenuDropdown({
                       accounts={availableConnectedAccounts.map((account) => ({
                         ...account,
                         unreadNotificationsCount:
-                          connectedAccountUnreadNotifications?.[
+                          connectedAccountUnreadNotifications[
                             account.address.toLowerCase()
                           ] ?? 0,
                       }))}
@@ -241,6 +241,7 @@ export default function HeaderUserMenuDropdown({
                                 : "Primary profile"
                             }
                           >
+                            {/* eslint-disable-next-line @next/next/no-img-element -- profile pictures come from arbitrary remote hosts at a fixed 24px size; keep them unoptimized as before. */}
                             <img
                               src={getScaledImageUri(
                                 profile.pfp,
