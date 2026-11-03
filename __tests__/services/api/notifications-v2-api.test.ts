@@ -578,45 +578,50 @@ describe("fetchNotificationsV2", () => {
     }
   );
 
-  it("maps returned credits after deletion without a related drop or actor", async () => {
-    const context = {
-      event_id: "release",
-      reason: "AUTHOR_DELETED",
-      wave_id: "wave",
-      competition_id: "competition",
-      competition_title: "Main Stage",
-      entry_id: "entry",
-      drop_id: "deleted",
-      submission_title: "Freedom To Transcend",
-      credit_type: "TDH",
-      amount: 500,
-      released_at: 900,
-    };
-    (commonApiFetch as jest.Mock).mockResolvedValue({
-      unread_count: 1,
-      notifications: [
+  it.each([wave, undefined])(
+    "preserves optional wave context for returned credits without a drop or actor (%p)",
+    async (relatedWave) => {
+      const context = {
+        event_id: "release",
+        reason: "AUTHOR_DELETED",
+        wave_id: "wave",
+        competition_id: "competition",
+        competition_title: "Main Stage",
+        entry_id: "entry",
+        drop_id: "deleted",
+        submission_title: "Freedom To Transcend",
+        credit_type: "TDH",
+        amount: 500,
+        released_at: 900,
+      };
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 100,
+            cause: ApiNotificationCause.VotingCreditsReturned,
+            created_at: 1000,
+            read_at: null,
+            related_identity: null,
+            related_drops: [],
+            additional_context: context,
+            ...(relatedWave ? { related_wave: relatedWave } : {}),
+          },
+        ],
+      });
+      const response = await fetchNotificationsV2({ limit: "30" });
+      expect(response.notifications).toEqual([
         {
           id: 100,
           cause: ApiNotificationCause.VotingCreditsReturned,
           created_at: 1000,
           read_at: null,
-          related_identity: null,
-          related_drops: [],
           additional_context: context,
+          ...(relatedWave ? { related_wave: relatedWave } : {}),
         },
-      ],
-    });
-    const response = await fetchNotificationsV2({ limit: "30" });
-    expect(response.notifications).toEqual([
-      {
-        id: 100,
-        cause: ApiNotificationCause.VotingCreditsReturned,
-        created_at: 1000,
-        read_at: null,
-        additional_context: context,
-      },
-    ]);
-  });
+      ]);
+    }
+  );
 
   it.each([0, -5, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
     "ignores malformed returned credit amounts (%s)",
