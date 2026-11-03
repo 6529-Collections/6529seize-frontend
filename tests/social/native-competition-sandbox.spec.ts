@@ -2444,6 +2444,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
       await expect(selectAll).toBeVisible();
       await expect(resetVotes).toHaveCount(0);
+      await page.mouse.move(0, 0);
       const createStyle = await page
         .getByRole("button", { name: "Open create menu", exact: true })
         .evaluate((button) => {
@@ -2463,6 +2464,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           );
         });
       await selectAll.click();
+      // Compare resting styles, not the hover state left by the selection click.
+      await page.mouse.move(0, 0);
       for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
         for (const [property, value] of Object.entries(createStyle)) {
