@@ -655,6 +655,7 @@ function DropListItemContentMediaImageContent({
           originalQuality={canToggleOriginal ? quality : undefined}
           preferHighQualityPreview={preferHighQualityImage}
           onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+          videoAlt={altOverride}
         />
       )}
     </>

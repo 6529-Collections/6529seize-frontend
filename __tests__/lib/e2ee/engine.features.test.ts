@@ -290,7 +290,7 @@ describe("E2EE engine: features", () => {
     expect(b.getMessages(g).find((m) => m.id === sent.id)!.text).toBe(
       "a threat edited in"
     );
-    expect(b.reportPreview(g, sent.id)).toEqual({
+    expect(await b.reportPreview(g, sent.id)).toEqual({
       latest: { text: "a threat edited in", attachmentNames: [] },
       original: { text: "see you at noon", attachmentNames: [] },
     });
@@ -468,6 +468,8 @@ describe("E2EE engine: features", () => {
     });
     expect(reloaded.engine.getStatus()).toBe("ready");
     expect(reloaded.signCalls).toBe(0);
+    // Startup restores summaries; opening reads only the newest local page.
+    await reloaded.engine.loadHistory?.(g);
     expect(texts(reloaded.engine.getMessages(g))).toEqual(["before reload"]);
     await a.send(g, { text: "after reload" });
     await settle(world);

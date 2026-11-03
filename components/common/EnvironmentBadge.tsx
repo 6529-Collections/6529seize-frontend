@@ -1,9 +1,13 @@
 "use client";
 
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { getAppEnvironment, getBrowserOrigin } from "@/config/appEnvironment";
+import {
+  getAppEnvironment,
+  getBrowserOrigin,
+  getConfiguredAppOrigin,
+} from "@/config/appEnvironment";
+import { publicEnv } from "@/config/env";
 import { useId, useSyncExternalStore } from "react";
-import { useInitialEnvironmentOrigin } from "./EnvironmentOriginContext";
 import { Tooltip } from "react-tooltip";
 
 interface EnvironmentBadgeProps {
@@ -11,15 +15,20 @@ interface EnvironmentBadgeProps {
 }
 
 const subscribeToBrowserOrigin = () => () => undefined;
+// Each deployment is built for one host (BASE_ENDPOINT), so the server HTML of
+// every page, prerendered or not, carries that host's badge without reading
+// the request. A browser on another host, such as a local server on a
+// different port, shows its own badge right after hydration.
+const getConfiguredOrigin = () =>
+  getConfiguredAppOrigin(publicEnv.BASE_ENDPOINT);
 
 export default function EnvironmentBadge({
   compact = false,
 }: EnvironmentBadgeProps) {
-  const initialOrigin = useInitialEnvironmentOrigin();
   const browserOrigin = useSyncExternalStore(
     subscribeToBrowserOrigin,
     getBrowserOrigin,
-    () => initialOrigin
+    getConfiguredOrigin
   );
   const { badge, host } = getAppEnvironment(browserOrigin);
   const tooltipId = buildTooltipId("environment-badge", useId());
