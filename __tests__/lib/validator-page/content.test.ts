@@ -57,6 +57,37 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/serve none/);
   });
 
+  it("names every rc.5 file by system and CPU, and the .deb per CPU", () => {
+    const download = VALIDATOR_GUIDE_MARKDOWN.slice(
+      VALIDATOR_GUIDE_MARKDOWN.indexOf("## Download and check"),
+      VALIDATOR_GUIDE_MARKDOWN.indexOf("## Install")
+    );
+    for (const name of [
+      "6529-Validator-0.1.0.dmg",
+      "6529-Validator-Setup-0.1.0-x64.exe",
+      "6529-Validator-0.1.0-x64.msi",
+      "6529-validator_0.1.0_amd64.deb",
+      "6529-validator_0.1.0_arm64.deb",
+      "6529-Validator-0.1.0-x86_64.AppImage",
+      "validator-0.1.0-aarch64-apple-darwin.tar.gz",
+      "validator-0.1.0-x86_64-apple-darwin.tar.gz",
+      "validator-0.1.0-aarch64-unknown-linux-gnu.tar.gz",
+      "validator-0.1.0-x86_64-unknown-linux-gnu.tar.gz",
+      "validator-0.1.0-x86_64-pc-windows-msvc.zip",
+      "SHA256SUMS",
+      "release.json",
+    ]) {
+      expect(download).toContain(`\`${name}\``);
+    }
+    expect(download).toContain(
+      "| Another Linux desktop | x86-64 only | `6529-Validator-0.1.0-x86_64.AppImage` |"
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "On ARM64, a Raspberry Pi among them, run `sudo apt install ./6529-validator_0.1.0_arm64.deb`."
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain("- AppImage (x86-64 only):");
+  });
+
   it("keeps the owner's line word for word and names the DM account", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
       "6529 never starts a DM with you or asks for a seed phrase."
