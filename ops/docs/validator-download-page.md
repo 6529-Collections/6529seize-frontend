@@ -12,6 +12,7 @@ validators fetch to find updates.
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
 | `/validator/guide` | The tester guide | Password |
+| `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
 | `/validator/releases` | Every release, newest first, with its files' SHA-256 | Password |
 | `/validator/download/<version>/<file>` | A 302 to a presigned S3 URL that works for 5 minutes | Password |
@@ -111,6 +112,7 @@ ISO 8601 date or time), and may have `commit`, `software_id`, `notes` and
 ## Text
 
 The guide and the known issues are Markdown in
-`lib/validator-page/content/`. Testers send status files and logs by
+`lib/validator-page/content/`. The hardware page's text and numbers are in
+`hardwareText.ts` there, each checked against the release it names. Testers send status files and logs by
 encrypted DM in the 6529 app to 6529's account, 6529validators
 (`VALIDATOR_STATUS_DM_ACCOUNT` in `lib/validator-page/content/pageText.ts`).
