@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { getStagingApiKey } from "@/config/serverEnv";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
@@ -25,9 +25,7 @@ const fetchDropMetadata = async (
   id: string,
   apiAuth: string | null
 ): Promise<ApiOgMetadata> => {
-  const url = `${publicEnv.API_ENDPOINT}/api/og-metadata/drops/${encodeURIComponent(
-    id
-  )}`;
+  const url = apiUrl(`/api/og-metadata/drops/${encodeURIComponent(id)}`);
   const response = await fetch(url, {
     redirect: "error",
     headers: apiAuth === null ? {} : { "x-6529-auth": apiAuth },

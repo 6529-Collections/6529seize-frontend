@@ -4,7 +4,7 @@ import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInpu
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
@@ -309,7 +309,7 @@ export default function WalletCheckerComponent(
     queryKey: ["delegations", submittedAddress],
     queryFn: async () => {
       try {
-        const url = `${publicEnv.API_ENDPOINT}/api/delegations/${submittedAddress}`;
+        const url = apiUrl(`/api/delegations/${submittedAddress}`);
         return await fetchUrl(url);
       } catch (error) {
         console.error(
@@ -440,7 +440,7 @@ export default function WalletCheckerComponent(
     queryKey: ["consolidated-wallets", fetchedAddress],
     queryFn: async () => {
       try {
-        const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
+        const url = apiUrl(`/api/consolidations/${fetchedAddress}`);
         const response: DBResponse<string> = await fetchUrl(url);
         const wallets = response.data;
 
