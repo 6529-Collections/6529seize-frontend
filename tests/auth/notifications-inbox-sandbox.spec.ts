@@ -192,6 +192,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     page,
     baseURL,
   }, testInfo) => {
+    // The sidebar inbox exists only on desktop; notifications-sandbox covers
+    // single-artwork navigation from the full feed on every platform.
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"

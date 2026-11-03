@@ -70,7 +70,17 @@ it("opens the single artwork view when a competition push includes its drop id",
     resolvePushRedirectUrl({
       ...creditReturn,
       competition_entry_id: "entry",
-      drop_id: "artwork",
+      competition_drop_id: "artwork",
     })
   ).toBe("/waves/wave/competitions/competition?drop=artwork");
+});
+
+it("preserves entry navigation when older competition pushes carry a legacy drop serial", () => {
+  expect(
+    resolvePushRedirectUrl({
+      ...creditReturn,
+      competition_entry_id: "entry",
+      drop_id: "12345",
+    })
+  ).toBe("/waves/wave/competitions/competition?entry=entry");
 });

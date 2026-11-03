@@ -27,15 +27,21 @@ const redirectConfig = {
     drop_id,
     competition_id,
     competition_entry_id,
+    competition_drop_id,
   }: {
     wave_id: string;
     drop_id: string;
     competition_id?: string;
     competition_entry_id?: string;
+    competition_drop_id?: string;
   }) => {
     if (competition_id) {
-      if (drop_id)
-        return getCompetitionDropRoute(wave_id, competition_id, drop_id);
+      if (competition_drop_id)
+        return getCompetitionDropRoute(
+          wave_id,
+          competition_id,
+          competition_drop_id
+        );
       const entryQuery = competition_entry_id
         ? `?entry=${encodeURIComponent(competition_entry_id)}`
         : "";
