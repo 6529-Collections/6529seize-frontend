@@ -119,6 +119,14 @@ function WebSidebarUser({
     []
   );
 
+  // The account menu holds the "Connect Device" entry; fetch the modal while
+  // it is open so the dialog appears without a network wait.
+  useEffect(() => {
+    if (showUserMenu && canUseDesktopConnect) {
+      preloadHeaderQRModal();
+    }
+  }, [showUserMenu, canUseDesktopConnect]);
+
   if (
     !hasHydrated ||
     connectionState === "initializing" ||
@@ -305,14 +313,6 @@ function WebSidebarUser({
       profileClickTimeoutRef.current = null;
     }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
   };
-
-  // The account menu holds the "Connect Device" entry; fetch the modal while
-  // it is open so the dialog appears without a network wait.
-  useEffect(() => {
-    if (showUserMenu && canUseDesktopConnect) {
-      preloadHeaderQRModal();
-    }
-  }, [showUserMenu, canUseDesktopConnect]);
 
   const onOpenConnect = () => {
     setShowUserMenu(false);
