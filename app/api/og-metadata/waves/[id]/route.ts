@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
 import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
 import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
@@ -22,9 +22,7 @@ const getUsableText = (value: string | null | undefined): string | null => {
 };
 
 const fetchWaveMetadata = async (id: string): Promise<ApiOgMetadata> => {
-  const url = `${publicEnv.API_ENDPOINT}/api/og-metadata/waves/${encodeURIComponent(
-    id
-  )}`;
+  const url = apiUrl(`/api/og-metadata/waves/${encodeURIComponent(id)}`);
   const response = await fetch(url, {
     next: { revalidate },
   });

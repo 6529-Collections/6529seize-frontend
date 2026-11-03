@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/authContext";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation } from "@/entities/IDelegation";
 import { fetchUrl } from "@/services/6529api";
@@ -44,7 +44,7 @@ async function fetchWalletDelegations(
   wallet: string
 ): Promise<WalletDelegations> {
   const response = await fetchUrl<DBResponse<Delegation>>(
-    `${publicEnv.API_ENDPOINT}/api/delegations/${wallet}`
+    apiUrl(`/api/delegations/${wallet}`)
   );
   return {
     rows: Array.isArray(response.data) ? response.data : [],

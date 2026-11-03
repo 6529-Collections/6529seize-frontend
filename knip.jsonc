@@ -97,6 +97,9 @@
       // Browser variant of i18n/localeDictionaries.ts, reached only through
       // the Turbopack `resolveAlias` browser condition in config/nextConfig.ts.
       "i18n/localeDictionaries.browser.ts": ["files"],
+      // Browser variant of config/env.ts, reached only through the Turbopack
+      // `resolveAlias` browser condition in config/nextConfig.ts.
+      "config/env.browser.ts": ["files"],
       // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
       // excludes their focused Jest consumers from its usage graph.
       "scripts/pr-ci-policy-bundle.cjs": ["exports"],

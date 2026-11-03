@@ -1,5 +1,5 @@
 import { getCanonicalNextMintNumber } from "@/components/meme-calendar/meme-calendar.helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
@@ -50,7 +50,7 @@ const fetchMemeNft = cache(
     try {
       const params = new URLSearchParams({ contract: MEMES_CONTRACT, id });
       const response = await fetchUrl<DBResponse<NFT>>(
-        `${publicEnv.API_ENDPOINT}/api/nfts?${params.toString()}`,
+        apiUrl(`/api/nfts?${params.toString()}`),
         { cache: "no-store" }
       );
       const data: unknown = response.data;
@@ -70,7 +70,7 @@ const fetchMemeMetadata = cache(
   async (id: string): Promise<MemePageFetchResult<ApiMemesExtendedData[]>> => {
     try {
       const response = await fetchUrl<DBResponse<ApiMemesExtendedData>>(
-        `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${encodeURIComponent(id)}`,
+        apiUrl(`/api/memes_extended_data?id=${encodeURIComponent(id)}`),
         { cache: "no-store" }
       );
       const data: unknown = response.data;

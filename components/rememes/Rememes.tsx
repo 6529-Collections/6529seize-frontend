@@ -9,7 +9,7 @@ import Pagination from "@/components/pagination/Pagination";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFTLite, Rememe } from "@/entities/INFT";
@@ -124,7 +124,7 @@ export default function Rememes({
   const activeFetchRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`)
+    fetchUrl(apiUrl("/api/memes_lite"))
       .then((response: DBResponse) => {
         setMemes(response.data);
       })
@@ -151,7 +151,9 @@ export default function Rememes({
       if (selectedSorting === RememeSort.CREATED_ASC) {
         sort = "&sort=created_at&sort_direction=desc";
       }
-      let url = `${publicEnv.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
+      const url = apiUrl(
+        `/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`
+      );
       fetchUrl(url, { signal: abortController.signal })
         .then((response: DBResponse) => {
           if (

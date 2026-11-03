@@ -266,6 +266,11 @@ export function sharedConfig(
         "@/i18n/sourceMessages": {
           browser: "./i18n/sourceMessages.browser.ts",
         },
+        // Browser bundles read the build-validated public env without zod;
+        // server rendering keeps validating it.
+        "@/config/env": {
+          browser: "./config/env.browser.ts",
+        },
       },
     },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],

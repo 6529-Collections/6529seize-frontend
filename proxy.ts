@@ -39,6 +39,7 @@ import {
 } from "@/lib/proxy/waveRoutes";
 import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 import { publicEnv } from "./config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
 const redirectMappings = [
@@ -357,7 +358,7 @@ async function accessDenial(
   // credential stands in for it.
   const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
   const verdict = await getAccessVerdict({
-    apiEndpoint: publicEnv.API_ENDPOINT,
+    apiEndpoint: getApiBase(),
     authValue,
   });
 
