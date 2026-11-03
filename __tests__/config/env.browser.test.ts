@@ -103,6 +103,25 @@ describe("config/env.browser", () => {
     );
   });
 
+  it("fails fast with a named error when the baked env is not JSON", () => {
+    expect(() => loadModule(BROWSER_MODULE, "{not json")).toThrow(
+      "PUBLIC_RUNTIME in this browser bundle is not valid JSON"
+    );
+  });
+
+  it("relies on next.config.ts inlining PUBLIC_RUNTIME into every bundle", () => {
+    // Next's `env` option replaces process.env.PUBLIC_RUNTIME at build time in
+    // client, server and edge code alike; the browser reader depends on it.
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "next.config.ts"),
+      "utf8"
+    );
+
+    expect(source).toMatch(
+      /env:\s*\{\s*PUBLIC_RUNTIME:\s*JSON\.stringify\(publicEnv\),/
+    );
+  });
+
   it("does not import zod or the schema at runtime", () => {
     const source = fs.readFileSync(
       path.join(process.cwd(), "config/env.browser.ts"),

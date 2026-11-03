@@ -8,13 +8,22 @@ import type { PublicEnv } from "./env.schema";
 // Server rendering and Jest keep the validating `./env.ts`. The exports
 // mirror `./env.ts`.
 
-const raw =
-  typeof process === "undefined" ? undefined : process.env["PUBLIC_RUNTIME"];
-if (!raw) {
-  throw new Error("PUBLIC_RUNTIME is missing from this browser bundle");
+function readBakedPublicEnv(): PublicEnv {
+  const raw =
+    typeof process === "undefined" ? undefined : process.env["PUBLIC_RUNTIME"];
+  if (!raw) {
+    throw new Error("PUBLIC_RUNTIME is missing from this browser bundle");
+  }
+  try {
+    return JSON.parse(raw) as PublicEnv;
+  } catch (error) {
+    throw new Error("PUBLIC_RUNTIME in this browser bundle is not valid JSON", {
+      cause: error,
+    });
+  }
 }
 
-export const publicEnv: PublicEnv = JSON.parse(raw) as PublicEnv;
+export const publicEnv: PublicEnv = readBakedPublicEnv();
 
 export const getNodeEnv = (): string | undefined => {
   if (publicEnv.NODE_ENV) {
