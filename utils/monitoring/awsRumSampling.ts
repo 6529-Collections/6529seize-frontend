@@ -7,12 +7,17 @@ const AWS_RUM_SAMPLING_STORAGE_KEY = "6529:aws-rum-session-sampled";
 /**
  * Reads the sampling decision of a live aws-rum-web session, so a tab that
  * joins a session another tab started keeps that session's decision.
- * Parsing mirrors the SDK's own cookie reader.
  */
 const readAwsRumSessionCookieDecision = (): boolean | undefined => {
   try {
     for (const cookie of document.cookie.split("; ")) {
-      const [name, value] = cookie.split("=");
+      // Split on the first "=" only: the base64 value can end in "=" padding.
+      const separator = cookie.indexOf("=");
+      if (separator === -1) {
+        continue;
+      }
+      const name = cookie.slice(0, separator);
+      const value = cookie.slice(separator + 1);
       if (name !== AWS_RUM_SESSION_COOKIE_NAME || !value) {
         continue;
       }
@@ -74,7 +79,11 @@ export function isAwsRumSessionSampled(sampleRate: number): boolean {
   if (storedDecision !== undefined) {
     return storedDecision;
   }
-  const sampled = Math.random() < sampleRate;
+  const sampled = Math.random() < clampSampleRate(sampleRate);
   storeDecision(sampled);
   return sampled;
 }
+
+// A rate outside [0, 1] is clamped; a non-finite rate never samples.
+const clampSampleRate = (sampleRate: number): number =>
+  Number.isFinite(sampleRate) ? Math.min(Math.max(sampleRate, 0), 1) : 0;

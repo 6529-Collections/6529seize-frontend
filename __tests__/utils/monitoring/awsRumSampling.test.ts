@@ -75,12 +75,35 @@ describe("isAwsRumSessionSampled", () => {
     expect(randomSpy).not.toHaveBeenCalled();
   });
 
-  it("reads a cookie whose base64 padding the cookie split drops", () => {
-    const encoded = encodeSession({ sessionId: "ab", record: true });
-    expect(encoded).toMatch(/=$/);
-    setSessionCookie(encoded);
+  it.each([true, false])(
+    "reads the record flag (%s) from a cookie value with base64 padding",
+    (record) => {
+      // Session ids sized so both payloads end in base64 "=" padding.
+      const encoded = encodeSession({
+        sessionId: record ? "ab" : "abc",
+        record,
+      });
+      expect(encoded).toMatch(/=$/);
+      setSessionCookie(encoded);
+      // The stored decision and the draw both disagree with the cookie, so
+      // only a parsed record flag can produce the expected result.
+      window.sessionStorage.setItem(STORAGE_KEY, record ? "0" : "1");
+      randomSpy.mockReturnValue(record ? 0.99 : 0);
 
-    expect(isAwsRumSessionSampled(0)).toBe(true);
+      expect(isAwsRumSessionSampled(record ? 0 : 1)).toBe(record);
+      expect(randomSpy).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    [-0.5, 0, false],
+    [1.5, 0.999, true],
+    [Number.NaN, 0, false],
+    [Number.POSITIVE_INFINITY, 0, false],
+  ])("clamps the sample rate %p", (sampleRate, draw, expected) => {
+    randomSpy.mockReturnValue(draw);
+
+    expect(isAwsRumSessionSampled(sampleRate)).toBe(expected);
   });
 
   it.each([
