@@ -26,6 +26,10 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.myVotes.sort": "Ordenar por",
+  "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",
+  "waves.myVotes.sort.leaderboard": "Posición en la clasificación",
+  "waves.myVotes.sort.lastVoted": "Último voto",
   "e2ee.profile.view": "Ver el perfil de {name}",
   "e2ee.profile.viewUnknown": "Ver perfil",
   "e2ee.profile.level": "Nivel {level}",
@@ -239,6 +243,8 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.copyFailed": "No se pudo copiar",
   "waves.drop.actions.menuLabel": "Acciones del drop",
   "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
+  "waves.drop.actions.showMore": "Mostrar más",
+  "waves.drop.actions.showLess": "Mostrar menos",
   "media.video.captions": "Subtitulos",
   "media.video.download": "Descargar multimedia",
   "media.video.downloading": "Descargando multimedia",

@@ -774,6 +774,8 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
+  showMore: "Show more",
+  showLess: "Show less",
 } as const);
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
@@ -919,6 +921,10 @@ const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
 } as const);
 
 const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
+  sort: "Sort by",
+  "sort.voteAmount": "Your vote amount",
+  "sort.leaderboard": "Leaderboard position",
+  "sort.lastVoted": "Last voted",
   total: "Total",
   votesGivenNow: "Votes given now",
   projectedAtDecision: "Projected vote count at decision time",
