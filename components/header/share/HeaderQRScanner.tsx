@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { getConnectionShareRoute } from "./connectionShareQr";
 import {
   getQRScannerErrorReason,
   isQRScannerAvailable,
@@ -133,6 +134,16 @@ export default function HeaderQRScanner({
         onScanSuccess();
         router.push(resolvedPath);
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
+        if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
+          const route = getConnectionShareRoute({ content, appScheme });
+          if (!route) {
+            setToast({ message: invalidQRCodeMessage, type: "error" });
+            return;
+          }
+          onScanSuccess();
+          router.push(route);
+          return;
+        }
         const resolvedUrl = content.replace(`${appScheme}://`, "");
         const [scope, ...pathParts] = resolvedUrl.split("?")[0]?.split("/")!;
 
@@ -157,9 +168,6 @@ export default function HeaderQRScanner({
         switch (scope) {
           case DeepLinkScope.NAVIGATE:
             path = `/${pathParts.join("/")}`;
-            break;
-          case DeepLinkScope.SHARE_CONNECTION:
-            path = "/accept-connection-sharing";
             break;
           default:
             console.warn("Unknown Deep Link Scope", scope);

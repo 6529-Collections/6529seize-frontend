@@ -4,17 +4,23 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
-  "e2ee.connectionSetup.action":
-    "Set up signed posts and encrypted DMs on this device",
+  "e2ee.connectionSetup.title": "Set up device",
+  "e2ee.connectionSetup.scan":
+    "Scan this code with the QR scanner in the 6529 mobile app.",
+  "e2ee.connectionSetup.openInstruction":
+    "Open the setup link in 6529 Desktop.",
+  "e2ee.connectionSetup.restore":
+    "Restore an encrypted backup to read earlier chats on this device.",
+  "e2ee.connectionSetup.action": "Set up signed posts and encrypted DMs",
   "e2ee.connectionSetup.description":
-    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs. Your existing chat history stays on your current devices; restore a backup to read it there.",
+    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs.",
   "e2ee.connectionSetup.compatibility":
     "On iPhone, encrypted messages need iOS 16.4 or later; signed posts need iOS 17 or later.",
   "e2ee.connectionSetup.approve": "Approve receiving device (one signature)",
   "e2ee.connectionSetup.qr": "Private device setup QR code",
   "e2ee.connectionSetup.open": "Open in 6529 Desktop",
   "e2ee.connectionSetup.keepPrivate":
-    "Only open or scan this link on your own device. It signs in and authorizes that device to post as you and read encrypted messages. The link expires shortly and can be used once.",
+    "Use this only on a device you own. It signs you in and enables signed posts and encrypted DMs. It expires shortly and works once.",
   "e2ee.connectionSetup.back": "Back to connection sharing",
   "e2ee.connectionSetup.failed":
     "Signed in, but device setup could not finish. Create a new setup link from your source browser to try again. Your existing keys have been kept.",
@@ -92,7 +98,7 @@ export const E2EE_MESSAGES = {
     "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
-  "e2ee.enroll.button": "Turn on encrypted messages (one signature)",
+  "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",

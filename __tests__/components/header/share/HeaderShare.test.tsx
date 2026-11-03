@@ -433,7 +433,7 @@ describe("HeaderShare", () => {
     const modal = await screen.findByTestId("header-share-modal");
     expect(modal).toHaveClass("tw-max-w-sm", "sm:tw-max-w-2xl", "tw-p-0");
     expect(screen.getByTestId("header-share-modal-content")).toHaveClass(
-      "tw-p-5"
+      "tw-overflow-y-auto"
     );
     expect(modal.querySelector("#header-share-content")).toHaveClass(
       "tw-w-48",

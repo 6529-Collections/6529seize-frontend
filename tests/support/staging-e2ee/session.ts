@@ -532,7 +532,7 @@ function enrollmentHeading(page: Page) {
 
 export function enrollmentButton(page: Page) {
   return page.getByRole("button", {
-    name: "Turn on encrypted messages (one signature)",
+    name: "Enable encryption (one signature)",
   });
 }
 

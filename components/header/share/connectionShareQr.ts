@@ -1,5 +1,7 @@
 import { getAddress, isAddress } from "viem";
 
+const DEVICE_SETUP_FRAGMENT = /^#device_setup_key=[A-Za-z0-9_-]{43}$/u;
+
 const CONNECTION_SHARE_SCOPE = "share-connection";
 const CONNECTION_SHARE_CODE_PARAM = "connection_share_code";
 const CONNECTION_SHARE_ADDRESS_PARAM = "address";
@@ -29,7 +31,7 @@ export function getConnectionShareRoute({
       url.username ||
       url.password ||
       url.port ||
-      url.hash
+      (url.hash && !DEVICE_SETUP_FRAGMENT.test(url.hash))
     ) {
       return null;
     }
@@ -62,7 +64,7 @@ export function getConnectionShareRoute({
       _t: String(timestamp),
     });
 
-    return `/accept-connection-sharing?${destinationParams.toString()}`;
+    return `/accept-connection-sharing?${destinationParams.toString()}${url.hash}`;
   } catch {
     return null;
   }

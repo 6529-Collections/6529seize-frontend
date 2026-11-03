@@ -134,16 +134,16 @@ export default function DeviceConnectionShare({
   }, [link]);
   return (
     <div className="tw-flex tw-flex-col tw-gap-3 tw-text-sm tw-text-iron-200">
-      <p className="tw-m-0 tw-leading-6">
-        {t(locale, "e2ee.connectionSetup.description")}
-      </p>
-      {target === "native" ? (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "e2ee.connectionSetup.compatibility")}
-        </p>
-      ) : null}
       {activeLink ? (
         <>
+          <p className="tw-m-0 tw-leading-6">
+            {t(
+              locale,
+              target === "native"
+                ? "e2ee.connectionSetup.scan"
+                : "e2ee.connectionSetup.openInstruction"
+            )}
+          </p>
           {/* A generated data URL, never a remote image containing credentials. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -176,25 +176,46 @@ export default function DeviceConnectionShare({
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-amber-200">
             {t(locale, "e2ee.connectionSetup.keepPrivate")}
           </p>
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "e2ee.connectionSetup.restore")}
+          </p>
         </>
       ) : (
-        <Button
-          variant="primary"
-          size="md"
-          disabled={activeProfileProxy !== null}
-          loading={flow.isEnabling}
-          onClick={() => flow.enable("connection-share")}
-        >
-          {t(locale, "e2ee.connectionSetup.approve")}
-        </Button>
+        <>
+          <p className="tw-m-0 tw-leading-6">
+            {t(locale, "e2ee.connectionSetup.description")}
+          </p>
+          {target === "native" ? (
+            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(locale, "e2ee.connectionSetup.compatibility")}
+            </p>
+          ) : null}
+          <Button
+            variant="primary"
+            size="md"
+            disabled={activeProfileProxy !== null}
+            loading={flow.isEnabling}
+            onClick={() => flow.enable("connection-share")}
+          >
+            {t(locale, "e2ee.connectionSetup.approve")}
+          </Button>
+        </>
       )}
-      <SignedMessagesEnableStatus
-        status={flow.status}
-        onReconnect={flow.reconnect}
-      />
-      <Button variant="secondary" size="sm" onClick={onBack}>
-        {t(locale, "e2ee.connectionSetup.back")}
-      </Button>
+      <div className="tw-flex tw-flex-col">
+        <SignedMessagesEnableStatus
+          status={flow.status}
+          onReconnect={flow.reconnect}
+          className="tw-mb-3"
+        />
+        <Button
+          variant="secondary"
+          size="sm"
+          className="!tw-whitespace-normal !tw-text-sm !tw-font-medium"
+          onClick={onBack}
+        >
+          {t(locale, "e2ee.connectionSetup.back")}
+        </Button>
+      </div>
     </div>
   );
 }
