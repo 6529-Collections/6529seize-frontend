@@ -1,21 +1,21 @@
-// The known issues at /validator/known-issues, rendered as Markdown.
+// The known issues at /validator/known-issues, rendered as Markdown. Built from the rc.5 tester package (KNOWN-ISSUES.md).
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
 export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
-  "Each issue a tester might meet in the 6529 validator 0.1.0 test release, with its workaround. Checked on 2026-11-03.",
+  "Each issue a tester might meet in release candidate 5 of the 6529 validator 0.1.0 (commit `29a8caf`), with its workaround. Checked on 2026-11-03.",
   "",
   "## Joining the network",
   "",
-  "1. With Tor off, the validator reaches none of its built-in peers. They are onion addresses. Tor is on by default, at home and on a cloud VM. Workaround: keep Tor on. A validator in a data center with Tor off (`--mode rack`) needs a peer by IP address in `[p2p] bootstrap`. Ask 6529 for one.",
-  "2. Joining can wait on a peer that stops answering. The validator closes such a peer and dials another within seconds. Workaround: if Ready to sign stays on one step for more than 15 minutes, restart the validator once and tell us.",
-  '3. The history comes only from validators that run this release. Earlier test builds serve none. While 6529 upgrades its own nodes, a fresh install can wait at "history found". Workaround: wait, and report it if it lasts more than an hour.',
+  "1. With Tor off, the validator reaches none of its built-in peers. They are onion addresses. Tor is on by default, at home and on a cloud VM. Workaround: keep Tor on. A validator in a data center with Tor off (`--mode datacenter`) needs a peer by IP address in `[p2p] bootstrap`. Ask 6529 for one.",
+  "2. Joining can wait on a peer that stops answering. The validator closes such a peer and dials another within seconds. Workaround: if Ready to sign stays at finding the agreed day for more than 15 minutes, restart the validator once and tell us.",
+  "3. Rebuild and match can take 30 minutes or more through Tor. The validator reads every Ethereum block since the checkpoint of 1 November before its result can match, so the step grows longer each day. Its progress stays at 90% the whole time. Workaround: leave the validator running.",
   "",
   "## Install and download",
   "",
   "4. The install docs point at a release page testers cannot open. The repository is private, so the GitHub links in `docs/` fail. Workaround: download from [this site's download page](/validator).",
-  "5. There is no `SHA256SUMS.sigstore.json`. The docs' `cosign` step does not apply to test releases. Workaround: compare the SHA-256 with the download page and `SHA256SUMS`.",
-  '6. Windows may show "Windows protected your PC" until it has seen the signed file often. Workaround: press **More info**, check that the publisher is 6529 Collection LLC, and press **Run anyway**.',
+  "5. There is no `SHA256SUMS.sigstore.json`. The docs' `cosign` step does not apply to this release candidate. Workaround: compare the SHA-256 with the download page and `SHA256SUMS`.",
+  '6. Windows may show "Windows protected your PC" until it has seen the signed file often. Workaround: **More info**, check that the publisher is 6529 Collection LLC, **Run anyway**.',
   "7. A program copied without its `release.json` reports itself as a development build. Workaround: on the terminal path, keep the archive's folder whole.",
   '8. Linux needs glibc 2.35 or newer. Older systems fail with "GLIBC_2.3x not found". Workaround: Ubuntu 22.04, Debian 12, Raspberry Pi OS Bookworm or newer.',
   "9. Windows on ARM is untested. It runs the x64 build through emulation. Report what you see.",
@@ -27,11 +27,11 @@ export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
   "12. An old `NOT_GRANTED` alert can stay until your key first signs. The authorization counts from the next cycle, and an alert raised before that clears after your key's first vote. Workaround: acknowledge it under History on the page.",
   "13. Some public Ethereum servers refuse Tor. The validator moves to the next one. If all refuse, it says `WAITING_SOURCE`. Workaround: add a server that accepts Tor, use your own node, or set `[tor] ethereum = false`.",
   '14. "light-client updates ... unavailable from one data source" can appear as a warning. 6529\'s own nodes show it too, and the validator uses another source. Report it if it lasts more than a day.',
-  "15. The Mac app signs only while you are logged in and the Mac is awake. Workaround: for a Mac that signs with no one logged in, use the terminal guide (`docs/install/macos.md` in the archive).",
+  "15. The Mac app signs only while you are logged in and the Mac is awake. Workaround: for a Mac that signs with no one logged in, use the terminal guide (`docs/install/macos.md`).",
   "16. The AppImage opens no window and signs only while it runs. Workaround: for a validator that starts with the machine, use the `.deb`.",
   "17. Moving the Mac app to the Trash does not stop the validator until you log out. Workaround: first choose **Stop the validator** in the logo's menu.",
-  "18. On a Mac where the validator was set up as a system service from Terminal, the Update page shows the app's steps, which do not restart that setup's program. Workaround: follow the Upgrade section of `docs/install/macos.md` in the archive.",
-  "19. Some wallets refuse a message that names no chain. The authorization names none on purpose. Workaround: sign with Foundry's `cast` (`docs/install/grant.md` in the archive).",
+  "18. On a Mac where the validator was set up as a system service from Terminal, the Update page shows the app's steps, which do not restart that setup's program. Follow the Upgrade section of `docs/install/macos.md` instead.",
+  "19. Some wallets refuse a message that names no chain. The authorization names none on purpose. Workaround: sign with Foundry's `cast` (`docs/install/grant.md`).",
   "20. One key on two machines is a double vote. Copying the data folder, or restoring a disk image, excludes your account for 30 days, and that authorization's keys never count again. Workaround: never copy it; make a separate key on each machine.",
   "21. Settings › Peers can make a computer help new validators find the network. On a computer with a key, the validators that connect to it can tell it is yours. The page says so when you switch it on. Workaround: leave it off, or switch it on on a second computer that has no key.",
   "",
