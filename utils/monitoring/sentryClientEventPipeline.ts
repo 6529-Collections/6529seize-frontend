@@ -108,6 +108,42 @@ function shouldFilterReferenceErrors(
   return referenceErrors.some((p) => message.includes(p));
 }
 
+// Event filters in the order they ran as an if-chain; `some` stops at the
+// first match just as the chain did.
+const EVENT_FILTERS: ReadonlyArray<
+  (event: Sentry.Event, hint?: Sentry.EventHint) => boolean
+> = [
+  shouldFilterInjectedWalletCollision,
+  shouldFilterBraveWalletPageEvaluationError,
+  shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterKnownWalletProviderObjectRejection,
+  shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileUserRejectedRequest,
+  shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterInjectedProviderProxyStartsWithError,
+  shouldFilterBrowserExtensionMessagingConnectionError,
+  shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterExpectedWaveRequestReplacementAbort,
+  shouldFilterCoinbaseWalletLinkWebSocket1006,
+  shouldFilterWalletConnectStaleSessionTopic,
+  shouldFilterTalismanExtensionOnboardingError,
+  shouldFilterTwitterConfigReferenceError,
+  shouldFilterTwitterCurrentInsetReferenceError,
+  shouldFilterInstagramPageHideBridgeError,
+  shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
+  shouldFilterGifPickerTenorError,
+  shouldFilterSentryRouteParameterizationError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
+  shouldFilterChromeMobileIosInjectedGaError,
+  shouldFilterInjectedIosAutoplayNotAllowedError,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
+  shouldFilterThirdPartyTelemetryNetworkError,
+];
+
 function shouldFilterEvent(
   event: Sentry.Event,
   hint?: Sentry.EventHint
@@ -125,119 +161,7 @@ function shouldFilterEvent(
     }
   }
 
-  if (shouldFilterInjectedWalletCollision(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterBraveWalletPageEvaluationError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterRabbyChromeUserRejectedRequest(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterInjectedWasmCspUnsafeEval(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterAnonymousUnsafeEvalCspError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterInjectedProviderProxyStartsWithError(event)) {
-    return true;
-  }
-
-  if (shouldFilterBrowserExtensionMessagingConnectionError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterExpectedWaveRequestReplacementAbort(event)) {
-    return true;
-  }
-
-  if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterWalletConnectStaleSessionTopic(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterTalismanExtensionOnboardingError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterTwitterConfigReferenceError(event)) {
-    return true;
-  }
-
-  if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
-    return true;
-  }
-
-  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
-    return true;
-  }
-
-  if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
-    return true;
-  }
-
-  if (shouldFilterGifPickerTenorError(event)) {
-    return true;
-  }
-
-  if (shouldFilterSentryRouteParameterizationError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
-    return true;
-  }
-
-  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
-    return true;
-  }
-
-  if (shouldFilterInjectedIosAutoplayNotAllowedError(event)) {
-    return true;
-  }
-
-  if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
-    return true;
-  }
-
-  if (shouldFilterThirdPartyTelemetryNetworkError(event)) {
+  if (EVENT_FILTERS.some((filter) => filter(event, hint))) {
     return true;
   }
 
@@ -281,7 +205,7 @@ function enrichNextServerComponentRenderError(
     ...event.tags,
     next_error_digest: digest,
   };
-  if (!event.fingerprint?.length) {
+  if ((event.fingerprint?.length ?? 0) === 0) {
     event.fingerprint = ["next-server-component-render", digest];
   }
 }
@@ -504,7 +428,7 @@ function getNetworkErrorSamplingEvent(
 /** The client `beforeSend` pipeline: returns the event to send, or null to drop it. */
 export function processSentryClientEvent(
   event: Sentry.ErrorEvent,
-  hint: Sentry.EventHint
+  hint?: Sentry.EventHint
 ): Sentry.ErrorEvent | null {
   if (shouldFilterEvent(event, hint)) {
     return null;
@@ -559,10 +483,8 @@ export function processSentryClientEvent(
 }
 
 /** The client `beforeSendTransaction` pipeline. */
-export function processSentryClientTransaction(
-  event: Sentry.TransactionEvent
-): Sentry.TransactionEvent | null {
-  return sanitizeSentryEvent(
-    filterNoisyThirdPartyTransactionSpans(event) as Sentry.TransactionEvent
-  );
+export function processSentryClientTransaction<T extends Sentry.Event>(
+  event: T
+): T | null {
+  return sanitizeSentryEvent(filterNoisyThirdPartyTransactionSpans(event) as T);
 }
