@@ -1,4 +1,4 @@
-import { asE2eeApiError } from "../api";
+import { asE2eeApiError } from "../api-errors";
 import { digestBytes, rosterDigest } from "../digests";
 import type { ApiE2eeDevice } from "../api-types";
 import type { E2eeUntrustedDevice } from "../types";
