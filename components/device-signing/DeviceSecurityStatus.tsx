@@ -10,10 +10,14 @@ import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee, type E2eeUiStatus } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 type EncryptionState = "on" | "off" | "checking" | "elsewhere" | "attention";
 function encryptionState(status: E2eeUiStatus): EncryptionState {
@@ -67,16 +71,26 @@ export function DeviceSecurityDetails({
   encrypted,
 }: Pick<ReturnType<typeof useDeviceSecurityState>, "proof" | "encrypted">) {
   const locale = useBrowserLocale();
+  const formatStatus = (status: typeof proof | typeof encrypted) => {
+    const label = t(locale, `e2ee.deviceStatus.${status}`);
+    return status === "on" || status === "off" ? (
+      <strong key="status" className="tw-font-bold">
+        {label}
+      </strong>
+    ) : (
+      label
+    );
+  };
   return (
     <>
       <span className="tw-block">
-        {t(locale, "e2ee.deviceStatus.proofLine", {
-          status: t(locale, `e2ee.deviceStatus.${proof}`),
+        {tRich(locale, "e2ee.deviceStatus.proofLine", {
+          status: formatStatus(proof),
         })}
       </span>
       <span className="tw-block">
-        {t(locale, "e2ee.deviceStatus.encryptionLine", {
-          status: t(locale, `e2ee.deviceStatus.${encrypted}`),
+        {tRich(locale, "e2ee.deviceStatus.encryptionLine", {
+          status: formatStatus(encrypted),
         })}
       </span>
     </>
@@ -85,10 +99,13 @@ export function DeviceSecurityDetails({
 
 function DeviceSecurityStatusContent({
   descriptionId,
+  menuOpen,
 }: {
   readonly descriptionId: string;
+  readonly menuOpen: boolean;
 }) {
   const { proof, encrypted } = useDeviceSecurityState();
+  const isTouchDevice = useIsTouchDevice();
   const complete = proof === "on" && encrypted === "on";
   const partial = proof === "on" || encrypted === "on";
   const color = complete ? "tw-text-green-400" : "tw-text-iron-400";
@@ -99,13 +116,24 @@ function DeviceSecurityStatusContent({
       className={`tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-2 tw-ring-iron-950 ${statusColor}`}
     >
       <Icon aria-hidden="true" className="tw-size-4" />
-      <span
-        id={descriptionId}
-        role="tooltip"
-        className="tw-pointer-events-none tw-absolute tw-left-full tw-top-1/2 tw-z-50 tw-ml-2 -tw-translate-y-1/2 tw-whitespace-nowrap tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-50 tw-opacity-0 tw-shadow-lg group-focus-visible/user:tw-opacity-100 group-aria-expanded/user:!tw-opacity-0 [@media(hover:hover)]:group-hover/user:tw-opacity-100"
-      >
+      <span id={descriptionId} className="tw-sr-only">
         <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
       </span>
+      {!isTouchDevice && !menuOpen && (
+        <BodyPortalTooltip
+          id={`${descriptionId}-tooltip`}
+          place="right"
+          opacity={1}
+          openEvents={{ mouseenter: true, focus: true }}
+          closeEvents={{ mouseleave: true, blur: true }}
+          globalCloseEvents={{ escape: true }}
+          style={TOOLTIP_STYLES}
+        >
+          <div className="tailwind-scope tw-font-normal">
+            <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
+          </div>
+        </BodyPortalTooltip>
+      )}
     </span>
   );
 }
@@ -116,6 +144,7 @@ export const isDeviceSecurityStatusEnabled = (): boolean =>
 /** Describes this app/browser, independently of whether its wallet is connected. */
 export default function DeviceSecurityStatus(props: {
   readonly descriptionId: string;
+  readonly menuOpen: boolean;
 }) {
   if (!isDeviceSecurityStatusEnabled()) return null;
   return <DeviceSecurityStatusContent {...props} />;
