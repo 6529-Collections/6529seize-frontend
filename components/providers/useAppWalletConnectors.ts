@@ -57,7 +57,8 @@ function injectAppWalletConnectors({
 }: InjectAppWalletConnectorsInput): void {
   const { processedWallets } = host;
 
-  // Check if wallets have actually changed to prevent unnecessary re-injection
+  // Checked again after the async import: another WagmiSetup mount may have
+  // installed the same wallet set while the connector chunk was loading.
   if (!haveAppWalletsChanged(processedWallets, appWallets)) {
     return;
   }
