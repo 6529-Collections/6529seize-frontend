@@ -7,7 +7,7 @@ import ValidatorFoldOpener from "./ValidatorFoldOpener";
 import ValidatorMarkdown from "./ValidatorMarkdown";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
 import { ValidatorFeedback, ValidatorNeeds } from "./ValidatorSections";
-import ValidatorSteps from "./ValidatorSteps";
+import ValidatorSteps, { type ValidatorDebs } from "./ValidatorSteps";
 import { LINK, SECTION_HEADING } from "./validatorStyles";
 
 /**
@@ -19,7 +19,7 @@ export default function ValidatorGuidePage({
   debs,
 }: {
   readonly platform: VisitorPlatform;
-  readonly debs: { readonly x64: string; readonly arm64: string };
+  readonly debs: ValidatorDebs;
 }) {
   return (
     <ValidatorPageFrame current="guide">

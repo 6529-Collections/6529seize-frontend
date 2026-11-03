@@ -12,6 +12,12 @@ import { BODY, CODE, LINK } from "./validatorStyles";
 
 type SystemKey = "mac" | "windows" | "linux";
 
+/** This release's two .deb file names, or null while no release is out. */
+export type ValidatorDebs = {
+  readonly x64: string;
+  readonly arm64: string;
+} | null;
+
 type Picture = {
   readonly src: string;
   readonly width: number;
@@ -155,8 +161,17 @@ function LinuxCommands({
   debs,
 }: {
   readonly platform: VisitorPlatform;
-  readonly debs: { readonly x64: string; readonly arm64: string };
+  readonly debs: ValidatorDebs;
 }) {
+  if (!debs) {
+    return (
+      <p
+        className={`tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black tw-p-4 ${BODY}`}
+      >
+        The command appears here once the test release is out.
+      </p>
+    );
+  }
   const commands = [
     { cpu: "x86-64", command: `sudo apt install ./${debs.x64}` },
     { cpu: "ARM64", command: `sudo apt install ./${debs.arm64}` },
@@ -259,7 +274,7 @@ export default function ValidatorSteps({
 }: {
   readonly initial: VisitorPlatform;
   /** The .deb file names, for the Linux install command. */
-  readonly debs: { readonly x64: string; readonly arm64: string };
+  readonly debs: ValidatorDebs;
 }) {
   const platform = useVisitorPlatform(initial);
   const [chosen, setChosen] = useState<SystemKey | null>(null);
@@ -268,14 +283,22 @@ export default function ValidatorSteps({
   const tabId = (key: SystemKey) => `${baseId}-tab-${key}`;
   const panelId = `${baseId}-panel`;
 
+  // Arrow keys, Home and End move between the tabs, as in the ARIA
+  // Authoring Practices.
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+    const index = SYSTEMS.findIndex((entry) => entry.key === system);
+    const targets: Record<string, number> = {
+      ArrowRight: (index + 1) % SYSTEMS.length,
+      ArrowLeft: (index + SYSTEMS.length - 1) % SYSTEMS.length,
+      Home: 0,
+      End: SYSTEMS.length - 1,
+    };
+    const nextIndex = targets[event.key];
+    if (nextIndex === undefined) {
       return;
     }
     event.preventDefault();
-    const index = SYSTEMS.findIndex((entry) => entry.key === system);
-    const step = event.key === "ArrowRight" ? 1 : SYSTEMS.length - 1;
-    const next = SYSTEMS[(index + step) % SYSTEMS.length]!.key;
+    const next = SYSTEMS[nextIndex]!.key;
     setChosen(next);
     document.getElementById(tabId(next))?.focus();
   };

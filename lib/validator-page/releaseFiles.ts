@@ -17,6 +17,8 @@ type FileFacts = {
   readonly what: string;
   /** Who signed it, or null when nobody did. */
   readonly signedBy: string | null;
+  /** What else vouches for it, such as Apple's notarization. */
+  readonly signedNote: string | null;
 };
 
 export type ValidatorInstaller = FileFacts & {
@@ -39,8 +41,8 @@ type ValidatorReleaseDownloads = {
   readonly releaseJson: ValidatorReleaseFile | null;
 };
 
-const MAC_SIGNED = "6529 Collection LLC, notarized by Apple";
-const WINDOWS_SIGNED = "6529 Collection LLC";
+const SIGNER = "6529 Collection LLC";
+const NOTARIZED = "notarized by Apple";
 const DEB = ".deb package";
 const TERMINAL_ARCHIVE = "Terminal archive";
 const WINDOWS_SUMMARY = "Windows 10 or 11 · 64-bit";
@@ -56,7 +58,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Mac",
     cpu: "Apple silicon or Intel",
     what: "App (.dmg)",
-    signedBy: MAC_SIGNED,
+    signedBy: SIGNER,
+    signedNote: NOTARIZED,
   },
   {
     kind: "windows",
@@ -66,7 +69,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Windows",
     cpu: "x86-64",
     what: "Installer (Setup.exe)",
-    signedBy: WINDOWS_SIGNED,
+    signedBy: SIGNER,
+    signedNote: null,
   },
   {
     kind: "deb-x64",
@@ -77,6 +81,7 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     cpu: "x86-64",
     what: DEB,
     signedBy: null,
+    signedNote: null,
   },
   {
     kind: "deb-arm64",
@@ -87,6 +92,7 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     cpu: "ARM64",
     what: DEB,
     signedBy: null,
+    signedNote: null,
   },
   {
     kind: "appimage",
@@ -97,6 +103,7 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     cpu: "x86-64",
     what: "AppImage",
     signedBy: null,
+    signedNote: null,
   },
 ];
 
@@ -108,7 +115,8 @@ const WINDOWS_MSI: FileFacts & { readonly title: string } = {
   system: "Windows",
   cpu: "x86-64",
   what: "Installer (.msi), the one inside Setup.exe",
-  signedBy: WINDOWS_SIGNED,
+  signedBy: SIGNER,
+  signedNote: null,
 };
 
 const ARCHIVE_TARGETS: readonly (FileFacts & {
@@ -121,7 +129,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Mac",
     cpu: "Apple silicon",
     what: TERMINAL_ARCHIVE,
-    signedBy: MAC_SIGNED,
+    signedBy: SIGNER,
+    signedNote: NOTARIZED,
   },
   {
     target: "x86_64-apple-darwin",
@@ -129,7 +138,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Mac",
     cpu: "Intel",
     what: TERMINAL_ARCHIVE,
-    signedBy: MAC_SIGNED,
+    signedBy: SIGNER,
+    signedNote: NOTARIZED,
   },
   {
     target: "x86_64-pc-windows-msvc",
@@ -137,7 +147,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Windows",
     cpu: "x86-64",
     what: TERMINAL_ARCHIVE,
-    signedBy: WINDOWS_SIGNED,
+    signedBy: SIGNER,
+    signedNote: null,
   },
   {
     target: "x86_64-unknown-linux-gnu",
@@ -146,6 +157,7 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     cpu: "x86-64",
     what: TERMINAL_ARCHIVE,
     signedBy: null,
+    signedNote: null,
   },
   {
     target: "aarch64-unknown-linux-gnu",
@@ -154,6 +166,7 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     cpu: "ARM64",
     what: TERMINAL_ARCHIVE,
     signedBy: null,
+    signedNote: null,
   },
 ];
 
@@ -174,6 +187,7 @@ function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
       cpu: "",
       what: "Other file",
       signedBy: null,
+      signedNote: null,
       file,
     };
   }
@@ -183,6 +197,7 @@ function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
     cpu: known.cpu,
     what: known.what,
     signedBy: known.signedBy,
+    signedNote: known.signedNote,
     file,
   };
 }
@@ -219,6 +234,7 @@ export function groupReleaseFiles(
         cpu: installer.cpu,
         what: installer.what,
         signedBy: installer.signedBy,
+        signedNote: installer.signedNote,
         file,
       });
       continue;
@@ -274,6 +290,7 @@ export function listReleaseFiles(
     cpu: installer.cpu,
     what: installer.what,
     signedBy: installer.signedBy,
+    signedNote: installer.signedNote,
     file: installer.file,
   }));
   entries.push(...archives);
@@ -284,10 +301,27 @@ export function listReleaseFiles(
       cpu: "",
       what: "release.json: its commit and each program's SHA-256",
       signedBy: null,
+      signedNote: null,
       file: releaseJson,
     });
   }
   return entries;
+}
+
+/**
+ * The two .deb file names for the Linux install command, or null when the
+ * release (or the feed) has no pair, so the page never shows a stale name.
+ */
+export function getDebNames(
+  release: ValidatorRelease | undefined
+): { readonly x64: string; readonly arm64: string } | null {
+  if (!release) {
+    return null;
+  }
+  const { installers } = groupReleaseFiles(release);
+  const x64 = installers.find((item) => item.kind === "deb-x64")?.file.name;
+  const arm64 = installers.find((item) => item.kind === "deb-arm64")?.file.name;
+  return x64 && arm64 ? { x64, arm64 } : null;
 }
 
 /** The site path that hands out one file of one release. */

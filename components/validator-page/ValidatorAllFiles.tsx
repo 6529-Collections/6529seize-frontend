@@ -42,18 +42,21 @@ function Cell({
   );
 }
 
-/** "6529 Collection LLC" on one line, and Apple's notarization under it. */
-function SignedBy({ value }: { readonly value: string | null }) {
-  if (!value) {
+/** The signer on one line, and Apple's notarization under it. */
+function SignedBy({
+  signer,
+  note,
+}: {
+  readonly signer: string | null;
+  readonly note: string | null;
+}) {
+  if (!signer) {
     return <span>Not signed</span>;
   }
-  const [signer, ...notes] = value.split(", ");
   return (
     <span className="tw-flex tw-flex-col max-lg:tw-items-end">
       <span className="tw-whitespace-nowrap">{signer}</span>
-      {notes.length > 0 && (
-        <span className="tw-text-xs tw-text-iron-500">{notes.join(", ")}</span>
-      )}
+      {note && <span className="tw-text-xs tw-text-iron-500">{note}</span>}
     </span>
   );
 }
@@ -182,7 +185,7 @@ export default function ValidatorAllFiles({
                   </span>
                 </Cell>
                 <Cell label="Signed by" className="tw-text-iron-300">
-                  <SignedBy value={entry.signedBy} />
+                  <SignedBy signer={entry.signedBy} note={entry.signedNote} />
                 </Cell>
                 <td className={`${CELL} lg:tw-text-right`}>
                   <a

@@ -10,6 +10,7 @@ import type {
 } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,
+  getDebNames,
   getReleaseDownloadPath,
   groupReleaseFiles,
   type ValidatorFileEntry,
@@ -128,8 +129,6 @@ export default function ValidatorDownloadPage({
   const release = snapshot.releases[0];
   const version = release ? getBaseVersion(release.version) : "0.1.0";
   const installers = release ? groupReleaseFiles(release).installers : [];
-  const debName = (kind: "deb-x64" | "deb-arm64", fallback: string) =>
-    installers.find((item) => item.kind === kind)?.file.name ?? fallback;
   const knownIssues = guideFold("known-issues");
   return (
     <ValidatorPageFrame current="download">
@@ -163,13 +162,7 @@ export default function ValidatorDownloadPage({
         <h2 id="steps" className="tw-sr-only">
           Three steps
         </h2>
-        <ValidatorSteps
-          initial={platform}
-          debs={{
-            x64: debName("deb-x64", "6529-validator_0.1.0_amd64.deb"),
-            arm64: debName("deb-arm64", "6529-validator_0.1.0_arm64.deb"),
-          }}
-        />
+        <ValidatorSteps initial={platform} debs={getDebNames(release)} />
       </section>
 
       <ValidatorNeeds />

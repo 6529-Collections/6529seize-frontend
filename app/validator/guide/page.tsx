@@ -9,7 +9,7 @@ import {
   getValidatorMetadata,
 } from "@/lib/validator-page/pageAccess";
 import { getReleaseFeedSnapshot } from "@/lib/validator-page/releaseFeed";
-import { groupReleaseFiles } from "@/lib/validator-page/releaseFiles";
+import { getDebNames } from "@/lib/validator-page/releaseFiles";
 
 export default async function ValidatorGuideRoute() {
   await connection();
@@ -21,17 +21,10 @@ export default async function ValidatorGuideRoute() {
     getReleaseFeedSnapshot(),
     headers(),
   ]);
-  const release = snapshot.releases[0];
-  const installers = release ? groupReleaseFiles(release).installers : [];
-  const debName = (kind: "deb-x64" | "deb-arm64", fallback: string) =>
-    installers.find((item) => item.kind === kind)?.file.name ?? fallback;
   return (
     <ValidatorGuidePage
       platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
-      debs={{
-        x64: debName("deb-x64", "6529-validator_0.1.0_amd64.deb"),
-        arm64: debName("deb-arm64", "6529-validator_0.1.0_arm64.deb"),
-      }}
+      debs={getDebNames(snapshot.releases[0])}
     />
   );
 }

@@ -2,6 +2,7 @@
 import { parseReleaseFeed } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,
+  getDebNames,
   getReleaseDownloadPath,
   groupReleaseFiles,
   listReleaseFiles,
@@ -23,8 +24,10 @@ describe("groupReleaseFiles", () => {
       ["deb-arm64", "6529-validator_0.1.0_arm64.deb"],
       ["appimage", "6529-Validator-0.1.0-x86_64.AppImage"],
     ]);
-    expect(groups.installers[0]?.signedBy).toContain("notarized");
+    expect(groups.installers[0]?.signedBy).toBe("6529 Collection LLC");
+    expect(groups.installers[0]?.signedNote).toBe("notarized by Apple");
     expect(groups.installers[1]?.signedBy).toBe("6529 Collection LLC");
+    expect(groups.installers[1]?.signedNote).toBeNull();
     expect(groups.installers[2]?.signedBy).toBeNull();
     expect(groups.installers.map((item) => item.summary)).toEqual([
       "macOS 11 or newer · Apple silicon or Intel",
@@ -84,6 +87,14 @@ describe("groupReleaseFiles", () => {
     expect(
       entries.map((entry) => [entry.system, entry.cpu, entry.signedBy])
     ).toContainEqual(["Linux", "ARM64", null]);
+  });
+
+  it("names both .deb files for the Linux command, or none", () => {
+    expect(getDebNames(release)).toEqual({
+      x64: "6529-validator_0.1.0_amd64.deb",
+      arm64: "6529-validator_0.1.0_arm64.deb",
+    });
+    expect(getDebNames(undefined)).toBeNull();
   });
 
   it("builds download paths and labels", () => {
