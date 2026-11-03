@@ -57,6 +57,8 @@ describe("the facts layer", () => {
     expect(show("tdh.latest.delta")).toBe("+2,951,745");
     expect(show("tdh.latest.identities")).toBe("10,273");
     expect(show("tdh.latest.wallets")).toBe("11,126");
+    // The wallet root's leaves leave out the registry's two burn addresses.
+    expect(show("tdh.latest.walletLeaves")).toBe("11,124");
     expect(show("tdh.latest.agree.live.identities.equal")).toBe("10,273");
     expect(show("tdh.latest.agree.live.wallets.total")).toBe("11,126");
     expect(show("tdh.latest.cutoff")).toBe("26,215,721");
@@ -87,8 +89,7 @@ describe("the facts layer", () => {
   });
 
   it("marks the three days written late on Oct 16 and the two written on time", () => {
-    const days =
-      book.get<{ cycle: number; late: boolean }[]>("tdh.days").value;
+    const days = book.get<{ cycle: number; late: boolean }[]>("tdh.days").value;
     expect(days.map((day) => [day.cycle, day.late])).toEqual([
       [20740, true],
       [20741, true],

@@ -1,4 +1,6 @@
 import { fill } from "@/components/explained/i18n";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatNumber } from "@/i18n/format";
@@ -131,28 +133,32 @@ function BlocksFigure({
           </span>
         </div>
       )}
-      <ul className="tw-m-0 tw-mt-3.5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0">
-        {rows.map((row) => (
-          <li
-            key={row.id}
-            className={`tw-grid tw-grid-cols-[12px_minmax(0,1fr)] tw-items-baseline tw-gap-2.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 ${"within" in row ? "max-md:tw-pl-6" : ""}`}
-          >
-            <span
-              className={`tw-inline-block tw-size-3 tw-rounded-sm ${row.tone}`}
-              aria-hidden="true"
-            />
-            <span>
-              <b className="tw-mr-1.5 tw-font-semibold tw-text-iron-50">
-                {row.n}
-              </b>
-              {row.label}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className={`${EX_TEXT.cap} tw-m-0 tw-mt-3 tw-max-w-[760px]`}>
-        {rich(locale, k("blocks.cap"))}
-      </p>
+      {/* The key and the caption side by side under the bar, so the
+          figure's width is used. */}
+      <div className="tw-mt-3.5 tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-gap-x-12">
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-content-start tw-gap-2 tw-p-0">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className={`tw-grid tw-grid-cols-[12px_minmax(0,1fr)] tw-items-baseline tw-gap-2.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 ${"within" in row ? "max-md:tw-pl-6" : ""}`}
+            >
+              <span
+                className={`tw-inline-block tw-size-3 tw-rounded-sm ${row.tone}`}
+                aria-hidden="true"
+              />
+              <span>
+                <b className="tw-mr-1.5 tw-font-semibold tw-text-iron-50">
+                  {row.n}
+                </b>
+                {row.label}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className={`${EX_TEXT.cap} tw-m-0 tw-max-w-[600px]`}>
+          {rich(locale, k("blocks.cap"))}
+        </p>
+      </div>
     </figure>
   );
 }
@@ -246,11 +252,20 @@ export default function HowMade({
       label={fill(locale, k("s2.label"))}
       heading={rich(locale, k("s2.heading"))}
       figure={
-        <div className="tw-grid tw-gap-12 md:tw-gap-16">
-          <div className="tw-grid tw-grid-cols-1 tw-gap-12 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:tw-gap-16">
-            <BlocksFigure locale={locale} facts={facts} />
-            <PhasesFigure locale={locale} facts={facts} />
-          </div>
+        // The blocks figure carries the section's point; where program A's
+        // steps go is a profile for the engineer, one press away at every
+        // width, as the ledger below is.
+        <div className="tw-grid tw-grid-cols-1 tw-gap-8">
+          <BlocksFigure locale={locale} facts={facts} />
+          <PhoneMore
+            more={fill(locale, k("phases.more"))}
+            less={fill(locale, k("phases.less"))}
+            everywhere
+          >
+            <div className={`${MORE_HIDDEN} tw-mb-2 tw-max-w-[860px]`}>
+              <PhasesFigure locale={locale} facts={facts} />
+            </div>
+          </PhoneMore>
         </div>
       }
     >

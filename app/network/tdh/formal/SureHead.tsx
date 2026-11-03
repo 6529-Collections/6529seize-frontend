@@ -125,9 +125,9 @@ export default function SureHead({
           cells={[
             {
               value: book.maybe("manifest.sections.count"),
+              // Each caption six words or fewer; the splits are told in the
+              // paragraph under the band, beside the table that splits them.
               caption: m("explained.tdh.sure.score.claims", {
-                tdh: p.v("manifest.sections.tdh"),
-                p53: p.v("manifest.sections.p53"),
                 link: (
                   <a className={EX_LINK} href="#claims">
                     {m("explained.tdh.sure.score.claimsLink")}
@@ -141,22 +141,14 @@ export default function SureHead({
               caption:
                 book.maybe<number>("manifest.distinct")?.value ===
                 book.maybe<number>("manifest.proved")?.value
-                  ? m("explained.tdh.sure.score.provedAll", {
-                      tdh: p.v("manifest.proved.tdh"),
-                      p53: p.v("manifest.proved.p53"),
-                    })
+                  ? m("explained.tdh.sure.score.provedAll")
                   : m("explained.tdh.sure.score.proved", {
                       distinct: p.v("manifest.distinct"),
-                      tdh: p.v("manifest.proved.tdh"),
-                      p53: p.v("manifest.proved.p53"),
                     }),
             },
             {
               value: book.maybe("manifest.shownFalse"),
-              caption: m("explained.tdh.sure.score.false", {
-                kernel: p.v("manifest.shownFalse.kernel"),
-                evaluation: p.v("manifest.shownFalse.evaluation"),
-              }),
+              caption: m("explained.tdh.sure.score.false"),
             },
             {
               value: book.maybe("manifest.limits"),
@@ -221,8 +213,13 @@ export default function SureHead({
               ? "explained.tdh.sure.score.counts"
               : "explained.tdh.sure.score.countsShort",
             {
+              claims: p.v("manifest.sections.count"),
+              claimsTdh: p.v("manifest.sections.tdh"),
+              claimsP53: p.v("manifest.sections.p53"),
               proved: p.v("manifest.proved"),
+              shownFalse: p.v("manifest.shownFalse"),
               kernel: p.v("manifest.shownFalse.kernel"),
+              evaluation: p.v("manifest.shownFalse.evaluation"),
               audited: p.v("manifest.audited"),
               theorems: p.v("manifest.audit.wholeTheorems"),
             }
