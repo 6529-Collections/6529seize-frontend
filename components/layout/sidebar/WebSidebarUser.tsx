@@ -119,14 +119,6 @@ function WebSidebarUser({
     []
   );
 
-  // The account menu holds the "Connect Device" entry; fetch the modal while
-  // it is open so the dialog appears without a network wait.
-  useEffect(() => {
-    if (showUserMenu && canUseDesktopConnect) {
-      preloadHeaderQRModal();
-    }
-  }, [showUserMenu, canUseDesktopConnect]);
-
   if (
     !hasHydrated ||
     connectionState === "initializing" ||
@@ -258,6 +250,11 @@ function WebSidebarUser({
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const toggleUserMenu = () => {
+    if (!showUserMenu && canUseDesktopConnect) {
+      // The account menu holds "Connect Device"; fetch the modal as it opens
+      // so the dialog appears without a network wait.
+      preloadHeaderQRModal();
+    }
     setShowUserMenu((current) => !current);
   };
 
