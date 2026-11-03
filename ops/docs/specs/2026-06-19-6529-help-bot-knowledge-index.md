@@ -54,9 +54,9 @@ from deletion and manual review status.
 
 The `home.overview` record also describes the shared hero artwork and copy, with
 Connect wallet followed by Start here for logged-out visitors. The hero uses a
-fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
-What is 6529? section explains art, Waves, and participation, linking to
-`/the-memes`, `/waves`, and The Memes - Main Stage Wave respectively.
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The
+latest-drop slot follows the hero directly; the home page has no What is 6529?
+section.
 
 The `home.overview` record describes the shared discovery cards on the homepage:
 covers beside the content on mobile and filling the card behind a dark, image-tinted text
