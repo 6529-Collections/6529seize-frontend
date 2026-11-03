@@ -1,6 +1,7 @@
 import DelegationPage, {
   generateMetadata,
 } from "@/app/delegation/[...section]/page";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { DelegationCenterSection } from "@/types/enums";
 
 describe("delegation page server", () => {
@@ -8,20 +9,36 @@ describe("delegation page server", () => {
     const params = Promise.resolve({ section: ["delegation-center"] });
     const searchParams = Promise.resolve({
       address: "0x1",
-      collection: "c",
+      collection: MEMES_CONTRACT.toLowerCase(),
       use_case: "2",
     });
     const element = await DelegationPage({ params, searchParams });
     expect(element.props).toMatchObject({
       section: DelegationCenterSection.CENTER,
       addressQuery: "0x1",
-      collectionQuery: "c",
+      collectionQuery: MEMES_CONTRACT,
       useCaseQuery: 2,
     });
     const metadata = await generateMetadata({ params });
     expect(metadata).toEqual(
       expect.objectContaining({ title: "Safe Collecting | 6529.io" })
     );
+  });
+
+  it.each([
+    [{ collection: "c", use_case: "999" }],
+    [{ collection: "0x1", use_case: "998" }],
+    [{ collection: "MEMES", use_case: "2abc" }],
+  ])("passes only listed delegation presets to the form: %j", async (query) => {
+    const element = await DelegationPage({
+      params: Promise.resolve({ section: ["register-delegation"] }),
+      searchParams: Promise.resolve(query),
+    });
+    expect(element.props).toMatchObject({
+      section: DelegationCenterSection.REGISTER_DELEGATION,
+      collectionQuery: query.collection === "MEMES" ? MEMES_CONTRACT : "",
+      useCaseQuery: 0,
+    });
   });
 
   it("titles the wallet architecture route as the TAP guide", async () => {

@@ -2955,6 +2955,23 @@ const DELEGATION_EXPIRY_MESSAGES = objectMessages("delegation.expiry", {
     "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.",
 } as const);
 
+const DELEGATION_SUMMARY_MESSAGES = objectMessages("delegation.summary", {
+  title: "Review before signing",
+  description:
+    "Your wallet will ask you to sign a transaction with exactly these values.",
+  incomplete: "Complete the form to review exactly what you will sign.",
+  originalDelegator: "Original delegator",
+  collection: "Collection",
+  useCase: "Use case",
+  useCaseValue: "#{number} - {name}",
+  delegate: "Delegate address",
+  expiry: "Expiry",
+  expiryNever: "Never",
+  tokens: "Tokens",
+  tokensAll: "All tokens",
+  tokenId: "Token ID {tokenId}",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "wave.byAuthor": "by {author}",
   "wave.serial": "Wave #{serial}",
@@ -3381,6 +3398,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
+  ...DELEGATION_SUMMARY_MESSAGES,
   ...join6529Messages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",

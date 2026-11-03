@@ -15,6 +15,14 @@ import {
   getDelegationExpiryError,
 } from "./delegation-expiry";
 import {
+  findDelegationCollectionOption,
+  findDelegationUseCaseOption,
+  getDelegationCollectionOptions,
+} from "./delegation-options";
+import DelegationRegistrationSummary, {
+  type DelegationRegistration,
+} from "./DelegationRegistrationSummary";
+import {
   getGasError,
   type DelegationWriteSettledHandler,
 } from "./delegation-shared";
@@ -63,11 +71,20 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
   const [newDelegationToken, setNewDelegationToken] = useState<
     number | undefined
   >(undefined);
+  const collectionOptions = getDelegationCollectionOptions(props.subdelegation);
+  // Link presets seed a field only when they match one of its options;
+  // anything else leaves the field on its "Select" placeholder.
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(
-    props.use_case_query ?? 0
+    () => findDelegationUseCaseOption(props.use_case_query)?.use_case ?? 0
   );
   const [newDelegationCollection, setNewDelegationCollection] =
-    useState<string>(props.collection_query ?? "0");
+    useState<string>(
+      () =>
+        findDelegationCollectionOption(
+          props.collection_query,
+          collectionOptions
+        )?.contract ?? "0"
+    );
 
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
@@ -80,39 +97,42 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     showExpiryCalendar && newDelegationExpiry.expiresAt !== null
       ? newDelegationExpiry.expiresAt
       : NEVER_DATE;
+  // The write and the summary above the submit button both read this one
+  // object, so the summary always shows exactly what will be signed.
+  const registration: DelegationRegistration = {
+    originalDelegator: props.subdelegation?.originalDelegator,
+    collection: newDelegationCollection,
+    delegate: newDelegationToAddress,
+    expiry: expiryArg,
+    useCase: newDelegationUseCase,
+    allTokens: !showTokensInput,
+    tokenId: showTokensInput ? newDelegationToken : 0,
+  };
+  const registrationArgs = [
+    registration.collection,
+    registration.delegate,
+    registration.expiry,
+    registration.useCase,
+    registration.allTokens,
+    registration.tokenId,
+  ];
+  const canWrite = validate().length === 0;
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
-        args: [
-          props.subdelegation.originalDelegator,
-          newDelegationCollection,
-          newDelegationToAddress,
-          expiryArg,
-          newDelegationUseCase,
-          !showTokensInput,
-          showTokensInput ? newDelegationToken : 0,
-        ],
-        functionName:
-          validate().length === 0
-            ? "registerDelegationAddressUsingSubDelegation"
-            : undefined,
+        args: [props.subdelegation.originalDelegator, ...registrationArgs],
+        functionName: canWrite
+          ? "registerDelegationAddressUsingSubDelegation"
+          : undefined,
       }
     : {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
-        args: [
-          newDelegationCollection,
-          newDelegationToAddress,
-          expiryArg,
-          newDelegationUseCase,
-          !showTokensInput,
-          showTokensInput ? newDelegationToken : 0,
-        ],
-        functionName:
-          validate().length === 0 ? "registerDelegationAddress" : undefined,
+        args: registrationArgs,
+        functionName: canWrite ? "registerDelegationAddress" : undefined,
       };
 
   function clearErrors() {
@@ -121,10 +141,15 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
 
   function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
-    if (!newDelegationCollection || newDelegationCollection === "0") {
+    if (
+      !findDelegationCollectionOption(
+        newDelegationCollection,
+        collectionOptions
+      )
+    ) {
       newErrors.push("Missing or invalid Collection");
     }
-    if (!newDelegationUseCase) {
+    if (!findDelegationUseCaseOption(newDelegationUseCase)) {
       newErrors.push("Missing or invalid Use Case");
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
@@ -298,6 +323,11 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             </Link>
           </div>
         </DelegationFormRow>
+        <DelegationRegistrationSummary
+          registration={registration}
+          collectionOptions={collectionOptions}
+          ready={canWrite}
+        />
         <DelegationSubmitGroups
           title={"Registering Delegation"}
           writeParams={contractWriteDelegationConfigParams}

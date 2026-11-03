@@ -144,13 +144,15 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     if (tdhAddress) {
       const addresses = tdhAddress.consolidation_key.split("-");
       setAddressOptions(addresses);
-      if (
-        newPrimaryAddressQuery &&
-        addresses.some((candidate) =>
-          areEqualAddresses(candidate, newPrimaryAddressQuery)
-        )
-      ) {
-        setSelectedToAddress(newPrimaryAddressQuery);
+      // Select the listed option itself, so the field shows the address that
+      // will be written even when the link uses different letter case.
+      const queriedAddress = newPrimaryAddressQuery
+        ? addresses.find((candidate) =>
+            areEqualAddresses(candidate, newPrimaryAddressQuery)
+          )
+        : undefined;
+      if (queriedAddress) {
+        setSelectedToAddress(queriedAddress);
       } else {
         const newTo = addresses.length === 1 ? addresses[0] : "";
         setSelectedToAddress(newTo!);

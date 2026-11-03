@@ -7,6 +7,7 @@ import {
 import { DelegationCenterSection } from "@/types/enums";
 import type { Metadata } from "next";
 import DelegationPageClient from "@/app/delegation/[...section]/page.client";
+import { parseDelegationFormPresets } from "@/components/delegation/delegation-options";
 import {
   normalizeSafeCollectingSegments,
   getSafeCollectingArticlePath,
@@ -24,10 +25,13 @@ export default async function DelegationPage({
   }>;
 }) {
   const { section } = await params;
-  const { address = "", collection = "", use_case } = await searchParams;
+  const { address = "", collection, use_case } = await searchParams;
   const sectionPath = normalizeSafeCollectingSegments(section);
   const mySection = sectionPath.length > 1 ? sectionPath : sectionPath[0];
-  const useCaseQuery = use_case ? Number.parseInt(use_case) || 0 : 0;
+  const { collectionQuery, useCaseQuery } = parseDelegationFormPresets({
+    collection,
+    use_case,
+  });
 
   if (
     typeof mySection === "string" &&
@@ -41,7 +45,7 @@ export default async function DelegationPage({
       <DelegationPageClient
         section={resolvedSection}
         addressQuery={address}
-        collectionQuery={collection}
+        collectionQuery={collectionQuery}
         useCaseQuery={useCaseQuery}
         path={sectionPath}
       />
@@ -53,7 +57,7 @@ export default async function DelegationPage({
       section={DelegationCenterSection.HTML}
       path={sectionPath}
       addressQuery={address}
-      collectionQuery={collection}
+      collectionQuery={collectionQuery}
       useCaseQuery={useCaseQuery}
     />
   );

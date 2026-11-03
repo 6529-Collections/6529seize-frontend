@@ -51,6 +51,14 @@ standard tooltip, available on hover and keyboard focus.
     day (23:59:59 local). The form names your time zone and shows the exact
     expiry in local time and UTC before you sign.
   - Optional: `Tokens` (`All` or `Select Token ID`)
+  - `Review before signing`, above `Register Delegation`, lists the exact
+    values the wallet will be asked to sign: collection name and contract
+    address, use case number and name, the full delegate address, expiry, and
+    tokens. A Delegation Manager also sees the original delegator. Until the
+    form is complete, it asks you to finish the form instead.
+  - `Delegate Address` accepts a wallet address or an ENS name. An ENS name is
+    resolved to its current address. A pasted `name - 0x...` value uses the
+    ENS name's address, and a label that is not an ENS name is not accepted.
 - `register-consolidation`
   - Required: `Collection`, `Consolidating With`
 - `build-consolidation`
@@ -78,7 +86,7 @@ standard tooltip, available on hover and keyboard focus.
 - With `Select Date`, the picker starts at the first date that ends at least
   1 hour from now. Submit rechecks the time and refuses an expiry less than
   1 hour away with `Choose a later expiry date. The delegation must stay
-  active for at least 1 hour after you submit.` The same rules apply to
+active for at least 1 hour after you submit.` The same rules apply to
   `Expiry Date` on the inline update form.
 - `register-delegation` supports all listed use cases in the selector, but the
   UI note calls out current 6529.io support for `#1`, `#2`, and `#3`.
@@ -198,8 +206,13 @@ wallet, in a safe order.
 ## Query Parameter Behavior
 
 - `register-delegation` accepts:
-  - `collection=<contract>` to preselect `Collection`
-  - `use_case=<id>` to preselect `Use Case`
+  - `collection=<contract>` to preselect `Collection`. The contract must be one
+    of the listed collections (any letter case). `collection=MEMES` selects
+    The Memes.
+  - `use_case=<id>` to preselect `Use Case`. The id must be one of the listed
+    use cases, `1` to `17`.
+  - Any other value is ignored: the field stays on `Select Collection` or
+    `Select Use Case` and must be chosen before submitting.
 - `assign-primary-address` accepts:
   - `address=<wallet>` to preselect `Primary Address` only when the wallet is
     inside the resolved consolidation key
