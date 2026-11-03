@@ -10,6 +10,7 @@ const ROOT_GRAPH_MODULES = [
   "components/app-wallets/app-wallet-envelope.ts",
   "utils/wallet-validation.utils.ts",
   "wagmiConfig/wagmiAppWalletConnector.ts",
+  "components/providers/useAppWalletConnectors.ts",
   "helpers/waves/drop.helpers.ts",
 ];
 
@@ -26,6 +27,22 @@ describe("app-wallet lazy loading contract", () => {
       expect(readSource(relativePath)).not.toMatch(HEAVY_STATIC_IMPORT);
     }
   );
+
+  it("loads the app-wallet connector on demand from the root providers", () => {
+    for (const relativePath of [
+      "components/providers/WagmiSetup.tsx",
+      "components/providers/useAppWalletConnectors.ts",
+      "components/auth/SeizeConnectProvider.tsx",
+      "components/auth/CapacitorConnectFlow.tsx",
+    ]) {
+      expect(readSource(relativePath)).not.toMatch(
+        /^\s*import\s+(?!type\b)[^;]*?\bfrom\s+["']@\/wagmiConfig\/wagmiAppWalletConnector["']/m
+      );
+    }
+    expect(
+      readSource("components/providers/useAppWalletConnectors.ts")
+    ).toMatch(/import\(\s*["']@\/wagmiConfig\/wagmiAppWalletConnector["']\s*\)/);
+  });
 
   it("loads the app-wallet cipher implementation on demand", () => {
     expect(readSource("components/app-wallets/app-wallet-helpers.ts")).toMatch(

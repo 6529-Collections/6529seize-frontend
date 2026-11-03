@@ -4,7 +4,6 @@ import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { mainnet, sepolia } from "viem/chains";
 import DeferredWagmiProvider from "./DeferredWagmiProvider";
-import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -15,6 +14,10 @@ import {
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { createPublicWagmiConfig } from "@/components/providers/createPublicWagmiConfig";
 import { installSafeEthereumProxy } from "@/components/providers/safeEthereumProxy";
+import {
+  type AppWalletConnectorHost,
+  useAppWalletConnectors,
+} from "@/components/providers/useAppWalletConnectors";
 import {
   hasPersistedWalletSession,
   subscribeToWalletSessionChanges,
@@ -43,9 +46,6 @@ import {
   markMobileLaunchStep,
   measureMobileLaunchAsync,
 } from "@/utils/monitoring/mobileLaunchTiming";
-import { validateWalletSafely } from "@/utils/wallet-validation.utils";
-import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
-import type { createAppWalletConnector as CreateAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { Chain } from "viem";
 
@@ -201,6 +201,14 @@ function requestAppWalletPassword(
 function showAppKitToast(toast: AppToastInput): void {
   getWagmiAppKitFastPathStore().toastDelegate?.(toast);
 }
+
+const APP_WALLET_CONNECTOR_HOST: AppWalletConnectorHost = {
+  get processedWallets() {
+    return getWagmiAppKitFastPathStore().processedWallets;
+  },
+  requestPassword: requestAppWalletPassword,
+  showToast: showAppKitToast,
+};
 
 function assertFastPathConfiguration(configurationKey: string): void {
   const existingConfigurationKey =
@@ -429,28 +437,6 @@ function startAppKitInitializationOnce(
   return initializationPromise;
 }
 
-type InjectAppWalletConnectorsInput = {
-  readonly currentAdapter: WagmiAdapter | null;
-  readonly appWallets: readonly AppWallet[];
-  readonly createAppWalletConnector: typeof CreateAppWalletConnector;
-};
-
-// App wallets exist only in the Capacitor app. Their connector (viem account
-// signing) loads when there is an app-wallet change to apply.
-const loadAppWalletConnector = () =>
-  import("@/wagmiConfig/wagmiAppWalletConnector");
-
-function haveAppWalletsChanged(appWallets: readonly AppWallet[]): boolean {
-  const { processedWallets } = getWagmiAppKitFastPathStore();
-  const currentAddresses = new Set(appWallets.map((w) => w.address));
-  return !(
-    processedWallets.current.size === currentAddresses.size &&
-    Array.from(processedWallets.current).every((addr) =>
-      currentAddresses.has(addr)
-    )
-  );
-}
-
 type AppKitAdapterManagerPublicShape = Pick<
   AppKitAdapterManager,
   "cleanup" | "createAdapterWithCache" | "shouldRecreateAdapter"
@@ -491,69 +477,6 @@ function markAdapterReadyForLaunchTiming(
   }
 
   markMobileLaunchStep("wagmi_children_unblocked");
-}
-
-function injectAppWalletConnectors({
-  currentAdapter,
-  appWallets,
-  createAppWalletConnector,
-}: InjectAppWalletConnectorsInput): void {
-  if (currentAdapter === null) {
-    return;
-  }
-
-  // Check if wallets have actually changed to prevent unnecessary re-injection
-  if (!haveAppWalletsChanged(appWallets)) {
-    return;
-  }
-
-  const { processedWallets } = getWagmiAppKitFastPathStore();
-  const currentAddresses = new Set(appWallets.map((w) => w.address));
-
-  try {
-    // Create connectors for current wallets
-    const connectors = appWallets.flatMap((wallet) => {
-      try {
-        validateWalletSafely(wallet);
-        const connector = createAppWalletConnector(
-          Array.from(currentAdapter.wagmiConfig.chains),
-          { appWallet: wallet },
-          () => requestAppWalletPassword(wallet.address, wallet.address_hashed)
-        );
-        const setupConnector =
-          currentAdapter.wagmiConfig._internal.connectors.setup(connector);
-        return [setupConnector];
-      } catch (error) {
-        logErrorSecurely(
-          "[WagmiSetup] Skipping invalid app-wallet connector",
-          error
-        );
-        return [];
-      }
-    });
-
-    // Get existing non-app-wallet connectors
-    const existingConnectors = currentAdapter.wagmiConfig.connectors.filter(
-      (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
-    );
-
-    // Update connector state with fail-fast approach
-    currentAdapter.wagmiConfig._internal.connectors.setState([
-      ...connectors,
-      ...existingConnectors,
-    ]);
-
-    // Update processed wallets tracking
-    processedWallets.current = currentAddresses;
-  } catch (error) {
-    logErrorSecurely("[WagmiSetup] Connector injection failed", error);
-    const userMessage = sanitizeErrorForUser(error);
-    showAppKitToast({
-      message: userMessage,
-      type: "error",
-    });
-    // Don't throw here - let the component continue but notify the user
-  }
 }
 
 export default function WagmiSetup({
@@ -770,40 +693,8 @@ export default function WagmiSetup({
     setWalletStackWagmiConfig(currentAdapter?.wagmiConfig ?? null);
   }, [currentAdapter]);
 
-  // Inject wallet connectors dynamically using hooks (simplified approach)
-  useEffect(() => {
-    if (currentAdapter === null || !haveAppWalletsChanged(appWallets)) {
-      return;
-    }
-
-    let cancelled = false;
-    const injectLoadedConnectors = async () => {
-      let connectorModule: Awaited<ReturnType<typeof loadAppWalletConnector>>;
-      try {
-        connectorModule = await loadAppWalletConnector();
-      } catch (error: unknown) {
-        noteWalletChunkFailure(error);
-        logErrorSecurely(
-          "[WagmiSetup] App-wallet connector failed to load",
-          error
-        );
-        return;
-      }
-      if (cancelled) {
-        return;
-      }
-      injectAppWalletConnectors({
-        currentAdapter,
-        appWallets,
-        createAppWalletConnector: connectorModule.createAppWalletConnector,
-      });
-    };
-    void injectLoadedConnectors();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [currentAdapter, appWallets]);
+  // Install Capacitor app-wallet connectors on the wallet-stack adapter.
+  useAppWalletConnectors(currentAdapter, appWallets, APP_WALLET_CONNECTOR_HOST);
 
   // A new task gives React a paint opportunity after the Wagmi provider and
   // children commit. User connect intent can start the same singleton sooner
