@@ -37,6 +37,7 @@ import {
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { NATIVE_IOS_COOKIE } from "@/constants/constants";
@@ -137,7 +138,7 @@ export default async function RootLayout({
           type="image/svg+xml"
           sizes="any"
         />
-        <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
+        <link rel="preconnect" href={getApiBase()} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link
           rel="preconnect"
