@@ -39,6 +39,10 @@
       "ref": "SP1's security advisory GHSA-c873-wfhp-wx5m, published 2025-01-15: missing verifier checks and Fiat-Shamir observations in sp1-stark before 4.0.0, fixed in 4.0.0; Succinct's security update of 2025-01-27 disclosed them with the freezing of the routers to the SP1 verifier contracts on mainnets",
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-c873-wfhp-wx5m"
     },
+    "sp1Earliest": {
+      "ref": "SP1's security advisories in succinctlabs/sp1, read 2026-11-03: the earliest published is GHSA-f77q-r5qm-w4m8, published 2024-10-28 (high): insufficient range checks of BabyBear arithmetic in the Gnark recursion circuit, fixed in 1.2.0; GHSA-8m24-3cfx-9fjw (2024-11-08, insufficient observation of the cumulative sum) and GHSA-c873-wfhp-wx5m (2025-01-15) followed",
+      "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-f77q-r5qm-w4m8"
+    },
     "sp1Cve": {
       "ref": "GitHub's advisory database, GHSA-63x8-x938-vx33 (CVE-2026-40323): a soundness flaw in SP1 6's recursion circuit, fixed in 6.1.0",
       "url": "https://github.com/advisories/GHSA-63x8-x938-vx33"
@@ -245,6 +249,7 @@
     "fixed": "6.1.0",
     "frozen": "6.0.0",
     "earlier": "2025-01-15",
+    "earliest": "2024-10-28",
     "latestId": "GHSA-p7v2-jjv3-8p8f",
     "latestPublished": "2026-10-11",
     "latestFixed": "6.8.1"

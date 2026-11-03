@@ -302,6 +302,7 @@ export default function TwoPrograms({
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
                 earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+                earliest: facts.print("proofs.sp1Advisory.earliest", "long"),
                 latestId: facts.print("proofs.sp1Advisory.latestId"),
                 latestDate: facts.print(
                   "proofs.sp1Advisory.latestPublished",

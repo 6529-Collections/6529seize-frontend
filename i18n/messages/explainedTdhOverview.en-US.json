@@ -103,7 +103,7 @@
   "explained.tdh.overview.uses.level": "Your Level",
   "explained.tdh.overview.uses.levelBody": "Your Level grows with your TDH, your xTDH and the Rep others give you.",
   "explained.tdh.overview.uses.validators": "Validators, later",
-  "explained.tdh.overview.uses.validatorsBody": "A validator's signature will count by its holder's TDH, at most {cap} an account, the network's own two accounts in full (D148). Software {version}: built, being tested.",
+  "explained.tdh.overview.uses.validatorsBody": "A validator's signature will count by its holder's TDH: once six or more parties have weight, at most {cap} an account, the network's own two accounts in full (D144, D148). Software {version}: built, being tested.",
   "explained.tdh.overview.number.label": "Your number",
   "explained.tdh.overview.number.title": "Is my number right?",
   "explained.tdh.overview.number.body": "Explain my TDH shows every copy that counted for you, your boost, and whether your record was equal in today's comparison.",

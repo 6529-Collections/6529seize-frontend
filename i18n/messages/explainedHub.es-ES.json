@@ -159,7 +159,7 @@
   "explained.hub.guide.absolute": "ningún voto lo cambia",
   "explained.hub.guide.proposed": "con su número P",
   "explained.hub.guide.open": "sin resolver",
-  "explained.hub.guide.proved": "en Lean, sobre las reglas; o una ejecución probada en conocimiento cero; sin reglas retiradas",
+  "explained.hub.guide.proved": "en Lean, sobre las reglas; o una ejecución probada en conocimiento cero; una regla retirada se nombra al lado",
   "explained.hub.guide.tested": "con vectores o a diario",
   "explained.hub.guide.notGuaranteed": "un límite con nombre",
   "explained.hub.guide.halfPair": "pruebas A y B",

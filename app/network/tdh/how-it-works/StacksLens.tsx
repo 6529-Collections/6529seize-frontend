@@ -193,7 +193,9 @@ export default function StacksLens({
       }}
       readout={
         <Readout
-          big={days(values.raw)}
+          big={ht(locale, "explained.tdh.how.stacks.held", {
+            days: n(values.raw),
+          })}
           say={
             <>
               {lead && <b className={B}>{lead}</b>} {say}

@@ -38,6 +38,7 @@ export default function ProofsSources({
   // under its own identifier.
   const advisory = (
     id:
+      | "proofs.sp1Advisory.earliest"
       | "proofs.sp1Advisory.earlier"
       | "proofs.sp1Advisory.id"
       | "proofs.sp1Advisory.latestId"
@@ -101,6 +102,11 @@ export default function ProofsSources({
           {
             title: fill(locale, k("hwk.sp1.title")),
             body: rich(locale, k("hwk.sp1.body"), {
+              earliest: facts.print("proofs.sp1Advisory.earliest", "long"),
+              earliestLink: advisory(
+                "proofs.sp1Advisory.earliest",
+                "GHSA-f77q-r5qm-w4m8"
+              ),
               earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
               earlierLink: advisory(
                 "proofs.sp1Advisory.earlier",

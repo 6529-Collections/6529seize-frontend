@@ -26,6 +26,7 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   p52: "spec",
   runLog: "decision",
   sp1Update: "site",
+  sp1Earliest: "site",
   sp1Cve: "site",
   sp1Native: "site",
   risc0Cve: "site",
@@ -287,6 +288,12 @@ export const PROOF_FACTS = {
     "sp1Update",
     "day",
     proofs.sp1Advisory.earlier
+  ),
+  // SP1's earliest published soundness flaw, from its advisories listing.
+  "proofs.sp1Advisory.earliest": fact(
+    "sp1Earliest",
+    "day",
+    proofs.sp1Advisory.earliest
   ),
   // SP1's newest advisory: its native verifier only, fixed before the SP1
   // that program A uses.

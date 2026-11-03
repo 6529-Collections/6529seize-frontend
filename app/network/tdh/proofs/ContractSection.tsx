@@ -11,6 +11,21 @@ import { rich } from "@/components/explained/rich";
 import Section, { Para } from "./Section";
 
 /**
+ * The whole transaction's gas, exactly: the contract's run plus its base
+ * cost and calldata, the sum of the table's rows. The record rounds it.
+ */
+function transactionTotal(
+  locale: SupportedLocale,
+  facts: PageFacts
+): string {
+  const execution = facts.num("proofs.pair.executionGas");
+  const intrinsic = facts.num("proofs.pair.intrinsicGas");
+  return execution === null || intrinsic === null
+    ? facts.print("proofs.pair.transactionGas")
+    : formatCount(locale, execution + intrinsic);
+}
+
+/**
  * One submission's gas, part by part: the two verifiers, the rest of the
  * contract's own work (its execution less the two verifications), and the
  * transaction's base cost with its calldata; then the whole.
@@ -76,7 +91,7 @@ function GasTable({
             {fill(locale, k("gas.total"))}
           </th>
           <td className="tw-whitespace-nowrap tw-py-2 tw-text-right tw-font-mono tw-text-[14px] tw-font-semibold tw-tabular-nums tw-text-iron-50">
-            {facts.print("proofs.pair.transactionGas")}
+            {transactionTotal(locale, facts)}
           </td>
         </tr>
       </tbody>
@@ -210,7 +225,7 @@ export default function ContractSection({
                 {rich(locale, k("gas.note"), {
                   submit: facts.print("proofs.pair.submitGas"),
                   cold: facts.print("proofs.pair.coldCallGas"),
-                  total: facts.print("proofs.pair.transactionGas"),
+                  total: transactionTotal(locale, facts),
                 })}
               </p>
             </div>

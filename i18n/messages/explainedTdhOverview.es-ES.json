@@ -103,7 +103,7 @@
   "explained.tdh.overview.uses.level": "Tu Level",
   "explained.tdh.overview.uses.levelBody": "Tu Level crece con tu TDH, tu xTDH y la Rep que otros te dan.",
   "explained.tdh.overview.uses.validators": "Validadores, más adelante",
-  "explained.tdh.overview.uses.validatorsBody": "La firma de un validador contará según el TDH de su titular, como mucho {cap} por cuenta, las dos cuentas propias de la red enteras (D148). Software {version}: construido, en pruebas.",
+  "explained.tdh.overview.uses.validatorsBody": "La firma de un validador contará según el TDH de su titular: cuando seis o más partes tengan peso, como mucho {cap} por cuenta, las dos cuentas propias de la red enteras (D144, D148). Software {version}: construido, en pruebas.",
   "explained.tdh.overview.number.label": "Tu número",
   "explained.tdh.overview.number.title": "¿Es correcto mi número?",
   "explained.tdh.overview.number.body": "Explicar mi TDH muestra cada copia que contó para ti, tu boost, y si tu registro fue igual en la comparación de hoy.",

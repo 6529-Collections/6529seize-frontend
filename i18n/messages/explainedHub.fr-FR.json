@@ -159,7 +159,7 @@
   "explained.hub.guide.absolute": "aucun vote ne le change",
   "explained.hub.guide.proposed": "avec son numéro P",
   "explained.hub.guide.open": "non tranché",
-  "explained.hub.guide.proved": "en Lean, sur les règles ; ou une exécution prouvée à divulgation nulle ; règles retirées exclues",
+  "explained.hub.guide.proved": "en Lean, sur les règles ; ou une exécution prouvée à divulgation nulle ; une règle retirée est nommée à côté",
   "explained.hub.guide.tested": "par des vecteurs ou chaque jour",
   "explained.hub.guide.notGuaranteed": "une limite nommée",
   "explained.hub.guide.halfPair": "preuves A et B",

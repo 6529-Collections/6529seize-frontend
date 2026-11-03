@@ -213,7 +213,7 @@ export default function Guarantees({
       bytes: facts.print("proofs.statement.bytes"),
       words: facts.print("proofs.statement.words"),
       id: facts.print("proofs.sp1Advisory.id"),
-      earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+      earliest: facts.print("proofs.sp1Advisory.earliest", "long"),
       latestId: facts.print("proofs.sp1Advisory.latestId"),
       r0Id: facts.print("proofs.risc0Advisory.id"),
       r0Count: facts.print("proofs.risc0Advisory.count"),
@@ -286,10 +286,11 @@ export default function Guarantees({
       stamp={
         <StampLine
           locale={locale}
+          // Nothing tested a wrong rule, so the broken state drops Tested.
           marks={[
             { kind: "decided", refText: "D128" },
             { maturity: "built" },
-            { kind: "tested" },
+            ...(broken ? [] : [{ kind: "tested" as const }]),
           ]}
           // A mistake in the rules is constructed, as every failing state
           // on these pages is: it carries the Simulated tag.

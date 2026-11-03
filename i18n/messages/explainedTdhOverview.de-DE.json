@@ -103,7 +103,7 @@
   "explained.tdh.overview.uses.level": "Ihr Level",
   "explained.tdh.overview.uses.levelBody": "Ihr Level wächst mit Ihrem TDH, Ihrem xTDH und der Rep, die andere Ihnen geben.",
   "explained.tdh.overview.uses.validators": "Validatoren, später",
-  "explained.tdh.overview.uses.validatorsBody": "Die Signatur eines Validators zählt nach dem TDH seines Halters, höchstens {cap} je Konto, die zwei eigenen Konten des Netzwerks voll (D148). Software {version}: gebaut, im Test.",
+  "explained.tdh.overview.uses.validatorsBody": "Die Signatur eines Validators zählt nach dem TDH seines Halters: sobald sechs oder mehr Parteien Gewicht haben, höchstens {cap} je Konto, die zwei eigenen Konten des Netzwerks voll (D144, D148). Software {version}: gebaut, im Test.",
   "explained.tdh.overview.number.label": "Ihre Zahl",
   "explained.tdh.overview.number.title": "Stimmt meine Zahl?",
   "explained.tdh.overview.number.body": "Mein TDH erklären zeigt jede Kopie, die für Sie gezählt hat, Ihren Boost und ob Ihr Datensatz im heutigen Vergleich gleich war.",

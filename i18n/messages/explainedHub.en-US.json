@@ -159,7 +159,7 @@
   "explained.hub.guide.absolute": "no vote changes it",
   "explained.hub.guide.proposed": "with its P-number",
   "explained.hub.guide.open": "not settled",
-  "explained.hub.guide.proved": "in Lean, or in zero knowledge; retired rules excluded",
+  "explained.hub.guide.proved": "in Lean, or in zero knowledge; a retired rule is named beside it",
   "explained.hub.guide.tested": "by vectors or daily",
   "explained.hub.guide.notGuaranteed": "a named limit",
   "explained.hub.guide.halfPair": "proofs A and B",
