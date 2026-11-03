@@ -35,6 +35,18 @@ export function getInboxDrop(notification: TypedNotification) {
   return drops[0];
 }
 
+export function getInboxPreview(notification: TypedNotification): string {
+  const drop = getInboxDrop(notification);
+  const content =
+    drop?.title ??
+    drop?.parts.map((part) => part.content ?? "").join(" ") ??
+    "";
+  return content
+    .replaceAll(/([@#])\[([^\[\]\r\n]+)\]/g, "$1$2")
+    .trim()
+    .slice(0, 240);
+}
+
 function getInboxCompetitionDestination(
   notification:
     | INotificationVotingCreditsReturned
