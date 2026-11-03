@@ -5,6 +5,7 @@ import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import ArtworkNotificationThumbnail from "@/components/notifications/ArtworkNotificationThumbnail";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
