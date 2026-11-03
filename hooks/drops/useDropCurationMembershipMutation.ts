@@ -5,7 +5,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import type { ApiDropCurationRequest } from "@/generated/models/ApiDropCurationRequest";
 import { commonApiDeleteWithBody } from "@/services/api/common-api";
@@ -69,7 +69,7 @@ const isTargetCurationDropsQuery = ({
 };
 
 const getDropCurationMembershipEndpoint = (dropId: string): string =>
-  `${publicEnv.API_ENDPOINT}/api/drops/${dropId}/curations`;
+  apiUrl(`/api/drops/${dropId}/curations`);
 
 const getDropCurationMembershipHeaders = (): Record<string, string> => {
   const apiAuth = getStagingAuth();

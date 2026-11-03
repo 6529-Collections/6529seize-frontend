@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   NETWORK_PAGE_TITLE_CLASSES,
   NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
@@ -133,7 +133,9 @@ export default function CommunityStats() {
   }
 
   useEffect(() => {
-    const url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
+    const url = apiUrl(
+      `/api/tdh_global_history?page_size=${pageSize}&page=${page}`
+    );
     void fetchUrl<DBResponse<GlobalTDHHistory>>(url)
       .then((response) => {
         const tdhH = response.data.reverse();

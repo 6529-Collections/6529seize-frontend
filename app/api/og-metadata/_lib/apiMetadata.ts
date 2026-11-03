@@ -1,4 +1,3 @@
-import { publicEnv } from "@/config/env";
 import { getStagingApiKey } from "@/config/serverEnv";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import {
@@ -6,11 +5,14 @@ import {
   isJsonContentType,
   readLimitedJson,
 } from "@/lib/fetch/limitedBody";
+import {
+  getApiBase,
+  PUBLIC_PRODUCTION_API_BASE,
+} from "@/services/api/api-endpoints";
 
 const MAX_METADATA_BYTES = 256 * 1024;
 const DEFAULT_METADATA_TIMEOUT_MS = 5_000;
 const STAGING_API_ORIGIN = "https://api.staging.6529.io";
-const PUBLIC_API_ORIGIN = "https://api.6529.io";
 const TRANSIENT_STATUSES = new Set([429, 502, 503, 504]);
 
 // Path segments and query values must match these allowlists before they are
@@ -102,8 +104,7 @@ export async function withOgApiJson<T>(
     options.timeoutMs ?? DEFAULT_METADATA_TIMEOUT_MS
   );
   const apiAuth = getStagingApiKey() ?? null;
-  const mayUsePublicApi =
-    new URL(publicEnv.API_ENDPOINT).origin === STAGING_API_ORIGIN;
+  const mayUsePublicApi = new URL(getApiBase()).origin === STAGING_API_ORIGIN;
   let usePublicApi = false;
   const requestOnce = (url: string): Promise<Response> =>
     fetch(url, {
@@ -120,7 +121,7 @@ export async function withOgApiJson<T>(
     query: OgApiQuery
   ): Promise<Response> => {
     const url = buildApiUrl(
-      usePublicApi ? PUBLIC_API_ORIGIN : publicEnv.API_ENDPOINT,
+      usePublicApi ? PUBLIC_PRODUCTION_API_BASE : getApiBase(),
       segments,
       query
     ).toString();
