@@ -1,4 +1,5 @@
-import { asE2eeApiError, type E2eeApiClient } from "../api";
+import { asE2eeApiError } from "../api-errors";
+import type { E2eeApiClient } from "../api";
 import type { ApiE2eeDevice } from "../api-types";
 import { digestBytes, revokeDigest } from "../digests";
 import {

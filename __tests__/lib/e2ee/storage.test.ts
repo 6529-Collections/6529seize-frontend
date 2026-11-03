@@ -42,7 +42,14 @@ const group = (g: string): StoredGroup =>
   ({ g, status: "active", cursor: 3 }) as unknown as StoredGroup;
 
 const message = (g: string, id: string): StoredMessage =>
-  ({ id, g, seq: 1, kind: "message", text: "hi" }) as unknown as StoredMessage;
+  ({
+    id,
+    g,
+    seq: 1,
+    kind: "message",
+    text: "hi",
+    mentions: [],
+  }) as unknown as StoredMessage;
 
 const outbox = (g: string, id: string): StoredOutboxItem =>
   ({ id, g, createdAt: 1, sealed: null }) as unknown as StoredOutboxItem;
@@ -214,7 +221,7 @@ function rawRecord(
   key: string
 ): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
-    const open = factory.open(E2EE_DB_NAME, 1);
+    const open = factory.open(E2EE_DB_NAME);
     open.onsuccess = () => {
       const request = open.result
         .transaction(store, "readonly")

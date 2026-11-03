@@ -85,7 +85,9 @@ verify the result in Wallet Checker.
   - `address` is kept only on checker and assign-primary routes.
   - `collection` and `use_case` are kept only on register-delegation.
 - Direct links can prefill:
-  - `register-delegation?collection=<contract>&use_case=<id>`
+  - `register-delegation?collection=<contract>&use_case=<id>` only with a
+    listed collection (or `MEMES`) and a listed use case; other values leave
+    the field unselected
   - `assign-primary-address?address=<wallet>` only when the wallet is part of
     the resolved consolidation key
 - Manager action buttons use disabled styling and do not open forms until one
@@ -104,7 +106,7 @@ verify the result in Wallet Checker.
 - If manager actions do not open a form, select one incoming
   `Delegation Managers` row first.
 - If collection tables stay on `Fetching incoming ...` or `Fetching outgoing
-  ...`, connect wallet and reload the same route.
+...`, connect wallet and reload the same route.
 
 ## Limitations / Notes
 

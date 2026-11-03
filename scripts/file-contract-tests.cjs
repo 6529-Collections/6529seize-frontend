@@ -67,6 +67,10 @@ const CONTRACTS = [
     ],
   },
   {
+    test: "__tests__/scripts/perf-budget.test.ts",
+    inputs: [/^scripts\/perf-budget\.json$/u],
+  },
+  {
     test: "__tests__/scripts/dependency-governance-workflow.test.ts",
     inputs: [/^\.github\/workflows\/dependency-governance\.yml$/u],
   },
