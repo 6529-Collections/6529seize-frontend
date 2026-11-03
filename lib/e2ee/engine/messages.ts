@@ -1,5 +1,5 @@
-import type { Payload } from "../payload";
 import { isDuplicateImport } from "./imported";
+import type { Payload } from "../payload";
 import type { SignedVersion, StoredMessage } from "../records";
 import type { GroupRuntime } from "./store";
 
@@ -65,9 +65,8 @@ function applyMsg(
   if (existing && !existing.pending) {
     return false;
   }
-  if (payload.imp && isDuplicateImport(runtime, payload.id, payload.imp)) {
+  if (payload.imp && isDuplicateImport(runtime, payload.id, payload.imp))
     return false;
-  }
   put(runtime, {
     id: payload.id,
     g: meta.g,
@@ -211,7 +210,7 @@ export function applyPayload(
 }
 
 export function searchMessages(
-  runtimes: Iterable<GroupRuntime>,
+  runtimes: Iterable<Pick<GroupRuntime, "messages">>,
   query: string
 ): StoredMessage[] {
   const needle = query.trim().toLocaleLowerCase();

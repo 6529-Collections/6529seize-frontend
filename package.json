@@ -332,6 +332,7 @@
     "eslint-plugin-sonarjs": "3.0.7",
     "eslint-plugin-tailwindcss": "3.18.2",
     "eslint-plugin-unused-imports": "4.4.1",
+    "fake-indexeddb": "6.2.4",
     "identity-obj-proxy": "3.0.0",
     "istanbul-lib-coverage": "3.2.2",
     "jest": "30.4.2",

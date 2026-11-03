@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 
 import ValidatorDocPage from "@/components/validator-page/ValidatorDocPage";
-import { fillBootstrapPeers } from "@/lib/validator-page/bootstrapPeers";
 import { VALIDATOR_GUIDE_MARKDOWN } from "@/lib/validator-page/content/guideMarkdown";
 import {
   getLockedView,
@@ -15,20 +14,12 @@ export default async function ValidatorGuideRoute() {
   if (locked) {
     return locked;
   }
-  const { markdown, complete } = await fillBootstrapPeers(
-    VALIDATOR_GUIDE_MARKDOWN
-  );
   return (
     <ValidatorDocPage
       section="guide"
       eyebrow="Tester guide"
       title="Set up the 6529 validator"
-      markdown={markdown}
-      notice={
-        complete
-          ? undefined
-          : "The sentry addresses could not be loaded. Reload the page in a minute."
-      }
+      markdown={VALIDATOR_GUIDE_MARKDOWN}
       withContents
     />
   );
@@ -36,5 +27,5 @@ export default async function ValidatorGuideRoute() {
 
 export const metadata: Metadata = getValidatorMetadata(
   "Tester guide | 6529 Validator",
-  "Install the 6529 validator, sign the grant and add the peers."
+  "Install the 6529 validator and sign the authorization."
 );
