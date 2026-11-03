@@ -104,6 +104,106 @@ describe("E2eeConversationView", () => {
     globalThis.localStorage.clear();
   });
 
+  it("starts open-chat tracking when initial sync makes the conversation available", async () => {
+    const setOpenConversation = jest.fn((_g: string | null) => undefined);
+    const engine = Object.assign(createFakeE2eeEngine(), {
+      setOpenConversation,
+    });
+    const view = render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    await waitFor(() => expect(engine.sync).toHaveBeenCalled());
+    expect(setOpenConversation).not.toHaveBeenCalled();
+    act(() => engine.update({ conversations: [conversation()] }));
+    await waitFor(() =>
+      expect(setOpenConversation).toHaveBeenCalledWith(GROUP_G)
+    );
+    expect(setOpenConversation).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(setOpenConversation).toHaveBeenLastCalledWith(null);
+  });
+
+  it("handles each reply jump once and permits another jump to the same message", async () => {
+    const engine = renderView();
+    const reply = screen.getByRole("button", { name: /hello @me and @bob/u });
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1)
+    );
+    const input = screen.getByRole("textbox", { name: "Encrypted message" });
+    act(() => {
+      input.focus();
+      engine.update({
+        messages: {
+          [GROUP_G]: [
+            ...timeline,
+            message({ id: "incoming", seq: 10, text: "incoming" }),
+          ],
+        },
+      });
+    });
+    expect(input).toHaveFocus();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it("announces paging progress, completion and failure while retaining the control", async () => {
+    const engine = renderView();
+    let resolve: (() => void) | undefined;
+    engine.loadHistory = jest.fn(
+      () =>
+        new Promise<void>((done) => {
+          resolve = done;
+        })
+    );
+    // The fixture engine now exposes paging; publish a fresh snapshot.
+    act(() =>
+      engine.update({
+        conversations: [conversation({ updatedAt: Date.now() })],
+      })
+    );
+    const older = await screen.findByRole("button", {
+      name: "Load older messages",
+    });
+    fireEvent.click(older);
+    expect(older).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(older).toBeEnabled();
+    fireEvent.click(older);
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    engine.loadHistory = jest.fn().mockRejectedValue(new Error("Read failed"));
+    fireEvent.click(older);
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Messages could not be loaded"
+      )
+    );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
+    expect(older).toBeEnabled();
+  });
+
   it("renders the header with name, members and the encryption badge", () => {
     renderView();
     expect(
@@ -273,6 +373,12 @@ describe("E2eeConversationView", () => {
       name: "What does this message contain?",
     });
     expect(within(categories).getAllByRole("radio")).toHaveLength(4);
+    // Loading the complete report preview may read an evicted local record.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Send report" })
+      ).toBeEnabled()
+    );
     // A category is required.
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Send report" })

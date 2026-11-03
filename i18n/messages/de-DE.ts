@@ -615,6 +615,8 @@ export const DE_DE_MESSAGES = {
   "drop.media.saveDialogTitle": "Bild speichern",
   "drop.media.processingFailed": "Bildverarbeitung fehlgeschlagen.",
   "drop.media.processingTimedOut": "Zeitlimit fuer Bildverarbeitung erreicht.",
+  "media.interactive.frameTitle": "Interaktives HTML-Medium",
+  "media.interactive.loading": "Interaktives Medium wird geladen",
   "quickDm.regionAriaLabel": "Schnelle Direktnachrichten",
   "quickDm.openButtonAriaLabel": "Schnelle Direktnachrichten öffnen",
   "quickDm.openButtonUnreadAriaLabel":
