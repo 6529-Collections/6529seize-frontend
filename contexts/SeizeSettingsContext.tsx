@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
@@ -87,7 +88,7 @@ export const SeizeSettingsProvider = ({
 
       try {
         const settings = await fetchUrl<ApiSeizeSettingsResponse>(
-          `${publicEnv.API_ENDPOINT}/api/settings`
+          apiUrl("/api/settings")
         );
 
         if (!isMountedRef.current) return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { Consolidation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
@@ -49,7 +49,7 @@ export default function ConsolidationMappingTool() {
     setError(null);
     setProcessing(true);
 
-    fetchAllPages<Consolidation>(`${publicEnv.API_ENDPOINT}/api/consolidations`)
+    fetchAllPages<Consolidation>(apiUrl("/api/consolidations"))
       .then((loadedConsolidations) => {
         setConsolidations(loadedConsolidations);
         if (file) {

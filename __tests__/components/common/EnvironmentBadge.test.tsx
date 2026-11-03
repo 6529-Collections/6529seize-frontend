@@ -3,6 +3,7 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 
 let mockBrowserOrigin = "https://6529.io";
+const mockPublicEnv = { BASE_ENDPOINT: "https://6529.io" };
 
 jest.mock("@/config/appEnvironment", () => {
   const actual = jest.requireActual("@/config/appEnvironment");
@@ -11,16 +12,20 @@ jest.mock("@/config/appEnvironment", () => {
     getBrowserOrigin: () => mockBrowserOrigin,
   };
 });
-
-import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
+jest.mock("@/config/env", () => ({
+  get publicEnv() {
+    return mockPublicEnv;
+  },
+}));
 
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 
-describe("EnvironmentBadge", () => {
-  afterEach(() => {
-    mockBrowserOrigin = "https://6529.io";
-  });
+afterEach(() => {
+  mockBrowserOrigin = "https://6529.io";
+  mockPublicEnv.BASE_ENDPOINT = "https://6529.io";
+});
 
+describe("EnvironmentBadge", () => {
   it("does not render in production", () => {
     const { container } = render(<EnvironmentBadge />);
 
@@ -59,33 +64,35 @@ describe("EnvironmentBadge", () => {
     );
   });
 
-  it("hydrates from a production-safe empty badge before revealing the browser environment", async () => {
-    mockBrowserOrigin = "https://staging.6529.io";
+  it("replaces the configured host's badge with the browser host's after hydration", async () => {
+    // A local server started on another port than the build's BASE_ENDPOINT.
+    mockPublicEnv.BASE_ENDPOINT = "http://localhost:3001";
+    mockBrowserOrigin = "http://localhost:3005";
     const container = document.createElement("div");
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-
     container.innerHTML = renderToString(<EnvironmentBadge />);
     document.body.appendChild(container);
-    expect(container).toBeEmptyDOMElement();
+    expect(
+      within(container).getByLabelText("Environment: LCL:3001 (localhost:3001)")
+    ).toBeInTheDocument();
 
+    const errors: unknown[] = [];
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
-        root = hydrateRoot(container, <EnvironmentBadge />);
+        root = hydrateRoot(container, <EnvironmentBadge />, {
+          onRecoverableError: (error) => errors.push(error),
+        });
       });
 
       expect(
-        within(container).getByLabelText("Environment: STG (staging.6529.io)")
-      ).toHaveTextContent("STG");
-      expect(consoleError.mock.calls.flat().join(" ")).not.toMatch(
-        /hydration|did not match/i
-      );
+        within(container).getByLabelText(
+          "Environment: LCL:3005 (localhost:3005)"
+        )
+      ).toHaveTextContent("LCL:3005");
+      expect(errors).toEqual([]);
     } finally {
       act(() => root?.unmount());
       container.remove();
-      consoleError.mockRestore();
     }
   });
 });
@@ -95,16 +102,12 @@ it.each([
   ["https://staging.6529.io", "STG", "staging.6529.io"],
   ["https://prxtstaging.6529.io", "PRXTSTG", "prxtstaging.6529.io"],
 ])(
-  "renders %s in server HTML and preserves its node through hydration",
+  "renders the configured %s in server HTML and preserves its node through hydration",
   async (origin, badge, host) => {
+    mockPublicEnv.BASE_ENDPOINT = `${origin}/waves`;
     mockBrowserOrigin = origin;
-    const ui = (
-      <EnvironmentOriginProvider origin={origin}>
-        <EnvironmentBadge compact />
-      </EnvironmentOriginProvider>
-    );
     const container = document.createElement("div");
-    container.innerHTML = renderToString(ui);
+    container.innerHTML = renderToString(<EnvironmentBadge compact />);
     document.body.appendChild(container);
     const initialBadge = within(container).getByLabelText(
       `Environment: ${badge} (${host})`
@@ -114,7 +117,7 @@ it.each([
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
-        root = hydrateRoot(container, ui, {
+        root = hydrateRoot(container, <EnvironmentBadge compact />, {
           onRecoverableError: (error) => errors.push(error),
         });
       });
@@ -125,20 +128,14 @@ it.each([
     } finally {
       act(() => root?.unmount());
       container.remove();
-      mockBrowserOrigin = "https://6529.io";
     }
   }
 );
 
-it.each(["https://6529.io", "https://www.6529.io"])(
-  "omits the production badge from server HTML for %s",
-  (origin) => {
-    expect(
-      renderToString(
-        <EnvironmentOriginProvider origin={origin}>
-          <EnvironmentBadge />
-        </EnvironmentOriginProvider>
-      )
-    ).toBe("");
+it.each(["https://6529.io", "https://www.6529.io", "not a url"])(
+  "omits the badge from server HTML for the configured %s",
+  (baseEndpoint) => {
+    mockPublicEnv.BASE_ENDPOINT = baseEndpoint;
+    expect(renderToString(<EnvironmentBadge />)).toBe("");
   }
 );

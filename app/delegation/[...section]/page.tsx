@@ -4,6 +4,7 @@ import {
   getDelegationRouteMetadata,
   getWalletCheckerCanonicalPath,
 } from "@/components/delegation/delegation-page-metadata";
+import { parseDelegationFormPresets } from "@/components/delegation/delegation-options";
 import { DelegationCenterSection } from "@/types/enums";
 import type { Metadata } from "next";
 import DelegationPageClient from "./page.client";
@@ -20,10 +21,13 @@ export default async function DelegationPage({
   }>;
 }) {
   const { section } = await params;
-  const { address = "", collection = "", use_case } = await searchParams;
+  const { address = "", collection, use_case } = await searchParams;
   const sectionPath = section;
   const mySection = sectionPath.length > 1 ? sectionPath : sectionPath[0];
-  const useCaseQuery = use_case ? parseInt(use_case) || 0 : 0;
+  const { collectionQuery, useCaseQuery } = parseDelegationFormPresets({
+    collection,
+    use_case,
+  });
 
   if (
     mySection &&
@@ -36,7 +40,7 @@ export default async function DelegationPage({
       <DelegationPageClient
         section={resolvedSection}
         addressQuery={address}
-        collectionQuery={collection}
+        collectionQuery={collectionQuery}
         useCaseQuery={useCaseQuery}
         path={sectionPath}
       />
@@ -48,7 +52,7 @@ export default async function DelegationPage({
       section={DelegationCenterSection.HTML}
       path={sectionPath}
       addressQuery={address}
-      collectionQuery={collection}
+      collectionQuery={collectionQuery}
       useCaseQuery={useCaseQuery}
     />
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { fetchUrl } from "@/services/6529api";
 import { useQueries, type UseQueryResult } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
@@ -48,9 +48,7 @@ export function useConsolidationGroups(wallets: readonly string[]) {
       queryKey: [QueryKey.CONSOLIDATION_GROUP, wallet],
       queryFn: async () =>
         parseConsolidationGroup(
-          await fetchUrl(
-            `${publicEnv.API_ENDPOINT}/api/consolidations/${wallet}`
-          )
+          await fetchUrl(apiUrl(`/api/consolidations/${wallet}`))
         ),
       staleTime: GROUP_STALE_TIME_MS,
       refetchOnWindowFocus: false,
@@ -170,7 +168,7 @@ export function useConsolidationFreshLinks(
       queryFn: async () =>
         parseConsolidationRows(
           await fetchUrl(
-            `${publicEnv.API_ENDPOINT}/api/consolidations/${wallet}?show_incomplete=true`
+            apiUrl(`/api/consolidations/${wallet}?show_incomplete=true`)
           )
         ),
       refetchInterval: REFETCH_INTERVAL_MS,
