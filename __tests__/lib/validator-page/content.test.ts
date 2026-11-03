@@ -88,6 +88,20 @@ describe("validator page text", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain("- AppImage (x86-64 only):");
   });
 
+  it("states the glibc floor the .deb packages declare, and which Windows on ARM runs it", () => {
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "| Ubuntu 22.04 or newer, or Debian 12 or newer, on ARM64, including a Raspberry Pi 4 or 5 on 64-bit Raspberry Pi OS (Bookworm) | ARM64 |"
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain("`libc6 (>= 2.35)`");
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "Windows 11 on ARM runs the x86-64 installer through emulation (untested). Windows 10 on ARM can't run it."
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
+      "Windows 10 on ARM can't run it."
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).not.toMatch(/Ubuntu or Debian on ARM \|/);
+  });
+
   it("keeps the owner's line word for word and names the DM account", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
       "6529 never starts a DM with you or asks for a seed phrase."
