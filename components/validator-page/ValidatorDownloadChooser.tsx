@@ -110,8 +110,8 @@ export default function ValidatorDownloadChooser({
       {appImage && (
         <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
           <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
-            The .deb is for Ubuntu, Debian and Mint. On Fedora or another Linux
-            on Intel or AMD:
+            The .deb is for Ubuntu, Debian, Mint and Raspberry Pi OS. On Fedora
+            or another Linux on Intel or AMD:
           </span>
           <a
             href={appImage.href}
