@@ -14,7 +14,6 @@
 import { HttpFile } from '../http/http';
 
 export enum ApiNotificationCause {
-    E2EeMessage = 'E2EE_MESSAGE',
     IdentitySubscribed = 'IDENTITY_SUBSCRIBED',
     IdentityMentioned = 'IDENTITY_MENTIONED',
     IdentityRep = 'IDENTITY_REP',
@@ -31,5 +30,6 @@ export enum ApiNotificationCause {
     SubscriptionCoverage = 'SUBSCRIPTION_COVERAGE',
     CompetitionLifecycle = 'COMPETITION_LIFECYCLE',
     MemeCollaboration = 'MEME_COLLABORATION',
-    VotingCreditsReturned = 'VOTING_CREDITS_RETURNED'
+    VotingCreditsReturned = 'VOTING_CREDITS_RETURNED',
+    E2EeMessage = 'E2EE_MESSAGE'
 }

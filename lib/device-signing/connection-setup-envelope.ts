@@ -45,7 +45,7 @@ const urlEncode = (bytes: Uint8Array): string =>
   bytesToBase64(bytes)
     .replaceAll("+", "-")
     .replaceAll("/", "_")
-    .replace(/=+$/u, "");
+    .replaceAll("=", "");
 const urlDecode = (text: string): Uint8Array => {
   if (!/^[A-Za-z0-9_-]+$/u.test(text)) throw new Error("Invalid device setup");
   const padded = text.replaceAll("-", "+").replaceAll("_", "/");

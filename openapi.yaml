@@ -38381,7 +38381,6 @@ components:
     ApiNotificationCause:
       type: string
       enum:
-        - E2EE_MESSAGE
         - IDENTITY_SUBSCRIBED
         - IDENTITY_MENTIONED
         - IDENTITY_REP
@@ -38399,6 +38398,7 @@ components:
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
         - VOTING_CREDITS_RETURNED
+        - E2EE_MESSAGE
     ApiNotificationDropReactedReactor:
       type: object
       required:
