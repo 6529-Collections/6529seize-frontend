@@ -157,8 +157,9 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
             {getButtonLabel()}
           </ButtonLink>
         )}
-        {/* Blank space with the large button's height while it may still
-            mount, so the countdown card does not grow after hydration. */}
+        {/* Blank space with the large button's height (size="lg" is
+            tw-min-h-11 in buttonStyles.ts) while it may still mount, so the
+            countdown card does not grow after hydration. */}
         {!hideMintBtn && hideNftPurchasing && reservesNftPurchasingSpace && (
           <div aria-hidden="true" className="tw-h-11" />
         )}

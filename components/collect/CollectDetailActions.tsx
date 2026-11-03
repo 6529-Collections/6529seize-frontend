@@ -442,10 +442,12 @@ export default function CollectDetailActions(props: CollectDetailActionsProps) {
   );
 }
 
-// Blank space with the panel's first-render footprint, its loading state
-// (measured on the production build at 390 and 1280 px: 76 px framed, 108 px
-// unframed), while the actions may still mount, so the detail page does not
-// move when they replace it. Never shows purchasing UI.
+// Blank space with the panel's first-render footprint, its loading state,
+// while the actions may still mount, so the detail page does not move when
+// they replace it. Never shows purchasing UI. The heights were measured on a
+// production build's server HTML at 390 and 1280 px (PR #4589): framed =
+// CollectDetailLoading (44 px row + 16 px gap + 16 px line), unframed =
+// PendingTrade plus the fallback action row. Re-measure if either changes.
 function CollectDetailActionsSpace({
   mobileSticky,
 }: Pick<CollectDetailActionsProps, "mobileSticky">) {

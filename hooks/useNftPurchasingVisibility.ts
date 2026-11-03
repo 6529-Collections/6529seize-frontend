@@ -9,6 +9,7 @@ import useCapacitor from "./useCapacitor";
 const subscribe = () => () => undefined;
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
+const noHint = () => false;
 
 export function useNftPurchasingVisibility() {
   const { isIos } = useCapacitor();
@@ -25,6 +26,14 @@ export function useNftPurchasingVisibility() {
   // iOS keeps purchasing hidden but does not redirect until the country check
   // settles, so a US cold deep link stays put. Android and web never wait.
   const isAwaitingIosCountry = isIos && isCountryPending;
+  // Storage is read only after hydration and only in the iOS app. The server
+  // and hydration renders use the fixed `false` snapshot (isIos is also false
+  // there), so the first client render always equals the server HTML.
+  const hasUsCountryHint = useSyncExternalStore(
+    subscribe,
+    isIos ? readUsCountryHint : noHint,
+    noHint
+  );
   // One HTML for every visitor: the server HTML and the hydration render never
   // contain purchasing content, so no request decides it and nothing can reach
   // the iOS app before the browser checks the platform. Web and Android mount
@@ -41,7 +50,6 @@ export function useNftPurchasingVisibility() {
     // check runs on a device whose last completed check was US. A restricted
     // result collapses it. The hint is layout only, never permission.
     reservesNftPurchasingSpace:
-      hideNftPurchasing &&
-      (!isIos || (!shouldRedirect && readUsCountryHint())),
+      hideNftPurchasing && (!isIos || (!shouldRedirect && hasUsCountryHint)),
   };
 }

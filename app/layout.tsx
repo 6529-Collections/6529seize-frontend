@@ -78,10 +78,11 @@ export default async function RootLayout({
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
   // The shell reads nothing from the request: every visitor gets the same
   // HTML, and the browser decides native iOS, the EULA gate and NFT
-  // purchasing. Routes still render per request by default only because
-  // shell components call useSearchParams() outside a Suspense boundary,
-  // which fails the build for any route Next tries to prerender. A page that
-  // exports `dynamic = "force-static"` opts out here and is prerendered. See
+  // purchasing. connection() is the deliberate opt-out that keeps routes
+  // rendering per request by default. It cannot be removed yet: shell
+  // components call useSearchParams() outside a Suspense boundary, which
+  // fails the build for any route Next tries to prerender. A page that
+  // exports `dynamic = "force-static"` skips it and is prerendered. See
   // "Static Rendering Readiness" in
   // ops/docs/developer/next-config-runtime-rationale.md.
   await connection();
