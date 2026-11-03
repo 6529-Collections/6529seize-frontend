@@ -88,7 +88,12 @@ export default function LayoutWrapper({
   const [nativeLayoutFailed, setNativeLayoutFailed] = useState(false);
   const isNativeLayoutLoaded = nativeLayoutLoader.useIsReady({
     enabled: isApp && !nativeLayoutFailed,
-    onError: () => setNativeLayoutFailed(true),
+    onError: () => {
+      // The loader logs the error itself; this names the failed surface so a
+      // broken app launch is easy to find in logs and Sentry.
+      console.error("Failed to load the native layout");
+      setNativeLayoutFailed(true);
+    },
   });
 
   const isAccessOrRestricted =

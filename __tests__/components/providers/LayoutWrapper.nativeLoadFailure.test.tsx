@@ -64,6 +64,9 @@ it("shows the page instead of the startup placeholder when the native layout can
       screen.getByRole("main")
     );
     expect(consoleError).toHaveBeenCalledWith(
+      "Failed to load the native layout"
+    );
+    expect(consoleError).toHaveBeenCalledWith(
       "Failed to load a lazy component",
       expect.any(Error)
     );
