@@ -8,7 +8,7 @@ test.describe("Delegation Mapping Tool Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("Delegation Mapping Tool | Tools");
 
-    const heading = page.locator("main h1:visible");
+    const heading = page.getByRole("main").getByRole("heading", { level: 1 });
     await expect(heading).toContainText("Delegation Mapping Tool");
     await expect(heading).toBeVisible();
   });

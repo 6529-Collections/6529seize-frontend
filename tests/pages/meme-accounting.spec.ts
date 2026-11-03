@@ -8,7 +8,7 @@ test.describe("Meme Accounting Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("Meme Accounting - The Memes");
 
-    const heading = page.locator("main h1:visible");
+    const heading = page.getByRole("main").getByRole("heading", { level: 1 });
     await expect(heading).toContainText("Meme Accounting");
     await expect(heading).toBeVisible();
 
