@@ -141,6 +141,30 @@ describe("encrypted conversation list", () => {
     );
   });
 
+  it("opens the history with unread incoming messages when concurrent chats share a row", () => {
+    const pair = {
+      kind: "dm" as const,
+      admins: [SELF_ID, ALICE_ID],
+      members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+    };
+    const current = conversation({ ...pair, g: "a" });
+    const incoming = conversation({ ...pair, g: "b", unread: 1 });
+    render(
+      <E2eeTestProvider
+        value={contextFor(
+          createFakeE2eeEngine({ conversations: [current, incoming] })
+        )}
+      >
+        <E2eeConversationListPage />
+      </E2eeTestProvider>
+    );
+    const row = within(
+      screen.getByRole("list", { name: "Encrypted chats" })
+    ).getByRole("link");
+    expect(row).toHaveAttribute("href", "/messages/encrypted/b");
+    expect(row).toHaveTextContent("1 unread message");
+  });
+
   it("shows an empty state with a way to start a chat", () => {
     render(
       <E2eeTestProvider value={contextFor(createFakeE2eeEngine())}>

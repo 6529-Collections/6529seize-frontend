@@ -308,8 +308,12 @@ export function E2eeConversationList({
         const latest = thread.sessions.reduce((a, b) =>
           a.updatedAt >= b.updatedAt ? a : b
         );
+        const incoming = unmuted
+          .filter((session) => session.unread > 0 || session.mentions > 0)
+          .sort((a, b) => b.updatedAt - a.updatedAt)[0];
         const conversation = {
           ...thread.current,
+          g: incoming?.g ?? thread.current.g,
           lastMessage: latest.lastMessage,
           updatedAt: latest.updatedAt,
           unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
