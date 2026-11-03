@@ -406,7 +406,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await history.selectOption(oldGroup);
     await expect(alice.page).toHaveURL(oldUrl);
     await expectMessage(alice.page, "An earlier encrypted message");
-    await expect(composer(alice.page)).toBeDisabled();
+    await expect(composer(alice.page)).toHaveCount(0);
     await alice.page
       .getByRole("link", { name: "Open current chat", exact: true })
       .click();
