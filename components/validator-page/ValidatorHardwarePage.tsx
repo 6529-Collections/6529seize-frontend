@@ -95,7 +95,7 @@ function SystemDownloads({
   readonly downloads: readonly HardwareDownload[];
 }) {
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
+    <div className="tw-flex tw-flex-wrap tw-content-start tw-items-start tw-gap-2 tw-pt-4">
       {downloads.map((download) => (
         <a
           key={download.href}
