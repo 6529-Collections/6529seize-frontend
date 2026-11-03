@@ -83,3 +83,24 @@ it("keeps single reactions readable and does not mark a read row again", () => {
   fireEvent.click(screen.getByRole("link"));
   expect(onOpen).toHaveBeenCalledWith([]);
 });
+
+it("uses the group's latest drop even when the first reaction is older", () => {
+  const older = {
+    ...reaction(1, "alice", 10),
+    related_drops: [{ ...drop, title: "Old title", serial_no: 1 }],
+  };
+  const group = groupReactionNotifications([older, reaction(2, "bob", 10)])[0]!;
+  render(
+    <NotificationInboxRow
+      notification={group}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText("@GelatoGenesis in #QUORUM")).toBeInTheDocument();
+  expect(screen.queryByText("Old title")).not.toBeInTheDocument();
+  expect(screen.getByRole("link")).toHaveAttribute(
+    "href",
+    "/waves/wave?serialNo=42"
+  );
+});

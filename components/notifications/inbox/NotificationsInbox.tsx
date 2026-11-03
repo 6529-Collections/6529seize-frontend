@@ -45,14 +45,21 @@ export default function NotificationsInbox({
     isNotificationVisible(item, hideNftPurchasing)
   );
   const markRead = useMutation({
-    mutationFn: async (id: number | "all") => {
-      await commonApiPostWithoutBodyAndResponse({
-        endpoint:
-          id === "all" ? "notifications/read" : `notifications/${id}/read`,
-      });
+    mutationFn: async (target: number[] | "all") => {
+      const endpoints =
+        target === "all"
+          ? ["notifications/read"]
+          : target.map((id) => `notifications/${id}/read`);
+      const results = await Promise.allSettled(
+        endpoints.map((endpoint) =>
+          commonApiPostWithoutBodyAndResponse({ endpoint })
+        )
+      );
       // Browser unread counts refresh even if native badge reconciliation fails.
       invalidateNotifications();
       await reconcileProfileDeliveredNotifications();
+      const failed = results.find((result) => result.status === "rejected");
+      if (failed?.status === "rejected") throw failed.reason;
     },
     onMutate: () => setReadError(false),
     onError: () => {
@@ -79,7 +86,7 @@ export default function NotificationsInbox({
   }, [handle, query.isSuccess, markNotificationRead]);
 
   const openNotification = (unreadIds: number[]) => {
-    for (const id of unreadIds) markRead.mutate(id);
+    if (unreadIds.length > 0) markRead.mutate(unreadIds);
     onClose();
   };
   let message: string | null = null;

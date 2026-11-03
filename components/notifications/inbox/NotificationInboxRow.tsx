@@ -27,7 +27,7 @@ export default function NotificationInboxRow({
   const locale = useBrowserLocale();
   const group = isGroupedReactionsItem(item) ? item : null;
   const notification = isGroupedReactionsItem(item)
-    ? item.notifications[0]!
+    ? { ...item.notifications[0]!, related_drops: [item.drop] }
     : item;
   const unreadIds = [
     ...new Set(

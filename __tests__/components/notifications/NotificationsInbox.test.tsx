@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import NotificationsInbox from "@/components/notifications/inbox/NotificationsInbox";
@@ -25,16 +25,28 @@ jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en",
 }));
-jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
-  ReactQueryWrapperContext: jest
-    .requireActual<typeof import("react")>("react")
-    .createContext({ invalidateNotifications: jest.fn() }),
+jest.mock("@/components/notifications/inbox/NotificationInboxRow", () => ({
+  __esModule: true,
+  default: ({ onOpen }: { onOpen: (ids: number[]) => void }) => (
+    <button onClick={() => onOpen([11, 12])}>Open reaction group</button>
+  ),
 }));
-jest.mock("@/components/notifications/NotificationsContext", () => ({
-  useNotificationsContext: () => ({
-    reconcileProfileDeliveredNotifications: jest.fn(),
-  }),
-}));
+jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
+  const invalidateNotifications = jest.fn();
+  return {
+    invalidateNotifications,
+    ReactQueryWrapperContext: jest
+      .requireActual<typeof import("react")>("react")
+      .createContext({ invalidateNotifications }),
+  };
+});
+jest.mock("@/components/notifications/NotificationsContext", () => {
+  const reconcileProfileDeliveredNotifications = jest.fn();
+  return {
+    reconcileProfileDeliveredNotifications,
+    useNotificationsContext: () => ({ reconcileProfileDeliveredNotifications }),
+  };
+});
 jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn(),
 }));
@@ -197,4 +209,57 @@ describe("NotificationsInbox automatic read", () => {
     expect(postRead).toHaveBeenCalledTimes(2);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  it.each([false, true])(
+    "refreshes once after all grouped reads settle (partial failure: %s)",
+    async (partialFailure) => {
+      const { invalidateNotifications } = jest.requireMock<{
+        invalidateNotifications: jest.Mock;
+      }>("@/components/react-query-wrapper/ReactQueryWrapper");
+      const { reconcileProfileDeliveredNotifications } = jest.requireMock<{
+        reconcileProfileDeliveredNotifications: jest.Mock;
+      }>("@/components/notifications/NotificationsContext");
+      jest.mocked(useNotificationsQuery).mockReturnValue({
+        items: [{ id: 11 }],
+        isSuccess: true,
+      } as unknown as ReturnType<typeof useNotificationsQuery>);
+      render(inbox());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+      jest.clearAllMocks();
+      let finishFirstRead: (() => void) | undefined;
+      postRead.mockImplementation(({ endpoint }) => {
+        if (endpoint === "notifications/11/read") {
+          return new Promise<void>((resolve) => {
+            finishFirstRead = resolve;
+          });
+        }
+        return partialFailure
+          ? Promise.reject(new Error("Read failed"))
+          : Promise.resolve();
+      });
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open reaction group" })
+      );
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+      expect(postRead).toHaveBeenCalledTimes(2);
+      expect(postRead).toHaveBeenCalledWith({
+        endpoint: "notifications/11/read",
+      });
+      expect(postRead).toHaveBeenCalledWith({
+        endpoint: "notifications/12/read",
+      });
+      expect(invalidateNotifications).not.toHaveBeenCalled();
+      await act(async () => {
+        finishFirstRead?.();
+        await jest.runOnlyPendingTimersAsync();
+      });
+      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+      expect(reconcileProfileDeliveredNotifications).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole("alert") !== null).toBe(partialFailure);
+    }
+  );
 });
