@@ -47,7 +47,12 @@ describe("handleValidatorPageGate", () => {
     ).toBeUndefined();
   });
 
-  it.each(["/validator", "/validator/guide", "/validator/download/x/y"])(
+  it.each([
+    "/validator",
+    "/validator/guide",
+    "/validator/hardware",
+    "/validator/download/x/y",
+  ])(
     "shows the password form at %s without a cookie",
     (path) => {
       const response = handleValidatorPageGate(request(path), path);
