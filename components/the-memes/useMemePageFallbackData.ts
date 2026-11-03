@@ -4,7 +4,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { fetchUrl } from "@/services/6529api";
 
 export type MemePageInitialData =
@@ -56,11 +56,11 @@ export function useMemePageFallbackData({
       try {
         const [metaResponse, nftResponse] = await Promise.all([
           fetchUrl<DBResponse<ApiMemesExtendedData>>(
-            `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`,
+            apiUrl(`/api/memes_extended_data?id=${nftId}`),
             { signal: controller.signal }
           ),
           fetchUrl<DBResponse<NFT>>(
-            `${publicEnv.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`,
+            apiUrl(`/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`),
             { signal: controller.signal }
           ),
         ]);

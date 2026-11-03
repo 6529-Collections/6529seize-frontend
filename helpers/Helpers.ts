@@ -1,7 +1,7 @@
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
@@ -56,7 +56,7 @@ export function isGradientsContract(contract: string) {
 }
 
 export function isNextgenContract(contract: string) {
-  return areEqualAddresses(contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]);
+  return areEqualAddresses(contract, NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID]);
 }
 
 export function isMemeLabContract(contract: string) {

@@ -21,7 +21,7 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
 import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
@@ -159,7 +159,9 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     if (tokenId) {
       const controller = new AbortController();
       setFetchingProofs(true);
-      const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
+      const url = apiUrl(
+        `/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`
+      );
       fetchUrl<ProofResponse>(url, { signal: controller.signal })
         .then((response: ProofResponse) => {
           if (controller.signal.aborted) {
