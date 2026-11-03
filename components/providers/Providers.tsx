@@ -12,7 +12,6 @@ import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
-import { NftPurchasingServerRenderProvider } from "@/components/common/NftPurchasingServerRender";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
@@ -52,7 +51,6 @@ export default function Providers({
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
-  canServerRenderNftPurchasing = false,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -60,7 +58,6 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
-  readonly canServerRenderNftPurchasing?: boolean;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -151,13 +148,7 @@ export default function Providers({
       <CapacitorSetup />
       <EULAConsentStartup>
         <EditingDropProvider>
-          <ActiveGroupProvider>
-            <NftPurchasingServerRenderProvider
-              enabled={canServerRenderNftPurchasing}
-            >
-              {appProviders}
-            </NftPurchasingServerRenderProvider>
-          </ActiveGroupProvider>
+          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
         </EditingDropProvider>
       </EULAConsentStartup>
     </>

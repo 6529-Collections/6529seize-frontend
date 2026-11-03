@@ -75,7 +75,7 @@ jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: ({ isOpen }: any) =>
     isOpen ? <div data-testid="modal">open</div> : null,
