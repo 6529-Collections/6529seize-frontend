@@ -41,18 +41,25 @@ export default function NotificationsInbox({
     identity: handle,
     causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
   });
-  const notifications = query.rawItems.filter((item) =>
+  const notifications = query.items.filter((item) =>
     isNotificationVisible(item, hideNftPurchasing)
   );
   const markRead = useMutation({
-    mutationFn: async (id: number | "all") => {
-      await commonApiPostWithoutBodyAndResponse({
-        endpoint:
-          id === "all" ? "notifications/read" : `notifications/${id}/read`,
-      });
+    mutationFn: async (target: number[] | "all") => {
+      const endpoints =
+        target === "all"
+          ? ["notifications/read"]
+          : target.map((id) => `notifications/${id}/read`);
+      const results = await Promise.allSettled(
+        endpoints.map((endpoint) =>
+          commonApiPostWithoutBodyAndResponse({ endpoint })
+        )
+      );
       // Browser unread counts refresh even if native badge reconciliation fails.
       invalidateNotifications();
       await reconcileProfileDeliveredNotifications();
+      const failed = results.find((result) => result.status === "rejected");
+      if (failed?.status === "rejected") throw failed.reason;
     },
     onMutate: () => setReadError(false),
     onError: () => {
@@ -78,9 +85,8 @@ export default function NotificationsInbox({
     return () => clearTimeout(timeout);
   }, [handle, query.isSuccess, markNotificationRead]);
 
-  const openNotification = (id: number) => {
-    if (notifications.find((item) => item.id === id)?.read_at === null)
-      markRead.mutate(id);
+  const openNotification = (unreadIds: number[]) => {
+    if (unreadIds.length > 0) markRead.mutate(unreadIds);
     onClose();
   };
   let message: string | null = null;
