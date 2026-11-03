@@ -69,7 +69,11 @@ export default function TDHProfile({
             {t(locale, "network.tdh.profile.input")}
           </label>
           <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
+            {/* Test harnesses and browser extensions can add attributes (for
+                example an inline caret-color) to this server-rendered input before
+                React hydrates it; that is not a mismatch worth a console error. */}
             <input
+              suppressHydrationWarning
               id="tdh-profile-input"
               value={input}
               onChange={(event) => setInput(event.target.value)}

@@ -86,7 +86,11 @@ export default function TDHExample({
           </div>
 
           <label className="tw-mt-5 tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {/* Test harnesses and browser extensions can add attributes (for
+                example an inline caret-color) to this server-rendered input before
+                React hydrates it; that is not a mismatch worth a console error. */}
             <input
+              suppressHydrationWarning
               checked={sellNakamoto}
               className="tw-size-4 tw-accent-primary-500"
               onChange={(event) => setSellNakamoto(event.target.checked)}
