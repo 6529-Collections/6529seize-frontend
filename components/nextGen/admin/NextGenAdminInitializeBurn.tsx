@@ -1,7 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { NULL_ADDRESS } from "@/constants/constants";
 import { postData } from "@/services/6529api";
 import {
@@ -121,7 +121,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
       };
 
       postData(
-        `${publicEnv.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+        `${getApiBase()}/api/nextgen/register_burn_collection`,
         data
       ).then((response) => {
         if (response.status === 200 && response.response) {

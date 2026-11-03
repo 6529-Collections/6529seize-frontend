@@ -10,7 +10,7 @@ import {
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import { publicEnv } from "@/config/env";
+import { apiUrl, getApiBase } from "@/services/api/api-endpoints";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -169,7 +169,9 @@ function getUrlParams(
   const artistFilter = selectedArtist
     ? `&artist=${encodeURIComponent(selectedArtist)}`
     : "";
-  return `${publicEnv.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
+  return apiUrl(
+    `/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`
+  );
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
@@ -188,7 +190,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
     fetchUrl<ApiArtistNameItem[]>(
-      `${publicEnv.API_ENDPOINT}/api/${path}/artists_names`
+      `${getApiBase()}/api/${path}/artists_names`
     ).then((res: ApiArtistNameItem[]) => {
       setArtists(res);
     });

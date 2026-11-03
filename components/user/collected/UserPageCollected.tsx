@@ -8,7 +8,7 @@ import {
   EMPTY_USER_PAGE_STATS_INITIAL_DATA,
   type UserPageStatsInitialData,
 } from "@/components/user/stats/userPageStats.types";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { CollectedCard } from "@/entities/IProfile";
 import {
   CollectedCollectionType,
@@ -633,7 +633,9 @@ export default function UserPageCollected({
     queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
     queryFn: async () => {
       try {
-        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?page_size=200&seized=${CollectionSeized.SEIZED}&account_for_consolidations=false`;
+        const allPagesUrl = apiUrl(
+          `/api/profiles/${String(connectedAddress)}/collected?page_size=200&seized=${CollectionSeized.SEIZED}&account_for_consolidations=false`
+        );
         return await fetchAllPages<CollectedCard>(allPagesUrl);
       } catch (error) {
         console.error(
