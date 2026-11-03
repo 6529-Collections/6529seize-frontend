@@ -12,14 +12,13 @@ export interface NextGenContractAddresses {
 }
 
 function getNextGenChainId() {
-  if (publicEnv.NEXTGEN_CHAIN_ID) {
-    const chainId = publicEnv.NEXTGEN_CHAIN_ID;
-    if (chainId == sepolia.id) {
-      return sepolia.id;
-    }
-    if (chainId == goerli.id) {
-      return goerli.id;
-    }
+  // The public env schema coerces NEXTGEN_CHAIN_ID to a number.
+  const chainId = publicEnv.NEXTGEN_CHAIN_ID;
+  if (chainId === sepolia.id) {
+    return sepolia.id;
+  }
+  if (chainId === goerli.id) {
+    return goerli.id;
   }
   return mainnet.id;
 }
