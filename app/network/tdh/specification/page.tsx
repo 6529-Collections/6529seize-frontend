@@ -170,7 +170,7 @@ export default async function SpecificationPage({
             {/* The rules' two true marks under the rules to get exact, so
                 the panel beside keeps to its rows and neither column ends
                 in a hole. */}
-            <div className="tw-mt-8 tw-flex tw-flex-col tw-items-start tw-gap-2">
+            <div className="tw-mt-12 tw-flex tw-flex-col tw-items-start tw-gap-2">
               <Mark
                 kind="proposed"
                 locale={locale}
@@ -265,7 +265,7 @@ export default async function SpecificationPage({
           </aside>
         </div>
 
-        <div className="tw-mt-12">
+        <div className="tw-mt-16">
           <DriftNote by={["D136", "D137"]} locale={locale}>
             {m(
               reported === null || current === null

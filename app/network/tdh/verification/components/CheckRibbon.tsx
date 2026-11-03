@@ -224,7 +224,7 @@ function RibbonGrid({
   return (
     <div className="tw-@container">
       <ol
-        className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 @[20rem]:tw-grid-cols-4 @[20rem]:tw-gap-1.5 @[34rem]:tw-grid-cols-5 @[34rem]:tw-gap-2 @[56rem]:tw-grid-cols-10"
+        className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 @[20rem]:tw-grid-cols-4 @[34rem]:tw-grid-cols-5 @[56rem]:tw-grid-cols-10"
         aria-label={label}
         data-fig="ribbon"
       >
