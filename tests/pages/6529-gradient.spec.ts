@@ -25,9 +25,9 @@ test.describe("6529 Gradient Page", () => {
   });
 
   test("should display the correct title and heading", async ({ page }) => {
-    await expect(page.locator("h1")).toContainText("6529 Gradient");
+    await expect(page.locator("main h1:visible")).toContainText("6529 Gradient");
 
-    const heading = page.locator("h1");
+    const heading = page.locator("main h1:visible");
     await expect(heading).toContainText("6529 Gradient");
     await expect(heading).toBeVisible();
   });
@@ -101,7 +101,7 @@ test.describe("Individual Gradient Page", () => {
   });
 
   test("should display gradient details", async ({ page }) => {
-    await expect(page.locator("h1")).toContainText("6529 Gradient");
+    await expect(page.locator("main h1:visible")).toContainText("6529 Gradient");
 
     const gradientImage = page.locator(
       'img[alt="6529 Gradient #1"]#the-art-fullscreen-img'

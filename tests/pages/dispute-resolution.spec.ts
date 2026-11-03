@@ -8,7 +8,7 @@ test.describe("Dispute Resolution Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("Dispute Resolution | 6529.io");
 
-    const heading = page.locator("h1");
+    const heading = page.locator("main h1:visible");
     await expect(heading).toContainText("Dispute Resolution");
     await expect(heading).toBeVisible();
   });

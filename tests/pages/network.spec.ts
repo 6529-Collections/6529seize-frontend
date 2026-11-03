@@ -8,7 +8,7 @@ test.describe("Network Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("Network");
 
-    const heading = page.locator("h1");
+    const heading = page.locator("main h1:visible");
     await expect(heading).toContainText("Network");
     await expect(heading).toBeVisible();
 

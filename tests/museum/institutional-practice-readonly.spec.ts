@@ -310,7 +310,7 @@ async function expectStudyRoute(
       timeout: ROUTE_URL_SETTLEMENT_TIMEOUT_MS,
     });
     await expect(page).not.toHaveTitle(/404|PAGE NOT FOUND/iu);
-    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("main h1:visible")).toHaveCount(1);
     await expect(
       page.getByRole("heading", { level: 1, name: route.title, exact: true })
     ).toBeVisible();
