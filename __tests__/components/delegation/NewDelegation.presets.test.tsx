@@ -204,20 +204,55 @@ describe("NewDelegation signing summary", () => {
     delete submitProps.current;
   });
 
-  it("asks for a complete form before showing values", () => {
+  function summaryValues() {
+    return within(summary())
+      .getAllByRole("definition")
+      .map((value) => value.textContent);
+  }
+
+  it("shows known values and marks missing ones while the form is partial", () => {
     renderForm({ collection: "MEMES", use_case: "3" });
 
-    expect(
-      within(summary()).getByText(
-        "Complete the form to review exactly what you will sign."
-      )
-    ).toBeInTheDocument();
-    expect(within(summary()).queryByRole("term")).not.toBeInTheDocument();
+    expect(summaryValues()).toEqual([
+      `The Memes${MEMES_CONTRACT}`,
+      "#3 - Airdrops",
+      "Not set",
+      "Never",
+      "All tokens",
+    ]);
+    expect(latestSubmit().writeParams.functionName).toBeUndefined();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Select Date" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Select Token ID" }));
+    expect(summaryValues().slice(3)).toEqual(["Not set", "Not set"]);
+    expect(latestSubmit().writeParams.functionName).toBeUndefined();
+  });
+
+  it("marks every field as not set on an empty form", () => {
+    renderForm({});
+
+    expect(summaryValues()).toEqual([
+      "Not set",
+      "Not set",
+      "Not set",
+      "Never",
+      "All tokens",
+    ]);
+    expect(latestSubmit().validate()).toEqual([
+      "Missing or invalid Collection",
+      "Missing or invalid Use Case",
+      "Missing or invalid Address",
+    ]);
   });
 
   it("shows exactly the values passed to the write", () => {
     renderForm({ collection: "MEMES", use_case: "3" });
     enterDelegate(DELEGATE);
+
+    // NEVER_DATE and "all tokens" come from the form's own defaults: only
+    // the submit button is mocked here.
+    expect(screen.getByRole("radio", { name: "Never" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "All" })).toBeChecked();
 
     const [collection, delegate, expiry, useCase, allTokens, tokenId] =
       latestSubmit().writeParams.args;

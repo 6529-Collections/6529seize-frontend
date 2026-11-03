@@ -41,6 +41,31 @@ describe("delegation page server", () => {
     });
   });
 
+  it.each([
+    [["delegation-center"], DelegationCenterSection.CENTER],
+    [["unknown", "path"], DelegationCenterSection.HTML],
+  ])("parses presets the same way on %j", async (section, expectedSection) => {
+    const listed = await DelegationPage({
+      params: Promise.resolve({ section }),
+      searchParams: Promise.resolve({ collection: "MEMES", use_case: "3" }),
+    });
+    expect(listed.props).toMatchObject({
+      section: expectedSection,
+      collectionQuery: MEMES_CONTRACT,
+      useCaseQuery: 3,
+    });
+
+    const unlisted = await DelegationPage({
+      params: Promise.resolve({ section }),
+      searchParams: Promise.resolve({ collection: "c", use_case: "999" }),
+    });
+    expect(unlisted.props).toMatchObject({
+      section: expectedSection,
+      collectionQuery: "",
+      useCaseQuery: 0,
+    });
+  });
+
   it("titles the wallet architecture route as the TAP guide", async () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ section: ["wallet-architecture"] }),

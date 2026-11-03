@@ -54,8 +54,10 @@ standard tooltip, available on hover and keyboard focus.
   - `Review before signing`, above `Register Delegation`, lists the exact
     values the wallet will be asked to sign: collection name and contract
     address, use case number and name, the full delegate address, expiry, and
-    tokens. A Delegation Manager also sees the original delegator. Until the
-    form is complete, it asks you to finish the form instead.
+    tokens. A Delegation Manager also sees the original delegator. Each value
+    appears as soon as the form has it; a value that is still missing shows
+    `Not set`. `Register Delegation` stays blocked until every required field
+    is valid.
   - `Delegate Address` accepts a wallet address or an ENS name. An ENS name is
     resolved to its current address. A pasted `name - 0x...` value uses the
     ENS name's address, and a label that is not an ENS name is not accepted.
