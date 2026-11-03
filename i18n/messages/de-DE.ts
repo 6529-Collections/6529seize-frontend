@@ -28,6 +28,10 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.myVotes.sort": "Sortieren nach",
+  "waves.myVotes.sort.voteAmount": "Deine Stimmenzahl",
+  "waves.myVotes.sort.leaderboard": "Ranglistenposition",
+  "waves.myVotes.sort.lastVoted": "Zuletzt abgestimmt",
   "e2ee.profile.view": "Profil von {name} ansehen",
   "e2ee.profile.viewUnknown": "Profil ansehen",
   "e2ee.profile.level": "Stufe {level}",
