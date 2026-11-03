@@ -78,7 +78,7 @@ export function E2eeConversationListPage() {
   const ready = useE2ee().status === "ready";
   return (
     <E2eePageShell
-      title={t(locale, "e2ee.title")}
+      title={t(locale, "e2ee.list.title")}
       subtitle={<E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />}
       backHref={getMessagesBaseRoute(false)}
       backLabel={t(locale, "e2ee.section.plaintext")}

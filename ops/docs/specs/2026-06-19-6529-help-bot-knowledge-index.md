@@ -8,8 +8,9 @@ created: 2026-06-19
 # 6529 Help Bot Knowledge Index
 
 The `messages.encrypted-chats` record distinguishes the new-chat plus button
-from the conversations row, their setup explanations, and the visible
-**Back to encrypted messages** link on the new-chat page.
+from the conversations row, the **Start an encrypted chat** and **Your encrypted
+chats** page titles, their setup explanations, and the visible
+**Back to your encrypted chats** link on the new-chat page.
 
 The `waves.native-competitions` record covers optional anonymous submissions,
 their default-off creation setting, publication lock, per-entry winner reveal,

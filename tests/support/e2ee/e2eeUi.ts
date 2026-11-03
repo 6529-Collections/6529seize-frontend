@@ -120,7 +120,7 @@ export async function startChat(
   const { page } = session;
   await gotoPath(page, `${ENCRYPTED_ROUTE}/new`);
   await expect(
-    page.getByRole("heading", { name: "New encrypted chat" })
+    page.getByRole("heading", { name: "Start an encrypted chat" })
   ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
   for (const handle of people) {
     await pickPerson(page, handle);

@@ -68,7 +68,7 @@ describe("encrypted conversation list", () => {
     expect(rows[1]).toHaveTextContent("Message deleted");
     expect(rows[1]).toHaveTextContent("Paused");
     expect(
-      screen.getByRole("heading", { name: "Encrypted messages" })
+      screen.getByRole("heading", { name: "Your encrypted chats" })
     ).toBeInTheDocument();
     expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
   });

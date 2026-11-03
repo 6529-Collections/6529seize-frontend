@@ -155,8 +155,10 @@ export const E2EE_MESSAGES = {
   "e2ee.list.entryHint": "End-to-end encrypted chats",
   "e2ee.list.viewAll": "All encrypted chats",
   "e2ee.list.label": "Encrypted chats",
+  "e2ee.list.title": "Your encrypted chats",
 
-  "e2ee.new.title": "New encrypted chat",
+  "e2ee.new.title": "Start an encrypted chat",
+  "e2ee.new.back": "Back to your encrypted chats",
   "e2ee.new.description":
     "Choose who to chat with. Only the people in the chat can read it.",
   "e2ee.new.searchLabel": "Search people",
