@@ -3,31 +3,19 @@ import {
   NEXTGEN_CORE_ABI,
   NEXTGEN_MINTER_ABI,
 } from "@/abis/abis";
-import { publicEnv } from "@/config/env";
 import type { Abi } from "viem";
-import { goerli, mainnet, sepolia } from "viem/chains";
+import {
+  NEXTGEN_ADMIN_ADDRESSES,
+  NEXTGEN_CORE_ADDRESSES,
+  NEXTGEN_MINTER_ADDRESSES,
+  type NextGenContractAddresses,
+} from "./nextgen_addresses";
 
-export interface NextGenContract {
-  [goerli.id]: string;
-  [sepolia.id]: string;
-  [mainnet.id]: string;
+export { NEXTGEN_CHAIN_ID } from "./nextgen_addresses";
+
+export interface NextGenContract extends NextGenContractAddresses {
   abi: Abi;
 }
-
-function getNextGenChainId() {
-  if (publicEnv.NEXTGEN_CHAIN_ID) {
-    const chainId = publicEnv.NEXTGEN_CHAIN_ID;
-    if (chainId == sepolia.id) {
-      return sepolia.id;
-    }
-    if (chainId == goerli.id) {
-      return goerli.id;
-    }
-  }
-  return mainnet.id;
-}
-
-export const NEXTGEN_CHAIN_ID = getNextGenChainId();
 
 export enum FunctionSelectors {
   CREATE_COLLECTION = "0xe1fa8089",
@@ -53,22 +41,16 @@ export enum FunctionSelectors {
 }
 
 export const NEXTGEN_CORE: NextGenContract = {
-  [goerli.id]: "0x25a972f1bf3c816061ceaea59d2bb3fe4c130766",
-  [sepolia.id]: "0x60671e59a349589Ad74bE6cd643003a0Abb38cC3",
-  [mainnet.id]: "0x45882f9bc325E14FBb298a1Df930C43a874B83ae",
+  ...NEXTGEN_CORE_ADDRESSES,
   abi: NEXTGEN_CORE_ABI,
 };
 
 export const NEXTGEN_MINTER: NextGenContract = {
-  [goerli.id]: "0x1a7040a7d4baf44f136c50626a4e8f4ae5ca170f",
-  [sepolia.id]: "0xaDA9027EaF134038d3731f677241c4351b799Eb4",
-  [mainnet.id]: "0x6113fd2c91514e84e6149c6ede47f2e09545253a",
+  ...NEXTGEN_MINTER_ADDRESSES,
   abi: NEXTGEN_MINTER_ABI,
 };
 
 export const NEXTGEN_ADMIN: NextGenContract = {
-  [goerli.id]: "0x1bAe1D145Dd61fBBB62C85f8A6d7B6eDe0D150f5",
-  [sepolia.id]: "0xdA8d7A00D222b223e6152B22fFe97cA1778E5f38",
-  [mainnet.id]: "0x26ad9c64930bf5e057cb895a183436b30ad140f8",
+  ...NEXTGEN_ADMIN_ADDRESSES,
   abi: NEXTGEN_ADMIN_ABI,
 };
