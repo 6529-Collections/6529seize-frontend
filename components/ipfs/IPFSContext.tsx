@@ -40,12 +40,18 @@ const createIpfsService = async (): Promise<IpfsService> => {
 
 // Uploads are rare (profile pictures), so the IPFS client loads and prepares
 // on the first upload instead of for every visitor at app start.
-const getIpfsService = (): Promise<IpfsService> => {
-  ipfsServicePromise ??= createIpfsService().catch((error: unknown) => {
-    ipfsServicePromise = null;
+const getIpfsService = async (): Promise<IpfsService> => {
+  ipfsServicePromise ??= createIpfsService();
+  const pending = ipfsServicePromise;
+  try {
+    return await pending;
+  } catch (error: unknown) {
+    // Forget a failed attempt so the next upload tries again.
+    if (ipfsServicePromise === pending) {
+      ipfsServicePromise = null;
+    }
     throw error;
-  });
-  return ipfsServicePromise;
+  }
 };
 
 export const addFileToIpfs = async (file: File): Promise<string> => {

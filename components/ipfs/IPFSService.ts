@@ -4,7 +4,7 @@ interface IpfsServiceConfig {
 }
 
 const getErrorMessage = (error: unknown): unknown =>
-  (error as { message?: unknown })?.message;
+  error instanceof Error ? error.message : error;
 
 // Kubo RPC accepts POST only and reports failures with non-2xx statuses.
 async function postIpfsRpc(url: string, body?: FormData): Promise<Response> {
