@@ -234,7 +234,7 @@ export function useVirtualizedWaveMessages(
       : null);
   const activeDropMessages = dropId ? fullWaveMessagesForDrop : null;
   const activeMessages = activeDropMessages ?? activeFullWaveMessages;
-  const hasActiveMessages = Boolean(activeMessages);
+  const hasActiveMessages = activeMessages !== null;
   const activeMessagesCount = activeMessages?.drops.length ?? 0;
   const virtualLimit = getScopedVirtualLimit({
     scopeKey,
@@ -243,7 +243,7 @@ export function useVirtualizedWaveMessages(
   });
   const persistedEffectiveLimit = scopedAppendTrackingState.effectiveLimit;
   const baseVirtualLimit = Math.max(virtualLimit, persistedEffectiveLimit);
-  const effectiveVirtualLimit = activeMessages
+  const effectiveVirtualLimit = hasActiveMessages
     ? Math.max(
         getNextVirtualLimitAfterAppend({
           currentLimit: baseVirtualLimit,
@@ -262,7 +262,7 @@ export function useVirtualizedWaveMessages(
   const hasMoreLocal = hasActiveMessages
     ? activeMessagesCount > effectiveVirtualLimit
     : false;
-  const nextAppendTrackingState = activeMessages
+  const nextAppendTrackingState = hasActiveMessages
     ? {
         scopeKey,
         previousTotal: activeMessagesCount,

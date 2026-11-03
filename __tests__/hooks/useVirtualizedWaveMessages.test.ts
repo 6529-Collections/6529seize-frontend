@@ -251,6 +251,24 @@ describe("useVirtualizedWaveMessages", () => {
     expect(result.current?.hasMoreLocal).toBe(false);
   });
 
+  it("falls back to the normal limit when the oldest rendered drop is gone", () => {
+    const { result, rerender } = renderHook(() =>
+      useVirtualizedWaveMessages("wave-1", null, 2)
+    );
+
+    currentWaveMessages = createWaveData("wave-1", [2, 1]);
+    rerender();
+
+    expect(getSerials(result.current)).toEqual([2, 1]);
+
+    // The previously oldest rendered drop is not in the new set.
+    currentWaveMessages = createWaveData("wave-1", [12, 11, 10, 9, 8, 7, 6, 5]);
+    rerender();
+
+    expect(getSerials(result.current)).toEqual([12, 11, 10, 9]);
+    expect(result.current?.hasMoreLocal).toBe(true);
+  });
+
   it("keeps a revealed serial target rendered when newer drops arrive", async () => {
     const around = Array.from({ length: 38 }, (_, index) => 39 - index);
     currentWaveMessages = createWaveData("wave-1", around);
