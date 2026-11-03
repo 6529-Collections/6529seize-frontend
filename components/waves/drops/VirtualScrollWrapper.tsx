@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { observeHeight } from "@/helpers/observeHeight";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { VideoPlaybackMemoryProvider } from "@/components/drops/view/item/content/media/VideoPlaybackMemory";
@@ -9,65 +10,6 @@ import {
   clearWaveDropNearViewport,
   setWaveDropNearViewport,
 } from "@/contexts/wave/drop-visibility";
-import { WaveDropContentExpansionProvider } from "./WaveDropContentExpansionContext";
-
-interface ResizeSubscription {
-  readonly updateHeight: (height: number) => void;
-}
-
-const getPlaceholderHeight = (measuredHeight: number | null) =>
-  measuredHeight ?? "auto";
-
-const resizeSubscriptions = new Map<Element, ResizeSubscription>();
-let sharedResizeObserver: ResizeObserver | null = null;
-
-function getSharedResizeObserver(): ResizeObserver | null {
-  if (typeof ResizeObserver === "undefined") {
-    return null;
-  }
-
-  sharedResizeObserver ??= new ResizeObserver((entries) => {
-    for (const entry of entries) {
-      const subscription = resizeSubscriptions.get(entry.target);
-      if (!subscription) {
-        continue;
-      }
-
-      const borderBoxSize = (entry as Partial<ResizeObserverEntry>)
-        .borderBoxSize?.[0];
-      subscription.updateHeight(
-        borderBoxSize?.blockSize ?? entry.contentRect.height
-      );
-    }
-  });
-
-  return sharedResizeObserver;
-}
-
-function observeHeight(
-  element: HTMLElement,
-  subscription: ResizeSubscription
-): (() => void) | undefined {
-  const observer = getSharedResizeObserver();
-  if (!observer) {
-    return undefined;
-  }
-
-  resizeSubscriptions.set(element, subscription);
-  observer.observe(element);
-
-  return () => {
-    observer.unobserve(element);
-    resizeSubscriptions.delete(element);
-
-    if (resizeSubscriptions.size === 0) {
-      observer.disconnect();
-      if (observer === sharedResizeObserver) {
-        sharedResizeObserver = null;
-      }
-    }
-  };
-}
 
 /**
  * Props for VirtualScrollWrapper
@@ -87,7 +29,6 @@ interface VirtualScrollWrapperProps {
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly rootMargin?: string | undefined;
-  readonly enableLongContentCollapse?: boolean | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -126,7 +67,6 @@ export default function VirtualScrollWrapper({
   type,
   suspendLightDropHydration = false,
   rootMargin = "5000px 0px 5000px 0px",
-  enableLongContentCollapse = false,
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStreamActions();
 
@@ -298,24 +238,17 @@ export default function VirtualScrollWrapper({
 
   return (
     <div ref={containerRef}>
-      <WaveDropContentExpansionProvider
-        enabled={enableLongContentCollapse}
-        scrollContainerRef={scrollContainerRef}
-      >
-        <VideoPlaybackMemoryProvider
-          key={`${waveId}:${dropId ?? dropSerialNo}`}
-        >
-          {shouldRenderChildren ? (
-            children
-          ) : (
-            <div
-              style={{
-                height: getPlaceholderHeight(measuredHeight),
-              }}
-            />
-          )}
-        </VideoPlaybackMemoryProvider>
-      </WaveDropContentExpansionProvider>
+      <VideoPlaybackMemoryProvider key={`${waveId}:${dropId ?? dropSerialNo}`}>
+        {shouldRenderChildren ? (
+          children
+        ) : (
+          <div
+            style={{
+              height: measuredHeight,
+            }}
+          />
+        )}
+      </VideoPlaybackMemoryProvider>
     </div>
   );
 }

@@ -17,7 +17,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { logError } from "@/utils/security-logger";
-import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
+import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
 import { normalizeAddress } from "./seizeConnectWalletState";
 import CapacitorConnectDialog, {
   type CapacitorConnectDialogView,

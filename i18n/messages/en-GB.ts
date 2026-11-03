@@ -237,8 +237,6 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   "waves.drop.actions.menuLabel": "Drop actions",
   "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
-  "waves.drop.actions.showMore": "Show more",
-  "waves.drop.actions.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
@@ -603,6 +601,8 @@ export const EN_GB_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":

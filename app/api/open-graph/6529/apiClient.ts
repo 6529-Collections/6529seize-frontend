@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 
-import { publicEnv } from "@/config/env";
 import { getStagingApiKey } from "@/config/serverEnv";
-
-const PUBLIC_API_BASE = "https://api.6529.io";
+import {
+  getApiBase,
+  PUBLIC_PRODUCTION_API_BASE,
+} from "@/services/api/api-endpoints";
 
 export type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -33,8 +34,8 @@ function trimLeadingSlashes(value: string): string {
   return value.slice(start);
 }
 
-function getApiBase(): string {
-  const base = publicEnv.API_ENDPOINT?.trim();
+function getPrimaryApiBase(): string {
+  const base = getApiBase().trim();
   if (!base) {
     throw new Error("API endpoint is not configured.");
   }
@@ -69,12 +70,15 @@ function normalizeApiOrigin(base: string): string {
 }
 
 function getApiBases(): readonly string[] {
-  const primary = getApiBase();
-  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
+  const primary = getPrimaryApiBase();
+  if (
+    normalizeApiOrigin(primary) ===
+    normalizeApiOrigin(PUBLIC_PRODUCTION_API_BASE)
+  ) {
     return [primary];
   }
 
-  return [primary, PUBLIC_API_BASE];
+  return [primary, PUBLIC_PRODUCTION_API_BASE];
 }
 
 function getCallerApiAuth(context?: ApiContext): string | undefined {
