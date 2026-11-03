@@ -2,6 +2,7 @@
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
+import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type {
@@ -13,6 +14,7 @@ import { formatE2eeTimestamp, getMemberName, tCount } from "../e2eeFormat";
 
 const SEARCH_DEBOUNCE_MS = 250;
 const MIN_QUERY_LENGTH = 2;
+const RESULTS_PAGE_SIZE = 50;
 
 function getSearchStatus(
   locale: ReturnType<typeof useBrowserLocale>,
@@ -60,6 +62,7 @@ export function E2eeSearchPanel({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<readonly E2eeMessage[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [page, setPage] = useState(0);
   const trimmed = query.trim();
 
   useEffect(() => {
@@ -71,9 +74,10 @@ export function E2eeSearchPanel({
       return;
     }
     let cancelled = false;
+    const controller = new AbortController();
     const timer = globalThis.setTimeout(() => {
       engine
-        .search(trimmed, conversation.g)
+        .search(trimmed, conversation.g, controller.signal)
         .then((found) => {
           if (!cancelled) {
             setResults(found);
@@ -88,11 +92,16 @@ export function E2eeSearchPanel({
     }, SEARCH_DEBOUNCE_MS);
     return () => {
       cancelled = true;
+      controller.abort();
       globalThis.clearTimeout(timer);
     };
   }, [engine, conversation.g, trimmed]);
 
   const visibleResults = trimmed.length < MIN_QUERY_LENGTH ? null : results;
+  const shownResults = visibleResults?.slice(
+    page * RESULTS_PAGE_SIZE,
+    (page + 1) * RESULTS_PAGE_SIZE
+  );
 
   return (
     <section
@@ -117,7 +126,12 @@ export function E2eeSearchPanel({
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(0);
+              setResults(null);
+              setFailed(false);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
                 onClose();
@@ -144,7 +158,7 @@ export function E2eeSearchPanel({
       </div>
       {visibleResults && visibleResults.length > 0 ? (
         <ul className="tw-m-0 tw-mt-2 tw-flex tw-max-h-64 tw-list-none tw-flex-col tw-gap-1 tw-overflow-y-auto tw-p-0">
-          {visibleResults.map((message) => (
+          {shownResults?.map((message) => (
             <li key={message.id}>
               <button
                 type="button"
@@ -171,6 +185,26 @@ export function E2eeSearchPanel({
             </li>
           ))}
         </ul>
+      ) : null}
+      {visibleResults && visibleResults.length > RESULTS_PAGE_SIZE ? (
+        <div className="tw-mt-2 tw-flex tw-justify-between tw-gap-2">
+          <Button
+            size="xs"
+            variant="secondary"
+            disabled={page === 0}
+            onClick={() => setPage((current) => current - 1)}
+          >
+            {t(locale, "e2ee.conversation.search.previous")}
+          </Button>
+          <Button
+            size="xs"
+            variant="secondary"
+            disabled={(page + 1) * RESULTS_PAGE_SIZE >= visibleResults.length}
+            onClick={() => setPage((current) => current + 1)}
+          >
+            {t(locale, "e2ee.conversation.search.next")}
+          </Button>
+        </div>
       ) : null}
     </section>
   );

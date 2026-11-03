@@ -51,7 +51,7 @@ const INSTALLERS: readonly {
   },
   {
     kind: "windows",
-    pattern: /-x64\.msi$/,
+    pattern: /-Setup-.+-x64\.exe$/,
     title: "Windows",
     forMachines: "Windows 10 or 11, 64-bit.",
     signing: WINDOWS_SIGNING,
@@ -79,6 +79,12 @@ const INSTALLERS: readonly {
     signing: LINUX_SIGNING,
   },
 ];
+
+// Setup.exe holds this installer. It goes under "Other downloads", or takes
+// the Windows button in a release without a Setup.exe.
+const WINDOWS_MSI_PATTERN = /-x64\.msi$/;
+const WINDOWS_MSI_TITLE = "Windows, .msi installer";
+const WINDOWS_MSI_SIGNING = `The installer inside Setup.exe, on its own. ${WINDOWS_SIGNING}`;
 
 const ARCHIVE_TARGETS: readonly {
   readonly target: string;
@@ -113,6 +119,9 @@ const ARCHIVE_TARGETS: readonly {
 ];
 
 function describeArchive(file: ValidatorReleaseFile): ValidatorArchive {
+  if (WINDOWS_MSI_PATTERN.test(file.name)) {
+    return { title: WINDOWS_MSI_TITLE, signing: WINDOWS_MSI_SIGNING, file };
+  }
   const known = ARCHIVE_TARGETS.find(
     (entry) =>
       file.name.startsWith("validator-") &&
@@ -162,9 +171,27 @@ export function groupReleaseFiles(
     archives.push(describeArchive(file));
   }
 
+  const msiIndex = archives.findIndex(
+    (archive) => archive.title === WINDOWS_MSI_TITLE
+  );
+  const msi = archives[msiIndex];
+  if (msi && !installers.some((item) => item.kind === "windows")) {
+    archives.splice(msiIndex, 1);
+    installers.push({
+      kind: "windows",
+      title: "Windows",
+      forMachines: "Windows 10 or 11, 64-bit.",
+      signing: WINDOWS_SIGNING,
+      file: msi.file,
+    });
+  }
+
   const order = INSTALLERS.map((entry) => entry.kind);
   installers.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
-  const archiveOrder = ARCHIVE_TARGETS.map((entry) => entry.title);
+  const archiveOrder = [
+    WINDOWS_MSI_TITLE,
+    ...ARCHIVE_TARGETS.map((entry) => entry.title),
+  ];
   archives.sort((a, b) => {
     const indexA = archiveOrder.indexOf(a.title);
     const indexB = archiveOrder.indexOf(b.title);

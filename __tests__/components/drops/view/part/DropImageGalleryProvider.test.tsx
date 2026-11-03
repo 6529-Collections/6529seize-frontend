@@ -237,6 +237,86 @@ describe("DropImageGalleryProvider", () => {
       "2 / 2"
     );
   });
+
+  it("plays a Giphy GIF from MP4, fullscreens the video and moves on to images", () => {
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+    renderGallery({
+      items: [
+        {
+          id: "body-1",
+          src: "https://media.giphy.com/media/88EhKlGzXuhBfStCds/giphy.gif",
+          source: "body",
+        },
+        galleryItems[1]!,
+      ],
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open body" }));
+
+    const video = screen.getByLabelText("Expanded GIF animation", {
+      selector: "video",
+    });
+    expect(video).toHaveAttribute(
+      "src",
+      `/api/og-metadata/image?${new URLSearchParams({
+        url: "https://media.giphy.com/media/88EhKlGzXuhBfStCds/giphy.mp4",
+        format: "mp4",
+      }).toString()}`
+    );
+    expect(
+      screen.getByRole("button", { name: "Play animation" })
+    ).toBeInTheDocument();
+    fireEvent.loadedMetadata(video);
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    expect(requestFullscreen.mock.contexts[0]).toBe(video);
+
+    fireEvent.click(screen.getByRole("button", { name: "Next image" }));
+
+    expect(
+      screen.queryByLabelText("Expanded GIF animation", { selector: "video" })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /animation/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
+      "src",
+      "upload.png" + "?preview"
+    );
+  });
+
+  it("tries a failed Giphy video again after moving away and back", () => {
+    renderGallery({
+      items: [
+        {
+          id: "body-1",
+          src: "https://media.giphy.com/media/88EhKlGzXuhBfStCds/giphy.gif",
+          source: "body",
+        },
+        galleryItems[1]!,
+      ],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Open body" }));
+    fireEvent.error(
+      screen.getByLabelText("Expanded GIF animation", { selector: "video" })
+    );
+    expect(
+      screen.queryByLabelText("Expanded GIF animation", { selector: "video" })
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next image" }));
+    fireEvent.click(screen.getByRole("button", { name: "Previous image" }));
+
+    expect(
+      screen.getByLabelText("Expanded GIF animation", { selector: "video" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByAltText("Expanded image preview")
+    ).not.toBeInTheDocument();
+  });
 });
 
 jest.mock("@/helpers/image.helpers", () => ({
