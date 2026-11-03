@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { useAuth } from "@/components/auth/Auth";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
-import { faWater } from "@fortawesome/free-solid-svg-icons/faWater";
+import { faWater } from "@fortawesome/free-solid-svg-icons";
 import {
   buildDirectMessageIdentityCandidates,
   normalizeDirectMessageIdentity,

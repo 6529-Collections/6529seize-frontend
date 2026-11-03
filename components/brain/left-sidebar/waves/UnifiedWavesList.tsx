@@ -5,7 +5,7 @@ import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";

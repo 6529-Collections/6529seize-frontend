@@ -1,6 +1,8 @@
-import { faCopy } from "@fortawesome/free-solid-svg-icons/faCopy";
-import { faExternalLink } from "@fortawesome/free-solid-svg-icons/faExternalLink";
-import { faRotate } from "@fortawesome/free-solid-svg-icons/faRotate";
+import {
+  faCopy,
+  faExternalLink,
+  faRotate,
+} from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import {
   ArrowDownTrayIcon,

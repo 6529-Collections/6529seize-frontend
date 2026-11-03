@@ -1,7 +1,7 @@
 import WavePicture from "@/components/waves/WavePicture";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { faBellSlash } from "@fortawesome/free-solid-svg-icons/faBellSlash";
+import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 
 interface WaveAvatarProps {

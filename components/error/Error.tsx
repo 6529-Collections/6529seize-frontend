@@ -2,9 +2,11 @@
 
 import Button from "@/components/utils/button/Button";
 import { useTitle } from "@/contexts/TitleContext";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
-import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
-import { faCopy } from "@fortawesome/free-solid-svg-icons/faCopy";
+import {
+  faChevronDown,
+  faChevronUp,
+  faCopy,
+} from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";

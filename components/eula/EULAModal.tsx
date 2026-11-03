@@ -8,7 +8,7 @@ import { t } from "@/i18n/messages";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import { useEULAConsent } from "./useEULAConsent";
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
-import { faArrowDown } from "@fortawesome/free-solid-svg-icons/faArrowDown";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import EULAIntroSections from "./EULAIntroSections";
 import EULACommunicationsSection from "./EULACommunicationsSection";
 import EULAFooter from "./EULAFooter";

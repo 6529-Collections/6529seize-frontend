@@ -1,6 +1,6 @@
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import styles from "./DotLoader.module.css";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 export default function DotLoader() {
   return (

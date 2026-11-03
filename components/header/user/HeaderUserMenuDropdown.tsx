@@ -1,12 +1,14 @@
 "use client";
 
-import { faPlugCircleMinus } from "@fortawesome/free-solid-svg-icons/faPlugCircleMinus";
-import { faPlugCirclePlus } from "@fortawesome/free-solid-svg-icons/faPlugCirclePlus";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons/faRightFromBracket";
-import { faShuffle } from "@fortawesome/free-solid-svg-icons/faShuffle";
-import { faShieldHalved } from "@fortawesome/free-solid-svg-icons/faShieldHalved";
-import { faSliders } from "@fortawesome/free-solid-svg-icons/faSliders";
-import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
+import {
+  faPlugCircleMinus,
+  faPlugCirclePlus,
+  faRightFromBracket,
+  faShuffle,
+  faShieldHalved,
+  faSliders,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
