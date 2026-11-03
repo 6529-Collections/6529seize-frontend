@@ -24,6 +24,7 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesResetProps {
+  readonly toolbarContent?: React.ReactNode;
   readonly resetVote?: ((dropId: string) => Promise<void>) | undefined;
   readonly waveId: string;
   readonly haveDrops: boolean;
@@ -40,6 +41,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   waveId,
+  toolbarContent,
   resetVote,
   haveDrops,
   availableVotes = null,
@@ -142,7 +144,12 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     void handleReset();
   };
 
-  if (!haveDrops || isVotingClosed) return null;
+  const showResetControls = (haveDrops && !isVotingClosed) || isResetting;
+  if (
+    !showResetControls &&
+    (toolbarContent === undefined || toolbarContent === null)
+  )
+    return null;
   const selectedLabel = t(
     locale,
     selectedCount === 1
@@ -165,39 +172,48 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     <>
       <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <button
-              type="button"
-              onClick={onToggleSelectAll}
-              className={buttonClassName}
-              disabled={isResetting}
-            >
-              <span className={COMPACT_ACTION_CONTENT_CLASS}>
-                {t(
-                  locale,
-                  allItemsSelected
-                    ? "waves.myVotes.deselectAll"
-                    : "waves.myVotes.selectAll"
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+            {toolbarContent}
+            {showResetControls && (
+              <>
+                <button
+                  type="button"
+                  onClick={onToggleSelectAll}
+                  className={buttonClassName}
+                  disabled={isResetting}
+                >
+                  <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                    {t(
+                      locale,
+                      allItemsSelected
+                        ? "waves.myVotes.deselectAll"
+                        : "waves.myVotes.selectAll"
+                    )}
+                  </span>
+                </button>
+                {(selectedCount > 0 || isResetting) && (
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <button
+                      type="button"
+                      onClick={handleResetClick}
+                      className={buttonClassName}
+                      disabled={isResetting}
+                      aria-label={resetButtonAriaLabel}
+                    >
+                      <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                        {isResetting
+                          ? t(locale, "waves.myVotes.resetting")
+                          : resetButtonLabel}
+                      </span>
+                    </button>
+                    {selectedCount > 0 && (
+                      <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
+                        {selectedLabel}
+                      </output>
+                    )}
+                  </div>
                 )}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={handleResetClick}
-              className={buttonClassName}
-              disabled={!selectedCount || isResetting}
-              aria-label={resetButtonAriaLabel}
-            >
-              <span className={COMPACT_ACTION_CONTENT_CLASS}>
-                {isResetting
-                  ? t(locale, "waves.myVotes.resetting")
-                  : resetButtonLabel}
-              </span>
-            </button>
-            {selectedCount > 0 && (
-              <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
-                {selectedLabel}
-              </output>
+              </>
             )}
           </div>
           {typeof availableVotes === "number" && (

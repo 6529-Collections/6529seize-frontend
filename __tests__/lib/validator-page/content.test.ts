@@ -45,6 +45,18 @@ describe("validator page text", () => {
     );
   });
 
+  it("carries the mainnet join test's timing and the datacenter mode", () => {
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "a fresh install was ready about 50 minutes after it started"
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain("`--mode datacenter`");
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toMatch(
+      /^3\. Rebuild and match can take 30 minutes or more/m
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/serve none/);
+  });
+
   it("keeps the owner's line word for word and names the DM account", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
       "6529 never starts a DM with you or asks for a seed phrase."
