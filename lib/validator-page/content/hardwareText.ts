@@ -17,7 +17,7 @@ export const MINIMUM: readonly {
   {
     label: "Memory",
     value: "8 GB",
-    detail: "The validator uses about 2 GB at its daily peak.",
+    detail: "The validator uses under 2 GB at its daily peak.",
   },
   {
     label: "Disk",
@@ -103,7 +103,7 @@ export const PARTS: readonly {
     key: "memory",
     part: "Memory (RAM)",
     answer: "8 GB is plenty.",
-    why: "The validator uses about 2 GB while it calculates the day, and under 400 MB the rest of the time.",
+    why: "The validator uses under 2 GB for the few seconds it calculates the day, and under 400 MB the rest of the time.",
   },
   {
     key: "storage",
@@ -127,7 +127,7 @@ export const PARTS: readonly {
     key: "first-start",
     part: "First start",
     answer: "Leave it on for about an hour.",
-    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's test on 3 November this took 50 minutes, and it takes a little longer each day.",
+    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests on 3 November this took 50 to 63 minutes.",
   },
 ];
 
