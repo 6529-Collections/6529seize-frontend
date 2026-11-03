@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,6 +21,19 @@ import {
 } from "@/lib/validator-page/content/hardwareText";
 import LocalSigningTimes from "./hardware/LocalSigningTimes";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
+import { SECONDARY_BUTTON } from "./validatorStyles";
+
+/** One file a system card offers, with the same button as every download. */
+export type HardwareDownload = {
+  readonly label: string;
+  readonly href: string;
+  /** The file's name, for screen readers; null for a link to the page. */
+  readonly fileName: string | null;
+};
+
+export type HardwareDownloads = Readonly<
+  Partial<Record<(typeof SYSTEMS)[number]["key"], readonly HardwareDownload[]>>
+>;
 
 const SECTION = "tw-mt-14 sm:tw-mt-16";
 const SECTION_HEADING =
@@ -39,7 +52,6 @@ const SMALL = "tw-text-sm tw-leading-6 tw-text-iron-400";
 const CARD_ROW = "tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0";
 const FOCUS =
   "focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
-const TEXT_LINK = `tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline hover:tw-text-primary-200 ${FOCUS}`;
 
 function Chips({ chips }: { readonly chips: readonly string[] }) {
   return (
@@ -77,7 +89,45 @@ function Minimum() {
   );
 }
 
-function Systems() {
+function SystemDownloads({
+  downloads,
+}: {
+  readonly downloads: readonly HardwareDownload[];
+}) {
+  return (
+    <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
+      {downloads.map((download) => (
+        <a
+          key={download.href}
+          href={download.href}
+          className={SECONDARY_BUTTON}
+          aria-label={
+            download.fileName
+              ? `${download.label}, ${download.fileName}`
+              : undefined
+          }
+        >
+          <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+          {download.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/** The card's files, or a button to the download page while none is out. */
+function filesFor(
+  downloads: HardwareDownloads,
+  key: keyof HardwareDownloads,
+  label: string
+): readonly HardwareDownload[] {
+  const files = downloads[key] ?? [];
+  return files.length > 0
+    ? files
+    : [{ label, href: "/validator", fileName: null }];
+}
+
+function Systems({ downloads }: { readonly downloads: HardwareDownloads }) {
   return (
     <section aria-labelledby="systems" className={SECTION}>
       <h2 id="systems" className={SECTION_HEADING}>
@@ -107,12 +157,9 @@ function Systems() {
             </p>
             <p className={`tw-mb-0 tw-mt-3 ${SMALL}`}>{system.check}</p>
             <p className={`tw-mb-0 tw-mt-3 ${SMALL}`}>{system.note}</p>
-            <div className="tw-pt-3">
-              <Link href="/validator#download" className={TEXT_LINK}>
-                {system.download}
-                <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-              </Link>
-            </div>
+            <SystemDownloads
+              downloads={filesFor(downloads, system.key, system.download)}
+            />
           </li>
         ))}
       </ul>
@@ -456,7 +503,12 @@ function Sources() {
   );
 }
 
-export default function ValidatorHardwarePage() {
+export default function ValidatorHardwarePage({
+  downloads,
+}: {
+  /** This release's files for each system card, from the release feed. */
+  readonly downloads: HardwareDownloads;
+}) {
   return (
     <ValidatorPageFrame current="hardware">
       <ValidatorPageHeader eyebrow="Hardware" title="Your Mac or PC is enough">
@@ -476,7 +528,7 @@ export default function ValidatorHardwarePage() {
           </Link>
         </div>
       </ValidatorPageHeader>
-      <Systems />
+      <Systems downloads={downloads} />
       <Parts />
       <DayFigure />
       <RaspberryPi />

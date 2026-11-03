@@ -144,7 +144,11 @@ export default function ValidatorDownloadPage({
         </p>
       </ValidatorPageHeader>
 
-      <section aria-label="Download" className="tw-mb-12">
+      <section
+        id="download"
+        aria-label="Download"
+        className="tw-mb-12 tw-scroll-mt-24"
+      >
         {release ? (
           <ValidatorDownloadChooser
             options={installers.map((item) => toOption(release, item))}

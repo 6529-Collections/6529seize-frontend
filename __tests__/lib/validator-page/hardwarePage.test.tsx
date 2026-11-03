@@ -6,13 +6,26 @@ import ValidatorHardwareRoute, {
 } from "@/app/validator/hardware/page";
 import { createAccessCookieValue } from "@/lib/validator-page/accessGate";
 import {
+  parseReleaseFeed,
+  type ReleaseFeedSnapshot,
+} from "@/lib/validator-page/releaseFeed";
+import {
   MINIMUM,
   PARTS,
   QUESTIONS,
   SYSTEMS,
 } from "@/lib/validator-page/content/hardwareText";
+import { SECONDARY_BUTTON } from "@/components/validator-page/validatorStyles";
+import { TEST_RELEASE_ENTRY } from "./fixtures";
 
 const PASSWORD = "test-only-password-4";
+const NO_RELEASE: ReleaseFeedSnapshot = {
+  state: "missing",
+  feed: null,
+  signature: null,
+  releases: [],
+};
+let mockSnapshot = NO_RELEASE;
 let accessCookie: string | undefined;
 
 jest.mock("next/headers", () => ({
@@ -22,6 +35,11 @@ jest.mock("next/headers", () => ({
         ? { name, value: accessCookie }
         : undefined,
   }),
+}));
+
+jest.mock("@/lib/validator-page/releaseFeed", () => ({
+  ...jest.requireActual("@/lib/validator-page/releaseFeed"),
+  getReleaseFeedSnapshot: async () => mockSnapshot,
 }));
 
 jest.mock("next/server", () => ({
@@ -66,6 +84,29 @@ describe("/validator/hardware", () => {
     expect(html).toMatch(
       /<a(?=[^>]*aria-current="page")(?=[^>]*href="\/validator\/hardware")[^>]*>/
     );
+  });
+
+  it("offers each system's file with the same button as every download", async () => {
+    accessCookie = createAccessCookieValue(PASSWORD);
+    mockSnapshot = {
+      ...NO_RELEASE,
+      state: "ok",
+      releases: parseReleaseFeed({ releases: [TEST_RELEASE_ENTRY] }),
+    };
+    const html = await renderRoute();
+    for (const [label, file] of [
+      ["Download for Mac", "6529-Validator-0.1.0.dmg"],
+      ["Download for Windows", "6529-Validator-Setup-0.1.0-x64.exe"],
+      ["Linux, x86-64", "6529-validator_0.1.0_amd64.deb"],
+      ["Linux, ARM64", "6529-validator_0.1.0_arm64.deb"],
+    ]) {
+      expect(html).toContain(
+        `href="/validator/download/0.1.0-test.2/${file}" class="${SECONDARY_BUTTON}" aria-label="${label}, ${file}"`
+      );
+    }
+    mockSnapshot = NO_RELEASE;
+    const empty = await renderRoute();
+    expect(empty).toContain(`href="/validator" class="${SECONDARY_BUTTON}"`);
   });
 
   it("stays out of search engines", () => {
