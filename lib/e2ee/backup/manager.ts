@@ -22,11 +22,7 @@ import {
   sealChunk,
   sealEnvelope,
 } from "./crypto";
-import {
-  BackupError,
-  backupErrorCode,
-  toBackupError,
-} from "./errors";
+import { BackupError, backupErrorCode, toBackupError } from "./errors";
 import {
   type BackupSegment,
   decodeSegment,
@@ -416,7 +412,7 @@ export class E2eeBackupManager {
   private async pendingSegments(
     local: BackupLocalState
   ): Promise<EncodedSegment[]> {
-    const history = this.deps.engine.backupHistory();
+    const history = await this.deps.engine.backupHistory();
     const pack = () =>
       packSegments(
         changedHistory(history, local),

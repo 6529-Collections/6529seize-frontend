@@ -51,8 +51,6 @@ export default function Providers({
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
-  initialIsIos = false,
-  initialEulaConsentVersion,
   canServerRenderNftPurchasing = false,
 }: {
   readonly children: React.ReactNode;
@@ -61,8 +59,6 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
-  readonly initialIsIos?: boolean;
-  readonly initialEulaConsentVersion?: string | undefined;
   readonly canServerRenderNftPurchasing?: boolean;
 }) {
   const sharedProviders = (
@@ -150,10 +146,7 @@ export default function Providers({
     <>
       <DocumentLanguage />
       <CapacitorSetup />
-      <EULAConsentStartup
-        initialIsIos={initialIsIos}
-        initialConsentVersion={initialEulaConsentVersion}
-      >
+      <EULAConsentStartup>
         <EditingDropProvider>
           <ActiveGroupProvider>
             <NftPurchasingServerRenderProvider

@@ -147,7 +147,8 @@ function OtherDownloads({ release }: { readonly release: ValidatorRelease }) {
         Other downloads
       </h2>
       <p className={`tw-mb-5 tw-mt-3 ${BODY}`}>
-        Archives for the terminal. Each holds the validator program and the
+        The Windows <code className={CODE}>.msi</code> on its own, and archives
+        for the terminal. Each archive holds the validator program and the
         install guide in <code className={CODE}>docs/install/</code>.
       </p>
       <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0">
@@ -243,7 +244,8 @@ function CheckYourDownload({
         </p>
       )}
       <p className={`tw-mb-3 ${BODY}`}>
-        The Mac app and the Windows installer are signed by 6529 Collection LLC.
+        The Mac app and the Windows installers are signed by 6529 Collection
+        LLC.
       </p>
       <ul className="tw-m-0 tw-list-disc tw-space-y-2 tw-pl-6">
         <li className={BODY}>
@@ -331,7 +333,7 @@ const NEXT_STEPS = [
     href: "/validator/guide",
     icon: BookOpenIcon,
     title: "Tester guide",
-    text: "Install, make the key, sign the grant and add the peers. About 30 minutes.",
+    text: "Install, make the key and sign the authorization. About 30 minutes.",
   },
   {
     href: "/validator/known-issues",
@@ -431,8 +433,10 @@ export default function ValidatorDownloadPage({
         <p className={`tw-m-0 ${BODY}`}>
           Status files and logs name your keys and your account. Send them only
           in an encrypted DM in the 6529 app to {describeStatusDmAccount()},
-          never in the wave. 6529 never starts a DM with you and never asks for
-          a seed phrase.
+          never in the wave.
+        </p>
+        <p className={`tw-mb-0 tw-mt-3 ${BODY}`}>
+          6529 never starts a DM with you or asks for a seed phrase.
         </p>
       </section>
     </ValidatorPageFrame>
