@@ -94,7 +94,9 @@ export default function Cc0Licence({
                 { value: "one", label: ht(locale, "cc0.model.one") },
                 { value: "grad", label: ht(locale, "cc0.model.grad") },
               ]}
-              value={broken ? null : work}
+              // The Punk is in Meme Card #1: broken, that card stays picked,
+              // so the control and the answer agree.
+              value={broken ? "one" : work}
               onChange={setWork}
               attr="work"
             />

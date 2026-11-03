@@ -240,7 +240,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector("#diff")).toHaveTextContent(
-      "Once 6529.io moves to the Rust core's result (planned for about Oct 23, not made as of Nov 1), nothing re-reads the logs"
+      "Once 6529.io moves to the Rust core's result (planned for about Oct 23, not made as of Nov 3), nothing re-reads the logs"
     );
     const trail = screen.getByRole("list", {
       name: "Who can repeat each step",

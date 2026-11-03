@@ -205,6 +205,10 @@ export default function HowWeKnowLadder({
               {ot(locale, "know.linkSure")}
               <Icon kind="arrow" className="tw-size-4" />
             </Link>
+            <Link className={EX_BUTTON.link} href="/network/tdh/proofs">
+              {ot(locale, "know.linkProofs")}
+              <Icon kind="arrow" className="tw-size-4" />
+            </Link>
           </p>
         </div>
       </div>

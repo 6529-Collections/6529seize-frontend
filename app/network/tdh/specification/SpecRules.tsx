@@ -259,6 +259,22 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
       </Sub>
       <Sub id="s3-2" no="3.2" title={m("explained.tdh.spec.s3-2.title")}>
         <Prose>{m("explained.tdh.spec.s3-2.body")}</Prose>
+        {/* P26 states the value types and the documents that are no input
+            inside §3.2; this block keeps that number rather than inventing
+            a §3.5 that P26 does not have. */}
+        <h4
+          id="s3-2-values"
+          className={`${EX_TEXT.h3} tw-mb-2.5 tw-mt-8 tw-scroll-mt-24`}
+        >
+          {m("explained.tdh.spec.s3-5.title")}
+        </h4>
+        <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>
+        <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
+          className="tw-mt-4"
+          code={VALUES}
+          label={s("explained.tdh.spec.s3-5.code")}
+        />
       </Sub>
       <Sub id="s3-3" no="3.3" title={m("explained.tdh.spec.s3-3.title")}>
         <Prose>{m("explained.tdh.spec.s3-3.body")}</Prose>
@@ -275,15 +291,6 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
             dead: <CodeName>0x…dead</CodeName>,
           })}
         </Prose>
-      </Sub>
-      <Sub id="s3-5" no="3.5" title={m("explained.tdh.spec.s3-5.title")}>
-        <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>
-        <CodeBlock
-          hint={s("explained.tdh.spec.scrollHint")}
-          className="tw-mt-4"
-          code={VALUES}
-          label={s("explained.tdh.spec.s3-5.code")}
-        />
       </Sub>
     </EdSection>
   );
@@ -422,7 +429,7 @@ function Section6({ ctx }: { readonly ctx: SpecContext }) {
           />
         )}
       </Sub>
-      <Sub id="s6-4" no="6.4" title={m("explained.tdh.spec.s6-4.title")}>
+      <Sub id="s6-4" no="6.4–§6.5" title={m("explained.tdh.spec.s6-4.title")}>
         <span id="s6-5" className="tw-scroll-mt-24" />
         <Prose>{m("explained.tdh.spec.s6-4.body")}</Prose>
       </Sub>

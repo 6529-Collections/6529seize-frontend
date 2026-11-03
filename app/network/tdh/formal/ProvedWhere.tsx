@@ -73,6 +73,7 @@ export default function ProvedWhere({ ctx }: { readonly ctx: SureContext }) {
           {
             kicker: s("explained.tdh.sure.where.provedKicker"),
             title: s("explained.tdh.sure.where.proved", {
+              tdh: p.f("manifest.proved.tdh"),
               proved: p.f("manifest.proved"),
             }),
             cap: m("explained.tdh.sure.where.provedCap", {

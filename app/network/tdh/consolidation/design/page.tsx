@@ -104,7 +104,16 @@ export default async function TdhConsolidationDesignPage({
           title={dt(locale, "explained.tdh.design.title")}
           titleClassName="tw-max-w-[900px] [text-wrap:balance]"
           lede={dt(locale, "explained.tdh.design.lede")}
-        />
+        >
+          {/* The lede's "cannot" carries its evidence and its limit. */}
+          <div className="tw-mt-5">
+            <Mark
+              kind="tested"
+              refText={dt(locale, "explained.tdh.design.ledeMark")}
+              locale={locale}
+            />
+          </div>
+        </PageHead>
 
         <Section tight>
           <span id="consolidation-rules" />

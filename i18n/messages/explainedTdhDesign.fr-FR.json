@@ -31,5 +31,6 @@
   "explained.tdh.design.hwk.analysis": "L'analyse",
   "explained.tdh.design.hwk.analysisBody": "La vérification exhaustive par 6529 de chaque règle candidate face à tout ensemble d'enregistrements qu'un attaquant détenant certains de vos wallets pourrait signer. Elle a été faite pour le passage à quatre wallets et est résumée dans le ticket public de suivi du frontend ({issue}). Son code n'est pas publié, donc seul 6529 peut la rejouer. Le code de regroupement qu'elle épingle : {backend}.",
   "explained.tdh.design.hwk.model": "Le modèle",
-  "explained.tdh.design.hwk.modelBody": "Le regroupement du moteur de TDH v1.4, dans votre navigateur."
+  "explained.tdh.design.hwk.modelBody": "Le regroupement du moteur de TDH v1.4, dans votre navigateur.",
+  "explained.tdh.design.ledeMark": "par la vérification exhaustive de 6529 elle-même, pas un audit extérieur ; son code n'est pas publié, donc seul 6529 peut la refaire"
 }

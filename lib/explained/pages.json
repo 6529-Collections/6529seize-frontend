@@ -14,7 +14,7 @@
         "app/explained/_lib/**"
       ],
       "dependsOn": ["D67", "D89", "D116", "D142"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "wordsPerScreen": 160
       },
@@ -49,7 +49,7 @@
         "D142",
         "D148"
       ],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "words": 1175,
         "firstScreen": 120,
@@ -90,7 +90,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/how-it-works/**"],
       "dependsOn": ["D89", "D131", "D132", "D136"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "firstScreen": 120
       },
@@ -161,7 +161,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/*"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "words": 900,
         "firstScreen": 130,
@@ -202,7 +202,7 @@
         "app/network/tdh/verification/components/**"
       ],
       "dependsOn": ["D116", "D121", "D131", "D132"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "words": 1100,
         "firstScreenMin": 150,
@@ -233,7 +233,7 @@
         "app/network/tdh/verification/day-not-found/**"
       ],
       "dependsOn": ["D116", "D136", "D137", "D144"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "words": 560,
         "firstScreenMin": 150,
@@ -250,7 +250,7 @@
       "lane": "P4",
       "sources": ["app/network/tdh/formal/**"],
       "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137", "D148"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "firstScreenMin": 150,
         "firstScreen": 285
@@ -282,7 +282,7 @@
       "lane": "P5",
       "sources": ["app/network/tdh/proofs/**"],
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "budget": {
         "firstScreenMin": 150,
         "firstScreen": 285
@@ -334,7 +334,7 @@
       "lane": "P4",
       "sources": ["app/network/tdh/specification/**"],
       "dependsOn": ["D30", "D89", "D116", "D121", "D131", "D136", "D137"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "states": []
     },
     {
@@ -346,7 +346,7 @@
       "lane": "P4",
       "sources": ["app/network/tdh/implementations/**"],
       "dependsOn": ["D116", "D119", "D125", "D132"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "states": []
     },
     {
@@ -358,7 +358,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/design/**"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "states": [
         {
           "name": "order-step1-split",
@@ -381,7 +381,7 @@
       "lane": "P4",
       "sources": ["app/network/tdh/historic-boosts/**"],
       "dependsOn": ["D136", "D137"],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "states": []
     },
     {
@@ -405,7 +405,7 @@
         "D136",
         "D137"
       ],
-      "checkedThrough": "D158",
+      "checkedThrough": "D160",
       "states": []
     },
     {
@@ -459,7 +459,7 @@
       "lane": "K",
       "sources": ["app/explained/kit/**"],
       "dependsOn": [],
-      "checkedThrough": "D141",
+      "checkedThrough": "D160",
       "states": [
         {
           "name": "lens-break",

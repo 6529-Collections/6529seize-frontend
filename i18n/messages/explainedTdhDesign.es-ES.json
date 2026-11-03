@@ -31,5 +31,6 @@
   "explained.tdh.design.hwk.analysis": "El análisis",
   "explained.tdh.design.hwk.analysisBody": "La comprobación exhaustiva de 6529 de cada regla candidata frente a todo conjunto de registros que pudiera firmar un atacante con algunas de tus wallets. Se hizo para el cambio a cuatro wallets y se resume en la incidencia pública de seguimiento del frontend ({issue}). Su código no está publicado, así que solo 6529 puede repetirla. El código de agrupación que fija: {backend}.",
   "explained.tdh.design.hwk.model": "El modelo",
-  "explained.tdh.design.hwk.modelBody": "La agrupación del motor de TDH v1.4, en tu navegador."
+  "explained.tdh.design.hwk.modelBody": "La agrupación del motor de TDH v1.4, en tu navegador.",
+  "explained.tdh.design.ledeMark": "por la propia comprobación exhaustiva de 6529, no una auditoría externa; su código no está publicado, así que solo 6529 puede repetirla"
 }

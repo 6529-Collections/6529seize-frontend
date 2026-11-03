@@ -36,7 +36,7 @@
   "explained.tdh.wallets.why.explain": "Explain my TDH muestra qué contó tu identidad en el último resultado.",
   "explained.tdh.wallets.why.open": "Abrirlo",
   "explained.tdh.wallets.rule.label": "La regla",
-  "explained.tdh.wallets.rule.title": "Cada par se vincula en ambos sentidos, y el vínculo confirmado más reciente decide qué wallets se agrupan primero.",
+  "explained.tdh.wallets.rule.title": "Cada par se vincula en ambos sentidos; el vínculo más reciente agrupa primero.",
   "explained.tdh.wallets.rule.body": "Las wallets se convierten en una identidad cuando cada par entre ellas está vinculado en ambos sentidos. Hasta tres wallets se agrupan como antes. Una cuarta solo se une cuando una wallet tiene vínculos en ambos sentidos con cada una de las otras tres, todos registrados a partir del {gate}.",
   "explained.tdh.wallets.lens.label": "Cuatro wallets, una identidad",
   "explained.tdh.wallets.lens.question": "¿Cómo se convierten las wallets en una identidad, y cuándo puede unirse una cuarta?",
@@ -44,7 +44,7 @@
   "explained.tdh.wallets.lens.three": "Tres, todas vinculadas",
   "explained.tdh.wallets.lens.missing": "Falta un par",
   "explained.tdh.wallets.lens.oldfour": "Cuatro, vinculadas antes del {date}",
-  "explained.tdh.wallets.lens.addD": "Añadir D",
+  "explained.tdh.wallets.lens.addD": "Añadir D vínculo a vínculo (se divide)",
   "explained.tdh.wallets.lens.adding": "Añadir una cuarta wallet",
   "explained.tdh.wallets.lens.step1": "Paso {n} · primero {step}",
   "explained.tdh.wallets.lens.then": "Paso {n} · {step}",
@@ -113,5 +113,6 @@
   "explained.tdh.wallets.hwk.model": "El modelo",
   "explained.tdh.wallets.hwk.modelBody": "La agrupación del motor de TDH v1.4, ejecutada en tu navegador; supera los {pass} vectores de agrupación de P26.",
   "explained.tdh.wallets.hwk.setup": "La configuración guiada",
-  "explained.tdh.wallets.hwk.setupBody": "Las herramientas de consolidación de 6529.io y sus textos: coste, orden y managers; que los perfiles de las wallets se fusionan para siempre y el de mayor CIC conserva su nombre; y que una wallet de otra consolidación la abandona."
+  "explained.tdh.wallets.hwk.setupBody": "Las herramientas de consolidación de 6529.io y sus textos: coste, orden y managers; que los perfiles de las wallets se fusionan para siempre y el de la valoración NIC más alta conserva su nombre; y que una wallet de otra consolidación la abandona.",
+  "explained.tdh.wallets.setupWarn": "Tus perfiles de 6529.io se fusionan para siempre: lee primero {before}."
 }

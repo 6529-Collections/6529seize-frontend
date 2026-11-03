@@ -63,7 +63,11 @@ const STEPS: readonly Step[] = [
     id: "eligible",
     href: "#step-3",
     sections: "§5.1",
-    rule: (n) => `firstMint ≤ T − ${n(R.eligibility_min_age_s)}`,
+    rule: (n) =>
+      [
+        `Memes, Gradients: firstMint ≤ T − ${n(R.eligibility_min_age_s)}`,
+        "NextGen:          minted at or before B",
+      ].join("\n"),
   },
   {
     id: "editions",
@@ -160,6 +164,14 @@ const STEPS: readonly Step[] = [
       ].join("\n"),
   },
   {
+    // P26 §8.6: derived data, not part of §9's output, but the rate behind
+    // the overview's "tomorrow's result adds", so the calculation is whole.
+    id: "dailyRate",
+    href: "/network/tdh/specification#s8-6",
+    sections: "§8.6",
+    rule: () => "rate_e4 = beta × Σ r over days(a) > 0, in 10⁻⁴ TDH a day",
+  },
+  {
     // P26 §9 defines the result, not its roots: their encoding and hashing
     // are P28's and P53's (§4.1, §4.2), as the rule's last line says.
     id: "output",
@@ -207,6 +219,15 @@ function traceLine(
     },
     boost: { cents: n(t.betaCents), beta: c(t.betaCents) },
     totals: { final: n(t.final) },
+    // Both tokens are held a whole day or more, so both rates count.
+    dailyRate: {
+      name: "rate_e4",
+      e4: n(t.betaCents * (t.rateCents + t.gradRateCents)),
+      rate: formatCents(
+        locale,
+        (t.betaCents * (t.rateCents + t.gradRateCents)) / 10_000
+      ),
+    },
   };
   // The base and the final are P26's notation with the trace's numbers in
   // them: code, not copy, as the rules beside them are. Beta is in cents.

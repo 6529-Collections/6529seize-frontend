@@ -406,8 +406,10 @@ describe("versions and boosts", () => {
     expect(current).toMatch(
       /1\.80 today, 2\.00 at most from seasons alone; with extra sets and Gradients, about 2\.04 today and 2\.24 at most/
     );
-    // The rename sits on the current version's own row (D137).
-    expect(current).toMatch(/renamed to it on Oct 18 \(D137\)/);
+    // The current row carries its live mark; the rename is told under In
+    // the specification, not in a table about boosts.
+    expect(current).toMatch(/Live/);
+    expect(current).not.toMatch(/renamed/);
     expect(current).toMatch(/Up to 20; 16 pay today/);
     expect(container.querySelector("#tdh-1-3")?.textContent).toMatch(
       /Mar 29, 2024 to Oct 9, 2025.*1\.55.*Up to 11/

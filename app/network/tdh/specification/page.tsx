@@ -136,19 +136,30 @@ export default async function SpecificationPage({
 
         <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-10 lg:tw-mt-12 lg:tw-grid-cols-[minmax(0,1fr)_360px]">
           <div>
+            {/* The contents are the sticky bar above; this column names
+                the three rules a reimplementation must get exact, each a
+                jump to its section, then the vectors that test them. */}
             <span className={`${EX_TEXT.label} tw-mb-3 tw-block`}>
-              {m("explained.tdh.spec.contents")}
+              {m("explained.tdh.spec.exact.label")}
             </span>
             <Contents
-              label={s("explained.tdh.spec.contents")}
+              label={s("explained.tdh.spec.exact.label")}
               items={[
-                ...SECTIONS.map(([id, title], index) => ({
-                  href: `#${id}`,
-                  no: String(index + 1),
-                  title: m(title, {
-                    count: p.v("spec.deviations.inForce"),
-                  }),
-                })),
+                {
+                  href: "#s5-2",
+                  no: "5.2",
+                  title: m("explained.tdh.spec.exact.floor"),
+                },
+                {
+                  href: "#s8-1",
+                  no: "8.1",
+                  title: m("explained.tdh.spec.exact.rate"),
+                },
+                {
+                  href: "#s8-4",
+                  no: "8.4",
+                  title: m("explained.tdh.spec.exact.final"),
+                },
                 {
                   href: "/network/tdh/implementations#vectors",
                   no: "→",
@@ -227,28 +238,26 @@ export default async function SpecificationPage({
                 size="sm"
                 refText={s("explained.tdh.spec.version.liveRule")}
               />
-              {/* How we know it runs as written: tested, a separate question;
-                  its counts and date are the daily comparison's facts. */}
-              <span data-fact="tdh.days.equal">
-                <Mark
-                  kind="tested"
-                  locale={locale}
-                  size="sm"
-                  refText={s(
-                    p.num("tdh.days.equal") !== null &&
-                      p.num("tdh.days.equal") === p.num("tdh.days.compared")
-                      ? "explained.tdh.spec.version.live"
-                      : "explained.tdh.spec.version.liveSome",
-                    {
-                      equal: p.f("tdh.days.equal"),
-                      compared: p.f("tdh.days.compared"),
-                      date: p.f("tdh.latest.date"),
-                    }
-                  )}
-                />
-              </span>
-              {/* The Live mark's limit, in the panel it qualifies. */}
-              <span className="tw-basis-full tw-text-[13px] tw-leading-5 tw-text-iron-400">
+              {/* How we know it runs as written, in words under the two
+                  marks (a block carries at most two): its counts and date
+                  are the daily comparison's facts, then the Live mark's
+                  limit. */}
+              <span
+                className="tw-basis-full tw-text-[13px] tw-leading-5 tw-text-iron-400"
+                data-fact="tdh.days.equal"
+              >
+                {s(
+                  p.num("tdh.days.equal") !== null &&
+                    p.num("tdh.days.equal") === p.num("tdh.days.compared")
+                    ? "explained.tdh.spec.version.live"
+                    : "explained.tdh.spec.version.liveSome",
+                  {
+                    equal: p.f("tdh.days.equal"),
+                    compared: p.f("tdh.days.compared"),
+                    date: p.f("tdh.latest.date"),
+                  }
+                )}
+                {". "}
                 {s("explained.tdh.spec.version.liveLimit")}
               </span>
             </div>

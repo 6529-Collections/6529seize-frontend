@@ -7,10 +7,13 @@ const FOOTER_ROW_CLASSES =
 
 export default function Footer({
   homeGallery = false,
+  lightLinks = false,
 }: {
   readonly homeGallery?: boolean;
+  /** Links in iron-400, as on the home gallery, without its spacing. */
+  readonly lightLinks?: boolean;
 }) {
-  const linkClassName = `${FOOTER_LINK_CLASSES} ${homeGallery ? "tw-text-iron-400" : "tw-text-iron-500"}`;
+  const linkClassName = `${FOOTER_LINK_CLASSES} ${homeGallery || lightLinks ? "tw-text-iron-400" : "tw-text-iron-500"}`;
   function printLink(href: string, text: string, newTab: boolean = false) {
     const target = newTab ? "_blank" : "_self";
     return (

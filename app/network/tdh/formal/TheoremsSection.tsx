@@ -96,6 +96,10 @@ function Panel({
   const { m, s, p, locale } = ctx;
   const words = key(entry.id, "theorem.{id}.words");
   const read = key(entry.id, "theorem.{id}.read");
+  // How the proof goes, in two or three lines, where the page has them:
+  // what is inducted on, which lemma does the work, where a hypothesis is
+  // used (the netting claim tells it in parts, in §02).
+  const how = key(entry.id, "theorem.{id}.how");
   const what = key(section.id, "claim.{id}.what");
   const limit = key(section.id, "claim.{id}.limit");
   const values = {
@@ -180,6 +184,14 @@ function Panel({
             {read && (
               <p className={NOTE} data-fact={section.fact.id}>
                 {m(read, values)}
+              </p>
+            )}
+            {how && (
+              <p className={NOTE} data-proof-idea="">
+                <b className="tw-font-semibold tw-text-iron-50">
+                  {s("explained.tdh.sure.theorems.how")}
+                </b>{" "}
+                {m(how, values)}
               </p>
             )}
           </>

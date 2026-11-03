@@ -31,5 +31,6 @@
   "explained.tdh.design.hwk.analysis": "Die Analyse",
   "explained.tdh.design.hwk.analysisBody": "Die erschöpfende Prüfung jeder Kandidatenregel durch 6529, gegen jede Menge von Registrierungen, die ein Angreifer mit einigen Ihrer Wallets signieren könnte. Sie wurde für die Umstellung auf vier Wallets gemacht und ist im öffentlichen Tracking-Issue des Frontends zusammengefasst ({issue}). Ihr Code ist nicht veröffentlicht, also kann nur 6529 sie wiederholen. Der festgehaltene Gruppierungscode: {backend}.",
   "explained.tdh.design.hwk.model": "Das Modell",
-  "explained.tdh.design.hwk.modelBody": "Die Gruppierung der Engine von TDH v1.4, in Ihrem Browser."
+  "explained.tdh.design.hwk.modelBody": "Die Gruppierung der Engine von TDH v1.4, in Ihrem Browser.",
+  "explained.tdh.design.ledeMark": "durch die eigene erschöpfende Prüfung von 6529, kein externes Audit; ihr Code ist unveröffentlicht, also kann nur 6529 sie wiederholen"
 }

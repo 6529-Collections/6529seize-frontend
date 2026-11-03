@@ -31,5 +31,6 @@
   "explained.tdh.design.hwk.analysis": "The analysis",
   "explained.tdh.design.hwk.analysisBody": "6529's exhaustive check of each candidate rule against every set of registrations an attacker holding some of your wallets could sign. It was made for the four-wallet change and is summarized in the frontend's public tracking issue ({issue}). Its code is not published, so only 6529 can rerun it. The grouping code it pins: {backend}.",
   "explained.tdh.design.hwk.model": "The model",
-  "explained.tdh.design.hwk.modelBody": "The TDH v1.4 engine's grouping, in your browser."
+  "explained.tdh.design.hwk.modelBody": "The TDH v1.4 engine's grouping, in your browser.",
+  "explained.tdh.design.ledeMark": "by 6529's own exhaustive check, not an outside audit; its code is unpublished, so only 6529 can rerun it"
 }

@@ -146,8 +146,9 @@ function Term({
     >
       {children}
       {/* The part's letter, on the line rather than raised, so it stays
-          inside the term's box. */}
-      <span className="tw-ml-1 tw-align-baseline tw-text-xs tw-font-bold tw-text-primary-300">
+          inside the term's box; a space, not a margin, keeps it a word
+          apart when the line is read aloud or copied. */}{" "}
+      <span className="tw-align-baseline tw-text-xs tw-font-bold tw-text-primary-300">
         {letter}
       </span>
     </a>

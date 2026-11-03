@@ -45,6 +45,9 @@ export const TERMS: readonly Term[] = [
       since: p.v("versions.current.since", "long"),
       renamed: p.v("names.renamedAt", "long"),
       version: <CodeName>{p.v("rules.version")}</CodeName>,
+      first: p.v("tdh.days.first", "long"),
+      equal: p.v("tdh.days.equal"),
+      compared: p.v("tdh.days.compared"),
       versions: (
         <Link className={EX_LINK} href="/network/tdh/historic-boosts">
           {t(DEFAULT_LOCALE, "explained.tdh.glossary.v14.versions")}

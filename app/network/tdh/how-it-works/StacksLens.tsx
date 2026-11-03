@@ -60,7 +60,8 @@ export default function StacksLens({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const model = useBreakable<{ action: Pick }>({ action: "hold" }, () => ({
+  // Opens on the question's answer: A sells one, and A's newest copy leaves.
+  const model = useBreakable<{ action: Pick }>({ action: "sell" }, () => ({
     action: "move",
   }));
   const action: StackAction = model.broken

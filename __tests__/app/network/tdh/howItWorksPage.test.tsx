@@ -76,9 +76,10 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("firstday");
-    // Guess first: the answer waits for the guess.
+    // The model opens answered, on the example arrival; Guess first is an
+    // optional prompt above it.
     expect(model).toHaveTextContent(
-      "Make your guess above, or pick when the copy arrives, to see the answer."
+      "The result dated Monday, Oct 19 counts its first whole day (28 h 55 min held). The one before found 4 h 55 min: not a whole day."
     );
     await user.click(within(model).getByRole("button", { name: "Oct 19" }));
     expect(model).toHaveTextContent(
@@ -210,6 +211,9 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("stacks");
+    // Opens on its question's answer: A sells one.
+    expect(model).toHaveTextContent("A's 10-day copy leaves");
+    await user.click(within(model).getByRole("button", { name: "Nothing" }));
     expect(model).toHaveTextContent("310 days");
     await user.click(
       within(model).getByRole("button", { name: "A sells one" })
@@ -256,14 +260,23 @@ describe("How TDH is calculated", () => {
   it("lists every step in P26's order, each linked to its model", async () => {
     await renderPage();
     const steps = document.querySelectorAll("[data-step]");
-    // From reading the logs (§3) to the output and its roots (§9).
-    expect(steps).toHaveLength(14);
+    // From reading the logs (§3) to the output and its roots (§9), the
+    // daily rate (§8.6) included.
+    expect(steps).toHaveLength(15);
     expect(steps[0]).toHaveTextContent("Reading the logs");
     expect(
-      within(steps[steps.length - 2] as HTMLElement).getByRole("link", {
+      within(steps[steps.length - 3] as HTMLElement).getByRole("link", {
         name: "Totals",
       })
     ).toHaveAttribute("href", "#part-n");
+    expect(
+      within(steps[steps.length - 2] as HTMLElement).getByRole("link", {
+        name: "Daily rate",
+      })
+    ).toHaveAttribute("href", "/network/tdh/specification#s8-6");
+    expect(
+      document.querySelector('[data-trace="dailyRate"]')?.textContent
+    ).toMatch(/rate_e4 = [\d,]+: about [\d.]+ more tomorrow/);
     expect(
       within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
         name: "The output",

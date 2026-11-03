@@ -36,7 +36,7 @@
   "explained.tdh.wallets.why.explain": "Explain my TDH zeigt, was Ihre Identität im neuesten Ergebnis gezählt bekam.",
   "explained.tdh.wallets.why.open": "Öffnen",
   "explained.tdh.wallets.rule.label": "Die Regel",
-  "explained.tdh.wallets.rule.title": "Jedes Paar ist in beide Richtungen verknüpft, und die zuletzt bestätigte Verknüpfung entscheidet, welche Wallets zuerst gruppiert werden.",
+  "explained.tdh.wallets.rule.title": "Jedes Paar ist in beide Richtungen verknüpft; die neueste Verknüpfung gruppiert zuerst.",
   "explained.tdh.wallets.rule.body": "Wallets werden eine Identität, wenn jedes Paar unter ihnen in beide Richtungen verknüpft ist. Bis zu drei Wallets gruppieren sich wie bisher. Eine vierte tritt nur bei, wenn eine Wallet mit jeder der anderen drei in beide Richtungen verknüpft ist, alle registriert ab dem {gate}.",
   "explained.tdh.wallets.lens.label": "Vier Wallets, eine Identität",
   "explained.tdh.wallets.lens.question": "Wie werden Wallets eine Identität, und wann kann eine vierte beitreten?",
@@ -44,7 +44,7 @@
   "explained.tdh.wallets.lens.three": "Drei, alle verknüpft",
   "explained.tdh.wallets.lens.missing": "Ein Paar fehlt",
   "explained.tdh.wallets.lens.oldfour": "Vier, verknüpft vor dem {date}",
-  "explained.tdh.wallets.lens.addD": "D hinzufügen",
+  "explained.tdh.wallets.lens.addD": "D Verknüpfung für Verknüpfung hinzufügen (es teilt sich)",
   "explained.tdh.wallets.lens.adding": "Eine vierte Wallet hinzufügen",
   "explained.tdh.wallets.lens.step1": "Schritt {n} · zuerst {step}",
   "explained.tdh.wallets.lens.then": "Schritt {n} · {step}",
@@ -113,5 +113,6 @@
   "explained.tdh.wallets.hwk.model": "Das Modell",
   "explained.tdh.wallets.hwk.modelBody": "Die Gruppierung der Engine von TDH v1.4, ausgeführt in Ihrem Browser; sie besteht alle {pass} Gruppierungsvektoren von P26.",
   "explained.tdh.wallets.hwk.setup": "Die geführte Einrichtung",
-  "explained.tdh.wallets.hwk.setupBody": "Die Konsolidierungswerkzeuge von 6529.io und ihre Texte: Kosten, Reihenfolge und Manager; dass die Profile der Wallets dauerhaft zusammengeführt werden und das mit dem höchsten CIC seinen Handle behält; und dass eine Wallet aus einer anderen Konsolidierung diese verlässt."
+  "explained.tdh.wallets.hwk.setupBody": "Die Konsolidierungswerkzeuge von 6529.io und ihre Texte: Kosten, Reihenfolge und Manager; dass die Profile der Wallets dauerhaft zusammengeführt werden und das mit der höchsten NIC-Bewertung seinen Handle behält; und dass eine Wallet aus einer anderen Konsolidierung diese verlässt.",
+  "explained.tdh.wallets.setupWarn": "Ihre 6529.io-Profile verschmelzen endgültig: Lesen Sie zuerst {before}."
 }

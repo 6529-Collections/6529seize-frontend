@@ -83,19 +83,21 @@ describe("the hub, first version", () => {
     expect(panel).toHaveTextContent(
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about TDH`
     );
-    // The later decisions are named, never "three later decisions".
+    // The validator theorems are told in words, the decision numbers left
+    // to How sure.
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules; ${book.num("manifest.proved.p53")} more are about the proposed validator rules, from before D144, D148 and D150. Lean proves things about rules, never a day. ${book.num("manifest.shownFalse.tdh")} counterexamples about TDH (${book.num("manifest.shownFalse")} in all) stay on record; only 6529 can rerun them today.`
+      `About a model of TDH's rules; ${book.num("manifest.proved.p53")} more are about the proposed validator rules, written before the cap changed. Lean proves things about rules, never a day. ${book.num("manifest.shownFalse.tdh")} statements about TDH shown false (${book.num("manifest.shownFalse")} in all) stay on record; only 6529 can rerun them today.`
     );
     // The proved day carries its retired rule in the same sentence, and the
     // test pair under today's rules is told beside it.
     expect(panel).toHaveTextContent("One real day, half a pair");
     expect(panel).toHaveTextContent(
-      "Program A proved Oct 11 under retired rules, and mainnet's verifier accepted it read-only; both have proved a test cycle under TDH v1.4. Nothing is on Ethereum yet (D116)."
+      "Program A proved Oct 11 under retired rules, and mainnet's verifier accepted it read-only; both have proved a test cycle under TDH v1.4. Nothing is on Ethereum yet (D128)."
     );
-    // What anyone can repeat today, and what needs private code.
+    // Who runs everything today, then what anyone can check, then what
+    // needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. 6529 runs both recomputations and 6529.io's own; recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). Your TDH is in each of those results: see yours."
+      "Today 6529 runs both recomputations and 6529.io's own. Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. Recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });

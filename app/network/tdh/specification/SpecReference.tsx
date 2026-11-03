@@ -336,7 +336,11 @@ function Section11({ ctx }: { readonly ctx: SpecContext }) {
                   },
                   {
                     key: "decision",
-                    label: s("explained.tdh.spec.s11.col.decision"),
+                    // "For the cutover" is said beside its status: not made,
+                    // as of the facts layer's last check.
+                    label: s("explained.tdh.spec.s11.col.decision", {
+                      checked: p.f("tdh.cutover.checkedAt"),
+                    }),
                   },
                 ]}
                 rows={ctx.deviations.map((item) => ({

@@ -147,29 +147,29 @@ export default async function VersionsPage({
       key: "tdh-1-4",
       id: "tdh-1-4",
       cells: {
-        version: (
-          <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+        version: m("explained.tdh.versions.name", {
+          version: p.v("versions.current.number"),
+        }),
+        // The live mark sits with the dates it qualifies, in the In effect
+        // cell; the rename is told under In the specification.
+        when: (
+          <span className="tw-flex tw-flex-col tw-items-start tw-gap-1.5">
             <span>
-              {m("explained.tdh.versions.name", {
-                version: p.v("versions.current.number"),
+              {m("explained.tdh.versions.current.when", {
+                fourWallets: p.v("versions.fourWallets"),
+                from: (
+                  <FactText
+                    fact={book.maybe("versions.current.since")}
+                    locale={locale}
+                  >
+                    {since ? day(since) : ""}
+                  </FactText>
+                ),
               })}
             </span>
             <Track maturity="live" locale={locale} size="sm" />
           </span>
         ),
-        when: m("explained.tdh.versions.current.when", {
-          fourWallets: p.v("versions.fourWallets"),
-          renamed: p.v("names.renamedAt"),
-          old: p.v("names.v10.name"),
-          from: (
-            <FactText
-              fact={book.maybe("versions.current.since")}
-              locale={locale}
-            >
-              {since ? day(since) : ""}
-            </FactText>
-          ),
-        }),
         fullSet: m("explained.tdh.versions.current.fullSet", {
           today: p.v("engine.boost.fullSet"),
           ceiling: p.v("rules.fullSetCeiling"),

@@ -54,6 +54,11 @@ function flipped(word: DecodedWord): DecodedWord {
 type WordPick = WordGroup | "b";
 
 /** P53 §4.6's encoding, one line a group, as the exact rule beside the words. */
+/** The retired rule version proof A's words were proved under, as text. */
+function ruleVersionText(value: unknown): string {
+  return typeof value === "string" ? value : "-";
+}
+
 const RULE_LINES: readonly {
   readonly text: string;
   readonly group: WordGroup | null;
@@ -493,7 +498,14 @@ export default function StatementWords({
         <StampLine
           locale={locale}
           marks={[
-            { kind: "proved", refText: fill(locale, k("words.colA")) },
+            // Proof A's words are of a day under retired rules: the stamp
+            // says so, so the model alone does not read as today's evidence.
+            {
+              kind: "proved",
+              refText: fill(locale, k("words.stampA"), {
+                version: ruleVersionText(facts.raw("proofs.day.ruleVersion")),
+              }),
+            },
             { kind: "tested", refText: fill(locale, k("words.colB")) },
           ]}
           // The flipped bit is made up for the model: Simulated, as the

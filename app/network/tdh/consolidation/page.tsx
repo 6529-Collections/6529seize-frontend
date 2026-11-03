@@ -260,6 +260,16 @@ export default async function TdhYourWalletsPage({
               {wt(locale, "explained.tdh.wallets.add.label")}
             </a>
           </div>
+          {/* The one consequence that cannot be undone, beside the button. */}
+          <p className={`tw-m-0 tw-mt-3 ${EX_TEXT.cap}`} data-setup-warn="">
+            {rich(locale, "explained.tdh.wallets.setupWarn", {
+              before: (
+                <a className={EX_LINK} href="#before">
+                  {wt(locale, "explained.tdh.wallets.before.label")}
+                </a>
+              ),
+            })}
+          </p>
         </PageHead>
 
         <Section id="why">

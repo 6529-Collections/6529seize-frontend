@@ -337,7 +337,6 @@ export default async function ImplementationsPage({
                           kind="proved"
                           locale={locale}
                           size="sm"
-                          label={s("explained.tdh.impl.lean.provedMark")}
                           refText={s("explained.tdh.impl.lean.proved", {
                             tdh: p.f("manifest.proved.tdh"),
                             all: p.f("manifest.proved"),

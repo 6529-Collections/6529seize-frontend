@@ -385,7 +385,7 @@ describe("the overview", () => {
       within(table).getByRole("rowheader", { name: "next 900" })
     ).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveAccessibleName(
-      "All TDH as one area, split by rank: the top identities' share of the total, and their share of the identities."
+      "All TDH added up, split by rank: the top identities' share of the total, and their share of the identities."
     );
   });
 });
@@ -402,7 +402,7 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, in SP1: the day of Oct 11, under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it. A proof under retired rules does not count toward today's evidence."
+      "Proof A, in SP1: the day of Oct 11, under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepted it read-only at block 26,206,630. A proof under retired rules does not count toward today's evidence."
     );
     expect(zk).toHaveTextContent(
       "Proof B, in RISC Zero, from code written apart: no mainnet day yet; under TDH v1.4, one test cycle."

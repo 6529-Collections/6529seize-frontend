@@ -116,48 +116,55 @@ function Layers({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <ol
-      className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-2 tw-p-0"
-      aria-label={fill(locale, k("guard.layers"))}
-      data-layers=""
-    >
-      {LAYERS.map((layer, index) => {
-        const state = states[layer];
-        return (
-          <li
-            key={layer}
-            className={`tw-relative tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-rounded-xl tw-border tw-px-4 tw-py-3 xl:tw-grid-cols-[minmax(0,1fr)_auto] ${BOX[state]} ${EX_MOTION.model}`}
-            data-layer={layer}
-            data-state={state}
-          >
-            <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-3">
-              <span
-                className="tw-w-4 tw-flex-none tw-text-[13px] tw-font-semibold tw-text-iron-400"
-                aria-hidden="true"
-              >
-                {index + 1}
-              </span>
-              <span className="tw-min-w-0">
-                <b
-                  className={`tw-block tw-text-[15px] tw-font-semibold tw-leading-5 ${state === "unreached" ? "tw-text-iron-400" : "tw-text-iron-50"}`}
+    <>
+      {/* The layers read top to bottom as guarantees; the contract's own
+        order (outputs, then proofs) is said, so the two do not clash. */}
+      <p className="tw-m-0 tw-mt-5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        {fill(locale, k("guard.order"))}
+      </p>
+      <ol
+        className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-gap-2 tw-p-0"
+        aria-label={fill(locale, k("guard.layers"))}
+        data-layers=""
+      >
+        {LAYERS.map((layer, index) => {
+          const state = states[layer];
+          return (
+            <li
+              key={layer}
+              className={`tw-relative tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-rounded-xl tw-border tw-px-4 tw-py-3 xl:tw-grid-cols-[minmax(0,1fr)_auto] ${BOX[state]} ${EX_MOTION.model}`}
+              data-layer={layer}
+              data-state={state}
+            >
+              <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-3">
+                <span
+                  className="tw-w-4 tw-flex-none tw-text-[13px] tw-font-semibold tw-text-iron-400"
+                  aria-hidden="true"
                 >
-                  {fill(locale, k(LAYER_TITLE[layer]))}
-                </b>
-                <span className="tw-block tw-text-[13px] tw-leading-[18px] tw-text-iron-400">
-                  {fill(locale, k(LAYER_SUB[layer]))}
+                  {index + 1}
+                </span>
+                <span className="tw-min-w-0">
+                  <b
+                    className={`tw-block tw-text-[15px] tw-font-semibold tw-leading-5 ${state === "unreached" ? "tw-text-iron-400" : "tw-text-iron-50"}`}
+                  >
+                    {fill(locale, k(LAYER_TITLE[layer]))}
+                  </b>
+                  <span className="tw-block tw-text-[13px] tw-leading-[18px] tw-text-iron-400">
+                    {fill(locale, k(LAYER_SUB[layer]))}
+                  </span>
                 </span>
               </span>
-            </span>
-            <span
-              className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-pl-7 tw-text-[13px] tw-font-semibold xl:tw-pl-0 ${STATE_TONE[state]}`}
-            >
-              <StateGlyph state={state} evidence={evidence} />
-              {fill(locale, k(STATE_WORD[state]))}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+              <span
+                className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-pl-7 tw-text-[13px] tw-font-semibold xl:tw-pl-0 ${STATE_TONE[state]}`}
+              >
+                <StateGlyph state={state} evidence={evidence} />
+                {fill(locale, k(STATE_WORD[state]))}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </>
   );
 }
 

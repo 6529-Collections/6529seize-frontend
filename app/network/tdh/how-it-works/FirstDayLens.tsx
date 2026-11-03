@@ -86,14 +86,15 @@ export default function FirstDayLens({
         : null,
     [arrived, day]
   );
-  // Guess first: the model opens on the case the guess asks about, drawn
-  // neutral, with no arrival picked and no snapshot lit, so nothing on the
-  // stage gives the answer away. A guess, or a pick, shows it.
+  // The model opens on the facts layer's example arrival, answered, as
+  // every model opens on a meaningful case (SCORECARD.md); Guess first
+  // stays above it as an optional prompt about the minute before midnight,
+  // and a guess moves the stage to that case.
   const model = useBreakable<{ arrival: ArrivalKey; sold: boolean }>(
-    { arrival: "beforeMidnight", sold: false },
+    { arrival: "example", sold: false },
     (state) => ({ ...state, sold: true })
   );
-  const [shown, setShown] = useState(false);
+  const [shown, setShown] = useState(true);
   if (!world) {
     return null;
   }

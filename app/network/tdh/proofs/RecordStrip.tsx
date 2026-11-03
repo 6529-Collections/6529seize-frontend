@@ -75,6 +75,7 @@ export default function RecordStrip({
       body: rich(locale, k("record.v14.body"), {
         cycle: facts.print("proofs.pairV14.cycle"),
         real: facts.cycleDate("proofs.pairV14.cycle"),
+        block: facts.print("proofs.pairV14.ethCallBlock"),
       }),
     },
     {

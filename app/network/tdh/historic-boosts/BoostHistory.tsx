@@ -29,7 +29,8 @@ function stepName(step: BoostStep): string {
   return step.label ?? "v" + step.version;
 }
 
-const HEIGHT = 260;
+// A plot about 260 px tall, so the small steps between versions read.
+const HEIGHT = 340;
 // Room on the left for the value axis, and under the line for each
 // version's name at its start, then the years.
 const PAD = { left: 44, right: 8, top: 28, bottom: 52 } as const;
