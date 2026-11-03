@@ -90,12 +90,16 @@ function Header({
         {/* The lede follows the title at every width: it is the page's one
           plain definition of a zero-knowledge proof, so it comes before the
           verdict's terms on a phone too. */}
-        <p
-          className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px] lg:tw-mt-0`}
-          data-ex-lede=""
-        >
-          {rich(locale, k("lede"))}
-        </p>
+        <div className="tw-mt-4 md:tw-mt-[22px] lg:tw-mt-0">
+          <p className={EX_TEXT.lede} data-ex-lede="">
+            {rich(locale, k("lede"))}
+          </p>
+          {/* What a proof is for, and what it still trusts, under the
+              definition, so the lede stays one sentence. */}
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-3 tw-max-w-[700px]`}>
+            {rich(locale, k("ledeMore"))}
+          </p>
+        </div>
       </div>
     </header>
   );
@@ -256,9 +260,6 @@ function RealVerdict({
               {facts.print("proofs.day.ruleVersion")}
             </span>
           ),
-          hours: facts.print("site.proofA.provedHours"),
-          minutes: facts.print("site.proofA.provedMinutes"),
-          seconds: facts.print("proofs.day.nativeSeconds"),
           block: facts.block("site.proofA.ethCallBlock"),
         })
       )}
@@ -412,6 +413,24 @@ export default function ProofsHero({
           </WhenSimulated>
         </SimulationSwitch>
       </div>
+      {/* The day in two sentences, for a reader who reads no further:
+          what was read, what proving it took, what was accepted, and what
+          the second proof has not done yet. */}
+      <p
+        className={`${EX_TEXT.body} tw-m-0 tw-mt-6 tw-max-w-[660px]`}
+        data-in-short=""
+      >
+        <b className="tw-font-semibold tw-text-iron-50">
+          {rich(locale, k("short.label"))}
+        </b>{" "}
+        {rich(locale, k("short.body"), {
+          bytes: facts.print("proofs.day.inputBytes"),
+          hours: facts.print("site.proofA.provedHours"),
+          minutes: facts.print("site.proofA.provedMinutes"),
+          seconds: facts.print("proofs.day.nativeSeconds"),
+          proofBytes: facts.print("proofs.pair.proofBytesA"),
+        })}
+      </p>
       {/* Who is who, before the figure: the verdict above already names
           program A, program B and their proof systems. */}
       <CastStrip locale={locale} />

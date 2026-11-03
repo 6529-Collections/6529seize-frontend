@@ -29,9 +29,15 @@ const READING_SHARE = 0.35;
 export default function PageContents({
   items,
   locale,
+  railFromWide = false,
 }: {
   readonly items: readonly ContentsEntry[];
   readonly locale: SupportedLocale;
+  /**
+   * The page shows its sections as a rail in its margin from 1,400 px up
+   * (the specification); the bar then gives way to it there.
+   */
+  readonly railFromWide?: boolean;
 }) {
   const [active, setActive] = useState<string | null>(null);
   const [shown, setShown] = useState(false);
@@ -107,7 +113,7 @@ export default function PageContents({
     // the app scrolls the window from inside its own frame, where sticky
     // does not hold, so the bar is fixed to the top of the screen.
     <div
-      className="tw-z-30 tw-h-0 lg:tw-sticky lg:tw-top-0"
+      className={`tw-z-30 tw-h-0 lg:tw-sticky lg:tw-top-0 ${railFromWide ? "min-[1400px]:tw-hidden" : ""}`}
       data-page-contents=""
       data-ex-nocopy=""
     >

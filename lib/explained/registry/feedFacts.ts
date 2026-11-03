@@ -198,6 +198,18 @@ export const FEED_FACTS = {
     (inputs) => rust(inputs)?.wallets,
     "wallets"
   ),
+  // The wallet root's leaves: one per wallet record whose identity is not a
+  // sink (P28 §4.3, P53 §4.1 step 3). The feed's count holds every record,
+  // the sinks' included. A sink is never consolidated, so each registry sink
+  // is an identity of one wallet (P26 §8.5), and it keeps its record, as a
+  // sink is credited and never debited (P26 §3.4): the leaves are the count
+  // less one record per sink.
+  "tdh.latest.walletLeaves": latestCount((inputs) => {
+    const wallets = rust(inputs)?.wallets;
+    return wallets === undefined
+      ? undefined
+      : wallets - inputs.engine.registry.sinks.length;
+  }, "wallets"),
   "tdh.latest.agree.live.identities.equal": latestCount(
     (inputs) => latest(inputs)?.agreement.rustVsLive?.identitiesEqual,
     "identities"

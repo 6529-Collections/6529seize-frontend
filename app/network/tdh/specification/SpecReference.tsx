@@ -3,7 +3,7 @@ import PhoneMore from "@/components/explained/layout/PhoneMore";
 import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import type { ReactNode } from "react";
 import Mark from "@/components/explained/marks/Mark";
-import { EX_LINK } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LINK } from "@/components/explained/tokens";
 import { REGISTRY_FIELDS } from "@/components/explained/engine/registry";
 import {
   Caption,
@@ -450,7 +450,15 @@ function Section13({ ctx }: { readonly ctx: SpecContext }) {
       </Prose>
       <Prose>{m("explained.tdh.spec.s13.invalid")}</Prose>
       <div id="evidence" className="tw-mt-8 tw-scroll-mt-24">
+        {/* Numbered as every other subhead is, with its section. */}
         <h3 className="tw-m-0 tw-mb-2.5 tw-text-[21px] tw-font-semibold tw-leading-7 tw-text-iron-50">
+          <a
+            className={`tw-mr-1 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 hover:tw-underline ${EX_FOCUS}`}
+            href="#evidence"
+          >
+            §13
+          </a>
+          {" "}
           {m("explained.tdh.spec.evidence.title")}
         </h3>
         <p

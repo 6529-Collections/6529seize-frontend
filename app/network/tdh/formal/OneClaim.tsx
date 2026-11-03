@@ -4,7 +4,8 @@ import {
   type ClaimPart,
   type ClaimSpan,
 } from "@/components/explained/evidence/claims";
-import { EX_LAYOUT } from "@/components/explained/tokens";
+import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { Glyph } from "@/components/explained/marks/glyphs";
 import { CodeName, EdSection } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext, SureKey } from "./sureShared";
@@ -24,90 +25,182 @@ const SKETCH: readonly {
   readonly name: string;
   readonly key: SureKey;
   readonly short: SureKey;
+  /** The group it falls in, its eyebrow on a phone. */
+  readonly group: SureKey;
 }[] = [
   {
     name: "netPairs_eq_of_net",
     key: "explained.tdh.sure.sketch.pairs",
     short: "explained.tdh.sure.sketch.pairsShort",
+    group: "explained.tdh.sure.sketch.groupOne",
   },
   {
     name: "net_invariance",
     key: "explained.tdh.sure.sketch.one",
     short: "explained.tdh.sure.sketch.oneShort",
+    group: "explained.tdh.sure.sketch.groupOne",
   },
   {
     name: "replay_invariance",
     key: "explained.tdh.sure.sketch.all",
     short: "explained.tdh.sure.sketch.allShort",
+    group: "explained.tdh.sure.sketch.groupInduction",
   },
   {
     name: "replayHoldings_invariance",
     key: "explained.tdh.sure.sketch.cycle",
     short: "explained.tdh.sure.sketch.cycleShort",
+    group: "explained.tdh.sure.sketch.groupCycle",
   },
 ];
 
 /**
- * The argument as a chain of four theorems, each the next one's step:
- * pairs, one transaction, the replay, a cycle. Open on the page, since how
- * the proof goes is what this section is for.
+ * The argument drawn as a dependency chain: four theorems, each the next
+ * one's step (pairs, one transaction, the replay, whole sequences), the
+ * groups they fall in above them, the frame lemmas under every step, and
+ * where the chain stops at both ends. Its heading sits on the page's
+ * label and text grid; the chain runs the section's full width.
  */
+const GROUPS: readonly {
+  readonly key: SureKey;
+  readonly span: string;
+}[] = [
+  { key: "explained.tdh.sure.sketch.groupOne", span: "lg:tw-col-span-2" },
+  { key: "explained.tdh.sure.sketch.groupInduction", span: "" },
+  { key: "explained.tdh.sure.sketch.groupCycle", span: "" },
+];
+
 function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
+  const last = SKETCH.length - 1;
   return (
-    <figure className="tw-m-0 tw-mt-10" data-fig="proof-chain">
-      {/* A statement row: the heading and where the chain stops on the
-          left, how it goes on the right, the four theorems under both. */}
-      <figcaption className="lg:tw-grid lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-items-start lg:tw-gap-x-12">
-        <div>
-          <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
+    <figure className="tw-m-0 tw-mt-12 md:tw-mt-14" data-fig="proof-chain">
+      <figcaption className={EX_LAYOUT.ed}>
+        <span aria-hidden="true" className="max-lg:tw-hidden" />
+        <div className={`${EX_LAYOUT.edWide} tw-min-w-0`}>
+          <h3 className={`${EX_TEXT.h3} tw-mb-2.5`}>
             {m("explained.tdh.sure.sketch.summary")}
           </h3>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-600 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-400 max-lg:tw-hidden">
-            {m("explained.tdh.sure.sketch.close")}
+          <p className={`${EX_LAYOUT.paragraph} tw-text-iron-300`}>
+            {m("explained.tdh.sure.sketch.intro")}
           </p>
         </div>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
-          {m("explained.tdh.sure.sketch.intro")}
-        </p>
       </figcaption>
-      <ol className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 lg:tw-grid-cols-4 lg:tw-gap-0">
-        {SKETCH.map((step, index) => (
-          <li
-            key={step.name}
-            className="tw-relative tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-4 lg:tw-mr-7 lg:last:tw-mr-0"
-          >
-            <span className="tw-flex tw-items-baseline tw-gap-2">
-              <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300">
-                {index + 1}
-              </span>
-              <b className="tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-50">
-                {m(step.short)}
-              </b>
-            </span>
-            <code className="tw-mt-2 tw-block tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-300 [overflow-wrap:anywhere]">
-              {step.name}
-            </code>
-            <span className="tw-mt-2 tw-text-[14px] tw-leading-[21px] tw-text-iron-300">
-              {m(step.key)}
-            </span>
-            {index < SKETCH.length - 1 && (
+      <div className="tw-mt-7" data-proof-chain="">
+        {/* The groups, as brackets over the steps they hold. */}
+        <ol
+          className="tw-m-0 tw-hidden tw-list-none tw-grid-cols-4 tw-gap-x-7 tw-p-0 tw-pt-2 lg:tw-grid"
+          aria-hidden="true"
+        >
+          {GROUPS.map((group) => (
+            <li
+              key={group.key}
+              className={`${group.span} tw-relative tw-h-4 tw-border-0 tw-border-x tw-border-t tw-border-solid tw-border-iron-700`}
+            >
+              {/* The group's name sits on its bracket's line. */}
               <span
-                aria-hidden="true"
-                // The arrow sits in the gap between two steps, by design
-                // outside the step it follows.
-                data-tdh-check-ignore="text-escapes-frame"
-                className="tw-absolute tw-hidden tw-text-lg tw-text-iron-400 lg:tw-right-[-22px] lg:tw-top-1/2 lg:tw-block lg:-tw-translate-y-1/2"
+                className={`${EX_TEXT.label} tw-absolute -tw-top-2 tw-left-3 tw-whitespace-nowrap tw-bg-[#0D0D0F] tw-px-1.5`}
               >
-                →
+                {m(group.key)}
               </span>
-            )}
-          </li>
-        ))}
-      </ol>
-      {/* On a phone the limit follows the chain it closes. */}
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400 lg:tw-hidden">
-        {m("explained.tdh.sure.sketch.close")}
-      </p>
+            </li>
+          ))}
+        </ol>
+        <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-y-7 tw-p-0 lg:tw-mt-2 lg:tw-grid-cols-4 lg:tw-gap-x-7">
+          {SKETCH.map((step, index) => (
+            <li
+              key={step.name}
+              className={`tw-relative tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-px-4 tw-pb-4 tw-pt-3.5 ${index === last ? "tw-border-green/60 tw-bg-green/[0.06]" : "tw-border-iron-800 tw-bg-iron-950"}`}
+              data-step={index + 1}
+            >
+              <span
+                className={`${EX_TEXT.label} tw-mb-2 tw-block lg:tw-hidden`}
+              >
+                {m(step.group)}
+              </span>
+              <span className="tw-flex tw-items-baseline tw-justify-between tw-gap-2">
+                <span className="tw-flex tw-items-baseline tw-gap-2">
+                  <span className="tw-text-[15px] tw-font-semibold tw-tabular-nums tw-text-primary-300">
+                    {index + 1}
+                  </span>
+                  <b className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+                    {m(step.short)}
+                  </b>
+                </span>
+              </span>
+              <code className="tw-mt-1.5 tw-block tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere]">
+                {step.name}
+              </code>
+              <span className="tw-mt-2.5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+                {m(step.key)}
+              </span>
+              {/* The last step is the claim the section is about. */}
+              {index === last && (
+                <span className="tw-mt-auto tw-pt-3 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-green">
+                  {m("explained.tdh.sure.sketch.claimTag")}
+                </span>
+              )}
+              {/* The arrow to the next step: across the gap on a desktop,
+                  down it on a phone. */}
+              {index < last && (
+                <span
+                  aria-hidden="true"
+                  data-tdh-check-ignore="text-escapes-frame"
+                  className="tw-absolute tw-left-1/2 tw-top-full tw-flex tw-h-7 tw-w-px -tw-translate-x-1/2 tw-items-end tw-justify-center tw-bg-iron-600 lg:tw-left-full lg:tw-top-1/2 lg:tw-h-px lg:tw-w-7 lg:tw-translate-x-0 lg:tw-items-center lg:tw-justify-end"
+                >
+                  <span className="tw-block tw-size-0 tw-translate-y-px tw-border-x-[5px] tw-border-b-0 tw-border-t-[6px] tw-border-solid tw-border-x-transparent tw-border-t-iron-400 lg:tw-translate-x-px lg:tw-translate-y-0 lg:tw-border-y-[5px] lg:tw-border-l-[6px] lg:tw-border-r-0 lg:tw-border-y-transparent lg:tw-border-l-iron-400" />
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+        {/* The frame lemmas, under every step: one rail with a tick up to
+            each step it holds. */}
+        <div className="tw-mt-5 lg:tw-mt-0" data-proof-frame="">
+          <div
+            className="tw-relative tw-hidden tw-h-5 lg:tw-grid lg:tw-grid-cols-4 lg:tw-gap-x-7"
+            aria-hidden="true"
+          >
+            {SKETCH.map((step) => (
+              <span
+                key={step.name}
+                className="tw-mx-auto tw-block tw-h-full tw-w-px tw-bg-iron-700"
+              />
+            ))}
+            <span className="tw-absolute tw-inset-x-[calc(12.5%_-_10.5px)] tw-bottom-0 tw-h-px tw-bg-iron-700" />
+          </div>
+          <p className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-text-center">
+            <b className="tw-font-semibold tw-text-iron-50">
+              {m("explained.tdh.sure.sketch.frameLead")}
+            </b>{" "}
+            {m("explained.tdh.sure.sketch.frame")}
+          </p>
+        </div>
+        {/* Where the chain stops, at both ends, behind a dashed line as on
+            the page's first figure. */}
+        <div
+          className="tw-mt-4 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-600 tw-p-4 md:tw-p-5"
+          data-proof-stops=""
+        >
+          <span className="tw-flex tw-items-center tw-gap-2 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+            <Glyph kind="notGuaranteed" className="tw-size-3.5" />
+            {m("explained.tdh.sure.sketch.stopsTitle")}
+          </span>
+          <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-7 tw-gap-y-3 tw-p-0 lg:tw-grid-cols-2">
+            <li className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.sure.sketch.stopBeforeLead")}
+              </b>{" "}
+              {m("explained.tdh.sure.sketch.stopBefore")}
+            </li>
+            <li className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.sure.sketch.stopAfterLead")}
+              </b>{" "}
+              {m("explained.tdh.sure.sketch.stopAfter")}
+            </li>
+          </ul>
+        </div>
+      </div>
     </figure>
   );
 }

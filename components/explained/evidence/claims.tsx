@@ -202,11 +202,23 @@ export function ClaimTable({
     readonly less: ReactNode;
   };
 }) {
+  // On a phone each count is a line of words ("16 proved"); from a
+  // desktop up the counts are three right-aligned columns of numerals under
+  // one heading row, the words kept for screen readers.
   const count = (
     entry: FactEntry | null | undefined,
     key: "proved" | "shownFalse" | "limits"
   ) => {
-    if (!entry || !isFact(entry) || entry.value === 0) return null;
+    if (!entry || !isFact(entry) || entry.value === 0) {
+      return (
+        <span
+          aria-hidden="true"
+          className="tw-hidden tw-text-iron-600 lg:tw-block"
+        >
+          –
+        </span>
+      );
+    }
     const one = key === "limits" && entry.value === 1;
     let messageKey: Parameters<typeof kt>[1] =
       "explained.kit.claimTable.proved";
@@ -218,44 +230,67 @@ export function ClaimTable({
         : "explained.kit.claimTable.limits";
     return (
       <span className="tw-block" data-fact={entry.id}>
-        {kt(locale, messageKey, { count: fmt(entry, locale) })}
+        <span className="lg:tw-sr-only">
+          {kt(locale, messageKey, { count: fmt(entry, locale) })}
+        </span>
+        <span
+          aria-hidden="true"
+          className="tw-hidden tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 lg:tw-block"
+        >
+          {fmt(entry, locale)}
+        </span>
       </span>
     );
   };
+  const columns = "lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_204px]";
   const folds = phoneFold !== undefined && rows.length > phoneFold.limit;
   const list = (
-    <ol
-      className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0"
-      data-claims=""
-    >
-      {rows.map((row, index) => (
-        <li
-          key={row.what}
-          className={`tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_150px] lg:tw-gap-[22px] ${folds && index >= (phoneFold?.limit ?? 0) ? PHONE_MORE_HIDDEN : ""}`}
-        >
-          <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
-            {index + 1}
-          </span>
-          <span className="tw-text-[17px] tw-font-semibold tw-leading-[25px] tw-text-iron-50">
-            {row.what}
-            <span className="tw-mt-1.5 tw-block tw-text-base tw-font-normal tw-leading-6 tw-text-iron-300">
-              {row.detail}
+    <>
+      {/* The counts' heading row, from a desktop up only: on a phone each
+        count says its own word. */}
+      <div
+        aria-hidden="true"
+        className={`tw-hidden tw-gap-[22px] tw-pb-2 lg:tw-grid ${columns}`}
+      >
+        <span className="tw-col-start-4 tw-grid tw-grid-cols-3 tw-items-end tw-gap-x-4 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] tw-text-iron-400">
+          <span>{kt(locale, "explained.kit.claimTable.colProved")}</span>
+          <span>{kt(locale, "explained.kit.claimTable.colShownFalse")}</span>
+          <span>{kt(locale, "explained.kit.claimTable.colLimits")}</span>
+        </span>
+      </div>
+      <ol
+        className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0"
+        data-claims=""
+      >
+        {rows.map((row, index) => (
+          <li
+            key={row.what}
+            className={`tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 ${columns} lg:tw-gap-[22px] ${folds && index >= phoneFold.limit ? PHONE_MORE_HIDDEN : ""}`}
+          >
+            <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
+              {index + 1}
             </span>
-          </span>
-          <span className="tw-col-start-2 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-col-start-3">
-            <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
-              {kt(locale, "explained.kit.claimTable.limit")}
+            <span className="tw-text-[17px] tw-font-semibold tw-leading-[25px] tw-text-iron-50">
+              {row.what}
+              <span className="tw-mt-1.5 tw-block tw-text-base tw-font-normal tw-leading-[26px] tw-text-iron-300">
+                {row.detail}
+              </span>
             </span>
-            {row.limit}
-          </span>
-          <span className="tw-col-start-2 tw-text-sm tw-leading-[21px] tw-text-iron-400 lg:tw-col-start-4">
-            {count(row.counts.proved, "proved")}
-            {count(row.counts.shownFalse, "shownFalse")}
-            {count(row.counts.limits, "limits")}
-          </span>
-        </li>
-      ))}
-    </ol>
+            <span className="tw-col-start-2 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-col-start-3">
+              <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+                {kt(locale, "explained.kit.claimTable.limit")}
+              </span>
+              {row.limit}
+            </span>
+            <span className="tw-col-start-2 tw-text-sm tw-leading-[21px] tw-text-iron-400 lg:tw-col-start-4 lg:tw-grid lg:tw-grid-cols-3 lg:tw-content-start lg:tw-gap-x-4 lg:tw-text-right lg:tw-tabular-nums">
+              {count(row.counts.proved, "proved")}
+              {count(row.counts.shownFalse, "shownFalse")}
+              {count(row.counts.limits, "limits")}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </>
   );
   if (!folds || phoneFold === undefined) return list;
   return (

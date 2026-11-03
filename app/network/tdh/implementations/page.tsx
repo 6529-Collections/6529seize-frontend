@@ -265,24 +265,18 @@ export default async function ImplementationsPage({
                         : m("explained.tdh.impl.a.runsLate", {
                             checked: p.v("tdh.cutover.checkedAt"),
                           }),
+                    // One mark a row; what each covers is the note under
+                    // the table, so the column scans as marks alone.
                     proved: programsFact ? (
                       // One of the day's two proofs: the half-pair mark, as
                       // on the overview and the proofs page.
-                      <span className="tw-inline-flex tw-flex-wrap tw-items-start tw-gap-x-2 tw-gap-y-1">
-                        <HalfPair a b={false} locale={locale} />
-                        <span className={EX_TEXT.cap}>
-                          {m("explained.tdh.impl.a.proofRef", {
-                            day: p.v("proofs.day.date"),
-                          })}
-                        </span>
-                      </span>
+                      <HalfPair a b={false} locale={locale} />
                     ) : (
                       <Mark
                         kind="notYet"
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.a.proof")}
-                        refText={s("explained.tdh.impl.a.proofRefNoDay")}
                       />
                     ),
                   },
@@ -299,7 +293,6 @@ export default async function ImplementationsPage({
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.b.proof")}
-                        refText={s("explained.tdh.impl.b.proofRef")}
                       />
                     ),
                   },
@@ -333,22 +326,9 @@ export default async function ImplementationsPage({
                       random: p.v("programs.randomPerChange"),
                     }),
                     // The kit's Proved mark, at the size of the column's
-                    // other marks, its counts the manifest's facts.
-                    proved: (
-                      <span data-fact="manifest.proved manifest.proved.tdh">
-                        {/* A model is proved about, not proved correct as a
-                            program: the mark's word says so. */}
-                        <Mark
-                          kind="proved"
-                          locale={locale}
-                          size="sm"
-                          refText={s("explained.tdh.impl.lean.proved", {
-                            tdh: p.f("manifest.proved.tdh"),
-                            all: p.f("manifest.proved"),
-                          })}
-                        />
-                      </span>
-                    ),
+                    // other marks; what is proved, and about what, is the
+                    // note under the table.
+                    proved: <Mark kind="proved" locale={locale} size="sm" />,
                   },
                 },
                 {
@@ -363,9 +343,30 @@ export default async function ImplementationsPage({
               ]}
             />
           </div>
-          {/* Two short notes, each with its lead, in place of one grey
-              block: the run times, then where these facts come from. */}
-          <div className="tw-mt-5 tw-grid tw-max-w-[560px] tw-gap-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {/* Three short notes, each with its lead: what each mark in the
+              last column covers, the run times, and where these facts come
+              from. Side by side from a desktop up, so the width under the
+              table is used; stacked, they keep a paragraph's gap. */}
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-[18px] tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-grid-cols-3">
+            <p className="tw-m-0">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.impl.cast.noteProvedLead")}
+              </b>{" "}
+              {programsFact
+                ? m("explained.tdh.impl.cast.noteProved", {
+                    day: p.v("proofs.day.date"),
+                    tdh: p.v("manifest.proved.tdh"),
+                    all: p.v("manifest.proved"),
+                  })
+                : m("explained.tdh.impl.cast.noteProvedNoDay", {
+                    tdh: p.v("manifest.proved.tdh"),
+                    all: p.v("manifest.proved"),
+                  })}{" "}
+              {m("explained.tdh.impl.lean.runsNote", {
+                day: p.v("model.replayDay"),
+                all: p.v("model.randomInputs"),
+              })}
+            </p>
             <p className="tw-m-0">
               <b className="tw-font-semibold tw-text-iron-50">
                 {m("explained.tdh.impl.cast.noteTimesLead")}
@@ -381,11 +382,7 @@ export default async function ImplementationsPage({
               <b className="tw-font-semibold tw-text-iron-50">
                 {m("explained.tdh.impl.cast.noteSourceLead")}
               </b>{" "}
-              {m("explained.tdh.impl.cast.noteSource")}{" "}
-              {m("explained.tdh.impl.lean.runsNote", {
-                day: p.v("model.replayDay"),
-                all: p.v("model.randomInputs"),
-              })}
+              {m("explained.tdh.impl.cast.noteSource")}
             </p>
           </div>
         </div>

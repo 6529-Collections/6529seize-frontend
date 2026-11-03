@@ -381,12 +381,21 @@ function rootRow(
         ? {
             note: (
               <ReceiptNote>
-                {pt(
-                  locale,
-                  id === "walletRoot"
-                    ? "explained.tdh.day.row.walletRootNote"
-                    : "explained.tdh.day.row.historyRootNote"
-                )}
+                {id === "walletRoot"
+                  ? // Its leaves leave out the burn addresses' records,
+                    // which the day's wallet count includes (P28 §4.3).
+                    rich(locale, "explained.tdh.day.row.walletRootNote", {
+                      leaves: (
+                        <FactValue
+                          fact={day.fact("walletLeaves")}
+                          locale={locale}
+                        />
+                      ),
+                      wallets: (
+                        <FactValue fact={day.fact("wallets")} locale={locale} />
+                      ),
+                    })
+                  : pt(locale, "explained.tdh.day.row.historyRootNote")}
               </ReceiptNote>
             ),
           }

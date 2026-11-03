@@ -126,7 +126,7 @@ function Panel({
           })}
         </span>
         <p
-          className="tw-m-0 tw-mt-3 tw-text-[17px] tw-leading-[28px] tw-text-iron-50"
+          className="tw-m-0 tw-mt-3 tw-text-base tw-leading-[26px] tw-text-iron-50"
           data-fact={section.fact.id}
         >
           {words ? m(words, values) : entry.statement}

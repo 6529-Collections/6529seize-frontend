@@ -266,6 +266,15 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
           id="s3-2-values"
           className={`${EX_TEXT.h3} tw-mb-2.5 tw-mt-8 tw-scroll-mt-24`}
         >
+          {/* Numbered as its siblings are, with the section P26 states it
+              in. */}
+          <a
+            className={`tw-mr-1 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 hover:tw-underline ${EX_FOCUS}`}
+            href="#s3-2-values"
+          >
+            §3.2
+          </a>
+          {" "}
           {m("explained.tdh.spec.s3-5.title")}
         </h4>
         <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>

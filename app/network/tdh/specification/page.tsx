@@ -25,6 +25,7 @@ import {
   FactsList,
   PageHead,
 } from "@/components/explained/reference/parts";
+import SpecRail from "./SpecRail";
 import SpecificationAnchors from "./SpecificationAnchors";
 import SpecReference from "./SpecReference";
 import SpecRules from "./SpecRules";
@@ -127,6 +128,7 @@ export default async function SpecificationPage({
         />
         <PageContents
           locale={locale}
+          railFromWide
           items={SECTIONS.map(([id, title], index) => ({
             href: `#${id}`,
             no: String(index + 1),
@@ -284,8 +286,26 @@ export default async function SpecificationPage({
           </DriftNote>
         </div>
 
-        <SpecRules ctx={ctx} />
-        <SpecReference ctx={ctx} />
+        {/* From a desktop up the code blocks and headings keep to the
+            text's measure (a long code line wraps under its own indent, as
+            on a phone), and on a wide desktop the margin column beside them
+            holds the sections as a rail that stays in view. */}
+        <div
+          id="spec-sections"
+          className="tw-relative lg:[&_[data-code-wrap]]:tw-max-w-[660px] lg:[&_[data-code-wrap]_pre]:tw-whitespace-pre-wrap lg:[&_h2]:tw-max-w-[660px]"
+        >
+          <SpecRail
+            sections="spec-sections"
+            label={s("explained.tdh.spec.contents")}
+            items={SECTIONS.map(([id, title], index) => ({
+              href: `#${id}`,
+              no: String(index + 1),
+              title: s(title, { count: p.f("spec.deviations.inForce") }),
+            }))}
+          />
+          <SpecRules ctx={ctx} />
+          <SpecReference ctx={ctx} />
+        </div>
 
         <PlaceLinks place={place} locale={locale} />
         <HowWeKnow
