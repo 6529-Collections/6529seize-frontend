@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import { toDataURL } from "qrcode";
 import { useAuth } from "@/components/auth/Auth";
@@ -15,21 +16,26 @@ import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMes
 import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import Button from "@/components/utils/button/Button";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import type { ConnectionSetupTarget } from "@/lib/device-signing/connection-setup-envelope";
 import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { publicEnv } from "@/config/env";
+import { t } from "@/i18n/messages";
+import { HEADER_SHARE_LOCALE } from "./constants";
 
 /** Source-side wallet approval. The receiving app never needs a live wallet. */
 export default function DeviceConnectionShare({
   target,
-  onBack,
+  renderLink,
+  footer,
 }: {
   readonly target: ConnectionSetupTarget;
-  readonly onBack: () => void;
+  readonly renderLink: (
+    link: { readonly url: string; readonly qr: string },
+    refresh: () => void,
+    loading: boolean
+  ) => ReactNode;
+  readonly footer: ReactNode;
 }) {
-  const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
   const sign = useAppGrantSigner();
@@ -39,7 +45,6 @@ export default function DeviceConnectionShare({
     expires: number;
     context: string;
   } | null>(null);
-  const [copied, setCopied] = useState(false);
   const context = JSON.stringify([
     address?.toLowerCase(),
     connectedProfile?.id,
@@ -102,11 +107,14 @@ export default function DeviceConnectionShare({
           address: share.address,
         });
         const url = `${scheme}://${route}?${query.toString()}#device_setup_key=${prepared.secret}`;
-        const qr = await toDataURL(url, {
-          errorCorrectionLevel: "M",
-          margin: 2,
-          width: 360,
-        });
+        const qr =
+          target === "native"
+            ? await toDataURL(url, {
+                errorCorrectionLevel: "M",
+                margin: 4,
+                width: 640,
+              })
+            : "";
         if (!isCurrent()) return { success: false, reason: "context-changed" };
         setLink({ url, qr, expires, context });
         return { success: true };
@@ -121,101 +129,37 @@ export default function DeviceConnectionShare({
   );
   const onEnabled = useCallback(() => undefined, []);
   const flow = useEnableSignedMessages({ requestGrant, onEnabled });
+  const { enable } = flow;
+  const refresh = () => enable("connection-share");
+  useEffect(() => {
+    // Start after the wallet flow has its initial snapshot. Cancel the
+    // scheduled start if the user backs out or React replays the mount.
+    const start = setTimeout(() => enable("connection-share"), 0);
+    return () => clearTimeout(start);
+  }, [enable]);
+
   useEffect(() => {
     if (!link) return;
     const timeout = setTimeout(
-      () => {
-        setLink(null);
-        setCopied(false);
-      },
+      () => setLink(null),
       Math.max(0, link.expires - Date.now())
     );
     return () => clearTimeout(timeout);
   }, [link]);
+
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3 tw-text-sm tw-text-iron-200">
-      {activeLink ? (
-        <>
-          <p className="tw-m-0 tw-leading-6">
-            {t(
-              locale,
-              target === "native"
-                ? "e2ee.connectionSetup.scan"
-                : "e2ee.connectionSetup.openInstruction"
-            )}
-          </p>
-          {/* A generated data URL, never a remote image containing credentials. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={activeLink.qr}
-            alt={t(locale, "e2ee.connectionSetup.qr")}
-            className="tw-mx-auto tw-w-full tw-max-w-80 tw-rounded-lg"
-          />
-          {target === "desktop" ? (
-            <a href={activeLink.url} className="tw-text-primary-300">
-              {t(locale, "e2ee.connectionSetup.open")}
-            </a>
-          ) : null}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(activeLink.url);
-                setCopied(true);
-              } catch {
-                setCopied(false);
-              }
-            }}
-          >
-            {t(
-              locale,
-              copied ? "headerShare.copy.copied" : "headerShare.copy.default"
-            )}
-          </Button>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-amber-200">
-            {t(locale, "e2ee.connectionSetup.keepPrivate")}
-          </p>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "e2ee.connectionSetup.restore")}
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="tw-m-0 tw-leading-6">
-            {t(locale, "e2ee.connectionSetup.description")}
-          </p>
-          {target === "native" ? (
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(locale, "e2ee.connectionSetup.compatibility")}
-            </p>
-          ) : null}
-          <Button
-            variant="primary"
-            size="md"
-            disabled={activeProfileProxy !== null}
-            loading={flow.isEnabling}
-            onClick={() => flow.enable("connection-share")}
-          >
-            {t(locale, "e2ee.connectionSetup.approve")}
-          </Button>
-        </>
-      )}
-      <div className="tw-flex tw-flex-col">
-        <SignedMessagesEnableStatus
-          status={flow.status}
-          onReconnect={flow.reconnect}
-          className="tw-mb-3"
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          className="!tw-whitespace-normal !tw-text-sm !tw-font-medium"
-          onClick={onBack}
-        >
-          {t(locale, "e2ee.connectionSetup.back")}
+    <>
+      {activeLink && renderLink(activeLink, refresh, flow.isEnabling)}
+      <SignedMessagesEnableStatus
+        status={flow.status}
+        onReconnect={flow.reconnect}
+      />
+      {!activeLink && !flow.isEnabling && (
+        <Button variant="primary" size="md" onClick={refresh}>
+          {t(HEADER_SHARE_LOCALE, "headerShare.connectionRefresh.action")}
         </Button>
-      </div>
-    </div>
+      )}
+      {footer}
+    </>
   );
 }

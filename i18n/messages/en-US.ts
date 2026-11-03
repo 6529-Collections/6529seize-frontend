@@ -3651,6 +3651,16 @@ export const EN_US_MESSAGES = {
   "headerShare.shareModal.closeAriaLabel": "Close share modal",
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.chooseApp": "Which app are you connecting?",
+  "headerShare.connectModal.only": "Connect only",
+  "headerShare.connectModal.secure":
+    "Connect with Post Signing & DM Encryption",
+  "headerShare.connectModal.as": "Connect as {name}",
+  "headerShare.connectModal.asSecure":
+    "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.back": "Back",
+  "headerShare.connectModal.oneTime":
+    "Use only on a device you own. This code works once.",
   "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
   "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
   "headerShare.connectModal.downloadApps": "Download apps",
@@ -3659,8 +3669,8 @@ export const EN_US_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "Mobile",
-  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.menu.desktop": "6529 Desktop",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",

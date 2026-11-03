@@ -15,13 +15,22 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowDownTrayIcon,
+  ArrowLeftIcon,
   ComputerDesktopIcon,
   EllipsisHorizontalIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
@@ -59,11 +68,13 @@ const TOOLTIP_STYLE = {
 };
 
 export function HeaderShareModalView({
+  open,
   shouldRender,
   isVisible,
   onClose,
   dialogRef,
   mode,
+  account,
   activeSubTab,
   setActiveSubTab,
   navigateBrowserSrc,
@@ -87,7 +98,28 @@ export function HeaderShareModalView({
   isMobile,
   isElectron,
 }: HeaderShareModalViewProps) {
-  const [secureSetup, setSecureSetup] = useState(false);
+  const [connectionMode, setConnectionMode] = useState<
+    "only" | "secure" | null
+  >(null);
+  const [previousOpen, setPreviousOpen] = useState(open);
+  if (open !== previousOpen) {
+    setPreviousOpen(open);
+    if (open || connectionMode === "secure") setConnectionMode(null);
+  }
+  const contentFrame = useRef<HTMLDivElement>(null);
+  const contentBody = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const frame = contentFrame.current;
+    const body = contentBody.current;
+    if (!frame || !body || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      frame.style.height = `${body.offsetHeight}px`;
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [shouldRender]);
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
@@ -158,7 +190,7 @@ export function HeaderShareModalView({
       <a
         data-testid="desktop-connection-panel"
         href={url}
-        className="tw-group tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-6 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
+        className="tw-group tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-4 tw-text-center tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
         style={squareStyle}
       >
         <Image
@@ -167,8 +199,8 @@ export function HeaderShareModalView({
           loading="eager"
           src="/6529Core.png"
           alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
-          width={150}
-          height={150}
+          width={124}
+          height={124}
           className="tw-unselectable"
         />
         <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
@@ -276,14 +308,18 @@ export function HeaderShareModalView({
     }
   };
 
-  const renderConnectionUrl = (url: string) => {
+  const renderConnectionUrl = (
+    url: string,
+    refresh = refreshConnectionShare,
+    loading = isConnectionShareLoading
+  ) => {
     const refreshLabel = t(
       HEADER_SHARE_LOCALE,
       "headerShare.connectionRefresh.action"
     );
     const unavailableLabel = t(
       HEADER_SHARE_LOCALE,
-      isConnectionShareLoading
+      loading
         ? "headerShare.connectionRefresh.loading"
         : "headerShare.connectionRefresh.unavailable"
     );
@@ -300,7 +336,7 @@ export function HeaderShareModalView({
           <button
             type="button"
             aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-            disabled={!url || isConnectionShareLoading}
+            disabled={!url || loading}
             className="tw-inline-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-opacity-50"
             data-tooltip-id="copy-url-tooltip"
             onClick={() => void copyUrl(url)}
@@ -316,15 +352,16 @@ export function HeaderShareModalView({
           type="button"
           aria-label={refreshLabel}
           title={refreshLabel}
-          aria-busy={isConnectionShareLoading}
-          aria-disabled={isConnectionShareLoading}
+          aria-busy={loading}
+          aria-disabled={loading}
           onClick={() => {
-            if (!isConnectionShareLoading) {
-              refreshConnectionShare();
+            if (!loading) {
+              setUrlCopied(false);
+              refresh();
             }
           }}
           className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
-            isConnectionShareLoading
+            loading
               ? "tw-cursor-wait tw-opacity-50"
               : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
           }`}
@@ -332,7 +369,7 @@ export function HeaderShareModalView({
           <FontAwesomeIcon
             icon={faRotate}
             aria-hidden="true"
-            className={`tw-size-4 ${isConnectionShareLoading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
+            className={`tw-size-4 ${loading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
           />
         </button>
         <Tooltip
@@ -521,11 +558,11 @@ export function HeaderShareModalView({
     const qrContent = (
       <div
         id="header-share-content"
-        className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
+        className={`tw-relative tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
           isConnectMode
             ? "tw-w-full"
             : "tw-w-48 sm:tw-w-[var(--page-share-qr-size)]"
-        } ${
+        } ${isConnectMode && activeSubTab === SubMode.DESKTOP ? "tw-h-56" : "tw-aspect-square"} ${
           isConnectMode && activeConnectionShareStatus === "ready"
             ? "tw-animate-fadeIn motion-reduce:tw-animate-none"
             : ""
@@ -570,14 +607,100 @@ export function HeaderShareModalView({
       );
     }
 
-    if (secureSetup)
+    return renderConnectContent(
+      qrContent,
+      activeConnectionShareStatus,
+      content,
+      url
+    );
+  }
+
+  function renderConnectContent(
+    qrContent: ReactNode,
+    activeConnectionShareStatus: ConnectionShareStatus,
+    content: ReactNode,
+    url: string
+  ) {
+    const goBack = () => {
+      setUrlCopied(false);
+      setConnectionMode(null);
+    };
+    const footer = (
+      <div className="tw-flex tw-items-center tw-gap-3">
+        <Button variant="secondary" size="sm" onClick={goBack}>
+          <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
+          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.back")}
+        </Button>
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.oneTime")}
+        </p>
+      </div>
+    );
+    const name = account.handle ?? account.address;
+    if (connectionMode === "secure") {
       return (
         <DeviceConnectionShare
           key={activeSubTab}
           target={activeSubTab === SubMode.DESKTOP ? "desktop" : "native"}
-          onBack={() => setSecureSetup(false)}
+          renderLink={(link, refresh, loading) => (
+            <>
+              <h3 className="tw-m-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-50">
+                {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.asSecure", {
+                  name,
+                })}
+              </h3>
+              {activeSubTab === SubMode.DESKTOP ? (
+                <div className="tw-h-56">{renderCoreLink(link.url)}</div>
+              ) : (
+                <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
+                  {renderQRCodeImage(
+                    link.qr,
+                    t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.qr")
+                  )}
+                </div>
+              )}
+              {renderConnectionUrl(link.url, refresh, loading)}
+            </>
+          )}
+          footer={footer}
         />
       );
+    }
+
+    if (!connectionMode) {
+      return (
+        <>
+          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.chooseApp")}
+          </p>
+          <ModalMenu
+            activeSubTab={activeSubTab}
+            isElectron={isElectron}
+            onSubTabChange={setActiveSubTab}
+          />
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setConnectionMode("only")}
+          >
+            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.only")}
+          </Button>
+          {account.canSetUp &&
+            isAppDeviceGrantsEnabled() &&
+            isSignedMessagesEnabled() &&
+            isE2eeEnabled() && (
+              <Button
+                variant="primary"
+                size="md"
+                className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2"
+                onClick={() => setConnectionMode("secure")}
+              >
+                {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
+              </Button>
+            )}
+        </>
+      );
+    }
 
     const connectionStatusKey =
       CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
@@ -588,6 +711,9 @@ export function HeaderShareModalView({
 
     return (
       <>
+        <h3 className="tw-m-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-50">
+          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.as", { name })}
+        </h3>
         <div
           data-testid="connection-share-content"
           className="tw-relative tw-w-full"
@@ -607,7 +733,13 @@ export function HeaderShareModalView({
             aria-hidden="true"
             className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
           >
-            <div className="tw-aspect-square tw-w-full" />
+            <div
+              className={
+                activeSubTab === SubMode.DESKTOP
+                  ? "tw-h-56 tw-w-full"
+                  : "tw-aspect-square tw-w-full"
+              }
+            />
             <div className="tw-h-10 tw-w-full" />
           </div>
           <div className="tw-absolute tw-inset-0">
@@ -621,19 +753,7 @@ export function HeaderShareModalView({
             )}
           </div>
         </div>
-        {activeConnectionShareStatus === "ready" &&
-        isAppDeviceGrantsEnabled() &&
-        isSignedMessagesEnabled() &&
-        isE2eeEnabled() ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            className="tw-mt-3 tw-w-full !tw-whitespace-normal !tw-text-sm !tw-font-medium"
-            onClick={() => setSecureSetup(true)}
-          >
-            {t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.action")}
-          </Button>
-        ) : null}
+        {footer}
       </>
     );
   }
@@ -678,9 +798,7 @@ export function HeaderShareModalView({
               id="header-share-title"
               className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
             >
-              {secureSetup
-                ? t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.title")
-                : modalTitle}
+              {modalTitle}
             </h2>
             {isConnectMode && (
               <Link
@@ -717,14 +835,45 @@ export function HeaderShareModalView({
           data-testid="header-share-modal-content"
           className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-3"
         >
-          {isConnectMode && (
-            <ModalMenu
-              activeSubTab={activeSubTab}
-              isElectron={isElectron}
-              onSubTabChange={setActiveSubTab}
-            />
+          {isConnectMode ? (
+            <div
+              ref={contentFrame}
+              className="tw-shrink-0 tw-overflow-hidden tw-transition-[height] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+            >
+              <div ref={contentBody} className="tw-flex tw-flex-col tw-gap-3">
+                {account.address && (
+                  <div className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-p-3">
+                    {account.pfp && (
+                      <Image
+                        unoptimized
+                        src={getScaledImageUri(
+                          account.pfp,
+                          ImageScale.W_200_H_200
+                        )}
+                        alt=""
+                        width={36}
+                        height={36}
+                        className="tw-size-9 tw-shrink-0 tw-rounded-full tw-object-cover"
+                      />
+                    )}
+                    <div className="tw-min-w-0">
+                      {account.handle && (
+                        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+                          {account.handle}
+                        </p>
+                      )}
+                      <p className="tw-m-0 tw-break-all tw-text-xs tw-text-iron-400">
+                        {account.address}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {renderActiveContent()}
+              </div>
+            </div>
+          ) : (
+            renderActiveContent()
           )}
-          {renderActiveContent()}
         </div>
       </dialog>
     </div>
