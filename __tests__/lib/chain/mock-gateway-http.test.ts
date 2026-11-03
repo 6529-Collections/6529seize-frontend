@@ -85,6 +85,7 @@ describe("scripts/mock-chain-gateway.cjs", () => {
     try {
       const ready = await new Promise<{ url: string; gateways: { id: string }[] }>((resolve, reject) => {
         let buffer = "";
+        let errors = "";
         child.stdout.on("data", (chunk: Buffer) => {
           buffer += chunk.toString("utf8");
           const line = buffer.split("\n")[0];
@@ -92,7 +93,10 @@ describe("scripts/mock-chain-gateway.cjs", () => {
             resolve(JSON.parse(line) as { url: string; gateways: { id: string }[] });
           }
         });
-        child.once("exit", (code) => reject(new Error(`exited with ${String(code)}`)));
+        child.stderr.on("data", (chunk: Buffer) => {
+          errors += chunk.toString("utf8");
+        });
+        child.once("exit", (code) => reject(new Error(`exited with ${String(code)}: ${errors}`)));
       });
       expect(ready.gateways.map((g) => g.id)).toEqual(["x", "y"]);
       const state = (await (await fetch(`${ready.url}/_mock/state`)).json()) as {
@@ -103,5 +107,6 @@ describe("scripts/mock-chain-gateway.cjs", () => {
     } finally {
       child.kill();
     }
-  });
+    // Startup compiles the TypeScript mock through tsx, slow on a loaded runner.
+  }, 180_000);
 });
