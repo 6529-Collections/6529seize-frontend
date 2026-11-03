@@ -601,6 +601,8 @@ export const EN_GB_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":

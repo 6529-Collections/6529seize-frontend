@@ -1,3 +1,5 @@
+import { E2eeApiError, asE2eeApiError } from "./api-errors";
+import { buildE2eeApiClient } from "./api-client";
 import {
   commonApiFetch,
   commonApiPost,
@@ -35,59 +37,7 @@ import type {
   ApiE2eeWelcome,
 } from "./api-types";
 
-/**
- * Typed REST error. `status` 0 means the request never produced an HTTP
- * response (network failure); the outcome of a write is then unknown.
- */
-export class E2eeApiError extends Error {
-  readonly status: number;
-  readonly code: string | null;
-  readonly currentEpoch: number | null;
-
-  constructor(input: {
-    message: string;
-    status: number;
-    code?: string | null;
-    currentEpoch?: number | null;
-  }) {
-    super(input.message);
-    this.name = "E2eeApiError";
-    this.status = input.status;
-    this.code = input.code ?? null;
-    this.currentEpoch = input.currentEpoch ?? null;
-  }
-}
-
-interface ErrorShape {
-  readonly name?: unknown;
-  readonly status?: unknown;
-  readonly code?: unknown;
-  readonly currentEpoch?: unknown;
-}
-
-/** Duck-typed so test doubles (and errors crossing realms) qualify. */
-export function asE2eeApiError(error: unknown): E2eeApiError | null {
-  if (error instanceof E2eeApiError) {
-    return error;
-  }
-  if (typeof error !== "object" || error === null) {
-    return null;
-  }
-  const shape = error as ErrorShape;
-  if (shape.name !== "E2eeApiError" || typeof shape.status !== "number") {
-    return null;
-  }
-  return new E2eeApiError({
-    message: error instanceof Error ? error.message : "E2EE API error",
-    status: shape.status,
-    code: typeof shape.code === "string" ? shape.code : null,
-    currentEpoch:
-      typeof shape.currentEpoch === "number" ? shape.currentEpoch : null,
-  });
-}
-
-export const e2eeErrorCode = (error: unknown): string | null =>
-  asE2eeApiError(error)?.code ?? null;
+export { E2eeApiError, asE2eeApiError, e2eeErrorCode } from "./api-errors";
 
 /** Contract 4.2: every endpoint the engine uses. Tests inject a fake. */
 export interface E2eeApiClient {
@@ -143,7 +93,8 @@ export interface E2eeApiClient {
   getBlobChunk(
     blobId: string,
     index: number,
-    deviceKey: string
+    deviceKey: string,
+    signal?: AbortSignal
   ): Promise<ApiE2eeBlobChunk>;
   report(body: ApiE2eeReportRequest): Promise<ApiE2eeReport>;
 }
@@ -185,8 +136,6 @@ export function toE2eeApiError(error: unknown): unknown {
     currentEpoch: readCurrentEpoch(error),
   });
 }
-
-const enc = encodeURIComponent;
 
 /** The account whose session an E2EE client may use: its engine's own. */
 export interface E2eeApiAccount {
@@ -234,13 +183,18 @@ function requests(account: E2eeApiAccount) {
       return request();
     });
   return {
-    get: <T>(endpoint: string, params?: Record<string, string>) =>
+    get: <T>(
+      endpoint: string,
+      params?: Record<string, string>,
+      signal?: AbortSignal
+    ) =>
       send(() =>
         commonApiFetch<T>({
           endpoint,
           ...(params ? { params } : {}),
           errorMode: "structured",
           cache: "no-store",
+          ...(signal ? { signal } : {}),
         })
       ),
     post: <T>(endpoint: string, body: object) =>
@@ -259,53 +213,5 @@ function requests(account: E2eeApiAccount) {
  * out only while the browser's session is that account's own.
  */
 export function createE2eeApiClient(account: E2eeApiAccount): E2eeApiClient {
-  const { get, post, put } = requests(account);
-  return {
-    getMe: () => get<ApiE2eeMe>("e2ee/me"),
-    registerDevice: (body) => post(`e2ee/devices`, body),
-    registerLoginGrantDevice: (body) => post(`e2ee/devices/login-grant`, body),
-    getDevice: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}`),
-    getProfileDevices: (profileId) =>
-      get(`e2ee/profiles/${enc(profileId)}/devices`),
-    revokeDevice: (deviceKey, body) =>
-      post(`e2ee/devices/${enc(deviceKey)}/revoke`, body),
-    uploadKeyPackages: (deviceKey, body) =>
-      post(`e2ee/devices/${enc(deviceKey)}/key-packages`, body),
-    claimKeyPackages: (body) => post(`e2ee/key-packages/claim`, body),
-    checkEligibility: (body) => post(`e2ee/eligibility`, body),
-    createGroup: (body) => post(`e2ee/groups`, body),
-    getGroup: (group, deviceKey) =>
-      get(`e2ee/groups/${enc(group)}`, { device_key: deviceKey }),
-    submitEntry: (group, body) =>
-      post(`e2ee/groups/${enc(group)}/entries`, body),
-    getLog: (group, query) =>
-      get(`e2ee/groups/${enc(group)}/log`, {
-        device_key: query.deviceKey,
-        after_seq: String(query.afterSeq),
-        limit: String(query.limit ?? 100),
-      }),
-    sendMessage: (group, body) =>
-      post(`e2ee/groups/${enc(group)}/messages`, body),
-    repairRoster: (group, body) =>
-      post(`e2ee/groups/${enc(group)}/roster`, body),
-    getWelcomes: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}/welcomes`),
-    ackWelcome: async (deviceKey, welcomeId) => {
-      await post<unknown>(
-        `e2ee/devices/${enc(deviceKey)}/welcomes/${enc(welcomeId)}/ack`,
-        {}
-      );
-    },
-    getDeviceGroups: (deviceKey) =>
-      get(`e2ee/devices/${enc(deviceKey)}/groups`),
-    createBlob: (body) => post(`e2ee/blobs`, body),
-    putBlobChunk: (blobId, index, body) =>
-      put(`e2ee/blobs/${enc(blobId)}/chunks/${index}`, body),
-    completeBlob: (blobId) =>
-      post<ApiE2eeBlob>(`e2ee/blobs/${enc(blobId)}/complete`, {}),
-    getBlobChunk: (blobId, index, deviceKey) =>
-      get(`e2ee/blobs/${enc(blobId)}/chunks/${index}`, {
-        device_key: deviceKey,
-      }),
-    report: (body) => post(`e2ee/reports`, body),
-  };
+  return buildE2eeApiClient(requests(account));
 }
