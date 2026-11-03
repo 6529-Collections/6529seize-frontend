@@ -27,7 +27,11 @@ function MessagesBranchLoadingFallback() {
 // The mobile shell (BrainMobile) is rendered only inside the native app.
 const MessagesMobile = createNativeOnlyBranch(
   () => import("../MessagesMobile"),
-  MessagesBranchLoadingFallback
+  {
+    name: "messages shell",
+    loading: MessagesBranchLoadingFallback,
+    webBranch: MessagesDesktop,
+  }
 );
 
 // Main layout content that uses the Layout context
