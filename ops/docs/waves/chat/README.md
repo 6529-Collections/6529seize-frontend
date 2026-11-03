@@ -46,6 +46,8 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
   composer renders versus unavailable-state panels.
 - [Delete Your Wave Chat History](feature-delete-own-chat-history.md): the
   irreversible profile-scoped cleanup action and its preservation rules.
+- [Open and Collapsed Replies](feature-open-and-collapsed-replies.md): letting
+  everyone reply to drops and showing replies as threads under each drop.
 
 ## Flows
 
@@ -69,3 +71,5 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 - [Wave Sidebars Index](../sidebars/README.md)
 - [Realtime Index](../../realtime/README.md)
 - [Navigation Index](../../navigation/README.md)
+
+- [Private Bookmarks](feature-private-bookmarks.md): privately save messages and return to their conversations.

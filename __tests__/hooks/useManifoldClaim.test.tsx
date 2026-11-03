@@ -28,6 +28,61 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+test("exposes an initial RPC failure without inventing a claim", () => {
+  mockRead.mockReturnValue({
+    data: undefined,
+    isFetching: false,
+    error: new Error("offline"),
+  });
+  const { result } = renderHook(() =>
+    useManifoldClaim({
+      chainId: 1,
+      contract: "0x1",
+      proxy: "0x2",
+      abi: [],
+      identifier: 1,
+    })
+  );
+  expect(result.current.isError).toBe(true);
+  expect(result.current.claim).toBeUndefined();
+});
+
+test("recovers from an RPC error even when the successful data is unchanged", async () => {
+  const data = [
+    BigInt(3),
+    {
+      total: BigInt(1),
+      totalMax: BigInt(2),
+      cost: BigInt(0),
+      startDate: BigInt(0),
+      endDate: BigInt(9999999999),
+      merkleRoot: NULL_MERKLE,
+    },
+  ];
+  let error: Error | null = null;
+  mockRead.mockImplementation(() => ({ data, isFetching: false, error }));
+  const { result, rerender } = renderHook(() =>
+    useManifoldClaim({
+      chainId: 1,
+      contract: "0x1",
+      proxy: "0x2",
+      abi: [],
+      identifier: 1,
+    })
+  );
+  await waitFor(() => expect(result.current.claim?.isError).toBe(false));
+
+  error = new Error("temporarily offline");
+  rerender();
+  await waitFor(() => expect(result.current.claim?.isError).toBe(true));
+
+  error = null;
+  rerender();
+  await waitFor(() => expect(result.current.claim?.isError).toBe(false));
+  expect(result.current.isError).toBe(false);
+  expect(result.current.claim?.status).toBe(ManifoldClaimStatus.ACTIVE);
+});
+
 test("builds claim from contract data", async () => {
   mockRead.mockReturnValue({
     data: [

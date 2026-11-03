@@ -1,6 +1,8 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
+import { getStagingApiKey } from "@/config/serverEnv";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import { MetadataNotFoundError } from "@/app/api/og-metadata/_lib/metadataNotFoundError";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
 import { renderDropOgImage } from "@/app/api/og-metadata/drops/[id]/image";
@@ -23,14 +25,16 @@ const fetchDropMetadata = async (
   id: string,
   apiAuth: string | null
 ): Promise<ApiOgMetadata> => {
-  const url = `${publicEnv.API_ENDPOINT}/api/og-metadata/drops/${encodeURIComponent(
-    id
-  )}`;
+  const url = apiUrl(`/api/og-metadata/drops/${encodeURIComponent(id)}`);
   const response = await fetch(url, {
     redirect: "error",
     headers: apiAuth === null ? {} : { "x-6529-auth": apiAuth },
     next: { revalidate },
   });
+
+  if (response.status === 404) {
+    throw new MetadataNotFoundError();
+  }
 
   if (!response.ok) {
     throw new Error(`Drop OG metadata request failed: ${response.status}`);
@@ -57,7 +61,8 @@ export async function GET(
     const cookieStore = await cookies();
     const apiAuth =
       getUsableText(cookieStore.get(API_AUTH_COOKIE)?.value) ??
-      getUsableText(publicEnv.STAGING_API_KEY);
+      getStagingApiKey() ??
+      null;
     const metadata = await fetchDropMetadata(normalizedId, apiAuth);
     const montserratFonts = await loadMontserratFonts();
 
@@ -78,6 +83,13 @@ export async function GET(
       }
     );
   } catch (error) {
+    if (error instanceof MetadataNotFoundError) {
+      return NextResponse.json(
+        { error: "Drop not found." },
+        { status: 404, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
     console.error("Unable to generate drop OG metadata image.", error);
     return NextResponse.json(
       { error: "Unable to generate drop OG metadata image." },

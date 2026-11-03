@@ -1,0 +1,171 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ProductionArtifactObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:AbortMultipartUpload"],
+      "Resource": [
+        "arn:aws:s3:::seize-web/web_build/????????????????????????????????????????/*",
+        "arn:aws:s3:::seize-web/web_build/current-production-version.json"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ProductionArtifactBucketMetadata",
+      "Effect": "Allow",
+      "Action": ["s3:GetBucketLocation", "s3:GetBucketPolicy"],
+      "Resource": ["arn:aws:s3:::seize-web"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkRegionalStorageBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketOwnershipControls",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketPolicy"
+      ],
+      "Resource": ["arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkEnvironmentStorageObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkArtifactObjectMetadata",
+      "Effect": "Allow",
+      "Action": ["s3:GetObjectAcl"],
+      "Resource": [
+        "arn:aws:s3:::seize-web/web_build/????????????????????????????????????????/*",
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkRuntimeVersionManagement",
+      "Effect": "Allow",
+      "Action": ["s3:PutObjectAcl", "s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/????????????????????????????????????????"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkApplicationExtensionCache",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkRuntimeVersionManifestCleanup",
+      "Effect": "Allow",
+      "Action": ["s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkCompiledEnvironmentTemplate",
+      "Effect": "Allow",
+      "Action": ["s3:GetObjectVersion"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkEnvironmentExtensionCleanup",
+      "Effect": "Allow",
+      "Action": ["s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_embedded_extensions/seize app/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    }
+  ]
+}

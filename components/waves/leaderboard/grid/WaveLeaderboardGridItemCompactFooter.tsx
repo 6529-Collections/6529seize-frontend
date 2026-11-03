@@ -14,6 +14,8 @@ import Link from "next/link";
 import React from "react";
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
+import { AnonymousAuthorName } from "@/components/waves/drops/AnonymousDropAuthor";
 
 interface WaveLeaderboardGridItemCompactFooterProps {
   readonly drop: ExtendedDrop;
@@ -108,7 +110,8 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
     >
       <div className="tw-mb-1 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
         <div className="tw-min-w-0 tw-flex-1">
-          {authorHandle && (
+          {isAnonymousAuthor(author) && <AnonymousAuthorName />}
+          {authorHandle && !isAnonymousAuthor(author) && (
             <UserProfileTooltipWrapper user={authorHandle}>
               <Link
                 onClick={(e) => e.stopPropagation()}
@@ -178,13 +181,11 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
               {isNegativeVote && "-"}
               {formatInteger(locale, Math.abs(userVote))}
             </span>{" "}
-            <span className={voteStyle}>
-              {votingCreditLabel}
-            </span>
+            <span className={voteStyle}>{votingCreditLabel}</span>
           </span>
         )}
         {canShowVotingAction && (
-          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-none tw-self-center tw-items-center tw-justify-end">
+          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-none tw-items-center tw-justify-end tw-self-center">
             <VotingModalButton
               drop={drop}
               onClick={onVoteButtonClick}

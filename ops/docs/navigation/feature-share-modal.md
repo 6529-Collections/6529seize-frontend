@@ -109,6 +109,16 @@ the `More` menu.
    card with a 6529 Desktop logo and compact white launch label. The entire card
    opens 6529 Desktop, not only the visible label.
 
+7. Copy the connection link with the copy icon inside the link field. Use the
+   separate refresh button to its right (`Generate new code`) to prepare a new
+   connection without closing the dialog. The selected tab stays open.
+8. While preparing the connection, copy and refresh are disabled and the previous
+   link cannot be used from the dialog. If preparation fails, use refresh to retry.
+
+The refresh action prepares both connection targets again. Mobile receives a new
+one-time code. Desktop requests a new handoff for session-v2 authentication;
+legacy authentication rebuilds the link from the current local credentials.
+
 No copy-page, social, or current-page Share actions appear in this dialog.
 
 ## Common Scenarios
@@ -139,6 +149,12 @@ No copy-page, social, or current-page Share actions appear in this dialog.
   hidden in Capacitor/native and mobile-device web contexts; supported mobile
   contexts share directly from the header instead.
 - Desktop is hidden as a connection target when already running in Electron.
+- Connection links open `Accept Connection Sharing`. Mobile connection links
+  are accepted only in 6529 Mobile, and Desktop connection links only in 6529
+  Desktop. Opened anywhere else, the page shows a message and a home link
+  instead of `Accept connection`. The page removes the link's one-time
+  credential from the address bar as soon as it loads, so reloading it does not
+  reopen the connection; open the original link or QR code again instead.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
   states retain the final connection area's footprint. The unframed loading

@@ -13,7 +13,9 @@ const { selectFileContractTests, changedFilesSince, runFileContractTests } =
 
 const HOVER = "__tests__/contracts/hover-revealed-controls.test.ts";
 const WAVES = "__tests__/contracts/waves-multi-competition-phase-1.test.ts";
+const FOCUS = "__tests__/contracts/keyboard-focus-indicators.test.ts";
 const COVERAGE = "__tests__/scripts/coverage-floor.test.ts";
+const API_ENDPOINTS = "__tests__/contracts/api-endpoint-boundary.test.ts";
 
 describe("filesystem contract selection", () => {
   it.each([
@@ -24,6 +26,32 @@ describe("filesystem contract selection", () => {
     HOVER,
   ])("selects the hover audit for %s without relying on imports", (file) => {
     expect(selectFileContractTests([file])).toContain(HOVER);
+  });
+
+  it.each([
+    "components/user/settings/UserSettingsUsername.tsx",
+    "components/compact-menu/constants.ts",
+    "app/join/page.utils.ts",
+    "tailwind.config.ts",
+    "__tests__/contracts/support/keyboardFocusIndicators.ts",
+  ])("selects the keyboard focus indicator scan for %s", (file) => {
+    expect(selectFileContractTests([file])).toContain(FOCUS);
+  });
+
+  it.each([
+    "services/api/common-api.ts",
+    "components/the-memes/MemePage.tsx",
+    "app/api/og-metadata/drops/[id]/route.ts",
+    "proxy.ts",
+    "standalone/standalone-memes-mint/src/app/layout.tsx",
+  ])("selects the API endpoint boundary scan for %s", (file) => {
+    expect(selectFileContractTests([file])).toContain(API_ENDPOINTS);
+  });
+
+  it("selects the global focus style test for the stylesheet it reads", () => {
+    expect(selectFileContractTests(["styles/globals.css"])).toEqual([
+      "__tests__/styles/link-focus-visibility.test.ts",
+    ]);
   });
 
   it.each([
@@ -43,6 +71,7 @@ describe("filesystem contract selection", () => {
     ["runner-benchmark", "runner-benchmark-workflow"],
     ["runner-benchmark-candidate", "runner-benchmark-workflow"],
     ["device-farm-qa", "device-farm-workflow"],
+    ["mobile-lab", "mobile-lab-workflow"],
   ])("selects the disk-reading suite for %s.yml", (workflow, test) => {
     expect(
       selectFileContractTests([`.github/workflows/${workflow}.yml`])
@@ -55,6 +84,12 @@ describe("filesystem contract selection", () => {
     ).toEqual([
       "__tests__/scripts/museum-publication-compatibility.test.ts",
       "__tests__/scripts/production-canary-workflow.test.ts",
+    ]);
+  });
+
+  it("selects the first-load budget contract when the budget file changes", () => {
+    expect(selectFileContractTests(["scripts/perf-budget.json"])).toEqual([
+      "__tests__/scripts/perf-budget.test.ts",
     ]);
   });
 
@@ -89,6 +124,7 @@ describe("filesystem contract selection", () => {
       const selected = selectFileContractTests([file]);
       expect(selected).toContain(HOVER);
       expect(selected).toContain(WAVES);
+      expect(selected).toContain(FOCUS);
       expect(selected).toContain(COVERAGE);
       expect(selected).toContain(
         "__tests__/scripts/file-contract-tests.test.ts"
@@ -109,6 +145,7 @@ describe("filesystem contract selection", () => {
         "--runInBand",
         "--runTestsByPath",
         HOVER,
+        FOCUS,
       ],
       expect.objectContaining({
         stdio: "inherit",

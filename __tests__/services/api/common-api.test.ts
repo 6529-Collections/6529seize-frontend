@@ -1,20 +1,134 @@
-import { commonApiFetchWithRetry } from "@/services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiFetchWithRetry,
+  commonApiPost,
+} from "@/services/api/common-api";
+import { isReactionRequestOutcomeUncertain } from "@/utils/monitoring/dropReactionErrorClassification";
 
-const fetchMock = global.fetch as jest.Mock;
+const fetchMock = globalThis.fetch as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
   fetchMock.mockReset();
 });
 
+describe("response body parsing", () => {
+  it("keeps a reaction outcome uncertain after a network failure reading HTTP 200", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(new TypeError("NetworkError")),
+    });
+
+    const error = await commonApiPost({
+      endpoint: "drops/drop-1/reaction",
+      body: { reaction: ":smile:" },
+      errorMode: "structured",
+    }).catch((failure: unknown) => failure);
+
+    expect(error).toEqual(
+      new Error(
+        "Failed to parse response as JSON from https://api.test.6529.io/api/drops/drop-1/reaction: NetworkError"
+      )
+    );
+    expect(isReactionRequestOutcomeUncertain(error)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("recognizes the fetch wrapper's normalized reaction network error without replay", async () => {
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    const error = await commonApiPost({
+      endpoint: "drops/drop-1/reaction",
+      body: { reaction: ":smile:" },
+      errorMode: "structured",
+    }).catch((failure: unknown) => failure);
+
+    expect(error).toEqual(
+      new Error(
+        "Network request failed. Please check your connection and try again. (https://api.test.6529.io/api/drops/drop-1/reaction)"
+      )
+    );
+    expect(isReactionRequestOutcomeUncertain(error)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves cancellation while reading an otherwise successful response", async () => {
+    const abortError = new DOMException(
+      "The user aborted a request.",
+      "AbortError"
+    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(abortError),
+    });
+
+    await expect(commonApiFetch({ endpoint: "a" })).rejects.toBe(abortError);
+  });
+
+  it("preserves a server-render deadline that expires while reading the body", async () => {
+    const timeoutError = new DOMException(
+      "The 6529 API did not respond within 4500ms.",
+      "TimeoutError"
+    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(timeoutError),
+    });
+
+    await expect(commonApiFetch({ endpoint: "a" })).rejects.toBe(timeoutError);
+  });
+
+  it("retains the URL and cause message for malformed JSON", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(new SyntaxError("Unexpected token")),
+    });
+
+    await expect(commonApiFetch({ endpoint: "a" })).rejects.toThrow(
+      "Failed to parse response as JSON from https://api.test.6529.io/api/a: Unexpected token"
+    );
+  });
+});
+
 describe("commonApiFetchWithRetry", () => {
+  it("preserves a body-read abort without retrying a cancelled request", async () => {
+    const controller = new AbortController();
+    const abortError = new DOMException(
+      "The user aborted a request.",
+      "AbortError"
+    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        controller.abort();
+        throw abortError;
+      },
+    });
+
+    await expect(
+      commonApiFetchWithRetry({
+        endpoint: "a",
+        signal: controller.signal,
+        retryOptions: { maxRetries: 2, initialDelayMs: 0, jitter: 0 },
+      })
+    ).rejects.toBe(abortError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ signal: controller.signal })
+    );
+  });
+
   it("retries once on failure then succeeds", async () => {
-    fetchMock
-      .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => "ok",
-      });
+    fetchMock.mockRejectedValueOnce(new Error("fail")).mockResolvedValueOnce({
+      ok: true,
+      json: async () => "ok",
+    });
 
     const result = await commonApiFetchWithRetry<string>({
       endpoint: "a",
@@ -32,7 +146,7 @@ describe("commonApiFetchWithRetry", () => {
       commonApiFetchWithRetry({
         endpoint: "a",
         retryOptions: { maxRetries: 1, initialDelayMs: 0, jitter: 0 },
-      }),
+      })
     ).rejects.toThrow("bad");
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

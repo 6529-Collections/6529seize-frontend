@@ -39,13 +39,13 @@ const BADGE_CONFIG = {
     icon: faFlag,
     tab: "active",
     className:
-      "tw-border-violet-400/35 tw-bg-violet-500/15 tw-text-violet-300 focus-visible:tw-ring-violet-400/50 desktop-hover:hover:tw-border-violet-300/60 desktop-hover:hover:tw-bg-violet-500/25 desktop-hover:hover:tw-text-violet-200",
+      "tw-border-violet-400/35 tw-bg-violet-500/15 tw-text-violet-300 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-violet-300/60 desktop-hover:hover:tw-bg-violet-500/25 desktop-hover:hover:tw-text-violet-200",
   },
   winner: {
     icon: faMedal,
     tab: "winners",
     className:
-      "tw-border-green/35 tw-bg-green/15 tw-text-green focus-visible:tw-ring-green/50 desktop-hover:hover:tw-border-green/60 desktop-hover:hover:tw-bg-green/25",
+      "tw-border-green/35 tw-bg-green/15 tw-text-green focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-green/60 desktop-hover:hover:tw-bg-green/25",
   },
 } as const;
 

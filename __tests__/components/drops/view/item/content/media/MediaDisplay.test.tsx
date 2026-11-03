@@ -4,10 +4,22 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 const mockGetArweaveGatewayFallbackUrls = jest.fn();
 const mockShouldUseIframeFallbackTimeout = jest.fn();
 const mockSandboxedExternalIframe = jest.fn();
+const mockCanonicalizeInteractiveMediaUrl = jest.fn();
+
+jest.mock("@/components/waves/memes/submission/constants/security", () => ({
+  canonicalizeInteractiveMediaUrl: (src: string) =>
+    mockCanonicalizeInteractiveMediaUrl(src),
+}));
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplayImage",
-  () => (props: any) => <div data-testid="image" data-src={props.src} />
+  () => (props: any) => (
+    <div
+      data-testid="image"
+      data-src={props.src}
+      data-loading-layout={props.imageLoadingLayout}
+    />
+  )
 );
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplayVideo",
@@ -67,6 +79,9 @@ jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
 jest.mock("@/helpers/media-download.helpers", () => ({
   __esModule: true,
   getDownloadFilenameFromUrl: jest.fn((_url: string) => "media.html"),
@@ -102,11 +117,31 @@ describe("MediaDisplay", () => {
       return [url];
     });
     mockShouldUseIframeFallbackTimeout.mockReturnValue(true);
+    mockCanonicalizeInteractiveMediaUrl.mockReset();
+    mockCanonicalizeInteractiveMediaUrl.mockImplementation(
+      (src: string) => src
+    );
   });
 
   it("renders image", () => {
     render(<MediaDisplay media_mime_type="image/png" media_url="img.png" />);
     expect(screen.getByTestId("image")).toHaveAttribute("data-src", "img.png");
+  });
+
+  it("forwards artwork loading layout to inert image cards", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="image/gif"
+        media_url="art.gif"
+        imageLoadingLayout="artwork"
+        isInertPreview
+        disableMediaInteraction
+      />
+    );
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-loading-layout",
+      "artwork"
+    );
   });
 
   it("renders video", () => {
@@ -266,6 +301,152 @@ describe("MediaDisplay", () => {
       "data-src",
       "https://media.6529.io/ipfs/hash"
     );
+  });
+
+  it("renders the html iframe on eager surfaces without a preview image", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="ipfs://hash"
+        loadStrategy="eager"
+      />
+    );
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://media.6529.io/ipfs/hash"
+    );
+    expect(screen.queryByTestId("image")).not.toBeInTheDocument();
+  });
+
+  it("keeps the tap-to-load gate and preview poster for eager html", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="ipfs://hash"
+        previewImageUrl="preview.png"
+        requireInteractionToLoad
+        loadStrategy="eager"
+      />
+    );
+
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-src",
+      "preview.png"
+    );
+    expect(screen.queryByTestId("iframe")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("load-gate"));
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://media.6529.io/ipfs/hash"
+    );
+  });
+
+  it("shows a loading status until the html iframe loads", () => {
+    render(
+      <MediaDisplay media_mime_type="text/html" media_url="ipfs://hash" />
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading interactive media"
+    );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onLoad?.();
+    });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("does not show a loading status when the frame URL is rejected", () => {
+    mockCanonicalizeInteractiveMediaUrl.mockReturnValue(null);
+
+    render(
+      <MediaDisplay media_mime_type="text/html" media_url="ipfs://hash" />
+    );
+
+    expect(mockCanonicalizeInteractiveMediaUrl).toHaveBeenCalledWith(
+      "https://media.6529.io/ipfs/hash"
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("keeps the loading status up through a gateway fallback until the next gateway loads", async () => {
+    jest.useFakeTimers();
+    mockGetArweaveGatewayFallbackUrls.mockReturnValue([
+      "https://arweave.net/tx",
+      "https://ardrive.net/tx",
+    ]);
+    mockShouldUseIframeFallbackTimeout.mockReturnValue(true);
+
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="https://arweave.net/tx"
+      />
+    );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onVisible?.();
+    });
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading interactive media"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(8000);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The first gateway never loaded, so the status stays visible while the
+    // next gateway loads instead of hiding and reappearing.
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://ardrive.net/tx"
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading interactive media"
+    );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onLoad?.();
+    });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("does not fall back or show the loading status after the frame loads", () => {
+    jest.useFakeTimers();
+    mockGetArweaveGatewayFallbackUrls.mockReturnValue([
+      "https://arweave.net/tx",
+      "https://ardrive.net/tx",
+    ]);
+    mockShouldUseIframeFallbackTimeout.mockReturnValue(true);
+
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="https://arweave.net/tx"
+      />
+    );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onVisible?.();
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onLoad?.();
+    });
+    act(() => {
+      jest.advanceTimersByTime(8000);
+    });
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://arweave.net/tx"
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("renders unknown media as a compact link", () => {

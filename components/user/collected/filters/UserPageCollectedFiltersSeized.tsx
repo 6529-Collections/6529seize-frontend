@@ -42,6 +42,7 @@ export default function UserPageCollectedFiltersSeized({
       containerRef={containerRef}
       setSelected={setSelected}
       size="sm"
+      variant="filter"
     />
   );
 }

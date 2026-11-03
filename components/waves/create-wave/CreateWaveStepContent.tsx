@@ -18,6 +18,10 @@ type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
 export default function CreateWaveStepContent({
   controller,
+  isCompetition = false,
+  lockSubmissionStrategy = false,
+  lockOutcomeDefinitions = false,
+  lockVotingCredits = false,
   overviewLeading,
   isSubwave = false,
   parentWaveName,
@@ -25,8 +29,14 @@ export default function CreateWaveStepContent({
   onCriteriaReplacementChange,
   onGroupResolutionChange,
   onInlineGroupCreate,
+  stepOverride,
 }: {
   readonly controller: WaveConfigController;
+  readonly stepOverride?: CreateWaveStep;
+  readonly isCompetition?: boolean;
+  readonly lockSubmissionStrategy?: boolean;
+  readonly lockOutcomeDefinitions?: boolean;
+  readonly lockVotingCredits?: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
   readonly isSubwave?: boolean;
@@ -76,7 +86,7 @@ export default function CreateWaveStepContent({
     onChatEnabledChange,
   } = controller;
 
-  switch (step) {
+  switch (stepOverride ?? step) {
     case CreateWaveStep.OVERVIEW:
       return (
         <div className="tw-flex tw-flex-col tw-gap-y-4">
@@ -129,6 +139,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.DROPS:
       return (
         <CreateWaveDrops
+          lockSubmissionStrategy={lockSubmissionStrategy}
           waveType={config.overview.type}
           drops={config.drops}
           errors={errors}
@@ -137,10 +148,18 @@ export default function CreateWaveStepContent({
         />
       );
     case CreateWaveStep.RULES:
-      return <CreateWaveRules config={config} setDisplay={setDisplay} />;
+      return (
+        <CreateWaveRules
+          config={config}
+          setDisplay={setDisplay}
+          isCompetition={isCompetition}
+        />
+      );
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
+          lockVotingCredits={lockVotingCredits}
+          isCompetition={isCompetition}
           waveType={config.overview.type}
           selectedType={config.voting.type}
           category={config.voting.category}
@@ -173,6 +192,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.OUTCOMES:
       return (
         <CreateWaveOutcomes
+          lockDefinitions={lockOutcomeDefinitions}
           outcomes={config.outcomes}
           outcomeType={selectedOutcomeType}
           waveType={config.overview.type}
@@ -191,6 +211,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.REVIEW:
       return (
         <CreateWaveReview
+          isCompetition={isCompetition}
           config={config}
           groupsCache={groupsCache}
           description={descriptionSnapshot}

@@ -4,6 +4,12 @@ import userEvent from '@testing-library/user-event';
 import ProxyCreateTargetSearch from '@/components/user/proxy/create/target/ProxyCreateTargetSearch';
 import { AuthContext } from '@/components/auth/Auth';
 import { useQuery } from '@tanstack/react-query';
+import { ImageScale } from '@/helpers/image.helpers';
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from '@/__tests__/utils/avatarSrc';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 
@@ -44,6 +50,27 @@ describe('ProxyCreateTargetSearch', () => {
     expect(screen.getByText('bob')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Remove selected profile' }));
     expect(onTargetSelect).toHaveBeenCalledWith(null);
+  });
+
+  it('requests AUTOx50 derivatives for selected and searched profile pictures', async () => {
+    const profileProxy = { granted_to: { handle: 'bob', pfp: CDN_AVATAR_URL } } as any;
+    const { unmount } = renderWithContext({ profileProxy, loading: false, onTargetSelect: jest.fn() });
+    expect(getRequestedImageSrc(screen.getByAltText('Profile picture'))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
+    unmount();
+
+    useQueryMock.mockReturnValue({
+      data: [{ handle: 'bob', pfp: CDN_AVATAR_URL }],
+      isLoading: false,
+      error: null,
+    });
+    const user = userEvent.setup();
+    renderWithContext({ profileProxy: null, loading: false, onTargetSelect: jest.fn() });
+    await user.type(screen.getByPlaceholderText('Search profile'), 'bob');
+    expect(getRequestedImageSrc(screen.getByAltText('Profile picture'))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
   });
 
   it('lists search results and selects a profile', async () => {

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import WebSidebar from "./sidebar/WebSidebar";
 import SmallScreenLayoutHeader from "./SmallScreenLayoutHeader";
+import { isSmallWebStartupExpected } from "./smallWebStartup";
 import type { CSSProperties, ReactNode } from "react";
 
 const DESKTOP_MAX_WIDTH = 1324;
@@ -17,6 +19,7 @@ interface WebLayoutProps {
 
 const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const {
+    isSidebarReady,
     isMobile,
     isNarrow,
     isCollapsed,
@@ -26,12 +29,25 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     sidebarWidth,
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
+  const pathname = usePathname();
+  const smallWebOverflow =
+    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-auto";
 
   // Changing responsive chrome must not remount page state or live uploads.
   // Close the old menu just as the previous separate layout did on unmount.
   useEffect(() => {
     closeOffcanvas();
   }, [isSmall, closeOffcanvas]);
+
+  useEffect(() => {
+    if (isSmall || !isSmallWebStartupExpected()) {
+      // Keep the override through the hydration defaults, but release it when
+      // React takes over or capabilities changed to desktop during loading.
+      delete document.documentElement.dataset["smallWebStartup"];
+    }
+  }, [isSmall, isMobile, isNarrow, isSidebarReady]);
 
   const cssVars = useMemo(
     () =>
@@ -48,7 +64,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     <div
       className={
         isSmall
-          ? "tw-overflow-auto tw-bg-black"
+          ? `${smallWebOverflow} tw-bg-black`
           : "layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       }
       style={isSmall ? undefined : cssVars}
@@ -57,14 +73,14 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-offcanvas={isOffcanvasOpen}
       data-right-open={isRightSidebarOpen}
       data-small={isSmall ? "true" : "false"}
+      data-sidebar-ready={isSidebarReady}
     >
-      {isSmall && (
-        <SmallScreenLayoutHeader
-          onMenuToggle={toggleCollapsed}
-          isMenuOpen={isOffcanvasOpen}
-        />
-      )}
-      <div className="tailwind-scope">
+      <SmallScreenLayoutHeader
+        active={isSmall}
+        onMenuToggle={toggleCollapsed}
+        isMenuOpen={isOffcanvasOpen}
+      />
+      <div className="tailwind-scope" data-web-sidebar="true">
         <WebSidebar
           key={isSmall ? "small" : "desktop"}
           isCollapsed={isSmall ? false : isCollapsed}

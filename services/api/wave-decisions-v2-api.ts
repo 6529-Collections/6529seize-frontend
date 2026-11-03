@@ -21,6 +21,7 @@ import {
   mapMentionedWaves,
   mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
+  mapSubmissionVotingV2,
 } from "@/services/api/drop-v2-mappers";
 
 interface FetchWaveDecisionsV2Props {
@@ -64,6 +65,10 @@ const mapDecisionDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: ApiDropType.Winner,
@@ -89,17 +94,14 @@ const mapDecisionDropV2 = ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: [],
-    raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
     is_additional_action_promised:

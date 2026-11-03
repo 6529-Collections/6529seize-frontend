@@ -10,15 +10,27 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-describe("HeroHeader", () => {
-  it("renders the hero heading copy", () => {
-    render(<HeroHeader />);
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
 
+describe("HeroHeader", () => {
+  it("renders the hero heading copy without artwork", () => {
+    const { container } = render(<HeroHeader />);
+
+    const heading = screen.getByRole("heading", {
+      name: "Building a decentralized network state",
+    });
+
+    expect(heading).toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
     expect(
-      screen.getByRole("heading", {
-        name: "Building a decentralized network state",
-      })
+      screen.getByText(
+        "A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+      )
     ).toBeInTheDocument();
+    expect(heading).toHaveClass("tw-font-semibold");
+    expect(heading).not.toHaveClass("tw-font-medium");
   });
 
   it("renders a quick link to network health", () => {

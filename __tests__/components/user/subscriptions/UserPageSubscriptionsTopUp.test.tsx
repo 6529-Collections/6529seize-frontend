@@ -1,3 +1,5 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import UserPageSubscriptionsTopUp from "@/components/user/subscriptions/UserPageSubscriptionsTopUp";
 import {
   MEMES_MINT_PRICE,
@@ -5,7 +7,8 @@ import {
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
-import { render, screen, waitFor } from "@testing-library/react";
+import useCapacitor from "@/hooks/useCapacitor";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
 
@@ -287,6 +290,169 @@ describe("UserPageSubscriptionsTopUp", () => {
 
     await waitFor(() => {
       expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe("UserPageSubscriptionsTopUp hash anchor", () => {
+  const TOP_UP_ID = "profile-subscriptions-top-up";
+  let scrollIntoView: jest.SpyInstance;
+
+  function setHash(hash: string): void {
+    globalThis.history.replaceState(null, "", `/handle/subscriptions${hash}`);
+  }
+
+  function setEnvironment({
+    isIos,
+    country,
+    isCountryPending = false,
+  }: Readonly<{
+    isIos: boolean;
+    country: string;
+    isCountryPending?: boolean;
+  }>): void {
+    jest
+      .mocked(useCapacitor)
+      .mockReturnValue({ isIos } as ReturnType<typeof useCapacitor>);
+    jest.mocked(useCookieConsent).mockReturnValue({
+      country,
+      isCountryPending,
+    } as ReturnType<typeof useCookieConsent>);
+  }
+
+  function renderGated() {
+    return (
+      <NftPurchasingGate>
+        <UserPageSubscriptionsTopUp />
+      </NftPurchasingGate>
+    );
+  }
+
+  async function settleFrames(): Promise<void> {
+    await act(async () => {
+      await new Promise<void>((resolve) => {
+        globalThis.requestAnimationFrame(() => {
+          globalThis.requestAnimationFrame(() => resolve());
+        });
+      });
+    });
+  }
+
+  beforeEach(() => {
+    sendTransaction.data = undefined;
+    sendTransaction.isPending = false;
+    sendTransaction.error = undefined;
+    waitSendTransaction.isLoading = false;
+    waitSendTransaction.isSuccess = false;
+    waitSendTransaction.isError = false;
+    waitSendTransaction.error = undefined;
+    scrollIntoView = jest
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(() => undefined);
+    setEnvironment({ isIos: false, country: "US" });
+    setHash("");
+  });
+
+  afterEach(() => {
+    scrollIntoView.mockRestore();
+    setHash("");
+  });
+
+  it("renders the top-up section with the id the notification links to", () => {
+    render(<UserPageSubscriptionsTopUp />);
+
+    const section = screen.getByRole("region", { name: "Top up" });
+    expect(section).toHaveAttribute("id", TOP_UP_ID);
+    expect(section).toHaveClass("tw-scroll-mt-24");
+  });
+
+  it("scrolls to the section and focuses its heading for the top-up hash", async () => {
+    setHash(`#${TOP_UP_ID}`);
+    render(<UserPageSubscriptionsTopUp />);
+
+    await waitFor(() => {
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+    expect(scrollIntoView.mock.contexts[0]).toBe(
+      screen.getByRole("region", { name: "Top up" })
+    );
+    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
+    await settleFrames();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it("neither scrolls nor moves focus on an ordinary load", async () => {
+    render(<UserPageSubscriptionsTopUp />);
+    await settleFrames();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.body).toHaveFocus();
+  });
+
+  it("ignores a hash that names another section", async () => {
+    setHash("#profile-subscriptions-history");
+    render(<UserPageSubscriptionsTopUp />);
+    await settleFrames();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.body).toHaveFocus();
+  });
+
+  it("never scrolls to or reveals the section on restricted iOS", async () => {
+    setEnvironment({ isIos: true, country: "FR" });
+    setHash(`#${TOP_UP_ID}`);
+    render(<UserPageSubscriptionsTopUp />);
+    await settleFrames();
+
+    expect(document.getElementById(TOP_UP_ID)).toBeNull();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.body).toHaveFocus();
+  });
+
+  it("keeps the gated page unmounted and unscrolled until iOS proves a US country", async () => {
+    setEnvironment({ isIos: true, country: "", isCountryPending: true });
+    setHash(`#${TOP_UP_ID}`);
+    const { rerender } = render(renderGated());
+    await settleFrames();
+
+    expect(document.getElementById(TOP_UP_ID)).toBeNull();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    setEnvironment({ isIos: true, country: "FR" });
+    rerender(renderGated());
+    await settleFrames();
+
+    expect(document.getElementById(TOP_UP_ID)).toBeNull();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.body).toHaveFocus();
+  });
+
+  it("scrolls once the country check resolves to US on iOS", async () => {
+    setEnvironment({ isIos: true, country: "", isCountryPending: true });
+    setHash(`#${TOP_UP_ID}`);
+    const { rerender } = render(renderGated());
+    await settleFrames();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    setEnvironment({ isIos: true, country: "US" });
+    rerender(renderGated());
+
+    await waitFor(() => {
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
+  });
+
+  it("scrolls for a late-mounting section on Android and web", async () => {
+    setHash(`#${TOP_UP_ID}`);
+    const { rerender } = render(<p>Loading profile</p>);
+    await settleFrames();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    rerender(renderGated());
+
+    await waitFor(() => {
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -11,6 +11,8 @@ import React, {
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import WaveMySubmissions from "@/components/waves/leaderboard/WaveMySubmissions";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import WaveApprovalStatusBar from "@/components/waves/approval/WaveApprovalStatusBar";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
@@ -54,6 +56,7 @@ interface CreateDropUiState {
 }
 
 interface LeaderboardContentProps {
+  readonly additionalActionOnly: boolean;
   readonly wave: ApiWave;
   readonly viewMode: LeaderboardViewMode;
   readonly sort: WaveDropsLeaderboardSort;
@@ -178,6 +181,7 @@ const ApproveListStickyLeaderboardControls: React.FC<
 };
 
 const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
+  additionalActionOnly,
   wave,
   viewMode,
   sort,
@@ -194,6 +198,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   if (viewMode === "list") {
     return (
       <WaveLeaderboardDrops
+        additionalActionOnly={additionalActionOnly}
         wave={wave}
         sort={sort}
         isVotingClosed={isVotingClosed}
@@ -227,6 +232,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
 
   return (
     <WaveLeaderboardGallery
+      additionalActionOnly={additionalActionOnly}
       wave={wave}
       sort={sort}
       isVotingClosed={isVotingClosed}
@@ -274,6 +280,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [additionalActionWaveId, setAdditionalActionWaveId] = useState<
+    string | null
+  >(null);
+  const additionalActionOnly =
+    isMemesWave && additionalActionWaveId === wave.id;
+  const [receiptDrop, setReceiptDrop] = useState<ApiDrop | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
@@ -485,8 +497,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const createDropAction = canOpenCreateDrop ? onCreateDrop : undefined;
   const shouldDelayApprovalControlsSticky =
     isApproveWave && effectiveViewMode === "list";
-  const leaderboardControls = (
+  const renderLeaderboardHeader = (additionalActions?: React.ReactNode) => (
     <WaveLeaderboardHeader
+      additionalActionOnly={additionalActionOnly}
+      onAdditionalActionChange={
+        isMemesWave
+          ? (checked) => setAdditionalActionWaveId(checked ? wave.id : null)
+          : undefined
+      }
       wave={wave}
       viewMode={effectiveViewMode}
       sort={effectiveSort}
@@ -496,7 +514,21 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       minPrice={minPrice}
       maxPrice={maxPrice}
       onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
+      additionalActions={additionalActions}
     />
+  );
+  const leaderboardControls = isMemesWave ? (
+    renderLeaderboardHeader()
+  ) : (
+    <div className="tw-space-y-3">
+      <WaveMySubmissions
+        key={`${wave.id}:${connectedProfile?.id ?? "anonymous"}:${activeProfileProxy?.id ?? "self"}`}
+        wave={wave}
+        receiptDrop={receiptDrop}
+        onDismissReceipt={() => setReceiptDrop(null)}
+        renderHeader={renderLeaderboardHeader}
+      />
+    </div>
   );
 
   return (
@@ -574,6 +606,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
                   wave={wave}
                   onCancel={closeCreateDrop}
                   onSuccess={closeCreateDrop}
+                  onServerDropCreated={setReceiptDrop}
                 />
               </motion.div>
             )}
@@ -601,10 +634,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               wave={wave}
               onCancel={closeCreateDrop}
               onSuccess={closeCreateDrop}
+              onServerDropCreated={setReceiptDrop}
             />
           )}
 
           <LeaderboardContent
+            additionalActionOnly={additionalActionOnly}
             wave={wave}
             viewMode={effectiveViewMode}
             sort={effectiveSort}

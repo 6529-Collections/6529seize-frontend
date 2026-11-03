@@ -1,7 +1,5 @@
-import {
-  EULAConsentProvider,
-  useEULAConsent,
-} from "@/components/eula/EULAConsentContext";
+import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
+import { useEULAConsent } from "@/components/eula/useEULAConsent";
 import {
   CONSENT_EULA_COOKIE,
   CURRENT_EULA_VERSION,
@@ -35,7 +33,7 @@ jest.mock("@/components/eula/EULAModal", () => ({
   default: function MockEULAModal() {
     const {
       useEULAConsent: useConsent,
-    } = require("@/components/eula/EULAConsentContext");
+    } = require("@/components/eula/useEULAConsent");
     const { consent, saveError, isSaving } = useConsent();
     return (
       <div role="dialog" aria-label="EULA" data-testid="modal">

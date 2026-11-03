@@ -474,7 +474,9 @@ const BoostedDropCardHomeMedia = memo(
       className={`tw-relative ${HOME_ASPECT_RATIO_CLASSES} ${isChatVariant ? CHAT_TEXT_MAX_HEIGHT_CLASSES : ""} tw-w-full tw-overflow-hidden tw-rounded-xl`}
     >
       <div className="tw-relative tw-h-full tw-w-full">
-        <div className="tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
+        <div
+          className={`tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl ${isChatVariant ? "tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02] motion-reduce:tw-transform-none motion-reduce:tw-transition-none" : ""}`}
+        >
           <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden">
             <DropListItemContentMedia
               media_mime_type={media.mime_type}

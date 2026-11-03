@@ -14,10 +14,10 @@ describe("MyStreamWaveMyVoteVotes", () => {
 
   const drop = { rating: 5, realtime_rating: 9, rating_prediction: 6 } as any;
 
-  it("shows positive rating style", () => {
+  it("keeps positive combined totals neutral like competition chat", () => {
     render(<MyStreamWaveMyVoteVotes drop={drop} />);
     expect(screen.getByText("5")).toHaveClass(
-      "tw-text-emerald-500",
+      "tw-text-iron-100",
       "tw-font-semibold"
     );
     expect(ProgressMock.mock.calls.at(-1)?.[0]).toEqual(

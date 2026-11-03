@@ -123,12 +123,12 @@ export function CollectedStatsSeasons({
   );
 
   return (
-    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-4 tw-pb-4 tw-pt-4 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] sm:tw-px-5 sm:tw-pb-5">
+    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-3 tw-pb-2 tw-pt-3 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
       <div className="tw-flex tw-items-baseline tw-gap-2 tw-px-1">
-        <span className="tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-400">
+        <span className="tw-text-[15px]/4 tw-font-semibold tw-tracking-tight tw-text-iron-100">
           {title}
         </span>
-        <span className="tw-ml-auto tw-text-[10px] tw-font-medium tw-text-iron-500">
+        <span className="tw-ml-auto tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
           {startedCount}
         </span>
       </div>
@@ -159,6 +159,7 @@ export function CollectedStatsSeasons({
                     aria-expanded
                     aria-label={showLess}
                     onClick={onToggleExpanded}
+                    data-profile-action="Show fewer seasons"
                     className={desktopToggleClassName}
                   >
                     {showLess}
@@ -169,6 +170,7 @@ export function CollectedStatsSeasons({
                     aria-expanded={false}
                     aria-label={showMoreAriaLabel}
                     onClick={onToggleExpanded}
+                    data-profile-action="Show more seasons"
                     className={desktopToggleClassName}
                   >
                     {showMore}
@@ -179,7 +181,7 @@ export function CollectedStatsSeasons({
           </>
         ) : (
           <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-            <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-start tw-gap-x-3 tw-gap-y-0 tw-pt-3">
+            <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-start tw-gap-x-2 tw-gap-y-0 tw-pt-2">
               <SeasonTiles
                 seasons={startedSeasons}
                 activeSeasonId={activeSeasonId}
@@ -197,7 +199,7 @@ export function CollectedStatsSeasons({
 
       {notStartedSeasons.length > 0 && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-px-1 tw-pt-2">
-          <span className="tw-mr-0.5 tw-text-[8px] tw-font-medium tw-text-iron-500">
+          <span className="tw-mr-0.5 tw-text-meta tw-font-normal tw-text-iron-500">
             {unseizedLabel}
           </span>
           {notStartedSeasons.map((season) => (

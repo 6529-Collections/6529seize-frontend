@@ -8,10 +8,6 @@
   question, follow [Verify GitHub authority](ops/skills/deploy-6529/SKILL.md#verify-github-authority).
   Check the authenticated account, repo permissions, actual required team and
   effective rules; preserve existing explicit authorization for the release.
-- For new staging or direct production release intents that include frontend,
-  follow the skill's [Coordinator release recording](ops/skills/deploy-6529/SKILL.md#coordinator-release-recording)
-  step before release merges or deployments. Preserve this current integration
-  when changing deployment instructions; keep its details in the skill.
 - For staging, merge the development branch into the latest `1a-staging` and
   push. Frontend changes automatically start `Web Deploy - STAGING`; backend
   changes require dispatching `Deploy a service` for the required services.
@@ -43,9 +39,11 @@
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# Next.js: ALWAYS read docs before coding
+# This is NOT the Next.js you know
 
-Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
 
@@ -167,14 +165,17 @@ All project commands must go through the repo-local `6529` wrapper.
   consistency, Tailwind-first styling migration, responsive layout, interaction
   states, media behavior, and browser evidence.
 - Every Network Museum PR that changes a public route, visible component,
-  layout, copy, or media must also pass the pre-PR full-page adversarial review
-  gate in `ops/standards/museum-visual-release-acceptance.md`. A PR must not be
-  opened until exact production-build screenshots of every changed Museum route
-  have been reviewed independently for museum/curatorial quality, visual/UX
-  quality, and copy/editorial quality, and all blocking findings have been fixed
-  and recaptured. Automated geometry, DOM, and accessibility checks do not
-  substitute for this gate.
+  layout, copy, or media must also pass the pre-PR Museum gate in
+  `ops/standards/museum-visual-release-acceptance.md`. The gate runs the
+  `fe-polish-judge` loop with the Museum profile: three independent lens reviews
+  (curatorial, visual/UX, copy/editorial) of full-page production-build
+  captures of every changed Museum route, sharing one findings ledger. A PR must
+  not be opened until the scoring script accepts the run. Automated geometry,
+  DOM, and accessibility checks do not substitute for this gate.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+- Use `ops/skills/fe-polish-judge/SKILL.md` and
+  `ops/standards/frontend-polish-judge.md` when asked for a polish score or an
+  autonomous builder–judge loop on a page. It is opt-in and adds no PR gate.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
   work.
@@ -252,6 +253,10 @@ is available, use it; otherwise read the relevant files in
 - New API calls should normally use `services/api/common-api.ts` helpers so
   staging auth, wallet JWT auth, URL construction, structured errors, abort
   handling, and monitoring stay consistent.
+- When code must build a 6529 API URL itself, use `apiUrl(path)` or
+  `getApiBase()` from `services/api/api-endpoints.ts`. Never read
+  `publicEnv.API_ENDPOINT` or hardcode the API host; the contract test
+  `__tests__/contracts/api-endpoint-boundary.test.ts` enforces this.
 - React Query cache keys and broad invalidation live in
   `components/react-query-wrapper/ReactQueryWrapper.tsx`. Reuse `QueryKey` and
   existing invalidation/update helpers before creating new cache patterns.
@@ -296,6 +301,7 @@ is available, use it; otherwise read the relevant files in
     gates, and deploy gates.
   - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates.
   - `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+  - `ops/skills/fe-polish-judge/SKILL.md` for scored builder–judge polish loops.
   - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
@@ -319,11 +325,12 @@ is available, use it; otherwise read the relevant files in
   distinct browser risk.
 - Keep exhaustive route inventories, static content, metadata, source mapping,
   link, and fail-closed invariants in fast Jest or other static contract tests.
-  The existing Museum institutional-practice sweep is a scoped exception:
-  retain its complete desktop/mobile route coverage, but schedule its isolated
-  PR and staging lanes only when the exact change set touches the Network
-  Museum route, component, publication, locale, environment-adapter, or E2E
-  paths declared by the CI classifier.
+  Museum browser packs run only for the Museum pages a change can affect:
+  `scripts/museum-release-selection.cjs` maps changed files to page surfaces
+  through `ops/testing-strategy/museum-surface-registry.v1.json` and selects
+  the packs whose specs visit them. Publication, shared-shell, and selection
+  changes, or anything it cannot map, run every pack. Keep each spec's
+  registered surfaces equal to the pages it visits.
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 

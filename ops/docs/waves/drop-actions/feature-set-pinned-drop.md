@@ -6,7 +6,8 @@ Use `Set as pinned drop` to replace the wave's pinned description drop with an
 existing posted drop.
 
 On non-direct-message waves, this also changes the content shown in the wave
-header description preview/popover.
+header description preview/popover. The `About` section also displays the
+current pinned drop below the wave header.
 
 ## Location in the Site
 
@@ -37,6 +38,7 @@ header description preview/popover.
    - you see `Pinned drop updated.`
    - the menu closes
    - the active wave and same-wave drop data refresh
+   - the `About` section displays the newly pinned drop
    - non-DM header preview/popover surfaces use the newly pinned drop
 
 ## Common Scenarios

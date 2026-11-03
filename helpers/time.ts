@@ -317,67 +317,9 @@ export class Time {
     });
   }
 
-  public toShortRelativeTime(): string {
-    const currentTime = new Date().getTime();
-    const timeDifference = currentTime - this.ms;
-
-    const seconds = Math.floor(timeDifference / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 1) {
-      return this.toDate().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-    } else if (days === 1) {
-      return "Yesterday";
-    } else if (hours > 0) {
-      return `${hours}h`;
-    } else if (minutes > 0) {
-      return `${minutes}m`;
-    } else {
-      return `Just now`;
-    }
-  }
-
   public toString = (): string => {
     return this.formatAsDuration();
   };
-
-  public toMonthAndDayString(): string {
-    function getDayWithSuffix(day: number): string {
-      if (day === 1 || day === 21 || day === 31) {
-        return `${day}st`;
-      } else if (day === 2 || day === 22) {
-        return `${day}nd`;
-      } else if (day === 3 || day === 23) {
-        return `${day}rd`;
-      } else {
-        return `${day}th`;
-      }
-    }
-    const isoDateString = this.toIsoDateString();
-    const date = new Date(isoDateString);
-    const month = date.toLocaleString("default", { month: "long" });
-    const day = date.getDate();
-    const dayWithSuffix = getDayWithSuffix(day);
-    return `${this.toDayName()}, ${month} ${dayWithSuffix}`;
-  }
-
-  public toDayName() {
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return daysOfWeek[this.toDate().getUTCDay()];
-  }
 
   public formatAsDuration() {
     let left = this.ms;

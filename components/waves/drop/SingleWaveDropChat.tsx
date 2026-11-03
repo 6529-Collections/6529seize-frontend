@@ -31,6 +31,7 @@ import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "../create-drop-content/reply-target-unavailable";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -159,6 +160,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
         eligibilityWave.chat?.authenticated_user_eligible ?? false,
+      authenticated_user_eligible_to_reply: eligibilityWave.chat
+        ? getWaveReplyEligibility(eligibilityWave.chat)
+        : false,
       authenticated_user_eligible_to_vote:
         eligibilityWave.voting?.authenticated_user_eligible ?? false,
       authenticated_user_eligible_to_participate:

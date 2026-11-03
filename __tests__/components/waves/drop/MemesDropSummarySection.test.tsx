@@ -3,9 +3,23 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/waves/drop/WaveDropMetaRow", () => ({
-  WaveDropMetaRow: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  WaveDropMetaRow: ({
+    children,
+    drop,
+  }: {
+    children: React.ReactNode;
+    drop: ExtendedDrop;
+  }) => {
+    const { MemeCollaboratorCredits } = jest.requireActual(
+      "@/components/waves/memes/collaborations/MemeCollaboratorCredits"
+    );
+    return (
+      <div>
+        <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        {children}
+      </div>
+    );
+  },
 }));
 
 jest.mock("@/components/waves/drop/WaveDropVoteSummary", () => ({
@@ -29,6 +43,27 @@ const renderSummary = (drop: ExtendedDrop) =>
   );
 
 describe("MemesDropSummarySection", () => {
+  it("preserves authored line breaks, blank lines, and spaces in the description", () => {
+    const description = "First line\nSecond line\n\nA  spaced paragraph";
+    render(
+      <MemesDropSummarySection
+        drop={{ submission_context: {} } as ExtendedDrop}
+        title="Photographic artwork"
+        description={description}
+        isWinner={false}
+        isVotingEnded={false}
+        canShowVote={false}
+        manualOutcomes={[]}
+        nicTotal={0}
+        repTotal={0}
+        onVoteClick={jest.fn()}
+      />
+    );
+    const paragraph = screen.getByText(/First line/);
+    expect(paragraph.textContent).toBe(description);
+    expect(paragraph).toHaveClass("tw-whitespace-pre-wrap", "tw-break-words");
+  });
+
   it("shows a compact mapped Meme card pill with the minted outcome", () => {
     renderSummary({
       submission_context: { meme_card_id: 521 },
@@ -54,3 +89,25 @@ describe("MemesDropSummarySection", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+it("renders accepted collaborator attribution once through the author metadata row", () => {
+  renderSummary({
+    submission_context: {},
+    collaborators: [
+      { id: "B", handle: "artistB", display: "artistB", pfp: null },
+    ],
+  } as ExtendedDrop);
+  expect(screen.getAllByRole("link", { name: "artistB" })).toHaveLength(1);
+});
+
+// Profile fetching and badge rendering have dedicated collaborator identity coverage.
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaboratorIdentity",
+  () => ({
+    MemeCollaboratorIdentity: ({
+      collaborator,
+    }: {
+      collaborator: { handle: string };
+    }) => <a href={`/${collaborator.handle}`}>{collaborator.handle}</a>,
+  })
+);

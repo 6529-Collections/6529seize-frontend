@@ -5,6 +5,7 @@ import PrivilegedDropCreator, {
 } from "@/components/waves/PrivilegedDropCreator";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import {
   useWaveEligibility,
   WaveEligibilityProvider,
@@ -20,6 +21,7 @@ type ProfileSetupVisibilityInput = {
 type DropPlaceholderMockProps = {
   readonly type: "chat" | "submission" | "both" | "profile-check" | "suspended";
   readonly profileSetupHref?: string | undefined;
+  readonly canReply?: boolean | undefined;
 };
 type MockAuthState = {
   readonly connectedProfile?:
@@ -100,6 +102,7 @@ jest.mock("@/components/waves/DropPlaceholder", () => ({
       data-testid="placeholder"
       data-type={props.type}
       data-profile-setup-href={props.profileSetupHref ?? ""}
+      data-can-reply={String(props.canReply ?? false)}
     />
   ),
 }));
@@ -233,6 +236,92 @@ describe("PrivilegedDropCreator", () => {
     });
     renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
     expect(screen.getByTestId("create")).toBeInTheDocument();
+  });
+
+  describe("open replies", () => {
+    const replyOnlyWave = {
+      ...wave,
+      chat: {
+        authenticated_user_eligible: false,
+        enabled: true,
+        replies: {
+          open: true,
+          collapsed: true,
+          authenticated_user_eligible: true,
+          authenticated_user_can_delete: false,
+        },
+      },
+    } as React.ComponentProps<typeof PrivilegedDropCreator>["wave"];
+
+    it("opens the chat composer while replying", () => {
+      mockPriv.mockReturnValue({
+        submissionRestriction: null,
+        chatRestriction: null,
+      });
+      renderPrivilegedDropCreator({
+        wave: replyOnlyWave,
+        activeDrop: {
+          action: ActiveDropAction.REPLY,
+          drop: { id: "drop-1" } as never,
+          partId: 1,
+        },
+      });
+
+      expect(mockPriv).toHaveBeenCalledWith(
+        expect.objectContaining({ canChat: true })
+      );
+      expect(screen.getByTestId("create")).toBeInTheDocument();
+    });
+
+    it("keeps new drops limited to chat members", () => {
+      mockPriv.mockReturnValue({
+        submissionRestriction: null,
+        chatRestriction: "NO_PERMISSION",
+      });
+      renderPrivilegedDropCreator({ wave: replyOnlyWave });
+
+      expect(mockPriv).toHaveBeenCalledWith(
+        expect.objectContaining({ canChat: false })
+      );
+      expect(screen.getByTestId("placeholder")).toHaveAttribute(
+        "data-can-reply",
+        "true"
+      );
+    });
+
+    it("does not offer replies when the wave keeps them closed", () => {
+      mockPriv.mockReturnValue({
+        submissionRestriction: null,
+        chatRestriction: "NO_PERMISSION",
+      });
+      renderPrivilegedDropCreator({
+        wave: {
+          ...replyOnlyWave,
+          chat: {
+            ...replyOnlyWave.chat,
+            replies: {
+              open: false,
+              collapsed: false,
+              authenticated_user_eligible: false,
+              authenticated_user_can_delete: false,
+            },
+          },
+        },
+        activeDrop: {
+          action: ActiveDropAction.REPLY,
+          drop: { id: "drop-1" } as never,
+          partId: 1,
+        },
+      });
+
+      expect(mockPriv).toHaveBeenCalledWith(
+        expect.objectContaining({ canChat: false })
+      );
+      expect(screen.getByTestId("placeholder")).toHaveAttribute(
+        "data-can-reply",
+        "false"
+      );
+    });
   });
 
   it("replaces the composer while posting access is being checked", () => {

@@ -18,7 +18,7 @@ import type {
 } from "./collect.types";
 
 export const COLLECT_INPUT_CLASS =
-  "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+  "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 touch-only:tw-text-base focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 interface CollectGoalFormProps {
   readonly draft: CollectGoalDraft;
@@ -168,7 +168,9 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               onChange={(event) => change({ targetCount: event.target.value })}
               aria-invalid={invalidField === "quantity"}
               aria-describedby={
-                invalidField === "quantity" ? `${id}-error` : undefined
+                invalidField === "quantity"
+                  ? `${id}-copies-hint ${id}-error`
+                  : `${id}-copies-hint`
               }
               className={COLLECT_INPUT_CLASS}
             />
@@ -217,6 +219,14 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           </label>
         )}
       </div>
+      {showQuantity && (
+        <p
+          id={`${id}-copies-hint`}
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "collect.goal.targetCountHint")}
+        </p>
+      )}
       {props.showBudget !== false && (
         <p
           id={`${id}-budget-hint`}

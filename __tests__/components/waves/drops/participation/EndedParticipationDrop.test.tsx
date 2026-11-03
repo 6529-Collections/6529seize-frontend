@@ -2,6 +2,8 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import EndedParticipationDrop from "@/components/waves/drops/participation/EndedParticipationDrop";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 
 jest.mock("next/navigation", () => ({
@@ -68,6 +70,16 @@ jest.mock(
       </div>
     );
   }
+);
+
+const mockRatings = jest.fn((_props: unknown) => (
+  <div data-testid="historical-vote-summary" />
+));
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropRatings",
+  () => ({
+    ParticipationDropRatings: (props: unknown) => mockRatings(props),
+  })
 );
 
 const drop: any = {
@@ -396,3 +408,61 @@ describe("EndedParticipationDrop", () => {
     ]);
   });
 });
+
+it("keeps scores and voters on an ended submission without enabling voting", () => {
+  const completed = {
+    ...drop,
+    drop_type: ApiDropType.Participatory,
+    wave: {
+      ...drop.wave,
+      voting_period_start: 1,
+      voting_credit_type: ApiWaveCreditType.Tdh,
+    },
+    rating: 187867,
+    raters_count: 3,
+    rank: 1,
+  };
+  render(
+    <EndedParticipationDrop
+      drop={completed}
+      showWaveInfo={false}
+      activeDrop={null}
+      showReplyAndQuote={false}
+      location={DropLocation.WAVE}
+      onReply={jest.fn()}
+      onQuoteClick={jest.fn()}
+    />
+  );
+  expect(screen.getByTestId("historical-vote-summary")).toBeInTheDocument();
+  expect(mockRatings).toHaveBeenLastCalledWith(
+    expect.objectContaining({ drop: completed, isVotingClosed: true })
+  );
+  expect(
+    screen.queryByRole("button", { name: "Vote" })
+  ).not.toBeInTheDocument();
+});
+
+it.each([ApiDropType.Chat, ApiDropType.Participatory])(
+  "omits vote summaries from an ended %s card without a voting period",
+  (dropType) => {
+    render(
+      <EndedParticipationDrop
+        drop={{
+          ...drop,
+          drop_type: dropType,
+          wave: { ...drop.wave, voting_period_start: null },
+        }}
+        contentPresentation="proposalCard"
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("historical-vote-summary")
+    ).not.toBeInTheDocument();
+  }
+);

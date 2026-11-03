@@ -1,7 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { compareSubwavesByLatestActivity } from "@/helpers/waves/subwave-activity.helpers";
+import { compareSubwavesForDisplay } from "@/helpers/waves/subwave-activity.helpers";
 import { useCallback, useMemo, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
@@ -36,11 +36,13 @@ export interface SidebarWaveTreeRow {
   readonly isLastSubwave: boolean;
 }
 
-const hasUnreadDrops = (wave: MinimalWave) =>
-  !wave.isMuted && (wave.unreadDropsCount > 0 || wave.newDropsCount.count > 0);
-
 const getUnreadDropsCount = (wave: MinimalWave) =>
   wave.isMuted ? 0 : Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
+
+// Matches the server's subwave_unread_drops rule: only subwaves the viewer
+// follows and has not muted contribute to the parent's aggregate.
+const getCountedSubwaveUnreadDrops = (subwave: MinimalWave) =>
+  subwave.isFollowing ? getUnreadDropsCount(subwave) : 0;
 
 const getUnreadSubwaveDropsCount = (
   wave: MinimalWave,
@@ -51,7 +53,7 @@ const getUnreadSubwaveDropsCount = (
   }
 
   const loadedSubwaveUnreadCount = subwaves.reduce(
-    (total, subwave) => total + getUnreadDropsCount(subwave),
+    (total, subwave) => total + getCountedSubwaveUnreadDrops(subwave),
     0
   );
 
@@ -131,7 +133,7 @@ const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
   }
 
   for (const subwaves of map.values()) {
-    subwaves.sort(compareSubwavesByLatestActivity);
+    subwaves.sort(compareSubwavesForDisplay);
   }
 
   return map;
@@ -328,7 +330,9 @@ export function useSidebarWaveTree({
     (wave: MinimalWave) =>
       !wave.isMuted &&
       (wave.unreadSubwaveDrops > 0 ||
-        (subwavesByParentId.get(wave.id) ?? []).some(hasUnreadDrops)),
+        (subwavesByParentId.get(wave.id) ?? []).some(
+          (subwave) => getCountedSubwaveUnreadDrops(subwave) > 0
+        )),
     [subwavesByParentId]
   );
 

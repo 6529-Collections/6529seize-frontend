@@ -1,8 +1,10 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, renderHook, screen, fireEvent } from "@testing-library/react";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -16,6 +18,38 @@ const push = jest.fn();
 (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams("q=1"));
 
 describe("WaveDropMobileMenuOpen", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (usePathname as jest.Mock).mockReturnValue("/p");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams("q=1"));
+  });
+
+  it("preserves competition navigation and closes the mobile menu once", () => {
+    const onOpenChange = jest.fn();
+    const drop = {
+      id: "entry-art",
+      drop_type: ApiDropType.Participatory,
+    } as ExtendedDrop;
+    (usePathname as jest.Mock).mockReturnValue("/waves/w/competitions/alpha");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("tab=leaderboard&default=1")
+    );
+    const { result } = renderHook(() => useCompetitionDropNavigation());
+    render(
+      <WaveDropMobileMenuOpen
+        drop={drop}
+        onNavigate={result.current}
+        onOpenChange={onOpenChange}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Open drop" }));
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      "/waves/w/competitions/alpha?tab=leaderboard&drop=entry-art",
+      { scroll: false }
+    );
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+  });
   it("renders nothing for chat drops", () => {
     const { container } = render(
       <WaveDropMobileMenuOpen

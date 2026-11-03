@@ -16,6 +16,7 @@ export default function GroupCreateXtdhGrantSelection({
   setMatchMode,
   showLookupError,
   showNonGrantedWarning,
+  quiet = false,
 }: {
   readonly errorMessage: string | null | undefined;
   readonly grant: ApiXTdhGrant | null | undefined;
@@ -28,6 +29,7 @@ export default function GroupCreateXtdhGrantSelection({
   ) => void;
   readonly showLookupError: boolean;
   readonly showNonGrantedWarning: boolean;
+  readonly quiet?: boolean;
 }) {
   return (
     <>
@@ -54,16 +56,18 @@ export default function GroupCreateXtdhGrantSelection({
       {isLookupFresh && !!grant && (
         <>
           <GroupCreateXtdhGrantRow
+            quiet={quiet}
             grant={grant}
             isSelected={true}
             interactive={false}
             className="tw-mt-3"
           />
           <GroupCreateXtdhGrantMatchMode
+            quiet={quiet}
             grant={grant}
             matchMode={matchMode}
             setMatchMode={setMatchMode}
-            className="tw-mt-3"
+            className={quiet ? "tw-mt-4" : "tw-mt-3"}
           />
         </>
       )}

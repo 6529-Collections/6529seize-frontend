@@ -9,11 +9,13 @@ import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
+  readonly isCompetition?: boolean;
   readonly setDisplay: (display: CreateWaveConfig["display"]) => void;
 }
 
 export default function CreateWaveRules({
   config,
+  isCompetition = false,
   setDisplay,
 }: CreateWaveRulesProps) {
   const locale = useBrowserLocale();
@@ -39,7 +41,12 @@ export default function CreateWaveRules({
           id="create-wave-guidelines-title"
           className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
         >
-          {t(locale, "waves.create.rules.guidelinesFieldLabel")}
+          {t(
+            locale,
+            isCompetition
+              ? "competitions.guidelinesLabel"
+              : "waves.create.rules.guidelinesFieldLabel"
+          )}
         </h3>
         <div className="tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
           <section>
@@ -49,13 +56,23 @@ export default function CreateWaveRules({
                   htmlFor="create-wave-custom-rules"
                   className="tw-sr-only"
                 >
-                  {t(locale, "waves.create.rules.guidelinesFieldLabel")}
+                  {t(
+                    locale,
+                    isCompetition
+                      ? "competitions.guidelinesLabel"
+                      : "waves.create.rules.guidelinesFieldLabel"
+                  )}
                 </label>
                 <p
                   id={customRulesHelpId}
                   className={CREATE_WAVE_FORM_STYLES.supportingText}
                 >
-                  {t(locale, "waves.create.rules.guidelinesDescription")}
+                  {t(
+                    locale,
+                    isCompetition
+                      ? "competitions.guidelinesDescription"
+                      : "waves.create.rules.guidelinesDescription"
+                  )}
                 </p>
               </div>
               <textarea
@@ -68,7 +85,9 @@ export default function CreateWaveRules({
                 className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 sm:tw-text-sm"
                 placeholder={t(
                   locale,
-                  "waves.create.rules.guidelinesPlaceholder"
+                  isCompetition
+                    ? "competitions.guidelinesPlaceholder"
+                    : "waves.create.rules.guidelinesPlaceholder"
                 )}
               />
               <div

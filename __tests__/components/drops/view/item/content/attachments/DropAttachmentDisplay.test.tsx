@@ -1,3 +1,4 @@
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import DropAttachmentDisplay from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay";
 import { ApiAttachmentSafetyScanner } from "@/generated/models/ApiAttachmentSafetyScanner";
 import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
@@ -12,6 +13,25 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
       : url,
 }));
 
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isAppleMobile: false,
+    hasTouchScreen: false,
+    isApp: false,
+    isMobileDevice: false,
+  })),
+}));
+jest.mock(
+  "@/components/drops/view/item/content/attachments/PdfAttachmentPreview",
+  () => ({
+    __esModule: true,
+    default: ({ url }: { url: string }) => (
+      <div data-testid="ios-pdf-reader">{url}</div>
+    ),
+  })
+);
+
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(
   navigator,
   "clipboard"
@@ -22,6 +42,37 @@ const hadCreateObjectURL = "createObjectURL" in URL;
 const hadRevokeObjectURL = "revokeObjectURL" in URL;
 
 describe("DropAttachmentDisplay", () => {
+  beforeEach(() =>
+    jest.mocked(useDeviceInfo).mockReturnValue({
+      isAppleMobile: false,
+      hasTouchScreen: false,
+      isApp: false,
+      isMobileDevice: false,
+    })
+  );
+
+  it("uses a page-aware reader on iOS and unmounts it when interaction is disabled", async () => {
+    jest.mocked(useDeviceInfo).mockReturnValue({
+      isAppleMobile: true,
+      hasTouchScreen: true,
+      isApp: false,
+      isMobileDevice: false,
+    });
+    const props = {
+      mimeType: "application/pdf",
+      attachmentUrl: "https://example.test/paper.pdf",
+    };
+    const { rerender } = render(<DropAttachmentDisplay {...props} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Render attachment preview" })
+    );
+    expect(screen.getByTestId("ios-pdf-reader")).toHaveTextContent(
+      props.attachmentUrl
+    );
+    expect(screen.queryByTitle("paper.pdf")).not.toBeInTheDocument();
+    rerender(<DropAttachmentDisplay {...props} disableMediaInteraction />);
+    expect(screen.queryByTestId("ios-pdf-reader")).not.toBeInTheDocument();
+  });
   afterEach(() => {
     jest.restoreAllMocks();
 

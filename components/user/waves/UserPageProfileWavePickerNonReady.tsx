@@ -56,7 +56,11 @@ function renderNotOwnProfileState(variant: WavePickerVariant) {
     return <CurationEmptyPanel title={title} message={message} />;
   }
 
-  return <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>;
+  return (
+    <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+      {message}
+    </p>
+  );
 }
 
 function renderProxyMode(variant: WavePickerVariant) {
@@ -67,7 +71,9 @@ function renderProxyMode(variant: WavePickerVariant) {
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+          <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+            {message}
+          </p>
         </div>
       </section>
     );
@@ -76,7 +82,9 @@ function renderProxyMode(variant: WavePickerVariant) {
   if (variant === MOBILE_SHEET_VARIANT) {
     return (
       <div className="tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+        <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+          {message}
+        </p>
       </div>
     );
   }
@@ -110,10 +118,12 @@ function renderMissingProfileState(
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-space-y-2 tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
             {title}
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+          <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+            {message}
+          </p>
           <ButtonLink href={profileHref} variant="primary" size="sm">
             {t(locale, "profileCuration.entry.goIdentity")}
           </ButtonLink>
@@ -124,10 +134,12 @@ function renderMissingProfileState(
 
   return (
     <div className="tw-space-y-2 tw-px-4 sm:tw-px-6">
-      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
         {title}
       </p>
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+      <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+        {message}
+      </p>
       <ButtonLink href={profileHref} variant="primary" size="sm">
         {t(locale, "profileCuration.entry.goIdentity")}
       </ButtonLink>
@@ -139,7 +151,7 @@ function renderLoadingState(variant: WavePickerVariant) {
   if (variant === DROPDOWN_VARIANT) {
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
-        <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4 tw-text-sm tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4 tw-text-meta tw-font-normal tw-text-iron-500">
           <Spinner dimension={14} />
           <span>Loading waves...</span>
         </div>
@@ -149,7 +161,7 @@ function renderLoadingState(variant: WavePickerVariant) {
 
   if (variant === MOBILE_SHEET_VARIANT) {
     return (
-      <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-text-sm tw-text-iron-400 sm:tw-px-6">
+      <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-text-meta tw-font-normal tw-text-iron-500 sm:tw-px-6">
         <Spinner dimension={14} />
         <span>Loading waves...</span>
       </div>
@@ -170,10 +182,10 @@ function renderErrorState({
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-space-y-3 tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
             Unable to load your waves
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+          <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
             There was a temporary problem loading the waves you can use for your
             profile.
           </p>
@@ -186,10 +198,10 @@ function renderErrorState({
   if (variant === MOBILE_SHEET_VARIANT) {
     return (
       <div className="tw-space-y-3 tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
           Unable to load your waves
         </p>
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+        <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
           There was a temporary problem loading the waves you can use for your
           profile.
         </p>
@@ -243,10 +255,12 @@ function renderNoPublicWavesState({
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-space-y-3 tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
             {title}
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+          <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+            {message}
+          </p>
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             <CreateProfileCurationButton onClick={onCreateProfileCuration} />
             <CreateWaveLink />
@@ -258,10 +272,12 @@ function renderNoPublicWavesState({
 
   return (
     <div className="tw-space-y-3 tw-px-4 sm:tw-px-6">
-      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
         {title}
       </p>
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+      <p className="tw-mb-0 tw-text-meta tw-font-normal tw-text-iron-500">
+        {message}
+      </p>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
         <CreateProfileCurationButton onClick={onCreateProfileCuration} />
         <CreateWaveLink />

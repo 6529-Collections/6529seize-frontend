@@ -1,9 +1,10 @@
-# Wave Leaderboard Sort and Price Filters
+# Wave Leaderboard Sort and Filters
 
 ## Overview
 
 Use leaderboard header filters to:
 - reorder drops with `Sort`
+- show promised extras on The Memes Main Stage with `Additional Action`
 - narrow curation-wave results with ETH bounds from `Filters`
 
 `Sort` is saved per wave in local browser storage. Price filters are local-only
@@ -27,7 +28,14 @@ UI state.
 ## Control Behavior
 
 - `Sort` is always visible in the leaderboard header.
-- On wider layouts, `Sort` uses compact pill tabs instead of a dropdown.
+- On wider layouts, `Sort` uses compact pill tabs. Main Stage keeps a compact
+  dropdown beside the `Additional Action` checkbox.
+- Click or tap the `Additional Action` checkbox or its label to show only marked
+  submissions. A checkmark and amber treatment show when it is active. Select it
+  again to restore all submissions. Keyboard users can focus it and press Space.
+- The filter includes marked submissions without a separate plan and applies to
+  the complete results, including later pages. Sorting and grid/list view remain
+  independent. On narrow screens the controls wrap without shortening the label.
 - `Sort` options are:
   - all waves: `Current Vote`, `Hot`, `Newest`
   - waves with `time_lock_ms`: `Projected Vote`
@@ -54,9 +62,19 @@ UI state.
 3. Optional (curation waves): open `Filters` and set min/max ETH bounds.
 4. Compare results in the current leaderboard view mode.
 
+## Common Scenarios
+
+- On Main Stage, select `Additional Action` to discover artists promising an
+  event, donation, physical item, airdrop, or another deliverable. Open the artwork
+  details to read the artist's optional plan. The promise does not verify approval
+  or fulfillment.
+- Keep the filter on while changing sort order or switching between grid and list.
+
 ## Edge Cases
 
 - Some sort/price combinations validly return empty results.
+- If no submissions match `Additional Action`, the empty state says:
+  `No submissions marked Additional Action.`
 - URL `min_price` and `max_price` values are not used by leaderboard header UI.
 - If both price bounds are set in reverse order (`min > max`), request bounds
   are normalized before fetch.
@@ -66,6 +84,8 @@ UI state.
 ## Failure and Recovery
 
 - Any sort or price change triggers a fresh leaderboard query.
+- If loading fails, use `Retry`. A failed filtered request does not show unfiltered
+  cards as matches. Changing the filter starts its own result set.
 - If controls are clipped on small widths, scroll the controls row horizontally.
 - If price filtering looks wrong, use `Clear filters` to reset ETH bounds.
 
@@ -73,6 +93,8 @@ UI state.
 
 - Sort and price changes only affect leaderboard presentation.
 - Sort preference is local per wave and browser, and is not part of the URL.
+- `Additional Action` is available on Main Stage. It resets when the leaderboard
+  remounts or the page refreshes and does not affect other waves.
 - Price filters are not URL-synced and reset with wave-context remounts
   (for example changing to another wave thread).
 - Curation price filtering uses ETH values.

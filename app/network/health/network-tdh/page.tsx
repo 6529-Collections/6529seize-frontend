@@ -5,6 +5,8 @@ import {
   NETWORK_REFERENCE_PAGE_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export default function CommunityStatsPage() {
   return (
@@ -28,6 +30,6 @@ export default function CommunityStatsPage() {
 export const generateMetadata = () => {
   return getAppMetadata({
     title: "Stats | Network",
-    description: "Network",
+    description: t(DEFAULT_LOCALE, "pageMetadata.networkTdhStats.description"),
   });
 };

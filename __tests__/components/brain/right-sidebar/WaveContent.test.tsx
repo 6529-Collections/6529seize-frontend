@@ -21,20 +21,6 @@ jest.mock("@/components/common/TabToggleWithOverflow", () => ({
   ),
 }));
 
-jest.mock(
-  "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters",
-  () => ({
-    __esModule: true,
-    WaveLeaderboardRightSidebarVoters: () => <div>voters</div>,
-  })
-);
-jest.mock(
-  "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs",
-  () => ({
-    __esModule: true,
-    WaveLeaderboardRightSidebarActivityLogs: () => <div>logs</div>,
-  })
-);
 jest.mock("@/components/brain/right-sidebar/BrainRightSidebarContent", () => ({
   __esModule: true,
   default: () => <div>content</div>,
@@ -161,11 +147,11 @@ describe("WaveContent", () => {
       />
     );
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,REP,Configuration,Voters,Activity"
+      "ABOUT-About,REP,Configuration"
     );
     expect(screen.getByTestId("tabs")).toHaveAttribute(
       "data-max-visible-tabs",
-      "4"
+      "3"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");
@@ -183,7 +169,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,REP,Configuration,Voters,Activity"
+      "ABOUT-About,REP,Configuration"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Proposals");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");

@@ -473,6 +473,31 @@ describe("GroupAssignmentPanel shared layout", () => {
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 
+  it("returns to the criteria overview without a false selection or empty editor region", async () => {
+    const user = userEvent.setup();
+    renderDialogPanel();
+
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    const identities = screen.getByRole("button", { name: "Identities" });
+    const editor = screen.getByRole("region", { name: "Identities" });
+    expect(identities).toHaveAttribute("aria-controls", editor.id);
+    expect(editor).toHaveAttribute("aria-labelledby", `${identities.id}-label`);
+    expect(identities).toHaveAttribute("aria-current", "true");
+    expect(identities).not.toHaveAttribute("aria-pressed");
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(identities).not.toHaveAttribute("aria-current");
+    expect(
+      screen.queryByRole("region", { name: "Identities" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Close" })
+    ).not.toBeInTheDocument();
+
+    await user.click(identities);
+    expect(screen.getByTestId("identity-builder")).toBeVisible();
+  });
+
   it("selects an existing group", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();

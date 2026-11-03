@@ -1,4 +1,5 @@
 "use client";
+import { getWaveCreationReturnPath } from "@/helpers/waves/create-wave-return.helpers";
 
 import { useContext, useState, type ReactNode } from "react";
 import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
@@ -100,7 +101,10 @@ export default function UserPageSetUpProfile({
         }
         return `/${updatedHandle}`;
       })();
-      router.replace(newPath, { scroll: false });
+      router.replace(
+        getWaveCreationReturnPath(globalThis.location.search) ?? newPath,
+        { scroll: false }
+      );
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

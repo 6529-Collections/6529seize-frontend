@@ -40,7 +40,7 @@ interface BoostedDropCardHomeProps {
 
 const MAX_FIRE_ICONS = 5;
 const HOME_CARD_CLASSES =
-  "tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:-tw-translate-y-1.5 hover:tw-shadow-[0_0_32px_-10px_rgba(255,255,255,0.12)]";
+  "tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none";
 const CHAT_CARD_CLASSES =
   "tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/80 tw-bg-iron-950/95 tw-p-0 tw-text-left tw-shadow-[0_14px_36px_-28px_rgba(0,0,0,0.85)] tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-950";
 const CLICKABLE_CARD_CLASS = "tw-cursor-pointer";
@@ -53,13 +53,13 @@ const CHAT_HEADER_CLASSES =
 const HEADER_LEFT_CLASSES =
   "tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-overflow-hidden";
 const PILL_CLASSES =
-  "tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60";
+  "tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md";
 const FOOTER_CLASSES =
   "tw-relative tw-z-30 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/70 tw-px-4 tw-py-3";
 const PROFILE_LINK_CLASSES =
-  "tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-md tw-no-underline tw-transition-opacity desktop-hover:hover:tw-opacity-80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-md tw-no-underline tw-transition-opacity tw-duration-200 tw-ease-out desktop-hover:hover:tw-opacity-80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
 const WAVE_LINK_CLASSES =
-  "tw-group/wave tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-full tw-bg-white/5 tw-py-1 tw-pl-2.5 tw-pr-1 tw-no-underline tw-transition-all active:tw-scale-95 desktop-hover:hover:tw-bg-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-group/wave tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-full tw-bg-white/5 tw-py-1 tw-pl-2.5 tw-pr-1 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out active:tw-bg-white/15 desktop-hover:hover:tw-bg-white/10 focus-visible:tw-bg-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
 const OPEN_DROP_BUTTON_CLASSES =
   "tw-absolute tw-inset-0 tw-z-20 tw-m-0 tw-block tw-h-full tw-w-full tw-cursor-pointer tw-rounded-[inherit] tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
@@ -223,6 +223,7 @@ const BoostedDropCardFooter = memo(
   }) => (
     <div className={FOOTER_CLASSES}>
       <Link
+        data-home-action="Open artist profile"
         href={author.handle ? `/${author.handle}` : "#"}
         onClick={(event) => event.stopPropagation()}
         className={PROFILE_LINK_CLASSES}
@@ -244,11 +245,12 @@ const BoostedDropCardFooter = memo(
         <BoostedDropCardChatBoostButton drop={drop} />
       ) : (
         <Link
+          data-home-action="Open wave"
           href={waveHref}
           onClick={(event) => event.stopPropagation()}
           className={WAVE_LINK_CLASSES}
         >
-          <span className="tw-break-words tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover/wave:tw-text-iron-200">
+          <span className="tw-break-words tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/wave:tw-text-white desktop-hover:group-hover/wave:tw-text-white motion-reduce:tw-transition-none">
             {waveName}
           </span>
           {wavePicture && (
@@ -282,6 +284,7 @@ const BoostedDropCardOpenButton = memo(
 
     return (
       <button
+        data-home-action="Open drop"
         type="button"
         className={OPEN_DROP_BUTTON_CLASSES}
         onClick={onClick}

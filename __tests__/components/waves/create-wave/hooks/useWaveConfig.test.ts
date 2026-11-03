@@ -67,6 +67,43 @@ describe("useWaveConfig", () => {
   });
 
   describe("Initial State", () => {
+    it("keeps restored competition drafts chat-only during wave creation", async () => {
+      const { result } = renderHook(() => useWaveConfig({ chatOnly: true }));
+      act(() => {
+        result.current.replaceConfig({
+          ...result.current.config,
+          overview: {
+            ...result.current.config.overview,
+            name: "Restored wave",
+            type: ApiWaveType.Rank,
+          },
+          chat: { enabled: false },
+        });
+      });
+      expect(result.current.config.overview).toMatchObject({
+        name: "Restored wave",
+        type: ApiWaveType.Chat,
+        typeSelected: true,
+      });
+      expect(result.current.config.chat.enabled).toBe(true);
+      await act(async () => {
+        await result.current.onStep({
+          step: CreateWaveStep.GROUPS,
+          direction: "forward",
+        });
+      });
+      expect(mockGetCreateWaveValidationErrors).toHaveBeenLastCalledWith({
+        config: result.current.config,
+        step: CreateWaveStep.OVERVIEW,
+      });
+      const competition = renderHook(() =>
+        useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+      );
+      expect(competition.result.current.config.overview.type).toBe(
+        ApiWaveType.Rank
+      );
+    });
+
     it("should initialize with default Chat wave configuration", () => {
       const { result } = renderHook(() => useWaveConfig());
 

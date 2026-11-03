@@ -4,25 +4,33 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
+import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import { isEmptyObject } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
+import { cache } from "react";
+import { fetchNextgenOrNull } from "@/app/nextgen/nextgen-api";
 import { getNextgenTitle } from "../../title-utils";
 
 const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
-export async function fetchCollection(
-  id: string,
-  headers: Record<string, string>
-): Promise<NextGenCollection | null> {
-  const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
-  const collection = await commonApiFetch<NextGenCollection>({
-    endpoint: `nextgen/collections/${parsedId}`,
-    headers: headers,
-  }).catch(() => null);
-  return collection === null || isEmptyObject(collection) ? null : collection;
-}
+// Request-scoped memoization (React `cache`): `generateMetadata` and the page
+// share one fetch per request, as long as they pass the same headers object
+// (see `getNextgenRequestHeaders`). Resolves `null` only for a real 404 or an
+// empty body; any other API failure is rethrown to the route error boundary.
+export const fetchCollection = cache(
+  async (
+    id: string,
+    headers: Record<string, string>
+  ): Promise<NextGenCollection | null> => {
+    const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
+    const collection = await fetchNextgenOrNull<NextGenCollection>({
+      endpoint: `nextgen/collections/${parsedId}`,
+      headers,
+    });
+    return collection === null || isEmptyObject(collection) ? null : collection;
+  }
+);
 
 export function getCollectionView(view: string): NextgenCollectionView {
   const normalizedView = view.toLowerCase();
@@ -84,25 +92,27 @@ export function getNextgenCollectionSocialCardTitle(
 export function getNextgenCollectionMetadata({
   collection,
   documentTitle,
-  subtitle,
+  canonicalPath,
   title,
+  view,
 }: {
   readonly collection: NextGenCollection;
+  readonly canonicalPath: string;
   readonly documentTitle?: string | undefined;
-  readonly subtitle?: string | undefined;
   readonly title: string;
+  readonly view?: string | undefined;
 }): Metadata {
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title: documentTitle ?? title,
       description: "NextGen",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
-        image: collection.banner || collection.image,
-        subtitle: subtitle ?? `${collection.name} | NextGen`,
-        title,
+        collectionId: collection.id,
+        view,
       }),
       ogImageAlt: `${title} social card`,
-    })
+    }),
+    { canonicalPath }
   );
 }
 
@@ -110,10 +120,14 @@ export async function generateNextgenCollectionMetadata({
   collection,
   headers,
   page,
+  routeSegment,
+  canonicalQuery,
 }: {
   readonly collection: string;
   readonly headers: Record<string, string>;
   readonly page: string;
+  readonly routeSegment: "art" | "mint" | "trait-sets" | "distribution-plan";
+  readonly canonicalQuery?: string;
 }): Promise<Metadata> {
   const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
@@ -122,8 +136,23 @@ export async function generateNextgenCollectionMetadata({
   const title = getNextgenTitle(page, resolvedCollection.name);
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
+    canonicalPath: getNextgenCollectionCanonicalPath(
+      resolvedCollection.name,
+      routeSegment,
+      canonicalQuery
+    ),
     documentTitle: title,
-    subtitle: `${resolvedCollection.name} | NextGen`,
     title,
+    view: page,
   });
+}
+
+export function getNextgenCollectionCanonicalPath(
+  collectionName: string,
+  view = "",
+  query = ""
+): string {
+  const path = `/nextgen/collection/${encodeURIComponent(formatNameForUrl(collectionName))}`;
+  const viewPath = view ? `${path}/${encodeURIComponent(view)}` : path;
+  return query ? `${viewPath}?${query}` : viewPath;
 }

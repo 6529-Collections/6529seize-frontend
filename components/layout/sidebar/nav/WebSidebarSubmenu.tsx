@@ -259,7 +259,7 @@ function WebSidebarSubmenu({
       <Link
         key={item.href}
         href={item.href}
-        className={`tw-touch-action-manipulation tw-group tw-flex tw-items-center tw-rounded-lg tw-no-underline tw-ring-offset-iron-950 tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-600 focus-visible:tw-ring-offset-1 ${
+        className={`tw-touch-action-manipulation tw-group tw-flex tw-items-center tw-rounded-lg tw-no-underline tw-ring-offset-iron-950 tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-1 ${
           nested
             ? "tw-min-h-10 tw-px-3 tw-py-2 tw-text-sm"
             : "tw-mb-1 tw-px-3 tw-py-2 tw-text-md"
@@ -280,6 +280,7 @@ function WebSidebarSubmenu({
     <div
       ref={containerRef}
       id={`sidebar-flyout-${section.key}`}
+      data-sidebar-flyout="true"
       className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] motion-safe:tw-animate-sidebar-flyout-in motion-reduce:tw-animate-none"
       style={{
         left: leftStyle,

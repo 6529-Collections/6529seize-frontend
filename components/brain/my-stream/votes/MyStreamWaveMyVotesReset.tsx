@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import Button from "@/components/utils/button/Button";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import MyStreamWaveMyVotesResetProgress from "./MyStreamWaveMyVotesResetProgress";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -19,6 +24,7 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesResetProps {
+  readonly resetVote?: ((dropId: string) => Promise<void>) | undefined;
   readonly waveId: string;
   readonly haveDrops: boolean;
   readonly availableVotes?: number | null;
@@ -34,6 +40,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   waveId,
+  resetVote,
   haveDrops,
   availableVotes = null,
   selected,
@@ -44,7 +51,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   onResettingChange,
 }) => {
   const locale = useBrowserLocale();
-  const { setToast } = useContext(AuthContext);
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  const { setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
   const queryClient = useQueryClient();
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
@@ -54,19 +65,28 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const selectedCount = selected.size;
 
   const rateChangeMutation = useMutation({
-    mutationFn: async (param: { dropId: string }) =>
-      await commonApiPost<DropRateChangeRequest, ApiDrop>({
+    mutationFn: async (param: { dropId: string }) => {
+      if (resetVote) {
+        await resetVote(param.dropId);
+        return null;
+      }
+      return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${param.dropId}/ratings`,
         body: {
           rating: 0,
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
-      }),
-    onSuccess: (response: ApiDrop) => {
-      applyWaveDropVoteUpdate(queryClient, response, waveId, {
-        invalidateWaveSummary: false,
       });
-      removeSelected(response.id);
+    },
+    onSuccess: (response: ApiDrop | null, { dropId }) => {
+      if (response)
+        applyWaveDropVoteUpdate(queryClient, response, waveId, {
+          contextProfile: activeProfileProxy
+            ? undefined
+            : connectedProfile?.handle,
+          invalidateWaveSummary: false,
+        });
+      removeSelected(dropId);
     },
     onError: (error) => {
       setToast({
@@ -107,7 +127,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setTotalCount(0);
     }
 
-    if (didResetAnyDrop) {
+    if (didResetAnyDrop && !resetVote) {
       invalidateWaveApprovalSummaryQueries(queryClient, waveId);
     }
   };
@@ -146,34 +166,36 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <Button
+            <button
+              type="button"
               onClick={onToggleSelectAll}
-              variant="tertiary"
-              size="xs"
+              className={buttonClassName}
               disabled={isResetting}
             >
-              {t(
-                locale,
-                allItemsSelected
-                  ? "waves.myVotes.deselectAll"
-                  : "waves.myVotes.selectAll"
-              )}
-            </Button>
-            <Button
+              <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                {t(
+                  locale,
+                  allItemsSelected
+                    ? "waves.myVotes.deselectAll"
+                    : "waves.myVotes.selectAll"
+                )}
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={handleResetClick}
-              variant="tertiary"
-              size="xs"
+              className={buttonClassName}
               disabled={!selectedCount || isResetting}
               aria-label={resetButtonAriaLabel}
             >
-              {isResetting
-                ? t(locale, "waves.myVotes.resetting")
-                : resetButtonLabel}
-            </Button>
+              <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                {isResetting
+                  ? t(locale, "waves.myVotes.resetting")
+                  : resetButtonLabel}
+              </span>
+            </button>
             {selectedCount > 0 && (
-              <output
-                className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400"
-              >
+              <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
                 {selectedLabel}
               </output>
             )}

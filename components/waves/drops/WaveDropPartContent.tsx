@@ -265,14 +265,14 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
     <div className="tw-w-full">
       <div className="tw-flex tw-w-full tw-flex-col tw-justify-between md:tw-flex-row md:tw-gap-x-3">
         {isStorm && (
-          <div className="tw-mb-3 tw-flex tw-justify-between tw-space-x-3 md:tw-hidden">
+          <div className="tw-mb-3 tw-mt-4 tw-flex tw-justify-between tw-space-x-3 md:tw-hidden">
             {renderNavigationButton("previous")}
             {renderNavigationButton("next")}
           </div>
         )}
 
         {isStorm && (
-          <div className="tw-hidden md:tw-block">
+          <div className="tw-hidden md:tw-block md:tw-pt-4">
             {renderNavigationButton("previous")}
           </div>
         )}
@@ -326,7 +326,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         </DropImageGalleryProvider>
 
         {isStorm && (
-          <div className="tw-hidden md:tw-block">
+          <div className="tw-hidden md:tw-block md:tw-pt-4">
             {renderNavigationButton("next")}
           </div>
         )}

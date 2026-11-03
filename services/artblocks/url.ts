@@ -154,16 +154,18 @@ export const buildMediaUrl = ({
   return `https://media.artblocks.io/${tokenId}.png`;
 };
 
-const FLAGSHIP_LIVE_SLUG = "flagship";
-
+// The live view loads the work's Art Blocks generator page. A token id alone
+// resolves to the flagship contract that minted it.
 export const buildLiveUrl = ({
   contract,
   tokenId,
 }: ArtBlocksTokenIdentifier): string => {
   const normalizedContract = ensureValidContract(contract);
 
-  const prefix = normalizedContract ?? FLAGSHIP_LIVE_SLUG;
-  return `https://live.artblocks.io/token/${prefix}-${tokenId}`;
+  const path = normalizedContract
+    ? `${normalizedContract}/${tokenId}`
+    : tokenId;
+  return `https://generator.artblocks.io/${path}`;
 };
 
 export const buildTokenApiUrl = ({

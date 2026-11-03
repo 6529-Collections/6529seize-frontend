@@ -106,20 +106,43 @@ Mobile (`< lg`):
 - Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
-- Amount accepts integers.
+- Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
+  The plus/minus symbols indicate signed amounts and are not buttons.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 
+### Edit an existing Rep category
+
+- In `Received`, eligible signed-in viewers can select a category's pencil to
+  edit their total contribution. The pencil is hidden on their own profile and
+  when signed out; authorized proxies act for the grantor.
+- The editor uses a centered dialog on desktop and a draggable bottom sheet on
+  mobile, with the same dismissal behavior as `Grant Rep` and `Rate NIC`.
+- Allowance loading keeps the panel size stable. The amount becomes editable
+  when the current contribution and allowance load. If loading fails, use
+  `Try again`; `Save` stays disabled until the allowance is available.
+- `Save` updates the total contribution and refreshes the profile. `Cancel`,
+  the close button, and Escape dismiss the editor and return focus to the pencil.
+
 ### Localization fallback debt
 
-- Surface: the Grant REP dialog under the profile Identity tab.
+- Surfaces: the Grant REP and Rate NIC dialogs under the profile Identity tab,
+  including their desktop/mobile entry points, the category editor, and Current /
+  Adjustment summaries. The category editor's title, allowance labels, input
+  label, actions, feedback, and loading/retry states use `en-US` fallback
+  messages in untranslated locales.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
-  source copy in locales without translated entries.
-- User impact: supported non-English locales can see English fallback copy while
-  the complete grant flow remains functional.
-- Owner/follow-up: frontend localization maintainers can add translated entries
-  during the next profile localization pass.
+  source copy in locales without translated entries, including the REP amount
+  label. Outside the category editor, dialog titles, NIC labels and actions,
+  unavailable-state Cancel buttons, proxy labels, and rating feedback retain
+  existing English strings. Shared adjustment summaries also retain English
+  strings. Rating summaries retain the existing comma-separated number formatting.
+- User impact: supported non-English locales can see English copy and number
+  formatting while both rating flows remain functional.
+- Owner/follow-up: frontend localization maintainers can migrate the remaining
+  strings and number formatting and add translations during the next profile
+  localization pass.
 
 ## NIC and Statements Behavior
 
@@ -127,7 +150,7 @@ Mobile (`< lg`):
   count.
 - Desktop shows a `Rate NIC` CTA in the NIC section when rating is allowed.
 - Mobile shows `Rate NIC` only in the `NIC` subview when rating is allowed.
-- Desktop and mobile rating flows open a modal with `Save` and `Cancel`.
+- Desktop and mobile rating flows open a modal with `Rate` and `Cancel`.
 - `Rate` is enabled only when the value changed and is valid.
 
 Statement ownership in this tab:
@@ -143,6 +166,7 @@ Statement ownership in this tab:
 - Mobile:
   - `Total Rep` subview uses REP log with direction tabs
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
+- Loading uses three compact row placeholders before the activity entries appear.
 - Empty results show `No Activity Log`.
 
 ## Permissions and Visibility Rules

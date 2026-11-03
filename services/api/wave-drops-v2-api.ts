@@ -31,6 +31,7 @@ import {
   mapMentionedWaves,
   mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
+  mapSubmissionVotingV2,
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
 import {
@@ -46,6 +47,7 @@ import type {
   ApiDropV2View,
   ApiDropWithoutWaveV2View,
 } from "@/services/api/drop-v2-view.types";
+import { fetchDropMetadataByIdV2 } from "./wave-drop-metadata-v2-api";
 import type {
   ApiWaveDropsV2PageFeed,
   ApiWavePollsPage,
@@ -62,6 +64,7 @@ import type {
 } from "./wave-drops-v2.types";
 
 export { fetchDropReactionDetailsV2 } from "./wave-drop-reactions-v2-api";
+export { fetchDropMetadataByIdV2 } from "./wave-drop-metadata-v2-api";
 export { fetchWaveSearchAuthors } from "./wave-search-authors-api";
 
 export type {
@@ -118,44 +121,6 @@ const hydrateDropParts = async (
     .filter((part): part is ApiDropPart => !!part);
 
   return [basePart, ...extraParts];
-};
-
-const mergeMetadata = (
-  priorityMetadata: readonly ApiDropMetadataResponse[],
-  metadata: readonly ApiDropMetadataResponse[]
-): ApiDropMetadataResponse[] => {
-  const priorityKeys = new Set(
-    priorityMetadata.map((item) => item.data_key.trim()).filter(Boolean)
-  );
-
-  return [
-    ...priorityMetadata,
-    ...metadata.filter((item) => !priorityKeys.has(item.data_key.trim())),
-  ];
-};
-
-export const fetchDropMetadataByIdV2 = async ({
-  dropId,
-  headers,
-  priorityMetadata = [],
-  signal,
-}: {
-  readonly dropId: string;
-  readonly headers?: Record<string, string> | undefined;
-  readonly priorityMetadata?: readonly ApiDropMetadataResponse[] | undefined;
-  readonly signal?: AbortSignal | undefined;
-}): Promise<ApiDropMetadataResponse[]> => {
-  try {
-    const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
-      endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(dropId))}/metadata`,
-      headers,
-      signal,
-    });
-    return mergeMetadata(priorityMetadata, metadata);
-  } catch (error) {
-    rethrowAbortFetchError(error);
-    return [...priorityMetadata];
-  }
 };
 
 const fetchDropMetadataV2 = async (
@@ -238,6 +203,10 @@ const hydrateDropV2 = async ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
@@ -260,19 +229,19 @@ const hydrateDropV2 = async ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata,
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: topRaters,
-    raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    ...((drop.replies_count ?? 0) > 0
+      ? { replies_count: drop.replies_count }
+      : {}),
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
@@ -294,6 +263,10 @@ export const mapLeaderboardDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
@@ -315,17 +288,14 @@ export const mapLeaderboardDropV2 = ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: [],
-    raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
     is_additional_action_promised:

@@ -14,7 +14,6 @@ import { formatEther } from "viem";
 import CollectTradeController from "./CollectTradeController";
 import OfferPlanPanel from "./OfferPlanPanel";
 import CollectAssetMedia from "./CollectAssetMedia";
-import marketplaceFont from "./marketplace-font.module.css";
 import { analyzeCollectOffers } from "./analyze-collect-offers";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import type {
@@ -138,7 +137,7 @@ function OfferWorkspace({
         locale,
         blended === true ? "collect.blend.title" : "collect.offerPlan.title"
       )}
-      className={`${marketplaceFont["surface"] ?? ""} tw-space-y-5 focus:tw-outline-none`}
+      className="tw-space-y-5 focus:tw-outline-none"
     >
       <button
         type="button"

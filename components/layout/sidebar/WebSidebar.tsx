@@ -6,7 +6,10 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import LazyHeaderSearchModal, {
+  preloadHeaderSearchModal,
+  useHeaderSearchModalEarlyPreload,
+} from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -18,6 +21,7 @@ import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarUser from "./WebSidebarUser";
 import WebSidebarVersionUpdate from "./WebSidebarVersionUpdate";
+import DesktopNotifications from "@/components/notifications/inbox/DesktopNotifications";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;
@@ -42,7 +46,7 @@ function WebSidebar({
   const pathname = usePathname();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const hasHydrated = useHasHydrated();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
     {
@@ -54,6 +58,11 @@ function WebSidebar({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const showDesktopSearch = !isMobile;
+
+  // Warm the search modal from the visitor's first interaction (or when idle),
+  // so the first open does not wait on the network. The chunk stays out of
+  // first-load JS.
+  useHeaderSearchModalEarlyPreload(showDesktopSearch);
 
   useKey(
     (event) => event.key === "k",
@@ -127,8 +136,8 @@ function WebSidebar({
           type="button"
           className={
             isMobile
-              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
-              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
+              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           }
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
@@ -143,12 +152,16 @@ function WebSidebar({
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          className="tw-group/sidebar tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
+          data-primary-sidebar="true"
           ref={scrollContainerRef}
         >
-          <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-pt-2">
+          <div
+            className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-pt-2"
+            data-sidebar-content="true"
+          >
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
               onToggle={handleToggle}
@@ -190,6 +203,8 @@ function WebSidebar({
                           event?.stopPropagation();
                           setIsSearchOpen(true);
                         }}
+                        onPointerEnter={preloadHeaderSearchModal}
+                        onFocus={preloadHeaderSearchModal}
                         icon={MagnifyingGlassIcon}
                         active={false}
                         collapsed={shouldShowCollapsed}
@@ -207,14 +222,22 @@ function WebSidebar({
                 >
                   {hasHydrated && address && (
                     <div className="tw-px-3">
-                      <WebSidebarNavItem
-                        href="/notifications"
-                        icon={BellIcon}
-                        active={pathname.startsWith("/notifications")}
-                        collapsed={shouldShowCollapsed}
-                        label="Notifications"
-                        hasIndicator={haveUnreadNotifications}
-                      />
+                      {isMobile ? (
+                        <WebSidebarNavItem
+                          href="/notifications"
+                          icon={BellIcon}
+                          active={pathname.startsWith("/notifications")}
+                          collapsed={shouldShowCollapsed}
+                          label="Notifications"
+                          hasIndicator={haveUnreadNotifications}
+                        />
+                      ) : (
+                        <DesktopNotifications
+                          key={`${connectedProfile?.id ?? address}:${activeProfileProxy?.id ?? ""}:${hasValidWalletAuth}:${pathname}`}
+                          collapsed={shouldShowCollapsed}
+                          unread={haveUnreadNotifications}
+                        />
+                      )}
                     </div>
                   )}
                   <WebSidebarUser
@@ -228,7 +251,10 @@ function WebSidebar({
         </div>
       </div>
       {isSearchOpen && (
-        <HeaderSearchModal onClose={() => setIsSearchOpen(false)} wave={null} />
+        <LazyHeaderSearchModal
+          onClose={() => setIsSearchOpen(false)}
+          wave={null}
+        />
       )}
       {!isTouchScreen && (
         <ReactTooltip

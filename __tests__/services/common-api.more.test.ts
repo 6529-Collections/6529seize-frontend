@@ -11,6 +11,9 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(() => null),
+  getWalletRole: jest.fn(() => null),
+  hasActiveSessionV2Auth: jest.fn(() => false),
   getStagingAuth: jest.fn(),
 }));
 
@@ -156,6 +159,35 @@ describe("commonApi utility methods", () => {
           Authorization: "Bearer jwt",
         },
         body: JSON.stringify({ a: 1 }),
+      }
+    );
+  });
+
+  it("commonApiDelete sends an optional JSON body such as a device signature", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+    });
+    const body = {
+      device_signature: {
+        grant_id: `0x${"1".repeat(64)}`,
+        seq: 1,
+        claimed_time: 1,
+        signature: `0x${"2".repeat(128)}`,
+      },
+    };
+    await commonApiDelete({ endpoint: "drops/d1", body });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/drops/d1",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-6529-auth": "stage",
+          Authorization: "Bearer jwt",
+        },
+        body: JSON.stringify(body),
       }
     );
   });

@@ -42,13 +42,17 @@ const rqContext = { onDropRateChange: jest.fn() } as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+  useQueryClientMock.mockReturnValue({
+    invalidateQueries,
+    setQueriesData,
+    getQueryData: jest.fn(),
+  });
   useMutationMock.mockImplementation((config: any) => ({
     mutateAsync: async (param: any) => {
       const result = { id: param.dropId, wave: { id: "wave-1" } };
       // Simulate the onSuccess callback
       if (config.onSuccess) {
-        config.onSuccess(result);
+        config.onSuccess(result, param);
       }
       return result;
     },
@@ -255,7 +259,7 @@ test("cleans up and invalidates once when a later reset fails", async () => {
         }
 
         const result = { id: param.dropId, wave: { id: "wave-1" } };
-        config.onSuccess?.(result);
+        config.onSuccess?.(result, param);
         return result;
       },
     };

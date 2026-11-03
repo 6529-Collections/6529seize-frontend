@@ -82,3 +82,20 @@ describe("CommonProfileSearchItems", () => {
     );
   });
 });
+
+it("announces pending searches instead of no results", () => {
+  render(
+    <CommonProfileSearchItems
+      open
+      profiles={[]}
+      selected={null}
+      searchCriteria="abc"
+      busy
+      statusText="Searching…"
+      onProfileSelect={jest.fn()}
+    />
+  );
+  expect(screen.getByRole("status")).toHaveTextContent("Searching…");
+  expect(screen.queryByText("No results")).not.toBeInTheDocument();
+  expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "true");
+});

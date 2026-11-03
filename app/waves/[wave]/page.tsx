@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import {
   buildWavesMetadata,
@@ -13,13 +14,20 @@ export default async function WavePage({
   readonly params: Promise<{ wave: string }>;
   readonly searchParams: Promise<WavesSearchParams>;
 }) {
-  const { wave } = await params;
-  const resolvedParams = await searchParams;
+  const [{ wave }, resolvedParams, requestHeaders] = await Promise.all([
+    params,
+    searchParams,
+    headers(),
+  ]);
 
   return await renderWavesPageContent({
     waveId: wave,
     searchParams: resolvedParams,
     routeContext: "waves",
+    // Browser fetches already have an interactive shell. Keep the anonymous
+    // preview for document loads and crawlers. Next hides internal RSC headers.
+    includePublicPreview: requestHeaders.get("sec-fetch-dest") !== "empty",
+    includeServerFeedSeed: requestHeaders.get("sec-fetch-dest") !== "empty",
   });
 }
 

@@ -92,6 +92,9 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
   };
 
   const onWaveCreated = () => {
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMPETITION_HUB],
+    });
     invalidateProfileWaveActivity();
     invalidateAllWaves();
   };
@@ -109,6 +112,9 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
     }, 1000);
   };
   const onIdentityFollowChange = () => {
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     });

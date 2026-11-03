@@ -112,14 +112,18 @@ const defaultSidebarSections = [
     items: [],
     subsections: [
       {
-        name: "Delegation & Wallets",
-        items: [
-          { name: "Delegation Center", href: "/delegation/delegation-center" },
-        ],
+        name: "Safe Collecting",
+        items: [{ name: "Delegation Center", href: "/safe-collecting" }],
       },
     ],
   },
 ];
+
+beforeAll(async () => {
+  // The modal loads through next/dynamic. Warm the module registry so the
+  // first open is bounded by the lazy mount, not by cold ts-jest transforms.
+  await import("@/components/header/header-search/HeaderSearchModal");
+});
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -85,6 +85,33 @@ it("lets the details determine the homepage still-image height", () => {
   });
 });
 
+it.each([
+  ["PNG", "", "true"],
+  ["MP4", "video.mp4", "false"],
+])(
+  "identifies %s homepage media even without a rendered image",
+  (format, animation, isImage) => {
+    const nft = {
+      id: 551,
+      image: "poster.png",
+      animation,
+      metadata: { animation_details: { format } },
+    } as ApiMemesExtendedData;
+    const { container } = render(
+      <NowMintingSection nft={nft} isFetching={false} />
+    );
+    // The mocked renderer contains no img, so eligibility must come from the NFT.
+    expect(container.querySelector("img")).toBeNull();
+    const column = container.querySelector("[data-home-artwork-column]");
+    expect(column).toHaveAttribute("data-home-artwork-is-image", isImage);
+    if (isImage === "true") {
+      expect(column?.parentElement).not.toHaveClass("tw-gap-y-6");
+    } else {
+      expect(column?.parentElement).toHaveClass("tw-gap-y-6");
+    }
+  }
+);
+
 it.each(["GIF", "SVG"])("fits %s animation artwork as an image", (format) => {
   render(
     <HomeNftArtwork

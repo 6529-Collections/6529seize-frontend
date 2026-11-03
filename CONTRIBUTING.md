@@ -42,8 +42,7 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Dependencies, including `@6529-collections/release-request`, come from public
-npm. No package token or private-registry setup is required. Install the exact
+Dependencies come from public npm. No package token or private-registry setup is required. Install the exact
 lockfile through the existing secure wrapper:
 
 ```bash
@@ -93,6 +92,14 @@ Useful commands:
 `lint:changed` runs the tight ESLint rules through `eslint.config.diff.mjs`,
 reporting only lines changed from the branch's merge base with `origin/main`.
 Legacy violations on untouched lines do not block a focused contribution.
+
+The one exception is the Rules of Hooks. The main config keeps
+`react-hooks/rules-of-hooks` off, so `6529 run lint:hooks` runs it across the
+whole repo with the minimal, non-type-aware `eslint.config.hooks.mjs` and the
+main config's ignore list. The Debt ratchet workflow runs it on every PR. Inline
+`eslint-disable` comments do not apply to it: rename a non-hook helper that
+starts with `use`, or restructure the component, instead of suppressing the
+finding.
 
 Changed-file lint and format commands use a Node runner to select files and
 split large lists into bounded chunks before invoking the installed tools.
@@ -163,6 +170,53 @@ an unchanged toolchain result, lock the result into the same PR:
 
 The update command refuses any per-file increase or a newly affected file.
 Fix new diagnostics instead of widening the baseline.
+
+### Time Zones In Tests
+
+Jest is pinned to UTC (`jest.config.js` sets `TZ` before it forks workers), so
+a result never depends on the machine that ran it. A pinned zone cannot catch
+zone bugs by itself, so test date code in other zones on purpose:
+
+- `runInTimeZone` in `__tests__/utils/timeZoneHarness.ts` runs an exported
+  function in a fresh Node process in any IANA zone and returns the results.
+  It is the authoritative check, because `Date`, `toLocale*String` and
+  `Intl` all follow the real zone. Batch many inputs into one call.
+- `withHostTimeZone` in the same file makes `Intl.DateTimeFormat` default to
+  a zone inside a callback, for rendering components in-process. It does not
+  change `Date` getters or `toLocale*String`.
+- `mockDefaultTimeZone` in `__tests__/utils/timeZoneHydration.ts` does the same
+  for `Intl.DateTimeFormat` and for `Date#toLocaleDateString`,
+  `toLocaleTimeString` and `toLocaleString`, so use it for components that
+  format through those. Restore it in a `finally` block.
+- `TEST_TIME_ZONES` (UTC, Los Angeles, Auckland) and `EXTREME_TIME_ZONES`
+  (UTC-11, UTC+14) are the zones to cover. Assigning `process.env.TZ` inside a
+  test does nothing: Jest gives each test a copy of the environment.
+
+Write each date expectation so it holds in every zone. If the code shows a
+viewer-local time, run it in each of `TEST_TIME_ZONES` and expect a literal
+string per zone, not one string that happens to be right in UTC. If the code
+shows a UTC or calendar value, name `timeZone: "UTC"` or use a date-only string
+in the test. If the code works in local wall-clock time, build the fixtures
+from local parts (`new Date(2035, 4, 1, 9, 15)`), not from a `...Z` instant.
+
+To run a suite or file in another zone, set `JEST_TZ` to an IANA zone name. A
+plain `TZ` is ignored on purpose, because shells often set it. In PowerShell:
+
+```powershell
+$env:JEST_TZ = "America/Los_Angeles"
+node_modules\.bin\jest.cmd <test path> --coverage=false
+Remove-Item Env:JEST_TZ
+```
+
+In Git Bash, prefix the command instead:
+`JEST_TZ=Pacific/Auckland node_modules/.bin/jest.cmd <test path> --coverage=false`.
+Do not use `TZ=` there: on Windows, Git Bash drops a `TZ` value that contains a
+slash (such as `America/Los_Angeles`) before Node starts.
+`runInTimeZone` sets the zone through the process API and works from any shell.
+
+Playwright is not pinned. A spec that depends on the browser zone must set
+`test.use({ timezoneId })` itself, as
+`tests/critical-shell/public-hydration-readonly.spec.ts` does.
 
 ## Generated Files
 

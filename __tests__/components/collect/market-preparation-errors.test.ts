@@ -7,6 +7,9 @@ import { commonApiPost } from "@/services/api/common-api";
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: () => null,
   getStagingAuth: () => null,
+  getWalletAddress: () => null,
+  getWalletRole: () => null,
+  hasActiveSessionV2Auth: () => false,
 }));
 
 const PRIVATE_DETAIL = "private-provider-payload-and-url";

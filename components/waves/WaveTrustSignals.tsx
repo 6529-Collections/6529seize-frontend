@@ -61,6 +61,7 @@ export function WaveTrustSignals({
   className,
   tooltipId,
   learnMoreHref,
+  scoreDetailsDisabled = false,
 }: WaveTrustSignalsProps) {
   const visibilityScore = formatScore(waveScore?.visibility_score);
   const qualityScore = formatScore(waveScore?.quality_score);
@@ -164,6 +165,7 @@ export function WaveTrustSignals({
         <>
           {hasRichTooltip ? (
             <WaveScoreSummaryHoverCard
+              disabled={scoreDetailsDisabled}
               learnMoreHref={learnMoreHref}
               triggerDisplay={
                 isInlineSidebarVariant(variant) ? "inline-flex" : undefined
@@ -173,7 +175,8 @@ export function WaveTrustSignals({
             >
               <button
                 type="button"
-                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses} ${summaryButtonAffordanceClasses}`}
+                disabled={scoreDetailsDisabled}
+                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-default ${summaryButtonResetClasses} ${summaryButtonAffordanceClasses}`}
                 aria-label={summaryLabel}
               >
                 {summaryChipContent}

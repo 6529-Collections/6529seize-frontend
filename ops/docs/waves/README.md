@@ -15,6 +15,7 @@ Use this area for wave and direct-message tasks:
 - Discovery route: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
+- Competitions: `/waves/{waveId}/competitions`
 - Messages list: `/messages`
 - Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
@@ -42,11 +43,12 @@ Use this area for wave and direct-message tasks:
 - Posts appear newest first. Each card identifies the author, posting time, and
   originating Profile Wave. Curated replies can also appear.
 - On mobile web, the default `/waves` view remains a Wave navigator. Select
-  `Profile Waves Feed` above the Wave list to open the cross-Wave feed at
+  the feed icon beside the `Waves` heading above the Wave list to open the cross-Wave feed at
   `/waves?view=profile-feed`; use `Waves` at the top of the feed to return.
 - Opening a feed post enters its Wave conversation. Browser Back returns to the
   feed, while the Wave navigation control returns to the main Wave list.
-- The native app keeps its existing Profile Waves Feed entry in the Waves view.
+- In the native app, the same feed icon opens the feed; there
+  is no separate Profile Waves Feed card.
 
 ## Access and Availability
 
@@ -59,6 +61,10 @@ Use this area for wave and direct-message tasks:
 - Small-screen web `/waves` with no selected wave and native-app waves routes
   still use the regular connect-wallet gate.
 - `/messages` requires authenticated wallet access.
+- While the native app shows the Messages list, it prepares a few recent
+  conversations in the background. Prepared chats show cached messages on open
+  while checking for newer ones; an unprepared chat can still show loading.
+  Background preparation does not mark a conversation as read.
 - A profile handle is required before route content renders.
 - Proxy sessions cannot access wave/message content and show unavailable states.
 - Wave and direct-message creation requires a connected non-proxy profile.
@@ -73,6 +79,9 @@ Use this area for wave and direct-message tasks:
 - Wave and direct-message creation form behavior is owned by Waves Create docs.
 
 ## Features
+
+- [Competitions](competitions/README.md): parallel Rank/Approve competitions,
+  independent votes and credits, administration and shared chat.
 
 - [Discovery](discovery/README.md): dedicated `/discover` route, card behavior,
   and navigation entry points.
@@ -123,3 +132,5 @@ Use this area for wave and direct-message tasks:
 - [Profiles Index](../profiles/README.md)
 - [Media Index](../media/README.md)
 - [Shared Index](../shared/README.md)
+
+- [Private Bookmarks](chat/feature-private-bookmarks.md): privately save messages and return to their conversations.

@@ -7,6 +7,15 @@ import {
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "@/components/navigation/ViewContext";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
+import { Capacitor } from "@capacitor/core";
+
+jest.mock("@capacitor/core", () => {
+  const core = jest.requireActual("@capacitor/core");
+  return {
+    ...core,
+    Capacitor: { ...core.Capacitor, isNativePlatform: jest.fn(() => false) },
+  };
+});
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -44,11 +53,97 @@ const strictWrapper: React.FC<{ children: React.ReactNode }> = ({
 
 describe("NavigationHistoryContext", () => {
   beforeEach(() => {
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     routerMock.push.mockClear();
     routerMock.replace.mockClear();
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
+  });
+
+  it.each(["/collect", "/collect/orders"])(
+    "returns from native %s with the latest source filters",
+    (destination) => {
+      jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+      mockPathname = "/Shelby/collected";
+      mockSearchParams = new URLSearchParams("page=1");
+      const { result, rerender } = renderHook(
+        () => useNavigationHistoryContext(),
+        { wrapper }
+      );
+      mockSearchParams = new URLSearchParams(
+        "page=3&collection=memelab&details=closed"
+      );
+      rerender();
+      mockPathname = destination;
+      mockSearchParams = new URLSearchParams();
+      rerender();
+      expect(result.current.canGoBack).toBe(true);
+      act(() => result.current.goBack());
+      expect(routerMock.push).toHaveBeenCalledWith(
+        "/Shelby/collected?page=3&collection=memelab&details=closed"
+      );
+      mockPathname = "/Shelby/collected";
+      mockSearchParams = new URLSearchParams(
+        "page=3&collection=memelab&details=closed"
+      );
+      rerender();
+      expect(result.current.canGoBack).toBe(false);
+    }
+  );
+
+  it("returns from Orders to the current Collect selections before its origin", () => {
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    mockPathname = "/the-memes/1";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/collect";
+    mockSearchParams = new URLSearchParams("intent=season&definition=2");
+    rerender();
+    mockSearchParams = new URLSearchParams("intent=season&definition=3");
+    rerender();
+    mockPathname = "/collect/orders";
+    mockSearchParams = new URLSearchParams("operation=receipt");
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith(
+      "/collect?intent=season&definition=3"
+    );
+    mockPathname = "/collect";
+    mockSearchParams = new URLSearchParams("intent=season&definition=3");
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith("/the-memes/1");
+  });
+
+  it.each(["/collect", "/collect/orders"])(
+    "has no invented origin on a cold native %s visit",
+    (path) => {
+      jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+      mockPathname = path;
+      const { result } = renderHook(() => useNavigationHistoryContext(), {
+        wrapper,
+      });
+      expect(result.current.canGoBack).toBe(false);
+      act(() => result.current.goBack());
+      expect(routerMock.push).not.toHaveBeenCalled();
+    }
+  );
+
+  it("keeps the existing web grouping when leaving Orders", () => {
+    mockPathname = "/network";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/collect";
+    rerender();
+    mockPathname = "/collect/orders";
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenCalledWith("/network");
   });
 
   it("pushes view and navigates back to previous route", () => {

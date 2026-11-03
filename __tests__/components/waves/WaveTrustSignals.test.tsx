@@ -142,6 +142,33 @@ describe("WaveTrustSignals", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("closes and disables score details while preserving the visible score", () => {
+    const props = {
+      waveRep,
+      waveScore,
+      variant: "sidebar-inline",
+      mode: "summary",
+    } as const;
+    const { rerender } = render(<WaveTrustSignals {...props} />);
+    const trigger = screen.getByRole("button", { name: /^Wave score 83\./ });
+    fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} scoreDetailsDisabled />);
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveTextContent("83");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} />);
+    expect(trigger).toBeEnabled();
+    fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+  });
+
   it("renders nothing in summary mode without score data", () => {
     const { container } = render(
       <WaveTrustSignals waveScore={null} variant="sidebar" mode="summary" />

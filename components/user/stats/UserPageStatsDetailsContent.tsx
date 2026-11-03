@@ -28,7 +28,7 @@ export default function UserPageStatsDetailsContent({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <div className="tw-mt-6 tw-space-y-8 lg:tw-mt-8 lg:tw-space-y-10">
+    <div className="tw-mt-0 tw-space-y-5 md:tw-mt-6 md:tw-space-y-8 lg:tw-mt-8 lg:tw-space-y-10">
       <UserPageStatsCollected
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}

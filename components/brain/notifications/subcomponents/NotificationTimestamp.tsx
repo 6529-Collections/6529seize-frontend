@@ -1,4 +1,4 @@
-import { getTimeAgoShort } from "@/helpers/Helpers";
+import LocalDateTime from "@/components/utils/time/LocalDateTime";
 
 interface NotificationTimestampProps {
   readonly createdAt: number;
@@ -16,7 +16,7 @@ export default function NotificationTimestamp({
       <span aria-hidden="true" className="tw-mr-1 tw-text-xs tw-font-bold">
         &#8226;
       </span>
-      {getTimeAgoShort(createdAt)}
+      <LocalDateTime value={createdAt} format="relative" />
     </span>
   );
 }

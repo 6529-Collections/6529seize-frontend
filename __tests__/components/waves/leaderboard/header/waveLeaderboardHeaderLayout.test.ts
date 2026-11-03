@@ -1,4 +1,63 @@
-import { resolveWaveLeaderboardHeaderLayout } from "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout";
+import {
+  resolveSubmissionToolbarLayout,
+  resolveWaveLeaderboardHeaderLayout,
+} from "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout";
+
+describe("submission toolbar layout", () => {
+  const input = {
+    rowWidth: 600,
+    viewModesWidth: 104,
+    sortControlWidth: 111,
+    submissionActionsWidth: 205,
+    showAdditionalActions: true,
+    showPriceActions: false,
+    hasFullControlsBasis: false,
+  };
+
+  it.each<[number, boolean, boolean]>([
+    [600, false, false],
+    [442, false, false],
+    [350, true, false],
+    [207, true, true],
+  ])(
+    "keeps measured controls usable at %s px",
+    (rowWidth, balanced, compact) => {
+      expect(resolveSubmissionToolbarLayout({ ...input, rowWidth })).toEqual({
+        balanceSubmissionRows: balanced,
+        compactSubmissionControls: compact,
+        controlsRowFlexClass: balanced
+          ? "tw-flex-[1_1_100%]"
+          : "tw-flex-[1_1_auto]",
+      });
+    }
+  );
+
+  it("preserves price-action layout even in a narrow container", () => {
+    expect(
+      resolveSubmissionToolbarLayout({
+        ...input,
+        rowWidth: 207,
+        showPriceActions: true,
+      })
+    ).toMatchObject({
+      balanceSubmissionRows: false,
+      compactSubmissionControls: false,
+    });
+  });
+
+  it("waits for the action measurements before changing the row layout", () => {
+    expect(
+      resolveSubmissionToolbarLayout({
+        ...input,
+        rowWidth: 207,
+        submissionActionsWidth: 0,
+      })
+    ).toMatchObject({
+      balanceSubmissionRows: false,
+      compactSubmissionControls: false,
+    });
+  });
+});
 
 describe("resolveWaveLeaderboardHeaderLayout", () => {
   const baseInput = {

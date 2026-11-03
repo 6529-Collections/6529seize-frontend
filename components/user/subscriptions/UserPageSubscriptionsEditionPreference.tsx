@@ -116,7 +116,7 @@ export default function UserPageSubscriptionsEditionPreference(
       {!props.readonly && (
         <p
           id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-light tw-leading-relaxed tw-text-iron-500"
+          className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500"
         >
           {isAllEditions
             ? "You will receive all editions you are eligible for"

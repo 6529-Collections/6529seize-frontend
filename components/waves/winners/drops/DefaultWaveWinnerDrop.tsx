@@ -24,6 +24,7 @@ import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import { QUORUM_PROPOSAL_CARD_SURFACE_CLASS } from "@/components/waves/drops/dropContentPresentation";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -117,6 +118,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   const hasUserVoted = userContextRating !== 0;
   const userVote = userContextRating;
   const isUserVoteNegative = userVote < 0;
+  const isQuorumCompact = contentPresentation === "quorumCompact";
   const creditType =
     WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type] || "votes";
 
@@ -124,17 +126,24 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     <div
       onClickCapture={handleClickCapture}
       onClick={handleClick}
-      className="tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-iron-700"
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-200 tw-ease-out ${
+        isQuorumCompact
+          ? `tw-bg-iron-950 ${QUORUM_PROPOSAL_CARD_SURFACE_CLASS}`
+          : "tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 desktop-hover:hover:tw-border-iron-700"
+      }`}
     >
-      <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
+      <div
+        className={`tw-rounded-xl tw-p-4 ${isQuorumCompact ? "sm:tw-p-5" : ""}`}
+        {...touchHandlers}
+      >
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <div
-            className={`tw-flex tw-flex-1 tw-gap-x-3 ${
+            className={`tw-flex tw-min-w-0 tw-flex-1 tw-gap-x-3 ${
               isApprovalWave ? "tw-items-start tw-pb-3" : ""
             }`}
           >
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
-            <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
               <WaveWinnersDropHeader
                 winner={winner}
                 showVotingInfo={false}
@@ -169,13 +178,13 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                 isApprovalWave ? "tw-relative" : ""
               }`}
             >
-              {isApprovalWave && (
+              {isApprovalWave && !isQuorumCompact && (
                 <span
                   aria-hidden="true"
                   className="tw-pointer-events-none tw-absolute tw-left-[-4.25rem] tw-right-[-1rem] tw-top-0 tw-h-px tw-bg-iron-800/60"
                 />
               )}
-              <div className="tw-flex tw-items-center tw-gap-x-4 tw-whitespace-nowrap">
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
                 <WaveWinnersDropHeaderTotalVotes
                   winner={winner}
                   tight={isApprovalWave}

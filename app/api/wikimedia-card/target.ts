@@ -75,6 +75,9 @@ export const sanitizeCacheKey = (url: URL): string => {
   return clone.toString();
 };
 
+// Bounds the language list, which also scopes the response cache.
+const MAX_ACCEPT_LANGUAGE_ENTRIES = 5;
+
 export const parseAcceptLanguage = (header: string | null): string[] => {
   if (!header) {
     return ["en"];
@@ -93,7 +96,7 @@ export const parseAcceptLanguage = (header: string | null): string[] => {
   entries.sort((a, b) => b.q - a.q);
 
   const preferred = new Set<string>();
-  for (const entry of entries) {
+  for (const entry of entries.slice(0, MAX_ACCEPT_LANGUAGE_ENTRIES)) {
     if (!entry.lang) {
       continue;
     }

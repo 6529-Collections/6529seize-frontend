@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React from "react";
 import { screen } from "@testing-library/react";
 import RememesDownloads, {
@@ -26,10 +28,7 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn().mockReturnValue({
-    title: "Rememes",
-    description: "Open Data",
-  }),
+  getAppMetadata: jest.fn((customMetadata: unknown) => customMetadata),
 }));
 
 describe("Open Data rememes page", () => {
@@ -42,8 +41,11 @@ describe("Open Data rememes page", () => {
 
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({
-      title: "Rememes",
-      description: "Open Data",
+      title: "Rememes | Open Data",
+      description: t(
+        DEFAULT_LOCALE,
+        "pageMetadata.openDataRememes.description"
+      ),
     });
   });
 });

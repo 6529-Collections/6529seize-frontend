@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const mockOpenVotingModal = jest.fn();
 
@@ -82,6 +83,40 @@ describe("WaveLeaderboardGrid", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  it.each([false, true])(
+    "offers retry without hiding loaded grid rows (%s)",
+    (hasEntries) => {
+      const refetch = jest.fn();
+      (useWaveDropsLeaderboard as jest.Mock).mockReturnValue({
+        drops: hasEntries ? [{ id: "saved-row" }] : [],
+        isError: true,
+        isFetching: false,
+        refetch,
+        pageMetadata: [],
+        queryWindowKey: "failed-grid",
+      });
+      render(
+        <WaveLeaderboardGrid
+          wave={wave}
+          sort={WaveDropsLeaderboardSort.RANK}
+          mode="compact"
+          onDropClick={jest.fn()}
+          scrollContainerRef={scrollContainerRef}
+        />
+      );
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        hasEntries
+          ? "Showing the entries already loaded."
+          : "Couldn’t load submissions."
+      );
+      expect(screen.queryAllByTestId("grid-item")).toHaveLength(
+        hasEntries ? 1 : 0
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("shows loading state", () => {
     (useWaveDropsLeaderboard as jest.Mock).mockReturnValue({

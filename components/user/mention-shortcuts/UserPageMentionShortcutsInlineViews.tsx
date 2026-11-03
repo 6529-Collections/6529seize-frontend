@@ -54,7 +54,7 @@ export function QuickTagsDeleteConfirmation({
           ref={headingRef}
           id="delete-mention-shortcut-title"
           tabIndex={-1}
-          className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
+          className="tw-m-0 tw-text-[15px]/5 tw-font-semibold tw-tracking-wide tw-text-iron-100 focus:tw-outline-none"
         >
           {t(locale, "user.mentionShortcuts.deleteTitle", {
             alias: alias.alias,
@@ -62,7 +62,7 @@ export function QuickTagsDeleteConfirmation({
         </h3>
       </div>
 
-      <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-3 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
         {t(locale, "user.mentionShortcuts.deleteWarning")}
       </p>
       <p aria-live="polite" className="tw-sr-only">
@@ -99,7 +99,7 @@ export function QuickTagsLoadError({
 
   return (
     <div role="alert" className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-      <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-error">
+      <p className="tw-m-0 tw-text-[15px] tw-font-normal tw-leading-5 tw-text-error">
         {t(locale, "user.mentionShortcuts.loadError")}
       </p>
       <button

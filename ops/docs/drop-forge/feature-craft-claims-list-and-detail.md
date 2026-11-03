@@ -154,3 +154,19 @@ The craft surface combines:
 - [Drop Forge Craft-to-Launch Flow](flow-drop-forge-craft-to-launch.md)
 - [Drop Forge Access and Claim Operations](troubleshooting-drop-forge-access-and-claims.md)
 - [Docs Home](../README.md)
+
+## Managed collaborator credits
+
+Claims from new artwork submissions carry the initial artist roster saved at
+next-mint selection. Claims Builder includes only accepted collaborators;
+unanswered invitations do not block claim creation or publication.
+
+Admins can edit Artist, SEIZE Artist Profile, Collab, title, description and
+media in Craft, just as they edit other claim traits. The existing
+comma-separated artist and profile format is preserved. Arweave publication
+uses the saved claim values with normal metadata and media validation; it does
+not check invitations or compare the claim with the initial collaborator roster.
+
+An admin can add an artist who did not accept an invitation. This changes the
+final mint metadata only: it does not accept the invitation or add the
+submission to that profile's accepted-collaboration lists.

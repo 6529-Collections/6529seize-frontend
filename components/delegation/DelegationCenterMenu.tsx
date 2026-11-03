@@ -4,10 +4,16 @@ import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowUpRightFromSquare,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +22,7 @@ import { useEffect, useRef } from "react";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
-import DelegationCenterComponent from "./DelegationCenter";
+import ConsolidationBuilder from "./consolidation-builder/ConsolidationBuilder";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -29,6 +35,8 @@ import {
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
+import SafeCollecting from "./safe-collecting/SafeCollecting";
+import TapGuide from "./tap-guide/TapGuide";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import {
   DELEGATION_CARD_CLASS_NAME,
@@ -43,15 +51,15 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
 }> = [
   {
     section: DelegationCenterSection.CENTER,
-    label: "Delegation Center",
+    label: t(DEFAULT_LOCALE, "safeCollecting.navLabel"),
   },
   {
     section: DelegationCenterSection.WALLET_ARCHITECTURE,
-    label: "Wallet Architecture",
+    label: t(DEFAULT_LOCALE, "delegation.tapGuide.navLabel"),
   },
   {
     section: DelegationCenterSection.FAQ,
-    label: "Delegation FAQ",
+    label: "FAQ",
   },
   {
     section: DelegationCenterSection.CONSOLIDATION_USE_CASES,
@@ -67,6 +75,7 @@ const SECTIONS_WITHOUT_NAVIGATION = new Set<DelegationCenterSection>([
   DelegationCenterSection.REGISTER_DELEGATION,
   DelegationCenterSection.REGISTER_SUB_DELEGATION,
   DelegationCenterSection.REGISTER_CONSOLIDATION,
+  DelegationCenterSection.BUILD_CONSOLIDATION,
   DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
   DelegationCenterSection.ANY_COLLECTION,
   DelegationCenterSection.MEMES_COLLECTION,
@@ -130,11 +139,16 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       ].includes(props.section) &&
       isWalletConnectionResolving(accountResolution)
     )
-      return <AuthLoadingPlaceholder />;
+      return (
+        <>
+          <SafeCollectingBackLink />
+          <AuthLoadingPlaceholder />
+        </>
+      );
     switch (props.section) {
       case DelegationCenterSection.CENTER:
         return (
-          <DelegationCenterComponent
+          <SafeCollecting
             setSection={(section) => props.setActiveSection(section)}
           />
         );
@@ -205,6 +219,20 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onSetToast={showDelegationToast}
           />
         );
+      case DelegationCenterSection.BUILD_CONSOLIDATION:
+        // Not keyed by account: each step's signer connects in turn, so the
+        // wallet list must survive account switches and reconnects.
+        return (
+          <ConsolidationBuilder
+            connectedAddress={hasConnectedWallet ? connectedAddress : undefined}
+            isSafeWallet={hasConnectedWallet && accountResolution.isSafeWallet}
+            walletResolving={isWalletConnectionResolving(accountResolution)}
+            onConnect={accountResolution.seizeConnect}
+            onHide={() => {
+              props.setActiveSection(DelegationCenterSection.CENTER);
+            }}
+          />
+        );
       case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
         if (!hasConnectedWallet || !connectedAddress) {
           return (
@@ -257,14 +285,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           />
         );
       case DelegationCenterSection.WALLET_ARCHITECTURE:
-        return (
-          <DelegationHTML
-            title="Wallet Architecture"
-            path="reference-overview-wallet-architecture"
-          />
-        );
+        return <TapGuide />;
       case DelegationCenterSection.FAQ:
-        return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
+        return <DelegationHTML title="FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:
         return (
           <DelegationHTML
@@ -294,7 +317,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       props.section === section ||
       (section === DelegationCenterSection.FAQ &&
         props.section === DelegationCenterSection.HTML &&
-        pathname?.startsWith("/delegation/delegation-faq/"))
+        pathname.startsWith("/safe-collecting/faq/"))
     );
   }
 
@@ -330,7 +353,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       {showNavigation && (
-        <nav aria-label="Delegation center" className="tw-mb-7 sm:tw-mb-8">
+        <nav
+          aria-label={t(DEFAULT_LOCALE, "safeCollecting.menuLabel")}
+          className="tw-mb-7 sm:tw-mb-8"
+        >
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>
@@ -407,6 +433,24 @@ function GithubLink() {
   );
 }
 
+function SafeCollectingBackLink() {
+  return (
+    <ButtonLink
+      href="/safe-collecting"
+      variant="secondary"
+      size="sm"
+      className="tw-mb-4"
+    >
+      <FontAwesomeIcon
+        icon={faArrowLeft}
+        className="tw-size-3"
+        aria-hidden="true"
+      />
+      Back to Safe Collecting
+    </ButtonLink>
+  );
+}
+
 function DelegationConnectWalletState(
   props: Readonly<{
     title: string;
@@ -415,29 +459,32 @@ function DelegationConnectWalletState(
   }>
 ) {
   return (
-    <section
-      className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
-      aria-labelledby="connect-wallet-heading"
-    >
-      <h1
-        id="connect-wallet-heading"
-        className={DELEGATION_PAGE_TITLE_CLASS_NAME}
+    <>
+      <SafeCollectingBackLink />
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
+        aria-labelledby="connect-wallet-heading"
       >
-        {props.title}
-      </h1>
-      <p className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mb-5`}>
-        {props.body}
-      </p>
-      <Button
-        type="button"
-        variant="primary"
-        size="lg"
-        onClick={() => {
-          props.onConnect();
-        }}
-      >
-        Connect Wallet
-      </Button>
-    </section>
+        <h1
+          id="connect-wallet-heading"
+          className={DELEGATION_PAGE_TITLE_CLASS_NAME}
+        >
+          {props.title}
+        </h1>
+        <p className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mb-5`}>
+          {props.body}
+        </p>
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          onClick={() => {
+            props.onConnect();
+          }}
+        >
+          Connect Wallet
+        </Button>
+      </section>
+    </>
   );
 }

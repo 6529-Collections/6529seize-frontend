@@ -24,7 +24,7 @@ type in the current thread.
 2. When another participant types, a row fades in with three animated dots and
    a handle label.
 3. The label updates as people start typing, stop typing, or post.
-4. If no new typing signal arrives for about 5 to 6 seconds, the row fades out.
+4. If no new typing signal arrives for about 5 seconds, the row fades out.
 
 ## Label Rules
 
@@ -33,13 +33,16 @@ type in the current thread.
 - Three or more typers: `handle1, handle2 and N more people are typing`.
 - Handles are ordered by highest participant level first.
 - The current viewer's own typing is not echoed back.
+- Public waves and private threads use the same labels; private-thread labels
+  require signing in with a profile that can view the thread.
 
 ## Edge Cases
 
 - Loading and empty-thread states show instead of the typing row.
 - Gallery view does not show this row.
 - Typing events for other wave IDs are ignored.
-- Switching waves clears current typing state.
+- Switching waves, switching profiles, signing out, or reconnecting clears
+  current typing state. A fresh connection starts with no previous labels.
 - Muting a wave clears and disables typing updates.
 - Unmuting starts a fresh typing subscription for the active wave.
 - Drop-post updates remove that author's typing label immediately.
@@ -47,7 +50,11 @@ type in the current thread.
 
 ## Failure and Recovery
 
-- If websocket traffic drops, current typing labels time out and clear.
+- If the wave connection disconnects, current typing labels clear.
+- After reconnecting or refreshing your session, typing updates resume once
+  your connection is authenticated and subscribed to the current wave.
+- Rejected or expired sign-in credentials do not grant private-thread typing
+  access. Sign in again if your session cannot be refreshed.
 - Wave typing subscription retries are limited to 20 attempts with a 2-second
   delay between attempts.
 - If retries are exhausted, switch threads or reload to start a fresh
@@ -57,7 +64,11 @@ type in the current thread.
 
 - This indicator is a lightweight activity signal, not guaranteed presence or
   delivery state.
-- Label refresh is interval-based, so show/hide timing can lag briefly.
+- Labels update when typing or posting events arrive and expire after about five
+  seconds without a fresh signal. An idle thread needs no periodic typing refresh.
+- Backgrounding the Capacitor app or hiding a mobile browser tab clears typing
+  labels and pauses its subscription.
+  Returning starts a fresh subscription for the active thread.
 - There is no dedicated typing-connection error banner.
 
 ## Related Pages

@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { NFT } from "@/entities/INFT";
 import {
@@ -183,7 +183,7 @@ export default function RememeAddComponent({
       try {
         setTokenIds(myTokenIds);
         const validation = await postData(
-          `${publicEnv.API_ENDPOINT}/api/rememes/validate`,
+          apiUrl("/api/rememes/validate"),
           getRememe(myTokenIds)
         );
         const response = validation.response as RememeValidationResponse;
@@ -309,7 +309,7 @@ export default function RememeAddComponent({
                 <ComboboxOption
                   key={meme.id}
                   value={meme}
-                  className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-bg-iron-800"
+                  className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400"
                 >
                   <PlusIcon
                     aria-hidden="true"

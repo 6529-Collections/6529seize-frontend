@@ -1,4 +1,7 @@
 import { renderHook } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
+import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
+import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { useQuery } from "@tanstack/react-query";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -6,6 +9,7 @@ import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helper
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import {
   useWaveOutcomeVisibility,
+  useApproveWaveCustomTabLabels,
   useWaveSubmissionButtonLabel,
   useWaveSubmissionButtonLabelOverride,
 } from "@/hooks/waves/useWaveMetadata";
@@ -129,6 +133,91 @@ describe("useWaveOutcomeVisibility", () => {
     );
 
     expect(result.current).toBe(false);
+  });
+});
+
+describe("competition appearance scope", () => {
+  const parentMetadata = [
+    {
+      id: 1,
+      data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+      data_value: "Parent action",
+    },
+  ];
+  let metadata: ApiWaveMetadata[];
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(WaveDisplayMetadataContext.Provider, {
+      value: { waveId: "wave-1", metadata },
+      children,
+    });
+  const useLabel = (waveId = "wave-1") =>
+    useWaveSubmissionButtonLabel({
+      waveId,
+      submissionExperience: WaveSubmissionExperience.DEFAULT,
+    });
+
+  beforeEach(() => {
+    useQueryMock.mockReturnValue({ data: parentMetadata });
+    metadata = [];
+  });
+
+  it("uses native presentation immediately and updates after an appearance edit", () => {
+    metadata = [{ ...parentMetadata[0]!, data_value: "Enter competition" }];
+    const { result, rerender } = renderHook(() => useLabel(), { wrapper });
+    expect(result.current).toBe("Enter competition");
+    expect(useQueryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    metadata = [{ ...parentMetadata[0]!, data_value: "Nominate" }];
+    rerender();
+    expect(result.current).toBe("Nominate");
+  });
+
+  it("uses competition defaults when native presentation is empty", () => {
+    const { result } = renderHook(() => useLabel(), { wrapper });
+    expect(result.current).toBe("Drop");
+  });
+
+  it("preserves parent metadata outside the native scope and for other waves", () => {
+    expect(renderHook(() => useLabel()).result.current).toBe("Parent action");
+    metadata = [{ ...parentMetadata[0]!, data_value: "Enter competition" }];
+    expect(
+      renderHook(() => useLabel("wave-2"), { wrapper }).result.current
+    ).toBe("Parent action");
+    expect(useQueryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it("uses native Approve labels and outcome visibility", () => {
+    metadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: "Candidates",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+        data_value: "Selected",
+      },
+      {
+        id: 3,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "false",
+      },
+    ];
+    const { result } = renderHook(
+      () => ({
+        labels: useApproveWaveCustomTabLabels(createWave(ApiWaveType.Approve)),
+        outcomes: useWaveOutcomeVisibility(createWave(ApiWaveType.Approve)),
+      }),
+      { wrapper }
+    );
+    expect(result.current).toEqual({
+      labels: { approvals: "Candidates", approved: "Selected" },
+      outcomes: false,
+    });
   });
 });
 

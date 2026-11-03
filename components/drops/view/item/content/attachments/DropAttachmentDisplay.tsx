@@ -12,6 +12,8 @@ import {
 } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
 import clsx from "clsx";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import PdfAttachmentPreview from "./PdfAttachmentPreview";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatedAttachmentPanel,
@@ -51,6 +53,7 @@ export default function DropAttachmentDisplay({
   const downloadAbortRef = useRef<AbortController | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const { isCapacitor } = useCapacitor();
+  const { isAppleMobile } = useDeviceInfo();
   const safeAttachmentUrl = useMemo(
     () => getSafeAttachmentUrl(attachmentUrl),
     [attachmentUrl]
@@ -59,7 +62,7 @@ export default function DropAttachmentDisplay({
   const safetySize = formatFileSizeLabel(safety?.size_bytes, ATTACHMENT_LOCALE);
   const hasSafetyMetadata = Boolean(safetySize || safety?.sha256);
   const hasDetails = hasSafetyMetadata;
-  const isRendered = isPreviewOpen;
+  const isRendered = isPreviewOpen && !disableMediaInteraction;
   const safetyLabel = t(ATTACHMENT_LOCALE, "attachment.safety.badge");
   const viewSafetyDetailsLabel = t(
     ATTACHMENT_LOCALE,
@@ -316,15 +319,30 @@ export default function DropAttachmentDisplay({
           {downloadError}
         </div>
       )}
-      <AnimatedAttachmentPanel isOpen={isPreviewOpen && !!safeAttachmentUrl}>
-        {renderType === "pdf" && safeAttachmentUrl && (
-          <iframe
-            src={safeAttachmentUrl}
-            title={fileName}
-            referrerPolicy="no-referrer"
-            className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
-          />
-        )}
+      <AnimatedAttachmentPanel
+        isOpen={
+          isPreviewOpen && !disableMediaInteraction && !!safeAttachmentUrl
+        }
+      >
+        {renderType === "pdf" &&
+          safeAttachmentUrl &&
+          !disableMediaInteraction &&
+          (isAppleMobile ? (
+            <PdfAttachmentPreview
+              key={safeAttachmentUrl}
+              url={safeAttachmentUrl}
+              fileName={fileName}
+              open={isPreviewOpen}
+              onClose={() => setIsPreviewOpen(false)}
+            />
+          ) : (
+            <iframe
+              src={safeAttachmentUrl}
+              title={fileName}
+              referrerPolicy="no-referrer"
+              className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
+            />
+          ))}
         {renderType === "csv" && safeAttachmentUrl && (
           <CsvAttachmentPreview url={safeAttachmentUrl} />
         )}

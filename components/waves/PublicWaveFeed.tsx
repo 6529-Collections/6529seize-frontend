@@ -7,53 +7,54 @@ export default function PublicWaveFeed({
 }: {
   readonly feed: Extract<PublicWaveFeedResult, { ok: true }>;
 }) {
-  if (feed.items.length === 0) {
-    return null;
-  }
-
+  if (feed.items.length === 0) return null;
   const headingId = `public-wave-feed-${feed.waveId}`;
 
   return (
     <section
       aria-labelledby={headingId}
-      className="tailwind-scope tw-min-h-full tw-bg-iron-950 tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8"
+      className="tailwind-scope tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-iron-950"
       data-public-wave-feed={feed.waveId}
     >
-      <div className="tw-mx-auto tw-w-full tw-max-w-3xl">
+      <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
         <h2
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-2xl"
+          className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50 lg:tw-text-xl"
           id={headingId}
         >
           {feed.waveName}
         </h2>
-        <ol className="tw-m-0 tw-mt-5 tw-list-none tw-space-y-3 tw-p-0">
-          {feed.items.map((item) => {
-            const linkText = item.title ?? item.excerpt ?? `#${item.serialNo}`;
-
-            return (
-              <li key={item.id}>
-                <article className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-p-4">
-                  <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400">
+      </div>
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col-reverse tw-overflow-y-auto">
+        <ol className="tw-m-0 tw-flex tw-min-h-full tw-shrink-0 tw-list-none tw-flex-col tw-justify-end tw-gap-5 tw-px-4 tw-py-5 sm:tw-px-6">
+          {[...feed.items].reverse().map((item) => (
+            <li key={item.id}>
+              <article className="tw-flex tw-gap-3">
+                <div
+                  aria-hidden="true"
+                  className="tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800"
+                />
+                <div className="tw-min-w-0 tw-flex-1">
+                  <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
                     {item.authorLabel}
                   </p>
-                  <h3 className="tw-m-0 tw-mt-1 tw-text-base tw-font-semibold tw-leading-snug">
+                  <h3 className="tw-m-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-6">
                     <Link
-                      className="tw-break-words tw-text-iron-50 tw-no-underline tw-outline-none tw-transition-colors focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
+                      className="tw-break-words tw-text-iron-100 tw-no-underline tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
                       href={item.href}
                       prefetch={false}
                     >
-                      {linkText}
+                      {item.title ?? item.excerpt ?? `#${item.serialNo}`}
                     </Link>
                   </h3>
                   {item.title && item.excerpt ? (
-                    <p className="tw-m-0 tw-mt-2 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">
+                    <p className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">
                       {item.excerpt}
                     </p>
                   ) : null}
-                </article>
-              </li>
-            );
-          })}
+                </div>
+              </article>
+            </li>
+          ))}
         </ol>
       </div>
     </section>

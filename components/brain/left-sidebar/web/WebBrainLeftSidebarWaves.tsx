@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import WebUnifiedWavesList from "./WebUnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
@@ -13,7 +13,9 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   isCollapsed = false,
   showProfileFeedShortcut = true,
 }) => {
-  const { waves, registerWave } = useMyStream();
+  const { waves, registerWave, requestMainWavesList } = useMyStream();
+
+  useEffect(() => requestMainWavesList(), [requestMainWavesList]);
 
   const onNextPage = () => {
     if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {
@@ -27,7 +29,10 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}
+      isPinnedWavesLoading={waves.isPinnedWavesLoading ?? false}
       isFetchingNextPage={waves.isFetchingNextPage}
+      hasLoadingError={waves.hasLoadingError}
+      retryLoading={waves.retryLoading}
       onHover={registerWave}
       scrollContainerRef={scrollContainerRef}
       isCollapsed={isCollapsed}

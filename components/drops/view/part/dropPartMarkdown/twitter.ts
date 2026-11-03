@@ -1,5 +1,5 @@
-import { parseTweetUrl } from "@/lib/twitter";
-export { TWITTER_DOMAINS } from "@/lib/twitter";
+import { parseTweetUrl } from "@/lib/twitter/url";
+export { TWITTER_DOMAINS } from "@/lib/twitter/url";
 
 export const ensureTwitterLink = (
   href: string

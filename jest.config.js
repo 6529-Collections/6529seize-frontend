@@ -1,5 +1,14 @@
 // jest.config.js
 
+// Pin the time zone for every test. Jest loads this file in the parent process
+// before it forks workers, and workers inherit the parent's environment, so
+// tests run in the same zone on every machine (Windows, Linux, CI). Set
+// JEST_TZ to run a suite in another IANA zone, for example
+// `$env:JEST_TZ = "America/Los_Angeles"` in PowerShell. A plain TZ is ignored
+// on purpose: it is often set by the shell and would make results machine
+// specific. Changing process.env.TZ inside a test has no effect.
+process.env.TZ = process.env.JEST_TZ || "UTC";
+
 // No longer using next/jest
 // const nextJest = require('next/jest')();
 // const createJestConfig = nextJest({ dir: './' });

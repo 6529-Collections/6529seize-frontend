@@ -38,7 +38,7 @@ export function generateMetadata(): Metadata {
   return getAppMetadata(
     {
       title: "Discovery",
-      description: "Active discussions you are not yet following",
+      description: "Explore active discussions and community votes.",
     },
     { canonicalPath: "/discover" }
   );

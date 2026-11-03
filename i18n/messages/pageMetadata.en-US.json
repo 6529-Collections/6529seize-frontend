@@ -1,0 +1,22 @@
+{
+  "pageMetadata.networkLevels.description": "Levels combine TDH and Rep into one trust score from 0 to 100. See the thresholds for each level.",
+  "pageMetadata.networkActivity.description": "Filterable log of network-wide profile activity, including Rep ratings, handle changes, profile edits and proxies.",
+  "pageMetadata.networkDefinitions.description": "Definitions of the collection, activity and TDH metrics used across the 6529 network.",
+  "pageMetadata.networkTdhStats.description": "Charts of total network TDH and its daily creation and destruction, with boosted, unboosted and unweighted views.",
+  "pageMetadata.networkNerd.description": "Ranked leaderboard of 6529 network members by cards collected or interactions, with boosted and unboosted TDH views.",
+  "pageMetadata.networkTdhHistoricBoosts.description": "Archive of previous TDH versions with their effective periods, booster categories and rule details.",
+  "pageMetadata.consolidationMappingTool.description": "Upload a CSV of wallet addresses and token balances and download it with balances combined under each consolidation's primary address.",
+  "pageMetadata.memeGas.description": "Gas costs in ETH for each card in The Memes and Meme Lab, filterable by artist and period.",
+  "pageMetadata.memeAccounting.description": "Volume, proceeds, royalties and artist splits for each card in The Memes and Meme Lab, filterable by artist and period.",
+  "pageMetadata.appWallets.description": "Create, import and manage app wallets stored on your device in the 6529 app.",
+  "pageMetadata.appWalletsImport.description": "Import an existing wallet into the 6529 app using its 12-word recovery phrase or a private key.",
+  "pageMetadata.appWallet.description": "View an app wallet's address and balance, back up its recovery details, or delete it.",
+  "pageMetadata.blockFinder.description": "Predict the Ethereum block closest to a chosen date and time, or find blocks whose numbers contain chosen digit sequences.",
+  "pageMetadata.subscriptionsReport.description": "Aggregate Memes subscription counts for the active, upcoming and past drops.",
+  "pageMetadata.openData6529bot.description": "Public usage data for 6529bot, the AI pull request reviewer: review runs, tokens and estimated spend by day, repository and model.",
+  "pageMetadata.openDataMemeSubscriptions.description": "Download dated subscription export files for The Memes cards.",
+  "pageMetadata.openDataNetworkMetrics.description": "Download dated exports of consolidated network metrics, including TDH.",
+  "pageMetadata.openDataRememes.description": "Download dated exports of the ReMemes dataset.",
+  "pageMetadata.openDataRoyalties.description": "Download dated exports of royalties data.",
+  "pageMetadata.openDataTeam.description": "Download published team data exports from 6529 Open Data."
+}

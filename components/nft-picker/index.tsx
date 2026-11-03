@@ -543,10 +543,10 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 />
               ) : (
                 <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-p-6 tw-text-center">
-                  <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-sm group-data-[typography=profile]/profile-xtdh:tw-font-medium group-data-[typography=profile]/profile-xtdh:tw-text-iron-400">
                     No tokens selected
                   </span>
-                  <span className="tw-max-w-xs tw-text-xs tw-text-iron-300">
+                  <span className="tw-max-w-xs tw-text-xs tw-text-iron-300 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500">
                     {allowAll
                       ? "Add tokens using the input above or choose Select All to include the entire collection."
                       : "Add tokens using the input above."}

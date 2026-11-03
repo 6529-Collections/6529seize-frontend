@@ -3,6 +3,7 @@
 import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import { AuthLoadingBoundary } from "@/components/auth/AuthLoadingPlaceholder";
 import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import Button from "@/components/utils/button/Button";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -61,7 +62,7 @@ async function postRememeSubmission(body: {
     headers.set("x-6529-auth", apiAuth);
   }
 
-  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
+  const response = await fetch(apiUrl("/api/rememes/add"), {
     method: "POST",
     body: JSON.stringify(body),
     headers,
@@ -90,6 +91,7 @@ export default function RememeAddPage() {
     null
   );
   const signerAddressRef = useRef<string | null>(null);
+  const submissionInFlightRef = useRef(false);
   const [memes, setMemes] = useState<NFT[]>([]);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
@@ -163,11 +165,9 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
-      (response: DBResponse) => {
-        setMemes(response.data);
-      }
-    );
+    void fetchUrl(apiUrl("/api/memes_lite")).then((response: DBResponse) => {
+      setMemes(response.data);
+    });
   }, []);
 
   useEffect(() => {
@@ -196,6 +196,7 @@ export default function RememeAddPage() {
         setSignErrors(["Error: Connect a wallet before signing"]);
         return;
       }
+      submissionInFlightRef.current = true;
       setSubmitting(true);
       postRememeSubmission({
         address: signerAddress,
@@ -244,6 +245,7 @@ export default function RememeAddPage() {
           });
         })
         .finally(() => {
+          submissionInFlightRef.current = false;
           setSubmitting(false);
         });
     }
@@ -257,6 +259,8 @@ export default function RememeAddPage() {
     };
   }
 
+  const isSigningOrSubmitting = signMessage.isPending || submitting;
+
   const verifiedAction = (
     <AuthLoadingBoundary
       loading={isWalletConnectionResolving(connection)}
@@ -267,6 +271,7 @@ export default function RememeAddPage() {
           type="button"
           variant="action"
           size="lg"
+          loading={isSigningOrSubmitting}
           disabled={
             !addRememe ||
             !addRememe.valid ||
@@ -279,6 +284,9 @@ export default function RememeAddPage() {
             submissionResult?.success
           }
           onClick={() => {
+            if (isSigningOrSubmitting || submissionInFlightRef.current) {
+              return;
+            }
             setSignErrors([]);
             setSubmissionResult(undefined);
             if (addRememe) {

@@ -14,6 +14,10 @@
 import { HttpFile } from '../http/http';
 
 export class ApiContentModeratorAccess {
+    /**
+    * Unique cases requiring manual review, including open reports and pending checks. Optional for rolling compatibility; current servers always return it.
+    */
+    'needs_review_count'?: number;
     'moderator': boolean;
     'has_open_reports': boolean;
     'open_report_count': number;
@@ -25,6 +29,12 @@ export class ApiContentModeratorAccess {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "needs_review_count",
+            "baseName": "needs_review_count",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "moderator",
             "baseName": "moderator",

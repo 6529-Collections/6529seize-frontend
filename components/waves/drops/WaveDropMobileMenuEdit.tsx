@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
@@ -19,7 +19,10 @@ const WaveDropMobileMenuEdit: React.FC<WaveDropMobileMenuEditProps> = ({
   const { connectedProfile } = useContext(AuthContext);
 
   // Only show edit for drop authors
-  if (connectedProfile?.handle !== drop.author.handle) {
+  if (
+    drop.author.is_anonymous ||
+    connectedProfile?.handle !== drop.author.handle
+  ) {
     return null;
   }
 
@@ -30,11 +33,11 @@ const WaveDropMobileMenuEdit: React.FC<WaveDropMobileMenuEditProps> = ({
 
   return (
     <button
-      className="tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-iron-800 tw-transition-colors tw-duration-200"
+      className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
       onClick={handleEdit}
     >
-      <PencilIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300" />
-      <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+      <PencilIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
+      <span className="tw-text-base tw-font-semibold tw-text-iron-300">
         Edit Message
       </span>
     </button>

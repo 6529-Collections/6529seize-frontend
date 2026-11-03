@@ -1,10 +1,12 @@
 import crypto from "node:crypto";
 import {
+  getAppWalletEncryptionVersion,
+  isAppWalletEncryptedEnvelope,
+} from "@/components/app-wallets/app-wallet-envelope";
+import {
   decryptData,
   encryptData,
-  getAppWalletEncryptionVersion,
   getAppWalletPassphraseError,
-  isAppWalletEncryptedEnvelope,
 } from "@/components/app-wallets/app-wallet-helpers";
 
 const salt = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4";

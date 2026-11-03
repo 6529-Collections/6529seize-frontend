@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import SmallScreenHeader from "@/components/layout/SmallScreenHeader";
 
@@ -37,22 +37,50 @@ describe("SmallScreenHeader page sharing", () => {
   });
 
   it("shows Share on a supported mobile-browser route", () => {
-    render(
-      <SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />
-    );
+    render(<SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />);
 
     expect(
       screen.getByRole("button", { name: "Share page" })
     ).toBeInTheDocument();
   });
 
+  it("exposes pending navigation until controls become interactive", () => {
+    const onMenuToggle = jest.fn();
+    const { rerender } = render(
+      <SmallScreenHeader
+        interactive={false}
+        onMenuToggle={onMenuToggle}
+        isMenuOpen={false}
+      />
+    );
+    expect(screen.getByRole("banner")).toHaveAttribute("aria-busy", "true");
+    expect(
+      screen.getByRole("status", { name: "Loading navigation…" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Search" })
+    ).not.toBeInTheDocument();
+    const menu = screen.getByRole("button", { name: "Open menu" });
+    expect(menu).toBeDisabled();
+    fireEvent.click(menu);
+    expect(onMenuToggle).not.toHaveBeenCalled();
+
+    rerender(
+      <SmallScreenHeader onMenuToggle={onMenuToggle} isMenuOpen={false} />
+    );
+    expect(screen.getByRole("banner")).toHaveAttribute("aria-busy", "false");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
+    expect(menu).toBeEnabled();
+    fireEvent.click(menu);
+    expect(onMenuToggle).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps Share available in the waves query view", () => {
     pathname = "/alice";
     searchParams = new URLSearchParams("view=waves");
 
-    render(
-      <SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />
-    );
+    render(<SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />);
 
     expect(
       screen.getByRole("button", { name: "Share page" })
@@ -64,9 +92,7 @@ describe("SmallScreenHeader page sharing", () => {
     (unsupportedPathname) => {
       pathname = unsupportedPathname;
 
-      render(
-        <SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />
-      );
+      render(<SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />);
 
       expect(
         screen.queryByRole("button", { name: "Share page" })
@@ -78,9 +104,7 @@ describe("SmallScreenHeader page sharing", () => {
     pathname = "/alice";
     searchParams = new URLSearchParams("view=messages");
 
-    render(
-      <SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />
-    );
+    render(<SmallScreenHeader onMenuToggle={jest.fn()} isMenuOpen={false} />);
 
     expect(
       screen.queryByRole("button", { name: "Share page" })

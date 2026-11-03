@@ -16,6 +16,11 @@ jest.mock(
     }
 );
 
+jest.mock("@/components/delegation/delegation-expiry", () => ({
+  ...jest.requireActual("@/components/delegation/delegation-expiry"),
+  getViewerTimeZone: () => "America/Los_Angeles",
+}));
+
 const CHECKED_ADDRESS = "0x1111111111111111111111111111111111111111";
 const RELATED_ADDRESS = "0x2222222222222222222222222222222222222222";
 
@@ -107,6 +112,56 @@ describe("WalletCheckerResults", () => {
     expect(screen.getByText("Recommended Actions:")).toBeInTheDocument();
     expect(screen.getAllByText("checked.eth").length).toBeGreaterThan(0);
     expect(screen.getAllByText("related.eth").length).toBeGreaterThan(0);
+  });
+
+  it("shows a dated expiry as an exact instant in the viewer's zone", () => {
+    // A legacy expiry registered as 00:00 UTC on 15 October 2026.
+    const delegation = createDelegation({
+      expiry: Date.parse("2026-10-15T00:00:00Z") / 1000,
+    });
+
+    render(
+      <WalletCheckerResults
+        fetchedAddress={CHECKED_ADDRESS}
+        delegationsLoaded
+        delegations={[delegation]}
+        subDelegations={[]}
+        activeDelegation={delegation}
+        consolidationsLoaded={false}
+        consolidations={[]}
+        consolidatedWallets={[]}
+        consolidationActions={[]}
+      />
+    );
+
+    const expected = "Oct 14, 2026, 5:00 PM PDT";
+    const matches = screen.getAllByText(
+      (_content, element) =>
+        element?.childElementCount === 0 &&
+        element.textContent?.replace(/\s/g, " ") === expected
+    );
+    // The delegations table cell and the active delegation summary.
+    expect(matches).toHaveLength(2);
+  });
+
+  it("shows a zero expiry as never, not as 1 January 1970", () => {
+    render(
+      <WalletCheckerResults
+        fetchedAddress={CHECKED_ADDRESS}
+        delegationsLoaded
+        delegations={[createDelegation({ expiry: 0 })]}
+        subDelegations={[]}
+        activeDelegation={undefined}
+        consolidationsLoaded={false}
+        consolidations={[]}
+        consolidatedWallets={[]}
+        consolidationActions={[]}
+      />
+    );
+
+    const row = screen.getAllByRole("row")[1];
+    expect(row).toHaveTextContent("Never");
+    expect(row).not.toHaveTextContent("1970");
   });
 
   it("does not leak a zero expiry value into the active delegation output", () => {

@@ -2,9 +2,12 @@
 
 ## Overview
 
+For independently managed competitions in a shared wave, see
+[Competitions](../competitions/README.md).
+
 Use this area to create:
 
-- new waves (`Chat`, `Rank`, and `Approve`)
+- new chat waves and subwaves
 - new direct messages
 
 ## Features
@@ -16,7 +19,7 @@ Use this area to create:
   `/messages/{waveId}`.
 - Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
-  - `/waves` and `/waves/{waveId}` left-sidebar `Waves` section (`+`)
+  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave`; plus icon when collapsed)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
@@ -37,22 +40,11 @@ Use this area to create:
 - Step pages:
   1. [Wave Creation Setup Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
-     `Approve`)
-  4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
-     `Approve`)
-  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
-     `Approve`)
-  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
-     `Approve`)
-  7. [Wave Creation Guidelines Step](feature-rules-step.md)
-  8. [Wave Creation Description Step](feature-description-step.md)
-  9. [Final Overview](feature-final-overview-step.md)
-- Step path by wave type:
-  - `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
-  - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
-  - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
-  - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  3. [Wave Creation Guidelines Step](feature-rules-step.md)
+  4. [Wave Creation Description Step](feature-description-step.md)
+  5. [Final Overview](feature-final-overview-step.md)
+- Standalone waves use `Start a chat wave -> Review`; access, picture, and guidelines are optional settings on the first screen. Subwaves retain the guided sequence.
+- Add Rank or Approve competitions afterward through [competition setup](../competitions/feature-manage-competitions.md). Each competition owns its schedule, entries, votes, outcomes and appearance.
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
@@ -60,7 +52,7 @@ such as `Vote limits and behavior`. An expandable section shows `Customized`
 when saved or restored values differ from the defaults and opens as
 `Needs attention` when a hidden field fails validation.
 
-`Submission requirements` stays open, with all its controls visible.
+Competition submission requirements are configured in competition setup.
 
 ### Direct-Message Journey
 
@@ -70,9 +62,10 @@ when saved or restored values differ from the defaults and opens as
 ### Access and Availability
 
 - Create forms render only when the connected identity has a profile handle.
+- Signed-out entry explains Connect to create a wave and preserves the create URL.
 - Without a profile handle, Create Wave entry points open a compact profile
-  setup dialog with `Go to Identity` and `Not now`; the multi-step form does not
-  render.
+  setup dialog with `Go to Identity`; completing setup returns to standalone
+  wave creation, or to the parent wave when creating a subwave.
 
 ## Flows
 

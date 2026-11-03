@@ -12,6 +12,7 @@ export default function CreateWaveLayout({
   showActions,
   submitting,
   nextDisabled = false,
+  quickChat = false,
   setStep,
   onComplete,
 }: {
@@ -21,6 +22,7 @@ export default function CreateWaveLayout({
   readonly showActions: boolean;
   readonly submitting: boolean;
   readonly nextDisabled?: boolean | undefined;
+  readonly quickChat?: boolean;
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
@@ -30,18 +32,22 @@ export default function CreateWaveLayout({
   const { canScrollDown } = useCreateWaveScrollHint();
 
   return (
-    <div className="tw-relative tw-flex tw-h-max tw-min-h-full tw-w-full tw-shrink-0 lg:after:tw-pointer-events-none lg:after:tw-absolute lg:after:tw-inset-y-0 lg:after:tw-left-52 lg:after:tw-z-20 lg:after:tw-w-px lg:after:tw-bg-white/[0.06] lg:after:tw-content-['']">
-      <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-8 lg:tw-pr-5">
-        <CreateWavesMainSteps
-          activeStep={step}
-          waveType={config.overview.type}
-          ongoingRanking={config.dates?.ongoingRanking ?? false}
-          disabled={submitting}
-          onStep={(targetStep) => {
-            void setStep(targetStep, "backward");
-          }}
-        />
-      </div>
+    <div
+      className={`tw-relative tw-flex tw-h-max tw-min-h-full tw-w-full tw-shrink-0 ${quickChat ? "" : "lg:after:tw-pointer-events-none lg:after:tw-absolute lg:after:tw-inset-y-0 lg:after:tw-left-52 lg:after:tw-z-20 lg:after:tw-w-px lg:after:tw-bg-white/[0.06] lg:after:tw-content-['']"}`}
+    >
+      {!quickChat && (
+        <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-8 lg:tw-pr-5">
+          <CreateWavesMainSteps
+            activeStep={step}
+            waveType={config.overview.type}
+            ongoingRanking={config.dates.ongoingRanking ?? false}
+            disabled={submitting}
+            onStep={(targetStep) => {
+              void setStep(targetStep, "backward");
+            }}
+          />
+        </div>
+      )}
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-bg-iron-950">
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-1 tw-flex-col">
           {/* Joined to the top of the flow: the compact step progress pins to
@@ -55,6 +61,7 @@ export default function CreateWaveLayout({
               activeStep={step}
               ongoingRanking={config.dates.ongoingRanking ?? false}
               waveType={config.overview.type}
+              quickChat={quickChat}
             />
           </div>
           <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">{children}</div>
@@ -82,6 +89,7 @@ export default function CreateWaveLayout({
                 submitting={submitting}
                 nextDisabled={nextDisabled}
                 onComplete={onComplete}
+                quickChat={quickChat}
               />
             </div>
           ) : null}

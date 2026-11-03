@@ -45,6 +45,31 @@ describe("useAlchemyNftQueries", () => {
       },
     ];
 
+    it("calls the backend proxy directly in the desktop app", async () => {
+      const userAgent = jest
+        .spyOn(globalThis.navigator, "userAgent", "get")
+        .mockReturnValue(
+          "Mozilla/5.0 Chrome/146.0 Electron/41.10.3 Safari/537.36"
+        );
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockAlchemyResponse),
+      });
+
+      try {
+        const result = await fetchOwnerNfts(1, "0x123", "0xowner");
+
+        expect(result).toEqual(expectedProcessedResult);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+          `${MOCK_API_ENDPOINT}/alchemy-proxy/owner-nfts?chainId=1&contract=0x123&owner=0xowner`,
+          { signal: undefined }
+        );
+      } finally {
+        userAgent.mockRestore();
+      }
+    });
+
     it("should return processed data from primary endpoint when successful", async () => {
       globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,

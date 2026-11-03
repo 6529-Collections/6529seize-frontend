@@ -25,7 +25,10 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}
+      isPinnedWavesLoading={waves.isPinnedWavesLoading ?? false}
       isFetchingNextPage={waves.isFetchingNextPage}
+      hasLoadingError={waves.hasLoadingError}
+      retryLoading={waves.retryLoading}
       onHover={registerWave}
       scrollContainerRef={scrollContainerRef}
     />

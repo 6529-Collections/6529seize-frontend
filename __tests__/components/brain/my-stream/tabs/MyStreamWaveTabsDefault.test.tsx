@@ -10,6 +10,19 @@ const mockUseBreakpoint = jest.fn(() => "LG");
 const mockShare = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
+const mockOpenInformation = jest.fn();
+
+jest.mock("@/contexts/WaveInformationContext", () => ({
+  useWaveInformation: () => ({ open: mockOpenInformation }),
+}));
+
+const mockOpenWaveSearch = jest.fn();
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
+  useOpenMyStreamWaveSearch: () => ({
+    open: mockOpenWaveSearch,
+    trigger: { current: null },
+  }),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: jest.fn() }),
@@ -34,6 +47,12 @@ jest.mock("react-use", () => {
 });
 
 const useContentTab = jest.fn();
+
+// The Join CTA owns its auth/query wiring and has dedicated tests.
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   __esModule: true,
@@ -132,6 +151,7 @@ describe("MyStreamWaveTabsDefault", () => {
     mockShare.mockReset();
     mockWriteText.mockReset();
     mockCopyToClipboard.mockReset();
+    mockOpenInformation.mockReset();
     mockShare.mockResolvedValue(undefined);
     mockWriteText.mockResolvedValue(undefined);
     setNavigatorShare(mockShare);
@@ -382,7 +402,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps compact subtitle trigger and search action", () => {
+  it("opens wave information from the compact title and keeps search available", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -405,9 +425,8 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.queryByText("A chill place to discuss drops")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Show wave description" })
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
+    expect(mockOpenInformation).toHaveBeenCalledWith("w1");
   });
 
   it("shows compact Drop on the Chat tab and opens the submit flow", () => {

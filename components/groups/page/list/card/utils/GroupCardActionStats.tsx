@@ -1,6 +1,8 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { tRich } from "@/i18n/messages";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import CircleLoader, {
@@ -18,11 +20,14 @@ export default function GroupCardActionStats({
   matter,
   membersCount,
   loadingMembersCount,
+  compact = false,
 }: {
   readonly matter: GroupCardRateMatter;
   readonly membersCount: number | null;
   readonly loadingMembersCount: boolean;
+  readonly compact?: boolean | undefined;
 }) {
+  const locale = useBrowserLocale();
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "Nic",
@@ -119,29 +124,56 @@ export default function GroupCardActionStats({
       : null;
 
   return (
-    <div className="tw-mt-4">
-      <p className="tw-mb-0 tw-block tw-text-sm tw-font-medium tw-text-iron-50">
+    <div className={compact ? "tw-min-w-0" : "tw-mt-4"}>
+      <p
+        className={
+          compact
+            ? "tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+            : "tw-mb-0 tw-block tw-text-sm tw-font-medium tw-text-iron-50"
+        }
+      >
         <img
           src="/pepe-xglasses.png"
-          className="-tw-mt-0.5 tw-ml-1 tw-mr-1.5 tw-inline tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
+          className={
+            compact
+              ? "tw-h-4 tw-w-4 tw-shrink-0 tw-object-contain"
+              : "-tw-mt-0.5 tw-ml-1 tw-mr-1.5 tw-inline tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
+          }
           alt="pepe-xglasses"
         />
-        You can grant up to{" "}
-        <span className="tw-font-semibold tw-text-primary-400">
-          {creditPerMember > 0 && "+-"}
-          {formatNumberWithCommas(+creditPerMember.toFixed(0))}
-        </span>{" "}
-        {MATTER_LABEL[matter]} to each of
-        <span>
-          <span className="tw-font-semibold tw-text-primary-400">
-            {" "}
-            {loadingMembersCount ? (
-              <CircleLoader size={CircleLoaderSize.SMALL} />
-            ) : (
-              count
-            )}
-          </span>{" "}
-          members of the group.
+        <span className={compact ? "tw-min-w-0" : undefined}>
+          {tRich(locale, "network.groupInspection.creditSummary", {
+            credit: (
+              <span
+                key="credit"
+                className={
+                  compact
+                    ? "tw-font-medium tw-text-primary-400"
+                    : "tw-font-semibold tw-text-primary-400"
+                }
+              >
+                {creditPerMember > 0 && "+-"}
+                {formatNumberWithCommas(+creditPerMember.toFixed(0))}
+              </span>
+            ),
+            matter: MATTER_LABEL[matter],
+            count: (
+              <span
+                key="count"
+                className={
+                  compact
+                    ? "tw-font-medium tw-text-primary-400"
+                    : "tw-font-semibold tw-text-primary-400"
+                }
+              >
+                {loadingMembersCount ? (
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                ) : (
+                  count
+                )}
+              </span>
+            ),
+          })}
         </span>
       </p>
     </div>

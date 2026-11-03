@@ -8,6 +8,7 @@ import {
 } from "./support/pageAssertions";
 import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
 import { installSurfaceSimulation } from "./support/surfaceSimulation";
+import { attachMuseumMediaDiagnostics } from "./support/museumMediaDiagnostics";
 
 const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
@@ -17,7 +18,8 @@ const ACCESS_INPUT_SELECTOR =
   'input[aria-label="Team access code"], input[placeholder="Team Login"]';
 type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
-async function installStagingAccessUnlock(page: Page) {
+/** Unlocks the staging access gate on navigation; for extra pages too. */
+export async function installStagingAccessUnlock(page: Page) {
   const originalGoto = page.goto.bind(page) as PageGoto;
   const gotoWithAccessUnlock: PageGoto = async (...args) => {
     const response = await originalGoto(...args);
@@ -36,7 +38,8 @@ async function installStagingAccessUnlock(page: Page) {
   page.goto = gotoWithAccessUnlock as Page["goto"];
 }
 
-async function seedStagingAccessCookie(
+/** Seeds the staging access cookie; for contexts a spec creates itself. */
+export async function seedStagingAccessCookie(
   context: BrowserContext,
   baseURL?: string
 ) {
@@ -157,6 +160,9 @@ const test = base.extend({
   },
   page: async ({ page, baseURL }, runTest, testInfo) => {
     const diagnostics = attachPageDiagnostics(page);
+    const detachMuseumDiagnostics = testInfo.file.includes("/museum/")
+      ? await attachMuseumMediaDiagnostics(page, diagnostics)
+      : undefined;
 
     if (shouldUnlockStaging(baseURL)) {
       await installStagingAccessUnlock(page);
@@ -164,6 +170,7 @@ const test = base.extend({
 
     await runTest(page);
 
+    await detachMuseumDiagnostics?.();
     await attachPageDiagnosticsArtifact(testInfo, diagnostics);
     assertNoPageErrors(diagnostics);
   },
@@ -186,7 +193,12 @@ export {
   type AxeViolationAllowance,
 } from "./support/a11yAssertions";
 export {
+  expectActiveOptionIndicator,
+  expectFocusedLinksShowIndicator,
+  expectKeyboardFocusIndicator,
+  expectKeyboardFocusOutline,
   expectKeyboardFocusVisibleWithinTabs,
+  expectNoOutlineOnPointerFocus,
   getFocusedElementSummary,
   pressTab,
   type FocusSummary,

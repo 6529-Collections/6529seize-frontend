@@ -1,5 +1,5 @@
 import React from "react";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
 import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
@@ -152,6 +152,42 @@ describe("group member preview", () => {
     );
 
     expect(await screen.findByText("1 user")).toBeInTheDocument();
+  });
+
+  it("shows complete criteria as tags while preserving the member preview action", async () => {
+    const user = userEvent.setup();
+    const onOpen = jest.fn();
+    const criteria = [
+      "TDH + xTDH at least 1,000",
+      "xTDH grant for Art, Light and Life",
+    ];
+    const target = {
+      kind: "draft" as const,
+      group: draftGroup,
+      name: "Network filter",
+      summary:
+        "TDH + xTDH at least 1,000 and xTDH grant for Art, Light and Life",
+    };
+    renderWithQueryClient(
+      <GroupMembersPreviewTrigger
+        target={target}
+        appearance="inline"
+        inlineCriteriaItems={criteria}
+        onOpen={onOpen}
+      />
+    );
+
+    expect(
+      within(screen.getByRole("list"))
+        .getAllByRole("listitem")
+        .map((item) => item.textContent)
+    ).toEqual(criteria);
+    expect(await screen.findByText("21 users")).toBeInTheDocument();
+    expect(fetchGroupMembersPage).toHaveBeenCalledWith(
+      expect.objectContaining({ target })
+    );
+    await user.click(screen.getByRole("button", { name: "View members" }));
+    expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
   it("renders the user count itself as the summary action", async () => {

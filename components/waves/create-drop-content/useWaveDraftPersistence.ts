@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { EditorState } from "lexical";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import {
@@ -6,7 +12,22 @@ import {
   readRestorableWaveDraft,
   writeWaveDraft,
 } from "@/helpers/waves/wave-draft.helpers";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+const persistEditorState = (
+  waveId: string,
+  editorState: EditorState | null
+) => {
+  let serialized: string | null = null;
+  try {
+    serialized = editorState ? JSON.stringify(editorState.toJSON()) : null;
+  } catch {
+    serialized = null;
+  }
+  if (serialized) writeWaveDraft(waveId, serialized);
+  else clearWaveDraft(waveId);
+};
 
 /**
  * Persist an in-progress chat message across a full reload (e.g. the
@@ -55,25 +76,32 @@ export const useWaveDraftPersistence = ({
       clearWaveDraft(draftWaveId);
       return;
     }
-    const handle = setTimeout(() => {
-      if (!editorState) {
-        clearWaveDraft(draftWaveId);
-        return;
-      }
-      let serialized: string | null = null;
-      try {
-        serialized = JSON.stringify(editorState.toJSON());
-      } catch {
-        serialized = null;
-      }
-      if (serialized) {
-        writeWaveDraft(draftWaveId, serialized);
-      } else {
-        clearWaveDraft(draftWaveId);
-      }
-    }, 400);
+    const handle = setTimeout(
+      () => persistEditorState(draftWaveId, editorState),
+      400
+    );
     return () => clearTimeout(handle);
   }, [editorState, draftWaveId, isMountEditor]);
+
+  const flushBeforeTabLeave = useEffectEvent(() => {
+    // Reply/quote/edit content must never replace the primary composer draft.
+    // A restoring editor may not have reported its initial state yet.
+    if (draftWaveId && editorState)
+      persistEditorState(draftWaveId, editorState);
+  });
+  useLayoutEffect(() => {
+    let profileInvalidated = false;
+    const invalidate = () => {
+      profileInvalidated = true;
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+    return () => {
+      globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+      // Fast tab/history changes can leave before the 400ms autosave runs.
+      // Flush during teardown while this primary editor still owns its draft.
+      if (!profileInvalidated) flushBeforeTabLeave();
+    };
+  }, []);
 
   return { initialDraftJson: isMountEditor ? initialDraftJson : null };
 };

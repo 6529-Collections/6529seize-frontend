@@ -9,19 +9,21 @@ type NextMintDropState = {
   readonly nextMint: ApiDropV2View | null;
   readonly nextMintTitle: string | null;
   readonly waveId: string | null;
+  readonly nextDecisionTime: number | null;
   readonly isReady: boolean;
   readonly isSettingsLoaded: boolean;
   readonly isFetching: boolean;
+  readonly isLoading: boolean;
 };
 
 export const useNextMintDrop = (): NextMintDropState => {
-  const { seizeSettings, isLoaded } = useSeizeSettings();
+  const { seizeSettings, isLoaded, loadError } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
   const { wave } = useWaveById(waveId, {
     enabled: !!waveId,
   });
 
-  const { decisionPoints, isFetching } = useWaveDecisions({
+  const { decisionPoints, isFetching, isLoading } = useWaveDecisions({
     waveId: waveId ?? "",
     enabled: !!waveId,
     pageSize: 1,
@@ -48,8 +50,11 @@ export const useNextMintDrop = (): NextMintDropState => {
     nextMint,
     nextMintTitle,
     waveId,
+    nextDecisionTime:
+      wave?.id === waveId ? (wave.wave.next_decision_time ?? null) : null,
     isReady: isLoaded && !!waveId,
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
+    isLoading: (!isLoaded && !loadError) || (!!waveId && isLoading),
   };
 };

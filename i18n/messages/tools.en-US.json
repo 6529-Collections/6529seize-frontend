@@ -1,12 +1,12 @@
 {
-  "tools.contents.groups.nftDelegation": "NFT Delegation",
+  "tools.contents.groups.nftDelegation": "Safe Collecting",
   "tools.contents.groups.theMemesTools": "The Memes Tools",
   "tools.contents.groups.builderTools": "Builder Tools",
   "tools.contents.groups.openData": "Open Data",
   "tools.contents.pages.tools": "Tools",
-  "tools.contents.pages.delegationCenter": "Delegation Center",
-  "tools.contents.pages.walletArchitecture": "Wallet Architecture",
-  "tools.contents.pages.delegationFaq": "Delegation FAQ",
+  "tools.contents.pages.delegationCenter": "Safe Collecting",
+  "tools.contents.pages.walletArchitecture": "TAP Guide",
+  "tools.contents.pages.delegationFaq": "FAQ",
   "tools.contents.pages.consolidationUseCases": "Consolidation Use Cases",
   "tools.contents.pages.walletChecker": "Wallet Checker",
   "tools.contents.pages.subscriptionsReport": "Subscriptions Report",
@@ -21,6 +21,7 @@
   "tools.contents.pages.api": "API",
   "tools.contents.pages.emma": "EMMA",
   "tools.contents.pages.blockFinder": "Block Finder",
+  "tools.contents.pages.timeZones": "World Time Zones",
   "tools.contents.pages.openData": "Open Data",
   "tools.contents.pages.networkMetrics": "Network Metrics",
   "tools.contents.pages.memeSubscriptions": "Meme Subscriptions",
@@ -32,5 +33,10 @@
   "tools.index.metadata.description": "6529 Tools, reports and Open Data.",
   "tools.index.eyebrow": "Tools",
   "tools.index.title": "6529 Tools",
-  "tools.index.cardAriaLabel": "Open tool: {page}"
+  "tools.index.cardAriaLabel": "Open tool: {page}",
+  "tools.blockFinder.toast.timeWindowNeedsBlockNumbers": "Add at least one block number when using a time window.",
+  "tools.blockFinder.toast.invalidBlockNumbers": "Enter block numbers separated by commas.",
+  "tools.blockFinder.toast.invalidDateTime": "Enter a valid date and time.",
+  "tools.blockFinder.toast.predictFailed": "Couldn’t predict block numbers. Please try again.",
+  "tools.blockFinder.toast.predictFailedWithReason": "Couldn’t predict block numbers: {reason}"
 }

@@ -2,6 +2,9 @@
 
 ## Overview
 
+For independently managed competitions in a shared wave, see
+[Competitions](../competitions/README.md).
+
 Use this area for rank-wave leaderboard tasks: submission entry, ranking views,
 decision timing, winners, and vote management.
 

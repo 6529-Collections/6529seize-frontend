@@ -107,10 +107,10 @@ const useNewestMessagesSync = ({
         console.error("Error fetching newest messages:", error);
       } finally {
         cleanupController(waveId);
-        isFetchingNewestRef.current[waveId] = false;
+        delete isFetchingNewestRef.current[waveId];
 
         if (needsRefetchAfterCurrentRef.current[waveId]) {
-          needsRefetchAfterCurrentRef.current[waveId] = false;
+          delete needsRefetchAfterCurrentRef.current[waveId];
           const latestFetchedSerialNo =
             getData(waveId)?.latestFetchedSerialNo ?? null;
           if (latestFetchedSerialNo !== null) {
@@ -326,6 +326,7 @@ interface UseProcessIncomingDropParams extends Pick<
   | "activeWaveId"
   | "getData"
   | "hasServerFeedSeed"
+  | "isWaveInUse"
   | "updateData"
   | "registerWave"
   | "syncNewestMessages"
@@ -339,6 +340,7 @@ const useProcessIncomingDrop = ({
   activeWaveId,
   getData,
   hasServerFeedSeed,
+  isWaveInUse,
   updateData,
   registerWave,
   syncNewestMessages,
@@ -415,7 +417,12 @@ const useProcessIncomingDrop = ({
           markActiveWaveAsRead(waveId, drop.serial_no);
           return;
         }
-        registerWave(waveId);
+        // Waves without cached messages keep only list metadata, such as
+        // unread counts, which the wave lists track themselves. They load
+        // fresh when opened, so only an open wave missing its cache loads now.
+        if (isWaveInUse(waveId)) {
+          registerWave(waveId);
+        }
         return;
       }
 
@@ -480,6 +487,7 @@ const useProcessIncomingDrop = ({
       activeWaveIdRef,
       getData,
       hasServerFeedSeed,
+      isWaveInUse,
       updateData,
       registerWave,
       applyCanonicalDropUpdateForExistingDrop,
@@ -498,6 +506,12 @@ const useProcessIncomingDrop = ({
   return { processIncomingDrop, processDropUpdateRef };
 };
 
+/**
+ * The single app-wide handler for ATTACHMENT_STATUS_UPDATE. It refreshes every
+ * cached drop query and the active wave's in-memory message store. Drop list
+ * hooks must not subscribe to this event again; they would repeat the same
+ * cache update once per mounted list.
+ */
 const useAttachmentStatusUpdate = ({
   activeWaveId,
   getData,
@@ -624,6 +638,7 @@ export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
   hasServerFeedSeed,
+  isWaveInUse,
   updateData,
   registerWave,
   syncNewestMessages,
@@ -640,6 +655,7 @@ export function useWaveRealtimeUpdater({
     activeWaveId,
     getData,
     hasServerFeedSeed,
+    isWaveInUse,
     updateData,
     registerWave,
     syncNewestMessages,

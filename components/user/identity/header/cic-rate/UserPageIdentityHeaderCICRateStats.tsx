@@ -96,7 +96,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         {items.map((item) => (
           <span
             key={item.label}
-            className={`tw-block tw-text-iron-500 tw-font-medium${
+            className={`tw-block tw-text-iron-400 tw-font-normal${
               item.labelBreakAll ? " tw-break-all" : ""
             }`}>
             <span>
@@ -112,17 +112,17 @@ export default function UserPageIdentityHeaderCICRateStats({
   }
 
   return (
-    <div className="tw-rounded-lg tw-bg-white/[0.03] tw-border tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 tw-space-y-2.5">
+    <div className="tw-space-y-2">
       {items.map((item) => (
         <div
           key={item.label}
-          className="tw-flex tw-items-center tw-justify-between">
+          className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
           <span
-            className="tw-text-xs tw-text-iron-500 tw-font-medium">
+            className="tw-min-w-0 tw-break-words tw-text-xs tw-text-iron-400 tw-font-normal">
             {item.label}
           </span>
           <span
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${item.valueColorClassName}`}>
+            className={`tw-ml-auto tw-whitespace-nowrap tw-text-xs tw-tabular-nums tw-font-medium ${item.valueColorClassName}`}>
             {item.value}
           </span>
         </div>

@@ -85,6 +85,10 @@ export function AcquisitionDocumentSection({
   readonly sectionClassName?: string;
 }) {
   const historical = isHistoricalAcquisitionStatusDocument(document);
+  const heading =
+    document.kind === "source_record" && document.sourcePath.endsWith(".json")
+      ? t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")
+      : document.title;
 
   return (
     <section
@@ -112,14 +116,14 @@ export function AcquisitionDocumentSection({
           id={`acquisition-document-${document.id}`}
           className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
         >
-          {document.title}
+          {heading}
         </h2>
       ) : (
         <h3
           id={`acquisition-document-${document.id}`}
           className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
         >
-          {document.title}
+          {heading}
         </h3>
       )}
       {document.kind === "source_record" ? (
@@ -131,7 +135,7 @@ export function AcquisitionDocumentSection({
         </div>
       ) : (
         <MuseumMarkdown
-          className="tw-mt-6"
+          className="tw-mt-6 tw-break-words"
           embeddedDocument
           sourceCommit={sourceCommit}
           sourcePath={document.sourcePath}

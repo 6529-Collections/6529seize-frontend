@@ -1,23 +1,39 @@
-import { render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { DiscoverWaveExplorer } from "@/components/waves/discovery/DiscoverWaveExplorer";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 
 const replaceMock = jest.fn();
-let searchParams = "";
+let searchParams: string | null = "";
 let latestExploreProps: Record<string, any> | null = null;
+let mockCanUseCollections = false;
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({ canUseCollections: mockCanUseCollections }),
+}));
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/discover",
   useRouter: () => ({ replace: replaceMock }),
-  useSearchParams: () => new URLSearchParams(searchParams),
+  useSearchParams: () =>
+    searchParams === null ? null : new URLSearchParams(searchParams),
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
   ExploreWavesSection: (props: Record<string, any>) => {
     latestExploreProps = props;
-    return <div>{props.headerControls}</div>;
+    return (
+      <div>
+        {props["headerActions"]}
+        {props["headerControls"]}
+      </div>
+    );
   },
 }));
 
@@ -26,19 +42,56 @@ describe("DiscoverWaveExplorer", () => {
     replaceMock.mockClear();
     searchParams = "";
     latestExploreProps = null;
+    mockCanUseCollections = false;
   });
 
   it("uses combined score discovery by default", () => {
     render(<DiscoverWaveExplorer />);
 
     expect(latestExploreProps).toMatchObject({
-      title: "Active discussions you are not yet following",
+      title: "Active discussions",
       excludeFollowed: true,
       view: ApiWavesV2ListType.Overview,
       overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
       scoreSort: ApiWaveScoreSort.Balanced,
       statusLabel: "Balanced waves",
     });
+  });
+
+  it("personalizes discussion copy for an authenticated viewer", () => {
+    mockCanUseCollections = true;
+    render(<DiscoverWaveExplorer />);
+    expect(latestExploreProps?.["title"]).toBe(
+      "Active discussions you are not yet following"
+    );
+  });
+
+  it("defaults to recommendations and permits navigation when search params are unavailable", () => {
+    searchParams = null;
+    render(<DiscoverWaveExplorer />);
+
+    expect(
+      screen.getByRole("tab", { name: "Worth Checking Out" })
+    ).toHaveAttribute("aria-selected", "true");
+    expect(latestExploreProps).toMatchObject({
+      scoreSort: ApiWaveScoreSort.Balanced,
+      statusLabel: "Balanced waves",
+    });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Active Votes" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?view=active-votes",
+      {
+        scroll: false,
+      }
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Worth Checking Out" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?view=recommendations",
+      {
+        scroll: false,
+      }
+    );
   });
 
   it("uses the latest-post backend overview without score filters", () => {
@@ -76,4 +129,113 @@ describe("DiscoverWaveExplorer", () => {
       statusLabel: "Newest waves",
     });
   });
+
+  it.each(["", "filter=REP_60&sort=QUALITY&locale=en-GB"])(
+    "keeps the formula link outside the controls and preserves its origin: %s",
+    (query) => {
+      searchParams = query;
+      render(<DiscoverWaveExplorer />);
+      const formula = screen.getByRole("link", { name: "Score formula" });
+      const href = new URL(formula.getAttribute("href")!, "https://6529.io");
+      expect(href.pathname).toBe("/network/wave-score");
+      expect(href.searchParams.get("returnTo")).toBe(
+        query ? `/discover?${query}` : "/discover"
+      );
+      expect(
+        screen.getByRole("group", { name: "Discovery controls" })
+      ).not.toContainElement(formula);
+    }
+  );
+
+  it("keeps the current threshold and unrelated URL parameters when choosing a score sort", () => {
+    searchParams = "filter=SCORE_50&locale=en-GB";
+    render(<DiscoverWaveExplorer />);
+    fireEvent.click(screen.getByRole("tab", { name: "Quality" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?filter=SCORE_50&locale=en-GB&sort=QUALITY",
+      { scroll: false }
+    );
+  });
+
+  it("updates thresholds with the keyboard while keeping the selected sort", async () => {
+    searchParams = "sort=QUALITY";
+    render(<DiscoverWaveExplorer />);
+    fireEvent.keyDown(screen.getByRole("radio", { name: "All" }), {
+      key: "End",
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "REP 60+" })).toHaveFocus()
+    );
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?sort=QUALITY&filter=REP_60",
+      { scroll: false }
+    );
+  });
+
+  it("lists all sorts in the sheet and clears thresholds when a chronology sort is chosen", async () => {
+    searchParams = "sort=QUALITY&filter=HOT_60";
+    render(<DiscoverWaveExplorer />);
+    const trigger = screen.getByRole("button", {
+      name: "Wave discovery sort: Quality",
+    });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const sheet = await screen.findByRole("dialog", {
+      name: "Wave discovery sort",
+    });
+    for (const name of [
+      "Balanced",
+      "Quality",
+      "Hot",
+      "REP",
+      "Newest",
+      "Latest Posts",
+    ]) {
+      expect(within(sheet).getByRole("button", { name })).toHaveAttribute(
+        "aria-pressed",
+        String(name === "Quality")
+      );
+    }
+    fireEvent.click(
+      within(sheet).getByRole("button", { name: "Latest Posts" })
+    );
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?sort=LATEST_POSTS",
+      { scroll: false }
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+});
+
+it("associates discovery view controls with the rendered panel", () => {
+  searchParams = "";
+  render(<DiscoverWaveExplorer />);
+  const votes = screen.getByRole("tab", { name: "Active Votes" });
+  const recommendations = screen.getByRole("tab", {
+    name: "Worth Checking Out",
+  });
+  expect(screen.getByRole("tabpanel")).toHaveAttribute(
+    "id",
+    recommendations.getAttribute("aria-controls")
+  );
+  expect(
+    within(
+      screen.getByRole("tablist", { name: "Wave discovery" })
+    ).getAllByRole("tab")
+  ).toEqual([recommendations, votes]);
+  expect(recommendations).toHaveAttribute("aria-selected", "true");
+  fireEvent.keyDown(recommendations, { key: "ArrowLeft" });
+  expect(votes).toHaveFocus();
+  expect(replaceMock).toHaveBeenLastCalledWith("/discover?view=active-votes", {
+    scroll: false,
+  });
+  fireEvent.keyDown(votes, { key: "Home" });
+  expect(recommendations).toHaveFocus();
+  expect(replaceMock).toHaveBeenLastCalledWith(
+    "/discover?view=recommendations",
+    { scroll: false }
+  );
 });

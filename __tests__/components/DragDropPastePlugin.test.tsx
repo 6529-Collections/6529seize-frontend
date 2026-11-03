@@ -236,9 +236,14 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("inserts one image when Chrome exposes it in both clipboard collections", async () => {
-    const imageOptions = { type: "image/png", lastModified: 1700000000000 };
-    const listedImage = new File(["a"], "image.png", imageOptions);
-    const itemImage = new File(["a"], "image.png", imageOptions);
+    const listedImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000000,
+    });
+    const itemImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000001,
+    });
     const preventDefault = jest.fn();
 
     renderPlugin();
@@ -270,6 +275,39 @@ describe("DragDropPastePlugin", () => {
     const uploadedFile = (multiPartUpload as jest.Mock).mock.calls[0][0].file;
     expect(uploadedFile).toBe(listedImage);
     expect(uploadedFile).not.toBe(itemImage);
+  });
+
+  it("accepts a metadata collision across clipboard views", async () => {
+    const listedImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000000,
+    });
+    const itemImage = new File(["b"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000001,
+    });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [listedImage],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => itemImage },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: listedImage, path: "drop" })
+    );
   });
 
   it("keeps a distinct clipboard item when the file list is populated", async () => {

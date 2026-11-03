@@ -3,11 +3,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import {
   Description,
   Dialog,
@@ -26,13 +27,15 @@ export default function DropsListItemDeleteDropModal({
   closeModal,
   onDropDeleted,
 }: {
-  readonly drop: ApiDrop;
+  readonly drop: Pick<ApiDrop, "id" | "drop_type"> & {
+    readonly wave: Pick<ApiDrop["wave"], "id">;
+  };
   readonly closeModal: () => void;
   readonly onDropDeleted?: (() => void) | undefined;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved } = useMyStreamActions();
 
   const contentType =
     drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";
@@ -40,9 +43,7 @@ export default function DropsListItemDeleteDropModal({
   const [mutating, setMutating] = useState(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await commonApiDelete({
-        endpoint: `drops/${drop.id}`,
-      }),
+      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
         message: `${contentType} deleted.`,
@@ -57,6 +58,10 @@ export default function DropsListItemDeleteDropModal({
       }
     },
     onError: (error) => {
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: `Couldn't delete this ${contentType.toLowerCase()}.`,

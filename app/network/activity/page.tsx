@@ -8,6 +8,8 @@ import {
   INITIAL_ACTIVITY_LOGS_PARAMS,
 } from "@/helpers/profile-logs.helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { notFound } from "next/navigation";
 
 export default async function CommunityActivityPage() {
@@ -30,6 +32,6 @@ export default async function CommunityActivityPage() {
 export const generateMetadata = async () => {
   return getAppMetadata({
     title: "Activity | Network",
-    description: "Network",
+    description: t(DEFAULT_LOCALE, "pageMetadata.networkActivity.description"),
   });
 };

@@ -6,10 +6,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
 import { CompactMenu } from "@/components/compact-menu";
+import TabButton from "./TabButton";
 
 interface TabOption {
   readonly key: string;
   readonly label: string;
+  readonly panelId?: string | undefined;
 }
 
 export type TabToggleWithOverflowVariant = "underline" | "compactPills";
@@ -21,6 +23,7 @@ interface TabToggleWithOverflowProps {
   readonly maxVisibleTabs?: number | undefined;
   readonly fullWidth?: boolean | undefined;
   readonly variant?: TabToggleWithOverflowVariant | undefined;
+  readonly transition?: boolean | undefined;
 }
 
 interface OverflowTriggerProps {
@@ -78,7 +81,9 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   maxVisibleTabs = 3,
   fullWidth = false,
   variant = "underline",
+  transition = false,
 }) => {
+  const Button = transition ? TabButton : "button";
   const isCompactPills = variant === "compactPills";
   const clampedMax = React.useMemo(
     () => Math.max(0, Math.floor(maxVisibleTabs)),
@@ -181,9 +186,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         )}
       >
         {visibleTabs.map((option, index) => (
-          <button
+          <Button
             role="tab"
             aria-selected={activeKey === option.key}
+            aria-controls={option.panelId}
             key={option.key}
             type="button"
             tabIndex={index === focusedTabIndex ? 0 : -1}
@@ -205,7 +211,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             )}
           >
             {option.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -238,7 +244,13 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           items={overflowTabs.map((option) => ({
             id: option.key,
             label: option.label,
-            onSelect: () => handleSelect(option.key),
+            onSelect: () => {
+              if (transition) {
+                React.startTransition(() => handleSelect(option.key));
+              } else {
+                handleSelect(option.key);
+              }
+            },
             active: activeKey === option.key,
           }))}
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"

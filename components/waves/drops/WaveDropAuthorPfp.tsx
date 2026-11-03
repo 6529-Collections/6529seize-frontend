@@ -8,6 +8,8 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
+import { AnonymousAuthorAvatar } from "./AnonymousDropAuthor";
 
 interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;
@@ -26,9 +28,10 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({
   disableNavigation = false,
 }) => {
   const compact = useCompactMode();
-  const resolvedPfp = drop.author.pfp
-    ? resolveIpfsUrlSync(drop.author.pfp)
-    : null;
+  const resolvedPfp =
+    drop.author.pfp && !isAnonymousAuthor(drop.author)
+      ? resolveIpfsUrlSync(drop.author.pfp)
+      : null;
   const [loadState, setLoadState] = useState<PfpLoadState>({
     src: null,
     mode: "optimized",
@@ -44,6 +47,8 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({
   const tooltipUser = authorHandle ?? drop.author.id;
 
   const sizeClasses = compact ? "tw-h-8 tw-w-8" : "tw-h-10 tw-w-10";
+  if (isAnonymousAuthor(drop.author))
+    return <AnonymousAuthorAvatar className={sizeClasses} />;
   const containerClasses = `tw-relative tw-flex-shrink-0 ${sizeClasses} tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-bg-iron-950`;
 
   const handleImageError = () => {

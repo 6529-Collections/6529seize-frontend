@@ -20,7 +20,6 @@ import { t } from "@/i18n/messages";
 import type { CreateWaveDescriptionHandles } from "../description/CreateWaveDescription";
 import { getCreateWaveDropRequest } from "../services/createWaveDropRequest";
 import { multiPartUpload } from "../services/multiPartUpload";
-import { useAddWaveMutation } from "../services/waveApiService";
 import {
   getAdminGroupId,
   WaveAdminGroupError,
@@ -28,6 +27,14 @@ import {
 import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
+import {
+  isRejectedCompetitionCommand,
+  newCompetitionRequestKey,
+} from "@/helpers/competition.helpers";
+import { commonApiPost } from "@/services/api/common-api";
+import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
+import type { ApiCreateWaveHubRequest } from "@/generated/models/ApiCreateWaveHubRequest";
+import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -104,6 +111,8 @@ export function useCreateWaveSubmission({
   );
   const [submitting, setSubmitting] = useState(false);
   const submissionInProgressRef = useRef(false);
+  const nativeHubRequest = useRef<ApiCreateWaveHubRequest | null>(null);
+  const nativeDisplayMetadata = useRef<ApiCreateWaveMetadataRequest[]>([]);
   const [showDropError, setShowDropError] = useState(false);
   const { submit: submitInlineGroup } = useGroupMutations({
     requestAuth,
@@ -113,54 +122,39 @@ export function useCreateWaveSubmission({
     submissionInProgressRef.current = false;
     setSubmitting(false);
   };
-
-  const addWaveMutation = useAddWaveMutation({
-    onSuccess: async (response, variables) => {
-      if (variables.displayMetadataRequests.length > 0) {
-        try {
-          await Promise.all(
-            variables.displayMetadataRequests.map((body) =>
-              createWaveMetadata({
-                waveId: response.id,
-                body,
-              })
-            )
-          );
-        } catch {
-          setToast({
-            message:
-              "Wave created, but custom display settings were not saved.",
-            type: "warning",
-          });
-        }
+  const showWaveCreatedToast = (waveId: string) => {
+    const copyWaveLink = async (): Promise<void> => {
+      try {
+        const url = new URL(
+          `/waves/${encodeURIComponent(waveId)}`,
+          globalThis.location.origin
+        ).href;
+        await navigator.clipboard.writeText(url);
+        setToast({
+          type: "success",
+          message: t(locale, "waves.create.quick.copied"),
+        });
+      } catch (error: unknown) {
+        setToast({
+          type: "error",
+          title: t(locale, "waves.create.quick.copyFailed"),
+          details: getToastErrorDetails(error),
+        });
       }
-
-      void waitAndInvalidateDrops();
-      onWaveCreated();
-      onSuccess?.();
-      const createdWaveRoute = getWaveRoute({
-        waveId: response.id,
-        isDirectMessage: false,
-        isApp,
-      });
-      if (isApp) {
-        router.replace(createdWaveRoute);
-      } else {
-        router.push(createdWaveRoute);
-      }
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't create this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      finishSubmitting();
-    },
-  });
+    };
+    setToast({
+      type: "success",
+      title: t(locale, "waves.create.quick.successTitle"),
+      description: t(locale, "waves.create.quick.successDescription"),
+      autoClose: 12000,
+      action: {
+        label: t(locale, "waves.create.quick.copyLink"),
+        onClick: () => {
+          void copyWaveLink();
+        },
+      },
+    });
+  };
 
   const onHaveDropToSubmitChange = (haveDrop: boolean) => {
     if (haveDrop) {
@@ -198,7 +192,16 @@ export function useCreateWaveSubmission({
 
   const getDescriptionForReview = (): CreateDropConfig | null => {
     const drop = descriptionRef.current?.getDropSnapshot() ?? null;
-    if (drop === null || drop.parts.length === 0) {
+    if (
+      !drop?.parts.some(
+        (part) =>
+          !!part.content?.trim() ||
+          part.media.length > 0 ||
+          (part.uploaded_attachments?.length ?? 0) > 0 ||
+          (part.attachments?.length ?? 0) > 0 ||
+          !!part.quoted_drop
+      )
+    ) {
       setShowDropError(true);
       return null;
     }
@@ -213,6 +216,129 @@ export function useCreateWaveSubmission({
     return drop;
   };
 
+  const validateRestrictedAccess = async (
+    configuredAdminGroupId: string | null
+  ): Promise<boolean> => {
+    if (config.groups.canView === null) return true;
+    let groupValidation;
+    try {
+      groupValidation = await validateWaveGroups(
+        getWaveGroupValidationRequest({
+          groups: {
+            ...config.groups,
+            admin: configuredAdminGroupId,
+          },
+          waveType: config.overview.type,
+          chatEnabled: config.chat.enabled,
+          includeAuthenticatedUserAsAdmin: true,
+        })
+      );
+    } catch {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.create.groups.validation.unavailableTitle"),
+        description: t(locale, "waves.create.groups.validation.unavailable"),
+      });
+      return false;
+    }
+    if (!groupValidation.valid) {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.create.groups.validation.invalidTitle"),
+        description: t(
+          locale,
+          "waves.create.groups.validation.invalidDescription"
+        ),
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const createNativeHub = async (
+    waveBody: ReturnType<typeof getCreateNewWaveBody>,
+    displayMetadataRequests: ApiCreateWaveMetadataRequest[],
+    adminGroupId: string
+  ): Promise<void> => {
+    if (!nativeHubRequest.current) {
+      nativeDisplayMetadata.current = displayMetadataRequests;
+      nativeHubRequest.current = {
+        idempotency_key: newCompetitionRequestKey(),
+        name: waveBody.name,
+        picture: waveBody.picture,
+        description_drop: waveBody.description_drop,
+        visibility: waveBody.visibility,
+        chat: waveBody.chat,
+        admin_group: { group_id: adminGroupId },
+        admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
+        ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
+      };
+    }
+    const hub = await commonApiPost<ApiCreateWaveHubRequest, ApiWaveV3>({
+      endpoint: "v3/waves",
+      body: nativeHubRequest.current,
+      errorMode: "structured",
+    });
+    if (nativeDisplayMetadata.current.length > 0) {
+      try {
+        await Promise.all(
+          nativeDisplayMetadata.current.map((body) =>
+            createWaveMetadata({ waveId: hub.id, body })
+          )
+        );
+      } catch {
+        setToast({
+          type: "warning",
+          message: t(locale, "competitions.hubDisplayFailure"),
+        });
+      }
+    }
+    const destination = getWaveRoute({
+      waveId: hub.id,
+      isDirectMessage: false,
+      isApp,
+    });
+    nativeHubRequest.current = null;
+    nativeDisplayMetadata.current = [];
+    void waitAndInvalidateDrops();
+    onWaveCreated();
+    onSuccess?.();
+    showWaveCreatedToast(hub.id);
+    finishSubmitting();
+    if (isApp) router.replace(destination);
+    else router.push(destination);
+  };
+
+  const prepareWaveSubmission = async (
+    drop: CreateDropConfig,
+    adminGroupId: string
+  ) => {
+    const dropRequest = await getCreateWaveDropRequest(drop);
+    const picture = config.overview.image
+      ? await multiPartUpload({ file: config.overview.image, path: "wave" })
+      : null;
+
+    const submissionConfig: CreateWaveConfig = {
+      ...config,
+      groups: {
+        ...config.groups,
+        admin: adminGroupId,
+      },
+    };
+    const waveBody = getCreateNewWaveBody({
+      config: submissionConfig,
+      picture: picture?.url ?? null,
+      drop: dropRequest,
+      parentWaveId,
+    });
+    const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
+      display: submissionConfig.display,
+      waveType: submissionConfig.overview.type,
+      ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
+    });
+    return { waveBody, displayMetadataRequests };
+  };
+
   const onComplete = async (): Promise<void> => {
     if (submissionInProgressRef.current) {
       return;
@@ -220,7 +346,6 @@ export function useCreateWaveSubmission({
 
     submissionInProgressRef.current = true;
     setSubmitting(true);
-    let mutationStarted = false;
 
     try {
       const { success } = await requestAuth();
@@ -237,44 +362,9 @@ export function useCreateWaveSubmission({
 
       const configuredAdminGroupId =
         config.groups.admin ?? parentAdminGroupId ?? null;
-      if (config.groups.canView !== null) {
-        let groupValidation;
-        try {
-          groupValidation = await validateWaveGroups(
-            getWaveGroupValidationRequest({
-              groups: {
-                ...config.groups,
-                admin: configuredAdminGroupId,
-              },
-              waveType: config.overview.type,
-              chatEnabled: config.chat.enabled,
-              includeAuthenticatedUserAsAdmin: true,
-            })
-          );
-        } catch {
-          setToast({
-            type: "error",
-            title: t(locale, "waves.create.groups.validation.unavailableTitle"),
-            description: t(
-              locale,
-              "waves.create.groups.validation.unavailable"
-            ),
-          });
-          finishSubmitting();
-          return;
-        }
-        if (!groupValidation.valid) {
-          setToast({
-            type: "error",
-            title: t(locale, "waves.create.groups.validation.invalidTitle"),
-            description: t(
-              locale,
-              "waves.create.groups.validation.invalidDescription"
-            ),
-          });
-          finishSubmitting();
-          return;
-        }
+      if (!(await validateRestrictedAccess(configuredAdminGroupId))) {
+        finishSubmitting();
+        return;
       }
 
       const parentAccessConfirmed =
@@ -300,45 +390,25 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      const dropRequest = await getCreateWaveDropRequest(drop);
-      const picture = config.overview.image
-        ? await multiPartUpload({ file: config.overview.image, path: "wave" })
-        : null;
+      const { waveBody, displayMetadataRequests } = await prepareWaveSubmission(
+        drop,
+        adminGroupId
+      );
 
-      const submissionConfig: CreateWaveConfig = {
-        ...config,
-        groups: {
-          ...config.groups,
-          admin: adminGroupId,
-        },
-      };
-      const waveBody = getCreateNewWaveBody({
-        config: submissionConfig,
-        picture: picture?.url ?? null,
-        drop: dropRequest,
-        parentWaveId,
-      });
-      const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
-        display: submissionConfig.display,
-        waveType: submissionConfig.overview.type,
-        ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
-      });
-
-      mutationStarted = true;
-      await addWaveMutation.mutateAsync({
-        body: waveBody,
-        displayMetadataRequests,
-      });
+      await createNativeHub(waveBody, displayMetadataRequests, adminGroupId);
     } catch (error) {
-      if (!mutationStarted) {
-        setToast({
-          type: "error",
-          title: "Couldn't create this wave.",
-          description: "Please try again.",
-          details: getToastErrorDetails(error, "Could not create wave."),
-        });
-        finishSubmitting();
+      if (isRejectedCompetitionCommand(error)) {
+        nativeHubRequest.current = null;
       }
+      setToast({
+        type: "error",
+        title: t(locale, "competitions.waveCreationFailure"),
+        description: nativeHubRequest.current
+          ? t(locale, "competitions.hubRetry")
+          : t(locale, "competitions.tryAgain"),
+        details: getToastErrorDetails(error, "Could not create wave."),
+      });
+      finishSubmitting();
     }
   };
 

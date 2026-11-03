@@ -17,6 +17,7 @@ import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import HighlightDropWrapper from "./HighlightDropWrapper";
+import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
 import UnreadDivider from "./UnreadDivider";
 import {
   DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
@@ -63,6 +64,9 @@ interface DropsListProps {
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
+
+const NO_SIGNATURE_GROUPS: ReturnType<typeof getDropSignatureGroups> =
+  new Map();
 
 const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
@@ -111,6 +115,16 @@ const DropsList = memo(
 
       return drops;
     }, [drops, location]);
+
+    // Chat headers seal their whole group of consecutive posts. Profile views
+    // show a header on every post, so each keeps its own seal there.
+    const signatureGroups = useMemo(
+      () =>
+        location === DropLocation.PROFILE
+          ? NO_SIGNATURE_GROUPS
+          : getDropSignatureGroups(orderedDrops),
+      [location, orderedDrops]
+    );
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
     const getItemData = useMemo(() => {
@@ -289,7 +303,11 @@ const DropsList = memo(
               previousDrop={previousDrop}
               nextDrop={nextDrop}
               showWaveInfo={getItemData.showWaveInfo}
-              activeDrop={getItemData.activeDrop}
+              activeDrop={
+                getItemData.activeDrop?.drop.id === drop.id
+                  ? getItemData.activeDrop
+                  : null
+              }
               onReply={getItemData.handleReply}
               location={location}
               showReplyAndQuote={getItemData.showReplyAndQuote}
@@ -303,6 +321,7 @@ const DropsList = memo(
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
               moderationPresentation={moderationPresentation}
+              signatureGroup={signatureGroups.get(drop.id)}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
@@ -352,6 +371,7 @@ const DropsList = memo(
       suspendLightDropHydration,
       virtualScrollRootMargin,
       moderationPresentation,
+      signatureGroups,
     ]);
 
     return (

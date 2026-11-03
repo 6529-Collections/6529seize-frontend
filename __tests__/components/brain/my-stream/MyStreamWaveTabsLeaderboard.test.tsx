@@ -4,6 +4,7 @@ import React from "react";
 import MyStreamWaveTabsLeaderboard from "@/components/brain/my-stream/MyStreamWaveTabsLeaderboard";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
 
 jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({
@@ -29,15 +30,23 @@ let mockFirstDecision = false;
 function renderComponent(view: BrainView = BrainView.DEFAULT, props: any = {}) {
   const onViewChange = jest.fn();
   const registerTabRef = jest.fn();
-  const { wave = { wave: { type: ApiWaveType.Rank } }, ...restProps } = props;
+  const {
+    wave = { wave: { type: ApiWaveType.Rank } },
+    flat = false,
+    ...restProps
+  } = props;
   render(
-    <MyStreamWaveTabsLeaderboard
-      wave={wave as any}
-      activeView={view}
-      onViewChange={onViewChange}
-      registerTabRef={registerTabRef}
-      {...restProps}
-    />
+    <CompetitionNavigationContext.Provider
+      value={{ flat, nativeCompetition: null }}
+    >
+      <MyStreamWaveTabsLeaderboard
+        wave={wave as any}
+        activeView={view}
+        onViewChange={onViewChange}
+        registerTabRef={registerTabRef}
+        {...restProps}
+      />
+    </CompetitionNavigationContext.Provider>
   );
   return { onViewChange, registerTabRef };
 }
@@ -76,6 +85,15 @@ describe("MyStreamWaveTabsLeaderboard", () => {
     renderComponent();
     expect(screen.queryByText("Leaderboard")).toBeNull();
     expect(screen.getByText("Submissions")).toBeInTheDocument();
+  });
+
+  it("selects submissions for a completed flat legacy competition URL", () => {
+    mockCompleted = true;
+    renderComponent(BrainView.LEADERBOARD, { flat: true });
+    expect(screen.getByRole("button", { name: "Submissions" })).toHaveAttribute(
+      "aria-current",
+      "true"
+    );
   });
 
   it("renders injected content between leaderboard and winners", () => {

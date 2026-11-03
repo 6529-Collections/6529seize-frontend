@@ -1,4 +1,6 @@
 "use client";
+import { MemeCollaboratorPicker } from "@/components/waves/memes/collaborations/MemeCollaboratorPicker";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
@@ -21,6 +23,10 @@ import { ProposalCardOption } from "../components/ProposalCardOption";
 import { getProposalCardMimeType } from "@/lib/proposal-card/media";
 
 interface ArtworkStepProps {
+  readonly collaborators?: ApiMemeCollaboratorProfile[];
+  readonly onCollaboratorsChange?: (
+    profiles: ApiMemeCollaboratorProfile[]
+  ) => void;
   readonly proposalFrame?: ProposalCardLayout | null;
   readonly onProposalFrameChange?: (layout: ProposalCardLayout | null) => void;
   readonly traits: TraitsData;
@@ -53,6 +59,8 @@ interface ArtworkStepProps {
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly isAdditionalActionPromised: boolean;
   readonly onAdditionalActionPromisedChange: (value: boolean) => void;
+  readonly additionalActionPlan: string;
+  readonly onAdditionalActionPlanChange: (value: string) => void;
   readonly isSubmitting?: boolean | undefined;
   readonly submissionPhase?: SubmissionPhase | undefined;
   readonly initialTraits?: TraitsData | undefined;
@@ -71,6 +79,8 @@ interface ArtworkStepProps {
  * appearance based on the current submission phase.
  */
 const ArtworkStep: React.FC<ArtworkStepProps> = ({
+  collaborators = [],
+  onCollaboratorsChange,
   proposalFrame,
   onProposalFrameChange,
   traits,
@@ -100,6 +110,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   setTraits,
   isAdditionalActionPromised,
   onAdditionalActionPromisedChange,
+  additionalActionPlan,
+  onAdditionalActionPlanChange,
   isSubmitting = false,
   submissionPhase = "idle",
   initialTraits,
@@ -254,6 +266,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     />
   );
 
+  /** Keep the action declaration and plan editor together in the artwork details panel. */
   const renderArtworkDetailsPanel = () => (
     <ArtworkDetails
       title={traits.title}
@@ -269,11 +282,22 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       showAdditionalActionPromised={true}
       isAdditionalActionPromised={isAdditionalActionPromised}
       onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
+      additionalActionPlan={additionalActionPlan}
+      onAdditionalActionPlanChange={onAdditionalActionPlanChange}
     />
   );
 
   const renderArtworkTraitsPanel = () => (
     <MemesArtSubmissionTraits
+      hideCollab
+      collaboratorPicker={
+        onCollaboratorsChange ? (
+          <MemeCollaboratorPicker
+            collaborators={collaborators}
+            onChange={onCollaboratorsChange}
+          />
+        ) : undefined
+      }
       traits={traits}
       setTraits={setTraits}
       validationErrors={validation.errors}

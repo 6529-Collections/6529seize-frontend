@@ -17,6 +17,14 @@ export class ApiModerationCurrentState {
     'profile_status': ApiModerationCurrentStateProfileStatusEnum | null;
     'drop_status': ApiModerationCurrentStateDropStatusEnum | null;
     'published': boolean;
+    /**
+    * A previously published post no longer exists. This does not represent a moderation removal.
+    */
+    'deleted': boolean;
+    /**
+    * Number of open reports for this published post, including reports of earlier revisions.
+    */
+    'open_report_count': number;
     'suppressed': boolean;
     'revision': string | null;
 
@@ -41,6 +49,18 @@ export class ApiModerationCurrentState {
             "name": "published",
             "baseName": "published",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "deleted",
+            "baseName": "deleted",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "open_report_count",
+            "baseName": "open_report_count",
+            "type": "number",
             "format": ""
         },
         {

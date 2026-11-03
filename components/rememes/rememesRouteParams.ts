@@ -1,3 +1,4 @@
+import { isValidEthAddress } from "@/helpers/addressFormatting";
 import {
   DEFAULT_LOCALE,
   normalizeLocale,
@@ -148,6 +149,26 @@ export function getRememesAddHref({
 }): string {
   return getRouteHrefWithLocale({
     href: "/rememes/add",
+    locale,
+  });
+}
+
+/** Canonical identity only; navigation keeps the original route parameters. */
+export function getRememeDetailCanonicalPath({
+  contract,
+  id,
+  locale,
+}: {
+  readonly contract: string;
+  readonly id: string;
+  readonly locale: SupportedLocale;
+}): string | undefined {
+  if (!isValidEthAddress(contract) || !/^\d+$/.test(id)) {
+    return undefined;
+  }
+  return getRememeDetailHref({
+    contract: contract.toLowerCase(),
+    id: BigInt(id).toString(),
     locale,
   });
 }

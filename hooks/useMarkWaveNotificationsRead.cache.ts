@@ -299,6 +299,10 @@ export const useClearWaveReadStateOnAddressChange = (
 export const useClearWaveReadStateOnLastUnmount = (
   addressKey: string | null
 ): void => {
+  // eslint-disable-next-line react-compiler/react-compiler -- Compiled regression test proves this opt-out prevents an incorrect mutable-global alias.
+  "use no memo";
+  // React Compiler aliases the deferred cleanup snapshot to the mutable global,
+  // then reads its address after it is cleared. Preserve this effect verbatim.
   const latestAddressKeyRef = useRef(addressKey);
 
   useLayoutEffect(() => {

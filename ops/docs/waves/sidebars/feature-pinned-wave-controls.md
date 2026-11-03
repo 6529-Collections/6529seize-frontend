@@ -35,8 +35,8 @@ independent and do not sync.
 ## User Journey
 
 1. Open `/waves/{waveId}` and select `Pin wave` from the header or wave row.
-2. The wave appears in the pinned block above regular waves.
-3. Unpin from either control to remove it from the pinned block.
+2. The wave appears in the `Pinned` collection. Use its tab beside `Joined` and `All`.
+3. Unpin from either control to remove it from the `Pinned` collection.
 4. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
 5. In native app small-screen mode, opened threads are added to local shortcuts
    (newest first, max 20).
@@ -54,6 +54,9 @@ independent and do not sync.
 - In desktop expanded sidebars, row pin and unpin controls collapse while idle
   and appear on row hover or direct keyboard focus on the pin control; on touch
   devices, they remain visible.
+- The row control's `Pin` / `Unpin` hover label renders above the sidebar, so
+  it stays fully readable on the first row under the `All` / `Pinned` /
+  `Joined` filter. Touch devices do not show the hover label.
 - In collapsed web sidebars, row pin controls are hidden.
 - DM lists do not expose row pin controls.
 - When app shortcuts reach 20, opening another thread keeps the newest 20 and

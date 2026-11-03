@@ -11,10 +11,15 @@
  * Do not edit the class manually.
  */
 
+import { ApiCompetitionEntryContext } from '../models/ApiCompetitionEntryContext';
 import { ApiCompetitionLeaderboardEntry } from '../models/ApiCompetitionLeaderboardEntry';
 import { HttpFile } from '../http/http';
 
 export class ApiCompetitionLeaderboardPage {
+    /**
+    * Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+    */
+    'cards'?: Array<ApiCompetitionEntryContext>;
     'data': Array<ApiCompetitionLeaderboardEntry>;
     'next_cursor': string | null;
     'has_more': boolean;
@@ -24,6 +29,12 @@ export class ApiCompetitionLeaderboardPage {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "cards",
+            "baseName": "cards",
+            "type": "Array<ApiCompetitionEntryContext>",
+            "format": ""
+        },
         {
             "name": "data",
             "baseName": "data",

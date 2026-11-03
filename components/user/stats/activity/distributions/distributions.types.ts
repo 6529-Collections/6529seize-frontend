@@ -9,6 +9,7 @@ export interface DistributionTableItem {
   readonly tokenId: number;
   readonly name: string;
   readonly wallet: string;
+  readonly walletAddress: string;
   readonly phases: DistributionTableItemPhase[];
   readonly amountMinted: number;
   readonly amountTotal: number;

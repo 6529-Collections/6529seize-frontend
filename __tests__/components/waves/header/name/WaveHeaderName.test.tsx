@@ -1,3 +1,6 @@
+jest.mock("@/hooks/waves/useWaveConfiguration", () => ({
+  useWaveConfiguration: (wave: unknown) => wave,
+}));
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveHeaderName from "@/components/waves/header/name/WaveHeaderName";

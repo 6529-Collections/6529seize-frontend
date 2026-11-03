@@ -186,9 +186,8 @@ export default function CreateWaveGroups({
         isCustomized={hasCustomPermissions}
         hasError={hasCustomPermissionsError}
         defaultOpen={hasCustomPermissions}
-        variant="filled"
       >
-        <div className="tw-flex tw-flex-col tw-gap-y-6 tw-p-4">
+        <div className="tw-flex tw-flex-col tw-gap-y-6">
           {customizableGroupTypes.map((groupType) => (
             <CreateWaveGroup
               key={groupType}

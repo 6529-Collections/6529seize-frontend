@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 
 import {
   FOLLOW_THE_REPO_WAVE_URL,
@@ -45,16 +45,19 @@ export default function TechReportPage({
               grouped by repository.
             </p>
             <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-              For live PR drops and shorter updates, see{" "}
-              <a
-                href={FOLLOW_THE_REPO_WAVE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
-              >
-                Follow The Repo
-              </a>
-              {"."}
+              {tRich(locale, "about.tech.report.liveActivity", {
+                followTheRepo: (
+                  <a
+                    href={FOLLOW_THE_REPO_WAVE_URL}
+                    key="follow-the-repo"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:tw-text-primary-200 tw-rounded-sm tw-font-semibold tw-text-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+                  >
+                    {t(locale, "about.tech.index.followTheRepo")}
+                  </a>
+                ),
+              })}
             </p>
           </div>
           <dl className="tw-mb-0 tw-grid tw-grid-cols-3 tw-gap-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 lg:tw-grid-cols-1">

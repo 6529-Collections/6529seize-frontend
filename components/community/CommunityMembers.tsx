@@ -13,6 +13,7 @@ import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunity
 import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -32,6 +33,7 @@ import {
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import CommunityMembersGroupDetails from "./CommunityMembersGroupDetails";
 import CommunityMembersGroupFilter from "./CommunityMembersGroupFilter";
+import type { GroupCriteriaView } from "@/components/groups/assignment/GroupCriteriaEditor";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -67,7 +69,7 @@ function NetworkHeaderActionButton({
 }) {
   const hasHydrated = useHasHydrated();
   const buttonClassName = [
-    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40",
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 focus-visible:tw-ring-primary-400",
     compact
       ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
       : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",
@@ -101,6 +103,9 @@ export default function CommunityMembers() {
   useSetTitle("Network");
   const locale = useBrowserLocale();
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
+  const isDesktopViewport = useMediaQuery("(min-width: 1024px)");
+  const hasTouchPointer = useMediaQuery("(any-pointer: coarse)");
+  const centeredFilterModal = isDesktopViewport && !hasTouchPointer;
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
@@ -356,6 +361,8 @@ export default function CommunityMembers() {
   const goToNerd = () => router.push("/network/nerd");
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [filterView, setFilterView] = useState<GroupCriteriaView | null>(null);
+  const showFilterBack = !centeredFilterModal && filterView !== null;
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
   const hasCustomSort =
@@ -409,16 +416,21 @@ export default function CommunityMembers() {
           <h1 className={`${NETWORK_PAGE_TITLE_CLASSES} tw-flex-shrink-0`}>
             Network
           </h1>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10">
             <NetworkHeaderActionButton
               active={!!activeGroupId}
-              compact
               expanded={mobileFilterOpen}
               hasPopup
-              onClick={() => setMobileFilterOpen(true)}
-              label="Open group filters"
+              onClick={() => {
+                setFilterView(null);
+                setMobileFilterOpen(true);
+              }}
+              label={t(locale, "network.actions.openFilters")}
             >
-              <FunnelIcon className="tw-size-4" />
+              <FunnelIcon className="tw-size-4" aria-hidden="true" />
+              <span className="tw-hidden sm:tw-inline">
+                {t(locale, "network.groupFilter.filter")}
+              </span>
             </NetworkHeaderActionButton>
             <div className="sm:tw-hidden">
               <NetworkHeaderActionButton
@@ -427,7 +439,7 @@ export default function CommunityMembers() {
                 expanded={mobileSortOpen}
                 hasPopup
                 onClick={() => setMobileSortOpen(true)}
-                label="Open sort options"
+                label={t(locale, "network.actions.openSort")}
               >
                 <BarsArrowDownIcon className="tw-size-4" />
               </NetworkHeaderActionButton>
@@ -435,9 +447,9 @@ export default function CommunityMembers() {
           </div>
         </div>
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10">
             <NetworkHeaderActionButton
-              label="Open Nerd view"
+              label={t(locale, "network.actions.openNerd")}
               onClick={goToNerd}
             >
               <span className="tw-whitespace-nowrap">Nerd view</span>
@@ -463,20 +475,31 @@ export default function CommunityMembers() {
       </div>
 
       <MobileWrapperDialog
-        title={t(locale, "network.groupFilter.title")}
+        title={
+          showFilterBack ? undefined : t(locale, "network.groupFilter.title")
+        }
+        ariaLabel={t(locale, "network.groupFilter.title")}
+        onBack={showFilterBack ? () => setFilterView(null) : undefined}
+        showHeaderDivider={false}
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
+        tabletModal={centeredFilterModal}
+        maxWidthClass="md:tw-max-w-2xl lg:tw-max-w-5xl"
         fixedHeight
+        fitVisualViewport
         noPadding
         enableDragToClose
         showHeaderCloseButton
-        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
-        titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
-        headerCloseButtonClassName="-tw-mt-1"
+        surfaceClassName={`[--mobile-wrapper-dialog-resting-height:calc(100dvh-4rem)] tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
+        titleClassName="tw-text-base !tw-font-semibold !tw-text-iron-100 tw-tracking-tight"
+        headerClassName="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-2"
+        headerCloseButtonClassName="!tw-size-11 max-md:!tw-inline-flex"
       >
         <CommunityMembersGroupFilter
+          view={centeredFilterModal ? (filterView ?? "identities") : filterView}
+          onViewChange={setFilterView}
+          mobileNavigation={!centeredFilterModal}
           activeGroupId={activeGroupId}
           onGroupChange={(group) => {
             setActiveGroupId(group?.id ?? null);

@@ -18,6 +18,10 @@ payment and time. An offer can apply to a collection rather than one card.
 On-chain rows can link to their Ethereum transaction; off-chain market actions
 can exist without a transaction hash.
 
+Wide views show columns. On phones and in narrower panels, each row stacks the
+action and total, item details, sender and recipient, then the date and transaction
+link. The same information and links remain available without sideways scrolling.
+
 Individual supported card pages also show activity relevant to that card.
 Collection-wide offers may appear on eligible cards, but represent one shared
 order rather than separate bids for every card.

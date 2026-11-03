@@ -23,6 +23,26 @@ export class ApiSessionNonceQuery {
     * Backward-compatible request field. Session challenges are issued for the backend-configured auth chain, not this client-supplied value.
     */
     'chain_id'?: number;
+    /**
+    * Web only. Raw 32-byte Ed25519 public key (0x + 64 lowercase hex) to grant signing rights to in the SIWE message.
+    */
+    'device_key'?: string;
+    /**
+    * Required when device_key is present.
+    */
+    'device_key_type'?: ApiSessionNonceQueryDeviceKeyTypeEnum;
+    /**
+    * Optional comma separated list from post, edit, delete, react, vote. Defaults to post,edit,delete,react. Must include post.
+    */
+    'device_scopes'?: string;
+    /**
+    * Combined grant: the MLS device key to grant for encrypted messages.
+    */
+    'mls_device_key'?: string;
+    /**
+    * Required when mls_device_key is present.
+    */
+    'mls_ciphersuite'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -46,6 +66,36 @@ export class ApiSessionNonceQuery {
             "baseName": "chain_id",
             "type": "number",
             "format": ""
+        },
+        {
+            "name": "device_key",
+            "baseName": "device_key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "device_key_type",
+            "baseName": "device_key_type",
+            "type": "ApiSessionNonceQueryDeviceKeyTypeEnum",
+            "format": ""
+        },
+        {
+            "name": "device_scopes",
+            "baseName": "device_scopes",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mls_device_key",
+            "baseName": "mls_device_key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mls_ciphersuite",
+            "baseName": "mls_ciphersuite",
+            "type": "number",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -60,5 +110,8 @@ export enum ApiSessionNonceQueryClientTypeEnum {
     Web = 'web',
     Native = 'native',
     Desktop = 'desktop'
+}
+export enum ApiSessionNonceQueryDeviceKeyTypeEnum {
+    Ed25519 = 'ed25519'
 }
 

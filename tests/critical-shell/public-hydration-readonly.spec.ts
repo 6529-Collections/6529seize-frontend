@@ -77,23 +77,63 @@ test("keeps server-rendered calculator controls inactive until JavaScript is rea
   }
 });
 
-test("hydrates browser-local calendar clocks with a different client time and timezone @performance @readonly", async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(new Date(Date.now() + 90_000));
-  await page.goto("/meme-calendar?locale=de-DE", {
-    waitUntil: "domcontentloaded",
+for (const { clientTime, tableName, firstMintTime } of [
+  {
+    clientTime: "2026-09-16T00:01:30Z",
+    tableName: "Upcoming Mints for SZN 16",
+    firstMintTime: "2026-09-18T14:40:00Z",
+  },
+  {
+    // September 30 is the last SZN 16 mint and belongs in the Next Mint card.
+    clientTime: "2026-09-29T00:01:30Z",
+    tableName: "Upcoming SZN 17",
+    firstMintTime: "2026-10-02T14:40:00Z",
+  },
+]) {
+  test(`hydrates browser-local calendar clocks with a different client time and timezone: ${tableName} @performance @readonly`, async ({
+    page,
+  }) => {
+    // Pin only the browser clock; SSR retains the server clock. Using today's
+    // date makes the expected table change when only the season's last mint remains.
+    await page.clock.setFixedTime(new Date(clientTime));
+    await page.goto("/meme-calendar?locale=de-DE", {
+      waitUntil: "domcontentloaded",
+    });
+    const table = page.getByRole("table", { name: tableName, exact: true });
+    await expect(table).toBeVisible();
+    const firstMintRow = table.getByRole("row").nth(1);
+    const formatMintTime = (timeZone: string) =>
+      new Date(firstMintTime).toLocaleString("de-DE", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone,
+      });
+    await expect(firstMintRow).toContainText(
+      formatMintTime("Pacific/Auckland")
+    );
+    await page.getByRole("tab", { name: "UTC", exact: true }).click();
+    await expect(
+      page.getByRole("tab", { name: "UTC", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(firstMintRow).toContainText(`${formatMintTime("UTC")} UTC`);
   });
-  await expect(
-    page.getByRole("table", { name: /Upcoming Mints for SZN/ })
-  ).toBeVisible();
-  await page.getByRole("tab", { name: "UTC", exact: true }).click();
-  await expect(
-    page.getByRole("tab", { name: "UTC", exact: true })
-  ).toHaveAttribute("aria-selected", "true");
-});
+}
 
-for (const path of ["/messages", "/waves/create"]) {
+for (const { path, walletHeading } of [
+  {
+    path: "/messages",
+    walletHeading: "This content is only available to connected wallets.",
+  },
+  {
+    path: "/waves/create",
+    walletHeading: "Connect to create a wave",
+  },
+]) {
   test(`keeps ${path} neutral until wallet restoration can run @critical-shell @readonly`, async ({
     page,
   }) => {
@@ -112,18 +152,20 @@ for (const path of ["/messages", "/waves/create"]) {
       ).toBeVisible();
       await expect(
         page.getByRole("heading", {
-          name: "This content is only available to connected wallets.",
+          name: walletHeading,
         })
       ).toHaveCount(0);
       await expect(
         page.getByText("You need to set up a profile to continue.")
       ).toHaveCount(0);
       releaseScripts();
+      // Cold hydration also loads the lazy wave layout. Match the public
+      // search readiness deadline without relaxing the neutral-state checks.
       await expect(
         page.getByRole("heading", {
-          name: "This content is only available to connected wallets.",
+          name: walletHeading,
         })
-      ).toBeVisible();
+      ).toBeVisible({ timeout: 15000 });
     } finally {
       releaseScripts();
     }

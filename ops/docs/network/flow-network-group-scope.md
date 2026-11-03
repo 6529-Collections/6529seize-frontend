@@ -37,8 +37,17 @@ no standalone Network Groups page.
 ## User Journey
 
 1. Open `/network` and select `Filter`.
-2. Build and save criteria. Network's criteria editor does not offer saved-group
-   search or the `Hide criteria and members` setting.
+2. Choose `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
+   `Collection Access`, or `xTDH Grant` from the left-side list on desktop.
+   On phones and touch tablets, the sheet opens with a vertical list of all
+   eight criteria. Scroll down the list if needed, then select a row to open
+   its editor. `Back` returns to the list and preserves the draft; configured
+   rows have a checkmark. The editor scrolls independently above the summary
+   and primary action. `Close` dismisses the sheet.
+   Check the criteria tags in the footer
+   and `View members`, then select `Create and use new group`. Network's
+   criteria editor does not offer saved-group search or the
+   `Hide criteria and members` setting.
 3. `/network` applies the selected scope and stores its group id in the URL.
    Group links shared from supported app surfaces can also open
    `/network?group={groupId}` directly.
@@ -54,6 +63,13 @@ no standalone Network Groups page.
 7. Open `/network/activity` to view activity under the same scope.
 8. Return to `/network`, open `Filter`, then create another criteria-based
    group. Use `Clear selected group` outside the filter to clear scope.
+
+## Identity Lists
+
+The filter uses the same [identity editor](../waves/create/feature-groups-step.md#identity-criteria)
+as Wave access: Included/Excluded tabs, saved profile pictures and handles,
+readable wallet fallbacks, and paginated lists. Individual wallets remain
+removable if profile lookup fails.
 
 ## Common Scenarios
 
@@ -87,7 +103,7 @@ no standalone Network Groups page.
 
 ## Failure and Recovery
 
-- If `/network/activity` looks unexpectedly scoped, open `/network`, clear scope in `Filter`, then reopen `/network/activity`.
+- If `/network/activity` looks unexpectedly scoped, open `/network`, use `Clear selected group` above the results, then reopen `/network/activity`.
 - If a deep link scope is stale, open `/network` and reselect or clear scope.
 - If URL edits do not change scope, apply scope through `/network` `Filter`.
 - If the selected group's criteria cannot be loaded, use `Try again` in the

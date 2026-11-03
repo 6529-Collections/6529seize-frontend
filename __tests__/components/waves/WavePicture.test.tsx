@@ -1,7 +1,13 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
 import WavePicture from "@/components/waves/WavePicture";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 describe("WavePicture", () => {
   it("renders picture image when provided", () => {
@@ -9,6 +15,36 @@ describe("WavePicture", () => {
     const img = screen.getByRole("img", { name: "wave" });
     expect(img.getAttribute("src")).toContain("pic.jpg");
     expect(img).toHaveAttribute("alt", "wave");
+  });
+
+  it("requests the 200x200 derivative of a CDN wave picture and falls back to the original", () => {
+    render(
+      <WavePicture name="wave" picture={CDN_AVATAR_URL} contributors={[]} />
+    );
+    const img = screen.getByRole("img", { name: "wave" });
+    expect(img).toHaveAttribute(
+      "src",
+      `https://d3lqz0a4bldqgf.cloudfront.net${scaledAvatarPath(ImageScale.W_200_H_200)}`
+    );
+
+    fireEvent.error(img);
+    expect(screen.getByRole("img", { name: "wave" })).toHaveAttribute(
+      "src",
+      CDN_AVATAR_URL
+    );
+  });
+
+  it("requests the 200x200 derivative for contributor avatars", () => {
+    render(
+      <WavePicture
+        name="wave"
+        picture={null}
+        contributors={[{ pfp: CDN_AVATAR_URL }]}
+      />
+    );
+    expect(getRequestedImageSrc(screen.getByRole("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
   });
 
   it("renders default wave icon fallback when no picture and no contributors", () => {

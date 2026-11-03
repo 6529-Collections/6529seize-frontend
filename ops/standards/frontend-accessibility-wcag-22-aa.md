@@ -40,6 +40,9 @@ renders it must remain accessible.
 - Make pointer targets large enough for normal touch use. Use WCAG 2.2 target
   size guidance unless a documented exception applies.
 - Ensure errors are announced, associated with fields, and explain recovery.
+- Keep the page language correct: `<html lang>` names the language the page is
+  rendered in, and content in another language carries its own `lang`. See
+  [frontend-i18n-localization.md](frontend-i18n-localization.md).
 - Keep motion optional. Respect reduced-motion settings for animation that can
   distract, disorient, or block task completion.
 - Avoid content that requires hover, precise pointer movement, or dragging when

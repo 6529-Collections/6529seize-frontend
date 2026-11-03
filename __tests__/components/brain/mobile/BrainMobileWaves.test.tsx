@@ -4,7 +4,6 @@ import {
   MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME,
   MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
-import { t } from "@/i18n/messages";
 
 let receivedRef: any;
 let receivedFooterProps: any;
@@ -100,17 +99,9 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   expect(root).toHaveClass("tw-flex", "tw-h-full", "tw-min-h-0");
   expect(scrollContainer).toBeInTheDocument();
   expect(root.lastElementChild).toBe(screen.getByTestId("footer"));
-  const profileFeedLink = screen.getByRole("link", {
-    name: /profile waves feed/i,
-  });
-  expect(profileFeedLink).toHaveAttribute("href", "/waves?view=profile-feed");
-  expect(profileFeedLink).toHaveClass(
-    "tw-mx-4",
-    "tw-box-border",
-    "tw-bg-iron-900/70",
-    "tw-ring-white/[0.06]"
-  );
-  expect(profileFeedLink).not.toHaveClass("tw-text-primary-300");
+  expect(
+    screen.queryByRole("link", { name: /profile waves feed/i })
+  ).toBeNull();
   expect(receivedRef).toBeDefined();
   expect(receivedRef.current).toBe(scrollContainer);
   expect(receivedRef.current).toContainElement(screen.getByTestId("waves"));
@@ -131,17 +122,4 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   fireEvent.click(screen.getByTestId("footer"));
 
   expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
-});
-
-test("uses browser locale for the profile feed link title", async () => {
-  setBrowserLanguages(["fr-FR"]);
-
-  render(<BrainMobileWaves onOpenQuickVote={jest.fn()} />);
-
-  expect(
-    await screen.findByText(t("fr-FR", "waves.mobile.profileFeed.title"))
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByText(t("fr-FR", "waves.mobile.profileFeed.subtitle"))
-  ).not.toBeInTheDocument();
 });

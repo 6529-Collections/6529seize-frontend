@@ -93,12 +93,10 @@ function getHtmlDataImageFiles(html: string): File[] {
 
 /** Matches separate File wrappers for the same clipboard entry. */
 function getClipboardFileSignature(file: File): string {
-  return JSON.stringify([
-    file.name,
-    file.size,
-    file.type,
-    file.lastModified,
-  ]);
+  // Chrome can assign different lastModified values to the File wrappers
+  // exposed through clipboardData.files and clipboardData.items.
+  // Matching different files with identical metadata is an accepted tradeoff.
+  return JSON.stringify([file.name, file.size, file.type]);
 }
 
 /** Combines clipboard file views while keeping distinct file items. */

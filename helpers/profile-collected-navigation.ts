@@ -17,6 +17,7 @@ const ALLOWED_COLLECTED_QUERY_PARAMS = [
   "activity",
   "address",
   "collection",
+  "details",
   "distribution-page",
   "locale",
   "page",
@@ -130,6 +131,9 @@ export const isCollectedCardAnchorId = (value: string): boolean => {
   );
 };
 
+const isCollectedActivityAnchorId = (value: string): boolean =>
+  /^collected-activity-[a-zA-Z0-9-]{1,256}$/.test(value);
+
 interface ProfileCollectedReturnContext {
   readonly href: string;
   readonly profile: string;
@@ -164,7 +168,10 @@ export function getProfileCollectedReturnContext(
     let safeHash = "";
     if (url.hash) {
       const decodedHash = decodeURIComponent(url.hash.slice(1));
-      if (isCollectedCardAnchorId(decodedHash)) {
+      if (
+        isCollectedCardAnchorId(decodedHash) ||
+        isCollectedActivityAnchorId(decodedHash)
+      ) {
         safeHash = `#${decodedHash}`;
       }
     }

@@ -4,7 +4,7 @@ import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInpu
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
@@ -27,6 +27,10 @@ import WalletCheckerResults, {
   type ConsolidatedWallet,
   type ConsolidationDisplay,
 } from "./WalletCheckerResults";
+import {
+  fetchConsolidationGroupRows,
+  selectConsolidationActions,
+} from "./walletCheckerConsolidations";
 import {
   DELEGATION_CARD_CLASS_NAME,
   DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
@@ -305,7 +309,7 @@ export default function WalletCheckerComponent(
     queryKey: ["delegations", submittedAddress],
     queryFn: async () => {
       try {
-        const url = `${publicEnv.API_ENDPOINT}/api/delegations/${submittedAddress}`;
+        const url = apiUrl(`/api/delegations/${submittedAddress}`);
         return await fetchUrl(url);
       } catch (error) {
         console.error(
@@ -403,36 +407,7 @@ export default function WalletCheckerComponent(
     queryKey: ["consolidations", submittedAddress],
     queryFn: async () => {
       try {
-        const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${submittedAddress}?show_incomplete=true`;
-        const firstResponse: DBResponse<WalletConsolidation> =
-          await fetchUrl(baseUrl);
-        const firstData = firstResponse.data;
-
-        if (firstData.length > 0) {
-          const firstConsolidation = firstData[0];
-          if (!firstConsolidation) {
-            return firstData;
-          }
-          const newWallet = areEqualAddresses(
-            submittedAddress,
-            firstConsolidation.wallet1
-          )
-            ? firstConsolidation.wallet2
-            : firstConsolidation.wallet1;
-          const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-          try {
-            const secondResponse: DBResponse<WalletConsolidation> =
-              await fetchUrl(nextUrl);
-            return [...firstData, ...secondResponse.data];
-          } catch {
-            console.error(
-              `Failed to fetch consolidations for related wallet: ${newWallet}`
-            );
-            return firstData;
-          }
-        }
-
-        return firstData;
+        return await fetchConsolidationGroupRows(submittedAddress);
       } catch (error) {
         console.error(
           `Failed to fetch consolidations for ${submittedAddress}`,
@@ -465,7 +440,7 @@ export default function WalletCheckerComponent(
     queryKey: ["consolidated-wallets", fetchedAddress],
     queryFn: async () => {
       try {
-        const url = `${publicEnv.API_ENDPOINT}/api/consolidations/${fetchedAddress}`;
+        const url = apiUrl(`/api/consolidations/${fetchedAddress}`);
         const response: DBResponse<string> = await fetchUrl(url);
         const wallets = response.data;
 
@@ -535,20 +510,34 @@ export default function WalletCheckerComponent(
     return undefined;
   }, [delegationsLoaded, delegations, fetchedAddress]);
 
-  const consolidationActions = useMemo<ConsolidationDisplay[]>(() => {
-    if (!consolidationsLoaded) {
-      return [];
+  // Suggestions depend on the active consolidation, which loads separately.
+  // Wait until that request settles for this wallet so valid suggestions are
+  // never filtered against an empty or previous wallet's group.
+  const settledConsolidatedWallets = useMemo<
+    ConsolidatedWallet[] | null
+  >(() => {
+    if (consolidatedWalletsStatus === "success") {
+      return consolidatedWalletsResponse;
     }
+    return consolidatedWalletsStatus === "error" ? [] : null;
+  }, [consolidatedWalletsStatus, consolidatedWalletsResponse]);
 
-    return consolidations.filter(
-      (candidate) =>
-        !consolidations.some(
-          (comparison) =>
-            areEqualAddresses(comparison.to, candidate.from) &&
-            areEqualAddresses(comparison.from, candidate.to)
-        )
-    );
-  }, [consolidationsLoaded, consolidations]);
+  const consolidationActions = useMemo<ConsolidationDisplay[]>(
+    () =>
+      consolidationsLoaded && settledConsolidatedWallets
+        ? selectConsolidationActions(
+            consolidations,
+            settledConsolidatedWallets,
+            fetchedAddress
+          )
+        : [],
+    [
+      consolidationsLoaded,
+      consolidations,
+      settledConsolidatedWallets,
+      fetchedAddress,
+    ]
+  );
 
   const resultsLoaded =
     !!fetchedAddress && delegationsLoaded && consolidationsLoaded;

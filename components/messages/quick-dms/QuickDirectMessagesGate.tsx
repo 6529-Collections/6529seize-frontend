@@ -6,7 +6,8 @@ import { useIsTransferModeActive } from "@/components/nft-transfer/TransferState
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { Suspense, useSyncExternalStore } from "react";
+import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
 import {
   CREATE_WAVE_QUERY_PARAM,
   isCreateWaveSurface,
@@ -59,18 +60,23 @@ const useCanMountQuickDirectMessages = (): boolean => {
     createParam: searchParams.get(CREATE_WAVE_QUERY_PARAM),
   });
 
+  // Encrypted chats have their own composer at the bottom right; the
+  // launcher would sit on its Send button, and quick DMs are plaintext.
+  const isEncryptedMessages = isEncryptedMessagesPathname(pathname);
+
   return Boolean(
     !isApp &&
     !isMobileDevice &&
     !isTransferModeActive &&
     !isCreatingWave &&
+    !isEncryptedMessages &&
     isDesktopViewport &&
     connectedProfile?.handle &&
     showWaves
   );
 };
 
-export default function QuickDirectMessagesGate() {
+function QuickDirectMessagesLauncher() {
   const canMountQuickDirectMessages = useCanMountQuickDirectMessages();
 
   if (!canMountQuickDirectMessages) {
@@ -78,4 +84,15 @@ export default function QuickDirectMessagesGate() {
   }
 
   return <LazyQuickDirectMessages />;
+}
+
+// It reads the create-wave query and only mounts for connected desktop users
+// in the browser, so its own Suspense boundary lets a prerendered page render
+// without it.
+export default function QuickDirectMessagesGate() {
+  return (
+    <Suspense fallback={null}>
+      <QuickDirectMessagesLauncher />
+    </Suspense>
+  );
 }

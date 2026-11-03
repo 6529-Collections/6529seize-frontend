@@ -165,9 +165,11 @@ function CreditScopePreview({
 }
 
 function CreateWaveCreditScopeSelect({
+  isCompetition,
   creditScope,
   onCreditScopeChange,
 }: {
+  readonly isCompetition?: boolean;
   readonly creditScope: ApiWaveCreditScope;
   readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
 }) {
@@ -175,8 +177,18 @@ function CreateWaveCreditScopeSelect({
   const creditScopeOptions = [
     {
       scope: ApiWaveCreditScope.Wave,
-      label: t(locale, "waves.create.voting.scope.wave.label"),
-      description: t(locale, "waves.create.voting.scope.wave.description"),
+      label: t(
+        locale,
+        isCompetition
+          ? "competitions.scopeLabel"
+          : "waves.create.voting.scope.wave.label"
+      ),
+      description: t(
+        locale,
+        isCompetition
+          ? "competitions.scopeDescription"
+          : "waves.create.voting.scope.wave.description"
+      ),
     },
     {
       scope: ApiWaveCreditScope.Drop,
@@ -258,6 +270,8 @@ function CreateWaveCreditScopeSelect({
 }
 
 export default function CreateWaveVoting({
+  isCompetition = false,
+  lockVotingCredits = false,
   waveType,
   selectedType,
   category,
@@ -289,6 +303,8 @@ export default function CreateWaveVoting({
   readonly category: string | null;
   readonly profileId: string | null;
   readonly creditNfts: ApiWaveCreditNft[];
+  readonly isCompetition?: boolean;
+  readonly lockVotingCredits?: boolean;
   readonly creditScope: ApiWaveCreditScope;
   readonly memeCount: number | null;
   readonly isMemeCountLoading: boolean;
@@ -374,58 +390,66 @@ export default function CreateWaveVoting({
             : "waves.create.voting.title"
         )}
       />
-      <div className={VOTING_OPTIONS_GRID_CLASSES}>
-        {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
-          .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
-          .map((votingType) => (
-            <CommonBorderedRadioButton
-              key={votingType}
-              type={votingType}
-              selected={selectedType}
-              disabled={false}
-              variant="subtle"
-              name="create-wave-credit-type"
-              ariaLabel={getCreateWaveVotingLabel(votingType)}
-              onChange={onTypeChange}
-            >
-              <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
-                  selectedType === votingType
-                    ? "tw-text-white"
-                    : "tw-text-iron-300 group-hover:tw-text-white"
-                }`}
+      <fieldset
+        disabled={lockVotingCredits}
+        className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0 disabled:tw-opacity-60"
+      >
+        <div className={VOTING_OPTIONS_GRID_CLASSES}>
+          {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
+            .filter(
+              (votingType) => VOTING_TYPES_ORDER[votingType] !== undefined
+            )
+            .map((votingType) => (
+              <CommonBorderedRadioButton
+                key={votingType}
+                type={votingType}
+                selected={selectedType}
+                disabled={false}
+                variant="subtle"
+                name="create-wave-credit-type"
+                ariaLabel={getCreateWaveVotingLabel(votingType)}
+                onChange={onTypeChange}
               >
-                {getCreateWaveVotingLabel(votingType)}
-              </span>
-            </CommonBorderedRadioButton>
-          ))}
-        {selectedType === ApiWaveCreditType.Rep && (
-          <div className="tw-col-span-full !tw-px-0 !tw-py-0">
-            <CreateWaveVotingRep
-              category={category}
-              profileId={profileId}
+                <span
+                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                    selectedType === votingType
+                      ? "tw-text-white"
+                      : "tw-text-iron-300 group-hover:tw-text-white"
+                  }`}
+                >
+                  {getCreateWaveVotingLabel(votingType)}
+                </span>
+              </CommonBorderedRadioButton>
+            ))}
+          {selectedType === ApiWaveCreditType.Rep && (
+            <div className="tw-col-span-full !tw-px-0 !tw-py-0">
+              <CreateWaveVotingRep
+                category={category}
+                profileId={profileId}
+                errors={errors}
+                setCategory={setCategory}
+                setProfileId={setProfileId}
+              />
+            </div>
+          )}
+          {selectedType === ApiWaveCreditType.CardSetTdh && (
+            <MemeCardSetPicker
+              creditNfts={creditNfts}
+              memeCount={memeCount}
+              isMemeCountLoading={isMemeCountLoading}
+              isMemeCountError={isMemeCountError}
               errors={errors}
-              setCategory={setCategory}
-              setProfileId={setProfileId}
+              onCreditNftsChange={setCreditNfts}
             />
-          </div>
-        )}
-        {selectedType === ApiWaveCreditType.CardSetTdh && (
-          <MemeCardSetPicker
-            creditNfts={creditNfts}
-            memeCount={memeCount}
-            isMemeCountLoading={isMemeCountLoading}
-            isMemeCountError={isMemeCountError}
-            errors={errors}
-            onCreditNftsChange={setCreditNfts}
-          />
-        )}
-      </div>
+          )}
+        </div>
 
-      <CreateWaveCreditScopeSelect
-        creditScope={creditScope}
-        onCreditScopeChange={onCreditScopeChange}
-      />
+        <CreateWaveCreditScopeSelect
+          isCompetition={isCompetition}
+          creditScope={creditScope}
+          onCreditScopeChange={onCreditScopeChange}
+        />
+      </fieldset>
 
       {waveType === ApiWaveType.Approve && (
         <div
@@ -487,7 +511,7 @@ export default function CreateWaveVoting({
                   <NegativeVotingToggle
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
-                    isDisabled={false}
+                    isDisabled={lockVotingCredits}
                   />
                 </>
               ) : (
@@ -495,7 +519,7 @@ export default function CreateWaveVoting({
                   <NegativeVotingToggle
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
-                    isDisabled={false}
+                    isDisabled={lockVotingCredits}
                   />
                   <TimeWeightedVoting
                     config={timeWeighted}

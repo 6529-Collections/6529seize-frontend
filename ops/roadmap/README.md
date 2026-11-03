@@ -146,43 +146,26 @@ Already addressed on `origin/main` and not listed below:
   paths.
 - The DNS rebinding gap in the public URL guard; main now validates DNS results
   and uses a pinned `undici` lookup dispatcher for guarded fetches.
-- The unbounded Alchemy token metadata batch path; main now has request body
-  limits, a 100-token cap, caching, and basic request rate limiting.
+- The Alchemy proxy routes (`app/api/alchemy/*`); they now validate inputs,
+  accept only supported networks, cap batch sizes, cache lookups briefly,
+  bound upstream time and response size, and rate limit each client through
+  `lib/security/clientRateLimit.ts`. The collection search route is retired.
 
 ### P1: Remove Secret-Like Values From Public Runtime Config
 
 `next.config.ts` still serializes the complete `publicEnv` into
-`PUBLIC_RUNTIME` and individual browser-bundled env values, including
-`STAGING_API_KEY`, `DEV_MODE_AUTH_JWT`, `FARCASTER_WARPCAST_API_KEY`, IPFS RPC
-endpoints, and `IPFS_MFS_PATH`. Client auth helpers still read staging/dev auth
-values from that public config.
+`PUBLIC_RUNTIME` and individual browser-bundled env values, including IPFS RPC
+endpoints and `IPFS_MFS_PATH`. `STAGING_API_KEY` and
+`FARCASTER_WARPCAST_API_KEY` are now server-only (`config/serverEnv.ts`). Dev
+auth values stay public for local development, but are ignored outside
+development and test runtimes and fail production builds for non-local hosts.
 
 Remediation:
 
-- Split truly public configuration from server-only secrets and operational
-  credentials.
-- Keep staging auth, dev auth JWTs, third-party API keys, and writable service
-  endpoints out of `next.config.ts env` and `.next/PUBLIC_RUNTIME.json`.
-- Fail production/staging builds when `USE_DEV_AUTH` or equivalent dev auth
-  values are enabled.
+- Keep writable service endpoints out of `next.config.ts env` and
+  `.next/PUBLIC_RUNTIME.json`.
 - Rotate any credential-like values that were ever deployed through the public
   runtime bundle.
-
-### P1: Put Server-Side Quotas Around Remaining Alchemy Proxy Routes
-
-`app/api/alchemy/collections/route.ts` and
-`app/api/alchemy/owner-nfts/route.ts` still proxy anonymous user input through
-the server Alchemy API key. The token metadata route has been capped, but these
-routes still need comparable controls.
-
-Remediation:
-
-- Add rate limiting, bounded upstream response reads, and request timeouts.
-- Validate `owner`, `contract`, `chain`, and `pageKey` inputs before calling
-  Alchemy.
-- Restrict supported networks explicitly and reject unknown chain values.
-- Consider requiring app auth or moving these calls behind the backend quota
-  layer if the frontend API key proxy is not intended to be public.
 
 ### P1: Stop Exposing Writable IPFS RPC From Browser Code
 
@@ -215,18 +198,6 @@ Remediation:
 - Add `noopener,noreferrer` to metadata-derived `window.open` calls.
 - Add regression tests covering unsafe schemes, disallowed hosts, and sandbox
   attributes.
-
-### P3: Remove Or Gate The Public Sentry Example Route
-
-`app/api/sentry-example-api/route.ts` remains public and intentionally throws on
-every GET request, with a public example page that triggers it.
-
-Remediation:
-
-- Remove the example route/page from production builds, or gate them behind a
-  local/dev-only flag or admin-only check.
-- Add a test or route inventory assertion so intentional error fixtures do not
-  ship publicly by accident.
 
 ### P3: Sanitize Or Render NextGen Artist Signatures As Text
 

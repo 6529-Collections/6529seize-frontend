@@ -102,6 +102,18 @@ local timezone. Viewing the schedule does not require connecting a wallet.
   heading.
 - DST transitions for Europe/Athens can move rendered UTC/local times by one
   hour while wall-clock mint windows stay on Athens schedule.
+- In `Local` mode the lower calendar uses the viewer's dates: each mint sits
+  on the local date its window opens, and the highlighted day is the viewer's
+  today. East of UTC (for example New Zealand or Kiribati), the
+  Monday/Wednesday/Friday mints appear on the next day's cell. `Jump to Today`
+  and `Find mint date` open the matching local season and cell. `UTC` mode
+  keeps UTC dates for every viewer.
+- The calendar guide lists minting days as Monday / Wednesday / Friday (UTC).
+  In `Local` mode it adds the viewer's own weekdays for those mints, for
+  example `In your time zone: Tue, Thu, Sat` in New Zealand.
+- The upcoming-mints card's season range shows the season's calendar dates
+  (for example `Thu, Jan 1, 2026 - Tue, Mar 31, 2026`) in both modes and every
+  time zone.
 - Invalid or non-positive top-panel/calendar `Meme #` input is ignored.
 - `/the-memes/{id}` behavior:
   - Non-integer ids show `MEME` not-found.

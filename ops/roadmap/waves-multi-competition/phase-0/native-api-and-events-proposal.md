@@ -1,5 +1,14 @@
 # Native API and Event Proposal
 
+This is the Phase 0 design proposal, amended for the shipped command policy.
+Exact implemented operations, schemas, filters and event delivery are defined
+by the backend OpenAPI/runtime and synchronized frontend `openapi.yaml`; the
+illustrative resource/event shapes below are not a substitute for them. See
+[current evidence](../native-delivery/production-status-2026-10-01.md) and the
+[decision register](./decision-register.md). The new [default selection](../default-competition.md)
+may require additive native read support; it must never repurpose legacy-primary
+fields or legacy GETs.
+
 ## API Direction
 
 Use a new `/v3` resource namespace for native wave/competition semantics.
@@ -108,6 +117,8 @@ properties:
   competition_id: { type: string }
   drop_id: { type: string }
   submitter: { $ref: "#/components/schemas/ApiProfileMin" }
+  # WITHDRAWN/DISQUALIFIED are retained internal/history vocabulary, not public commands.
+  # Deleted content is suppressed from public reads regardless of stored status.
   status: { type: string, enum: [ACTIVE, WITHDRAWN, DISQUALIFIED, WINNER] }
   config_version: { type: integer, minimum: 1 }
   submitted_at: { type: integer, format: int64 }
@@ -117,8 +128,9 @@ properties:
 ```
 
 Entry reads embed or link the unchanged current drop response. Winning fields
-are entry-relative. If the same drop has more than one entry, each entry
-returns its own rank/winner context.
+are entry-relative. Current commands enforce one competition per drop for its
+lifetime and create dedicated immutable competition drops. Retained status
+enums do not expose withdrawal/disqualification commands.
 
 ## Native Reads
 
@@ -156,38 +168,37 @@ serial rules; no page may duplicate or omit a row under a stable snapshot.
 
 ## Commands
 
-All commands require JWT, current authorization, `Idempotency-Key`, and the
-expected `config_version` where configuration affects validity. Command
-responses use 200/201 for completed writes, 202 only for a genuinely
-asynchronous operation, 400 validation, 401 auth, 403 authorization, masked
-404 parent/child mismatch, 409 lifecycle/config/idempotency conflict, and 422
-valid syntax that violates domain eligibility.
+Implemented commands require JWT, current authorization, JSON-body
+`idempotency_key`, and the expected JSON-body `config_version` where required.
+Successful implemented commands return 200. Errors include 400 validation,
+401 auth, 403 authorization, masked 404 parent/child mismatch,
+409 lifecycle/config/idempotency conflict, and 422 domain eligibility failure.
 
 | Method and path | Command |
 | --- | --- |
-| `POST /v3/waves/{wave_id}/competitions` | Create draft; wave-admin only; returns 201. |
-| `PATCH /v3/waves/{wave_id}/competitions/{competition_id}` | Update allowed draft/presentation fields with `If-Match` config version. |
+| `POST /v3/waves/{wave_id}/competitions` | Create draft; wave-admin only; returns 200. |
+| `PATCH /v3/waves/{wave_id}/competitions/{competition_id}` | Update allowed configuration/presentation/access fields with body config version. |
 | `POST .../{competition_id}/actions/publish` | Validate and publish one immutable config version. |
-| `POST .../{competition_id}/actions/end` | End and disable further entry/vote execution without inventing results. |
-| `POST .../{competition_id}/actions/cancel` | Cancel, preserve history, disable execution; compensation is a separate future command. |
 | `POST .../{competition_id}/actions/archive` | Hide from default active listings while retaining direct reads/audit. |
 | `POST .../{competition_id}/actions/clone` | Create a new draft ID from terminal config; never reopen. |
-| `POST .../{competition_id}/pauses` | Start a pause with reason/idempotency key. |
-| `POST .../{competition_id}/pauses/{pause_id}/actions/resume` | End a current pause exactly once. |
-| `POST .../{competition_id}/entries` | Atomically create a new ordinary drop plus entry, or associate an eligible existing `drop_id`; first UI uses new drop and one active-entry restriction. |
-| `POST .../{competition_id}/entries/{entry_id}/actions/withdraw` | Submitter withdrawal under lifecycle policy. |
-| `POST .../{competition_id}/entries/{entry_id}/actions/disqualify` | Audited admin moderation action. |
-| `PUT .../{competition_id}/entries/{entry_id}/votes/me` | Create/replace viewer vote with signed config version; idempotent by actor/entry. |
-| `DELETE .../{competition_id}/entries/{entry_id}/votes/me` | Remove viewer vote when allowed; signed/idempotent policy. |
+| `POST .../{competition_id}/actions/pause` | Pause decisions with reason/idempotency key. |
+| `POST .../{competition_id}/actions/resume` | Resume decisions under version/idempotency checks. |
+| `POST .../{competition_id}/entries` | Atomically create a dedicated immutable competition drop and entry; no existing chat association or drop reuse. |
+| `PUT .../{competition_id}/entries/{entry_id}/votes/me` | Create/replace viewer vote, including zero/removal, with signed config version; idempotent by actor/entry. |
 
 Draft creation and hub creation are separate operations. A client may create a
 hub, receive its stable ID, and later create any number of competition drafts.
 Failure of competition creation never rolls back or deletes the hub.
 
+Manual end/cancel and entry withdrawal/disqualification are not implemented
+commands. Entries are deleted through existing authorized drop deletion; removed
+content must not reappear through public historical reads.
+
 ## Signing Envelope
 
-Native entry, vote, and sensitive admin commands sign a canonical structured
-payload:
+When native entry/vote signing is required, the canonical structured payload
+also binds the deployment API host (`audience`) and Ethereum `chain_id=1`.
+The original illustrative fields are:
 
 ```yaml
 domain: "6529-competition-v1"
@@ -235,7 +246,10 @@ dedupe by event ID and tolerate additive fields.
 Existing websocket event types and payloads retain all current fields. When a
 current drop/vote event concerns a native entry, optional `competition_id` and
 `competition_entry_id` are added; `wave_id` remains mandatory. New competition
-events are additive types old clients may ignore.
+events are additive types old clients may ignore. The event table is a design
+vocabulary, not a list of user notifications or proof every event is shipped.
+Only winner lifecycle notifications are emitted; ordinary mentions/replies
+remain supported. No proposed event authorizes a manual cancel/withdraw action.
 
 ## Legacy Safety
 

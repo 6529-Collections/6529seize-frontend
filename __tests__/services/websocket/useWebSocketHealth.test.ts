@@ -2,6 +2,13 @@ import { act, renderHook } from "@testing-library/react";
 import { useWebSocketHealth } from "@/services/websocket/useWebSocketHealth";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocket } from "@/services/websocket/useWebSocket";
+import { Capacitor } from "@capacitor/core";
+
+let mockAppActive = true;
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
+}));
 import {
   AUTH_TOKEN_CHANGED_EVENT,
   getAuthJwt,
@@ -142,6 +149,7 @@ afterAll(() => {
 });
 describe("useWebSocketHealth", () => {
   beforeEach(() => {
+    mockAppActive = true;
     jest.clearAllMocks();
     jest.clearAllTimers();
     mockUseWebSocket.mockReturnValue({
@@ -169,6 +177,70 @@ describe("useWebSocketHealth", () => {
 
     expect(mockConnect).toHaveBeenCalledWith("initial-token");
     expect(mockDisconnect).not.toHaveBeenCalled();
+  });
+
+  it("disconnects and stops health checks while inactive, then reconnects on resume", () => {
+    const native = jest
+      .spyOn(Capacitor, "isNativePlatform")
+      .mockReturnValue(true);
+    mockGetAuthJwt.mockReturnValue("initial-token");
+    const { rerender } = renderHook(useWebSocketHealth);
+    mockConnect.mockClear();
+    mockAppActive = false;
+    rerender();
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    mockGetAuthJwt.mockClear();
+    act(() => {
+      jest.advanceTimersByTime(60_000);
+      window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT));
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(mockGetAuthJwt).not.toHaveBeenCalled();
+    expect(mockConnect).not.toHaveBeenCalled();
+    mockAppActive = true;
+    rerender();
+    expect(mockConnect).toHaveBeenCalledWith("initial-token");
+    native.mockRestore();
+  });
+
+  it("stops hidden mobile-browser health timers while retaining the notification socket and auth updates", () => {
+    const native = jest
+      .spyOn(Capacitor, "isNativePlatform")
+      .mockReturnValue(false);
+    mockGetAuthJwt.mockReturnValue("initial-token");
+    const socketMethods = {
+      subscribe: jest.fn(() => () => undefined),
+      send: jest.fn(),
+      config: { url: "ws://localhost" },
+    };
+    mockUseWebSocket.mockReturnValue({
+      ...socketMethods,
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+    const { rerender } = renderHook(useWebSocketHealth);
+    mockAppActive = false;
+    rerender();
+    mockGetAuthJwt.mockClear();
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(mockGetAuthJwt).not.toHaveBeenCalled();
+    expect(mockDisconnect).not.toHaveBeenCalled();
+    // Auth changes must still revoke an existing connection in a hidden tab.
+    mockGetAuthJwt.mockReturnValue(null);
+    act(() => window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT)));
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    mockGetAuthJwt.mockReturnValue("return-token");
+    mockUseWebSocket.mockReturnValue({
+      ...socketMethods,
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.DISCONNECTED,
+    });
+    mockAppActive = true;
+    rerender();
+    expect(mockConnect).toHaveBeenCalledWith("return-token");
+    native.mockRestore();
   });
 
   it("disconnects when no token is present but the socket is connected", () => {

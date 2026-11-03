@@ -17,7 +17,13 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
 }));
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
-  () => (props: any) => <div data-testid="media" {...props} />
+  () => (props: any) => (
+    <div
+      data-testid="media"
+      data-media-url={props.media_url}
+      data-fill-video-container={String(props.fillVideoContainer)}
+    />
+  )
 );
 jest.mock("@/components/waves/drop/SingleWaveDropPosition", () => ({
   SingleWaveDropPosition: (p: any) => (
@@ -50,7 +56,7 @@ describe("DropItemChat", () => {
     (useDrop as jest.Mock).mockReturnValue({
       drop: {
         drop_type: ApiDropType.Participatory,
-        parts: [{ media: [{ mime_type: "image/png", url: "img" }] }],
+        parts: [{ media: [{ mime_type: "video/mp4", url: "video" }] }],
         metadata: [{ data_key: "title", data_value: "Title" }],
         title: "T",
         wave: { id: "w", name: "Wave" },
@@ -64,7 +70,17 @@ describe("DropItemChat", () => {
       "tw-m-0"
     );
     expect(screen.getByTestId("position")).toHaveTextContent("2");
-    expect(screen.getByTestId("media")).toHaveAttribute("media_url", "img");
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-url",
+      "video"
+    );
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-fill-video-container",
+      "true"
+    );
+    expect(screen.getByTestId("media").parentElement).toHaveClass(
+      "tw-bg-iron-900/30"
+    );
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
   });
 

@@ -1,0 +1,110 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Page } from "react-pdf";
+import type { PDFPageProxy } from "pdfjs-dist";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+
+export default function PdfAttachmentPage({
+  page,
+  width,
+  scrollRoot,
+  viewportHeight,
+  estimatedAspectRatio,
+  onError,
+}: {
+  readonly page: number;
+  readonly width: number;
+  readonly scrollRoot: HTMLDivElement;
+  readonly viewportHeight: number;
+  readonly estimatedAspectRatio: number;
+  readonly onError: () => void;
+}) {
+  const loadedPageRef = useRef<PDFPageProxy | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [nearViewport, setNearViewport] = useState(false);
+  const onLoad = useCallback(
+    (loaded: PDFPageProxy) => {
+      loadedPageRef.current = loaded;
+      const viewport = loaded.getViewport({ scale: 1 });
+      const ratio = viewport.height / viewport.width;
+      if (!Number.isFinite(ratio) || ratio <= 0) {
+        onError();
+        return;
+      }
+      setAspectRatio(ratio);
+    },
+    [onError]
+  );
+  const observePage = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element) return;
+      const nearby = new IntersectionObserver(
+        ([entry]) => {
+          setNearViewport(entry?.isIntersecting ?? false);
+        },
+        { root: scrollRoot, rootMargin: `${viewportHeight}px 0px` }
+      );
+      nearby.observe(element);
+      return () => {
+        nearby.disconnect();
+      };
+    },
+    [scrollRoot, viewportHeight]
+  );
+  useEffect(() => {
+    if (!nearViewport) return;
+    return () => {
+      // Removing the canvas alone leaves decoded images and drawing commands
+      // cached in PDF.js. Release them when this page leaves the render window
+      // (or closes); PDF.js defers cleanup while a render is still in flight.
+      loadedPageRef.current?.cleanup();
+    };
+  }, [nearViewport]);
+  const ratio = aspectRatio ?? estimatedAspectRatio;
+  // Keep raster memory bounded on iPad and unusually shaped pages. Pages away
+  // from the viewport retain their measured space, without canvases or text layers.
+  const pixelRatio = Math.min(
+    globalThis.devicePixelRatio || 1,
+    3,
+    Math.sqrt(4_000_000 / (width * width * ratio)),
+    4096 / width,
+    4096 / (width * ratio)
+  );
+  const render = nearViewport && aspectRatio !== null;
+  return (
+    <div
+      ref={observePage}
+      className="tw-relative tw-mb-3 tw-bg-white"
+      style={{ aspectRatio: `1 / ${ratio}` }}
+      data-pdf-page={page}
+    >
+      <h3 className="tw-sr-only">
+        {t(DEFAULT_LOCALE, "attachment.pdf.pageHeading", {
+          page: formatInteger(DEFAULT_LOCALE, page),
+        })}
+      </h3>
+      {nearViewport && (
+        <Page
+          pageNumber={page}
+          width={width}
+          devicePixelRatio={pixelRatio}
+          renderMode={render ? "canvas" : "none"}
+          renderTextLayer={render}
+          renderAnnotationLayer={false}
+          onLoadSuccess={onLoad}
+          onLoadError={onError}
+          onRenderError={onError}
+          loading={
+            <p role="status" className="tw-p-4 tw-text-iron-900">
+              {t(DEFAULT_LOCALE, "attachment.pdf.loadingPage")}
+            </p>
+          }
+          error={null}
+        />
+      )}
+    </div>
+  );
+}

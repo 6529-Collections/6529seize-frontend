@@ -174,7 +174,7 @@ describe("SingleWaveDropVoteContent", () => {
     ).toBeInTheDocument();
   });
 
-  it("allows Vote with reply to be turned on before editing", () => {
+  it("allows Explain vote to be turned on before editing", () => {
     render(
       <SingleWaveDropVoteContent
         drop={createMockDrop()}
@@ -184,15 +184,15 @@ describe("SingleWaveDropVoteContent", () => {
     );
 
     const rationaleSwitch = screen.getByRole("switch", {
-      name: /vote with reply/i,
+      name: /explain vote/i,
     });
-    expect(rationaleSwitch).toHaveAccessibleName("Vote with reply");
+    expect(rationaleSwitch).toHaveAccessibleName("Explain vote");
     expect(rationaleSwitch).not.toBeChecked();
     expect(rationaleSwitch).not.toBeDisabled();
     expect(rationaleSwitch).not.toHaveAttribute("aria-expanded");
     expect(rationaleSwitch).toHaveAttribute("aria-controls");
     expect(rationaleSwitch).toHaveAccessibleDescription(
-      /Editing this text turns on Vote with reply/i
+      /Editing this text turns on Explain vote/i
     );
     expect(
       screen.queryByRole("textbox", { name: /optional rationale reply/i })
@@ -221,7 +221,7 @@ describe("SingleWaveDropVoteContent", () => {
     );
 
     const rationaleSwitch = screen.getByRole("switch", {
-      name: /vote with reply/i,
+      name: /explain vote/i,
     });
     fireEvent.click(rationaleSwitch);
 
@@ -262,7 +262,7 @@ describe("SingleWaveDropVoteContent", () => {
     );
 
     const rationaleSwitch = screen.getByRole("switch", {
-      name: "Vote with reply",
+      name: "Explain vote",
     });
     fireEvent.click(rationaleSwitch);
 
@@ -273,13 +273,13 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(rationaleSwitch).toBeChecked();
     expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
-      "Add rationale text or turn Vote with reply off."
+      "Add rationale text or turn Explain vote off."
     );
     expect(rationaleTextarea).toHaveAccessibleDescription(
-      /Add rationale text or turn Vote with reply off/i
+      /Add rationale text or turn Explain vote off/i
     );
     expect(rationaleSwitch).toHaveAccessibleDescription(
-      /Add rationale text or turn Vote with reply off/i
+      /Add rationale text or turn Explain vote off/i
     );
   });
 
@@ -305,7 +305,7 @@ describe("SingleWaveDropVoteContent", () => {
       screen.queryByRole("textbox", { name: /optional rationale reply/i })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("switch", { name: /vote with reply/i })
+      screen.queryByRole("switch", { name: /explain vote/i })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("vote-submit")).toHaveAttribute(
       "data-submit-label",

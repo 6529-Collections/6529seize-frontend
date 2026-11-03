@@ -38,17 +38,17 @@ export default function UserPageStatsActivityWalletTableRowGas({
     locale
   );
   const tooltipContent = (
-    <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_auto] tw-gap-x-3 tw-gap-y-1 tw-text-sm">
-      <dt className="tw-text-iron-400">{gasLabel}</dt>
-      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
+    <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_auto] tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-font-medium">
+      <dt className="tw-text-iron-300">{gasLabel}</dt>
+      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-100">
         {formatNumberWithCommasOrDash(+gas.toFixed(5))}
       </dd>
-      <dt className="tw-text-iron-400">{gasGweiLabel}</dt>
-      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
+      <dt className="tw-text-iron-300">{gasGweiLabel}</dt>
+      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-100">
         {formatNumberWithCommasOrDash(gasGwei)}
       </dd>
-      <dt className="tw-text-iron-400">{gasPriceLabel}</dt>
-      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
+      <dt className="tw-text-iron-300">{gasPriceLabel}</dt>
+      <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-100">
         {formatNumberWithCommasOrDash(+gasPriceGwei.toFixed(2))}
       </dd>
     </dl>

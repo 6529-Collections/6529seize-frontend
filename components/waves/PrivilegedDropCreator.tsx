@@ -1,7 +1,11 @@
 import { isAuthResolving } from "@/components/auth/authResolution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import {
+  ActiveDropAction,
+  type ActiveDropState,
+} from "@/types/dropInteractionTypes";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
@@ -73,6 +77,24 @@ function getProfileModerationPlaceholder({
   return null;
 }
 
+/**
+ * Open replies let people outside the chat group answer a drop, so the chat
+ * composer opens for them only while a reply target is active.
+ */
+const getChatComposerAccess = (
+  chat: ApiWave["chat"],
+  activeDrop: ActiveDropState | null
+): { readonly canChat: boolean; readonly canReplyWithoutChat: boolean } => {
+  const canReplyWithoutChat =
+    !chat.authenticated_user_eligible && getWaveReplyEligibility(chat);
+  const isReplying = activeDrop?.action === ActiveDropAction.REPLY;
+  return {
+    canChat:
+      chat.authenticated_user_eligible || (canReplyWithoutChat && isReplying),
+    canReplyWithoutChat,
+  };
+};
+
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
@@ -131,11 +153,15 @@ export default function PrivilegedDropCreator({
       ? `/${address.toLowerCase()}`
       : undefined;
 
+  const { canChat, canReplyWithoutChat } = getChatComposerAccess(
+    wave.chat,
+    activeDrop
+  );
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
-    canChat: wave.chat.authenticated_user_eligible,
+    canChat,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
     slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,
@@ -176,6 +202,7 @@ export default function PrivilegedDropCreator({
         chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
         profileSetupHref={profileSetupHref}
+        canReply={canReplyWithoutChat}
       />
     );
   }
@@ -186,6 +213,7 @@ export default function PrivilegedDropCreator({
         type="chat"
         chatRestriction={blockingChatRestriction}
         profileSetupHref={profileSetupHref}
+        canReply={canReplyWithoutChat}
       />
     );
   }

@@ -24,7 +24,7 @@ export default function UserPageRepNewRepSearchDropdown({
 
   if (state === RepSearchState.MIN_LENGTH_ERROR) {
     return (
-      <p className="tw-m-0 tw-px-2 tw-py-1 tw-text-xs tw-font-normal tw-text-iron-500">
+      <p className="tw-m-0 tw-px-2 tw-py-1.5 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
         {t(locale, "rep.categories.grant.minimumCharacters", {
           min: minSearchLength,
         })}
@@ -34,7 +34,7 @@ export default function UserPageRepNewRepSearchDropdown({
 
   if (state === RepSearchState.MAX_LENGTH_ERROR) {
     return (
-      <p className="tw-m-0 tw-px-2 tw-py-1 tw-text-xs tw-font-normal tw-text-iron-500">
+      <p className="tw-m-0 tw-px-2 tw-py-1.5 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
         {t(locale, "rep.categories.grant.maximumCharacters", {
           max: maxSearchLength,
         })}
@@ -44,7 +44,7 @@ export default function UserPageRepNewRepSearchDropdown({
 
   if (state === RepSearchState.LOADING) {
     return (
-      <output className="tw-flex tw-items-center tw-gap-2 tw-px-2 tw-text-xs tw-text-iron-400">
+      <output className="tw-flex tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-xs tw-leading-5 tw-text-iron-400">
         <CircleLoader />
         <span>{t(locale, "rep.categories.grant.searching")}</span>
       </output>
@@ -56,18 +56,18 @@ export default function UserPageRepNewRepSearchDropdown({
   }
 
   return (
-    <div className="tw-flex tw-max-h-80 tw-flex-wrap tw-gap-2.5 tw-overflow-y-auto tw-px-1 tw-py-1">
+    <div className="tw-flex tw-max-h-80 tw-flex-wrap tw-gap-2 tw-overflow-y-auto tw-p-1">
       {categories.map((category) => {
         const isMemesSubmissionCategory = category === MEMES_NOMINEE_CATEGORY;
         const isNonQualifyingLookalike = isMemesNomineeLookalike(category);
         let categoryAppearance =
-          "tw-border-white/10 tw-bg-transparent tw-text-white hover:tw-bg-white/5";
+          "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-200 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
         if (isMemesSubmissionCategory) {
           categoryAppearance =
-            "tw-border-emerald-500/30 tw-bg-emerald-500/10 tw-text-white hover:tw-bg-emerald-500/15";
+            "tw-border-emerald-500/30 tw-bg-emerald-500/10 tw-text-white hover:tw-border-emerald-500/50 hover:tw-bg-emerald-500/15";
         } else if (isNonQualifyingLookalike) {
           categoryAppearance =
-            "tw-border-white/10 tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/5";
+            "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
         }
 
         return (
@@ -78,17 +78,17 @@ export default function UserPageRepNewRepSearchDropdown({
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-1 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-white/40 md:tw-px-2 md:tw-py-1.5 md:tw-text-xs ${categoryAppearance}`}
+            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-min-h-8 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
           >
             <span
-              className={`tw-break-words ${
-                isMemesSubmissionCategory ? "tw-font-bold" : ""
+              className={`tw-min-w-0 tw-max-w-full tw-break-words ${
+                isMemesSubmissionCategory ? "tw-font-medium" : ""
               }`}
             >
               {category}
             </span>
             {isMemesSubmissionCategory && (
-              <span className="tw-ml-1 tw-whitespace-nowrap tw-rounded tw-bg-emerald-500/20 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-emerald-400">
+              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300">
                 {t(locale, "rep.categories.grant.submissionBadge")}
               </span>
             )}

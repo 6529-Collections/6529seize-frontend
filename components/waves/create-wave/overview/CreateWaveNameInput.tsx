@@ -38,6 +38,7 @@ export default function CreateWaveNameInput({
               value={name}
               id="create-wave-name"
               autoComplete="off"
+              maxLength={250}
               aria-required={true}
               aria-invalid={isNameError}
               aria-describedby={isNameError ? errorId : undefined}
@@ -76,6 +77,7 @@ export default function CreateWaveNameInput({
           {isNameError && (
             <div
               id={errorId}
+              role="alert"
               className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
             >
               <svg
@@ -93,7 +95,7 @@ export default function CreateWaveNameInput({
                 />
               </svg>
               <div className="tw-relative tw-z-10 tw-text-xs tw-font-medium tw-text-error">
-                Name is required
+                {t(locale, "waves.create.quick.nameRequired")}
               </div>
             </div>
           )}

@@ -3,21 +3,23 @@
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import { WaveAvatar } from "../web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar";
 import { WaveScoreSummaryHoverCard } from "@/components/waves/WaveTrustSignals";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useHoverIntent } from "@/hooks/useHoverIntent";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
+export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 6 as const;
 const PREVIEW_THUMBNAIL_WIDTH_PX = 32;
 const PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX = 44;
-const PREVIEW_GAP_PX = 6;
-const PREVIEW_TOUCH_GAP_PX = 8;
+const PREVIEW_GAP_PX = 12;
+const PREVIEW_TOUCH_GAP_PX = 16;
 
 export interface HighlyRatedWavePreviewItem {
   readonly wave: MinimalWave;
@@ -258,7 +260,7 @@ function HighlyRatedWavePreviewScoreBadge({
       >
         <path
           d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
-          className="tw-fill-iron-900 tw-stroke-white/25"
+          className="tw-fill-iron-900 tw-stroke-iron-800"
           strokeWidth="1.2"
           strokeLinejoin="round"
         />
@@ -269,7 +271,7 @@ function HighlyRatedWavePreviewScoreBadge({
           textAnchor="middle"
           fontSize={getScoreBadgeFontSize(scoreLabel)}
           fontWeight="700"
-          className="tw-fill-iron-50"
+          className="tw-fill-iron-300"
         >
           {scoreLabel}
         </text>
@@ -281,9 +283,11 @@ function HighlyRatedWavePreviewScoreBadge({
 function HighlyRatedWavePreviewLink({
   isTouchPreview,
   item,
+  scoreDetailsDisabled,
 }: {
   readonly isTouchPreview: boolean;
   readonly item: HighlyRatedWavePreviewItem;
+  readonly scoreDetailsDisabled: boolean;
 }) {
   const { wave } = item;
   const isDropWave = wave.type !== ApiWaveType.Chat;
@@ -306,7 +310,16 @@ function HighlyRatedWavePreviewLink({
             score: scoreLabel,
           }
         );
+  // Hover prefetches only after the pointer rests on the preview, not while it
+  // sweeps across the row. Clicking prefetches right away instead.
+  const { schedule: scheduleHoverIntent, cancel: cancelHoverIntent } =
+    useHoverIntent();
+  const { onMouseEnter } = item;
+  const handleMouseEnter = onMouseEnter
+    ? () => scheduleHoverIntent(onMouseEnter)
+    : undefined;
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    cancelHoverIntent();
     item.onClick(event);
     if (event.defaultPrevented || isModifiedAnchorClick(event)) {
       event.stopPropagation();
@@ -315,6 +328,7 @@ function HighlyRatedWavePreviewLink({
 
   return (
     <WaveScoreSummaryHoverCard
+      disabled={scoreDetailsDisabled}
       closeOnContentClick
       stopClickPropagation
       summaryHeader={{
@@ -339,10 +353,14 @@ function HighlyRatedWavePreviewLink({
     >
       <Link
         href={item.href}
+        {...waveFeatureAttributes("sidebar_entry", "recommendations_wave")}
         prefetch={false}
         aria-label={linkLabel}
+        aria-current={item.isActive ? "page" : undefined}
         onClick={handleLinkClick}
-        {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
+        {...(handleMouseEnter
+          ? { onMouseEnter: handleMouseEnter, onMouseLeave: cancelHoverIntent }
+          : {})}
         className={`tw-group/preview tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
       >
         <WaveAvatar
@@ -370,11 +388,13 @@ export function HighlyRatedWavesToggle({
   compactTouchPadding = false,
   paddingClassName,
   previewItems,
+  scoreDetailsDisabled = false,
 }: {
   readonly isTouchPreview?: boolean | undefined;
   readonly compactTouchPadding?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly scoreDetailsDisabled?: boolean;
 }) {
   const previewStripRef = useRef<HTMLDivElement>(null);
   const [visiblePreviewCount, setVisiblePreviewCount] = useState<number>(
@@ -435,11 +455,12 @@ export function HighlyRatedWavesToggle({
     >
       <div
         ref={previewStripRef}
-        className={`tw-flex tw-min-w-0 tw-items-center tw-justify-between ${isTouchPreview ? "tw-gap-x-2" : "tw-gap-x-1.5"}`}
+        className={`tw-flex tw-min-w-0 tw-items-center ${isTouchPreview ? "tw-mr-2" : "tw-mr-1.5"} ${visiblePreviewItems.length === HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT ? "tw-justify-between" : "tw-justify-start"} ${isTouchPreview ? "tw-gap-x-4" : "tw-gap-x-3"}`}
       >
         {visiblePreviewItems.map((item) => (
           <HighlyRatedWavePreviewLink
             isTouchPreview={isTouchPreview}
+            scoreDetailsDisabled={scoreDetailsDisabled}
             key={item.wave.id}
             item={item}
           />

@@ -51,7 +51,7 @@ export default function UserPageStatsActivityTDHHistory({
   } else {
     content = (
       <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] lg:tw-mt-4">
-        <output className="tw-block tw-px-4 tw-py-5 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
+        <output className="tw-block tw-px-4 tw-py-5 tw-text-meta/5 tw-font-normal tw-italic tw-text-iron-500 sm:tw-px-6">
           {getTdhHistoryMessage(
             "user.collected.stats.tdhHistory.empty",
             undefined,
@@ -65,7 +65,7 @@ export default function UserPageStatsActivityTDHHistory({
   return (
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+        <h3 className="tw-mb-0 tw-text-lg/7 tw-font-semibold tw-text-iron-100 md:tw-text-xl/7">
           {getTdhHistoryMessage(
             "user.collected.stats.tdhHistory.title",
             undefined,

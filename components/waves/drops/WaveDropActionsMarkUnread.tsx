@@ -36,7 +36,9 @@ export default function WaveDropActionsMarkUnread({
   const { waves, directMessages } = useMyStream();
 
   const isAuthor =
-    connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
+    !drop.author.is_anonymous &&
+    connectedProfile?.handle === drop.author.handle &&
+    !activeProfileProxy;
 
   const handleMarkUnread = useCallback(async () => {
     if (loading) return;

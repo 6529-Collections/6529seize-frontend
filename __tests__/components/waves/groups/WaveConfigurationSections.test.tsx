@@ -1,18 +1,11 @@
+jest.mock("@/hooks/waves/useWaveConfiguration", () => ({
+  useWaveConfiguration: (wave: unknown) => wave,
+}));
 import { render, screen } from "@testing-library/react";
 import WaveConfigurationSections from "@/components/waves/groups/WaveConfigurationSections";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock("@/components/waves/specs/WaveTypeIcon", () => ({
-  __esModule: true,
-  default: ({
-    waveType,
-    label,
-  }: {
-    readonly waveType: ApiWaveType;
-    readonly label?: string;
-  }) => <span>{label ?? waveType}</span>,
-}));
 jest.mock("@/components/waves/specs/WaveDisableLinks", () => ({
   __esModule: true,
   default: ({ display }: { readonly display?: string }) => (
@@ -25,23 +18,16 @@ jest.mock("@/components/waves/specs/WaveSlowMode", () => ({
     <div data-testid="slow-mode-setting" data-display={display} />
   ),
 }));
+jest.mock("@/components/waves/specs/WaveChatReplies", () => ({
+  __esModule: true,
+  default: () => <div data-testid="replies-setting" />,
+}));
 jest.mock("@/components/waves/specs/WaveChatStatus", () => ({
   __esModule: true,
   default: ({ display }: { readonly display?: string }) => (
     <div data-testid="chat-status-setting" data-display={display} />
   ),
 }));
-jest.mock("@/components/waves/groups/WaveConfigurationDisplay", () => ({
-  __esModule: true,
-  default: () => <div data-testid="display-configuration" />,
-}));
-jest.mock(
-  "@/components/waves/groups/WaveConfigurationReadOnlySections",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="read-only-configuration" />,
-  })
-);
 jest.mock("@/components/waves/groups/WaveConfigurationRules", () => ({
   __esModule: true,
   default: () => <div data-testid="configuration-rules" />,
@@ -100,9 +86,10 @@ describe("WaveConfigurationSections", () => {
   it("renders wave and chat access configuration", () => {
     render(<WaveConfigurationSections wave={makeWave(ApiWaveType.Chat)} />);
 
-    expect(screen.getByRole("heading", { name: "Wave" })).toBeInTheDocument();
-    expect(screen.getByText("Type")).toBeInTheDocument();
-    expect(screen.getByText(ApiWaveType.Chat)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Wave" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Type")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Access" })).toBeInTheDocument();
     expect(
       screen.getByTestId(`group-${WaveGroupType.VIEW}`)
@@ -134,8 +121,13 @@ describe("WaveConfigurationSections", () => {
       "data-display",
       "configuration"
     );
-    expect(screen.getByTestId("display-configuration")).toBeInTheDocument();
-    expect(screen.getByTestId("read-only-configuration")).toBeInTheDocument();
+    expect(screen.getByTestId("replies-setting")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("display-configuration")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("read-only-configuration")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("configuration-rules")).toBeInTheDocument();
     expect(screen.getByTestId("admin-settings")).toBeInTheDocument();
     expect(screen.getByTestId("delete-chat-history")).toBeInTheDocument();
@@ -154,29 +146,33 @@ describe("WaveConfigurationSections", () => {
     ).toBeTruthy();
   });
 
-  it("includes participation and voting access for competition waves", () => {
+  it("keeps competition access out of wave Configuration", () => {
     render(<WaveConfigurationSections wave={makeWave(ApiWaveType.Rank)} />);
 
     expect(
-      screen.getByTestId(`group-${WaveGroupType.DROP}`)
-    ).toBeInTheDocument();
+      screen.queryByTestId(`group-${WaveGroupType.DROP}`)
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId(`group-${WaveGroupType.VOTE}`)
-    ).toBeInTheDocument();
+      screen.queryByTestId(`group-${WaveGroupType.VOTE}`)
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-status-setting")).toHaveAttribute(
       "data-display",
       "configuration"
     );
   });
 
-  it("identifies perpetual rank waves in the Wave section", () => {
+  it("omits the Wave type block for perpetual rank waves too", () => {
     render(
       <WaveConfigurationSections
         wave={makeWave(ApiWaveType.Rank, true, null)}
       />
     );
 
-    expect(screen.getByText("Perpetual Rank")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Wave" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Type")).not.toBeInTheDocument();
+    expect(screen.queryByText("Perpetual Rank")).not.toBeInTheDocument();
     expect(screen.queryByText(ApiWaveType.Rank)).not.toBeInTheDocument();
   });
 
@@ -187,6 +183,7 @@ describe("WaveConfigurationSections", () => {
 
     expect(screen.queryByTestId("links-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("slow-mode-setting")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("replies-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("personal-display")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-status-setting")).toHaveAttribute(
       "data-display",

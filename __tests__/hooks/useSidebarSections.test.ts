@@ -23,9 +23,15 @@ describe("useSidebarSections", () => {
       "NextGen",
       "Meme Lab",
       "ReMemes",
+      "6529 Stream",
       "NFT Activity",
       "Memes Calendar",
     ]);
+    expect(nftsSection?.items[6]).toEqual({
+      name: "6529 Stream",
+      href: "/stream",
+      activePathPrefixes: ["/stream/"],
+    });
 
     const wavesSection = result.current.find(
       (section) => section.key === "waves"
@@ -49,32 +55,6 @@ describe("useSidebarSections", () => {
         activePathPrefixes: ["/museum/network/"],
       },
     ]);
-  });
-
-  it("inserts the Stream review after live collections only when enabled", () => {
-    const { result } = renderHook(() =>
-      useSidebarSections(false, false, "US", true)
-    );
-
-    const nftsSection = result.current.find(
-      (section) => section.key === "nfts"
-    );
-    expect(nftsSection?.items.map((item) => item.name)).toEqual([
-      "Collect",
-      "The Memes",
-      "6529 Gradient",
-      "NextGen",
-      "Meme Lab",
-      "ReMemes",
-      "6529 Stream — Review",
-      "NFT Activity",
-      "Memes Calendar",
-    ]);
-    expect(nftsSection?.items[6]).toEqual({
-      name: "6529 Stream — Review",
-      href: "/reviews/6529-stream",
-      activePathPrefixes: ["/reviews/6529-stream/"],
-    });
   });
 
   it("does not include retired release notes links", () => {
@@ -107,7 +87,7 @@ describe("useSidebarSections", () => {
       "Overview",
       "Collections & Minting",
       "Network & Reputation",
-      "Delegation & Wallets",
+      "Safe Collecting",
       "Data & Developer Tools",
       "Legal",
     ]);
@@ -127,6 +107,7 @@ describe("useSidebarSections", () => {
       { name: "Meme Lab", href: "/about/meme-lab" },
       { name: "6529 Gradient", href: "/about/6529-gradient" },
       { name: "Minting", href: "/about/minting" },
+      { name: "GDRC", href: "/about/gdrc1" },
     ]);
     expect(aboutSection?.subsections[2]?.items).toEqual([
       { name: "Identities", href: "/network" },
@@ -149,27 +130,28 @@ describe("useSidebarSections", () => {
         href: "/network/nerd",
         activePathPrefixes: ["/network/nerd/"],
       },
-      { name: "Prenodes", href: "/network/prenodes" },
       {
         name: "TDH Historic Boosts",
         href: "/network/tdh/historic-boosts",
       },
+      {
+        name: "Wallet Consolidation",
+        href: "/network/tdh/consolidation",
+      },
     ]);
     expect(aboutSection?.subsections[3]?.items).toEqual([
-      { name: "GDRC", href: "/about/gdrc1" },
-      { name: "NFT Delegation", href: "/about/nft-delegation" },
-      { name: "Primary Address", href: "/about/primary-address" },
-      { name: "Delegation Center", href: "/delegation/delegation-center" },
+      { name: "Safe Collecting", href: "/safe-collecting" },
       {
-        name: "Wallet Architecture",
-        href: "/delegation/wallet-architecture",
+        name: "TAP Guide",
+        href: "/safe-collecting/tap-guide",
       },
-      { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
+      { name: "FAQ", href: "/safe-collecting/faq" },
       {
         name: "Consolidation Use Cases",
-        href: "/delegation/consolidation-use-cases",
+        href: "/safe-collecting/consolidation-use-cases",
       },
-      { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+      { name: "Wallet Checker", href: "/safe-collecting/wallet-checker" },
+      { name: "Primary Address", href: "/about/primary-address" },
     ]);
     expect(aboutSection?.subsections[4]?.items).toEqual([
       { name: "Tech", href: "/about/tech" },
@@ -183,6 +165,7 @@ describe("useSidebarSections", () => {
       { name: "API", href: "/tools/api" },
       { name: "EMMA", href: "/emma" },
       { name: "Block Finder", href: "/tools/block-finder" },
+      { name: "World Time Zones", href: "/tools/time-zones" },
       { name: "Open Data", href: "/open-data" },
       { name: "6529bot Data", href: "/open-data/6529bot" },
       { name: "Network Metrics", href: "/open-data/network-metrics" },
@@ -213,7 +196,7 @@ describe("useSidebarSections", () => {
       (section) => section.key === "about"
     );
     const delegationWallets = aboutSection?.subsections.find(
-      (subsection) => subsection.name === "Delegation & Wallets"
+      (subsection) => subsection.name === "Safe Collecting"
     );
 
     expect(delegationWallets?.items).toEqual(

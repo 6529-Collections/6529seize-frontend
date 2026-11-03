@@ -26,6 +26,7 @@ import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTa
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiMemeCollaboratorProfile } from '../models/ApiMemeCollaboratorProfile';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
@@ -33,6 +34,15 @@ import { HttpFile } from '../http/http';
 
 export class ApiCurationDrop {
     'drop_priority_order': number | null;
+    /**
+    * Original submitter artist credit before accepted collaborator credits are appended.
+    */
+    'submission_artist'?: string;
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
+    /**
+    * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
+    */
+    'voters_count_available'?: boolean;
     'id': string;
     /**
     * Sequence number of the drop in Seize
@@ -72,6 +82,10 @@ export class ApiCurationDrop {
     'context_profile_context': ApiDropContextProfileContext;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
+    /**
+    * True when the drop\'s current content is the body of an author\'s device signed create or edit event, the same state as a non-null current_event_id from GET /drops/{dropId}/signed-events. False otherwise, including when the viewer cannot see the drop\'s content or its author is anonymous. Treat a missing value as false.
+    */
+    'is_author_signed'?: boolean;
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
     'is_additional_action_promised': boolean | null;
@@ -89,6 +103,24 @@ export class ApiCurationDrop {
             "baseName": "drop_priority_order",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "submission_artist",
+            "baseName": "submission_artist",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
+            "format": ""
+        },
+        {
+            "name": "voters_count_available",
+            "baseName": "voters_count_available",
+            "type": "boolean",
+            "format": ""
         },
         {
             "name": "id",
@@ -249,6 +281,12 @@ export class ApiCurationDrop {
         {
             "name": "is_signed",
             "baseName": "is_signed",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_author_signed",
+            "baseName": "is_author_signed",
             "type": "boolean",
             "format": ""
         },

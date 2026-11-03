@@ -1,10 +1,5 @@
-import PrimaryRouteLoadingShell from "@/components/navigation/PrimaryRouteLoadingShell";
+import NotificationsLoading from "@/components/notifications/NotificationsLoading";
 
 export default function Loading() {
-  return (
-    <PrimaryRouteLoadingShell
-      messageKey="navigation.primary.loading.notifications"
-      variant="notifications"
-    />
-  );
+  return <NotificationsLoading />;
 }

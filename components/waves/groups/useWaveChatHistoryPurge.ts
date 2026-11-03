@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import {
   EMPTY_PURGE,
@@ -22,7 +22,7 @@ export function useWaveChatHistoryPurge({
 }) {
   const key = JSON.stringify([profileId, waveId]);
   const { requestAuth } = useAuth();
-  const { processDropsRemoved, refreshWaveMessages } = useMyStream();
+  const { processDropsRemoved, refreshWaveMessages } = useMyStreamActions();
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(false);
   const subscribe = useCallback(

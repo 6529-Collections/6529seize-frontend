@@ -95,7 +95,7 @@ context-aware `Back`).
 - Web sidebar and search-page catalogs can vary by runtime constraints:
   iOS non-US hides subscription-related entries, and `App Wallets` appears only
   when app-wallet support is enabled. `About` keeps network/reference routes in
-  `Network & Reputation`, wallet/delegation routes in `Delegation & Wallets`,
+  `Network & Reputation`, wallet/delegation routes in `Safe Collecting`,
   and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears
   only when the connected wallet can access `/drop-forge`.
 - The sidebar `Share` row is desktop-web-only and remains standalone whether

@@ -2,6 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import QuorumProposalCompactContent, {
   getQuorumProposalCompactSectionKey,
 } from "@/components/waves/quorum/QuorumProposalCompactContent";
+import type { SupportedLocale } from "@/i18n/locales";
+
+let mockLocale: SupportedLocale = "en-US";
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
 
 jest.mock(
   "@/components/drops/view/part/DropPartMarkdownWithPropLogger",
@@ -37,6 +44,10 @@ function getDetailsToggle(): HTMLElement {
 }
 
 describe("QuorumProposalCompactContent", () => {
+  afterEach(() => {
+    mockLocale = "en-US";
+  });
+
   it("shows the title and summary immediately", () => {
     render(
       <QuorumProposalCompactContent
@@ -50,6 +61,9 @@ describe("QuorumProposalCompactContent", () => {
     );
 
     expect(screen.getByText("Slow Mode")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("proposal-card-context-label")
+    ).toBeInTheDocument();
     expect(screen.getByText("Summary")).toBeInTheDocument();
     expect(screen.getByText("Keep the feed readable.")).toBeInTheDocument();
     expect(
@@ -173,4 +187,34 @@ describe("QuorumProposalCompactContent", () => {
 
     expect(onParentClick).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["en-US", "Summary", "Show details (2)", "Hide details"],
+    ["en-GB", "Summary", "Show details (2)", "Hide details"],
+    ["fr-FR", "Résumé", "Afficher les détails (2)", "Masquer les détails"],
+    ["es-ES", "Resumen", "Mostrar detalles (2)", "Ocultar detalles"],
+    ["de-DE", "Zusammenfassung", "Details anzeigen (2)", "Details ausblenden"],
+  ] as const)(
+    "localizes proposal chrome for %s",
+    (locale, summaryLabel, showDetailsLabel, hideDetailsLabel) => {
+      mockLocale = locale;
+
+      render(
+        <QuorumProposalCompactContent
+          proposal={proposal}
+          mentionedUsers={[]}
+          mentionedGroups={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(summaryLabel)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: showDetailsLabel }));
+      expect(
+        screen.getByRole("button", { name: hideDetailsLabel })
+      ).toBeInTheDocument();
+    }
+  );
 });

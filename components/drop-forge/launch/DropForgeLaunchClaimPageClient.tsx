@@ -39,8 +39,12 @@ export default function DropForgeLaunchClaimPageClient({
   const { requestAuth, setToast } = useAuth();
   const { contract: forgeMintingContract, chain: forgeMintingChain } =
     useDropForgeMintingConfig();
-  const { hasWallet, permissionsLoading, canAccessLaunchPage, isClaimsAdmin } =
-    useDropForgePermissions();
+  const {
+    hasWallet,
+    permissionsLoading,
+    canAccessLaunchPage,
+    canManageClaimActions,
+  } = useDropForgePermissions();
   const claimWrite = useWriteContract();
   const payArtistWrite = useSendTransaction();
   const waitClaimWrite = useWaitForTransactionReceipt({
@@ -105,7 +109,7 @@ export default function DropForgeLaunchClaimPageClient({
     hasWallet,
     permissionsLoading,
     canAccessLaunchPage,
-    isClaimsAdmin,
+    isClaimsAdmin: canManageClaimActions,
     manifoldClaim,
     onChainClaimFetching,
     state: launchClaimState,
@@ -211,7 +215,7 @@ export default function DropForgeLaunchClaimPageClient({
     setToast,
     hasWallet,
     canAccessLaunchPage,
-    isClaimsAdmin,
+    isClaimsAdmin: canManageClaimActions,
     isInitialized,
     manifoldClaim,
     claimWrite,

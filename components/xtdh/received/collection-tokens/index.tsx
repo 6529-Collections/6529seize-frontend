@@ -131,7 +131,7 @@ export function XtdhCollectionTokensPanel({
           interactionMode="static"
         />
       ) : (
-        <div className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300">
+        <div className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal">
           Collection summary unavailable.
         </div>
       )}
@@ -148,7 +148,7 @@ export function XtdhCollectionTokensPanel({
             onSelect={handleBackToTokens}
           />
           {!selectedGrant && (
-            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            <p className="tw-m-0 tw-text-sm tw-text-iron-300 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal">
               Explore the grants and grantors powering this token&apos;s xTDH.
             </p>
           )}

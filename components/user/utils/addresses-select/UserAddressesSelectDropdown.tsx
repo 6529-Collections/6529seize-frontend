@@ -13,12 +13,16 @@ type SelectedType = string | null;
 
 export default function UserAddressesSelectDropdown({
   wallets,
+  variant = "default",
   containerRef,
   onActiveAddress,
+  onAddressChange: onAddressChangeCallback,
 }: {
   readonly wallets: ApiWallet[];
+  readonly variant?: "default" | "filter";
   readonly containerRef?: RefObject<HTMLDivElement | null> | undefined;
   readonly onActiveAddress: (address: SelectedType) => void;
+  readonly onAddressChange?: (() => void) | undefined;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,6 +60,7 @@ export default function UserAddressesSelectDropdown({
   }, [activeAddress, onActiveAddress]);
 
   const onAddressChange = (address: string | null) => {
+    onAddressChangeCallback?.();
     // Robust clone of current params (works in tests/mocks)
     const params = new URLSearchParams(
       searchParams?.entries ? Array.from(searchParams.entries()) : []
@@ -91,6 +96,7 @@ export default function UserAddressesSelectDropdown({
       containerRef={containerRef}
       setSelected={onAddressChange}
       size="sm"
+      variant={variant}
       renderItemChildren={(item) =>
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />

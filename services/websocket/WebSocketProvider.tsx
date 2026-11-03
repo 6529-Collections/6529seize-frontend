@@ -11,13 +11,20 @@ import type {
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
-import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
+import {
+  setWebSocketMessageMetadata,
+  WebSocketStatus,
+  WEBSOCKET_RECOVERY_CAPABILITY,
+} from "./WebSocketTypes";
+import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
-import { getAuthJwt } from "../auth/auth.utils";
+import { ensureActiveSession } from "../auth/session-readiness";
+import { getAuthJwt, isAuthJwtUsable } from "../auth/auth.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
-const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
+const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds, before jitter
+const RECONNECT_JITTER_RATIO = 0.25; // +/-25% so reconnects do not synchronize
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
 const AUTHENTICATION_TIMEOUT_MS = 8000;
 const AUTHENTICATION_FAILED_CLOSE_CODE = 4008;
@@ -90,16 +97,18 @@ const createCredentialMarker = (credential: string): string => {
 };
 
 /**
- * Calculate delay for exponential backoff
+ * Calculate delay for exponential backoff with jitter
  */
 function calculateReconnectDelay(
   attempt: number,
   initialDelay: number,
   maxDelay: number
 ): number {
-  // Exponential backoff formula: initialDelay * 2^attempt (capped at maxDelay)
-  const delay = initialDelay * Math.pow(1.5, attempt);
-  return Math.min(delay, maxDelay);
+  // Exponential backoff formula: initialDelay * 1.5^attempt (capped at maxDelay)
+  const delay = Math.min(initialDelay * Math.pow(1.5, attempt), maxDelay);
+  // Jitter is applied after the cap so clients that saturate at the maximum
+  // delay still spread out instead of reconnecting together after a deploy.
+  return applyDelayJitter(delay, RECONNECT_JITTER_RATIO);
 }
 
 /**
@@ -127,6 +136,7 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const authenticationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
+  const connectionRequestRef = useRef(0);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
   const rejectedCredentialMarkerRef = useRef<string | null>(null);
 
@@ -247,6 +257,24 @@ export function WebSocketProvider({
    */
   const connect = useCallback(
     function connectSocket(token?: string) {
+      const connectionRequest = ++connectionRequestRef.current;
+      if (token && !isAuthJwtUsable(token)) {
+        const rejectedToken = token;
+        void ensureActiveSession()
+          .then((freshToken) => {
+            if (
+              connectionRequestRef.current === connectionRequest &&
+              freshToken &&
+              freshToken !== rejectedToken &&
+              isAuthJwtUsable(freshToken) &&
+              getAuthJwt() === freshToken
+            ) {
+              connectSocket(freshToken);
+            }
+          })
+          .catch(() => undefined);
+        return;
+      }
       const useMessageAuth = !!token;
       const credentialMarker = token ? createCredentialMarker(token) : null;
 
@@ -286,15 +314,18 @@ export function WebSocketProvider({
       // Update status to connecting
       setStatus(WebSocketStatus.CONNECTING);
 
-      // Build URL with optional token
-      let url = config.url;
-      if (token && !useMessageAuth) {
-        url += `?token=${encodeURIComponent(token)}`;
-      }
-
       try {
+        // Advertise reconnect safety on every connection, including anonymous sessions.
+        const url = new URL(config.url);
+        url.searchParams.set(
+          "recovery_capability",
+          WEBSOCKET_RECOVERY_CAPABILITY
+        );
+        if (token && !useMessageAuth) {
+          url.searchParams.set("token", token);
+        }
         // Create new WebSocket connection
-        const ws = new WebSocket(url);
+        const ws = new WebSocket(url.toString());
 
         // Set up event handlers
         ws.onopen = () => {
@@ -335,7 +366,7 @@ export function WebSocketProvider({
           handleMessage(event);
         };
 
-        ws.onclose = (event) => {
+        ws.onclose = () => {
           if (wsRef.current !== ws) {
             return;
           }
@@ -345,14 +376,14 @@ export function WebSocketProvider({
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
 
-          const shouldReconnect =
-            event.code !== 1000 && !isManualDisconnectRef.current;
+          // API Gateway may close a slow listener with code 1000. Only a local
+          // intentional disconnect should suppress normal authenticated recovery.
+          const shouldReconnect = !isManualDisconnectRef.current;
           const freshToken = shouldReconnect
             ? (getAuthJwt() ?? reconnectTokenRef.current)
             : undefined;
 
-          // Only attempt reconnect for unexpected closure (not code 1000)
-          // and if this wasn't a manual disconnect
+          // Reconnect server-initiated closures, including normal transport closes.
           if (shouldReconnect) {
             // Get fresh token before reconnecting
             if (freshToken) {
@@ -388,6 +419,7 @@ export function WebSocketProvider({
    * Disconnect from WebSocket server
    */
   const disconnect = useCallback(() => {
+    connectionRequestRef.current += 1;
     // Set flag to indicate this is intentional
     isManualDisconnectRef.current = true;
 
@@ -456,6 +488,7 @@ export function WebSocketProvider({
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      connectionRequestRef.current += 1;
       // Clear any pending reconnect
       clearReconnectTimer();
       clearAuthenticationTimer();

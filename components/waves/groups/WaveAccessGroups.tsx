@@ -5,12 +5,14 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 
 interface WaveAccessGroupsProps {
   readonly wave: ApiWave;
+  readonly includeCompetition?: boolean;
   readonly display?: "group" | "members" | undefined;
 }
 
 export default function WaveAccessGroups({
   wave,
   display = "group",
+  includeCompetition = true,
 }: WaveAccessGroupsProps) {
   const groups = (
     <>
@@ -20,7 +22,7 @@ export default function WaveAccessGroups({
         wave={wave}
         showMembersSummary={display === "members"}
       />
-      {wave.wave.type !== ApiWaveType.Chat && (
+      {includeCompetition && wave.wave.type !== ApiWaveType.Chat && (
         <>
           <WaveGroup
             scope={wave.participation.scope}

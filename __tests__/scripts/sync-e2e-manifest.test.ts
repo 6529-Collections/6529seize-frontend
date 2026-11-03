@@ -7,7 +7,7 @@ type Pack = {
   scriptKey: string;
   alias?: string;
   description: string;
-  safety: "local" | "readonly" | "sandbox";
+  safety: "local" | "readonly" | "sandbox" | "stateful";
   environments: string[];
   triggers: string[];
   env?: Record<string, string>;
@@ -44,7 +44,16 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(72);
+    // Independent sandbox packs can land together on the staging branch.
+    // Validate the complete checked-in inventory below instead of a fixed count.
+    expect(packs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scriptKey: "test:e2e:notifications-inbox-sandbox",
+          specs: ["tests/auth/notifications-inbox-sandbox.spec.ts"],
+        }),
+      ])
+    );
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -56,6 +65,123 @@ describe("E2E pack manifest", () => {
       )
     );
     expect(checkedInE2eScripts).toEqual(rendered);
+  });
+
+  it("runs wave creation on both web shells in its isolated PR sandbox lane", () => {
+    expect(
+      packs.find((pack) => pack.scriptKey === "test:e2e:wave-creation-sandbox")
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/social/create-wave-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_BASE_URL: "http://localhost:3298",
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-creation",
+      },
+    });
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain("if (waveCreationBrowserRequired)");
+    expect(workflow).toContain("if: matrix.lane == 'playwright-wave-creation'");
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:wave-creation-sandbox"
+    );
+  });
+
+  it("runs native competitions on both web shells in a dedicated PR sandbox lane", () => {
+    const native = packs.find(
+      (pack) => pack.scriptKey === "test:e2e:native-competition-sandbox"
+    );
+    expect(native).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: [
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-notification-settings-sandbox.spec.ts",
+        "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
+      ],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+      },
+    });
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain(
+      "plan.checks.playwright_native_competition?.required"
+    );
+    expect(workflow).toContain(
+      "if: matrix.lane == 'playwright-native-competition'"
+    );
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:native-competition-sandbox"
+    );
+  });
+
+  it("keeps the encrypted messages pack on loopback with its own ports and dist dir", () => {
+    const e2ee = packs.filter(
+      (pack) => pack.scriptKey === "test:e2e:e2ee-sandbox"
+    );
+    expect(e2ee).toHaveLength(1);
+    expect(e2ee[0]).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      specs: ["tests/e2ee"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      workers: 1,
+      env: {
+        PLAYWRIGHT_ENV: "local",
+        PLAYWRIGHT_E2EE_SANDBOX: "1",
+        USE_DEV_AUTH: "true",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3299",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
+        NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/composerSandboxServer.cjs",
+      },
+    });
+  });
+
+  it("isolates submission artwork from the complete competition pack", () => {
+    expect(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:submission-artwork-sandbox"
+      )
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/media/submission-artwork-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_AUTH_SANDBOX: "1",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+    });
+    const nativeSpec = fs.readFileSync(
+      path.join(ROOT, "tests/social/native-competition-sandbox.spec.ts"),
+      "utf8"
+    );
+    expect(nativeSpec).not.toContain("defineSubmissionArtworkPreviewTests");
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain(
+      "if: matrix.lane == 'playwright-submission-artwork'"
+    );
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:submission-artwork-sandbox"
+    );
   });
 
   it("keeps artwork documentation mutations in the local desktop and mobile sandbox", () => {
@@ -88,7 +214,7 @@ describe("E2E pack manifest", () => {
         pack.specs?.every((spec) => spec.startsWith("tests/museum/"))
     );
 
-    expect(museumOnlyPacks).toHaveLength(15);
+    expect(museumOnlyPacks).toHaveLength(18);
     expect(museumOnlyPacks.every((pack) => pack.changeScope === "museum")).toBe(
       true
     );
@@ -102,16 +228,19 @@ describe("E2E pack manifest", () => {
         "local:test:e2e:museum-data-architecture",
         "local:test:e2e:museum-institutional-practice",
         "local:test:e2e:museum-inside-system",
+        "local:test:e2e:museum-network-ia",
         "local:test:e2e:museum-rights",
         "production:test:e2e:production:museum-about",
         "production:test:e2e:production:museum-data-architecture",
         "production:test:e2e:production:museum-institutional-practice",
         "production:test:e2e:production:museum-inside-system",
+        "production:test:e2e:production:museum-network-ia",
         "production:test:e2e:production:museum-rights",
         "staging:test:e2e:staging:museum-about",
         "staging:test:e2e:staging:museum-data-architecture",
         "staging:test:e2e:staging:museum-institutional-practice",
         "staging:test:e2e:staging:museum-inside-system",
+        "staging:test:e2e:staging:museum-network-ia",
         "staging:test:e2e:staging:museum-rights",
       ].sort()
     );
@@ -179,22 +308,25 @@ describe("E2E pack manifest", () => {
   });
 
   it("makes deployed packs explicitly read-only and non-empty", () => {
-    const staging = packs.filter((pack) => pack.environments[0] === "staging");
+    // Opt-in stateful packs have their own contract (next test).
+    const staging = packs.filter(
+      (pack) => pack.environments[0] === "staging" && pack.safety !== "stateful"
+    );
     const production = packs.filter(
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(18);
+    expect(staging).toHaveLength(20);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(17);
-    expect(production).toHaveLength(17);
+    ).toHaveLength(19);
+    expect(production).toHaveLength(19);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
-    ).toHaveLength(11);
+    ).toHaveLength(12);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(16);
+    ).toHaveLength(18);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks
@@ -230,6 +362,58 @@ describe("E2E pack manifest", () => {
     }
   });
 
+  it("keeps the staging E2EE pack opt-in, single-worker and off every automatic lane", () => {
+    const stateful = packs.filter((pack) => pack.safety === "stateful");
+    expect(stateful).toEqual([
+      expect.objectContaining({
+        scriptKey: "test:e2e:staging:e2ee",
+        alias: "e2ee-staging",
+        environments: ["staging"],
+        triggers: ["manual"],
+        specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+        projects: ["web-desktop-chromium"],
+        workers: 1,
+        env: {
+          PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+          PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+          PLAYWRIGHT_ENV: "staging",
+          PLAYWRIGHT_READONLY: "0",
+          PLAYWRIGHT_E2EE_STAGING: "1",
+        },
+      }),
+    ]);
+    expect((stateful[0] as Pack & { traceOff?: boolean }).traceOff).toBe(true);
+
+    const misconfigured = clonePack(stateful[0]!);
+    misconfigured.triggers = ["post-deploy", "manual"];
+    misconfigured.workers = 2;
+    misconfigured.env = {
+      ...misconfigured.env,
+      PLAYWRIGHT_BASE_URL: "https://6529.io",
+    };
+    delete (misconfigured as Pack & { traceOff?: boolean }).traceOff;
+    expect(manifestTools.validateManifest([misconfigured])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "stateful packs must use only the manual trigger"
+        ),
+        expect.stringContaining("stateful packs must set workers to 1"),
+        expect.stringContaining("stateful packs must turn traces off"),
+        expect.stringContaining(
+          "stateful packs must set PLAYWRIGHT_BASE_URL=https://staging.6529.io"
+        ),
+      ])
+    );
+
+    const production = clonePack(stateful[0]!);
+    production.environments = ["production"];
+    expect(manifestTools.validateManifest([production])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("stateful packs must target staging"),
+      ])
+    );
+  });
+
   it("rejects unsafe production and ambiguous aliases", () => {
     const production = clonePack(
       packs.find((pack) => pack.environments[0] === "production") as Pack
@@ -254,8 +438,12 @@ describe("E2E pack manifest", () => {
       ])
     );
 
-    const first = clonePack(packs[0]!);
-    const second = clonePack(packs[1]!);
+    const first = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e") as Pack
+    );
+    const second = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e:all-projects") as Pack
+    );
     first.alias = "duplicate";
     second.alias = "duplicate";
     expect(manifestTools.validateManifest([first, second])).toEqual(

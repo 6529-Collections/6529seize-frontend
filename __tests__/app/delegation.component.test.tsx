@@ -21,6 +21,14 @@ jest.mock(
         Delegation Center
       </button>
       <span data-testid="address-query">{props.address_query}</span>
+      <button onClick={() => props.setAddressQuery("")}>Clear wallet</button>
+      <button
+        onClick={() =>
+          props.setAddressQuery("0x0000000000000000000000000000000000000529")
+        }
+      >
+        Check another wallet
+      </button>
     </>
   )
 );
@@ -65,7 +73,7 @@ describe("Delegation page component", () => {
     );
     fireEvent.click(screen.getByTestId("menu"));
     expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CHECKER}`
+      `/safe-collecting/${DelegationCenterSection.CHECKER}`
     );
   });
 
@@ -81,13 +89,11 @@ describe("Delegation page component", () => {
         />
       </AuthContext.Provider>
     );
-    replace.mockClear();
+    expect(replace).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByTestId("delegation-center-menu"));
 
-    expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CENTER}`
-    );
+    expect(push).toHaveBeenCalledWith("/safe-collecting");
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -104,6 +110,7 @@ describe("Delegation page component", () => {
       </AuthContext.Provider>
     );
     expect(screen.getByTestId("address-query")).toHaveTextContent(address);
+    expect(replace).not.toHaveBeenCalled();
 
     rerender(
       <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
@@ -116,6 +123,7 @@ describe("Delegation page component", () => {
       </AuthContext.Provider>
     );
     expect(screen.getByTestId("address-query")).toHaveTextContent("");
+    replace.mockClear();
 
     rerender(
       <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>
@@ -128,5 +136,76 @@ describe("Delegation page component", () => {
       </AuthContext.Provider>
     );
     expect(screen.getByTestId("address-query")).toHaveTextContent(address);
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("preserves forwarded queries and section anchors on the Safe Collecting hub", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/safe-collecting?utm_source=old-link#safe-setup"
+    );
+    render(
+      <DelegationPage
+        section={DelegationCenterSection.CENTER}
+        addressQuery=""
+        collectionQuery=""
+        useCaseQuery={0}
+      />
+    );
+    expect(replace).not.toHaveBeenCalled();
+    expect(window.location.search).toBe("?utm_source=old-link");
+    expect(window.location.hash).toBe("#safe-setup");
+    window.history.replaceState({}, "", "/");
+  });
+
+  it.each(["", "name.eth", "0x0000000000000000000000000000000000000529"])(
+    "does not replay server metadata on wallet checker mount: %s",
+    (address) => {
+      render(
+        <React.StrictMode>
+          <DelegationPage
+            section={DelegationCenterSection.CHECKER}
+            addressQuery={address}
+            collectionQuery=""
+            useCaseQuery={0}
+          />
+        </React.StrictMode>
+      );
+      expect(replace).not.toHaveBeenCalled();
+    }
+  );
+
+  it("navigates for wallet edits but does not replay updated server props", () => {
+    const props = {
+      section: DelegationCenterSection.CHECKER,
+      addressQuery: "0x6feea4b5ee60ad140a0d7b0df2d7903ae865456e",
+      collectionQuery: "",
+      useCaseQuery: 0,
+    };
+    const { rerender } = render(<DelegationPage {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Clear wallet" }));
+    expect(replace).toHaveBeenCalledTimes(1);
+    expect(replace).toHaveBeenLastCalledWith(
+      "/safe-collecting/wallet-checker",
+      {
+        scroll: false,
+      }
+    );
+
+    rerender(<DelegationPage {...props} addressQuery="" />);
+    expect(replace).toHaveBeenCalledTimes(1);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Check another wallet" })
+    );
+    const nextAddress = "0x0000000000000000000000000000000000000529";
+    expect(replace).toHaveBeenCalledTimes(2);
+    expect(replace).toHaveBeenLastCalledWith(
+      `/safe-collecting/wallet-checker?address=${nextAddress}`,
+      { scroll: false }
+    );
+
+    rerender(<DelegationPage {...props} addressQuery={nextAddress} />);
+    expect(replace).toHaveBeenCalledTimes(2);
   });
 });

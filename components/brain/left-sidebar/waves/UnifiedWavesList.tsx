@@ -1,4 +1,7 @@
 "use client";
+import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
+import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
@@ -11,16 +14,22 @@ import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthResolving } from "@/components/auth/authResolution";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import { JoinedWavesListRecovery } from "./JoinedWavesListRecovery";
 
 interface UnifiedWavesListProps {
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly waves: MinimalWave[];
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
+  readonly isPinnedWavesLoading?: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -28,17 +37,33 @@ interface UnifiedWavesListProps {
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   waves,
+  hasLoadingError = false,
+  retryLoading,
   fetchNextPage,
   hasNextPage,
   isFetching,
+  isPinnedWavesLoading = false,
   isFetchingNextPage,
   onHover,
   scrollContainerRef,
 }) => {
   const { isApp } = useDeviceInfo();
   const { openWave } = useCreateModalState();
+  const locale = useBrowserLocale();
+  const [savedCollection] = useWaveSidebarCollection();
+  const { canUseCollections, key } = useWaveDiscoveryViewer();
+  const [search] = useWaveSidebarSearch(key ?? "guest");
+  const isSearching = Boolean(search.trim());
+  const collection = canUseCollections ? savedCollection : "all";
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
+  // This list already consumes the wallet identity through discovery. Keep
+  // its empty state pending until wallet and profile restoration settle.
+  const collectionFetching =
+    isFetching ||
+    isAuthResolving(connectionState, fetchingProfile) ||
+    (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
-  const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
     following && !!connectedProfile?.handle && !activeProfileProxy;
   // Refs to the scroll container and sentinel
@@ -55,12 +80,21 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage, isFetching]);
 
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
     const sentinel = listRef.current?.sentinelRef.current;
-    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
+    if (
+      !sentinel ||
+      hasLoadingError ||
+      isFetching ||
+      isSearching ||
+      collection === "pinned" ||
+      !hasNextPage ||
+      isFetchingNextPage
+    )
+      return;
 
     const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -82,15 +116,22 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     obs.observe(sentinel);
 
     return () => obs.disconnect();
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [
+    collection,
+    isSearching,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    hasLoadingError,
+  ]);
 
   return (
     <div className="tw-mb-4">
       <div
         className={
           isApp
-            ? "tw-h-full tw-bg-transparent tw-py-1"
-            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+            ? "tw-h-full tw-bg-transparent tw-py-1 [--wave-sidebar-background:#0d0d0e]"
+            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 [--wave-sidebar-background:theme(colors.iron.950)]"
         }
       >
         {!isApp && (
@@ -109,6 +150,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           {/* Unified Waves List */}
           <UnifiedWavesListWaves
             ref={listRef}
+            isLoading={collectionFetching || isFetchingNextPage}
             waves={waves}
             onHover={onHover}
             scrollContainerRef={scrollContainerRef}
@@ -116,21 +158,34 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader
-            isFetching={isFetching && waves.length === 0}
-            isFetchingNextPage={isFetchingNextPage}
+            isFetching={
+              !isSearching && collectionFetching && waves.length === 0
+            }
+            isFetchingNextPage={!isSearching && isFetchingNextPage}
           />
 
           {/* Empty state */}
-          <UnifiedWavesListEmpty
-            sortedWaves={waves}
-            isFetching={isFetching}
-            isFetchingNextPage={isFetchingNextPage}
-            emptyMessage={
-              isJoinedFilterActive
-                ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
-                : undefined
-            }
-          />
+          {!isSearching && collection === "joined" && (
+            <JoinedWavesListRecovery
+              hasError={hasLoadingError}
+              hasNextPage={hasNextPage === true}
+              isFetching={collectionFetching || isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+              onRetry={retryLoading ?? fetchNextPage}
+            />
+          )}
+          {!isSearching && !hasLoadingError && (
+            <UnifiedWavesListEmpty
+              sortedWaves={waves}
+              isFetching={collectionFetching}
+              isFetchingNextPage={isFetchingNextPage}
+              emptyMessage={
+                isJoinedFilterActive
+                  ? t(locale, "waves.sidebar.joinedEmptyMessage")
+                  : undefined
+              }
+            />
+          )}
         </div>
       </div>
     </div>

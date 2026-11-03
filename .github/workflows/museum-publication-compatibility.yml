@@ -220,11 +220,17 @@ jobs:
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ needs.strict-adapter.outputs.publication_commit }}
         run: |
           set -euo pipefail
-          ./bin/6529 run e2e:packs -- \
-            --env production \
-            --trigger cron \
-            --pack museum-institutional-practice \
-            --artifact-root museum-release-baseline-artifacts
+          # Run both cron Museum packs; report a failure only after both finish.
+          sweep_status=0
+          for pack in museum-institutional-practice museum-network-ia; do
+            ./bin/6529 run e2e:packs -- \
+              --env production \
+              --trigger cron \
+              --pack "$pack" \
+              --artifact-root "museum-release-baseline-artifacts/$pack" ||
+              sweep_status=1
+          done
+          exit "$sweep_status"
       - name: Upload broad-sweep evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

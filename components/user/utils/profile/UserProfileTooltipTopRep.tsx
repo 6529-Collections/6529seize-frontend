@@ -27,10 +27,14 @@ export default function UserProfileTooltipTopRep({
     if (ratingStats.length === 0) return [];
 
     return [...ratingStats]
-      .sort(
-        (a, b) =>
-          b.rating - a.rating || b.contributor_count - a.contributor_count
-      )
+      .sort((a, b) => {
+        const magnitudeDifference = Math.abs(b.rating) - Math.abs(a.rating);
+        if (magnitudeDifference !== 0) return magnitudeDifference;
+
+        // Keep category ties consistent with the profile API's binary ordering.
+        if (a.category < b.category) return -1;
+        return a.category > b.category ? 1 : 0;
+      })
       .slice(0, 3);
   }, [repRates]);
 

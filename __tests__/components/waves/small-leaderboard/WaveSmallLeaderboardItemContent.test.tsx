@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveSmallLeaderboardItemContent } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
+import ProposalCardContextLabel from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 jest.mock("@/components/waves/drops/WaveDropPartContentMedias", () => () => (
   <div data-testid="medias" />
@@ -11,7 +12,10 @@ jest.mock(
   () => (props: any) => <div data-testid="proposal-card">{props.drop.id}</div>
 );
 const waveDropPartContentMarkdownMock = jest.fn(() => (
-  <div data-testid="markdown" />
+  <>
+    <ProposalCardContextLabel />
+    <div data-testid="markdown" />
+  </>
 ));
 jest.mock("@/components/waves/drops/WaveDropPartContentMarkdown", () => ({
   __esModule: true,
@@ -103,6 +107,7 @@ describe("WaveSmallLeaderboardItemContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+    expect(screen.queryByTestId("proposal-card-context-label")).toBeNull();
   });
 
   it("uses the shared proposal card and retains the existing open action", async () => {

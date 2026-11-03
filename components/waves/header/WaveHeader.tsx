@@ -2,7 +2,6 @@
 
 import { useContext, useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getTimeAgo } from "@/helpers/Helpers";
 import WaveHeaderFollow, { WaveFollowBtnSize } from "./WaveHeaderFollow";
 import { AuthContext } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
@@ -13,15 +12,16 @@ import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
-import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
+import WaveAuthor from "../specs/WaveAuthor";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
 import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
 import WaveHeaderShareButton from "./WaveHeaderShareButton";
+import LocalDateTime from "@/components/utils/time/LocalDateTime";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate, formatInteger } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
 const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
@@ -49,7 +49,6 @@ export default function WaveHeader({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const seizeSettings = useSeizeSettingsOptional();
   const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
-  const created = getTimeAgo(wave.created_at);
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
@@ -87,10 +86,6 @@ export default function WaveHeader({
   const showPinAction = !isSubwave;
   const showTrustStats = !isDirectMessage;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-3.5" : "";
-  const createdDate = formatDate(
-    WAVE_HEADER_LOCALE,
-    Time.millis(wave.created_at).toDate()
-  );
   const postsCount = formatInteger(
     WAVE_HEADER_LOCALE,
     wave.metrics.drops_count
@@ -199,13 +194,17 @@ export default function WaveHeader({
           )}
         </div>
 
-        <div className="tw-mt-1 tw-text-sm">
-          <span className="tw-font-normal tw-text-iron-500">
-            {t(WAVE_HEADER_LOCALE, "waves.header.createdLabel", {
-              relativeTime: created,
-              date: createdDate,
-            })}
+        <div className="tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm">
+          <WaveAuthor wave={wave} />
+          <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-500">
+            ·
           </span>
+          <LocalDateTime
+            data-testid="wave-creation-date"
+            value={wave.created_at}
+            locale={WAVE_HEADER_LOCALE}
+            className="tw-shrink-0 tw-text-iron-500"
+          />
         </div>
 
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">

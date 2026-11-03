@@ -8,9 +8,12 @@ the pull request and staging deployment, not by the roadmap phase number.
 ## Approved Baseline
 
 The architectural defaults in the [decision register](./decision-register.md)
-are approved as the implementation baseline. Two product policies are
-deliberately deferred with named owners and later-phase gates; neither changes
-the Phase 1 additive schema or read-API estimate.
+are the implementation baseline, amended on 2026-10-01 to reflect shipped
+product decisions and the newly approved, unimplemented default-competition
+policy. D-05/D-17 are now resolved. The original inventories and machine-readable
+GET snapshots remain historical evidence, not a current feature inventory.
+See the [production assessment](../native-delivery/production-status-2026-10-01.md)
+for current implementation and open acceptance gates.
 
 The permanent compatibility boundary is every externally reachable GET route
 mounted at this baseline. The machine-readable census contains 296 runtime

@@ -8,6 +8,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import { ProposalCardContextLabelVisibilityProvider } from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -49,21 +50,23 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   };
 
   return (
-    <WaveDropContent
-      drop={{
-        type: DropSize.FULL,
-        ...winner.drop,
-        stableKey: winner.drop.id,
-        stableHash: winner.drop.id,
-      }}
-      activePartIndex={activePartIndex}
-      setActivePartIndex={setActivePartIndex}
-      onDropContentClick={onDropContentClick}
-      onLongPress={() => {}}
-      onQuoteClick={() => {}}
-      setLongPressTriggered={() => {}}
-      isCompetitionDrop={isCompetitionDrop}
-      contentPresentation={contentPresentation}
-    />
+    <ProposalCardContextLabelVisibilityProvider visible={false}>
+      <WaveDropContent
+        drop={{
+          type: DropSize.FULL,
+          ...winner.drop,
+          stableKey: winner.drop.id,
+          stableHash: winner.drop.id,
+        }}
+        activePartIndex={activePartIndex}
+        setActivePartIndex={setActivePartIndex}
+        onDropContentClick={onDropContentClick}
+        onLongPress={() => {}}
+        onQuoteClick={() => {}}
+        setLongPressTriggered={() => {}}
+        isCompetitionDrop={isCompetitionDrop}
+        contentPresentation={contentPresentation}
+      />
+    </ProposalCardContextLabelVisibilityProvider>
   );
 };

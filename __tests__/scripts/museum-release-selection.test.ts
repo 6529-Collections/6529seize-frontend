@@ -6,6 +6,7 @@ import path from "node:path";
 const selection = require("../../scripts/museum-release-selection.cjs") as {
   CONTRACT: string;
   PACKS: Record<string, readonly string[]>;
+  fileEffect: (file: string) => { effect: string; packs?: string[] };
   packSelection: (
     classification: { tier: string },
     environment: "pr" | "staging" | "production",
@@ -24,6 +25,12 @@ const selection = require("../../scripts/museum-release-selection.cjs") as {
       effective_mode: string;
       hold_state: string;
     };
+    affected_pages: {
+      affected_surfaces: string[];
+      analysis_error?: string;
+      file_effects: Array<{ file: string; effect: string; reason: string }>;
+    } | null;
+    browser_scope: string;
     classification: { tier: string };
     contract: string;
     selected_packs: string[];
@@ -33,6 +40,17 @@ const selection = require("../../scripts/museum-release-selection.cjs") as {
   };
   verifySelectionDigest: (selection: unknown) => boolean;
 };
+
+const manifestMuseumPacks = (
+  require("../../tests/packs.manifest.cjs") as {
+    PACKS: Array<{
+      alias?: string;
+      changeScope?: string;
+      environments: string[];
+      scriptKey: string;
+    }>;
+  }
+).PACKS.filter((pack) => pack.changeScope === "museum");
 
 const shadowEvidence = JSON.parse(
   fs.readFileSync(
@@ -50,6 +68,8 @@ const shadowEvidence = JSON.parse(
     head_sha: string;
     expected_tier: string;
     expected_pr_packs: string[];
+    expected_pr_browser_scope: string;
+    expected_staging_packs: string[];
   }>;
 };
 
@@ -136,13 +156,65 @@ describe("Museum release selection", () => {
     }
   });
 
-  it.each(["P1", "P2", "P3"])("retains every Museum pack for %s", (tier) => {
-    const result = selection.packSelection({ tier }, "production", {
-      effective_mode: "tiered",
-    });
+  it.each(["P1", "P2", "P3"])(
+    "fails closed to every Museum pack for %s without an affected-page analysis",
+    (tier) => {
+      const result = selection.packSelection({ tier }, "production", {
+        effective_mode: "tiered",
+      });
 
-    expect(result.selected_packs).toEqual(selection.PACKS["production"]);
-    expect(result.static_scope).toMatch(/affected-plus-broad|full/u);
+      expect(result.selected_packs).toEqual(selection.PACKS["production"]);
+      expect(result.static_scope).toBe("full");
+    }
+  );
+
+  it("keeps Network IA as the PR gate and a deployed pack", () => {
+    expect(selection.PACKS["pr"]).not.toContain("test:e2e:museum-network-ia");
+    expect(selection.PACKS["staging"]).toContain("museum-network-ia");
+    expect(selection.PACKS["production"]).toContain("museum-network-ia");
+  });
+
+  // Deployed E2E workflows validate selections against the deployed manifest,
+  // so the selector must choose from exactly the packs that manifest defines.
+  it.each(["staging", "production"])(
+    "selects from exactly the %s Museum packs in the manifest",
+    (environment) => {
+      const manifestAliases = manifestMuseumPacks
+        .filter((pack) => pack.environments.includes(environment))
+        .map((pack) => pack.alias);
+      expect([...(selection.PACKS[environment] ?? [])].sort()).toEqual(
+        manifestAliases.sort()
+      );
+    }
+  );
+
+  it("selects from exactly the local Museum packs apart from the PR gate", () => {
+    const localScripts = manifestMuseumPacks
+      .filter((pack) => pack.environments.includes("local"))
+      .map((pack) => pack.scriptKey);
+    expect(
+      [...(selection.PACKS["pr"] ?? []), "test:e2e:museum-network-ia"].sort()
+    ).toEqual(localScripts.sort());
+  });
+
+  it.each([
+    ["__tests__/components/museum/MuseumShell.test.tsx", "none"],
+    [".github/workflows/deploy-staging.yml", "none"],
+    ["app/about/page.tsx", "none"],
+    [".github/workflows/app-pr-ci.yml", "gate"],
+    ["pnpm-lock.yaml", "gate"],
+    ["scripts/museum-release-selection.cjs", "all"],
+    ["ops/testing-strategy/museum-surface-registry.v1.json", "all"],
+    ["tests/packs.manifest.cjs", "all"],
+    ["tests/museum/support-fixture.ts", "all"],
+    ["lib/museum/publication/load.ts", "all"],
+    ["components/museum/MuseumShell.tsx", "all"],
+    ["tests/museum/rights-readonly.spec.ts", "packs"],
+    ["components/museum/MuseumObjectMetadata.ts", "surfaces"],
+    ["i18n/messages/museum.en-US.json", "surfaces"],
+    ["public/museum/research/editorial/inside-system.svg", "surfaces"],
+  ])("classifies %s as a %s selection effect", (file, effect) => {
+    expect(selection.fileEffect(file).effect).toBe(effect);
   });
 
   it("rejects an unvalidated environment at the exported pack boundary", () => {
@@ -231,7 +303,7 @@ describe("Museum release selection", () => {
 
   it("keeps historical shadows exact and never claims a release-count threshold", () => {
     expect(shadowEvidence.contract).toBe("museum-release-shadow-evidence-v1");
-    expect(shadowEvidence.fixtures).toHaveLength(3);
+    expect(shadowEvidence.fixtures).toHaveLength(5);
 
     for (const fixture of shadowEvidence.fixtures) {
       const result = selection.selectMuseumRelease({
@@ -245,6 +317,138 @@ describe("Museum release selection", () => {
 
       expect(result.classification.tier).toBe(fixture.expected_tier);
       expect(result.selected_packs).toEqual(fixture.expected_pr_packs);
+      expect(result.browser_scope).toBe(fixture.expected_pr_browser_scope);
+
+      const staging = selection.selectMuseumRelease({
+        activationMode: "tiered",
+        base: fixture.base_sha,
+        environment: "staging",
+        head: fixture.head_sha,
+        holdState: "clear",
+        root: process.cwd(),
+      });
+      expect(staging.selected_packs).toEqual(fixture.expected_staging_packs);
     }
+  });
+
+  describe("affected-page selection on synthetic ranges", () => {
+    function selectRange(
+      files: Record<string, string>,
+      environment: "pr" | "staging",
+      baseFiles: Record<string, string> = {}
+    ) {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-affected-"));
+      try {
+        execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+        execFileSync("git", ["config", "user.name", "Museum test"], {
+          cwd: root,
+        });
+        execFileSync(
+          "git",
+          ["config", "user.email", "museum@example.invalid"],
+          { cwd: root }
+        );
+        write(root, "README.md", "base\n");
+        for (const [file, source] of Object.entries(baseFiles)) {
+          write(root, file, source);
+        }
+        const base = commit(root, "base");
+        for (const [file, source] of Object.entries(files)) {
+          write(root, file, source);
+        }
+        const head = commit(root, "head");
+        return selection.selectMuseumRelease({
+          activationMode: "tiered",
+          base,
+          environment,
+          head,
+          holdState: "clear",
+          root,
+        });
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+
+    it("skips browser coverage for Museum unit tests and unrelated workflows", () => {
+      const result = selectRange(
+        {
+          "__tests__/components/museum/MuseumShell.test.tsx": "it.todo('x');\n",
+          ".github/workflows/deploy-staging.yml": "name: x\n",
+        },
+        "pr"
+      );
+      expect(result.browser_scope).toBe("none");
+      expect(result.selected_packs).toEqual([]);
+    });
+
+    it("runs only the Network IA gate for dependency changes", () => {
+      const files = { "package.json": "{}\n" };
+      const pr = selectRange(files, "pr");
+      expect(pr.browser_scope).toBe("gate-only");
+      expect(pr.selected_packs).toEqual([]);
+      expect(selectRange(files, "staging").selected_packs).toEqual([
+        "museum-network-ia",
+      ]);
+    });
+
+    it("runs the changed spec's pack for a Museum spec edit", () => {
+      const result = selectRange(
+        { "tests/museum/rights-readonly.spec.ts": "test.todo('x');\n" },
+        "pr"
+      );
+      expect(result.browser_scope).toBe("affected-pages");
+      expect(result.selected_packs).toEqual(["test:e2e:museum-rights"]);
+    });
+
+    it("runs every pack when the selection machinery changes", () => {
+      const result = selectRange(
+        { "scripts/museum-release-selection.cjs": "// changed\n" },
+        "pr"
+      );
+      expect(result.browser_scope).toBe("all-museum-packs");
+      expect(result.selected_packs).toEqual(selection.PACKS["pr"]);
+    });
+
+    it("fails closed to every pack when a page change cannot be mapped", () => {
+      const result = selectRange(
+        { "lib/museum/unmapped.ts": "export const value = 1;\n" },
+        "staging"
+      );
+      expect(result.selected_packs).toEqual(selection.PACKS["staging"]);
+      expect(result.affected_pages?.analysis_error).toEqual(expect.any(String));
+    });
+
+    it("matches copy keys only as exact literals", () => {
+      const messages = JSON.stringify({ "museum.network.home": "Home" });
+      const prefixOnly = selectRange(
+        { "i18n/messages/museum.en-US.json": messages },
+        "pr",
+        {
+          "components/museum/MuseumHome.tsx":
+            'export const key = "museum.network.homeTitle";\n',
+        }
+      );
+      const effect = prefixOnly.affected_pages?.file_effects.find(
+        (entry) => entry.file === "i18n/messages/museum.en-US.json"
+      );
+      expect(effect).toMatchObject({
+        effect: "all",
+        reason: "The changed Museum file could not be mapped to a page.",
+      });
+      expect(prefixOnly.affected_pages?.analysis_error).toBeUndefined();
+
+      // An exact literal is found and handed to the surface registry, which
+      // this synthetic repository does not have.
+      const exact = selectRange(
+        { "i18n/messages/museum.en-US.json": messages },
+        "pr",
+        {
+          "components/museum/MuseumHome.tsx":
+            'export const key = "museum.network.home";\n',
+        }
+      );
+      expect(exact.affected_pages?.analysis_error).toEqual(expect.any(String));
+    });
   });
 });

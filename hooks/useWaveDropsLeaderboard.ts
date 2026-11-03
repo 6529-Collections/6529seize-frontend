@@ -31,10 +31,13 @@ export enum WaveDropsLeaderboardSort {
 }
 
 interface UseWaveDropsLeaderboardProps {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly waveId: string;
+  readonly pageSize?: number | undefined;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly enabled?: boolean | undefined;
   readonly maxPages?: number | undefined;
+  readonly retainOnUnmount?: boolean | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -60,17 +63,20 @@ interface CanonicalPriceFilters {
 }
 
 interface LeaderboardQueryKeyInput {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly waveId: string;
+  readonly pageSize: number;
   readonly sort: WaveDropsLeaderboardSort;
   readonly sortDirection: "ASC" | "DESC" | undefined;
   readonly maxPages: number | undefined;
   readonly priceFilters: CanonicalPriceFilters;
 }
 
-interface LeaderboardParamsInput
-  extends Omit<LeaderboardQueryKeyInput, "maxPages"> {
+interface LeaderboardParamsInput extends Omit<
+  LeaderboardQueryKeyInput,
+  "maxPages"
+> {
   readonly pageParam: number | null;
-  readonly pageSize: number;
 }
 
 interface FetchLeaderboardPageInput extends LeaderboardParamsInput {
@@ -129,7 +135,9 @@ const getCanonicalPriceFilters = ({
 };
 
 const buildLeaderboardQueryKey = ({
+  additionalActionOnly,
   waveId,
+  pageSize,
   sort,
   sortDirection,
   maxPages,
@@ -139,7 +147,8 @@ const buildLeaderboardQueryKey = ({
     QueryKey.DROPS_LEADERBOARD,
     {
       waveId,
-      page_size: WAVE_DROPS_PARAMS.limit,
+      ...(additionalActionOnly ? { is_additional_action_promised: true } : {}),
+      page_size: pageSize,
       sort,
       sort_direction: sortDirection,
       page_window: maxPages ?? null,
@@ -150,6 +159,7 @@ const buildLeaderboardQueryKey = ({
   ] as const;
 
 const buildLeaderboardParams = ({
+  additionalActionOnly,
   pageParam,
   pageSize,
   sort,
@@ -157,6 +167,7 @@ const buildLeaderboardParams = ({
   priceFilters,
 }: LeaderboardParamsInput): Record<string, string> => {
   const params: Record<string, string> = {
+    ...(additionalActionOnly ? { is_additional_action_promised: "true" } : {}),
     page_size: pageSize.toString(),
     sort,
   };
@@ -181,6 +192,7 @@ const buildLeaderboardParams = ({
 };
 
 const fetchLeaderboardPage = ({
+  additionalActionOnly,
   waveId,
   pageParam,
   pageSize,
@@ -192,6 +204,7 @@ const fetchLeaderboardPage = ({
   fetchWaveLeaderboardV2({
     waveId,
     params: buildLeaderboardParams({
+      additionalActionOnly,
       waveId,
       pageParam,
       pageSize,
@@ -229,9 +242,7 @@ const getVisiblePageDrops = (
   sort: WaveDropsLeaderboardSort
 ) =>
   sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE
-    ? page.drops.filter(
-        (drop) => drop.context_profile_context?.rating !== 0
-      )
+    ? page.drops.filter((drop) => drop.context_profile_context?.rating !== 0)
     : page.drops;
 
 interface VisibleLeaderboardPage {
@@ -295,16 +306,23 @@ const useRemoveDropsQueryOnUnmount = ({
     return () => {
       queryClient.removeQueries({
         queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+        // Other mounted views can share this wave's cache and in-flight requests.
+        predicate: (query) =>
+          query.getObserversCount() === 0 &&
+          query.meta?.["retainOnUnmount"] !== true,
       });
     };
   }, [waveId, queryClient]);
 };
 
 export function useWaveDropsLeaderboard({
+  additionalActionOnly = false,
   waveId,
+  pageSize = WAVE_DROPS_PARAMS.limit,
   sort = WaveDropsLeaderboardSort.RANK,
   enabled = true,
   maxPages,
+  retainOnUnmount = false,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -322,13 +340,23 @@ export function useWaveDropsLeaderboard({
   const queryKey = useMemo(
     () =>
       buildLeaderboardQueryKey({
+        additionalActionOnly,
         waveId,
+        pageSize,
         sort,
         sortDirection,
         maxPages,
         priceFilters: canonicalPriceFilters,
       }),
-    [canonicalPriceFilters, maxPages, sort, sortDirection, waveId]
+    [
+      additionalActionOnly,
+      canonicalPriceFilters,
+      maxPages,
+      pageSize,
+      sort,
+      sortDirection,
+      waveId,
+    ]
   );
 
   const {
@@ -354,9 +382,10 @@ export function useWaveDropsLeaderboard({
       readonly signal?: AbortSignal | undefined;
     }) =>
       fetchLeaderboardPage({
+        additionalActionOnly,
         waveId,
         pageParam,
-        pageSize: WAVE_DROPS_PARAMS.limit,
+        pageSize,
         sort,
         sortDirection,
         priceFilters: canonicalPriceFilters,
@@ -369,6 +398,8 @@ export function useWaveDropsLeaderboard({
     ...(maxPages === undefined ? {} : { maxPages }),
     enabled: isQueryEnabled,
     staleTime: 60000,
+    meta: { retainOnUnmount },
+    refetchOnWindowFocus: retainOnUnmount,
     ...getDefaultQueryRetry(),
   });
 
@@ -412,7 +443,7 @@ export function useWaveDropsLeaderboard({
     isError,
     isFetchNextPageError,
     isFetchPreviousPageError,
-    isFetching: isQueryEnabled && (isFetching || !hasInitialized),
+    isFetching: isQueryEnabled && (isFetching || (!hasInitialized && !isError)),
     isFetchingNextPage,
     isFetchingPreviousPage,
     refetch,

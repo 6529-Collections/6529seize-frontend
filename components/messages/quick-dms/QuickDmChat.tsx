@@ -25,6 +25,7 @@ import {
   getFormattedWaveName,
   getQuickDmAvatarSource,
 } from "./QuickDirectMessagesUtils";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 
 interface QuickDmChatProps {
   readonly hasUnreadOutsideCurrentChat: boolean;
@@ -116,6 +117,7 @@ export const QuickDmChat = ({
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_reply: getWaveReplyEligibility(wave.chat),
       authenticated_user_eligible_to_vote:
         wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_participate:

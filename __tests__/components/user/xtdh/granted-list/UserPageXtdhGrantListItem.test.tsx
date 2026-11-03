@@ -128,6 +128,11 @@ describe("UserPageXtdhGrantListItem", () => {
 
     // Should show "Last grant"
     expect(screen.getByText("Last grant")).toBeInTheDocument();
+    // The last xTDH run that credits the grant: 00:00 UTC on valid_to's date.
+    expect(screen.getByText("Dec 4, 2025, 00:00 UTC")).toHaveAttribute(
+      "dateTime",
+      "2025-12-04T00:00:00.000Z"
+    );
   });
 });
 

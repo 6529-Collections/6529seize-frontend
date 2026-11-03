@@ -2,6 +2,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getWaveChatRepliesSettings } from "@/helpers/waves/wave-chat-replies.helpers";
 import {
   getWaveCustomRulesFromMetadata,
   getWaveOutcomeVisibilityFromMetadata,
@@ -323,6 +324,7 @@ const getWaveAutomaticSections = (
       getChatWaveSection({
         linksDisabled: context.wave.chat.links_disabled,
         slowModeCooldownMs: context.wave.chat.slow_mode_cooldown_ms,
+        replies: getWaveChatRepliesSettings(context.wave.chat),
       })
     );
     return sections;

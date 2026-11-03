@@ -1,4 +1,4 @@
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { expect, test, waitForRouteReady } from "../testHelpers";
 import { installImageArtworkSandbox } from "../support/videoArtworkSandbox";
 
@@ -42,7 +42,130 @@ export async function expectContainedImage(image: Locator) {
   expect(Math.abs(geometry.y)).toBeLessThanOrEqual(2);
 }
 
+export async function expectMemeArtworkScrolling(page: Page) {
+  const column = page.getByTestId("meme-artwork-column");
+  const scrolling = await column.evaluate(async (element: HTMLElement) => {
+    const details = element.nextElementSibling as HTMLElement;
+    const originalStyle = details.getAttribute("style");
+    const scrollTo = async (top: number) => {
+      window.scrollTo({ top, behavior: "instant" });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+    };
+    try {
+      await scrollTo(0);
+      // Keep a deterministic scroll range when market data changes height.
+      details.style.minHeight = `${element.offsetHeight + 400}px`;
+      const start = element.getBoundingClientRect().top;
+      await scrollTo(start + 48);
+      const firstTop = element.getBoundingClientRect().top;
+      await scrollTo(start + 128);
+      const secondTop = element.getBoundingClientRect().top;
+      const grid = element.parentElement!;
+      await scrollTo(grid.getBoundingClientRect().bottom + window.scrollY - 50);
+      const end = element.getBoundingClientRect();
+      return {
+        desktop: window.matchMedia("(min-width: 1024px)").matches,
+        position: getComputedStyle(element).position,
+        firstTop,
+        secondTop,
+        endTop: end.top,
+        bottomGap: grid.getBoundingClientRect().bottom - end.bottom,
+      };
+    } finally {
+      if (originalStyle === null) details.removeAttribute("style");
+      else details.setAttribute("style", originalStyle);
+      await scrollTo(0);
+    }
+  });
+  if (scrolling.desktop) {
+    expect(scrolling.position).toBe("sticky");
+    expect(Math.abs(scrolling.firstTop - 24)).toBeLessThanOrEqual(2);
+    expect(Math.abs(scrolling.secondTop - 24)).toBeLessThanOrEqual(2);
+  } else {
+    expect(scrolling.position).toBe("relative");
+    expect(
+      Math.abs(scrolling.secondTop - scrolling.firstTop + 80)
+    ).toBeLessThanOrEqual(2);
+  }
+  expect(scrolling.endTop).toBeLessThan(24);
+  expect(scrolling.bottomGap).toBeGreaterThanOrEqual(-2);
+}
+
 export function defineNftImageLayoutTests() {
+  for (const width of [390, 1023]) {
+    test(`homepage image uses natural height without gaps at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/");
+      await waitForRouteReady(page);
+      const column = page
+        .getByText(/^(Latest Drop|Next Drop)$/)
+        .locator("..")
+        .locator("[data-home-artwork-column]");
+      await expect(column).toBeVisible();
+      await expect(column).toHaveAttribute(
+        "data-home-artwork-is-image",
+        /^(true|false)$/
+      );
+      test.skip(
+        (await column.getAttribute("data-home-artwork-is-image")) === "false",
+        "Current homepage media data identifies a non-image drop"
+      );
+      const image = column
+        .getByRole("img")
+        .locator("xpath=self::*[ancestor::*[@data-artwork-image-frame]]")
+        .first();
+      await expect(image).toBeVisible();
+      await expect(image).toHaveJSProperty("tagName", "IMG");
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      const layout = await image.evaluate((element: HTMLImageElement) => {
+        const column = element.closest("[data-home-artwork-column]");
+        if (!column) {
+          throw new Error("Homepage image is missing its artwork column");
+        }
+        const detailsElement = column.nextElementSibling;
+        if (!detailsElement) {
+          throw new Error(
+            "Homepage artwork column is missing its details sibling"
+          );
+        }
+        const artwork = column.getBoundingClientRect();
+        const bounds = element.getBoundingClientRect();
+        const details = detailsElement.getBoundingClientRect();
+        return {
+          width: bounds.width,
+          columnHeight: artwork.height,
+          availableWidth: artwork.width,
+          height: bounds.height,
+          naturalHeight:
+            (bounds.width * element.naturalHeight) / element.naturalWidth,
+          topGap: bounds.top - artwork.top,
+          bottomGap: details.top - bounds.bottom,
+        };
+      });
+      expect(layout.width).toBeGreaterThan(0);
+      expect(layout.columnHeight).toBeGreaterThan(0);
+      expect(Math.abs(layout.columnHeight - layout.height)).toBeLessThanOrEqual(
+        2
+      );
+      expect(
+        Math.abs(layout.width - layout.availableWidth)
+      ).toBeLessThanOrEqual(2);
+      expect(
+        Math.abs(layout.height - layout.naturalHeight)
+      ).toBeLessThanOrEqual(2);
+      expect(Math.abs(layout.topGap)).toBeLessThanOrEqual(2);
+      expect(Math.abs(layout.bottomGap)).toBeLessThanOrEqual(2);
+    });
+  }
+
   for (const viewport of [
     { width: 390, height: 600 },
     { width: 1440, height: 1000 },
@@ -81,6 +204,8 @@ export function defineNftImageLayoutTests() {
       });
       for (const delta of Object.values(shift))
         expect(Math.abs(delta)).toBeLessThanOrEqual(2);
+
+      await expectMemeArtworkScrolling(page);
     });
   }
 
@@ -95,14 +220,18 @@ export function defineNftImageLayoutTests() {
       .locator("..")
       .locator("[data-home-artwork-column]");
     await expect(column).toBeVisible();
+    await expect(column).toHaveAttribute(
+      "data-home-artwork-is-image",
+      /^(true|false)$/
+    );
+    test.skip(
+      (await column.getAttribute("data-home-artwork-is-image")) === "false",
+      "Current homepage media data identifies a non-image drop"
+    );
     const image = column
       .getByRole("img")
       .locator("xpath=self::*[ancestor::*[@data-artwork-image-frame]]")
       .first();
-    test.skip(
-      (await image.count()) === 0,
-      "Current homepage drop has no still image"
-    );
     await expectContainedImage(image);
     const layout = await image.evaluate((element: HTMLImageElement) => {
       const column = element.closest("[data-home-artwork-column]")!;

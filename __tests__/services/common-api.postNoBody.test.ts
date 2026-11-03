@@ -3,6 +3,9 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(() => null),
+  getWalletRole: jest.fn(() => null),
+  hasActiveSessionV2Auth: jest.fn(() => false),
   getStagingAuth: jest.fn(),
 }));
 

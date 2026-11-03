@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
@@ -20,6 +21,7 @@ interface MemesDropSummarySectionProps {
   readonly nicTotal: number;
   readonly repTotal: number;
   readonly onVoteClick: () => void;
+  readonly collaborationControls?: ReactNode;
 }
 
 export function MemesDropSummarySection({
@@ -34,6 +36,7 @@ export function MemesDropSummarySection({
   nicTotal,
   repTotal,
   onVoteClick,
+  collaborationControls,
 }: MemesDropSummarySectionProps) {
   const memeCardId = drop.submission_context?.meme_card_id;
   const hasMemeCard = isValidMemeCardId(memeCardId);
@@ -56,7 +59,7 @@ export function MemesDropSummarySection({
             {title}
           </h1>
           {description && (
-            <p className="tw-mb-0 tw-text-sm tw-text-white/60 lg:tw-text-md">
+            <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-text-white/60 lg:tw-text-md">
               {description}
             </p>
           )}
@@ -112,16 +115,14 @@ export function MemesDropSummarySection({
         {hasMemeCard && (
           <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
             {manualOutcomes.map((outcome) => (
-              <span
-                key={outcome}
-                className="tw-text-sm tw-text-amber-400/70"
-              >
+              <span key={outcome} className="tw-text-sm tw-text-amber-400/70">
                 {outcome}
               </span>
             ))}
             <MainStageMemeCardLink memeCardId={memeCardId} />
           </div>
         )}
+        {collaborationControls}
       </div>
     </div>
   );

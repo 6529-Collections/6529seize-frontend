@@ -1,0 +1,58 @@
+<b>Overview:</b> This page outlines the process for registering a Delegation Manager (Sub-delegation) to a "Delegated Wallet" using your "Safe Wallet". <br>
+<br>Safe (formerly Gnosis Safe) is a multi-signature smart contract-based wallet often used as a secure vault for NFTs and other tokens.
+You can find out more about SAFE <a href="https://safe.global/" target="_blank" rel="noopener noreferrer">at safe.global</a>.
+<br>
+
+<br>Delegation Management (Sub-delegation) allows you to reduce the number of delegation transactions you perform with your "Safe Wallet" by delegating all contract interactions,
+including changing delegations, to a "Delegated Wallet." This ensures your "Safe Wallet" remains cold (not connected) after the initial Delegation Management (Sub-delegation).
+<br>
+<br>
+<div>
+  <b>Recommended Approach</b><br>
+  <br>
+  The best approach for most Safe users is to set a Delegation Manager to a hotter address such as a Trezor address.
+  This allows the hotter wallet to make and change delegations on behalf of the Safe without having to sign further transactions from the Safe.
+<br><br>
+The steps below show how to set a Delegation Manager (Sub-delegation), for all collections and all use cases. This presumes you have already set a up your Safe account as your cold wallet.
+If you would like to set a different type of delegation, you would follow the same general process but make different selections for the collection or use cases.<br><br>
+  <ol>
+    <li>Connect to the <a href="https://app.safe.global" target="_blank" rel="noopener noreferrer">Safe app</a>, access your Safe Wallet, and go to "New Transaction", then launch the Transaction Builder app.</li><br>
+    <li>In the New Transaction Area:<br>
+      <br>
+      <ul>
+        <li>Enter the NFTDelegation.com smart contract Address: 0x2202CB9c00487e7e8EF21e6d8E914B32e709f43d</li><br>
+        <li>Enter the NFTDelegation.com smart contract ABI. <a href="../assets/screenshots/NFTDelegationABI.js.json" target="_blank" rel="noopener noreferrer">Click here to get the ABI.</a></li>
+        <img src="../assets/screenshots/safe1.png" alt="safe1 screenshot">
+      </ul>
+    </li>
+    <li>In the Transaction information Area:<br>
+      <br>
+      <ul>
+        <li>Select registerDelegationAddress as the Contract Method Selector</li><br>
+        <li>Enter the value 0x8888888888888888888888888888888888888888 in the collection address box. This value refers to "Any Collection".</li><br>
+        <li>Enter the delegation address (for the Delegation Manager).</li><br>
+        <li>Enter the value 64060588800 as the expiry date. This value represents "no expiry date".</li><br>
+        <li>Enter the value 998 as the Use Case. This value represents "Delegation Management (Sub-delegation)".</li><br>
+        <li>Enter true in the allTokens input box.</li><br>
+        <li>Enter 0 in the tokenId input box.</li><br>
+        <li>Click the 'Add transaction' button.</li>
+        <img src="../assets/screenshots/safe2.png" alt="safe2 screenshot">
+      </ul>
+    </li>
+      <li>To Execute the transaction:<br>
+        <br>
+        <ul>
+          <li>Click on the 'Create Batch' button.<br>
+            <img src="../assets/screenshots/safe3.png" alt="safe3 screenshot">
+          </li>
+          <li>Click on the 'Send Batch' button.<br>
+            <img src="../assets/screenshots/safe4.png" alt="safe4 screenshot">
+
+          </li>
+          <li>Click on the 'Submit' button and execute the transaction.<br>
+            <img src="../assets/screenshots/safe5.png" alt="safe5 screenshot">
+          </li>
+        </ul>
+    </li>
+  </ol>
+</div>

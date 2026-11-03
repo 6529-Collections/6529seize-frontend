@@ -113,6 +113,32 @@ function buildDropNode({
     return null;
   }
 
+  const datePublished = formatMillis(drop.created_at);
+  const author = metadata.author ? buildProfileRef(metadata.author) : undefined;
+  const text = cleanText(drop.content) ?? cleanText(drop.description);
+  const image = drop.media
+    ?.filter(
+      (media) => !media.mime_type || media.mime_type.startsWith("image/")
+    )
+    .map((media) => toAbsoluteHttpUrl(media.url))
+    .filter(isString);
+  const video = drop.media
+    ?.filter((media) => media.mime_type?.startsWith("video/"))
+    .map((media) => toAbsoluteHttpUrl(media.url))
+    .filter(isString)
+    .map((contentUrl) => ({ "@type": "VideoObject", contentUrl }));
+
+  // Do not emit an ineligible post or manufacture a publication date.
+  if (
+    datePublished === undefined ||
+    typeof author?.["name"] !== "string" ||
+    (text === undefined &&
+      (image?.length ?? 0) === 0 &&
+      (video?.length ?? 0) === 0)
+  ) {
+    return null;
+  }
+
   const id = nodeId(path, "drop");
   const voteInteraction = interactionCounter(
     "VoteAction",
@@ -122,14 +148,13 @@ function buildDropNode({
   return compactJsonLdObject({
     "@type": "SocialMediaPosting",
     "@id": id,
-    headline: cleanText(drop.title) ?? `Drop #${drop.serial_no}`,
-    articleBody: cleanText(drop.content ?? drop.description),
-    datePublished: formatMillis(drop.submitted_at),
-    image: drop.media
-      ?.map((media) => toAbsoluteHttpUrl(media.url))
-      .filter(isString),
+    headline: cleanText(drop.title),
+    text,
+    datePublished,
+    image,
+    video,
     url: canonicalUrl(path),
-    author: metadata.author ? buildProfileRef(metadata.author) : undefined,
+    author,
     isPartOf: { "@id": waveId },
     interactionStatistic: voteInteraction ? [voteInteraction] : undefined,
     additionalProperty: [
@@ -150,7 +175,7 @@ function buildProfileRef(profile: {
 
   return compactJsonLdObject({
     "@type": "Person",
-    name: handle ?? profile.primary_address,
+    name: handle ?? cleanText(profile.primary_address),
     alternateName: handle,
     url: handle ? canonicalUrl(`/${handle}`) : undefined,
     image: toAbsoluteHttpUrl(profile.pfp),

@@ -16,6 +16,8 @@ interface WaveLeaderboardDropContentProps {
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly onOpenDrop?: (() => void) | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export const WaveLeaderboardDropContent: React.FC<
@@ -25,11 +27,17 @@ export const WaveLeaderboardDropContent: React.FC<
   isCompetitionDrop = false,
   mediaContainerHeightClassName,
   contentPresentation = "default",
+  onOpenDrop,
+  onDropContentClick: onOpenContent,
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
+    if (onOpenContent) {
+      onOpenContent(clickedDrop);
+      return;
+    }
     const href = getWaveRoute({
       waveId: clickedDrop.wave.id,
       serialNo: clickedDrop.serial_no,
@@ -44,7 +52,14 @@ export const WaveLeaderboardDropContent: React.FC<
       <div className="tw-mt-1.5 tw-flex tw-flex-col tw-gap-y-1">
         <ProposalCardContent
           drop={drop}
-          textFooter={<WaveDropActionsOpen drop={drop} variant="readFull" />}
+          textFooter={
+            <WaveDropActionsOpen
+              drop={drop}
+              variant="readFull"
+              onOpen={onOpenDrop}
+              onNavigate={onOpenContent}
+            />
+          }
         />
         <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <WaveDropReactions drop={drop} />

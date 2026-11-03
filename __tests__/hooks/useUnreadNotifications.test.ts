@@ -49,9 +49,9 @@ describe("useUnreadNotifications", () => {
           QueryKey.IDENTITY_NOTIFICATIONS,
           {
             auth: getAuthTokenFingerprint("valid-jwt"),
-            identity: "bob",
             limit: "1",
             version: "v2",
+            includeCompetitions: true,
           },
         ],
         enabled: true,
@@ -105,6 +105,20 @@ describe("useUnreadNotifications", () => {
       })
     ).toBe(false);
     expect(queryOptions.retry(0, new Error("temporary failure"))).toBe(true);
+  });
+
+  it("stops retrying other client errors but keeps retrying timeouts and server failures", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob"));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.retry(0, { status: 400 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 404 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 429 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 408 })).toBe(true);
+    expect(queryOptions.retry(2, { status: 503 })).toBe(true);
+    expect(queryOptions.retry(3, { status: 503 })).toBe(false);
   });
 
   it("disables timer and lifecycle refetches only after terminal auth errors", () => {
@@ -166,6 +180,21 @@ describe("useUnreadNotifications", () => {
     );
   });
 
+  it("shares one query between readers of the same token whatever handle they pass", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob"));
+    renderHook(() => useUnreadNotifications("Bob"));
+    renderHook(() => useUnreadNotifications("previous-handle"));
+
+    const queryKeys = useQueryMock.mock.calls.map(
+      ([options]) => options.queryKey
+    );
+    expect(queryKeys).toHaveLength(3);
+    expect(queryKeys[1]).toEqual(queryKeys[0]);
+    expect(queryKeys[2]).toEqual(queryKeys[0]);
+  });
+
   it("uses a fresh query after the auth token materially changes", () => {
     useQueryMock.mockReturnValue({ data: undefined });
     getAuthJwtMock.mockReturnValue("first-jwt");
@@ -181,7 +210,6 @@ describe("useUnreadNotifications", () => {
     expect(secondQueryKey[1]).toEqual(
       expect.objectContaining({
         auth: getAuthTokenFingerprint("reauthenticated-jwt"),
-        identity: "bob",
       })
     );
   });

@@ -17,7 +17,6 @@ let mockLayoutSpaces = {
   spacerSpace: 0,
   mobileTabsSpace: 0,
   mobileNavSpace: 0,
-  contentSpace: 0,
   measurementsComplete: false,
 };
 
@@ -28,6 +27,12 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     const MockDynamicHeader = () => <div data-testid="header" />;
     MockDynamicHeader.displayName = "MockDynamicHeader";
     return MockDynamicHeader;
+  }
+
+  if (loaderSource.includes("AppKitModalHooks")) {
+    const MockDynamicAppKitModalHooks = () => null;
+    MockDynamicAppKitModalHooks.displayName = "MockDynamicAppKitModalHooks";
+    return MockDynamicAppKitModalHooks;
   }
 
   if (loaderSource.includes("BrainMobileMessages")) {
@@ -187,7 +192,6 @@ describe("AppLayout", () => {
       spacerSpace: 0,
       mobileTabsSpace: 0,
       mobileNavSpace: 0,
-      contentSpace: 0,
       measurementsComplete: false,
     };
   });

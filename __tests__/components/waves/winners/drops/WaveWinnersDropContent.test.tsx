@@ -2,15 +2,19 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { WaveWinnersDropContent } from "@/components/waves/winners/drops/WaveWinnersDropContent";
+import ProposalCardContextLabel from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 const push = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 const WaveDropContentMock = jest.fn((props: any) => (
-  <button
-    data-testid="content"
-    onClick={() => props.onDropContentClick(props.drop)}
-  />
+  <>
+    <ProposalCardContextLabel />
+    <button
+      data-testid="content"
+      onClick={() => props.onDropContentClick(props.drop)}
+    />
+  </>
 ));
 
 jest.mock("@/components/waves/drops/WaveDropContent", () => ({
@@ -52,5 +56,6 @@ describe("WaveWinnersDropContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+    expect(screen.queryByTestId("proposal-card-context-label")).toBeNull();
   });
 });

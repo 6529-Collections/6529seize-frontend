@@ -6,6 +6,7 @@ import {
   formatNumber,
   formatRelativeTime,
   formatTime,
+  selectPluralCategory,
 } from "@/i18n/format";
 import {
   DEFAULT_LOCALE,
@@ -89,6 +90,16 @@ const FILE_KIND_MESSAGE_KEYS = [
 ] as const;
 
 describe("frontend i18n helpers", () => {
+  it.each(SUPPORTED_LOCALES)("resolves wave tab copy for %s", (locale) => {
+    expect(t(locale, "wave.navigation.chat")).toBe("Chat");
+    expect(t(locale, "wave.navigation.sales")).toBe("Sales");
+    expect(t(locale, "wave.navigation.myStream")).toBe("My Stream");
+    expect(t(locale, "wave.navigation.polls")).toBe("Polls");
+    expect(t(locale, "wave.navigation.loadingSection")).toBe(
+      "Loading section…"
+    );
+  });
+
   it("keeps rich values in the message-defined order", () => {
     const artistLink = { type: "artist-link" } as const;
 
@@ -495,9 +506,17 @@ describe("frontend i18n helpers", () => {
     expect(formatNumber("de-DE", 1234.5, { maximumFractionDigits: 1 })).toBe(
       "1.234,5"
     );
-    expect(formatDate("en-GB", new Date("2024-01-02T00:00:00.000Z"))).toBe(
-      "2 Jan 2024"
-    );
+    // An instant renders in the runtime zone unless one is given, so name UTC
+    // to keep the expected day the same in every zone the suite runs in.
+    expect(
+      formatDate("en-GB", new Date("2024-01-02T00:00:00.000Z"), {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    ).toBe("2 Jan 2024");
+    expect(formatDate("en-GB", "2024-01-02")).toBe("2 Jan 2024");
     expect(formatRelativeTime("en-US", -1, "day")).toBe("yesterday");
     expect(compareLocalized("en-US", "2", "10")).toBeLessThan(0);
     const sampleTime = new Date("2024-01-02T13:05:00.000Z");
@@ -663,5 +682,29 @@ describe("frontend i18n helpers", () => {
       );
       expect(new Set(labels).size).toBe(labels.length);
     }
+  });
+});
+
+describe("historical vote details localization", () => {
+  it.each(SUPPORTED_LOCALES)(
+    "keeps the explanation and tab label consistent in %s",
+    (locale) => {
+      const label = t(locale, "waves.voteDetails.logs.tab");
+      expect(
+        t(locale, "waves.voteDetails.voters.unavailableExplanation", {
+          voteLogTab: label,
+        })
+      ).toContain(`Open ${label}`);
+      expect(t(locale, "waves.voteDetails.voters.unavailable")).toBe(
+        "Voters unavailable"
+      );
+    }
+  );
+
+  it("normalizes plural locales and falls back for unsupported input", () => {
+    expect(selectPluralCategory("FR-fr", 0)).toBe("one");
+    expect(selectPluralCategory("unsupported", 0)).toBe("other");
+    expect(selectPluralCategory(null, 1)).toBe("one");
+    expect(selectPluralCategory("en-US", Number.NaN)).toBe("other");
   });
 });

@@ -10,6 +10,10 @@ let mockAccounts = [
   { profileId: "A", jwt: "jwt-A" },
   { profileId: "B", jwt: "jwt-B" },
 ];
+const mockRetiredCompetitionFlag = jest.fn(() => false);
+jest.mock("@/helpers/competition.helpers", () => ({
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
+}));
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: () => "jwt-A",
   getConnectedWalletAccounts: () => mockAccounts,
@@ -27,6 +31,7 @@ jest.mock("@sentry/nextjs", () => ({
 const info = { platform: "ios" } as DeviceInfo;
 beforeEach(() => {
   jest.clearAllMocks();
+  mockRetiredCompetitionFlag.mockReturnValue(false);
   jest
     .mocked(completePushInstallationMigration)
     .mockReset()
@@ -106,3 +111,19 @@ it("preserves single-account registration and completes its migration", async ()
     "new-token"
   );
 });
+
+it.each([false, true])(
+  "registers competition push capability independently of retired rollout settings (%s)",
+  async (enabled) => {
+    mockRetiredCompetitionFlag.mockReturnValue(enabled);
+    await registerPushNotificationWithRetry(
+      "new-phone",
+      info,
+      "new-token",
+      "A"
+    );
+    for (const [request] of jest.mocked(commonApiPost).mock.calls) {
+      expect(request.body).toHaveProperty("include_competitions", true);
+    }
+  }
+);

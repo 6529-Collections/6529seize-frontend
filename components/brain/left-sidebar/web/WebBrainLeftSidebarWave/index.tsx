@@ -14,6 +14,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface WebBrainLeftSidebarWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
@@ -31,6 +32,7 @@ interface WebBrainLeftSidebarWaveProps {
 const TOOLTIP_PLACEMENT = "right" as const;
 
 const WebBrainLeftSidebarWave = ({
+  scoreDetailsDisabled = false,
   isAnnouncement = false,
   wave,
   onHover,
@@ -50,18 +52,19 @@ const WebBrainLeftSidebarWave = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
-  const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
-    basePath,
-    activeWaveId: activeWave.id,
-    setActiveWave: activeWave.set,
-    onHover,
-    prefetchWaveData,
-    pathname,
-    searchParams,
-    waveId: wave.id,
-    hasTouchScreen,
-    firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
-  });
+  const { href, isActive, onMouseEnter, onMouseLeave, onClick } =
+    useWaveNavigation({
+      basePath,
+      activeWaveId: activeWave.id,
+      setActiveWave: activeWave.set,
+      onHover,
+      prefetchWaveData,
+      pathname,
+      searchParams,
+      waveId: wave.id,
+      hasTouchScreen,
+      firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
+    });
 
   const formattedWaveName = useMemo(
     () =>
@@ -94,6 +97,7 @@ const WebBrainLeftSidebarWave = ({
         isAnnouncement={isAnnouncement}
         isDropWave={isDropWave}
         onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onClick={onClick}
         showTooltip={showCollapsedTooltip}
         tooltipId={tooltipId}
@@ -106,6 +110,7 @@ const WebBrainLeftSidebarWave = ({
 
   return (
     <ExpandedWave
+      scoreDetailsDisabled={scoreDetailsDisabled}
       formattedWaveName={formattedWaveName}
       haveNewDrops={haveNewDrops}
       href={href}
@@ -115,6 +120,7 @@ const WebBrainLeftSidebarWave = ({
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
       onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}

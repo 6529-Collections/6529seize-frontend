@@ -2,6 +2,7 @@ export type SidebarWaveRowLayoutVariant = "app" | "web";
 
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;
+  readonly isAnnouncement?: boolean;
   readonly variant: SidebarWaveRowLayoutVariant;
 }
 
@@ -58,6 +59,7 @@ const rowLayoutByVariant = {
 
 export const getSidebarWaveRowLayoutClasses = ({
   isChildRow,
+  isAnnouncement = false,
   variant,
 }: SidebarWaveRowLayoutInput): SidebarWaveRowLayoutClasses => {
   const variantLayout = rowLayoutByVariant[variant];
@@ -66,5 +68,7 @@ export const getSidebarWaveRowLayoutClasses = ({
     return variantLayout.child;
   }
 
-  return variantLayout.default;
+  return isAnnouncement
+    ? { ...variantLayout.default, rowHeightClasses: "tw-h-full tw-min-h-12" }
+    : variantLayout.default;
 };

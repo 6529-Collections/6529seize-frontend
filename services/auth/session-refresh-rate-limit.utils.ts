@@ -10,8 +10,11 @@ export type SessionRefreshFailureCooldownType =
 
 type ApiStatusError = {
   readonly status?: unknown;
+  readonly headers?: Headers;
   readonly response?: {
     readonly status?: unknown;
+    readonly headers?: Headers;
+    readonly body?: unknown;
   };
 };
 
@@ -48,6 +51,55 @@ export function getSessionRefreshFailureCooldownMs(
   return SESSION_REFRESH_RETRY_COOLDOWN_MS;
 }
 
-export function getRateLimitCooldownMs(): number {
+export class SessionRefreshRateLimitError extends Error {
+  readonly status = 429;
+  constructor(readonly retryAtMs: number) {
+    super("Session refresh is temporarily busy. Please try again shortly.");
+    this.name = "SessionRefreshRateLimitError";
+  }
+}
+
+export function getRateLimitCooldownMs(error?: unknown): number {
+  if (error instanceof SessionRefreshRateLimitError) {
+    return Math.min(
+      SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS,
+      Math.max(0, error.retryAtMs - Date.now())
+    );
+  }
+  if (typeof error !== "object" || error === null) {
+    return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
+  }
+  const apiError = error as ApiStatusError;
+  const retryAfter = (apiError.headers ?? apiError.response?.headers)?.get(
+    "Retry-After"
+  );
+  if (retryAfter) {
+    const seconds = /^\d+$/.test(retryAfter) ? Number(retryAfter) : null;
+    const delay =
+      seconds === null ? Date.parse(retryAfter) - Date.now() : seconds * 1000;
+    if (Number.isFinite(delay) && delay >= 0)
+      return Math.min(delay, SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS);
+  }
+  let body = apiError.response?.body;
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body) as unknown;
+    } catch {
+      body = null;
+    }
+  }
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "retryAfter" in body &&
+    typeof body.retryAfter === "number" &&
+    Number.isFinite(body.retryAfter) &&
+    body.retryAfter >= 0
+  ) {
+    return Math.min(
+      body.retryAfter * 1000,
+      SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS
+    );
+  }
   return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
 }

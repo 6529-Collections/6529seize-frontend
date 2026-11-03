@@ -3,7 +3,7 @@ import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 export function usePersistentScrollOffset(
   scrollKey: string,
-  scrollContainerRef: RefObject<HTMLDivElement | null>
+  scrollContainerRef: RefObject<HTMLElement | null>
 ): number {
   const { getPosition, setPosition } = useScrollPositionContext();
   const [initialOffset] = useState(() => getPosition(scrollKey));

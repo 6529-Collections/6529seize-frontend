@@ -11,6 +11,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
+import {
+  rememberEvictedWave,
+  selectWavesToEvict,
+} from "./waveMessagesEviction";
 
 type DropChange = {
   key: string;
@@ -74,6 +78,7 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
 const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
 
 export type Listener = (data: WaveMessages | undefined) => void;
+type EvictionListener = (waveId: string) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported
@@ -92,6 +97,12 @@ type PendingServerFeedSeed = {
 function useWaveMessagesStore() {
   const [, forceRender] = useReducer((version: number) => version + 1, 0);
   const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
+  // Resident wave ids, least recently used first.
+  const residentWaveIdsRef = useRef<Set<string>>(new Set());
+  // Evicted waves reject late writes until they load again.
+  const evictedWaveIdsRef = useRef<Set<string>>(new Set());
+  const evictionListenersRef = useRef<Set<EvictionListener>>(new Set());
+  const activeWaveIdRef = useRef<string | null>(null);
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
   const updateQueueRef = useRef<QueuedWaveMessagesUpdate[]>([]);
@@ -144,6 +155,8 @@ function useWaveMessagesStore() {
       serverFeedSeedReadyCallbacksRef.current.clear();
       updateQueueRef.current = [];
       authoritativePaginationWaveIdsRef.current.clear();
+      residentWaveIdsRef.current.clear();
+      evictedWaveIdsRef.current.clear();
       if (clearedWaveIds.length === 0) {
         return;
       }
@@ -173,19 +186,122 @@ function useWaveMessagesStore() {
     };
   }, []);
 
+  // Moves a resident wave to the most recently used end.
+  const touchWave = useCallback((waveId: string): void => {
+    if (residentWaveIdsRef.current.delete(waveId)) {
+      residentWaveIdsRef.current.add(waveId);
+    }
+  }, []);
+
+  // The active wave is never evicted and counts as just used.
+  const trackActiveWave = useCallback(
+    (waveId: string | null): void => {
+      activeWaveIdRef.current = waveId;
+      if (waveId) {
+        touchWave(waveId);
+      }
+    },
+    [touchWave]
+  );
+
+  // A wave is in use while it is active or a mounted component subscribes.
+  const isWaveInUse = useCallback(
+    (waveId: string): boolean =>
+      activeWaveIdRef.current === waveId ||
+      (listenersRef.current[waveId]?.size ?? 0) > 0,
+    []
+  );
+
+  // Data hooks release their per-wave requests, timers and state on eviction.
+  const subscribeToEvictions = useCallback(
+    (listener: EvictionListener): (() => void) => {
+      evictionListenersRef.current.add(listener);
+      return () => {
+        evictionListenersRef.current.delete(listener);
+      };
+    },
+    []
+  );
+
+  const releaseWaveState = useCallback((waveId: string): void => {
+    pendingServerFeedSeedsRef.current.delete(waveId);
+    activeServerFeedSeedsRef.current.delete(waveId);
+    activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+    appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
+    completedInitialRegistrationsRef.current.delete(waveId);
+    committedServerFeedSeedsRef.current.delete(waveId);
+    serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+    authoritativePaginationWaveIdsRef.current.delete(waveId);
+    residentWaveIdsRef.current.delete(waveId);
+    updateQueueRef.current = updateQueueRef.current.filter(
+      ({ update }) => update.key !== waveId
+    );
+  }, []);
+
+  const evictLeastRecentlyUsedWaves = useCallback(
+    (insertedWaveId: string): void => {
+      const evictedWaveIds = selectWavesToEvict(
+        residentWaveIdsRef.current,
+        (waveId) =>
+          waveId === insertedWaveId ||
+          isWaveInUse(waveId) ||
+          pendingServerFeedSeedsRef.current.has(waveId) ||
+          activeServerFeedSeedsRef.current.has(waveId)
+      );
+      if (evictedWaveIds.length === 0) {
+        return;
+      }
+
+      const next = { ...waveMessagesRef.current };
+      for (const waveId of evictedWaveIds) {
+        delete next[waveId];
+        releaseWaveState(waveId);
+        rememberEvictedWave(evictedWaveIdsRef.current, waveId);
+      }
+      waveMessagesRef.current = next;
+      // Evicted waves have no subscribers, so only the data hooks hear of it.
+      for (const waveId of evictedWaveIds) {
+        for (const listener of evictionListenersRef.current) {
+          listener(waveId);
+        }
+      }
+    },
+    [isWaveInUse, releaseWaveState]
+  );
+
+  // Runs after each queued update applies: a wave cached for the first time
+  // becomes the most recently used one and may push older waves out.
+  const admitWave = useCallback(
+    (waveId: string): void => {
+      if (
+        residentWaveIdsRef.current.has(waveId) ||
+        !waveMessagesRef.current[waveId]
+      ) {
+        return;
+      }
+      residentWaveIdsRef.current.add(waveId);
+      evictLeastRecentlyUsedWaves(waveId);
+    },
+    [evictLeastRecentlyUsedWaves]
+  );
+
   // Stable function to get data for a key
   const getData = useCallback((key: string): WaveMessages | undefined => {
     return waveMessagesRef.current[key];
   }, []);
 
   // Stable function to subscribe a listener for a specific key
-  const subscribe = useCallback((key: string, callback: Listener) => {
-    const keyListeners = listenersRef.current[key] ?? new Set();
-    keyListeners.add(callback);
-    listenersRef.current[key] = keyListeners;
-    // Provide initial value immediately upon subscription
-    callback(waveMessagesRef.current[key]);
-  }, []);
+  const subscribe = useCallback(
+    (key: string, listener: Listener) => {
+      const keyListeners = listenersRef.current[key] ?? new Set();
+      keyListeners.add(listener);
+      listenersRef.current[key] = keyListeners;
+      touchWave(key);
+      // Provide initial value immediately upon subscription
+      listener(waveMessagesRef.current[key]);
+    },
+    [touchWave]
+  );
 
   // Stable function to unsubscribe a listener
   const unsubscribe = useCallback((key: string, callback: Listener) => {
@@ -308,19 +424,29 @@ function useWaveMessagesStore() {
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
+      if (update.isLoading === true) {
+        // A loading placeholder starts a fresh load, so the wave caches again.
+        evictedWaveIdsRef.current.delete(update.key);
+      } else if (evictedWaveIdsRef.current.has(update.key)) {
+        // A late result for an evicted wave would leave a partial cache.
+        return;
+      }
       updateQueueRef.current.push({
         update,
         mergePolicy: "standard",
+        onApplied: () => admitWave(update.key),
         generation: storeGenerationRef.current,
       });
       // Start processing if not already running
       processQueue();
     },
-    [processQueue] // Dependency: processQueue
+    [admitWave, processQueue]
   );
 
   const registerPendingServerFeedSeed = useCallback(
     (waveId: string, promise: Promise<ServerWaveFeedSeedResult>) => {
+      // A server seed loads the wave again, so it may cache again.
+      evictedWaveIdsRef.current.delete(waveId);
       activeServerFeedSeedsRef.current.delete(waveId);
       activeServerFeedSeedGatePromisesRef.current.delete(waveId);
       completedInitialRegistrationsRef.current.delete(waveId);
@@ -445,6 +571,7 @@ function useWaveMessagesStore() {
         mergePolicy: "preserve-existing",
         generation: seedGeneration,
         onApplied: () => {
+          admitWave(waveId);
           if (seedGeneration !== storeGenerationRef.current) {
             return;
           }
@@ -455,7 +582,7 @@ function useWaveMessagesStore() {
       processQueue();
       return true;
     },
-    [processQueue, releaseServerFeedSeedIfReady]
+    [admitWave, processQueue, releaseServerFeedSeedIfReady]
   );
 
   const completeInitialServerFeedRegistration = useCallback(
@@ -590,17 +717,7 @@ function useWaveMessagesStore() {
   const clearWave = useCallback(
     (waveId: string) => {
       if (storeGeneration !== storeGenerationRef.current) return false;
-      pendingServerFeedSeedsRef.current.delete(waveId);
-      activeServerFeedSeedsRef.current.delete(waveId);
-      activeServerFeedSeedGatePromisesRef.current.delete(waveId);
-      appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
-      completedInitialRegistrationsRef.current.delete(waveId);
-      committedServerFeedSeedsRef.current.delete(waveId);
-      serverFeedSeedReadyCallbacksRef.current.delete(waveId);
-      authoritativePaginationWaveIdsRef.current.delete(waveId);
-      updateQueueRef.current = updateQueueRef.current.filter(
-        ({ update }) => update.key !== waveId
-      );
+      releaseWaveState(waveId);
       const next = { ...waveMessagesRef.current };
       delete next[waveId];
       waveMessagesRef.current = next;
@@ -608,13 +725,16 @@ function useWaveMessagesStore() {
       listenersRef.current[waveId]?.forEach((listener) => listener(undefined));
       return true;
     },
-    [storeGeneration]
+    [releaseWaveState, storeGeneration]
   );
 
   return {
     getData,
     subscribe,
     unsubscribe,
+    trackActiveWave,
+    isWaveInUse,
+    subscribeToEvictions,
     updateData,
     registerPendingServerFeedSeed,
     clearPendingServerFeedSeed,

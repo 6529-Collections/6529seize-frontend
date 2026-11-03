@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 
-export function useCompactMenuFocus(open: boolean) {
+export function useCompactMenuFocus(open: boolean, autoFocusItem = true) {
   const menuItemsRef = useRef<HTMLDivElement | null>(null);
 
   const focusInitialMenuItem = useCallback(() => {
     const container = menuItemsRef.current;
-    if (!container) {
+    if (!autoFocusItem || !container) {
       return;
     }
 
@@ -27,7 +27,7 @@ export function useCompactMenuFocus(open: boolean) {
       });
       break;
     }
-  }, []);
+  }, [autoFocusItem]);
 
   const wasOpenRef = useRef(open);
 

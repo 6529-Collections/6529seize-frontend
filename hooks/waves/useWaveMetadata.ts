@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useWaveDisplayMetadataOverride } from "@/contexts/WaveDisplayMetadataContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -35,7 +36,7 @@ export function useWaveMetadata(
 
 export function useApproveWaveCustomTabLabels(wave: ApiWave) {
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
-  const { data } = useWaveMetadata(wave.id, { enabled: isApproveWave });
+  const data = useWaveDisplayMetadata(wave.id, isApproveWave);
 
   return useMemo(
     () => getApproveWaveTabLabelsFromMetadata(isApproveWave ? data : null),
@@ -49,9 +50,7 @@ export function useWaveOutcomeVisibility(
   const isCompetitionWave =
     wave?.wave.type === ApiWaveType.Rank ||
     wave?.wave.type === ApiWaveType.Approve;
-  const { data } = useWaveMetadata(wave?.id, {
-    enabled: isCompetitionWave,
-  });
+  const data = useWaveDisplayMetadata(wave?.id, isCompetitionWave);
 
   return useMemo(() => {
     if (!isCompetitionWave) {
@@ -75,9 +74,7 @@ export function useWaveSubmissionButtonLabel({
   readonly submissionExperience: WaveSubmissionExperience;
   readonly waveId: string | null | undefined;
 }): string {
-  const { data } = useWaveMetadata(waveId, {
-    enabled: Boolean(enabled && waveId),
-  });
+  const data = useWaveDisplayMetadata(waveId, enabled);
 
   return useMemo(
     () =>
@@ -96,12 +93,21 @@ export function useWaveSubmissionButtonLabelOverride({
   readonly enabled?: boolean | undefined;
   readonly waveId: string | null | undefined;
 }): string | null {
-  const { data } = useWaveMetadata(waveId, {
-    enabled: Boolean(enabled && waveId),
-  });
+  const data = useWaveDisplayMetadata(waveId, enabled);
 
   return useMemo(
     () => getWaveSubmissionButtonLabelOverrideFromMetadata(data),
     [data]
   );
+}
+
+function useWaveDisplayMetadata(
+  waveId: string | null | undefined,
+  enabled: boolean
+) {
+  const override = useWaveDisplayMetadataOverride(waveId);
+  const { data } = useWaveMetadata(waveId, {
+    enabled: enabled && override === undefined,
+  });
+  return override ?? data;
 }

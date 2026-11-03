@@ -1,13 +1,18 @@
-import { act } from "react";
+import { act, useLayoutEffect } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { useSidebarController } from "@/hooks/useSidebarController";
 
+const readySnapshots = jest.fn();
+
 function Sidebar() {
-  const { isCollapsed, isOffcanvasMode, toggleCollapsed } =
+  const { isCollapsed, isOffcanvasMode, isSidebarReady, toggleCollapsed } =
     useSidebarController();
+  useLayoutEffect(() => {
+    if (isSidebarReady) readySnapshots(isCollapsed, isOffcanvasMode);
+  }, [isCollapsed, isOffcanvasMode, isSidebarReady]);
   return (
-    <nav>
+    <nav data-sidebar-ready={isSidebarReady}>
       <a href="/about">About</a>
       <output>{`${isCollapsed}:${isOffcanvasMode}`}</output>
       <button onClick={toggleCollapsed}>Toggle</button>
@@ -26,6 +31,7 @@ it.each([
 ] as const)(
   "hydrates width=%s stored=%s then restores sidebar state",
   async (width, stored, collapsed, offcanvas) => {
+    readySnapshots.mockClear();
     sessionStorage.setItem("sidebarCollapsed", stored);
     Object.defineProperty(navigator, "maxTouchPoints", {
       configurable: true,
@@ -49,6 +55,10 @@ it.each([
     document.body.appendChild(container);
     const link = container.querySelector("a");
     expect(container.querySelector("output")?.textContent).toBe("true:false");
+    expect(container.querySelector("nav")).toHaveAttribute(
+      "data-sidebar-ready",
+      "false"
+    );
     const onRecoverableError = jest.fn();
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
@@ -56,6 +66,11 @@ it.each([
         root = hydrateRoot(container, <Sidebar />, { onRecoverableError });
       });
       expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(container.querySelector("nav")).toHaveAttribute(
+        "data-sidebar-ready",
+        "true"
+      );
+      expect(readySnapshots.mock.calls).toEqual([[collapsed, offcanvas]]);
       expect(container.querySelector("a")).toBe(link);
       expect(container.querySelector("output")?.textContent).toBe(
         `${collapsed}:${offcanvas}`

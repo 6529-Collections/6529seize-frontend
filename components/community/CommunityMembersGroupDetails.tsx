@@ -20,10 +20,14 @@ import { useRef, useState } from "react";
 type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 
 const INSPECTION_SURFACE_CLASSES =
-  "tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/30 tw-p-4";
+  "tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-4 sm:tw-p-5 lg:tw-p-6";
 
-const BULK_RATE_ACTION_CLASSES =
-  "tw-relative tw-isolate !tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-border-transparent !tw-bg-transparent tw-py-0 tw-text-center before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1.5 before:tw-rounded-lg before:tw-border before:tw-border-solid before:tw-border-white/10 before:tw-bg-white/[0.07] before:tw-content-[''] desktop-hover:hover:before:tw-border-white/20 desktop-hover:hover:before:tw-bg-white/10 active:!tw-bg-transparent active:before:tw-bg-white/5 sm:!tw-border-white/10 sm:!tw-bg-white/[0.07] sm:tw-min-h-9 sm:tw-w-auto sm:tw-py-2 sm:before:tw-hidden sm:desktop-hover:hover:!tw-border-white/20 sm:desktop-hover:hover:!tw-bg-white/10 sm:active:!tw-bg-white/5";
+const BULK_RATE_LAYOUT_CLASSES =
+  "tw-w-full tw-max-w-full !tw-whitespace-normal touch-only:tw-min-h-11 sm:tw-w-auto";
+
+// Reuse the short fade/slide, releasing its transform when it finishes.
+const BULK_RATE_REVEAL_CLASSES =
+  "motion-safe:tw-animate-sidebar-account-menu-in motion-safe:[animation-fill-mode:backwards] motion-reduce:tw-animate-none";
 
 export default function CommunityMembersGroupDetails({
   groupId,
@@ -70,15 +74,16 @@ export default function CommunityMembersGroupDetails({
       }),
   });
   const closeButton = (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="xs"
       onClick={onClose}
       aria-label={t(locale, "network.groupInspection.close")}
       title={t(locale, "network.groupInspection.close")}
-      className="tw-flex tw-size-11 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50 sm:tw-size-8"
+      className="tw-w-8 tw-shrink-0 !tw-p-0 touch-only:tw-h-11 touch-only:tw-w-11"
     >
-      <XMarkIcon className="tw-size-4" aria-hidden="true" />
-    </button>
+      <XMarkIcon className="tw-size-5 tw-shrink-0" aria-hidden="true" />
+    </Button>
   );
 
   if (isLoading) {
@@ -155,7 +160,7 @@ export default function CommunityMembersGroupDetails({
           </p>
           <h2
             id="selected-group-name"
-            className="tw-m-0 tw-break-words !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-100"
+            className="tw-m-0 tw-break-words !tw-text-base !tw-font-semibold !tw-leading-5 !tw-text-iron-100 sm:!tw-text-lg sm:!tw-leading-6"
           >
             {groupName}
           </h2>
@@ -166,13 +171,13 @@ export default function CommunityMembersGroupDetails({
         <div
           role="group"
           aria-label={t(locale, "network.groupInspection.bulkActionsLabel")}
-          className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap"
+          className={`tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-2.5 sm:tw-flex-row sm:tw-flex-wrap ${BULK_RATE_REVEAL_CLASSES}`}
         >
           <Button
             ref={repButtonRef}
             variant="secondary"
             size="sm"
-            className={BULK_RATE_ACTION_CLASSES}
+            className={BULK_RATE_LAYOUT_CLASSES}
             onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
           >
             {t(locale, "network.groupInspection.bulkRep")}
@@ -181,7 +186,7 @@ export default function CommunityMembersGroupDetails({
             ref={nicButtonRef}
             variant="secondary"
             size="sm"
-            className={BULK_RATE_ACTION_CLASSES}
+            className={BULK_RATE_LAYOUT_CLASSES}
             onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
           >
             {t(locale, "network.groupInspection.bulkNic")}
@@ -199,9 +204,10 @@ export default function CommunityMembersGroupDetails({
               : "network.groupInspection.bulkNic"
           )}
           tabIndex={-1}
-          className="tw-mt-3 tw-overflow-hidden tw-rounded-lg tw-bg-black/20 tw-ring-1 tw-ring-inset tw-ring-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className={`tw-mt-4 tw-min-w-0 tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 ${BULK_RATE_REVEAL_CLASSES}`}
         >
           <GroupCardVoteAll
+            compact
             group={group}
             matter={activeRateMatter}
             viewerIdentityKey={viewerIdentityKey}
@@ -209,7 +215,7 @@ export default function CommunityMembersGroupDetails({
           />
         </div>
       ) : null}
-      <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3">
+      <div className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
         <GroupCardConfigs group={group} quiet />
       </div>
     </section>

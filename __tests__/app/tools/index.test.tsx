@@ -45,15 +45,17 @@ describe("Tools index page", () => {
     expect(
       screen.getByRole("heading", { name: "6529 Tools" })
     ).toBeInTheDocument();
-    expect(screen.getByText("NFT Delegation")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Safe Collecting" })
+    ).toBeInTheDocument();
     expect(screen.getByText("The Memes Tools")).toBeInTheDocument();
     expect(screen.getByText("Builder Tools")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Open Data" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /open tool: delegation center/i })
-    ).toHaveAttribute("href", "/delegation/delegation-center");
+      screen.getByRole("link", { name: /open tool: safe collecting/i })
+    ).toHaveAttribute("href", "/safe-collecting");
     expect(
       screen.getByRole("link", { name: /open tool: subscriptions report/i })
     ).toHaveAttribute("href", "/tools/subscriptions-report");

@@ -17,6 +17,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiSubmissionDropVoting {
     /**
+    * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
+    */
+    'voters_count_available'?: boolean;
+    /**
     * Largest absolute current individual allocation, retaining its sign. Equal magnitudes are resolved by voter ID ascending. Included in leaderboard responses for participatory RANK drops when a nonzero vote is available; otherwise omitted. Not a vote change or a time-weighted contribution.
     */
     'largest_vote'?: ApiDropVoter;
@@ -33,6 +37,12 @@ export class ApiSubmissionDropVoting {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "voters_count_available",
+            "baseName": "voters_count_available",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "largest_vote",
             "baseName": "largest_vote",

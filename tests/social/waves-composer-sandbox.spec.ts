@@ -1,5 +1,5 @@
 import { defineWaveImageLayoutTests } from "../media/imageArtworkLayoutCases";
-import type { Page, Route } from "@playwright/test";
+import type { Page, Route, WebSocketRoute } from "@playwright/test";
 import { defineWaveImagePreviewTests } from "../media/waveImagePreviewCases";
 import { defineWaveVideoLayoutTests } from "../media/waveVideoLayoutCases";
 
@@ -53,6 +53,85 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   defineWaveImageLayoutTests();
   defineWaveImagePreviewTests();
 
+  test("authenticates the wave listener before receiving and sending typing", async ({
+    baseURL,
+    page,
+  }) => {
+    const waveSockets = new Set<WebSocketRoute>();
+    let anonymousWaveSubscriptions = 0;
+    let deliveredTyping = 0;
+    const apiOrigin = new URL(getSandboxApiOrigin(baseURL));
+    await page.routeWebSocket(
+      (url) => url.protocol === "ws:" && url.host === apiOrigin.host,
+      (ws) => {
+        let authenticated = false;
+        ws.onMessage((payload) => {
+          if (typeof payload !== "string") return;
+          const message = JSON.parse(payload) as {
+            type: string;
+            access_token?: string;
+            wave_id?: string;
+          };
+          if (message.type === "AUTHENTICATE" && message.access_token) {
+            authenticated = true;
+            ws.send(JSON.stringify({ type: "AUTHENTICATED" }));
+          }
+          if (message.type === "SUBSCRIBE_TO_WAVE") {
+            if (authenticated) waveSockets.add(ws);
+            else anonymousWaveSubscriptions += 1;
+          }
+          if (
+            message.type === "USER_IS_TYPING" &&
+            authenticated &&
+            waveSockets.size > 0
+          ) {
+            deliveredTyping += 1;
+          }
+        });
+        ws.onClose(() => waveSockets.delete(ws));
+      }
+    );
+    await gotoSandboxWave(page);
+    await expect.poll(() => waveSockets.size).toBe(1);
+    expect(anonymousWaveSubscriptions).toBe(0);
+    const sendTypers = (handles: readonly string[]) => {
+      for (const ws of waveSockets) {
+        for (const handle of handles)
+          ws.send(
+            JSON.stringify({
+              type: "USER_IS_TYPING",
+              data: { wave_id: SANDBOX_WAVE_ID, profile: { handle, level: 1 } },
+            })
+          );
+      }
+    };
+    sendTypers(["typing-alice"]);
+    await expect(
+      page.getByText("typing-alice is typing", { exact: true })
+    ).toBeVisible();
+    sendTypers(["typing-alice", "typing-bob"]);
+    await expect(
+      page.getByText("typing-alice, typing-bob are typing", { exact: true })
+    ).toBeVisible();
+    sendTypers(["typing-alice", "typing-bob", "typing-carol"]);
+    await expect(
+      page.getByText("typing-alice, typing-bob and 1 more people are typing", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last()
+      .fill("Typing without posting");
+    await expect.poll(() => deliveredTyping).toBeGreaterThan(0);
+    await expect(
+      page.getByText("typing-alice, typing-bob and 1 more people are typing", {
+        exact: true,
+      })
+    ).toBeHidden({ timeout: 10000 });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
     page,
@@ -84,6 +163,71 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await page.getByRole("button", { name: "Remove file" }).last().click();
     await expect(page.getByText("composer-sandbox.pdf")).toBeHidden();
     await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("pastes one image when Chrome exposes different timestamp wrappers", async ({
+    baseURL,
+    page,
+  }) => {
+    let uploadStartCount = 0;
+    await installDropImageUploadFixture(page, baseURL, () => {
+      uploadStartCount += 1;
+    });
+    await gotoSandboxWave(page);
+
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await composer.evaluate((element) => {
+      const bytes = new Uint8Array([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
+      const listedImage = new File([bytes], "image.png", {
+        type: "image/png",
+        lastModified: 1700000000000,
+      });
+      const itemImage = new File([bytes], "image.png", {
+        type: "image/png",
+        lastModified: 1700000000001,
+      });
+      const pasteEvent = new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+      });
+
+      Object.defineProperty(pasteEvent, "clipboardData", {
+        value: {
+          files: [listedImage],
+          items: [
+            {
+              kind: "file",
+              type: "image/png",
+              getAsFile: () => itemImage,
+            },
+          ],
+          getData: () => "",
+        },
+      });
+      element.dispatchEvent(pasteEvent);
+    });
+
+    await expect(
+      page.getByRole("button", { name: "Select image" })
+    ).toHaveCount(1);
+    await expect.poll(() => uploadStartCount).toBe(1);
+    await expect(
+      page.getByRole("button", { name: "Select image" }).locator("img")
+    ).toHaveAttribute("src", /\/__composer-sandbox\/pasted-image\.png$/);
+    await expect(
+      page.getByRole("status").filter({ hasText: /Uploading image/i })
+    ).toHaveCount(0);
+    expect(uploadStartCount).toBe(1);
+
+    await page.getByRole("button", { name: "Remove image" }).click();
+    await expect(
+      page.getByRole("button", { name: "Select image" })
+    ).toHaveCount(0);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -141,6 +285,79 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("preserves lists links and paragraphs in long chat posts", async ({
+    baseURL,
+    page,
+  }) => {
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const payload = (await response.json()) as {
+      drops: Array<Record<string, unknown>>;
+    };
+    const sourceDrop = payload.drops[0];
+    if (!sourceDrop) throw new Error("Expected a source drop in the sandbox.");
+
+    const items = Array.from(
+      { length: 16 },
+      (_, index) =>
+        `- [Task ${index + 1}](https://example.com/task-${index + 1}): Preserve the authored list structure and readable formatting in this detailed status update.`
+    );
+    const content = [
+      "## Long formatted update",
+      "",
+      "Completed work remains a separate paragraph.",
+      "",
+      ...items.slice(0, 8),
+      "",
+      "Ongoing work remains a separate paragraph.",
+      "",
+      ...items.slice(8),
+      "",
+      "End of the complete formatted update.",
+    ].join("\n");
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) =>
+        route.fulfill({
+          json: {
+            ...payload,
+            drops: [{ ...sourceDrop, content, hide_link_preview: true }],
+          },
+        })
+    );
+    await gotoSandboxWave(page);
+
+    const post = page
+      .getByRole("heading", { name: "Long formatted update", exact: true })
+      .locator("xpath=ancestor::*[@data-serial-no][1]");
+    await expect(post).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(post.getByRole("list")).toHaveCount(2);
+    await expect(post.getByRole("listitem")).toHaveCount(16);
+    await expect(
+      post.getByRole("link", { name: "Task 1", exact: true })
+    ).toHaveAttribute("href", "https://example.com/task-1");
+    for (const paragraph of [
+      "Completed work remains a separate paragraph.",
+      "Ongoing work remains a separate paragraph.",
+      "End of the complete formatted update.",
+    ]) {
+      const matchingParagraph = post
+        .getByRole("paragraph")
+        .filter({ hasText: paragraph });
+      await expect(matchingParagraph).toHaveCount(1);
+      await expect(matchingParagraph).toHaveText(paragraph);
+    }
+    await expect(
+      post.getByRole("button", { name: /Show more|Show less/ })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
@@ -257,10 +474,65 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("moves the app chat composer down without an upward jump when closing the keyboard", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    // Only this project installs the iOS shell whose keyboard inset animates here.
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "The iOS keyboard layout requires the Capacitor iOS simulation"
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await gotoSandboxWave(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const positions = await composer.evaluate(async (element) => {
+      const root = document.documentElement;
+      // Publish the same geometry as the native keyboard hook. This checks
+      // browser layout; native keyboard synchronization is verified separately.
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-duration",
+        "0ms"
+      );
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-easing",
+        "cubic-bezier(0.1, 0.8, 0.2, 1)"
+      );
+      root.style.setProperty("--native-keyboard-inset-bottom", "180px");
+      root.dataset["nativeKeyboardVisible"] = "true";
+      const positions = [element.getBoundingClientRect().bottom];
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve())
+      );
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-duration",
+        "250ms"
+      );
+      root.style.setProperty("--native-keyboard-inset-bottom", "0px");
+      delete root.dataset["nativeKeyboardVisible"];
+      positions.push(element.getBoundingClientRect().bottom);
+      const started = performance.now();
+      while (performance.now() - started < 350) {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+        positions.push(element.getBoundingClientRect().bottom);
+      }
+      return positions;
+    });
+    for (let i = 1; i < positions.length; i += 1) {
+      expect(positions[i]!).toBeGreaterThanOrEqual(positions[i - 1]! - 1);
+    }
+    expect(positions.at(-1)! - positions[0]!).toBeGreaterThan(100);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("submits one exact-shape synthetic chat drop without uploads", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     await gotoSandboxWave(page);
 
     const composer = page
@@ -285,7 +557,31 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       });
     }
-    await page.getByRole("button", { name: "Post" }).last().click();
+    const postButton = page.getByRole("button", { name: "Post" }).last();
+    await postButton.evaluate((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          button.setAttribute(
+            "data-composer-focused-at-submit",
+            String(
+              document.activeElement?.getAttribute("contenteditable") === "true"
+            )
+          );
+        },
+        { capture: true, once: true }
+      );
+    });
+    if (testInfo.project.use.isMobile) {
+      await postButton.tap();
+    } else {
+      await postButton.click();
+    }
+    // A tap must not dismiss the native input before submission starts.
+    await expect(postButton).toHaveAttribute(
+      "data-composer-focused-at-submit",
+      "true"
+    );
 
     await expect
       .poll(
@@ -335,6 +631,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(composer).toBeFocused();
+    await expect(composer).toHaveText("");
+    // Sending ends this draft's undo history; Undo must not revive a sent post.
+    await composer.press("ControlOrMeta+z");
+    await expect(composer).toHaveText("");
 
     const requests = await fetchSandboxRequests(baseURL);
     expect(
@@ -774,6 +1075,65 @@ async function installExternalDataFixtures(page: Page) {
     await route.fulfill({
       contentType: "application/json",
       json: [],
+      status: 200,
+    });
+  });
+}
+
+async function installDropImageUploadFixture(
+  page: Page,
+  baseURL: string | undefined,
+  onUploadStart: () => void
+) {
+  const sandboxApiOrigin = getSandboxApiOrigin(baseURL);
+  // Keep the mocked PUT same-origin so the browser can read its ETag.
+  const uploadUrl = new URL("/__composer-sandbox/image-upload", baseURL).href;
+  const mediaUrl = `${sandboxApiOrigin}/__composer-sandbox/pasted-image.png`;
+
+  await page.route("**/drop-media/multipart-upload**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+
+    if (pathname.endsWith("/part")) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { upload_url: uploadUrl },
+        status: 200,
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/completion")) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { media_url: mediaUrl, mime_type: "image/png" },
+        status: 200,
+      });
+      return;
+    }
+
+    onUploadStart();
+    await route.fulfill({
+      contentType: "application/json",
+      json: { upload_id: "clipboard-image", key: "clipboard-image.png" },
+      status: 200,
+    });
+  });
+
+  await page.route(uploadUrl, async (route) => {
+    await route.fulfill({
+      body: "",
+      headers: { etag: '"clipboard-image-etag"' },
+      status: 200,
+    });
+  });
+
+  await page.route(mediaUrl, async (route) => {
+    await route.fulfill({
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64"
+      ),
+      contentType: "image/png",
       status: 200,
     });
   });

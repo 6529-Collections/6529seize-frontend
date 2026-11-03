@@ -14,9 +14,119 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { LeaderboardViewMode } from "../types";
+import {
+  getMainStageTabClassName,
+  MAIN_STAGE_TABLIST_CLASS_NAME,
+} from "./mainStageToolbarStyles";
 
 type ActionsRemeasureVariant = "none" | "filter-only" | "with-drop";
 type LeaderboardSortItem = CommonSelectItem<WaveDropsLeaderboardSort>;
+
+export function getHeaderControlsRowClass({
+  flexClass,
+  basisClass,
+  compactSubmissionControls,
+  balanceSubmissionRows,
+  enableControlsScroll,
+  showAdditionalActionFilter,
+}: {
+  readonly flexClass: string;
+  readonly basisClass: string;
+  readonly compactSubmissionControls: boolean;
+  readonly balanceSubmissionRows: boolean;
+  readonly enableControlsScroll: boolean;
+  readonly showAdditionalActionFilter: boolean;
+}) {
+  if (showAdditionalActionFilter) {
+    return "tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2";
+  }
+  return `tw-flex tw-min-w-0 ${flexClass} tw-flex-nowrap tw-items-start ${
+    compactSubmissionControls
+      ? "tw-gap-1 [&_[role=tab]]:tw-w-[26px]"
+      : "tw-gap-2"
+  } ${basisClass} ${balanceSubmissionRows ? "tw-justify-between" : ""} ${
+    enableControlsScroll
+      ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+      : "tw-overflow-x-hidden"
+  }`;
+}
+
+export function getHeaderSortMode({
+  isLargeScreen,
+}: {
+  readonly isLargeScreen: boolean;
+}): "tabs" | "dropdown" {
+  return isLargeScreen ? "tabs" : "dropdown";
+}
+
+export function PriceActionsRow({
+  isVisible,
+  testId,
+  showAdditionalActions,
+  actionMode,
+  wrapActions,
+  children,
+}: {
+  readonly isVisible: boolean;
+  readonly testId:
+    | "leaderboard-header-actions-row"
+    | "leaderboard-price-actions-row";
+  readonly showAdditionalActions: boolean;
+  readonly actionMode?: "full" | "icon" | undefined;
+  readonly wrapActions?: boolean | undefined;
+  readonly children: React.ReactNode;
+}) {
+  if (!isVisible) return null;
+  let wrapStatus: "yes" | "no" | undefined;
+  if (wrapActions !== undefined) wrapStatus = wrapActions ? "yes" : "no";
+  return (
+    <div
+      data-testid={testId}
+      data-action-mode={actionMode}
+      data-wrap={wrapStatus}
+      className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
+        showAdditionalActions ? "tw-max-w-full tw-flex-wrap" : ""
+      } ${wrapActions ? "tw-basis-auto" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SubmissionActionsRow({
+  isVisible,
+  refObject,
+  balanceRows,
+  additionalActions,
+  onCreateDrop,
+  createLabel,
+}: {
+  readonly isVisible: boolean;
+  readonly refObject: React.RefObject<HTMLDivElement | null>;
+  readonly balanceRows: boolean;
+  readonly additionalActions: React.ReactNode;
+  readonly onCreateDrop: (() => void) | undefined;
+  readonly createLabel: string;
+}) {
+  if (!isVisible) return null;
+  return (
+    <div
+      data-testid="leaderboard-submission-actions"
+      ref={refObject}
+      className={`tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 ${
+        balanceRows ? "tw-w-full tw-justify-between" : "tw-ml-auto"
+      }`}
+    >
+      {additionalActions}
+      {onCreateDrop && (
+        <Button onClick={onCreateDrop} variant="primary" size="sm">
+          <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          <span>{createLabel}</span>
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export const getLeaderboardViewModes = (
   isMemesWave: boolean
@@ -91,8 +201,12 @@ const getViewModeLabel = (mode: LeaderboardViewMode): string => {
 
 const getViewModeTabClass = (
   mode: LeaderboardViewMode,
-  activeMode: LeaderboardViewMode
+  activeMode: LeaderboardViewMode,
+  isMainStage: boolean
 ): string => {
+  if (isMainStage) {
+    return `${getMainStageTabClassName(activeMode === mode)} tw-w-8`;
+  }
   const baseClassName =
     "tw-flex tw-h-[30px] tw-w-[30px] tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-[color,background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
@@ -114,6 +228,7 @@ const getViewModeIcon = (mode: LeaderboardViewMode): React.ReactNode => {
 };
 
 interface HeaderViewModeTabsProps {
+  readonly isMainStage?: boolean;
   readonly refObject: React.RefObject<HTMLDivElement | null>;
   readonly viewModes: readonly LeaderboardViewMode[];
   readonly viewMode: LeaderboardViewMode;
@@ -122,6 +237,7 @@ interface HeaderViewModeTabsProps {
 }
 
 export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
+  isMainStage = false,
   refObject,
   viewModes,
   viewMode,
@@ -132,7 +248,11 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
     ref={refObject}
     role="tablist"
     aria-label="Leaderboard view modes"
-    className="tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+    className={
+      isMainStage
+        ? MAIN_STAGE_TABLIST_CLASS_NAME
+        : "tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+    }
   >
     {viewModes.map((mode) => {
       const label = getViewModeLabel(mode);
@@ -144,7 +264,7 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
             aria-label={label}
             aria-selected={viewMode === mode}
             tabIndex={viewMode === mode ? 0 : -1}
-            className={getViewModeTabClass(mode, viewMode)}
+            className={getViewModeTabClass(mode, viewMode, isMainStage)}
             onClick={() => onViewModeChange(mode)}
             data-tooltip-id={`leaderboard-view-mode-${mode}-${waveId}`}
           >
@@ -293,9 +413,8 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
 
     <div
       ref={sortDropdownProbeRef}
-      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-3.5 tw-pr-8 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-2 tw-pr-6 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
     >
-      <span className="tw-font-semibold tw-text-iron-500">Sort: </span>
       {activeSortLabel}
     </div>
 

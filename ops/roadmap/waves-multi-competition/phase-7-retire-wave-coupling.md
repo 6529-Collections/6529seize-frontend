@@ -7,8 +7,8 @@
 - Status: Not started
 - Delivery target: To be selected
 - Owner: Unassigned
-- Evidence: Add links to decisions, implementation, validation, and deployment
-  records as the phase advances.
+- Evidence: [2026-10-01 production assessment](./native-delivery/production-status-2026-10-01.md).
+  No migration/cutover or retirement implementation is claimed by the native release.
 
 ## Outcome
 
@@ -19,6 +19,13 @@ obsolete schema are retired in a measured order.
 Every GET API that was externally available at the Phase 0 baseline remains
 permanently backwards compatible through a supported façade over native or
 retained read data. Cleanup removes internal coupling, not those contracts.
+
+## Current Boundary
+
+Legacy creation APIs, original-primary frontend paths, wave-scoped writes and
+legacy workers are still present. They are intentional coexistence paths until
+migration and compatibility gates permit retirement. A UI default competition
+is not an execution owner and must not be used to remove or repoint them.
 
 ## Entry Criteria
 

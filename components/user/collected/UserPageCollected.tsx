@@ -8,7 +8,7 @@ import {
   EMPTY_USER_PAGE_STATS_INITIAL_DATA,
   type UserPageStatsInitialData,
 } from "@/components/user/stats/userPageStats.types";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { CollectedCard } from "@/entities/IProfile";
 import {
   CollectedCollectionType,
@@ -34,6 +34,7 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
+import UserPageCollectedCardsNoCards from "./cards/UserPageCollectedCardsNoCards";
 import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {
   COLLECTED_COLLECTIONS_META,
@@ -43,6 +44,7 @@ import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import UserPageCollectedStats from "./UserPageCollectedStats";
+import { useCollectedTracking } from "./useCollectedTracking";
 import {
   applyQueryUpdateItemsToState,
   convertCollection,
@@ -51,7 +53,7 @@ import {
   convertSortedBy,
   convertSznId,
   DEFAULT_SEIZED,
-  DEFAULT_SORT_DIRECTION,
+  getNextCollectedSortDirection,
   getNormalizedCollectedQueryStateFromFilters,
   normalizePageNumber,
   PAGE_SIZE,
@@ -80,6 +82,7 @@ export default function UserPageCollected({
   const params = useParams();
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
+  const { rootRef, onClickCapture, trackAction } = useCollectedTracking(user);
   const locale = normalizeLocale(searchParams.get("locale"));
   const collectedReturnTo = buildProfileCollectedReturnPath({
     pathname,
@@ -130,6 +133,12 @@ export default function UserPageCollected({
   }, [searchParams, profile.handle, user]);
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const artworkRef = useRef<HTMLDivElement>(null);
+  const pendingPageNavigation = useRef<{
+    from: string;
+    to: string;
+    page: number;
+  } | null>(null);
   const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const createQueryString = useCallback(
@@ -294,6 +303,13 @@ export default function UserPageCollected({
     collection: CollectedCollectionType | null
   ): Promise<void> => {
     if (filters.collection === null && collection === null) return;
+    trackAction(
+      "Filters",
+      collection === CollectedCollectionType.NETWORK ||
+        filters.collection === CollectedCollectionType.NETWORK
+        ? "Change view"
+        : "Change collection"
+    );
     const { nextFilters, updateItems } = getCollectionUpdate({
       collection,
       allowToggle: true,
@@ -305,6 +321,7 @@ export default function UserPageCollected({
   const setCollectionShortcut = async (
     collection: CollectedCollectionType
   ): Promise<void> => {
+    trackAction("Collection summary", "Change collection");
     const { nextFilters, updateItems } = getCollectionUpdate({
       collection,
       allowToggle: true,
@@ -314,6 +331,7 @@ export default function UserPageCollected({
   };
 
   const setSeasonShortcut = async (seasonNumber: number): Promise<void> => {
+    trackAction("Collection summary", "Change season");
     const isActiveSeasonShortcut =
       filters.collection === CollectedCollectionType.MEMES &&
       effectiveSeasonId === seasonNumber;
@@ -346,25 +364,8 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const calculateSortDirection = ({
-    newSortBy,
-    currentSortBy,
-    currentSortDirection,
-  }: {
-    newSortBy: CollectionSort;
-    currentSortBy: CollectionSort;
-    currentSortDirection: SortDirection;
-  }): SortDirection | null => {
-    if (newSortBy === currentSortBy) {
-      if (currentSortDirection === SortDirection.ASC) {
-        return SortDirection.DESC;
-      }
-      return SortDirection.ASC;
-    }
-    return DEFAULT_SORT_DIRECTION;
-  };
-
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
+    trackAction("Filters", "Change sort");
     const items: QueryUpdateInput[] = [
       {
         name: "sortBy",
@@ -372,7 +373,7 @@ export default function UserPageCollected({
       },
       {
         name: "sortDirection",
-        value: calculateSortDirection({
+        value: getNextCollectedSortDirection({
           newSortBy: sortBy,
           currentSortBy: filters.sortBy,
           currentSortDirection: filters.sortDirection,
@@ -387,6 +388,7 @@ export default function UserPageCollected({
   };
 
   const setSeized = async (seized: CollectionSeized | null): Promise<void> => {
+    trackAction("Filters", "Change seized filter");
     const items: QueryUpdateInput[] = [
       {
         name: "seized",
@@ -401,6 +403,7 @@ export default function UserPageCollected({
   };
 
   const setSzn = async (szn: MemeSeason | null): Promise<void> => {
+    trackAction("Filters", "Change season");
     const nextInitialSznId = szn?.id ?? null;
     setFilters((prev) => ({
       ...prev,
@@ -432,6 +435,7 @@ export default function UserPageCollected({
   const setSubcollection = async (
     subcollection: string | null
   ): Promise<void> => {
+    trackAction("Filters", "Change collection");
     const items: QueryUpdateInput[] = [
       {
         name: "subcollection",
@@ -462,6 +466,42 @@ export default function UserPageCollected({
     await updateFields(items, historyMode);
   };
 
+  const setPageFromControl = (page: number): Promise<void> => {
+    if (page !== filters.page) {
+      trackAction("Artwork", "Change page");
+      pendingPageNavigation.current = {
+        from: searchParams.toString(),
+        to: createQueryString([{ name: "page", value: page.toString() }]),
+        page,
+      };
+    }
+    return setPage(page);
+  };
+
+  const clearFilters = (): Promise<void> => {
+    trackAction("Filters", "Clear filters");
+    const items: QueryUpdateInput[] = [
+      { name: "address", value: null },
+      {
+        name: "collection",
+        value:
+          filters.collection === CollectedCollectionType.NETWORK
+            ? CollectedCollectionType.NETWORK
+            : null,
+      },
+      { name: "subcollection", value: null },
+      { name: "szn", value: null },
+      { name: "seized", value: DEFAULT_SEIZED },
+      { name: "page", value: "1" },
+    ];
+    pendingPageNavigation.current = {
+      from: searchParams.toString(),
+      to: createQueryString(items),
+      page: 1,
+    };
+    return updateFields(items);
+  };
+
   useEffect(() => {
     setFilters((prev) => {
       const newFilters = getFilters();
@@ -475,6 +515,8 @@ export default function UserPageCollected({
   const {
     isFetching,
     isLoading: isInitialLoading,
+    isSuccess,
+    isPlaceholderData,
     data,
   } = useQuery<Page<CollectedCard>>({
     queryKey: [QueryKey.PROFILE_COLLECTED, filters],
@@ -516,6 +558,8 @@ export default function UserPageCollected({
     data: dataNetwork,
     isLoading: isNetworkLoading,
     isFetching: isNetworkFetching,
+    isSuccess: isNetworkSuccess,
+    isPlaceholderData: isNetworkPlaceholderData,
   } = useXtdhTokensQuery({
     identity: filters.handleOrWallet,
     page: filters.page,
@@ -527,6 +571,51 @@ export default function UserPageCollected({
   });
   const isFetchingData = isNetwork ? isNetworkFetching : isFetching;
   const isLoading = isNetwork ? isNetworkLoading : isInitialLoading;
+  const isPageReady = isNetwork
+    ? isNetworkSuccess && !isNetworkPlaceholderData
+    : isSuccess && !isPlaceholderData;
+  const loadedPage = isNetwork ? dataNetwork?.page : data?.page;
+  const isEmptyPage =
+    isPageReady &&
+    loadedPage === filters.page &&
+    (isNetwork ? dataNetwork?.data.length === 0 : data?.data.length === 0);
+  const currentFiltersQuery = createQueryString([]);
+
+  useEffect(() => {
+    const pending = pendingPageNavigation.current;
+    const query = searchParams.toString();
+    if (!pending || query === pending.from) return;
+    if (query !== pending.to) {
+      pendingPageNavigation.current = null;
+      return;
+    }
+    if (
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
+      !isPageReady ||
+      isFetchingData ||
+      currentFiltersQuery !== pending.to ||
+      filters.page !== pending.page ||
+      loadedPage !== pending.page
+    )
+      return;
+
+    pendingPageNavigation.current = null;
+    const list = artworkRef.current?.querySelector<HTMLUListElement>("ul");
+    const focusTarget =
+      list?.querySelector<HTMLAnchorElement>("a[href]") ??
+      list ??
+      artworkRef.current?.querySelector<HTMLOutputElement>("output");
+    if (!focusTarget) return;
+    focusTarget.focus({ preventScroll: true });
+    artworkRef.current?.scrollIntoView({ block: "start" });
+  }, [
+    searchParams,
+    isPageReady,
+    isFetchingData,
+    filters.page,
+    loadedPage,
+    currentFiltersQuery,
+  ]);
 
   const showTransfer =
     !isMobile &&
@@ -544,7 +633,9 @@ export default function UserPageCollected({
     queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
     queryFn: async () => {
       try {
-        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?page_size=200&seized=${CollectionSeized.SEIZED}&account_for_consolidations=false`;
+        const allPagesUrl = apiUrl(
+          `/api/profiles/${String(connectedAddress)}/collected?page_size=200&seized=${CollectionSeized.SEIZED}&account_for_consolidations=false`
+        );
         return await fetchAllPages<CollectedCard>(allPagesUrl);
       } catch (error) {
         console.error(
@@ -604,7 +695,13 @@ export default function UserPageCollected({
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="tailwind-scope">
+    <div
+      ref={rootRef}
+      onClickCapture={onClickCapture}
+      onAuxClickCapture={onClickCapture}
+      lang={locale}
+      className="tailwind-scope"
+    >
       <UserPageCollectedStats
         profile={profile}
         activeAddress={
@@ -625,7 +722,12 @@ export default function UserPageCollected({
         </div>
       ) : (
         <>
-          <div ref={scrollContainer} className="tw-mt-6">
+          <div
+            ref={scrollContainer}
+            data-profile-section="Filters"
+            data-profile-section-anchor="Filters"
+            className="tw-mt-6"
+          >
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
@@ -636,30 +738,47 @@ export default function UserPageCollected({
               setSzn={setSzn}
               setSubcollection={setSubcollection}
               showTransfer={showTransfer}
+              onAddressChange={() => trackAction("Filters", "Change address")}
             />
           </div>
 
-          <div className="tw-mt-6 tw-flex tw-gap-6">
-            {isNetwork ? (
+          <div
+            ref={artworkRef}
+            data-profile-section="Artwork"
+            aria-busy={isFetchingData}
+            className="tw-mt-6 tw-scroll-mt-24"
+          >
+            {isEmptyPage && (
+              <UserPageCollectedCardsNoCards
+                filters={filters}
+                locale={locale}
+                onClearFilters={clearFilters}
+                isLoading={isFetchingData}
+              />
+            )}
+            {!isEmptyPage && isNetwork && (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
                 page={filters.page}
-                setPage={setPage}
+                setPage={setPageFromControl}
                 next={dataNetwork?.next ?? false}
                 locale={locale}
+                isLoading={isFetchingData}
               />
-            ) : (
+            )}
+            {!isEmptyPage && !isNetwork && (
               <UserPageCollectedCards
                 cards={data?.data ?? []}
                 totalPages={totalPages}
                 page={filters.page}
                 showDataRow={showDataRow}
                 filters={filters}
-                setPage={setPage}
+                setPage={setPageFromControl}
                 dataTransfer={dataTransfer ?? []}
                 isTransferLoading={isFetchingTransfer}
                 locale={locale}
                 returnTo={collectedReturnTo}
+                isLoading={isFetchingData}
               />
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ApiBlockedProfile } from "@/generated/models/ApiBlockedProfile";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -93,7 +93,7 @@ function BlockedProfileRow({
         <span className="tw-relative tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
           {profile.pfp && (
             <Image
-              src={resolveIpfsUrlSync(profile.pfp)}
+              src={getScaledImageUri(profile.pfp, ImageScale.W_200_H_200)}
               alt=""
               fill
               sizes="40px"

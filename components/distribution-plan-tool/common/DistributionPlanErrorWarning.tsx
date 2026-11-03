@@ -40,7 +40,7 @@ export default function DistributionPlanErrorWarning() {
         <button
           onClick={runOperations}
           type="button"
-          className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out tw-text-error">
+          className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-border-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out tw-text-error">
           Run Analysis
         </button>
       </div>

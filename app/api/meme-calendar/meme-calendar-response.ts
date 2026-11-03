@@ -1,5 +1,4 @@
 import {
-  getCanonicalNextMintNumber,
   getMintNumberForMintDate,
   getMintTimelineDetails,
   nextMintDateOnOrAfter,
@@ -7,9 +6,15 @@ import {
   toISO,
   type ZoomLevel,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import { getMintTimelineStatus } from "../../../shared/memes-calendar/queries";
+export {
+  getMintTimelineStatus,
+  getNextMintTimelineDetails,
+  getCurrentMintTimelineDetails,
+} from "../../../shared/memes-calendar/queries";
 
 type MintTimelineDetails = ReturnType<typeof getMintTimelineDetails>;
-type MintTimelineStatus = "past" | "live" | "upcoming";
+type MintTimelineStatus = ReturnType<typeof getMintTimelineStatus>;
 type MintTimelineRange = MintTimelineDetails["ranges"][ZoomLevel];
 
 interface MemeCalendarMintPositionFields {
@@ -109,47 +114,6 @@ function getMemeCalendarMintPositionFields(
     position_in_era: positionInEra,
     position_in_eon: positionInEon,
   };
-}
-
-export function getMintTimelineStatus(
-  timeline: MintTimelineDetails,
-  now: Date = new Date()
-): MintTimelineStatus {
-  if (now < timeline.instantUtc) {
-    return "upcoming";
-  }
-  if (now < timeline.mintEndUtc) {
-    return "live";
-  }
-  return "past";
-}
-
-export function getNextMintTimelineDetails(
-  now: Date = new Date()
-): MintTimelineDetails {
-  return getMintTimelineDetails(getCanonicalNextMintNumber(now));
-}
-
-export function getCurrentMintTimelineDetails(
-  now: Date = new Date()
-): MintTimelineDetails | null {
-  const nextTimeline = getNextMintTimelineDetails(now);
-  const currentOrPreviousTimeline = getMintTimelineDetails(
-    getMintNumberForMintDate(now)
-  );
-  const candidates = [nextTimeline, currentOrPreviousTimeline];
-  const previousMintNumber = currentOrPreviousTimeline.mintNumber - 1;
-  if (previousMintNumber > 0) {
-    // Meme mint windows are shorter than the regular mint cadence, so the
-    // live window can only be the date-derived mint or its immediate neighbor.
-    candidates.push(getMintTimelineDetails(previousMintNumber));
-  }
-
-  return (
-    candidates.find(
-      (timeline) => getMintTimelineStatus(timeline, now) === "live"
-    ) ?? null
-  );
 }
 
 export function buildMemeCalendarMintResponse(

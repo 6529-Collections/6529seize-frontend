@@ -8,11 +8,15 @@ export default function WaveGroupEditButton({
   label,
   loading,
   onClick,
+  expanded,
+  controls,
 }: {
   readonly disabled: boolean;
   readonly label: string;
   readonly loading: boolean;
-  readonly onClick: () => void;
+  readonly onClick: (trigger: HTMLButtonElement) => void;
+  readonly expanded?: boolean;
+  readonly controls?: string | undefined;
 }) {
   return (
     <button
@@ -20,7 +24,9 @@ export default function WaveGroupEditButton({
       aria-label={label}
       title={label}
       disabled={disabled}
-      onClick={onClick}
+      onClick={(event) => onClick(event.currentTarget)}
+      aria-expanded={expanded}
+      aria-controls={controls}
       className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
     >
       {loading ? (

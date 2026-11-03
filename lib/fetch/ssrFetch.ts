@@ -1,10 +1,24 @@
-import { publicEnv } from "@/config/env";
-import { getServerEnvOrThrow } from "@/config/serverEnv";
+import { getApiBase } from "@/services/api/api-endpoints";
+import { isProductionBuildPhase } from "@/config/nextPhase";
+import { getServerEnvOrThrow, getStagingApiKey } from "@/config/serverEnv";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import {
   generateClientSignature,
   generateWafSignature,
 } from "@/helpers/server-signature.helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import {
+  bindResponseDeadline,
+  createFetchDeadline,
+  discardResponse,
+} from "@/lib/fetch/fetchDeadline";
+
+/**
+ * Longest a server render waits on the first-party API, from request start to
+ * the last byte of the response. Without it a slow API holds the render for
+ * undici's ~300 s default.
+ */
+export const SSR_API_TIMEOUT_MS = 4500;
 
 const getOriginalFetch = (): typeof fetch => {
   if (globalThis.fetch === undefined) {
@@ -25,8 +39,9 @@ const originalFetch = getOriginalFetch();
 const isApiRequest = (url: string | URL): boolean => {
   const urlString = typeof url === "string" ? url : url.toString();
   try {
-    const parsedUrl = new URL(urlString, publicEnv.API_ENDPOINT);
-    return parsedUrl.origin === new URL(publicEnv.API_ENDPOINT).origin;
+    const apiBase = getApiBase();
+    const parsedUrl = new URL(urlString, apiBase);
+    return parsedUrl.origin === new URL(apiBase).origin;
   } catch {
     return false;
   }
@@ -40,6 +55,119 @@ const extractPathFromUrl = (url: string | URL, baseUrl: string): string => {
   } catch {
     return "";
   }
+};
+
+// Keep only the API family (for example `GET /api/identities/*`). Identifiers
+// and query strings never reach the logs.
+const describeRequestForLog = (method: string, path: string): string => {
+  const segments = (path.split("?", 1)[0] ?? "").split("/").filter(Boolean);
+  const family = segments.slice(0, 2).join("/");
+  return `${method} /${family}${segments.length > 2 ? "/*" : ""}`;
+};
+
+// Next.js memoizes identical GET/HEAD requests within a render, but skips any
+// call that carries `init.signal`. Its own patched fetch folds `init` into a
+// Request for the same reason, so hand it the Request directly: the deadline
+// still cancels the transfer and memoization keeps working. A signal supplied
+// by the caller already opted that call out, so it keeps the plain form.
+const sendWithSignal = (
+  input: RequestInfo | URL,
+  init: RequestInit,
+  signal: AbortSignal,
+  method: string
+): Promise<Response> => {
+  const keepsMemoization =
+    (method === "GET" || method === "HEAD") && !init.signal;
+  if (!keepsMemoization) {
+    return originalFetch(input, { ...init, signal });
+  }
+  const { next, ...overrides } = init;
+  return originalFetch(
+    new Request(input, { ...overrides, signal }),
+    next ? { next } : undefined
+  );
+};
+
+/**
+ * Runs a first-party API request under one deadline covering the response
+ * headers and body. The caller's own signal still cancels it, and the timer is
+ * released as soon as the body is consumed or the request fails.
+ */
+const fetchApiWithDeadline = async (
+  input: RequestInfo | URL,
+  init: RequestInit,
+  method: string,
+  path: string
+): Promise<Response> => {
+  // Static generation and other build-time work may legitimately wait longer
+  // than a live render can.
+  if (isProductionBuildPhase()) {
+    return originalFetch(input, init);
+  }
+
+  let awaitingHeaders = true;
+  const callerSignal =
+    init.signal === undefined && input instanceof Request
+      ? input.signal
+      : init.signal;
+  const deadline = createFetchDeadline(callerSignal, SSR_API_TIMEOUT_MS, () => {
+    // A body nobody reads is cancelled quietly; only a silent API is worth a log.
+    if (awaitingHeaders) {
+      console.warn(
+        `[SSR Fetch] 6529 API request exceeded ${SSR_API_TIMEOUT_MS}ms (${describeRequestForLog(method, path)}).`
+      );
+    }
+    return new DOMException(
+      `The 6529 API did not respond within ${SSR_API_TIMEOUT_MS}ms.`,
+      "TimeoutError"
+    );
+  });
+
+  let response: Response | undefined;
+  try {
+    response = await deadline.run(async () => {
+      const result = await sendWithSignal(input, init, deadline.signal, method);
+      if (deadline.signal.aborted) {
+        discardResponse(result);
+        throw deadline.signal.reason;
+      }
+      return result;
+    });
+    awaitingHeaders = false;
+    return bindResponseDeadline(response, deadline);
+  } catch (error) {
+    deadline.dispose();
+    if (response) discardResponse(response);
+    throw error;
+  }
+};
+
+// Server-held staging access fills in only when the caller sent none; the
+// signed path still prefers the visitor's own access cookie.
+const applyServerStagingAccess = (headers: Headers): void => {
+  const stagingApiKey = getStagingApiKey();
+  if (stagingApiKey && !headers.has(API_AUTH_COOKIE)) {
+    headers.set(API_AUTH_COOKIE, stagingApiKey);
+  }
+};
+
+// fetch keeps custom headers across redirects, including cross-origin ones, so
+// a request that still carries the server staging key never follows one.
+const withServerKeyRedirectGuard = (
+  init: RequestInit | undefined,
+  headers: Headers
+): RequestInit => {
+  const stagingApiKey = getStagingApiKey();
+  const carriesServerKey =
+    stagingApiKey !== undefined &&
+    headers.get(API_AUTH_COOKIE) === stagingApiKey;
+  return {
+    ...init,
+    headers,
+    ...(carriesServerKey && init?.redirect !== "manual"
+      ? { redirect: "error" as const }
+      : {}),
+  };
 };
 
 const createSsrFetch =
@@ -70,7 +198,7 @@ const createSsrFetch =
       (input instanceof Request ? input.method : undefined) ??
       "GET"
     ).toUpperCase();
-    const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
+    const path = extractPathFromUrl(url, getApiBase());
 
     if (!path) {
       return originalFetch(input, init);
@@ -86,6 +214,7 @@ const createSsrFetch =
     if (!includeWalletAuth) {
       enhancedHeaders.delete("Authorization");
     }
+    applyServerStagingAccess(enhancedHeaders);
 
     try {
       const env = getServerEnvOrThrow();
@@ -95,10 +224,12 @@ const createSsrFetch =
       console.warn(
         `[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed.`
       );
-      return originalFetch(input, {
-        ...init,
-        headers: enhancedHeaders,
-      });
+      return fetchApiWithDeadline(
+        input,
+        withServerKeyRedirectGuard(init, enhancedHeaders),
+        method,
+        path
+      );
     }
 
     const signatureData = generateClientSignature(
@@ -133,10 +264,12 @@ const createSsrFetch =
       );
     }
 
-    return originalFetch(input, {
-      ...init,
-      headers: enhancedHeaders,
-    });
+    return fetchApiWithDeadline(
+      input,
+      withServerKeyRedirectGuard(init, enhancedHeaders),
+      method,
+      path
+    );
   };
 
 const enhancedFetch = createSsrFetch(true);

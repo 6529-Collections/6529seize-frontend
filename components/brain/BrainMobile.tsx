@@ -1,18 +1,42 @@
 "use client";
+import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
+import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
+import {
+  getCompetitionRoute,
+  isCompetitionPathname,
+  getCompetitionIdFromPathname,
+} from "@/helpers/competition.helpers";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  useWaveTabPreference,
+  rememberHistoryWaveTab,
+} from "@/hooks/useWaveTabPreference";
+import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
+import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 
 import type { ReactNode } from "react";
 import React, {
   Suspense,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
-import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+  useAnimationControls,
+} from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import BrainDesktopDrop from "./BrainDesktopDrop";
+import SingleWaveDropLoading from "@/components/waves/drop/SingleWaveDropLoading";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -33,6 +57,7 @@ import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
   getWaveHomeRoute,
+  getWavePathRoute,
 } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
@@ -53,6 +78,8 @@ import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
 import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
 import { WaveContentTabs } from "./right-sidebar/WaveContent";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { useWaveInformation } from "@/contexts/WaveInformationContext";
+import WaveInformationSheet from "./mobile/WaveInformationSheet";
 import { useLayout } from "./my-stream/layout/LayoutContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
@@ -74,12 +101,23 @@ const getRestoredWaveView = (
 ): BrainView | null =>
   isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
 
+function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
+  const tab =
+    view === BrainView.DEFAULT
+      ? MyStreamWaveTab.CHAT
+      : (view as unknown as MyStreamWaveTab);
+  return Object.values(MyStreamWaveTab).includes(tab) ? tab : undefined;
+}
+
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
+  const information = useWaveInformation();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { rememberTab } = useWaveTabPreference();
   const { currentWaveView, rememberWaveView } = useNavigationHistoryContext();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { registerRef } = useLayout();
@@ -97,7 +135,12 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
 
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
-  const { data: drop } = useQuery<ApiDrop>({
+  const {
+    data: drop,
+    error: dropError,
+    refetch: refetchDrop,
+    isFetching: isDropFetching,
+  } = useQuery<ApiDrop>({
     queryKey: getDropQueryKey(effectiveDropId),
     queryFn: () => {
       if (!effectiveDropId) {
@@ -118,18 +161,22 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     null;
   const { data: wave } = useWaveData({
     waveId: waveId,
-    onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: pathname.startsWith("/messages"),
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath || getHomeRoute();
-      router.push(newUrl, { scroll: false });
-    },
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const route = getMissingWaveNavigationRoute(waveId);
+          if (!route) return;
+          const params = route.searchParams;
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: route.pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath || getHomeRoute();
+          router.push(newUrl, { scroll: false });
+        },
   });
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
@@ -139,6 +186,16 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     enabled: isCompetitionWave,
   });
   const outcomesVisible = useWaveOutcomeVisibility(wave);
+  const {
+    hasCompetitions: hasAvailableCompetitions,
+    hideCompetitionsTab,
+    activeCount: activeCompetitionCount,
+    defaultCompetitionId,
+    defaultSelectionEnabled,
+  } = useWaveCompetitionsTab(wave);
+  useDefaultCompetitionNavigation(wave, true);
+  const hasCompetitions =
+    hasAvailableCompetitions || isCompetitionPathname(pathname);
 
   const {
     voting: { isCompleted },
@@ -166,7 +223,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     isRankWave,
     isApproveWave,
     showOutcomeView: outcomesVisible,
+    hasCompetitions,
     hasPolls,
+    defaultSelectionEnabled,
     pathname,
     searchParams,
     wave,
@@ -175,13 +234,69 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   });
   const onViewChange = useCallback(
     (view: BrainView) => {
+      const competitionTab =
+        waveCompetitionTabs[view as unknown as MyStreamWaveTab];
+      if (waveId && defaultSelectionEnabled && competitionTab) {
+        const selectedId = isCompetitionPathname(pathname)
+          ? getCompetitionIdFromPathname(pathname)
+          : (searchParams.get("competition") ?? defaultCompetitionId);
+        rememberTab(waveId, view as unknown as MyStreamWaveTab, selectedId);
+        navigateTab(
+          selectedId
+            ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
+            : `${getWavePathRoute(waveId)}?tab=${view.toLowerCase()}`
+        );
+        return;
+      }
       selectView(view);
+      const tab = getWaveTab(view);
+      if (waveId && tab !== undefined) {
+        rememberTab(waveId, tab);
+        rememberHistoryWaveTab(waveId, tab);
+      }
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });
       }
+      if (
+        waveId &&
+        isCompetitionPathname(pathname) &&
+        view !== BrainView.COMPETITIONS
+      ) {
+        const competitionId = getCompetitionIdFromPathname(pathname);
+        const params = new URLSearchParams({
+          tab: tab?.toLowerCase() ?? view.toLowerCase(),
+        });
+        if (competitionId) params.set("competition", competitionId);
+        navigateTab(`${getWavePathRoute(waveId)}?${params}`);
+      }
     },
-    [selectView, isApp, waveId, rememberWaveView]
+    [
+      selectView,
+      rememberTab,
+      isApp,
+      waveId,
+      rememberWaveView,
+      pathname,
+      navigateTab,
+      defaultSelectionEnabled,
+      defaultCompetitionId,
+      searchParams,
+    ]
   );
+  const viewAnimation = useAnimationControls();
+  useEffect(() => {
+    // Animate the transition without using the view as the subtree's lifetime.
+    // A tab key discarded the shared wave/chat DOM on every native tab visit.
+    viewAnimation.set({ opacity: shouldReduceMotion ? 1 : 0.92 });
+    void viewAnimation.start({
+      opacity: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.12, ease: "easeOut" },
+    });
+    return () => viewAnimation.stop();
+  }, [activeView, waveId, shouldReduceMotion, viewAnimation]);
+
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
     activeTab: SidebarTab.ABOUT,
@@ -211,6 +326,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const onDropClick = (selectedDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", selectedDrop.id);
+    params.delete("default");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -218,12 +334,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || getHomeRoute();
-    router.replace(newUrl, { scroll: false });
+    closeDropInCurrentUrl();
   };
 
   const isDropOpen =
@@ -302,84 +413,114 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       }`}
     >
       {createOverlay}
-      {isDropOpen && (
+      {effectiveDropId && (
         <div className={dropOverlayClass}>
-          <BrainDesktopDrop
-            drop={{
-              type: DropSize.FULL,
-              ...drop,
-              stableKey: drop.id,
-              stableHash: drop.id,
-            }}
-            onClose={onDropClose}
-          />
+          {isDropOpen ? (
+            <BrainDesktopDrop
+              drop={{
+                type: DropSize.FULL,
+                ...drop,
+                stableKey: drop.id,
+                stableHash: drop.id,
+              }}
+              onClose={onDropClose}
+            />
+          ) : (
+            <SingleWaveDropLoading
+              onClose={onDropClose}
+              isError={!!dropError && !isDropFetching}
+              onRetry={() => {
+                void refetchDrop();
+              }}
+            />
+          )}
         </div>
       )}
-      {(hasWave || !isApp) && (
-        <BrainMobileTabs
-          activeView={activeView}
-          onViewChange={onViewChange}
-          wave={wave}
-          waveActive={hasWave}
-          hasPolls={hasPolls}
-          outcomesVisible={outcomesVisible}
-          waveNavigationReady={waveNavigationReady}
-          showWavesTab={hydrated}
-          showStreamBack={hydrated}
-          isApp={isApp}
-        />
-      )}
-      {isApp &&
-        wave &&
-        (activeView === BrainView.ABOUT ? (
-          <div ref={setInformationTabsRef}>
-            <WaveContentTabs
+      <div
+        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+        aria-hidden={!!effectiveDropId}
+        inert={effectiveDropId ? true : undefined}
+      >
+        {wave &&
+          information?.request?.overlay &&
+          information.request.waveId === wave.id && (
+            <WaveInformationSheet
+              key={information.request.id}
               wave={wave}
-              activeTab={activeAboutTab}
-              setActiveTab={onAboutTabChange}
-              maxVisibleTabs={3}
-              variant="compactPills"
-              aboutTabLabel={waveRightPanelText(
-                "waves.sidebar.rightPanel.tabs.overview"
-              )}
+              onClose={information.close}
             />
-          </div>
-        ) : (
-          <MobileWaveSubwavesBar wave={wave} />
-        ))}
-      <LazyMotion features={domAnimation}>
-        <m.div
-          key={activeView}
-          {...swipeBackHandlers}
-          initial={shouldReduceMotion ? false : { opacity: 0.92 }}
-          animate={{ opacity: 1 }}
-          transition={
-            shouldReduceMotion
-              ? { duration: 0 }
-              : { duration: 0.12, ease: "easeOut" }
-          }
-          className="tw-relative tw-min-w-0 tw-flex-1"
-        >
-          <BrainMobileViewContent
+          )}
+        {(hasWave || !isApp) && (
+          <BrainMobileTabs
             activeView={activeView}
-            activeWaveId={waveId}
-            activeAboutTab={activeAboutTab}
-            onAboutTabChange={onAboutTabChange}
-            isCurationWave={isCurationWave}
-            isMemesWave={isMemesWave}
-            isRankWave={isRankWave}
-            isApproveWave={isApproveWave}
-            outcomesVisible={outcomesVisible}
-            hasPolls={hasPolls}
-            onDropClick={onDropClick}
-            onOpenQuickVote={quickVote.openQuickVote}
-            onPrefetchQuickVote={quickVote.prefetchQuickVote}
+            onViewChange={onViewChange}
             wave={wave}
+            waveActive={hasWave}
+            hasPolls={hasPolls}
+            hasCompetitions={hasCompetitions}
+            hideCompetitionsTab={hideCompetitionsTab}
+            hasDefaultCompetition={Boolean(
+              searchParams.get("competition") ?? defaultCompetitionId
+            )}
+            activeCompetitionCount={activeCompetitionCount}
+            outcomesVisible={outcomesVisible}
+            waveNavigationReady={waveNavigationReady}
+            showWavesTab={hydrated}
+            showStreamBack={hydrated}
+            isApp={isApp}
+          />
+        )}
+        {isApp &&
+          wave &&
+          (activeView === BrainView.ABOUT ? (
+            <div ref={setInformationTabsRef}>
+              <WaveContentTabs
+                activeTab={activeAboutTab}
+                setActiveTab={onAboutTabChange}
+                maxVisibleTabs={3}
+                variant="compactPills"
+                aboutTabLabel={waveRightPanelText(
+                  "waves.sidebar.rightPanel.tabs.overview"
+                )}
+              />
+            </div>
+          ) : (
+            <MobileWaveSubwavesBar wave={wave} />
+          ))}
+        <LazyMotion features={domAnimation}>
+          <m.div
+            key={waveId ?? "root"}
+            {...swipeBackHandlers}
+            initial={shouldReduceMotion ? false : { opacity: 0.92 }}
+            animate={viewAnimation}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: "easeOut" }
+            }
+            className="tw-relative tw-min-w-0 tw-flex-1"
           >
-            {children}
-          </BrainMobileViewContent>
-        </m.div>
-      </LazyMotion>
+            <BrainMobileViewContent
+              activeView={activeView}
+              activeWaveId={waveId}
+              activeAboutTab={activeAboutTab}
+              onAboutTabChange={onAboutTabChange}
+              isCurationWave={isCurationWave}
+              isMemesWave={isMemesWave}
+              isRankWave={isRankWave}
+              isApproveWave={isApproveWave}
+              outcomesVisible={outcomesVisible}
+              hasPolls={hasPolls}
+              onDropClick={onDropClick}
+              onOpenQuickVote={quickVote.openQuickVote}
+              onPrefetchQuickVote={quickVote.prefetchQuickVote}
+              wave={wave}
+            >
+              {children}
+            </BrainMobileViewContent>
+          </m.div>
+        </LazyMotion>
+      </div>
       {quickVoteRuntimeIntent === null ? null : (
         <LazyMemesQuickVoteRuntime
           intent={quickVoteRuntimeIntent}

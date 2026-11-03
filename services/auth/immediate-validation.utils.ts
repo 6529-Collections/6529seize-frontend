@@ -10,7 +10,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevAuthEnabled } from "@/config/devAuth";
 
 interface ImmediateValidationParams {
   currentAddress: string;
@@ -166,9 +166,14 @@ const handleValidationError = async (
     callbacks.onShowSignModal(true);
   } else {
     callbacks.onLogError("validateJwt_general_error", error);
-    if (isConnected) {
-      callbacks.onShowSignModal(true);
-    }
+    // Transport, rate-limit and storage failures say nothing about whether the
+    // saved session is valid. Resume/online recovery can retry it later.
+    return createValidationResult(
+      false,
+      abortSignal.aborted,
+      false,
+      abortSignal.aborted ? "cancelled" : "failed"
+    );
   }
 
   return createValidationResult(
@@ -186,10 +191,7 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  if (publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv) {
+  if (isDevAuthEnabled()) {
     return createValidationResult(
       true,
       false,

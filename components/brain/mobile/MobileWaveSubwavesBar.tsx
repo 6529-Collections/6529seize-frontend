@@ -24,7 +24,7 @@ interface MobileWaveSubwaveItem {
   readonly pictureName: string;
   readonly picture: string | null;
   readonly contributors: readonly SidebarWaveContributor[];
-  readonly type: ApiWaveType;
+  readonly hasCompetition: boolean;
   readonly muted: boolean;
   readonly unreadDropsCount: number;
 }
@@ -90,7 +90,7 @@ const getParentWaveItem = (wave: ApiWave): MobileWaveSubwaveItem => {
           pfp: contributor.pfp ?? "",
           identity: contributor.handle ?? null,
         })) ?? [],
-      type: parentWave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
+      hasCompetition: parentWave.has_competition,
       muted: parentWave.context_profile_context?.muted ?? false,
       unreadDropsCount: parentWave.context_profile_context?.unread_drops ?? 0,
     };
@@ -105,7 +105,7 @@ const getParentWaveItem = (wave: ApiWave): MobileWaveSubwaveItem => {
       pfp: contributor.contributor_pfp,
       identity: contributor.contributor_identity,
     })),
-    type: wave.wave.type,
+    hasCompetition: wave.wave.type !== ApiWaveType.Chat,
     muted: wave.metrics.muted,
     unreadDropsCount: wave.metrics.your_unread_drops_count,
   };
@@ -117,7 +117,7 @@ const getSidebarWaveItem = (wave: SidebarWave): MobileWaveSubwaveItem => ({
   pictureName: wave.name,
   picture: wave.picture,
   contributors: wave.contributors,
-  type: wave.type,
+  hasCompetition: wave.hasCompetition,
   muted: wave.muted,
   unreadDropsCount: wave.unreadDropsCount,
 });
@@ -133,7 +133,7 @@ const getActiveSubwaveFallbackItem = (
     pfp: contributor.contributor_pfp,
     identity: contributor.contributor_identity,
   })),
-  type: wave.wave.type,
+  hasCompetition: wave.wave.type !== ApiWaveType.Chat,
   muted: wave.metrics.muted,
   unreadDropsCount: wave.metrics.your_unread_drops_count,
 });
@@ -249,7 +249,6 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
         <div className="tw-flex tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-scrollbar-none">
           {items.map((item) => {
             const isActive = item.id === currentWaveId;
-            const isDropWave = item.type !== ApiWaveType.Chat;
             const showUnreadBadge =
               !isActive && !item.muted && item.unreadDropsCount > 0;
 
@@ -274,7 +273,7 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
                       contributors={item.contributors}
                     />
                   </span>
-                  {isDropWave && (
+                  {item.hasCompetition && (
                     <span className="tw-absolute -tw-bottom-0.5 -tw-right-0.5 tw-flex tw-size-2.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950">
                       <TrophyIcon
                         className="tw-size-2 tw-text-[#E8D48A]"

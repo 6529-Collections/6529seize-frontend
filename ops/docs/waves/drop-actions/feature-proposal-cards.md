@@ -74,6 +74,10 @@ saved settings. The editor opens in a desktop popover or a mobile/touch sheet.
   contains those items.
 - A proposal with ready static image media can show one preview image. Animated,
   processing, or failed media is not used as the card preview.
+- Uploaded videos are identified by **Video** and **View artwork**. A video-only
+  proposal shows a Video tile when thumbnails are enabled. With thumbnails
+  hidden, the Video label remains in the text. Summary cards do not load or
+  autoplay video players.
 - Wave creators and admins can choose the proposal-preview text limit and
   whether the first ready still image appears beside proposal summaries in chat
   and list views. Full proposal media is unchanged. Layout, typography,
@@ -86,7 +90,7 @@ saved settings. The editor opens in a desktop popover or a mobile/touch sheet.
   block forward navigation instead of being silently accepted.
 - Very short proposals remain compact and do not receive invented descriptive
   text.
-- `Read full` follows the excerpt, or the title when there is no excerpt, in
+- `Read full` (or **View artwork** for uploaded videos) follows the excerpt, or the title when there is no excerpt, in
   the text column. A taller preview image does not push the action below it.
 - The surrounding proposal row keeps its existing author, date, status, vote,
   voter, and action controls.
@@ -99,7 +103,8 @@ saved settings. The editor opens in a desktop popover or a mobile/touch sheet.
 - Multipart cards count the published number of parts even when the card shows
   content from only the available proposal data.
 - If no ready static image is available, the card uses a ready static NFT
-  preview when present; otherwise it renders without an image.
+  preview when present; otherwise videos use the Video tile and other cards
+  render without an image.
 - Normal Chat drops inside the same Wave continue to use the normal message
   presentation.
 - Gallery-first Memes and Curation views and Quorum proposal layouts keep their

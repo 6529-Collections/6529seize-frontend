@@ -26,7 +26,7 @@
   "network.tdh.explainer.faq.sale.title": "Why can selling one card reduce TDH by more than that card’s score?",
   "network.tdh.explainer.faq.sale.body": "The sold copy stops contributing its holding days. If the sale also breaks a set or removes a Gradient boost, your multiplier falls on the rest of your holdings too. TDH is recalculated from what you hold; it is not a permanently banked balance.",
   "network.tdh.explainer.faq.transfer.title": "Do I keep my holding time when I move a card?",
-  "network.tdh.explainer.faq.transfer.body": "Transfers between wallets in your confirmed consolidation preserve the original acquisition time. A transfer outside that group removes the sender’s contribution and starts a new holding period for the recipient. Delegation alone does not consolidate wallets.",
+  "network.tdh.explainer.faq.transfer.body": "Transfers between wallets in your confirmed consolidation, which can hold up to four wallets, preserve the original acquisition time. A transfer outside that group removes the sender’s contribution and starts a new holding period for the recipient. Delegation alone does not consolidate wallets.",
   "network.tdh.explainer.faq.new.title": "When does a new purchase or newly minted card count?",
   "network.tdh.explainer.faq.new.body": "A copy needs a completed 24-hour holding period to contribute holding days. Newly minted Memes and Gradients also need to pass the snapshot’s separate 24-hour mint-age filter. An already eligible card can complete a set before its new owner has held it for a full day.",
   "network.tdh.explainer.faq.set.title": "Does a full collection include the current season?",

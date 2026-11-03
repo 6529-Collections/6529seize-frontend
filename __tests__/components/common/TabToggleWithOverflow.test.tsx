@@ -1,6 +1,7 @@
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Suspense, useState } from "react";
 
 describe("TabToggleWithOverflow", () => {
   const options = [
@@ -90,7 +91,10 @@ describe("TabToggleWithOverflow", () => {
   it("applies ARIA roles to visible tabs", () => {
     render(
       <TabToggleWithOverflow
-        options={options}
+        options={options.map((option) => ({
+          ...option,
+          panelId: `panel-${option.key}`,
+        }))}
         activeKey="a"
         onSelect={() => {}}
         maxVisibleTabs={2}
@@ -102,10 +106,60 @@ describe("TabToggleWithOverflow", () => {
       "aria-selected",
       "true"
     );
+    expect(screen.getByRole("tab", { name: "A" })).toHaveAttribute(
+      "aria-controls",
+      "panel-a"
+    );
     expect(screen.getByRole("tab", { name: "B" })).toHaveAttribute(
       "aria-selected",
       "false"
     );
+  });
+
+  it("preserves pending feedback and keyboard focus for transition-enabled pills", async () => {
+    let ready = false;
+    let resolveDestination!: () => void;
+    const destination = new Promise<void>((resolve) => {
+      resolveDestination = resolve;
+    });
+    function Destination() {
+      if (!ready) throw destination;
+      return <p>New view</p>;
+    }
+    function Tabs() {
+      const [selected, setSelected] = useState("a");
+      return (
+        <Suspense fallback={<p>Loading view</p>}>
+          <TabToggleWithOverflow
+            options={options}
+            activeKey={selected}
+            onSelect={setSelected}
+            maxVisibleTabs={2}
+            variant="compactPills"
+            transition
+          />
+          {selected === "b" ? <Destination /> : <p>Current view</p>}
+        </Suspense>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Tabs />);
+    await user.click(screen.getByRole("tab", { name: "A" }));
+    await user.keyboard("{ArrowRight}");
+    const tab = screen.getByRole("tab", { name: "B" });
+    expect(tab).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(tab).toHaveAttribute("aria-busy", "true");
+    expect(tab).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByText("Current view")).toBeInTheDocument();
+    await act(async () => {
+      ready = true;
+      resolveDestination();
+      await destination;
+    });
+    expect(tab).not.toHaveAttribute("aria-busy", "true");
+    expect(tab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText("New view")).toBeInTheDocument();
   });
 
   it.each(["underline", "compactPills"] as const)(

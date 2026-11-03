@@ -61,6 +61,10 @@ const INTEGRITY_PATTERNS = Object.freeze([
   /^app\/museum\/network\/layout\.tsx$/u,
   /^components\/museum\/(?:MuseumMarkdown|MuseumShell|MuseumNavigation|MuseumSourceContribution)\.tsx$/u,
 ]);
+// Workflows that schedule or run Museum browser lanes. Other workflow edits do
+// not change Museum pages and do not start the Museum lane.
+const MUSEUM_LANE_WORKFLOW_PATTERN =
+  /^\.github\/workflows\/(?:app-pr-ci|staging-e2e|staging-e2e-dispatch|production-e2e|production-e2e-dispatch|museum-publication-compatibility)\.ya?ml$/u;
 const P1_PATTERNS = Object.freeze([
   /^i18n\/messages\/museum\.en-US\.json$/u,
   /^styles\/museum\.css$/u,
@@ -91,6 +95,31 @@ function isMuseumPath(file) {
 
 function isPolicyPath(file) {
   return POLICY_PATTERNS.some((pattern) => pattern.test(normalizePath(file)));
+}
+
+function isIntegrityPath(file) {
+  return INTEGRITY_PATTERNS.some((pattern) =>
+    pattern.test(normalizePath(file))
+  );
+}
+
+function isMuseumLaneWorkflow(file) {
+  return MUSEUM_LANE_WORKFLOW_PATTERN.test(normalizePath(file));
+}
+
+// Pre-install lane activation. Unit and contract tests run in the Jest lanes,
+// and workflows without Museum lanes cannot change Museum pages, so neither
+// starts the Museum browser lane. The selection tool then narrows the lane to
+// the affected pages.
+function requiresMuseumLane(file) {
+  const normalized = normalizePath(file);
+  if (normalized.startsWith("__tests__/")) {
+    return false;
+  }
+  if (normalized.startsWith(".github/workflows/")) {
+    return isMuseumLaneWorkflow(normalized);
+  }
+  return isMuseumPath(normalized) || isPolicyPath(normalized);
 }
 
 function resolveCommit(root, ref) {
@@ -910,9 +939,11 @@ module.exports = {
   assertionOnlyTestProof,
   classifyEntries,
   classifyRange,
+  isIntegrityPath,
   isMuseumPath,
   isPolicyPath,
   presentationComponentProof,
   readOption,
+  requiresMuseumLane,
   withClassificationDigest,
 };

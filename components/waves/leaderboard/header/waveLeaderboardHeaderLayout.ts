@@ -30,6 +30,47 @@ const DEFAULT_WRAP_EARLY_THRESHOLD_PX = 20;
 const isValidWidth = (value: number): boolean =>
   Number.isFinite(value) && value > 0;
 
+export function resolveSubmissionToolbarLayout({
+  rowWidth,
+  viewModesWidth,
+  sortControlWidth,
+  submissionActionsWidth,
+  showAdditionalActions,
+  showPriceActions,
+  hasFullControlsBasis,
+}: {
+  readonly rowWidth: number;
+  readonly viewModesWidth: number;
+  readonly sortControlWidth: number;
+  readonly submissionActionsWidth: number;
+  readonly showAdditionalActions: boolean;
+  readonly showPriceActions: boolean;
+  readonly hasFullControlsBasis: boolean;
+}) {
+  const minimumToolbarWidth =
+    viewModesWidth + sortControlWidth + submissionActionsWidth + 16;
+  const balanceSubmissionRows =
+    showAdditionalActions &&
+    !showPriceActions &&
+    isValidWidth(rowWidth) &&
+    isValidWidth(sortControlWidth) &&
+    isValidWidth(submissionActionsWidth) &&
+    minimumToolbarWidth > rowWidth + WIDTH_TOLERANCE_PX;
+  const compactSubmissionControls = balanceSubmissionRows && rowWidth < 240;
+  let controlsRowFlexClass = "tw-flex-1";
+  if (showAdditionalActions) {
+    controlsRowFlexClass =
+      hasFullControlsBasis || balanceSubmissionRows
+        ? "tw-flex-[1_1_100%]"
+        : "tw-flex-[1_1_auto]";
+  }
+  return {
+    balanceSubmissionRows,
+    compactSubmissionControls,
+    controlsRowFlexClass,
+  };
+}
+
 const normalizeGapWidth = (value: number | undefined): number => {
   if (value === undefined || !Number.isFinite(value)) {
     return DEFAULT_GAP_WIDTH;

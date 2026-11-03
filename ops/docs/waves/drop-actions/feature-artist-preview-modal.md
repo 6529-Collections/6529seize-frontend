@@ -43,7 +43,9 @@ Badge state decides which section opens first.
    - selecting a winner card opens that drop in the current route context
      (`drop` query is set and existing query params are preserved)
    - selecting a prevote card follows its token link to `/the-memes/{tokenId}`
-5. The modal closes after opening a winner card through drop context.
+5. The modal closes after opening a submission or winner card through drop context.
+   In the native app, the single-artwork view fills the screen, with its own
+   safe-area toolbar, including when opened from a profile.
 6. Users can also close with close button or backdrop click/tap.
 7. In app-wrapper contexts, swipe-down close is also supported.
 
@@ -52,9 +54,28 @@ Badge state decides which section opens first.
 - `Active Submissions` loading state shows `Loading submissions...`.
 - `Active Submissions` cards show artwork preview, optional title, position,
   current score, submission date, and mini vote control.
+- In competition-backed submissions, `Slider` and `Numeric` stay compact and
+  vertically centered beside `Your vote`, with larger invisible tap areas on
+  touch screens.
+- In the native app, the focused vote field stays visible as the keyboard opens,
+  and the close button remains above the submission panel.
+- The active card's top row shows the media-format indicator and optional
+  `Additional Action` badge on the left, with the leaderboard-style position
+  badge on the right. The title appears below this row. Hover or focus the
+  media indicator to see its format.
+- The category tabs fill the available width below 640px. They stay above the
+  scrolling cards with a small clear edge beneath them.
+- Both sections use one column on small screens, two on medium screens, and
+  three on large screens.
+- Cards marked `Additional Action` indicate that the artist promised something
+  beyond the artwork. Hover or focus the badge for an explanation. Selecting
+  the badge keeps the popup open and does not cast a vote.
 - Submission position labels use ordinal place formatting (`1st`, `2nd`,
   `3rd`, `4th`, and so on).
 - `Minted to Memes` loading state shows `Loading minted memes...`.
+- `Minted to Memes` cards show the media-format indicator beside the artwork
+  title. Winner cards use the submission media format; older collection cards
+  use the original NFT media format, even when the preview is a still image.
 - `Minted to Memes` can render a mixed grid:
   - winner cards first
   - prevote cards after winners
@@ -77,7 +98,7 @@ header to share or copy its link. See [Wave Drop Open and Copy Links](feature-op
 - Minted-memes cards can be fewer than trophy counts when winner-drop or
   prevote-card lookups fail.
 - If no minted-memes cards are renderable, the modal shows `No minted memes
-  found.`.
+found.`.
 - On desktop web, `Esc` closes this modal.
 - Header subtitle is fixed to `The Memes Collection`.
 

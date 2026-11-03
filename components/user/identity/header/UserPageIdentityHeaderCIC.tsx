@@ -48,12 +48,12 @@ export default function UserPageIdentityHeaderCIC({
 
   return (
     <div className="tw-mb-6">
-      <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+      <div className="tw-mb-2 tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
         NIC
       </div>
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
         <div className="tw-flex tw-flex-col tw-items-start">
-          <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
+          <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50">
             {formatNumberWithCommas(cicRating)}
           </div>
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold tw-uppercase">
@@ -71,7 +71,7 @@ export default function UserPageIdentityHeaderCIC({
               maxCount={TOP_RATERS_COUNT}
             />
           )}
-          <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+          <span className="tw-text-meta/5 tw-font-normal tw-text-iron-500">
             {formatNumberWithCommas(raterCount)}{" "}
             {raterCount === 1 ? "rater" : "raters"}
           </span>
@@ -84,10 +84,10 @@ export default function UserPageIdentityHeaderCIC({
             cicOverview.authenticated_user_contribution !== null &&
             cicOverview.authenticated_user_contribution !== 0 && (
               <div className="tw-flex tw-items-center tw-gap-x-1.5">
-                <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                <span className="tw-text-meta/4 tw-font-normal tw-text-iron-500">
                   Your Rating:
                 </span>
-                <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+                <span className="tw-text-meta/4 tw-font-medium tw-text-iron-300">
                   {cicOverview.authenticated_user_contribution > 0 && "+"}
                   {formatNumberWithCommas(
                     cicOverview.authenticated_user_contribution

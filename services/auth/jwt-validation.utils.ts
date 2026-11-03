@@ -361,13 +361,18 @@ export const validateJwt = async ({
       shouldPersistRefreshedSession,
     });
   } catch (error: unknown) {
-    if (serverRejected) {
-      return createInvalidJwtResult("failed");
-    }
-    if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
+    if (
+      !serverRejected &&
+      hasValidLocalJwt &&
+      hasActiveSessionV2Auth({ address: wallet })
+    ) {
       return createValidJwtResult("local_valid_after_failure");
     }
-    if (hasValidLocalJwt) {
+    if (
+      !serverRejected &&
+      hasValidLocalJwt &&
+      !hasActiveSessionV2Auth({ address: wallet })
+    ) {
       return createSessionUpgradeRequiredResult("failed");
     }
     throw error;

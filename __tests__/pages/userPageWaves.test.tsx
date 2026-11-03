@@ -1,3 +1,5 @@
+jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+jest.mock("@/components/user/layout/UserPageDropModal", () => () => null);
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/helpers/server.app.helpers", () => ({
@@ -24,11 +26,10 @@ jest.mock("@/components/providers/metadata", () => ({
   getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
-// Mock layout to avoid needing React Query providers
-jest.mock("@/components/user/layout/UserPageLayout", () => ({
+jest.mock("@/components/user/layout/UserPageTabTransition", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="layout">{children}</div>
+    <div data-testid="tab-transition">{children}</div>
   ),
 }));
 
@@ -64,7 +65,7 @@ describe("waves page via createUserTabPage", () => {
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
-  it("renders layout + tab when no redirect needed", async () => {
+  it("renders tab when no redirect needed", async () => {
     const { Page } = buildFactory();
 
     const element = await Page({

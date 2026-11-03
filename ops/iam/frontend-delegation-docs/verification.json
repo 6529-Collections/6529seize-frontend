@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-13T18:17:24.446124+00:00",
+  "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-docs-publish",
+  "trust_verified": true,
+  "policies_verified": [
+    "arn:aws:iam::987989283142:policy/FrontendDelegationDocsPublish"
+  ],
+  "policy_versions": {
+    "FrontendDelegationDocsPublish": "v1"
+  },
+  "inline_policies": [],
+  "max_session_duration": 3600,
+  "simulation_summary": {
+    "access_analyzer_findings": 0,
+    "positive_cases": 56,
+    "negative_cases": 110,
+    "status": "passed",
+    "policy_sha256": {
+      "FrontendStagingDeployment.json": "4d52eb3b01194bba832ac3b60ce0f478915c09208192dbfbc30338e5c8f2a0aa",
+      "FrontendProductionDeployment.json": "c5cfa2cc64e6bee41ea020b60f7e87774ab7488467d36be0fd887b26dd5c6a7a",
+      "FrontendProductionStorage.json": "ea20c5449b38e25c9c78f44ae161d635309cbb95e90a8b8d7328158fc704021f",
+      "FrontendDelegationDocsPublish.json": "16b9ab3bb76a865eafbd895d9d870ba8eedcadc4f93202f48cf817d49a29b485"
+    }
+  }
+}

@@ -23,7 +23,7 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 ## User Journey
 
 1. Open a wave or direct-message thread.
-2. During initial hydration, the thread shows a centered loader.
+2. Public waves can show server-rendered post text in the chat layout while the interactive thread initializes. Text and drop links remain readable without JavaScript. This content stays until the thread has rendered, including through wallet/profile restoration; it does not switch to a discovery-card skeleton. Returning to a previously opened wave or reloading its chat keeps the preview until that chat is ready again. Threads without a public preview show their loading state.
 3. If no drops exist, the thread shows `Start the conversation`.
 4. While pinned at visual bottom, incoming drops keep the view at latest.
 5. Scroll up to read history; the thread stops pinning and keeps your place.
@@ -58,6 +58,9 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 
 ## Failure and Recovery
 
+- If a drop's thread fails to load, an error and `Try again` replace the empty
+  conversation prompt. Already loaded replies remain visible during a failure.
+
 - If loading older pages fails, already loaded drops stay visible; scroll up again or refresh.
 - If pending/new-message controls appear out of sync, return to bottom and retry.
 - If scroll state feels stale after major layout changes, refresh the thread.
@@ -70,6 +73,22 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
   [Wave Chat Unread Divider and Jump Controls](feature-unread-divider-and-controls.md).
 - Keyboard and app-shell spacing behavior is documented in
   [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md).
+
+## Direct Post Links Without JavaScript
+
+A public `/waves/{waveId}?drop={dropId}` or `?serialNo={number}` link includes
+that selected post in the initial page HTML, even when it is older than the
+latest ten posts. The preview includes the author, publication date in UTC,
+plain-text content, images, and links to other attached media. A storm includes
+up to ten parts; longer storms offer guidance to connect and read the rest.
+Private, direct-message, moderated, inaccessible, and wrong-wave posts do not
+produce a public post preview. An unavailable selection does not substitute
+unrelated latest posts. Links without a post selection retain the recent feed.
+
+Browser loading states, the signed-out connect-wallet gate, and the interactive
+post overlay apply to these links as described in the User Journey section.
+Supported `locale` query values format the publication day for that locale;
+preview labels currently fall back to English where translations are missing.
 
 ## Related Pages
 

@@ -121,6 +121,47 @@ describe("BrainMobileTabs", () => {
     });
   });
 
+  it.each([true, false])(
+    "shows familiar competition tabs on a native hub when a default exists (%s)",
+    (hasDefaultCompetition) => {
+      render(
+        <BrainMobileTabs
+          activeView={BrainView.DEFAULT}
+          onViewChange={onViewChange}
+          wave={createWave()}
+          waveActive={true}
+          showWavesTab={false}
+          showStreamBack={false}
+          isApp={true}
+          hasDefaultCompetition={hasDefaultCompetition}
+        />
+      );
+      for (const name of ["Outcome", "Votes"]) {
+        const tab = screen.queryByRole("button", { name });
+        if (hasDefaultCompetition) expect(tab).toBeInTheDocument();
+        else expect(tab).not.toBeInTheDocument();
+      }
+    }
+  );
+
+  it("hides Create when the viewer has no eligible creation actions", () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        wave={createWave()}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Open create menu" })
+    ).not.toBeInTheDocument();
+  });
+
   it("switches native curation tabs while preserving other URL state", async () => {
     const user = userEvent.setup();
     searchParams = new URLSearchParams("curation=curation-1&filter=active");
@@ -269,14 +310,14 @@ describe("BrainMobileTabs", () => {
 
     expect(scrollableTabs).toBeInTheDocument();
     expect(scrollableTabs).not.toContainElement(createButton);
-    expect(createButton).toHaveClass("tw-size-11");
+    expect(createButton).toHaveClass("tw-min-h-11");
 
     await userEvent.click(createButton);
     expect(
-      screen.getByRole("menuitem", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "New subwave" })
+      screen.getByRole("button", { name: /^New subwave/ })
     ).toBeInTheDocument();
   });
 
@@ -344,7 +385,7 @@ describe("BrainMobileTabs", () => {
         onViewChange: expect.any(Function),
       })
     );
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
@@ -363,14 +404,13 @@ describe("BrainMobileTabs", () => {
       />
     );
 
-    expect(screen.getByText("About")).toHaveClass("tw-font-medium");
-    expect(screen.getByText("About")).not.toHaveClass("tw-font-semibold");
+    expect(screen.queryByText("About")).not.toBeInTheDocument();
 
     expect(screen.getByRole("button", { name: /polls/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();
   });
 
-  it("renders My Votes for curation rank wave", () => {
+  it("renders Votes for curation rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -391,12 +431,12 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Sales")).toBeInTheDocument();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(screen.queryByText("Outcome")).toBeNull();
     expect(screen.queryByText("FAQ")).toBeNull();
   });
 
-  it("renders My Votes for authenticated normal rank wave", () => {
+  it("renders Votes for authenticated normal rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -417,7 +457,7 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
@@ -444,10 +484,10 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.queryByText("Outcome")).toBeNull();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
   });
 
-  it("hides My Votes for guests on normal rank waves", () => {
+  it("shows Votes for guests on normal rank waves", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -471,11 +511,11 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getByText("Votes")).toBeVisible();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
-  it("hides My Votes for guests on memes rank wave", () => {
+  it("shows Votes for guests on memes rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: true,
       isCurationWave: false,
@@ -498,7 +538,7 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getByText("Votes")).toBeVisible();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
@@ -548,7 +588,7 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(leaderboardMock).toHaveBeenCalledWith(
       expect.objectContaining({
         wave: expect.objectContaining({ id: "1" }),
@@ -557,7 +597,7 @@ describe("BrainMobileTabs", () => {
     );
   });
 
-  it("hides My Votes for guests on normal approve waves", () => {
+  it("shows Votes for guests on normal approve waves", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -581,7 +621,7 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getByText("Votes")).toBeVisible();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
@@ -607,7 +647,7 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Sales")).toBeInTheDocument();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(screen.queryByText("Outcome")).toBeNull();
   });
 });

@@ -72,7 +72,6 @@ describe("AboutPage", () => {
     AboutSection.FAQ,
     AboutSection.APPLY,
     AboutSection.CONTACT_US,
-    AboutSection.NFT_DELEGATION,
   ])("uses the modern About surface for %s", async (section) => {
     const element = await AboutPage({
       params: Promise.resolve({ section }),

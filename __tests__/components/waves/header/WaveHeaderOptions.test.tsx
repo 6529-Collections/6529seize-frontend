@@ -1,6 +1,8 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useState } from "react";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "@/components/waves/header/options/WaveHeaderOptions";
@@ -160,8 +162,7 @@ test("opens and closes options", async () => {
     }
   );
   const btn = screen.getByRole("button");
-  expect(btn).toHaveClass("tw-size-8", "desktop-hover:hover:tw-bg-iron-700");
-  expect(btn).not.toHaveClass("tw-size-9");
+  expect(btn).toHaveClass("tw-size-11", "desktop-hover:tw-size-8");
   await user.click(btn);
   expect(screen.getByTestId("delete")).toHaveAttribute("data-mobile", "false");
   expect(screen.getByTestId("profile-wave")).toHaveAttribute("data-wave", "w1");
@@ -271,3 +272,59 @@ test("renders nothing when owner actions are hidden", () => {
   expect(screen.queryByRole("button", { name: /open options/i })).toBeNull();
   expect(screen.queryByTestId("delete")).toBeNull();
 });
+
+function InformationPanel() {
+  const [view, setView] = useState("about");
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  return (
+    <WaveInformationPanelContext.Provider
+      value={{
+        view,
+        contentId: "information-content",
+        container,
+        open: setView,
+        back: () => setView("about"),
+      }}
+    >
+      <section role="dialog" aria-label="Wave information">
+        <div hidden={view !== "about"}>
+          <WaveHeaderOptions wave={wave} showOwnerActions />
+        </div>
+        {view !== "about" && (
+          <button type="button" onClick={() => setView("about")}>
+            Back
+          </button>
+        )}
+        <div id="information-content" ref={setContainer} />
+      </section>
+    </WaveInformationPanelContext.Provider>
+  );
+}
+
+test.each([true, false])(
+  "keeps options in the information panel and returns after cancelling deletion (mobile viewport: %s)",
+  async (isMobile) => {
+    useIsMobileLayoutViewportMock.mockReturnValue(isMobile);
+    const user = userEvent.setup();
+    render(<InformationPanel />, { wrapper: createWrapper() });
+    const trigger = screen.getByRole("button", { name: "Open options" });
+    expect(trigger).not.toHaveAttribute("aria-haspopup");
+    expect(trigger).toHaveAttribute("aria-controls", "information-content");
+    await user.click(trigger);
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    const panel = within(
+      screen.getByRole("dialog", { name: "Wave information" })
+    );
+    expect(panel.getByTestId("delete")).toHaveAttribute("data-mobile", "true");
+    await user.click(panel.getByTestId("delete"));
+    expect(
+      screen.getByRole("dialog", { name: "Delete wave confirmation" })
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Cancel deletion" }));
+    expect(panel.getByTestId("delete")).toBeVisible();
+    await user.click(panel.getByRole("button", { name: "Back" }));
+    expect(panel.queryByTestId("delete")).not.toBeInTheDocument();
+    expect(trigger).toBeVisible();
+    await waitFor(() => expect(trigger).toHaveFocus());
+  }
+);

@@ -11,6 +11,7 @@ const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
 const useWaveDecisions = jest.fn();
+const mockPush = jest.fn();
 let dropsProps: any;
 let galleryProps: any;
 let gridProps: any;
@@ -47,6 +48,12 @@ const resetIntersectionObserver = () => {
 
   delete (global as any).IntersectionObserver;
 };
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/waves/1",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -188,8 +195,9 @@ const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   );
 
 const getLeaderboardControlsFrame = (): HTMLElement => {
-  const controlsFrame =
-    screen.getByTestId("header").parentElement?.parentElement;
+  const controlsFrame = screen
+    .getByTestId("header")
+    .closest(".tw-bg-black.tw-py-4");
 
   if (!(controlsFrame instanceof HTMLElement)) {
     throw new Error("Leaderboard controls frame was not rendered");

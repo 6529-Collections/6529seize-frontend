@@ -8,6 +8,12 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
+import { installLocalCountryCheck } from "../support/localCountryCheck";
+
+test.beforeEach(async ({ page, baseURL }) => {
+  await installLocalCountryCheck(page, baseURL);
+});
+
 type ConsoleDiagnostics = {
   consoleErrors: string[];
   pageErrors: string[];
@@ -53,7 +59,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/emma", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1" });
+    await waitForRouteReady(page, { readySelector: "main h1" });
 
     await expect(
       page.getByRole("heading", { level: 1, name: "EMMA" }).first()
@@ -156,7 +162,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/tools/app-wallets", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1" });
+    await waitForRouteReady(page, { readySelector: "main h1" });
 
     await expect(
       page.getByRole("heading", { level: 1, name: "App Wallets" })
@@ -197,7 +203,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
       const diagnostics = attachConsoleDiagnostics(page);
 
       await page.goto(path, { waitUntil: "domcontentloaded" });
-      await waitForRouteReady(page, { readySelector: "h1" });
+      await waitForRouteReady(page, { readySelector: "main h1" });
 
       await expect(
         page.getByRole("heading", {
@@ -214,6 +220,15 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
 
   test("keeps the public waves shell mountable", async ({ page }) => {
     const diagnostics = attachConsoleDiagnostics(page);
+    // A chunk named by the page (script tag or dynamic-import preload) that the
+    // server cannot serve leaves the waves branch stuck on its skeleton.
+    const missingNextAssets: string[] = [];
+    page.on("response", (response) => {
+      const { pathname } = new URL(response.url());
+      if (response.status() === 404 && pathname.startsWith("/_next/static/")) {
+        missingNextAssets.push(pathname);
+      }
+    });
 
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page, { readySelector: "#waves-content" });
@@ -228,7 +243,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         })
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves?view=profile-feed");
     } else {
       await expect(
@@ -241,9 +256,12 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         page.getByText("See what the community is sharing in Profile Waves.")
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
+    expect(missingNextAssets, "Next.js static assets that returned 404").toEqual(
+      []
+    );
     await expectRouteShellHealthy(page, diagnostics, {
       // Local feed API health gets separate coverage; keep this allowance
       // route-scoped because Chromium reports the resource 500 without a URL.
@@ -271,7 +289,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/tools/block-finder", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1" });
+    await waitForRouteReady(page, { readySelector: "main h1" });
     await expect(
       page.getByRole("heading", { level: 1, name: "Block Finder" })
     ).toBeVisible();

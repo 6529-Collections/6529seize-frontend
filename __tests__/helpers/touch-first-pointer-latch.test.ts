@@ -51,7 +51,9 @@ function loadHelpersWithSentinel(): {
     throw new Error("failed to load touch-first helpers");
   }
 
-  const getSentinel = (eventType: "pointermove" | "pointerdown" = "pointermove") =>
+  const getSentinel = (
+    eventType: "pointermove" | "pointerdown" = "pointermove"
+  ) =>
     addSpy.mock.calls.find(([type]) => type === eventType)?.[1] as
       | SentinelHandler
       | undefined;
@@ -108,6 +110,47 @@ describe("behavioral fine-pointer latch", () => {
       Reflect.deleteProperty(globalThis.navigator, "userAgentData");
     }
   });
+
+  it.each([
+    [
+      "an Android tablet",
+      "Mozilla/5.0 (Linux; Android 14; Pixel Tablet; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Safari/537.36 6529Mobile/1.3",
+      true,
+    ],
+    [
+      "an Android phone",
+      "Mozilla/5.0 (Linux; Android 14; Pixel 8; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Mobile Safari/537.36 6529Mobile/1.3",
+      false,
+    ],
+  ])(
+    "inside 6529 Mobile, hydrates a stored latch on %s only if it is not a phone",
+    (_device, userAgent, hydrated) => {
+      localStorage.setItem("6529-fine-pointer", "1");
+      const original = Object.getOwnPropertyDescriptor(
+        globalThis.navigator,
+        "userAgent"
+      );
+      Object.defineProperty(globalThis.navigator, "userAgent", {
+        configurable: true,
+        value: userAgent,
+      });
+
+      try {
+        const { helpers, restore } = loadHelpersWithSentinel();
+
+        expect(helpers.hasFinePointerCapability()).toBe(hydrated);
+        expect(helpers.isTouchFirstEnvironment()).toBe(!hydrated);
+
+        restore();
+      } finally {
+        if (original) {
+          Object.defineProperty(globalThis.navigator, "userAgent", original);
+        } else {
+          Reflect.deleteProperty(globalThis.navigator, "userAgent");
+        }
+      }
+    }
+  );
 
   it("persists the latch for future sessions", () => {
     const { helpers, getSentinel, restore } = loadHelpersWithSentinel();

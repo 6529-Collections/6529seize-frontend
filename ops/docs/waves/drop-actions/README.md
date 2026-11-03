@@ -52,6 +52,7 @@ threads.
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
 - [Wave Competition Participant and Winner Badges](feature-wave-competition-badges.md)
 - [Wave Creator Badge](feature-wave-creator-badge.md)
+- [Signed Messages](feature-signed-messages.md)
 
 ### Connected behavior (owned in other areas)
 

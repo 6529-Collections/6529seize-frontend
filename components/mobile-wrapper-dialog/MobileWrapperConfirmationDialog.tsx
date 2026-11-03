@@ -4,6 +4,7 @@ import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
 import Button from "@/components/utils/button/Button";
 import MobileWrapperDialog from "./MobileWrapperDialog";
 import { Description } from "@headlessui/react";
+import type { ReactNode } from "react";
 
 interface MobileWrapperConfirmationDialogProps {
   readonly isOpen: boolean;
@@ -17,6 +18,9 @@ interface MobileWrapperConfirmationDialogProps {
   readonly confirmDisabled?: boolean | undefined;
   readonly confirmVariant?: ButtonVariant | undefined;
   readonly zIndexClassName?: string | undefined;
+  readonly children?: ReactNode;
+  readonly titleClassName?: string | undefined;
+  readonly messageClassName?: string | undefined;
 }
 
 export default function MobileWrapperConfirmationDialog({
@@ -31,20 +35,26 @@ export default function MobileWrapperConfirmationDialog({
   confirmDisabled = false,
   confirmVariant = "primary",
   zIndexClassName,
+  children,
+  titleClassName,
+  messageClassName = "tw-text-sm tw-leading-6 tw-text-iron-400",
 }: MobileWrapperConfirmationDialogProps) {
   return (
     <MobileWrapperDialog
       title={title}
+      titleClassName={titleClassName}
       isOpen={isOpen}
       onClose={onClose}
+      dismissible={!isConfirming}
       tabletModal
       maxWidthClass="md:tw-max-w-lg"
       zIndexClassName={zIndexClassName}
     >
       <div className="tw-px-4 sm:tw-px-6">
-        <Description className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <Description className={`tw-mb-0 tw-mt-3 ${messageClassName}`}>
           {message}
         </Description>
+        {children}
 
         <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-justify-end sm:tw-gap-3">
           <Button

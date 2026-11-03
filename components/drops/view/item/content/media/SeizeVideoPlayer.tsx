@@ -1,11 +1,20 @@
 "use client";
 
+import { flushSync } from "react-dom";
+import { useVideoLoading } from "./useVideoLoading";
+import {
+  useMobileAppActivity,
+  useMobileBatterySavings,
+} from "@/hooks/useMobileAppActivity";
+
 import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import frameStyles from "./SeizeVideoFrame.module.css";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useVideoProgress } from "./useVideoProgress";
+import { useVideoPlaybackMemory } from "./useVideoPlaybackMemory";
+import { useVideoSizing } from "./useVideoSizing";
 import React, {
   useCallback,
   useEffect,
@@ -15,10 +24,6 @@ import React, {
 } from "react";
 import {
   assignRef,
-  getAspectRatio,
-  getVideoRatio,
-  getNaturalWidthClassName,
-  getOrientation,
   resolveSeizeVideoTemplate,
   useElementInView,
   usePrefersReducedMotion,
@@ -80,6 +85,7 @@ interface SeizeVideoPlayerProps {
   readonly onVideoClick?:
     | ((event: React.MouseEvent<HTMLElement>) => void)
     | undefined;
+  readonly onPlaybackRequest?: (() => void) | undefined;
   readonly onError?: React.ReactEventHandler<HTMLVideoElement> | undefined;
   readonly "aria-label"?: string | undefined;
   readonly "data-testid"?: string | undefined;
@@ -91,7 +97,6 @@ interface SeizeVideoPlayerProps {
 
 const CONTROL_HIDE_DELAY_MS = 1800;
 const DEFAULT_CAPTIONS_LANGUAGE = DEFAULT_LOCALE;
-const DEFAULT_UNLOADED_ASPECT_RATIO = "16 / 9";
 
 export default function SeizeVideoPlayer({
   src,
@@ -123,6 +128,7 @@ export default function SeizeVideoPlayer({
   isDownloading = false,
   fallbackSources,
   onVideoClick,
+  onPlaybackRequest,
   onError,
   "aria-label": ariaLabel,
   "data-testid": dataTestId,
@@ -131,6 +137,9 @@ export default function SeizeVideoPlayer({
   "data-disable": dataDisable,
   "data-nft-media-renderer": dataNftMediaRenderer,
 }: SeizeVideoPlayerProps) {
+  const isAppActive = useMobileAppActivity();
+  const isMobileEnvironment = useMobileBatterySavings();
+  const [openedSource, setOpenedSource] = useState<string | undefined>();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
   const isScrubbingRef = useRef(false);
@@ -155,13 +164,18 @@ export default function SeizeVideoPlayer({
     [autoPlay, controls, loop, mode, muted, preload, template]
   );
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [aspectRatio, setAspectRatio] = useState<string | undefined>();
-  const [orientation, setOrientation] = useState("unknown");
+  const { savedPlayback, rememberUserControl, isUserControlled } =
+    useVideoPlaybackMemory(videoElement, dataUrl ?? src ?? id);
+  const muteIdentity = dataUrl ?? src ?? id;
   const [mutedState, setMutedState] = useState<{
     readonly src?: string | undefined;
     readonly prop?: boolean | undefined;
     readonly value?: boolean | undefined;
-  }>({});
+  }>(() => ({
+    src: muteIdentity,
+    prop: resolvedTemplate.muted,
+    value: savedPlayback?.muted,
+  }));
   const [isPaused, setIsPaused] = useState(!resolvedTemplate.autoPlay);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -172,20 +186,6 @@ export default function SeizeVideoPlayer({
   const [userPausedAutoplaySrc, setUserPausedAutoplaySrc] = useState<
     string | null
   >(null);
-  const [videoSize, setVideoSize] = useState<
-    | {
-        readonly width: number;
-        readonly height: number;
-        readonly src: string | undefined;
-      }
-    | undefined
-  >();
-  const [viewportHeight, setViewportHeight] = useState<number | undefined>(
-    () =>
-      globalThis.window === undefined
-        ? undefined
-        : globalThis.window.innerHeight
-  );
   const [fallbackState, setFallbackState] = useState<{
     readonly originSrc?: string | undefined;
     readonly source?: string | undefined;
@@ -200,6 +200,14 @@ export default function SeizeVideoPlayer({
   const isInView = useElementInView(wrapperElement);
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
+  const { recordVideoSize, widthClassName, responsiveMediaStyle } =
+    useVideoSizing({
+      directSrc,
+      identity: muteIdentity,
+      layout,
+      aspectRatioHint,
+      isFullscreen,
+    });
 
   const {
     updateProgress,
@@ -280,20 +288,6 @@ export default function SeizeVideoPlayer({
   }
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
-
-    const updateViewportHeight = () => {
-      setViewportHeight(globalThis.window.innerHeight);
-    };
-    globalThis.window.addEventListener("resize", updateViewportHeight);
-    return () => {
-      globalThis.window.removeEventListener("resize", updateViewportHeight);
-    };
-  }, []);
-
-  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(getFullscreenElement() === wrapperRef.current);
       setControlsVisible(true);
@@ -339,6 +333,7 @@ export default function SeizeVideoPlayer({
       handleNativeFullscreenBegin
     );
     video.addEventListener("webkitendfullscreen", handleNativeFullscreenEnd);
+    handleNativeFullscreenEnd();
     return () => {
       video.removeEventListener(
         "webkitbeginfullscreen",
@@ -359,13 +354,8 @@ export default function SeizeVideoPlayer({
 
   function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
     const video = event.currentTarget;
-    setVideoSize({
-      width: video.videoWidth,
-      height: video.videoHeight,
-      src: directSrc,
-    });
-    setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
-    setOrientation(getOrientation(video.videoWidth, video.videoHeight));
+    setOpenedSource(directSrc);
+    recordVideoSize(video);
     updateProgress();
   }
 
@@ -387,10 +377,23 @@ export default function SeizeVideoPlayer({
     }
 
     if (playerOwnsAutoplay) {
-      setUserPausedAutoplaySrc(directSrc ?? null);
+      setUserPausedAutoplaySrc(autoplayIdentity);
     }
     video.pause();
+    rememberUserControl();
     handlePause();
+  }
+
+  function prepareDirectSource(video: HTMLVideoElement) {
+    if (directSrc && !video.getAttribute("src")) {
+      // Commit the source before play() in the same user gesture. A later React
+      // src assignment could otherwise abort the pending playback request.
+      flushSync(() => setOpenedSource(directSrc));
+      if (!video.getAttribute("src")) {
+        video.src = directSrc;
+        video.load();
+      }
+    }
   }
 
   function togglePlayback() {
@@ -398,7 +401,10 @@ export default function SeizeVideoPlayer({
     if (!video) return;
 
     if (video.paused || video.ended) {
+      rememberUserControl();
       setUserPausedAutoplaySrc(null);
+      if (onPlaybackRequest) flushSync(onPlaybackRequest);
+      prepareDirectSource(video);
       video.play().catch(() => {
         setIsPaused(true);
         setControlsVisible(true);
@@ -428,7 +434,12 @@ export default function SeizeVideoPlayer({
       video.muted = nextMuted;
       video.defaultMuted = nextMuted;
     }
-    setMutedState({ prop: resolvedTemplate.muted, src, value: nextMuted });
+    rememberUserControl(true);
+    setMutedState({
+      prop: resolvedTemplate.muted,
+      src: muteIdentity,
+      value: nextMuted,
+    });
     revealControls();
   }
 
@@ -493,12 +504,17 @@ export default function SeizeVideoPlayer({
   function openPosterGate(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setOpenPosterGateKey(posterGateKey);
-    setUserPausedAutoplaySrc(null);
+    flushSync(() => {
+      setOpenPosterGateKey(posterGateKey);
+      setOpenedSource(directSrc);
+      setUserPausedAutoplaySrc(null);
+    });
     const video = videoElement;
     if (!video) {
       return;
     }
+    prepareDirectSource(video);
+    rememberUserControl();
     video.play().catch(() => {
       setIsPaused(true);
       setControlsVisible(true);
@@ -506,6 +522,7 @@ export default function SeizeVideoPlayer({
   }
 
   function handleError(event: React.SyntheticEvent<HTMLVideoElement, Event>) {
+    if (!isAppActive || (isMobileEnvironment && !canLoadDirectSource)) return;
     const currentIndex = orderedFallbackSources.findIndex(
       (candidate) => candidate === directSrc
     );
@@ -527,42 +544,7 @@ export default function SeizeVideoPlayer({
       revealControls();
     };
 
-  function getResponsiveMediaStyle(): React.CSSProperties | undefined {
-    if (isFillLayout || layout === "artwork" || isFullscreen) {
-      const measuredRatio =
-        videoSize?.src === directSrc
-          ? getVideoRatio(videoSize?.width, videoSize?.height)
-          : undefined;
-      return {
-        "--video-ratio":
-          measuredRatio ?? getVideoRatio(aspectRatioHint, 1) ?? 16 / 9,
-      } as React.CSSProperties;
-    }
-
-    const style: React.CSSProperties = {};
-    style.aspectRatio = aspectRatio ?? DEFAULT_UNLOADED_ASPECT_RATIO;
-
-    const fallbackViewportHeight = viewportHeight ?? 900;
-    const maxViewportHeight =
-      layout === "prominent"
-        ? Math.max(320, fallbackViewportHeight - 220)
-        : Math.max(260, fallbackViewportHeight - 160);
-    const maxHeight = Math.min(
-      layout === "prominent" ? 650 : 520,
-      maxViewportHeight
-    );
-    style.maxHeight = `${maxHeight}px`;
-
-    if (videoSize && videoSize.height > videoSize.width) {
-      const ratio = videoSize.width / videoSize.height;
-      style.maxWidth = `${Math.floor(maxHeight * ratio)}px`;
-    }
-
-    return style;
-  }
-
   const isFillLayout = layout === "fill";
-  const widthClassName = getNaturalWidthClassName(orientation, layout);
   const posterGateIdentity = poster ?? id ?? dataUrl ?? src ?? "";
   const posterGateKey = `${template}:${posterGateIdentity}`;
   const isPosterGateClosed =
@@ -577,23 +559,26 @@ export default function SeizeVideoPlayer({
     (resolvedTemplate.mode === "ambient" ||
       resolvedTemplate.mode === "inert-preview");
   const videoAutoPlay =
-    resolvedTemplate.autoPlay && !playerOwnsAutoplay && !isPosterGateClosed;
+    isAppActive &&
+    resolvedTemplate.autoPlay &&
+    !playerOwnsAutoplay &&
+    !isPosterGateClosed;
   const minimalVideoHandlers = getMinimalVideoHandlers({
     hideControlsSoon,
     revealControls,
     showMinimalControls,
   });
   const isMuted =
-    mutedState.src === src &&
+    mutedState.src === muteIdentity &&
     mutedState.prop === resolvedTemplate.muted &&
     typeof mutedState.value === "boolean"
       ? mutedState.value
-      : resolvedTemplate.muted;
+      : (savedPlayback?.muted ?? resolvedTemplate.muted);
   const isAnyFullscreen = isFullscreen || isNativeFullscreen;
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
-  const responsiveMediaStyle = getResponsiveMediaStyle();
-  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
+  const autoplayIdentity = directSrc ?? dataUrl ?? id ?? "external-video";
+  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === autoplayIdentity;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
       captions: t(locale, "media.video.captions"),
@@ -614,27 +599,48 @@ export default function SeizeVideoPlayer({
   );
   const resolvedCaptionsLabel = captionsLabel ?? labels.captions;
 
+  const { canLoadDirectSource, renderedSrc, videoPreload } = useVideoLoading({
+    directSrc,
+    videoElement,
+    isMobileEnvironment,
+    isAppActive,
+    isInView,
+    isAnyFullscreen,
+    openedSource,
+    poster,
+    isPosterGateClosed,
+    autoPlay: resolvedTemplate.autoPlay,
+    preload: resolvedTemplate.preload,
+  });
+
   const syncOwnedAutoplay = useCallback(() => {
     const video = videoElement;
     if (!video || !playerOwnsAutoplay) {
       return;
     }
 
-    if (!isInView || prefersReducedMotion) {
+    if (hasUserPausedOwnedAutoplay) return;
+    if (
+      !isAppActive ||
+      (!isInView && !isFullscreen && !isNativeFullscreen) ||
+      prefersReducedMotion
+    ) {
       video.pause();
       return;
     }
-    if (hasUserPausedOwnedAutoplay) {
-      return;
-    }
 
+    if (isUserControlled()) return;
     video.play().catch(() => {
       setIsPaused(true);
       setControlsVisible(true);
     });
   }, [
+    isUserControlled,
     hasUserPausedOwnedAutoplay,
     isInView,
+    isAppActive,
+    isFullscreen,
+    isNativeFullscreen,
     playerOwnsAutoplay,
     prefersReducedMotion,
     videoElement,
@@ -646,6 +652,10 @@ export default function SeizeVideoPlayer({
   }, [directSrc, syncOwnedAutoplay]);
 
   useEffect(() => {
+    if (!isAppActive) videoElement?.pause();
+  }, [isAppActive, videoElement]);
+
+  useEffect(() => {
     if (!videoElement) {
       return;
     }
@@ -653,7 +663,6 @@ export default function SeizeVideoPlayer({
     videoElement.muted = isMuted;
     videoElement.defaultMuted = isMuted;
   }, [isMuted, videoElement]);
-
   return (
     <div
       ref={setWrapperRef}
@@ -683,6 +692,8 @@ export default function SeizeVideoPlayer({
           dataMime={dataMime}
           dataTestId={dataTestId}
           dataUrl={dataUrl}
+          playbackIdentity={muteIdentity}
+          key={muteIdentity}
           id={id}
           isMuted={isMuted}
           isWrapperFullscreen={isWrapperFullscreen}
@@ -705,15 +716,14 @@ export default function SeizeVideoPlayer({
           onTimeUpdate={updateProgress}
           onTouchStart={minimalVideoHandlers.onTouchStart}
           poster={poster}
-          preload={resolvedTemplate.preload}
+          preload={videoPreload}
           setVideoRef={setVideoRef}
-          src={directSrc}
+          src={renderedSrc}
           videoAutoPlay={videoAutoPlay}
           videoClassName={videoClassName}
           videoControls={videoControls}
           videoTabIndex={showMinimalControls ? 0 : undefined}
         />
-
         {isPosterGateClosed && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
             <button
@@ -726,7 +736,6 @@ export default function SeizeVideoPlayer({
             </button>
           </div>
         )}
-
         {showMinimalControls && (
           <SeizeVideoMinimalControls
             isAnyFullscreen={isAnyFullscreen}

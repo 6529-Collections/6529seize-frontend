@@ -1,8 +1,6 @@
+import { PROFILE_ACTIVITY_BODY } from "@/components/profile-activity/profileActivityTypography";
 import type { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
-import {
-    getScaledImageUri,
-    ImageScale,
-} from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
@@ -15,7 +13,9 @@ export default function ProfileActivityLogPfp({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-text-iron-300 tw-font-medium">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         profile picture
       </span>
 
@@ -32,12 +32,12 @@ export default function ProfileActivityLogPfp({
                 alt="Profile picture"
                 width="20"
                 height="20"
-                className="tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
+                className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-2 tw-ring-white/30"
               />
             )}
           </div>
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400"
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@ export default function ProfileActivityLogPfp({
           alt="Profile picture"
           width="20"
           height="20"
-          className="tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-2 tw-ring-white/30 tw-bg-iron-800"
+          className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-2 tw-ring-white/30"
         />
       </div>
     </>

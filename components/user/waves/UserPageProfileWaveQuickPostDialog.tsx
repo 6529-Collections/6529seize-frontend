@@ -157,6 +157,7 @@ export default function UserPageProfileWaveQuickPostDialog({
   return (
     <MobileWrapperDialog
       title={`Add post to ${curation.name}`}
+      titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
       isOpen={isOpen}
       onClose={onClose}
       noPadding
@@ -184,7 +185,7 @@ export default function UserPageProfileWaveQuickPostDialog({
               role="alert"
               className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/25 tw-bg-amber-400/10 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
             >
-              <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-amber-100">
+              <p className="tw-mb-0 tw-text-md tw-font-normal tw-leading-6 tw-text-amber-100">
                 {t(locale, "profileCuration.quickPost.partialInline")}
               </p>
               <Button

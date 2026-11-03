@@ -22,6 +22,15 @@ New frontend work must avoid adding accessibility, localization, or UI/UX debt.
   standards and record any remaining page-level debt.
 - Document exceptions with owner, reason, user impact, and a follow-up path.
 
+## Review Standards
+
+- [Network Museum Visual Release Acceptance](museum-visual-release-acceptance.md)
+  is the blocking pre-PR gate for visible Museum changes. It runs the polish
+  judge loop with the Museum profile.
+- [Frontend Polish Judge](frontend-polish-judge.md) is an opt-in scored rubric
+  and builder–judge loop for raising a surface to the 6529 bar, including
+  network-state style and crypto usability and safety. It adds no PR gate.
+
 ## Progressive Migration
 
 The frontend is migrating incrementally. Standards PRs may merge independently.

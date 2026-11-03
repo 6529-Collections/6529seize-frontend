@@ -44,10 +44,18 @@ export function useCollectionLocks(options: {
   readonly address: string | undefined;
   readonly isConnected: boolean;
   readonly collection: DelegationCollection;
+  /** Poll cadence for the reads: `false` unless a write was just confirmed. */
+  readonly refetchInterval: number | false;
   readonly showDelegationToast: (toast: DelegationToastState) => void;
 }) {
   const locale = useBrowserLocale();
-  const { address, isConnected, collection, showDelegationToast } = options;
+  const {
+    address,
+    isConnected,
+    collection,
+    refetchInterval,
+    showDelegationToast,
+  } = options;
 
   // The refs hold the title for the lock write currently in flight. Set them
   // immediately before each writeContract call so success/error toasts stay tied
@@ -75,7 +83,8 @@ export function useCollectionLocks(options: {
         ),
         query: {
           enabled: isConnected,
-          refetchInterval: 10000,
+          refetchInterval,
+          refetchOnWindowFocus: true,
         },
       };
 
@@ -92,7 +101,8 @@ export function useCollectionLocks(options: {
     ),
     query: {
       enabled: isConnected,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 
@@ -111,7 +121,8 @@ export function useCollectionLocks(options: {
         args: [DELEGATION_ALL_ADDRESS, address],
         query: {
           enabled: isConnected,
-          refetchInterval: 10000,
+          refetchInterval,
+          refetchOnWindowFocus: true,
         },
       };
 
@@ -127,7 +138,8 @@ export function useCollectionLocks(options: {
     args: [collection.contract, address],
     query: {
       enabled: isConnected,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 

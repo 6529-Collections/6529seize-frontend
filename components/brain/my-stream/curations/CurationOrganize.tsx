@@ -115,13 +115,26 @@ export default function CurationOrganize({
   onDone,
   children,
   axis = "vertical",
+  profileTypography = false,
 }: {
   readonly order: CurationOrder;
   readonly enabled: boolean;
   readonly onDone: () => void;
   readonly children: ReactNode;
   readonly axis?: "horizontal" | "vertical";
+  readonly profileTypography?: boolean;
 }) {
+  const typography = profileTypography
+    ? {
+        title: "tw-font-medium",
+        message: "tw-text-meta tw-font-normal",
+        error: "tw-text-md tw-font-normal",
+      }
+    : {
+        title: "tw-font-semibold",
+        message: "tw-text-xs",
+        error: "tw-text-sm",
+      };
   const locale = useBrowserLocale();
   const instructionsId = useId();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -344,11 +357,13 @@ export default function CurationOrganize({
           <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-3 tw-min-h-[52px] tw-w-full tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-backdrop-blur-md">
             <div className="tw-flex tw-h-[50px] tw-items-center tw-gap-2">
               <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-baseline">
-                <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                <span
+                  className={`tw-flex-shrink-0 tw-text-sm tw-text-iron-100 ${typography.title}`}
+                >
                   {t(locale, "profileCuration.order.organizing")}
                 </span>
                 <span
-                  className={`tw-ml-2 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-500 ${showToolbarMessageOnMobile ? "tw-inline" : "tw-hidden sm:tw-inline"}`}
+                  className={`tw-ml-2 tw-min-w-0 tw-truncate tw-text-iron-500 ${typography.message} ${showToolbarMessageOnMobile ? "tw-inline" : "tw-hidden sm:tw-inline"}`}
                 >
                   {toolbarMessage}
                 </span>
@@ -380,7 +395,7 @@ export default function CurationOrganize({
             {hasSessionFeedback && order.error && (
               <p
                 role="alert"
-                className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-red"
+                className={`tw-mb-0 tw-mt-2 tw-text-red ${typography.error}`}
               >
                 {order.error}
               </p>

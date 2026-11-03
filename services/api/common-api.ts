@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -7,6 +8,7 @@ import {
   getWalletRole,
 } from "../auth/auth.utils";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
+import { sessionAwareFetch } from "./session-aware-fetch";
 
 type ApiErrorMode = "legacy-string" | "structured";
 type ApiRequestOrigin = "api" | "app";
@@ -32,9 +34,10 @@ export const getStructuredApiErrorStatus = (
   return typeof status === "number" ? status : undefined;
 };
 
-export const getStructuredApiErrorCode = (
+/** The parsed JSON body of a structured API error, when it is an object. */
+export const getStructuredApiErrorBody = (
   error: unknown
-): string | undefined => {
+): Readonly<Record<string, unknown>> | undefined => {
   if (typeof error !== "object" || error === null || !("response" in error)) {
     return undefined;
   }
@@ -55,10 +58,15 @@ export const getStructuredApiErrorCode = (
       return undefined;
     }
   }
-  if (typeof body !== "object" || body === null || !("code" in body)) {
-    return undefined;
-  }
-  const code = (body as { readonly code?: unknown }).code;
+  return typeof body === "object" && body !== null && !Array.isArray(body)
+    ? (body as Readonly<Record<string, unknown>>)
+    : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  const code = getStructuredApiErrorBody(error)?.["code"];
   return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
 
@@ -85,7 +93,7 @@ const buildUrl = (
 ): string => {
   let path = `/api/${endpoint}`;
   const apiEndpoint =
-    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : getApiBase();
   let url = `${apiEndpoint}${path}`;
 
   if (params) {
@@ -227,6 +235,7 @@ const handleApiError = async (
 };
 
 interface ExecuteApiRequestParams {
+  readonly manageWalletAuth?: boolean | undefined;
   readonly url: string;
   readonly method: string;
   readonly headers: Record<string, string>;
@@ -288,6 +297,14 @@ const parseApiResponse = async <T>(
   try {
     return await res.json();
   } catch (jsonError) {
+    // A cancelled or timed-out transfer is not malformed JSON, and the wrapped
+    // message below would add the full request URL to the error.
+    if (
+      jsonError instanceof DOMException &&
+      (jsonError.name === "AbortError" || jsonError.name === "TimeoutError")
+    ) {
+      throw jsonError;
+    }
     const errorMessage =
       jsonError instanceof Error ? jsonError.message : String(jsonError);
     throw new Error(
@@ -347,6 +364,7 @@ const normalizeFetchError = (error: unknown, url: string): unknown => {
 };
 
 const executeApiRequest = async <T>({
+  manageWalletAuth = true,
   url,
   method,
   headers,
@@ -369,7 +387,7 @@ const executeApiRequest = async <T>({
   });
 
   try {
-    const res = await fetch(url, requestInit);
+    const res = await sessionAwareFetch(url, requestInit, manageWalletAuth);
     status = res.status;
 
     if (!res.ok) {
@@ -422,6 +440,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   );
 
   return executeApiRequest<T>({
+    manageWalletAuth: param.includeWalletAuth !== false,
     url,
     method: "GET",
     headers: getHeaders(
@@ -580,6 +599,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
             : "";
         });
   const result = await executeApiRequest<U>({
+    manageWalletAuth: param.includeWalletAuth !== false,
     url,
     method: "POST",
     headers: getHeaders(
@@ -619,6 +639,8 @@ export const commonApiDelete = async (param: {
   headers?: Record<string, string> | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  /** Optional JSON body, for example a device signature. */
+  body?: object | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -626,6 +648,7 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    body: param.body === undefined ? undefined : JSON.stringify(param.body),
     signal: param.signal,
     parseJson: false,
     errorMode: param.errorMode ?? "legacy-string",

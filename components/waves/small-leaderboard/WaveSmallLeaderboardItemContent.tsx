@@ -6,19 +6,14 @@ import {
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Tooltip } from "react-tooltip";
 import Image from "next/image";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
+import { ProposalCardContextLabelVisibilityProvider } from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
@@ -92,17 +87,19 @@ export const WaveSmallLeaderboardItemContent: React.FC<
             />
           )
         )}
-        <WaveDropPartContentMarkdown
-          mentionedUsers={drop.mentioned_users}
-          mentionedGroups={drop.mentioned_groups}
-          mentionedWaves={drop.mentioned_waves}
-          referencedNfts={drop.referenced_nfts}
-          part={drop.parts[0]!}
-          wave={drop.wave}
-          drop={drop}
-          onQuoteClick={() => {}}
-          contentPresentation={contentPresentation}
-        />
+        <ProposalCardContextLabelVisibilityProvider visible={false}>
+          <WaveDropPartContentMarkdown
+            mentionedUsers={drop.mentioned_users}
+            mentionedGroups={drop.mentioned_groups}
+            mentionedWaves={drop.mentioned_waves}
+            referencedNfts={drop.referenced_nfts}
+            part={drop.parts[0]!}
+            wave={drop.wave}
+            drop={drop}
+            onQuoteClick={() => {}}
+            contentPresentation={contentPresentation}
+          />
+        </ProposalCardContextLabelVisibilityProvider>
         {showGradient && (
           <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-[1] tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent" />
         )}

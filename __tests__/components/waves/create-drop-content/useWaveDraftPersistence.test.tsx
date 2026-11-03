@@ -1,3 +1,4 @@
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { useWaveDraftPersistence } from "@/components/waves/create-drop-content/useWaveDraftPersistence";
@@ -110,6 +111,55 @@ describe("useWaveDraftPersistence", () => {
       JSON.stringify({ root: { text: "hello" } })
     );
   });
+
+  it("flushes the latest primary draft when a fast tab/history change unmounts the editor", () => {
+    const { rerender, unmount } = renderPersistence();
+    rerender({
+      activeDrop: null,
+      editorState: makeEditorState({ root: { text: "latest unsaved draft" } }),
+      dropEditorRefreshKey: 0,
+    });
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
+    unmount();
+    expect(writeWaveDraftMock).toHaveBeenLastCalledWith(
+      WAVE_ID,
+      JSON.stringify({ root: { text: "latest unsaved draft" } })
+    );
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(writeWaveDraftMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not flush a previous profile's editor on teardown", () => {
+    const { unmount } = renderPersistence({
+      editorState: makeEditorState({ root: { text: "previous profile" } }),
+    });
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+    unmount();
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["reply", "edit"])(
+    "does not flush %s content as a primary draft",
+    (mode) => {
+      const { rerender, unmount } = renderPersistence();
+      if (mode === "edit")
+        useEditingDropMock.mockReturnValue({ editingDropId: "editing" });
+      rerender({
+        activeDrop:
+          mode === "reply"
+            ? ({ action: "reply" } as unknown as ActiveDropState)
+            : null,
+        editorState: makeEditorState({ root: { text: mode } }),
+        dropEditorRefreshKey: 0,
+      });
+      unmount();
+      expect(writeWaveDraftMock).not.toHaveBeenCalled();
+    }
+  );
 
   it("never saves while a reply or quote is active", () => {
     const { rerender } = renderPersistence();

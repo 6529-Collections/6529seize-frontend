@@ -173,6 +173,52 @@ describe("touch-first helpers", () => {
       expect(isTouchFirstEnvironment()).toBe(false);
     });
 
+    describe("inside 6529 Mobile, which appends 6529Mobile/<version> to the UA", () => {
+      // Touch plus a paired trackpad: only the phone override keeps a device
+      // touch-first, so the UA fallback decides.
+      beforeEach(() => {
+        defineMaxTouchPoints(5);
+        defineMatchMedia({
+          "(any-pointer: fine)": true,
+          "(any-hover: hover)": true,
+          "(any-pointer: coarse)": true,
+        });
+        defineUserAgentData(undefined);
+      });
+
+      it.each([
+        [
+          "Android tablet",
+          "Mozilla/5.0 (Linux; Android 14; Pixel Tablet Build/AP2A.240805.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Safari/537.36",
+          false,
+        ],
+        [
+          "Android phone",
+          "Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP2A.240805.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Mobile Safari/537.36",
+          true,
+        ],
+        [
+          "iPhone",
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          true,
+        ],
+        [
+          "iPad",
+          "Mozilla/5.0 (iPad; CPU OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          false,
+        ],
+      ])(
+        "classifies an %s the same with and without the token",
+        (_device, userAgent, touchFirst) => {
+          defineUserAgent(userAgent);
+          expect(isTouchFirstEnvironment()).toBe(touchFirst);
+
+          defineUserAgent(`${userAgent} 6529Mobile/1.3`);
+          expect(isTouchFirstEnvironment()).toBe(touchFirst);
+        }
+      );
+    });
+
     it("keeps tablets with a trackpad on desktop when client hints say not mobile", () => {
       // Android tablet UAs still contain "Android", but client hints report
       // mobile=false — the tablet+trackpad combo must stay desktop.
@@ -244,6 +290,9 @@ describe("touch-first helpers", () => {
   });
 
   describe("subscribeToTouchFirstChanges", () => {
+    const sharedHandlerOf = (mql: MockMediaQueryList): (() => void) =>
+      mql.addEventListener?.mock.calls[0]?.[1];
+
     it("subscribes and unsubscribes from capability media queries", () => {
       defineMatchMedia({});
       const onChange = jest.fn();
@@ -251,16 +300,108 @@ describe("touch-first helpers", () => {
       const unsubscribe = subscribeToTouchFirstChanges(onChange);
       expect(createdMqls.length).toBeGreaterThan(0);
       for (const mql of createdMqls) {
-        expect(mql.addEventListener).toHaveBeenCalledWith("change", onChange);
+        expect(mql.addEventListener).toHaveBeenCalledTimes(1);
+        expect(mql.addEventListener).toHaveBeenCalledWith(
+          "change",
+          expect.any(Function)
+        );
       }
+
+      // A media query flip reaches the subscriber through the shared listener.
+      sharedHandlerOf(createdMqls[0]!)();
+      expect(onChange).toHaveBeenCalledTimes(1);
 
       unsubscribe();
       for (const mql of createdMqls) {
+        expect(mql.removeEventListener).toHaveBeenCalledTimes(1);
         expect(mql.removeEventListener).toHaveBeenCalledWith(
           "change",
-          onChange
+          sharedHandlerOf(mql)
         );
       }
+    });
+
+    it("shares one media query listener per query across subscribers", () => {
+      defineMatchMedia({});
+      const subscribers = Array.from({ length: 25 }, () => jest.fn());
+
+      const unsubscribers = subscribers.map((subscriber) =>
+        subscribeToTouchFirstChanges(subscriber)
+      );
+
+      // The first subscriber created the media query lists; the other 24
+      // added no matchMedia lookups and no listeners.
+      const queries = createdMqls.map((mql) => mql.media);
+      expect(queries.length).toBeGreaterThan(0);
+      expect(new Set(queries).size).toBe(queries.length);
+      for (const mql of createdMqls) {
+        expect(mql.addEventListener).toHaveBeenCalledTimes(1);
+      }
+
+      // One media query flip notifies every subscriber exactly once.
+      sharedHandlerOf(createdMqls[0]!)();
+      for (const subscriber of subscribers) {
+        expect(subscriber).toHaveBeenCalledTimes(1);
+      }
+
+      // Listeners stay attached until the last subscriber leaves.
+      for (const unsubscribe of unsubscribers.slice(0, -1)) {
+        unsubscribe();
+      }
+      for (const mql of createdMqls) {
+        expect(mql.removeEventListener).not.toHaveBeenCalled();
+      }
+
+      unsubscribers.at(-1)?.();
+      for (const mql of createdMqls) {
+        expect(mql.removeEventListener).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("stops notifying a subscriber after it unsubscribes", () => {
+      defineMatchMedia({});
+      const staying = jest.fn();
+      const leaving = jest.fn();
+      const unsubscribeStaying = subscribeToTouchFirstChanges(staying);
+      const unsubscribeLeaving = subscribeToTouchFirstChanges(leaving);
+
+      unsubscribeLeaving();
+      sharedHandlerOf(createdMqls[0]!)();
+
+      expect(staying).toHaveBeenCalledTimes(1);
+      expect(leaving).not.toHaveBeenCalled();
+      unsubscribeStaying();
+    });
+
+    it("keeps repeated subscriptions of the same callback independent", () => {
+      defineMatchMedia({});
+      const onChange = jest.fn();
+      const unsubscribeFirst = subscribeToTouchFirstChanges(onChange);
+      const unsubscribeSecond = subscribeToTouchFirstChanges(onChange);
+
+      unsubscribeFirst();
+      sharedHandlerOf(createdMqls[0]!)();
+      expect(onChange).toHaveBeenCalledTimes(1);
+
+      unsubscribeSecond();
+      for (const mql of createdMqls) {
+        expect(mql.removeEventListener).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("recreates the shared listeners for a later first subscriber", () => {
+      defineMatchMedia({});
+      subscribeToTouchFirstChanges(jest.fn())();
+      const firstRound = [...createdMqls];
+
+      defineMatchMedia({});
+      const unsubscribe = subscribeToTouchFirstChanges(jest.fn());
+
+      expect(createdMqls.length).toBe(firstRound.length);
+      for (const mql of createdMqls) {
+        expect(mql.addEventListener).toHaveBeenCalledTimes(1);
+      }
+      unsubscribe();
     });
 
     it("is a no-op without matchMedia", () => {

@@ -1,5 +1,7 @@
 "use client";
 
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -60,7 +62,6 @@ interface WaveInfo {
     getNextValidDecision: (
       decisions: ApiWaveDecision[]
     ) => ApiWaveDecision | null;
-    calculateMintingDate: (checkpointTime: number | null) => number | null;
   };
   isChatWave: boolean;
   isRankWave: boolean;
@@ -232,51 +233,6 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     };
   }, [currentPause, nextPause, hasDecisionsBeforePause]);
 
-  // Calculate the minting date based on checkpoint date
-  const calculateMintingDate = useMemo(() => {
-    return (checkpointTime: number | null): number | null => {
-      if (!checkpointTime) return null;
-
-      const checkpointDate = new Date(checkpointTime);
-      const dayOfWeek = checkpointDate.getUTCDay();
-
-      // Calculate days until next minting day
-      let daysToAdd: number;
-      switch (dayOfWeek) {
-        case 1: // Monday → Wednesday
-          daysToAdd = 2;
-          break;
-        case 3: // Wednesday → Friday
-          daysToAdd = 2;
-          break;
-        case 5: // Friday → Monday
-          daysToAdd = 3;
-          break;
-        default:
-          // For other days, find next Monday/Wednesday/Friday
-          if (dayOfWeek === 0) {
-            // Sunday → Monday
-            daysToAdd = 1;
-          } else if (dayOfWeek === 2) {
-            // Tuesday → Wednesday
-            daysToAdd = 1;
-          } else if (dayOfWeek === 4) {
-            // Thursday → Friday
-            daysToAdd = 1;
-          } else {
-            // Saturday → Monday
-            daysToAdd = 2;
-          }
-      }
-
-      // Create new date and add days
-      const mintingDate = new Date(checkpointTime);
-      mintingDate.setUTCDate(mintingDate.getUTCDate() + daysToAdd);
-
-      return mintingDate.getTime();
-    };
-  }, []);
-
   // Extract common wave properties that are used in multiple calculations
   const maxDropsCount = useMemo(
     () =>
@@ -285,7 +241,10 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   );
 
   const identityDropsCount = useMemo(
-    () => wave?.metrics.your_participation_drops_count ?? null,
+    () =>
+      presentationCompetition(wave)
+        ? null
+        : (wave?.metrics.your_participation_drops_count ?? null),
     [wave]
   );
 
@@ -427,15 +386,23 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       hasDecisionsBeforePause,
       filterDecisionsDuringPauses,
       getNextValidDecision,
-      calculateMintingDate,
     },
     // Wave type flags
     isChatWave: wave?.wave.type === ApiWaveType.Chat,
     isRankWave: wave?.wave.type === ApiWaveType.Rank,
     isApproveWave: wave?.wave.type === ApiWaveType.Approve,
-    isMemesWave: isMemesWave(wave?.id.toLowerCase()),
-    isCurationWave: isCurationWave(wave?.id.toLowerCase()),
-    isQuorumWave: isQuorumWave(wave?.id.toLowerCase()),
+    isMemesWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.MainStage
+      ) ?? isMemesWave(wave?.id.toLowerCase()),
+    isCurationWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Curation
+      ) ?? isCurationWave(wave?.id.toLowerCase()),
+    isQuorumWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Quorum
+      ) ?? isQuorumWave(wave?.id.toLowerCase()),
     isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

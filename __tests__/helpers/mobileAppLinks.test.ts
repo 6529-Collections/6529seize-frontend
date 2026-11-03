@@ -2,6 +2,7 @@ import {
   getMobileAppLink,
   getMobilePlatform,
   getNativeLinkDestination,
+  isCurrentNativeLinkLocation,
   isMobileAppDestination,
 } from "@/helpers/mobileAppLinks";
 
@@ -158,4 +159,150 @@ describe("mobile app links", () => {
       expect(getMobilePlatform(ua, touchPoints)).toBe(platform);
     }
   );
+  describe("universal links", () => {
+    const resolve = (value: string) =>
+      getNativeLinkDestination(value, "mobile6529", origin, 123);
+
+    it.each([
+      [
+        "https://6529.io/waves/1?drop=2&tag=a&tag=b#drop-2",
+        "/waves/1?drop=2&tag=a&tag=b&_t=123#drop-2",
+      ],
+      ["https://www.6529.io/the-memes/1", "/the-memes/1?_t=123"],
+      ["https://6529.io", "/?_t=123"],
+      ["HTTPS://6529.IO:443/prxt0/collected", "/prxt0/collected?_t=123"],
+      ["https://6529.io/punk6529.eth", "/punk6529.eth?_t=123"],
+      ["https://6529.io/review-database", "/review-database?_t=123"],
+    ])("maps %s to %s", (value, expected) => {
+      expect(resolve(value)).toBe(expected);
+    });
+
+    it("routes a shared staging link within the staging app", () => {
+      expect(
+        getNativeLinkDestination(
+          "https://STAGING.6529.IO/waves/1?drop=2&tag=a&tag=b#drop-2",
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBe("/waves/1?drop=2&tag=a&tag=b&_t=123#drop-2");
+    });
+
+    it.each([
+      "https://6529.io",
+      "https://prxtstaging.6529.io",
+      "https://staging.6529.io.example.com",
+      "http://localhost:3001",
+      "http://staging.6529.io",
+      "https://staging.6529.io:8443",
+    ])("rejects staging links from a different app origin %s", (appOrigin) => {
+      expect(
+        getNativeLinkDestination(
+          "https://staging.6529.io/waves/1",
+          "mobileStaging6529",
+          appOrigin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it.each([
+      "/auth/callback",
+      "/tools/app-wallets/import-wallet",
+      "/open-mobile",
+      "/api/version",
+      "/.well-known/apple-app-site-association",
+      "/favicon.svg",
+      "/bad%",
+      "//evil.example",
+    ])("keeps staging exclusion or unsafe path %s in the browser", (path) => {
+      expect(
+        getNativeLinkDestination(
+          `https://staging.6529.io${path}`,
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBeNull();
+    });
+
+    it.each([
+      "https://evil.example/waves/1",
+      "https://6529.io.evil.example/waves/1",
+      "https://staging.6529.io/waves/1",
+      "https://user@6529.io/waves/1",
+      "https://6529.io:8443/waves/1",
+      "http://6529.io/waves/1",
+      "https://6529.io//evil.example",
+      "https://6529.io/%2F%2Fevil.example",
+      "https://6529.io/bad%",
+    ])("never leaves the app's origin or accepts malformed %s", (value) => {
+      expect(resolve(value)).toBeNull();
+    });
+
+    it.each([
+      "/api/version",
+      "/_next/static/chunk",
+      "/.well-known/apple-app-site-association",
+      "/open-mobile?path=/waves/1",
+      "/access",
+      "/restricted",
+      "/accept-connection-sharing?token=secret",
+      "/app-wallets",
+      "/tools/app-wallets/import-wallet",
+      "/auth/callback",
+      "/review-data/1",
+      "/%61pi/version",
+      "/favicon.ico",
+      "/sitemap.xml",
+      "/llms.txt",
+      "/media/IMAGE.PNG",
+    ])(
+      "ignores path %s, which the association file keeps in the browser",
+      (path) => {
+        expect(resolve(`https://6529.io${path}`)).toBeNull();
+      }
+    );
+
+    it("keeps the app link scheme's existing path rules", () => {
+      expect(resolve("mobile6529://navigate/tools/app-wallets")).toBe(
+        "/tools/app-wallets?_t=123"
+      );
+    });
+  });
+
+  describe("isCurrentNativeLinkLocation", () => {
+    const destination = "/waves/1?tag=a&tag=b&view=grid&_t=123#drop-2";
+
+    it.each([
+      `${origin}/waves/1?tag=a&tag=b&view=grid#drop-2`,
+      `${origin}/waves/1?view=grid&tag=a&tag=b#drop-2`,
+      `${origin}/waves/1/?tag=a&tag=b&view=grid&_t=99#drop-2`,
+      `${origin}/w%61ves/1?tag=%61&tag=b&view=grid#drop-2`,
+    ])("matches %s", (current) => {
+      expect(isCurrentNativeLinkLocation(destination, current, origin)).toBe(
+        true
+      );
+    });
+
+    it.each([
+      `${origin}/waves/2?tag=a&tag=b&view=grid#drop-2`,
+      `${origin}/waves/1?tag=b&tag=a&view=grid#drop-2`,
+      `${origin}/waves/1?tag=a&tag=b&view=list#drop-2`,
+      `${origin}/waves/1?tag=a&tag=b&view=grid&extra=1#drop-2`,
+      `${origin}/waves/1?tag=a&tag=b&view=grid`,
+      `${origin}/waves/1?tag=a&tag=b&view=grid#drop-3`,
+      "https://other.example/waves/1?tag=a&tag=b&view=grid#drop-2",
+    ])("does not match %s", (current) => {
+      expect(isCurrentNativeLinkLocation(destination, current, origin)).toBe(
+        false
+      );
+    });
+
+    it("matches the home page with and without the navigation timestamp", () => {
+      expect(
+        isCurrentNativeLinkLocation("/?_t=123", `${origin}/`, origin)
+      ).toBe(true);
+    });
+  });
 });

@@ -1,8 +1,11 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import Image from "next/image";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -11,6 +14,8 @@ import {
   MEMES_CONTRACT,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import {
   faLink,
@@ -21,11 +26,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
-import {
-  DELEGATION_CARD_CLASS_NAME,
-  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
-  DELEGATION_PAGE_TITLE_CLASS_NAME,
-} from "./delegation-ui";
+import { DELEGATION_CARD_CLASS_NAME } from "./delegation-ui";
 
 interface Props {
   setSection(section: DelegationCenterSection): void;
@@ -48,6 +49,7 @@ function getCollectionSection(contract: string) {
 }
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
@@ -90,15 +92,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
     return (
       <section className="tw-w-full" aria-labelledby="manage-by-collection">
         <div className="tw-mb-6">
-          <h2
+          <h3
             id="manage-by-collection"
             className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
           >
-            Manage by Collection
-          </h2>
+            {t(locale, "safeCollecting.tools.collections.title")}
+          </h3>
           <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
-            Manage existing records by collection scope, including locks that
-            block incoming delegations.
+            {t(locale, "safeCollecting.tools.collections.description")}
           </p>
         </div>
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
@@ -139,56 +140,49 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
 
   const actionCards = [
     {
-      title: "Delegations",
+      title: t(locale, "safeCollecting.tools.delegations.title"),
       icon: faWallet,
       details: [
-        "Let a hot wallet use NFT utility held by a vault wallet",
-        "Useful for minting, allowlists, and airdrops",
+        t(locale, "safeCollecting.tools.delegations.detailUtility"),
+        t(locale, "safeCollecting.tools.delegations.detailUses"),
       ],
-      buttonLabel: "Delegation",
+      buttonLabel: t(locale, "safeCollecting.tools.delegations.action"),
       section: DelegationCenterSection.REGISTER_DELEGATION,
     },
     {
-      title: "Consolidations",
+      title: t(locale, "safeCollecting.tools.consolidations.title"),
       icon: faLink,
       details: [
-        "Link wallets you control for TDH and collection metrics",
-        "Requires reciprocal records between the wallets",
+        t(locale, "safeCollecting.tools.consolidations.detailLink"),
+        t(locale, "safeCollecting.tools.consolidations.detailReciprocal"),
       ],
-      buttonLabel: "Consolidation",
+      buttonLabel: t(locale, "safeCollecting.tools.consolidations.action"),
       section: DelegationCenterSection.REGISTER_CONSOLIDATION,
+      guidedSection: DelegationCenterSection.BUILD_CONSOLIDATION,
     },
     {
-      title: "Delegation Management",
+      title: t(locale, "safeCollecting.tools.management.title"),
       icon: faUserGear,
       details: [
-        "Let one wallet maintain delegations for another wallet",
-        "Keep vault wallets cold after setup",
+        t(locale, "safeCollecting.tools.management.detailMaintain"),
+        t(locale, "safeCollecting.tools.management.detailCold"),
       ],
-      buttonLabel: "Delegation Manager",
+      buttonLabel: t(locale, "safeCollecting.tools.management.action"),
       section: DelegationCenterSection.REGISTER_SUB_DELEGATION,
     },
-  ] as const;
+  ];
 
   return (
     <div className="tw-w-full">
-      <header className="tw-mb-12">
-        <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>Delegation Center</h1>
-        <p className={DELEGATION_PAGE_DESCRIPTION_CLASS_NAME}>
-          Register wallet relationships for NFT utility and 6529 collection
-          metrics. These actions do not transfer NFTs.
-        </p>
-      </header>
-
       <div className="tw-space-y-3">
         {actionCards.map((card) => (
           <article
             key={card.title}
             className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 tw-transition-colors hover:tw-border-white/[0.08] hover:tw-bg-iron-900 sm:tw-p-6`}
           >
-            <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
               {card.title}
-            </h2>
+            </h3>
             <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-5 md:tw-flex-row md:tw-items-center md:tw-justify-between">
               <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-4 md:tw-items-center md:tw-gap-6 lg:tw-gap-10">
                 <div className="tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-start tw-text-iron-400 md:tw-w-12 md:tw-justify-center">
@@ -217,13 +211,24 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   />
                   {card.buttonLabel}
                 </PrimaryButton>
+                {"guidedSection" in card && (
+                  <ButtonLink
+                    href={getSafeCollectingSectionPath(card.guidedSection)}
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    className="tw-mt-2"
+                  >
+                    {t(locale, "delegation.consolidationBuilder.entry")}
+                  </ButtonLink>
+                )}
               </div>
             </div>
           </article>
         ))}
       </div>
 
-      <div className="tw-mt-16">{printCollectionSelection()}</div>
+      <div className="tw-mt-10">{printCollectionSelection()}</div>
     </div>
   );
 }

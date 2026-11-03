@@ -6,7 +6,8 @@
       "**/*.{ts,tsx,js,jsx,cjs,mjs}",
       "!{node_modules,.next,coverage,public}/**",
       "!{tmp_gen_outp,tmp_gen_final}/**",
-      "!.generated-backup-*/**"
+      "!.generated-backup-*/**",
+      "!native/**"
     ],
 
     // 2) Optionally add entries Knip can't infer from scripts/configs
@@ -24,6 +25,8 @@
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
+      // Reached only through the standalone tsconfig `paths` mapping.
+      "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx",
       "standalone/standalone-memes-mint/src/next.config.ts",
       "standalone/standalone-memes-mint/src/postcss.config.js",
       "standalone/standalone-memes-mint/src/tailwind.config.cjs",
@@ -64,6 +67,19 @@
       "tests/**": ["files", "exports", "types"],
       ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      // wasm-bindgen glue of the MLS module (scripts/build-mls-wasm.cjs).
+      "lib/e2ee/wasm/generated/**": ["exports", "types"],
+      // Chain codec written against 6529chain's target design (Speed Demon
+      // W6 C1). No app importer yet; its focused Jest contracts, which knip
+      // excludes, are the consumers. The `decisions` data-source adapter
+      // (W6 C4) makes it reachable and removes these exemptions.
+      "lib/chain/codec/**": ["files", "exports", "types"],
+      "lib/chain/types/**": ["files", "exports", "types"],
+      // W6 C2: gateway client, status ladder and the CI mock gateway, under
+      // the same exemption until W6 C4 imports them.
+      "lib/chain/gateway/**": ["files", "exports", "types"],
+      "lib/chain/mock/**": ["files", "exports", "types"],
+      "lib/chain/status-ladder.ts": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
@@ -76,19 +92,14 @@
       ],
       "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
       "components/utils/toast/AppToast.tsx": ["exports"],
-      // Stacked public-review foundation. The route integration imports these
-      // components and exports in the next feature slice, which removes these
-      // exact exemptions when they become reachable from App Router entries.
-      "components/public-review/PublicReviewFeedbackComposer.tsx": ["files"],
-      "components/public-review/PublicReviewLedger.tsx": ["files"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
-      // The public-review generator exposes pure internals to its focused Jest
-      // contract tests; Knip intentionally does not analyze test-only usage.
-      "scripts/public-reviews/solidity-reference.cjs": ["exports"],
-      "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
-      "scripts/public-reviews/stream-knowledge.cjs": ["exports"],
-      "scripts/public-reviews/stream-knowledge-packs.cjs": ["exports"],
+      // Browser variant of i18n/localeDictionaries.ts, reached only through
+      // the Turbopack `resolveAlias` browser condition in config/nextConfig.ts.
+      "i18n/localeDictionaries.browser.ts": ["files"],
+      // Browser variant of config/env.ts, reached only through the Turbopack
+      // `resolveAlias` browser condition in config/nextConfig.ts.
+      "config/env.browser.ts": ["files"],
       // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
       // excludes their focused Jest consumers from its usage graph.
       "scripts/pr-ci-policy-bundle.cjs": ["exports"],
@@ -103,15 +114,27 @@
       // The filesystem-contract CLI exposes pure selection and runner helpers
       // to its focused Jest contract; Knip excludes test consumers.
       "scripts/file-contract-tests.cjs": ["exports"],
+      // Failure-summary parsers are exposed to focused CLI contract tests;
+      // Knip intentionally excludes those Jest consumers from its usage graph.
+      "scripts/ci-failure-details.cjs": ["exports"],
+      // The world time-zone map generator exposes its pure parsing and
+      // geometry helpers to a focused Jest contract; Knip excludes test consumers.
+      "scripts/generate-world-time-zones.cjs": ["exports"],
       // The production artifact CLI exposes pure safety helpers to a focused
       // adversarial Jest contract, which Knip excludes from its usage graph.
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
       // Invoked from workflow YAML; pure helpers are exported for focused tests.
       "ops/scripts/elastic-beanstalk-readiness.cjs": ["exports"],
-      "services/api/public-review/feedback-codec.ts": ["exports", "types"],
-      "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
-      "lib/storage/idb-keyval.ts": ["files"],
+      // In-repo idb-keyval clone behind the bundler alias: it keeps the full
+      // package API for aliased third-party consumers knip cannot see.
+      "lib/storage/idb-keyval.ts": ["files", "exports"],
+      // Chain anchor source and validator certificate reader (Speed Demon
+      // W6 C3), written against 6529chain's target design. No app importer
+      // until PLAN-WAVES' v2 event anchor and a desktop validator panel use
+      // them; focused Jest contracts, which knip excludes, cover them.
+      "lib/chain/anchor/**": ["files", "exports", "types"],
+      "lib/chain/validator/**": ["files", "exports", "types"],
       "playwright.config.ts": ["exports"],
       "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],
@@ -122,6 +145,7 @@
       "eslint.config.single.mjs": ["exports"],
       "standalone/standalone-memes-mint/src/app/layout.tsx": ["exports"],
       "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx": ["exports"],
       "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
       "standalone/standalone-memes-mint/src/postcss.config.js": ["exports"],
       "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
@@ -156,9 +180,7 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor",
-      // Invoked as a repository CLI through `6529 exec`, not imported by app code.
-      "@6529-collections/release-request"
+      "react-doctor"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported

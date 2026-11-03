@@ -18,7 +18,8 @@ describe('CreateSnapshotTableRowDownload', () => {
   beforeEach(() => {
     (distributionPlanApiFetch as jest.Mock).mockResolvedValue({ success: true, data: [{ a: '1' }] });
     jest.spyOn(document, 'createElement');
-    (global.URL as any).createObjectURL = jest.fn();
+    global.URL.createObjectURL = jest.fn(() => 'blob:results');
+    global.URL.revokeObjectURL = jest.fn();
   });
 
   it('downloads json when button clicked', async () => {
@@ -28,6 +29,7 @@ describe('CreateSnapshotTableRowDownload', () => {
       fireEvent.click(jsonBtn!);
     });
     expect(distributionPlanApiFetch).toHaveBeenCalled();
+    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:results');
   });
 
   it('downloads csv when csv button clicked', async () => {

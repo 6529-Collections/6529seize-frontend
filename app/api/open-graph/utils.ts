@@ -1,5 +1,5 @@
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { load } from "cheerio";
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 
 export { buildGoogleWorkspaceResponse } from "./googleWorkspace";
 
@@ -56,7 +56,8 @@ const JSON_LD_MAX_NODES = 64;
 const JSON_LD_MAX_DEPTH = 8;
 const JSON_LD_IMAGE_MAX_CANDIDATES = 16;
 
-type LoadedHtml = ReturnType<typeof load>;
+type LoadedHtml = ReturnType<typeof loadHtmlMetadata>;
+type HtmlNode = Parameters<LoadedHtml>[0];
 
 function normalizeWhitespace(value: string | undefined): string | undefined {
   const trimmed = value?.replace(/\s+/g, " ").trim();
@@ -65,7 +66,7 @@ function normalizeWhitespace(value: string | undefined): string | undefined {
 
 function getMetaIdentifier(
   $: LoadedHtml,
-  element: unknown
+  element: HtmlNode
 ): string | undefined {
   const tag = $(element);
   return normalizeWhitespace(
@@ -80,7 +81,7 @@ function collectMetaContent(
   const keySet = new Set(keys.map((key) => key.toLowerCase()));
   const results = new Map<string, string[]>();
 
-  $("meta").each((_index: number, element: unknown) => {
+  $("meta").each((_index: number, element: HtmlNode) => {
     const identifier = getMetaIdentifier($, element);
     if (!identifier || !keySet.has(identifier)) {
       return;
@@ -145,7 +146,7 @@ function iconPreferenceScore(rel: string, href: string): number {
 function extractIconLinks($: LoadedHtml, baseUrl: URL): string[] {
   const byUrl = new Map<string, number>();
 
-  $("link").each((_index: number, element: unknown) => {
+  $("link").each((_index: number, element: HtmlNode) => {
     const tag = $(element);
     const rel = normalizeWhitespace(tag.attr("rel")) ?? "";
     const href = normalizeWhitespace(tag.attr("href"));
@@ -284,7 +285,7 @@ function extractJsonLdNodes($: LoadedHtml): JsonLdNode[] {
   const nodes: JsonLdNode[] = [];
 
   $('script[type="application/ld+json"]').each(
-    (_index: number, element: unknown) => {
+    (_index: number, element: HtmlNode) => {
       const parsed = safeParseJsonLd($(element).contents().text());
       nodes.push(...flattenJsonLdNodes(parsed));
     }
@@ -427,7 +428,7 @@ export function buildResponse(
   contentType: string | null,
   _finalUrl?: string
 ): LinkPreviewResponse {
-  const $ = load(html);
+  const $ = loadHtmlMetadata(html);
   const jsonLdNode = pickJsonLdNode(extractJsonLdNodes($));
   const title =
     extractFirstMetaContent($, TITLE_KEYS) ??

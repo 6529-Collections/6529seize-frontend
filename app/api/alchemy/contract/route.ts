@@ -1,20 +1,21 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { normaliseAddress } from "@/services/alchemy/utils";
-import type { SupportedChain } from "@/types/nft";
+import { fetchContractMetadata } from "../contractMetadata";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
+// Matches the server-side contract metadata cache lifetime.
+const CACHEABLE_HEADERS = { "Cache-Control": "private, max-age=300" };
 
-const NETWORK_MAP: Record<SupportedChain, string> = {
-  ethereum: "eth-mainnet",
-};
-
-function resolveNetwork(chain: SupportedChain = "ethereum"): string {
-  return NETWORK_MAP[chain] ?? NETWORK_MAP.ethereum;
-}
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many contract metadata requests",
+});
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -26,42 +27,45 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const chain = searchParams.get("chain");
+  if (chain !== null && chain !== "ethereum") {
+    return NextResponse.json(
+      { error: "Unsupported chain" },
+      { status: 400, headers: NO_STORE_HEADERS }
+    );
+  }
+
   const checksum = normaliseAddress(address);
   if (!checksum) {
     return NextResponse.json(null, { headers: NO_STORE_HEADERS });
   }
 
-  const chain = (searchParams.get("chain") ?? "ethereum") as SupportedChain;
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
 
   try {
-    const apiKey = getAlchemyApiKey();
-    const network = resolveNetwork(chain);
-    const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getContractMetadata?contractAddress=${checksum}`;
-
-    const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+    const entry = await fetchContractMetadata({
+      address: checksum,
+      apiKey: getAlchemyApiKey(),
+      chain: "ethereum",
       signal: request.signal,
     });
 
-    if (response.status === 404) {
-      return NextResponse.json(null, { headers: NO_STORE_HEADERS });
-    }
-
-    if (!response.ok) {
+    if (entry.error) {
       return NextResponse.json(
-        { error: "Failed to fetch contract metadata" },
-        { status: response.status, headers: NO_STORE_HEADERS }
+        { error: entry.error },
+        { status: entry.status ?? 502, headers: NO_STORE_HEADERS }
       );
     }
 
-    const payload = await response.json();
-    return NextResponse.json(
-      { ...payload, _checksum: checksum },
-      { headers: NO_STORE_HEADERS }
-    );
+    return NextResponse.json(entry.metadata, { headers: CACHEABLE_HEADERS });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to fetch contract metadata";
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch contract metadata";
     return NextResponse.json(
       { error: message },
       { status: 400, headers: NO_STORE_HEADERS }

@@ -9,7 +9,10 @@ import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
-import type { GroupCriteriaIdentityLabels } from "@/helpers/groups/group-criteria-summary";
+import type {
+  GroupCriteriaIdentityLabels,
+  GroupCriteriaSummary,
+} from "@/helpers/groups/group-criteria-summary";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -60,19 +63,6 @@ const MORE_RULES = [
   CreateWaveInlineGroupRuleType.COLLECTIONS,
   CreateWaveInlineGroupRuleType.XTDH_GRANT,
 ] as const;
-
-export const CREATE_WAVE_INLINE_GROUP_RULE_LABELS: Record<
-  CreateWaveInlineGroupRuleType,
-  string
-> = {
-  [CreateWaveInlineGroupRuleType.LEVEL]: "Level",
-  [CreateWaveInlineGroupRuleType.TDH]: "TDH",
-  [CreateWaveInlineGroupRuleType.CIC]: "NIC",
-  [CreateWaveInlineGroupRuleType.REP]: "Rep",
-  [CreateWaveInlineGroupRuleType.NFTS]: "Required NFTs",
-  [CreateWaveInlineGroupRuleType.COLLECTIONS]: "Collection Access",
-  [CreateWaveInlineGroupRuleType.XTDH_GRANT]: "xTDH Grant",
-};
 
 export const CREATE_WAVE_INLINE_GROUP_QUICK_RULES = QUICK_RULES;
 export const CREATE_WAVE_INLINE_GROUP_MORE_RULES = MORE_RULES;
@@ -206,8 +196,8 @@ const createInlineGroupIdentityFromWallet = (
   wallet: string
 ): CommunityMemberMinimal => ({
   profile_id: null,
-  handle: wallet,
-  normalised_handle: wallet.toLowerCase(),
+  handle: null,
+  normalised_handle: null,
   primary_wallet: wallet,
   display: wallet,
   tdh: 0,
@@ -327,7 +317,7 @@ export const getInlineGroupConfiguredRules = (
   return ruleChecks.filter(([, hasRule]) => hasRule).map(([rule]) => rule);
 };
 
-export const getInlineGroupDraftSummary = ({
+export const getInlineGroupDraftSummaryDetails = ({
   draft,
   identityCount,
   beneficiaryGrantCollectionName,
@@ -339,7 +329,7 @@ export const getInlineGroupDraftSummary = ({
   readonly beneficiaryGrantCollectionName?: string | null | undefined;
   readonly identityLabels?: GroupCriteriaIdentityLabels | undefined;
   readonly locale?: SupportedLocale | undefined;
-}): string | null => {
+}): GroupCriteriaSummary => {
   const normalizedCollectionName = beneficiaryGrantCollectionName?.trim() ?? "";
   let grantCriterionOverride: string | undefined;
   if (hasGrantRule(draft)) {
@@ -349,15 +339,18 @@ export const getInlineGroupDraftSummary = ({
         })
       : t(locale, "waves.create.groups.members.criteria.grant.selected");
   }
-  const summary = getGroupCriteriaSummary({
+  return getGroupCriteriaSummary({
     group: draft.group,
     locale,
     includedCountOverride: identityCount,
     grantCriterionOverride,
     identityLabels,
   });
-  return summary.text;
 };
+
+export const getInlineGroupDraftSummary = (
+  args: Parameters<typeof getInlineGroupDraftSummaryDetails>[0]
+): string | null => getInlineGroupDraftSummaryDetails(args).text;
 
 export const buildInlineGroupName = ({
   waveName,

@@ -27,7 +27,7 @@ const mockGetEligibility = jest.fn();
 const mockUpdateEligibility = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
   })),
 }));

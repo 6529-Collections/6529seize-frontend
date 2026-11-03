@@ -24,8 +24,8 @@ export function AllTokensSelectedCard({
             </span>
 
             <span className="tw-flex-1 tw-min-w-0">
-                <span className="tw-block tw-text-base tw-font-semibold tw-text-green-400">All tokens selected</span>
-                <span className="tw-block tw-text-sm tw-text-iron-400">
+                <span className="tw-block tw-text-base tw-font-semibold tw-text-green-400 group-data-[typography=profile]/profile-xtdh:tw-text-[15px]">All tokens selected</span>
+                <span className="tw-block tw-text-sm tw-text-iron-400 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-300">
                     Click "Deselect All" to add specific tokens
                 </span>
             </span>

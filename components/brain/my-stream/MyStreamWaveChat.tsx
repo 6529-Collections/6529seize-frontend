@@ -2,8 +2,15 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
+import {
+  useExpandedReplyThreadsStore,
+  WaveReplyThreadsProvider,
+} from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
+import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import {
   DropMode,
   type DropComposerDensity,
@@ -21,7 +28,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -39,7 +46,7 @@ import {
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
   useEffect,
@@ -202,10 +209,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   waveViewStyleOverride,
   composerDensity = "default",
 }) => {
-  const router = useRouter();
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -292,8 +298,26 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     };
   });
 
-  const scrollTarget =
+  const requestedScrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
+  const collapseReplies = isWaveRepliesCollapsed(wave);
+  const replyThreadsStore = useExpandedReplyThreadsStore();
+  // A link to a collapsed reply opens its parent's thread instead.
+  const replyThreadTarget = useCollapsedReplyThreadTarget({
+    enabled: collapseReplies && viewMode !== "gallery",
+    waveId: wave.id,
+    serialNo: requestedScrollTarget,
+  });
+  const scrollTarget =
+    replyThreadTarget?.parentSerialNo ?? requestedScrollTarget;
+
+  useEffect(() => {
+    if (!replyThreadTarget) {
+      return;
+    }
+    replyThreadsStore.setExpanded(replyThreadTarget.parentDropId, true);
+    fetchAroundSerialNo(wave.id, replyThreadTarget.parentSerialNo);
+  }, [fetchAroundSerialNo, replyThreadTarget, replyThreadsStore, wave.id]);
 
   let dividerTarget = firstUnreadSerialNo;
   if (initialDropState?.waveId === wave.id) {
@@ -319,13 +343,35 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     if (!params.has("serialNo") && !params.has("divider")) {
       return;
     }
+    // Keep a message target authoritative when the link also names another
+    // section. Removing it would reactivate that conflicting destination.
+    const requestedTab = params.get("tab");
+    if (params.has("serialNo") && requestedTab && requestedTab !== "chat") {
+      return;
+    }
     params.delete("serialNo");
     params.delete("divider");
     const href = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
-    router.replace(href, { scroll: false });
-  }, [initialDropState, pathname, router, searchParams, viewMode]);
+    // This is one-time URL cleanup, not navigation. A router replacement
+    // removes the document-only feed wrappers and remounts the chat at latest.
+    const previousState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(null, "", href + globalThis.location.hash);
+    // Preserve visit-specific tab metadata, keeping Next's updated state.
+    const currentState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(
+      {
+        ...(typeof previousState === "object" && previousState !== null
+          ? previousState
+          : {}),
+        ...(typeof currentState === "object" && currentState !== null
+          ? currentState
+          : {}),
+      },
+      ""
+    );
+  }, [initialDropState, pathname, searchParams, viewMode]);
 
   const { waveViewStyle } = useLayout();
   const effectiveWaveViewStyle = waveViewStyleOverride ?? waveViewStyle;
@@ -346,6 +392,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       isApp
         ? {
             paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
+            transition:
+              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
           }
         : undefined,
     [isApp]
@@ -372,6 +420,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = useCallback(() => {
     setActiveDropForWave(null);
   }, [setActiveDropForWave]);
+
+  const onDropAddedToQueue = useCallback(() => {
+    // Show a new reply where it lands: in its parent's thread.
+    const replyTarget = activeDropRef.current;
+    if (
+      collapseReplies &&
+      replyTarget?.action === ActiveDropAction.REPLY &&
+      !replyTarget.drop.reply_to
+    ) {
+      replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+    }
+    setActiveDropForWave(null);
+  }, [collapseReplies, replyThreadsStore, setActiveDropForWave]);
 
   useWebSocketMessage<WsDropDeleteMessage["data"]>(
     WsMessageType.DROP_DELETE,
@@ -598,53 +659,65 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             </div>
           </div>
         )}
-        <WaveDropsAllWithoutProvider
-          key={wave.id}
-          waveId={wave.id}
+        <WaveReplyThreadsProvider
+          enabled={collapseReplies}
           wave={wave}
-          onReply={handleReply}
-          activeDrop={activeDrop}
-          initialDrop={scrollTarget}
-          dividerSerialNo={dividerTarget}
-          unreadCount={
-            isDirectMessage
-              ? (dmUnreadConversation?.unread_count ?? 0)
-              : wave.metrics.your_unread_drops_count
-          }
-          dropId={null}
-          onDropContentClick={onDropClick}
-          isMuted={wave.metrics.muted}
-          winningThreshold={winningThreshold}
-          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-        />
+          store={replyThreadsStore}
+        >
+          <WaveDropsAllWithoutProvider
+            key={
+              replyThreadTarget
+                ? `${wave.id}-thread-${replyThreadTarget.parentSerialNo}`
+                : wave.id
+            }
+            waveId={wave.id}
+            wave={wave}
+            onReply={handleReply}
+            activeDrop={activeDrop}
+            initialDrop={scrollTarget}
+            dividerSerialNo={dividerTarget}
+            unreadCount={
+              isDirectMessage
+                ? (dmUnreadConversation?.unread_count ?? 0)
+                : wave.metrics.your_unread_drops_count
+            }
+            dropId={null}
+            onDropContentClick={onDropClick}
+            isMuted={wave.metrics.muted}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+          />
+        </WaveReplyThreadsProvider>
         {!(isApp && editingDropId) && (
           <div
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <CreateDropWaveWrapper composerDensity={composerDensity}>
-              <PrivilegedDropCreator
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                onReplyTargetUnavailable={onCancelReplyQuote}
-                onDropAddedToQueue={onCancelReplyQuote}
-                wave={wave}
-                dropId={null}
-                fixedDropMode={fixedDropMode}
-                externalAttachmentDrop={externalAttachmentDrop}
-                onExternalAttachmentDropConsumed={() =>
-                  setExternalAttachmentDrop(null)
-                }
-                onSubmitCurationUrl={chatCurationUrlSubmitHandler}
-                canSubmitCurationUrl={canSubmitChatCurationUrl}
-                curationUrlSubmitRestrictionMessage={
-                  chatCurationUrlSubmitRestrictionMessage
-                }
-                termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
-              />
-            </CreateDropWaveWrapper>
+            <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
+              <CreateDropWaveWrapper composerDensity={composerDensity}>
+                <PrivilegedDropCreator
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  onReplyTargetUnavailable={onCancelReplyQuote}
+                  onDropAddedToQueue={onDropAddedToQueue}
+                  wave={wave}
+                  dropId={null}
+                  fixedDropMode={fixedDropMode}
+                  externalAttachmentDrop={externalAttachmentDrop}
+                  onExternalAttachmentDropConsumed={() =>
+                    setExternalAttachmentDrop(null)
+                  }
+                  onSubmitCurationUrl={chatCurationUrlSubmitHandler}
+                  canSubmitCurationUrl={canSubmitChatCurationUrl}
+                  curationUrlSubmitRestrictionMessage={
+                    chatCurationUrlSubmitRestrictionMessage
+                  }
+                  termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
+                />
+              </CreateDropWaveWrapper>
+            </LegacyDmComposerGate>
           </div>
         )}
         {showFixedParticipationSubmit && (

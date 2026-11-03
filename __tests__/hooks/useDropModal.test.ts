@@ -1,11 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { useDropModal } from "@/hooks/useDropModal";
 import { useQuery } from "@tanstack/react-query";
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 
 jest.mock("@tanstack/react-query", () => ({
@@ -65,7 +61,12 @@ describe("useDropModal", () => {
     expect(result.current.activeDrop).toBeUndefined();
   });
 
-  it("removes drop param on close and uses router.replace", () => {
+  it("removes only drop state immediately without server navigation", () => {
+    window.history.replaceState(
+      { saved: true },
+      "",
+      "/alice?drop=drop-1&foo=bar#chat"
+    );
     (useQuery as jest.Mock).mockReturnValue({
       data: { id: "drop-1" },
       isLoading: false,
@@ -78,6 +79,10 @@ describe("useDropModal", () => {
     });
 
     expect(beginClosingDrop).toHaveBeenCalledWith("drop-1");
-    expect(replace).toHaveBeenCalledWith("/alice?foo=bar", { scroll: false });
+    expect(
+      window.location.pathname + window.location.search + window.location.hash
+    ).toBe("/alice?foo=bar#chat");
+    expect(window.history.state).toEqual({ saved: true });
+    expect(replace).not.toHaveBeenCalled();
   });
 });

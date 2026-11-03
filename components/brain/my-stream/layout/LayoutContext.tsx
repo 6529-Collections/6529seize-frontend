@@ -37,8 +37,6 @@ interface LayoutSpaces {
 
   // Space used by mobile nav
   mobileNavSpace: number;
-  // Available space for content
-  contentSpace: number;
 
   // Whether measurements have completed
   measurementsComplete: boolean;
@@ -51,12 +49,14 @@ const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
   a.spacerSpace === b.spacerSpace &&
   a.mobileTabsSpace === b.mobileTabsSpace &&
   a.mobileNavSpace === b.mobileNavSpace &&
-  a.contentSpace === b.contentSpace &&
   a.measurementsComplete === b.measurementsComplete;
 
 const NATIVE_KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING =
+  "var(--native-keyboard-layout-transition-easing, ease-out)";
 
 const formatCssLength = (value: number | string): string =>
   typeof value === "number" ? `${value}px` : value;
@@ -87,7 +87,7 @@ const calculateNativeKeyboardHeightStyle = (
   if (!shouldFollowKeyboard) return style;
   return {
     ...style,
-    transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+    transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}`,
   };
 };
 
@@ -103,7 +103,7 @@ type LayoutRefType =
 
 type MeasuredLayoutSpaceKey = Exclude<
   keyof LayoutSpaces,
-  "contentSpace" | "measurementsComplete"
+  "measurementsComplete"
 >;
 
 const layoutMeasurementConfigs: readonly {
@@ -216,7 +216,6 @@ const defaultSpaces: LayoutSpaces = {
   spacerSpace: 0,
   mobileTabsSpace: 0,
   mobileNavSpace: 0,
-  contentSpace: 0,
   measurementsComplete: false,
 };
 
@@ -309,24 +308,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   // Calculate spaces based on current measurements
+  // Only measured element heights feed the context. Window height changes
+  // (including mobile URL-bar collapse while scrolling) must not re-render
+  // every layout consumer; heights are applied through CSS viewport units.
   const calculateSpaces = useCallback(() => {
-    const measuredSpaces = measureLayoutSpaces(refMap.current);
-
-    // Calculate total occupied space
-    const totalOccupiedSpace = Object.values(measuredSpaces).reduce(
-      (totalSpace, measuredSpace) => totalSpace + measuredSpace,
-      0
-    );
-
-    // Ensure content space is at least 0 to prevent negative values
-    const calculatedContentSpace = Math.max(
-      0,
-      window.innerHeight - totalOccupiedSpace
-    );
-
     const nextSpaces: LayoutSpaces = {
-      ...measuredSpaces,
-      contentSpace: calculatedContentSpace,
+      ...measureLayoutSpaces(refMap.current),
       measurementsComplete: true,
     };
 
@@ -351,8 +338,19 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     // Nothing needed here - we'll observe elements as they're registered
 
-    // Also listen for window resize
-    window.addEventListener("resize", calculateSpaces);
+    // Window resizes can reflow the measured elements. Measure at most once
+    // per frame; resize can fire many times per frame while dragging.
+    let resizeFramePending = false;
+    let resizeFrame = 0;
+    const scheduleResizeCalculation = () => {
+      if (resizeFramePending) return;
+      resizeFramePending = true;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFramePending = false;
+        calculateSpaces();
+      });
+    };
+    window.addEventListener("resize", scheduleResizeCalculation);
 
     // Initial calculation
     const initialCalculationFrame = requestAnimationFrame(calculateSpaces);
@@ -364,7 +362,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         resizeObserverRef.current = null;
       }
       cancelAnimationFrame(initialCalculationFrame);
-      window.removeEventListener("resize", calculateSpaces);
+      if (resizeFramePending) cancelAnimationFrame(resizeFrame);
+      window.removeEventListener("resize", scheduleResizeCalculation);
     };
   }, [calculateSpaces]);
 
@@ -465,8 +464,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
-    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
-  }, [navAdjustedSpaces]);
+    return calculateNativeKeyboardHeightStyle(
+      { ...navAdjustedSpaces, mobileNavSpace: 0 },
+      isCapacitor,
+      isViewportLocked
+    );
+  }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);

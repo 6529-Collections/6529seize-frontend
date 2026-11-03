@@ -53,7 +53,7 @@ function UserPageHeaderAboutStatementContent({
     <div className="tw-space-y-2">
       <div
         ref={setStatementElement}
-        className={`tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400 sm:tw-text-md sm:tw-leading-6 ${clampClass}`}
+        className={`tw-mb-0 tw-whitespace-pre-line tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300 ${clampClass}`}
       >
         {statementValue}
       </div>

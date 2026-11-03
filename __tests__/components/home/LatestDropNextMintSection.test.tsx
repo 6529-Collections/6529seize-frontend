@@ -89,6 +89,23 @@ const createDrop = (memeCardId?: number): ApiDropV2View =>
     ...(memeCardId ? { submission_context: { meme_card_id: memeCardId } } : {}),
   }) as ApiDropV2View;
 
+it.each([
+  ["image/png", "true"],
+  ["video/mp4", "false"],
+])(
+  "identifies %s Next Drop media even without a rendered image",
+  (mime_type, isImage) => {
+    const drop = {
+      ...createDrop(488),
+      parts: [{ media: [{ mime_type, url: "artwork" }] }],
+    } as ApiDropV2View;
+    const { container } = render(<LatestDropNextMintSection drop={drop} />);
+    const column = container.querySelector("[data-home-artwork-column]");
+    expect(column?.querySelector("img")).toBeNull();
+    expect(column).toHaveAttribute("data-home-artwork-is-image", isImage);
+  }
+);
+
 describe("LatestDropNextMintSection", () => {
   it("links an explicitly mapped next drop to its Meme card", () => {
     render(<LatestDropNextMintSection drop={createDrop(488)} />);

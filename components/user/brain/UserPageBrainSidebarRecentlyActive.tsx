@@ -21,7 +21,7 @@ export default function UserPageBrainSidebarRecentlyActive({
     <section aria-labelledby="brain-recent-waves-heading">
       <h2
         id="brain-recent-waves-heading"
-        className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
+        className="tw-m-0 tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500"
       >
         {getUserPageBrainSidebarMessage(
           locale,
@@ -50,7 +50,7 @@ export default function UserPageBrainSidebarRecentlyActive({
             buttonClassName={BRAIN_SIDEBAR_ACTION_BUTTON_CLASS}
             completionClassName={BRAIN_SIDEBAR_COMPLETION_CLASS}
             containerClassName="tw-space-y-1"
-            errorClassName="tw-m-0 tw-text-xs tw-text-red-300/80"
+            errorClassName="tw-m-0 tw-text-[15px]/4 tw-font-normal tw-text-red-300/80"
             showErrorMessage
           />
         </div>

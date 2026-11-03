@@ -23,6 +23,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface ExpandedWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
   readonly href: string;
@@ -33,6 +34,7 @@ interface ExpandedWaveProps {
   readonly latestDropTimestamp?: number | null | undefined;
   readonly nameRef: RefObject<HTMLDivElement | null>;
   readonly onMouseEnter?: (() => void) | undefined;
+  readonly onMouseLeave?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;
@@ -50,6 +52,7 @@ interface ExpandedWaveProps {
 }
 
 export const ExpandedWave = ({
+  scoreDetailsDisabled = false,
   formattedWaveName,
   haveNewDrops,
   href,
@@ -60,6 +63,7 @@ export const ExpandedWave = ({
   latestDropTimestamp,
   nameRef,
   onMouseEnter,
+  onMouseLeave,
   onClick,
   showExpandedTooltip,
   showPin,
@@ -92,7 +96,8 @@ export const ExpandedWave = ({
   const shouldShowPinButton = showPin && depth === 0;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
-  const rowVerticalPaddingClasses = isChildRow ? "tw-py-1" : "tw-py-2";
+  const rowVerticalPaddingClasses =
+    isChildRow || isAnnouncement ? "tw-py-1" : "tw-py-2";
   const contentGapClasses = isChildRow ? "tw-gap-y-0.5" : "tw-gap-y-1";
   const titleTextClasses = isChildRow ? "tw-text-[13px]" : "tw-text-sm";
   const timestampTextClasses = isChildRow ? "tw-text-[11px]" : "tw-text-xs";
@@ -104,6 +109,7 @@ export const ExpandedWave = ({
     guideLineOffsetClasses,
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
+    isAnnouncement,
     variant: "web",
   });
   const subwavePrefetchTimerRef = useRef<ReturnType<
@@ -144,12 +150,17 @@ export const ExpandedWave = ({
     onMouseEnter?.();
   }, [onMouseEnter, scheduleSubwavePrefetch]);
 
+  const handleRowMouseLeave = useCallback(() => {
+    cancelSubwavePrefetch();
+    onMouseLeave?.();
+  }, [cancelSubwavePrefetch, onMouseLeave]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
-      onMouseLeave={cancelSubwavePrefetch}
+      onMouseLeave={handleRowMouseLeave}
       role="group"
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
@@ -246,6 +257,7 @@ export const ExpandedWave = ({
                 )}
                 {hasSummaryScore && (
                   <WaveTrustSignals
+                    scoreDetailsDisabled={scoreDetailsDisabled}
                     waveRep={wave.waveRep}
                     waveScore={wave.waveScore}
                     variant="sidebar-inline"

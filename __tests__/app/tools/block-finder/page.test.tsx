@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import BlockFinderPage, {
@@ -32,7 +34,7 @@ describe("tools/block-finder/page.tsx (server)", () => {
     const md = await generateMetadata();
     expect(getAppMetadata).toHaveBeenCalledWith({
       title: "Block Finder | Tools",
-      description: "Tools",
+      description: t(DEFAULT_LOCALE, "pageMetadata.blockFinder.description"),
     });
     expect(md).toEqual({
       title: "Mock Title",

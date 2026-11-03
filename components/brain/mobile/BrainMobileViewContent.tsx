@@ -2,12 +2,16 @@
 
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useSearchParams } from "next/navigation";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
 import { BrainView } from "./brainMobileViews";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import type { MyStreamWaveTab } from "@/types/waves.types";
 
 const ignoreAboutTabChange = (_tab: SidebarTab): void => undefined;
 
@@ -63,6 +67,17 @@ const MyStreamWaveMyVotes = dynamic(
 const MyStreamWaveFAQ = dynamic(() => import("../my-stream/MyStreamWaveFAQ"), {
   loading: () => <BrainMobileViewLoadingFallback />,
 });
+const BrainRightSidebarConfiguration = dynamic(
+  () => import("../right-sidebar/BrainRightSidebarConfiguration"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
+
+const CompetitionHub = dynamic(
+  () => import("@/components/competitions/CompetitionHub"),
+  {
+    loading: () => <BrainMobileViewLoadingFallback />,
+  }
+);
 
 const BrainMobileMessages = dynamic(() => import("./BrainMobileMessages"), {
   loading: () => <BrainMobileViewLoadingFallback />,
@@ -132,9 +147,7 @@ interface BrainMobileFAQViewProps {
 function BrainMobileProfileFeed() {
   const { mobileWavesViewStyle } = useLayout();
 
-  return (
-    <CommunityCurations heightStyle={mobileWavesViewStyle} />
-  );
+  return <CommunityCurations heightStyle={mobileWavesViewStyle} />;
 }
 
 function BrainMobileLeaderboardView({
@@ -270,11 +283,37 @@ export default function BrainMobileViewContent({
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
+  const isCompetitionRoute = isCompetitionPathname(usePathname());
+  const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
+  const hasIndependentContent = [
+    BrainView.ABOUT,
+    BrainView.WAVES,
+    BrainView.PROFILE_FEED,
+    BrainView.MESSAGES,
+    BrainView.NOTIFICATIONS,
+  ].includes(activeView);
+
+  // Remembered wave views must not discard the shared loading/retry shell
+  // while their permissions and availability are still unknown.
+  if (activeWaveId && !wave && !hasIndependentContent) return children;
+
+  // Implicit competition sections resolve in the shared wave content. Rendering
+  // a legacy mobile view here first would expose the wrong content and controls.
+  if (
+    !isCompetitionRoute &&
+    waveCompetitionTabs[activeView as unknown as MyStreamWaveTab] !== undefined
+  )
+    return children;
 
   switch (activeView) {
     case BrainView.DEFAULT:
       return children;
+    case BrainView.COMPETITIONS:
+      if (isCompetitionRoute) return children;
+      return wave ? (
+        <CompetitionHub key={wave.id} waveId={wave.id} embedded />
+      ) : null;
     case BrainView.ABOUT:
       return (
         <BrainMobileAbout
@@ -283,6 +322,13 @@ export default function BrainMobileViewContent({
           setActiveTab={onAboutTabChange}
         />
       );
+    case BrainView.CONFIGURATION:
+      if (isCompetitionRoute || search.get("competition")) return children;
+      return wave ? (
+        <div className="tw-h-full tw-min-h-0 tw-overflow-y-auto">
+          <BrainRightSidebarConfiguration wave={wave} />
+        </div>
+      ) : null;
     case BrainView.LEADERBOARD:
       return (
         <BrainMobileLeaderboardView

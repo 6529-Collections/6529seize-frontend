@@ -8,7 +8,7 @@ export const BRAIN_SIDEBAR_ACTION_BUTTON_CLASS =
   "tw-cursor-pointer tw-rounded-sm tw-border-none tw-bg-transparent tw-px-1 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none";
 
 export const BRAIN_SIDEBAR_COMPLETION_CLASS =
-  "tw-m-0 tw-block tw-rounded-sm tw-px-1 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-m-0 tw-block tw-rounded-sm tw-px-1 tw-py-1 tw-text-meta/4 tw-font-normal tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 const SKELETON_KEYS = [0, 1, 2, 3, 4] as const;
 
@@ -47,7 +47,7 @@ export default function UserPageBrainSidebarSectionState({
   if (state.isInitialError) {
     return (
       <div className="tw-border-red-500/20 tw-bg-red-500/5 tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-p-3">
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+        <p className="tw-m-0 tw-text-[15px]/4 tw-font-normal tw-text-iron-300">
           {getUserPageBrainSidebarMessage(locale, loadErrorMessageKey)}
         </p>
         <button
@@ -63,7 +63,7 @@ export default function UserPageBrainSidebarSectionState({
 
   if (state.status === "success" && state.waves.length === 0) {
     return (
-      <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-600">
+      <p className="tw-mb-0 tw-mt-3 tw-text-meta/4 tw-font-normal tw-text-iron-500">
         {getUserPageBrainSidebarMessage(locale, emptyMessageKey)}
       </p>
     );

@@ -4,11 +4,9 @@ Agents and developers deploy with ordinary merges and the repository's GitHub
 Actions workflows. Use the phase authorized by the user; a staging request does
 not authorize production.
 
-For a new staging or direct production release intent that includes frontend,
-follow [Coordinator release recording](../../skills/deploy-6529/SKILL.md#coordinator-release-recording)
-after authorization, scope, and exact release inputs are established, before any
-merge or deployment. Use the same recording outcome for retries, resumes, and
-promotion; the skill defines submission and failure handling.
+Frontend-only, backend-only, and coupled releases use the direct workflows below
+without submitting a Coordinator request or waiting for its recording workflow.
+Keep existing `.release-coordinator/` run and outbox records as historical evidence.
 
 | Target     | Frontend                                                                       | Backend                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
@@ -18,6 +16,73 @@ promotion; the skill defines submission and failure handling.
 Frontend staging retains its existing `ops/**`-only push exclusion. Dispatch
 `deploy-staging.yml` on `1a-staging` when an authorized ops-only change needs an
 actual deployment.
+
+The staging build first verifies that the committed help artifacts match the
+production publication profile. It then generates the staging profile, including
+staging-only help records, and verifies that those generated files remain unchanged
+through packaging. Staging-generated help data does not belong in the production
+source snapshot.
+
+### Shared staging queue
+
+Frontend staging serializes whole deployment runs with `staging-deploy` and
+`cancel-in-progress: false`. An active run finishes its pinned source and verified
+artifact even if a newer `1a-staging` push queues during its build. The server
+fetches complete history when its checkout is shallow, requires that source to
+remain in staging history, prepares the run's exact SHA in a temporary detached
+worktree, and retains artifact checksums and exact local and HTTP version checks.
+It does not substitute the latest branch head or rebuild on the server.
+
+Under the instance deployment lock, the healthy running app's SHA must be an
+ancestor of, or equal to, the candidate SHA. Older or divergent reruns, unavailable
+history, and an unhealthy or unknown running version fail before activation.
+The live checkout remains unchanged, including on rejection, so a legacy PM2
+restart or rollback continues to use its original files. The temporary source
+worktree is removed after the deployment attempt; the immutable app release
+remains independent of it. A fresh host with no existing app can deploy normally.
+Intentional rollbacks use a new reviewed revert commit through the normal
+workflow; automatic recovery to the previous healthy runtime after failed
+activation remains unchanged.
+
+The default queue retains one pending run. A later push can replace that pending
+run while preserving the active run, so shared staging pushes must preserve all
+previous integration changes. Separate staging E2E can overlap a later deployment
+and does not block the deployment queue.
+
+## AWS deployment credentials
+
+Frontend deployment jobs use GitHub OIDC and separate scoped IAM roles. Set
+`AWS_DEPLOY_ROLE_ARN` as an environment variable in each existing GitHub
+environment: `staging` accepts only `1a-staging`, and `production` accepts only
+`main`. Preserve their application configuration secrets. The deployment jobs
+validate the role ARN, check the assumed account, and require successful
+authentication; they have no static-key fallback. Build and verification jobs
+receive no AWS deployment credentials or OIDC token permission.
+
+The optional delegation-docs CDN publisher uses its own `delegation-docs`
+environment, restricted to `main`, with a separate `AWS_DEPLOY_ROLE_ARN` and
+OIDC subject. Its role accesses only `6529bucket/delegation-content/` in
+`eu-west-1`. A dry run verifies AWS authentication and read-only CDN access,
+then builds a receipt without publishing content. IPFS credentials are exposed
+only to the publishing step. See [publisher permissions](../../iam/frontend-delegation-docs/README.md).
+
+Sessions last 90 minutes to cover the 75-minute deployment job timeout and
+staging's artifact download window. Their names include the GitHub run ID:
+`frontend-staging-<run ID>` and `frontend-production-<run ID>`.
+Staging's signed artifact URL is capped by STS expiry. Authentication starts
+inside the 75-minute deployment job, so its 90-minute session outlasts that
+job's full download/deploy window by at least 15 minutes.
+
+Staging permissions cover its artifact prefix in `seize-web` in `us-east-1`
+and commands on its existing SSM-managed server in `eu-west-1`. Production
+permissions cover its versioned artifact prefix, the existing Elastic Beanstalk
+environment and deployment resources, and its announcement distribution.
+IAM roles are global. Infrastructure or resource replacements require an
+administrative policy review; deployment roles cannot edit their own policies.
+
+See the [staging IAM runbook](../../iam/frontend-staging/README.md) and
+[production IAM runbook](../../iam/frontend-production/README.md) for exact
+policies, trust, validation, and runtime permission boundaries.
 
 Every frontend build resolves, verifies, and packages one complete Network
 Museum publication. A missing, partial, or invalid publication fails the build
@@ -39,6 +104,25 @@ Keep this relationship intact if the target port or load-balancer timeout change
 an installed nginx proxy does not protect connections that bypass it.
 
 See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-load-balancer-attributes.html#connection-idle-timeout).
+
+## Standalone threadpool size
+
+`Procfile` also sets `UV_THREADPOOL_SIZE=16` for the standalone server. The
+staging PM2 environment generated by `ops/scripts/deploy-staging-artifact.sh`
+and `scripts/start-standalone.cjs` use the same value. Node's default pool has
+four threads, shared by DNS lookups, filesystem reads, compression, crypto and
+the `sharp` image transforms behind Next.js image optimization, so a few slow
+operations can queue unrelated requests. The variable must be present when the
+process starts, so it lives in the launch configuration rather than in
+application code. Keep the three launch paths in step when changing it.
+
+## Staging crawler cards
+
+Open Graph and crawler cards on staging intentionally require the visitor's
+staging access cookie, so they do not render without it. The deploy does not
+give the staging server its own access key: `/api` routes bypass the staging
+access gate, so a server-held key would let anyone without staging access render
+pre-release data through `/api/og-metadata/*`.
 
 ## Order and completion
 
@@ -67,8 +151,8 @@ See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbal
 ## Workflow dispatch examples
 
 Production E2E also runs a daily read-only canary at 05:30 UTC. It resolves the
-most recently started successful production deployment, verifies its canonical
-deploy job and current live version, and checks out that exact source before
+live production SHA against successful GitHub production deployment records,
+verifies the selected run's canonical deploy job and current live version, and checks out that exact source before
 running the manifest's production `cron` packs. It shares the post-deploy E2E
 concurrency group, installation steps, publication provenance, and artifacts.
 The canary runs the full cron set regardless of the previous deployment's change
@@ -78,6 +162,26 @@ To rerun that canary, dispatch Production E2E on `main` with `scope=canary` and
 the successful deployment run ID in `automatic_deploy_run_id`. The default
 `post-deploy` scope preserves ordinary deployment validation. Both modes reject
 a selected deployment that is no longer live.
+
+The production source resolver retries transient GitHub API transport errors
+and HTTP 5xx responses immediately, up to three attempts per read. Authentication
+errors and invalid deployment provenance fail immediately. Successful responses
+must still satisfy the deploy-run, canonical-job, and live-version checks.
+
+Scheduled discovery reads the uncached live version first. It examines at most
+three pages of SHA-matching production deployment records and, if they omit the
+live deployment, at most three pages of SHA-bound workflow history. Every
+candidate must match the live SHA; old history never determines the expected
+version. Unsettled versions and missing or invalid provenance remain failures.
+The job preserves source discovery, run/job provenance, and live-version evidence
+even when browser checks cannot start. Canary alerts distinguish setup failures
+from browser-test failures.
+
+Wave browser coverage waits for a rendered data row after the sidebar shell
+mounts. Museum exact-source coverage allows a bounded server-side background
+refresh to settle through new documents, then retains the fresh-publication and
+immutable source-commit assertions. Persistent stale content, HTTP 5xx, missing
+data, and wrong source identities still fail validation.
 
 Run these only after the corresponding merge and within the authorized scope.
 Select the service needed by the change; `api` below is an example.
@@ -111,8 +215,22 @@ Backend production also carries release-note inputs:
   create a release note, with PR/group metadata omitted and publish left false.
 
 The autonomous bot owns release-note writing and publication. Preserve its
-metadata and final signal. CI wave notifications are best effort and use deploy
-run IDs to correlate E2E replies.
+metadata and final signal. Per-deploy frontend and backend notes post to the
+`Deploys · Production` wave; `6529 Releases` receives one AI-written daily
+digest plus individual Desktop and mobile app release notes. CI wave
+notifications are best effort and use deploy run IDs to correlate E2E replies.
+
+## Sitemap generation
+
+The `postbuild` step (`next-sitemap.build.cjs`) builds the sitemap from live
+public API feeds. Each feed gets up to three attempts with jittered backoff. If a
+feed is still unavailable or fails its minimum-size floor, production deploy
+builds (GitHub Actions with `VERSION` set to the exact commit) fail rather than
+publish a truncated sitemap; rerun the build once the API is healthy. Pull
+request and local builds skip only that section, print a loud warning (and a
+GitHub annotation in CI), and still emit the static pages. The optional profile
+sample never fails a build. Set `SITEMAP_FAILURE_POLICY=fail` or `fallback` to
+override the detection.
 
 ## Failure and rollback
 

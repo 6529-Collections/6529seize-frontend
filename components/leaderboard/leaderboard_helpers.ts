@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { useCallback, useEffect, useState } from "react";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { CICType } from "@/entities/IProfile";
@@ -191,7 +191,7 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
       );
       setTotalResults(data.count);
       setLeaderboard(data.data);
-      setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
+      setMyFetchUrl(apiUrl(`/api/${data.url}`));
     } finally {
       setIsLoading(false);
     }

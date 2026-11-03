@@ -215,6 +215,8 @@ export const TIMELINE_MESSAGES = namespaceMessages("timeline", [
   ["media.imageAlt", "{label} preview image"],
   ["media.videoAriaLabel", "{label} preview video"],
   ["media.htmlTitle", "{label} interactive preview"],
+  ["media.openMedia", "Open {label}"],
+  ["media.unavailable", "{label} preview unavailable"],
 ] as const);
 
 export const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
@@ -329,7 +331,8 @@ export const MEME_CALENDAR_MESSAGES = namespaceMessages("memeCalendar", [
   ["grid.info.hide", "Hide calendar guide"],
   ["grid.info.panelLabel", "Calendar guide"],
   ["grid.info.mintingDays.label", "Minting Days"],
-  ["grid.info.mintingDays.text", "Monday / Wednesday / Friday"],
+  ["grid.info.mintingDays.text", "Monday / Wednesday / Friday (UTC)"],
+  ["grid.info.mintingDays.local", "In your time zone: {days}"],
   ["grid.info.szn.label", "SZN"],
   ["grid.info.szn.text", "Traditional calendar quarter system / 3 months each"],
   ["grid.info.szn.note", "~ 39 mints"],

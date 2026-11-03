@@ -1,5 +1,7 @@
 "use client";
 
+import { PROFILE_ACTIVITY_EMPHASIS } from "@/components/profile-activity/profileActivityTypography";
+
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLog } from "@/entities/IProfile";
@@ -60,7 +62,7 @@ export default function ProfileActivityLogItemWrapper({
                 handleOrWallet={handleOrWallet}
                 isCurrentUser={isCurrentUser}
                 tabTarget={tabTarget}
-                textClassName="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100"
+                textClassName={`tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
               />
             )}
             {children}

@@ -63,18 +63,10 @@ function CompactCandidateWaveRow({
       }`}
     >
       <div className="tw-min-w-0 tw-flex-1 tw-space-y-0.5">
-        <h3
-          className={`tw-m-0 tw-truncate tw-font-semibold tw-tracking-tight ${
-            isMobileSheet ? "tw-text-base" : "tw-text-sm"
-          }`}
-        >
+        <h3 className="tw-m-0 tw-truncate tw-text-sm tw-font-medium">
           {wave.name}
         </h3>
-        <p
-          className={`tw-mb-0 tw-truncate tw-text-iron-500 ${
-            isMobileSheet ? "tw-text-sm" : "tw-text-xs"
-          }`}
-        >
+        <p className="tw-mb-0 tw-truncate tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
           {wave.metrics.drops_count} posts • {wave.metrics.subscribers_count}{" "}
           joined
         </p>
@@ -128,10 +120,10 @@ function PanelCandidateWaveRow({
         </div>
 
         <div className="tw-min-w-0">
-          <h3 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+          <h3 className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
             {wave.name}
           </h3>
-          <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-xs tw-leading-4 tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
             {wave.metrics.drops_count} posts • {wave.metrics.subscribers_count}{" "}
             joined
           </p>
@@ -238,7 +230,7 @@ export default function UserPageProfileWavePickerReady({
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-no-scrollbar tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto tw-overflow-x-hidden tw-px-1.5">
-          <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-label tw-font-medium tw-uppercase tw-text-iron-500">
             Profile wave
           </p>
           <div className="tw-flex tw-flex-col tw-gap-1">
@@ -263,10 +255,10 @@ export default function UserPageProfileWavePickerReady({
     <section className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-black sm:tw-rounded-3xl">
       <div className="tw-p-5">
         <div className="tw-max-w-2xl">
-          <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
+          <h2 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
+          <p className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
             {t(locale, "profileCuration.entry.noEligibleNone")}
           </p>
         </div>
@@ -288,7 +280,7 @@ export default function UserPageProfileWavePickerReady({
             aria-expanded={showExistingWaves}
             aria-controls={existingWavesId}
             onClick={() => setShowExistingWaves((isVisible) => !isVisible)}
-            className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-500 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
+            className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-500 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
           >
             <span>{t(locale, "profileCuration.entry.existingWave")}</span>
             <ChevronDownIcon

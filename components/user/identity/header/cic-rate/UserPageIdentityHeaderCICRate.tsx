@@ -20,29 +20,23 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, tRich } from "@/i18n/messages";
 
-const CIC_SPAN_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-black/40 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/[0.15] tw-px-3";
-
-const CIC_FOCUS_RING_CLASS_NAME =
-  "focus:tw-border-emerald-500 focus:tw-ring-1 focus:tw-ring-emerald-500/30";
-
-const CIC_INPUT_TOOLTIP_CLASS_NAME =
-  "tw-max-w-[12rem] -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3 tw-px-3 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
-
-const CIC_INPUT_FULL_CLASS_NAME =
-  "tw-w-full -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3.5 tw-px-4 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
   isTooltip,
   onSuccess,
   onCancel,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
+  readonly locale?: SupportedLocale;
 }) {
   const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -220,8 +214,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const rateInput = (
     <div
-      className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-1.5" : "tw-mb-2"
+      className={`tw-relative tw-flex tw-w-full tw-min-w-0 ${
+        isTooltip ? "tw-flex-1" : "tw-mt-2"
       }`}
     >
       <UserPageRateInput
@@ -229,10 +223,7 @@ export default function UserPageIdentityHeaderCICRate({
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        spanClassName={CIC_SPAN_CLASS_NAME}
-        inputClassName={
-          isTooltip ? CIC_INPUT_TOOLTIP_CLASS_NAME : CIC_INPUT_FULL_CLASS_NAME
-        }
+        variant={isTooltip ? "tooltip" : "form"}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
@@ -242,7 +233,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
-      inLineValues={isTooltip}
+      inLineValues={true}
+      valueLayout="inline"
       originalValue={originalRating}
       adjustedValue={newRating}
       adjustmentType="NIC"
@@ -250,7 +242,7 @@ export default function UserPageIdentityHeaderCICRate({
   );
 
   return (
-    <div>
+    <div className={isTooltip ? "tw-w-full tw-min-w-0" : undefined}>
       <UserPageIdentityHeaderCICRateStats
         isTooltip={isTooltip}
         profile={profile}
@@ -262,32 +254,24 @@ export default function UserPageIdentityHeaderCICRate({
       <form onSubmit={onSubmit} className="tw-mt-6">
         {isTooltip ? (
           <>
-            <div className="tw-flex tw-items-end tw-gap-3">
-              <div className="tw-w-full sm:tw-w-auto">
-                <label
-                  htmlFor="nic-rating-input"
-                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-200"
-                >
-                  Your total NIC Rating of{" "}
-                  <span className="tw-whitespace-nowrap">{profile.query}:</span>
-                </label>
-                {rateInput}
-              </div>
-              <div className="tw-w-full sm:tw-w-auto">
-                <div className="tw-inline-flex tw-w-full tw-items-end tw-space-x-6 sm:tw-w-auto">
-                  <Button
-                    type="submit"
-                    disabled={isSaveDisabled}
-                    loading={mutating}
-                    variant="success"
-                    size="lg"
-                    fullWidth
-                    className="sm:tw-w-auto"
-                  >
-                    Rate
-                  </Button>
-                </div>
-              </div>
+            <label
+              htmlFor="nic-rating-input"
+              className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]"
+            >
+              {t(locale, "user.rate.nic.label", { profile: profile.query ?? "" })}
+            </label>
+            <div className="tw-mt-2 tw-flex tw-items-stretch tw-gap-3">
+              {rateInput}
+              <Button
+                type="submit"
+                disabled={isSaveDisabled}
+                loading={mutating}
+                variant="success"
+                size="md"
+                className="tw-shrink-0 !tw-text-xs touch-only:tw-h-11"
+              >
+                {t(locale, "user.rate.submit")}
+              </Button>
             </div>
             {adjustmentHelper}
           </>
@@ -295,35 +279,33 @@ export default function UserPageIdentityHeaderCICRate({
           <>
             <label
               htmlFor="nic-rating-input"
-              className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
-              Your total NIC Rating of{" "}
-              <span className="tw-whitespace-nowrap">{profile.query}</span>
+              {tRich(locale, "user.rate.nic.label", {
+                profile: (
+                  <span key="profile" className="tw-whitespace-nowrap">
+                    {profile.query}
+                  </span>
+                ),
+              })}
             </label>
             {rateInput}
 
             {adjustmentHelper}
 
-            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
+            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
               <Button
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
                 variant="success"
-                size="lg"
+                size="xl"
                 fullWidth
-                className="md:tw-w-auto md:tw-flex-1"
               >
-                Rate
+                {t(locale, "user.rate.submit")}
               </Button>
               {onCancel && (
-                <Button
-                  onClick={onCancel}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                  className="md:tw-w-auto md:tw-flex-1"
-                >
+                <Button onClick={onCancel} variant="ghost" size="lg" fullWidth>
                   Cancel
                 </Button>
               )}

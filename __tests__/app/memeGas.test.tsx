@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import MemeGasPage, { generateMetadata } from "@/app/meme-gas/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
@@ -57,7 +59,7 @@ describe("MemeGasPage", () => {
     });
     expect(metadata).toMatchObject({
       title: "Meme Gas - The Memes",
-      description: `Tools | ${domain}`,
+      description: `${t(DEFAULT_LOCALE, "pageMetadata.memeGas.description")} | ${domain}`,
     });
   });
 });

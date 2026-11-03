@@ -1,4 +1,5 @@
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import type { CreateDropConfig } from "@/entities/IDrop";
 import {
   deleteCreateWaveDraft,
   readCreateWaveDrafts,
@@ -90,5 +91,91 @@ describe("create-wave-draft.helpers", () => {
     // A write on top of corruption recovers cleanly.
     upsertCreateWaveDraft(makeDraft("a", 100));
     expect(readCreateWaveDrafts()).toHaveLength(1);
+  });
+
+  it("isolates first-post text between profile scopes", () => {
+    const description: CreateDropConfig = {
+      parts: [{ content: "Private first post", media: [], quoted_drop: null }],
+      metadata: [],
+      mentioned_users: [],
+      referenced_nfts: [],
+      signature: null,
+    };
+    upsertCreateWaveDraft(
+      { ...makeDraft("private", 200), description },
+      "wallet:profile-a"
+    );
+    expect(readCreateWaveDrafts("wallet:profile-b")).toEqual([]);
+    expect(readCreateWaveDrafts("other-wallet:profile-a")).toEqual([]);
+    expect(
+      readCreateWaveDrafts("wallet:profile-a")[0]?.description?.parts[0]
+        ?.content
+    ).toBe("Private first post");
+  });
+
+  it("strips media, inline images, signatures, and signer information", () => {
+    const description: CreateDropConfig = {
+      parts: [
+        {
+          content:
+            "Keep **this** text ![Seize](loading) ![photo](data:image/png;base64,secret)",
+          media: [new File(["binary"], "private.jpg")],
+          quoted_drop: null,
+          clientId: "transient-id",
+          attachments: [{ url: "secret-upload-url" } as never],
+        },
+      ],
+      title: "First post title",
+      metadata: [],
+      mentioned_users: [],
+      referenced_nfts: [],
+      signature: "private-signature",
+      signature_message: "private-signed-message",
+      signer_address: "private-signer",
+      is_safe_signature: true,
+    };
+    upsertCreateWaveDraft(
+      { ...makeDraft("text", 200), description },
+      "wallet:profile"
+    );
+    const serialized = localStorage.getItem(
+      "create-wave-drafts:v2:wallet:profile"
+    )!;
+    for (const forbidden of [
+      "private-signature",
+      "private-signed-message",
+      "private-signer",
+      "secret-upload-url",
+      "transient-id",
+      "base64",
+      "loading",
+      "binary",
+    ])
+      expect(serialized).not.toContain(forbidden);
+    const restored = readCreateWaveDrafts("wallet:profile")[0]!;
+    // Preserve the author's remaining Markdown whitespace rather than trimming
+    // line breaks or indentation while removing images.
+    expect(restored.description?.parts[0]?.content).toBe("Keep **this** text  ");
+    expect(restored.description?.parts[0]?.media).toEqual([]);
+    expect(restored.mediaOmitted).toBe(true);
+  });
+
+  it("preserves legacy settings without importing unscoped post text", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([
+        {
+          ...makeDraft("legacy", 100),
+          description: { parts: [{ content: "Unscoped text" }] },
+        },
+      ])
+    );
+    const restored = readCreateWaveDrafts("wallet:profile")[0]!;
+    expect(restored.settingsOnly).toBe(true);
+    expect(restored.description).toBeNull();
+    upsertCreateWaveDraft({ ...restored, updatedAt: 200 }, "wallet:profile");
+    expect(readCreateWaveDrafts("wallet:profile")).toHaveLength(1);
+    expect(readCreateWaveDrafts("other:profile")).toEqual([]);
+    expect(readCreateWaveDrafts()).toEqual([]);
   });
 });

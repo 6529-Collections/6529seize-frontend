@@ -3,7 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { isMuseumPath, isPolicyPath } = require("./museum-release-tier.cjs");
+const { requiresMuseumLane } = require("./museum-release-tier.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -99,20 +99,186 @@ function applyEffectiveAppPrCiPlan(plan) {
   const deploymentContract = files.some((file) =>
     DEPLOYMENT_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  // Keep App PR lane activation at least as broad as the tier classifier.
-  // P1/P2 surface work and P3 policy/control-plane work must receive the
-  // complete Museum inventory rather than being omitted by the legacy,
-  // narrower ownership helper.
-  const playwrightMuseum = files.some(
-    (file) => isMuseumPath(file) || isPolicyPath(file)
+  // Start the Museum lane for any change that can affect a Museum page or the
+  // Museum lane itself. The selection tool then runs only the affected packs.
+  const playwrightMuseum = files.some(requiresMuseumLane);
+
+  const playwrightProfileRep = files.some(
+    (file) =>
+      file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/utils/rate/") ||
+      file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
+      file === "hooks/useRepAllocation.ts" ||
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
   );
 
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
 
+  const playwrightNativeCompetition = files.some(
+    (file) =>
+      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
+        file
+      ) ||
+      /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
+        file
+      ) ||
+      [
+        "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
+        "contexts/CompetitionContext.tsx",
+        "helpers/competition.helpers.ts",
+        "helpers/competition-labels.helpers.ts",
+        "helpers/competition-config.helpers.ts",
+        "services/api/competitions-api.ts",
+        "services/wallet-signatures/competition-signature.ts",
+        "i18n/messages/competitions.ts",
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/media/waveImagePreviewCases.ts",
+        "components/waves/drop/MemesDropArtworkHero.tsx",
+        "components/drops/view/item/content/media/DropImagePreview.tsx",
+        "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+        "components/drops/view/item/content/media/MediaDisplay.tsx",
+        "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+        "components/memes/drops/MemeParticipationDrop.tsx",
+        "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/memes/drops/MemesLeaderboardDrop.tsx",
+        "components/drops/view/item/content/media/ImageMediaModal.tsx",
+        "components/drops/view/item/content/media/useOriginalImage.ts",
+        "helpers/gif-preview.helpers.ts",
+        "tests/social/wave-notification-settings-sandbox.spec.ts",
+        "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
+        "components/brain/my-stream/MyStreamWaveChat.tsx",
+        "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
+        "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
+        "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
+        "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
+        "components/brain/left-sidebar/waves/UnifiedWavesListWaves.tsx",
+        "components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx",
+        "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog.tsx",
+        "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialogSkeleton.tsx",
+        "hooks/useWavesList.ts",
+        "contexts/wave/MyStreamContext.tsx",
+        "components/brain/my-stream/MyStreamWavePending.tsx",
+        "components/header/AppHeader.tsx",
+        "components/brain/mobile/WaveInformationSheet.tsx",
+        "components/waves/specs/WaveNotificationSettings.tsx",
+        "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+        "components/brain/mobile/WaveInformationPanelContext.ts",
+        "components/brain/right-sidebar/BrainRightSidebar.tsx",
+        "components/waves/specs/WaveSettingRow.tsx",
+        "components/waves/specs/groups/group/edit/WaveGroupEditButtons.tsx",
+        "components/waves/specs/groups/group/edit/WaveGroupChangeDialog.tsx",
+        "components/groups/assignment/GroupAssignmentDialog.tsx",
+        "contexts/WaveInformationContext.tsx",
+        "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx",
+        "components/mobile-wrapper-dialog/MobileWrapperDialogHeader.tsx",
+        "components/brain/my-stream/MyStreamActionTooltip.tsx",
+        "tests/support/composerSandboxServer.cjs",
+        "components/waves/WavesMobile.tsx",
+        "components/brain/BrainMobile.tsx",
+        "components/brain/my-stream/MyStreamWaveContent.tsx",
+        "components/waves/drops/WaveDropActionsOpen.tsx",
+        "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
+        "components/waves/drops/WaveDropMobileMenuOpen.tsx",
+        "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+        "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx",
+        "components/utils/tooltip/BodyPortalTooltip.tsx",
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
+        "tests/packs.manifest.cjs",
+        "openapi.yaml",
+        ".github/workflows/app-pr-ci.yml",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+      ].includes(file)
+  );
+
+  const playwrightSubmissionArtwork = files.some((file) =>
+    [
+      "tests/media/submission-artwork-sandbox.spec.ts",
+      "tests/media/waveImagePreviewCases.ts",
+      "tests/support/videoArtworkSandbox.ts",
+      "components/waves/drop/WaveDropAdditionalInfo.tsx",
+      "components/waves/drop/WaveDropAdditionalInfoVideo.tsx",
+      "hooks/useChatVideoPoster.ts",
+      "public/video-preview-placeholder.svg",
+      "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/drops/view/item/content/media/DropImagePreview.tsx",
+      "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+      "components/drops/view/item/content/media/MediaDisplay.tsx",
+      "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+      "components/drops/view/item/content/media/ImageMediaModal.tsx",
+      "components/drops/view/item/content/media/useOriginalImage.ts",
+      "components/memes/drops/MemeParticipationDrop.tsx",
+      "components/memes/drops/MemeWinnerDrop.tsx",
+      "components/memes/drops/MemesLeaderboardDrop.tsx",
+      "helpers/gif-preview.helpers.ts",
+      "tests/support/composerSandboxServer.cjs",
+      "tests/packs.manifest.cjs",
+      "playwright.config.ts",
+      "tsconfig.playwright.json",
+      ".github/workflows/app-pr-ci.yml",
+      "scripts/app-pr-ci-effective-plan.cjs",
+      "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+    ].includes(file)
+  );
+
+  const playwrightWaveFeatureUsage = files.some(
+    (file) =>
+      /^(?:services\/analytics\/(?:mixpanel|waveFeature)|hooks\/useWaveFeatureUsage|tests\/(?:social\/wave-feature-usage-sandbox|support\/waveFeature)|components\/brain\/left-sidebar\/waves\/(?:SidebarDiscovery|SidebarActiveVotes|SidebarWaveNavigation|HighlyRatedWavesToggle)|components\/utils\/select\/)/u.test(
+        file
+      ) ||
+      [
+        "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+        "components/brain/my-stream/MyStreamWaveTabOption.tsx",
+        "components/common/TabToggle.tsx",
+        "components/providers/MixpanelSetup.tsx",
+        "components/brain/left-sidebar/web/WebProfileFeedShortcut.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardHeader.tsx",
+        "playwright.config.ts",
+        "tsconfig.playwright.json",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
+  const playwrightPdfAttachments = files.some(
+    (file) =>
+      /^(?:components\/drops\/view\/item\/content\/attachments\/|__tests__\/components\/drops\/view\/item\/content\/attachments\/|tests\/media\/pdf-attachment|tests\/fixtures\/pdf\/)/u.test(
+        file
+      ) ||
+      [
+        "components/waves/drops/WaveDropPartContentAttachments.tsx",
+        "hooks/useDeviceInfo.ts",
+        "scripts/prepare-pdfjs-assets.cjs",
+        "proxy.ts",
+        "config/securityHeaders.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
+    playwright_critical_shell: playwrightProfileRep
+      ? check(
+          true,
+          "Profile REP and rating changes require the profile dialog browser pack."
+        )
+      : baseChecks.playwright_critical_shell,
     install: check(
       true,
       playwrightMuseum
@@ -138,6 +304,28 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightArtworkDocumentation
         ? "Artwork documentation editor, HTTP boundary fixtures or browser lane policy changed."
         : "No artwork documentation editor or browser lane contract changed."
+    ),
+    playwright_native_competition: check(
+      playwrightNativeCompetition,
+      playwrightNativeCompetition
+        ? "Native competition changes require desktop and mobile sandbox browser coverage."
+        : "No native competition surfaces changed."
+    ),
+    playwright_submission_artwork: check(
+      playwrightSubmissionArtwork,
+      playwrightSubmissionArtwork
+        ? "Submission artwork media or its browser contract requires isolated desktop and mobile coverage."
+        : "No submission artwork media or browser contract changed."
+    ),
+    playwright_wave_feature_usage: check(
+      playwrightWaveFeatureUsage,
+      playwrightWaveFeatureUsage
+        ? "Wave tracking controls or SDK policy require isolated desktop/mobile visibility and privacy coverage."
+        : "No Wave feature tracking boundary changed."
+    ),
+    playwright_pdf_attachments: check(
+      playwrightPdfAttachments,
+      "PDF attachment reader or its browser/runtime dependencies changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

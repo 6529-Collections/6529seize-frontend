@@ -1,4 +1,5 @@
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -20,7 +21,10 @@ export default function WaveWinnersDropHeaderAuthorPfp({
             <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
               {/* Winner avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
               <img
-                src={winner.drop.author.pfp}
+                src={getScaledImageUri(
+                  winner.drop.author.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile picture"
                 className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
               />

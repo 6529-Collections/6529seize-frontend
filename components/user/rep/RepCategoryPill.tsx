@@ -70,7 +70,7 @@ export default function RepCategoryPill({
   const detailClasses =
     "tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-1.5";
   const contributorButtonClasses =
-    "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-decoration-white/30 tw-underline-offset-4 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-text-iron-200 focus-visible:tw-underline desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-underline";
+    "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-decoration-white/30 tw-underline-offset-4 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-text-iron-200 focus-visible:tw-underline desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-underline";
 
   const details = (
     <>

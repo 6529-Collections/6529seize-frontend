@@ -9,7 +9,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 
 const NETWORK_CARDS_LIST_CLASS =
-  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
+  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
 // CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
 const NETWORK_CARDS_LIST_COMPATIBILITY_PROPS = {
   role: "list",
@@ -21,12 +21,14 @@ export default function UserPageCollectedNetworkCards({
   setPage,
   next,
   locale = DEFAULT_LOCALE,
+  isLoading = false,
 }: {
   readonly cards: ApiXTdhToken[];
   readonly page: number;
   readonly setPage: (page: number) => void;
   readonly next: boolean;
   readonly locale?: SupportedLocale | undefined;
+  readonly isLoading?: boolean | undefined;
 }) {
   const tokens = useMemo(
     () =>
@@ -47,7 +49,7 @@ export default function UserPageCollectedNetworkCards({
 
   if (cards.length === 0) {
     return (
-      <div className="tw-w-full tw-py-10 tw-text-center tw-text-iron-400">
+      <div className="tw-w-full tw-py-10 tw-text-center tw-text-meta tw-font-normal tw-text-iron-500">
         {emptyText}
       </div>
     );
@@ -58,10 +60,12 @@ export default function UserPageCollectedNetworkCards({
       <ul
         {...NETWORK_CARDS_LIST_COMPATIBILITY_PROPS}
         aria-label={listLabel}
+        tabIndex={-1}
         className={NETWORK_CARDS_LIST_CLASS}
       >
         {cards.map((card) => (
           <li
+            data-profile-section-anchor="Artwork"
             key={`${card.contract}-${card.token}`}
             className="tw-min-w-0 tw-list-none"
           >
@@ -76,7 +80,7 @@ export default function UserPageCollectedNetworkCards({
           totalPages={next ? page + 1 : page}
           haveNextPage={next}
           small={false}
-          loading={false}
+          loading={isLoading}
         />
       </div>
     </>
@@ -153,10 +157,10 @@ function NetworkCard({
         </div>
 
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-pt-4">
-          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-white/40">
+          <span className="tw-mr-2 tw-truncate tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
             {collectionName}
           </span>
-          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-white/50">
+          <span className="tw-font-mono tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
             {tokenLabel}
           </span>
         </div>
@@ -164,21 +168,25 @@ function NetworkCard({
 
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-1.5 tw-self-end tw-px-4 tw-pb-4 tw-pt-1.5">
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <span className="tw-block tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+          <span className="tw-block tw-w-full tw-truncate tw-text-[15px] tw-font-semibold tw-leading-[19.25px] tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
             {tokenName}
           </span>
         </div>
 
-        <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
-          <span className="tw-flex tw-items-baseline tw-gap-1.5 tw-text-[13px] tw-font-semibold">
-            <span className="tw-order-2 tw-text-white/30">{xtdhLabel}</span>
-            <span className="tw-order-1 tw-text-white/80">
+        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+          <span className="tw-flex tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-meta tw-font-medium tw-tabular-nums">
+            <span className="tw-order-2 tw-font-normal tw-text-iron-500">
+              {xtdhLabel}
+            </span>
+            <span className="tw-order-1 tw-text-iron-100">
               {formatStatFloor(card.xtdh, 1)}
             </span>
           </span>
-          <span className="tw-flex tw-items-baseline tw-justify-end tw-gap-1.5 tw-text-[13px] tw-font-semibold">
-            <span className="tw-order-2 tw-text-white/30">{xtdhRateLabel}</span>
-            <span className="tw-order-1 tw-text-white/80">
+          <span className="tw-flex tw-max-w-full tw-flex-wrap tw-items-baseline tw-justify-end tw-gap-x-1.5 tw-text-meta tw-font-medium tw-tabular-nums">
+            <span className="tw-order-2 tw-font-normal tw-text-iron-500">
+              {xtdhRateLabel}
+            </span>
+            <span className="tw-order-1 tw-text-iron-100">
               {formatStatFloor(card.xtdh_rate, 1)}
             </span>
           </span>

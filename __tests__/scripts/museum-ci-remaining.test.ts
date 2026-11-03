@@ -394,7 +394,14 @@ describe("Museum isolated remaining runner", () => {
       ].join("\n")
     );
     expect(workflowRun).toContain(
-      "cleanup_museum_server\nmuseum_remaining_log="
+      [
+        "cleanup_museum_server",
+        'if [ "${#selected_specs[@]}" -eq 0 ]; then',
+        '  echo "Museum $MUSEUM_PROJECT selection is gate-only; no further packs are affected."',
+        "  exit 0",
+        "fi",
+        "museum_remaining_log=",
+      ].join("\n")
     );
     expect(workflowRun).toContain("trap 'exit 143' TERM");
     const source = fs.readFileSync(runner, "utf8");
@@ -491,5 +498,13 @@ describe("Museum execution inventory", () => {
     expect(() =>
       inventory(projects[0]!, [rightsFile, aboutFile], true)
     ).toThrow("coverage is incomplete");
+  });
+
+  it("accepts a gate-only selection with no remaining packs", () => {
+    const result = inventory(projects[0]!, []);
+    expect(result.full_test_count).toBe(1);
+    expect(result.rights.test_count).toBe(0);
+    expect(result.remaining.test_count).toBe(0);
+    expect(result.specs).toEqual([gateFile]);
   });
 });

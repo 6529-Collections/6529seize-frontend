@@ -7,9 +7,11 @@ import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
 import SmallScreenHeader from "./SmallScreenHeader";
 
 export default function SmallScreenLayoutHeader({
+  active = true,
   onMenuToggle,
   isMenuOpen,
 }: {
+  readonly active?: boolean;
   readonly onMenuToggle: () => void;
   readonly isMenuOpen: boolean;
 }) {
@@ -17,24 +19,30 @@ export default function SmallScreenLayoutHeader({
   const { setHeaderRef } = useHeaderContext();
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
+      if (!active) return;
       registerRef("header", node);
       setHeaderRef(node);
     },
-    [registerRef, setHeaderRef]
+    [active, registerRef, setHeaderRef]
   );
 
   useEffect(
     () => () => {
+      if (!active) return;
       registerRef("header", null);
       setHeaderRef(null);
     },
-    [registerRef, setHeaderRef]
+    [active, registerRef, setHeaderRef]
   );
 
   return (
-    <div ref={headerWrapperRef}>
-      <MobileAppBanner />
-      <SmallScreenHeader onMenuToggle={onMenuToggle} isMenuOpen={isMenuOpen} />
+    <div ref={headerWrapperRef} hidden={!active} data-web-small-header="true">
+      {active && <MobileAppBanner />}
+      <SmallScreenHeader
+        interactive={active}
+        onMenuToggle={onMenuToggle}
+        isMenuOpen={isMenuOpen}
+      />
     </div>
   );
 }

@@ -110,6 +110,12 @@ ranking, and voting rules retain their usual meaning.
 - Desktop modal restores focus to the previously focused element on close.
 - In app mode, modal renders inline and does not mutate `document.body`
   overflow.
+- Competition voting reuses an artwork's known competition and entry when
+  available. The form still loads current vote credits and may briefly show
+  `Loading competition…`; artworks without that context must first be identified.
+- After a competition vote is confirmed, your vote and credits update and the
+  voting modal closes immediately. Scores and rankings refresh in the background
+  while existing content stays visible.
 - Current-vote distribution is limited to participatory rank-wave drops. It is
   omitted for winners and for chat or approve waves, even where those views
   have other voting information.
@@ -128,6 +134,9 @@ ranking, and voting rules retain their usual meaning.
   stays open.
 - If vote submit request fails, voting stays open and an error toast is shown.
 - Closing voting only closes the voting surface; single-drop view stays open.
+- A background refresh failure does not turn a confirmed competition vote into
+  a failed save. Loaded artwork stays visible during temporary refresh failures;
+  access-denied or deleted entries still show an error.
 - If the optional distribution cannot be loaded, the drop and its normal
   voting controls remain usable. Select `Retry` to request current data again.
 - If a background refresh fails, the last valid distribution remains visible.

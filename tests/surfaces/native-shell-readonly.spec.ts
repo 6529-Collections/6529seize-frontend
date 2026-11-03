@@ -1,7 +1,10 @@
+import { defineMobileVideoBatteryTest } from "../media/mobileVideoBatteryCases";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
-import { gotoReady } from "../support/routeReadiness";
+import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
   isElectronSimulationProject,
@@ -237,6 +240,169 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("Collect Back restores the Collected filters and source action", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
+      );
+      await expect(
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
+      ).toBeVisible({
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      const source = new URL(page.url());
+      const link = page.getByRole("link", { name: action, exact: true });
+      await link.scrollIntoViewIfNeeded();
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(true);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect")
+      );
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeFocused();
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeInViewport();
+    }
+  });
+
+  for (const path of ["/collect", "/collect/orders"]) {
+    test(`fresh ${path} does not offer a false Back destination`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        !isCapacitorSimulationProject(testInfo.project.name),
+        "Native app Back contract"
+      );
+      // A document navigation starts a fresh app history for each deep link.
+      await gotoReady(page, path);
+      await expect(
+        page.getByRole("navigation", { name: "Primary navigation", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    });
+  }
+
+  test("Back remains usable after returning from Orders to a profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    await gotoReady(page, "/about");
+    await expect(
+      page.getByRole("navigation", { name: "Primary navigation", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Search 6529", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Search 6529", exact: true })
+      .fill(PROFILE_HANDLE);
+    await page
+      .getByRole("option")
+      .filter({ hasText: PROFILE_HANDLE })
+      .first()
+      .click();
+    await page
+      .getByRole("navigation", { name: "Profile sections" })
+      .getByRole("link", { name: "Collected", exact: true })
+      .click();
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .click();
+    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
+    );
+    await expect(
+      page.getByRole("button", { name: "Back", exact: true })
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(page, (url) => url.pathname === "/about");
+  });
+
+  test("native profile artwork opens above the app header and closes back to the profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native profile artwork geometry is covered on Capacitor simulations"
+    );
+    const dropId =
+      process.env["TARGET_DROP_ID"] ??
+      (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1"
+        ? "00000000-0000-4000-8000-000000000530"
+        : "74b13174-b34f-43e5-b302-23680f0d0b05");
+    await gotoReady(page, `/punk6529?drop=${dropId}`);
+    const artwork = page.getByRole("main").locator("[data-video-viewport]");
+    await expect(artwork).toBeVisible({ timeout: 30_000 });
+    await expect
+      .poll(() =>
+        artwork.evaluate((element) => element.getBoundingClientRect().top)
+      )
+      .toBe(0);
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (element) =>
+            element.getBoundingClientRect().height - window.innerHeight
+        )
+      )
+      .toBe(0);
+    const close = artwork.getByRole("button", {
+      name: "Close panel",
+      exact: true,
+    });
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const share = artwork.getByRole("button", {
+      name: "Share drop",
+      exact: true,
+    });
+    await expect(share).toBeInViewport({ ratio: 1 });
+    await share.click({ trial: true });
+    await page.screenshot({
+      path: testInfo.outputPath("native-profile-artwork.png"),
+    });
+    await close.click();
+    await expect(artwork).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.has("drop"));
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+  });
+
   test("Capacitor simulations expose native runtime signals", async ({
     page,
   }, testInfo) => {
@@ -254,6 +420,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "content",
       /viewport-fit=cover/
     );
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
     await expect(await readShellRuntime(page)).toEqual({
       capacitorIsNative: true,
       capacitorPlatform: platform,
@@ -265,6 +434,562 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       surface: `capacitor-${platform}-sim`,
       userAgentHasElectron: false,
     });
+
+    // A client-side navigation must not restore the web zoom limits.
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, { timeout: 15_000 });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
+  });
+
+  for (const reducedMotion of [false, true]) {
+    test(`iOS Waves navigation ${reducedMotion ? "respects reduced motion" : "moves into and out of a wave"}`, async ({
+      page,
+    }, testInfo) => {
+      // This flow exercises the native iOS layout, not the web/Electron shells.
+      test.skip(
+        testInfo.project.name !== "capacitor-ios-sim",
+        "Wave content navigation uses the native app layout"
+      );
+      await page.emulateMedia({
+        reducedMotion: reducedMotion ? "reduce" : "no-preference",
+      });
+      await gotoReady(page, "/waves");
+      const surface = page.getByTestId("wave-navigation-content");
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "list"
+      );
+      const waveList = page.getByRole("region", {
+        name: "All recent waves list",
+        exact: true,
+      });
+      const waveLink = waveList.getByRole("link").first();
+      await expect(waveLink).toBeVisible();
+
+      const waitForMotion = (snapshots = false) =>
+        page.waitForFunction((useSnapshots) => {
+          const animations = useSnapshots
+            ? document
+                .getAnimations()
+                .filter(
+                  (animation) =>
+                    animation.effect instanceof KeyframeEffect &&
+                    animation.effect.pseudoElement?.includes("wave-navigation")
+                )
+            : (document
+                .querySelector("[data-wave-navigation-screen]")
+                ?.getAnimations() ?? []);
+          const animation = useSnapshots
+            ? animations.find(
+                (item) =>
+                  item.effect instanceof KeyframeEffect &&
+                  item.effect.pseudoElement ===
+                    "::view-transition-new(wave-navigation)"
+              )
+            : animations[0];
+          if (!animation || animation.playState !== "running") return null;
+          const effect = animation.effect;
+          if (!(effect instanceof KeyframeEffect)) return null;
+          const frames = effect.getKeyframes();
+          for (const item of animations) {
+            item.pause();
+            item.currentTime = 100;
+          }
+          return {
+            transform: frames[0]?.["transform"],
+            duration: effect.getTiming().duration,
+            outgoingVisible: animations.some(
+              (item) =>
+                item.effect instanceof KeyframeEffect &&
+                item.effect.pseudoElement ===
+                  "::view-transition-old(wave-navigation)"
+            ),
+          };
+        }, snapshots);
+      const finishMotion = () =>
+        page.evaluate(() => {
+          for (const animation of document.getAnimations()) {
+            if (
+              animation.effect instanceof KeyframeEffect &&
+              animation.effect.pseudoElement?.includes("wave-navigation")
+            )
+              animation.finish();
+          }
+          document
+            .querySelector("[data-wave-navigation-screen]")
+            ?.getAnimations()
+            .forEach((animation) => animation.finish());
+        });
+      const listHeight = await surface.evaluate(
+        (element) => element.getBoundingClientRect().height
+      );
+      const readHeaderGeometry = () =>
+        surface.evaluate((element) => {
+          const header = element.previousElementSibling;
+          if (!header)
+            throw new Error("Expected header outside the animated content");
+          const { x, y, width, height } = header.getBoundingClientRect();
+          return {
+            x,
+            y,
+            width,
+            height,
+            transform: getComputedStyle(header).transform,
+          };
+        });
+      const headerGeometry = await readHeaderGeometry();
+      const opening = reducedMotion ? null : waitForMotion(true);
+      // Read the clicked destination at activation: live activity can reorder rows.
+      const clickedDestination = page.evaluate(
+        () =>
+          new Promise<string | null>((resolve) => {
+            document.addEventListener(
+              "click",
+              (event) => {
+                const target = event.target;
+                resolve(
+                  target instanceof Element
+                    ? (target.closest("a")?.getAttribute("href") ?? null)
+                    : null
+                );
+              },
+              { once: true, capture: true }
+            );
+          })
+      );
+      await waveLink.click();
+      const path = await clickedDestination;
+      if (!path) throw new Error("Expected a clicked wave destination");
+      await expect(page).toHaveURL(new URL(path, page.url()).toString());
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "wave"
+      );
+      if (opening) {
+        expect(await (await opening).jsonValue()).toEqual({
+          transform: "scale(0.98)",
+          duration: 260,
+          outgoingVisible: true,
+        });
+        expect(
+          await page.evaluate(() =>
+            Number.parseFloat(
+              getComputedStyle(
+                document.documentElement,
+                "::view-transition-group(wave-navigation)"
+              ).height
+            )
+          )
+        ).toBeGreaterThanOrEqual(listHeight);
+        expect(await readHeaderGeometry()).toEqual(headerGeometry);
+        await page.screenshot({
+          path: testInfo.outputPath("wave-opening.png"),
+        });
+        await finishMotion();
+      } else {
+        expect(
+          await surface.evaluate((element) => element.getAnimations().length)
+        ).toBe(0);
+      }
+      await expect
+        .poll(() =>
+          surface.evaluate((element) => getComputedStyle(element).transform)
+        )
+        .toBe("none");
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-navigation-transition"
+      );
+      const returning = reducedMotion ? null : waitForMotion();
+      await page.goBack();
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "list"
+      );
+      if (returning) {
+        expect(await (await returning).jsonValue()).toEqual({
+          transform: "scale(1.02)",
+          duration: 240,
+          outgoingVisible: false,
+        });
+        await finishMotion();
+      } else {
+        expect(
+          await surface.evaluate((element) => element.getAnimations().length)
+        ).toBe(0);
+      }
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
+      if (!reducedMotion) {
+        const reopened = waitForMotion(true);
+        await waveLink.click();
+        await reopened;
+        await finishMotion();
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+        const closing = waitForMotion(true);
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+        expect(await (await closing).jsonValue()).toEqual({
+          transform: "scale(1)",
+          duration: 260,
+          outgoingVisible: true,
+        });
+        expect(await readHeaderGeometry()).toEqual(headerGeometry);
+        await page.screenshot({
+          path: testInfo.outputPath("wave-returning.png"),
+        });
+        await finishMotion();
+        await expect(surface).toHaveAttribute(
+          "data-wave-navigation-screen",
+          "list"
+        );
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+      }
+    });
+  }
+
+  test("iOS Waves search stays above the keyboard and restores its list height", async ({
+    page,
+  }, testInfo) => {
+    // Native keyboard overlay geometry differs from web and Electron layouts.
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "Keyboard geometry is covered on the iOS Capacitor simulation"
+    );
+    await gotoReady(page, "/waves");
+    const scrollport = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
+      .locator(
+        'xpath=ancestor::div[@data-mobile-bottom-nav-scroll-target="true"][1]'
+      )
+      .filter({ visible: true });
+    await expect(scrollport).toBeVisible();
+    const searchToggle = page.getByRole("button", {
+      name: "Find a wave…",
+      exact: true,
+    });
+    await expect(searchToggle).toBeVisible();
+    await expect
+      .poll(() =>
+        scrollport.evaluate(
+          (element) => element.scrollHeight - element.clientHeight
+        )
+      )
+      .toBeGreaterThan(500);
+    await scrollport.evaluate(async (element) => {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve())
+      );
+      element.scrollTo({ top: 1000, behavior: "instant" });
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(500);
+    await page.screenshot({ path: testInfo.outputPath("sticky-search.png") });
+    await expect
+      .poll(() =>
+        searchToggle.evaluate((element) => {
+          const controls = element.closest(".tw-sticky");
+          const scrollport = element.closest(
+            '[data-mobile-bottom-nav-scroll-target="true"]'
+          );
+          if (!controls || !scrollport) return Number.POSITIVE_INFINITY;
+          return Math.abs(
+            controls.getBoundingClientRect().top -
+              scrollport.getBoundingClientRect().top
+          );
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    // Compare the same layout measurement before and after the keyboard cycle.
+    const restingHeight = await scrollport.evaluate(
+      (element) => element.clientHeight
+    );
+    await searchToggle.click();
+    const input = page.getByRole("searchbox", { name: "Find a wave…" });
+    await expect(input).toBeFocused();
+
+    // Match native overlay mode: the visual viewport shrinks while the layout
+    // viewport stays full height. The shared keyboard hook owns the CSS inset.
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Object.defineProperty(viewport, "height", {
+        configurable: true,
+        value: globalThis.innerHeight - 320,
+      });
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.clientHeight))
+      .toBeLessThan(restingHeight - 250);
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const scrollport = element.closest(
+            '[data-mobile-bottom-nav-scroll-target="true"]'
+          );
+          if (!scrollport) return false;
+          const visible = scrollport.getBoundingClientRect();
+          return bounds.top >= visible.top && bounds.bottom <= visible.bottom;
+        })
+      )
+      .toBe(true);
+    await input.fill("xx");
+    await expect(input).toHaveValue("xx");
+    await page.getByRole("button", { name: "Close wave search" }).click();
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.clientHeight))
+      .toBeCloseTo(restingHeight, 0);
+    await expect(page.getByText("All Waves", { exact: true })).toBeVisible();
+  });
+
+  test("Network filter keeps the focused input and action above the keyboard", async ({
+    page,
+    browserName,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name) &&
+        testInfo.project.name !== "web-mobile-chromium",
+      "Network keyboard behavior is covered on mobile web and Capacitor simulations"
+    );
+    await gotoReady(page, "/network");
+    const openFilters = page.getByRole("button", {
+      name: "Open group filters",
+      exact: true,
+    });
+    await openFilters.click();
+    const filter = page.getByRole("dialog", {
+      name: "Filter Network",
+      exact: true,
+    });
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    const input = filter.getByRole("spinbutton", {
+      name: "Level at least",
+      exact: true,
+    });
+    const summary = filter.getByText("Level at least 10", { exact: true });
+    const action = filter.getByRole("button", {
+      name: "Create and use new group",
+      exact: true,
+    });
+    await input.fill("10");
+    await expect(input).toBeFocused();
+    await expect(summary).toBeVisible();
+
+    // A frame sequence catches repeated smooth-scroll requests during keyboard
+    // animation, in addition to the settled clipping checks below. This is a
+    // browser simulation, not evidence of a physical keyboard animation.
+    const animation = await input.evaluate(async (element) => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      const calls: string[] = [];
+      const scrollIntoView = Element.prototype.scrollIntoView;
+      const scrollBy = Element.prototype.scrollBy;
+      Element.prototype.scrollIntoView = function (options) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        scrollIntoView.call(this, options);
+      };
+      Element.prototype.scrollBy = function (
+        options?: ScrollToOptions | number,
+        y?: number
+      ) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        Reflect.apply(
+          scrollBy,
+          this,
+          typeof options === "number" ? [options, y ?? 0] : [options]
+        );
+      };
+      try {
+        const restingHeight = viewport.height;
+        for (let frame = 1; frame <= 12; frame++) {
+          Object.defineProperty(viewport, "height", {
+            configurable: true,
+            value: restingHeight - (320 * frame) / 12,
+          });
+          viewport.dispatchEvent(new Event("resize"));
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          );
+        }
+        const callsDuringAnimation = calls.length;
+        await new Promise<void>((resolve) => setTimeout(resolve, 750));
+        return {
+          callsDuringAnimation,
+          calls,
+          focused: document.activeElement === element,
+        };
+      } finally {
+        Element.prototype.scrollIntoView = scrollIntoView;
+        Element.prototype.scrollBy = scrollBy;
+      }
+    });
+    expect(animation.callsDuringAnimation).toBe(0);
+    expect(animation.calls).not.toContain("smooth");
+    expect(animation.focused).toBe(true);
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-native-keyboard-visible",
+        "true"
+      );
+    }
+    // The mobile summary scrolls after the editor, as requested, instead of
+    // occupying or being visually hidden within the fixed action footer.
+    const summaryCard = filter
+      .getByRole("region", { name: "Level", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summaryCard).toContainText("Level at least 10");
+    await expect
+      .poll(() => summaryCard.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(1);
+    await expect(summary).toBeVisible();
+    await expect
+      .poll(() => filter.ariaSnapshot())
+      .toContain("Level at least 10");
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          let top = viewport.offsetTop;
+          let bottom = top + viewport.height;
+          for (
+            let parent = element.parentElement;
+            parent;
+            parent = parent.parentElement
+          ) {
+            if (
+              !/(auto|scroll|hidden)/.test(getComputedStyle(parent).overflowY)
+            )
+              continue;
+            const clip = parent.getBoundingClientRect();
+            top = Math.max(top, clip.top);
+            bottom = Math.min(bottom, clip.bottom);
+          }
+          return bounds.top >= top && bounds.bottom <= bottom;
+        })
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        action.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+    // WebKit uses Option-Tab to include buttons in keyboard navigation.
+    await input.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+    const preview = filter.getByRole("button", {
+      name: "View members",
+      exact: true,
+    });
+    await expect(preview).toBeFocused();
+    await expect(preview).toBeInViewport({ ratio: 1 });
+    await input.focus();
+    await expect(summary).toBeVisible();
+    await filter.getByRole("button", { name: "Back", exact: true }).click();
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const allowlists = filter.getByRole("textbox", {
+      name: "Search allowlists",
+      exact: true,
+    });
+    await allowlists.fill("keyboard-test-no-match");
+    await expect(allowlists).toBeFocused();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await expect
+      .poll(() =>
+        allowlists.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          const bounds = element.getBoundingClientRect();
+          const editor = element.closest("[tabindex='-1']");
+          const clip = editor?.getBoundingClientRect();
+          return (
+            !!viewport &&
+            !!clip &&
+            bounds.top >= Math.max(clip.top, viewport.offsetTop) &&
+            bounds.bottom <=
+              Math.min(clip.bottom, viewport.offsetTop + viewport.height)
+          );
+        })
+      )
+      .toBe(true);
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("group", { name: "Filter Network", exact: true })
+    ).toBeHidden();
+    const backBounds = await back.boundingBox();
+    const editorTop = await allowlists.evaluate(
+      (element) =>
+        element.closest("[tabindex='-1']")?.getBoundingClientRect().top
+    );
+    expect(
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
+    ).toBeLessThanOrEqual(editorTop ?? 0);
+    await page.screenshot({
+      path: testInfo.outputPath("network-keyboard.png"),
+    });
+
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeVisible();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
+    await allowlists.blur();
+    await allowlists.focus();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await back.click();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })
+      .click();
+    await expect(input).toHaveValue("10");
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(openFilters).toBeFocused();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
   });
 
   test("iOS native simulation hides non-US subscription downloads", async ({
@@ -846,3 +1571,8 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
     await expect(copyTextAction).toBeHidden({ timeout: 10_000 });
   });
 });
+
+defineMobileVideoBatteryTest(
+  "native artwork video stops offscreen buffering and restores position after backgrounding",
+  isCapacitorSimulationProject
+);

@@ -56,50 +56,147 @@ export async function openMuseumAcceptanceRoute(
   await expect(page.locator("main").first()).toBeVisible();
 }
 
+async function waitForLazyImageFrame(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      })
+  );
+}
+
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  let settledCount = 0;
-  let stableSince: number | undefined;
-  // Streaming/hydration may add lazy images while the first batch loads.
-  // Require a quiet interval, including for an initially empty inventory,
-  // rather than accepting the first unchanged recount.
+  const expected = new Map<string, { count: number; label: string }>();
+  let stableSince = Date.now();
+  // Track the media identity, not its position: a failed managed image can be
+  // replaced by an alert, shifting every subsequent img in the document.
+  const snapshot = () =>
+    images.evaluateAll((elements) => {
+      const counts = new Map<string, number>();
+      return elements.map((element) => {
+        const image = element as HTMLImageElement;
+        const key = `${image.alt} (${image.getAttribute("src") ?? ""})`;
+        const occurrence = (counts.get(key) ?? 0) + 1;
+        counts.set(key, occurrence);
+        return {
+          key,
+          // Keep the full source only as an internal identity. Assertion text
+          // uses alternative text; sanitized URLs are in Browser media state.
+          label: image.alt || "Unnamed image",
+          occurrence,
+          loaded: image.complete && image.naturalWidth > 0,
+          failed: image.complete && image.naturalWidth === 0,
+        };
+      });
+    });
+
   await expect
     .poll(
       async () => {
-        const imageCount = await images.count();
-        if (imageCount === settledCount) {
-          stableSince ??= Date.now();
-          return Date.now() - stableSince >= 500;
+        const inventory = await snapshot();
+        for (const image of inventory) {
+          if (image.occurrence <= (expected.get(image.key)?.count ?? 0))
+            continue;
+          expected.set(image.key, {
+            count: image.occurrence,
+            label: image.label,
+          });
+          stableSince = Date.now();
         }
-        if (imageCount < settledCount) settledCount = 0;
-        for (let index = settledCount; index < imageCount; index += 1) {
-          await images.nth(index).scrollIntoViewIfNeeded();
-        }
-        await Promise.all(
-          Array.from(
-            { length: imageCount - settledCount },
-            async (_, offset) => {
-              const image = images.nth(settledCount + offset);
-              await expect
-                .poll(
-                  () =>
-                    image.evaluate((element) => {
-                      if (!(element instanceof HTMLImageElement)) return false;
-                      return element.complete && element.naturalWidth > 0;
-                    }),
-                  { timeout: 20_000 }
-                )
-                .toBe(true);
-            }
-          )
+        // Keep the next unresolved lazy image in view until the browser finishes
+        // it. A two-frame visit followed by scrolling to the bottom can leave
+        // native lazy loading (or a newly selected responsive source) deferred.
+        const pending = inventory.find(
+          (image) => !image.loaded && !image.failed
         );
-        settledCount = imageCount;
-        stableSince = Date.now();
-        return false;
+        if (pending !== undefined) {
+          await images.evaluateAll((elements, identity) => {
+            const matches = elements.filter((element) => {
+              const image = element as HTMLImageElement;
+              return (
+                `${image.alt} (${image.getAttribute("src") ?? ""})` ===
+                identity.key
+              );
+            });
+            matches[identity.occurrence - 1]?.scrollIntoView({
+              block: "center",
+            });
+          }, pending);
+          await waitForLazyImageFrame(page);
+        }
+        const current = await snapshot();
+        const problems: string[] = [];
+        for (const [key, { count, label }] of expected) {
+          const matches = current.filter((image) => image.key === key);
+          if (matches.length < count)
+            problems.push(`Media disappeared or was replaced: ${label}`);
+          for (const image of matches) {
+            if (image.failed) problems.push(`Image failed to decode: ${label}`);
+            else if (!image.loaded)
+              problems.push(`Image still loading: ${label}`);
+          }
+        }
+        if (Date.now() - stableSince < 500)
+          problems.push("Media inventory is still settling");
+        return problems;
       },
-      { timeout: 30_000, intervals: [100, 250] }
+      {
+        timeout: 30_000,
+        intervals: [100, 250],
+        message:
+          "Every observed Museum image must remain present and decode successfully",
+      }
     )
-    .toBe(true);
+    .toEqual([])
+    .catch(async (error: unknown) => {
+      const state = await images.evaluateAll((elements) => {
+        const safeUrl = (value: string | null) => {
+          if (!value) return value;
+          try {
+            const base =
+              typeof document === "undefined"
+                ? "https://example.invalid"
+                : document.baseURI;
+            const url = new URL(value, base);
+            if (!["https:", "http:"].includes(url.protocol))
+              return "[non-HTTP URL]";
+            return `${url.origin}${url.pathname}`;
+          } catch {
+            return "[invalid URL]";
+          }
+        };
+        return elements.map((element) => {
+          const image = element as HTMLImageElement;
+          return {
+            alt: image.alt,
+            src: safeUrl(image.getAttribute("src")),
+            currentSrc: safeUrl(image.currentSrc),
+            // Data URLs contain commas that are not candidate separators. Drop
+            // the entire field before splitting so no inline payload is logged.
+            srcSet: /(?:^|[\s,])data:/iu.test(
+              image.getAttribute("srcset") ?? ""
+            )
+              ? "[inline srcset redacted]"
+              : (image.getAttribute("srcset") ?? "")
+                  .split(",")
+                  .map((candidate) => {
+                    const [url, descriptor] = candidate.trim().split(/\s+/u);
+                    return { url: safeUrl(url ?? null), descriptor };
+                  }),
+            sizes: image.getAttribute("sizes"),
+            loading: image.loading,
+            complete: image.complete,
+            naturalWidth: image.naturalWidth,
+            naturalHeight: image.naturalHeight,
+          };
+        });
+      });
+      throw new Error(
+        `${error instanceof Error ? error.message : String(error)}\nBrowser media state: ${JSON.stringify(state)}`,
+        { cause: error }
+      );
+    });
 }
 
 export async function expectNoUnresolvedMuseumMedia(
@@ -130,7 +227,9 @@ export async function expectNoUnresolvedMuseumMedia(
             if (!isVisible(element)) continue;
             if (!(element instanceof HTMLImageElement)) continue;
             if (!element.complete || element.naturalWidth === 0) {
-              failures.push(`unresolved image: ${element.alt || element.src}`);
+              failures.push(
+                `unresolved image: ${element.alt || "Unnamed image"}`
+              );
             }
           }
           for (const element of root.querySelectorAll(
@@ -157,6 +256,7 @@ export async function expectCollectionAcceptance(page: Page) {
     '[data-testid="museum-landing-media-card"]'
   );
   await expect(holdingCards).toHaveCount(13);
+  await expect(holdingCards.getByRole("img")).toHaveCount(13);
   const veraCard = holdingCards.filter({
     has: page.getByRole("link", {
       name: "Themes and Variations #210",
@@ -178,6 +278,15 @@ export async function expectCollectionAcceptance(page: Page) {
     'section[aria-labelledby="collection-holdings-title"]',
     "img"
   );
+
+  await expect(
+    page
+      .getByRole("main")
+      .last()
+      .locator(
+        'section[aria-labelledby="collection-holdings-title"] img[src^="https://media-proxy.artblocks.io/"]'
+      )
+  ).toHaveCount(0);
 
   const magnumTitles = [
     "Patrolling the border between the Negev Desert and Jordan",
@@ -366,6 +475,12 @@ export async function expectResearchAcceptance(page: Page) {
 
   // Wait for the expected sections/cards before taking the media inventory.
   await expectNoUnresolvedMuseumMedia(page, "main", "img");
+  await expect(
+    page
+      .getByRole("main")
+      .last()
+      .locator('img[src^="https://media-proxy.artblocks.io/"]')
+  ).toHaveCount(0);
 
   const imageArticles = await page
     .getByRole("main")

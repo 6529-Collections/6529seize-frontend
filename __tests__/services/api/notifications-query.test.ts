@@ -5,11 +5,26 @@ import {
   getIdentityNotificationsQueryKey,
 } from "@/services/api/notifications-query";
 
+const mockRetiredCompetitionFlag = jest.fn(() => false);
+jest.mock("@/helpers/competition.helpers", () => ({
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
+}));
+
 jest.mock("@/services/api/notifications-v2-api", () => ({
   fetchNotificationsV2: jest.fn(),
 }));
 
 describe("notifications query options", () => {
+  beforeEach(() => {
+    mockRetiredCompetitionFlag.mockReturnValue(false);
+  });
+  it("always scopes notification pages to competition-capable responses", () => {
+    const legacy = getIdentityNotificationsQueryKey({ identity: "alice" });
+    mockRetiredCompetitionFlag.mockReturnValue(true);
+    const native = getIdentityNotificationsQueryKey({ identity: "alice" });
+    expect(native).toEqual(legacy);
+    expect(native[1]).toMatchObject({ includeCompetitions: true });
+  });
   it("builds the exact identity, limit, cause, and version key", () => {
     expect(
       getIdentityNotificationsQueryKey({
@@ -27,8 +42,29 @@ describe("notifications query options", () => {
         limit: "30",
         cause: "DROP_REPLIED,IDENTITY_MENTIONED",
         version: "v2",
+        includeCompetitions: true,
       },
     ]);
+  });
+
+  it("continues from the raw page cursor even when all records are excluded", () => {
+    const options = getIdentityNotificationsInfiniteQueryOptions({
+      identity: "alice",
+    });
+    expect(
+      options.getNextPageParam({
+        notifications: [],
+        unread_count: 1,
+        nextPageParam: 100,
+      })
+    ).toBe(100);
+    expect(
+      options.getNextPageParam({
+        notifications: [],
+        unread_count: 0,
+        nextPageParam: null,
+      })
+    ).toBeNull();
   });
 
   it("uses the same parameters and server headers in its query function", async () => {

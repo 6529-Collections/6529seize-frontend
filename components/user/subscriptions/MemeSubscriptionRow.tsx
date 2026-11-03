@@ -115,12 +115,6 @@ export default function MemeSubscriptionRow(
     setSelectedCount(subscribedCount);
   }, [subscribedCount]);
 
-  useEffect(() => {
-    if (selectedCount > props.eligibilityCount) {
-      setSelectedCount(Math.max(0, props.eligibilityCount));
-    }
-  }, [props.eligibilityCount, selectedCount]);
-
   const { final, hasNoAllocation } = useSubscriptionAllocationStatus({
     profileKey: props.profileKey,
     contract: props.subscription.contract,
@@ -294,23 +288,25 @@ export default function MemeSubscriptionRow(
     }
 
     const isCountSelectDisabled =
+      props.eligibilityCount < 1 ||
       (disableWhenSingleOption && props.eligibilityCount <= 1) ||
       props.readonly ||
       isSubmitting ||
       props.minting_today;
 
     return (
-      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25">
+      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25 has-[:focus-visible]:tw-ring-primary-400">
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={SUBSCRIPTION_COUNT_SELECT_CLASS}
-            value={selectedCount}
+            value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
             onChange={(e) => {
               handleCountChange(e.target.value).catch(() => undefined);
             }}
             aria-label={`Select subscription quantity for ${props.title}`}
           >
+            {props.eligibilityCount < 1 && <option value={0}>0</option>}
             {countOptions.map((num) => (
               <option key={num} value={num}>
                 {num}
@@ -391,15 +387,15 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none">
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4">
+    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-sm:tw-p-3">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+            <span className="tw-break-words tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 tw-text-iron-100 sm:tw-whitespace-nowrap">
               {props.title} #{props.subscription.token_id}
             </span>
             {props.date && (
-              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-leading-4">
+              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-meta tw-font-normal tw-tabular-nums tw-leading-4">
                 <span className="tw-text-iron-500">
                   SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
                 </span>
@@ -410,10 +406,10 @@ export default function MemeSubscriptionRow(
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
                     locale={locale}
-                    className="tw-font-medium tw-text-primary-300"
+                    className="tw-text-xs tw-font-medium tw-text-primary-300"
                   />
                 ) : (
-                  <span className="tw-text-iron-600">
+                  <span className="tw-text-iron-500">
                     {formatFullDate(props.date.utcDay, "utc")}
                   </span>
                 )}
@@ -421,12 +417,12 @@ export default function MemeSubscriptionRow(
             )}
           </div>
           {hasNoAllocation && (
-            <output className="tw-text-xs tw-leading-5 tw-text-iron-400">
+            <output className="tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "profile.subscriptions.noAllocation")}
             </output>
           )}
           {finalWithMetadata && (
-            <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">
+            <span className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
               Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
               {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
               {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
@@ -435,7 +431,7 @@ export default function MemeSubscriptionRow(
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 max-sm:tw-gap-2">
           {isSubmitting && <Spinner />}
           {renderCountSelector({
             disableWhenSingleOption: true,

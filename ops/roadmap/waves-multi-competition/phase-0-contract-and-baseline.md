@@ -18,6 +18,15 @@
   [OpenAPI snapshot](./phase-0/baseline/public-get-openapi-snapshot.json), and
   [runtime route manifest](./phase-0/baseline/runtime-get-route-manifest.json)
 
+## Current Amendment
+
+The Phase 0 inventory/GET baseline remains complete. The decision register and
+UX/domain guidance were amended on 2026-10-01 to match shipped policy and add
+[default competition](./default-competition.md), approved but not implemented.
+Use the [production assessment](./native-delivery/production-status-2026-10-01.md)
+for current delivery and acceptance; the discovery checklist below describes
+Phase 0's original analysis work rather than a new implementation request.
+
 ## Outcome
 
 The team has an approved domain contract, compatibility policy, API direction,
@@ -78,9 +87,9 @@ additional scope.
 
 All ten answers, their rationale, owner, and downstream gate are recorded in
 the [decision register](./phase-0/decision-register.md). Approved defaults are
-the implementation baseline. D-05 and D-17 are deliberately deferred to named
-owners before the later mutation/rollout phases they affect; neither blocks the
-additive Phase 1 schema/read estimate.
+the implementation baseline. D-05/D-17 are now resolved by the release decisions;
+D-19 adds the approved default-selection follow-up. Frozen compatibility
+contracts remain unchanged.
 
 ## Domain Contract
 
@@ -285,11 +294,11 @@ Threat-model at least:
 - **Delivery/rollback:** complete. The future zero-downtime order is additive
   and reversible; rollback disables execution/flags and retains all data.
 
-Roadmap Phase 1 can be estimated and started without changing this domain
-contract. Deferred D-05 blocks native cancellation compensation policy in
-roadmap Phase 4, and D-17 blocks broad cancelled-history presentation in
-roadmap Phase 6; neither is an unknown execution or privileged-winner dependency.
+The foundation and native runtime have since shipped. D-05/D-17 are resolved;
+manual cancellation and compensating economics are not part of the current
+product. Remaining production acceptance and migration prerequisites are
+tracked in the linked production assessment.
 
 ## Next Phase
 
-Proceed to [Phase 1: Additive Backend Foundation](./phase-1-additive-backend-foundation.md).
+See the [current roadmap and remaining sequence](./README.md#roadmap).

@@ -39,7 +39,8 @@ async function forceExpandedDesktopSidebar(page: Page) {
 async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
-  await expect(searchInput).toBeVisible();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchInput.fill("wave score");
   const result = page.getByRole("option", { name: WAVE_SCORE_RESULT }).first();
   await expect(result).toBeVisible();
@@ -58,13 +59,21 @@ async function expectWaveScorePage(page: Page) {
 }
 
 async function expectTdhExplainer(page: Page) {
+  await waitForRouteReady(page, { readySelector: "main h1" });
+  // Shared staging has the Explained redesign before its rollout to main.
+  const explained =
+    (await page
+      .getByRole("main")
+      .locator('[data-explained-shell="tdh"]')
+      .count()) > 0;
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "How TDH is calculated",
+      name: explained ? "Total Days Held" : "How TDH is calculated",
       exact: true,
     })
   ).toBeVisible();
+  return explained;
 }
 
 async function expectLinkHref(page: Page, name: string, href: string) {
@@ -153,6 +162,34 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     );
   });
 
+  test("iPhone Safari suppresses focus zoom without disabling web scaling", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "This checks Safari policy in browser simulation; real iPhone gestures are tested separately"
+    );
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgent", {
+        configurable: true,
+        value:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+      });
+    });
+    await gotoReady(page, "/");
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=yes/);
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=yes/);
+  });
+
   test("Capacitor simulations apply native viewport setup", async ({
     page,
   }, testInfo) => {
@@ -187,7 +224,46 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
   test("TDH explainer links to network reference pages", async ({ page }) => {
     await gotoReady(page, "/network/tdh");
 
-    await expectTdhExplainer(page);
+    const explained = await expectTdhExplainer(page);
+    if (explained) {
+      const chapter = page.getByRole("region", {
+        name: "In this chapter",
+        exact: true,
+      });
+      await expect(chapter).toBeVisible();
+      for (const [name, href] of [
+        [
+          "1 How it works Time, rarity, collections and you: models to move.",
+          "/network/tdh/how-it-works",
+        ],
+        ["S1 Specification Every rule, exactly.", "/network/tdh/specification"],
+        [
+          "S4 Versions and boosts Every boost schedule so far.",
+          "/network/tdh/historic-boosts",
+        ],
+        ["S5 Glossary Each word, one meaning.", "/network/tdh/glossary"],
+      ] as const) {
+        const link = chapter.getByRole("link", { name, exact: true });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", href);
+      }
+      await chapter
+        .getByRole("link", {
+          name: "1 How it works Time, rarity, collections and you: models to move.",
+          exact: true,
+        })
+        .click();
+      await expect(page).toHaveURL(/\/network\/tdh\/how-it-works$/);
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "How TDH is calculated",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      return;
+    }
     await expect(
       page.getByRole("heading", {
         level: 2,
@@ -204,16 +280,16 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expectLinkHref(page, "Levels", "/network/levels");
   });
 
-  test("Delegation Center renders disconnected-safe choices", async ({
+  test("Safe Collecting renders disconnected-safe choices", async ({
     page,
   }) => {
-    await gotoReady(page, "/delegation/delegation-center");
+    await gotoReady(page, "/safe-collecting");
 
     await expect(
-      page.getByRole("heading", { level: 1, name: "Delegation Center" })
+      page.getByRole("heading", { level: 1, name: "Safe Collecting" })
     ).toBeVisible();
     await expect(
-      page.getByText("These actions do not transfer NFTs.")
+      page.getByRole("heading", { name: "All tools", exact: true })
     ).toBeVisible();
     for (const name of REQUIRED_DELEGATION_ACTIONS) {
       await expect(
@@ -226,10 +302,8 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(page.getByRole("button", { name: /The Memes/ })).toBeVisible();
   });
 
-  test("Delegation FAQ child article renders article navigation", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/delegation/delegation-faq/register-delegation");
+  test("FAQ child article renders article navigation", async ({ page }) => {
+    await gotoReady(page, "/safe-collecting/faq/register-delegation");
 
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" })
@@ -239,10 +313,10 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "All FAQ topics" })
-    ).toHaveAttribute("href", "/delegation/delegation-faq");
+    ).toHaveAttribute("href", "/safe-collecting/faq");
     await expect(
       page.getByRole("navigation", {
-        name: "Delegation FAQ article navigation",
+        name: "FAQ article navigation",
       })
     ).toBeVisible();
   });

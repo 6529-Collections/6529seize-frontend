@@ -41,6 +41,8 @@ const NEXTGEN_ADMIN_ACTIONS: readonly RegExp[] = [
 ].map(exactName);
 
 const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
+  /^Add Admin$/,
+  /^Revoke admin /,
   /^Back to Drop Forge$/,
   /^View Claim/,
   /^Complete$/,
@@ -123,6 +125,9 @@ async function expectDropForgeDenied(
     timeout: 8000,
   });
   await expectNoMainButtons(page, DROP_FORGE_WRITE_ACTIONS);
+  await expect(
+    page.getByRole("heading", { name: "Contract Admins" })
+  ).toHaveCount(0);
   await expectNoMainLinks(page, [
     /^Craft Claims$/,
     /^Launch Claims$/,

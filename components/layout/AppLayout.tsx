@@ -7,6 +7,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
+import {
+  getWaveNavigationScreen,
+  useWaveNavigationTransition,
+} from "../brain/mobile/useWaveNavigationTransition";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "@/contexts/HeaderContext";
@@ -133,6 +137,12 @@ function AppLayoutContent({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  // This content-height wrapper is not a scrollport on collection pages.
+  // Clip horizontally without trapping sticky descendants or document scrolling.
+  const overflowClassName =
+    pathname === "/the-memes"
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams.get("drop") !== null;
@@ -141,6 +151,8 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
+  const waveNavigationScreen = getWaveNavigationScreen(pathname, waveParam);
+  const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
@@ -200,7 +212,7 @@ function AppLayoutContent({ children }: Props) {
     <>
       <div
         data-mobile-bottom-nav-scroll-target="true"
-        className={`${safeAreaClass} ${"tw-overflow-auto"}`}
+        className={`${safeAreaClass} ${overflowClassName}`}
         style={streamRouteLoadingReserveStyle}
       >
         <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
@@ -211,10 +223,16 @@ function AppLayoutContent({ children }: Props) {
           <div ref={headerWrapperRef}>
             <TouchDeviceHeader />
           </div>
-          {activeContent}
-          {isNavVisible && !shouldUseContentBottomClearance && (
-            <div className="tw-h-[104px] tw-w-full" />
-          )}
+          <div
+            ref={waveNavigationRef}
+            data-testid="wave-navigation-content"
+            data-wave-navigation-screen={waveNavigationScreen ?? undefined}
+          >
+            {activeContent}
+            {isNavVisible && !shouldUseContentBottomClearance && (
+              <div className="tw-h-[104px] tw-w-full" />
+            )}
+          </div>
         </div>
       </div>
       {shouldRenderBottomNav && (

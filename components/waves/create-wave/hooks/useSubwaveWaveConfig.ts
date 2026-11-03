@@ -13,7 +13,10 @@ export function useSubwaveWaveConfig({
   readonly parentAdminGroupId?: string | null | undefined;
   readonly parentViewGroupId?: string | null | undefined;
 }) {
-  const waveConfig = useWaveConfig({ initialViewGroupId: parentViewGroupId });
+  const waveConfig = useWaveConfig({
+    initialViewGroupId: parentViewGroupId,
+    chatOnly: true,
+  });
   const [parentAdminGroup, setParentAdminGroup] = useState<ApiGroupFull | null>(
     null
   );

@@ -69,6 +69,41 @@ describe("ProposalCardContent", () => {
     mockProposalCardRecipe = null;
   });
 
+  it("recognizes a video-only artwork without mounting a player or fetching a preview", () => {
+    const { container } = render(
+      <ProposalCardContent
+        drop={{
+          ...proposal,
+          parts: [proposal.parts[1]!],
+        }}
+      />
+    );
+    expect(screen.getByText("Video", { exact: true })).toBeInTheDocument();
+    expect(
+      screen.getByTestId("proposal-card-video-proposal-1")
+    ).toBeInTheDocument();
+    expect(container.querySelector("video")).toBeNull();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
+
+  it("honors hidden thumbnails while still identifying video media", () => {
+    mockProposalCardRecipe = {
+      version: 1,
+      layout: "summary",
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: false,
+    };
+    render(
+      <ProposalCardContent
+        drop={{ ...proposal, parts: [proposal.parts[1]!] }}
+      />
+    );
+    expect(screen.getByText("Video", { exact: true })).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("proposal-card-video-proposal-1")
+    ).not.toBeInTheDocument();
+  });
+
   it("renders authored compact content and only real proposal context", () => {
     render(<ProposalCardContent drop={proposal} />);
 

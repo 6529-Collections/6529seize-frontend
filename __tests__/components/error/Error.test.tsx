@@ -31,14 +31,6 @@ jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, copyToClipboardMock],
 }));
 
-jest.mock("framer-motion", () => ({
-  __esModule: true,
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  },
-}));
-
 describe("ErrorComponent", () => {
   beforeEach(() => {
     jest.clearAllTimers();

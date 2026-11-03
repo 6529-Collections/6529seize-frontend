@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import NextgenTokenAbout from '@/components/nextGen/collections/nextgenToken/NextGenTokenAbout';
+import { renderServerThenHydrate } from '@/__tests__/utils/timeZoneHydration';
 
 jest.mock('next/image', () => (props: any) => <img {...props} />);
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid={p.icon?.iconName || 'icon'} /> }));
@@ -8,7 +9,7 @@ jest.mock('@/helpers/Helpers', () => ({
   isNullAddress: jest.fn(() => false),
   formatAddress: (a:string)=>a,
   numberWithCommas: (n:number)=>String(n),
-  printMintDate: ()=> 'date',
+  printMintDate: jest.requireActual('@/helpers/Helpers').printMintDate,
   cicToType: jest.fn(()=> 'REP'),
   getRoyaltyImage: jest.fn(()=> 'r.png'),
 }));
@@ -30,6 +31,25 @@ describe('NextGenTokenAbout', () => {
     expect(screen.getByTestId('fire')).toBeInTheDocument();
     await waitFor(() => screen.getByText('5'));
     expect(screen.getByText('5')).toBeInTheDocument();
+  });
+
+  it('hydrates the server mint date unchanged for an Auckland viewer', async () => {
+    // 11:27 UTC on Oct 12 is already Oct 13 in Auckland; the mint day is Oct 12.
+    const result = await renderServerThenHydrate(
+      <NextgenTokenAbout
+        token={{ ...token, mint_date: new Date('2026-10-12T11:27:11.000Z') }}
+        collection={collection}
+      />,
+      { serverTimeZone: 'UTC', clientTimeZone: 'Pacific/Auckland' }
+    );
+    try {
+      expect(result.serverHtml).toContain('Oct 12, 2026');
+      expect(result.recoverableErrors).toEqual([]);
+      expect(result.hydrationConsoleErrors).toEqual([]);
+      expect(result.container).toHaveTextContent('Oct 12, 2026');
+    } finally {
+      await result.cleanup();
+    }
   });
 
   it("keeps collecting actions in the parent market section", async () => {

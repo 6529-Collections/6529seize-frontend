@@ -55,7 +55,7 @@ function NextGenViewButton({
       disabled={!hasHydrated}
       onClick={() => setView(v)}
       aria-current={isCurrent ? "page" : undefined}
-      className={`tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-whitespace-nowrap tw-border-0 tw-border-b-2 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10 sm:tw-text-base ${
+      className={`tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-whitespace-nowrap tw-border-0 tw-border-b-2 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-text-base ${
         isCurrent
           ? "tw-border-primary-400 tw-text-white"
           : "tw-border-transparent tw-text-iron-400 hover:tw-text-white"

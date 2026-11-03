@@ -13,6 +13,7 @@ import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
+  COMPETITIONS = "COMPETITIONS",
   LEADERBOARD = "LEADERBOARD",
   SUBMISSIONS = "SUBMISSIONS",
   SALES = "SALES",
@@ -21,6 +22,8 @@ export enum MyStreamWaveTab {
   MY_VOTES = "MY_VOTES",
   POLLS = "POLLS",
   FAQ = "FAQ",
+  CONFIGURATION = "CONFIGURATION",
+  ABOUT = "ABOUT",
 }
 
 export enum CreateWaveGroupConfigType {
@@ -256,4 +259,5 @@ export interface SidebarWavesPage {
   readonly waves: SidebarWave[];
   readonly page: number;
   readonly next: boolean;
+  readonly nextCursor?: string | null;
 }

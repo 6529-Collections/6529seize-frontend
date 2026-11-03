@@ -10,11 +10,11 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -23,7 +23,9 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -80,8 +82,17 @@ export default function HeaderUserMenuDropdown({
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ) => {
-    await setActiveProfileProxy(profileProxy);
-    onClose();
+    if (pendingAction) {
+      return;
+    }
+    setPendingAction("switch-proxy");
+    try {
+      if (await setActiveProfileProxy(profileProxy)) {
+        onClose();
+      }
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   const getLabel = (): string => {
@@ -158,324 +169,331 @@ export default function HeaderUserMenuDropdown({
 
   return (
     <div>
-      <AnimatePresence mode="wait" initial={false}>
-        {isOpen && (
-          <motion.div
-            className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
-            style={{
-              left: "calc(var(--layout-margin, 0px) + 1.5rem)",
-            }}
-          >
-            <div className="tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
-              <div className="tw-flow-root tw-max-h-[calc(100dvh-6rem)] tw-overflow-y-auto tw-overflow-x-hidden tw-py-2">
-                <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y-2 tw-divide-solid tw-divide-iron-700 tw-p-0">
-                  {availableConnectedAccounts.length > 0 && (
-                    <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
-                      <HeaderUserConnectedAccounts
-                        accounts={availableConnectedAccounts.map((account) => ({
-                          ...account,
-                          unreadNotificationsCount:
-                            connectedAccountUnreadNotifications?.[
-                              account.address.toLowerCase()
-                            ] ?? 0,
-                        }))}
-                        onSelectAccount={onSelectConnectedAccount}
-                        canAddAccount={canAddConnectedAccount}
-                        onAddAccount={() => {
-                          void runMenuAction({
-                            action: seizeAddConnectedAccount,
-                            pendingKey: "add-account",
-                            errorMessage:
-                              "Failed to add connected account. Please try again.",
-                          });
-                        }}
-                        onSignOutAll={() => {
-                          void runMenuAction({
-                            action: seizeDisconnectAndLogoutAll,
-                            pendingKey: "logout-all",
-                            errorMessage:
-                              "Failed to sign out all profiles. Please try again.",
-                          });
-                        }}
-                        actionsDisabled={pendingAction !== null}
-                      />
-                    </li>
-                  )}
-                  {hasProxySection && (
-                    <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
-                      <p className="tw-m-0 tw-px-3 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                        Proxy Profile
-                      </p>
-                      <div className="tw-h-full">
-                        <button
-                          type="button"
-                          className={`${
-                            activeProfileProxy
-                              ? "tw-bg-transparent hover:tw-bg-iron-700"
-                              : "tw-bg-iron-700"
-                          } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
-                          onClick={() => onActivateProfileProxy(null)}
-                        >
-                          {profile.pfp ? (
-                            <div
-                              className="tw-relative tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg"
-                              title={
-                                activeProfileProxy
-                                  ? "Use primary profile"
-                                  : "Primary profile"
-                              }
-                            >
-                              <img
-                                src={profile.pfp}
-                                alt={`${label} avatar`}
-                                className="tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-object-cover tw-transition tw-duration-300 tw-ease-out"
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              className={`${
-                                activeProfileProxy
-                                  ? "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-                                  : "tw-bg-iron-600"
-                              } tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
-                              title={
-                                activeProfileProxy
-                                  ? "Use primary profile"
-                                  : "Primary profile"
-                              }
-                            ></div>
-                          )}
-                          <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-truncate">
-                            <span className="tw-text-md tw-font-medium tw-text-white">
-                              {label}
-                            </span>
-                            {!activeProfileProxy && (
-                              <svg
-                                className="tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M20 6L9 17L4 12"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            )}
-                          </div>
-                        </button>
-                      </div>
-                      {receivedProfileProxies.map((profileProxy) => (
-                        <HeaderUserProxyDropdownItem
-                          key={profileProxy.id}
-                          profileProxy={profileProxy}
-                          activeProfileProxy={activeProfileProxy}
-                          onActivateProfileProxy={onActivateProfileProxy}
-                        />
-                      ))}
-                    </li>
-                  )}
-                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
-                    {isConnected ? (
-                      <button
-                        onClick={() => {
-                          void runMenuAction({
-                            action: seizeDisconnect,
-                            pendingKey: "disconnect",
-                            errorMessage:
-                              "Failed to disconnect wallet. Please try again.",
-                          });
-                        }}
-                        disabled={pendingAction !== null}
-                        type="button"
-                        aria-label="Disconnect"
-                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlugCircleMinus}
-                          height={20}
-                          width={20}
-                        />
-                        <span>Disconnect Wallet</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          void runMenuAction({
-                            action: seizeConnectFresh,
-                            pendingKey: "connect",
-                            errorMessage:
-                              "Failed to open wallet connection. Please try again.",
-                          });
-                        }}
-                        disabled={pendingAction !== null}
-                        type="button"
-                        aria-label="Connect"
-                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlugCirclePlus}
-                          height={20}
-                          width={20}
-                        />
-                        <span>Connect Wallet</span>
-                      </button>
-                    )}
-                    {hasConnectionActions && (
-                      <>
-                        <div
-                          data-testid="connection-actions-divider"
-                          aria-hidden="true"
-                          className="-tw-mx-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700"
-                        />
-                        {onOpenConnect && (
-                          <button
-                            onClick={onOpenConnect}
-                            type="button"
-                            aria-label={t(
-                              HEADER_USER_MENU_LOCALE,
-                              "headerUserMenu.connectDevice"
-                            )}
-                            className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                          >
-                            <DevicesIcon className="tw-size-5 tw-flex-shrink-0" />
-                            <span>
-                              {t(
-                                HEADER_USER_MENU_LOCALE,
-                                "headerUserMenu.connectDevice"
-                              )}
-                            </span>
-                          </button>
-                        )}
-                        {sessionUpgradeRequired && requestSessionUpgrade && (
-                          <button
-                            onClick={() => {
-                              void runMenuAction({
-                                action: async () => {
-                                  await requestSessionUpgrade();
-                                },
-                                pendingKey: "upgrade-auth",
-                                errorMessage:
-                                  "Failed to start authentication upgrade. Please try again.",
-                              });
-                            }}
-                            disabled={pendingAction !== null}
-                            type="button"
-                            aria-label={upgradeAuthenticationLabel}
-                            className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                          >
-                            <FontAwesomeIcon
-                              icon={faShieldHalved}
-                              height={20}
-                              width={20}
-                            />
-                            <span>{upgradeAuthenticationLabel}</span>
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </li>
-                  {isConnected && chains.length > 1 && (
-                    <li className="tw-h-full tw-px-2 tw-pt-2">
-                      <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-3 tw-pt-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
-                        Network: {currentChainName}
-                      </span>
-                      <button
-                        onClick={onSwitchChain}
-                        type="button"
-                        aria-label="Switch Chain"
-                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faShuffle}
-                          height={16}
-                          width={16}
-                        />
-                        <span>Switch to {nextChainName}</span>
-                      </button>
-                    </li>
-                  )}
-                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
-                    <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-gap-2">
-                      {profilePath && (
-                        <Link
-                          href={profilePath}
-                          onClick={onClose}
-                          aria-label={t(
-                            HEADER_USER_MENU_LOCALE,
-                            "headerUserMenu.profile"
-                          )}
-                          className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                        >
-                          <FontAwesomeIcon
-                            icon={faUser}
-                            height={20}
-                            width={20}
-                          />
-                          <span>
-                            {t(
-                              HEADER_USER_MENU_LOCALE,
-                              "headerUserMenu.profile"
-                            )}
-                          </span>
-                        </Link>
-                      )}
-                      <Link
-                        href="/preferences"
-                        onClick={onClose}
-                        aria-label={t(
-                          HEADER_USER_MENU_LOCALE,
-                          "profilePreferences.button"
-                        )}
-                        className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faSliders}
-                          height={20}
-                          width={20}
-                        />
-                      </Link>
-                    </div>
-                    <HeaderArtworkDocumentationLink
-                      onClose={onClose}
-                      enabled={artworkDocumentationEnabled}
+      {isOpen && (
+        <div
+          className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
+          style={{
+            left: "calc(var(--layout-margin, 0px) + 1.5rem)",
+          }}
+        >
+          <div className="tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
+            <div className="tw-flow-root tw-max-h-[calc(100dvh-6rem)] tw-overflow-y-auto tw-overflow-x-hidden tw-py-2">
+              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y-2 tw-divide-solid tw-divide-iron-700 tw-p-0">
+                {availableConnectedAccounts.length > 0 && (
+                  <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
+                    <HeaderUserConnectedAccounts
+                      accounts={availableConnectedAccounts.map((account) => ({
+                        ...account,
+                        unreadNotificationsCount:
+                          connectedAccountUnreadNotifications[
+                            account.address.toLowerCase()
+                          ] ?? 0,
+                      }))}
+                      onSelectAccount={onSelectConnectedAccount}
+                      canAddAccount={canAddConnectedAccount}
+                      onAddAccount={() => {
+                        void runMenuAction({
+                          action: seizeAddConnectedAccount,
+                          pendingKey: "add-account",
+                          errorMessage:
+                            "Failed to add connected account. Please try again.",
+                        });
+                      }}
+                      onSignOutAll={() => {
+                        void runMenuAction({
+                          action: () =>
+                            signOutWithE2eeChoice(
+                              "all",
+                              seizeDisconnectAndLogoutAll
+                            ),
+                          pendingKey: "logout-all",
+                          errorMessage:
+                            "Failed to sign out all profiles. Please try again.",
+                        });
+                      }}
+                      actionsDisabled={pendingAction !== null}
                     />
+                  </li>
+                )}
+                {hasProxySection && (
+                  <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
+                    <p className="tw-m-0 tw-px-3 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                      Proxy Profile
+                    </p>
+                    <div className="tw-h-full">
+                      <button
+                        type="button"
+                        disabled={pendingAction !== null}
+                        aria-pressed={!activeProfileProxy}
+                        className={`${
+                          activeProfileProxy
+                            ? "tw-bg-transparent hover:tw-bg-iron-700"
+                            : "tw-bg-iron-700"
+                        } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60`}
+                        onClick={() => onActivateProfileProxy(null)}
+                      >
+                        {profile.pfp ? (
+                          <div
+                            className="tw-relative tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg"
+                            title={
+                              activeProfileProxy
+                                ? "Use primary profile"
+                                : "Primary profile"
+                            }
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element -- profile pictures come from arbitrary remote hosts at a fixed 24px size; keep them unoptimized as before. */}
+                            <img
+                              src={getScaledImageUri(
+                                profile.pfp,
+                                ImageScale.W_200_H_200
+                              )}
+                              alt={`${label} avatar`}
+                              className="tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-object-cover tw-transition tw-duration-300 tw-ease-out"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className={`${
+                              activeProfileProxy
+                                ? "tw-bg-iron-700 group-hover:tw-bg-iron-600"
+                                : "tw-bg-iron-600"
+                            } tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+                            title={
+                              activeProfileProxy
+                                ? "Use primary profile"
+                                : "Primary profile"
+                            }
+                          ></div>
+                        )}
+                        <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-truncate">
+                          <span className="tw-text-md tw-font-medium tw-text-white">
+                            {label}
+                          </span>
+                          {!activeProfileProxy && (
+                            <svg
+                              className="tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M20 6L9 17L4 12"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                    {receivedProfileProxies.map((profileProxy) => (
+                      <HeaderUserProxyDropdownItem
+                        key={profileProxy.id}
+                        profileProxy={profileProxy}
+                        activeProfileProxy={activeProfileProxy}
+                        onActivateProfileProxy={onActivateProfileProxy}
+                        disabled={pendingAction !== null}
+                      />
+                    ))}
+                  </li>
+                )}
+                <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
+                  {isConnected ? (
                     <button
                       onClick={() => {
                         void runMenuAction({
-                          action: seizeDisconnectAndLogout,
-                          pendingKey: "logout",
-                          errorMessage: "Failed to sign out. Please try again.",
+                          action: seizeDisconnect,
+                          pendingKey: "disconnect",
+                          errorMessage:
+                            "Failed to disconnect wallet. Please try again.",
                         });
                       }}
                       disabled={pendingAction !== null}
                       type="button"
-                      aria-label={t(
-                        HEADER_USER_MENU_LOCALE,
-                        "headerUserMenu.logout"
-                      )}
+                      aria-label="Disconnect"
                       className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
                       <FontAwesomeIcon
-                        icon={faRightFromBracket}
+                        icon={faPlugCircleMinus}
                         height={20}
                         width={20}
                       />
-                      <span>
-                        {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.logout")}
-                      </span>
+                      <span>Disconnect Wallet</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        void runMenuAction({
+                          action: seizeConnectFresh,
+                          pendingKey: "connect",
+                          errorMessage:
+                            "Failed to open wallet connection. Please try again.",
+                        });
+                      }}
+                      disabled={pendingAction !== null}
+                      type="button"
+                      aria-label="Connect"
+                      className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPlugCirclePlus}
+                        height={20}
+                        width={20}
+                      />
+                      <span>Connect Wallet</span>
+                    </button>
+                  )}
+                  {hasConnectionActions && (
+                    <>
+                      <div
+                        data-testid="connection-actions-divider"
+                        aria-hidden="true"
+                        className="-tw-mx-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700"
+                      />
+                      {onOpenConnect && (
+                        <button
+                          onClick={onOpenConnect}
+                          type="button"
+                          aria-label={t(
+                            HEADER_USER_MENU_LOCALE,
+                            "headerUserMenu.connectDevice"
+                          )}
+                          className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        >
+                          <DevicesIcon className="tw-size-5 tw-flex-shrink-0" />
+                          <span>
+                            {t(
+                              HEADER_USER_MENU_LOCALE,
+                              "headerUserMenu.connectDevice"
+                            )}
+                          </span>
+                        </button>
+                      )}
+                      {sessionUpgradeRequired && requestSessionUpgrade && (
+                        <button
+                          onClick={() => {
+                            void runMenuAction({
+                              action: async () => {
+                                await requestSessionUpgrade();
+                              },
+                              pendingKey: "upgrade-auth",
+                              errorMessage:
+                                "Failed to start authentication upgrade. Please try again.",
+                            });
+                          }}
+                          disabled={pendingAction !== null}
+                          type="button"
+                          aria-label={upgradeAuthenticationLabel}
+                          className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        >
+                          <FontAwesomeIcon
+                            icon={faShieldHalved}
+                            height={20}
+                            width={20}
+                          />
+                          <span>{upgradeAuthenticationLabel}</span>
+                        </button>
+                      )}
+                    </>
+                  )}
+                </li>
+                {isConnected && chains.length > 1 && (
+                  <li className="tw-h-full tw-px-2 tw-pt-2">
+                    <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-3 tw-pt-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
+                      Network: {currentChainName}
+                    </span>
+                    <button
+                      onClick={onSwitchChain}
+                      type="button"
+                      aria-label="Switch Chain"
+                      className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                    >
+                      <FontAwesomeIcon
+                        icon={faShuffle}
+                        height={16}
+                        width={16}
+                      />
+                      <span>Switch to {nextChainName}</span>
                     </button>
                   </li>
-                </ul>
-              </div>
+                )}
+                <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
+                  <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-gap-2">
+                    {profilePath && (
+                      <Link
+                        href={profilePath}
+                        onClick={onClose}
+                        aria-label={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "headerUserMenu.profile"
+                        )}
+                        className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
+                        <span>
+                          {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profile")}
+                        </span>
+                      </Link>
+                    )}
+                    <Link
+                      href="/preferences"
+                      onClick={onClose}
+                      aria-label={t(
+                        HEADER_USER_MENU_LOCALE,
+                        "profilePreferences.button"
+                      )}
+                      className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                    >
+                      <FontAwesomeIcon
+                        icon={faSliders}
+                        height={20}
+                        width={20}
+                      />
+                    </Link>
+                  </div>
+                  <HeaderBookmarksLink onClose={onClose} />
+                  <HeaderArtworkDocumentationLink
+                    onClose={onClose}
+                    enabled={artworkDocumentationEnabled}
+                  />
+                  <button
+                    onClick={() => {
+                      void runMenuAction({
+                        action: () =>
+                          signOutWithE2eeChoice(
+                            "profile",
+                            seizeDisconnectAndLogout
+                          ),
+                        pendingKey: "logout",
+                        errorMessage: "Failed to sign out. Please try again.",
+                      });
+                    }}
+                    disabled={pendingAction !== null}
+                    type="button"
+                    aria-label={t(
+                      HEADER_USER_MENU_LOCALE,
+                      "headerUserMenu.logout"
+                    )}
+                    className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                  >
+                    <FontAwesomeIcon
+                      icon={faRightFromBracket}
+                      height={20}
+                      width={20}
+                    />
+                    <span>
+                      {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.logout")}
+                    </span>
+                  </button>
+                </li>
+              </ul>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

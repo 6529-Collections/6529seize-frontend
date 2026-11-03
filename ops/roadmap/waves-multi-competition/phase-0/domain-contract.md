@@ -10,6 +10,9 @@
   audit history. It is not a subwave.
 - **Competition entry** — stable association between a competition and a drop.
   It owns submission/winner status; the drop remains durable content.
+- **Default competition** — computed UI selection for competition tabs; ordinary wave entry remains in Chat, under [D-19](../default-competition.md).
+  This approved follow-up is not implemented. It can change over time without
+  changing the legacy primary, explicit links, privileges or execution owner.
 - **Legacy primary competition** — immutable competition identity assigned to
   each baseline `RANK` or `APPROVE` wave. It is the only competition projected
   through legacy wave-scoped GET contracts, forever.
@@ -17,9 +20,11 @@
   GETs see a contract-valid `CHAT` projection even when native competitions
   exist.
 - **Stored lifecycle** — `DRAFT`, `PUBLISHED`, `ENDED`, `CANCELLED`, or
-  `ARCHIVED`. Upcoming, participation open, voting open, deciding, and complete
+  `ARCHIVED`; manual end/cancel commands are not exposed. Upcoming, participation
+  open, voting open, deciding, and complete
   are computed phases, not additional stored states.
-- **Storage mode** — `LEGACY_ADAPTER` or `NATIVE`, fixed for a competition.
+- **Storage mode** — `LEGACY_ADAPTER` or `NATIVE`, fixed during ordinary
+  operation; only a guarded Phase 5 migration may change it.
 - **Execution mode** — `DISABLED`, `SHADOW`, or `ACTIVE`, changed through an
   audited compare-and-set transition.
 - **Capability** — explicit privileged integration assignment such as
@@ -27,12 +32,12 @@
 
 ## Field Ownership
 
-The current entity evidence is `src/entities/IWave.ts` and
+The legacy baseline entity evidence is `src/entities/IWave.ts` and
 `src/entities/IDrop.ts` in the backend. Current API mapping lives in
 `src/api-serverless/src/waves/waves.mappers.ts` and
 `src/api-serverless/src/drops/api-drop.mapper.ts`.
 
-| Field or behavior | Current owner | Target owner | Legacy projection | Migration phase |
+| Field or behavior | Legacy baseline owner | Target owner | Legacy projection | Migration phase |
 | --- | --- | --- | --- | --- |
 | Wave ID, serial, name, picture, description | Wave | Wave | Unchanged | N/A |
 | Creator, created/updated timestamps | Wave | Wave | Unchanged | N/A |
@@ -138,3 +143,8 @@ frontend inventories.
 7. Legacy projections are deterministic: immutable primary or chat, never an
    arbitrary native competition.
 8. Winning changes entry state; drop identity and chat history remain stable.
+9. Native entries use dedicated immutable competition drops, never converted
+   chat drops; one competition per drop for its lifetime. Deleted content stays
+   absent from public current and historical views.
+10. UI default selection cannot change permanent legacy GET projection or grant
+    participation, voting, administration or privileged capabilities.

@@ -72,6 +72,38 @@ describe("AWS RUM privacy boundary", () => {
     ).toEqual({ message: "A different wallet error" });
   });
 
+  it("redacts connection-link credentials from JS errors and request URLs", () => {
+    const pageUrl =
+      "https://6529.io/accept-connection-sharing?token=synthetic-link-secret&address=0x1";
+    const sanitizedError = sanitizeAwsRumEvent(
+      "com.amazon.rum.js_error_event",
+      {
+        version: "1.0.0",
+        type: "Error",
+        message: `Script error at ${pageUrl}`,
+        filename: pageUrl,
+        stack: `Error\n    at ${pageUrl}:1:2`,
+        lineno: 1,
+      }
+    );
+
+    expect(JSON.stringify(sanitizedError)).not.toContain(
+      "synthetic-link-secret"
+    );
+    expect(sanitizedError).toEqual(
+      expect.objectContaining({
+        filename:
+          "https://6529.io/accept-connection-sharing?token=[Filtered]&address=0x1",
+        lineno: 1,
+      })
+    );
+    expect(
+      sanitizeAwsRumUrl(
+        "https://api.6529.io/api/example?connection_share_code=synthetic-link-secret"
+      )
+    ).toBe("https://api.6529.io/api/example?connection_share_code=[Filtered]");
+  });
+
   it("establishes the safe page before forwarding sanitized plugin events", () => {
     const record = jest.fn();
     const recordPageView = jest.fn();

@@ -27,6 +27,7 @@ export interface WaveTrustSignalsProps {
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
   readonly learnMoreHref?: string | undefined;
+  readonly scoreDetailsDisabled?: boolean | undefined;
 }
 
 const WAVE_TRUST_LOCALE = DEFAULT_LOCALE;
@@ -603,6 +604,7 @@ function WaveScoreSummaryPopoverContent({
 export function WaveScoreSummaryHoverCard({
   children,
   closeOnContentClick,
+  disabled = false,
   learnMoreHref,
   stopClickPropagation,
   summaryHeader,
@@ -612,6 +614,7 @@ export function WaveScoreSummaryHoverCard({
 }: {
   readonly children: ReactElement;
   readonly closeOnContentClick?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
   readonly learnMoreHref?: string | undefined;
   readonly stopClickPropagation?: boolean | undefined;
   readonly summaryHeader?: WaveScoreSummaryHeader | undefined;
@@ -630,6 +633,7 @@ export function WaveScoreSummaryHoverCard({
 
   return (
     <HoverCard
+      disabled={disabled}
       ariaLabel={t(WAVE_TRUST_LOCALE, "waves.score.summary.detailsAriaLabel")}
       placement="bottom"
       delayShow={100}

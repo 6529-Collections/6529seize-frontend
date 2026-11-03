@@ -1,0 +1,163 @@
+.detailPanel {
+  container-type: inline-size;
+}
+
+.detailPanel:has([data-collect-detail-header], [data-collect-detail-utilities])
+  > .detailPanelContent
+  > [data-collect-market-link],
+.detailPanel [data-collect-trade-status]:empty {
+  display: none;
+}
+
+.inlineActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actionGroup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  align-items: start;
+  gap: 8px;
+}
+
+/* List keeps its label and padding; Make an offer fills the rest of its row. */
+.actionGroup:has([data-collect-owner-action]) {
+  grid-template-columns: minmax(0, 1fr) max-content 44px;
+}
+
+/* Collect keeps its entire price; the secondary action takes the remaining width. */
+.actionGroup:has(.mainActions > button[type="submit"]) {
+  grid-template-columns: minmax(max-content, 1fr) minmax(44px, 1fr) 44px;
+}
+
+.stickyActions:has(> button[type="submit"]) {
+  grid-template-columns: minmax(max-content, 1fr) minmax(44px, 1fr);
+}
+
+.mainActions,
+.mainActions > [data-collect-secondary-actions] {
+  display: contents;
+}
+
+.actionGroup [data-collect-more-actions] {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.actionGroup [data-collect-owner-action] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Without Collect or an eligible List control, the offer fills both label slots. */
+.actionGroup:not(:has([data-collect-owner-action]))
+  .mainActions:not(:has(> button[type="submit"]))
+  > button,
+.actionGroup:not(:has([data-collect-owner-action]))
+  .mainActions:not(:has(> button[type="submit"]))
+  > [data-collect-secondary-actions]
+  > button {
+  grid-column: 1 / span 2;
+}
+
+.actionGroup [data-collect-owner-feedback] {
+  grid-column: 1 / -1;
+}
+
+.mainActions > button,
+.mainActions > [data-collect-secondary-actions] > button,
+.actionGroup [data-collect-owner-action] {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+/* Only secondary labels truncate; Collect must always show the complete price. */
+.mainActions > button:not([type="submit"]),
+.mainActions > [data-collect-secondary-actions] > button,
+.stickyActions > button:not([type="submit"]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Below lg the desktop shell reserves its collapsed rail; phone/app shells do not. */
+:global(body:has(.layout-root[data-small="false"][data-mobile="false"]))
+  .stickyActions {
+  left: theme("spacing.20");
+}
+
+@container (min-width: 420px) {
+  .detailPanel [data-collect-connection-header] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 20px;
+  }
+}
+
+@container (max-width: 399px) {
+  .mainActions > button,
+  .mainActions > [data-collect-secondary-actions] > button {
+    padding-inline: 8px;
+  }
+}
+
+/* Extremely narrow panels need a separate Collect row to keep every target usable. */
+@container (max-width: 283px) {
+  .actionGroup:has(.mainActions > button[type="submit"]) {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .mainActions > button[type="submit"] {
+    grid-column: 1 / -1;
+  }
+
+  .actionGroup:has(.mainActions > button[type="submit"])
+    [data-collect-more-actions] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 639px) {
+  .mainActions > button,
+  .mainActions > [data-collect-secondary-actions] > button {
+    font-size: 15px;
+  }
+
+  .stickyActions > button {
+    height: 44px;
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    border-radius: 8px;
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 359px) {
+  .stickyActions > button {
+    padding-inline: 8px;
+  }
+}
+
+/* Active selection review and dialogs take priority over the duplicate actions. */
+:global(
+    body:has(
+      dialog[open],
+      [aria-modal="true"]:not(dialog):not([hidden]):not([aria-hidden="true"]),
+      [data-market-depth-selection-bar]:not([hidden] *)
+    )
+  )
+  .stickyActions {
+  visibility: hidden;
+  pointer-events: none;
+}

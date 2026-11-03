@@ -1,11 +1,9 @@
-@font-face {
-  font-family: "Square One";
-  font-display: swap;
-  src:
-    url("../assets/square-one-2/SquareOne-p7jra.woff2") format("woff2"),
-    url("../assets/square-one-2/SquareOne-p7jra.ttf") format("truetype");
-}
-
+/*
+ * The main app loads Montserrat with next/font in app/layout.tsx, which
+ * preloads it and exposes it as --font-montserrat. This face serves surfaces
+ * without that loader, such as the standalone memes mint page; shared styles
+ * fall back to it through var(--font-montserrat, "Montserrat").
+ */
 @font-face {
   font-family: "Montserrat";
   font-display: swap;

@@ -5,40 +5,58 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
 
+// Browser chrome can resize the viewport slightly without opening a keyboard.
+const BROWSER_KEYBOARD_MIN_INSET = 100;
+
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+// Animate layout offset with the surface height. A compositor transform can
+// outrun height layout on iOS, briefly pushing the sheet offscreen.
 const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
-  bottom: 0,
-  transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
-  transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  bottom: MOBILE_DIALOG_KEYBOARD_INSET,
+  transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
 };
 
 type MobileWrapperDialogProps = {
+  readonly id?: string | undefined;
   readonly title?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onBack?: (() => void) | undefined;
+  readonly onEscape?: (() => void) | undefined;
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  /** Also fit the software keyboard viewport in mobile browsers. */
+  readonly fitVisualViewport?: boolean | undefined;
+  /** Action-only sheets enter at their final position while the keyboard closes. */
+  readonly avoidKeyboard?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly headerClassName?: string | undefined;
+  readonly headerVariant?: "default" | "minimal" | undefined;
   readonly titleActions?: ReactNode;
   readonly headerActions?: ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -158,7 +176,7 @@ function getDialogHeight({
     `max(0px, calc(${viewportHeight} - 4rem - ` +
     `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
 
-  return `min(${restingHeight}, ${keyboardAvailableHeight})`;
+  return `min(var(--mobile-wrapper-dialog-resting-height, ${restingHeight}), var(--mobile-wrapper-dialog-available-height, ${keyboardAvailableHeight}))`;
 }
 
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
@@ -313,14 +331,12 @@ function getSurfaceStyle({
 
 function FloatingCloseButton({
   show,
-  hideOnMobile,
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
   closeLabel,
 }: {
   readonly show: boolean;
-  readonly hideOnMobile: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -342,9 +358,7 @@ function FloatingCloseButton({
     >
       <div
         className={clsx(
-          "tw-absolute -tw-top-16 tw-right-0 tw-pr-2 tw-pt-4 md:tw-pr-0",
-          hideOnMobile ? "tw-hidden" : "tw-flex",
-          hideOnMobile && !tabletModal && "md:tw-flex",
+          "tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0",
           tabletModal && "md:tw-hidden"
         )}
       >
@@ -385,23 +399,28 @@ function DragHandle({
 }
 
 export default function MobileWrapperDialog({
+  id,
   title,
   ariaLabel,
   isOpen,
   onClose,
   onBack,
+  onEscape,
   onBeforeLeave,
   onAfterLeave,
   children,
   noPadding,
   tall,
   fixedHeight,
+  fitVisualViewport = false,
+  avoidKeyboard = true,
   tabletModal,
   showScrollbar,
   allowOverflow,
   maxWidthClass,
   zIndexClassName = "tw-z-[1010]",
   headerClassName,
+  headerVariant,
   titleActions,
   headerActions,
   mobileCloseButtonClassName,
@@ -438,7 +457,6 @@ export default function MobileWrapperDialog({
     isDragging,
   } = useMobileDialogDrag({
     dismissible,
-    showDragHandle,
     enableDragToClose,
     tabletModal,
     onClose,
@@ -486,11 +504,68 @@ export default function MobileWrapperDialog({
     dismissible && !!tabletModal && !showHeaderCloseButton;
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
-  const hideMobileCloseButton = canDragToClose && isTouchDevice;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;
   useRetainedDialogFocus(keepMounted, dialogOpen, dialogRef);
+
+  const fitBrowserViewport = useCallback(
+    (container: HTMLDivElement | null) => {
+      const viewport = globalThis.visualViewport;
+      if (
+        !avoidKeyboard ||
+        !fitVisualViewport ||
+        isCapacitor ||
+        !container ||
+        !viewport
+      ) {
+        return;
+      }
+      // Native shells already own this inset. Browsers expose their keyboard
+      // avoidance through the visual viewport instead of native plugin events.
+      const updateInset = () => {
+        const isZoomed = viewport.scale > 1;
+        const inset = isZoomed
+          ? 0
+          : Math.max(
+              0,
+              globalThis.innerHeight - viewport.height - viewport.offsetTop
+            );
+        if (isZoomed) {
+          container.style.removeProperty(
+            "--mobile-wrapper-dialog-available-height"
+          );
+        } else {
+          container.style.setProperty(
+            "--mobile-wrapper-dialog-available-height",
+            `max(0px, calc(${viewport.height}px - 4rem))`
+          );
+        }
+        container.style.setProperty(
+          "--mobile-wrapper-dialog-keyboard-inset",
+          `${inset}px`
+        );
+        container.dataset["mobileDialogKeyboardVisible"] = String(
+          inset > BROWSER_KEYBOARD_MIN_INSET
+        );
+      };
+      updateInset();
+      viewport.addEventListener("resize", updateInset);
+      viewport.addEventListener("scroll", updateInset, { passive: true });
+      return () => {
+        viewport.removeEventListener("resize", updateInset);
+        viewport.removeEventListener("scroll", updateInset);
+        container.style.removeProperty(
+          "--mobile-wrapper-dialog-keyboard-inset"
+        );
+        container.style.removeProperty(
+          "--mobile-wrapper-dialog-available-height"
+        );
+        delete container.dataset["mobileDialogKeyboardVisible"];
+      };
+    },
+    [avoidKeyboard, fitVisualViewport, isCapacitor]
+  );
 
   useEffect(() => {
     if (!dialogOpen || !focusTitleOnOpen) {
@@ -515,6 +590,7 @@ export default function MobileWrapperDialog({
           The stable callback ref also resets readiness when this surface hides. */}
       <span hidden aria-hidden="true" ref={setDialogMount} />
       <Dialog
+        id={id}
         ref={dialogRef}
         as="div"
         open={dialogOpen}
@@ -525,7 +601,7 @@ export default function MobileWrapperDialog({
           // Headless UI blurs focus before calling onClose for Escape. Keep
           // focus here, but let nested dialogs and portalled controls handle it.
           if (
-            preserveFocusOnEscape &&
+            (preserveFocusOnEscape || onEscape) &&
             !event.defaultPrevented &&
             event.key === "Escape" &&
             event.target instanceof Element &&
@@ -533,7 +609,7 @@ export default function MobileWrapperDialog({
               event.currentTarget
           ) {
             event.preventDefault();
-            handleClose();
+            (onEscape ?? handleClose)();
           }
         }}
         aria-label={ariaLabel}
@@ -556,8 +632,16 @@ export default function MobileWrapperDialog({
             onClick={(e) => e.stopPropagation()}
           >
             <div
+              ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
-              style={MOBILE_DIALOG_CONTAINER_STYLE}
+              style={
+                avoidKeyboard
+                  ? MOBILE_DIALOG_CONTAINER_STYLE
+                  : ({
+                      ...MOBILE_DIALOG_CONTAINER_STYLE,
+                      "--mobile-wrapper-dialog-keyboard-inset": "0px",
+                    } as CSSProperties)
+              }
             >
               <TransitionChild
                 as={Fragment}
@@ -568,12 +652,10 @@ export default function MobileWrapperDialog({
                   <DialogPanel
                     className={dragPanelClassNames}
                     style={panelStyle}
-                    {...dragTouchHandlers}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <FloatingCloseButton
                       show={showFloatingCloseButton}
-                      hideOnMobile={hideMobileCloseButton}
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
@@ -584,30 +666,41 @@ export default function MobileWrapperDialog({
                         className={contentClassNames}
                         style={{ paddingBottom: bottomPadding }}
                       >
-                        <DragHandle
-                          show={showTouchDragHandle}
-                          tabletModal={tabletModal}
-                        />
-                        <MobileWrapperDialogHeader
-                          title={title}
-                          showDesktopCloseButton={showDesktopHeaderCloseButton}
-                          onClose={handleClose}
-                          onBack={dismissible ? onBack : undefined}
-                          className={headerClassName}
-                          titleActions={titleActions}
-                          headerActions={headerActions}
-                          showHeaderCloseButton={showInlineHeaderCloseButton}
-                          showHeaderDivider={showHeaderDivider}
-                          headerCloseButtonClassName={clsx(
-                            hideMobileCloseButton &&
-                              "!tw-hidden md:!tw-inline-flex",
-                            headerCloseButtonClassName
-                          )}
-                          titleClassName={titleClassName}
-                          titleRef={titleRef}
-                          backLabel={resolvedBackLabel}
-                          closeLabel={resolvedCloseLabel}
-                        />
+                        <div
+                          data-testid="mobile-dialog-header"
+                          {...dragTouchHandlers}
+                          style={
+                            canDragToClose
+                              ? { touchAction: "pan-x pinch-zoom" }
+                              : undefined
+                          }
+                        >
+                          <DragHandle
+                            show={showTouchDragHandle}
+                            tabletModal={tabletModal}
+                          />
+                          <MobileWrapperDialogHeader
+                            title={title}
+                            showDesktopCloseButton={
+                              showDesktopHeaderCloseButton
+                            }
+                            onClose={handleClose}
+                            onBack={dismissible ? onBack : undefined}
+                            className={headerClassName}
+                            variant={headerVariant}
+                            titleActions={titleActions}
+                            headerActions={headerActions}
+                            showHeaderCloseButton={showInlineHeaderCloseButton}
+                            showHeaderDivider={showHeaderDivider}
+                            headerCloseButtonClassName={
+                              headerCloseButtonClassName
+                            }
+                            titleClassName={titleClassName}
+                            titleRef={titleRef}
+                            backLabel={resolvedBackLabel}
+                            closeLabel={resolvedCloseLabel}
+                          />
+                        </div>
                         {children}
                       </div>
                     </div>

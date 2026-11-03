@@ -61,6 +61,24 @@ describe("UserPageRepNewRepSearch", () => {
     });
   });
 
+  it("lets users type an amount while category selection remains required", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    await user.clear(screen.getByRole("textbox", { name: "REP amount" }));
+    await user.type(screen.getByRole("textbox", { name: "REP amount" }), "1");
+    expect(screen.getByRole("textbox", { name: "REP amount" })).toHaveValue(
+      "1"
+    );
+    expect(
+      screen.getByRole("button", { name: "Grant REP" })
+    ).toBeDisabled();
+  });
+
   it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {
     const user = userEvent.setup();
     render(
@@ -151,7 +169,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(screen.getByRole("button", { name: "Memes nominee" }));
 
     await waitFor(() => expect(input).toHaveValue("Memes nominee"));
-    expect(input).toHaveClass("tw-border-white/10");
+    expect(input).toHaveClass("tw-ring-iron-700/60");
     expect(input).not.toHaveClass("tw-border-amber-400/50");
     expect(
       screen.getByText(

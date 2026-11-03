@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -12,6 +13,7 @@ import type {
   CreateDropWrapperHandles,
 } from "./utils/CreateDropWrapper";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
+import { CreateDropDraftContext } from "./CreateDropDraftContext";
 import type {
   CreateDropConfig,
   CreateDropPart,
@@ -61,7 +63,7 @@ interface DropEditorProps {
     | undefined;
 }
 
-const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
+const DropEditorBody = forwardRef<DropEditorHandles, DropEditorProps>(
   (
     {
       className,
@@ -82,22 +84,44 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     },
     ref
   ) => {
+    const draftContext = useContext(CreateDropDraftContext);
+    const initialDrop = draftContext?.initialDrop ?? null;
     const [init, setInit] = useState(isClient);
     useEffect(() => setInit(true), []);
 
-    const [title, setTitle] = useState<string | null>(null);
-    const [metadata, setMetadata] = useState<DropMetadata[]>([]);
+    const [title, setTitle] = useState<string | null>(
+      initialDrop?.title ?? null
+    );
+    const [metadata, setMetadata] = useState<DropMetadata[]>(
+      initialDrop?.metadata ?? []
+    );
     const [mentionedUsers, setMentionedUsers] = useState<
       Omit<MentionedUser, "current_handle">[]
-    >([]);
-    const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
-    const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
-    const [drop, setDrop] = useState<CreateDropConfig | null>(null);
+    >(initialDrop?.mentioned_users ?? []);
+    const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>(
+      initialDrop?.mentioned_waves ?? []
+    );
+    const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>(
+      initialDrop?.referenced_nfts ?? []
+    );
+    const [drop, setDrop] = useState<CreateDropConfig | null>(
+      initialDrop && initialDrop.parts.length > 1
+        ? {
+            ...initialDrop,
+            parts: initialDrop.parts.slice(0, -1).map((part, index) => ({
+              ...part,
+              clientId: part.clientId ?? `restored-${index}`,
+            })),
+          }
+        : null
+    );
     const [viewType, setViewType] = useState<CreateDropViewType>(
       CreateDropViewType.COMPACT
     );
 
-    const [isStormMode, setIsStormMode] = useState(false);
+    const [isStormMode, setIsStormMode] = useState(
+      (initialDrop?.parts.length ?? 0) > 1
+    );
 
     const onMentionedUser = (
       newUser: Omit<MentionedUser, "current_handle">
@@ -111,16 +135,6 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
         return [...curr, newWave];
       });
     };
-
-    useEffect(() => {
-      setTitle(null);
-      setMetadata([]);
-      setMentionedUsers([]);
-      setMentionedWaves([]);
-      setReferencedNfts([]);
-      setDrop(null);
-      setViewType(CreateDropViewType.COMPACT);
-    }, [dropEditorRefreshKey]);
 
     const createDropWrapperRef = useRef<CreateDropWrapperHandles | null>(null);
     const requestDrop = (): CreateDropConfig | null =>
@@ -200,5 +214,11 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
   }
 );
 
+DropEditorBody.displayName = "DropEditorBody";
+const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
+  (props, ref) => (
+    <DropEditorBody {...props} key={props.dropEditorRefreshKey} ref={ref} />
+  )
+);
 DropEditor.displayName = "DropEditor";
 export default DropEditor;

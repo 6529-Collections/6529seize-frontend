@@ -1,3 +1,4 @@
+import { PROFILE_ACTIVITY_BODY } from "@/components/profile-activity/profileActivityTypography";
 import type {
   ProfileActivityLogBanner1Edit,
   ProfileActivityLogBanner2Edit,
@@ -23,7 +24,9 @@ export default function ProfileActivityLogBanner({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         {TITLE[log.type]}
       </span>
       {!isAdded && (

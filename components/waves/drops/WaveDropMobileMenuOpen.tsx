@@ -9,11 +9,14 @@ import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 interface WaveDropMobileMenuOpenProps {
   readonly drop: ExtendedDrop;
   readonly onOpenChange: () => void;
+  /** Owns route navigation; onOpenChange still closes the menu afterward. */
+  readonly onNavigate?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
   drop,
   onOpenChange,
+  onNavigate,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -25,16 +28,20 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
   }
 
   const onDropClick = () => {
-    const params = new URLSearchParams(searchParams.toString());
     const waveId = drop.wave?.id ?? "";
-    params.set("drop", drop.id);
     startDropOpen({
       dropId: drop.id,
       waveId,
       source: "leaderboard_mobile_menu",
       isMobile: true,
     });
-    router.push(`${pathname}?${params.toString()}`);
+    if (onNavigate) {
+      onNavigate(drop);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("drop", drop.id);
+      router.push(`${pathname}?${params.toString()}`);
+    }
     onOpenChange();
   };
 

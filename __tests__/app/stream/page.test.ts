@@ -1,27 +1,21 @@
-const mockNotFound = jest.fn(() => {
-  throw new Error("NEXT_NOT_FOUND");
-});
-const mockRedirect = jest.fn(() => {
-  throw new Error("NEXT_REDIRECT");
-});
+import { renderToStaticMarkup } from "react-dom/server";
 
-jest.mock("next/navigation", () => ({
-  notFound: mockNotFound,
-  redirect: mockRedirect,
-}));
+import StreamPage, { generateMetadata } from "@/app/stream/page";
 
-jest.mock("@/config/env", () => ({
-  publicEnv: {
-    BASE_ENDPOINT: "https://6529.io",
-  },
-}));
+describe("/stream placeholder", () => {
+  it("says Stream is being rebuilt and links to the 6529-works repository", () => {
+    const html = renderToStaticMarkup(StreamPage());
 
-import StreamReviewRedirectPage from "@/app/stream/page";
+    expect(html).toContain("<h1");
+    expect(html).toContain("6529 Stream is being rebuilt.");
+    expect(html).toContain(
+      'href="https://github.com/6529-Collections/6529-works"'
+    );
+    expect(html).toContain("6529-works on GitHub");
+    expect(html).not.toContain("/reviews/6529-stream");
+  });
 
-describe("/stream production gate", () => {
-  it("redirects production traffic to the published Stream review", () => {
-    expect(() => StreamReviewRedirectPage()).toThrow("NEXT_REDIRECT");
-    expect(mockNotFound).not.toHaveBeenCalled();
-    expect(mockRedirect).toHaveBeenCalledWith("/reviews/6529-stream");
+  it("is not indexed", () => {
+    expect(generateMetadata().robots).toEqual({ index: false, follow: true });
   });
 });

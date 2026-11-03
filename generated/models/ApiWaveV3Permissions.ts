@@ -14,6 +14,7 @@
 import { HttpFile } from '../http/http';
 
 export class ApiWaveV3Permissions {
+    'create_competition'?: boolean;
     'view': boolean;
     'chat': boolean;
     'administer': boolean;
@@ -23,6 +24,12 @@ export class ApiWaveV3Permissions {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "create_competition",
+            "baseName": "create_competition",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "view",
             "baseName": "view",

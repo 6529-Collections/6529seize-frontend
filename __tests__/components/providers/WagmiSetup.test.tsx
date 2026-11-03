@@ -30,7 +30,9 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
 }));
 
 // Mock all external dependencies
-jest.mock("@/components/auth/Auth");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: jest.fn(),
 }));
@@ -104,6 +106,12 @@ jest.mock("@/components/providers/DeferredWagmiProvider", () => ({
 }));
 jest.mock("@/components/providers/createPublicWagmiConfig", () => ({
   createPublicWagmiConfig: jest.fn(() => ({ connectors: [], storage: null })),
+}));
+// These suites cover a returning wallet user, whose stack loads on mount.
+// The session gate itself is covered in "Wallet stack session gate" below.
+jest.mock("@/components/providers/walletSessionGate", () => ({
+  hasPersistedWalletSession: jest.fn(() => true),
+  subscribeToWalletSessionChanges: jest.fn(() => () => undefined),
 }));
 jest.mock("ethers", () => ({
   ethers: {
@@ -281,6 +289,15 @@ describe("WagmiSetup Security Tests", () => {
     );
 
     return result;
+  };
+
+  // Settles the mocked dynamic wallet-stack imports without running timers.
+  const settleWalletStackImport = async (): Promise<void> => {
+    await act(async () => {
+      for (let turn = 0; turn < 10; turn += 1) {
+        await Promise.resolve();
+      }
+    });
   };
 
   const AppKitBootstrapProbe = () => {
@@ -736,6 +753,9 @@ describe("WagmiSetup Security Tests", () => {
       expect(
         container.querySelector('[data-testid="wagmi-provider"]')
       ).toBeTruthy();
+      // The stored session loads the wallet stack before creating the adapter.
+      expect(mockCreateAppKitAdapter).not.toHaveBeenCalled();
+      await settleWalletStackImport();
       expect(mockCreateAppKitAdapter).toHaveBeenCalledTimes(1);
       expect(mockInitializeAppKit).not.toHaveBeenCalled();
       expect(

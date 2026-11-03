@@ -158,18 +158,14 @@ describe("jwt-validation.utils", () => {
     );
   });
 
-  it("reports a failed refresh after the server rejects the session", async () => {
+  it("preserves a transient refresh error after the server rejects the access token", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
     mockedHasActiveSessionV2Auth.mockReturnValue(true);
     mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
 
     await expect(
       validateJwt({ ...validParams, serverRejected: true })
-    ).resolves.toEqual({
-      isValid: false,
-      refreshOutcome: "failed",
-      wasCancelled: false,
-    });
+    ).rejects.toThrow("Failed to fetch");
   });
 
   it("does not trust the same local JWT after forced refresh is rejected", async () => {

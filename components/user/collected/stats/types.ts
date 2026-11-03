@@ -43,6 +43,7 @@ export interface UseCollectedStatsDataArgs {
 }
 
 export interface UseCollectedStatsDataResult {
+  readonly isDetailsLoading: boolean;
   readonly statsPath: string | null;
   readonly collectedStats: ApiCollectedStats | undefined;
   readonly seasons: MemeSeason[];

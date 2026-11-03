@@ -62,6 +62,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     fetchNextPage,
     status,
     refetch,
+    refetchIfStale,
   } = useWavesV2({
     overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -97,8 +98,17 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     refetch();
   }, [refetch, shouldFetchDmWaves]);
 
+  const refreshStaleWaves = useCallback(() => {
+    if (!shouldFetchDmWaves) {
+      return;
+    }
+
+    refetchIfStale();
+  }, [refetchIfStale, shouldFetchDmWaves]);
+
   return useMemo(
     () => ({
+      viewerIdentityKey,
       waves: sorted,
       isFetching: shouldFetchDmWaves ? isFetching : false,
       isFetchingNextPage: shouldFetchDmWaves ? isFetchingNextPage : false,
@@ -116,9 +126,11 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       missingPinnedIds: [],
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
+      refreshStaleWaves,
     }),
     [
       sorted,
+      viewerIdentityKey,
       isFetching,
       isFetchingNextPage,
       hasNextPage,
@@ -126,6 +138,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       status,
       mainWaves,
       refetchStable,
+      refreshStaleWaves,
       shouldFetchDmWaves,
     ]
   );

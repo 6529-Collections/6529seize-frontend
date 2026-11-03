@@ -1,3 +1,6 @@
+import { isValidEthAddress } from "@/helpers/addressFormatting";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import {
   getDelegationArticle,
@@ -32,9 +35,9 @@ const SECTION_METADATA: Readonly<
   >
 > = {
   [DelegationCenterSection.CENTER]: {
-    title: "Delegation Center",
-    navLabel: "Delegation Center",
-    description: "Register, manage, and review NFT delegation records.",
+    title: t(DEFAULT_LOCALE, "safeCollecting.pageTitle"),
+    navLabel: t(DEFAULT_LOCALE, "safeCollecting.navLabel"),
+    description: t(DEFAULT_LOCALE, "safeCollecting.metadataDescription"),
   },
   [DelegationCenterSection.REGISTER_DELEGATION]: {
     title: "Register Delegation",
@@ -52,6 +55,14 @@ const SECTION_METADATA: Readonly<
     title: "Register Consolidation",
     navLabel: "Register Consolidation",
     description: "Connect wallets you control for 6529 collection metrics.",
+  },
+  [DelegationCenterSection.BUILD_CONSOLIDATION]: {
+    title: t(DEFAULT_LOCALE, "delegation.consolidationBuilder.title"),
+    navLabel: t(DEFAULT_LOCALE, "delegation.consolidationBuilder.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "delegation.consolidationBuilder.metadataDescription"
+    ),
   },
   [DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS]: {
     title: "Assign Primary Address",
@@ -79,15 +90,13 @@ const SECTION_METADATA: Readonly<
     description: "Manage delegation records for 6529 Gradient.",
   },
   [DelegationCenterSection.WALLET_ARCHITECTURE]: {
-    title: "Wallet Architecture",
-    navLabel: "Wallet Architecture",
-    description:
-      "Understand vault, transaction, and minting wallet architecture.",
-    articleSlug: "reference-overview-wallet-architecture",
+    title: t(DEFAULT_LOCALE, "delegation.tapGuide.metadataTitle"),
+    navLabel: t(DEFAULT_LOCALE, "delegation.tapGuide.navLabel"),
+    description: t(DEFAULT_LOCALE, "delegation.tapGuide.metadataDescription"),
   },
   [DelegationCenterSection.FAQ]: {
-    title: "Delegation FAQ",
-    navLabel: "Delegation FAQ",
+    title: "FAQ",
+    navLabel: "FAQ",
     description: "Find delegation help articles and setup references.",
     articleSlug: "delegation-faq",
   },
@@ -147,9 +156,9 @@ export function getDelegationRouteMetadata(
   }
 
   return {
-    title: finalSegment ? titleCaseSlug(finalSegment) : "Delegation",
-    navLabel: "Delegation",
-    description: "NFT Delegation",
+    title: finalSegment ? titleCaseSlug(finalSegment) : "Safe Collecting",
+    navLabel: "Safe Collecting",
+    description: "Wallet setup and Safe Collecting tools.",
     isFaqChildArticle: false,
   };
 }
@@ -182,7 +191,7 @@ export function getDelegationArticleNavigation(
     return {
       slug: candidateSlug,
       title: article.title,
-      href: `/delegation/delegation-faq/${candidateSlug}`,
+      href: `/safe-collecting/faq/${candidateSlug}`,
     };
   }
 
@@ -190,4 +199,22 @@ export function getDelegationArticleNavigation(
     previous: toLink(previousSlug),
     next: toLink(nextSlug),
   };
+}
+
+export function getWalletCheckerCanonicalPath(
+  address: string | string[] | undefined
+): string {
+  const path = "/safe-collecting/wallet-checker";
+  if (typeof address !== "string" || !address) {
+    return path;
+  }
+  if (isValidEthAddress(address)) {
+    return `${path}?${new URLSearchParams({ address: address.toLowerCase() })}`;
+  }
+  // ENS resolution happens in the browser. Preserve its input identity rather
+  // than claiming it is equivalent to the empty checker or guessing a wallet.
+  if (address.toLowerCase().endsWith(".eth")) {
+    return `${path}?${new URLSearchParams({ address })}`;
+  }
+  return path;
 }

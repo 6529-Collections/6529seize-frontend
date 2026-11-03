@@ -1,3 +1,7 @@
+"use client";
+
+import CompetitionAwareDropVote from "@/components/competitions/CompetitionAwareDropVote";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import dynamic from "next/dynamic";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
@@ -29,23 +33,17 @@ const SingleWaveDropVoteContent = dynamic(
 );
 
 export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
-  drop,
   size = SingleWaveDropVoteSize.NORMAL,
-  onVoteSuccess,
-  onVoteRequestStarted,
   submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
-  voteMode,
-  onVoteModeChange,
+  ...props
 }) => {
-  return (
-    <SingleWaveDropVoteContent
-      drop={drop}
-      size={size}
-      onVoteSuccess={onVoteSuccess}
-      onVoteRequestStarted={onVoteRequestStarted}
-      submissionMode={submissionMode}
-      voteMode={voteMode}
-      onVoteModeChange={onVoteModeChange}
+  const resolvedProps = { ...props, size, submissionMode };
+  return props.drop.drop_type !== ApiDropType.Chat ? (
+    <CompetitionAwareDropVote
+      {...resolvedProps}
+      fallback={<SingleWaveDropVoteContent {...resolvedProps} />}
     />
+  ) : (
+    <SingleWaveDropVoteContent {...resolvedProps} />
   );
 };

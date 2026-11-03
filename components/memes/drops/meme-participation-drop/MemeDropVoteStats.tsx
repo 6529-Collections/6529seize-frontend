@@ -1,9 +1,11 @@
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface MemeDropVoteStatsProps {
   readonly drop: ExtendedDrop;
@@ -12,7 +14,7 @@ interface MemeDropVoteStatsProps {
 export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
   const current = drop.rating;
   const projected = drop.rating_prediction;
-  const votingCreditType = drop.wave.voting_credit_type;
+  const votingCreditType = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const userContext = drop.context_profile_context;
   const isPositive = (current ?? 0) >= 0;
   const firstThreeVoters = drop.top_raters.slice(0, 3);
@@ -27,7 +29,7 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
     <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
-          className={`tw-text-body tw-font-semibold tw-leading-5 tw-tracking-identity tw-tabular-nums ${
+          className={`tw-text-body tw-font-semibold tw-tabular-nums tw-leading-5 tw-tracking-identity ${
             isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
           }`}
         >
@@ -63,7 +65,7 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
             >
               {isUserVoteNegative && "-"}
               {formatNumberWithCommas(Math.abs(userVote))}{" "}
-              <span className="tw-text-iron-400 tw-font-normal">
+              <span className="tw-font-normal tw-text-iron-400">
                 {votingCreditType}
               </span>
             </span>
@@ -82,12 +84,15 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
               >
                 {voter.profile.pfp ? (
                   <img
-                    className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                    src={voter.profile.pfp}
+                    className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                    src={getScaledImageUri(
+                      voter.profile.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
                     alt="Recent voter"
                   />
                 ) : (
-                  <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                  <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                 )}
               </Link>
               <Tooltip

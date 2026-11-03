@@ -1,4 +1,8 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-GB.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-GB.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-GB.json";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
+import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-GB.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-GB.json";
@@ -8,6 +12,7 @@ import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-GB
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { EN_GB_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -16,6 +21,19 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
+  "network.groupFilter.filter": "Filter",
+  "network.groupFilter.all": "All filters",
+  "network.groupFilter.level": "Level",
+  "network.groupFilter.tdh": "TDH",
+  "network.groupFilter.nic": "NIC",
+  "network.groupFilter.rep": "Rep",
+  "network.groupFilter.nfts": "Required NFTs",
+  "network.groupFilter.collections": "Collection Access",
+  "network.groupFilter.xtdhGrant": "xTDH Grant",
+  ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "No subscription allocation",
@@ -24,6 +42,8 @@ export const EN_GB_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -162,6 +182,18 @@ export const EN_GB_MESSAGES = {
   "network.groupInspection.bulkRep": "REP everyone matching criteria",
   "network.groupInspection.bulkNic": "NIC everyone matching criteria",
   "network.groupInspection.bulkActionsLabel": "Bulk rating actions",
+  "network.groupInspection.add": "Add",
+  "network.groupInspection.subtract": "Subtract",
+  "network.groupInspection.grant": "Grant",
+  "network.groupInspection.cancel": "Cancel",
+  "network.groupInspection.repCategory": "Rep Category",
+  "network.groupInspection.clearCategory": "Clear category",
+  "network.groupInspection.repCategoryRequired": "Please enter rep category",
+  "network.groupInspection.creditSummary":
+    "You can grant up to {credit} {matter} to each of {count} members of the group.",
+  "network.groupInspection.progress": "{matter} Progress",
+  "network.groupInspection.keepOpen":
+    "Keep this window open while we distribute credits across the group.",
   "network.groupInspection.bulkRepSuccess": "REP distributed.",
   "network.groupInspection.bulkNicSuccess": "NIC distributed.",
   "network.groupInspection.source": "Source: filters + optional manual list",
@@ -569,6 +601,8 @@ export const EN_GB_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":
@@ -605,6 +639,7 @@ export const EN_GB_MESSAGES = {
   "waves.chat.guidelinesDialog.loadErrorDescription":
     "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
+  "waves.threadLoadError": "This thread could not be loaded.",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
@@ -745,6 +780,8 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "waves.create.groups.editAccess.loading": "Loading current criteria…",
   "waves.create.groups.editAccess.loadErrorTitle":
     "Couldn't load the current criteria.",
@@ -973,6 +1010,9 @@ export const EN_GB_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
   "waves.proposalCard.contextLabel": "Proposal",
+  "waves.proposalCard.summaryLabel": "Summary",
+  "waves.proposalCard.showDetails": "Show details ({count})",
+  "waves.proposalCard.hideDetails": "Hide details",
   "waves.proposalCard.readFull": "Read full",
   "waves.proposalCard.readFullNamed": "Read full: {title}",
   "waves.proposalCard.untitledProposal": "Untitled proposal",
@@ -1016,6 +1056,7 @@ export const EN_GB_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Labels cannot match existing tabs.",
   ...EN_GB_PAGINATION_MESSAGES,
+  ...EN_GB_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -1083,6 +1124,11 @@ export const EN_GB_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.detail.live.artwork.mintDateLabel": "Mint date:",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Connected Profile",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Level: {level}",
+  "theMemes.mint.connect.mintForMe": "Mint for me",
+  "theMemes.mint.connect.mintForFren": "Mint for fren",
   ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
   "theMemes.filters.year.label": "Year",

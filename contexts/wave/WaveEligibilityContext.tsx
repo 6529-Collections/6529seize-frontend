@@ -14,11 +14,12 @@ import type { ChatRestriction } from "@/hooks/useDropPriviledges";
 
 export interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;
+  /** Replying can be open to people who can't start new chat drops. */
+  authenticated_user_eligible_to_reply?: boolean | undefined;
   authenticated_user_chat_restriction?: ChatRestriction | null;
   authenticated_user_eligible_to_vote: boolean;
   authenticated_user_eligible_to_participate: boolean;
   authenticated_user_admin: boolean;
-  lastUpdated: number;
 }
 
 interface WaveEligibilityContextType {
@@ -54,6 +55,34 @@ interface WaveEligibilityProviderProps {
   children: React.ReactNode;
 }
 
+type EligibilityUpdate = Partial<WaveEligibility>;
+
+const RAW_ELIGIBILITY_KEYS = [
+  "authenticated_user_eligible_to_chat",
+  "authenticated_user_eligible_to_reply",
+  "authenticated_user_eligible_to_vote",
+  "authenticated_user_eligible_to_participate",
+  "authenticated_user_admin",
+] as const satisfies readonly (keyof WaveEligibility)[];
+
+const ELIGIBILITY_FRESH_MS = 5 * 60 * 1000;
+
+const updatesRawEligibility = (update: EligibilityUpdate): boolean =>
+  RAW_ELIGIBILITY_KEYS.some((key) => key in update);
+
+// Every wave feed page and refetch re-reports eligibility. Unchanged values
+// must keep the same state object, or every drop's reaction and reply
+// controls re-render with the page.
+const changesEligibility = (
+  current: WaveEligibility | undefined,
+  update: EligibilityUpdate
+): boolean => {
+  if (!current) return true;
+  return Object.entries(update).some(
+    ([key, value]) => !Object.is(current[key as keyof WaveEligibility], value)
+  );
+};
+
 export const WaveEligibilityProvider: React.FC<
   WaveEligibilityProviderProps
 > = ({ children }) => {
@@ -61,25 +90,27 @@ export const WaveEligibilityProvider: React.FC<
     Record<string, WaveEligibility>
   >({});
   const refreshingRef = useRef<Set<string>>(new Set());
+  // When the server last confirmed each wave's eligibility, changed or not.
+  // The only freshness record: kept out of state so confirmations alone do
+  // not re-render consumers. One entry per visited wave, like `eligibility`.
+  const confirmedAtRef = useRef<Map<string, number>>(new Map());
 
   const updateEligibility = useCallback(
-    (waveId: string, newEligibility: Partial<WaveEligibility>) => {
-      const updatesRawEligibility =
-        "authenticated_user_eligible_to_chat" in newEligibility ||
-        "authenticated_user_eligible_to_vote" in newEligibility ||
-        "authenticated_user_eligible_to_participate" in newEligibility ||
-        "authenticated_user_admin" in newEligibility;
+    (waveId: string, newEligibility: EligibilityUpdate) => {
+      if (updatesRawEligibility(newEligibility)) {
+        confirmedAtRef.current.set(waveId, Date.now());
+      }
 
-      setEligibility((prev) => ({
-        ...prev,
-        [waveId]: {
-          ...prev[waveId],
-          ...newEligibility,
-          lastUpdated: updatesRawEligibility
-            ? Date.now()
-            : (prev[waveId]?.lastUpdated ?? 0),
-        } as WaveEligibility,
-      }));
+      setEligibility((prev) => {
+        const current = prev[waveId];
+        if (!changesEligibility(current, newEligibility)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [waveId]: { ...current, ...newEligibility } as WaveEligibility,
+        };
+      });
     },
     []
   );
@@ -92,8 +123,11 @@ export const WaveEligibilityProvider: React.FC<
       }
 
       // Check if data is recent (less than 5 minutes old)
-      const existing = eligibility[waveId];
-      if (existing && Date.now() - existing.lastUpdated < 5 * 60 * 1000) {
+      const confirmedAt = confirmedAtRef.current.get(waveId);
+      if (
+        confirmedAt !== undefined &&
+        Date.now() - confirmedAt < ELIGIBILITY_FRESH_MS
+      ) {
         return;
       }
 
@@ -106,6 +140,9 @@ export const WaveEligibilityProvider: React.FC<
 
         updateEligibility(waveId, {
           authenticated_user_eligible_to_chat:
+            wave.chat.authenticated_user_eligible,
+          authenticated_user_eligible_to_reply:
+            wave.chat.replies?.authenticated_user_eligible ??
             wave.chat.authenticated_user_eligible,
           authenticated_user_eligible_to_vote:
             wave.voting.authenticated_user_eligible,
@@ -123,7 +160,7 @@ export const WaveEligibilityProvider: React.FC<
         refreshingRef.current.delete(waveId);
       }
     },
-    [eligibility, updateEligibility]
+    [updateEligibility]
   );
 
   const getEligibility = useCallback(

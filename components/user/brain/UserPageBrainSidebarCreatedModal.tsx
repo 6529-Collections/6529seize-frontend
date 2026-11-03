@@ -66,7 +66,7 @@ export default function UserPageBrainSidebarCreatedModal({
             }`}
           >
             <div className="tw-min-w-0 tw-flex-1">
-              <DialogTitle className="tw-m-0 tw-truncate tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl">
+              <DialogTitle className="tw-m-0 tw-truncate tw-text-lg/7 tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-leading-8 md:tw-text-xl/8">
                 {getUserPageBrainSidebarMessage(
                   locale,
                   "user.brain.sidebar.createdModalTitle",
@@ -74,7 +74,7 @@ export default function UserPageBrainSidebarCreatedModal({
                 )}
               </DialogTitle>
               {!state.isInitialLoading && !state.isInitialError && (
-                <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+                <p className="tw-mb-0 tw-mt-1 tw-text-meta/5 tw-font-normal tw-tabular-nums tw-text-iron-500">
                   {countLabel}
                 </p>
               )}
@@ -116,7 +116,7 @@ export default function UserPageBrainSidebarCreatedModal({
 
               {state.isInitialError && (
                 <div className="tw-border-red-500/20 tw-bg-red-500/5 tw-rounded-xl tw-border tw-border-solid tw-p-4">
-                  <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                  <p className="tw-m-0 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
                     {getUserPageBrainSidebarMessage(
                       locale,
                       "user.brain.sidebar.createdLoadError"
@@ -136,7 +136,7 @@ export default function UserPageBrainSidebarCreatedModal({
               )}
 
               {state.status === "success" && state.waves.length === 0 && (
-                <p className="tw-m-0 tw-py-8 tw-text-center tw-text-sm tw-text-iron-500">
+                <p className="tw-m-0 tw-py-8 tw-text-center tw-text-meta/5 tw-font-normal tw-text-iron-500">
                   {getUserPageBrainSidebarMessage(
                     locale,
                     "user.brain.sidebar.createdEmpty"
@@ -157,9 +157,9 @@ export default function UserPageBrainSidebarCreatedModal({
                   <UserPageBrainSidebarLoadMore
                     state={state}
                     buttonClassName={`${MODAL_ACTION_BUTTON_CLASS} tw-w-full`}
-                    completionClassName="tw-m-0 tw-rounded-sm tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                    completionClassName="tw-m-0 tw-rounded-sm tw-py-2 tw-text-center tw-text-meta/5 tw-font-normal tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                     containerClassName="tw-mt-2 tw-space-y-2"
-                    errorClassName="tw-m-0 tw-text-sm tw-text-red-300/80"
+                    errorClassName="tw-m-0 tw-text-[15px]/5 tw-font-normal tw-text-red-300/80"
                     showErrorMessage
                   />
                 </div>

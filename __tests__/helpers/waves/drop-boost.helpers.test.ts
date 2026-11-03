@@ -62,6 +62,20 @@ describe("canShowDropBoostAction", () => {
     ).toBe(true);
   });
 
+  it("allows boosting anonymous entries when the viewer has the same placeholder handle but a different id", () => {
+    const drop = createDrop({
+      authorId: "anonymous-entry-author",
+      authorHandle: "Anonymous",
+    });
+    drop.author.is_anonymous = true;
+    expect(
+      canShowDropBoostAction({
+        drop,
+        connectedProfile: { id: "real-profile", handle: "Anonymous" },
+      })
+    ).toBe(true);
+  });
+
   it("hides the action without a connected profile", () => {
     expect(
       canShowDropBoostAction({

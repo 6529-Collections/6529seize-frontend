@@ -9,6 +9,63 @@ two section cards:
 - `Launch Claims`: initialize claim phases, update claim config, and run
   airdrops
 
+Below the cards, a static `Contract Admins` card shows the active chain and creator
+contract, linked to Etherscan for that chain, then its owner first and deduplicated
+on-chain admins. Each row puts its Owner/Admin pill above a mainnet ENS name and
+full wallet address on one line when space allows, wrapping on narrow screens.
+Missing, loading, or failed ENS lookups do not hide the address or list.
+All landing-access wallets can read this list and refresh it. Craft access
+remains distribution-admin-only.
+
+## Contract Admin Changes
+
+- Add/Revoke controls are shown only to the owner or `CLAIMS_ADMIN_WALLETS`.
+  Other approved on-chain admins have Launch access but cannot manage admins.
+- Add accepts a wallet address or ENS name resolved through the existing
+  mainnet ENS input. Confirmation shows the exact resolved wallet address.
+  Invalid/unresolved names, the zero address, owner, and existing admins cannot
+  be added. Revoke requires confirmation and is never offered for the owner.
+  Formatted ENS labels are forward-resolved, not trusted by their editable wallet
+  suffix. Editing the name invalidates an unconfirmed operation; pending, failed,
+  or missing resolution blocks Add rather than reusing the prior wallet.
+- The header's `Add Admin` button unfolds an inline form above the list, without
+  opening a separate input dialog. `Review Admin` opens the existing transaction
+  review; `Cancel` closes and resets the form and returns focus to `Add Admin`.
+  Refresh/Revoke use the shared app tooltips rather than native browser titles.
+- Transactions call `approveAdmin(address)` or `revokeAdmin(address)` on the
+  active creator contract, not the lazy-claim extension. The existing on-chain
+  dialog shows wallet confirmation, submission, receipt, and error states.
+  A successful receipt refreshes the list and shared creator permission reads.
+- Only the contract owner can execute these methods on-chain. Configured
+  claims admins intentionally see the controls for testing; non-owner calls
+  still fail. Their pre-sign review explicitly warns that this wallet is not
+  the owner and the transaction is expected to fail. No environment admin list
+  or ownership is changed by these calls.
+- On-chain reads refresh periodically and on refocus. A read failure shows a
+  retry and disables writes rather than trusting an old list. A wallet/network
+  change invalidates an unconfirmed operation; duplicate submissions are blocked.
+- Manual Refresh displays a spinner and disables the refresh button for at least
+  1.5 seconds, and until both owner/admin reads finish if they take longer. The
+  visual minimum does not delay fresh list data or affect periodic refreshes.
+- The chain follows existing Drop Forge configuration: Sepolia uses the
+  testnet creator, other supported wallet contexts use the mainnet creator.
+  Sepolia launch action tracking is still unsupported by the backend.
+
+### Localization Fallback Debt
+
+- Route/component: `/drop-forge`, `DropForgeContractAdmins` and its transaction hook.
+- Untranslated surface: the `dropForge.admins.*` labels, accessible names,
+  validation, warnings, and transaction-error messages. All are message-backed;
+  other locale dictionaries currently fall back to the canonical en-US source.
+- User impact: users selecting en-GB, fr-FR, es-ES, or de-DE still see English
+  admin-management copy, without missing labels or errors.
+- Owner: frontend Drop Forge maintainers (`6529seize-maintainers`).
+- Remediation: translate `i18n/messages/drop-forge-admins.ts` keys into the four
+  locale dictionaries and verify wrapping, keyboard focus, and screen-reader
+  announcements on the authenticated admin surface in every supported locale.
+  Existing Craft/Launch and shared transaction-dialog fallback debt is outside
+  this admin-copy migration; transaction authority is unchanged.
+
 ## Location in the Site
 
 - Route: `/drop-forge`

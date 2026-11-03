@@ -44,7 +44,7 @@ export function TypedArtistProfile({
           ) : (
             <MuseumMarkdown
               key={document.id}
-              className="tw-max-w-3xl"
+              className="tw-max-w-3xl tw-break-words"
               embeddedDocument
               sourceCommit={publication.identity.commit}
               sourcePath={document.sourcePath}

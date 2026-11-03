@@ -22,7 +22,8 @@ import {
 import { getUploadErrorMessage } from "@/services/api/upload-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditPfp({
   profile,
@@ -59,13 +60,23 @@ export default function UserPageHeaderEditPfp({
     },
   });
 
-  const [imageToShow, setImageToShow] = useState<string | null>(
-    profile.pfp ? getScaledImageUri(profile.pfp, ImageScale.W_200_H_200) : null
-  );
+  const savedImage = profile.pfp
+    ? getScaledImageUri(profile.pfp, ImageScale.W_200_H_200)
+    : null;
 
   const [selectedMeme, setSelectedMeme] = useState<NFTLite | null>(null);
   const [file, setFile] = useState<File | null>();
   const [error, setError] = useState<string | null>(null);
+
+  // The preview URL is revoked when the file is replaced or cleared and when
+  // the editor unmounts.
+  const filePreviewUrl = useObjectUrl(file);
+  let imageToShow = savedImage;
+  if (file) {
+    imageToShow = filePreviewUrl ?? savedImage;
+  } else if (selectedMeme) {
+    imageToShow = selectedMeme.scaled ?? selectedMeme.image;
+  }
 
   const setSelectedMemeAndRemoveFile = (meme: NFTLite) => {
     setSelectedMeme(meme);
@@ -78,14 +89,6 @@ export default function UserPageHeaderEditPfp({
     setSelectedMeme(null);
     setError(null);
   };
-
-  useEffect(() => {
-    if (file) {
-      setImageToShow(URL.createObjectURL(file));
-    } else if (selectedMeme) {
-      setImageToShow(selectedMeme.scaled ?? selectedMeme.image);
-    }
-  }, [file, selectedMeme]);
 
   const [saving, setSaving] = useState<boolean>(false);
 

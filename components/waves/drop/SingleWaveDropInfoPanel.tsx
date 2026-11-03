@@ -1,6 +1,8 @@
 "use client";
 
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
+import { MemeCollaborationPanel } from "@/components/waves/memes/collaborations/MemeCollaborationPanel";
+import { shouldLoadMemeCollaboration } from "@/components/waves/memes/collaborations/shouldLoadMemeCollaboration";
 import VotingModal from "@/components/voting/VotingModal";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -66,6 +68,13 @@ export const SingleWaveDropInfoPanel = ({
             )}
 
             <WaveDropMetaRow drop={drop} isWinner={isWinner} />
+            {shouldLoadMemeCollaboration(drop) && (
+              <MemeCollaborationPanel
+                key={drop.id}
+                dropId={drop.id}
+                authorId={drop.author.id}
+              />
+            )}
 
             {!isChatWave && (
               <div className="tw-mt-6">

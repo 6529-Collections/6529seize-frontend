@@ -2,6 +2,12 @@ import React, { type ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import Follower from "@/components/utils/followers/Follower";
 import { AuthContext } from "@/components/auth/Auth";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -99,6 +105,20 @@ test.each([
     expect(screen.getByAltText("0xabc's profile image")).toBeInTheDocument();
   }
 );
+
+test("requests the AUTOx50 derivative of a CDN profile picture", () => {
+  render(
+    <Follower
+      follower={{
+        ...baseFollower,
+        identity: { ...baseFollower.identity, pfp: CDN_AVATAR_URL },
+      }}
+    />
+  );
+  expect(
+    getRequestedImageSrc(screen.getByAltText("alice's profile image"))
+  ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
+});
 
 test("shows placeholder when no pfp", () => {
   const follower = {

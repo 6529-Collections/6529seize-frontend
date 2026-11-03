@@ -8,11 +8,17 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
+import {
+  AnonymousAuthorAvatar,
+  AnonymousAuthorName,
+} from "@/components/waves/drops/AnonymousDropAuthor";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -27,6 +33,7 @@ interface WaveLeaderboardDropAuthorAvatarProps {
 export const WaveLeaderboardDropAuthorAvatar: React.FC<
   WaveLeaderboardDropAuthorAvatarProps
 > = ({ drop }) => {
+  if (isAnonymousAuthor(drop.author)) return <AnonymousAuthorAvatar />;
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
 
   return (
@@ -41,7 +48,10 @@ export const WaveLeaderboardDropAuthorAvatar: React.FC<
             <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
               <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
                 <Image
-                  src={resolveIpfsUrlSync(drop.author.pfp)}
+                  src={getScaledImageUri(
+                    drop.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="Profile picture"
                   width={40}
                   height={40}
@@ -61,6 +71,16 @@ export const WaveLeaderboardDropAuthorAvatar: React.FC<
 export const WaveLeaderboardDropAuthor: React.FC<
   WaveLeaderboardDropAuthorProps
 > = ({ drop, showAvatar = true, winningThreshold }) => {
+  if (isAnonymousAuthor(drop.author))
+    return (
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+        {showAvatar && <AnonymousAuthorAvatar />}
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-font-semibold">
+          <AnonymousAuthorName />
+          <WaveDropTime timestamp={drop.created_at} />
+        </div>
+      </div>
+    );
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
   const isApproveDrop =
     typeof winningThreshold === "number" && winningThreshold > 0;
@@ -108,7 +128,9 @@ export const WaveLeaderboardDropAuthor: React.FC<
         />
         {authorStatusBadge}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
-        <WaveDropTime timestamp={drop.created_at} />
+        <WithDropAuthorSignedMarker drop={drop}>
+          <WaveDropTime timestamp={drop.created_at} />
+        </WithDropAuthorSignedMarker>
       </div>
     </div>
   );

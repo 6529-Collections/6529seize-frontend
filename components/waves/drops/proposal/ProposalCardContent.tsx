@@ -10,6 +10,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveProposalCardRecipe } from "@/hooks/waves/useWaveProposalCardRecipe";
 import { t } from "@/i18n/messages";
+import { PlayCircleIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ReactNode } from "react";
 
 interface ProposalCardContentProps {
@@ -70,6 +71,10 @@ const getContextLabels = ({
 }): readonly string[] => {
   const labels: string[] = [];
 
+  if (viewModel.hasVideo && !viewModel.showVideoPlaceholder) {
+    labels.push(t(locale, "waves.proposalCard.video"));
+  }
+
   if (viewModel.partCount > 1) {
     labels.push(
       getCountLabel({
@@ -108,7 +113,7 @@ const ProposalCardTextFooter = ({
     return null;
   }
 
-  return <div className="tw-mt-1">{children}</div>;
+  return <div className="tw-mt-3">{children}</div>;
 };
 
 export default function ProposalCardContent({
@@ -145,7 +150,7 @@ export default function ProposalCardContent({
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
           <h3
-            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-text-pretty tw-break-words tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
+            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-text-pretty tw-break-words tw-font-medium tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
               isCompact
                 ? "tw-text-sm !tw-leading-snug"
                 : "tw-text-base !tw-leading-[1.3] sm:tw-text-lg"
@@ -157,19 +162,19 @@ export default function ProposalCardContent({
             <p
               className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-text-pretty tw-break-words tw-leading-[1.6] tw-tracking-normal tw-text-iron-300 ${
                 isCompact
-                  ? "tw-mt-1 tw-line-clamp-2 tw-text-xs"
-                  : "tw-mt-1.5 tw-line-clamp-3 tw-text-sm"
+                  ? "tw-mt-1.5 tw-line-clamp-2 tw-text-xs"
+                  : "tw-mt-2 tw-line-clamp-3 tw-text-sm"
               }`}
             >
               {viewModel.excerpt}
             </p>
           ) : null}
           {contextLabels.length > 0 ? (
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[11px] tw-font-medium tw-text-iron-500">
+            <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[11px] tw-font-medium tw-text-iron-400">
               {contextLabels.map((label, index) => (
                 <span key={label} className="tw-inline-flex tw-items-center">
                   {index > 0 ? (
-                    <span className="tw-mr-2 tw-size-1 tw-rounded-full tw-bg-iron-700" />
+                    <span className="tw-mr-2 tw-size-1 tw-rounded-full tw-bg-iron-600" />
                   ) : null}
                   {label}
                 </span>
@@ -182,7 +187,7 @@ export default function ProposalCardContent({
         {viewModel.previewImage ? (
           <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center">
             <div
-              className={`tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${
+              className={`tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-primary-400/15 ${
                 isCompact ? "tw-size-20" : "tw-size-24"
               }`}
             >
@@ -202,6 +207,17 @@ export default function ProposalCardContent({
             ) : null}
           </div>
         ) : null}
+        {viewModel.showVideoPlaceholder && (
+          <div
+            data-testid={`proposal-card-video-${drop.id}`}
+            className={`tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-900 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/15 ${isCompact ? "tw-size-20" : "tw-size-24"}`}
+          >
+            <PlayCircleIcon aria-hidden="true" className="tw-size-8" />
+            <span className="tw-text-xs tw-font-medium">
+              {t(locale, "waves.proposalCard.video")}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

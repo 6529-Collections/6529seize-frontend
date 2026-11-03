@@ -11,6 +11,8 @@ interface WaveDropActionsOpenProps {
   readonly drop: ExtendedDrop;
   readonly isDropdownItem?: boolean | undefined;
   readonly onOpen?: (() => void) | undefined;
+  /** Owns route navigation; onOpen still runs after navigation. */
+  readonly onNavigate?: ((drop: ExtendedDrop) => void) | undefined;
   readonly variant?: "icon" | "readFull";
 }
 
@@ -18,6 +20,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
   drop,
   isDropdownItem = false,
   onOpen,
+  onNavigate,
   variant = "icon",
 }) => {
   const router = useRouter();
@@ -26,6 +29,10 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
   const canBeOpened = drop.drop_type !== ApiDropType.Chat;
 
   const onDropClick = (targetDrop: ExtendedDrop) => {
+    if (onNavigate) {
+      onNavigate(targetDrop);
+      return;
+    }
     const params = new URLSearchParams(searchParams.toString());
     params.set("drop", targetDrop.id);
     router.push(`${pathname}?${params.toString()}`);
@@ -86,6 +93,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
         onClick={(event) => {
           event.stopPropagation();
           onDropClick(drop);
+          onOpen?.();
         }}
         aria-label="Open drop"
       >

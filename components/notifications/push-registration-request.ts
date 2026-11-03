@@ -67,6 +67,7 @@ export function sendPreparedPushRegistration(
       token: registration.token,
       platform: registration.deviceInfo.platform,
       profile_id: registration.profileId,
+      include_competitions: true,
     },
     errorMode: "structured",
   });

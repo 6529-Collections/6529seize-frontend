@@ -8,8 +8,11 @@ import {
   formatSlowModeInterval,
   getSlowModeRemainingMs,
 } from "@/helpers/waves/slow-mode.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
+import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface SlowModeChatNoticeProps {
   readonly wave: ApiWave;
@@ -51,43 +54,40 @@ function ActiveSlowModeChatNotice({
   nextDropAllowed,
 }: ActiveSlowModeChatNoticeProps) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const [now, setNow] = useState(() => Date.now());
+  const isCoolingDown = nextDropAllowed !== null && now < nextDropAllowed;
 
-  useEffect(() => {
-    if (nextDropAllowed === null) {
-      return;
-    }
-
-    if (nextDropAllowed <= Date.now()) {
-      return;
-    }
-
-    let didInvalidate = false;
-    const intervalId = setInterval(() => {
+  // Ticks only while the cooldown runs and the page is visible; the tick that
+  // reaches the cooldown end (or the first one after the page is shown again)
+  // refreshes the wave and stops the timer.
+  useVisibleInterval(
+    () => {
       const currentTime = Date.now();
       setNow(currentTime);
 
-      if (currentTime < nextDropAllowed || didInvalidate) {
+      if (nextDropAllowed === null || currentTime < nextDropAllowed) {
         return;
       }
 
-      didInvalidate = true;
-      clearInterval(intervalId);
       void queryClient
         .invalidateQueries({
           queryKey: [QueryKey.WAVE, { wave_id: waveId }],
         })
         .catch(() => undefined);
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [nextDropAllowed, queryClient, waveId]);
+    },
+    isCoolingDown ? 1000 : null
+  );
 
   const remainingMs = getSlowModeRemainingMs({ nextDropAllowed, now });
   const message =
     remainingMs > 0
-      ? `Slow mode: send again in ${formatSlowModeCountdown(remainingMs)}`
-      : `Slow mode: one message every ${formatSlowModeInterval(cooldownMs)}`;
+      ? t(locale, "waves.slowMode.notice.cooldown", {
+          countdown: formatSlowModeCountdown(remainingMs),
+        })
+      : t(locale, "waves.slowMode.notice.interval", {
+          interval: formatSlowModeInterval(cooldownMs),
+        });
 
   return (
     <p

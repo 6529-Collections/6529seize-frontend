@@ -20,7 +20,20 @@ Defaults are aligned so **one hostname drives both** the baked-in app URL and th
 
 `next.config.ts` reads `STANDALONE_BASE_ENDPOINT` during `next build`. The export script sets it to `https://<bucket>` so WalletConnect / AppKit `metadata.url` matches the site origin.
 
-The standalone layout mounts a **document-level anchor interceptor**: any normal click on an `http(s)` link opens a **new tab** and never performs in-place navigation in the mint shell. Relative links and same-origin URLs (the mint host) are rewritten to **`https://6529.io`** (`STANDALONE_MAIN_SITE_BASE` in `standalone-memes-mint/src/next.config.ts`). **`BASE_ENDPOINT`** stays the mint origin for WalletConnect / metadata (`STANDALONE_BASE_ENDPOINT` / bucket URL). To opt out for a specific anchor, set `data-standalone-skip-intercept="true"`.
+**`BASE_ENDPOINT`** stays the mint origin for WalletConnect / metadata (`STANDALONE_BASE_ENDPOINT` / bucket URL).
+
+### Links to 6529.io
+
+There is no link interceptor or document-level click handler. Links to the main site are ordinary anchors that the standalone branches hardcode as absolute `https://6529.io/...` URLs:
+
+- `components/manifold-minting/ManifoldMinting.tsx`: the artist name link, the Distribution Plan link and the profile link in `ArtistInfoStrip`.
+- `components/nft-marketplace-links/NFTMarketplaceLinks.tsx`: the 6529.io collection link (`https://6529.io/the-memes/<id>`) in the marketplace list.
+
+The artist, distribution and 6529.io links open in a new tab (`target="_blank" rel="noopener noreferrer"`), and so do the marketplace links. `STANDALONE_MAIN_SITE_BASE` (`next.config.ts`) is written to the runtime config (`PUBLIC_RUNTIME`) and to `version.json` as `main_site_base`, but no code reads it to build links, so changing it does not change where those links point.
+
+### Search indexing
+
+Test exports are non-indexable. `scripts/export-mint-page.cjs` sets `STANDALONE_TEST_BUILD=true` for `--test` and `false` otherwise. `src/next.config.ts` bakes that value into the runtime config as `STANDALONE_TEST_BUILD` (`publicEnv`, from `config/env.schema.ts`). When it is `true`, `src/app/layout.tsx` sets `robots: { index: false, follow: false }`, which Next renders as `<meta name="robots" content="noindex, nofollow">` on every page, including the page itself. The export checks each HTML file in the test output and fails before writing `dist/` if one lacks that tag. Production exports get no robots meta, as before. The export does not produce a `robots.txt` or response headers, so it adds neither. Response headers for the CloudFront distributions are configured outside this repo.
 
 Override buckets only if needed:
 
@@ -85,7 +98,16 @@ If lookup returns nothing (no alias match, IAM, or the distribution is past the 
 
 ## Public assets
 
-Only files listed in `scripts/export-mint-page.cjs` (`STANDALONE_PUBLIC_FILES`) are copied from the repo `public/` into the standalone app before build. Add entries there if the mint UI references new root-level static files.
+Only files listed in `scripts/export-mint-page.cjs` (`STANDALONE_PUBLIC_FILES`) are copied from the repo `public/` into the standalone app before build. Add entries there if the mint UI references new root-level static files. The export aborts when a listed file is missing.
+
+The tab icon is the production favicon pair (`favicon.png` and `favicon.svg`, the same files the main app links from `getProductionAppEnvironment()`). `src/app/layout.tsx` links both, so keep them in `STANDALONE_PUBLIC_FILES`.
+
+## Static export constraints
+
+`output: "export"` rejects code the main app can use freely. Keep these in mind when the mint page's import graph grows:
+
+- **No Server Actions.** Next fails the build ("Server Actions are not supported with static export") if any `"use server"` module is reachable from `src/app/layout.tsx` or `src/app/page.tsx`, even behind a lazy `import()`. The shared `Providers` component statically imports the Quick Direct Messages gate, which lazily loads the whole wave chat UI. That UI has reached a Server Action before (the Memes submission form's), and nothing in it guards against reaching one again. This build never mounts Quick Direct Messages (`enableMyStream={false}`), so `src/tsconfig.json` maps that one import to the empty `src/components/NoQuickDirectMessagesGate.tsx`. `__tests__/contracts/standalone-mint-export.test.ts` walks the import graph and fails if a Server Action becomes reachable.
+- **Statically rendered layout.** `src/app/layout.tsx` exports `dynamic = "force-static"` so providers that call `useSearchParams()` also prerender the generated `/_not-found` page.
 
 ## Help
 
