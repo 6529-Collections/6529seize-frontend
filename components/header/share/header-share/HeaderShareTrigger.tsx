@@ -12,7 +12,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { isPageShareSupported } from "../page-share-support";
 
 import { HEADER_SHARE_LOCALE } from "./constants";
-import { HeaderPageShareModal } from "./HeaderQRModal";
+import {
+  LazyHeaderPageShareModal,
+  preloadHeaderQRModal,
+} from "./lazyHeaderQRModal";
 
 function HeaderShareContent({
   isCollapsed = false,
@@ -24,6 +27,7 @@ function HeaderShareContent({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
+  const [hasRequestedModal, setHasRequestedModal] = useState<boolean>(false);
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId,
@@ -48,7 +52,12 @@ function HeaderShareContent({
         type="button"
         aria-label={t(HEADER_SHARE_LOCALE, "headerShare.trigger.ariaLabel")}
         title={t(HEADER_SHARE_LOCALE, "headerShare.trigger.title")}
-        onClick={() => setShowQRModal(true)}
+        onPointerEnter={preloadHeaderQRModal}
+        onFocus={preloadHeaderQRModal}
+        onClick={() => {
+          setHasRequestedModal(true);
+          setShowQRModal(true);
+        }}
         className={`tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           isCollapsed
             ? "desktop-hover:hover:tw-text-white"
@@ -78,10 +87,12 @@ function HeaderShareContent({
           </span>
         </div>
       </button>
-      <HeaderPageShareModal
-        show={showQRModal}
-        onClose={() => setShowQRModal(false)}
-      />
+      {hasRequestedModal && (
+        <LazyHeaderPageShareModal
+          show={showQRModal}
+          onClose={() => setShowQRModal(false)}
+        />
+      )}
     </div>
   );
 }
