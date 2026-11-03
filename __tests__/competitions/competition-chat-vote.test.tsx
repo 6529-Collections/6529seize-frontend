@@ -437,14 +437,20 @@ it("invalidates the old viewer during commit before passive effects can flush", 
     client.clear();
   }
 });
-it("keeps voting open when saving the vote fails", async () => {
+it("keeps voting open and refreshes fresh limits when saving the vote fails", async () => {
   jest.mocked(setCompetitionVote).mockRejectedValue(new Error("Save failed"));
+  jest
+    .mocked(fetchCompetitionCredits)
+    .mockResolvedValueOnce(initialBudget)
+    .mockResolvedValue({ ...initialBudget, max_vote: 10 });
   const onClose = jest.fn();
   mount("numeric", drop, onClose);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
   fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
   await screen.findByRole("alert");
+  await waitFor(() => expect(input).toHaveAttribute("max", "10"));
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(2);
   expect(onClose).not.toHaveBeenCalled();
   expect(invalidateCompetition).not.toHaveBeenCalled();
   expect(screen.queryByText("Saved")).not.toBeInTheDocument();
