@@ -18,8 +18,9 @@ export default function DeviceSetupMenuAction({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
-  const { proof, encrypted, canEnableEncryption } = useDeviceSecurityState();
-  const canEnableProof = proof === "off";
+  const details = useDeviceSecurityState();
+  const { proof, canEnableEncryption } = details;
+  const canEnableProof = proof === "off" || proof === "expired";
   const encryptionLabel = canEnableProof
     ? "e2ee.deviceStatus.enableBoth"
     : "e2ee.deviceStatus.enableEncryption";
@@ -29,7 +30,7 @@ export default function DeviceSetupMenuAction({
   return (
     <>
       <div className="tw-px-3 tw-text-xs tw-text-iron-400 [@media(hover:hover)]:tw-hidden">
-        <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
+        <DeviceSecurityDetails {...details} />
       </div>
       {(canEnableEncryption || canEnableProof) && (
         <Link

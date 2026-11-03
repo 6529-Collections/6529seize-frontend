@@ -10,16 +10,26 @@ import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee, type E2eeUiStatus } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatRelativeTime } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
-import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
+import {
+  getDeviceGrantStatus,
+  GRANT_RENEWAL_WINDOW_MS,
+} from "@/lib/device-signing/device-key-store";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
-type EncryptionState = "on" | "off" | "checking" | "elsewhere" | "attention";
+type EncryptionState =
+  | "expired"
+  | "on"
+  | "off"
+  | "checking"
+  | "elsewhere"
+  | "attention";
 function encryptionState(status: E2eeUiStatus): EncryptionState {
   switch (status) {
     case "ready":
@@ -55,21 +65,53 @@ export function useDeviceSecurityState() {
     grant?.wallet.toLowerCase() === address &&
     local.publicKeys.includes(grant.device_key.toLowerCase());
   const grantStatus = getDeviceGrantStatus(matchesLocalKey ? grant : null, now);
-  let proof: "on" | "off" | "checking" | "unknown" | "unavailable" = "off";
+  let proof: "expired" | "on" | "off" | "checking" | "unknown" | "unavailable" =
+    "off";
   if (address === null) proof = "unavailable";
   else if (!local.loaded || now === 0 || remote.isPending) proof = "checking";
   else if (remote.isError) proof = "unknown";
   else if (grantStatus === "active" || grantStatus === "renewal") proof = "on";
-  const encrypted = encryptionState(encryption.status);
+  else if (grantStatus === "expired") proof = "expired";
+  const encryptionDevice = encryption.thisDevice;
+  const encryptionExpiry =
+    encryptionDevice && encryptionDevice.revokedAt === null
+      ? encryptionDevice.expiresAt
+      : null;
+  const encryptionExpired =
+    now > 0 && encryptionExpiry !== null && encryptionExpiry <= now;
+  const encrypted = encryptionExpired
+    ? "expired"
+    : encryptionState(encryption.status);
+  const proofRenewal =
+    proof === "on" && grantStatus === "renewal" && grant
+      ? grant.expires_at - now
+      : null;
+  const encryptionRemaining =
+    encryptionExpiry !== null ? encryptionExpiry - now : null;
+  const encryptionRenewal =
+    encrypted === "on" &&
+    now > 0 &&
+    encryptionRemaining !== null &&
+    encryptionRemaining <= GRANT_RENEWAL_WINDOW_MS
+      ? encryptionRemaining
+      : null;
   const canEnableEncryption =
     encryption.status === "idle" || encryption.status === "needs-enrollment";
-  return { proof, encrypted, canEnableEncryption };
+  return {
+    proof,
+    encrypted,
+    canEnableEncryption,
+    proofRenewal,
+    encryptionRenewal,
+  };
 }
 
 export function DeviceSecurityDetails({
   proof,
   encrypted,
-}: Pick<ReturnType<typeof useDeviceSecurityState>, "proof" | "encrypted">) {
+  proofRenewal,
+  encryptionRenewal,
+}: Omit<ReturnType<typeof useDeviceSecurityState>, "canEnableEncryption">) {
   const locale = useBrowserLocale();
   const formatStatus = (status: typeof proof | typeof encrypted) => {
     const label = t(locale, `e2ee.deviceStatus.${status}`);
@@ -81,17 +123,30 @@ export function DeviceSecurityDetails({
       label
     );
   };
+  const formatExpiry = (remaining: number | null) =>
+    remaining === null
+      ? null
+      : t(locale, "e2ee.deviceStatus.expiring", {
+          time: formatRelativeTime(
+            locale,
+            Math.ceil(remaining / 86_400_000),
+            "day",
+            { numeric: "always" }
+          ),
+        });
   return (
     <>
       <span className="tw-block">
         {tRich(locale, "e2ee.deviceStatus.proofLine", {
           status: formatStatus(proof),
         })}
+        {formatExpiry(proofRenewal)}
       </span>
       <span className="tw-block">
         {tRich(locale, "e2ee.deviceStatus.encryptionLine", {
           status: formatStatus(encrypted),
         })}
+        {formatExpiry(encryptionRenewal)}
       </span>
     </>
   );
@@ -104,20 +159,25 @@ function DeviceSecurityStatusContent({
   readonly descriptionId: string;
   readonly menuOpen: boolean;
 }) {
-  const { proof, encrypted } = useDeviceSecurityState();
+  const details = useDeviceSecurityState();
+  const { proof, encrypted, proofRenewal, encryptionRenewal } = details;
   const isTouchDevice = useIsTouchDevice();
   const complete = proof === "on" && encrypted === "on";
   const partial = proof === "on" || encrypted === "on";
-  const color = complete ? "tw-text-green-400" : "tw-text-iron-400";
-  const statusColor = partial && !complete ? "tw-text-amber-300" : color;
-  const Icon = complete ? ShieldCheckIcon : ShieldExclamationIcon;
+  const renewalDue = proofRenewal !== null || encryptionRenewal !== null;
+  const healthy = complete && !renewalDue;
+  const attention = renewalDue || (partial && !complete);
+  let statusColor = "tw-text-iron-400";
+  if (healthy) statusColor = "tw-text-green-400";
+  if (attention) statusColor = "tw-text-amber-300";
+  const Icon = healthy ? ShieldCheckIcon : ShieldExclamationIcon;
   return (
     <span
       className={`tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-2 tw-ring-iron-950 ${statusColor}`}
     >
       <Icon aria-hidden="true" className="tw-size-4" />
       <span id={descriptionId} className="tw-sr-only">
-        <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
+        <DeviceSecurityDetails {...details} />
       </span>
       {!isTouchDevice && !menuOpen && (
         <BodyPortalTooltip
@@ -130,7 +190,7 @@ function DeviceSecurityStatusContent({
           style={TOOLTIP_STYLES}
         >
           <div className="tailwind-scope tw-font-normal">
-            <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
+            <DeviceSecurityDetails {...details} />
           </div>
         </BodyPortalTooltip>
       )}

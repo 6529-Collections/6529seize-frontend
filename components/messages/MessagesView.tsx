@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { usePathname, useSearchParams } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
@@ -54,7 +55,14 @@ const MessagesView: React.FC = () => {
 
   return (
     <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
-      {content}
+      {showPlaceholder ? (
+        <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col">
+          <E2eeRenewalBanner inboxReminder className="tw-mx-3 tw-mt-2" />
+          <div className="tw-min-h-0 tw-flex-1">{content}</div>
+        </div>
+      ) : (
+        content
+      )}
     </BrainContent>
   );
 };

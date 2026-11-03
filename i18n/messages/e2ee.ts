@@ -113,6 +113,10 @@ export const E2EE_MESSAGES = {
 
   "e2ee.renew.body":
     "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
+  "e2ee.renew.inboxButton": "Renew encryption",
+  "e2ee.renew.inboxCombined":
+    "Author proof and encrypted DMs expire on {date}.",
+  "e2ee.renew.dismiss": "Dismiss encryption renewal reminder",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
@@ -633,6 +637,8 @@ export const E2EE_MESSAGES = {
     "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
+  "e2ee.deviceStatus.expiring": " · expires {time}",
+  "e2ee.deviceStatus.expired": "expired",
   "e2ee.deviceStatus.on": "on",
   "e2ee.deviceStatus.off": "off",
   "e2ee.deviceStatus.checking": "checking",
