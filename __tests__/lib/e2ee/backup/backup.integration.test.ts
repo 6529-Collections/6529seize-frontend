@@ -182,6 +182,8 @@ describe("E2EE encrypted history backup", () => {
       ])
     );
     expect(backupB.getSnapshot().phase).toBe("on");
+    const lastBeforeRejoin = fresh.engine.getConversation(g)?.lastMessage;
+    expect(lastBeforeRejoin).not.toBeNull();
 
     // Bob comes back; his device adds the new device through a normal MLS
     // device add. The restored history stays and new messages arrive.
@@ -193,6 +195,9 @@ describe("E2EE encrypted history backup", () => {
     bobAgain.engine.setOpenConversation(g);
     await settle(world);
     expect(fresh.engine.getConversation(g)?.status).toBe("active");
+    expect(fresh.engine.getConversation(g)?.lastMessage).toEqual(
+      lastBeforeRejoin
+    );
     await bobAgain.engine.send(g, { text: "secret delta" });
     await settle(world);
     expect(texts(fresh.engine.getMessages(g))).toEqual(

@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowDownTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { useNearViewport } from "@/hooks/useNearViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -56,6 +57,23 @@ type InlineState = "loading" | "ready" | "failed" | "tooLarge";
  * shows as a file to download instead.
  */
 function InlineImage(props: AttachmentProps) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const near = useNearViewport(ref, "400px 0px");
+  return (
+    <span ref={ref} className="tw-block tw-min-h-24 tw-max-w-full">
+      {near ? (
+        <InlineImageContent {...props} />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="tw-block tw-h-48 tw-w-48 tw-max-w-full tw-rounded-lg tw-bg-iron-900"
+        />
+      )}
+    </span>
+  );
+}
+
+function InlineImageContent(props: AttachmentProps) {
   const { engine, g, messageId, attachment } = props;
   const locale = useBrowserLocale();
   const name = attachmentDisplayName(locale, attachment.name);
@@ -68,6 +86,7 @@ function InlineImage(props: AttachmentProps) {
       return;
     }
     let cancelled = false;
+    const controller = new AbortController();
     // Set by the cleanup while the load awaits; read through a call so the
     // checks after each await are not narrowed away.
     const isCancelled = () => cancelled;
@@ -82,7 +101,12 @@ function InlineImage(props: AttachmentProps) {
       if (isCancelled()) {
         return;
       }
-      const blob = await engine.getAttachment(g, messageId, attachment.blob);
+      const blob = await engine.getAttachment(
+        g,
+        messageId,
+        attachment.blob,
+        controller.signal
+      );
       if (isCancelled()) {
         return;
       }
@@ -106,6 +130,7 @@ function InlineImage(props: AttachmentProps) {
     });
     return () => {
       cancelled = true;
+      controller.abort();
       release();
     };
   }, [engine, g, messageId, attachment.blob, tooLargeClaim]);
