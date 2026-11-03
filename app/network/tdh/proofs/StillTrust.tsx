@@ -53,6 +53,7 @@ export default function StillTrust({
                   r0Id: facts.print("proofs.risc0Advisory.id"),
                   r0Date: facts.print("proofs.risc0Advisory.published", "long"),
                   r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                  r0Count: facts.print("proofs.risc0Advisory.count"),
                   zkvmB: facts.print("proofs.b.zkvm"),
                 }),
               },

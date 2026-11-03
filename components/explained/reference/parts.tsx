@@ -46,7 +46,9 @@ export function PageHead({
       ) : (
         <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-start lg:tw-gap-x-12">
           <div className="tw-min-w-0">{opening}</div>
-          <div className="tw-hidden tw-min-w-0 lg:tw-block">{aside}</div>
+          {/* The glance comes under the lede on a phone, not dropped: it is
+              where a reader first meets the limit. */}
+          <div className="tw-mt-6 tw-min-w-0 lg:tw-mt-0">{aside}</div>
         </div>
       )}
       {children}
@@ -365,11 +367,11 @@ export function Trap({
  * wider than the frame the block scrolls sideways inside it (a focusable,
  * named region), never the page.
  *
- * On a phone, a block whose lines align columns with runs of spaces
- * (`minted[i]  = ...`) keeps scrolling, since wrapped it reads as a
- * staircase, and shows a fade at its right edge so the cut is visibly a
- * scroll. Any other block wraps, each line hanging two characters to the
- * right of its own start, so no rule is cut mid-token out of sight.
+ * On a phone every block wraps at the width it gets, each line hanging two
+ * characters to the right of its own start, so no rule is cut mid-token
+ * out of sight and none needs a sideways scroll to be read. From a tablet
+ * up, a block whose lines align columns with runs of spaces
+ * (`minted[i]  = ...`) keeps its columns and scrolls inside its frame.
  */
 const ALIGNED_COLUMNS = /\S {2,}\S/;
 
@@ -379,7 +381,6 @@ export function CodeBlock({
   className = "",
   comment: marker = "#",
   showLabel = false,
-  hint,
 }: {
   readonly code: string;
   /** What the block is, for screen readers. */
@@ -390,30 +391,19 @@ export function CodeBlock({
   /** Print the label above the code, for blocks that read as steps. */
   readonly showLabel?: boolean;
   /**
-   * Words under a block that scrolls sideways on a phone ("Scroll for the
-   * whole line"), so its cut edge never reads as the line's end.
+   * Words for a block that scrolls sideways. Every block now wraps on a
+   * phone, so they are no longer shown; callers may still pass them.
    */
   readonly hint?: string;
 }) {
   const lines = code.split("\n");
   const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
-  // Wrapped, so a long rule line is never cut at the frame's edge out of
-  // sight. Only a column-aligned block scrolls; it fades at its right edge
-  // to say there is more.
-  // A block that scrolls sideways on a phone fades at its right edge, so the
-  // cut reads as more to scroll, not as the end of the line.
-  const scrollCue =
-    "max-md:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]";
-  // Lean wraps from a tablet up, each line hanging under its own indent. On
-  // a phone its lines keep their shape and scroll sideways, with the fade
-  // that says there is more: hanging indents in a 350 px column turn a
-  // statement into a staircase.
-  const lean = marker === "--";
-  let wrap = "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
-  if (aligned) wrap = "tw-whitespace-pre";
-  else if (lean)
-    wrap =
-      "max-md:tw-whitespace-pre md:tw-whitespace-pre-wrap md:[overflow-wrap:anywhere]";
+  // Wrapped on a phone, each line hanging under its own indent. From a
+  // tablet up only a column-aligned block keeps its lines whole and
+  // scrolls inside its frame.
+  const wrap = aligned
+    ? "tw-whitespace-pre-wrap [overflow-wrap:anywhere] md:tw-whitespace-pre md:[overflow-wrap:normal]"
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
   return (
     <div
       className={`tw-relative tw-min-w-0 tw-max-w-[924px] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
@@ -428,7 +418,7 @@ export function CodeBlock({
         </span>
       )}
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned || lean ? scrollCue : ""} ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"
@@ -445,11 +435,9 @@ export function CodeBlock({
               <span
                 key={index}
                 className="tw-block"
-                style={
-                  aligned
-                    ? undefined
-                    : { paddingLeft: hang, textIndent: `-${hang}` }
-                }
+                // A line that does not wrap (a column-aligned one, from a
+                // tablet up) is unmoved: the indent and its hang cancel.
+                style={{ paddingLeft: hang, textIndent: `-${hang}` }}
               >
                 {rule}
                 {comment && <span className="tw-text-iron-400">{comment}</span>}
@@ -459,22 +447,6 @@ export function CodeBlock({
           })}
         </code>
       </pre>
-      {aligned && (
-        <span
-          className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-[#0a0a0c] tw-to-transparent md:tw-hidden"
-          aria-hidden="true"
-        />
-      )}
-      {hint !== undefined && (aligned || lean) && (
-        <span
-          className="tw-flex tw-items-center tw-gap-1.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 md:tw-hidden"
-          aria-hidden="true"
-          data-code-hint=""
-        >
-          {hint}
-          <span className="tw-text-iron-300">→</span>
-        </span>
-      )}
     </div>
   );
 }

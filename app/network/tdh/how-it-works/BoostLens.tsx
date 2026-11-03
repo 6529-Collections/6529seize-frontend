@@ -20,6 +20,7 @@ import {
   BOOST_START,
   MAX_SETS,
   boostOf,
+  additionalSetsPlateau,
   boostRuleValues,
   extraSetsLimit,
   gradientLimit,
@@ -95,6 +96,7 @@ export default function BoostLens({
   ].map((part) => ({ ...part, value: part.value / MICRO }));
   const B = "tw-font-semibold tw-text-iron-50";
   const rv = boostRuleValues();
+  const addLimit = additionalSetsPlateau();
   const dec = (value: number, digits = 2) =>
     formatDecimal(locale, value, digits);
   const singles =
@@ -104,7 +106,7 @@ export default function BoostLens({
       text: (
         <>
           {ht(locale, "explained.tdh.how.boost.ruleSets")}
-          {" = "}
+          {" → "}
           <RuleValue>{formatCount(locale, state.sets)}</RuleValue>
         </>
       ),
@@ -116,8 +118,13 @@ export default function BoostLens({
       on: state.sets > 0,
     },
     {
-      // P26 §8.3's notation, the same in every language.
-      text: `ADD(s) = ${dec(rv.first)} × (1 − q^(s−1)) ÷ (1 − q), q = ${dec(rv.q, 4)}`,
+      // P26 §8.3's notation, the same in every language: in millionths,
+      // rounded half up, 0 for one set or none, constant from its limit on.
+      text: `ADD(s) = 0 if s ≤ 1, else HALFUP(${formatCount(locale, rv.firstMicro)} × (1 − q^(s−1)) ÷ (1 − q)) millionths, q = ${dec(rv.q, 4)}`,
+    },
+    {
+      text: `ADD(s) = ${formatCount(locale, addLimit.micro)} for every s ≥ ${formatCount(locale, addLimit.fromSets)}`,
+      on: state.sets >= addLimit.fromSets,
     },
     {
       text: ht(locale, "explained.tdh.how.boost.ruleSeasons", {
@@ -143,7 +150,7 @@ export default function BoostLens({
       text: (
         <>
           {ht(locale, "explained.tdh.how.boost.ruleBeta")}
-          {" = "}
+          {" → "}
           <RuleValue>
             {ht(locale, "explained.tdh.how.boost.ruleBetaValue", {
               cents: formatCount(locale, result.beta),
@@ -226,14 +233,21 @@ export default function BoostLens({
       stage={
         <>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
+            {/* A full set pays every season, so with one held the
+                season count is not the reader's to set. */}
             <Stepper
-              label={ht(locale, "explained.tdh.how.boost.seasons")}
-              value={state.seasons}
+              label={
+                state.sets > 0
+                  ? ht(locale, "explained.tdh.how.boost.seasonsFull")
+                  : ht(locale, "explained.tdh.how.boost.seasons")
+              }
+              value={state.sets > 0 ? paying : state.seasons}
               min={0}
               max={paying}
               onChange={(seasons) => model.set({ seasons })}
               locale={locale}
               attr="seasons"
+              disabled={state.sets > 0}
             />
             <Stepper
               label={ht(locale, "explained.tdh.how.boost.sets")}

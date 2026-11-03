@@ -36,10 +36,17 @@ export function HalfPair({
   b,
   locale,
   test = false,
+  word: showWord = true,
 }: {
   readonly a: boolean;
   readonly b: boolean;
   readonly locale: SupportedLocale;
+  /**
+   * The mark's word beside its capsules. Off where a title beside it says
+   * the same ("Proof B, program B in RISC Zero"); the capsules keep their
+   * names for screen readers.
+   */
+  readonly word?: boolean;
   /**
    * Proofs of a synthetic test cycle, not of a real day: the capsules are
    * outlined in green, not filled, and the word says so, so a skim never
@@ -89,9 +96,12 @@ export function HalfPair({
     >
       {capsule("A", a)}
       {capsule("B", b)}
-      <span className="tw-ml-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
-        {word}
-      </span>
+      {/* The mark's word is one unit: it never breaks a word a line. */}
+      {showWord && (
+        <span className="tw-ml-1.5 tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-text-iron-50">
+          {word}
+        </span>
+      )}
     </span>
   );
 }

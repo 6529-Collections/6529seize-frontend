@@ -5,11 +5,11 @@ import { LimitNote } from "@/components/explained/evidence/notes";
 import { fill } from "@/components/explained/i18n";
 import Hash from "@/components/explained/marks/Hash";
 import Mark from "@/components/explained/marks/Mark";
-import { EX_TEXT } from "@/components/explained/tokens";
+import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { factText, isFact } from "@/lib/explained/facts";
 import { k } from "./_lib/copy";
-import type { PageFacts } from "./_lib/facts";
+import { EXPLORER, type PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
 import Section, { Para } from "./Section";
 
@@ -38,21 +38,38 @@ function HashFact({
   facts,
   id,
   locale,
+  address = false,
 }: {
   readonly facts: PageFacts;
   readonly id: keyof typeof HASH_NAMES;
   readonly locale: SupportedLocale;
+  /** A mainnet contract: linked to it on an explorer, beside the copy. */
+  readonly address?: boolean;
 }) {
   const entry = facts.entry(id);
   if (!entry || !isFact(entry)) return <>{facts.print(id)}</>;
+  const value = factText(entry);
   return (
     <span data-fact={id}>
       <Hash
-        value={factText(entry)}
+        value={value}
         locale={locale}
         copy
         name={fill(locale, k(HASH_NAMES[id]))}
       />
+      {address && (
+        <>
+          {" "}
+          <a
+            className={`${EX_LINK} tw-whitespace-nowrap tw-text-[13px]`}
+            href={`${EXPLORER}/address/${value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {fill(locale, k("table.explorer"))}
+          </a>
+        </>
+      )}
     </span>
   );
 }
@@ -135,6 +152,7 @@ function ProgramsTable({
             facts={facts}
             id="proofs.verifiers.sp1Gateway"
             locale={locale}
+            address
           />
         ),
         selector: (
@@ -149,6 +167,7 @@ function ProgramsTable({
             facts={facts}
             id="proofs.verifiers.risc0Router"
             locale={locale}
+            address
           />
         ),
         selector: (
@@ -160,27 +179,19 @@ function ProgramsTable({
     },
     {
       id: "pair",
+      // A test pair carries no Proved mark: a skim must not read it as a
+      // day proved by both programs. Its label names it a test cycle.
       label: rich(locale, k("table.pair"), {
         cycle: facts.print("proofs.pairV14.cycle"),
         real: facts.cycleDate("proofs.pairV14.cycle"),
       }),
-      a: (
-        <>
-          <Mark kind="proved" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.pairA"), {
-            steps: facts.print("proofs.pairV14.stepsA"),
-          })}
-        </>
-      ),
-      b: (
-        <>
-          <Mark kind="proved" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.pairB"), {
-            steps: facts.print("proofs.pairV14.stepsB"),
-            words: facts.print("proofs.statement.words"),
-          })}
-        </>
-      ),
+      a: rich(locale, k("table.pairA"), {
+        steps: facts.print("proofs.pairV14.stepsA"),
+      }),
+      b: rich(locale, k("table.pairB"), {
+        steps: facts.print("proofs.pairV14.stepsB"),
+        words: facts.print("proofs.statement.words"),
+      }),
     },
   ];
   const head =
@@ -301,6 +312,11 @@ export default function TwoPrograms({
                 selector: facts.print("proofs.verifiers.sp1Selector"),
                 frozen: facts.print("proofs.sp1Advisory.frozen"),
                 r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                r0Count: facts.print("proofs.risc0Advisory.count"),
+                r0Earliest: facts.print(
+                  "proofs.risc0Advisory.earliest",
+                  "long"
+                ),
                 zkvmA: facts.print("proofs.a.zkvm"),
                 zkvmB: facts.print("proofs.b.zkvm"),
               })}

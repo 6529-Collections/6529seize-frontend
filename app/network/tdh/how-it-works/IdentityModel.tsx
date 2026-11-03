@@ -162,7 +162,7 @@ export default function IdentityModel({
             text: (
               <>
                 {ht(locale, "explained.tdh.how.identity.ruleBeta")}
-                {" = "}
+                {" → "}
                 <RuleValue>
                   {ht(locale, "explained.tdh.how.boost.ruleBetaValue", {
                     cents: formatCount(

@@ -29,6 +29,8 @@ function Glance({ ctx }: { readonly ctx: SureContext }) {
       lead: m("explained.tdh.sure.glance.leanLead"),
       text: m("explained.tdh.sure.glance.lean", {
         count: p.v("manifest.proved"),
+        tdh: p.v("manifest.proved.tdh"),
+        p53: p.v("manifest.proved.p53"),
       }),
     },
     {

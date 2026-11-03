@@ -55,7 +55,7 @@ export default async function ExplainedHubPage({
         { label: ht(locale, "crumbAbout"), href: "/about" },
         { label: kt(locale, "explained.kit.map.hub") },
       ]}
-      live={{ fact: book.maybe("page.readAt"), kind: "read" }}
+      live={{ fact: book.maybe("feed.writtenAt"), kind: "feed" }}
       facts={book.snapshot()}
       locale={locale}
     >

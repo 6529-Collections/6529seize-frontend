@@ -41,7 +41,8 @@ export default function ProofsSources({
       | "proofs.sp1Advisory.earlier"
       | "proofs.sp1Advisory.id"
       | "proofs.sp1Advisory.latestId"
-      | "proofs.risc0Advisory.id",
+      | "proofs.risc0Advisory.id"
+      | "proofs.risc0Advisory.count",
     name: string
   ) => {
     const url = facts.entry(id)?.source.url;
@@ -121,6 +122,8 @@ export default function ProofsSources({
                 "proofs.risc0Advisory.id",
                 "GHSA-g3qg-6746-3mg9"
               ),
+              r0Count: facts.print("proofs.risc0Advisory.count"),
+              r0AllLink: advisory("proofs.risc0Advisory.count", "risc0/risc0"),
             }),
           },
           {

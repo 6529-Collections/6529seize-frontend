@@ -29,6 +29,7 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   sp1Cve: "site",
   sp1Native: "site",
   risc0Cve: "site",
+  risc0Advisories: "site",
 };
 
 function proofSource(key: SourceKey) {
@@ -231,6 +232,16 @@ export const PROOF_FACTS = {
   ),
 
   "proofs.contract.checks": count("contracts", proofs.contract.checks),
+  // How far back Ethereum serves a block hash to a contract: BLOCKHASH and
+  // the EIP-2935 history contract (the contracts record, "anchorHash").
+  "proofs.contract.blockhashWindow": count(
+    "contracts",
+    proofs.contract.blockhashWindow
+  ),
+  "proofs.contract.historyWindow": count(
+    "contracts",
+    proofs.contract.historyWindow
+  ),
   "proofs.contract.unitTests": fact(
     "contracts",
     "count",
@@ -250,11 +261,7 @@ export const PROOF_FACTS = {
   ),
   // 6529's own audit, of the contract's first version: the run log of that
   // day. The contract has changed in several rounds since.
-  "proofs.contract.auditedOn": fact(
-    "runLog",
-    "day",
-    proofs.contract.auditedOn
-  ),
+  "proofs.contract.auditedOn": fact("runLog", "day", proofs.contract.auditedOn),
   "proofs.contract.horizon": fact("contracts", "day", proofs.contract.horizon),
   "proofs.contract.retiredRuleId": fact(
     "contracts",
@@ -310,6 +317,16 @@ export const PROOF_FACTS = {
     "risc0Cve",
     "text",
     proofs.risc0Advisory.fixed
+  ),
+  // All of RISC Zero's published soundness flaws, not only the one above.
+  "proofs.risc0Advisory.count": count(
+    "risc0Advisories",
+    proofs.risc0Advisory.count
+  ),
+  "proofs.risc0Advisory.earliest": fact(
+    "risc0Advisories",
+    "day",
+    proofs.risc0Advisory.earliest
   ),
 
   "proofs.catchup.chainStart": count("p53", proofs.catchup.chainStart),

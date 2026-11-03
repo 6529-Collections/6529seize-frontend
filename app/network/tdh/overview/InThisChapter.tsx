@@ -27,9 +27,14 @@ const SPINE_DESC: Readonly<Record<string, OverviewKey>> = {
 
 /** Each page's line, by page id: the not-found view lists the pages with them too. */
 export function tdhPageLines(locale: SupportedLocale): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(SPINE_DESC).map(([id, key]) => [id, ot(locale, key)])
-  );
+  return {
+    // The overview lists the other pages, not itself; the not-found view
+    // lists it too, so it needs its own line.
+    overview: ot(locale, "index.overview"),
+    ...Object.fromEntries(
+      Object.entries(SPINE_DESC).map(([id, key]) => [id, ot(locale, key)])
+    ),
+  };
 }
 
 export default function InThisChapter({

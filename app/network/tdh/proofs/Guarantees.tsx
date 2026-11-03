@@ -209,6 +209,9 @@ export default function Guarantees({
       earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
       latestId: facts.print("proofs.sp1Advisory.latestId"),
       r0Id: facts.print("proofs.risc0Advisory.id"),
+      r0Count: facts.print("proofs.risc0Advisory.count"),
+      r0Earliest: facts.print("proofs.risc0Advisory.earliest", "long"),
+      firstProofs: facts.print("proofs.milestones.firstProofs", "long"),
     })
   );
 

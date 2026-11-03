@@ -204,6 +204,7 @@ export function Stepper({
   onChange,
   locale,
   attr,
+  disabled = false,
 }: {
   /** What is counted: "Gradients". */
   readonly label: string;
@@ -214,6 +215,8 @@ export function Stepper({
   readonly locale: SupportedLocale;
   /** A data attribute naming the stepper, for the gates' states. */
   readonly attr?: string;
+  /** Set by another control: shown, but neither button moves it. */
+  readonly disabled?: boolean;
 }) {
   const button = `tw-size-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-text-lg tw-font-semibold tw-text-iron-50 disabled:tw-cursor-not-allowed disabled:tw-text-iron-400 md:tw-size-[38px] ${EX_FOCUS}`;
   return (
@@ -233,7 +236,7 @@ export function Stepper({
         <button
           type="button"
           className={button}
-          disabled={value <= min}
+          disabled={disabled || value <= min}
           onClick={() => onChange(Math.max(min, value - 1))}
           aria-label={kt(locale, "explained.kit.lens.fewer", { what: label })}
         >
@@ -248,7 +251,7 @@ export function Stepper({
         <button
           type="button"
           className={button}
-          disabled={value >= max}
+          disabled={disabled || value >= max}
           onClick={() => onChange(Math.min(max, value + 1))}
           aria-label={kt(locale, "explained.kit.lens.more", { what: label })}
         >

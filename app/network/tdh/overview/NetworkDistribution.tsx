@@ -29,28 +29,30 @@ interface Tone {
 }
 
 // A stepped ramp, lightest at the top of the ranking: each group's bar and
-// ribbon are one step of it, so the four ribbons read apart. The rest take
-// the ramp's lowest step, a plain fill: the 45° hatch means the boost and
-// nothing else (EXPLAINED.md §4.2).
+// ribbon are one step of it, at least 1.6:1 in luminance from the next, so
+// the four read apart in the bars and in the ribbons (one opacity for every
+// ribbon keeps the steps). The rest take the ramp's lowest step, a plain
+// fill: the 45° hatch means the boost and nothing else (EXPLAINED.md §4.2).
+const BAND_ALPHA = 0.62;
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
-    fill: "rgb(236, 237, 241)",
-    band: "rgba(236, 237, 241, 0.5)",
+    fill: "rgb(240, 241, 244)",
+    band: `rgba(240, 241, 244, ${BAND_ALPHA})`,
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
-    fill: "rgb(168, 170, 180)",
-    band: "rgba(168, 170, 180, 0.42)",
+    fill: "rgb(164, 166, 177)",
+    band: `rgba(164, 166, 177, ${BAND_ALPHA})`,
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
-    fill: "rgb(104, 106, 118)",
-    band: "rgba(104, 106, 118, 0.42)",
+    fill: "rgb(102, 104, 116)",
+    band: `rgba(102, 104, 116, ${BAND_ALPHA})`,
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "rgb(58, 59, 67)",
-    band: "rgba(58, 59, 67, 0.55)",
+    fill: "rgb(46, 47, 54)",
+    band: `rgba(46, 47, 54, ${BAND_ALPHA})`,
     ink: "tw-text-iron-50",
   },
 };
@@ -375,12 +377,16 @@ export default function NetworkDistribution({
         <ShareTable items={items} locale={locale} />
       </div>
       <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
-        {ot(locale, "network.caption", {
-          count: formatCount(locale, top100.count),
-          share: percent(locale, top100.tdh / data.total),
-          ranked: formatCount(locale, data.identities),
-          read: readTime(locale, data.readAt),
-        })}
+        {ot(
+          locale,
+          data.fromSnapshot ? "network.captionSnapshot" : "network.caption",
+          {
+            count: formatCount(locale, top100.count),
+            share: percent(locale, top100.tdh / data.total),
+            ranked: formatCount(locale, data.identities),
+            read: readTime(locale, data.readAt),
+          }
+        )}
       </figcaption>
     </figure>
   );

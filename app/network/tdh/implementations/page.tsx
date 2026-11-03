@@ -331,10 +331,13 @@ export default async function ImplementationsPage({
                     // other marks, its counts the manifest's facts.
                     proved: (
                       <span data-fact="manifest.proved manifest.proved.tdh">
+                        {/* A model is proved about, not proved correct as a
+                            program: the mark's word says so. */}
                         <Mark
                           kind="proved"
                           locale={locale}
                           size="sm"
+                          label={s("explained.tdh.impl.lean.provedMark")}
                           refText={s("explained.tdh.impl.lean.proved", {
                             tdh: p.f("manifest.proved.tdh"),
                             all: p.f("manifest.proved"),
@@ -367,6 +370,7 @@ export default async function ImplementationsPage({
                 time: p.v("programs.rustReference.time"),
                 day: p.v("model.replayDay"),
                 runtime: p.v("tdh.latest.builds.rust.runtime"),
+                native: p.v("proofs.day.nativeSeconds"),
               })}
             </p>
             <p className="tw-m-0">
@@ -396,6 +400,8 @@ export default async function ImplementationsPage({
               date: p.v("rules.p26Date"),
               served: servedLine,
               public: p.v("vectors.public.count"),
+              hand: p.v("vectors.handDerived"),
+              noVector: p.v("vectors.noVector"),
             })}
           </Prose>
           <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2">

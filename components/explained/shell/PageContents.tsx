@@ -37,18 +37,20 @@ export default function PageContents({
   const [shown, setShown] = useState(false);
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLOListElement>(null);
-  // The wide bar scrolls sideways when its sections outrun it: keep the one
-  // being read in view, with room for its neighbour.
+  // The wide bar scrolls sideways when its sections outrun it: the one
+  // being read sits in the middle, its neighbours on both sides, and the
+  // edges fade, so no label is ever cut without a sign there is more.
   useEffect(() => {
     const row = rowRef.current;
     if (row === null || active === null) return;
     const link = row.querySelector<HTMLElement>('[aria-current="location"]');
     if (link === null) return;
     const left = link.offsetLeft - row.offsetLeft;
-    const right = left + link.offsetWidth;
-    if (left < row.scrollLeft || right > row.scrollLeft + row.clientWidth) {
-      row.scrollTo({ left: Math.max(0, left - 48) });
-    }
+    const centred = left - (row.clientWidth - link.offsetWidth) / 2;
+    const max = row.scrollWidth - row.clientWidth;
+    const target = Math.min(max, Math.max(0, centred));
+    if (Math.abs(target - row.scrollLeft) < 1) return;
+    row.scrollTo({ left: target });
   }, [active]);
   useEffect(() => {
     const targets = items
@@ -111,12 +113,12 @@ export default function PageContents({
     >
       <nav
         aria-label={label}
-        className={`tw-z-30 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]/95 tw-px-5 tw-backdrop-blur tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none max-lg:tw-fixed max-lg:tw-inset-x-0 max-lg:tw-top-0 md:tw-px-12 lg:tw-absolute lg:tw-inset-x-[-48px] lg:tw-top-0 ${shown ? "tw-opacity-100" : "tw-pointer-events-none tw-opacity-0"}`}
+        className={`tw-z-30 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-px-5 tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none max-lg:tw-fixed max-lg:tw-inset-x-0 max-lg:tw-top-0 md:tw-px-12 lg:tw-absolute lg:tw-inset-x-[-48px] lg:tw-top-0 ${shown ? "tw-opacity-100" : "tw-pointer-events-none tw-opacity-0"}`}
         {...(shown ? {} : { "aria-hidden": true, inert: true })}
       >
         <ol
           ref={rowRef}
-          className="tw-m-0 tw-hidden tw-list-none tw-gap-5 tw-overflow-x-auto tw-p-0 [mask-image:linear-gradient(90deg,#000_calc(100%_-_32px),transparent)] [scrollbar-width:none] lg:tw-flex"
+          className="tw-m-0 tw-hidden tw-list-none tw-gap-5 tw-overflow-x-auto tw-px-6 tw-py-0 [mask-image:linear-gradient(90deg,transparent,#000_24px,#000_calc(100%_-_32px),transparent)] [scrollbar-width:none] lg:tw-flex"
         >
           {items.map((item) => (
             <li key={item.href} className="tw-flex-none">

@@ -621,11 +621,15 @@ function LoopCircle({
                 fill={on ? EX_HEX.youInk : EX_HEX.ink2}
                 {...(station.fact ? { "data-fact": station.fact } : {})}
               >
-                {fitLines(station.num, anchor, tx, width).map((line, row) => (
-                  <tspan key={line} x={tx} dy={row === 0 ? 0 : 16}>
-                    {line}
-                  </tspan>
-                ))}
+                {fitLines(station.num, anchor, tx, width).map(
+                  (line, row, lines) => (
+                    // A wrapped line keeps its space, so the label reads
+                    // whole to a screen reader and in copied text.
+                    <tspan key={line} x={tx} dy={row === 0 ? 0 : 16}>
+                      {row < lines.length - 1 ? `${line} ` : line}
+                    </tspan>
+                  )
+                )}
               </text>
             </g>
           );

@@ -133,7 +133,8 @@ describe("How TDH is calculated", () => {
       within(model).getByRole("button", { name: "152 (#562, minting)" })
     );
     expect(model).toHaveTextContent("152 minted, counted as 310.");
-    expect(model).toHaveTextContent("min(claim limit, 310) = 310");
+    // A value worked into a rule follows an arrow, never another "=".
+    expect(model).toHaveTextContent("min(claim limit, 310) → 310");
     expect(model).toHaveTextContent("H = 3,941 (FirstGM: 6,529 − 2,588)");
     // Break it: the copy that ends the floor raises every copy's rate.
     await user.click(breakIt("floor"));

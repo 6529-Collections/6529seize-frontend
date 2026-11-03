@@ -65,6 +65,14 @@ export function extraSetsLimit(): number {
   return additionalSetsLimit(R).micro / 1_000_000;
 }
 
+/** ADD's constant value in millionths and the set count it starts at (P26 §8.3). */
+export function additionalSetsPlateau(): {
+  readonly micro: number;
+  readonly fromSets: number;
+} {
+  return additionalSetsLimit(R);
+}
+
 /**
  * The registry's boost values, as the rule rail prints them: each bonus and
  * the extra sets' first step as a multiplier, the ratio q as a fraction.
@@ -72,6 +80,7 @@ export function extraSetsLimit(): number {
 export function boostRuleValues(): {
   readonly season: number;
   readonly first: number;
+  readonly firstMicro: number;
   readonly q: number;
   readonly genesis: number;
   readonly nakamoto: number;
@@ -81,6 +90,7 @@ export function boostRuleValues(): {
   return {
     season: R.season_bonus / 1_000_000,
     first: R.additional_set_first / 1_000_000,
+    firstMicro: R.additional_set_first,
     q: R.additional_set_ratio / 10_000,
     genesis: R.genesis_bonus / 1_000_000,
     nakamoto: R.nakamoto_bonus / 1_000_000,

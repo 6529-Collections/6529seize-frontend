@@ -116,7 +116,8 @@ export default function Cc0Answer({
             ))}
           </div>
           {/* The licence sits on the art: each card named, free to use,
-              and its full image one tap away. */}
+              and its card page, with its artist, edition and holders, one
+              tap away; the full image is the download beside the text. */}
           <figcaption>
             <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
               {FAN.map(({ art }) => (
@@ -124,17 +125,12 @@ export default function Cc0Answer({
                   <span className="tw-text-xs tw-font-semibold tw-tracking-[0.04em] tw-text-iron-200">
                     CC0
                   </span>
-                  <a
-                    className={EX_LINK}
-                    href={art.original}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                  <Link className={EX_LINK} href={`/the-memes/${art.id}`}>
                     {ht(locale, "cc0.fanCaption", {
                       id: art.id,
                       title: art.title,
                     })}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

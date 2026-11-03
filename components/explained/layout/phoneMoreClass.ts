@@ -5,3 +5,6 @@
  * the string.
  */
 export const PHONE_MORE_HIDDEN = "max-md:group-[:not(.is-open)]/more:tw-hidden";
+
+/** The same, folded at every width: for a `PhoneMore` with `everywhere`. */
+export const MORE_HIDDEN = "group-[:not(.is-open)]/more:tw-hidden";

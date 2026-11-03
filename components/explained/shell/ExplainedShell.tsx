@@ -60,10 +60,16 @@ export default function ExplainedShell({
   readonly menus?: { readonly shelf?: boolean; readonly switcher?: boolean };
 }) {
   const def = chapter === "hub" ? null : chapterById(chapter);
+  // A chapter page's sections and models land below its sticky contents
+  // bar when jumped to, never under it.
+  const landing =
+    chapter === "hub"
+      ? ""
+      : "[&_[data-lens]]:tw-scroll-mt-28 [&_section[id]]:tw-scroll-mt-28";
   return (
     <FactsProvider snapshot={facts}>
       <div
-        className={`tailwind-scope tw-min-h-[100dvh] tw-w-full tw-bg-[#0D0D0F] tw-text-base tw-leading-[26px] tw-text-iron-300 tw-antialiased [font-variant-numeric:tabular-nums] md:tw-text-[18px] md:tw-leading-[29px] ${TEXT_WRAP}`}
+        className={`tailwind-scope tw-min-h-[100dvh] tw-w-full tw-bg-[#0D0D0F] tw-text-base tw-leading-[26px] tw-text-iron-300 tw-antialiased [font-variant-numeric:tabular-nums] md:tw-text-[18px] md:tw-leading-[29px] ${TEXT_WRAP} ${landing}`}
         data-explained-shell={chapter}
         data-explained-page={page}
         // On a phone the shell's crumbs bar and chapter bar (EXPLAINED.md

@@ -32,7 +32,11 @@ interface Step {
   readonly id: string;
   readonly href: string;
   readonly sections: string;
-  readonly rule: (n: (value: number) => string) => string;
+  /** `n` prints a count, `c` a multiplier to two decimals. */
+  readonly rule: (
+    n: (value: number) => string,
+    c: (value: number) => string
+  ) => string;
   /** A line that sums a longer rule up; the Specification states it exactly. */
   readonly summary?: boolean;
 }
@@ -89,7 +93,12 @@ const STEPS: readonly Step[] = [
     id: "seasons",
     href: "#part-c",
     sections: "§5.4",
-    rule: () => "season k = Memes start_k … start_(k+1) − 1",
+    rule: (n, c) =>
+      [
+        "season k = Memes start_k … start_(k+1) − 1",
+        `pays ${c(R.season_bonus / 1_000_000)} when not the current season`,
+        `  and k ≤ ${n(R.last_boosted_season)}`,
+      ].join("\n"),
   },
   {
     id: "identities",
@@ -98,8 +107,8 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one linked both ways to all,`,
-        `  every link from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 10)} (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways to every other,`,
+        `  those links all from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 10)} (D136)`,
       ].join("\n"),
     summary: true,
   },
@@ -132,6 +141,7 @@ const STEPS: readonly Step[] = [
     sections: "§8.3",
     rule: () =>
       "beta = HALFUP((10⁶ + meme_u + grad_u) ÷ 10⁴)\nmeme_u: seasons and sets, grad_u: Gradients, in millionths",
+    summary: true,
   },
   {
     id: "final",
@@ -142,8 +152,12 @@ const STEPS: readonly Step[] = [
   {
     id: "totals",
     href: "#part-n",
-    sections: "§8.5",
-    rule: () => "total = Σ identity finals",
+    sections: "§8.5, §8.7",
+    rule: () =>
+      [
+        "total = Σ identity finals",
+        "past §8.7's range (2⁵³, 2⁶⁴): no result, none published",
+      ].join("\n"),
   },
   {
     // P26 §9 defines the result, not its roots: their encoding and hashing
@@ -319,7 +333,7 @@ export default function StepsInOrder({
           {STEPS.map((step, index) => (
             <li
               key={step.id}
-              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_140px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,170px)_minmax(0,1fr)_minmax(0,240px)_140px]"
+              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_140px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,150px)_minmax(0,1fr)_minmax(0,290px)_104px]"
               data-step={step.id}
             >
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-400">
@@ -336,7 +350,7 @@ export default function StepsInOrder({
                   hangs two characters in. */}
               <code className="tw-col-start-2 tw-block tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
                 {step
-                  .rule(n)
+                  .rule(n, (value) => formatCents(locale, value))
                   .replace(/([≤−×÷=+→]) /g, "$1\u00a0")
                   .split("\n")
                   .map((line, index) => (
@@ -350,6 +364,16 @@ export default function StepsInOrder({
                       {line}
                     </span>
                   ))}
+                {/* A gist is marked where it is read, beside the rule
+                    itself, so it is never taken for the exact rule. */}
+                {step.summary === true && (
+                  <span
+                    className="tw-mt-1 tw-block tw-font-sans tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400"
+                    data-abridged=""
+                  >
+                    {ht(locale, "explained.tdh.how.order.summary")}
+                  </span>
+                )}
               </code>
               {trace !== null && (
                 <span
@@ -374,11 +398,6 @@ export default function StepsInOrder({
                     </Link>
                   </span>
                 ))}
-                {step.summary === true && (
-                  <span className="tw-block">
-                    {ht(locale, "explained.tdh.how.order.summary")}
-                  </span>
-                )}
               </span>
             </li>
           ))}

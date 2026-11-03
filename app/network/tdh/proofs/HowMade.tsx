@@ -1,10 +1,8 @@
-import Lanes from "@/components/explained/figures/Lanes";
 import { fill } from "@/components/explained/i18n";
 import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatNumber } from "@/i18n/format";
 import { formatCount } from "@/lib/explained/format";
-import { fmt, isFact } from "@/lib/explained/facts";
 import type { ProofPhase } from "@/lib/explained/registry/proofFacts";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
@@ -17,15 +15,6 @@ import Section, { Para } from "./Section";
  * (bloom or receipts, P53 §4.6: one form a block), and program A's steps by
  * phase from the profiled build, drawn as shares of one bar each.
  */
-
-function text(
-  facts: PageFacts,
-  locale: SupportedLocale,
-  id: Parameters<PageFacts["entry"]>[0]
-): string {
-  const entry = facts.entry(id);
-  return entry && isFact(entry) ? fmt(entry, locale) : "";
-}
 
 function share(locale: SupportedLocale, part: number, whole: number): string {
   return formatNumber(locale, part / whole, {
@@ -258,51 +247,6 @@ export default function HowMade({
       heading={rich(locale, k("s2.heading"))}
       figure={
         <div className="tw-grid tw-gap-12 md:tw-gap-16">
-          <Lanes
-            locale={locale}
-            label={fill(locale, k("lanes.label"), {
-              date: text(facts, locale, "proofs.day.date"),
-            })}
-            lanes={[
-              {
-                kicker: fill(locale, k("lanes.eth.kicker")),
-                title: fill(locale, k("lanes.eth.title")),
-                cap: rich(locale, k("lanes.eth.cap"), {
-                  blocks: facts.print("proofs.day.blocks"),
-                }),
-              },
-              {
-                kicker: fill(locale, k("lanes.input.kicker")),
-                title: fill(locale, k("lanes.input.title")),
-                cap: rich(locale, k("lanes.input.cap"), {
-                  bytes: facts.print("proofs.day.inputBytes"),
-                }),
-              },
-              {
-                kicker: fill(locale, k("lanes.run.kicker")),
-                title: fill(locale, k("lanes.run.title")),
-                cap: rich(locale, k("lanes.run.cap"), {
-                  steps: facts.print("proofs.day.steps"),
-                }),
-              },
-              {
-                kicker: fill(locale, k("lanes.proof.kicker")),
-                title: fill(locale, k("lanes.proof.title")),
-                cap: rich(locale, k("lanes.proof.cap"), {
-                  bytes: facts.print("proofs.pair.proofBytesA"),
-                  hours: facts.print("site.proofA.provedHours"),
-                  minutes: facts.print("site.proofA.provedMinutes"),
-                  gpu: facts.print("proofs.day.gpu"),
-                }),
-              },
-              {
-                kicker: fill(locale, k("lanes.verify.kicker")),
-                title: fill(locale, k("lanes.verify.title")),
-                cap: rich(locale, k("lanes.verify.cap")),
-                ok: true,
-              },
-            ]}
-          />
           <div className="tw-grid tw-grid-cols-1 tw-gap-12 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:tw-gap-16">
             <BlocksFigure locale={locale} facts={facts} />
             <PhasesFigure locale={locale} facts={facts} />

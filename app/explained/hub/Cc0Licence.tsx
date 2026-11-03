@@ -44,7 +44,13 @@ function verdict(work: Work, use: Use): { big: HubKey; say: HubKey[] } {
     };
   }
   if (work === "one") {
-    return { big: "cc0.model.yesBut", say: ["cc0.model.oneSay"] };
+    return {
+      big: "cc0.model.yesBut",
+      say:
+        use === "ad"
+          ? ["cc0.model.oneSay", "cc0.model.adSay"]
+          : ["cc0.model.oneSay"],
+    };
   }
   return {
     big: "cc0.model.yes",
@@ -147,13 +153,17 @@ export default function Cc0Licence({
       }
       stamp={
         // A Gradient's answer is 6529's own policy, live on its license
-        // page, not D89; the Memes' answers rest on D89.
+        // page, not D89; the Punk's is the limit CC0 itself states (its
+        // §4), so the stamp never says Absolute beside "Not covered"; the
+        // Memes' answers rest on D89.
         <StampLine
           locale={locale}
           marks={
             work === "grad"
               ? [{ maturity: "live", label: ht(locale, "cc0.chapter") }]
-              : [{ kind: "absolute", refText: "D89" }]
+              : broken
+                ? [{ kind: "notGuaranteed", refText: "CC0 §4" }]
+                : [{ kind: "absolute", refText: "D89" }]
           }
         />
       }

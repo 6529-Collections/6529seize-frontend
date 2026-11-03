@@ -126,6 +126,7 @@ export default async function ProofsPage({
               words: facts.print("proofs.statement.words"),
               total: facts.print("proofs.statement.bytes"),
               wordBytes: facts.print("proofs.statement.wordBytes"),
+              historyLogs: facts.print("proofs.day.historyLogs"),
             })}
           </Para>
           <Para>

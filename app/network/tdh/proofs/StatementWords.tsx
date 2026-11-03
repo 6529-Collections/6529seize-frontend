@@ -253,6 +253,8 @@ export default function StatementWords({
     block === null ? "" : formatCount(locale, block);
   const cutBlock = blockOf("cutNumber");
   const lookUp = {
+    // Word 0, the statement's kind: the hash of its class name (P53 §4.6).
+    tag: 'keccak256("6529.TStatement.v1")',
     anchor: printBlock(blockOf("anchorNumber")),
     cut: printBlock(cutBlock),
     next: printBlock(cutBlock === null ? null : cutBlock + 1),
@@ -267,6 +269,7 @@ export default function StatementWords({
         name: <code className="tw-font-mono">{flippedName}</code>,
         bytes: facts.print("proofs.statement.bytes"),
         words,
+        firstProofs: facts.print("proofs.milestones.firstProofs", "long"),
       })}
     />
   ) : compare ? (

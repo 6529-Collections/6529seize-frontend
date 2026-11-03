@@ -19,6 +19,7 @@ export default function PhoneMore({
   less,
   children,
   className = "",
+  everywhere = false,
 }: {
   /** The control while folded: "All 9 claims". */
   readonly more: ReactNode;
@@ -26,6 +27,11 @@ export default function PhoneMore({
   readonly less: ReactNode;
   readonly children: ReactNode;
   readonly className?: string;
+  /**
+   * Fold at every width, not only on a phone: for a ledger a figure above
+   * already says in brief. Its rows carry `MORE_HIDDEN`.
+   */
+  readonly everywhere?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -54,7 +60,7 @@ export default function PhoneMore({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-primary-300 md:tw-hidden ${EX_FOCUS}`}
+        className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-primary-300 ${everywhere ? "" : "md:tw-hidden"} ${EX_FOCUS}`}
       >
         <span
           className={`tw-inline-block tw-transition-transform motion-reduce:tw-transition-none ${open ? "tw-rotate-90" : ""}`}

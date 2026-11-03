@@ -205,6 +205,12 @@ function Section10({ ctx }: { readonly ctx: SpecContext }) {
         {m("explained.tdh.spec.s10.note", {
           registry: <CodeName wrap>{p.v("rules.registry")}</CodeName>,
           vector: <CodeName>28-registry-hash</CodeName>,
+          ruleIdFormula: (
+            <CodeName wrap>
+              H(&quot;6529.TdhRule.v1&quot;, keccak256(rule version),
+              registryHash)
+            </CodeName>
+          ),
         })}
       </Caption>
       <FullRecord ctx={ctx} />

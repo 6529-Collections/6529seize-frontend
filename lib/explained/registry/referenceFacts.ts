@@ -332,6 +332,24 @@ export const REFERENCE_FACTS = {
     (registry) => registry.manifold_lazy_claim
   ),
 
+  // Where the vectors' expected values come from: the first ones derived by
+  // hand from P26, the rest generated with the Python reference and checked.
+  "vectors.handDerived": fromReference<number>(
+    "count",
+    "spec",
+    (data) => data.vectorOrigin.source,
+    (data) => data.vectorOrigin.handDerived,
+    "vectors"
+  ),
+
+  // The files that are no vector at all: every implementation refuses each.
+  "vectors.noVector": fromReference<number>(
+    "count",
+    "spec",
+    (data) => data.vectorOrigin.noVectorSource,
+    (data) => data.vectorOrigin.noVector
+  ),
+
   // The public vectors.
   "vectors.public": defineFact<string[]>({
     format: "list",

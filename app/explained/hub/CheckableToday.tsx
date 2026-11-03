@@ -43,7 +43,7 @@ function Item({
       <span className="tw-mt-2 tw-block tw-text-[22px] tw-font-semibold tw-tabular-nums tw-leading-7 tw-tracking-[-0.01em] max-[359px]:tw-text-base max-[359px]:tw-leading-6 lg:tw-mt-0 lg:tw-self-end">
         {head}
       </span>
-      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
+      <span className="tw-mt-2 tw-block tw-text-base tw-leading-[26px] tw-text-iron-300 lg:tw-mt-0">
         {children}
       </span>
     </li>
@@ -101,9 +101,13 @@ export default function CheckableToday({
           {late !== null && late.value > 0 && (
             <>
               {" "}
-              {hrich(locale, "check.identitiesLate", {
-                late: fact("tdh.days.late"),
-              })}
+              {hrich(
+                locale,
+                everyDayEqual(book)
+                  ? "check.identitiesLateEqual"
+                  : "check.identitiesLate",
+                { late: fact("tdh.days.late") }
+              )}
             </>
           )}
         </Item>

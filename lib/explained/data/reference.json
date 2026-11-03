@@ -133,6 +133,12 @@
     "cleanRoomChoices": 23,
     "randomPerChange": 1000
   },
+  "vectorOrigin": {
+    "source": "6529chain design/tdh-reference/README.md at 7522ef3: vectors 01-18 have hand-derived expected values (18 updated for D131's transaction netting); the later ones were generated with the Python reference and their derivations checked by hand",
+    "handDerived": 18,
+    "noVector": 17,
+    "noVectorSource": "6529chain design/tdh-reference/no-vector/ at 7522ef3: 17 files that are no vector at all (P26 §3.2), each made so that a lenient reader would pass it; every implementation must refuse each one whole"
+  },
   "publicVectors": {
     "source": "the five public vectors served as /network/tdh/public-vectors.json (components/explained/engine/publicVectors.ts); a test checks the two lists agree",
     "ids": [

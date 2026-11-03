@@ -23,7 +23,8 @@ const NUM_NARROW = "max-[379px]:tw-text-[24px] max-[379px]:tw-leading-8";
 
 /**
  * Then, the network (steps 13 and 14): every identity's TDH added up, from
- * the latest result of the daily comparison, and the cutover (D132). Every
+ * the latest result of the daily comparison. The cutover's status (D132) is
+ * the daily check's to tell, not this lesson's. Every
  * number is a fact of the feed; when the feed cannot be read, the section
  * says so instead of printing a number.
  */
@@ -43,8 +44,6 @@ export default function NetworkSection({
   const days = book.maybe<DaySummary[]>("tdh.days");
   const written = book.maybe<string>("feed.writtenAt");
   const fileUrl = book.maybe<string>("tdh.latest.file.url");
-  const cutover = book.maybe<string>("tdh.cutover.about");
-  const cutoverChecked = book.maybe<string>("tdh.cutover.checkedAt");
   const v = (fact: Parameters<typeof FactValue>[0]["fact"]) => (
     <FactValue fact={fact} locale={locale} />
   );
@@ -65,9 +64,6 @@ export default function NetworkSection({
     bodyKey = "explained.tdh.how.n.bodyMore";
   if (delta !== null && delta.value < 0)
     bodyKey = "explained.tdh.how.n.bodyLess";
-  const cutoverPast =
-    cutover !== null &&
-    Date.parse(cutover.value) < Date.parse(book.snapshot().asOf);
   const fileName = fileUrl?.value.split("/").slice(-2).join("/") ?? null;
 
   return (
@@ -92,15 +88,7 @@ export default function NetworkSection({
               total: v(total),
               date: v(date),
               delta: deltaPlain,
-            })}{" "}
-            {cutover !== null &&
-              rich(
-                locale,
-                cutoverPast
-                  ? "explained.tdh.how.n.cutoverPast"
-                  : "explained.tdh.how.n.cutover",
-                { date: v(cutover), checked: v(cutoverChecked) }
-              )}
+            })}
           </Para>
         )}
         <p className="tw-m-0">

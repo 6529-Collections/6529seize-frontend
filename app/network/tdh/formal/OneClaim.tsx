@@ -4,8 +4,8 @@ import {
   type ClaimPart,
   type ClaimSpan,
 } from "@/components/explained/evidence/claims";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
-import { CodeName } from "@/components/explained/reference/parts";
+import { EX_LAYOUT } from "@/components/explained/tokens";
+import { CodeName, EdSection } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext, SureKey } from "./sureShared";
 
@@ -214,45 +214,41 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
     },
   ];
   return (
-    <section id="featured" className={`tw-scroll-mt-24 ${EX_LAYOUT.section}`}>
-      <div className={EX_LAYOUT.stmt}>
-        <div>
-          <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
-            <span className="tw-text-primary-300">02</span>
-            {" · "}
-            {m("explained.tdh.sure.featured.label")}
-          </span>
-          <h2 className={EX_TEXT.stmt}>
-            {m("explained.tdh.sure.featured.title")}
-          </h2>
-        </div>
-        <div className="lg:tw-pt-1.5">
-          <p className={EX_LAYOUT.paragraph}>
-            {m("explained.tdh.sure.featured.body", {
-              day: p.v("netting.day"),
-            })}
-          </p>
-        </div>
-      </div>
-      <FactScope
-        className="tw-mt-10 md:tw-mt-12"
-        ids={[
-          "netting.first.at",
-          "netting.first.commit",
-          "netting.narrowed.at",
-          "netting.narrowed.commit",
-          "netting.proved.at",
-          "netting.exact.at",
-          "netting.exact.commit",
-          "netting.proved.commit",
-          "netting.first.minutes",
-          "netting.narrowed.minutes",
-          "manifest.headline.name",
-        ]}
-      >
-        <ClaimInParts parts={parts} spans={spans} locale={locale} />
-      </FactScope>
-      <ProofSketch m={m} />
-    </section>
+    <EdSection
+      id="featured"
+      tight={false}
+      no="02"
+      label={m("explained.tdh.sure.featured.label")}
+      title={m("explained.tdh.sure.featured.title")}
+      full={
+        <>
+          <FactScope
+            className="tw-mt-10 md:tw-mt-12"
+            ids={[
+              "netting.first.at",
+              "netting.first.commit",
+              "netting.narrowed.at",
+              "netting.narrowed.commit",
+              "netting.proved.at",
+              "netting.exact.at",
+              "netting.exact.commit",
+              "netting.proved.commit",
+              "netting.first.minutes",
+              "netting.narrowed.minutes",
+              "manifest.headline.name",
+            ]}
+          >
+            <ClaimInParts parts={parts} spans={spans} locale={locale} />
+          </FactScope>
+          <ProofSketch m={m} />
+        </>
+      }
+    >
+      <p className={EX_LAYOUT.paragraph}>
+        {m("explained.tdh.sure.featured.body", {
+          day: p.v("netting.day"),
+        })}
+      </p>
+    </EdSection>
   );
 }

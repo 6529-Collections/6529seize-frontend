@@ -142,7 +142,7 @@ export default async function GlossaryPage({
         />
       ),
       source: (
-        <span className="tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        <span className="tw-text-sm tw-leading-[21px] tw-text-iron-400">
           {m(key(term.id, "src"))}
         </span>
       ),

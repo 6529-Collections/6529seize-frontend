@@ -5,7 +5,7 @@ import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
 import PhoneMore from "@/components/explained/layout/PhoneMore";
-import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
+import { MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import RecordStrip from "./RecordStrip";
 import Section from "./Section";
 
@@ -31,13 +31,14 @@ export default function WhereItStands({
       figure={
         <div className="tw-grid tw-gap-10 md:tw-gap-12">
           <RecordStrip locale={locale} facts={facts} />
-          {/* The record above says it in brief; on a phone the full ledger
-              opens on request. */}
+          {/* The record above, and the page's first figure, say it in
+              brief; the full ledger opens on request, at every width. */}
           <PhoneMore
             more={fill(locale, k("s5.more"))}
             less={fill(locale, k("s5.less"))}
+            everywhere
           >
-            <div className={PHONE_MORE_HIDDEN}>
+            <div className={MORE_HIDDEN}>
               <IsIsNot
                 locale={locale}
                 label={fill(locale, k("s5.label"))}
@@ -49,7 +50,7 @@ export default function WhereItStands({
                       cycle: facts.print("site.proofA.cycle"),
                       hours: facts.print("site.proofA.provedHours"),
                       minutes: facts.print("site.proofA.provedMinutes"),
-                      block: facts.print("site.proofA.ethCallBlock"),
+                      block: facts.block("site.proofA.ethCallBlock"),
                     }),
                   },
                   {
@@ -59,7 +60,7 @@ export default function WhereItStands({
                       real: facts.cycleDate("proofs.pairV14.cycle"),
                       words: facts.print("proofs.statement.words"),
                       date: facts.print("proofs.pairV14.provedOn"),
-                      block: facts.print("proofs.pairV14.ethCallBlock"),
+                      block: facts.block("proofs.pairV14.ethCallBlock"),
                       gas: facts.print("proofs.pairV14.submitGas"),
                     }),
                   },

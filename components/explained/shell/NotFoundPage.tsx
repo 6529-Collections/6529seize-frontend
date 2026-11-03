@@ -79,6 +79,7 @@ export default function NotFoundPage({
                 no: entry.number ?? "",
                 title: kt(locale, entry.title),
                 href: entry.href,
+                desc: kt(locale, "explained.kit.notFound.liveChapter"),
               },
             ]
           : [

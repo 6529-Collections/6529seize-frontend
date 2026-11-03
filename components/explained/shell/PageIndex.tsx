@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
+import { withCc0 } from "../marks/Cc0";
 import { Icon } from "../marks/glyphs";
 import { EX_FOCUS } from "../tokens";
 
@@ -40,11 +41,11 @@ export default function PageIndex({
             <span
               className={`tw-font-semibold ${row.href ? "tw-text-iron-50" : "tw-text-iron-300"} ${row.shelf ? "tw-text-lg tw-leading-6" : "tw-text-[21px] tw-leading-7"}`}
             >
-              {row.title}
+              {withCc0(row.title)}
             </span>
             {row.desc !== undefined && (
               <span className="tw-col-start-2 tw-text-base tw-leading-6 tw-text-iron-400 md:tw-col-start-3">
-                {row.desc}
+                {withCc0(row.desc)}
               </span>
             )}
           </>

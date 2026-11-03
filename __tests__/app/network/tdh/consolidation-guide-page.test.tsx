@@ -87,14 +87,22 @@ describe("Your wallets", () => {
         name: "A linked with B, B linked with C, but A and C not linked: B + C; A alone.",
       })
     ).toBeInTheDocument();
-    await user.click(
-      within(why).getByRole("button", { name: "I added a wallet" })
-    );
+    // One choice of five: a radio group, the picked cause checked.
+    const added = within(why).getByRole("radio", { name: "I added a wallet" });
+    expect(added).toHaveAttribute("aria-checked", "false");
+    await user.click(added);
+    expect(added).toHaveAttribute("aria-checked", "true");
     expect(answer("added")).toBeVisible();
     expect(answer("moved")).not.toBeVisible();
     expect(
       within(answer("added")).getByRole("link", { name: "how" })
     ).toHaveAttribute("href", "#add");
+    // The arrow keys move the choice, and the focus with it.
+    await user.keyboard("{ArrowDown}");
+    expect(
+      within(why).getByRole("radio", { name: "I sold or sent a copy away" })
+    ).toHaveFocus();
+    expect(answer("sold")).toBeVisible();
   });
 
   it("groups wallets with the engine, and Break it links a fifth", async () => {
@@ -134,7 +142,9 @@ describe("Your wallets", () => {
     expect(
       within(add).getByRole("figure", { name: "The safe signing order" })
     ).toHaveTextContent("D → A, B, C");
-    expect(add).toHaveTextContent("Four transactions, each with a normal fee");
+    expect(add).toHaveTextContent("Four transactions at a normal fee");
+    // Linked through a delegation manager, every link is its own transaction.
+    expect(add).toHaveTextContent("one transaction per link, six in all");
     const faq = document.getElementById("faq")!;
     const details = faq.querySelectorAll("details");
     expect(details).toHaveLength(6);

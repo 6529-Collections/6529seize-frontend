@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PrevNext from "@/components/explained/shell/PrevNext";
+import { pagePlace } from "@/components/explained/shell/place";
 import { getAppMetadata } from "@/components/providers/metadata";
 import Receipt from "@/components/explained/evidence/Receipt";
 import Verdict from "@/components/explained/evidence/Verdict";
@@ -298,6 +299,7 @@ export default async function TdhDayReceiptPage({
   const title = pt(locale, "explained.tdh.day.title", { date });
   const tdh = chapterById("tdh");
   const check = tdh.check.find((page) => page.id === "check");
+  const checkPlace = pagePlace("tdh", "check", locale);
   const rows = file === null ? [] : receiptRows(day, book, locale, file.text);
   const fileUrl = day.text("file.url");
   return (
@@ -372,6 +374,8 @@ export default async function TdhDayReceiptPage({
         )}
         {file !== null && <Builds day={day} locale={locale} />}
         {check && (
+          // Back to the daily check, and on to the chapter's next page,
+          // so the receipt ends on two cards, not a lone half-width one.
           <PrevNext
             locale={locale}
             prev={{
@@ -379,6 +383,7 @@ export default async function TdhDayReceiptPage({
               title: kt(locale, check.title),
               ...(check.n === undefined ? {} : { n: check.n }),
             }}
+            {...(checkPlace.next ? { next: checkPlace.next } : {})}
           />
         )}
         <DayHowWeKnow day={day} book={book} locale={locale} title={title} />

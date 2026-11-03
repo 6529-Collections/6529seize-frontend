@@ -6,7 +6,8 @@ import { kt, type KitKey } from "../i18n";
  * the page, each tagged with who can repeat it today. The tag is a dot and a
  * word in ink tones, never a bordered pill (EXPLAINED.md §3 rule 1): a filled
  * dot when anyone can repeat the step, a hollow one when it needs something
- * the reader does not have yet, named in the word.
+ * the reader does not have yet, named in the word. The step's circle on the
+ * line follows its tag.
  */
 export type TrailWho =
   | "anyone"
@@ -71,7 +72,7 @@ export default function ProvenanceTrail({
             key={step.title}
             className={
               long
-                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[200px_minmax(0,280px)_auto] lg:tw-items-baseline lg:tw-justify-start lg:tw-gap-x-8"
+                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[220px_minmax(0,1fr)_minmax(0,240px)] lg:tw-items-baseline lg:tw-gap-x-8"
                 : "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-pb-0 lg:tw-pl-0 lg:tw-pr-3.5"
             }
             data-who={step.who}
@@ -86,12 +87,15 @@ export default function ProvenanceTrail({
                 aria-hidden="true"
               />
             )}
+            {/* The step's own circle says what its tag says: filled when
+                anyone can repeat it, hollow when it needs what the reader
+                does not have yet. */}
             <span
-              className={
+              className={`${
                 long
-                  ? "tw-absolute tw-left-0 tw-top-0.5 tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-400 tw-bg-[#0D0D0F]"
-                  : "tw-absolute tw-left-0 tw-top-0 tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-400 tw-bg-[#0D0D0F] lg:tw-relative lg:tw-block"
-              }
+                  ? "tw-absolute tw-left-0 tw-top-0.5 tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid"
+                  : "tw-absolute tw-left-0 tw-top-0 tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid lg:tw-relative lg:tw-block"
+              } ${open ? "tw-border-iron-100 tw-bg-iron-100" : "tw-border-iron-400 tw-bg-[#0D0D0F]"}`}
               aria-hidden="true"
             />
             <h3

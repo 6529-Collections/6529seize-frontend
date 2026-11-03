@@ -255,6 +255,10 @@ export default async function TdhYourWalletsPage({
             <Link className={EX_BUTTON.secondary} href="/network/tdh#explain">
               {wt(locale, "explained.tdh.wallets.explain")}
             </Link>
+            {/* The steps a collector adding a wallet comes for, one jump away. */}
+            <a className={EX_BUTTON.secondary} href="#add">
+              {wt(locale, "explained.tdh.wallets.add.label")}
+            </a>
           </div>
         </PageHead>
 

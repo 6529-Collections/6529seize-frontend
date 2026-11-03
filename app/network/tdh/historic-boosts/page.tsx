@@ -159,6 +159,8 @@ export default async function VersionsPage({
         ),
         when: m("explained.tdh.versions.current.when", {
           fourWallets: p.v("versions.fourWallets"),
+          renamed: p.v("names.renamedAt"),
+          old: p.v("names.v10.name"),
           from: (
             <FactText
               fact={book.maybe("versions.current.since")}
@@ -171,6 +173,8 @@ export default async function VersionsPage({
         fullSet: m("explained.tdh.versions.current.fullSet", {
           today: p.v("engine.boost.fullSet"),
           ceiling: p.v("rules.fullSetCeiling"),
+          max: p.v("engine.boost.todayMax"),
+          all: p.v("engine.boost.ceiling"),
         }),
         seasons: m("explained.tdh.versions.current.seasons", {
           last: p.v("rules.lastBoostedSeason"),

@@ -59,7 +59,9 @@ export default function ProvedWhere({ ctx }: { readonly ctx: SureContext }) {
             title: s("explained.tdh.sure.where.vectors", {
               total: p.f("manifest.vectors.total"),
             }),
-            cap: m("explained.tdh.sure.where.vectorsCap"),
+            cap: m("explained.tdh.sure.where.vectorsCap", {
+              hand: p.v("vectors.handDerived"),
+            }),
           },
           {
             kicker: s("explained.tdh.sure.where.modelKicker"),

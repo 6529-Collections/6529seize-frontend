@@ -403,7 +403,11 @@ describe("versions and boosts", () => {
     }
     const current = container.querySelector("#tdh-1-4")?.textContent ?? "";
     expect(current).toMatch(/Oct 10, 2025 to today/);
-    expect(current).toMatch(/1\.80 today; 2\.00 at most from seasons alone/);
+    expect(current).toMatch(
+      /1\.80 today, 2\.00 at most from seasons alone; with extra sets and Gradients, about 2\.04 today and 2\.24 at most/
+    );
+    // The rename sits on the current version's own row (D137).
+    expect(current).toMatch(/renamed to it on Oct 18 \(D137\)/);
     expect(current).toMatch(/Up to 20; 16 pay today/);
     expect(container.querySelector("#tdh-1-3")?.textContent).toMatch(
       /Mar 29, 2024 to Oct 9, 2025.*1\.55.*Up to 11/
