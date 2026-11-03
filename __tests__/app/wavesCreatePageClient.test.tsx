@@ -15,8 +15,6 @@ jest.mock("next/navigation", () => ({
     replace: mockReplace,
   }),
   usePathname: () => "/waves/create",
-  // The route loading shell renders while the native-only branch loads.
-  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -110,7 +108,7 @@ describe("WavesCreatePageClient", () => {
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
   });
 
-  it("renders the connect prompt inside WavesMobile for logged-out app users", async () => {
+  it("renders the connect prompt inside WavesMobile for logged-out app users", () => {
     mockUseAuth.mockReturnValue({ connectedProfile: null });
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "not-authenticated",
@@ -118,15 +116,14 @@ describe("WavesCreatePageClient", () => {
 
     renderCreatePage();
 
-    // The native-only mobile shell loads on demand.
-    expect(await screen.findByTestId("waves-mobile")).toContainElement(
+    expect(screen.getByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("connect-wallet")
     );
     expect(screen.queryByTestId("create-wave")).not.toBeInTheDocument();
     expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
   });
 
-  it("renders CreateWave instead of ConnectWallet when a profile is connected", async () => {
+  it("renders CreateWave instead of ConnectWallet when a profile is connected", () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: {
         id: "profile-1",
@@ -140,7 +137,7 @@ describe("WavesCreatePageClient", () => {
 
     renderCreatePage();
 
-    expect(await screen.findByTestId("waves-mobile")).toContainElement(
+    expect(screen.getByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("create-wave")
     );
     expect(screen.getByTestId("create-wave")).toHaveAttribute(
@@ -153,7 +150,7 @@ describe("WavesCreatePageClient", () => {
 
 it.each(["initializing", "connecting"])(
   "does not show Connect Wallet while %s",
-  async (state) => {
+  (state) => {
     mockConnectionState = state;
     mockUseAuth.mockReturnValue({
       connectedProfile: null,
@@ -164,7 +161,6 @@ it.each(["initializing", "connecting"])(
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
     renderCreatePage();
-    await screen.findByTestId("waves-mobile");
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
     expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();

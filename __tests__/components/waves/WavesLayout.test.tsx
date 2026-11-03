@@ -144,7 +144,7 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
   });
 
-  it("renders WavesMobile and children for logged-out app users", async () => {
+  it("renders WavesMobile and children for logged-out app users", () => {
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
 
     render(
@@ -153,9 +153,8 @@ describe("WavesLayout", () => {
       </WavesLayout>
     );
 
-    // The native-only mobile shell loads on demand.
-    expect(await screen.findByTestId("waves-mobile")).toBeInTheDocument();
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.getByTestId("waves-mobile")).toBeInTheDocument();
     expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
@@ -210,7 +209,7 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
-  it("renders Waves content read-only when profile setup is needed", async () => {
+  it("renders Waves content read-only when profile setup is needed", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "needs-profile",
     });
@@ -222,9 +221,9 @@ describe("WavesLayout", () => {
       </WavesLayout>
     );
 
-    expect(await screen.findByTestId("waves-mobile")).toBeInTheDocument();
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
     expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
+    expect(screen.getByTestId("waves-mobile")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
