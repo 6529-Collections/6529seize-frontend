@@ -45,6 +45,63 @@ describe("validator page text", () => {
     );
   });
 
+  it("carries the mainnet join test's timing and the datacenter mode", () => {
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "a fresh install was ready about 50 minutes after it started"
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain("`--mode datacenter`");
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toMatch(
+      /^3\. Rebuild and match can take 30 minutes or more/m
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/serve none/);
+  });
+
+  it("names every rc.5 file by system and CPU, and the .deb per CPU", () => {
+    const download = VALIDATOR_GUIDE_MARKDOWN.slice(
+      VALIDATOR_GUIDE_MARKDOWN.indexOf("## Download and check"),
+      VALIDATOR_GUIDE_MARKDOWN.indexOf("## Install")
+    );
+    for (const name of [
+      "6529-Validator-0.1.0.dmg",
+      "6529-Validator-Setup-0.1.0-x64.exe",
+      "6529-Validator-0.1.0-x64.msi",
+      "6529-validator_0.1.0_amd64.deb",
+      "6529-validator_0.1.0_arm64.deb",
+      "6529-Validator-0.1.0-x86_64.AppImage",
+      "validator-0.1.0-aarch64-apple-darwin.tar.gz",
+      "validator-0.1.0-x86_64-apple-darwin.tar.gz",
+      "validator-0.1.0-aarch64-unknown-linux-gnu.tar.gz",
+      "validator-0.1.0-x86_64-unknown-linux-gnu.tar.gz",
+      "validator-0.1.0-x86_64-pc-windows-msvc.zip",
+      "SHA256SUMS",
+      "release.json",
+    ]) {
+      expect(download).toContain(`\`${name}\``);
+    }
+    expect(download).toContain(
+      "| Another Linux desktop | x86-64 only | `6529-Validator-0.1.0-x86_64.AppImage` |"
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "On ARM64, a Raspberry Pi among them, run `sudo apt install ./6529-validator_0.1.0_arm64.deb`."
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain("- AppImage (x86-64 only):");
+  });
+
+  it("states the glibc floor the .deb packages declare, and which Windows on ARM runs it", () => {
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "| Ubuntu 22.04 or newer, or Debian 12 or newer, on ARM64, including a Raspberry Pi 4 or 5 on 64-bit Raspberry Pi OS (Bookworm) | ARM64 |"
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain("`libc6 (>= 2.35)`");
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      "Windows 11 on ARM runs the x86-64 installer through emulation (untested). Windows 10 on ARM can't run it."
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
+      "Windows 10 on ARM can't run it."
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).not.toMatch(/Ubuntu or Debian on ARM \|/);
+  });
+
   it("keeps the owner's line word for word and names the DM account", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
       "6529 never starts a DM with you or asks for a seed phrase."

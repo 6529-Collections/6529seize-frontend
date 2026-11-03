@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { getRole } from "@/services/auth/jwt-validation.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
@@ -44,4 +45,32 @@ export const resolveActiveProfileProxy = <
   return receivedProfileProxies?.find(
     (proxy) => proxy.created_by.id === authRole
   );
+};
+
+/** Checks the token's actor synchronously, before a React profile update can lag it. */
+export const isAuthSessionForProfile = ({
+  address,
+  profileId,
+  proxyProfileId,
+}: {
+  readonly address: string | null;
+  readonly profileId: string | null | undefined;
+  readonly proxyProfileId: string | null | undefined;
+}): boolean => {
+  const token = getAuthJwt();
+  if (!token || !address || !profileId) return false;
+  try {
+    const actor = jwtDecode<{ sub: string; role?: string | null }>(token);
+    if (actor.sub.toLowerCase() !== address.toLowerCase()) return false;
+    const authRole = actor.role ?? null;
+    return proxyProfileId
+      ? authRole === proxyProfileId
+      : isDirectProfileAuthSession({
+          authRole,
+          profileId,
+          hasActiveProxy: false,
+        });
+  } catch {
+    return false;
+  }
 };
