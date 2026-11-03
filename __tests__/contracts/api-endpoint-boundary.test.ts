@@ -88,7 +88,7 @@ const PENDING_COMPONENT_MIGRATION = [
 
 type Rule = {
   readonly name: string;
-  readonly pattern: RegExp;
+  readonly matches: (source: string) => boolean;
   readonly exemptions: Readonly<Record<string, string>>;
 };
 
@@ -96,7 +96,7 @@ const RULES: readonly Rule[] = [
   {
     name: "direct API_ENDPOINT read",
     // Word boundaries keep ALLOWLIST_API_ENDPOINT and IPFS_API_ENDPOINT out.
-    pattern: /\bAPI_ENDPOINT\b/u,
+    matches: (source) => /\bAPI_ENDPOINT\b/u.test(source),
     exemptions: {
       [HELPER]: "The endpoint list reads the configured value here.",
       "app/layout.tsx":
@@ -111,7 +111,8 @@ const RULES: readonly Rule[] = [
   },
   {
     name: "hardcoded production API host",
-    pattern: /\/\/api\.6529\.io\b/u,
+    // A plain substring scan of source text, not URL validation.
+    matches: (source) => source.includes("//api.6529.io"),
     exemptions: {
       [HELPER]: "PUBLIC_PRODUCTION_API_BASE names the production API once.",
       "app/tools/api/page.tsx":
@@ -151,12 +152,10 @@ describe("API endpoint boundary", () => {
     expect(sources.has(HELPER)).toBe(true);
   });
 
-  describe.each(RULES)("$name", ({ pattern, exemptions }) => {
+  describe.each(RULES)("$name", ({ matches, exemptions }) => {
     it("appears only in exempted files (use apiUrl() or getApiBase())", () => {
       const offenders = [...sources]
-        .filter(
-          ([file, source]) => !(file in exemptions) && pattern.test(source)
-        )
+        .filter(([file, source]) => !(file in exemptions) && matches(source))
         .map(([file]) => file);
 
       expect(offenders).toEqual([]);
@@ -164,7 +163,7 @@ describe("API endpoint boundary", () => {
 
     it("keeps every exemption in use", () => {
       const stale = Object.keys(exemptions).filter(
-        (file) => !pattern.test(sources.get(file) ?? "")
+        (file) => !matches(sources.get(file) ?? "")
       );
 
       expect(stale).toEqual([]);
