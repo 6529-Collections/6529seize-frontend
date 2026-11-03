@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { NFT } from "@/entities/INFT";
 import {
@@ -183,7 +183,7 @@ export default function RememeAddComponent({
       try {
         setTokenIds(myTokenIds);
         const validation = await postData(
-          `${publicEnv.API_ENDPOINT}/api/rememes/validate`,
+          apiUrl("/api/rememes/validate"),
           getRememe(myTokenIds)
         );
         const response = validation.response as RememeValidationResponse;

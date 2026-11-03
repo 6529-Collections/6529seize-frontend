@@ -162,6 +162,8 @@
     "museum:build-cardinality": "node scripts/require-6529-command.cjs && node scripts/museum-build-cardinality.cjs",
     "museum:release-tier": "node scripts/require-6529-command.cjs && node scripts/museum-release-tier.cjs",
     "museum:surface-registry": "node scripts/require-6529-command.cjs && node scripts/museum-surface-registry.cjs --check",
+    "perf:budget": "node scripts/require-6529-command.cjs && node scripts/perf-budget.cjs",
+    "perf:budget:update": "node scripts/require-6529-command.cjs && node scripts/perf-budget.cjs --update",
     "runner:benchmark:contract": "node scripts/require-6529-command.cjs && node ops/scripts/runner-benchmark.cjs validate-contract",
     "format": "node scripts/require-6529-command.cjs && prettier --write .",
     "format:check": "node scripts/require-6529-command.cjs && prettier --check .",
