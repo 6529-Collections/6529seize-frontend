@@ -2,10 +2,7 @@
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
-import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
-import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import { useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -13,7 +10,6 @@ import {
   getCardsRemainingUntilEndOf,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -32,8 +28,8 @@ import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import SubscriptionCoverageSummary from "./coverage/SubscriptionCoverageSummary";
 import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
 import { getSubscriptionCoveragePresentation } from "./coverage/subscriptionCoverage.helpers";
+import { useSubscriptionHistory } from "./useSubscriptionHistory";
 
-const HISTORY_PAGE_SIZE = 10;
 const COVERAGE_BORDER_CLASS = {
   neutral: "tw-border-white/[0.04]",
   positive: "tw-border-emerald-400/20",
@@ -65,6 +61,7 @@ export default function UserPageSubscriptions(
     : getSubscriptionProfileKey(connectedProfile);
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
   const coverageQuery = useSubscriptionCoverage({ profileKey });
+  const history = useSubscriptionHistory(profileKey);
   const coverageTone =
     coverageQuery.isLoading || coverageQuery.isError || !coverageQuery.data
       ? "neutral"
@@ -97,42 +94,11 @@ export default function UserPageSubscriptions(
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
     useState<boolean>(true);
 
-  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
-  const [fetchingTopUpHistory, setFetchingTopUpHistory] =
-    useState<boolean>(true);
-
-  const [redeemedHistory, setRedeemedHistory] = useState<
-    Page<RedeemedSubscription>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
-  const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
-    useState<boolean>(true);
-
   const remainingMintsForSeason = getCardsRemainingUntilEndOf("szn");
   const [memeSubscriptions, setMemeSubscriptions] = useState<NFTSubscription[]>(
     []
   );
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
-    useState<boolean>(true);
-
-  const [subscriptionLogs, setSubscriptionLogs] = useState<
-    Page<SubscriptionLog>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
-  const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
   function fetchDetails() {
@@ -177,56 +143,6 @@ export default function UserPageSubscriptions(
       });
   }
 
-  function fetchTopUpHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingTopUpHistory(true);
-    setFetchError("topups", false);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionTopUp[];
-    }>({
-      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setTopUpHistory(data);
-      })
-      .catch(() => {
-        setFetchError("topups", true);
-      })
-      .finally(() => {
-        setFetchingTopUpHistory(false);
-      });
-  }
-
-  function fetchRedeemHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingRedeemedHistory(true);
-    setFetchError("redeemed", false);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: RedeemedSubscription[];
-    }>({
-      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setRedeemedHistory(data);
-      })
-      .catch(() => {
-        setFetchError("redeemed", true);
-      })
-      .finally(() => {
-        setFetchingRedeemedHistory(false);
-      });
-  }
-
   function fetchMemeSubscriptions() {
     if (!profileKey) {
       return;
@@ -251,38 +167,10 @@ export default function UserPageSubscriptions(
       });
   }
 
-  function fetchLogs(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    setFetchingSubscriptionLogs(true);
-    setFetchError("logs", false);
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: boolean;
-      data: SubscriptionLog[];
-    }>({
-      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-    })
-      .then((data) => {
-        setSubscriptionLogs(data);
-      })
-      .catch(() => {
-        setFetchError("logs", true);
-      })
-      .finally(() => {
-        setFetchingSubscriptionLogs(false);
-      });
-  }
-
   const fetchSubscriptionData = (): void => {
     fetchDetails();
     fetchAirdropAddress();
-    fetchTopUpHistory(1);
     fetchMemeSubscriptions();
-    fetchRedeemHistory(1);
-    fetchLogs(1);
   };
 
   const refresh = (): void => {
@@ -290,6 +178,7 @@ export default function UserPageSubscriptions(
       return;
     }
     void coverageQuery.refetch();
+    void history.refresh();
     fetchSubscriptionData();
   };
 
@@ -309,7 +198,7 @@ export default function UserPageSubscriptions(
 
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-8 tw-pb-12 md:tw-gap-10">
-      {Object.values(fetchErrors).some(Boolean) && (
+      {(Object.values(fetchErrors).some(Boolean) || history.isError) && (
         <div
           role="status"
           className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-p-4 tw-text-sm tw-text-amber-200"
@@ -317,7 +206,10 @@ export default function UserPageSubscriptions(
           <span>{t(locale, "subscriptions.page.refreshError")}</span>
           <button
             type="button"
-            onClick={fetchSubscriptionData}
+            onClick={() => {
+              fetchSubscriptionData();
+              void history.refresh();
+            }}
             className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-amber-300/40 tw-bg-transparent tw-px-4 tw-font-medium tw-text-amber-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "subscriptions.page.retry")}
@@ -420,15 +312,17 @@ export default function UserPageSubscriptions(
         title={t(locale, "subscriptions.history.title")}
       >
         <UserPageSubscriptionsHistory
-          topups={topUpHistory}
-          redeemed={redeemedHistory}
-          logs={subscriptionLogs}
-          topUpsLoading={fetchingTopUpHistory}
-          redeemedLoading={fetchingRedeemedHistory}
-          logsLoading={fetchingSubscriptionLogs}
-          setRedeemedPage={fetchRedeemHistory}
-          setTopUpPage={fetchTopUpHistory}
-          setLogsPage={fetchLogs}
+          selectedIndex={history.selectedIndex}
+          onSelectionChange={history.setSelectedIndex}
+          topups={history.topups}
+          redeemed={history.redeemed}
+          logs={history.logs}
+          topUpsLoading={history.topupsLoading}
+          redeemedLoading={history.redeemedLoading}
+          logsLoading={history.logsLoading}
+          setRedeemedPage={(page) => history.setPage("redeemed", page)}
+          setTopUpPage={(page) => history.setPage("topups", page)}
+          setLogsPage={(page) => history.setPage("logs", page)}
         />
       </UserPageSubscriptionsSection>
     </div>

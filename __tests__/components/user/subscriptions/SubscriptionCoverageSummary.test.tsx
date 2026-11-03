@@ -106,7 +106,7 @@ describe("SubscriptionCoverageSummary", () => {
     ).toBeVisible();
     await userEvent
       .setup()
-      .click(screen.getByRole("button", { name: "Top up", exact: true }));
+      .click(screen.getByRole("button", { name: "Top up" }));
     expect(onToggleTopUp).toHaveBeenCalledTimes(1);
     await openDetails();
     expect(screen.getByText("Action required")).toBeVisible();
@@ -248,7 +248,7 @@ describe("SubscriptionCoverageSummary", () => {
     expect(screen.getByRole("heading", { name: "Not set up" })).toBeVisible();
     expect(screen.getByText("0 drops funded")).not.toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Top up", exact: true })
+      screen.getByRole("button", { name: "Top up" })
     ).toBeVisible();
   });
 
@@ -459,7 +459,7 @@ describe("SubscriptionCoverageSummary", () => {
       })
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Top up", exact: true })
+      screen.queryByRole("button", { name: "Top up" })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Choose drops" })

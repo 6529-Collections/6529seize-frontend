@@ -1,3 +1,4 @@
+import { useState, type ComponentProps } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageSubscriptionsHistory from "@/components/user/subscriptions/UserPageSubscriptionsHistory";
@@ -6,6 +7,22 @@ import type { Page } from "@/helpers/Types";
 import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
 import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+
+function HistoryTestView(
+  props: Omit<
+    ComponentProps<typeof UserPageSubscriptionsHistory>,
+    "selectedIndex" | "onSelectionChange"
+  >
+) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  return (
+    <UserPageSubscriptionsHistory
+      {...props}
+      selectedIndex={selectedIndex}
+      onSelectionChange={setSelectedIndex}
+    />
+  );
+}
 
 const address = "0xfb47b2ca7df248d36cf0e4f63bfd0503c25debd4";
 const date = new Date("2026-10-30T14:00:00Z");
@@ -67,14 +84,14 @@ describe("UserPageSubscriptionsHistory", () => {
   it("keeps full original entries and independent pagination in all three tabs", async () => {
     const user = userEvent.setup();
     const props = makeProps();
-    const { rerender } = render(<UserPageSubscriptionsHistory {...props} />);
+    const { rerender } = render(<HistoryTestView {...props} />);
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "Redeemed Subscriptions",
       "Log History",
       "Top Up History",
     ]);
     expect(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
     ).toHaveAttribute("aria-selected", "true");
     expect(
       screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
@@ -93,21 +110,18 @@ describe("UserPageSubscriptionsHistory", () => {
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setRedeemedPage).toHaveBeenCalledWith(2);
     rerender(
-      <UserPageSubscriptionsHistory
-        {...props}
-        redeemed={{ ...props.redeemed, page: 2 }}
-      />
+      <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 2 }} />
     );
     await user.click(
-      screen.getByRole("tab", { name: "Log History", exact: true })
+      screen.getByRole("tab", { name: "Log History" })
     );
     expect(screen.getByRole("tabpanel", { name: "Log History" })).toBeVisible();
-    expect(screen.getByText(props.logs.data[0].log)).toBeVisible();
-    expect(screen.getByText(props.logs.data[0].additional_info!)).toBeVisible();
+    expect(screen.getByText(props.logs.data[0]!.log)).toBeVisible();
+    expect(screen.getByText(props.logs.data[0]!.additional_info!)).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setLogsPage).toHaveBeenCalledWith(2);
     await user.click(
-      screen.getByRole("tab", { name: "Top Up History", exact: true })
+      screen.getByRole("tab", { name: "Top Up History" })
     );
     expect(
       screen.getByRole("tabpanel", { name: "Top Up History" })
@@ -120,7 +134,7 @@ describe("UserPageSubscriptionsHistory", () => {
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setTopUpPage).toHaveBeenCalledWith(2);
     await user.click(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
     );
     expect(
       within(screen.getByRole("tabpanel")).getByRole("textbox", {
@@ -131,31 +145,31 @@ describe("UserPageSubscriptionsHistory", () => {
 
   it("preserves the selected tab while loading and shows its original empty state", async () => {
     const props = makeProps();
-    const { rerender } = render(<UserPageSubscriptionsHistory {...props} />);
+    const { rerender } = render(<HistoryTestView {...props} />);
     await userEvent
       .setup()
-      .click(screen.getByRole("tab", { name: "Log History", exact: true }));
-    rerender(<UserPageSubscriptionsHistory {...props} logsLoading />);
+      .click(screen.getByRole("tab", { name: "Log History" }));
+    rerender(<HistoryTestView {...props} logsLoading />);
     expect(
-      screen.getByRole("tab", { name: "Log History", exact: true })
+      screen.getByRole("tab", { name: "Log History" })
     ).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Loading Log History")).toBeInTheDocument();
-    rerender(<UserPageSubscriptionsHistory {...props} logs={page([])} />);
+    rerender(<HistoryTestView {...props} logs={page([])} />);
     expect(screen.getByText("No logs found")).toBeVisible();
   });
 
   it("supports arrow-key tab navigation", async () => {
-    render(<UserPageSubscriptionsHistory {...makeProps()} />);
+    render(<HistoryTestView {...makeProps()} />);
     const user = userEvent.setup();
     await user.click(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
     );
     await user.keyboard("{ArrowRight}");
     expect(
-      screen.getByRole("tab", { name: "Log History", exact: true })
+      screen.getByRole("tab", { name: "Log History" })
     ).toHaveFocus();
     expect(
-      screen.getByRole("tab", { name: "Log History", exact: true })
+      screen.getByRole("tab", { name: "Log History" })
     ).toHaveAttribute("aria-selected", "true");
   });
 });

@@ -184,6 +184,11 @@ first render.
   - a separate heading and pills are always visible, with no expand/collapse
     control; the pills retain their selected state while data refreshes or the
     window resizes
+  - Redeemed Subscriptions loads first; Log History and Top Up History load when
+    selected. Recently loaded pages are reused when switching tabs, and each
+    history keeps its own page number
+  - after a confirmed transaction or balance refresh, the selected history
+    refreshes immediately; other cached histories refresh when selected
   - pagination when a tab has more than 10 rows
 
 ## Consolidation Changes

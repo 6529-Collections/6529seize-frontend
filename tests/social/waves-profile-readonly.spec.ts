@@ -564,10 +564,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("shows subscription history directly and preserves its selected pill across resizing", async ({
     page,
   }, testInfo) => {
+    const historyRequests: string[] = [];
+    page.on("request", (request) => {
+      const match =
+        /\/subscriptions\/consolidation\/(redeemed|logs|top-up)\//.exec(
+          new URL(request.url()).pathname
+        );
+      if (match) historyRequests.push(match[1]!);
+    });
     await gotoReadyWithApiResponse(
       page,
       `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-history`,
-      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+      (url) => url.pathname.includes("/subscriptions/consolidation/redeemed/")
     );
     await expectProfileShell(page, "Subscriptions");
     const overview = page.getByRole("region", {
@@ -580,7 +588,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await expect(
       page
-        .locator("main")
+        .getByRole("main")
         .getByRole("link", { name: "Learn more", exact: true })
     ).toHaveCount(1);
     await expect(learnMore).toHaveAttribute("href", "/about/subscriptions");
@@ -612,7 +620,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveCount(0);
-    const coverage = overview.locator("#profile-subscriptions-overview");
+    const coverage = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
     const mintingSettings = coverage.getByRole("button", {
       name: "Minting Settings",
       exact: true,
@@ -625,7 +635,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(details).toHaveAttribute("aria-expanded", "false");
     const coverageBox = await coverage.boundingBox();
     const headlineBox = await coverage
-      .locator("#profile-subscriptions-overview-title")
+      .getByRole("heading", { level: 2 })
       .boundingBox();
     const balanceBox = await coverage
       .getByText("Subscription balance", { exact: true })
@@ -672,6 +682,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "Log History",
       "Top Up History",
     ]);
+    expect(historyRequests).toEqual(["redeemed"]);
     const logs = tabs.getByRole("tab", { name: "Log History", exact: true });
     await logs.click();
     await expect(logs).toHaveAttribute("aria-selected", "true");
@@ -679,6 +690,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "aria-busy",
       "false"
     );
+    expect(historyRequests).toEqual(["redeemed", "logs"]);
     const viewport = page.viewportSize()!;
     await page.setViewportSize({
       width: viewport.width < 640 ? 900 : 390,
@@ -696,9 +708,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await expect(topUps).toBeFocused();
     await expect(topUps).toHaveAttribute("aria-selected", "true");
+    await expect(history.getByRole("tabpanel")).toHaveAttribute(
+      "aria-busy",
+      "false"
+    );
+    expect(historyRequests).toEqual(["redeemed", "logs", "top-up"]);
     await topUps.press("ArrowLeft");
     await expect(logs).toBeFocused();
     await expect(logs).toHaveAttribute("aria-selected", "true");
+    await expect(history.getByRole("tabpanel")).toHaveAttribute(
+      "aria-busy",
+      "false"
+    );
+    expect(historyRequests).toEqual(["redeemed", "logs", "top-up"]);
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(
       page,

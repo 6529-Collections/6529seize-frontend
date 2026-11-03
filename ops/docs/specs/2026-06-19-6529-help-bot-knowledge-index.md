@@ -149,7 +149,9 @@ merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
 reconciliation. The subscriptions overview also explains that profile history
 is a separate, always-visible section with three pills, preserving the selected
-view during resizing. The profile subscription record also explains how tapping,
+view during resizing. Redeemed loads first; the other histories load when selected,
+with cached pages and refreshes after confirmed transactions. The profile
+subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
 Profile subscription facts describe the short coverage answer and balance,
 Details for the Subscription coverage report, original explanations and actions,

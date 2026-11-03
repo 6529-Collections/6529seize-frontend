@@ -31,6 +31,8 @@ function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
 
 export default function UserPageSubscriptionsHistory(
   props: Readonly<{
+    selectedIndex: number;
+    onSelectionChange: (index: number) => void;
     topups: Page<SubscriptionTopUp>;
     redeemed: Page<RedeemedSubscription>;
     logs: Page<SubscriptionLog>;
@@ -82,7 +84,10 @@ export default function UserPageSubscriptionsHistory(
     },
   ];
   return (
-    <TabGroup>
+    <TabGroup
+      selectedIndex={props.selectedIndex}
+      onChange={props.onSelectionChange}
+    >
       <TabList
         aria-label={t(locale, "subscriptions.history.title")}
         className="tw-mb-4 tw-flex tw-flex-wrap tw-gap-2"

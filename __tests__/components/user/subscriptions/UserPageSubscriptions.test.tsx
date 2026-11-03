@@ -1,17 +1,34 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageSubscriptions from '@/components/user/subscriptions/UserPageSubscriptions';
-import { renderWithAuth } from '@/__tests__/utils/testContexts';
+import { createMockAuthContext } from '@/__tests__/utils/testContexts';
+import { renderWithQueryClient } from '@/__tests__/utils/reactQuery';
+import { AuthContext } from '@/components/auth/Auth';
+import type { ContextType, ReactElement, ReactNode } from 'react';
+
 import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import * as commonApi from '@/services/api/common-api';
 import * as memeCalendarHelpers from '@/components/meme-calendar/meme-calendar.helpers';
+
+function renderWithAuth(
+  component: ReactElement,
+  authValue: Partial<ContextType<typeof AuthContext>> = {}
+) {
+  return renderWithQueryClient(component, {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <AuthContext.Provider value={createMockAuthContext(authValue)}>
+        {children}
+      </AuthContext.Provider>
+    ),
+  });
+}
 
 const mockCoverageRefetch = jest.fn();
 
 // Mock child components
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsBalance', () => ({
   __esModule: true,
-  default: ({ details, fetching, refresh, show_refresh }: any) => (
+  default: ({ fetching, refresh, show_refresh }: any) => (
     <div data-testid="subscriptions-balance">
       Balance Component - Fetching: {fetching ? 'true' : 'false'}
       {show_refresh && <button onClick={refresh}>Refresh</button>}
@@ -21,7 +38,7 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsBalance', () => 
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsMode', () => ({
   __esModule: true,
-  default: ({ profileKey, details, readonly, refresh }: any) => (
+  default: ({ profileKey, readonly }: any) => (
     <div data-testid="subscriptions-mode">
       Mode Component - Profile: {profileKey}, Readonly: {readonly ? 'true' : 'false'}
     </div>
@@ -30,7 +47,12 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsMode', () => ({
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
   __esModule: true,
-  default: () => <div data-testid="subscriptions-topup">TopUp Component</div>,
+  default: ({ onTransactionConfirmed }: { onTransactionConfirmed: () => void }) => (
+    <div data-testid="subscriptions-topup">
+      TopUp Component
+      <button onClick={onTransactionConfirmed}>Confirm transaction</button>
+    </div>
+  ),
 }));
 
 jest.mock('@/components/user/subscriptions/coverage/SubscriptionCoverageSummary', () => ({
@@ -51,7 +73,7 @@ jest.mock('@/components/user/subscriptions/coverage/useSubscriptionCoverage', ()
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsUpcoming', () => ({
   __esModule: true,
-  default: ({ profileKey, details, memes_subscriptions, readonly, refresh }: any) => (
+  default: ({ profileKey, memes_subscriptions, readonly }: any) => (
     <div data-testid="subscriptions-upcoming">
       Upcoming Component - Memes: {memes_subscriptions?.length || 0}
       <div data-testid="subscriptions-mode">Mode Component - Profile: {profileKey}, Readonly: {readonly ? 'true' : 'false'}</div>
@@ -61,9 +83,12 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsUpcoming', () =>
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsHistory', () => ({
   __esModule: true,
-  default: ({ topups, redeemed, logs, setRedeemedPage, setTopUpPage, setLogsPage }: any) => (
+  default: ({ onSelectionChange, setRedeemedPage, setTopUpPage, setLogsPage }: any) => (
     <div data-testid="subscriptions-history">
       History Component
+      <button onClick={() => onSelectionChange(0)}>Select Redeemed</button>
+      <button onClick={() => onSelectionChange(1)}>Select Logs</button>
+      <button onClick={() => onSelectionChange(2)}>Select TopUp</button>
       <button onClick={() => setTopUpPage(2)}>Load TopUp Page 2</button>
       <button onClick={() => setRedeemedPage(2)}>Load Redeemed Page 2</button>
       <button onClick={() => setLogsPage(2)}>Load Logs Page 2</button>
@@ -73,7 +98,7 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsHistory', () => 
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsAirdropAddress', () => ({
   __esModule: true,
-  default: ({ show_edit, airdrop }: any) => (
+  default: ({ show_edit }: any) => (
     <div data-testid="subscriptions-airdrop">
       Airdrop Component - Edit: {show_edit ? 'true' : 'false'}
     </div>
@@ -211,7 +236,7 @@ describe('UserPageSubscriptions', () => {
   });
 
   describe('API Data Fetching', () => {
-    it('should fetch all data on mount', async () => {
+    it('fetches overview data and only redeemed history on mount', async () => {
       renderWithAuth(
         <UserPageSubscriptions profile={mockProfile} />,
         { connectedProfile: null }
@@ -224,18 +249,19 @@ describe('UserPageSubscriptions', () => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/test-key/airdrop-address',
         });
-        expect(mockCommonApiFetch).toHaveBeenCalledWith({
+        expect(mockCommonApiFetch).not.toHaveBeenCalledWith(expect.objectContaining({
           endpoint: 'subscriptions/consolidation/top-up/test-key?page=1&page_size=10',
-        });
+        }));
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/upcoming-memes/test-key?card_count=5',
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/redeemed/test-key?page=1&page_size=10',
+          signal: expect.any(AbortSignal),
         });
-        expect(mockCommonApiFetch).toHaveBeenCalledWith({
+        expect(mockCommonApiFetch).not.toHaveBeenCalledWith(expect.objectContaining({
           endpoint: 'subscriptions/consolidation/logs/test-key?page=1&page_size=10',
-        });
+        }));
       });
     });
 
@@ -266,7 +292,7 @@ describe('UserPageSubscriptions', () => {
   });
 
   describe('Refresh Functionality', () => {
-    it('should refresh all data when refresh is called', async () => {
+    it('refreshes overview and selected history without requesting unopened histories', async () => {
       const user = userEvent.setup();
       
       renderWithAuth(
@@ -275,16 +301,32 @@ describe('UserPageSubscriptions', () => {
       );
 
       await waitFor(() => {
-        expect(mockCommonApiFetch).toHaveBeenCalledTimes(6);
+        expect(mockCommonApiFetch).toHaveBeenCalledTimes(4);
       });
       jest.clearAllMocks();
 
       await user.click(screen.getByText('Refresh'));
 
       await waitFor(() => {
-        expect(mockCommonApiFetch).toHaveBeenCalledTimes(6);
+        expect(mockCommonApiFetch).toHaveBeenCalledTimes(4);
       });
     });
+  });
+
+  it('invalidates histories through the confirmed-transaction callback', async () => {
+    const user = userEvent.setup();
+    renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {connectedProfile: mockProfile});
+    await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalledTimes(4));
+    await user.click(screen.getByText('Select Logs'));
+    await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalledTimes(5));
+    mockCommonApiFetch.mockClear();
+    await user.click(screen.getByText('Confirm transaction'));
+    await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalledTimes(4));
+    expect(mockCoverageRefetch).toHaveBeenCalledTimes(1);
+    expect(mockCommonApiFetch).toHaveBeenCalledWith(expect.objectContaining({endpoint: 'subscriptions/consolidation/logs/test-key?page=1&page_size=10'}));
+    expect(mockCommonApiFetch).not.toHaveBeenCalledWith(expect.objectContaining({endpoint: expect.stringContaining('/top-up/')}));
+    await user.click(screen.getByText('Select Redeemed'));
+    await waitFor(() => expect(mockCommonApiFetch).toHaveBeenCalledTimes(5));
   });
 
   describe('Pagination Handlers', () => {
@@ -299,11 +341,13 @@ describe('UserPageSubscriptions', () => {
       jest.clearAllMocks();
 
       expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
+      await user.click(screen.getByText('Select TopUp'));
       await user.click(screen.getByText('Load TopUp Page 2'));
 
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/top-up/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -319,11 +363,13 @@ describe('UserPageSubscriptions', () => {
       jest.clearAllMocks();
 
       expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
+      await user.click(screen.getByText('Select Redeemed'));
       await user.click(screen.getByText('Load Redeemed Page 2'));
 
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/redeemed/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -339,11 +385,13 @@ describe('UserPageSubscriptions', () => {
       jest.clearAllMocks();
 
       expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
+      await user.click(screen.getByText('Select Logs'));
       await user.click(screen.getByText('Load Logs Page 2'));
 
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/logs/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });

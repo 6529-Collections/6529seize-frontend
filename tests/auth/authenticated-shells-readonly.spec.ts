@@ -392,7 +392,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expectProfileShell(page, "Subscriptions");
     await expect(
       page
-        .locator("main")
+        .getByRole("main")
         .getByRole("link", { name: "Learn more", exact: true })
     ).toHaveAttribute("href", "/about/subscriptions");
     await expect(
@@ -490,7 +490,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeLessThan(12);
     const showMore = upcoming.getByRole("button", { name: "Show More" });
     const footer = await showMore.boundingBox();
-    const list = await showMore.locator("..").boundingBox();
+    const list = await upcoming
+      .getByRole("button", { name: "Show More" })
+      .locator("..")
+      .boundingBox();
     expect(footer).not.toBeNull();
     expect(list).not.toBeNull();
     expect(Math.abs(footer!.width - list!.width)).toBeLessThanOrEqual(2);
