@@ -21,7 +21,7 @@ export function ValidatorNeeds() {
       >
         <li>
           A 64-bit computer: a Mac with macOS 11 or newer, a Windows 10 or 11
-          PC, or Linux, a Raspberry Pi 4 or 5 among them.
+          PC, or a Linux computer, a Raspberry Pi 4 or 5 among them.
         </li>
         <li>
           One that stays on, at home or in your office. A cloud server works

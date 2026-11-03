@@ -318,20 +318,20 @@ export default function ValidatorSteps({
               key={step.title}
               className={`${ABOUT_CARD_CLASS_NAME} tw-grid tw-items-center tw-gap-5 tw-p-5 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,23rem)] md:tw-gap-8 md:tw-p-6`}
             >
-              <div className="tw-flex tw-gap-4">
-                <span
-                  aria-hidden="true"
-                  className="tw-text-primary-200 tw-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-base tw-font-semibold"
-                >
-                  {index + 1}
-                </span>
-                <div className="tw-min-w-0">
+              <div className="tw-min-w-0">
+                <div className="tw-flex tw-items-center tw-gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="tw-text-primary-200 tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-sm tw-font-semibold"
+                  >
+                    {index + 1}
+                  </span>
                   <h3 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-8 tw-text-iron-50">
                     <span className="tw-sr-only">Step {index + 1}: </span>
                     {step.title}
                   </h3>
-                  <p className={`tw-mb-0 tw-mt-1 ${BODY}`}>{step.text}</p>
                 </div>
+                <p className={`tw-mb-0 tw-mt-2 ${BODY}`}>{step.text}</p>
               </div>
               {step.picture === "linux-commands" ? (
                 <LinuxCommands platform={platform} debs={debs} />

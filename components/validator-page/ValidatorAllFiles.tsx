@@ -19,7 +19,7 @@ const CELL =
 const MOBILE_LABEL =
   "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500 lg:tw-hidden";
 const HEAD =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
 
 function Cell({
   label,
@@ -39,6 +39,22 @@ function Cell({
       </span>
       {children}
     </td>
+  );
+}
+
+/** "6529 Collection LLC" on one line, and Apple's notarization under it. */
+function SignedBy({ value }: { readonly value: string | null }) {
+  if (!value) {
+    return <span>Not signed</span>;
+  }
+  const [signer, ...notes] = value.split(", ");
+  return (
+    <span className="tw-flex tw-flex-col max-lg:tw-items-end">
+      <span className="tw-whitespace-nowrap">{signer}</span>
+      {notes.length > 0 && (
+        <span className="tw-text-xs tw-text-iron-500">{notes.join(", ")}</span>
+      )}
+    </span>
   );
 }
 
@@ -134,7 +150,7 @@ export default function ValidatorAllFiles({
                 key={entry.file.name}
                 className="max-lg:tw-flex max-lg:tw-flex-col max-lg:tw-gap-3 max-lg:tw-rounded-xl max-lg:tw-border max-lg:tw-border-solid max-lg:tw-border-white/[0.08] max-lg:tw-bg-iron-950/60 max-lg:tw-p-4"
               >
-                <td className={`${CELL} max-lg:tw-block lg:tw-w-[40%]`}>
+                <td className={`${CELL} max-lg:tw-block`}>
                   <span className="tw-block tw-font-semibold tw-text-iron-50">
                     {label}
                   </span>
@@ -166,9 +182,7 @@ export default function ValidatorAllFiles({
                   </span>
                 </Cell>
                 <Cell label="Signed by" className="tw-text-iron-300">
-                  <span className="max-lg:tw-text-right">
-                    {entry.signedBy ?? "Not signed"}
-                  </span>
+                  <SignedBy value={entry.signedBy} />
                 </Cell>
                 <td className={`${CELL} lg:tw-text-right`}>
                   <a

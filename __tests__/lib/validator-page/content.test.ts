@@ -92,10 +92,10 @@ describe("validator page text", () => {
     const linux = fold("linux-and-the-terminal");
     expect(linux).toContain("glibc 2.35 or newer");
     expect(linux).toContain(
-      "`sudo apt install ./6529-validator_0.1.0_amd64.deb`"
+      "\nsudo apt install ./6529-validator_0.1.0_amd64.deb\n"
     );
     expect(linux).toContain(
-      "`sudo apt install ./6529-validator_0.1.0_arm64.deb`"
+      "\nsudo apt install ./6529-validator_0.1.0_arm64.deb\n"
     );
     expect(fold("known-issues")).toContain(
       "The [known issues](/validator/known-issues) list each one"
