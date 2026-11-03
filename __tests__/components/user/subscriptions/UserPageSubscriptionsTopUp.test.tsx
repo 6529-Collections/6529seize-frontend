@@ -103,12 +103,27 @@ describe("UserPageSubscriptionsTopUp", () => {
       >);
   });
 
+  it("keeps the original radio choices keyboard-selectable without sending ETH", async () => {
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+    const oneCard = screen.getByRole("radio", { name: "1 Card" });
+    await user.click(oneCard);
+    expect(oneCard).toBeChecked();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("radio", { name: "Other" })).toBeChecked();
+    expect(oneCard).not.toBeChecked();
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  });
+
   it("sends transaction when 1 Card option is selected and Send is clicked", async () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const oneCardOption = screen.getByRole("button", {
-      name: "1 Card 0.06529 ETH",
+    const oneCardOption = screen.getByRole("radio", {
+      name: "1 Card",
     });
     await user.click(oneCardOption);
 
@@ -282,13 +297,13 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(recommendation).toBeVisible();
     expect(minimum).toBeVisible();
     expect(
-      screen.getByRole("button", { name: /^Recommended/ })
-    ).toHaveAccessibleDescription(recommendation.textContent!);
+      screen.getByRole("radio", { name: /^Recommended/ })
+    ).toHaveAccessibleDescription(`0.17087 ETH ${recommendation.textContent}`);
     expect(
-      screen.getByRole("button", { name: /^Minimum for next drop/ })
-    ).toHaveAccessibleDescription(minimum.textContent!);
+      screen.getByRole("radio", { name: /^Minimum for next drop/ })
+    ).toHaveAccessibleDescription(`0.04029 ETH ${minimum.textContent}`);
     await user.click(
-      screen.getByRole("button", { name: "Recommended 3 Cards · 0.17087 ETH" })
+      screen.getByRole("radio", { name: "Recommended - 3 Cards" })
     );
     expect(minimum).toBeVisible();
     await user.click(
@@ -313,9 +328,7 @@ describe("UserPageSubscriptionsTopUp", () => {
       >);
     render(<UserPageSubscriptionsTopUp />);
     const user = userEvent.setup();
-    await user.click(
-      screen.getByRole("button", { name: "1 Card 0.06529 ETH" })
-    );
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
     await user.click(
       screen.getByRole("button", { name: "Top up 0.06529 ETH" })
     );
@@ -340,7 +353,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     );
     const user = userEvent.setup();
     await user.click(
-      screen.getByRole("button", { name: /^Minimum for next drop/ })
+      screen.getByRole("radio", { name: /^Minimum for next drop/ })
     );
     expect(
       screen.getByText("Funds 1 intended drop through The Memes #571")
@@ -367,9 +380,9 @@ describe("UserPageSubscriptionsTopUp", () => {
       />
     );
     expect(
-      screen.queryByRole("button", { name: /^Minimum for next drop/ })
+      screen.queryByRole("radio", { name: /^Minimum for next drop/ })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Recommended/ })).toBeVisible();
+    expect(screen.getByRole("radio", { name: /^Recommended/ })).toBeVisible();
   });
 
   it("refreshes coverage after the submitted transaction is confirmed", async () => {

@@ -115,6 +115,10 @@ first render.
 
 ## Current Behavior
 
+- Top up uses the original cards with radio selectors at the top right, stacked
+  card counts and ETH amounts, and a gentle lift and shadow on hover. Reduced
+  motion disables that animation. Other keeps its count input and ETH preview.
+  The panel has a visible Top up heading, with both funding projections retained.
 - Coverage status ramps with urgency and pairs a colored dot with text:
   - `Covered`: at least 7 consecutive intended drops are fully funded
   - `Plan a top up`: 4-6 drops are fully funded

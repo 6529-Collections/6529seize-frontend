@@ -438,6 +438,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const topUp = page.getByRole("region", { name: "Top up" });
     await expect(topUp).toHaveAttribute("id", hash.slice(1));
     await expect(topUp).toBeFocused();
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeVisible();
     await expect(topUp).toBeInViewport();
   });
 
@@ -505,12 +508,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const topUp = page.getByRole("region", { name: "Top up", exact: true });
     await expect(topUp).toBeFocused();
     await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeVisible();
+    await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")
     ).toBeVisible();
     await expect(
-      topUp.getByRole("button", { name: /^Minimum for next drop/ })
+      topUp.getByRole("radio", { name: /^Minimum for next drop/ })
     ).toHaveAccessibleDescription(
-      /^Funds 4 intended drops through The Memes #571$/
+      /^0.12232 ETH Funds 4 intended drops through The Memes #571$/
     );
     if (page.viewportSize()!.width >= 768) {
       await expectSingleLineLabel(
@@ -526,6 +532,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const customCount = topUp.getByRole("spinbutton", {
       name: "Other card count",
     });
+    const customInputBox = await customCount.boundingBox();
+    expect(customInputBox).not.toBeNull();
+    expect(customInputBox!.width).toBeGreaterThanOrEqual(100);
     await customCount.fill("2");
     await expect(topUp.getByRole("status")).toHaveText("0.13058 ETH");
     await expect(topUp.getByText("0.13058 ETH", { exact: true })).toBeVisible();
@@ -534,14 +543,23 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await captureSafeScreenshot(page, testInfo, "subscriptions-custom-preview");
     await customCount.fill("");
     await expect(topUp.getByRole("status")).toBeEmpty();
-    await topUp.getByRole("button", { name: /^Recommended/ }).click();
+    await topUp.getByRole("radio", { name: /^Recommended/ }).click();
     await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")
     ).toBeVisible();
     await expect(
       topUp.getByRole("button", { name: "Top up 2.73392 ETH" })
     ).toBeVisible();
-    await topUp.getByRole("button", { name: /^Minimum for next drop/ }).click();
+    await expect(
+      topUp.getByRole("radio", { name: /^Recommended/ })
+    ).toBeChecked();
+    await topUp.getByRole("radio", { name: /^Minimum for next drop/ }).click();
+    await expect(
+      topUp.getByRole("radio", { name: /^Minimum for next drop/ })
+    ).toBeChecked();
+    await expect(
+      topUp.getByRole("radio", { name: /^Recommended/ })
+    ).not.toBeChecked();
     await expect(
       topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
     ).toBeVisible();
@@ -552,11 +570,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     });
     await expect(deepTime).toHaveAttribute("aria-expanded", "false");
     await expect(
-      topUp.getByRole("button", { name: /^Remaining Period/ })
+      topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeHidden();
     await deepTime.click();
     await expect(
-      topUp.getByRole("button", { name: /^Remaining Period/ })
+      topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeVisible();
     await expect(
       topUp.getByRole("button", {
@@ -573,7 +591,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       })
       .click();
     await expect(
-      topUp.getByRole("button", { name: /^Remaining Period/ })
+      topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeHidden();
     await expect(
       topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
