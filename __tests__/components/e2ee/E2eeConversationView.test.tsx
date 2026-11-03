@@ -35,6 +35,9 @@ const mutedChats = (): string[] =>
 jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
   useProfileBlockState: () => ({ block: mockBlock }),
 }));
+jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
+  E2eeRenewalBanner: () => null,
+}));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
   useRouter: () => ({
