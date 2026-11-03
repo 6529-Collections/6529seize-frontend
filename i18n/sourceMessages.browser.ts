@@ -41,9 +41,14 @@ function reportUnregisteredKey(key: string): void {
     `[i18n] No en-US source message is registered for "${key}". Import its namespace from @/i18n/namespaces in the module that uses it.`
   );
   // Loaded only on a miss, so the monitoring code stays out of every page.
+  // If its chunk fails too, say so rather than drop the report silently.
   import("@/utils/monitoring/i18nMonitoring")
     .then((module) => module.reportUnregisteredMessageKey(key))
-    .catch(() => undefined);
+    .catch(() => {
+      console.warn(
+        `[i18n] Could not load monitoring to report the unregistered key "${key}".`
+      );
+    });
 }
 
 /**
