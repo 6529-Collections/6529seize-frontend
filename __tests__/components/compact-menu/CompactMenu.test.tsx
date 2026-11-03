@@ -28,7 +28,9 @@ describe("CompactMenu focus", () => {
     await user.keyboard("{ArrowUp}{Enter}");
     expect(select).toHaveBeenCalledWith("first");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(screen.getByRole("button", { name: "Options" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Options" })).toHaveFocus()
+    );
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 
@@ -55,7 +57,9 @@ describe("CompactMenu focus", () => {
     expect(menu).toHaveAttribute("aria-activedescendant", link.id);
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(screen.getByRole("button", { name: "Create" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create" })).toHaveFocus()
+    );
     await user.keyboard("{Enter}");
     await waitFor(() =>
       expect(

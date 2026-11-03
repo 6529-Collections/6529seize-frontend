@@ -209,6 +209,10 @@ export function defineCollectorsLeaderboardTests() {
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
+    // Finish the hover interaction before exercising keyboard focus. The tooltip
+    // becomes invisible before its dismissal transition removes it from the DOM.
+    await page.mouse.move(0, 0);
+    await expect(csvTooltip).toHaveCount(0);
     await csvButton.focus();
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");

@@ -1,7 +1,7 @@
 import "next/dist/compiled/server-only";
 
 import type { TheMemesSearchParams } from "@/components/the-memes/theMemesRouteParams";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { anonymousSsrFetch } from "@/lib/fetch/ssrFetch";
@@ -40,7 +40,7 @@ function getInitialDataUrl(): string {
     sort_direction: "ASC",
   });
 
-  return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
+  return apiUrl(`/api/memes_extended_data?${query.toString()}`);
 }
 
 function isMemesResponse(

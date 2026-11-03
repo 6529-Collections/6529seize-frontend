@@ -479,18 +479,42 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
 
 // Representative browser cases cover each newly translated guide family.
 // Dictionary completeness and interpolation across every locale live in Jest.
+// Shared staging has the Explained TDH redesign before production/main. Keep
+// both exact copy contracts during rollout, selecting by the page's shell marker
+// rather than accepting either heading or skipping localization assertions.
 for (const guide of [
   {
     locale: "en-GB",
     path: "/network/tdh/consolidation",
     heading: "Combine your wallets",
     link: "How your wallets fit together",
+    explained: {
+      heading: "Up to four wallets count as one collector.",
+      link: "Under the hood: why every pair must link both ways",
+      href: "/network/tdh/consolidation/design",
+    },
   },
   {
     locale: "fr-FR",
     path: "/safe-collecting",
     heading: "Collectionner en sécurité",
     link: "Configurer vos portefeuilles",
+    setup: {
+      fresh: "Partir de zéro",
+      existing: "Déjà collectionneur",
+      airdrops: "Choisir la destination des airdrops",
+    },
+  },
+  {
+    locale: "de-DE",
+    path: "/safe-collecting",
+    heading: "Sicher sammeln",
+    link: "Wallets einrichten",
+    setup: {
+      fresh: "Neu anfangen",
+      existing: "Du sammelst bereits",
+      airdrops: "Airdrop-Ziel wählen",
+    },
   },
   {
     locale: "es-ES",
@@ -503,9 +527,15 @@ for (const guide of [
     path: "/network/tdh/consolidation/design",
     heading: "So funktioniert die Wallet-Konsolidierung",
     link: "Leitfaden für Sammler lesen",
+    explained: {
+      heading:
+        "Warum jedes Paar von Wallets in beide Richtungen verknüpft wird",
+      link: "2 Ihre Wallets",
+      href: "/network/tdh/consolidation",
+    },
   },
 ] as const) {
-  test.describe(`${guide.locale} collecting guide @surface @medium @large @readonly`, () => {
+  test.describe(`${guide.locale} collecting guide (${guide.path}) @surface @medium @large @readonly`, () => {
     test.use({ locale: guide.locale });
 
     test("renders translated guide copy on a narrow screen", async ({
@@ -513,11 +543,53 @@ for (const guide of [
     }) => {
       await page.setViewportSize({ width: 375, height: 850 });
       await gotoReady(page, guide.path);
-      await expectHeading(page, guide.heading);
+      const main = pageMain(page);
       await expect(
-        page.getByRole("link", { name: guide.link, exact: true })
+        main.getByRole("heading", { level: 1 }).first()
       ).toBeVisible();
+      const expected =
+        "explained" in guide &&
+        (await page
+          .getByRole("main")
+          .first()
+          .locator('[data-explained-shell="tdh"]')
+          .count()) > 0
+          ? guide.explained
+          : guide;
+      await expect(
+        main.getByRole("heading", {
+          level: 1,
+          name: expected.heading,
+          exact: true,
+        })
+      ).toBeVisible();
+      const link = main.getByRole("link", { name: expected.link, exact: true });
+      await expect(link).toBeVisible();
+      if ("href" in expected) {
+        await expect(link).toHaveAttribute("href", expected.href);
+      }
       await expectNoHorizontalOverflow(page);
+      if ("setup" in guide) {
+        const airdrops = page.getByRole("link", {
+          name: guide.setup.airdrops,
+          exact: true,
+        });
+        await expect(airdrops).toBeVisible();
+        await expect(airdrops).toHaveAttribute(
+          "href",
+          "/safe-collecting/register-delegation?collection=MEMES&use_case=3"
+        );
+        await page
+          .getByRole("tab", { name: guide.setup.existing, exact: true })
+          .click();
+        await expectNoHorizontalOverflow(page);
+        await page.setViewportSize({ width: 320, height: 850 });
+        await expectNoHorizontalOverflow(page);
+        await page
+          .getByRole("tab", { name: guide.setup.fresh, exact: true })
+          .click();
+        await expectNoHorizontalOverflow(page);
+      }
     });
   });
 }

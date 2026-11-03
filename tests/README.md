@@ -302,6 +302,16 @@ App PR CI:
   in the installed quality lane for every pull request; test-helper
   typechecking and release-workflow contract suites run only when their owning
   paths change.
+- After that production build, `6529 run perf:budget` sums the gzip and
+  brotli bytes of first-load JavaScript for the root layout and a few key
+  routes, and fails when one grows past `scripts/perf-budget.json` plus a small
+  tolerance. Each file is compressed on its own and the sizes are added, so the
+  numbers are a stable gate for comparing builds, not the bytes a visitor
+  receives. The check evaluates the build's client reference manifests, so run
+  it only on builds of this repository. When a change shrinks the numbers, run
+  `6529 run perf:budget:update` after a local `6529 run base-build` and commit
+  the lower budget. Raise a budget only in a reviewed change that explains the
+  new bytes.
 - Selected quality/contracts, production-build, smoke-Playwright, and
   critical-shell-Playwright lanes run in parallel. The lightweight final
   `Installed app checks` job preserves the required branch-protection gate and
@@ -316,7 +326,7 @@ App PR CI:
   session that compiles every critical-shell route outgrows the 16 GB runner's
   memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
   `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
-false` because CI dev servers always start cold.
+  false` because CI dev servers always start cold.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name
@@ -418,11 +428,10 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, long-drop expansion at the latest scroll
-  position and expansion/collapse anchoring while reading older posts, plus
-  exact synthetic chat-drop and poll submits. The poll flow
-  covers its responsive layout, options, type, closing
-  time, audience, and anonymity controls. The mock API allows only those
+  and deterministic link previews, plus exact synthetic chat-drop and poll
+  submits. Long-post coverage verifies full lists, links, and separate paragraphs
+  without a plain-text collapse preview. The poll flow covers its responsive
+  layout, options, type, closing time, audience, and anonymity controls. The mock API allows only those
   queryless `/api/drops` shapes, with signer
   limited to the configured sandbox wallet or the empty unsigned direct-contract
   form; upload and attachment endpoints still fail closed. It must run against a
@@ -653,8 +662,7 @@ Large-pack ownership:
   require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
-  composer eligibility, long-drop timeline rendering, or local sandbox/mock API
-  coverage. The pack may use
+  composer eligibility, or local sandbox/mock API coverage. The pack may use
   local synthetic auth and a mock API, and it may submit only the synthetic
   chat-drop shape modeled by the mock API with the bounded sandbox signer. It
   must never submit drops or upload files to staging or production. Treat it as

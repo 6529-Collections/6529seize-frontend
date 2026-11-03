@@ -1,4 +1,4 @@
-import { asE2eeApiError } from "../api";
+import { asE2eeApiError } from "../api-errors";
 import type {
   ApiE2eeDevice,
   ApiE2eeKeyPackageStatus,
@@ -42,10 +42,8 @@ const RENEWAL_WINDOW_MS = 14 * DAY_MS;
 export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
 
-const grantExpired = (
-  ctx: EngineContext,
-  device: StoredDevice
-): boolean => device.grant.expires_at * 1000 <= ctx.now();
+const grantExpired = (ctx: EngineContext, device: StoredDevice): boolean =>
+  device.grant.expires_at * 1000 <= ctx.now();
 
 /**
  * The stored device, unless it was granted under another ciphersuite (the

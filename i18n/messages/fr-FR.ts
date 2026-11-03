@@ -28,6 +28,10 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.myVotes.sort": "Trier par",
+  "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
+  "waves.myVotes.sort.leaderboard": "Position au classement",
+  "waves.myVotes.sort.lastVoted": "Dernier vote",
   "e2ee.profile.view": "Voir le profil de {name}",
   "e2ee.profile.viewUnknown": "Voir le profil",
   "e2ee.profile.level": "Niveau {level}",
@@ -245,8 +249,6 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
-  "waves.drop.actions.showMore": "Afficher plus",
-  "waves.drop.actions.showLess": "Afficher moins",
   "media.video.captions": "Sous-titres",
   "media.video.download": "Telecharger le media",
   "media.video.downloading": "Telechargement du media",
@@ -625,6 +627,8 @@ export const FR_FR_MESSAGES = {
   "drop.media.saveDialogTitle": "Enregistrer l'image",
   "drop.media.processingFailed": "Le traitement de l'image a echoue.",
   "drop.media.processingTimedOut": "Le traitement de l'image a expire.",
+  "media.interactive.frameTitle": "Média HTML interactif",
+  "media.interactive.loading": "Chargement du média interactif",
   "quickDm.regionAriaLabel": "Messages directs rapides",
   "quickDm.openButtonAriaLabel": "Ouvrir les messages directs rapides",
   "quickDm.openButtonUnreadAriaLabel":

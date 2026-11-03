@@ -1,7 +1,7 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
-import { Menu, MenuItems, Transition } from "@headlessui/react";
+import { useEffect, useState } from "react";
+import { Menu, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
 import { CompactMenuItemsPanel } from "./subcomponents/CompactMenuItemsPanel";
@@ -124,8 +124,7 @@ function CompactMenuContent({
   useEffect(() => {
     onOpenChange?.(isOpen);
   }, [isOpen, onOpenChange]);
-  const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(
-    isOpen,
+  const { menuItemsRef } = useCompactMenuFocus(
     autoFocusItem || keyboardNavigation
   );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
@@ -142,44 +141,33 @@ function CompactMenuContent({
         isOpen={isOpen}
         close={close}
       />
-      <Transition
-        as={Fragment}
-        enter="tw-transition tw-duration-150 tw-ease-out"
-        enterFrom="tw-translate-y-1 tw-opacity-0"
-        enterTo="tw-translate-y-0 tw-opacity-100"
-        leave="tw-transition tw-duration-100 tw-ease-in"
-        leaveFrom="tw-translate-y-0 tw-opacity-100"
-        leaveTo="tw-translate-y-1 tw-opacity-0"
-        afterEnter={focusInitialMenuItem}
+      <MenuItems
+        ref={menuItemsRef}
+        data-keyboard-navigation={keyboardNavigation}
+        anchor={menuAnchor}
+        className={clsx(
+          "tw-group/compact-menu",
+          unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
+          menuWidthClassName,
+          menuClassName
+        )}
       >
-        <MenuItems
-          ref={menuItemsRef}
-          data-keyboard-navigation={keyboardNavigation}
-          anchor={menuAnchor}
-          className={clsx(
-            "tw-group/compact-menu",
-            unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
-            menuWidthClassName,
-            menuClassName
-          )}
-        >
-          <CompactMenuItemsPanel
-            items={items}
-            activeItemId={activeItemId}
-            onItemSelect={onItemSelect}
-            close={close}
-            closeOnSelect={closeOnSelect}
-            header={header}
-            headerClassName={headerClassName}
-            itemClassName={itemClassName}
-            activeItemClassName={activeItemClassName}
-            inactiveItemClassName={inactiveItemClassName}
-            focusItemClassName={focusItemClassName}
-            itemsWrapperClassName={itemsWrapperClassName}
-            unstyledItems={unstyledItems}
-          />
-        </MenuItems>
-      </Transition>
+        <CompactMenuItemsPanel
+          items={items}
+          activeItemId={activeItemId}
+          onItemSelect={onItemSelect}
+          close={close}
+          closeOnSelect={closeOnSelect}
+          header={header}
+          headerClassName={headerClassName}
+          itemClassName={itemClassName}
+          activeItemClassName={activeItemClassName}
+          inactiveItemClassName={inactiveItemClassName}
+          focusItemClassName={focusItemClassName}
+          itemsWrapperClassName={itemsWrapperClassName}
+          unstyledItems={unstyledItems}
+        />
+      </MenuItems>
     </>
   );
 }

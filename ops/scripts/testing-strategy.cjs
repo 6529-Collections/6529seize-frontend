@@ -595,6 +595,8 @@ function isBuildSensitiveFile(filePath) {
     normalized.startsWith(".github/workflows/") ||
     normalized.startsWith("generated/") ||
     normalized.startsWith("scripts/build") ||
+    // The first-load budget only runs after the production build.
+    normalized.startsWith("scripts/perf-budget") ||
     normalized.startsWith("scripts/start") ||
     normalized.startsWith("scripts/run-secure") ||
     normalized.startsWith("ops/testing-strategy/") ||

@@ -25,7 +25,7 @@
 .htmlContainer h5 {
   float: none;
   color: white;
-  font-family: "Montserrat", sans-serif !important;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif !important;
 }
 
 .htmlContainer.ensContent h4 {
@@ -64,7 +64,7 @@
   float: none;
   margin-top: 0;
   color: #efeff1;
-  font-family: Montserrat, sans-serif !important;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif !important;
   font-weight: 600;
   letter-spacing: -0.015em;
 }

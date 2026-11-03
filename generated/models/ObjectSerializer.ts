@@ -254,6 +254,7 @@ export * from '../models/ApiCompetitionLeaderboardPage';
 export * from '../models/ApiCompetitionLifecycle';
 export * from '../models/ApiCompetitionMyVote';
 export * from '../models/ApiCompetitionMyVotePage';
+export * from '../models/ApiCompetitionMyVotesSort';
 export * from '../models/ApiCompetitionOutcome';
 export * from '../models/ApiCompetitionOutcomePage';
 export * from '../models/ApiCompetitionPage';
@@ -807,6 +808,8 @@ export * from '../models/ApiUpdateProfileNotificationCategories';
 export * from '../models/ApiUpdateProfilePreferences';
 export * from '../models/ApiUpdateProxyActionRequest';
 export * from '../models/ApiUpdateWaveDecisionPause';
+export * from '../models/ApiUpdateWaveHubChat';
+export * from '../models/ApiUpdateWaveHubRequest';
 export * from '../models/ApiUpdateWaveNotificationPreferencesRequest';
 export * from '../models/ApiUpdateWaveParticipationConfig';
 export * from '../models/ApiUpdateWaveRequest';
@@ -1232,6 +1235,7 @@ import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboa
 import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
 import { ApiCompetitionMyVote      } from '../models/ApiCompetitionMyVote';
 import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
+import { ApiCompetitionMyVotesSort } from '../models/ApiCompetitionMyVotesSort';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
@@ -1785,6 +1789,8 @@ import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfi
 import { ApiUpdateProfilePreferences, ApiUpdateProfilePreferencesDirectMessagePolicyEnum    , ApiUpdateProfilePreferencesNotificationLevelEnum    } from '../models/ApiUpdateProfilePreferences';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
 import { ApiUpdateWaveDecisionPause } from '../models/ApiUpdateWaveDecisionPause';
+import { ApiUpdateWaveHubChat } from '../models/ApiUpdateWaveHubChat';
+import { ApiUpdateWaveHubRequest } from '../models/ApiUpdateWaveHubRequest';
 import { ApiUpdateWaveNotificationPreferencesRequest } from '../models/ApiUpdateWaveNotificationPreferencesRequest';
 import { ApiUpdateWaveParticipationConfig } from '../models/ApiUpdateWaveParticipationConfig';
 import { ApiUpdateWaveRequest } from '../models/ApiUpdateWaveRequest';
@@ -2058,6 +2064,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCompetitionDecisionStatus",
     "ApiCompetitionEntryStatus",
     "ApiCompetitionLifecycle",
+    "ApiCompetitionMyVotesSort",
     "ApiCompetitionParticipationConfigRequiredMediaEnum",
     "ApiCompetitionRulesInputTypeEnum",
     "ApiCompetitionSortDirection",
@@ -2999,6 +3006,8 @@ let typeMap: {[index: string]: any} = {
     "ApiUpdateProfilePreferences": ApiUpdateProfilePreferences,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
     "ApiUpdateWaveDecisionPause": ApiUpdateWaveDecisionPause,
+    "ApiUpdateWaveHubChat": ApiUpdateWaveHubChat,
+    "ApiUpdateWaveHubRequest": ApiUpdateWaveHubRequest,
     "ApiUpdateWaveNotificationPreferencesRequest": ApiUpdateWaveNotificationPreferencesRequest,
     "ApiUpdateWaveParticipationConfig": ApiUpdateWaveParticipationConfig,
     "ApiUpdateWaveRequest": ApiUpdateWaveRequest,

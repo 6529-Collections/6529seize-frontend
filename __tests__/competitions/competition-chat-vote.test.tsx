@@ -1,3 +1,4 @@
+import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
 import {
   act,
   fireEvent,
@@ -22,6 +23,9 @@ import {
   invalidateCompetition,
 } from "@/services/api/competitions-api";
 
+jest.mock("@/components/auth/auth-session-scope", () => ({
+  isAuthSessionForProfile: jest.fn(() => true),
+}));
 jest.mock(
   "next/dynamic",
   () => () =>
@@ -30,11 +34,12 @@ jest.mock(
     }
 );
 let mockSignedIn = true;
+const mockRequestAuth = jest.fn();
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockSignedIn ? { id: "viewer" } : null,
     setToast: jest.fn(),
-    requestAuth: async () => ({ success: true }),
+    requestAuth: mockRequestAuth,
   }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -133,8 +138,10 @@ function mount(
   return { ...rendered, client };
 }
 beforeEach(() => {
+  jest.mocked(isAuthSessionForProfile).mockReturnValue(true);
   jest.clearAllMocks();
   mockSignedIn = true;
+  mockRequestAuth.mockResolvedValue({ success: true });
   jest.mocked(useCompetitionViewer).mockReturnValue("viewer:self");
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context as never);
   jest.mocked(fetchCompetitionCredits).mockResolvedValue(initialBudget);
@@ -168,6 +175,40 @@ it("uses the entry budget and competition vote endpoint despite the parent wave'
     expect.any(AbortSignal)
   );
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+});
+it("does not submit a stale vote after the viewer changes during authentication", async () => {
+  let finishAuth!: (result: { success: boolean }) => void;
+  mockRequestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  const { unmount } = mount();
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() => expect(mockRequestAuth).toHaveBeenCalled());
+  unmount();
+  jest.mocked(useCompetitionViewer).mockReturnValue("other:self");
+  mount();
+  await act(async () => finishAuth({ success: true }));
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+it("blocks an actor change before React updates the viewer", async () => {
+  let finishAuth!: (result: { success: boolean }) => void;
+  mockRequestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  mount();
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  jest.mocked(isAuthSessionForProfile).mockReturnValue(false);
+  await act(async () => finishAuth({ success: true }));
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+  expect(input).toHaveValue(25);
 });
 it("keeps slider mode with the competition range", async () => {
   mount("slider");
