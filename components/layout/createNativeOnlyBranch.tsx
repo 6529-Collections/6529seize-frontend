@@ -22,9 +22,11 @@ export function createNativeOnlyBranch(
   const LoadedBranch = loader.Loaded;
   const Fallback = fallback;
 
+  // Intentionally at module evaluation, once per branch: in the app this
+  // starts the download before React renders the layout that needs it.
   if (
     typeof document !== "undefined" &&
-    document.documentElement.hasAttribute("data-native-runtime")
+    document.documentElement.dataset["nativeRuntime"] !== undefined
   ) {
     loader.preload();
   }
