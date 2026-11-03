@@ -87,6 +87,12 @@ describe("filesystem contract selection", () => {
     ]);
   });
 
+  it("selects the first-load budget contract when the budget file changes", () => {
+    expect(selectFileContractTests(["scripts/perf-budget.json"])).toEqual([
+      "__tests__/scripts/perf-budget.test.ts",
+    ]);
+  });
+
   it("selects baseline changes and deduplicates overlapping inputs", () => {
     expect(
       selectFileContractTests([

@@ -3,6 +3,7 @@ import {
   getDelegationAppTitle,
   getDelegationRouteMetadata,
 } from "@/components/delegation/delegation-page-metadata";
+import { parseDelegationFormPresets } from "@/components/delegation/delegation-options";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DelegationCenterSection } from "@/types/enums";
 import type { Metadata } from "next";
@@ -16,19 +17,17 @@ export default async function SafeCollectingPage({
 }) {
   const query = await searchParams;
   const address = typeof query["address"] === "string" ? query["address"] : "";
-  const collection =
-    typeof query["collection"] === "string" ? query["collection"] : "";
-  const useCase =
-    typeof query["use_case"] === "string"
-      ? Number.parseInt(query["use_case"], 10) || 0
-      : 0;
+  const { collectionQuery, useCaseQuery } = parseDelegationFormPresets({
+    collection: query["collection"],
+    use_case: query["use_case"],
+  });
 
   return (
     <DelegationPageClient
       section={DelegationCenterSection.CENTER}
       addressQuery={address}
-      collectionQuery={collection}
-      useCaseQuery={useCase}
+      collectionQuery={collectionQuery}
+      useCaseQuery={useCaseQuery}
     />
   );
 }
