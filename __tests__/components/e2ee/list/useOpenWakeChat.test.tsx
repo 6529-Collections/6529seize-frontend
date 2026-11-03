@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import {
   pickWakeChat,
   useOpenWakeChat,
@@ -6,23 +6,25 @@ import {
 import type { E2eeConversation } from "@/lib/e2ee/types";
 
 const mockReplace = jest.fn();
+const mockRouter = { replace: mockReplace };
 let mockSearch = "wake=1";
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => mockRouter,
   useSearchParams: () => new URLSearchParams(mockSearch),
 }));
 
 let mockConversations: E2eeConversation[] = [];
 const mockSync = jest.fn(async () => undefined);
 let mockStatus = "ready";
+const mockEngine = {
+  sync: mockSync,
+  getConversations: () => mockConversations,
+};
 jest.mock("@/hooks/e2ee/useE2ee", () => ({
   useE2ee: () => ({
     status: mockStatus,
     profileId: "profile-1",
-    engine: {
-      sync: mockSync,
-      getConversations: () => mockConversations,
-    },
+    engine: mockEngine,
   }),
 }));
 
@@ -77,6 +79,25 @@ describe("opening the chat a push woke", () => {
     );
   });
 
+  it("handles another push after clearing the first wake query", async () => {
+    mockConversations = [chat("g1", 1), chat("g2", 1)];
+    const { rerender } = renderHook(() => useOpenWakeChat());
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith("/messages/encrypted")
+    );
+
+    mockSearch = "";
+    rerender();
+    mockSearch = "wake=1";
+    mockConversations = [chat("g1", 0), chat("g2", 1)];
+    rerender();
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenLastCalledWith("/messages/encrypted/g2")
+    );
+    expect(mockSync).toHaveBeenCalledTimes(2);
+  });
+
   it("does nothing for an ordinary visit or before the device is ready", async () => {
     mockSearch = "";
     const { rerender } = renderHook(() => useOpenWakeChat());
@@ -103,5 +124,37 @@ describe("opening the chat a push woke", () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it.each(["clearing the wake query", "unmounting"])(
+    "cancels pending navigation after %s",
+    async (action) => {
+      mockConversations = [chat("g2", 1)];
+      let finishSync: () => void = () => undefined;
+      mockSync.mockImplementationOnce(
+        () =>
+          new Promise<undefined>((resolve) => {
+            finishSync = () => resolve(undefined);
+          })
+      );
+      const { rerender, unmount } = renderHook(() => useOpenWakeChat());
+      if (action === "unmounting") {
+        unmount();
+      } else {
+        mockSearch = "";
+        rerender();
+      }
+      await act(async () => finishSync());
+      expect(mockReplace).not.toHaveBeenCalled();
+    }
+  );
+
+  it("still opens local unread state when syncing fails", async () => {
+    mockConversations = [chat("g2", 1)];
+    mockSync.mockRejectedValueOnce(new Error("offline"));
+    renderHook(() => useOpenWakeChat());
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith("/messages/encrypted/g2")
+    );
   });
 });

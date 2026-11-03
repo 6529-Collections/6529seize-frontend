@@ -3,7 +3,7 @@
 import { Capacitor } from "@capacitor/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -31,6 +31,7 @@ import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 
 const ACCEPT_CONNECTION_LOCALE = DEFAULT_LOCALE;
+const SETUP_SECRET_PARAM = "device_setup_key";
 // Query parameters that carry connection credentials.
 const CONNECTION_LINK_SECRET_PARAMS = [
   "token",
@@ -42,6 +43,7 @@ interface AcceptConnectionSharingProps {
   token: string;
   address: string;
   role: string | undefined;
+  setupSecret: { current: string };
 }
 
 type SharedProfile = ReturnType<typeof useIdentity>["profile"];
@@ -63,15 +65,21 @@ type ConnectionFlow =
  */
 function removeConnectionSecretsFromAddressBar(): void {
   const url = new URL(globalThis.location.href);
-  const hasSecret = CONNECTION_LINK_SECRET_PARAMS.some((name) =>
-    url.searchParams.has(name)
-  );
+  const fragment = new URLSearchParams(url.hash.slice(1));
+  const hasSetupKey = fragment.has(SETUP_SECRET_PARAM);
+  const hasSecret =
+    hasSetupKey ||
+    CONNECTION_LINK_SECRET_PARAMS.some((name) => url.searchParams.has(name));
   if (!hasSecret) {
     return;
   }
 
   for (const name of CONNECTION_LINK_SECRET_PARAMS) {
     url.searchParams.delete(name);
+  }
+  if (hasSetupKey) {
+    fragment.delete(SETUP_SECRET_PARAM);
+    url.hash = fragment.toString();
   }
   globalThis.history.replaceState(
     globalThis.history.state,
@@ -112,7 +120,10 @@ function getConnectionFlow({
   if (shell === "pending") {
     return "pending";
   }
-  if (hasConnectionShareCode && shell === "native-app") {
+  if (
+    hasConnectionShareCode &&
+    (shell === "native-app" || shell === "desktop-app")
+  ) {
     return "native-share";
   }
   if (!hasLegacyDesktopToken) {
@@ -324,12 +335,16 @@ function isAddressInConnectedAccounts(address: string): boolean {
 async function acceptConnectionShare({
   address,
   connectionShareCode,
+  setupSecret,
+  target,
   setToast,
   seizeAcceptConnection,
   routerPush,
 }: {
   readonly address: string;
   readonly connectionShareCode: string;
+  readonly setupSecret: { current: string };
+  readonly target: "native" | "desktop";
   readonly setToast: SetToast;
   readonly seizeAcceptConnection: (address: string) => void;
   readonly routerPush: (path: string) => void;
@@ -345,7 +360,10 @@ async function acceptConnectionShare({
     return false;
   }
 
-  const redeemResponse = await redeemConnectionShare(connectionShareCode);
+  const redeemResponse = await redeemConnectionShare(
+    connectionShareCode,
+    target
+  );
   const hasValidRedeemResponse =
     !!redeemResponse.address &&
     !!redeemResponse.access_token &&
@@ -384,8 +402,35 @@ async function acceptConnectionShare({
     return false;
   }
 
+  const hasDeviceSetup =
+    Boolean(redeemResponse.encrypted_device_setup) ||
+    Boolean(setupSecret.current);
+  if (hasDeviceSetup) {
+    try {
+      if (!redeemResponse.encrypted_device_setup)
+        throw new Error("Missing device setup");
+      if (redeemResponse.role)
+        throw new Error("Proxy device setup is unavailable");
+      const { acceptConnectionDeviceSetup } =
+        await import("@/lib/device-signing/connection-setup");
+      await acceptConnectionDeviceSetup({
+        envelope: redeemResponse.encrypted_device_setup,
+        secret: setupSecret.current,
+        wallet: redeemResponse.address,
+        accessToken: redeemResponse.access_token,
+        target,
+      });
+    } catch {
+      setToast({
+        message: t(ACCEPT_CONNECTION_LOCALE, "e2ee.connectionSetup.failed"),
+        type: "error",
+      });
+    } finally {
+      setupSecret.current = "";
+    }
+  }
   seizeAcceptConnection(redeemResponse.address);
-  routerPush("/");
+  routerPush(hasDeviceSetup ? "/messages/encrypted" : "/");
   return true;
 }
 
@@ -580,6 +625,8 @@ function AcceptConnectionSharing(
         const accepted = await acceptConnectionShare({
           address,
           connectionShareCode,
+          setupSecret: props.setupSecret,
+          target: shell === "desktop-app" ? "desktop" : "native",
           setToast,
           seizeAcceptConnection,
           routerPush: (path) => router.push(path),
@@ -655,18 +702,26 @@ export default function AcceptConnectionSharingPage() {
   // The whole query identifies a link visit, so reopening the same link (with
   // a new `_t`) on the mounted page is cleaned again.
   const linkQuery = searchParams.toString();
+  const setupSecret = useRef("");
+  const capturedQuery = useRef<string | null>(null);
 
   // A layout effect runs before paint and before passive effects, such as
   // analytics and monitoring, that may read the page URL. It reads the visible
   // URL itself, so whatever credential is shown is removed even if it differs
   // from the router values the accept action uses.
   useLayoutEffect(() => {
+    const fragment = new URLSearchParams(globalThis.location.hash.slice(1));
+    if (capturedQuery.current !== linkQuery) setupSecret.current = "";
+    capturedQuery.current = linkQuery;
+    const unlockKey = fragment.get(SETUP_SECRET_PARAM);
+    if (unlockKey) setupSecret.current = unlockKey;
     removeConnectionSecretsFromAddressBar();
   }, [linkQuery]);
 
   return (
     <AcceptConnectionSharing
       connectionShareCode={connectionShareCode}
+      setupSecret={setupSecret}
       token={token}
       address={address}
       role={role}

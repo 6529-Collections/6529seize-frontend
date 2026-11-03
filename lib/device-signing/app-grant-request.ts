@@ -71,7 +71,7 @@ const failed = (reason: AppGrantFailure): AppGrantResult => ({
   reason,
 });
 
-const toRequest = (
+export const appGrantToRequest = (
   fields: AppGrantFields,
   signature: string,
   deviceLabel: string
@@ -120,7 +120,9 @@ async function adoptE2eeDevice(
   signature: string
 ): Promise<boolean> {
   const device = request.e2eeDevice;
-  if (!device || request.ownProfileId === null) {
+  if (!device) return false;
+  if (request.ownProfileId === null) {
+    device.dispose();
     return false;
   }
   return await device.adopt({
@@ -161,17 +163,17 @@ export async function requestAppDeviceGrant(
     let grant: ApiDeviceGrant;
     try {
       grant = await request.registerGrant(
-        toRequest(fields, signature, request.deviceLabel)
+        appGrantToRequest(fields, signature, request.deviceLabel)
       );
+      // The server must have stored exactly what the wallet signed.
+      if (
+        grant.id.toLowerCase() !== computeAppGrantId(typedData.message) ||
+        grant.revoked_at !== null ||
+        !(await saveDeviceGrant(fields.wallet, grant, request.ownProfileId))
+      ) {
+        return failed("register-failed");
+      }
     } catch {
-      return failed("register-failed");
-    }
-    // The server must have stored exactly what the wallet signed.
-    if (
-      grant.id.toLowerCase() !== computeAppGrantId(typedData.message) ||
-      grant.revoked_at !== null ||
-      !(await saveDeviceGrant(fields.wallet, grant, request.ownProfileId))
-    ) {
       return failed("register-failed");
     }
     handedOver = true;

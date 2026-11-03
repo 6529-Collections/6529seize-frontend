@@ -27,6 +27,7 @@ interface E2eeBannerProps {
   /** Danger banners interrupt (alert); others are polite status updates. */
   readonly live?: boolean | undefined;
   readonly className?: string | undefined;
+  readonly stackActions?: boolean | undefined;
 }
 
 export function E2eeBanner({
@@ -35,6 +36,7 @@ export function E2eeBanner({
   action,
   live = true,
   className = "",
+  stackActions = false,
 }: E2eeBannerProps) {
   const Icon = TONE_ICONS[tone];
   let role: "alert" | "status" | undefined;
@@ -44,7 +46,7 @@ export function E2eeBanner({
   return (
     <div
       role={role}
-      className={`tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm sm:tw-flex-row sm:tw-items-center ${TONE_CLASSES[tone]} ${className}`}
+      className={`tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm ${stackActions ? "" : "sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center"} ${TONE_CLASSES[tone]} ${className}`}
     >
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2">
         <Icon
@@ -54,7 +56,13 @@ export function E2eeBanner({
         <div className="tw-min-w-0 tw-flex-1 tw-break-words">{children}</div>
       </div>
       {hasContent(action) ? (
-        <div className="tw-flex tw-flex-shrink-0 tw-flex-wrap tw-gap-2">
+        <div
+          className={
+            stackActions
+              ? "tw-grid tw-w-full tw-grid-cols-2 tw-gap-2 [&>*]:!tw-w-full [&>*]:!tw-min-w-0 [&>*]:!tw-justify-center [&>*]:!tw-whitespace-normal [&>*]:tw-text-center [&>:last-child:nth-child(odd)]:tw-col-span-2"
+              : "tw-flex tw-max-w-full tw-flex-shrink-0 tw-flex-wrap tw-gap-2"
+          }
+        >
           {action}
         </div>
       ) : null}

@@ -1290,7 +1290,7 @@ import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreate
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateCompetitionEntryRequest } from '../models/ApiCreateCompetitionEntryRequest';
 import { ApiCreateCompetitionRequest } from '../models/ApiCreateCompetitionRequest';
-import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
+import { ApiCreateConnectionShareRequest , ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
 import { ApiCreateConnectionShareResponse    , ApiCreateConnectionShareResponseTargetClientTypeEnum    } from '../models/ApiCreateConnectionShareResponse';
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
@@ -1707,7 +1707,7 @@ import { ApiRateMatter } from '../models/ApiRateMatter';
 import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
 import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithProfileInfoAndLevelPage';
 import { ApiRedeemConnectionShareRequest , ApiRedeemConnectionShareRequestTargetClientTypeEnum   } from '../models/ApiRedeemConnectionShareRequest';
-import { ApiRedeemConnectionShareResponse    , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
+import { ApiRedeemConnectionShareResponse     , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRefreshPushInstallationBadgeRequest } from '../models/ApiRefreshPushInstallationBadgeRequest';

@@ -17,8 +17,8 @@ Signed messages are on for the website in production and staging. They
 are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
 build with the flag off shows none of the controls below and leaves writes
 unchanged. In 6529 Mobile and 6529 Desktop they also need the
-`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag, which is on in staging
-only until the app grant wording is approved (see
+`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag, which is currently on in staging
+and off in production (see
 [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 
 ## Location in the Site
@@ -262,7 +262,7 @@ that the wallet shows as structured fields with this statement:
   ...)". The encrypted-messages key then registers in the background without
   another prompt.
 
-This wording is a draft awaiting owner approval. The grant's origin is
+The existing wallet wording is retained for this rollout. The grant's origin is
 "6529 Desktop" in the desktop app and the site host (6529.io) in the phone
 app. App grants last 180 days, appear under **Devices that can post as you**
 like any other grant (labelled, for example, "6529 app on iPhone"), sign
@@ -367,3 +367,22 @@ same steps from one click and show a status line under the button.
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)
+
+## Connection sharing and status
+
+The Connect Device modal offers source-browser wallet approval for fresh
+receiving-app signing and encryption keys. Open the resulting short-lived,
+one-time link in Mobile or Core; no wallet connection is required in that
+receiving app. Existing working local keys are preserved. This shares a fresh
+wallet-approved device identity, not the source browser's old keys or chat
+history. See [Encrypted messages](../../encrypted-messages.md#setup-through-connection-sharing).
+
+A shield on the sidebar account avatar describes this browser's two states:
+signed posts and encrypted DMs. The state is independent of the live wallet
+connection. In web authentication prompts, the explanation distinguishes the
+wallet's standard SIWE **Version 1** from 6529's auth-session v2; the SIWE
+version itself is unchanged.
+
+The composer notice body uses the full space below its title and controls on
+narrow screens. Legacy DM warning actions use equal-width columns below the
+warning, including in the desktop quick-DM panel.

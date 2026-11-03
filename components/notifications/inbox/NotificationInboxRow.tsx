@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
@@ -50,7 +52,12 @@ export default function NotificationInboxRow({
     : [];
   const identity =
     "related_identity" in notification ? notification.related_identity : null;
-  const preview = getInboxPreview(notification);
+  const encryptedPreview = useEncryptedNotificationPreview(
+    notification.cause === ApiNotificationCause.E2EeMessage
+      ? (notification.additional_context.encrypted_group ?? null)
+      : null
+  );
+  const preview = encryptedPreview ?? getInboxPreview(notification);
   return (
     <li>
       <Link

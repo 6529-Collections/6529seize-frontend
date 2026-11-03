@@ -1,10 +1,19 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
+import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationInboxRow from "@/components/notifications/inbox/NotificationInboxRow";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { INotificationDropReacted } from "@/types/feed.types";
+
+jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
+  useEncryptedNotificationPreview: jest.fn(() => null),
+}));
+beforeEach(() => {
+  jest.mocked(useEncryptedNotificationPreview).mockReturnValue(null);
+});
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -104,3 +113,34 @@ it("uses the group's latest drop even when the first reaction is older", () => {
     "/waves/wave?serialNo=42"
   );
 });
+
+it.each([null, "A locally decrypted message"])(
+  "preserves encrypted notification fallback or local preview (%s)",
+  (preview) => {
+    jest.mocked(useEncryptedNotificationPreview).mockReturnValue(preview);
+    const notification: INotificationEncryptedMessage = {
+      id: 12,
+      created_at: 12,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: { encrypted_group: "0xgroup" },
+    };
+    const onOpen = jest.fn();
+    render(
+      <NotificationInboxRow
+        notification={notification}
+        handle="viewer"
+        onOpen={onOpen}
+      />
+    );
+    expect(useEncryptedNotificationPreview).toHaveBeenCalledWith("0xgroup");
+    expect(screen.getByText("New encrypted message")).toBeInTheDocument();
+    if (preview) expect(screen.getByText(preview)).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/messages/encrypted/0xgroup"
+    );
+    fireEvent.click(screen.getByRole("link"));
+    expect(onOpen).toHaveBeenCalledWith([12]);
+  }
+);

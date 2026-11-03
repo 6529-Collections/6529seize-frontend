@@ -27,6 +27,9 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "@/components/auth/Auth";
 import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import DeviceSecurityStatus, {
+  isDeviceSecurityStatusEnabled,
+} from "@/components/device-signing/DeviceSecurityStatus";
 import WebSidebarAccountAvatar from "./WebSidebarAccountAvatar";
 import { useSidebarIdentity } from "./useSidebarIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -49,6 +52,7 @@ function WebSidebarUser({
     useState(false);
   const hasHydrated = useHasHydrated();
   const accountDescriptionId = useId();
+  const deviceStatusId = useId();
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
     useIsMobileDeviceStatus();
@@ -334,7 +338,11 @@ function WebSidebarUser({
             : "webSidebar.accountMenu.openAriaLabel"
         )}
         aria-expanded={showUserMenu}
-        aria-describedby={accountDescriptionId}
+        aria-describedby={
+          isDeviceSecurityStatusEnabled()
+            ? `${accountDescriptionId} ${deviceStatusId}`
+            : accountDescriptionId
+        }
         aria-controls="user-menu"
       >
         <span id={accountDescriptionId} className="tw-sr-only">
@@ -364,6 +372,7 @@ function WebSidebarUser({
                 />
               )}
             </div>
+            <DeviceSecurityStatus descriptionId={deviceStatusId} />
             {hasUnreadOnOtherConnectedProfiles && (
               <div
                 className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"

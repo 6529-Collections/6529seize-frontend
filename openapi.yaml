@@ -30391,6 +30391,13 @@ components:
       required:
         - target_client_type
       properties:
+        encrypted_device_setup:
+          type: string
+          maxLength: 32768
+          pattern: ^v1\.[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]+$
+          description: >-
+            Encrypted fresh target-device keys and wallet grant. The unlock
+            secret is never sent to this API. Not supported for proxy sessions.
         target_client_type:
           type: string
           enum:
@@ -33457,12 +33464,16 @@ components:
           type: string
           nullable: true
           description: >-
-            Set when the device was granted by a combined sign-in grant: the
-            exact Sign-In with Ethereum message the wallet signed. Then
-            wallet_signature is the EIP-191 signature over it, grant_id is its
-            EIP-191 hash, and grant holds the terms of its
-            urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain,
-            issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
+            Set for a combined sign-in grant or an app device grant with an
+            encrypted-messages key. For a combined sign-in grant, this is the
+            exact SIWE message the wallet signed; wallet_signature is its
+            EIP-191 signature, grant_id its EIP-191 hash, and grant holds the
+            terms of its urn:6529:mls-device-grant:v1 resource (origin = the
+            SIWE domain, issued_at = its Issued At). For an app device grant,
+            this is the signed EIP-712 DeviceGrant message as JSON;
+            wallet_signature is its typed-data signature and grant_id its
+            EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant
+            registrations.
     ApiE2eeDeviceGrant:
       type: object
       description: >-
@@ -38389,6 +38400,11 @@ components:
         submitted_at:
           type: integer
           format: int64
+        encrypted_group:
+          type: string
+          description: >-
+            Opaque encrypted-chat handle. No sender or message content is stored
+            in the notification.
         reason:
           $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:
@@ -38548,6 +38564,7 @@ components:
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
         - VOTING_CREDITS_RETURNED
+        - E2EE_MESSAGE
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -40805,6 +40822,12 @@ components:
         - native_refresh_token
         - refresh_token_expires_at
       properties:
+        encrypted_device_setup:
+          type: string
+          nullable: true
+          description: >-
+            One-time encrypted device setup, unlocked locally using the link
+            fragment.
         address:
           type: string
         role:

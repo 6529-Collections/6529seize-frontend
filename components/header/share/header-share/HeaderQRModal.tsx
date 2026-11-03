@@ -20,6 +20,7 @@ import {
   Mode,
 } from "./constants";
 import type { PageShareTarget, SubMode } from "./constants";
+import { useConnectionShareUpgrade } from "./useConnectionShareUpgrade";
 import { HeaderShareModalView } from "./HeaderShareModalView";
 import {
   getSavedPageShareTarget,
@@ -87,6 +88,7 @@ function HeaderQRModal({
   const { address: contextWalletAddress, hasValidWalletAuth } =
     useSeizeConnectContext();
   const { ensureActiveSessionV2WebSession, requestSessionUpgrade } = useAuth();
+  const updateAuthentication = useConnectionShareUpgrade(requestSessionUpgrade);
   const activeWalletAddress = contextWalletAddress ?? getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
@@ -746,7 +748,7 @@ function HeaderQRModal({
       mobileConnectionShareStatus={displayState.mobileConnectionShareStatus}
       desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
-      requestSessionUpgrade={requestSessionUpgrade}
+      updateAuthentication={updateAuthentication}
       refreshConnectionShare={refreshConnectionShare}
       isConnectionShareLoading={isConnectionShareLoading}
       urlCopied={urlCopied}

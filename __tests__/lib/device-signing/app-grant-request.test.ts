@@ -96,6 +96,16 @@ describe("requestAppDeviceGrant", () => {
     mockSaveDeviceGrant.mockResolvedValue(true);
   });
 
+  it("releases the prepared encryption device when no owning profile exists", async () => {
+    const device = e2eeDevice();
+    const result = await requestAppDeviceGrant(
+      baseRequest({ ownProfileId: null, e2eeDevice: device })
+    );
+    expect(result).toMatchObject({ success: true, e2eeAdopted: false });
+    expect(device.adopt).not.toHaveBeenCalled();
+    expect(device.dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("registers a signing-only grant and stores it like a sign-in grant", async () => {
     const registerGrant = jest.fn(baseRequest().registerGrant);
     const result = await requestAppDeviceGrant(baseRequest({ registerGrant }));
@@ -199,6 +209,19 @@ describe("requestAppDeviceGrant", () => {
         })
       )
     ).resolves.toEqual({ success: false, reason: "register-failed" });
+  });
+
+  it("reports a failed local save and releases the encrypted-messages key", async () => {
+    const device = e2eeDevice();
+    mockSaveDeviceGrant.mockRejectedValueOnce(
+      new Error("IndexedDB write failed")
+    );
+
+    await expect(
+      requestAppDeviceGrant(baseRequest({ e2eeDevice: device }))
+    ).resolves.toEqual({ success: false, reason: "register-failed" });
+    expect(device.adopt).not.toHaveBeenCalled();
+    expect(device.dispose).toHaveBeenCalledTimes(1);
   });
 
   it("reports a device key that cannot be prepared", async () => {

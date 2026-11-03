@@ -29,6 +29,10 @@ export class ApiNotificationAdditionalContextV2 {
     */
     'artwork_title'?: string | null;
     'submitted_at'?: number;
+    /**
+    * Opaque encrypted-chat handle. No sender or message content is stored in the notification.
+    */
+    'encrypted_group'?: string;
     'reason'?: ApiVotingCreditReleaseReason;
     /**
     * Submission title saved before winning or deletion.
@@ -111,6 +115,12 @@ export class ApiNotificationAdditionalContextV2 {
             "baseName": "submitted_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "encrypted_group",
+            "baseName": "encrypted_group",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "reason",

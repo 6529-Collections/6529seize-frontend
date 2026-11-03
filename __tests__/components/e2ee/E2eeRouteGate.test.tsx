@@ -7,6 +7,22 @@ import {
   E2eeTestProvider,
 } from "./fakeE2eeEngine";
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: "0x1111111111111111111111111111111111111111",
+    canSignActiveWallet: true,
+    connectedAccounts: [],
+  }),
+}));
+jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
+  useSignedMessagesWallet: () => ({
+    isRemoteWallet: false,
+    networkName: "Ethereum",
+    isNetworkSupported: () => true,
+    switchNetwork: jest.fn(),
+  }),
+}));
+
 const renderGate = (value: ReturnType<typeof contextFor>) =>
   render(
     <E2eeTestProvider value={value}>

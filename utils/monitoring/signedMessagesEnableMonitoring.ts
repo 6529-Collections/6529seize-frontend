@@ -1,7 +1,12 @@
 import * as Sentry from "@sentry/nextjs";
 
 /** Which control started "Turn on signed messages". */
-export type SignedMessagesEnableSource = "notice" | "renew" | "devices";
+export type SignedMessagesEnableSource =
+  | "notice"
+  | "renew"
+  | "devices"
+  | "encrypted-messages"
+  | "connection-share";
 
 /** How the live wallet answers: a WalletConnect app or this browser. */
 export type SignedMessagesEnableWallet = "remote" | "browser";

@@ -229,6 +229,44 @@ function E2eeProviderEnabled({
     };
   }, [activeKey, buildDeps, loadModules, profileId, takeOver, wallet]);
 
+  // Follow combined-grant adoption even when the setup engine already exists.
+  useEffect(() => {
+    if (loadState?.phase !== "loaded" || loadState.key !== activeKey) return;
+    const engine = loadState.engine;
+    const pending = { checking: false, active: true, requested: false };
+    const shouldResume = () => pending.active && pending.requested;
+    const resumeGrantedDevice = async () => {
+      pending.requested = true;
+      if (
+        !pending.active ||
+        pending.checking ||
+        engine.getStatus() !== "needs-enrollment"
+      )
+        return;
+      pending.checking = true;
+      pending.requested = false;
+      try {
+        // Signing can store a combined grant while this engine is already
+        // waiting on the setup page. Re-read that grant without a new prompt.
+        await engine.enrollWithLoginGrant();
+      } catch {
+        // The engine exposes registration failures through its own state.
+      } finally {
+        pending.checking = false;
+        if (shouldResume()) void resumeGrantedDevice();
+      }
+    };
+    const resume = () => {
+      void resumeGrantedDevice();
+    };
+    resume();
+    globalThis.addEventListener("storage", resume);
+    return () => {
+      pending.active = false;
+      globalThis.removeEventListener("storage", resume);
+    };
+  }, [activeKey, loadState]);
+
   /** Hands every engine in this tab over (before removing local data). */
   const releaseEngines = useCallback(async () => {
     await Promise.all(

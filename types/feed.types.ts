@@ -210,6 +210,14 @@ export type INotificationMemeCollaboration = Omit<
   };
 };
 
+export type INotificationEncryptedMessage = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.E2EeMessage;
+  readonly additional_context: { readonly encrypted_group?: string };
+};
+
 export type INotificationArtistArtwork = NotificationBase &
   WithDrops & {
     readonly cause: ApiNotificationCause.ArtistArtworkSubmitted;
@@ -218,6 +226,7 @@ export type INotificationArtistArtwork = NotificationBase &
 
 export type TypedNotification =
   | INotificationArtistArtwork
+  | INotificationEncryptedMessage
   | INotificationVotingCreditsReturned
   | INotificationMemeCollaboration
   | INotificationCompetitionLifecycle

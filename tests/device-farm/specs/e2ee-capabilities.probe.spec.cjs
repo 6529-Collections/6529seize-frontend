@@ -25,6 +25,7 @@
  */
 
 const fs = require("node:fs");
+const assert = require("node:assert/strict");
 const path = require("node:path");
 const {
   isIos,
@@ -653,5 +654,6 @@ describe("E2EE capability probe (real device)", function () {
     console.log(`E2EE_PROBE_RESULT ${JSON.stringify(result)}`);
     writeArtifact(result);
     await saveScreenshot(driver, "e2ee-probe-home");
+    assert.notEqual(result.probe, null, "The capability probe must collect data");
   });
 });

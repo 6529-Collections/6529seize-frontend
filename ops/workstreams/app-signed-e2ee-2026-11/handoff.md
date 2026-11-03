@@ -1,54 +1,58 @@
 # Signed and encrypted messages in the apps: release handoff
 
-Status on 2026-11-01: review-ready PRs; nothing merged to `main`, nothing in
-production. For prxt6529 to ship. Live GitHub state overrides this note.
+Release candidates remain open as of 2026-11-03. The staging evidence below
+is from the original handoff; it does not establish that the latest PR heads
+are deployed. Live GitHub and deployment state override this note.
 
 ## PRs and deploy order
 
-Ship in this order. Backend before frontend before app builds.
+Backend before frontend before testing the updated app builds.
 
 1. Backend: 6529-Collections/6529seize-backend#2287 (`POST /device-grants`,
-   app grants in `POST /e2ee/devices/login-grant`). Deploy `api` only. No
-   migration.
-2. Frontend: 6529-Collections/6529seize-frontend#4540 (website combined
-   turn-on), then this workstream's frontend PR (branch
-   `claude/app-signed-e2ee`). It contains #4540's commits; merge #4540 first.
-   The Capacitor shell loads 6529.io, so phones get the change with the web
-   deploy.
-3. Desktop: 6529-Collections/6529-core#278 (branch
-   `claude/desktop-e2ee-signed`): renderer pull at frontend `5c0ab01667`,
-   build flags, stable local port, notification click, typed-data signing
-   for the Core seed wallet and the browser connector. Re-pull the renderer
-   from frontend `main` after step 2 merges, then build the desktop release.
-   Its DCO check fails only because the DCO app stops reading at 250 commits
-   (the PR has 885 through the subtree pull); DCO is not required there.
-4. Mobile shell: 6529-Collections/6529-core-mobile#27 adds a CI check that
-   runs the real shell in the iOS Simulator and Android emulators. It changes
-   nothing that ships; no store build is needed for this feature.
+   app grants in `POST /e2ee/devices/login-grant`, encrypted connection-share setup, and in-app encrypted notifications). Deploy `dbMigrationsLoop` then `api` for the nullable ciphertext column. No migration file or new service.
+2. Frontend: 6529-Collections/6529seize-frontend#4541 (this branch's app
+   grants, author proof, desktop notifications and phone wake navigation),
+   plus #4544 (the notice for unsupported browsers). The Capacitor shell
+   loads the deployed website; app grants are separate from basic encrypted
+   DMs, which are already available in production.
+3. Mobile: 6529-Collections/6529-core-mobile#26, branch
+   `claude/release-1.4`, is the single combined candidate. It includes the
+   former #27 native checks and #28 iOS minimum change. Build and test the
+   signed staging variant before the 1.4 store release. Minimum iOS is 16.4.
+4. Desktop: 6529-Collections/6529-core#278, branch
+   `claude/desktop-e2ee-signed`, still imports frontend `5c0ab01667`.
+   Refresh the renderer from frontend `main` after #4541 merges, then test
+   and build the final desktop candidate. Its imported history exceeds the
+   DCO and review bots' diff-enumeration limits; this tooling limitation
+   remains separate from application validation.
 
-## Owner decisions still open
+## Confirmed direction and remaining work
 
-- **App grant wording** (draft, not approved). Signing only: "Turn on signed
-  messages on this device until 16 Apr 2027. This device will sign your
-  posts, edits, deletes and reactions so anyone can verify they came from your
-  wallet. It can't move funds, change your handle, add devices or act as an
-  admin. No transaction, no gas, no token approvals. (Device key ...)". With
-  encrypted messages it adds "It will also encrypt (send) and decrypt (read)
-  your end-to-end encrypted messages, which 6529.io cannot read." and names
-  both keys. Edit `renderAppGrantStatementDraft1` in the frontend
-  (`lib/device-signing/app-grant.ts`) and the backend
-  (`src/api-serverless/src/device-signing/app-device-grant.ts`) together and
-  refresh the shared vectors in both test files.
-- **Turning app grants on in production** after approval: set
-  `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"` in
-  `.github/workflows/production-build-artifact.yml` and in the desktop live
-  build (`scripts/desktop-build-target.cjs` in 6529-core). Staging already has
-  it.
-- **iOS 15.0 to 16.3.** The current site never starts there (Next 16 targets
-  Safari 16.4: class static blocks fail with a `SyntaxError`), yet the app's
-  minimum iOS is 15.0. iOS 15 also refuses WebAssembly
-  under the CSP. Either transpile the site for older Safari or raise the
-  app's minimum and show an update notice. Not changed by these PRs.
+- The features are technically separate; the web combines their grants into
+  one wallet signature. A combined grant and an enrolled encrypted device
+  are separate states, so acceptance must check both.
+- Keep the approved current live wallet wording. Before enabling production
+  app grants, align any app-specific statement changes in the frontend
+  (`lib/device-signing/app-grant.ts`), backend
+  (`src/api-serverless/src/device-signing/app-device-grant.ts`) and shared
+  test vectors. This follow-up does not turn production flags on.
+- Production app grants use `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` in
+  `.github/workflows/production-build-artifact.yml` and the desktop live
+  build (`scripts/desktop-build-target.cjs` in 6529-core). Staging has it on.
+- This follow-up implements source-browser-approved setup links for Mobile
+  and Core, generic encrypted in-app notifications with local previews, and
+  a device-status shield. The target app never connects the wallet for this
+  setup. Existing local keys are preserved; historical messages need backup.
+  These additions still need acceptance on signed staging app builds.
+- The iOS compatibility decision is implemented by mobile #26 (minimum
+  16.4) and frontend #4544 (update notice). Signed messages still additionally
+  require iOS 17's Ed25519 support; iOS 16.4 supports encrypted messages.
+- Disconnected-wallet encryption setup now shares the connect-then-sign
+  flow; Connect Device authentication update resumes after connection. The
+  encryption provider adopts a signing-first combined grant on an already
+  open setup page. The mobile/quick-DM warning and composer banner layouts
+  are fixed. Sign-in uses Cancel or Escape; it has no top-right close button or version explanation, and backdrop clicks do not dismiss it.
+
 
 ## What was verified, and where
 
@@ -78,7 +82,7 @@ Ship in this order. Backend before frontend before app builds.
     byte-identical to viem's (unit test); not signed end to end in the app.
   - Test-backend pages stop at the staging Team Login (no working staging
     key on the box), so route and click checks ran on the live build.
-- 6529 Mobile in-app (6529-core-mobile#27, production site; runs
+- 6529 Mobile in-app (former 6529-core-mobile#27, now included in #26; production site; runs
   https://github.com/6529-Collections/6529-core-mobile/actions/runs/41303643217
   and .../41305064977), iOS 26.5 and 16.4 simulators, Android 15 (WebView 124) and 16 (WebView 133) emulators: launch with the 6529Mobile user agent,
   CSP enforced, the real OpenMLS wasm instantiates, IndexedDB and a stored
@@ -102,39 +106,52 @@ Ship in this order. Backend before frontend before app builds.
 
 Not verified: a real wallet signing an app grant (phone or desktop), push
 wakes on a physical phone, a real WalletConnect wallet's typed-data prompt,
-and anything on staging (the backend and frontend are not deployed there:
-this agent session's permission settings blocked pushes to `1a-staging`).
-These need a person with a wallet; see "How to test".
+and the apps against staging. These need a person with a wallet and the
+staging access secret; see "How to test".
 
-## Staging candidates
+## Staging
 
-Prepared and typechecked, not pushed (fetch and redo the merge if
-`1a-staging` moved):
+On staging since 2026-11-01 18:19 UTC (owner-approved; pushed by the
+coordinator session):
 
-- Backend: merge `claude/app-device-grant` into `1a-staging`, then
-  `gh workflow run deploy.yml --ref 1a-staging -f environment=staging -f
-service=api`. Prepared as `7f67cc14e` on `f9b09962a`.
-- Frontend: merge `claude/app-signed-e2ee` into `1a-staging` (it already has
-  #4540); help files need no change in the production profile. Prepared as
-  `99ff0ee51d` on `27c33ba644` (before the later CI fix commits).
+- Backend `1a-staging` `0fde43531f`: the two signed #2287 commits replayed
+  onto staging; `api` deploy run 41335897736.
+- Frontend `1a-staging` `e5679b8322`: #4541 at `228f8fdd95` (with #4540);
+  Web Deploy - STAGING run 41335981782. App grants are on there
+  (`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS`).
+
+Neither app could be pointed at staging from this machine: staging.6529.io
+sends every path to `/access`, and the desktop test build stops at the
+staging Team Login, without the staging access secret. Test the apps on
+staging by hand (below) with that secret.
 
 ## How to test (staging)
 
 Staging has app grants on. Use a throwaway wallet with a profile.
 
-1. Phone app pointed at staging, or the desktop app built against the test
-   backend. Sign in.
+1. Phone: use mobile #26's `claude/release-1.4` branch. Run
+   `npm run prepare:ios`, open Xcode and select `mobileStaging6529`,
+   then sign and run on a physical iPhone. For Android use
+   `npm run prepare:android:staging` and the `stagingDebug` variant. Do not
+   edit tracked `capacitor.config.json`; the schemes/flavors select staging.
+   Pass the staging access gate. Desktop: a 6529-core test build
+   (`BACKEND_TARGET=test`, needs `STAGING_API_KEY`), then the staging Team
+   Login. Sign in.
 2. Open a wave and select **Turn on** in the signed-messages notice. The
    wallet shows one typed-data request ("6529 Device Grant") with the
    statement above. Approve.
 3. Post a drop. It shows **Signed by its author**; open **Signature** and
    check "Signed by its author" with your wallet. Preferences > Devices lists
    the app (for example "6529 app on iPhone").
-4. Open `/messages/encrypted`. The device is already on (no second prompt).
+4. For a profile whose app grant included the encrypted-messages key, open
+   `/messages/encrypted`: the device is already on without another prompt.
+   If the grant was signing-only, verify the separate encrypted setup.
    Start a chat with a second account on the website and exchange messages
    both ways.
 5. Desktop only: with the window unfocused, have the other account send a
    message. A "New encrypted message" notification appears; selecting it
    opens that chat.
-6. Revoke the app's grant in Devices. Encrypted messages stop on that app too.
+6. Revoke the app's signing grant in Devices. A combined grant also revokes the
+   encrypted device linked to it. With separate setup, encryption remains active
+   until you revoke the encrypted device through its own linked grant.
 7. Repeat steps 1 to 4 with a WalletConnect wallet on the phone.

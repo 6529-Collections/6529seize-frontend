@@ -314,11 +314,12 @@ describe("mobile app links", () => {
       constructor(value: string | URL, base?: string | URL) {
         super(value, base);
         const text = String(value);
-        if (!text.startsWith("mobile6529://")) {
+        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(text);
+        if (!schemePrefix) {
           return;
         }
         const legacy = new RealURL(
-          `${text.replace("mobile6529://", "https://legacy.invalid//")}`
+          `https://legacy.invalid//${text.slice(schemePrefix[0].length)}`
         );
         Object.defineProperty(this, "hostname", { value: "" });
         Object.defineProperty(this, "pathname", { value: legacy.pathname });
@@ -365,6 +366,17 @@ describe("mobile app links", () => {
           123
         )
       ).toBeNull();
+    });
+
+    it("preserves the configured staging scheme on an older WebView", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobilestaging6529://navigate/messages/encrypted?x=1#m",
+          "mobileStaging6529",
+          origin,
+          123
+        )
+      ).toBe("/messages/encrypted?x=1&_t=123#m");
     });
   });
 });

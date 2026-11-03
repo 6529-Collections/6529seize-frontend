@@ -74,6 +74,24 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       notice.getByRole("button", { name: "Export history" })
     ).toBeVisible();
+    // The reported mobile/quick-DM regression squeezed the warning into a
+    // narrow column beside the actions. Both actions belong below it.
+    for (const width of [390, 768]) {
+      await alice.page.setViewportSize({ width, height: 900 });
+      const exportBox = await notice
+        .getByRole("button", { name: "Export history" })
+        .boundingBox();
+      const startBox = await notice
+        .getByRole("button", { name: "Start encrypted chat" })
+        .boundingBox();
+      const noticeBox = await notice.boundingBox();
+      expect(exportBox).not.toBeNull();
+      expect(startBox).not.toBeNull();
+      expect(noticeBox).not.toBeNull();
+      expect(Math.abs(exportBox!.width - startBox!.width)).toBeLessThan(2);
+      expect(Math.abs(exportBox!.y - startBox!.y)).toBeLessThan(2);
+      expect(noticeBox!.height).toBeLessThan(320);
+    }
     await notice.getByRole("button", { name: "Start encrypted chat" }).click();
 
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}/new$`), {
