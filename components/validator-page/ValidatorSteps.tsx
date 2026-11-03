@@ -134,7 +134,7 @@ function defaultSystem(platform: VisitorPlatform): SystemKey {
 
 function StepPicture({ picture }: { readonly picture: Picture }) {
   return (
-    <figure className="tw-m-0">
+    <figure className="tw-m-0 tw-w-full max-lg:tw-max-w-md">
       <Image
         unoptimized
         src={picture.src}
@@ -166,7 +166,7 @@ function LinuxCommands({
       (platform.cpu === "arm64") === (entry.cpu === "ARM64")
   );
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black tw-p-4">
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black tw-p-4 max-lg:tw-max-w-md">
       {commands.map((entry) => (
         <div key={entry.cpu}>
           {commands.length > 1 && (
@@ -316,7 +316,7 @@ export default function ValidatorSteps({
           {STEPS[system].map((step, index) => (
             <li
               key={step.title}
-              className={`${ABOUT_CARD_CLASS_NAME} tw-grid tw-items-center tw-gap-5 tw-p-5 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,23rem)] md:tw-gap-8 md:tw-p-6`}
+              className={`${ABOUT_CARD_CLASS_NAME} tw-grid tw-items-center tw-gap-5 tw-p-5 md:tw-p-6 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:tw-gap-8`}
             >
               <div className="tw-min-w-0">
                 <div className="tw-flex tw-items-center tw-gap-3">
