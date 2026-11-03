@@ -43,7 +43,7 @@ export function getDesktopNotificationsBridge(): DesktopNotificationsBridge | nu
   return null;
 }
 
-/** The newest countable message per chat that was already notified or seen. */
+/** The newest incoming notification cursor per chat that was notified or seen. */
 export type E2eeNoticeMarks = ReadonlyMap<string, number>;
 
 interface E2eeDesktopNotice {
@@ -52,7 +52,7 @@ interface E2eeDesktopNotice {
 }
 
 /**
- * Chats whose newest message from someone else is new since `marks` and
+ * Chats whose incoming message cursor is new since `marks` and
  * still unread. Muted chats and the chat open in a focused window are marked
  * without a notice. `marks: null` takes the baseline (what this device
  * already had when the engine became ready) without notices. Returns the
@@ -76,22 +76,26 @@ export function collectE2eeDesktopNotices({
   const notices: E2eeDesktopNotice[] = [];
   for (const conversation of conversations) {
     const last = conversation.lastMessage;
-    if (!last || last.pending) {
-      continue;
-    }
     // After the baseline, a chat never seen before (just joined) starts at 0.
     const seen = marks === null ? null : (marks.get(conversation.g) ?? 0);
-    next.set(conversation.g, Math.max(seen ?? 0, last.seq));
+    const seq =
+      conversation.lastIncomingSeq ??
+      (last &&
+      !last.pending &&
+      !last.imported &&
+      last.senderProfileId !== ownProfileId
+        ? last.seq
+        : (seen ?? 0));
+    next.set(conversation.g, Math.max(seen ?? 0, seq));
     if (
       seen !== null &&
-      last.seq > seen &&
+      seq > seen &&
       conversation.unread > 0 &&
-      last.senderProfileId !== ownProfileId &&
       conversation.status === "active" &&
       !muted.has(conversation.g) &&
       focusedChat !== conversation.g
     ) {
-      notices.push({ g: conversation.g, seq: last.seq });
+      notices.push({ g: conversation.g, seq });
     }
   }
   return { notices, marks: next };

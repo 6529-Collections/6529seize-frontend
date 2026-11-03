@@ -336,17 +336,19 @@ encrypted copy of your message history so you can restore it on a new device.
   Messages badge.
 - Phone push notifications say only "New encrypted message" (or that you were
   added to an encrypted chat). They carry no sender, chat or text, and open
-  `/messages/encrypted`. Once the phone has fetched the new messages, it opens
-  the chat if exactly one unmuted chat has unread messages; otherwise the
-  list stays open and shows which chats changed. The phone decides this
-  itself.
+  `/messages/encrypted`. The phone attempts a sync, then checks its local
+  chats even if that sync fails. It opens exactly one active, unmuted chat
+  with unread messages; otherwise the list stays open and shows which chats
+  changed. Leaving the wake visit cancels pending navigation. The phone
+  decides this itself.
 - 6529 Desktop shows a local notification, "New encrypted message", when a
   chat gets a message from someone else, unless the chat is muted or open in
   the focused window. Like phone push it names no sender, chat or text.
   Selecting it opens that chat. It is raised on the computer from the chats
   the app already decrypted, so nothing about the chat leaves the device.
-  Chats that already had unread messages when the app started do not
-  notify.
+  Chats that already had unread messages when the app started and imported
+  history do not notify. Incoming messages can notify while an outgoing
+  message is still pending, including when older history is being viewed.
 
 ## In 6529 Mobile and 6529 Desktop
 
@@ -354,10 +356,13 @@ encrypted copy of your message history so you can restore it on a new device.
   website's combined sign-in grant does not apply. Where app grants are on,
   **Turn on encrypted messages (one signature)** and **Turn on signed
   messages** both ask for one app grant signature (EIP-712 typed data) that
-  turns on signed messages and encrypted messages together (see
-  [Signed messages](waves/drop-actions/feature-signed-messages.md#in-6529-mobile-and-6529-desktop));
-  the device then registers without another prompt, and an earlier
-  signing-only grant of the app is revoked, as on the website. Where they are
+  turns on both when the wallet has an eligible profile and the request can
+  prepare its encrypted-messages key (see
+  [Signed messages](waves/drop-actions/feature-signed-messages.md#in-6529-mobile-and-6529-desktop)).
+  The device then registers without another prompt, and an earlier
+  signing-only grant of the app is revoked, as on the website. Otherwise,
+  turning on signed messages can grant signing only; encrypted messages
+  require their separate signature when combined setup is unavailable. Where they are
   off (production until the grant wording is approved), or the app cannot
   hold a signing key (iOS before 17), the card asks for the separate
   encrypted-messages signature. The grant's origin is "6529 Desktop" in the

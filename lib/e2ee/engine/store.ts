@@ -335,6 +335,15 @@ export class EngineStore {
       ? []
       : [...runtime.messages.values()].sort(compareMessages);
     let last: StoredMessage | null = null;
+    let lastIncomingSeq =
+      record.history?.lastIncomingSeq ?? record.history?.maxSeq ?? 0;
+    // New arrivals may be outside the selected history page or behind an
+    // outgoing pending echo. Their notification cursor must survive eviction.
+    for (const message of runtime.messages.values()) {
+      if (isCountable(message, this.ownProfileId) && !message.imported) {
+        lastIncomingSeq = Math.max(lastIncomingSeq, message.seq);
+      }
+    }
     let unread = 0;
     let mentions = 0;
     for (const message of ordered) {
@@ -375,6 +384,7 @@ export class EngineStore {
       splitView: record.splitView,
       untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
+      lastIncomingSeq,
       unread,
       mentions,
       historyError: runtime.historyError === true,

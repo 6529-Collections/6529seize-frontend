@@ -148,6 +148,8 @@ export interface E2eeConversation {
   /** Members' devices waiting for "Add device" or "Ignore". */
   untrustedDevices: E2eeUntrustedDevice[];
   lastMessage: E2eeMessage | null;
+  /** Notification cursor; excludes pending sends, own messages and imported history. */
+  lastIncomingSeq?: number;
   unread: number;
   mentions: number;
   /** A local saved-history read failed; retry without changing MLS state. */

@@ -41,7 +41,6 @@ export function useOpenWakeChat(): void {
   const { status, engine, profileId } = useE2ee();
   const muted = useMutedE2eeChats(profileId);
   const latestMuted = useRef(muted);
-  const handled = useRef(false);
   const woke = searchParams.get(ENCRYPTED_MESSAGES_WAKE_PARAM) !== null;
 
   useLayoutEffect(() => {
@@ -49,17 +48,13 @@ export function useOpenWakeChat(): void {
   }, [muted]);
 
   useEffect(() => {
-    if (!woke) {
-      handled.current = false;
+    if (!woke || status !== "ready" || !engine) {
       return;
     }
-    if (status !== "ready" || !engine || handled.current) {
-      return;
-    }
-    handled.current = true;
+    let active = true;
     const listRoute = getEncryptedMessagesRoute();
     const open = () => {
-      if (globalThis.location.pathname !== listRoute) {
+      if (!active || globalThis.location.pathname !== listRoute) {
         return;
       }
       const g = pickWakeChat(engine.getConversations(), latestMuted.current);
@@ -70,5 +65,8 @@ export function useOpenWakeChat(): void {
       .sync()
       .catch(() => undefined)
       .then(open);
+    return () => {
+      active = false;
+    };
   }, [engine, router, status, woke]);
 }

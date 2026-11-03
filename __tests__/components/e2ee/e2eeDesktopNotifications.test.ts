@@ -70,6 +70,70 @@ describe("encrypted-message desktop notices", () => {
     ]);
   });
 
+  it("keeps its cursor during a pending send and notices incoming messages behind it", () => {
+    const baseline = collect(null, [
+      chat("g1", 5, { lastIncomingSeq: 5 }),
+    ]).marks;
+    const pending = { ...message(0, ME), pending: true };
+    const waiting = collect(baseline, [
+      chat("g1", 0, {
+        lastMessage: pending,
+        lastIncomingSeq: 5,
+      }),
+    ]);
+    expect(waiting.marks.get("g1")).toBe(5);
+    expect(waiting.notices).toEqual([]);
+
+    const incoming = collect(waiting.marks, [
+      chat("g1", 0, {
+        lastMessage: pending,
+        lastIncomingSeq: 6,
+      }),
+    ]);
+    expect(incoming.notices).toEqual([{ g: "g1", seq: 6 }]);
+    const sent = collect(incoming.marks, [
+      chat("g1", 7, {
+        lastMessage: message(7, ME),
+        lastIncomingSeq: 6,
+      }),
+    ]);
+    expect(sent.notices).toEqual([]);
+    expect(sent.marks.get("g1")).toBe(6);
+  });
+
+  it("notices an incoming message even when an own send is published in the same batch", () => {
+    const baseline = collect(null, [
+      chat("g1", 5, { lastIncomingSeq: 5 }),
+    ]).marks;
+    expect(
+      collect(baseline, [
+        chat("g1", 7, {
+          lastMessage: message(7, ME),
+          lastIncomingSeq: 6,
+        }),
+      ]).notices
+    ).toEqual([{ g: "g1", seq: 6 }]);
+  });
+
+  it("never notifies about imported history", () => {
+    const baseline = collect(null, [chat("g1", 5)]).marks;
+    const imported = {
+      ...message(6, "profile-other"),
+      imported: { waveId: "old-wave" },
+    } as E2eeMessage;
+    expect(
+      collect(baseline, [chat("g1", 6, { lastMessage: imported })]).notices
+    ).toEqual([]);
+    expect(
+      collect(baseline, [
+        chat("g1", 6, {
+          lastMessage: imported,
+          lastIncomingSeq: 5,
+        }),
+      ]).notices
+    ).toEqual([]);
+  });
+
   it.each([
     ["the user's own message", { lastMessage: message(6, ME) }],
     ["a read chat", { unread: 0 }],
