@@ -6,6 +6,7 @@ import { STREAM_MESSAGES } from "@/i18n/messages/stream";
 
 type MessagesModule = typeof import("@/i18n/messages");
 type EnUsModule = typeof import("@/i18n/messages/en-US");
+type RegistryModule = typeof import("@/i18n/messageRegistry");
 
 const ROOT = process.cwd();
 const SECTION_CODE = /^(app\/stream|components\/stream|lib\/stream)\//;
@@ -60,18 +61,19 @@ function listSourceFiles(): string[] {
 describe("the stream.* message namespace", () => {
   it("keeps section copy out of the shared en-US dictionary", () => {
     jest.isolateModules(() => {
-      const { EN_US_MESSAGES } = jest.requireActual<EnUsModule>(
+      // The root dictionary is what every page bundles.
+      const { EN_US_ROOT_MESSAGES } = jest.requireActual<EnUsModule>(
         "@/i18n/messages/en-US"
       );
       // The production /stream placeholder (flag off) is shared copy.
       expect(
-        Object.keys(EN_US_MESSAGES).filter(
+        Object.keys(EN_US_ROOT_MESSAGES).filter(
           (key) =>
             key.startsWith("stream.") && !key.startsWith("stream.placeholder.")
         )
       ).toEqual([]);
       expect(
-        Object.keys(STREAM_MESSAGES).filter((key) => key in EN_US_MESSAGES)
+        Object.keys(STREAM_MESSAGES).filter((key) => key in EN_US_ROOT_MESSAGES)
       ).toEqual([]);
     });
   });
@@ -83,11 +85,17 @@ describe("the stream.* message namespace", () => {
   });
 
   it("registers its copy for every locale when the namespace loads", () => {
+    // Browser bundles resolve `@/i18n/sourceMessages` to the browser variant,
+    // which registers only the root dictionary until a namespace loads.
     jest.isolateModules(() => {
-      const { t } = jest.requireActual<MessagesModule>("@/i18n/messages");
-      expect(() => t("en-US", "stream.status.core")).toThrow(
-        "Missing source message"
+      jest.doMock("@/i18n/sourceMessages", () =>
+        jest.requireActual("@/i18n/sourceMessages.browser")
       );
+      const { getSourceMessage } = jest.requireActual<RegistryModule>(
+        "@/i18n/messageRegistry"
+      );
+      const { t } = jest.requireActual<MessagesModule>("@/i18n/messages");
+      expect(getSourceMessage("stream.status.core")).toBeUndefined();
       jest.requireActual("@/i18n/namespaces/stream");
       expect(t("en-US", "stream.status.core")).toBe(
         "Pre-audit · Sepolia testnet · mock data"
@@ -97,6 +105,16 @@ describe("the stream.* message namespace", () => {
       );
       expect(t("en-US", "stream.eth.amount", { amount: "0.0511" })).toBe(
         "0.0511 ETH"
+      );
+    });
+    jest.dontMock("@/i18n/sourceMessages");
+  });
+
+  it("is always registered for server rendering", () => {
+    jest.isolateModules(() => {
+      const { t } = jest.requireActual<MessagesModule>("@/i18n/messages");
+      expect(t("en-US", "stream.status.core")).toBe(
+        "Pre-audit · Sepolia testnet · mock data"
       );
     });
   });

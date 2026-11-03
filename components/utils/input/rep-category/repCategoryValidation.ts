@@ -1,4 +1,4 @@
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages";
 
 /**
  * Client-side mirror of the backend rep-category rule

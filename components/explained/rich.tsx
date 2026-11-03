@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { getNodeEnv } from "@/config/env";
 import type { SupportedLocale } from "@/i18n/locales";
 import { tRich, type MessageKey } from "@/i18n/messages";
-import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { getSourceMessage } from "@/i18n/messageRegistry";
 import { fill } from "./i18n";
 
 /**
@@ -48,7 +48,12 @@ export function plain(
   return fill(locale, key, params);
 }
 
-/** Whether a key built from data (a section id, an item id) has copy. */
+/**
+ * Whether a key built from data (a section id, an item id) has copy. Reads the
+ * source message registry: on the server that is the complete dictionary; in a
+ * browser it is the root dictionary plus the namespaces this module's graph
+ * imported, which the namespace guard keeps in step with the server.
+ */
 export function isMessageKey(key: string): key is MessageKey {
-  return Object.hasOwn(EN_US_MESSAGES, key);
+  return getSourceMessage(key) !== undefined;
 }

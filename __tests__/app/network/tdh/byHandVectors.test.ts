@@ -5,7 +5,7 @@ import {
   parseJsonExact,
 } from "@/components/explained/engine/json";
 import { runVector } from "@/components/explained/engine/vectors";
-import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US.complete";
 import { createFactBook } from "@/lib/explained/facts";
 import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
 

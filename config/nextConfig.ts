@@ -261,6 +261,11 @@ export function sharedConfig(
         "@/i18n/localeDictionaries": {
           browser: "./i18n/localeDictionaries.browser.ts",
         },
+        // Browser bundles register only the root en-US dictionary and the
+        // feature namespaces a page imports; server rendering registers all.
+        "@/i18n/sourceMessages": {
+          browser: "./i18n/sourceMessages.browser.ts",
+        },
       },
     },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],

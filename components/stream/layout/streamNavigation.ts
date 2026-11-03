@@ -1,4 +1,5 @@
 import type { MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/stream";
 import { STREAM_ROUTES } from "@/lib/stream/workKey";
 
 /** The section's information architecture: product pages, then the explainers. */

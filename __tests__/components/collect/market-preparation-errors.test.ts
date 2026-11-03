@@ -1,7 +1,6 @@
 import { marketPreparationError } from "@/components/collect/market-preparation-errors";
 import { SUPPORTED_LOCALES } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 
 jest.mock("@/services/auth/auth.utils", () => ({
