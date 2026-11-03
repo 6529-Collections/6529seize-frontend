@@ -60,7 +60,10 @@ export type LegacyImportResult = LegacyImportProgress &
 export interface LegacyImportDeps {
   readonly engine: Pick<
     E2eeEngine,
-    "sendImported" | "getMessages" | "getAttachmentsEnabled"
+    | "sendImported"
+    | "getMessages"
+    | "getAttachmentsEnabled"
+    | "findImportedMessage"
   >;
   readonly fetchMedia: (url: string, signal: AbortSignal) => Promise<Blob>;
   readonly sleep: (ms: number, signal: AbortSignal) => Promise<void>;
@@ -331,6 +334,18 @@ function recordStep(
   progress.mediaNotMoved += collected.notMoved + collected.files.length - moved;
 }
 
+async function indexSavedImport(
+  source: { engine: LegacyImportDeps["engine"]; g: string; waveId: string },
+  dropId: string,
+  part: number,
+  messageIdByDrop: Map<string, string>
+): Promise<boolean> {
+  const { engine, g, waveId } = source;
+  const existing = await engine.findImportedMessage?.(g, waveId, dropId, part);
+  if (existing && part === 0) messageIdByDrop.set(dropId, existing.id);
+  return Boolean(existing);
+}
+
 export async function runLegacyDmImport(input: {
   readonly g: string;
   readonly waveId: string;
@@ -383,7 +398,13 @@ export async function runLegacyDmImport(input: {
     if (signal.aborted) {
       return { ...progress, outcome: "cancelled" };
     }
-    if (present.has(unitKey(unit.item.legacy_drop_id, unit.part))) {
+    const existing = await indexSavedImport(
+      { engine: deps.engine, g, waveId },
+      unit.item.legacy_drop_id,
+      unit.part,
+      messageIdByDrop
+    );
+    if (existing || present.has(unitKey(unit.item.legacy_drop_id, unit.part))) {
       progress.skipped += 1;
       report();
       continue;
@@ -394,6 +415,15 @@ export async function runLegacyDmImport(input: {
       input.skipMedia === true,
       signal
     );
+    const replyDrop = unit.part === 0 ? unit.item.reply_to : null;
+    if (replyDrop && !messageIdByDrop.has(replyDrop)) {
+      await indexSavedImport(
+        { engine: deps.engine, g, waveId },
+        replyDrop,
+        0,
+        messageIdByDrop
+      );
+    }
     const step = await sendUnit(deps, g, {
       text: unit.text,
       reply: unit.part === 0 ? replyFor(unit.item.reply_to) : null,
