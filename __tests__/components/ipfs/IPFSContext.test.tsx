@@ -96,13 +96,13 @@ describe("IPFS uploads", () => {
   it("rejects without an IPFS API endpoint and retries on the next upload", async () => {
     const { addFileToIpfs, isolatedEnv } = loadUploads();
     const configuredEndpoint = isolatedEnv.IPFS_API_ENDPOINT;
-    isolatedEnv.IPFS_API_ENDPOINT = undefined;
+    Object.assign(isolatedEnv, { IPFS_API_ENDPOINT: undefined });
     await expect(addFileToIpfs(new File(["a"], "a.png"))).rejects.toThrow(
       "Missing IPFS_API_ENDPOINT"
     );
     expect(mockConstructor).not.toHaveBeenCalled();
 
-    isolatedEnv.IPFS_API_ENDPOINT = configuredEndpoint;
+    Object.assign(isolatedEnv, { IPFS_API_ENDPOINT: configuredEndpoint });
     await expect(addFileToIpfs(new File(["a"], "a.png"))).resolves.toBe(CID);
     expect(mockConstructor).toHaveBeenCalledTimes(1);
   });
