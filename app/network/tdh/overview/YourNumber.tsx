@@ -33,9 +33,10 @@ export default function YourNumber({
           </p>
         </div>
       </div>
-      <div className={`${EX_LAYOUT.ed} tw-mt-6`} id="explain">
-        <div className="max-lg:tw-hidden" />
-        <div className={EX_LAYOUT.edWide}>
+      {/* The picker spans the full column, as §01's figure and §02's grid
+          do: one body grid for the page. */}
+      <div className="tw-mt-8 tw-scroll-mt-24" id="explain">
+        <div>
           <ExplainMyTdh locale={locale} />
           <p className="tw-m-0 tw-mt-4">
             <Link

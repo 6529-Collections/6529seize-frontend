@@ -392,6 +392,13 @@ code {
   color: inherit;
 }
 
+/* A control's label that wraps keeps its lines even, so no button or radio
+   ends on one word ("Card #1", "sell one"). :where keeps it weak. */
+:where([data-explained-shell])
+  :where(button, label, summary, [role="radio"], [role="tab"]) {
+  text-wrap: balance;
+}
+
 /* 6529 Explained models move their geometry, not only their colour
    (EXPLAINED.md §5.4): a bar's width, a dot's place, an area's height ease
    over 160 ms on the 6529 easing. A model draws them with inline styles

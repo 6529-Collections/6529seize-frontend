@@ -221,22 +221,6 @@ export default function AreaTile({
               strokeWidth={1.5}
               strokeDasharray="5 4"
             />
-            {/* Inside the area when it has room, so the label never sits
-                on the area's dashed edge. */}
-            <Label
-              x={PAD.left + 8}
-              y={
-                lostInside && tileH + bandH > 30
-                  ? baseY - tileH - bandH + 19
-                  : Math.max(18, baseY - tileH - bandH - 10)
-              }
-              anchor="start"
-              size={13}
-              weight={600}
-              tone="fails"
-            >
-              {lostText}
-            </Label>
           </g>
         )}
         {tileW > 0.5 ? (
@@ -260,6 +244,28 @@ export default function AreaTile({
               days: formatCount(locale, 0),
             })}
           </Label>
+        )}
+        {lostW > 0 && (
+          // The lost area's label, drawn after the copy's own area, so the
+          // area draining away never covers it.
+          <g data-area-lost-label="" opacity={lostOpacity}>
+            {/* Inside the area when it has room, so the label never sits
+                on the area's dashed edge. */}
+            <Label
+              x={PAD.left + 8}
+              y={
+                lostInside && tileH + bandH > 30
+                  ? baseY - tileH - bandH + 19
+                  : Math.max(18, baseY - tileH - bandH - 10)
+              }
+              anchor="start"
+              size={13}
+              weight={600}
+              tone="fails"
+            >
+              {lostText}
+            </Label>
+          </g>
         )}
         {tdhLabel}
       </SvgFrame>

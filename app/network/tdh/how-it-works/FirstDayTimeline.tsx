@@ -114,7 +114,7 @@ export default function FirstDayTimeline({
         aria-hidden="true"
       />
       <span
-        className={`tw-absolute tw-top-[84px] tw-text-[13px] tw-leading-[18px] tw-text-iron-400 ${startPlace}`}
+        className={`tw-absolute tw-top-[84px] tw-text-[13px] tw-leading-5 tw-text-iron-400 ${startPlace}`}
         style={tight ? undefined : { left: `${arrivedAt}%` }}
       >
         {startText

@@ -296,7 +296,7 @@
   "explained.tdh.sure.claims.fewer": "Fewer claims",
   "explained.tdh.sure.glance.label": "How sure, at a glance",
   "explained.tdh.sure.glance.leanLead": "A Lean model of the rules:",
-  "explained.tdh.sure.glance.lean": "{count} named theorems about it, {tdh} on TDH and {p53} on the proposed validator rules, checked by Lean's kernel.",
+  "explained.tdh.sure.glance.lean": "{count} named theorems, {tdh} on TDH and {p53} on the proposed validator rules, checked by Lean's kernel in 6529's build; only 6529 can rerun it.",
   "explained.tdh.sure.glance.daysLead": "Each day:",
   "explained.tdh.sure.glance.days": "6529.io equals two recomputations in {equal} of {days} results, tested, not proved.",
   "explained.tdh.sure.glance.notLead": "A day:",

@@ -117,7 +117,7 @@ export function ClaimInParts({
             <span className="tw-mt-1.5 tw-block tw-text-[13px] tw-font-semibold tw-text-iron-400">
               {part.where}
             </span>
-            <blockquote className="tw-my-3 tw-ml-0 tw-mr-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-400 tw-pl-3 tw-text-base tw-leading-[25px] tw-text-iron-50">
+            <blockquote className="tw-my-3 tw-ml-0 tw-mr-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-400 tw-pl-3 tw-text-base tw-leading-[26px] tw-text-iron-50">
               {part.quote}
             </blockquote>
             <Mark
@@ -248,7 +248,7 @@ export function ClaimTable({
             </span>
             {row.limit}
           </span>
-          <span className="tw-col-start-2 tw-text-sm tw-leading-[22px] tw-text-iron-400 lg:tw-col-start-4">
+          <span className="tw-col-start-2 tw-text-sm tw-leading-[21px] tw-text-iron-400 lg:tw-col-start-4">
             {count(row.counts.proved, "proved")}
             {count(row.counts.shownFalse, "shownFalse")}
             {count(row.counts.limits, "limits")}
@@ -349,7 +349,7 @@ export function AssumptionLedger({
   const head =
     "tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-py-2.5 tw-pr-3.5 tw-text-left tw-align-bottom tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400";
   const cell =
-    "tw-block tw-border-0 tw-px-0 tw-py-[3px] tw-align-top tw-text-base tw-leading-6 tw-text-iron-300 md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-border-iron-900 md:tw-py-3.5 md:tw-pr-3.5";
+    "tw-block tw-border-0 tw-px-0 tw-py-[3px] tw-align-top tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-border-iron-900 md:tw-py-3.5 md:tw-pr-3.5";
   return (
     <table className="tw-w-full tw-border-collapse" data-ledger="">
       <thead className="tw-hidden md:tw-table-header-group">

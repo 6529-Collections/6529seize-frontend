@@ -32,7 +32,6 @@ import StepsInOrder from "./StepsInOrder";
 import { RecordValue } from "@/components/explained/layout/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
-  EdRow,
   GoLink,
   PageHead,
   pageLink,
@@ -43,6 +42,7 @@ import {
   You,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
+import { EX_TEXT } from "@/components/explained/tokens";
 import { formatDecimal } from "@/components/explained/layout/numbers";
 import { utcClock } from "@/components/explained/layout/time";
 
@@ -400,19 +400,19 @@ function PartB({
         )}
         {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
-      {/* The other two collections follow the model, so the statement's
-          prose ends with its heading. */}
+      {/* Under the model, one column of text: the other two collections,
+          then Base TDH, a step inside §II, so a sub-head of it, not a
+          second label-gutter row on a page of statement rows. */}
       <Para className="tw-mt-8 tw-max-w-[660px]">
         {rich(locale, "explained.tdh.how.b.others", {
           H: v("engine.H"),
           rateGradient: v("engine.rate.gradient"),
         })}
       </Para>
-      <EdRow
-        no="II"
-        label={ht(locale, "explained.tdh.how.base.label")}
-        className="tw-mt-16"
-      >
+      <div className="tw-mt-12 tw-max-w-[760px]">
+        <h3 className={`${EX_TEXT.h3} tw-mb-3`}>
+          {ht(locale, "explained.tdh.how.base.label")}
+        </h3>
         <Para>
           <span id="step-8" />
           {rate !== null && cents !== null
@@ -456,7 +456,7 @@ function PartB({
             </span>
           </figure>
         )}
-      </EdRow>
+      </div>
     </Section>
   );
 }

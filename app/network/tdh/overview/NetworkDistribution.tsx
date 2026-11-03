@@ -250,6 +250,67 @@ function Callouts({
 }
 
 /**
+ * From a desktop up, each group named on its own slice of the TDH bar, at
+ * the slice's start; a slice too thin for its share inside the bar carries
+ * the share in its name, at the bar's end, with a tick down to it. The
+ * names are the legend, so the figure needs no other.
+ */
+function Names({
+  items,
+  locale,
+}: {
+  readonly items: readonly Share[];
+  readonly locale: SupportedLocale;
+}) {
+  let from = 0;
+  const placed = items.map((share) => {
+    const start = from;
+    from += share.tdh;
+    return { share, start, value: share.tdh };
+  });
+  const text =
+    "tw-absolute tw-top-0 tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
+  return (
+    <div
+      className="tw-relative tw-mb-1.5 tw-h-5 max-lg:tw-hidden"
+      aria-hidden="true"
+      data-network-names=""
+    >
+      {placed.map(({ share, start, value }) => {
+        const thin = value < LABEL_MIN_SHARE;
+        const atEnd = thin && start + value / 2 > 0.5;
+        const swatch = (
+          <span
+            className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
+            style={{ background: TONES[share.group.key].fill }}
+          />
+        );
+        const name = thin
+          ? `${groupName(locale, share.group)} ${percent(locale, value)}`
+          : groupName(locale, share.group);
+        return (
+          <span key={share.group.key}>
+            <span
+              className={`${text} ${atEnd ? "tw-right-0" : ""}`}
+              style={atEnd ? undefined : { left: `${start * 100}%` }}
+            >
+              {swatch}
+              {name}
+            </span>
+            {thin && (
+              <span
+                className="tw-absolute tw-top-5 tw-h-1.5 tw-w-px tw-bg-iron-400"
+                style={{ left: `${(start + value / 2) * 100}%` }}
+              />
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
  * Every share in words: a table from 640 px up; below that each group is a
  * row of its own, its two shares on one line with their labels, as the
  * design stacks numeric tables on a phone (TDH-DESIGN.md §6). The column
@@ -345,17 +406,38 @@ export default function NetworkDistribution({
     "tw-mb-1.5 tw-block tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
   return (
     <figure className="tw-m-0 tw-mt-14 md:tw-mt-16" data-fig="network">
-      <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
-      <h3 className={`${EX_TEXT.h3} tw-mt-2`}>{ot(locale, "network.title")}</h3>
-      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-6 lg:tw-grid-cols-[minmax(0,1fr)_340px]">
+      <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
+        <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
+        {/* A figure drawn from the kept snapshot says so beside its title,
+            not only in its caption. */}
+        {data.fromSnapshot && (
+          <span
+            className="tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-300"
+            data-network-snapshot=""
+          >
+            {ot(locale, "network.snapshotTag", {
+              read: readTime(locale, data.readAt),
+            })}
+          </span>
+        )}
+      </span>
+      {/* The finding is the title: the top hundred's share, from the facts. */}
+      <h3 className={`${EX_TEXT.h3} tw-mt-2`}>
+        {ot(locale, "network.title", {
+          count: formatCount(locale, top100.count),
+          share: percent(locale, top100.tdh / data.total),
+        })}
+      </h3>
+      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-6">
         <div role="img" aria-label={ot(locale, "network.aria")}>
           {/* The role="img" names the figure; its labels are drawing, as an SVG's would be. */}
           <span className={rowLabel} aria-hidden="true">
             {ot(locale, "network.tdhRow")}
           </span>
-          {/* The thin groups' shares of TDH, named above the bar so the
-              ribbons below it stay joined to it. */}
-          <div className="tw-mb-1.5 [&>span]:tw-mt-0">
+          <Names items={items} locale={locale} />
+          {/* Below a desktop, the thin groups' shares of TDH, named above
+              the bar so the ribbons below it stay joined to it. */}
+          <div className="tw-mb-1.5 lg:tw-hidden [&>span]:tw-mt-0">
             <Callouts
               items={items}
               pick={(share) => share.tdh}
@@ -374,7 +456,11 @@ export default function NetworkDistribution({
             locale={locale}
           />
         </div>
-        <ShareTable items={items} locale={locale} />
+        {/* The figure's text: shown below a desktop, where the bars are
+            too narrow to name every slice; read out at every width. */}
+        <div className="lg:tw-sr-only">
+          <ShareTable items={items} locale={locale} />
+        </div>
       </div>
       <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
         {ot(

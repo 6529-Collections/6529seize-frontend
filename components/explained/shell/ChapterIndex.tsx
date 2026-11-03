@@ -58,11 +58,11 @@ export default function ChapterIndex({
               >
                 {withCc0(row.title)}
               </span>
-              <span className="tw-mt-1 tw-block tw-text-base tw-leading-6 tw-text-iron-300">
+              <span className="tw-mt-1 tw-block tw-text-base tw-leading-[26px] tw-text-iron-300">
                 {row.question}
               </span>
             </span>
-            <span className="tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 lg:tw-col-start-3">
+            <span className="tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 lg:tw-col-start-3">
               {/* The status answers the legend's question; the first row
                   names it, as a column's head. */}
               {index === 0 && (

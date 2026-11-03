@@ -96,7 +96,7 @@
   "explained.tdh.check.agree.wallets": "wallets",
   "explained.tdh.check.agree.identitiesEqual": "identités égales",
   "explained.tdh.check.agree.walletsEqual": "wallets égaux",
-  "explained.tdh.check.agree.caption": "Seules les comparaisons que fait l'exécution sont tracées : la référence Python n'est jamais comparée directement à 6529.io.",
+  "explained.tdh.check.agree.caption": "L'exécution compare aussi Python à 6529.io ; le fichier donne l'écart de leurs totaux (pythonVsLive).",
   "explained.tdh.check.agree.rootsSame": "La référence Python n'a pas d'arbre de hachage, donc pas de racines. Ses enregistrements sont ceux du noyau Rust octet pour octet, ce qui la lie aux mêmes racines.",
   "explained.tdh.check.agree.rootsDiffer": "La référence Python n'a pas d'arbre de hachage, donc pas de racines. Ce jour-là, ses enregistrements ne sont pas ceux du noyau Rust octet pour octet.",
   "explained.tdh.check.classes.name": "Classe {name}",

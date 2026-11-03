@@ -232,6 +232,8 @@ export default function AssuranceLadder({
     readonly title?: string;
     readonly rungs: readonly Rung[];
     readonly todayAfter: number;
+    /** Side by side, its share of the width (1 by default): the ladder with the longer rungs takes more, so the two end near one line. */
+    readonly weight?: number;
   }[];
   readonly locale: SupportedLocale;
 }) {
@@ -240,8 +242,17 @@ export default function AssuranceLadder({
     <div
       className={
         compact
-          ? "tw-grid tw-grid-cols-1 tw-gap-10 lg:tw-grid-cols-2 lg:tw-gap-6"
+          ? "tw-grid tw-grid-cols-1 tw-gap-10 lg:tw-gap-6 lg:[grid-template-columns:var(--ex-ladders)]"
           : ""
+      }
+      style={
+        compact
+          ? {
+              ["--ex-ladders" as string]: tracks
+                .map((track) => `minmax(0,${track.weight ?? 1}fr)`)
+                .join(" "),
+            }
+          : undefined
       }
     >
       {tracks.map((track) => (

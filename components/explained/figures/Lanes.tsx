@@ -41,7 +41,7 @@ function StepText({
       </b>
       {step.cap !== undefined && (
         <span
-          className={`tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400 ${foot ? "tw-pt-1" : ""}`}
+          className={`tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400 ${foot ? "tw-pt-1" : ""}`}
         >
           {step.cap}
         </span>
@@ -53,7 +53,7 @@ function StepText({
 function Arrow() {
   return (
     <div
-      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto lg:tw-pt-8"
+      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto lg:tw-self-center"
       aria-hidden="true"
     >
       <svg
@@ -82,9 +82,9 @@ export default function Lanes({
     .join(" 28px ");
   return (
     <ol
-      // Each box keeps its own height, top-aligned: stretched to the
-      // tallest, the short ones were two-thirds empty.
-      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-p-0 lg:tw-items-start lg:[grid-template-columns:var(--ex-lanes)]"
+      // One row of boxes of one height, the arrows centred between them on
+      // one line; each box's words sit at its top.
+      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-p-0 lg:[grid-template-columns:var(--ex-lanes)]"
       style={{ ["--ex-lanes" as string]: columns }}
       aria-label={kt(locale, "explained.kit.lanes.aria", { label })}
       data-fig="lanes"

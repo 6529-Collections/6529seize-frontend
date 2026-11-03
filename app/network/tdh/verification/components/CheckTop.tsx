@@ -608,22 +608,28 @@ export default function CheckTop({
             simulatedDiffer={simulated?.differ ?? null}
           />
         </WhenSimulated>
-        <RibbonCaption
-          input={input}
-          daysFact={book.maybe("tdh.days")}
-          latestDate={day.fact("date")}
-          locale={locale}
-        />
-        <LateList
-          days={input.days}
-          daysFact={book.maybe("tdh.days")}
-          locale={locale}
-        />
-        <AllResults
-          input={input}
-          daysFact={book.maybe("tdh.days")}
-          locale={locale}
-        />
+        {/* The caption at its measure on the left, the two ways into the
+            older results beside it, so no half of the row is empty. */}
+        <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,520px)_minmax(0,1fr)] lg:tw-items-start lg:tw-gap-x-12">
+          <RibbonCaption
+            input={input}
+            daysFact={book.maybe("tdh.days")}
+            latestDate={day.fact("date")}
+            locale={locale}
+          />
+          <div>
+            <LateList
+              days={input.days}
+              daysFact={book.maybe("tdh.days")}
+              locale={locale}
+            />
+            <AllResults
+              input={input}
+              daysFact={book.maybe("tdh.days")}
+              locale={locale}
+            />
+          </div>
+        </div>
       </div>
     </SimulationSwitch>
   );

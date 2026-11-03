@@ -203,9 +203,17 @@ describe("Explain my TDH", () => {
       screen.getByText("Your card counts from Mon, Oct 19.")
     ).toBeInTheDocument();
     expect(screen.getByText(/found 4 h 55 min: not a whole day/)).toBeVisible();
+    // A day adds BASE, rounded once per card (P26 §8.2), never the rate.
+    expect(screen.getByText(/found 4 h 55 min/)).toHaveTextContent(
+      /counts its first whole day and adds \d+; each day after adds \d+ or \d+ \(\d+\.\d{2} a day, rounded per card\)\./
+    );
     await user.click(screen.getByRole("button", { name: "Not found" }));
     expect(
       screen.getByText("No wallet found by that name.")
+    ).toBeInTheDocument();
+    // A wallet appears in the next result; only its TDH waits a whole day.
+    expect(
+      screen.getByText(/appears in the next result, with no TDH until/)
     ).toBeInTheDocument();
   });
 
@@ -372,14 +380,27 @@ describe("the overview", () => {
       />
     );
     expect(container.querySelector('[data-fig="network"]')).not.toBeNull();
-    expect(screen.getByText("top 10")).toBeInTheDocument();
-    expect(screen.getByText("the other 100")).toBeInTheDocument();
+    // The finding is the title; each group is named on its own slice, a
+    // thin one with its share, at the bar's end.
     expect(
-      screen.getByText(/The top 100 identities hold 70\.0% of all TDH, read/)
-    ).toHaveTextContent(
-      "read Oct 31, 09:12 UTC. An identity is one to four linked wallets. It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
+      screen.getByRole("heading", {
+        name: "The top 100 identities hold 70.0% of all TDH.",
+      })
+    ).toBeInTheDocument();
+    const names = container.querySelector("[data-network-names]");
+    expect(names).toHaveTextContent("top 10");
+    expect(names).toHaveTextContent("the other 100 5.0%");
+    expect(screen.getByText(/^Read Oct 31, 09:12 UTC\./)).toHaveTextContent(
+      "Read Oct 31, 09:12 UTC. An identity is one to four linked wallets. It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
     );
+    expect(container.querySelector("[data-network-snapshot]")).toBeNull();
     const table = screen.getByRole("table");
+    expect(
+      within(table).getByRole("rowheader", { name: "top 10" })
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("rowheader", { name: "the other 100" })
+    ).toBeInTheDocument();
     expect(within(table).getAllByRole("row")).toHaveLength(5);
     expect(
       within(table).getByRole("rowheader", { name: "next 900" })

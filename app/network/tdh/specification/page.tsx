@@ -167,10 +167,47 @@ export default async function SpecificationPage({
                 },
               ]}
             />
-            {/* Where P26 lives, under the contents: the panel keeps to its
-                rows and marks, and the column beside it does not stand
-                empty. */}
-            <Caption className="tw-mt-6 tw-max-w-[540px]">
+            {/* The rules' two true marks under the rules to get exact, so
+                the panel beside keeps to its rows and neither column ends
+                in a hole. */}
+            <div className="tw-mt-8 tw-flex tw-flex-col tw-items-start tw-gap-2">
+              <Mark
+                kind="proposed"
+                locale={locale}
+                size="sm"
+                refText={s("explained.tdh.spec.version.proposed")}
+              />
+              <Track
+                maturity="live"
+                locale={locale}
+                size="sm"
+                refText={s("explained.tdh.spec.version.liveRule")}
+              />
+              {/* How we know it runs as written, in words under the two
+                  marks (a block carries at most two): its counts and date
+                  are the daily comparison's facts, then the Live mark's
+                  limit. */}
+              <span
+                className="tw-max-w-[600px] tw-basis-full tw-text-[15px] tw-leading-6 tw-text-iron-400"
+                data-fact="tdh.days.equal"
+              >
+                {s(
+                  p.num("tdh.days.equal") !== null &&
+                    p.num("tdh.days.equal") === p.num("tdh.days.compared")
+                    ? "explained.tdh.spec.version.live"
+                    : "explained.tdh.spec.version.liveSome",
+                  {
+                    equal: p.f("tdh.days.equal"),
+                    compared: p.f("tdh.days.compared"),
+                    date: p.f("tdh.latest.date"),
+                  }
+                )}
+                {". "}
+                {s("explained.tdh.spec.version.liveLimit")}
+              </span>
+            </div>
+            {/* Where P26 lives, under the marks. */}
+            <Caption className="tw-mt-8 tw-max-w-[540px]">
               {m("explained.tdh.spec.version.private")}
             </Caption>
           </div>
@@ -225,46 +262,10 @@ export default async function SpecificationPage({
                 ]}
               />
             </div>
-            <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-2">
-              <Mark
-                kind="proposed"
-                locale={locale}
-                size="sm"
-                refText={s("explained.tdh.spec.version.proposed")}
-              />
-              <Track
-                maturity="live"
-                locale={locale}
-                size="sm"
-                refText={s("explained.tdh.spec.version.liveRule")}
-              />
-              {/* How we know it runs as written, in words under the two
-                  marks (a block carries at most two): its counts and date
-                  are the daily comparison's facts, then the Live mark's
-                  limit. */}
-              <span
-                className="tw-basis-full tw-text-[13px] tw-leading-5 tw-text-iron-400"
-                data-fact="tdh.days.equal"
-              >
-                {s(
-                  p.num("tdh.days.equal") !== null &&
-                    p.num("tdh.days.equal") === p.num("tdh.days.compared")
-                    ? "explained.tdh.spec.version.live"
-                    : "explained.tdh.spec.version.liveSome",
-                  {
-                    equal: p.f("tdh.days.equal"),
-                    compared: p.f("tdh.days.compared"),
-                    date: p.f("tdh.latest.date"),
-                  }
-                )}
-                {". "}
-                {s("explained.tdh.spec.version.liveLimit")}
-              </span>
-            </div>
           </aside>
         </div>
 
-        <div className="tw-mt-8">
+        <div className="tw-mt-12">
           <DriftNote by={["D136", "D137"]} locale={locale}>
             {m(
               reported === null || current === null

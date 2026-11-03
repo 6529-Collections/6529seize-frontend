@@ -130,7 +130,7 @@ function MachineLens({ locale }: { readonly locale: SupportedLocale }) {
             />
           </div>
           <div className="tw-min-w-0">
-            <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-text-sm tw-leading-[21px] tw-text-iron-400">
               <b className="tw-block tw-font-semibold tw-text-iron-50">
                 {card === "562" ? "Meme #562 · still minting" : artLine}
               </b>
@@ -155,14 +155,14 @@ function MachineLens({ locale }: { readonly locale: SupportedLocale }) {
                 onChange={(value) => model.set({ days: value })}
               />
             </div>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-[21px] tw-text-iron-400">
               × Rate{" "}
               <b className="tw-font-semibold tw-text-iron-50">
                 {formatCents(locale, rate / 100)}
               </b>{" "}
               · {formatCount(locale, h)} ÷ {formatCount(locale, edition)} copies
             </p>
-            <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-[21px] tw-text-iron-400">
               × Boost{" "}
               <b className="tw-font-semibold tw-text-iron-50">
                 {formatCents(locale, beta / 100)}

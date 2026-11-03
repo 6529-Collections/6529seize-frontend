@@ -96,7 +96,7 @@
   "explained.tdh.check.agree.wallets": "wallets",
   "explained.tdh.check.agree.identitiesEqual": "identities equal",
   "explained.tdh.check.agree.walletsEqual": "wallets equal",
-  "explained.tdh.check.agree.caption": "Only the comparisons the run makes are drawn: Python is never compared with 6529.io directly.",
+  "explained.tdh.check.agree.caption": "The run also compares Python with 6529.io; the file gives their totals' difference (pythonVsLive).",
   "explained.tdh.check.agree.rootsSame": "The Python reference has no hash tree, so it computes no roots; its records equal the Rust core's byte for byte, which commits it to the same roots.",
   "explained.tdh.check.agree.rootsDiffer": "The Python reference has no hash tree, so it computes no roots; on this day its records are not the Rust core's byte for byte.",
   "explained.tdh.check.classes.name": "Class {name}",

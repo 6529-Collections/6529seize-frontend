@@ -124,7 +124,7 @@ function Factor({
         {value}
       </span>
       {why !== undefined && (
-        <span className="tw-col-start-1 tw-text-[13px] tw-leading-[18px] tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
+        <span className="tw-col-start-1 tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
           {why}
         </span>
       )}
@@ -376,7 +376,7 @@ export default function Machine({
           onPick={(id) => model.set({ card: id })}
           locale={locale}
         />
-        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-5 tw-text-iron-400 max-md:tw-col-start-2 max-md:tw-row-start-1 max-[359px]:tw-col-start-1 max-[359px]:tw-row-start-auto">
+        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-[21px] tw-text-iron-400 max-md:tw-col-start-2 max-md:tw-row-start-1 max-[359px]:tw-col-start-1 max-[359px]:tw-row-start-auto">
           <b className={`tw-block ${BOLD}`}>{words.name}</b>
           <span>{withCc0(words.copies)}</span>
         </p>

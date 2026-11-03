@@ -26,7 +26,7 @@ function ColumnList({ column }: { readonly column: Column }) {
           // Items are fixed copy in a fixed order.
           <li
             key={index}
-            className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-base tw-leading-[25px] tw-text-iron-300"
+            className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-base tw-leading-[26px] tw-text-iron-300"
           >
             <Glyph kind={column.glyph} className="tw-mt-[5px] tw-size-3.5" />
             <span>{item}</span>

@@ -112,7 +112,7 @@
   "explained.tdh.glossary.xtdh.def": "A separate score on 6529.io: what other holders grant you, plus what the cards you hold produce and you have not granted away. Never TDH, never validator weight.",
   "explained.tdh.glossary.xtdh.src": "D41",
   "explained.tdh.glossary.burn.term": "Burn addresses (sinks)",
-  "explained.tdh.glossary.burn.def": "The zero address and {dead}. Copies sent there are burned; they keep records but are never debited or consolidated. Their TDH counts in the feed's total; validators will sign the total without them.",
+  "explained.tdh.glossary.burn.def": "The zero address and {dead}. Copies sent there are burned; they keep records but are never debited or consolidated. Their TDH counts in the feed's total; validators would sign the total without them.",
   "explained.tdh.glossary.burn.src": "P26 §3.4, §8.5",
   "explained.tdh.glossary.netting.term": "Netting",
   "explained.tdh.glossary.netting.def": "Within one transaction, each address's movements of a token are added up, and only the net change moves holdings: a copy that leaves and comes back in one transaction never left.",

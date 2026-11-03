@@ -55,11 +55,18 @@ const SKETCH: readonly {
 function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
   return (
     <figure className="tw-m-0 tw-mt-10" data-fig="proof-chain">
-      <figcaption>
-        <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
-          {m("explained.tdh.sure.sketch.summary")}
-        </h3>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      {/* A statement row: the heading and where the chain stops on the
+          left, how it goes on the right, the four theorems under both. */}
+      <figcaption className="lg:tw-grid lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-items-start lg:tw-gap-x-12">
+        <div>
+          <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
+            {m("explained.tdh.sure.sketch.summary")}
+          </h3>
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-600 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-400 max-lg:tw-hidden">
+            {m("explained.tdh.sure.sketch.close")}
+          </p>
+        </div>
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
           {m("explained.tdh.sure.sketch.intro")}
         </p>
       </figcaption>
@@ -77,7 +84,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
                 {m(step.short)}
               </b>
             </span>
-            <code className="tw-mt-2 tw-block tw-font-mono tw-text-[13px] tw-leading-[18px] tw-text-iron-300 [overflow-wrap:anywhere]">
+            <code className="tw-mt-2 tw-block tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-300 [overflow-wrap:anywhere]">
               {step.name}
             </code>
             <span className="tw-mt-2 tw-text-[14px] tw-leading-[21px] tw-text-iron-300">
@@ -97,7 +104,8 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
+      {/* On a phone the limit follows the chain it closes. */}
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400 lg:tw-hidden">
         {m("explained.tdh.sure.sketch.close")}
       </p>
     </figure>

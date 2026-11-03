@@ -34,6 +34,10 @@ import { ot } from "./copy";
 const HEIGHT = 230;
 const PAD = { left: 10, right: 10, top: 26, bottom: 30 } as const;
 const PLAY_MS = 2600;
+/** The curve copies × rate = H, drawn as this many straight steps. */
+const CURVE_STEPS = 48;
+/** Below this width the curve keeps no label: it would run off the plot. */
+const CURVE_LABEL_MIN = 560;
 
 interface Minting {
   readonly id: number | null;
@@ -120,6 +124,13 @@ export default function EditionSquash({
       label: ot(locale, "squash.firstGm"),
     },
   ];
+  // Every edition's corner rides one curve, copies × rate = H: the
+  // rectangle slides along it, so the plot's open space is the curve's.
+  const curve = Array.from({ length: CURVE_STEPS + 1 }, (_, i) => {
+    const n = rare * Math.pow(h / rare, i / CURVE_STEPS);
+    return `${i === 0 ? "M" : "L"}${xOf(n).toFixed(1)},${yOf(h / n).toFixed(1)}`;
+  }).join(" ");
+  const curveAt = rare * Math.pow(h / rare, 0.3);
   const play = () => {
     cancelAnimationFrame(frame.current);
     setBroken(false);
@@ -224,6 +235,20 @@ export default function EditionSquash({
                   strokeDasharray="3 4"
                 />
               ))}
+              <path
+                d={curve}
+                fill="none"
+                stroke={EX_HEX.ink4}
+                strokeWidth={1}
+                strokeDasharray="1 4"
+                strokeLinecap="round"
+                data-squash-curve=""
+              />
+              {width >= CURVE_LABEL_MIN && (
+                <Label x={xOf(curveAt) + 12} y={yOf(h / curveAt) - 6}>
+                  {ot(locale, "squash.curve", { h: formatCount(locale, h) })}
+                </Label>
+              )}
               {broken && minting && (
                 // The edition the floor counts: the area the card will
                 // have once the last airdrop tops it up.

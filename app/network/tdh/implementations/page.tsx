@@ -219,7 +219,11 @@ export default async function ImplementationsPage({
           title={m("explained.tdh.impl.cast.title")}
         >
           <Prose>{m("explained.tdh.impl.cast.body")}</Prose>
-          <div className="tw-mt-6">
+        </EdSection>
+        {/* The table runs the full column, as a wide table does on every
+            reference page, so its long cells wrap less. */}
+        <div className="tw-mt-6">
+          <div>
             <StackTable
               from="lg"
               size="small"
@@ -384,7 +388,7 @@ export default async function ImplementationsPage({
               })}
             </p>
           </div>
-        </EdSection>
+        </div>
 
         <EdSection
           id="vectors"

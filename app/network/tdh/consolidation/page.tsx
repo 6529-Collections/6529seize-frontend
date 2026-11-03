@@ -254,7 +254,7 @@ export default async function TdhYourWalletsPage({
           </p>
         </PageHead>
 
-        <Section id="why">
+        <Section id="why" afterHero>
           <span id="consolidation-change" />
           <span id="consolidation-wallets" />
           <EdRow

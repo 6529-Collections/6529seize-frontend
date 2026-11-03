@@ -59,7 +59,7 @@ export default function WhyPicker({
   };
   return (
     <div
-      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:tw-gap-6"
+      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:tw-grid-rows-[auto_1fr] md:tw-gap-6"
       data-lens="picker"
     >
       <div
@@ -80,7 +80,7 @@ export default function WhyPicker({
               tabIndex={on ? 0 : -1}
               data-pick={option.key}
               onClick={() => setPicked(option.key)}
-              className={`tw-grid tw-min-h-11 tw-cursor-pointer tw-grid-cols-[20px_minmax(0,1fr)] tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3.5 tw-text-left tw-text-base tw-leading-6 ${on ? "tw-border-primary-400 tw-bg-primary-400/[0.12] tw-text-iron-50" : "tw-border-iron-700 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600"} ${EX_FOCUS}`}
+              className={`tw-grid tw-min-h-11 tw-cursor-pointer tw-grid-cols-[20px_minmax(0,1fr)] tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3.5 tw-text-left tw-text-base tw-leading-[26px] ${on ? "tw-border-primary-400 tw-bg-primary-400/[0.12] tw-text-iron-50" : "tw-border-iron-700 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600"} ${EX_FOCUS}`}
             >
               <span
                 className={`tw-mt-[3px] tw-block tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid ${on ? "tw-border-primary-400 [background:radial-gradient(#528BFF_0_4px,transparent_5px)]" : "tw-border-iron-400"}`}

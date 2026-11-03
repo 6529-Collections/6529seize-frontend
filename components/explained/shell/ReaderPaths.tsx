@@ -49,7 +49,7 @@ export default function ReaderPaths({
             {/* The route shows on a phone too: a card that names only its
                 reader and its time does not say where it goes. It hides only
                 in a card too narrow to hold it (7.5rem). */}
-            <span className="tw-mt-1.5 tw-hidden tw-text-sm tw-leading-5 tw-text-iron-300 @[7.5rem]:tw-block md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
+            <span className="tw-mt-1.5 tw-hidden tw-text-sm tw-leading-[21px] tw-text-iron-300 @[7.5rem]:tw-block md:tw-mt-2 md:tw-text-[15px] md:tw-leading-6">
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}

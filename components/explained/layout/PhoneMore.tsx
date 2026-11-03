@@ -68,7 +68,9 @@ export default function PhoneMore({
         >
           ›
         </span>
-        {open ? less : more}
+        {/* One text run: a label with a fact in it ("All 9 claims") is
+            several nodes, and each would take the flex gap. */}
+        <span>{open ? less : more}</span>
       </button>
     </div>
   );

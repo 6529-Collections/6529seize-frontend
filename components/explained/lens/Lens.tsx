@@ -61,7 +61,7 @@ export function RuleRail({
           <div
             // The rule's lines are a fixed sequence.
             key={index}
-            className={`tw-whitespace-break-spaces tw-py-0.5 tw-font-mono tw-text-sm tw-leading-[22px] ${line.on ? ON_LINE : "tw-text-iron-300 " + closed}`}
+            className={`tw-whitespace-break-spaces tw-py-0.5 tw-font-mono tw-text-sm tw-leading-[21px] ${line.on ? ON_LINE : "tw-text-iron-300 " + closed}`}
             data-rule-on={line.on ? "1" : "0"}
           >
             <span

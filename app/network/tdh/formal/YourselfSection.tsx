@@ -113,7 +113,7 @@ export default function YourselfSection({
                   <Mark kind="notYet" locale={locale} size="sm" />
                 )}
               </div>
-              <p className="tw-m-0 tw-mt-1.5 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300">
+              <p className="tw-m-0 tw-mt-1.5 tw-max-w-[620px] tw-text-base tw-leading-[26px] tw-text-iron-300">
                 {step.body}
               </p>
               {step.extra}

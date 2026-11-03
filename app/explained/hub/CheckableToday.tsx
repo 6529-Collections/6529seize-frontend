@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import Mark from "@/components/explained/marks/Mark";
-import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { Fact } from "../_lib/facts";
@@ -16,7 +16,9 @@ import { hrich, ht } from "./copy";
  * with its second proof not done; then what anyone can check by themselves.
  * Each head links to the page that shows it.
  */
-const HEAD_LINK = `${EX_LINK} tw-font-semibold tw-text-iron-50`;
+// The headline is a link in white, underlined on hover: blue is kept for
+// the links in running text and for live values.
+const HEAD_LINK = `tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-text-iron-50 hover:tw-underline hover:tw-decoration-iron-500 hover:tw-underline-offset-4 ${EX_FOCUS}`;
 
 function Item({
   mark,

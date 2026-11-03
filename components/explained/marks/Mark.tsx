@@ -63,7 +63,7 @@ export const MARK_QUESTION: Record<
 };
 
 export const MARK_TEXT: Record<MarkSize, string> = {
-  md: "tw-text-sm tw-leading-5",
+  md: "tw-text-sm tw-leading-[21px]",
   sm: "tw-text-[13px] tw-leading-5",
 };
 

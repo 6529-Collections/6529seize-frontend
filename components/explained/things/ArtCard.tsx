@@ -85,7 +85,7 @@ export default function ArtCard({
         </div>
       )}
       {caption !== undefined && (
-        <figcaption className="tw-mt-2.5 tw-text-sm tw-leading-5 tw-text-iron-400">
+        <figcaption className="tw-mt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400">
           {caption}
         </figcaption>
       )}

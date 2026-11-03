@@ -239,7 +239,9 @@ describe("the specification", () => {
     const version = screen.getByRole("complementary", { name: "This version" });
     expect(version.textContent).toMatch(/tdh-v1\.4/);
     expect(version.textContent).toMatch(/108/);
-    expect(within(version).getByText("Proposed")).toBeInTheDocument();
+    // The rules' two marks sit under "Get these exactly", beside the panel.
+    expect(within(version).queryByText("Proposed")).toBeNull();
+    expect(screen.getAllByText("Proposed").length).toBeGreaterThan(0);
     const drift = container.querySelector('[data-drift-by="D136 D137"]');
     // The fixture's files still report the old name.
     expect(drift?.textContent).toMatch(/still report it until its builds move/);

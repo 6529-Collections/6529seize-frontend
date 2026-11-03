@@ -96,7 +96,7 @@
   "explained.tdh.check.agree.wallets": "Wallets",
   "explained.tdh.check.agree.identitiesEqual": "Identitäten gleich",
   "explained.tdh.check.agree.walletsEqual": "Wallets gleich",
-  "explained.tdh.check.agree.caption": "Gezeigt sind nur die Vergleiche, die der Lauf durchführt: Die Python-Referenz wird nie direkt mit 6529.io verglichen.",
+  "explained.tdh.check.agree.caption": "Der Lauf vergleicht auch Python mit 6529.io; die Datei nennt den Unterschied ihrer Summen (pythonVsLive).",
   "explained.tdh.check.agree.rootsSame": "Die Python-Referenz hat keinen Hash-Baum und berechnet daher keine Roots; ihre Datensätze sind Byte für Byte die des Rust-Kerns, was sie auf dieselben Roots festlegt.",
   "explained.tdh.check.agree.rootsDiffer": "Die Python-Referenz hat keinen Hash-Baum und berechnet daher keine Roots; an diesem Tag sind ihre Datensätze nicht Byte für Byte die des Rust-Kerns.",
   "explained.tdh.check.classes.name": "Klasse {name}",

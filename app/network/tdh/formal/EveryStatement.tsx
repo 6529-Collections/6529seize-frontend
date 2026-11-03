@@ -101,7 +101,7 @@ function Entry({
       </div>
       {/* Where it is, then what checked it: one line from sm, two below. */}
       <span
-        className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400"
+        className="tw-mt-1 tw-block tw-text-sm tw-leading-[21px] tw-text-iron-400"
         data-fact={factId}
       >
         <span className="tw-block sm:tw-inline">{where}</span>

@@ -149,8 +149,10 @@ export const EX_SPACE = [4, 8, 12, 16, 20, 24, 32, 48, 64, 80, 120] as const;
 export const EX_LAYOUT = {
   /** the page's gutters: 20 px on a phone, 48 px on a desktop */
   page: "tw-mx-auto tw-w-full tw-max-w-[1244px] tw-px-5 md:tw-px-12",
-  /** a section: 100 px above on a desktop, 72 on a phone, so text to text stays near 120 */
-  section: "tw-pt-[72px] md:tw-pt-[100px]",
+  /** a section: 84 px above on a desktop, 72 on a phone, so text to text stays at 112 or less */
+  section: "tw-pt-[72px] md:tw-pt-[84px]",
+  /** the first section under a hero: 104 px on a desktop, so the hero keeps its first screen */
+  sectionAfterHero: "tw-pt-[72px] md:tw-pt-[104px]",
   /** a tight section: 80 px, 52 on a phone */
   sectionTight: "tw-pt-[52px] md:tw-pt-20",
   /** the paragraph gap: 18 px, 0.62 of a desktop line */

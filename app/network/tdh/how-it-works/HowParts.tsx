@@ -107,7 +107,7 @@ export default function HowParts({
           <a
             key={part.id}
             href={`#${part.id}`}
-            className={`tw-relative tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-[60px] tw-pt-3.5 tw-text-sm tw-leading-5 tw-no-underline hover:tw-border-iron-700 md:tw-px-[18px] md:tw-pb-[74px] md:tw-pt-[18px] md:tw-text-[15px] md:tw-leading-[22px] ${EX_FOCUS}`}
+            className={`tw-relative tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-[60px] tw-pt-3.5 tw-text-sm tw-leading-[21px] tw-no-underline hover:tw-border-iron-700 md:tw-px-[18px] md:tw-pb-[74px] md:tw-pt-[18px] md:tw-text-[15px] md:tw-leading-[22px] ${EX_FOCUS}`}
           >
             <span className="tw-text-[13px] tw-font-bold tw-text-primary-300">
               {part.letter}

@@ -139,7 +139,7 @@ export default function RunVectors({
           {results.map((result) => (
             <li
               key={result.id}
-              className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-[15px] tw-leading-6 md:tw-grid-cols-[16px_minmax(0,1fr)_auto]"
+              className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-[15px] tw-leading-6 md:tw-grid-cols-[16px_minmax(0,7fr)_minmax(0,3fr)]"
               data-vector={result.id}
               data-pass={result.pass ? "1" : "0"}
             >
@@ -164,7 +164,9 @@ export default function RunVectors({
                   </span>
                 )}
               </span>
-              <span className="tw-col-start-2 tw-text-sm tw-text-iron-400 md:tw-col-start-auto md:tw-text-right">
+              {/* The counts in a column of their own, near the names, not
+                  pinned to the panel's far edge. */}
+              <span className="tw-col-start-2 tw-text-sm tw-tabular-nums tw-text-iron-400 md:tw-col-start-auto">
                 {s("explained.tdh.impl.here.checks", {
                   checks: formatCount(locale, result.checks),
                   ms: formatCount(locale, Math.max(1, Math.round(result.ms))),

@@ -75,19 +75,25 @@ export function PageHead({
 export function Section({
   id,
   tight = false,
+  afterHero = false,
   children,
   label,
 }: {
   readonly id?: string;
   readonly tight?: boolean;
+  /** The first section under a hero: a little more room, so the hero's first screen keeps to the hero. */
+  readonly afterHero?: boolean;
   readonly children: ReactNode;
   /** The section's accessible name, when it has no heading of its own. */
   readonly label?: string;
 }) {
+  let space: string = EX_LAYOUT.section;
+  if (tight) space = EX_LAYOUT.sectionTight;
+  else if (afterHero) space = EX_LAYOUT.sectionAfterHero;
   return (
     <section
       id={id}
-      className={`${tight ? EX_LAYOUT.sectionTight : EX_LAYOUT.section} tw-scroll-mt-24`}
+      className={`${space} tw-scroll-mt-24`}
       {...(label ? { "aria-label": label } : {})}
     >
       {children}

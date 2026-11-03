@@ -28,7 +28,7 @@ export function LimitNote({
       : "tw-border-dashed tw-border-iron-700";
   return (
     <div
-      className={`tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-2.5 tw-rounded-lg tw-border tw-px-4 tw-py-3.5 tw-text-base tw-leading-[25px] tw-text-iron-300 max-[359px]:tw-grid-cols-1 max-[359px]:tw-px-3 ${frame}`}
+      className={`tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-2.5 tw-rounded-lg tw-border tw-px-4 tw-py-3.5 tw-text-base tw-leading-[26px] tw-text-iron-300 max-[359px]:tw-grid-cols-1 max-[359px]:tw-px-3 ${frame}`}
       data-limit={tone}
     >
       <Glyph
@@ -139,7 +139,7 @@ function Column({
   readonly fallback: MarkKind;
 }) {
   return (
-    <div className="tw-px-6 tw-py-[22px]">
+    <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-[18px]">
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {label}
       </span>
@@ -150,7 +150,7 @@ function Column({
             // Items are fixed copy in a fixed order.
             <li
               key={index}
-              className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-base tw-leading-[25px] tw-text-iron-300"
+              className="tw-grid tw-grid-cols-[16px_minmax(0,1fr)] tw-gap-2.5 tw-text-base tw-leading-[26px] tw-text-iron-300"
             >
               <Glyph kind={kind} className="tw-mt-[5px] tw-size-3.5" />
               <span>{item.text}</span>
@@ -180,14 +180,14 @@ function TwoColumns({
   readonly label?: string;
 }) {
   return (
+    // Two columns under one rule each, no shared box: each ends where its
+    // items end, so a shorter list leaves no empty frame beside the longer.
     <div
-      className="tw-grid tw-grid-cols-1 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 md:tw-grid-cols-2"
+      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-8 md:tw-grid-cols-2 md:tw-gap-x-12"
       {...(label ? { "aria-label": label, role: "group" } : {})}
     >
       <Column label={left.label} items={left.items} fallback={left.mark} />
-      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-l md:tw-border-t-0">
-        <Column label={right.label} items={right.items} fallback={right.mark} />
-      </div>
+      <Column label={right.label} items={right.items} fallback={right.mark} />
     </div>
   );
 }
@@ -263,7 +263,7 @@ export function MarkList({
       {marks.map((mark) => (
         <li
           key={mark.kind}
-          className="tw-text-sm tw-leading-5 tw-text-iron-400"
+          className="tw-text-sm tw-leading-[21px] tw-text-iron-400"
         >
           <Mark kind={mark.kind} locale={locale} size="sm" />
           {mark.note ? ` ${mark.note}` : ""}

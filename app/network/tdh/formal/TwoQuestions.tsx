@@ -165,11 +165,13 @@ function TwoQuestionsFigures({
               title: s("explained.tdh.sure.layers.rule"),
               rungs: rule,
               todayAfter: 3,
+              weight: 5,
             },
             {
               title: s("explained.tdh.sure.layers.day"),
               rungs: day,
               todayAfter: 1,
+              weight: 7,
             },
           ]}
         />

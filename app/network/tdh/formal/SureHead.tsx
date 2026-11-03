@@ -212,22 +212,25 @@ export default function SureHead({
           })}
         </li>
       </ul>
-      {/* The three theorem counts of this page, tied together once. */}
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {m(
-          book.maybe("manifest.audit.wholeTheorems")
-            ? "explained.tdh.sure.score.counts"
-            : "explained.tdh.sure.score.countsShort",
-          {
-            proved: p.v("manifest.proved"),
-            kernel: p.v("manifest.shownFalse.kernel"),
-            audited: p.v("manifest.audited"),
-            theorems: p.v("manifest.audit.wholeTheorems"),
-          }
-        )}{" "}
-        {m("explained.tdh.sure.score.terms")}
-      </p>
-      <SplitTable ctx={ctx} />
+      {/* The three theorem counts of this page, tied together once, beside
+          the table that splits them by whose rules they are about. */}
+      <div className="tw-mt-5 lg:tw-grid lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:tw-items-start lg:tw-gap-x-12">
+        <p className="tw-m-0 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {m(
+            book.maybe("manifest.audit.wholeTheorems")
+              ? "explained.tdh.sure.score.counts"
+              : "explained.tdh.sure.score.countsShort",
+            {
+              proved: p.v("manifest.proved"),
+              kernel: p.v("manifest.shownFalse.kernel"),
+              audited: p.v("manifest.audited"),
+              theorems: p.v("manifest.audit.wholeTheorems"),
+            }
+          )}{" "}
+          {m("explained.tdh.sure.score.terms")}
+        </p>
+        <SplitTable ctx={ctx} />
+      </div>
     </>
   );
 }
@@ -267,7 +270,7 @@ function SplitTable({ ctx }: { readonly ctx: SureContext }) {
     },
   ];
   return (
-    <div className="tw-mt-5 tw-max-w-[720px]">
+    <div className="tw-mt-5 tw-max-w-[720px] lg:tw-mt-0">
       {/* Narrow screens: one line a row, no table to scroll. */}
       <ul
         className="tw-m-0 tw-list-none tw-p-0 md:tw-hidden"

@@ -55,7 +55,7 @@ export default function RecordTable({
       : ` · ${ot(locale, "explain.cardCopies", { copies: formatCount(locale, row.edition) })}`;
   return (
     <>
-      <table className="tw-w-full tw-border-collapse tw-text-base tw-leading-6 tw-text-iron-300 max-md:tw-hidden">
+      <table className="tw-w-full tw-border-collapse tw-text-base tw-leading-[26px] tw-text-iron-300 max-md:tw-hidden">
         <thead>
           <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800">
             <th

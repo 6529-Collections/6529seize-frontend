@@ -44,7 +44,7 @@ export default function PageIndex({
               {withCc0(row.title)}
             </span>
             {row.desc !== undefined && (
-              <span className="tw-col-start-2 tw-text-base tw-leading-6 tw-text-iron-400 md:tw-col-start-3">
+              <span className="tw-col-start-2 tw-text-base tw-leading-[26px] tw-text-iron-400 md:tw-col-start-3">
                 {withCc0(row.desc)}
               </span>
             )}

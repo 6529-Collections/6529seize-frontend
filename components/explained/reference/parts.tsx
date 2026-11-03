@@ -248,7 +248,7 @@ export function StackTable({
   const text =
     size === "small"
       ? "tw-text-[15px] tw-leading-6"
-      : "tw-text-base tw-leading-6";
+      : "tw-text-base tw-leading-[26px]";
   return (
     <table
       className={`tw-w-full tw-border-collapse ${text}`}
@@ -349,7 +349,7 @@ export function Trap({
 }) {
   return (
     <aside
-      className={`tw-rounded-lg tw-border tw-border-l-[3px] tw-border-solid tw-border-iron-700 tw-border-l-primary-400 tw-bg-primary-400/[0.04] tw-px-5 tw-py-[18px] ${className}`.trim()}
+      className={`tw-max-w-[660px] tw-rounded-lg tw-border tw-border-l-[3px] tw-border-solid tw-border-iron-700 tw-border-l-primary-400 tw-bg-primary-400/[0.04] tw-px-5 tw-py-[18px] ${className}`.trim()}
     >
       <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300">
         {label}
@@ -476,7 +476,7 @@ export function Contents({
           <li key={item.href}>
             <Link
               href={item.href}
-              className={`tw-grid tw-min-h-11 tw-grid-cols-[32px_minmax(0,1fr)] tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-base tw-leading-6 tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 min-[360px]:tw-grid-cols-[44px_minmax(0,1fr)] ${EX_FOCUS}`}
+              className={`tw-grid tw-min-h-11 tw-grid-cols-[32px_minmax(0,1fr)] tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-base tw-leading-[26px] tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 min-[360px]:tw-grid-cols-[44px_minmax(0,1fr)] ${EX_FOCUS}`}
             >
               <span className="tw-font-semibold tw-text-iron-400">
                 {item.no}

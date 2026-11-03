@@ -149,7 +149,7 @@ function Layers({
                   >
                     {fill(locale, k(LAYER_TITLE[layer]))}
                   </b>
-                  <span className="tw-block tw-text-[13px] tw-leading-[18px] tw-text-iron-400">
+                  <span className="tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
                     {fill(locale, k(LAYER_SUB[layer]))}
                   </span>
                 </span>

@@ -17,7 +17,7 @@ export function KitSection({
 }) {
   return (
     <section
-      className="tw-pt-[72px] md:tw-pt-[100px]"
+      className="tw-pt-[72px] md:tw-pt-[84px]"
       id={id}
       data-kit-section={id}
     >

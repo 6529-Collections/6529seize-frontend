@@ -79,7 +79,7 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     // The days written late or re-run say they came out equal too.
-    expect(panel).toHaveTextContent("those are equal too.");
+    expect(panel).toHaveTextContent("re-run (↻); all equal.");
     expect(panel).toHaveTextContent(
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about TDH`
     );
@@ -91,13 +91,19 @@ describe("the hub, first version", () => {
     // The proved day carries its retired rule in the same sentence, and the
     // test pair under today's rules is told beside it.
     expect(panel).toHaveTextContent("One real day, half a pair");
+    // A day would need both proofs: D128 is built, not deployed; proof B
+    // has proved test cycles only.
+    expect(panel).toHaveTextContent(
+      "a day would need one from each of two programs"
+    );
+    expect(panel).toHaveTextContent("B: test cycles only");
     expect(panel).toHaveTextContent(
       "Program A proved Oct 11 under retired rules, and mainnet's verifier accepted it read-only; both have proved a test cycle under TDH v1.4. Nothing is on Ethereum yet (D128)."
     );
     // Who runs everything today, then what anyone can check, then what
     // needs private code.
     expect(panel).toHaveTextContent(
-      "Today 6529 runs both recomputations and 6529.io's own. Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. Recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). Your TDH is in each of those results: see yours."
+      "Today 6529 runs both recomputations and 6529.io's own. Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. Recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). See yours in each of those results."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
