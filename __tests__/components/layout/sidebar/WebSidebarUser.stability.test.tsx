@@ -41,6 +41,7 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 }));
 jest.mock("@/components/header/share/HeaderShare", () => ({
   HeaderConnectModal: () => null,
+  preloadHeaderQRModal: jest.fn(),
 }));
 jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
 jest.mock("@/components/header/user/HeaderUserMenuDropdown", () => {

@@ -3,6 +3,7 @@
 import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import { AuthLoadingBoundary } from "@/components/auth/AuthLoadingPlaceholder";
 import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import Button from "@/components/utils/button/Button";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -61,7 +62,7 @@ async function postRememeSubmission(body: {
     headers.set("x-6529-auth", apiAuth);
   }
 
-  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
+  const response = await fetch(apiUrl("/api/rememes/add"), {
     method: "POST",
     body: JSON.stringify(body),
     headers,
@@ -164,11 +165,9 @@ export default function RememeAddPage() {
   }, [signMessage.isError]);
 
   useEffect(() => {
-    fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
-      (response: DBResponse) => {
-        setMemes(response.data);
-      }
-    );
+    void fetchUrl(apiUrl("/api/memes_lite")).then((response: DBResponse) => {
+      setMemes(response.data);
+    });
   }, []);
 
   useEffect(() => {

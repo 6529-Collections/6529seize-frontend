@@ -80,7 +80,9 @@ function HeaderQRModal({
   const isElectron = useElectron();
 
   const [shouldRender, setShouldRender] = useState(show);
-  const [isVisible, setIsVisible] = useState(show);
+  // Start hidden even when mounted open (the lazy loader mounts it on the
+  // first open) so the enter transition still runs on the next frame.
+  const [isVisible, setIsVisible] = useState(false);
 
   const { address: contextWalletAddress, hasValidWalletAuth } =
     useSeizeConnectContext();

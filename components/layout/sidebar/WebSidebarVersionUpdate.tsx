@@ -1,6 +1,7 @@
 "use client";
 
 import { useWebVersionUpdate } from "@/components/version-update/useWebVersionUpdate";
+import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -12,9 +13,9 @@ function UpdateRocketIcon({
   readonly className?: string | undefined;
 }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- Use the existing local update artwork at sidebar icon size.
+    // eslint-disable-next-line @next/next/no-img-element -- Use the small hash-named WebP the reload cover already caches.
     <img
-      src="/rocket-refresh-small.png"
+      src={VERSION_RELOAD_IMAGE_SRC}
       alt=""
       width={24}
       height={24}

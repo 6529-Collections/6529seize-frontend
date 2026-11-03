@@ -6,7 +6,7 @@ import { useIsTransferModeActive } from "@/components/nft-transfer/TransferState
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
 import {
   CREATE_WAVE_QUERY_PARAM,
@@ -76,7 +76,7 @@ const useCanMountQuickDirectMessages = (): boolean => {
   );
 };
 
-export default function QuickDirectMessagesGate() {
+function QuickDirectMessagesLauncher() {
   const canMountQuickDirectMessages = useCanMountQuickDirectMessages();
 
   if (!canMountQuickDirectMessages) {
@@ -84,4 +84,15 @@ export default function QuickDirectMessagesGate() {
   }
 
   return <LazyQuickDirectMessages />;
+}
+
+// It reads the create-wave query and only mounts for connected desktop users
+// in the browser, so its own Suspense boundary lets a prerendered page render
+// without it.
+export default function QuickDirectMessagesGate() {
+  return (
+    <Suspense fallback={null}>
+      <QuickDirectMessagesLauncher />
+    </Suspense>
+  );
 }

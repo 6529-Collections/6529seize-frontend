@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -92,7 +93,7 @@ const buildUrl = (
 ): string => {
   let path = `/api/${endpoint}`;
   const apiEndpoint =
-    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : getApiBase();
   let url = `${apiEndpoint}${path}`;
 
   if (params) {
