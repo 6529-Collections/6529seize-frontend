@@ -32,8 +32,10 @@ const dsn = publicEnv.SENTRY_DSN;
 const replayEnabled =
   sentryEnabled && isProduction && publicEnv.SENTRY_REPLAY_ENABLED === "true";
 
-type SentryClientEventPipeline =
-  typeof import("@/utils/monitoring/sentryClientEventPipeline");
+type SentryClientEventPipeline = Pick<
+  typeof import("@/utils/monitoring/sentryClientEventPipeline"),
+  "processSentryClientEvent" | "processSentryClientTransaction"
+>;
 
 let sentryClientEventPipeline: Promise<SentryClientEventPipeline> | undefined;
 
@@ -43,7 +45,11 @@ let sentryClientEventPipeline: Promise<SentryClientEventPipeline> | undefined;
 // redaction; a later event retries the import.
 function loadSentryClientEventPipeline(): Promise<SentryClientEventPipeline> {
   sentryClientEventPipeline ??=
-    import("@/utils/monitoring/sentryClientEventPipeline").catch(
+    import("@/utils/monitoring/sentryClientEventPipeline").then(
+      ({ processSentryClientEvent, processSentryClientTransaction }) => ({
+        processSentryClientEvent,
+        processSentryClientTransaction,
+      }),
       (error: unknown) => {
         sentryClientEventPipeline = undefined;
         throw error;
