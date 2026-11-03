@@ -1,3 +1,4 @@
+import competitionRuleDefaults from "../support/competitionRuleDefaults.json";
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -297,32 +298,7 @@ const competition = (id: string, title: string) => ({
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
-  participation: {
-    group_id: null,
-    signature_required: false,
-    max_entries_per_participant: null,
-    required_metadata: [],
-    required_media: [],
-    submission_type: null,
-    identity_submission_strategy: null,
-    identity_submission_duplicates: null,
-    starts_at: null,
-    ends_at: null,
-    terms: null,
-  },
-  voting: {
-    group_id: null,
-    credit_type: "TDH",
-    credit_scope: "WAVE",
-    credit_category: null,
-    credit_creditor: null,
-    credit_nfts: [],
-    signature_required: false,
-    starts_at: null,
-    ends_at: null,
-    max_votes_per_identity_to_entry: null,
-    forbid_negative_votes: false,
-  },
+  ...structuredClone(competitionRuleDefaults),
   decisions: {
     strategy: null,
     next_decision_time: null,

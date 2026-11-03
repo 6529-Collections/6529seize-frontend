@@ -2,6 +2,7 @@ const http = require("http");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 const composerSandboxConstants = require("./composerSandboxConstants.json");
+const competitionRuleDefaults = require("./competitionRuleDefaults.json");
 
 require("dotenv").config();
 require("dotenv").config({ path: ".env.test" });
@@ -873,32 +874,7 @@ const artworkCompetition = {
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
-  participation: {
-    group_id: null,
-    signature_required: false,
-    max_entries_per_participant: null,
-    required_metadata: [],
-    required_media: [],
-    submission_type: null,
-    identity_submission_strategy: null,
-    identity_submission_duplicates: null,
-    starts_at: null,
-    ends_at: null,
-    terms: null,
-  },
-  voting: {
-    group_id: null,
-    credit_type: "TDH",
-    credit_scope: "WAVE",
-    credit_category: null,
-    credit_creditor: null,
-    credit_nfts: [],
-    signature_required: false,
-    starts_at: null,
-    ends_at: null,
-    max_votes_per_identity_to_entry: null,
-    forbid_negative_votes: false,
-  },
+  ...structuredClone(competitionRuleDefaults),
   decisions: {
     strategy: null,
     next_decision_time: null,
