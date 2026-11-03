@@ -81,8 +81,7 @@ const KEY_SCAN_IGNORED_DIRS = [
 // `museum.rooms.${id}`.
 const KEY_LIKE_LITERAL =
   /["'`]([A-Za-z][\w-]*(?:\.[\w-]+)*\.?)(?=["'`]|\$\{)/gu;
-const NAMESPACE_IMPORT =
-  /(?:\bfrom\s*|\bimport\s*)["']@\/i18n\/namespaces\/([\w-]+)["']/gu;
+const NAMESPACE_SPECIFIER = "@/i18n/namespaces/";
 // Static imports and re-exports, side-effect imports, and dynamic imports.
 // Type-only imports are skipped below because they never reach a bundle.
 // Single `\s` separators keep the alternatives unambiguous, so a failed match
@@ -92,6 +91,35 @@ const MODULE_REFERENCE =
 // `<Component messageKey="museum.title" />`: the text before a JSX prop value,
 // back to the element's opening tag.
 const JSX_PROP_OPENING = /<([A-Z]\w*)(?:\.\w+)*\s[^<]*[\w-]=\{?\s*$/u;
+
+// Namespaces a module registers at runtime: `import "@/i18n/namespaces/<name>";`.
+// Only a bare side-effect import is certain to survive compilation.
+// TypeScript and SWC erase `import type`, inline `type` specifiers, and named
+// imports that are used only as types. A single forward scan, so no regex can
+// backtrack.
+function findSideEffectNamespaceImports(source: string): Set<string> {
+  const names = new Set<string>();
+  let index = source.indexOf(NAMESPACE_SPECIFIER);
+  while (index !== -1) {
+    const quote = source.charAt(index - 1);
+    const nameStart = index + NAMESPACE_SPECIFIER.length;
+    let nameEnd = nameStart;
+    while (/[\w-]/u.test(source.charAt(nameEnd))) {
+      nameEnd += 1;
+    }
+    const lineStart = source.lastIndexOf("\n", index) + 1;
+    if (
+      (quote === '"' || quote === "'") &&
+      source.charAt(nameEnd) === quote &&
+      nameEnd > nameStart &&
+      source.slice(lineStart, index - 1).trim() === "import"
+    ) {
+      names.add(source.slice(nameStart, nameEnd));
+    }
+    index = source.indexOf(NAMESPACE_SPECIFIER, nameEnd);
+  }
+  return names;
+}
 
 // Whether a module starts with a "use client" directive, after whitespace and
 // comments. A single forward scan, so comment-heavy input cannot backtrack.
@@ -257,6 +285,21 @@ function namespacesNamedBy(
   );
 }
 
+// Namespaces whose keys `source` names but does not import at runtime.
+function namespacesMissingFrom(
+  source: string,
+  namespaces: readonly Namespace[]
+): string[] {
+  const imported = findSideEffectNamespaceImports(source);
+  const needed = new Set<string>();
+  for (const match of source.matchAll(KEY_LIKE_LITERAL)) {
+    for (const namespace of namespacesNamedBy(match[1]!, namespaces)) {
+      needed.add(namespace.name);
+    }
+  }
+  return [...needed].filter((name) => !imported.has(name));
+}
+
 function toRepoPath(file: string): string {
   return path.relative(REPO_ROOT, file).split(path.sep).join("/");
 }
@@ -296,6 +339,35 @@ describe("use client detection", () => {
   });
 });
 
+describe("namespace import detection", () => {
+  const fixture: Namespace = {
+    name: "fixture",
+    keys: new Set(["fixture.title"]),
+    prefixes: new Set(["fixture."]),
+  };
+  const usesKey = 't(locale, "fixture.title");\n';
+
+  it.each([
+    ['import "@/i18n/namespaces/fixture";\n', []],
+    ["  import '@/i18n/namespaces/fixture'\n", []],
+    [
+      'import type { FIXTURE } from "@/i18n/namespaces/fixture";\n',
+      ["fixture"],
+    ],
+    [
+      'import { type FIXTURE } from "@/i18n/namespaces/fixture";\n',
+      ["fixture"],
+    ],
+    ['import { FIXTURE } from "@/i18n/namespaces/fixture";\n', ["fixture"]],
+    ['// import "@/i18n/namespaces/fixture";\n', ["fixture"]],
+    ['void import("@/i18n/namespaces/fixture");\n', ["fixture"]],
+  ])("%j leaves these namespaces unregistered: %j", (imports, missing) => {
+    expect(namespacesMissingFrom(imports + usesKey, [fixture])).toEqual(
+      missing
+    );
+  });
+});
+
 describe("en-US message namespaces", () => {
   it("compose the complete dictionary with the root dictionary, without overlap", () => {
     const owners = new Map<string, string[]>();
@@ -323,21 +395,10 @@ describe("en-US message namespaces", () => {
       if (!browserModules.has(file)) {
         continue;
       }
-      const imported = new Set(
-        [...source.matchAll(NAMESPACE_IMPORT)].map((match) => match[1])
-      );
-      const needed = new Set<string>();
-      for (const match of source.matchAll(KEY_LIKE_LITERAL)) {
-        for (const namespace of namespacesNamedBy(match[1]!, namespaces)) {
-          needed.add(namespace.name);
-        }
-      }
-      for (const name of needed) {
-        if (!imported.has(name)) {
-          missingImports.push(
-            `${toRepoPath(file)} needs import "@/i18n/namespaces/${name}"`
-          );
-        }
+      for (const name of namespacesMissingFrom(source, namespaces)) {
+        missingImports.push(
+          `${toRepoPath(file)} needs import "@/i18n/namespaces/${name}"`
+        );
       }
     }
 
