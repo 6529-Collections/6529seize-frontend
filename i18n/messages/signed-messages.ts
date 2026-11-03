@@ -1,7 +1,7 @@
 // en-US source strings for signed messages (device-key signed drop writes).
 // Other locales fall back to en-US while the feature is staged.
 export const SIGNED_MESSAGES_MESSAGES = {
-  "preferences.tabs.devices": "Devices",
+  "preferences.tabs.devices": "Device Permissions",
   "signedMessages.enable.unavailable":
     "Couldn't turn on signed messages. Please try again.",
   "signedMessages.enable.reconnectWallet":
@@ -67,9 +67,9 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.revoke.success": "{label} can no longer post as you.",
   "signedMessages.revoke.error":
     "Couldn't revoke this device. Please try again.",
-  "signedMessages.devices.title": "Devices that can post as you",
+  "signedMessages.devices.title": "Authorized devices",
   "signedMessages.devices.description":
-    "With signed messages on, a browser holds a key that signs your posts, edits, deletes and reactions. It cannot move funds, change your handle, add devices or act as an admin.",
+    "Review which devices can sign your posts or access encrypted DMs, and when each permission expires.",
   "signedMessages.devices.listLabel": "Devices",
   "signedMessages.devices.thisDevice": "This device",
   "signedMessages.devices.scopes": "Can {scopes}",
@@ -90,10 +90,12 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.status.revoked": "Revoked",
   "signedMessages.devices.revoke": "Revoke",
   "signedMessages.devices.revokeLabel": "Revoke {label}",
+  "signedMessages.devices.authorProof": "Author proof",
+  "signedMessages.devices.revokeProofTitle": "Revoke author proof for {label}?",
   "signedMessages.devices.revokeConfirm":
     "This device will no longer sign your messages. Its earlier signatures stay verifiable.",
   "signedMessages.devices.cancel": "Cancel",
-  "signedMessages.devices.empty": "No device can post as you yet.",
+  "signedMessages.devices.empty": "No authorized devices yet.",
   "signedMessages.devices.loading": "Loading devices",
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",

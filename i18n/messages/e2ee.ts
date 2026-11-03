@@ -616,6 +616,21 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
+  "e2ee.deviceStatus.proofLine": "Author proof: {status}",
+  "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
+  "e2ee.deviceStatus.enableBoth": "Enable author proof and encryption",
+  "e2ee.deviceStatus.enableProof": "Enable author proof",
+  "e2ee.deviceStatus.enableEncryption": "Enable encryption",
+  "e2ee.devices.managePermission": "Manage encrypted DM access",
+  "e2ee.devices.permission": "Encrypted DMs",
+  "e2ee.devices.combinedPermissions":
+    "Author proof and encrypted DMs (shared grant)",
+  "e2ee.devices.revokeCombinedTitle":
+    "Revoke author proof and encrypted DM access for {label}?",
+  "e2ee.devices.revokeEncryptionTitle":
+    "Revoke encrypted DM access for {label}?",
+  "e2ee.devices.revokeHistory":
+    "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
   "e2ee.deviceStatus.on": "on",

@@ -23,6 +23,13 @@ import { t } from "@/i18n/messages";
 import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { useId, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
+import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
+import { commonApiFetch } from "@/services/api/common-api";
+
 type GrantStatus = "active" | "expired" | "revoked";
 
 const SCOPE_LABEL_KEYS: Readonly<Record<string, MessageKey>> = {
@@ -91,11 +98,15 @@ function getGrantDates(
 
 function DeviceGrantRow({
   grant,
+  linkedDevice,
+  canRevoke,
   isThisDevice,
   nowMs,
   onRevoke,
 }: {
   readonly grant: ApiDeviceGrant;
+  readonly linkedDevice: ApiE2eeDevice | undefined;
+  readonly canRevoke: boolean;
   readonly isThisDevice: boolean;
   readonly nowMs: number;
   readonly onRevoke: (grant: ApiDeviceGrant) => void;
@@ -123,10 +134,29 @@ function DeviceGrantRow({
           </span>
         </div>
         <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-300">
+          {t(locale, "signedMessages.devices.authorProof")} ·{" "}
           {t(locale, "signedMessages.devices.scopes", {
             scopes: formatScopes(locale, grant.scopes),
           })}
         </p>
+        {linkedDevice && (
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-300">
+            {t(locale, "e2ee.devices.combinedPermissions")} ·{" "}
+            {t(
+              locale,
+              linkedDevice.revoked_at === null
+                ? "signedMessages.devices.expires"
+                : "signedMessages.devices.revokedOn",
+              {
+                date: formatDate(
+                  locale,
+                  linkedDevice.revoked_at ??
+                    linkedDevice.grant.expires_at * 1000
+                ),
+              }
+            )}
+          </p>
+        )}
         <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
           {[
             t(locale, "signedMessages.devices.wallet", {
@@ -136,7 +166,7 @@ function DeviceGrantRow({
           ].join(" · ")}
         </p>
       </div>
-      {status === "active" && (
+      {status === "active" && canRevoke && (
         <Button
           size="sm"
           variant="destructiveOutline"
@@ -189,13 +219,29 @@ function EnableSignedMessagesButton({
 export default function DevicesPreferencesSettings() {
   const locale = useBrowserLocale();
   const titleId = useId();
-  const { activeProfileProxy, isAuthenticated } = useAuth();
+  const { activeProfileProxy, isAuthenticated, connectedProfile } = useAuth();
   const { address } = useSeizeConnectContext();
   const listAddress =
     !activeProfileProxy && isAuthenticated && address
       ? address.toLowerCase()
       : null;
   const query = useDeviceGrants(listAddress);
+  const profileId = connectedProfile?.id;
+  const encryptionEnabled =
+    isE2eeEnabled() && Boolean(profileId && listAddress);
+  const encryptionDevices = useQuery({
+    queryKey: ["device-permissions-encryption", profileId, listAddress],
+    enabled: encryptionEnabled,
+    queryFn: async ({ signal }) => {
+      const data = await commonApiFetch<ApiE2eeMe>({
+        endpoint: "e2ee/me",
+        signal,
+      });
+      if (data.profile_id !== profileId)
+        throw new Error("Device profile changed");
+      return data.devices;
+    },
+  });
   const local = useLocalDeviceKeys(listAddress);
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
@@ -203,12 +249,32 @@ export default function DevicesPreferencesSettings() {
     null
   );
   const grants = query.data ?? [];
+  const encryptedDevices = encryptionEnabled
+    ? (encryptionDevices.data ?? [])
+    : [];
+  const linkedDevices = new Map(
+    encryptedDevices
+      .filter((device) => device.grant_message != null)
+      .map((device) => [device.grant_id, device])
+  );
+  const separateDevices = encryptedDevices.filter(
+    (device) =>
+      device.grant_message == null ||
+      !grants.some((grant) => grant.id === device.grant_id)
+  );
+  const canVerifyRevocation =
+    !encryptionEnabled ||
+    (encryptionDevices.isSuccess && !encryptionDevices.isError);
+  const pendingLinkedDevice = pendingRevoke
+    ? linkedDevices.get(pendingRevoke.id)
+    : undefined;
   const ownKeys = new Set(local.publicKeys);
   const localStatus = getDeviceGrantStatus(local.grant, nowMs);
 
   const confirmRevoke = async () => {
-    if (pendingRevoke && (await revoke(pendingRevoke))) {
+    if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
       setPendingRevoke(null);
+      if (encryptionEnabled) void encryptionDevices.refetch();
     }
   };
 
@@ -238,7 +304,8 @@ export default function DevicesPreferencesSettings() {
           }
         />
       )}
-      {query.isLoading && (
+      {(query.isLoading ||
+        (encryptionEnabled && encryptionDevices.isLoading)) && (
         <output
           aria-label={t(locale, "signedMessages.devices.loading")}
           className="tw-mt-4 tw-flex tw-min-h-24 tw-items-center tw-justify-center"
@@ -246,7 +313,7 @@ export default function DevicesPreferencesSettings() {
           <span className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400 motion-reduce:tw-animate-none" />
         </output>
       )}
-      {query.isError && (
+      {(query.isError || (encryptionEnabled && encryptionDevices.isError)) && (
         <div
           role="alert"
           className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3"
@@ -257,18 +324,24 @@ export default function DevicesPreferencesSettings() {
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => void query.refetch()}
+            onClick={() => {
+              void query.refetch();
+              if (encryptionEnabled) void encryptionDevices.refetch();
+            }}
           >
             {t(locale, "signedMessages.devices.retry")}
           </Button>
         </div>
       )}
-      {query.isSuccess && grants.length === 0 && (
-        <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400">
-          {t(locale, "signedMessages.devices.empty")}
-        </p>
-      )}
-      {grants.length > 0 && (
+      {query.isSuccess &&
+        canVerifyRevocation &&
+        grants.length === 0 &&
+        separateDevices.length === 0 && (
+          <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400">
+            {t(locale, "signedMessages.devices.empty")}
+          </p>
+        )}
+      {(grants.length > 0 || separateDevices.length > 0) && (
         <ul
           aria-label={t(locale, "signedMessages.devices.listLabel")}
           className="tw-m-0 tw-mt-2 tw-list-none tw-p-0"
@@ -277,21 +350,73 @@ export default function DevicesPreferencesSettings() {
             <DeviceGrantRow
               key={grant.id}
               grant={grant}
+              linkedDevice={linkedDevices.get(grant.id)}
+              canRevoke={canVerifyRevocation}
               isThisDevice={ownKeys.has(grant.device_key.toLowerCase())}
               nowMs={nowMs}
               onRevoke={setPendingRevoke}
             />
           ))}
+          {separateDevices.map((device) => (
+            <li
+              key={device.device_key}
+              className="tw-border-b tw-border-iron-800 tw-py-4 last:tw-border-b-0"
+            >
+              <p className="tw-m-0 tw-font-semibold tw-text-iron-100">
+                {device.label}
+              </p>
+              <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">
+                {t(
+                  locale,
+                  device.grant_message == null
+                    ? "e2ee.devices.permission"
+                    : "e2ee.devices.combinedPermissions"
+                )}{" "}
+                ·{" "}
+                {t(
+                  locale,
+                  device.revoked_at === null
+                    ? "signedMessages.devices.expires"
+                    : "signedMessages.devices.revokedOn",
+                  {
+                    date: formatDate(
+                      locale,
+                      device.revoked_at ?? device.grant.expires_at * 1000
+                    ),
+                  }
+                )}
+              </p>
+              {device.revoked_at === null && (
+                <Link
+                  href={getEncryptedDevicesRoute()}
+                  className="tw-text-sm tw-text-primary-300"
+                >
+                  {t(locale, "e2ee.devices.managePermission")}
+                </Link>
+              )}
+            </li>
+          ))}
         </ul>
       )}
       <MobileWrapperConfirmationDialog
-        isOpen={pendingRevoke !== null}
+        isOpen={pendingRevoke !== null && canVerifyRevocation}
         onClose={() => !isRevoking && setPendingRevoke(null)}
         onConfirm={() => void confirmRevoke()}
-        title={t(locale, "signedMessages.devices.revokeLabel", {
-          label: pendingRevoke?.device_label ?? "",
-        })}
-        message={t(locale, "signedMessages.devices.revokeConfirm")}
+        title={t(
+          locale,
+          pendingLinkedDevice
+            ? "e2ee.devices.revokeCombinedTitle"
+            : "signedMessages.devices.revokeProofTitle",
+          {
+            label: pendingRevoke?.device_label ?? "",
+          }
+        )}
+        message={t(
+          locale,
+          pendingLinkedDevice
+            ? "e2ee.devices.revokeHistory"
+            : "signedMessages.devices.revokeConfirm"
+        )}
         confirmText={t(locale, "signedMessages.devices.revoke")}
         cancelText={t(locale, "signedMessages.devices.cancel")}
         isConfirming={isRevoking}

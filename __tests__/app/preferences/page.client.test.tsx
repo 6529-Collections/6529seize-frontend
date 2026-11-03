@@ -51,12 +51,14 @@ describe("PreferencesPageClient", () => {
 
   it("offers the Devices tab only while signed messages are enabled", () => {
     const { rerender } = render(<PreferencesPageClient activeTab="devices" />);
-    expect(screen.queryByRole("link", { name: "Devices" })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Device Permissions" })
+    ).toBeNull();
     expect(screen.queryByText("Devices settings panel")).toBeNull();
 
     mockSignedMessagesEnabled = true;
     rerender(<PreferencesPageClient activeTab="devices" />);
-    const devicesTab = screen.getByRole("link", { name: "Devices" });
+    const devicesTab = screen.getByRole("link", { name: "Device Permissions" });
     expect(devicesTab).toHaveAttribute("href", "/preferences?tab=devices");
     expect(devicesTab).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Devices settings panel")).toBeVisible();
@@ -70,7 +72,7 @@ describe("PreferencesPageClient", () => {
     expect(screen.getByRole("heading", { name: "Preferences" })).toBeVisible();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     const notificationsTab = screen.getByRole("link", {
-      name: "Notifications & messages",
+      name: "Notifications & Messages",
     });
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
     expect(notificationsTab).toHaveClass(

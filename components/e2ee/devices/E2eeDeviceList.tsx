@@ -124,6 +124,14 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
           ) : null}
           <VerifiedIndicator verified={device.verified} />
         </div>
+        <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-300">
+          {t(
+            locale,
+            device.linkedAuthorProof
+              ? "e2ee.devices.combinedPermissions"
+              : "e2ee.devices.permission"
+          )}
+        </p>
         <DeviceDates device={device} />
       </div>
       {isActive && onRevoke ? (
@@ -198,15 +206,16 @@ export function E2eeDeviceList({
       ) : null}
       <E2eeConfirmDialog
         open={target !== null}
-        title={t(locale, "e2ee.devices.revokeConfirmTitle", {
-          label: target?.label ?? "",
-        })}
-        body={t(
+        title={t(
           locale,
-          target?.isThisDevice
-            ? "e2ee.devices.revokeThisConfirmBody"
-            : "e2ee.devices.revokeConfirmBody"
+          target?.linkedAuthorProof
+            ? "e2ee.devices.revokeCombinedTitle"
+            : "e2ee.devices.revokeEncryptionTitle",
+          {
+            label: target?.label ?? "",
+          }
         )}
+        body={t(locale, "e2ee.devices.revokeHistory")}
         confirmLabel={t(locale, "e2ee.devices.revokeConfirm")}
         errorFallbackKey="e2ee.devices.revokeFailed"
         onConfirm={async () => {

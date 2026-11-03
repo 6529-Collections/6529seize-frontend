@@ -27,6 +27,9 @@ import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
+import DeviceSetupMenuAction from "@/components/device-signing/DeviceSetupMenuAction";
+import { isDeviceSecurityStatusEnabled } from "@/components/device-signing/DeviceSecurityStatus";
+
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
 export default function HeaderUserMenuDropdown({
@@ -454,6 +457,9 @@ export default function HeaderUserMenuDropdown({
                       />
                     </Link>
                   </div>
+                  {isDeviceSecurityStatusEnabled() && !activeProfileProxy && (
+                    <DeviceSetupMenuAction onClose={onClose} />
+                  )}
                   <HeaderBookmarksLink onClose={onClose} />
                   <HeaderArtworkDocumentationLink
                     onClose={onClose}

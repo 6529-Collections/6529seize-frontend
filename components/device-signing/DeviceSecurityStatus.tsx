@@ -39,12 +39,7 @@ function encryptionState(status: E2eeUiStatus): EncryptionState {
   }
 }
 
-function DeviceSecurityStatusContent({
-  descriptionId,
-}: {
-  readonly descriptionId: string;
-}) {
-  const locale = useBrowserLocale();
+export function useDeviceSecurityState() {
   const address = useSignedMessagesAccount();
   const local = useLocalDeviceKeys(address);
   const remote = useDeviceGrants(address);
@@ -62,10 +57,38 @@ function DeviceSecurityStatusContent({
   else if (remote.isError) proof = "unknown";
   else if (grantStatus === "active" || grantStatus === "renewal") proof = "on";
   const encrypted = encryptionState(encryption.status);
-  const label = t(locale, "e2ee.deviceStatus.summary", {
-    proof: t(locale, `e2ee.deviceStatus.${proof}`),
-    encryption: t(locale, `e2ee.deviceStatus.${encrypted}`),
-  });
+  const canEnableEncryption =
+    encryption.status === "idle" || encryption.status === "needs-enrollment";
+  return { proof, encrypted, canEnableEncryption };
+}
+
+export function DeviceSecurityDetails({
+  proof,
+  encrypted,
+}: Pick<ReturnType<typeof useDeviceSecurityState>, "proof" | "encrypted">) {
+  const locale = useBrowserLocale();
+  return (
+    <>
+      <span className="tw-block">
+        {t(locale, "e2ee.deviceStatus.proofLine", {
+          status: t(locale, `e2ee.deviceStatus.${proof}`),
+        })}
+      </span>
+      <span className="tw-block">
+        {t(locale, "e2ee.deviceStatus.encryptionLine", {
+          status: t(locale, `e2ee.deviceStatus.${encrypted}`),
+        })}
+      </span>
+    </>
+  );
+}
+
+function DeviceSecurityStatusContent({
+  descriptionId,
+}: {
+  readonly descriptionId: string;
+}) {
+  const { proof, encrypted } = useDeviceSecurityState();
   const complete = proof === "on" && encrypted === "on";
   const partial = proof === "on" || encrypted === "on";
   const color = complete ? "tw-text-green-400" : "tw-text-iron-400";
@@ -73,12 +96,15 @@ function DeviceSecurityStatusContent({
   const Icon = complete ? ShieldCheckIcon : ShieldExclamationIcon;
   return (
     <span
-      title={label}
       className={`tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-2 tw-ring-iron-950 ${statusColor}`}
     >
       <Icon aria-hidden="true" className="tw-size-4" />
-      <span id={descriptionId} className="tw-sr-only">
-        {label}
+      <span
+        id={descriptionId}
+        role="tooltip"
+        className="tw-pointer-events-none tw-absolute tw-left-full tw-top-1/2 tw-z-50 tw-ml-2 -tw-translate-y-1/2 tw-whitespace-nowrap tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-50 tw-opacity-0 tw-shadow-lg group-focus-visible/user:tw-opacity-100 group-aria-expanded/user:!tw-opacity-0 [@media(hover:hover)]:group-hover/user:tw-opacity-100"
+      >
+        <DeviceSecurityDetails proof={proof} encrypted={encrypted} />
       </span>
     </span>
   );
