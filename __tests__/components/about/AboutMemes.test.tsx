@@ -31,12 +31,20 @@ describe("AboutMemes", () => {
   afterEach(() =>
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false })
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      })
   );
   it("omits the minting resource while retaining collection browsing", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(<AboutMemes />);
     expect(container.querySelector('a[href="/about/minting"]')).toBeNull();
     expect(container.querySelector('a[href="/the-memes"]')).toBeInTheDocument();
