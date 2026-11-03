@@ -73,9 +73,7 @@ two inline links within its existing sentence: “Hold Meme Cards” opens
 `/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
 eligibility and nominations for new artists. Restricted iOS visitors keep the
 browsing/community description without those links. The record includes the
-“Four steps into 6529.” introduction, the “Read the full guide” link, and
-“Explore Main Stage” as the A real say card's link to
-`/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
+“Four steps into 6529.” introduction and the “Read the full guide” link.
 
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
