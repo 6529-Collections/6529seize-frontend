@@ -1,10 +1,17 @@
 /**
  * @jest-environment node
  */
+import { getEventListeners } from "node:events";
+
 import { keccak256, stringToBytes } from "viem";
 
 import { networkId } from "@/lib/chain/codec/ids";
-import { createGatewayClient, GatewayConfigError, selectGateways } from "@/lib/chain/gateway/client";
+import {
+  createGatewayClient,
+  defaultSleep,
+  GatewayConfigError,
+  selectGateways,
+} from "@/lib/chain/gateway/client";
 import { createMockChain, MOCK_GENESIS_TIME_MS, type MockChain } from "@/lib/chain/mock/chain";
 import { createMockProofVerifier } from "@/lib/chain/mock/proof-verifier";
 import type { ChainStatus } from "@/lib/chain/status-ladder";
@@ -198,6 +205,34 @@ describe("gateway client (P41 §5.1 GW1-GW7)", () => {
     await chain.submit(first.bytes);
     const final = await client.track(second.bytes);
     expect(final).toMatchObject({ overlay: "replaced", reportedBy: 2 });
+  });
+});
+
+describe("default sleep", () => {
+  it("removes its abort listener when the timer fires", async () => {
+    const controller = new AbortController();
+    for (let i = 0; i < 50; i += 1) {
+      await defaultSleep(0, controller.signal);
+    }
+    expect(getEventListeners(controller.signal, "abort")).toHaveLength(0);
+  });
+
+  it("keeps listeners bounded across a long track and rejects on abort", async () => {
+    const chain = createMockChain();
+    const client = createGatewayClient({
+      gateways: [
+        chain.gateway({ id: "a", operator: "op-a" }, "censor"),
+        chain.gateway({ id: "b", operator: "op-b" }, "censor"),
+      ],
+      pollIntervalMs: 0,
+    });
+    const controller = new AbortController();
+    const { bytes } = await signedVote();
+    await client.track(bytes, { signal: controller.signal, maxPolls: 40 });
+    expect(getEventListeners(controller.signal, "abort")).toHaveLength(0);
+    const pending = defaultSleep(60_000, controller.signal);
+    controller.abort(new Error("stop"));
+    await expect(pending).rejects.toThrow("stop");
   });
 });
 

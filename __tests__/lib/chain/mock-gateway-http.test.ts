@@ -76,6 +76,12 @@ describe("mock chain gateway over HTTP (wire v0)", () => {
   });
 });
 
+describe("mock gateway binding", () => {
+  it("refuses to bind a non-loopback interface", async () => {
+    await expect(startMockGatewayServer({ host: "0.0.0.0" })).rejects.toThrow(RangeError);
+  });
+});
+
 describe("scripts/mock-chain-gateway.cjs", () => {
   it("starts, prints its ready line and serves the control API", async () => {
     const script = path.join(process.cwd(), "scripts", "mock-chain-gateway.cjs");

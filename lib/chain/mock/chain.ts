@@ -234,10 +234,11 @@ class MockChainState implements MockChain {
     this.height += 1n;
     this.timeMs += this.blockTimeMs;
     const txIds: Hex[] = [];
-    // Repeat so a key's consecutive nonces can land in one block.
+    // Repeat so a key's consecutive nonces can land in one block. Deleting
+    // the visited entry while iterating a Map is safe in JavaScript.
     for (let changed = true; changed; ) {
       changed = false;
-      for (const [txId, pending] of [...this.mempool.entries()]) {
+      for (const [txId, pending] of this.mempool) {
         changed = this.settlePending(txId, pending, txIds) || changed;
       }
     }

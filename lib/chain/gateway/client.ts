@@ -90,20 +90,26 @@ export interface GatewayClient {
 
 const DEFAULT_MAX_POLLS = 600;
 
-const defaultSleep: Sleep = (ms, signal) =>
+/** setTimeout as a promise; its abort listener is removed when the timer fires. */
+export const defaultSleep: Sleep = (ms, signal) =>
   new Promise<void>((resolve, reject) => {
     if (signal?.aborted === true) {
       reject(signal.reason as Error);
       return;
     }
-    const timer = setTimeout(resolve, ms);
+    // Aborting `cleanup` removes the abort listener once the timer fires.
+    const cleanup = new AbortController();
+    const timer = setTimeout(() => {
+      cleanup.abort();
+      resolve();
+    }, ms);
     signal?.addEventListener(
       "abort",
       () => {
         clearTimeout(timer);
         reject(signal.reason as Error);
       },
-      { once: true }
+      { once: true, signal: cleanup.signal }
     );
   });
 
@@ -353,14 +359,19 @@ class Tracking {
     await this.broadcast(this.active);
   }
 
-  private async verify(locations: readonly IncludedLocation[]): Promise<void> {
+  /**
+   * Verifies claimed locations one after another, by design: each step
+   * reads the evidence the previous one recorded, so a verified inclusion
+   * is not checked twice.
+   */
+  private async verify(locations: readonly IncludedLocation[], index = 0): Promise<void> {
     const verifier = this.client.verifier;
-    if (verifier === undefined) {
+    const location = locations[index];
+    if (verifier === undefined || location === undefined) {
       return;
     }
-    for (const location of locations) {
-      await this.verifyOne(verifier, location);
-    }
+    await this.verifyOne(verifier, location);
+    await this.verify(locations, index + 1);
   }
 
   private async verifyOne(verifier: ProofVerifier, location: IncludedLocation): Promise<void> {
@@ -408,6 +419,21 @@ class Tracking {
   }
 }
 
+/** Polls are sequential by design: one per slot, each reading the last one's evidence. */
+async function pollUntilDone(
+  tracking: Tracking,
+  settings: { readonly sleep: Sleep; readonly pollIntervalMs: number },
+  options: TrackOptions,
+  remaining: number
+): Promise<void> {
+  if (remaining <= 0 || tracking.isDone()) {
+    return;
+  }
+  await settings.sleep(settings.pollIntervalMs, options.signal);
+  await tracking.poll();
+  await pollUntilDone(tracking, settings, options, remaining - 1);
+}
+
 function bigintSafe(_key: string, value: unknown): unknown {
   return typeof value === "bigint" ? value.toString() : value;
 }
@@ -441,11 +467,7 @@ export function createGatewayClient(options: GatewayClientOptions): GatewayClien
       );
       tracking.emit();
       await tracking.broadcast(split.primary);
-      const maxPolls = trackOptions.maxPolls ?? DEFAULT_MAX_POLLS;
-      for (let polls = 0; polls < maxPolls && !tracking.isDone(); polls += 1) {
-        await settings.sleep(settings.pollIntervalMs, trackOptions.signal);
-        await tracking.poll();
-      }
+      await pollUntilDone(tracking, settings, trackOptions, trackOptions.maxPolls ?? DEFAULT_MAX_POLLS);
       return tracking.status;
     },
   };

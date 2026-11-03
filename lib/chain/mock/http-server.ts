@@ -56,6 +56,9 @@ export const DEFAULT_MOCK_GATEWAYS: readonly MockGatewaySpec[] = [
 const MAX_CONTROL_BYTES = 4 * 1024;
 const HASH_RE = /^0x[0-9a-fA-F]{64}$/;
 const LOOPBACK_HOSTS: ReadonlySet<string> = new Set(["localhost", "127.0.0.1", "[::1]"]);
+/** Interfaces the mock may bind: loopback only. */
+const BIND_HOSTS: ReadonlySet<string> = new Set(["127.0.0.1", "localhost", "::1"]);
+const LOOPBACK_BASE = "http://127.0.0.1";
 const GATEWAY_ID_RE = /^[A-Za-z0-9_-]{1,32}$/;
 const BEHAVIORS: readonly MockGatewayBehavior[] = ["honest", "silent", "censor", "liar"];
 
@@ -253,7 +256,7 @@ async function routeRequest(
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
-  const path = new URL(request.url ?? "/", "http://mock.invalid").pathname;
+  const path = new URL(request.url ?? "/", LOOPBACK_BASE).pathname;
   const route = gatewayRoute(path);
   if (route !== null) {
     const gateway = gateways.get(route.id);
@@ -284,8 +287,8 @@ async function handleRequest(
   }
   try {
     await routeRequest(chain, gateways, request, response);
-  } catch (failure: unknown) {
-    errorResponse(response, failure);
+  } catch (error: unknown) {
+    errorResponse(response, error);
   }
 }
 
@@ -310,6 +313,10 @@ async function listen(server: Server, port: number, host: string): Promise<numbe
 export async function startMockGatewayServer(
   options: MockGatewayServerOptions = {}
 ): Promise<MockGatewayServer> {
+  const host = options.host ?? "127.0.0.1";
+  if (!BIND_HOSTS.has(host)) {
+    throw new RangeError("the mock gateway binds loopback only: 127.0.0.1, localhost or ::1");
+  }
   const chain = createMockChain(options);
   const specs = options.gateways ?? DEFAULT_MOCK_GATEWAYS;
   const gateways = new Map<string, MockGateway>(
@@ -321,10 +328,11 @@ export async function startMockGatewayServer(
   const server = createServer((request, response) => {
     void handleRequest(chain, gateways, request, response);
   });
-  const host = options.host ?? "127.0.0.1";
   const port = await listen(server, options.port ?? 0, host);
-  const urlHost = host.includes(":") ? "[" + host + "]" : host;
-  const url = `http://${urlHost}:${port}`;
+  const base = new URL(LOOPBACK_BASE);
+  base.hostname = host.includes(":") ? "[" + host + "]" : host;
+  base.port = String(port);
+  const url = base.origin;
   const interval =
     options.blockIntervalMs !== undefined && options.blockIntervalMs > 0
       ? setInterval(() => chain.produceBlock(), options.blockIntervalMs)
