@@ -50,7 +50,7 @@ export default function HomeHowToStart() {
       trackingAction: "Browse Waves",
       title: t(locale, "home.start.community.title"),
       description: t(locale, "home.start.community.description"),
-      action: t(locale, "home.whatIs.waves.action"),
+      action: t(locale, "home.start.community.action"),
       href: "/waves",
     },
     {
