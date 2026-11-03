@@ -3,7 +3,7 @@
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
 export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
-  "Each issue a tester might meet in the 6529 validator 0.1.0 test release, with its workaround. Checked on 2026-11-02.",
+  "Each issue a tester might meet in the 6529 validator 0.1.0 test release, with its workaround. Checked on 2026-11-03.",
   "",
   "## Joining the network",
   "",
@@ -30,12 +30,13 @@ export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
   "15. The Mac app signs only while you are logged in and the Mac is awake. Workaround: for a Mac that signs with no one logged in, use the terminal guide (`docs/install/macos.md` in the archive).",
   "16. The AppImage opens no window and signs only while it runs. Workaround: for a validator that starts with the machine, use the `.deb`.",
   "17. Moving the Mac app to the Trash does not stop the validator until you log out. Workaround: first choose **Stop the validator** in the logo's menu.",
-  "18. Some wallets refuse a message that names no chain. The authorization names none on purpose. Workaround: sign with Foundry's `cast` (`docs/install/grant.md` in the archive).",
-  "19. One key on two machines is a double vote. Copying the data folder, or restoring a disk image, excludes your account for 30 days, and that authorization's keys never count again. Workaround: never copy it; make a separate key on each machine.",
-  "20. Settings › Peers can make a computer help new validators find the network. On a computer with a key, the validators that connect to it can tell it is yours. The page says so when you switch it on. Workaround: leave it off, or switch it on on a second computer that has no key.",
+  "18. On a Mac where the validator was set up as a system service from Terminal, the Update page shows the app's steps, which do not restart that setup's program. Workaround: follow the Upgrade section of `docs/install/macos.md` in the archive.",
+  "19. Some wallets refuse a message that names no chain. The authorization names none on purpose. Workaround: sign with Foundry's `cast` (`docs/install/grant.md` in the archive).",
+  "20. One key on two machines is a double vote. Copying the data folder, or restoring a disk image, excludes your account for 30 days, and that authorization's keys never count again. Workaround: never copy it; make a separate key on each machine.",
+  "21. Settings › Peers can make a computer help new validators find the network. On a computer with a key, the validators that connect to it can tell it is yours. The page says so when you switch it on. Workaround: leave it off, or switch it on on a second computer that has no key.",
   "",
   "## Dates",
   "",
-  "21. A fresh install must start before about 2026-11-17 01:30 UTC. The light client starts from a checkpoint built into the release (2026-11-01 08:48 UTC), good for about 15 days. A validator already running keeps its own state. Workaround: after that date, install the next release.",
-  "22. 0.1.0 stops signing on 2026-12-01. It checks no Ethereum block after that date, ahead of Ethereum's next upgrade. Workaround: install the 0.1.x release that follows before then. The Update page tells you when it is out.",
+  "22. A fresh install must start before about 2026-11-17 01:30 UTC. The light client starts from a checkpoint built into the release (2026-11-01 08:48 UTC), good for about 15 days. A validator already running keeps its own state. Workaround: after that date, install the next release.",
+  "23. 0.1.0 stops signing on 2026-12-01. It checks no Ethereum block after that date, ahead of Ethereum's next upgrade. Workaround: install the 0.1.x release that follows before then. The Update page tells you when it is out.",
 ]);
