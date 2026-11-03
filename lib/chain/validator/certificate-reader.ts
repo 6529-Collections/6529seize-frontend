@@ -62,7 +62,7 @@ function parseList<T>(value: unknown, parse: (item: unknown) => T): T[] {
   if (!Array.isArray(value)) {
     throw new ValidatorFormatError("expected an array");
   }
-  return (value as readonly unknown[]).map(parse);
+  return (value as readonly unknown[]).map((item) => parse(item));
 }
 
 export interface ValidatorApiReaderOptions {
@@ -124,14 +124,14 @@ export function createFixtureCertificateReader(
   label = "fixture"
 ): CertificateReader {
   const prov: CertificateProvenance = { source: "fixture", reportedBy: label, verifiedByClient: false };
-  const records = fixture.cycles.map(parseCycleRecord);
+  const records = fixture.cycles.map((record) => parseCycleRecord(record));
   // Executors that throw reject, so bad arguments fail like the API reader's.
   return {
     certificates(day) {
       return new Promise((resolve) => {
         checkDay(day);
         resolve({
-          value: (fixture.certificates[String(day)] ?? []).map(parseCertificateView),
+          value: (fixture.certificates[String(day)] ?? []).map((view) => parseCertificateView(view)),
           prov,
         });
       });
