@@ -859,6 +859,9 @@ const mentionDrop = notificationDrop({
   content: "Mentioned @playwright inside the sandbox notification flow.",
 });
 
+// Keep the destination drop content stable while exercising compact title tokens.
+mentionDrop.title = "@[playwright] and #[QUORUM]";
+
 const reactionDrop = notificationDrop({
   id: SANDBOX_NOTIFICATION_REACTION_DROP_ID,
   serialNo: 3,
@@ -2469,6 +2472,9 @@ function handleDiagnostics(method, pathname, res) {
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxCreatedWaveType = "CHAT";
+    for (const notification of sandboxNotifications) {
+      notification.read_at = null;
+    }
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -2824,7 +2830,15 @@ const mockApiKnownPostRoutes = [
   },
   {
     matches: isNotificationMutationPath,
-    respond: (res) => writeEmptyResponse(res, 204),
+    respond: (res, _body, pathname) => {
+      const notificationId = notificationIdFromPath(pathname);
+      for (const notification of sandboxNotifications) {
+        if (!notificationId || String(notification.id) === notificationId) {
+          notification.read_at = Date.now();
+        }
+      }
+      return writeEmptyResponse(res, 204);
+    },
   },
   {
     matches: (pathname) => pathname === "/api/auth/session-logout",

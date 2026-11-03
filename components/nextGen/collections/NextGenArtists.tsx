@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { useEffect, useState } from "react";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
@@ -19,7 +19,7 @@ export default function NextGenArtists() {
     let cancelled = false;
     setArtistsLoaded(false);
     setArtistsError(false);
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
+    const url = apiUrl("/api/nextgen/collections");
     void fetchUrl<DBResponse<NextGenCollection>>(url)
       .then((response) => {
         if (cancelled) {

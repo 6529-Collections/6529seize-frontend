@@ -60,7 +60,7 @@ import {
   getWaveHomeRoute,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
-import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
+import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useExitActiveWave } from "@/components/navigation/useExitActiveWave";
 import { useAuth } from "@/components/auth/Auth";

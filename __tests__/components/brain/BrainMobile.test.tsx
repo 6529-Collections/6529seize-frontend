@@ -293,7 +293,7 @@ const mockCreateWaveModal = jest.fn(
       </button>
     ) : null
 );
-jest.mock("@/components/waves/create-wave/CreateWaveModal", () => ({
+jest.mock("@/components/waves/create-wave/LazyCreateWaveModal", () => ({
   __esModule: true,
   default: (props: any) => mockCreateWaveModal(props),
 }));

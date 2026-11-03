@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
@@ -150,7 +150,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
       };
 
       postData(
-        `${publicEnv.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+        `${getApiBase()}/api/nextgen/register_burn_collection`,
         data
       ).then((response) => {
         if (response.status === 200 && response.response) {

@@ -919,6 +919,9 @@ async function installCompetitionApi(
 
   return {
     requests,
+    setVote: (id: string, value: number) => {
+      votes[id] = value;
+    },
     setAnonymousEntry: (id: string, hidden: boolean) => {
       if (hidden) anonymousEntries.add(id);
       else anonymousEntries.delete(id);
@@ -1067,6 +1070,72 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("edits shared wave metadata through v3 without rewriting its original competition", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, true);
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const configuration = await response.json();
+    configuration.wave.type = "CHAT";
+    const patches: Record<string, unknown>[] = [];
+    await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+      if (route.request().method() === "PATCH") {
+        const patch = route.request().postDataJSON() as Record<string, unknown>;
+        patches.push(patch);
+        Object.assign(configuration, patch);
+      }
+      return route.fulfill({
+        json: {
+          id: WAVE,
+          name: configuration.name,
+          picture: configuration.picture,
+          created_at: 1,
+          legacy_primary_competition_id: "alpha",
+          capabilities: { chat: true, competitions: true },
+          permissions: {
+            view: true,
+            chat: true,
+            administer: true,
+            create_competition: true,
+          },
+          configuration,
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await page
+      .getByRole("button", { name: "Edit wave name", exact: true })
+      .press("Enter");
+    const dialog = page.getByRole("dialog", {
+      name: "Rename wave",
+      exact: true,
+    });
+    await dialog
+      .getByPlaceholder("Please select a name")
+      .fill("Shared wave renamed");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect.poll(() => patches).toEqual([{ name: "Shared wave renamed" }]);
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+    await page.reload();
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("preserves Additional Action through the actual submission flow", async ({
     page,
   }, testInfo) => {
@@ -2960,7 +3029,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
+      await page.mouse.move(0, 0);
       const createStyle = await page
         .getByRole("button", { name: "Open create menu", exact: true })
         .evaluate((button) => {
@@ -2979,7 +3049,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             ].map((property) => [property, style.getPropertyValue(property)])
           );
         });
-      for (const name of ["Select all", "Reset votes"]) {
+      await selectAll.click();
+      // Compare resting styles, not the hover state left by the selection click.
+      await page.mouse.move(0, 0);
+      for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
         for (const [property, value] of Object.entries(createStyle)) {
           await expect(
@@ -2991,7 +3064,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
         );
       }
-      await selectAll.click();
       await expect(
         panel.getByRole("button", { name: "Deselect all", exact: true })
       ).toBeVisible();
@@ -3014,7 +3086,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await panel
         .getByRole("button", { name: "Deselect all", exact: true })
         .click();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("my-votes-full-width.png"),
@@ -3051,6 +3123,494 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(sandbox.requests).toHaveLength(0);
     });
   }
+
+  test("sorts complete My Votes pages, recovers errors and ignores a late previous order", async ({
+    page,
+  }, testInfo) => {
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|did not match|maximum update depth|too many re-renders/i.test(
+          message.text()
+        )
+      )
+        runtimeErrors.push(message.text());
+    });
+    const sandbox = await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 53 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `sorted-vote-${index}`,
+      drop_type: "SUBMISSION",
+      title: `Sorted artwork ${index}`,
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const orders: Record<string, typeof artworks> = {
+      vote_amount: artworks,
+      leaderboard: [artworks[52]!, ...artworks.slice(0, 52)],
+      last_voted: [...artworks].reverse(),
+    };
+    const values = new Map(
+      artworks.map((drop, index) => [drop.id, 53 - index])
+    );
+    const mutations: number[] = [];
+    let releaseVote: (() => void) | undefined;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/credits/me**",
+      (route) => {
+        const entryId = new URL(route.request().url()).searchParams.get(
+          "entry_id"
+        );
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: drop ? values.get(drop.id) : 0,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/entries/*/votes/me",
+      async (route) => {
+        const entryId = new URL(route.request().url()).pathname
+          .split("/")
+          .at(-3);
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        )!;
+        const { value } = route.request().postDataJSON() as { value: number };
+        if (value !== 0)
+          await new Promise<void>((resolve) => {
+            releaseVote = resolve;
+          });
+        mutations.push(value);
+        values.set(drop.id, value);
+        orders["last_voted"] = [
+          drop,
+          ...orders["last_voted"]!.filter((item) => item !== drop),
+        ];
+        orders["vote_amount"] = [...artworks].sort(
+          (a, b) => values.get(b.id)! - values.get(a.id)!
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: value,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    const reads: { sort: string; cursor: string | null }[] = [];
+    let holdRanking = true;
+    let releaseRanking: (() => void) | undefined;
+    let failRecent = true;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      async (route) => {
+        const url = new URL(route.request().url());
+        const sort = url.searchParams.get("sort") ?? "vote_amount";
+        const cursor = url.searchParams.get("cursor");
+        reads.push({ sort, cursor });
+        if (cursor && !cursor.startsWith(`${sort}:`)) {
+          return route.fulfill({
+            status: 400,
+            json: { message: "Wrong sort cursor" },
+          });
+        }
+        if (sort === "leaderboard" && holdRanking) {
+          holdRanking = false;
+          await new Promise<void>((resolve) => {
+            releaseRanking = resolve;
+          });
+        }
+        if (sort === "last_voted" && failRecent) {
+          failRecent = false;
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary failure" },
+          });
+        }
+        const start = cursor ? Number(cursor.split(":")[1]) : 0;
+        const end = start + 50;
+        const ordered = orders[sort]!.filter(
+          (drop) => values.get(drop.id) !== 0
+        );
+        const items = ordered.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: values.get(drop.id),
+              credit_spent: Math.abs(values.get(drop.id)!),
+              entry_status: "ACTIVE",
+            })),
+            cards: items.map((drop) => ({
+              ...resources.card(drop),
+              vote_summary: {
+                ...resources.card(drop).vote_summary,
+                user_vote: values.get(drop.id),
+                rank: orders["leaderboard"]!.indexOf(drop) + 1,
+              },
+            })),
+            has_more: end < ordered.length,
+            next_cursor: end < ordered.length ? `${sort}:${end}` : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const sort = panel.getByRole("button", { name: /^Sort by:/ });
+    const sortLabels: Record<string, string> = {
+      vote_amount: "Your vote amount",
+      leaderboard: "Leaderboard position",
+      last_voted: "Last voted",
+    };
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const sortOptions = isMobile
+      ? page.getByRole("dialog", { name: "Sort by", exact: true })
+      : page.getByRole("menu");
+    const selectSort = async (order: string) => {
+      await sort.click();
+      await sortOptions
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: sortLabels[order]!,
+          exact: true,
+        })
+        .click();
+      await expect(sortOptions).toHaveCount(0);
+    };
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    const readsBeforeSameSort = reads.length;
+    for (let repeat = 0; repeat < 8; repeat++) await selectSort("vote_amount");
+    expect(reads).toHaveLength(readsBeforeSameSort);
+    const selectAll = panel.getByRole("button", {
+      name: "Select all",
+      exact: true,
+    });
+    const reset = panel.getByRole("button", { name: /^Reset / });
+    await expect(reset).toHaveCount(0);
+    const sortBeforeSelection = (await sort.boundingBox())!;
+    const selectBeforeSelection = (await selectAll.boundingBox())!;
+    const firstCheckbox = panel
+      .getByRole("article")
+      .first()
+      .getByRole("checkbox");
+    await firstCheckbox.check();
+    await expect(reset).toBeEnabled();
+    const selectedCount = panel
+      .getByRole("status")
+      .filter({ hasText: "1 selected" });
+    await expect(selectedCount).toHaveText("1 selected");
+    const resetBounds = (await reset.boundingBox())!;
+    const countBounds = (await selectedCount.boundingBox())!;
+    expect(
+      Math.abs(
+        resetBounds.y +
+          resetBounds.height / 2 -
+          countBounds.y -
+          countBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
+    expect((await sort.boundingBox())!.x).toBe(sortBeforeSelection.x);
+    expect((await sort.boundingBox())!.y).toBe(sortBeforeSelection.y);
+    expect((await selectAll.boundingBox())!.x).toBe(selectBeforeSelection.x);
+    expect((await selectAll.boundingBox())!.y).toBe(selectBeforeSelection.y);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-selected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const controls = await Promise.all([
+        sort.boundingBox(),
+        selectAll.boundingBox(),
+        reset.boundingBox(),
+      ]);
+      expect(
+        controls.every(
+          (box) => box !== null && Math.abs(box.y - controls[0]!.y) < 1
+        )
+      ).toBe(true);
+      expect(controls[0]!.height).toBe(32);
+      await sort.click();
+      const amountOption = sortOptions.getByRole("menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      await amountOption.hover();
+      await expect(amountOption).toHaveCSS("font-size", "14px");
+      await expect(amountOption).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-menu.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await page.keyboard.press("Home");
+      await expect(amountOption).toHaveCSS("box-shadow", /2px/);
+      await page.keyboard.press("Escape");
+      await expect(sortOptions).toHaveCount(0);
+    }
+    await firstCheckbox.uncheck();
+    await expect(reset).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-unselected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    await sort.focus();
+    await sort.press(isMobile ? "Enter" : "ArrowDown");
+    await expect(
+      sortOptions.getByRole(isMobile ? "button" : "menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      })
+    ).toBeVisible();
+    if (isMobile) {
+      await expect(page.getByRole("menu")).toHaveCount(0);
+      const option = sortOptions.getByRole("button", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+    }
+    await page.keyboard.press("Escape");
+    await expect(sortOptions).toHaveCount(0);
+    await expect(sort).toBeFocused();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 0"
+    );
+    if (isMobile) {
+      await selectSort("leaderboard");
+    } else {
+      await sort.focus();
+      await expect(sort).toBeFocused();
+      await sort.press("ArrowDown");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Enter");
+    }
+    await expect.poll(() => releaseRanking !== undefined).toBe(true);
+    await expect(sort).toBeEnabled();
+    await selectSort("last_voted");
+    await expect(panel.getByRole("alert")).toBeVisible();
+    await panel.getByRole("button", { name: "Try again", exact: true }).click();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    releaseRanking?.();
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    for (const order of ["last_voted", "leaderboard", "vote_amount"]) {
+      await selectSort(order);
+      await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+        orders[order]![0]!.title
+      );
+      const more = panel.getByRole("button", {
+        name: "Load more",
+        exact: true,
+      });
+      if (await more.isVisible()) await more.scrollIntoViewIfNeeded();
+      await expect(panel.getByRole("article")).toHaveCount(53);
+      await expect(panel.getByRole("heading", { level: 3 })).toHaveText(
+        orders[order]!.map((drop) => drop.title)
+      );
+      expect(reads).toContainEqual({ sort: order, cursor: `${order}:50` });
+    }
+    await sort.scrollIntoViewIfNeeded();
+    await selectSort("leaderboard");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-sorting.png"),
+    });
+    await page.getByRole("tab", { name: "All votes", exact: true }).click();
+    await page.getByRole("tab", { name: "My Votes", exact: true }).click();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await page.reload();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    expect(sandbox.requests).toHaveLength(0);
+    expect(mutations).toHaveLength(0);
+    await selectSort("last_voted");
+    const newest = panel.getByRole("article", {
+      name: "Sorted artwork 52",
+      exact: true,
+    });
+    const edited = panel.getByRole("article", {
+      name: "Sorted artwork 51",
+      exact: true,
+    });
+    await newest.getByRole("spinbutton", { name: "Your vote" }).fill("4");
+    await edited.getByRole("spinbutton", { name: "Your vote" }).fill("99");
+    await edited
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect.poll(() => releaseVote !== undefined).toBe(true);
+    await expect(sort).toBeDisabled();
+    releaseVote?.();
+    await expect(sort).toBeEnabled();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(
+      newest.getByRole("spinbutton", { name: "Your vote" })
+    ).toHaveValue("4");
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    await edited.getByRole("checkbox").check();
+    await selectSort("vote_amount");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(panel.getByRole("button", { name: /^Reset / })).toHaveCount(0);
+    await edited.getByRole("checkbox").check();
+    await panel
+      .getByRole("button", { name: "Reset 1 vote", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Reset vote", exact: true })
+      .click();
+    await expect(edited).toHaveCount(0);
+    await expect(reset).toHaveCount(0);
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    expect(mutations).toEqual([99, 0]);
+    if ((page.viewportSize()?.width ?? 0) < 1024) {
+      await page.setViewportSize({ width: 320, height: 800 });
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "languages", {
+          configurable: true,
+          value: ["es-ES"],
+        });
+        globalThis.dispatchEvent(new Event("languagechange"));
+      });
+      const translatedSort = page.getByRole("button", {
+        name: /^Ordenar por:/,
+      });
+      await translatedSort.click();
+      const translatedSheet = page.getByRole("dialog", {
+        name: "Ordenar por",
+        exact: true,
+      });
+      await expect(
+        translatedSheet.getByRole("heading", { name: "Ordenar por" })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet-narrow-es.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await translatedSheet
+        .getByRole("button", {
+          name: "Posición en la clasificación",
+          exact: true,
+        })
+        .click();
+      await expect(translatedSheet).toHaveCount(0);
+      await expect(translatedSort).toHaveAccessibleName(
+        "Ordenar por: Posición en la clasificación"
+      );
+      expect(
+        (await translatedSort.boundingBox())!.height
+      ).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sorting-narrow-es.png"),
+      });
+    }
+    expect(runtimeErrors).toEqual([]);
+  });
+
+  test("reuses fresh My Votes limits across sorts and refreshes them after voting", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date());
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    let creditReads = 0;
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/credits/me") &&
+        url.searchParams.get("entry_id") === "entry-alpha"
+      )
+        creditReads++;
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const vote = panel.getByRole("spinbutton", {
+      name: "Your vote",
+      exact: true,
+    });
+    await expect(vote).toHaveValue("25");
+    await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
+    expect(creditReads).toBe(1);
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    for (const label of [
+      "Leaderboard position",
+      "Last voted",
+      "Your vote amount",
+    ]) {
+      await panel.getByRole("button", { name: /^Sort by:/ }).click();
+      const options = isMobile
+        ? page.getByRole("dialog", { name: "Sort by", exact: true })
+        : page.getByRole("menu");
+      await options
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: label,
+          exact: true,
+        })
+        .click();
+      await expect(options).toHaveCount(0);
+      await expect(vote).toHaveValue("25");
+      expect(creditReads).toBe(1);
+    }
+    expect(sandbox.requests).toHaveLength(0);
+    await vote.fill("40");
+    await panel.getByRole("button", { name: "Save vote", exact: true }).click();
+    await expect.poll(() => creditReads).toBe(2);
+    await expect(vote).toHaveValue("40");
+    await expect(panel.getByText(/^Available in wave\s*60$/)).toBeVisible();
+    expect(sandbox.requests).toHaveLength(1);
+    expect(sandbox.requests[0]?.body["value"]).toBe(40);
+  });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
     page,
@@ -4645,10 +5205,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  for (const popup of ["artist submissions", "participant entries"]) {
-    test(`preserves Numeric votes and explanations in the ${popup} popup`, async ({
+  for (const { popup, app } of [
+    { popup: "artist submissions", app: false },
+    { popup: "artist submissions", app: true },
+    { popup: "participant entries", app: false },
+  ]) {
+    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? " in app" : ""}`, async ({
       page,
     }, testInfo) => {
+      if (app) {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      }
       const sandbox = await installCompetitionApi(page);
       const response = await page.request.get(
         `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
@@ -4776,6 +5347,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
+      // The development issue badge can cover controls at the bottom of app sheets.
+      await page.addStyleTag({
+        content: "nextjs-portal { display: none !important; }",
+      });
       const detail = page
         .getByRole("main")
         .locator("[data-video-viewport]")
@@ -4908,15 +5483,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await promiseBadge.click();
         // The dialog wrapper has fixed-position children and no box of its own.
         await expect(promiseBadge).toBeVisible();
-        await expect(
-          dialog.getByRole("button", { name: "Close Gallery", exact: true })
-        ).toBeVisible();
+        const close = dialog.getByRole("button", {
+          name:
+            app || testInfo.project.name.startsWith("capacitor-")
+              ? "Close panel"
+              : "Close Gallery",
+          exact: true,
+        });
+        await expect(close).toBeVisible();
         await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
         expect(sandbox.requests).toEqual([]);
 
-        await dialog
-          .getByRole("button", { name: "Close Gallery", exact: true })
-          .focus();
+        await close.focus();
         await expect(promiseTooltip).toBeHidden();
         const currentTotal = dialog.getByText("123,456,789", { exact: true });
         const projectedTotal = dialog.getByText("123,456,999", { exact: true });
@@ -4984,16 +5562,112 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Numeric",
         exact: true,
       });
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await numeric.tap();
-        expect((await numeric.boundingBox())!.height).toBeGreaterThanOrEqual(
-          44
-        );
+      const expectCompactCenteredTabs = async () => {
+        const label = page
+          .getByRole("dialog")
+          .last()
+          .locator(".is-mini > div > p > span:first-child");
+        const labelBox = (await label.boundingBox())!;
+        const tabsBox = (await mode.boundingBox())!;
+        expect(tabsBox.height).toBeLessThanOrEqual(32);
+        expect(labelBox.x + labelBox.width).toBeLessThan(tabsBox.x);
+        expect(
+          Math.abs(
+            labelBox.y + labelBox.height / 2 - tabsBox.y - tabsBox.height / 2
+          )
+        ).toBeLessThan(2);
+      };
+      await mode.scrollIntoViewIfNeeded();
+      await expectCompactCenteredTabs();
+      if (testInfo.project.use.hasTouch) {
+        for (const button of [
+          mode.getByRole("button", { name: "Slider", exact: true }),
+          numeric,
+        ]) {
+          expect(
+            await button.evaluate((element) =>
+              parseFloat(getComputedStyle(element, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
+        }
+        const box = (await numeric.boundingBox())!;
+        // The invisible touch target extends beyond the compact visible tab.
+        await page.touchscreen.tap(box.x + box.width / 2, box.y - 8);
       } else {
         await numeric.focus();
         await page.keyboard.press("Enter");
       }
+      await expect(numeric).toHaveAttribute("aria-pressed", "true");
+      await expectCompactCenteredTabs();
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-tabs.png"),
+      });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      if (app && testInfo.project.use.hasTouch) {
+        const originalScrollport = await dialog
+          .getByTestId("artist-preview-app-scroll")
+          .elementHandle();
+        if (!originalScrollport)
+          throw new Error("Submission scrollport missing");
+        await input.focus();
+        try {
+          for (const height of [0, 160, 300, 0]) {
+            const geometry = await input.evaluate(async (element, inset) => {
+              const root = document.documentElement;
+              // This checks layout/scrolling; physical-device QA checks native events.
+              root.style.setProperty(
+                "--native-keyboard-layout-transition-duration",
+                "0ms"
+              );
+              root.style.setProperty(
+                "--native-keyboard-inset-bottom",
+                `${inset}px`
+              );
+              // Reveal the input on layout frames, without a keyboard-settle timer.
+              for (let frame = 0; frame < 3; frame++) {
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
+              const scrollport = element.closest(
+                '[data-testid="artist-preview-app-scroll"]'
+              );
+              const panel = scrollport?.parentElement;
+              if (!scrollport || !panel)
+                throw new Error("Submission scrollport missing");
+              return {
+                clearance:
+                  scrollport.getBoundingClientRect().bottom -
+                  element.getBoundingClientRect().bottom,
+                bottomGap:
+                  innerHeight - inset - panel.getBoundingClientRect().bottom,
+              };
+            }, height);
+            expect(geometry.clearance).toBeGreaterThanOrEqual(0);
+            expect(Math.abs(geometry.bottomGap)).toBeLessThanOrEqual(1);
+            expect(
+              await originalScrollport.evaluate(
+                (element) => element.isConnected
+              )
+            ).toBe(true);
+            await expect(input).toBeFocused();
+            await expect(
+              dialog.getByRole("button", { name: "Close panel", exact: true })
+            ).toBeInViewport({ ratio: 1 });
+          }
+        } finally {
+          await input.evaluate((element) => {
+            element.blur();
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-layout-transition-duration"
+            );
+            document.documentElement.style.removeProperty(
+              "--native-keyboard-inset-bottom"
+            );
+          });
+          await originalScrollport.dispose();
+        }
+      }
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
@@ -8878,17 +9552,36 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       };
       let failSave = true;
       let writes = 0;
-      await page.route(`**/api/waves/${WAVE}`, async (route) => {
-        if (route.request().method() === "POST") {
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "PATCH") {
           writes++;
+          const patch = route.request().postDataJSON();
+          expect(patch).toEqual({ chat: { links_disabled: true } });
           if (failSave)
             return route.fulfill({
               status: 500,
               json: { error: "Sandbox save failed" },
             });
-          wave.chat = { ...wave.chat, ...route.request().postDataJSON().chat };
+          wave.chat = { ...wave.chat, ...patch.chat };
         }
-        await route.fulfill({ json: wave });
+        await route.fulfill({
+          json: {
+            id: WAVE,
+            name: wave.name,
+            picture: wave.picture,
+            legacy_primary_competition_id: null,
+            default_competition_id: "alpha",
+            permissions: {
+              view: true,
+              administer: true,
+              create_competition: true,
+            },
+            configuration: wave,
+          },
+        });
       });
       await page.goto(`/waves/${WAVE}?tab=chat`);
       await openWaveInformation(page);

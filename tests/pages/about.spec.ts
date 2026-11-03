@@ -8,6 +8,105 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("shows direct desktop downloads and independent macOS 12 recovery", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgentData", {
+        configurable: true,
+        value: { platform: "macOS", mobile: false },
+      });
+      Object.defineProperty(navigator, "maxTouchPoints", {
+        configurable: true,
+        value: 0,
+      });
+    });
+    await page.route(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
+      async (route) => {
+        const url = route.request().url();
+        if (url.endsWith(".json")) {
+          await route.fulfill({ json: { version: "0.3.18", files: [] } });
+          return;
+        }
+        const legacy = url.endsWith("latest-macos-12.yml");
+        const version = legacy ? "0.3.15" : "0.3.18";
+        const file = url.includes("/win/")
+          ? `6529-DESKTOP-win-x64-${version}.exe`
+          : url.includes("/linux/")
+            ? `6529-DESKTOP-linux-x86_64-${version}.AppImage`
+            : `6529-DESKTOP-mac-arm64-${version}.dmg`;
+        await route.fulfill({
+          json: {
+            version,
+            files: [{ url: file }],
+            minimumSystemVersion: legacy ? "21.0.0" : "22.0.0",
+          },
+        });
+      }
+    );
+    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const mac = page.getByRole("group").filter({
+      has: page.getByText("macOS", { exact: true }),
+    });
+    const macSummary = page
+      .getByText("macOS", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await expect(macSummary).toHaveText("macOS");
+    if (isMobile) {
+      await expect(mac).not.toHaveAttribute("open");
+      await macSummary.click();
+    }
+    await expect(mac).toHaveAttribute("open");
+    await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
+    await expect(
+      mac.getByText("Last compatible version for macOS 12 Monterey")
+    ).toBeVisible();
+    await expect(
+      mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
+    ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
+    await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
+    if (!isMobile) {
+      const download = mac.getByRole("link", {
+        name: /version 0.3.15, Apple silicon/,
+      });
+      const contentBox = await mac
+        .getByRole("link", { name: /version 0.3.15, Apple silicon/ })
+        .locator("xpath=ancestor::section[1]")
+        .boundingBox();
+      const downloadBox = await download.boundingBox();
+      expect(contentBox).not.toBeNull();
+      expect(downloadBox).not.toBeNull();
+      if (contentBox && downloadBox) {
+        expect(Math.round(downloadBox.x + downloadBox.width)).toBe(
+          Math.round(contentBox.x + contentBox.width)
+        );
+      }
+    }
+    const windows = page
+      .getByText("Windows", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await windows.focus();
+    await page.keyboard.press("Enter");
+    await expect(mac).not.toHaveAttribute("open");
+    await expect(
+      mac
+        .getByRole("link", {
+          name: /version 0.3.15, Apple silicon/,
+          includeHidden: true,
+        })
+        .locator("xpath=ancestor::*[@inert]")
+    ).toHaveCount(1);
+    await expect(
+      page.getByRole("link", { name: /Windows, version 0.3.18, x64/ })
+    ).toHaveAttribute("href", /win-x64-0\.3\.18\.exe$/);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("should load the about index page", async ({ page }) => {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -80,6 +179,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByRole("button", { name: /Open About contents navigation/i })
       .click();
     const contentsMenu = page.getByRole("menu");
+    await expect(contentsMenu).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /prenodes/i })
     ).toHaveCount(0);
@@ -93,6 +193,43 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps About contents inactive until hydration makes the first click usable", async ({
+    page,
+  }) => {
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.continue();
+    });
+    try {
+      // A section whose copy is in the server HTML. Minting and Subscription
+      // Minting copy mounts only after hydration (purchasing content is never
+      // server-rendered), so it cannot show the pre-hydration state.
+      await page.goto("/about/faq", { waitUntil: "commit" });
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "6529 FAQ",
+          exact: true,
+        })
+      ).toBeVisible();
+      const contents = page.getByRole("button", {
+        name: /Open About contents navigation/i,
+      });
+      await expect(contents).toBeDisabled();
+      releaseScripts();
+      await expect(contents).toBeEnabled();
+      await contents.click();
+      await expect(page.getByRole("menu")).toBeVisible();
+      await expect(contents).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      releaseScripts();
+    }
   });
 
   test("should keep GDRC in view beside the narrow desktop menu", async ({

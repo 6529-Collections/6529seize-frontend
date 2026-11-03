@@ -28,6 +28,10 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.myVotes.sort": "Sortieren nach",
+  "waves.myVotes.sort.voteAmount": "Deine Stimmenzahl",
+  "waves.myVotes.sort.leaderboard": "Ranglistenposition",
+  "waves.myVotes.sort.lastVoted": "Zuletzt abgestimmt",
   "e2ee.profile.view": "Profil von {name} ansehen",
   "e2ee.profile.viewUnknown": "Profil ansehen",
   "e2ee.profile.level": "Stufe {level}",
@@ -245,6 +249,8 @@ export const DE_DE_MESSAGES = {
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
   "waves.drop.actions.menuLabel": "Drop-Aktionen",
   "waves.drop.actions.reactionPickerLabel": "Reaktion zum Drop hinzufügen",
+  "waves.drop.actions.showMore": "Mehr anzeigen",
+  "waves.drop.actions.showLess": "Weniger anzeigen",
   "media.video.captions": "Untertitel",
   "media.video.download": "Medien herunterladen",
   "media.video.downloading": "Medien werden heruntergeladen",
@@ -615,6 +621,8 @@ export const DE_DE_MESSAGES = {
   "drop.media.saveDialogTitle": "Bild speichern",
   "drop.media.processingFailed": "Bildverarbeitung fehlgeschlagen.",
   "drop.media.processingTimedOut": "Zeitlimit fuer Bildverarbeitung erreicht.",
+  "media.interactive.frameTitle": "Interaktives HTML-Medium",
+  "media.interactive.loading": "Interaktives Medium wird geladen",
   "quickDm.regionAriaLabel": "Schnelle Direktnachrichten",
   "quickDm.openButtonAriaLabel": "Schnelle Direktnachrichten öffnen",
   "quickDm.openButtonUnreadAriaLabel":

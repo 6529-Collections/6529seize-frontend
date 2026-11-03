@@ -3,7 +3,6 @@
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.css";
 import "@/styles/Home.module.css";
-import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -18,8 +17,6 @@ import VersionReloadScreen, {
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
-import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
-import { canServerRenderNftPurchasing } from "@/components/common/nftPurchasingRequest";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
@@ -38,17 +35,31 @@ import {
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
-import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
-import { cookies, headers } from "next/headers";
-import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
-import { getRequestOrigin } from "@/config/requestOrigin";
+import localFont from "next/font/local";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
-import Script from "next/script";
+import { connection } from "next/server";
 
+// Any route that fetches while rendering stays request-time, so its data is
+// never frozen at build. Routes that fetch nothing are unaffected. Pages move
+// to ISR one by one with their own cache policy, which this blanket setting
+// blocks; see "Static Rendering Readiness" in
+// ops/docs/developer/next-config-runtime-rationale.md.
 export const fetchCache = "force-no-store";
+
+// Loaded here so every route preloads the font from the HTML instead of
+// discovering it from the stylesheet, with a size-adjusted fallback while it
+// swaps in. The variable name becomes the generated family name
+// ("Montserrat"), which font checks in tests rely on; styles use it through
+// --font-montserrat.
+const Montserrat = localFont({
+  src: "../assets/montserrat/Montserrat-VariableFont_wght.woff2",
+  display: "swap",
+  variable: "--font-montserrat",
+});
 
 export const metadata = getAppMetadata();
 const productionEnvironment = getProductionAppEnvironment();
@@ -66,29 +77,26 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
-  // Routes render per request by default. A page that exports
-  // `dynamic = "force-static"` is prerendered and sees empty cookies and
-  // headers here; the shell then resolves native iOS EULA state in the
-  // browser and uses the configured origin for the environment badge.
-  const [cookieStore, requestHeaders] = await Promise.all([
-    cookies(),
-    headers(),
-  ]);
-  const initialOrigin = getRequestOrigin(
-    requestHeaders,
-    publicEnv.BASE_ENDPOINT
-  );
-  const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
-  const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
-  const serverRendersNftPurchasing = canServerRenderNftPurchasing({
-    hasNativeIosCookie: cookieStore.has(NATIVE_IOS_COOKIE),
-    userAgent: requestHeaders.get("user-agent"),
-  });
+  // The shell reads nothing from the request: every visitor gets the same
+  // HTML, and the browser decides native iOS, the EULA gate and NFT
+  // purchasing. connection() is the deliberate opt-out that keeps routes
+  // rendering per request by default. It cannot be removed yet: shell
+  // components call useSearchParams() outside a Suspense boundary, which
+  // fails the build for any route Next tries to prerender. A page that
+  // exports `dynamic = "force-static"` skips it and is prerendered. See
+  // "Static Rendering Readiness" in
+  // ops/docs/developer/next-config-runtime-rationale.md.
+  await connection();
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
     // keyboard input arrives during startup. Keep that root-only mutation.
-    <html lang="en-US" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      lang="en-US"
+      className={Montserrat.variable}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
@@ -111,11 +119,6 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_BOOTSTRAP_SCRIPT }}
         />
-        <Script
-          id="native-ios-platform-bootstrap"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
-        />
         <link
           data-runtime-favicon="png"
           rel="icon"
@@ -130,14 +133,25 @@ export default async function RootLayout({
           type="image/svg+xml"
           sizes="any"
         />
-        <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
+        <link rel="preconnect" href={getApiBase()} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link
           rel="preconnect"
           href={getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT)}
         />
         {isUsingStaticAssets && (
-          <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
+          <>
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+            />
+            {/* Fonts are CORS requests and cannot reuse the connection above. */}
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+              crossOrigin=""
+            />
+          </>
         )}
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
@@ -146,16 +160,10 @@ export default async function RootLayout({
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <EnvironmentOriginProvider origin={initialOrigin}>
-            <Providers
-              initialIsIos={initialIsIos}
-              initialEulaConsentVersion={initialEulaConsentVersion}
-              canServerRenderNftPurchasing={serverRendersNftPurchasing}
-            >
-              <DynamicHeadTitle />
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </Providers>
-          </EnvironmentOriginProvider>
+          <Providers>
+            <DynamicHeadTitle />
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </Providers>
         </AwsRumProvider>
       </body>
     </html>

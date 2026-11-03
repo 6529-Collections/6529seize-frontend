@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
@@ -22,7 +22,7 @@ export default function AccessPage() {
   useEffect(() => {
     if (!image) {
       const apiAuth = getStagingAuth();
-      fetch(`${publicEnv.API_ENDPOINT}/api/`, {
+      void fetch(apiUrl("/api/"), {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
       }).then((r: Response) => {
         r.json().then((response: { image?: string | undefined }) => {
@@ -41,7 +41,7 @@ export default function AccessPage() {
   function doLogin(target: HTMLInputElement) {
     target.select();
     const pass = target.value;
-    fetch(`${publicEnv.API_ENDPOINT}/api/`, {
+    void fetch(apiUrl("/api/"), {
       headers: { "x-6529-auth": pass },
     }).then((r: Response) => {
       if (r.status === 401) {

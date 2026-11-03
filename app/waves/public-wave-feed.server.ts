@@ -7,7 +7,7 @@ import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { anonymousSsrFetch } from "@/lib/fetch/ssrFetch";
 import { stripHtmlTags } from "@/lib/text/html";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 
 export const PUBLIC_WAVE_FEED_LIMIT = 10;
 export const PUBLIC_WAVE_FEED_REQUEST_LIMIT = PUBLIC_WAVE_FEED_LIMIT + 1;
@@ -112,7 +112,9 @@ export async function fetchPublicWaveFeed(
       limit: `${PUBLIC_WAVE_FEED_REQUEST_LIMIT}`,
     });
     const response = await anonymousSsrFetch(
-      `${publicEnv.API_ENDPOINT}/api/v2/waves/${encodeURIComponent(normalizedWaveId)}/drops?${query.toString()}`,
+      apiUrl(
+        `/api/v2/waves/${encodeURIComponent(normalizedWaveId)}/drops?${query.toString()}`
+      ),
       {
         cache: "no-store",
       }

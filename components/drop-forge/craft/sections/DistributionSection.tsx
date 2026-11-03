@@ -13,7 +13,7 @@ import {
   normalizeRootPhase,
   type DistributionSectionKey,
 } from "@/components/drop-forge/craft/craft-claim-helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DistributionPhoto } from "@/entities/IDistribution";
 import { fetchAllPages } from "@/services/6529api";
@@ -60,7 +60,9 @@ export default function DistributionSection({
     setLoading(true);
     setError(null);
 
-    const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${MEMES_CONTRACT}/${claimId}`;
+    const distributionPhotosUrl = apiUrl(
+      `/api/distribution_photos/${MEMES_CONTRACT}/${claimId}`
+    );
 
     const loadDistributionPhotos = async () => {
       try {

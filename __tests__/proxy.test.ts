@@ -166,6 +166,7 @@ describe("proxy", () => {
     "/icon-512-maskable.png",
     "/6529io.png",
     "/transient.avif",
+    "/video-preview-placeholder.svg",
     "/emojis/sgt_sob.webp",
     "/museum/research/editorial/example.png",
     "/profile-cms/templates/afterimage.png",

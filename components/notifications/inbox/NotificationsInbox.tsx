@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -34,24 +34,32 @@ export default function NotificationsInbox({
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const { reconcileProfileDeliveredNotifications } = useNotificationsContext();
   const [readError, setReadError] = useState(false);
+  const markedIdentityRef = useRef<string | null>(null);
   const handle =
     hasValidWalletAuth && !activeProfileProxy ? connectedProfile?.handle : null;
   const query = useNotificationsQuery({
     identity: handle,
     causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
   });
-  const notifications = query.rawItems.filter((item) =>
+  const notifications = query.items.filter((item) =>
     isNotificationVisible(item, hideNftPurchasing)
   );
   const markRead = useMutation({
-    mutationFn: async (id: number | "all") => {
-      await commonApiPostWithoutBodyAndResponse({
-        endpoint:
-          id === "all" ? "notifications/read" : `notifications/${id}/read`,
-      });
+    mutationFn: async (target: number[] | "all") => {
+      const endpoints =
+        target === "all"
+          ? ["notifications/read"]
+          : target.map((id) => `notifications/${id}/read`);
+      const results = await Promise.allSettled(
+        endpoints.map((endpoint) =>
+          commonApiPostWithoutBodyAndResponse({ endpoint })
+        )
+      );
       // Browser unread counts refresh even if native badge reconciliation fails.
       invalidateNotifications();
       await reconcileProfileDeliveredNotifications();
+      const failed = results.find((result) => result.status === "rejected");
+      if (failed?.status === "rejected") throw failed.reason;
     },
     onMutate: () => setReadError(false),
     onError: () => {
@@ -62,9 +70,23 @@ export default function NotificationsInbox({
       });
     },
   });
-  const openNotification = (id: number) => {
-    if (notifications.find((item) => item.id === id)?.read_at === null)
-      markRead.mutate(id);
+  const { mutate: markNotificationRead } = markRead;
+  useEffect(() => {
+    if (!handle) {
+      markedIdentityRef.current = null;
+      return;
+    }
+    if (!query.isSuccess || markedIdentityRef.current === handle) return;
+
+    const timeout = setTimeout(() => {
+      markedIdentityRef.current = handle;
+      markNotificationRead("all");
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [handle, query.isSuccess, markNotificationRead]);
+
+  const openNotification = (unreadIds: number[]) => {
+    if (unreadIds.length > 0) markRead.mutate(unreadIds);
     onClose();
   };
   let message: string | null = null;

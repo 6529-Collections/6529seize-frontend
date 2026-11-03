@@ -311,7 +311,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   default: () => <div data-testid="competition-tabs" />,
 }));
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (props: any) => mockMemesArtSubmissionModal(props),
 }));

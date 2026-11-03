@@ -20,7 +20,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     "Notifications inbox requires the local mock API runner."
   );
 
-  test("desktop preview preserves the route and unread state, restores focus, and opens a destination", async ({
+  test("desktop preview marks notifications read, preserves the route, restores focus, and opens a destination", async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -47,16 +47,35 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       inbox.getByText("sandbox-alice mentioned you", { exact: true })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(5);
+    await expect(
+      inbox.getByText("New reactions to your drop", { exact: true })
+    ).toHaveCount(1);
+    await expect(
+      inbox.getByText("A sandbox drop with grouped reactions.", { exact: true })
+    ).toHaveCount(1);
+    await expect(
+      inbox.getByText("reacted to your drop", { exact: false })
+    ).toHaveCount(0);
+    await expect(
+      inbox.getByText("@playwright and #QUORUM", { exact: true })
+    ).toBeVisible();
+    await expect(
+      inbox.getByText("@[playwright]", { exact: false })
+    ).toHaveCount(0);
+    await expect(inbox.getByText("#[QUORUM]", { exact: false })).toHaveCount(0);
+    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(0);
     expect(page.url()).toBe(route);
-    const requestsBefore = await fetchSandboxRequests(baseURL);
-    expect(
-      requestsBefore.filter(
-        (request) =>
-          request.method === "POST" &&
-          /\/notifications\/(?:read|\d+\/read)$/.test(request.path)
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path === "/api/notifications/read"
+          ).length
       )
-    ).toHaveLength(0);
+      .toBe(1);
+    await expect(trigger).not.toHaveAccessibleDescription("Unread");
     await expectNoHorizontalOverflow(page);
     const accessibility = await new AxeBuilder({ page })
       .include('[role="region"][aria-label="Notifications"]')
@@ -99,7 +118,25 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await inbox.getByRole("link", { name: "View all notifications" }).focus();
     await page.keyboard.press("Tab");
     await expect(inbox).not.toBeVisible();
+    const readsBeforeReopening = (await fetchSandboxRequests(baseURL)).filter(
+      (request) =>
+        request.method === "POST" && request.path === "/api/notifications/read"
+    ).length;
     await trigger.click();
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path === "/api/notifications/read"
+          ).length
+      )
+      .toBe(readsBeforeReopening + 1);
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeEnabled();
+    const requestsBeforeDismissal = await fetchSandboxRequests(baseURL);
     await page.getByRole("main").click({ position: { x: 500, y: 30 } });
     await expect(inbox).not.toBeVisible();
     const requestsAfterDismissal = await fetchSandboxRequests(baseURL);
@@ -109,7 +146,13 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           request.method === "POST" &&
           /\/notifications\/(?:read|\d+\/read)$/.test(request.path)
       )
-    ).toHaveLength(0);
+    ).toHaveLength(
+      requestsBeforeDismissal.filter(
+        (request) =>
+          request.method === "POST" &&
+          /\/notifications\/(?:read|\d+\/read)$/.test(request.path)
+      ).length
+    );
     await trigger.click();
     const destination = inbox
       .getByRole("link")
@@ -131,15 +174,6 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
         .last()
     ).toBeInViewport({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(inbox).not.toBeVisible();
-    await expect
-      .poll(async () =>
-        (await fetchSandboxRequests(baseURL)).some(
-          (request) =>
-            request.method === "POST" &&
-            request.path === "/api/notifications/1001/read"
-        )
-      )
-      .toBe(true);
     const requestsAfter = await fetchSandboxRequests(baseURL);
     expect(
       requestsAfter.some(
@@ -147,11 +181,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           request.method === "POST" &&
           request.path === "/api/notifications/read"
       )
-    ).toBe(false);
+    ).toBe(true);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("desktop mark-all is explicit and View all opens the full feed", async ({
+  test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -160,6 +194,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"
     );
+    let failNextRead = true;
+    await page.route("**/api/notifications/read", async (route) => {
+      if (failNextRead) {
+        failNextRead = false;
+        await route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Temporary read failure" }),
+        });
+        return;
+      }
+      await route.continue();
+    });
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     const trigger = page.getByRole("button", {
@@ -172,6 +219,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       exact: true,
     });
     const markAll = inbox.getByRole("button", { name: "Mark all as read" });
+    await expect(inbox.getByRole("alert")).toBeVisible();
+    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(4);
     await expect(markAll).toBeEnabled({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -185,6 +234,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
         )
       )
       .toBe(true);
+    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(0);
+    await expect(inbox.getByRole("alert")).toHaveCount(0);
     await inbox.getByRole("link", { name: "View all notifications" }).click();
     await expect(page).toHaveURL(/\/notifications$/, {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -192,6 +243,48 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       page.getByText("mentioned you", { exact: true }).first()
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("desktop unread row still marks its notification read after an automatic read failure", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    await page.route("**/api/notifications/read", (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Temporary read failure" }),
+      })
+    );
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    await expect(inbox.getByRole("alert")).toBeVisible();
+    await inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" })
+      .click();
+    await expect
+      .poll(async () =>
+        (await fetchSandboxRequests(baseURL)).some(
+          (request) =>
+            request.method === "POST" &&
+            request.path === "/api/notifications/1001/read"
+        )
+      )
+      .toBe(true);
+    await expect(inbox).not.toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
