@@ -54,7 +54,11 @@ describe("MyStreamWaveFAQ", () => {
   beforeEach(() => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      });
     setActiveContentTab.mockClear();
     useLayoutMock.mockReturnValue({ faqViewStyle: { height: "21px" } });
   });
@@ -62,7 +66,11 @@ describe("MyStreamWaveFAQ", () => {
   it("hides the first-party minting section on restricted iOS", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     render(<MyStreamWaveFAQ wave={{} as any} />);
     expect(
       screen.queryByRole("button", { name: "Minting a Meme Card" })

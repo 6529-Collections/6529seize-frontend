@@ -24,8 +24,6 @@ import VersionReloadScreen, {
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
-import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
-import { canServerRenderNftPurchasing } from "@/components/common/nftPurchasingRequest";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
@@ -47,12 +45,16 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { getApiBase } from "@/services/api/api-endpoints";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
-import { NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
 import localFont from "next/font/local";
-import { cookies, headers } from "next/headers";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
+import { connection } from "next/server";
 
+// Any route that fetches while rendering stays request-time, so its data is
+// never frozen at build. Routes that fetch nothing are unaffected. Pages move
+// to ISR one by one with their own cache policy, which this blanket setting
+// blocks; see "Static Rendering Readiness" in
+// ops/docs/developer/next-config-runtime-rationale.md.
 export const fetchCache = "force-no-store";
 
 // Loaded here so every route preloads the font from the HTML instead of
@@ -82,18 +84,16 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
-  // Routes render per request by default. A page that exports
-  // `dynamic = "force-static"` is prerendered and sees empty cookies and
-  // headers here. The native iOS EULA gate starts in the browser on every
-  // route (EULAConsentStartup); only the purchasing check reads the request.
-  const [cookieStore, requestHeaders] = await Promise.all([
-    cookies(),
-    headers(),
-  ]);
-  const serverRendersNftPurchasing = canServerRenderNftPurchasing({
-    hasNativeIosCookie: cookieStore.has(NATIVE_IOS_COOKIE),
-    userAgent: requestHeaders.get("user-agent"),
-  });
+  // The shell reads nothing from the request: every visitor gets the same
+  // HTML, and the browser decides native iOS, the EULA gate and NFT
+  // purchasing. connection() is the deliberate opt-out that keeps routes
+  // rendering per request by default. It cannot be removed yet: shell
+  // components call useSearchParams() outside a Suspense boundary, which
+  // fails the build for any route Next tries to prerender. A page that
+  // exports `dynamic = "force-static"` skips it and is prerendered. See
+  // "Static Rendering Readiness" in
+  // ops/docs/developer/next-config-runtime-rationale.md.
+  await connection();
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
@@ -122,11 +122,6 @@ export default async function RootLayout({
         <script
           id="native-startup-bootstrap"
           dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_SCRIPT }}
-        />
-        {/* Synchronous too: reload with the iOS marker before the app JS downloads. */}
-        <script
-          id="native-ios-platform-bootstrap"
-          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
         />
         <style dangerouslySetInnerHTML={{ __html: SMALL_WEB_STARTUP_STYLES }} />
         <script
@@ -185,7 +180,7 @@ export default async function RootLayout({
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <Providers canServerRenderNftPurchasing={serverRendersNftPurchasing}>
+          <Providers>
             <DynamicHeadTitle />
             <LayoutWrapper>{children}</LayoutWrapper>
           </Providers>
