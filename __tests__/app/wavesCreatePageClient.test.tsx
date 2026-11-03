@@ -15,6 +15,8 @@ jest.mock("next/navigation", () => ({
     replace: mockReplace,
   }),
   usePathname: () => "/waves/create",
+  // The route loading shell renders while the native-only branch loads.
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
