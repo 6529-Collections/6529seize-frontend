@@ -2166,13 +2166,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goto(`/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`);
     const submissions = page.getByText("Submissions closed", { exact: true });
     const voting = page.getByText("Voting open", { exact: true });
+    const submissionsRow = page
+      .getByText("Submissions closed", { exact: true })
+      .locator("..");
+    const votingRow = page
+      .getByText("Voting open", { exact: true })
+      .locator("..");
     await expect(submissions).toBeInViewport({ ratio: 1 });
     await expect(voting).toBeInViewport({ ratio: 1 });
-    await expect(submissions.locator("..")).toContainText("Dec 3, 2024");
-    await expect(voting.locator("..")).toContainText("No end date");
+    await expect(submissionsRow).toContainText("Dec 3, 2024");
+    await expect(votingRow).toContainText("No end date");
     for (const [status, detail] of [
-      [submissions, submissions.locator("..").getByText("Dec 3, 2024")],
-      [voting, voting.locator("..").getByText("No end date")],
+      [submissions, submissionsRow.getByText("Dec 3, 2024")],
+      [voting, votingRow.getByText("No end date")],
     ] as const) {
       await expect
         .poll(async () => {
