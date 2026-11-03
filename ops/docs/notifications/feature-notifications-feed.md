@@ -33,6 +33,10 @@ Reactions to the same drop share one row with reactor avatars and one drop
 preview, including reactions loaded through `Load more`. Mentions and wave tags
 in previews appear as `@handle` and `#wave`, without storage brackets.
 
+Grouped reactions and returned voting credits use the wave picture as their
+main image. A single reaction uses the person's profile picture. The bell is
+the fallback when the relevant picture is unavailable.
+
 Opening this inbox automatically marks notifications read for the active
 profile after the inbox loads. Closing it does not change read state. Selecting
 a row marks its unread notifications read if needed and opens its destination.

@@ -163,6 +163,7 @@ export type INotificationVotingCreditsReturned = Omit<
   "related_identity"
 > & {
   readonly cause: ApiNotificationCause.VotingCreditsReturned;
+  readonly related_wave?: NotificationWaveOverview;
   readonly additional_context: {
     readonly event_id: string;
     readonly reason: "WIN" | "AUTHOR_DELETED";
