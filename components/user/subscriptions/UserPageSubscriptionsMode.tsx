@@ -7,7 +7,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import SubscriptionSettingSelect from "./SubscriptionSettingSelect";
+import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
 import { formatSubscriptionCoverageDeadline } from "./coverage/subscriptionCoverage.helpers";
 
 export default function UserPageSubscriptionsMode(
@@ -74,39 +74,36 @@ export default function UserPageSubscriptionsMode(
     }
   };
 
+  let modeDetail: string | undefined;
+  if (!props.details) {
+    modeDetail = t(locale, "subscriptions.settings.loading");
+  } else if (props.details.last_update > 0) {
+    modeDetail = formatSubscriptionCoverageDeadline(
+      locale,
+      new Date(props.details.last_update)
+    );
+  }
+
   return (
-    <SubscriptionSettingSelect
+    <SubscriptionSettingToggle
       layout={props.layout ?? "row"}
       label={t(locale, "subscriptions.details.mode")}
-      detail={
-        props.details && props.details.last_update > 0
-          ? formatSubscriptionCoverageDeadline(
-              locale,
-              new Date(props.details.last_update)
-            )
+      detail={modeDetail}
+      describedBy={
+        !props.readonly && props.details
+          ? "profile-subscriptions-upcoming-description"
           : undefined
       }
-      value={isAuto}
-      valueLabel={
-        !props.details ? t(locale, "subscriptions.settings.loading") : undefined
-      }
+      checked={isAuto}
+      loading={!props.details}
       disabled={isDisabled}
       busy={isUpdating}
-      onChange={(auto) => {
-        void setMode(auto);
+      onChange={() => {
+        void setMode(!isAuto);
       }}
-      options={[
-        {
-          value: false,
-          label: t(locale, "subscriptions.coverage.mode.manual"),
-          description: t(locale, "subscriptions.mode.manualDescription"),
-        },
-        {
-          value: true,
-          label: t(locale, "subscriptions.coverage.mode.automatic"),
-          description: t(locale, "subscriptions.mode.automaticDescription"),
-        },
-      ]}
+      offLabel={t(locale, "subscriptions.coverage.mode.manual")}
+      onLabel={t(locale, "subscriptions.coverage.mode.automatic")}
+      ariaLabel={t(locale, "subscriptions.mode.label")}
     />
   );
 }

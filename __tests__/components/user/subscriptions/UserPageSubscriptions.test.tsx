@@ -69,9 +69,10 @@ jest.mock(
   "@/components/user/subscriptions/coverage/SubscriptionCoverageSummary",
   () => ({
     __esModule: true,
-    default: ({ children }: any) => (
+    default: ({ action, children }: any) => (
       <div data-testid="subscription-coverage-summary">
-        Coverage summary{children}
+        Coverage summary{action}
+        {children}
       </div>
     ),
   })
@@ -209,7 +210,7 @@ describe("UserPageSubscriptions", () => {
   });
 
   describe("Connected Account Detection", () => {
-    it("opens the existing top-up flow from the page header", async () => {
+    it("opens the existing top-up flow from the status card", async () => {
       renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
         connectedProfile: mockProfile,
         activeProfileProxy: null,

@@ -31,13 +31,16 @@ function setup({ readonly = false, loading = false, automatic = false } = {}) {
   return { requestAuth, setToast, refresh, user: userEvent.setup() };
 }
 
+const getMode = () =>
+  screen.getByRole("switch", { name: "Automatic subscription mode" });
+
 describe("UserPageSubscriptionsMode", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     post.mockResolvedValue({ automatic: true });
   });
 
-  it("shows the original UTC timestamp with the inline Mode value", () => {
+  it("keeps the original UTC timestamp with the Mode toggle", () => {
     renderWithAuth(
       <UserPageSubscriptionsMode
         profileKey="p1"
@@ -51,46 +54,33 @@ describe("UserPageSubscriptionsMode", () => {
         refresh={jest.fn()}
       />
     );
-    const mode = screen.getByRole("button", { name: "Mode Automatic" });
-    expect(mode).toHaveAccessibleDescription("Feb 20, 2026, 23:01 UTC");
+    expect(getMode()).toBeChecked();
+    expect(getMode()).toBeDisabled();
+    expect(getMode()).toHaveAccessibleDescription("Feb 20, 2026, 23:01 UTC");
     expect(screen.getByText("Feb 20, 2026, 23:01 UTC")).toBeVisible();
     expect(screen.queryByText(/since/)).not.toBeInTheDocument();
   });
 
-  it("shows the original choices and descriptions without resubmitting the saved choice", async () => {
-    const { user, requestAuth } = setup();
-    await user.click(screen.getByRole("button", { name: /^Mode Manual/ }));
-    expect(screen.getByRole("option", { name: "Manual" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
-    expect(
-      screen.getByRole("option", { name: "Manual" })
-    ).toHaveAccessibleDescription("You have to opt-in to each specific drop");
-    expect(
-      screen.getByRole("option", { name: "Automatic" })
-    ).toHaveAccessibleDescription(
-      "Automatic airdrops of all eligible drops unless you opt-out"
-    );
-    await user.click(screen.getByRole("option", { name: "Manual" }));
+  it("shows both original labels and a valid Manual value when last_update is zero", () => {
+    const { requestAuth } = setup();
+    expect(screen.getByText("Manual", { exact: true })).toBeVisible();
+    expect(screen.getByText("Automatic", { exact: true })).toBeVisible();
+    expect(getMode()).not.toBeChecked();
+    expect(getMode()).toBeEnabled();
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(screen.queryByText(/UTC/)).not.toBeInTheDocument();
     expect(requestAuth).not.toHaveBeenCalled();
     expect(post).not.toHaveBeenCalled();
   });
 
-  it("commits the keyboard choice only on Enter through the existing authenticated API", async () => {
-    const { user, refresh } = setup();
+  it("uses native keyboard toggling and the existing authenticated API", async () => {
+    const { user, refresh, requestAuth } = setup();
     await user.tab();
-    expect(screen.getByRole("button", { name: /^Mode Manual/ })).toHaveFocus();
-    await user.keyboard("{Enter}");
-    expect(screen.getByRole("listbox")).toBeVisible();
-    await user.keyboard("{ArrowDown}");
-    expect(post).not.toHaveBeenCalled();
-    await user.keyboard("{Enter}");
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: /^Mode Automatic/ })
-      ).toBeEnabled()
-    );
+    expect(getMode()).toHaveFocus();
+    await user.keyboard(" ");
+    await waitFor(() => expect(getMode()).toBeEnabled());
+    expect(getMode()).toBeChecked();
+    expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledWith({
       endpoint: "subscriptions/p1/subscription-mode",
       body: { automatic: true },
@@ -98,39 +88,34 @@ describe("UserPageSubscriptionsMode", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("dismisses with Escape and restores focus without changing mode", async () => {
-    const { user } = setup();
-    const trigger = screen.getByRole("button", { name: /^Mode Manual/ });
-    await user.click(trigger);
-    await user.keyboard("{ArrowDown}{Escape}");
-    await waitFor(() => expect(trigger).toHaveFocus());
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    expect(post).not.toHaveBeenCalled();
-  });
-
-  it("can reopen with Enter after opening with the mouse", async () => {
-    const { user } = setup();
-    const trigger = screen.getByRole("button", { name: /^Mode Manual/ });
-    await user.click(trigger);
-    await user.keyboard("{Escape}");
-    await waitFor(() => expect(trigger).toHaveFocus());
-    await user.keyboard("{Enter}");
-    expect(screen.getByRole("listbox")).toBeVisible();
-    expect(screen.getByRole("option", { name: "Manual" })).toHaveAttribute(
-      "aria-selected",
-      "true"
+  it("keeps the owner's original explanation associated with the toggle at its Upcoming Drops location", () => {
+    renderWithAuth(
+      <>
+        <UserPageSubscriptionsMode
+          profileKey="p1"
+          details={details}
+          readonly={false}
+          refresh={jest.fn()}
+        />
+        <span id="profile-subscriptions-upcoming-description">
+          You have to opt-in to each specific drop
+        </span>
+      </>
     );
-    expect(post).not.toHaveBeenCalled();
+    expect(getMode()).toHaveAccessibleDescription(
+      "You have to opt-in to each specific drop"
+    );
+    expect(
+      screen.getAllByText("You have to opt-in to each specific drop")
+    ).toHaveLength(1);
   });
 
   it("switches Automatic back to Manual using the original false value", async () => {
     const { user, refresh, requestAuth } = setup({ automatic: true });
     post.mockResolvedValue({ automatic: false });
-    await user.click(screen.getByRole("button", { name: /^Mode Automatic/ }));
-    await user.click(screen.getByRole("option", { name: "Manual" }));
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /^Mode Manual/ })).toBeEnabled()
-    );
+    await user.click(getMode());
+    await waitFor(() => expect(getMode()).toBeEnabled());
+    expect(getMode()).not.toBeChecked();
     expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledWith({
@@ -148,12 +133,10 @@ describe("UserPageSubscriptionsMode", () => {
         finishAuth = resolve;
       })
     );
-    const trigger = screen.getByRole("button", { name: /^Mode Manual/ });
-    await user.click(trigger);
-    await user.click(screen.getByRole("option", { name: "Automatic" }));
-    expect(trigger).toBeDisabled();
-    await user.click(trigger);
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    await user.click(getMode());
+    expect(getMode()).toBeDisabled();
+    expect(getMode()).not.toBeChecked();
+    await user.click(getMode());
     expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).not.toHaveBeenCalled();
     finishAuth({ success: true });
@@ -161,40 +144,49 @@ describe("UserPageSubscriptionsMode", () => {
     expect(post).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the saved choice if authentication is rejected", async () => {
-    const { user, requestAuth } = setup();
+  it("keeps the saved value when authentication is rejected", async () => {
+    const { user, requestAuth, refresh } = setup();
     requestAuth.mockResolvedValue({ success: false });
-    await user.click(screen.getByRole("button", { name: /^Mode Manual/ }));
-    await user.click(screen.getByRole("option", { name: "Automatic" }));
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /^Mode Manual/ })).toBeEnabled()
-    );
+    await user.click(getMode());
+    await waitFor(() => expect(getMode()).toBeEnabled());
+    expect(getMode()).not.toBeChecked();
     expect(post).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("keeps the saved choice and reports an API failure", async () => {
-    const { user, setToast, refresh } = setup();
-    post.mockRejectedValue(new Error("Unavailable"));
-    await user.click(screen.getByRole("button", { name: /^Mode Manual/ }));
-    await user.click(screen.getByRole("option", { name: "Automatic" }));
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /^Mode Manual/ })).toBeEnabled()
-    );
-    expect(setToast).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "error" })
-    );
-    expect(refresh).not.toHaveBeenCalled();
+  it.each(["authentication", "API"])(
+    "retains the saved value and reports a failed %s update",
+    async (failure) => {
+      const { user, requestAuth, setToast, refresh } = setup();
+      if (failure === "authentication")
+        requestAuth.mockRejectedValue(new Error("Unavailable"));
+      else post.mockRejectedValue(new Error("Unavailable"));
+      await user.click(getMode());
+      await waitFor(() => expect(getMode()).toBeEnabled());
+      expect(getMode()).not.toBeChecked();
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+      expect(refresh).not.toHaveBeenCalled();
+    }
+  );
+
+  it("uses the saved value returned by the API", async () => {
+    const { user, refresh } = setup();
+    post.mockResolvedValue({ automatic: false });
+    await user.click(getMode());
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
+    expect(getMode()).not.toBeChecked();
   });
 
   it.each([{ readonly: true }, { loading: true }])(
     "disables editing for %j",
     async (state) => {
       const { user, requestAuth } = setup(state);
-      const trigger = screen.getByRole("button", { name: /^Mode/ });
-      expect(trigger).toBeDisabled();
-      await user.click(trigger);
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      expect(getMode()).toBeDisabled();
+      await user.click(getMode());
       expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
     }
   );
 });

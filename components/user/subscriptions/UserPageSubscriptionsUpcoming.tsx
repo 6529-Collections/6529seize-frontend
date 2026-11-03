@@ -142,7 +142,13 @@ export default function UserPageSubscriptionsUpcoming(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-upcoming"
       title={t(locale, "subscriptions.upcoming.title")}
-      description={props.readonly ? undefined : description}
+      description={
+        props.readonly ? undefined : (
+          <span id="profile-subscriptions-upcoming-description">
+            {description}
+          </span>
+        )
+      }
     >
       <>
         <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">

@@ -3,9 +3,9 @@
 ## Overview
 
 The `Subscriptions` tab at `/{user}/subscriptions` puts Subscription balance,
-refresh and the owner-only Top up action beside the Subscription minting heading.
-Learn more sits beside the title. A compact coverage panel follows, with Details
-on its right on wide screens. Minting settings groups Mode, Edition Preference
+refresh and the owner-only Top up action inside the coverage panel, on its right
+on wider screens. Learn more sits beside the Subscription minting title. Details
+sits below the status description, beside the owner-only Choose drops shortcut. Minting settings groups Mode, Edition Preference
 and Airdrop Address below the status, followed by Upcoming Drops and Subscription
 History. Settings stack in one column on medium and smaller screens and share the subtle dark surface of
 Upcoming Drops, which retains decorative timeline markers. History retains its
@@ -85,9 +85,8 @@ first render.
    Without a funded-through point, the status explanation stays in the summary.
    An owner with Action required still sees the supplied top-up deadline here.
    The balance refresh icon shows its label on hover or keyboard focus.
-2. Open `Details` for the `Subscription coverage` report. Below 768px, Details
-   is a full-width row below the summary, with a subtle divider, its label on
-   the left and the chevron on the right. For Covered profiles,
+2. Open `Details` below the status description, beside Choose drops for owners,
+   for the `Subscription coverage` report. For Covered profiles,
    it contains the original status explanation, Balance capacity, Forecast use,
    and the projection note. Below 768px, report rows show labels on the left,
    values on the right and subtle dividers; wider screens keep the metrics grid.
@@ -102,7 +101,8 @@ first render.
    status-specific Set up, Top up subscriptions or Review settings action.
    Choose drops sits below the summary description instead. An explanation
    already shown above Details is not repeated.
-3. Owners have `Top up` beside Subscription balance in the page header.
+3. Owners have `Top up` with Subscription balance on the right of the coverage
+   panel. On phones, this group wraps below the summary controls.
    `Choose drops` sits on the left below the status description and scrolls to
    and focuses Upcoming Drops without opening Details.
    Top up opens a centered
@@ -127,11 +127,14 @@ first render.
    Edition Preference and Airdrop Address stack in one column below 1280px,
    with subtle row dividers, labels on the left and values on the right. The
    mode date, eligibility and full wallet address sit beneath their corresponding
-   values or labels. Wider screens use the inline layout. Mode opens Manual and Automatic; Edition
-   Preference opens One edition and All eligible. Each dropdown retains the
-   original option descriptions and marks the saved choice. Arrow keys move
-   through options, Enter selects, and Escape closes without changing the
-   setting. Eligibility remains beside Edition Preference. The full address,
+   values or labels. Wider screens use the inline layout. Mode uses the original
+   Manual / Automatic switch; Edition Preference uses One edition / All eligible.
+   Both labels remain visible, with the saved choice emphasized. Tab focuses a
+   switch and Space changes it through the existing authentication and save flow.
+   Controls are disabled while settings load or an update is pending and for
+   visitors. The original edition explanation is owner-only; the mode explanation
+   remains below Upcoming Drops. Eligibility remains beside Edition Preference.
+   The full address,
    ENS name, tooltip and owner edit link remain available. The mode's UTC
    last-update timestamp appears under its saved value, without added wording. Visitors can read saved values
    but cannot change them. Direct settings links still focus the section heading.
@@ -178,11 +181,13 @@ first render.
   consumption per drop.
 - `Mode` is editable in Minting settings above Upcoming Drops. Its original
   UTC last-update timestamp appears below the saved value, without "since".
-- The `Mode` and `Edition Preference` controls open dropdowns with the
-  original option descriptions, a selected checkmark, and keyboard navigation.
-  Pointer opening shows no automatic option highlight; hovering highlights a row,
-  and keyboard navigation shows a visible focus ring on the active option.
-  `Edition Preference` also shows `Eligibility xN`.
+- `Mode` and `Edition Preference` use the original shared switches, with both
+  choices visible and a native keyboard-focus indicator. The original accessible
+  names are Automatic subscription mode and All eligible editions. The
+  authentication, save payloads, success/error feedback and refresh behavior
+  remain unchanged. A failed or rejected update retains the saved value.
+  `Edition Preference` also shows `Eligibility xN` and its original owner-only
+  explanation. These choices wrap within the settings row when needed.
 - `Top up`:
   - sends ETH to the configured subscriptions address on the configured chain
   - uses exact backend-provided ETH for recommended and minimum options,

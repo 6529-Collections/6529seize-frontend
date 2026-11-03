@@ -181,14 +181,17 @@ is an always-visible inline group between coverage and Upcoming Drops, using
 the same subtle dark surface. Mode, Edition Preference and the full Airdrop
 Address stack in one column on medium and smaller screens, with subtle dividers,
 left-aligned labels, right-aligned values and supporting text below each row.
-The inline layout starts at 1280px. Dropdown options and descriptions, eligibility,
+The inline layout starts at 1280px. Mode uses the original Manual / Automatic
+switch and Edition Preference uses One edition / All eligible, with both labels
+visible. Tab focuses a switch and Space changes its value through the existing
+authentication and save flow; visitor, loading and pending-update controls stay
+disabled. Eligibility, the original owner-only edition explanation, Mode date,
 ENS, tooltip and edit link are preserved.
-Subscription balance and the owner-only Top up action sit in the page header;
-Learn more is beside the title. The compact status panel follows, with Details
-at the right on wide screens. Below 768px, Details is a full-width row below
-the summary, with a subtle divider above it, its label on the left and its
-chevron on the right. Owners have Choose drops below the status description on
-the left; it scrolls to and focuses Upcoming Drops without opening Details. The report
+Subscription balance, refresh and the owner-only Top up action sit inside the
+status panel, on its right on wider screens and wrapping below on phones.
+Learn more is beside the page title. Details sits below the status description
+on the left, beside the owner-only Choose drops shortcut. Choose drops scrolls
+to and focuses Upcoming Drops without opening Details. The report
 shows its metrics as left-label, right-value rows with subtle dividers below
 768px, and keeps the metrics grid on wider screens. Status, funded-drop
 count and Funded through stay in the summary above without duplicate report rows.

@@ -227,35 +227,6 @@ export default function UserPageSubscriptions(
             <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
           </Link>
         }
-        action={
-          <div
-            id="subscription-header-actions"
-            className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2"
-          >
-            <div className="tw-min-w-0 tw-flex-1">
-              <UserPageSubscriptionsBalance
-                coverage={coverageQuery.data}
-                details={details}
-                fetching={fetchingDetails}
-                refresh={refresh}
-                show_refresh={isConnectedAccount}
-              />
-            </div>
-            {isConnectedAccount && (
-              <button
-                id="subscription-top-up-opener"
-                type="button"
-                aria-haspopup="dialog"
-                aria-expanded={topUp.expanded}
-                aria-controls="profile-subscriptions-top-up"
-                onClick={() => topUp.setExpanded(!topUp.expanded)}
-                className="tw-inline-flex tw-min-h-9 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-              >
-                {t(locale, "subscriptions.page.topUpTitle")}
-              </button>
-            )}
-          </div>
-        }
       >
         <section
           id="profile-subscriptions-overview"
@@ -275,6 +246,35 @@ export default function UserPageSubscriptions(
               void coverageQuery.refetch();
             }}
             details={details}
+            action={
+              <div
+                id="subscription-overview-actions"
+                className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2 md:tw-flex-col md:tw-items-end md:tw-gap-y-3"
+              >
+                <div className="tw-min-w-0 tw-flex-1">
+                  <UserPageSubscriptionsBalance
+                    coverage={coverageQuery.data}
+                    details={details}
+                    fetching={fetchingDetails}
+                    refresh={refresh}
+                    show_refresh={isConnectedAccount}
+                  />
+                </div>
+                {isConnectedAccount && (
+                  <button
+                    id="subscription-top-up-opener"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded={topUp.expanded}
+                    aria-controls="profile-subscriptions-top-up"
+                    onClick={() => topUp.setExpanded(!topUp.expanded)}
+                    className="tw-inline-flex tw-min-h-9 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  >
+                    {t(locale, "subscriptions.page.topUpTitle")}
+                  </button>
+                )}
+              </div>
+            }
           >
             {isConnectedAccount && (
               <UserPageSubscriptionsTopUp

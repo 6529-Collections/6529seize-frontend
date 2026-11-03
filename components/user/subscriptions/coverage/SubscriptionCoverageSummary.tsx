@@ -91,6 +91,7 @@ export default function SubscriptionCoverageSummary({
   isOwner,
   onRefresh,
   details,
+  action,
   children,
 }: Readonly<{
   coverage: ApiSubscriptionCoverage | undefined;
@@ -99,6 +100,7 @@ export default function SubscriptionCoverageSummary({
   isOwner: boolean;
   onRefresh: () => void;
   details?: SubscriptionDetails | undefined;
+  action?: ReactNode;
   children?: ReactNode;
 }>) {
   const locale = useBrowserLocale();
@@ -136,7 +138,7 @@ export default function SubscriptionCoverageSummary({
         >
           <StatusIcon className="tw-size-5" />
         </span>
-        <div className="tw-min-w-0 tw-flex-1 tw-basis-64">
+        <div className="tw-min-w-0 tw-flex-1 tw-basis-64 md:tw-basis-0">
           <h2
             id="profile-subscriptions-overview-title"
             tabIndex={-1}
@@ -178,30 +180,36 @@ export default function SubscriptionCoverageSummary({
               {deadlineText}
             </p>
           )}
-          {isOwner && (
-            <a
-              href="#profile-subscriptions-upcoming"
-              className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
+          <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-1">
+            {isOwner && (
+              <a
+                href="#profile-subscriptions-upcoming"
+                className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
+              >
+                {t(locale, "subscriptions.coverage.action.chooseDrops")}
+                <ArrowDownIcon aria-hidden="true" className="tw-size-4" />
+              </a>
+            )}
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls="subscription-coverage-details"
+              onClick={() => setExpanded(!expanded)}
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
-              {t(locale, "subscriptions.coverage.action.chooseDrops")}
-              <ArrowDownIcon aria-hidden="true" className="tw-size-4" />
-            </a>
-          )}
+              {t(locale, "subscriptions.details.title")}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className={`tw-size-3 ${expanded ? "tw-rotate-180" : ""}`}
+              />
+            </button>
+          </div>
         </div>
-
-        <button
-          type="button"
-          aria-expanded={expanded}
-          aria-controls="subscription-coverage-details"
-          onClick={() => setExpanded(!expanded)}
-          className="tw-ml-auto tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 max-md:tw-mt-2 max-md:tw-w-full max-md:tw-justify-between max-md:tw-rounded-none max-md:tw-border-t max-md:tw-border-solid max-md:tw-border-white/[0.06] max-md:tw-pt-4 max-md:tw-text-left"
-        >
-          {t(locale, "subscriptions.details.title")}
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={`tw-size-3 max-md:tw-size-4 ${expanded ? "tw-rotate-180" : ""}`}
-          />
-        </button>
+        {action !== undefined && (
+          <div className="tw-ml-auto tw-min-w-0 tw-max-w-full tw-shrink-0 max-md:tw-w-full">
+            {action}
+          </div>
+        )}
       </div>
       {isError && coverage && (
         <p

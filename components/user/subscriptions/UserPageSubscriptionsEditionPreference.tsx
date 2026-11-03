@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
-import SubscriptionSettingSelect from "./SubscriptionSettingSelect";
+import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
 
 export default function UserPageSubscriptionsEditionPreference(
   props: Readonly<{
@@ -78,40 +78,35 @@ export default function UserPageSubscriptionsEditionPreference(
     }
   };
 
+  const description = t(
+    locale,
+    isAllEditions
+      ? "subscriptions.settings.allDescription"
+      : "subscriptions.settings.oneDescription"
+  );
+
   return (
-    <SubscriptionSettingSelect
+    <SubscriptionSettingToggle
       layout={props.layout ?? "row"}
       label={t(locale, "subscriptions.settings.editions")}
       labelNote={
-        <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-          {props.details
-            ? t(locale, "subscriptions.settings.eligibilityBadge", {
-                count: formatInteger(locale, subscriptionEligibilityCount),
-              })
-            : t(locale, "subscriptions.settings.loading")}
-        </span>
+        props.details
+          ? t(locale, "subscriptions.settings.eligibilityBadge", {
+              count: formatInteger(locale, subscriptionEligibilityCount),
+            })
+          : t(locale, "subscriptions.settings.loading")
       }
-      value={isAllEditions}
-      valueLabel={
-        !props.details ? t(locale, "subscriptions.settings.loading") : undefined
-      }
+      checked={isAllEditions}
+      loading={!props.details}
       disabled={isDisabled}
       busy={isUpdatingAllEditions}
-      onChange={(all) => {
-        void setEditionPreference(all);
+      onChange={() => {
+        void setEditionPreference(!isAllEditions);
       }}
-      options={[
-        {
-          value: false,
-          label: t(locale, "subscriptions.coverage.editions.one"),
-          description: t(locale, "subscriptions.settings.oneDescription"),
-        },
-        {
-          value: true,
-          label: t(locale, "subscriptions.settings.all"),
-          description: t(locale, "subscriptions.settings.allDescription"),
-        },
-      ]}
+      offLabel={t(locale, "subscriptions.coverage.editions.one")}
+      onLabel={t(locale, "subscriptions.settings.all")}
+      ariaLabel={t(locale, "subscriptions.coverage.editions.all")}
+      description={!props.readonly && props.details ? description : undefined}
     />
   );
 }

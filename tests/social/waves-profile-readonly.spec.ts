@@ -643,7 +643,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("heading", { level: 2 })
       .boundingBox();
     const balanceBox = await overview
-      .locator("#subscription-header-actions")
+      .locator("#subscription-overview-actions")
       .getByText("Subscription balance", { exact: true })
       .boundingBox();
     expect(coverageBox).not.toBeNull();
@@ -659,35 +659,42 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(detailsBox!.x + detailsBox!.width).toBeLessThanOrEqual(
       coverageBox!.x + coverageBox!.width
     );
+    expect(balanceBox!.y).toBeGreaterThanOrEqual(coverageBox!.y);
     expect(balanceBox!.y + balanceBox!.height).toBeLessThanOrEqual(
-      coverageBox!.y
+      coverageBox!.y + coverageBox!.height
     );
+    expect(detailsBox!.y).toBeGreaterThanOrEqual(
+      descriptionBox!.y + descriptionBox!.height
+    );
+    expect(Math.abs(detailsBox!.x - headlineBox!.x)).toBeLessThanOrEqual(1);
     if (page.viewportSize()!.width >= 768) {
-      expect(detailsBox!.x).toBeGreaterThanOrEqual(
+      expect(balanceBox!.x).toBeGreaterThanOrEqual(
         headlineBox!.x + headlineBox!.width
       );
-    } else {
-      expect(detailsBox!.y).toBeGreaterThanOrEqual(
-        descriptionBox!.y + descriptionBox!.height
-      );
-      expect(detailsBox!.width).toBeGreaterThanOrEqual(coverageBox!.width - 40);
-      const detailsChevron = await details.locator("svg").boundingBox();
-      expect(detailsChevron).not.toBeNull();
-      expect(
-        Math.abs(
-          detailsBox!.x +
-            detailsBox!.width -
-            detailsChevron!.x -
-            detailsChevron!.width
-        )
-      ).toBeLessThanOrEqual(1);
     }
     await expect(
-      mintingSettings.getByRole("button", { name: /^Mode/ })
+      mintingSettings.getByRole("switch", {
+        name: "Automatic subscription mode",
+        exact: true,
+      })
     ).toBeDisabled();
     await expect(
-      mintingSettings.getByRole("button", { name: /^Edition Preference/ })
+      mintingSettings.getByRole("switch", {
+        name: "All eligible editions",
+        exact: true,
+      })
     ).toBeDisabled();
+    for (const choice of [
+      "Manual",
+      "Automatic",
+      "One edition",
+      "All eligible",
+    ]) {
+      await expect(
+        mintingSettings.getByText(choice, { exact: true })
+      ).toBeVisible();
+    }
+    await expect(mintingSettings.getByText(/^You will receive/)).toHaveCount(0);
     await expect(
       page
         .locator("#profile-subscriptions-upcoming")
@@ -713,8 +720,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const initialViewport = page.viewportSize()!;
     await page.setViewportSize({ width: 1024, height: initialViewport.height });
     const settingControls = [
-      mintingSettings.getByRole("button", { name: /^Mode/ }),
-      mintingSettings.getByRole("button", { name: /^Edition Preference/ }),
+      mintingSettings.getByRole("group", { name: "Mode", exact: true }),
+      mintingSettings.getByRole("group", {
+        name: "Edition Preference",
+        exact: true,
+      }),
       mintingSettings.getByRole("heading", {
         name: "Airdrop Address",
         exact: true,
@@ -735,8 +745,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       Math.abs(settingBoxes[0]!.width - settingBoxes[1]!.width)
     ).toBeLessThanOrEqual(1);
     const modeValue = mintingSettings
-      .getByRole("button", { name: /^Mode/ })
-      .locator('[id$="-value"]');
+      .getByRole("group", { name: "Mode", exact: true })
+      .locator("[data-setting-controls]");
     const modeLabelBox = await mintingSettings
       .getByText("Mode", { exact: true })
       .boundingBox();

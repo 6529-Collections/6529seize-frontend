@@ -419,7 +419,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       page.getByRole("heading", { name: "Airdrop Address" })
     ).toBeVisible();
     await expect(
-      settings.getByRole("button", { name: /^Edition Preference/ })
+      settings.getByRole("switch", {
+        name: "All eligible editions",
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
       page.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
@@ -473,11 +476,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const detailsBox = await overview
       .getByRole("button", { name: "Details", exact: true })
       .boundingBox();
-    const headerActions = page.locator("#subscription-header-actions");
-    const topUpBox = await headerActions
+    const overviewActions = page.locator("#subscription-overview-actions");
+    const topUpBox = await overviewActions
       .getByRole("button", { name: "Top up", exact: true })
       .boundingBox();
-    const balanceBox = await headerActions
+    const balanceBox = await overviewActions
       .getByText("Subscription balance", { exact: true })
       .boundingBox();
     const overviewBox = await overview.boundingBox();
@@ -487,35 +490,39 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(topUpBox).not.toBeNull();
     expect(balanceBox).not.toBeNull();
     expect(overviewBox).not.toBeNull();
-    expect(topUpBox!.y + topUpBox!.height).toBeLessThanOrEqual(overviewBox!.y);
-    expect(balanceBox!.y + balanceBox!.height).toBeLessThanOrEqual(
-      overviewBox!.y
+    for (const box of [topUpBox!, balanceBox!]) {
+      expect(box.x).toBeGreaterThanOrEqual(overviewBox!.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(
+        overviewBox!.x + overviewBox!.width
+      );
+      expect(box.y).toBeGreaterThanOrEqual(overviewBox!.y);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        overviewBox!.y + overviewBox!.height
+      );
+    }
+    expect(detailsBox!.y).toBeGreaterThanOrEqual(
+      descriptionBox!.y + descriptionBox!.height
     );
+    const chooseDropsControlBox = await overview
+      .getByRole("link", { name: "Choose drops", exact: true })
+      .boundingBox();
+    expect(chooseDropsControlBox).not.toBeNull();
+    expect(detailsBox!.x).toBeGreaterThanOrEqual(
+      chooseDropsControlBox!.x + chooseDropsControlBox!.width
+    );
+    expect(
+      Math.abs(detailsBox!.y - chooseDropsControlBox!.y)
+    ).toBeLessThanOrEqual(1);
     if (page.viewportSize()!.width >= 768) {
-      expect(detailsBox!.x).toBeGreaterThanOrEqual(
+      expect(balanceBox!.x).toBeGreaterThanOrEqual(
         headlineBox!.x + headlineBox!.width
       );
-    } else {
-      expect(detailsBox!.y).toBeGreaterThanOrEqual(
-        descriptionBox!.y + descriptionBox!.height
+      expect(topUpBox!.x).toBeGreaterThanOrEqual(
+        headlineBox!.x + headlineBox!.width
       );
-      expect(detailsBox!.width).toBeGreaterThanOrEqual(overviewBox!.width - 40);
-      const detailsChevron = await overview
-        .getByRole("button", { name: "Details", exact: true })
-        .locator("svg")
-        .boundingBox();
-      expect(detailsChevron).not.toBeNull();
-      expect(
-        Math.abs(
-          detailsBox!.x +
-            detailsBox!.width -
-            detailsChevron!.x -
-            detailsChevron!.width
-        )
-      ).toBeLessThanOrEqual(1);
     }
-    const amount = headerActions.getByText("0.4 ETH", { exact: true });
-    const refreshBalance = headerActions.getByRole("button", {
+    const amount = overviewActions.getByText("0.4 ETH", { exact: true });
+    const refreshBalance = overviewActions.getByRole("button", {
       name: "Refresh balance",
     });
     await expect(amount).toBeVisible();
@@ -546,13 +553,23 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       name: "Minting settings",
       exact: true,
     });
-    const mode = settings.getByRole("button", { name: /^Mode .*Automatic$/ });
+    const modeGroup = settings.getByRole("group", {
+      name: "Mode",
+      exact: true,
+    });
+    const mode = modeGroup.getByRole("switch", {
+      name: "Automatic subscription mode",
+      exact: true,
+    });
     await expect(mode).toBeVisible();
+    await expect(mode).toHaveAccessibleDescription(
+      "Oct 2, 2026, 19:03 UTC Automatic airdrops of all eligible drops unless you opt-out"
+    );
     const modeDate = settings.getByText("Oct 2, 2026, 19:03 UTC", {
       exact: true,
     });
     await expect(modeDate).toBeVisible();
-    const modeValueBox = await mode
+    const modeValueBox = await modeGroup
       .getByText("Automatic", { exact: true })
       .boundingBox();
     const modeDateBox = await modeDate.boundingBox();
@@ -561,22 +578,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(modeDateBox!.y).toBeGreaterThanOrEqual(
       modeValueBox!.y + modeValueBox!.height
     );
-    if (page.viewportSize()!.width < 1280) {
-      const modeRowBox = await mode.boundingBox();
-      expect(modeRowBox).not.toBeNull();
-      expect(modeDateBox!.x).toBeLessThanOrEqual(modeValueBox!.x);
-      expect(
-        Math.abs(
-          modeDateBox!.x +
-            modeDateBox!.width -
-            modeRowBox!.x -
-            modeRowBox!.width
-        )
-      ).toBeLessThanOrEqual(1);
-      await expect(modeDate).toHaveCSS("text-align", "right");
-    } else {
-      expect(Math.abs(modeDateBox!.x - modeValueBox!.x)).toBeLessThanOrEqual(1);
-    }
+    const modeRowBox = await modeGroup.boundingBox();
+    expect(modeRowBox).not.toBeNull();
+    expect(modeDateBox!.x).toBeGreaterThanOrEqual(modeRowBox!.x);
+    expect(
+      Math.abs(
+        modeDateBox!.x + modeDateBox!.width - modeRowBox!.x - modeRowBox!.width
+      )
+    ).toBeLessThanOrEqual(1);
+    await expect(modeDate).toHaveCSS("text-align", "right");
     await expect(
       upcoming.getByText(
         "Automatic airdrops of all eligible drops unless you opt-out",
@@ -900,61 +910,41 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         ).toBeLessThanOrEqual(1);
       }
     }
-    await mode.click();
-    for (const option of await page.getByRole("option").all()) {
-      await expect(option).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-      await expect(option).toHaveCSS("box-shadow", "none");
-    }
-    await page.getByRole("listbox").press("Escape");
-    await mode.press("Enter");
+    await expect(mode).toBeChecked();
+    await expect(mode).toBeEnabled();
+    await expect(settings.getByText("Manual", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("option", { name: "Automatic", exact: true })
-    ).toHaveAttribute("aria-selected", "true");
-    await expect(
-      page.getByRole("option", { name: "Automatic", exact: true })
-    ).not.toHaveCSS("box-shadow", "none");
-    await expect(
-      page.getByRole("option", { name: "Manual", exact: true })
-    ).toHaveAccessibleDescription("You have to opt-in to each specific drop");
-    await page.getByRole("listbox").press("ArrowUp");
-    await expect(
-      page.getByRole("option", { name: "Manual", exact: true })
-    ).not.toHaveCSS("box-shadow", "none");
-    await page.getByRole("listbox").press("Escape");
-    await expect(mode).toBeFocused();
-    await expect(mode).toHaveText(/Automatic/);
-    const editions = settings.getByRole("button", {
-      name: /^Edition Preference/,
+      settings.getByText("Automatic", { exact: true })
+    ).toBeVisible();
+    const editions = settings.getByRole("switch", {
+      name: "All eligible editions",
+      exact: true,
     });
-    await editions.click();
-    for (const option of await page.getByRole("option").all()) {
-      await expect(option).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-      await expect(option).toHaveCSS("box-shadow", "none");
-    }
-    const editionRowBox = await editions.boundingBox();
-    const editionOptionsBox = await page.getByRole("listbox").boundingBox();
-    expect(editionRowBox).not.toBeNull();
-    expect(editionOptionsBox).not.toBeNull();
-    expect(editionOptionsBox!.x).toBeGreaterThanOrEqual(8);
-    expect(editionOptionsBox!.x + editionOptionsBox!.width).toBeLessThanOrEqual(
-      page.viewportSize()!.width - 8
+    await expect(editions).toBeChecked();
+    await expect(editions).toBeEnabled();
+    await expect(editions).toHaveAccessibleDescription(
+      /Eligibility x2 You will receive all editions you are eligible for/
     );
-    await expect(
-      page.getByRole("option", { name: "All eligible", exact: true })
-    ).toHaveAttribute("aria-selected", "true");
+    await mode.focus();
+    await expect(mode).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(editions).toBeFocused();
+    await expect(editions.locator("+ span")).not.toHaveCSS(
+      "box-shadow",
+      "none"
+    );
     await expectSingleLineLabel(
-      page
-        .getByRole("option", { name: "One edition", exact: true })
-        .getByText("One edition", { exact: true })
+      settings.getByText("One edition", { exact: true })
+    );
+    await expectSingleLineLabel(
+      settings.getByText("All eligible", { exact: true })
     );
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(
       page,
       testInfo,
-      "subscriptions-settings-dropdown"
+      "subscriptions-settings-toggles"
     );
-    await page.getByRole("listbox").press("Escape");
-    await expect(editions).toBeFocused();
     await expect(
       page.getByRole("button", { name: address, exact: true })
     ).toBeVisible();
