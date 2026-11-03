@@ -4,6 +4,8 @@ import { factText, fmt, isFact, type FactEntry } from "@/lib/explained/facts";
 import { kt } from "../i18n";
 import Mark, { type MarkKind } from "../marks/Mark";
 import FactValue from "../facts/FactValue";
+import PhoneMore from "../layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "../layout/phoneMoreClass";
 
 /**
  * Claims with their proof (EXPLAINED.md §6.4, §9): a claim told to the end
@@ -39,6 +41,24 @@ export interface ClaimSpan {
   readonly duration: string;
   readonly what: string;
   readonly outcome: "refuted" | "holds";
+  /**
+   * How long it stood, in minutes: the timeline's segments are drawn to
+   * scale. A span still standing has none; it takes the longest one's
+   * width and fades out at its open end.
+   */
+  readonly minutes?: number;
+}
+
+/** The timeline's columns: each closed span to scale, an open one as wide as the longest. */
+function spanColumns(spans: readonly ClaimSpan[]): string | undefined {
+  const closed = spans.flatMap((span) =>
+    span.minutes === undefined ? [] : [span.minutes]
+  );
+  if (closed.length === 0) return undefined;
+  const longest = Math.max(...closed);
+  return spans
+    .map((span) => `minmax(0,${span.minutes ?? longest}fr)`)
+    .join(" ");
 }
 
 function LeanBlock({
@@ -97,7 +117,7 @@ export function ClaimInParts({
             <span className="tw-mt-1.5 tw-block tw-text-[13px] tw-font-semibold tw-text-iron-400">
               {part.where}
             </span>
-            <blockquote className="tw-my-3 tw-ml-0 tw-mr-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-400 tw-pl-3 tw-text-base tw-leading-[25px] tw-text-iron-50">
+            <blockquote className="tw-my-3 tw-ml-0 tw-mr-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-400 tw-pl-3 tw-text-base tw-leading-[26px] tw-text-iron-50">
               {part.quote}
             </blockquote>
             <Mark
@@ -118,7 +138,7 @@ export function ClaimInParts({
               </p>
             )}
             {part.cap !== undefined && (
-              <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
                 {part.cap}
               </p>
             )}
@@ -127,13 +147,17 @@ export function ClaimInParts({
       </ol>
       {spans && (
         <ol
-          className="tw-m-0 tw-mt-[18px] tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 md:tw-grid-cols-3 md:tw-gap-0"
+          className="tw-m-0 tw-mt-[18px] tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 md:tw-gap-x-1 md:tw-gap-y-0 md:[grid-template-columns:var(--ex-spans)]"
+          style={{
+            ["--ex-spans" as string]:
+              spanColumns(spans) ?? `repeat(${spans.length},minmax(0,1fr))`,
+          }}
           aria-label={kt(locale, "explained.kit.claim.timeline")}
         >
           {spans.map((span) => (
             <li
               key={span.what}
-              className={`tw-border-0 tw-border-t-[3px] tw-border-solid tw-pt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 ${span.outcome === "holds" ? "tw-border-green" : "tw-border-error"}`}
+              className={`tw-relative tw-border-0 tw-border-t-[3px] tw-border-solid tw-pr-3 tw-pt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 ${span.outcome === "holds" ? "tw-border-green" : "tw-border-error"} ${span.outcome === "holds" && span.minutes === undefined ? "md:[border-image:linear-gradient(90deg,#3ccb7f_70%,transparent)_1]" : ""}`}
             >
               <b className="tw-block tw-text-[15px] tw-font-semibold tw-text-iron-50">
                 {span.duration}
@@ -163,9 +187,20 @@ export interface ClaimRow {
 export function ClaimTable({
   rows,
   locale,
+  phoneFold,
 }: {
   readonly rows: readonly ClaimRow[];
   readonly locale: SupportedLocale;
+  /**
+   * On a phone, only `limit` claims show until the reader opens the rest
+   * with `more` ("All 9 claims", its count a fact); every claim shows from
+   * a tablet up.
+   */
+  readonly phoneFold?: {
+    readonly limit: number;
+    readonly more: ReactNode;
+    readonly less: ReactNode;
+  };
 }) {
   const count = (
     entry: FactEntry | null | undefined,
@@ -187,7 +222,8 @@ export function ClaimTable({
       </span>
     );
   };
-  return (
+  const folds = phoneFold !== undefined && rows.length > phoneFold.limit;
+  const list = (
     <ol
       className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0"
       data-claims=""
@@ -195,7 +231,7 @@ export function ClaimTable({
       {rows.map((row, index) => (
         <li
           key={row.what}
-          className="tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_150px] lg:tw-gap-[22px]"
+          className={`tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_150px] lg:tw-gap-[22px] ${folds && index >= (phoneFold?.limit ?? 0) ? PHONE_MORE_HIDDEN : ""}`}
         >
           <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
             {index + 1}
@@ -206,13 +242,13 @@ export function ClaimTable({
               {row.detail}
             </span>
           </span>
-          <span className="tw-col-start-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-300 lg:tw-col-start-3">
+          <span className="tw-col-start-2 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-col-start-3">
             <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
               {kt(locale, "explained.kit.claimTable.limit")}
             </span>
             {row.limit}
           </span>
-          <span className="tw-col-start-2 tw-text-sm tw-leading-[22px] tw-text-iron-400 lg:tw-col-start-4">
+          <span className="tw-col-start-2 tw-text-sm tw-leading-[21px] tw-text-iron-400 lg:tw-col-start-4">
             {count(row.counts.proved, "proved")}
             {count(row.counts.shownFalse, "shownFalse")}
             {count(row.counts.limits, "limits")}
@@ -220,6 +256,12 @@ export function ClaimTable({
         </li>
       ))}
     </ol>
+  );
+  if (!folds || phoneFold === undefined) return list;
+  return (
+    <PhoneMore more={phoneFold.more} less={phoneFold.less}>
+      {list}
+    </PhoneMore>
   );
 }
 
@@ -239,10 +281,11 @@ function scoreBorders(index: number, count: number): string {
   if (count % 2 !== 0) {
     return index > 0 ? `tw-border-t ${wide}` : "";
   }
-  // Under 360 px the cells stack in one column, a rule above each.
-  const left = index % 2 === 1 ? "min-[360px]:tw-border-l" : "";
+  // On a phone the cells stack in one column, a rule above each; two
+  // columns from a tablet up.
+  const left = index % 2 === 1 ? "md:tw-border-l" : "";
   const top =
-    index >= 2 ? "tw-border-t" : index === 1 ? "max-[359px]:tw-border-t" : "";
+    index >= 2 ? "tw-border-t" : index === 1 ? "max-md:tw-border-t" : "";
   return `${left} ${top} ${wide}`.trim();
 }
 
@@ -257,7 +300,7 @@ export function Scoreboard({
 }) {
   return (
     <dl
-      className={`tw-m-0 tw-grid tw-grid-cols-1 ${cells.length % 2 === 0 ? "min-[360px]:tw-grid-cols-2" : ""} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
+      className={`tw-m-0 tw-grid tw-grid-cols-1 ${cells.length % 2 === 0 ? "md:tw-grid-cols-2" : ""} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
       style={{ ["--ex-score" as string]: String(cells.length) }}
       aria-label={label}
       data-scoreboard=""
@@ -265,18 +308,19 @@ export function Scoreboard({
       {cells.map((cell, index) => (
         <div
           key={cell.value?.id ?? index}
-          className={`tw-border-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-px-[22px] md:tw-py-5 ${scoreBorders(index, cells.length)}`}
+          className={`tw-border-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3.5 md:tw-px-[22px] md:tw-py-5 ${scoreBorders(index, cells.length)}`}
         >
           <dt className="tw-sr-only">
             {typeof cell.caption === "string" ? cell.caption : ""}
           </dt>
-          <dd className="tw-m-0">
+          {/* On a phone the number sits beside its caption, one row a count. */}
+          <dd className="tw-m-0 max-md:tw-flex max-md:tw-flex-wrap max-md:tw-items-baseline max-md:tw-gap-x-3">
             <FactValue
               fact={cell.value}
               locale={locale}
               className="tw-block tw-text-[30px] tw-font-semibold tw-leading-9 tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[40px] md:tw-leading-[46px]"
             />
-            <span className="tw-mt-1.5 tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400">
+            <span className="tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400 max-md:tw-min-w-[180px] max-md:tw-flex-1 md:tw-mt-1.5">
               {cell.caption}
             </span>
           </dd>
@@ -305,7 +349,7 @@ export function AssumptionLedger({
   const head =
     "tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-py-2.5 tw-pr-3.5 tw-text-left tw-align-bottom tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400";
   const cell =
-    "tw-block tw-border-0 tw-px-0 tw-py-[3px] tw-align-top tw-text-base tw-leading-6 tw-text-iron-300 md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-border-iron-900 md:tw-py-3.5 md:tw-pr-3.5";
+    "tw-block tw-border-0 tw-px-0 tw-py-[3px] tw-align-top tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-border-iron-900 md:tw-py-3.5 md:tw-pr-3.5";
   return (
     <table className="tw-w-full tw-border-collapse" data-ledger="">
       <thead className="tw-hidden md:tw-table-header-group">

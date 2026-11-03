@@ -364,5 +364,7 @@ export function measure(vh) {
       : 0,
     gutter,
     numbersOutsideFacts: outside,
+    // The following contents bar, which the long genres must carry.
+    contents: document.querySelector("[data-page-contents]") !== null,
   };
 }

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import type { ReactNode } from "react";
+import Mark from "@/components/explained/marks/Mark";
 import { EX_LINK } from "@/components/explained/tokens";
 import { REGISTRY_FIELDS } from "@/components/explained/engine/registry";
 import {
@@ -202,6 +205,12 @@ function Section10({ ctx }: { readonly ctx: SpecContext }) {
         {m("explained.tdh.spec.s10.note", {
           registry: <CodeName wrap>{p.v("rules.registry")}</CodeName>,
           vector: <CodeName>28-registry-hash</CodeName>,
+          ruleIdFormula: (
+            <CodeName wrap>
+              H(&quot;6529.TdhRule.v1&quot;, keccak256(rule version),
+              registryHash)
+            </CodeName>
+          ),
         })}
       </Caption>
       <FullRecord ctx={ctx} />
@@ -259,6 +268,7 @@ function FullRecord({ ctx }: { readonly ctx: SpecContext }) {
           })}
         </summary>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-3"
           code={lines.join("\n")}
           label={s("explained.tdh.spec.s10.fullLabel")}
@@ -273,7 +283,21 @@ function Section11({ ctx }: { readonly ctx: SpecContext }) {
   const settled = ctx.deviations.filter((item) => item.settled);
   const decision = (id: string, isSettled: boolean): ReactNode => {
     if (isSettled) return m("explained.tdh.spec.s11.settled");
-    return m(DECISION[id] ?? "explained.tdh.spec.s11.adopted");
+    const key = DECISION[id] ?? "explained.tdh.spec.s11.adopted";
+    // A proposal no decision has taken yet carries the Proposed mark, so a
+    // skim of the column never reads it as adopted.
+    if (
+      key !== "explained.tdh.spec.s11.proposedSpecWins" &&
+      key !== "explained.tdh.spec.s11.proposedAdopt"
+    ) {
+      return m(key);
+    }
+    return (
+      <span className="tw-flex tw-flex-col tw-items-start tw-gap-1">
+        <Mark kind="proposed" locale={ctx.locale} size="sm" />
+        <span>{m(key)}</span>
+      </span>
+    );
   };
   const text = (id: string, part: "old" | "v14" | "effect") => {
     const key = itemKey("dev", id, part);
@@ -289,32 +313,50 @@ function Section11({ ctx }: { readonly ctx: SpecContext }) {
       })}
       full={
         <FactScope className="tw-mt-6" ids={["spec.deviations"]}>
-          <StackTable
-            size="small"
-            from="lg"
-            caption={s("explained.tdh.spec.s11.table")}
-            columns={[
-              { key: "id", label: s("explained.tdh.spec.s11.col.id") },
-              { key: "old", label: s("explained.tdh.spec.s11.col.old") },
-              { key: "v14", label: s("explained.tdh.spec.s11.col.v14") },
-              { key: "effect", label: s("explained.tdh.spec.s11.col.effect") },
-              {
-                key: "decision",
-                label: s("explained.tdh.spec.s11.col.decision"),
-              },
-            ]}
-            rows={ctx.deviations.map((item) => ({
-              key: item.id,
-              id: item.id.toLowerCase(),
-              cells: {
-                id: <CodeName>{item.id}</CodeName>,
-                old: text(item.id, "old"),
-                v14: text(item.id, "v14"),
-                effect: text(item.id, "effect"),
-                decision: decision(item.id, item.settled),
-              },
-            }))}
-          />
+          {/* On a phone the {count} rows open on request: the heading
+              already states how many there are. */}
+          <PhoneMore
+            more={m("explained.tdh.spec.s11.more", {
+              count: p.v("spec.deviations.inForce"),
+            })}
+            less={m("explained.tdh.spec.s11.less")}
+          >
+            <div className={PHONE_MORE_HIDDEN}>
+              <StackTable
+                size="small"
+                from="lg"
+                caption={s("explained.tdh.spec.s11.table")}
+                columns={[
+                  { key: "id", label: s("explained.tdh.spec.s11.col.id") },
+                  { key: "old", label: s("explained.tdh.spec.s11.col.old") },
+                  { key: "v14", label: s("explained.tdh.spec.s11.col.v14") },
+                  {
+                    key: "effect",
+                    label: s("explained.tdh.spec.s11.col.effect"),
+                  },
+                  {
+                    key: "decision",
+                    // "For the cutover" is said beside its status: not made,
+                    // as of the facts layer's last check.
+                    label: s("explained.tdh.spec.s11.col.decision", {
+                      checked: p.f("tdh.cutover.checkedAt"),
+                    }),
+                  },
+                ]}
+                rows={ctx.deviations.map((item) => ({
+                  key: item.id,
+                  id: item.id.toLowerCase(),
+                  cells: {
+                    id: <CodeName>{item.id}</CodeName>,
+                    old: text(item.id, "old"),
+                    v14: text(item.id, "v14"),
+                    effect: text(item.id, "effect"),
+                    decision: decision(item.id, item.settled),
+                  },
+                }))}
+              />
+            </div>
+          </PhoneMore>
         </FactScope>
       }
     >
@@ -354,24 +396,31 @@ function Section12({ ctx }: { readonly ctx: SpecContext }) {
     >
       <Prose>{m("explained.tdh.spec.s12.body")}</Prose>
       <FactScope className="tw-mt-5" ids={["spec.issueIds"]}>
-        <StackTable
-          size="small"
-          caption={s("explained.tdh.spec.s12.table")}
-          columns={[
-            { key: "id", label: s("explained.tdh.spec.s12.col.id") },
-            { key: "issue", label: s("explained.tdh.spec.s12.col.issue") },
-            { key: "v14", label: s("explained.tdh.spec.s12.col.v14") },
-          ]}
-          rows={ctx.issues.map((id) => ({
-            key: id,
-            id: id.toLowerCase(),
-            cells: {
-              id: <CodeName>{id}</CodeName>,
-              issue: text(id, "issue"),
-              v14: text(id, "v14"),
-            },
-          }))}
-        />
+        <PhoneMore
+          more={m("explained.tdh.spec.s12.more", { count: p.v("spec.issues") })}
+          less={m("explained.tdh.spec.s12.less")}
+        >
+          <div className={PHONE_MORE_HIDDEN}>
+            <StackTable
+              size="small"
+              caption={s("explained.tdh.spec.s12.table")}
+              columns={[
+                { key: "id", label: s("explained.tdh.spec.s12.col.id") },
+                { key: "issue", label: s("explained.tdh.spec.s12.col.issue") },
+                { key: "v14", label: s("explained.tdh.spec.s12.col.v14") },
+              ]}
+              rows={ctx.issues.map((id) => ({
+                key: id,
+                id: id.toLowerCase(),
+                cells: {
+                  id: <CodeName>{id}</CodeName>,
+                  issue: text(id, "issue"),
+                  v14: text(id, "v14"),
+                },
+              }))}
+            />
+          </div>
+        </PhoneMore>
       </FactScope>
     </EdSection>
   );

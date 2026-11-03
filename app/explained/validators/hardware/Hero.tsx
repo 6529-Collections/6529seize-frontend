@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { FactText } from "@/components/explained/facts/FactText";
 import { kt } from "@/components/explained/i18n";
 import { Icon } from "@/components/explained/marks/glyphs";
-import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
+import { TrackBar } from "@/components/explained/marks/Track";
+import { EX_BUTTON, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, type Fact } from "@/lib/explained/facts";
 import { CARD, type TierId } from "./_lib/card";
@@ -22,11 +23,14 @@ import MachineChooser, { type ChooserResult } from "./MachineChooser";
 function TestingBanner({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <aside
-      className="tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-rounded-2xl tw-border tw-border-solid tw-border-green/45 tw-bg-green/[0.09] tw-px-5 tw-py-4 md:tw-mt-9 md:tw-flex-row md:tw-items-start md:tw-gap-5 md:tw-px-6 md:tw-py-5"
+      className="tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4 md:tw-mt-9 md:tw-flex-row md:tw-items-baseline md:tw-gap-5 md:tw-px-6 md:tw-py-5"
       aria-label={CARD.testing.tag}
       id="testing"
     >
-      <span className="tw-inline-flex tw-flex-none tw-self-start tw-rounded-lg tw-bg-green tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-bold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-[#0D0D0F]">
+      {/* The kit's maturity mark, not a filled tag: green means proved or
+          tested, and the software is built and being tested. */}
+      <span className="tw-inline-flex tw-flex-none tw-items-center tw-gap-2 tw-self-start tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-iron-200">
+        <TrackBar maturity="built" />
         {CARD.testing.tag}
       </span>
       <p className="tw-m-0 tw-text-base tw-leading-[26px] tw-text-iron-50 md:tw-text-lg md:tw-leading-[29px]">
@@ -169,7 +173,7 @@ export default function Hero({
         </p>
         <a
           href="#chooser"
-          className={`tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-full tw-bg-primary-500 tw-px-4 tw-text-[15px] tw-font-semibold tw-text-white tw-no-underline hover:tw-bg-primary-400 lg:tw-hidden ${EX_FOCUS}`}
+          className={`${EX_BUTTON.cta} tw-mt-5 lg:tw-hidden`}
           data-jump="chooser"
         >
           {hw(locale, "jumpChooser")}

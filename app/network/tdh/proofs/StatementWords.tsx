@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import { fill } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg } from "@/components/explained/lens/controls";
+import { EX_FOCUS, EX_MOTION } from "@/components/explained/tokens";
 import Lens, { Readout } from "@/components/explained/lens/Lens";
 import { Glyph } from "@/components/explained/marks/glyphs";
 import Hash from "@/components/explained/marks/Hash";
@@ -53,6 +54,11 @@ function flipped(word: DecodedWord): DecodedWord {
 type WordPick = WordGroup | "b";
 
 /** P53 §4.6's encoding, one line a group, as the exact rule beside the words. */
+/** The retired rule version proof A's words were proved under, as text. */
+function ruleVersionText(value: unknown): string {
+  return typeof value === "string" ? value : "-";
+}
+
 const RULE_LINES: readonly {
   readonly text: string;
   readonly group: WordGroup | null;
@@ -130,6 +136,79 @@ function BColumn({
   );
 }
 
+/**
+ * The statement at a glance: its words as a strip of cells in their order,
+ * the group being read lit, and any word that differs (program B's anchor,
+ * a flipped bit) edged in rose. A picture of the table under it, so it is
+ * drawn, not read aloud: the table and the readout say the same.
+ */
+function WordStrip({
+  words,
+  lit,
+  differs,
+  label,
+  groupLabel,
+}: {
+  readonly words: readonly DecodedWord[];
+  readonly lit: (word: DecodedWord) => boolean;
+  readonly differs: readonly number[];
+  readonly label: string;
+  /** The group's name under each word, as the picker names it. */
+  readonly groupLabel: (group: WordGroup) => string;
+}) {
+  return (
+    <div
+      // Five rows of five at every width. From xl each cell names its word
+      // and its group, so the grid is a picture of the statement before any
+      // click; narrower, the cells keep their numbers, the table names them.
+      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5 xl:tw-max-w-[760px]"
+      role="img"
+      aria-label={label}
+      data-word-strip=""
+    >
+      {words.map((word, at) => {
+        const on = lit(word);
+        const off = differs.includes(word.index);
+        // A word that opens a new group, in the statement's order, starts
+        // with a heavier edge: the groups read as runs along the rows.
+        const opens = at === 0 || words[at - 1]?.word.group !== word.word.group;
+        let tone = "tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400";
+        if (on)
+          tone = "tw-border-primary-400 tw-bg-primary-400/25 tw-text-iron-50";
+        if (off) tone = "tw-border-error tw-bg-error/15 tw-text-iron-50";
+        return (
+          <span
+            key={word.word.name}
+            className={`tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums xl:tw-h-auto xl:tw-min-h-[58px] xl:tw-flex-col xl:tw-items-start xl:tw-justify-center xl:tw-gap-0.5 xl:tw-px-2 xl:tw-py-1.5 xl:tw-text-left ${opens ? "xl:tw-border-l-[3px]" : ""} ${EX_MOTION.model} ${tone}`}
+            data-strip-word={word.index}
+            aria-hidden="true"
+          >
+            <span className="xl:tw-hidden">{word.index}</span>
+            <span className="tw-hidden tw-w-full tw-font-mono tw-text-xs tw-font-medium xl:tw-block">
+              <span className="tw-font-sans tw-font-semibold">
+                {word.index}
+              </span>{" "}
+              {/* A long name breaks where its words join (prevHistory|Count),
+                  never inside one. */}
+              {word.word.name.split(/(?=[A-Z])/).map((part, at) => (
+                <Fragment key={`${part}-${String(at)}`}>
+                  {at > 0 && <wbr />}
+                  {part}
+                </Fragment>
+              ))}
+            </span>
+            <span
+              className={`tw-hidden tw-w-full tw-text-xs tw-font-normal xl:tw-block ${on || off ? "tw-text-iron-200" : "tw-text-iron-400"}`}
+            >
+              {groupLabel(word.word.group)}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function StatementWords({
   locale,
 }: {
@@ -139,6 +218,8 @@ export default function StatementWords({
   const facts = pageFacts(snapshot, locale);
   const [pick, setPick] = useState<WordPick>("result");
   const [flip, setFlip] = useState(false);
+  // The table lists the lit words; every word on request.
+  const [showAll, setShowAll] = useState(false);
   const compare = !flip && pick === "b";
   const group: WordGroup = pick === "b" ? "anchor" : pick;
 
@@ -177,6 +258,8 @@ export default function StatementWords({
     block === null ? "" : formatCount(locale, block);
   const cutBlock = blockOf("cutNumber");
   const lookUp = {
+    // Word 0, the statement's kind: the hash of its class name (P53 §4.6).
+    tag: 'keccak256("6529.TStatement.v1")',
     anchor: printBlock(blockOf("anchorNumber")),
     cut: printBlock(cutBlock),
     next: printBlock(cutBlock === null ? null : cutBlock + 1),
@@ -191,6 +274,7 @@ export default function StatementWords({
         name: <code className="tw-font-mono">{flippedName}</code>,
         bytes: facts.print("proofs.statement.bytes"),
         words,
+        firstProofs: facts.print("proofs.milestones.firstProofs", "long"),
       })}
     />
   ) : compare ? (
@@ -216,22 +300,44 @@ export default function StatementWords({
       locale={locale}
       stage={
         <div>
-          <Seg<WordPick>
-            label={fill(locale, k("words.groups"))}
-            attr="group"
-            value={flip ? null : pick}
-            onChange={(next) => {
-              setFlip(false);
-              setPick(next);
-            }}
-            options={[
-              ...WORD_GROUPS.map((value) => ({
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-gap-3">
+            <Seg<WordPick>
+              label={fill(locale, k("words.groups"))}
+              attr="group"
+              value={flip ? null : pick}
+              onChange={(next) => {
+                setFlip(false);
+                setPick(next);
+              }}
+              options={WORD_GROUPS.map((value) => ({
                 value,
                 label: fill(locale, k(`words.group.${value}`)),
-              })),
-              { value: "b" as const, label: fill(locale, k("words.group.b")) },
-            ]}
-          />
+              }))}
+            />
+            {/* Program B's run beside A's is a view of its own, not a sixth
+              group: a toggle of its own, so the six groups keep one row. */}
+            <button
+              type="button"
+              aria-pressed={compare}
+              data-group="b"
+              onClick={() => {
+                setFlip(false);
+                setPick(compare ? "result" : "b");
+              }}
+              className={`tw-inline-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-semibold tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 ${compare ? "tw-border-iron-50 tw-bg-iron-50 tw-text-iron-950" : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            >
+              {fill(locale, k("words.group.b"))}
+            </button>
+          </div>
+          {decoded.a && (
+            <WordStrip
+              words={decoded.a}
+              lit={lit}
+              differs={compare ? differs : flip ? [FLIPPED_WORD] : []}
+              label={fill(locale, k("words.stripLabel"), { words })}
+              groupLabel={(value) => fill(locale, k(`words.group.${value}`))}
+            />
+          )}
           {decoded.a ? (
             <table
               className="tw-mt-5 tw-w-full tw-border-collapse max-lg:tw-block"
@@ -274,7 +380,7 @@ export default function StatementWords({
                   return (
                     <tr
                       key={word.word.name}
-                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on ? "" : "max-lg:tw-hidden"}`}
+                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-py-0 ${on || showAll ? "lg:tw-table-row" : "tw-hidden"}`}
                       data-word={word.index}
                       data-lit={on ? "1" : "0"}
                     >
@@ -339,12 +445,24 @@ export default function StatementWords({
           ) : null}
           {decoded.a ? (
             <p
-              className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 lg:tw-hidden"
+              className="tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400"
               data-words-more=""
             >
-              {fill(locale, k(compare ? "words.moreSame" : "words.more"), {
-                count: formatCount(locale, STATEMENT_WORDS.length - litCount),
-              })}
+              {!showAll &&
+                fill(locale, k(compare ? "words.moreSame" : "words.more"), {
+                  count: formatCount(locale, STATEMENT_WORDS.length - litCount),
+                })}
+              <button
+                type="button"
+                aria-pressed={showAll}
+                onClick={() => setShowAll((value) => !value)}
+                className={`tw-inline-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+                data-words-all=""
+              >
+                {showAll
+                  ? fill(locale, k("words.showLit"))
+                  : fill(locale, k("words.showAll"), { words })}
+              </button>
             </p>
           ) : (
             <p className="tw-m-0 tw-mt-5 tw-text-iron-400">
@@ -380,7 +498,14 @@ export default function StatementWords({
         <StampLine
           locale={locale}
           marks={[
-            { kind: "proved", refText: fill(locale, k("words.colA")) },
+            // Proof A's words are of a day under retired rules: the stamp
+            // says so, so the model alone does not read as today's evidence.
+            {
+              kind: "proved",
+              refText: fill(locale, k("words.stampA"), {
+                version: ruleVersionText(facts.raw("proofs.day.ruleVersion")),
+              }),
+            },
             { kind: "tested", refText: fill(locale, k("words.colB")) },
           ]}
           // The flipped bit is made up for the model: Simulated, as the

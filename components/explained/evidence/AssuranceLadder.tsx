@@ -36,10 +36,17 @@ export function HalfPair({
   b,
   locale,
   test = false,
+  word: showWord = true,
 }: {
   readonly a: boolean;
   readonly b: boolean;
   readonly locale: SupportedLocale;
+  /**
+   * The mark's word beside its capsules. Off where a title beside it says
+   * the same ("Proof B, program B in RISC Zero"); the capsules keep their
+   * names for screen readers.
+   */
+  readonly word?: boolean;
   /**
    * Proofs of a synthetic test cycle, not of a real day: the capsules are
    * outlined in green, not filled, and the word says so, so a skim never
@@ -89,9 +96,12 @@ export function HalfPair({
     >
       {capsule("A", a)}
       {capsule("B", b)}
-      <span className="tw-ml-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
-        {word}
-      </span>
+      {/* The mark's word is one unit: it never breaks a word a line. */}
+      {showWord && (
+        <span className="tw-ml-1.5 tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-text-iron-50">
+          {word}
+        </span>
+      )}
     </span>
   );
 }
@@ -197,7 +207,7 @@ function Track1({
               >
                 {rung.what}
                 {rung.detail !== undefined && (
-                  <span className="tw-mt-[3px] tw-block tw-text-[15px] tw-font-normal tw-leading-[23px] tw-text-iron-400">
+                  <span className="tw-mt-[3px] tw-block tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-300">
                     {rung.detail}
                   </span>
                 )}
@@ -222,6 +232,8 @@ export default function AssuranceLadder({
     readonly title?: string;
     readonly rungs: readonly Rung[];
     readonly todayAfter: number;
+    /** Side by side, its share of the width (1 by default): the ladder with the longer rungs takes more, so the two end near one line. */
+    readonly weight?: number;
   }[];
   readonly locale: SupportedLocale;
 }) {
@@ -230,8 +242,17 @@ export default function AssuranceLadder({
     <div
       className={
         compact
-          ? "tw-grid tw-grid-cols-1 tw-gap-10 lg:tw-grid-cols-2 lg:tw-gap-6"
+          ? "tw-grid tw-grid-cols-1 tw-gap-10 lg:tw-gap-6 lg:[grid-template-columns:var(--ex-ladders)]"
           : ""
+      }
+      style={
+        compact
+          ? {
+              ["--ex-ladders" as string]: tracks
+                .map((track) => `minmax(0,${track.weight ?? 1}fr)`)
+                .join(" "),
+            }
+          : undefined
       }
     >
       {tracks.map((track) => (

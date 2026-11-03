@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import FactValue from "@/components/explained/facts/FactValue";
+import { EX_LINK } from "@/components/explained/tokens";
 import { formatUtcDay } from "@/lib/explained/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import {
@@ -35,7 +36,12 @@ export interface PageFacts {
   readonly raw: (id: FactId) => FactValueType | null;
   /** The UTC day a cycle fact's number stands for (cycle N starts N days after 1970-01-01). */
   readonly cycleDate: (id: FactId) => ReactNode;
+  /** A mainnet block number, printed and linked to the block on an explorer. */
+  readonly block: (id: FactId) => ReactNode;
 }
+
+/** Where a mainnet block or address can be looked up by anyone. */
+export const EXPLORER = "https://etherscan.io";
 
 const DAY_MS = 86_400_000;
 
@@ -64,6 +70,21 @@ export function pageFacts(
         <span data-fact={id}>
           {formatUtcDay(locale, new Date(cycle * DAY_MS).toISOString())}
         </span>
+      ) : (
+        <FactValue fact={entry(id)} locale={locale} />
+      );
+    },
+    block: (id) => {
+      const value = raw(id);
+      return typeof value === "number" ? (
+        <a
+          className={EX_LINK}
+          href={`${EXPLORER}/block/${value}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <FactValue fact={entry(id)} locale={locale} />
+        </a>
       ) : (
         <FactValue fact={entry(id)} locale={locale} />
       );

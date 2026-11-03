@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Hash from "@/components/explained/marks/Hash";
 import { formatInteger, formatList } from "@/i18n/format";
-import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import {
   CodeBlock,
   CodeName,
@@ -14,22 +14,23 @@ import { FactText } from "@/components/explained/facts/FactText";
 import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import {
   ARITHMETIC,
+  BASE_LINE,
+  boost,
+  clusters,
+  conventions,
+  cutoff,
   DAILY_RATE,
+  editions,
   NETTING,
   ORDER,
   PAIR_STATE,
   RANGE,
+  rates,
   REPLAY,
   TOKEN_VALUES,
   TOPICS,
   UNDERFLOW,
   VALUES,
-  boost,
-  clusters,
-  conventions,
-  cutoff,
-  editions,
-  rates,
 } from "./specCode";
 import type { SpecContext } from "./specShared";
 import { ENGINE } from "@/lib/explained/engine";
@@ -55,7 +56,13 @@ function Sub({
   return (
     <div id={id} className="tw-mt-10 tw-scroll-mt-24 first:tw-mt-0">
       <h3 className={`${EX_TEXT.h3} tw-mb-2.5`}>
-        <span className="tw-mr-2 tw-text-iron-400">{`§${no}`}</span>
+        {/* The number links to its own section, for citation; a space
+            keeps it a word apart from the title when read or copied. */}
+        <a
+          className={`tw-mr-1 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 hover:tw-underline ${EX_FOCUS}`}
+          href={`#${id}`}
+        >{`§${no}`}</a>
+        {"\u00a0"}
         {title}
       </h3>
       {children}
@@ -104,9 +111,24 @@ function Section1({ ctx }: { readonly ctx: SpecContext }) {
       label={m("explained.tdh.spec.s1.label")}
       title={m("explained.tdh.spec.s1.heading")}
     >
-      <Prose>{m("explained.tdh.spec.s1.body")}</Prose>
+      {/* The two terms the page leans on, set as defined terms. */}
+      <Prose>
+        {m("explained.tdh.spec.s1.body", {
+          noResult: (
+            <b className="tw-font-semibold tw-text-iron-50">
+              {s("explained.tdh.spec.s1.noResult")}
+            </b>
+          ),
+          refusedWhole: (
+            <b className="tw-font-semibold tw-text-iron-50">
+              {s("explained.tdh.spec.s1.refusedWhole")}
+            </b>
+          ),
+        })}
+      </Prose>
       {registry && (
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-5"
           code={conventions(registry)}
           label={s("explained.tdh.spec.s1.code")}
@@ -214,6 +236,7 @@ function Section2({ ctx }: { readonly ctx: SpecContext }) {
       </div>
       <More summary={m("explained.tdh.spec.s2.topics")}>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           code={TOPICS}
           label={s("explained.tdh.spec.s2.topicsCode")}
         />
@@ -236,10 +259,27 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
       </Sub>
       <Sub id="s3-2" no="3.2" title={m("explained.tdh.spec.s3-2.title")}>
         <Prose>{m("explained.tdh.spec.s3-2.body")}</Prose>
+        {/* P26 states the value types and the documents that are no input
+            inside §3.2; this block keeps that number rather than inventing
+            a §3.5 that P26 does not have. */}
+        <h4
+          id="s3-2-values"
+          className={`${EX_TEXT.h3} tw-mb-2.5 tw-mt-8 tw-scroll-mt-24`}
+        >
+          {m("explained.tdh.spec.s3-5.title")}
+        </h4>
+        <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>
+        <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
+          className="tw-mt-4"
+          code={VALUES}
+          label={s("explained.tdh.spec.s3-5.code")}
+        />
       </Sub>
       <Sub id="s3-3" no="3.3" title={m("explained.tdh.spec.s3-3.title")}>
         <Prose>{m("explained.tdh.spec.s3-3.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={ORDER}
           label={s("explained.tdh.spec.s3-3.code")}
@@ -251,14 +291,6 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
             dead: <CodeName>0x…dead</CodeName>,
           })}
         </Prose>
-      </Sub>
-      <Sub id="s3-5" no="3.5" title={m("explained.tdh.spec.s3-5.title")}>
-        <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>
-        <CodeBlock
-          className="tw-mt-4"
-          code={VALUES}
-          label={s("explained.tdh.spec.s3-5.code")}
-        />
       </Sub>
     </EdSection>
   );
@@ -278,6 +310,7 @@ function Section4({ ctx }: { readonly ctx: SpecContext }) {
       <span id="s4-2" className="tw-scroll-mt-24" />
       {registry && (
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={cutoff(registry)}
           label={s("explained.tdh.spec.s4.code")}
@@ -308,6 +341,7 @@ function Section5({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s5-2" no="5.2" title={m("explained.tdh.spec.s5-2.title")}>
         {registry && (
           <CodeBlock
+            hint={s("explained.tdh.spec.scrollHint")}
             code={editions(registry)}
             label={s("explained.tdh.spec.s5-2.code")}
           />
@@ -336,6 +370,7 @@ function Section5({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s5-3" no="5.3" title={m("explained.tdh.spec.s5-3.title")}>
         {registry && (
           <CodeBlock
+            hint={s("explained.tdh.spec.scrollHint")}
             code={rates(registry)}
             label={s("explained.tdh.spec.s5-3.code")}
           />
@@ -371,6 +406,7 @@ function Section6({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s6-2" no="6.2" title={m("explained.tdh.spec.s6-2.title")}>
         <Prose>{m("explained.tdh.spec.s6-2.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={PAIR_STATE}
           label={s("explained.tdh.spec.s6-2.code")}
@@ -386,13 +422,14 @@ function Section6({ ctx }: { readonly ctx: SpecContext }) {
         </Prose>
         {registry && (
           <CodeBlock
+            hint={s("explained.tdh.spec.scrollHint")}
             className="tw-mt-4"
             code={clusters(registry)}
             label={s("explained.tdh.spec.s6-3.code")}
           />
         )}
       </Sub>
-      <Sub id="s6-4" no="6.4" title={m("explained.tdh.spec.s6-4.title")}>
+      <Sub id="s6-4" no="6.4–§6.5" title={m("explained.tdh.spec.s6-4.title")}>
         <span id="s6-5" className="tw-scroll-mt-24" />
         <Prose>{m("explained.tdh.spec.s6-4.body")}</Prose>
       </Sub>
@@ -412,18 +449,21 @@ function Section7({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s7-1" no="7.1" title={m("explained.tdh.spec.s7-1.title")}>
         <Prose>{m("explained.tdh.spec.s7-1.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={UNDERFLOW}
           label={s("explained.tdh.spec.s7-1.underflow")}
           showLabel
         />
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-3"
           code={NETTING}
           label={s("explained.tdh.spec.s7-1.netting")}
           showLabel
         />
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-3"
           code={REPLAY}
           label={s("explained.tdh.spec.s7-1.replay")}
@@ -437,6 +477,7 @@ function Section7({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s7-2" no="7.2" title={m("explained.tdh.spec.s7-2.title")}>
         <Prose>{m("explained.tdh.spec.s7-2.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={TOKEN_VALUES}
           label={s("explained.tdh.spec.s7-2.title")}
@@ -496,8 +537,18 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       label={m("explained.tdh.spec.s8.label")}
       title={m("explained.tdh.spec.s8.title")}
     >
+      <Prose className="tw-mb-6">
+        {m("explained.tdh.spec.s8.worked", {
+          link: (
+            <a className={EX_LINK} href="/network/tdh/how-it-works#steps">
+              {m("explained.tdh.spec.s8.workedLink")}
+            </a>
+          ),
+        })}
+      </Prose>
       <Sub id="s8-1" no="8.1" title={m("explained.tdh.spec.s8-1.title")}>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           code={ARITHMETIC}
           label={s("explained.tdh.spec.s8-1.code")}
         />
@@ -535,17 +586,25 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       </Sub>
       <Sub id="s8-2" no="8.2" title={m("explained.tdh.spec.s8-2.title")}>
         <Prose>{m("explained.tdh.spec.s8-2.body")}</Prose>
+        <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
+          className="tw-mt-4"
+          code={BASE_LINE}
+          label={s("explained.tdh.spec.s8-2.code")}
+        />
       </Sub>
       <Sub id="s8-3" no="8.3" title={m("explained.tdh.spec.s8-3.title")}>
         <Prose>{m("explained.tdh.spec.s8-3.body")}</Prose>
         {registry && (
           <CodeBlock
+            hint={s("explained.tdh.spec.scrollHint")}
             className="tw-mt-4"
             code={boost(registry)}
             label={s("explained.tdh.spec.s8-3.code")}
           />
         )}
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-3"
           code={addCheckpoints(locale)}
           label={s("explained.tdh.spec.s8-3.checkpoints")}
@@ -578,6 +637,7 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s8-6" no="8.6" title={m("explained.tdh.spec.s8-6.title")}>
         <Prose>{m("explained.tdh.spec.s8-6.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={DAILY_RATE}
           label={s("explained.tdh.spec.s8-6.title")}
@@ -586,6 +646,7 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       <Sub id="s8-7" no="8.7" title={m("explained.tdh.spec.s8-7.title")}>
         <Prose>{m("explained.tdh.spec.s8-7.body")}</Prose>
         <CodeBlock
+          hint={s("explained.tdh.spec.scrollHint")}
           className="tw-mt-4"
           code={RANGE}
           label={s("explained.tdh.spec.s8-7.title")}

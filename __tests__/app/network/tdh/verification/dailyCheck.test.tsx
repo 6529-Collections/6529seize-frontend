@@ -154,10 +154,14 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
     ]);
     expect(ribbon.querySelectorAll('[data-day="equal"]')).toHaveLength(5);
     expect(ribbon.querySelector('[data-day="open"]')).not.toBeNull();
-    // The caption says which files were rewritten, and when, from the facts.
+    // The caption counts the results written late or re-run; a list under
+    // it says which, and when, from the facts.
     expect(container.querySelector("#history")).toHaveTextContent(
-      "↻ marks a file rewritten after its run: Oct 14, Oct 15, and Oct 16 on Oct 16 at 15:59 UTC."
+      "↻ marks a result written later than its day's usual run, 3 so far"
     );
+    const late = container.querySelector("[data-late-list]");
+    expect(late).toHaveTextContent("Oct 14, Oct 15, and Oct 16");
+    expect(late).toHaveTextContent("Oct 16, 15:59 UTC");
   });
 
   it("draws a day the index skips as a day with no file, and opens every day below", async () => {
@@ -194,7 +198,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       identitiesEqual: 10,
       identitiesTotal: 10,
       writtenAt: null,
-      rewritten: false,
+      late: false,
     })).filter((day) => day.cycle !== 20735);
     const input = {
       days,
@@ -236,7 +240,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector("#diff")).toHaveTextContent(
-      "was planned for about Oct 23 and, as of Nov 1, has not been made. Once it is, nothing re-reads the logs"
+      "Once 6529.io moves to the Rust core's result (planned for about Oct 23, not made as of Nov 3), nothing re-reads the logs"
     );
     const trail = screen.getByRole("list", {
       name: "Who can repeat each step",

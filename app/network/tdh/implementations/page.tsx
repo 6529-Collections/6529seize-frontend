@@ -8,7 +8,6 @@ import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
 import Mark from "@/components/explained/marks/Mark";
-import { Glyph } from "@/components/explained/marks/glyphs";
 import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
@@ -22,7 +21,6 @@ import ImplAnchors from "./ImplAnchors";
 import RunVectors from "./RunVectors";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
-  Caption,
   CodeBlock,
   CodeName,
   Contents,
@@ -135,14 +133,15 @@ export default async function ImplementationsPage({
   const code = (name: string) => <CodeName wrap>{name}</CodeName>;
   // Every row of the "Proved as" column leads with a mark, so the column
   // scans: the half pair, Proved, or a dotted ring for none.
+  // One mark grammar down the column: the kit's Not proved mark, as the
+  // half pair and Not yet beside it, never a dot drawn by hand.
   const notProved = (
-    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-400">
-      <span
-        className="tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
-        aria-hidden="true"
-      />
-      {s("explained.tdh.impl.notProved")}
-    </span>
+    <Mark
+      kind="notProved"
+      locale={locale}
+      size="sm"
+      label={s("explained.tdh.impl.notProved")}
+    />
   );
   const program = (name: ImplKey, sub?: ImplKey) => (
     <>
@@ -183,8 +182,9 @@ export default async function ImplementationsPage({
           title={m("explained.tdh.impl.title")}
           lede={m("explained.tdh.impl.lede")}
         >
-          <div className="tw-mt-8 tw-max-w-[760px]">
+          <div className="tw-mt-8">
             <Contents
+              across
               label={s("explained.tdh.impl.toc.label")}
               items={[
                 {
@@ -219,26 +219,35 @@ export default async function ImplementationsPage({
           title={m("explained.tdh.impl.cast.title")}
         >
           <Prose>{m("explained.tdh.impl.cast.body")}</Prose>
-          <div className="tw-mt-6">
+        </EdSection>
+        {/* The table runs the full column, as a wide table does on every
+            reference page, so its long cells wrap less. */}
+        <div className="tw-mt-6">
+          <div>
             <StackTable
               from="lg"
+              size="small"
               caption={s("explained.tdh.impl.cast.caption")}
               columns={[
                 {
                   key: "program",
                   label: s("explained.tdh.impl.col.program"),
-                  width: "lg:tw-w-[170px]",
+                  width: "lg:tw-w-[19%]",
                 },
                 {
                   key: "written",
                   label: s("explained.tdh.impl.col.written"),
-                  width: "lg:tw-w-[230px]",
+                  width: "lg:tw-w-[31%]",
                 },
-                { key: "runs", label: s("explained.tdh.impl.col.runs") },
+                {
+                  key: "runs",
+                  label: s("explained.tdh.impl.col.runs"),
+                  width: "lg:tw-w-[27%]",
+                },
                 {
                   key: "proved",
                   label: s("explained.tdh.impl.col.proved"),
-                  width: "lg:tw-w-[170px]",
+                  width: "lg:tw-w-[23%]",
                 },
               ]}
               rows={[
@@ -259,7 +268,7 @@ export default async function ImplementationsPage({
                     proved: programsFact ? (
                       // One of the day's two proofs: the half-pair mark, as
                       // on the overview and the proofs page.
-                      <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                      <span className="tw-inline-flex tw-flex-wrap tw-items-start tw-gap-x-2 tw-gap-y-1">
                         <HalfPair a b={false} locale={locale} />
                         <span className={EX_TEXT.cap}>
                           {m("explained.tdh.impl.a.proofRef", {
@@ -323,18 +332,21 @@ export default async function ImplementationsPage({
                     runs: m("explained.tdh.impl.lean.runs", {
                       random: p.v("programs.randomPerChange"),
                     }),
+                    // The kit's Proved mark, at the size of the column's
+                    // other marks, its counts the manifest's facts.
                     proved: (
-                      <span className="tw-inline-flex tw-items-baseline tw-gap-1.5">
-                        <Glyph
+                      <span data-fact="manifest.proved manifest.proved.tdh">
+                        {/* A model is proved about, not proved correct as a
+                            program: the mark's word says so. */}
+                        <Mark
                           kind="proved"
-                          className="tw-size-3 tw-self-center"
-                        />
-                        <span>
-                          {m("explained.tdh.impl.lean.proved", {
-                            tdh: p.v("manifest.proved.tdh"),
-                            all: p.v("manifest.proved"),
+                          locale={locale}
+                          size="sm"
+                          refText={s("explained.tdh.impl.lean.proved", {
+                            tdh: p.f("manifest.proved.tdh"),
+                            all: p.f("manifest.proved"),
                           })}
-                        </span>
+                        />
                       </span>
                     ),
                   },
@@ -351,18 +363,32 @@ export default async function ImplementationsPage({
               ]}
             />
           </div>
-          <Caption className="tw-mt-3">
-            {m("explained.tdh.impl.cast.note", {
-              time: p.v("programs.rustReference.time"),
-              day: p.v("model.replayDay"),
-              runtime: p.v("tdh.latest.builds.rust.runtime"),
-            })}{" "}
-            {m("explained.tdh.impl.lean.runsNote", {
-              day: p.v("model.replayDay"),
-              all: p.v("model.randomInputs"),
-            })}
-          </Caption>
-        </EdSection>
+          {/* Two short notes, each with its lead, in place of one grey
+              block: the run times, then where these facts come from. */}
+          <div className="tw-mt-5 tw-grid tw-max-w-[560px] tw-gap-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.impl.cast.noteTimesLead")}
+              </b>{" "}
+              {m("explained.tdh.impl.cast.noteTimes", {
+                time: p.v("programs.rustReference.time"),
+                day: p.v("model.replayDay"),
+                runtime: p.v("tdh.latest.builds.rust.runtime"),
+                native: p.v("proofs.day.nativeSeconds"),
+              })}
+            </p>
+            <p className="tw-m-0">
+              <b className="tw-font-semibold tw-text-iron-50">
+                {m("explained.tdh.impl.cast.noteSourceLead")}
+              </b>{" "}
+              {m("explained.tdh.impl.cast.noteSource")}{" "}
+              {m("explained.tdh.impl.lean.runsNote", {
+                day: p.v("model.replayDay"),
+                all: p.v("model.randomInputs"),
+              })}
+            </p>
+          </div>
+        </div>
 
         <EdSection
           id="vectors"
@@ -378,6 +404,8 @@ export default async function ImplementationsPage({
               date: p.v("rules.p26Date"),
               served: servedLine,
               public: p.v("vectors.public.count"),
+              hand: p.v("vectors.handDerived"),
+              noVector: p.v("vectors.noVector"),
             })}
           </Prose>
           <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2">

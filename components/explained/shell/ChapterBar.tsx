@@ -26,7 +26,7 @@ function BarLink({
 }) {
   const on = page.id === active;
   const title = kt(locale, page.title);
-  const base = `tw-relative tw-inline-flex tw-h-[50px] tw-flex-none tw-items-center tw-gap-[7px] tw-whitespace-nowrap tw-px-[9px] tw-text-sm tw-no-underline md:tw-h-14 md:tw-px-[11px] md:tw-text-[15px] ${phoneOnly ? "md:tw-hidden" : ""}`;
+  const base = `tw-relative tw-inline-flex tw-h-[50px] tw-flex-none tw-snap-start tw-items-center tw-gap-[7px] tw-whitespace-nowrap tw-px-[9px] tw-text-sm tw-no-underline md:tw-h-14 md:tw-px-[11px] md:tw-text-[15px] ${phoneOnly ? "md:tw-hidden" : ""}`;
   const number = page.n ? (
     <span
       className={`tw-text-xs tw-font-semibold ${on ? "tw-text-primary-300" : "tw-text-iron-400"}`}
@@ -99,7 +99,9 @@ export default function ChapterBar({
       className="tw-relative tw-flex tw-items-center tw-pl-3 md:tw-h-14 md:tw-px-12"
     >
       <div
-        className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-0.5 tw-overflow-x-auto tw-pr-10 tw-scrollbar-none [mask-image:linear-gradient(90deg,#000_calc(100%-40px),transparent)]"
+        // Snaps to a page's start, and fades at both edges once scrolled,
+        // so a clipped page reads as more to scroll, never as a fragment.
+        className="tw-flex tw-min-w-0 tw-flex-1 tw-snap-x tw-snap-proximity tw-scroll-pl-3 tw-items-center tw-gap-0.5 tw-overflow-x-auto tw-pr-10 tw-scrollbar-none [mask-image:linear-gradient(90deg,#000_calc(100%-40px),transparent)] data-[scrolled=1]:[mask-image:linear-gradient(90deg,transparent,#000_28px,#000_calc(100%-40px),transparent)]"
         data-chapter-scroll=""
         // The layout gate's shared scroll frame: it scrolls sideways with an edge fade.
         data-tdh-scroll=""

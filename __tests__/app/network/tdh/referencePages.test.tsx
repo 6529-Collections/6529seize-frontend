@@ -129,7 +129,7 @@ describe("How sure", () => {
     expect(
       container.querySelector('[data-drift-by="D144 D148 D150"]')
     ).toHaveTextContent(
-      "D148 exempts the network’s two accounts from the 19.99% cap, and D150 makes them two parties"
+      "D148 exempts the network’s two accounts from the 19.99% cap, and D150 counts them as two parties"
     );
     const board = container.querySelector("[data-scoreboard]");
     expect(
@@ -138,7 +138,7 @@ describe("How sure", () => {
       )
     ).toEqual(["9", "84", "11", "12"]);
     expect(board?.textContent).toMatch(
-      /84Lean theorems behind the claims below, lemmas on the way included: 56 about TDH and 28 about the validator rules/
+      /84named theorems proved, lemmas and examples included: 56 about TDH, 28 about the validator rules/
     );
     for (const id of [
       "why",
@@ -239,7 +239,9 @@ describe("the specification", () => {
     const version = screen.getByRole("complementary", { name: "This version" });
     expect(version.textContent).toMatch(/tdh-v1\.4/);
     expect(version.textContent).toMatch(/108/);
-    expect(within(version).getByText("Proposed")).toBeInTheDocument();
+    // The rules' two marks sit under "Get these exactly", beside the panel.
+    expect(within(version).queryByText("Proposed")).toBeNull();
+    expect(screen.getAllByText("Proposed").length).toBeGreaterThan(0);
     const drift = container.querySelector('[data-drift-by="D136 D137"]');
     // The fixture's files still report the old name.
     expect(drift?.textContent).toMatch(/still report it until its builds move/);
@@ -256,7 +258,7 @@ describe("the specification", () => {
       /Settled by D136/
     );
     expect(container.textContent).toMatch(
-      /21 deviations from 6529\.io's old code/
+      /21 deviations from the code 6529\.io runs/
     );
     expect(container.textContent).toMatch(/adj\[i\] {5}= -2,588 if i = 8/);
     expect(container.textContent).toMatch(/consolidation_max_wallets \(4\)/);
@@ -403,7 +405,13 @@ describe("versions and boosts", () => {
     }
     const current = container.querySelector("#tdh-1-4")?.textContent ?? "";
     expect(current).toMatch(/Oct 10, 2025 to today/);
-    expect(current).toMatch(/1\.80 today, 2\.00 at most/);
+    expect(current).toMatch(
+      /1\.80 today, 2\.00 at most from seasons alone; with extra sets and Gradients, about 2\.04 today and 2\.24 at most/
+    );
+    // The current row carries its live mark; the rename is told under In
+    // the specification, not in a table about boosts.
+    expect(current).toMatch(/Live/);
+    expect(current).not.toMatch(/renamed/);
     expect(current).toMatch(/Up to 20; 16 pay today/);
     expect(container.querySelector("#tdh-1-3")?.textContent).toMatch(
       /Mar 29, 2024 to Oct 9, 2025.*1\.55.*Up to 11/

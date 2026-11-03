@@ -58,7 +58,7 @@ export default function RawBytes({
       </summary>
       {open && (
         <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-[18px] tw-pb-4 tw-pt-3">
-          <p className="tw-m-0 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+          <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-400">
             {rich(locale, k("raw.cap"), {
               date: facts.print("proofs.day.date"),
             })}

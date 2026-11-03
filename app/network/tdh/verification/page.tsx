@@ -74,7 +74,12 @@ function Header({
       >
         {pt(locale, "explained.tdh.check.title")}
       </h1>
-      <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
+      {/* On a phone the lede follows the verdict, so the verdict and its
+          limit share the first screen (TDH-DESIGN.md §4.4). */}
+      <p
+        className={`${EX_TEXT.lede} tw-mt-4 max-md:tw-hidden md:tw-mt-[22px]`}
+        data-ex-lede=""
+      >
         {pt(locale, "explained.tdh.check.lede")}
       </p>
       <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-5 md:tw-mt-6`}>

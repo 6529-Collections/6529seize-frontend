@@ -73,7 +73,7 @@ export default function LiveStrip({
       aria-label={kt(locale, "explained.kit.liveStrip.today")}
       data-livestrip=""
     >
-      <div className="tw-text-base tw-leading-[25px] tw-text-iron-300">
+      <div className="tw-text-base tw-leading-[26px] tw-text-iron-300">
         <span className="tw-mb-2 tw-flex tw-items-center tw-gap-2.5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300">
           <Pulse />
           {kt(locale, "explained.kit.liveStrip.today")}

@@ -86,13 +86,15 @@ export default function FirstDayLens({
         : null,
     [arrived, day]
   );
+  // The model opens on the facts layer's example arrival, answered, as
+  // every model opens on a meaningful case (SCORECARD.md); Guess first
+  // stays above it as an optional prompt about the minute before midnight,
+  // and a guess moves the stage to that case.
   const model = useBreakable<{ arrival: ArrivalKey; sold: boolean }>(
     { arrival: "example", sold: false },
     (state) => ({ ...state, sold: true })
   );
-  // Guess first: the answer stays hidden until the reader guesses or moves
-  // the model, and a guess moves the model to the case it asked about.
-  const [shown, setShown] = useState(false);
+  const [shown, setShown] = useState(true);
   if (!world) {
     return null;
   }
@@ -148,7 +150,7 @@ export default function FirstDayLens({
             <Seg
               label={ht(locale, "explained.tdh.how.firstday.arrivesGroup")}
               attr="at"
-              value={model.state.arrival}
+              value={shown ? model.state.arrival : null}
               onChange={(key) => {
                 const picked = options.find((o) => o.key === key);
                 if (picked) {
@@ -167,6 +169,7 @@ export default function FirstDayLens({
           </div>
           <FirstDayTimeline
             result={result}
+            reveal={shown}
             locale={locale}
             label={ht(locale, "explained.tdh.how.firstday.aria", {
               say: said.lead ? `${said.lead} ${said.rest}` : said.rest,
@@ -213,7 +216,13 @@ export default function FirstDayLens({
             !shown
               ? "?"
               : result.first === null
-                ? ht(locale, "explained.tdh.how.firstday.none")
+                ? // Sold before a whole day, no result ever counts it.
+                  ht(
+                    locale,
+                    model.broken
+                      ? "explained.tdh.how.firstday.never"
+                      : "explained.tdh.how.firstday.none"
+                  )
                 : utcDay(locale, result.first)
           }
           say={

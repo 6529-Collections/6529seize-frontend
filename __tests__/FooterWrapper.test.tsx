@@ -14,7 +14,9 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 jest.mock("next/navigation", () => ({ usePathname: jest.fn() }));
 jest.mock("@/components/footer/Footer", () => ({
   __esModule: true,
-  default: () => <div data-testid="footer" />,
+  default: ({ lightLinks }: { readonly lightLinks?: boolean }) => (
+    <div data-testid="footer" data-light={lightLinks ? "yes" : "no"} />
+  ),
 }));
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
@@ -44,5 +46,19 @@ describe("FooterWrapper", () => {
     usePathnameMock.mockReturnValue("/other");
     render(<FooterWrapper />);
     expect(screen.getByTestId("footer")).toBeInTheDocument();
+    expect(screen.getByTestId("footer")).toHaveAttribute("data-light", "no");
+  });
+
+  it("lightens the footer's links on 6529 Explained pages only", () => {
+    for (const [path, light] of [
+      ["/explained", "yes"],
+      ["/network/tdh/proofs", "yes"],
+      ["/network/tdhx", "no"],
+    ] as const) {
+      usePathnameMock.mockReturnValue(path);
+      const { unmount } = render(<FooterWrapper />);
+      expect(screen.getByTestId("footer")).toHaveAttribute("data-light", light);
+      unmount();
+    }
   });
 });

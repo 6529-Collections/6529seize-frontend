@@ -12,7 +12,7 @@ import { hrich, ht } from "./copy";
  * replaces the descriptive line by changing `explained.hub.mission`.
  */
 const HUB_LEDE =
-  "tw-m-0 tw-mt-4 tw-max-w-[660px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px] lg:tw-mt-0 lg:tw-pb-1.5 lg:tw-text-[20px] lg:tw-leading-[31px]";
+  "tw-m-0 tw-mt-4 tw-max-w-[660px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px] xl:tw-mt-0 xl:tw-pb-1.5 xl:tw-text-[19px] xl:tw-leading-[29px]";
 
 /**
  * On a wide screen the title and the descriptive line sit side by side, so
@@ -32,9 +32,13 @@ export function HubOpener({
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_400px] lg:tw-items-end lg:tw-gap-14">
+      {/* From xl the line sits beside the title, its last line on the
+          title's baseline, so the whole loop fits the first screen at
+          1440 × 900; under it on narrower windows. */}
+      <div className="xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_400px] xl:tw-items-end xl:tw-gap-x-12">
+        {/* 72/76 beside the line keeps the title to two lines in its column. */}
         <h1
-          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] lg:tw-text-[72px] lg:tw-leading-[76px]`}
+          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] xl:tw-text-[72px] xl:tw-leading-[76px]`}
         >
           {ht(locale, "title")}
         </h1>
@@ -63,7 +67,10 @@ export function HubSources({
   readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
-  const fact = (id: Parameters<typeof Fact>[0]["id"], style?: "long") => (
+  const fact = (
+    id: Parameters<typeof Fact>[0]["id"],
+    style?: "long" | "dated"
+  ) => (
     <Fact book={book} id={id} locale={locale} {...(style ? { style } : {})} />
   );
   return (
@@ -84,8 +91,9 @@ export function HubSources({
         {
           title: ht(locale, "hwk.feed"),
           body: hrich(locale, "hwk.feedBody", {
-            written: fact("feed.writtenAt", "long"),
-            read: fact("feed.readAt"),
+            // One format in the block: "Nov 2, 00:49 UTC".
+            written: fact("feed.writtenAt", "dated"),
+            read: fact("feed.readAt", "dated"),
           }),
         },
         {

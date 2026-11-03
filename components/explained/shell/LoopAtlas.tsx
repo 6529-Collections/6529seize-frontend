@@ -5,6 +5,8 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import LoopFigure, { type LoopStation } from "../figures/LoopFigure";
 import { Seg } from "../lens/controls";
+import Tag from "../marks/Tag";
+import { EX_FOCUS } from "../tokens";
 
 /**
  * The loop on the hub (EXPLAINED.md §6.2): the figure, "Follow one copy"
@@ -12,7 +14,8 @@ import { Seg } from "../lens/controls";
  * its number and sentence. Desktop, a circle; phone, a list. With
  * `autoplay`, the copy goes round once when the loop first comes into view,
  * a second a station, unless the reader asks for reduced motion; any touch
- * of the loop stops it.
+ * of the loop stops it, and so does its Stop button, shown while it plays
+ * (WCAG 2.2.2: moving content has a way to stop it).
  */
 const AUTOPLAY_STEP_MS = 1100;
 export interface AtlasStation extends LoopStation {
@@ -24,6 +27,8 @@ export interface AtlasStation extends LoopStation {
    * twice.
    */
   readonly head?: string;
+  /** The card's headline is a constructed example, not a live record: tagged so. */
+  readonly example?: boolean;
 }
 
 export interface AtlasStep {
@@ -142,10 +147,23 @@ export default function LoopAtlas({
             <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
               {kt(locale, "explained.kit.loop.follow")}
             </span>
+            {playing && (
+              <button
+                type="button"
+                className={`tw-min-h-9 tw-cursor-pointer tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3.5 tw-text-[13px] tw-font-semibold tw-text-iron-50 hover:tw-border-iron-500 ${EX_FOCUS}`}
+                onClick={() => {
+                  touched.current = true;
+                  setPlaying(false);
+                }}
+                data-loop-stop=""
+              >
+                {kt(locale, "explained.kit.loop.stop")}
+              </button>
+            )}
             <Seg
               label={kt(locale, "explained.kit.loop.follow")}
               attr="step"
-              phone="row"
+              phone={steps.length === 6 ? "grid3" : "row"}
               value={String(step)}
               onChange={(value) => {
                 touched.current = true;
@@ -165,8 +183,11 @@ export default function LoopAtlas({
               aria-live={playing ? "off" : "polite"}
               data-station-card={station.key}
             >
-              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300">
-                {station.name}
+              <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
+                <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300">
+                  {station.name}
+                </span>
+                {station.example && <Tag kind="example" locale={locale} />}
               </span>
               <span
                 className="tw-mt-2 tw-block tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300 max-[359px]:tw-text-xl"
@@ -176,7 +197,7 @@ export default function LoopAtlas({
               >
                 {station.head ?? station.num}
               </span>
-              <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              <p className="tw-m-0 tw-mt-2 tw-text-base tw-leading-[26px] tw-text-iron-300">
                 {station.say}
               </p>
               {action !== undefined && action !== null && (

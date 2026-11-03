@@ -327,7 +327,7 @@ export function Builds({
       </h2>
       <div className={EX_LAYOUT.edWide}>
         <table
-          className="tw-hidden tw-w-full tw-border-collapse tw-text-base tw-leading-6 md:tw-table"
+          className="tw-hidden tw-w-full tw-border-collapse tw-text-base tw-leading-[26px] md:tw-table"
           aria-label={pt(locale, "explained.tdh.day.builds.caption")}
         >
           <thead>

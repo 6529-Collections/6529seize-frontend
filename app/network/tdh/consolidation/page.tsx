@@ -29,8 +29,6 @@ import {
   pageLink,
   Para,
   Section,
-  Statement,
-  StatementLabel,
   You,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
@@ -38,6 +36,7 @@ import { wt, type WalletsKey } from "./copy";
 import PairPicture from "./PairPicture";
 import SignOrder from "./SignOrder";
 import WalletsLens from "./WalletsLens";
+import { HERO_LINKS, HERO_WALLETS } from "./walletPresets";
 import {
   CONFORMANCE_SOURCE,
   RANDOM_LINK_GRAPHS,
@@ -57,24 +56,6 @@ const DESIGN_HREF = "/network/tdh/consolidation/design";
  * wallet; what to know before starting; questions. Old anchors of the
  * consolidation guide land in their sections.
  */
-/**
- * The page's subject beside its opening: four wallets, every pair linked
- * both ways, one identity; D's links fresh, made after the gate.
- */
-const HERO_WALLETS = [
-  { id: "A", x: 0.22, y: 0.24 },
-  { id: "B", x: 0.78, y: 0.24 },
-  { id: "C", x: 0.22, y: 0.76 },
-  { id: "D", x: 0.78, y: 0.76 },
-] as const;
-const HERO_LINKS = [
-  { a: "A", b: "B", kind: "old" },
-  { a: "A", b: "C", kind: "old" },
-  { a: "B", b: "C", kind: "old" },
-  { a: "A", b: "D", kind: "fresh" },
-  { a: "B", b: "D", kind: "fresh" },
-  { a: "C", b: "D", kind: "fresh" },
-] as const;
 
 export default async function TdhYourWalletsPage({
   searchParams,
@@ -110,14 +91,30 @@ export default async function TdhYourWalletsPage({
       label: wt(locale, "explained.tdh.wallets.why.moved"),
       answer: answer(
         "explained.tdh.wallets.why.movedVerdict",
-        wt(locale, "explained.tdh.wallets.why.movedBody"),
+        // Two cases, the one that loses days first: a reader who saw a big
+        // drop finds its cause, and its common cause drawn, before the
+        // harmless case.
+        <>
+          <b className={B}>
+            {wt(locale, "explained.tdh.wallets.why.movedApartLead")}
+          </b>{" "}
+          {wt(locale, "explained.tdh.wallets.why.movedApart")}
+        </>,
         <div>
           {[
+            // The colon's answer first, as the picture's legend, then the
+            // picture it describes.
+            <p key="caption" className={`tw-m-0 tw-mt-2 ${EX_TEXT.claim}`}>
+              {wt(locale, "explained.tdh.wallets.why.movedCaption")}
+            </p>,
             <div key="picture" className="tw-mt-3">
               <PairPicture locale={locale} />
             </div>,
-            <p key="caption" className={`tw-m-0 tw-mt-2 ${EX_TEXT.cap}`}>
-              {wt(locale, "explained.tdh.wallets.why.movedCaption")}
+            <p key="linked" className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+              <b className={B}>
+                {wt(locale, "explained.tdh.wallets.why.movedLinkedLead")}
+              </b>{" "}
+              {wt(locale, "explained.tdh.wallets.why.movedBody")}
             </p>,
           ]}
         </div>
@@ -198,13 +195,21 @@ export default async function TdhYourWalletsPage({
           title={wt(locale, "explained.tdh.wallets.title")}
           titleClassName="tw-max-w-[940px]"
           aside={
-            <figure className="tw-m-0" aria-hidden="true">
-              <WalletGraph
-                wallets={HERO_WALLETS}
-                links={HERO_LINKS}
-                groups={[["A", "B", "C", "D"]]}
-                locale={locale}
-              />
+            <figure className="tw-m-0">
+              <div aria-hidden="true">
+                <WalletGraph
+                  wallets={HERO_WALLETS}
+                  links={HERO_LINKS}
+                  groups={[["A", "B", "C", "D"]]}
+                  locale={locale}
+                />
+              </div>
+              {/* The two line colours, keyed where they are first drawn. */}
+              <figcaption className={`tw-mt-2 ${EX_TEXT.cap}`}>
+                {rich(locale, "explained.tdh.wallets.heroCaption", {
+                  date: day(when.day),
+                })}
+              </figcaption>
             </figure>
           }
           lede={rich(locale, "explained.tdh.wallets.lede", {
@@ -224,17 +229,32 @@ export default async function TdhYourWalletsPage({
               />
             </FactText>
           </div>
-          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2.5 md:tw-mt-[30px]">
+          {/* On a phone the three are one column of equal buttons. */}
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-2.5 sm:tw-flex sm:tw-flex-wrap md:tw-mt-[30px] max-sm:[&>*]:tw-justify-center">
             <Link className={EX_BUTTON.cta} href={GUIDED_SETUP_HREF}>
               {wt(locale, "explained.tdh.wallets.setup")}
             </Link>
             <Link className={EX_BUTTON.secondary} href="/network/tdh#explain">
               {wt(locale, "explained.tdh.wallets.explain")}
             </Link>
+            {/* The steps a collector adding a wallet comes for, one jump away. */}
+            <a className={EX_BUTTON.secondary} href="#add">
+              {wt(locale, "explained.tdh.wallets.add.label")}
+            </a>
           </div>
+          {/* The one consequence that cannot be undone, beside the button. */}
+          <p className={`tw-m-0 tw-mt-3 ${EX_TEXT.cap}`} data-setup-warn="">
+            {rich(locale, "explained.tdh.wallets.setupWarn", {
+              before: (
+                <a className={EX_LINK} href="#before">
+                  {wt(locale, "explained.tdh.wallets.before.label")}
+                </a>
+              ),
+            })}
+          </p>
         </PageHead>
 
-        <Section id="why">
+        <Section id="why" afterHero>
           <span id="consolidation-change" />
           <span id="consolidation-wallets" />
           <EdRow
@@ -266,20 +286,22 @@ export default async function TdhYourWalletsPage({
         </Section>
 
         <Section id="four">
-          <Statement
-            label={
-              <StatementLabel mark="02">
-                {wt(locale, "explained.tdh.wallets.rule.label")}
-              </StatementLabel>
-            }
-            title={wt(locale, "explained.tdh.wallets.rule.title")}
+          {/* The same header as 01 and 03: number and label in the gutter,
+              the heading beside them. */}
+          <EdRow
+            no="02"
+            label={wt(locale, "explained.tdh.wallets.rule.label")}
+            wide
           >
-            <Para>
+            <h2 className={EX_TEXT.h2}>
+              {wt(locale, "explained.tdh.wallets.rule.title")}
+            </h2>
+            <Para className="tw-mt-4">
               {rich(locale, "explained.tdh.wallets.rule.body", {
                 gate: day(when.full),
               })}
             </Para>
-          </Statement>
+          </EdRow>
           <div className="tw-mt-12">
             <WalletsLens
               locale={locale}
@@ -317,11 +339,24 @@ export default async function TdhYourWalletsPage({
                     {
                       value: "step1",
                       label: wt(locale, "explained.tdh.wallets.lens.step1", {
+                        n: "1",
                         step: "D–A",
                       }),
                     },
-                    { value: "step2", label: "D–B" },
-                    { value: "step3", label: "D–C" },
+                    {
+                      value: "step2",
+                      label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        n: "2",
+                        step: "D–B",
+                      }),
+                    },
+                    {
+                      value: "step3",
+                      label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        n: "3",
+                        step: "D–C",
+                      }),
+                    },
                     {
                       value: "batch",
                       label: wt(locale, "explained.tdh.wallets.lens.batch"),
@@ -459,7 +494,9 @@ export default async function TdhYourWalletsPage({
                   >
                     {wt(locale, title)}
                   </h3>
-                  <p className="tw-m-0 tw-mt-2 tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-text-[18px] md:tw-leading-[29px]">
+                  {/* Card bodies, answers and the FAQ all read at body
+                      size, one size for the page's text. */}
+                  <p className={`${EX_TEXT.body} tw-m-0 tw-mt-2`}>
                     {wt(locale, body)}
                   </p>
                 </div>
@@ -484,12 +521,16 @@ export default async function TdhYourWalletsPage({
                   "explained.tdh.wallets.faq.roundA",
                 ],
                 [
+                  "explained.tdh.wallets.faq.oldQ",
+                  "explained.tdh.wallets.faq.oldA",
+                ],
+                [
                   "explained.tdh.wallets.faq.laterQ",
                   "explained.tdh.wallets.faq.laterA",
                 ],
                 [
-                  "explained.tdh.wallets.faq.oldQ",
-                  "explained.tdh.wallets.faq.oldA",
+                  "explained.tdh.wallets.faq.whenQ",
+                  "explained.tdh.wallets.faq.whenA",
                 ],
                 [
                   "explained.tdh.wallets.faq.expireQ",
@@ -503,7 +544,9 @@ export default async function TdhYourWalletsPage({
             ).map(([question, answerKey], index) => (
               <details
                 key={question}
-                open={index === 0}
+                // The two commonest collector questions, the one D136
+                // raised among them.
+                open={index < 2}
                 className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-iron-900"
               >
                 <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden">
@@ -525,7 +568,9 @@ export default async function TdhYourWalletsPage({
                     –
                   </span>
                 </summary>
-                <p className="tw-m-0 tw-hidden tw-max-w-[560px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
+                <p
+                  className={`${EX_TEXT.body} tw-m-0 tw-hidden tw-max-w-[600px] tw-pb-4 group-open:tw-block`}
+                >
                   {wt(locale, answerKey)}
                 </p>
               </details>
@@ -630,9 +675,7 @@ function WhyAnswer({
       <p className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.015em] tw-text-iron-50 md:tw-text-[26px] md:tw-leading-8">
         {verdict}
       </p>
-      <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {body}
-      </p>
+      <p className={`${EX_TEXT.body} tw-m-0 tw-mt-3`}>{body}</p>
       {extra}
     </div>
   );

@@ -31,7 +31,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
     const fact = book.maybe(id);
     return fact === null ? NOT_AVAILABLE : fmt(fact, locale);
   };
-  const tdh = chapterById("tdh").number ?? "";
+  // The chapter's own stations carry its name, not its number: two
+  // stations both marked "01" read as two stations numbered one.
+  const tdh = kt(locale, chapterById("tdh").title);
   return [
     {
       key: "art",
@@ -63,12 +65,14 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       head: ht(locale, "station.timeHead", {
         copy: f("engine.machine.default"),
       }),
+      example: true,
       say: ht(locale, "station.timeSay", {
         total: f("tdh.latest.total"),
         date: f("tdh.latest.date"),
         copy: f("engine.machine.default"),
         rate: f(`meme.${HELD_CARD}.rate`),
         edition: f(`meme.${HELD_CARD}.edition`),
+        h: f("engine.H"),
       }),
     },
     {
@@ -82,8 +86,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       key: "decide",
       name: ht(locale, "station.decide"),
       sub: ht(locale, "station.decideSub"),
+      // The time and its zone stay on one line in the loop's label.
       num: ht(locale, "station.decideNum", {
-        next: f("site.mainStage.next"),
+        next: f("site.mainStage.next").replace(/ (UTC)$/, "\u00a0$1"),
       }),
       fact: "site.mainStage.next",
       say: ht(locale, "station.decideSay", {
@@ -169,7 +174,10 @@ function VerifyNote({ locale }: { readonly locale: SupportedLocale }) {
       data-verify-note=""
     >
       <span className={EX_TEXT.label}>{ht(locale, "verifyNote.label")}</span>
-      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      {/* The hub's one line to quote, set as a heading-sized line, then
+          what it leaves open. */}
+      <p className={`${EX_TEXT.h3} tw-mt-2`}>{ht(locale, "verifyNote.lead")}</p>
+      <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
         {ht(locale, "verifyNote.body")}{" "}
         <Link className={EX_LINK} href="/network/tdh/verification">
           {ht(locale, "verifyNote.link")}

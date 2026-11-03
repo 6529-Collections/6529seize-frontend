@@ -38,15 +38,24 @@ export default function ArtCard({
 }) {
   // 0: the scaled art; 1: its original; 2: neither loads, so the frame.
   const [attempt, setAttempt] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const candidates = [src, fallbackSrc];
   const art = attempt < 2 ? (candidates[attempt] ?? null) : null;
   return (
     <figure className="tw-m-0" data-artcard={art ? "art" : "frame"}>
       {art ? (
         <div
-          className={`tw-relative tw-overflow-hidden tw-rounded-md tw-bg-iron-900 ${EX_ELEVATION.art}`}
+          className={`tw-relative tw-overflow-hidden tw-rounded-md ${loaded ? "tw-bg-iron-900" : "tw-border tw-border-dashed tw-border-iron-700 tw-bg-black/30"} ${EX_ELEVATION.art}`}
           style={{ aspectRatio: ART_RATIO }}
         >
+          {/* While the art loads, the frame shows the card's number, as it
+              does when the art cannot load; the art covers it. */}
+          <span
+            className="tw-absolute tw-inset-0 tw-grid tw-place-items-center tw-text-[22px] tw-font-semibold tw-text-iron-400"
+            aria-hidden="true"
+          >
+            {number}
+          </span>
           <Image
             src={art}
             alt={alt}
@@ -54,6 +63,7 @@ export default function ArtCard({
             sizes={sizes}
             className="tw-object-cover"
             priority={priority}
+            onLoad={() => setLoaded(true)}
             onError={() =>
               setAttempt((value) => (value === 0 && fallbackSrc ? 1 : 2))
             }
@@ -75,7 +85,7 @@ export default function ArtCard({
         </div>
       )}
       {caption !== undefined && (
-        <figcaption className="tw-mt-2.5 tw-text-sm tw-leading-5 tw-text-iron-400">
+        <figcaption className="tw-mt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400">
           {caption}
         </figcaption>
       )}

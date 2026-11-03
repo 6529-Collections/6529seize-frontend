@@ -380,6 +380,8 @@ export default function RatesLens({
               kind: "absolute",
               refText: `${n(threshold)}, D89`,
             },
+            // The threshold is absolute; the formula is P26's proposal.
+            { kind: "proposed", refText: "P26 §5.2, §8.1" },
           ]}
           tag={
             model.broken || (pick === "newest" && whatIf)

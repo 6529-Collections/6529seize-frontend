@@ -122,9 +122,11 @@ export default function OverviewHero({
       </header>
       <section
         id="tdh-minute"
-        className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-[30px] tw-pt-[18px] md:tw-pt-[30px] xl:tw-grid-cols-[minmax(0,1fr)_548px] xl:tw-gap-14"
+        className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-[30px] tw-pt-[18px] md:tw-pt-[30px] xl:tw-grid-cols-[minmax(0,1fr)_548px] xl:tw-items-stretch xl:tw-gap-14"
       >
-        <div className="tw-min-w-0">
+        {/* Beside the machine, today's panel sits at the column's foot,
+            level with the machine's area and its end. */}
+        <div className="tw-min-w-0 xl:tw-flex xl:tw-flex-col">
           <p className={EX_TEXT.lede} data-ex-lede="">
             {ot(locale, "lede")}
           </p>
@@ -158,7 +160,7 @@ export default function OverviewHero({
               <Icon kind="arrow" className="tw-size-4" />
             </Link>
           </div>
-          <div className="tw-mt-7 md:tw-mt-10">
+          <div className="tw-mt-7 md:tw-mt-10 xl:tw-mt-auto xl:tw-pt-10">
             <TodayOnTheNetwork book={book} locale={locale} />
           </div>
         </div>

@@ -16,15 +16,18 @@ export function PageHead({
   lede,
   id,
   children,
+  aside,
 }: {
   readonly eyebrow: ReactNode;
   readonly title: ReactNode;
   readonly lede: ReactNode;
   readonly id?: string;
   readonly children?: ReactNode;
+  /** The page's subject at a glance, beside the opening from a desktop up. */
+  readonly aside?: ReactNode;
 }) {
-  return (
-    <header className="tw-scroll-mt-24 tw-pt-[30px] md:tw-pt-[52px]" id={id}>
+  const opening = (
+    <>
       <p className={`${EX_TEXT.label} tw-m-0 tw-mb-4`}>{eyebrow}</p>
       <h1
         className={`${EX_TEXT.h1r} tw-max-w-[900px] max-[359px]:tw-text-[23px] max-[359px]:tw-leading-[28px]`}
@@ -34,6 +37,20 @@ export function PageHead({
       <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
         {lede}
       </p>
+    </>
+  );
+  return (
+    <header className="tw-scroll-mt-24 tw-pt-[30px] md:tw-pt-[52px]" id={id}>
+      {aside === undefined ? (
+        opening
+      ) : (
+        <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-start lg:tw-gap-x-12">
+          <div className="tw-min-w-0">{opening}</div>
+          {/* The glance comes under the lede on a phone, not dropped: it is
+              where a reader first meets the limit. */}
+          <div className="tw-mt-6 tw-min-w-0 lg:tw-mt-0">{aside}</div>
+        </div>
+      )}
       {children}
     </header>
   );
@@ -76,7 +93,10 @@ export function EdSection({
       className={`tw-scroll-mt-24 ${tight ? EX_LAYOUT.sectionTight : EX_LAYOUT.section}`}
     >
       <div className={EX_LAYOUT.ed}>
-        <div className="lg:tw-pt-2.5">
+        {/* The section's number and label stay in view in the left column
+            while its section scrolls, so a long reference page always says
+            where the reader is. */}
+        <div className="lg:tw-sticky lg:tw-top-40 lg:tw-self-start lg:tw-pt-2.5">
           {no !== undefined && (
             <span className="tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300">
               {no}
@@ -132,8 +152,9 @@ export function Caption({
 
 /**
  * A code name set in mono, never in capitals: `tdh-v1.4`, `DEV-2`,
- * `totalMax`. Short names stay on one line; a long identifier (`wrap`)
- * breaks anywhere rather than overflow its column.
+ * `totalMax`, at 0.88 of the text around it rounded down to a whole
+ * pixel, so no size is fractional. Short names stay on one line; a long
+ * identifier (`wrap`) breaks anywhere rather than overflow its column.
  */
 export function CodeName({
   children,
@@ -144,7 +165,7 @@ export function CodeName({
 }) {
   return (
     <code
-      className={`tw-font-mono tw-text-[0.88em] tw-normal-case tw-tracking-normal tw-text-iron-50 ${wrap ? "[overflow-wrap:anywhere]" : "tw-whitespace-nowrap"}`}
+      className={`tw-font-mono tw-text-[length:round(down,0.88em,1px)] tw-normal-case tw-tracking-normal tw-text-iron-50 ${wrap ? "[overflow-wrap:anywhere]" : "tw-whitespace-nowrap"}`}
     >
       {children}
     </code>
@@ -227,7 +248,7 @@ export function StackTable({
   const text =
     size === "small"
       ? "tw-text-[15px] tw-leading-6"
-      : "tw-text-base tw-leading-6";
+      : "tw-text-base tw-leading-[26px]";
   return (
     <table
       className={`tw-w-full tw-border-collapse ${text}`}
@@ -328,7 +349,7 @@ export function Trap({
 }) {
   return (
     <aside
-      className={`tw-rounded-lg tw-border tw-border-l-[3px] tw-border-solid tw-border-iron-700 tw-border-l-primary-400 tw-bg-primary-400/[0.04] tw-px-5 tw-py-[18px] ${className}`.trim()}
+      className={`tw-max-w-[660px] tw-rounded-lg tw-border tw-border-l-[3px] tw-border-solid tw-border-iron-700 tw-border-l-primary-400 tw-bg-primary-400/[0.04] tw-px-5 tw-py-[18px] ${className}`.trim()}
     >
       <span className="tw-mb-1.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300">
         {label}
@@ -347,11 +368,11 @@ export function Trap({
  * wider than the frame the block scrolls sideways inside it (a focusable,
  * named region), never the page.
  *
- * On a phone, a block whose lines align columns with runs of spaces
- * (`minted[i]  = ...`) keeps scrolling, since wrapped it reads as a
- * staircase, and shows a fade at its right edge so the cut is visibly a
- * scroll. Any other block wraps, each line hanging two characters to the
- * right of its own start, so no rule is cut mid-token out of sight.
+ * On a phone every block wraps at the width it gets, each line hanging two
+ * characters to the right of its own start, so no rule is cut mid-token
+ * out of sight and none needs a sideways scroll to be read. From a tablet
+ * up, a block whose lines align columns with runs of spaces
+ * (`minted[i]  = ...`) keeps its columns and scrolls inside its frame.
  */
 const ALIGNED_COLUMNS = /\S {2,}\S/;
 
@@ -370,23 +391,20 @@ export function CodeBlock({
   readonly comment?: string;
   /** Print the label above the code, for blocks that read as steps. */
   readonly showLabel?: boolean;
+  /**
+   * Words for a block that scrolls sideways. Every block now wraps on a
+   * phone, so they are no longer shown; callers may still pass them.
+   */
+  readonly hint?: string;
 }) {
   const lines = code.split("\n");
   const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
-  // Wrapped on a wide screen, so a long rule line is never cut at the
-  // frame's edge out of sight. A column-aligned block scrolls, and so does
-  // Lean on a phone, where wrapping would split its long identifiers; a
-  // scrolling block fades at its right edge to say there is more.
-  const lean = marker === "--";
-  // A block that scrolls sideways on a phone fades at its right edge, so the
-  // cut reads as more to scroll, not as the end of the line.
-  const scrollCue =
-    "max-md:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]";
+  // Wrapped on a phone, each line hanging under its own indent. From a
+  // tablet up only a column-aligned block keeps its lines whole and
+  // scrolls inside its frame.
   const wrap = aligned
-    ? "tw-whitespace-pre"
-    : lean
-      ? "max-md:tw-whitespace-pre md:tw-whitespace-pre-wrap md:[overflow-wrap:anywhere]"
-      : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+    ? "tw-whitespace-pre-wrap [overflow-wrap:anywhere] md:tw-whitespace-pre md:[overflow-wrap:normal]"
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
   return (
     <div
       className={`tw-relative tw-min-w-0 tw-max-w-[924px] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
@@ -401,7 +419,7 @@ export function CodeBlock({
         </span>
       )}
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned || lean ? scrollCue : ""} ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"
@@ -418,11 +436,9 @@ export function CodeBlock({
               <span
                 key={index}
                 className="tw-block"
-                style={
-                  aligned
-                    ? undefined
-                    : { paddingLeft: hang, textIndent: `-${hang}` }
-                }
+                // A line that does not wrap (a column-aligned one, from a
+                // tablet up) is unmoved: the indent and its hang cancel.
+                style={{ paddingLeft: hang, textIndent: `-${hang}` }}
               >
                 {rule}
                 {comment && <span className="tw-text-iron-400">{comment}</span>}
@@ -432,12 +448,6 @@ export function CodeBlock({
           })}
         </code>
       </pre>
-      {(aligned || lean) && (
-        <span
-          className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-[#0a0a0c] tw-to-transparent md:tw-hidden"
-          aria-hidden="true"
-        />
-      )}
     </div>
   );
 }
@@ -446,6 +456,7 @@ export function CodeBlock({
 export function Contents({
   items,
   label,
+  across = false,
 }: {
   readonly items: readonly {
     readonly href: string;
@@ -453,15 +464,19 @@ export function Contents({
     readonly title: ReactNode;
   }[];
   readonly label: string;
+  /** Every entry on one row from a desktop up, to the content's edge. */
+  readonly across?: boolean;
 }) {
   return (
     <nav aria-label={label}>
-      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0 md:tw-grid-cols-2">
+      <ol
+        className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0 md:tw-grid-cols-2 ${across ? "lg:tw-grid-cols-4" : ""}`}
+      >
         {items.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
-              className={`tw-grid tw-min-h-11 tw-grid-cols-[32px_minmax(0,1fr)] tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-base tw-leading-6 tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 min-[360px]:tw-grid-cols-[44px_minmax(0,1fr)] ${EX_FOCUS}`}
+              className={`tw-grid tw-min-h-11 tw-grid-cols-[32px_minmax(0,1fr)] tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-base tw-leading-[26px] tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 min-[360px]:tw-grid-cols-[44px_minmax(0,1fr)] ${EX_FOCUS}`}
             >
               <span className="tw-font-semibold tw-text-iron-400">
                 {item.no}

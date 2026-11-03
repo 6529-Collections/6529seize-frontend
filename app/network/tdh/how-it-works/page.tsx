@@ -4,6 +4,7 @@ import FactValue from "@/components/explained/facts/FactValue";
 import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
+import PageContents from "@/components/explained/shell/PageContents";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import PrevNext from "@/components/explained/shell/PrevNext";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -11,13 +12,13 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { FactBook, FactEntry } from "@/lib/explained/facts";
 import { ENGINE } from "@/lib/explained/engine";
-import { formatCents, formatCount, formatUtcDay } from "@/lib/explained/format";
+import { formatCents, formatCount } from "@/lib/explained/format";
 import {
   resolveExplainedLocale,
   type ExplainedParams,
 } from "@/lib/explained/locale.server";
 import BoostLens from "./BoostLens";
-import { ht } from "./copy";
+import { ht, type HowKey } from "./copy";
 import EligibilityLens from "./EligibilityLens";
 import FirstDayLens from "./FirstDayLens";
 import HowParts, { HowFormula } from "./HowParts";
@@ -27,11 +28,10 @@ import NetworkSection from "./NetworkSection";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
 import StacksLens from "./StacksLens";
-import StepsInOrder, { traceOf } from "./StepsInOrder";
+import StepsInOrder from "./StepsInOrder";
 import { RecordValue } from "@/components/explained/layout/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
-  EdRow,
   GoLink,
   PageHead,
   pageLink,
@@ -42,6 +42,7 @@ import {
   You,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
+import { EX_TEXT } from "@/components/explained/tokens";
 import { formatDecimal } from "@/components/explained/layout/numbers";
 import { utcClock } from "@/components/explained/layout/time";
 
@@ -93,9 +94,31 @@ export default async function TdhHowItWorksPage({
   const hFact = book.maybe<number>("engine.H");
   const capFact = book.maybe<number>("rules.editionFloorCap");
   const countFact = book.maybe<number>("memes.count");
-  const trace =
-    hFact && capFact && countFact
-      ? traceOf(hFact.value, capFact.value, countFact.value)
+  const gradFact = book.maybe<number>("engine.rate.gradient");
+  // The editions a reader can pick for it: a 310-copy card first, then the
+  // rarest and a 1,000-copy card, as 6529.io's editions are read today.
+  // None is below the threshold, so the worked example never needs a floor.
+  const thresholdFact = book.maybe<number>("rules.editionThreshold");
+  const candidates = [
+    capFact?.value,
+    book.maybe<number>("meme.4.edition")?.value,
+    book.maybe<number>("meme.2.edition")?.value,
+  ];
+  const pickable = candidates.filter(
+    (copies, index): copies is number =>
+      typeof copies === "number" &&
+      thresholdFact !== null &&
+      copies >= thresholdFact.value &&
+      candidates.indexOf(copies) === index
+  );
+  const traceInputs =
+    hFact && capFact && countFact && gradFact && pickable.length > 0
+      ? {
+          h: hFact.value,
+          nMemes: countFact.value,
+          gradRateCents: Math.round(gradFact.value * 100),
+          editions: pickable,
+        }
       : null;
 
   const chapter = chapterById("tdh");
@@ -146,6 +169,39 @@ export default async function TdhHowItWorksPage({
             </GoLink>
           </p>
         </div>
+        {/* A long page of four ideas: the bar that follows the reader, as on
+            How sure and the Specification. */}
+        <PageContents
+          locale={locale}
+          items={[
+            {
+              href: "#part-a",
+              no: "I",
+              key: "explained.tdh.how.parts.a.title",
+            },
+            {
+              href: "#part-b",
+              no: "II",
+              key: "explained.tdh.how.parts.b.title",
+            },
+            {
+              href: "#part-c",
+              no: "III",
+              key: "explained.tdh.how.parts.c.title",
+            },
+            {
+              href: "#part-d",
+              no: "IV",
+              key: "explained.tdh.how.parts.d.title",
+            },
+            { href: "#part-n", no: "·", key: "explained.tdh.how.n.label" },
+            { href: "#steps", no: "·", key: "explained.tdh.how.order.label" },
+          ].map(({ href, no, key }) => ({
+            href,
+            no,
+            title: ht(locale, key as HowKey),
+          }))}
+        />
 
         <PartA book={book} locale={locale} recentCards={recentCards} />
         <PartB
@@ -160,7 +216,7 @@ export default async function TdhHowItWorksPage({
           <span id="tdh-1-4" />
           <Statement
             label={
-              <StatementLabel mark="C">
+              <StatementLabel mark="III">
                 {ht(locale, "explained.tdh.how.parts.c.title")}
               </StatementLabel>
             }
@@ -175,6 +231,7 @@ export default async function TdhHowItWorksPage({
                 todayMax: f("engine.boost.todayMax"),
                 ceiling: f("engine.boost.ceiling"),
                 last: f("rules.lastBoostedSeason"),
+                read: f("memes.readAt"),
               })}
             </Para>
           </Statement>
@@ -189,7 +246,7 @@ export default async function TdhHowItWorksPage({
           <span id="step-12" />
           <Statement
             label={
-              <StatementLabel mark="D">
+              <StatementLabel mark="IV">
                 {ht(locale, "explained.tdh.how.parts.d.title")}
               </StatementLabel>
             }
@@ -209,7 +266,7 @@ export default async function TdhHowItWorksPage({
 
         <NetworkSection book={book} locale={locale} />
 
-        <StepsInOrder locale={locale} trace={trace} />
+        <StepsInOrder locale={locale} inputs={traceInputs} />
 
         <PrevNext
           locale={locale}
@@ -250,7 +307,7 @@ function PartA({
       <span id="step-2" />
       <Statement
         label={
-          <StatementLabel mark="A">
+          <StatementLabel mark="I">
             {ht(locale, "explained.tdh.how.parts.a.title")}
           </StatementLabel>
         }
@@ -314,7 +371,7 @@ function PartB({
       <span id="step-7" />
       <Statement
         label={
-          <StatementLabel mark="B">
+          <StatementLabel mark="II">
             {ht(locale, "explained.tdh.how.parts.b.title")}
           </StatementLabel>
         }
@@ -334,12 +391,6 @@ function PartB({
             threshold: v("rules.editionThreshold"),
           })}
         </Para>
-        <Para>
-          {rich(locale, "explained.tdh.how.b.others", {
-            H: v("engine.H"),
-            rateGradient: v("engine.rate.gradient"),
-          })}
-        </Para>
       </Statement>
       <div className="tw-mt-12">
         {ready ? null : (
@@ -349,11 +400,19 @@ function PartB({
         )}
         {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
-      <EdRow
-        no="B"
-        label={ht(locale, "explained.tdh.how.base.label")}
-        className="tw-mt-16"
-      >
+      {/* Under the model, one column of text: the other two collections,
+          then Base TDH, a step inside §II, so a sub-head of it, not a
+          second label-gutter row on a page of statement rows. */}
+      <Para className="tw-mt-8 tw-max-w-[660px]">
+        {rich(locale, "explained.tdh.how.b.others", {
+          H: v("engine.H"),
+          rateGradient: v("engine.rate.gradient"),
+        })}
+      </Para>
+      <div className="tw-mt-12 tw-max-w-[760px]">
+        <h3 className={`${EX_TEXT.h3} tw-mb-3`}>
+          {ht(locale, "explained.tdh.how.base.label")}
+        </h3>
         <Para>
           <span id="step-8" />
           {rate !== null && cents !== null
@@ -385,7 +444,7 @@ function PartB({
         {rate !== null && cents !== null && (
           <figure className="tw-m-0 tw-mt-4" data-fig="base">
             <code
-              className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300"
+              className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300"
               data-fact={rate.id}
               data-fact-derived=""
             >
@@ -397,7 +456,7 @@ function PartB({
             </span>
           </figure>
         )}
-      </EdRow>
+      </div>
     </Section>
   );
 }
@@ -410,7 +469,6 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
       {...(style ? { style } : {})}
     />
   );
-  const readAt = book.maybe<string>("memes.readAt");
   const source = `components/explained/engine/conformance.json, P26 at ${conformance.specification.commit.slice(0, 7)}`;
   return [
     {
@@ -440,14 +498,6 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
       title: ht(locale, "explained.tdh.how.hwk.editions"),
       body: rich(locale, "explained.tdh.how.hwk.editionsBody", {
         time: v("memes.readAt"),
-        date:
-          readAt === null ? (
-            v("memes.readAt")
-          ) : (
-            <FactText fact={readAt} locale={locale}>
-              {formatUtcDay(locale, readAt.value)}
-            </FactText>
-          ),
       }),
     },
     {

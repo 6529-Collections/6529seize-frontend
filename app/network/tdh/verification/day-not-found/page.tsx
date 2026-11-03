@@ -1,3 +1,4 @@
+import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { ageText } from "@/components/explained/age";
@@ -12,7 +13,7 @@ import {
   normalizeLocale,
   type SupportedLocale,
 } from "@/i18n/locales";
-import { loadFactBook } from "@/lib/explained/feed.server";
+import { loadCheckBook } from "../components/loadBook.server";
 import type { FactBook } from "@/lib/explained/facts";
 import {
   formatUtcClock,
@@ -43,8 +44,11 @@ type SearchParams = Promise<{
 }>;
 
 const CHECK_ROUTE = "/network/tdh/verification";
-/** 6529.io's own uploads, for the days before the comparison began. */
-const UPLOADS_URL = "https://api.6529.io/api/consolidated_uploads";
+/**
+ * 6529.io's own uploads, for the days before the comparison began: a public
+ * listing a reader opens, so it is the production API's, pinned on purpose.
+ */
+const UPLOADS_URL = `${PUBLIC_PRODUCTION_API_BASE}/api/consolidated_uploads`;
 
 function firstValue(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";
@@ -174,7 +178,9 @@ export default async function TdhVerificationDayNotFound({
 }) {
   const params = await searchParams;
   const locale = normalizeLocale(firstValue(params.locale));
-  const book = await loadFactBook();
+  // Every day file, as the daily check reads them, so each tile of the
+  // ribbon carries the same lines: its write time included.
+  const { book } = await loadCheckBook();
   const cycle = askedCycle(params.day);
   const latest = book.maybe<number>("tdh.latest.cycle");
   const latestDate = book.maybe<string>("tdh.latest.date");

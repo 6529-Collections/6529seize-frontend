@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { fill } from "@/components/explained/i18n";
 import Hash from "@/components/explained/marks/Hash";
 import Mark from "@/components/explained/marks/Mark";
-import { EX_TEXT } from "@/components/explained/tokens";
+import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { factText, isFact } from "@/lib/explained/facts";
 import { k } from "./_lib/copy";
-import type { PageFacts } from "./_lib/facts";
+import { EXPLORER, type PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
 import Section, { Para } from "./Section";
 
@@ -24,28 +26,50 @@ interface Row {
   readonly b: ReactNode;
 }
 
+const HASH_NAMES = {
+  "proofs.a.vkey": "table.keyName",
+  "proofs.b.imageId": "table.imageName",
+  "proofs.day.vkeyA": "table.dayKeyName",
+  "proofs.verifiers.sp1Gateway": "table.gatewayName",
+  "proofs.verifiers.risc0Router": "table.routerName",
+} as const;
+
 function HashFact({
   facts,
   id,
   locale,
+  address = false,
 }: {
   readonly facts: PageFacts;
-  readonly id: "proofs.a.vkey" | "proofs.b.imageId";
+  readonly id: keyof typeof HASH_NAMES;
   readonly locale: SupportedLocale;
+  /** A mainnet contract: linked to it on an explorer, beside the copy. */
+  readonly address?: boolean;
 }) {
   const entry = facts.entry(id);
   if (!entry || !isFact(entry)) return <>{facts.print(id)}</>;
+  const value = factText(entry);
   return (
     <span data-fact={id}>
       <Hash
-        value={factText(entry)}
+        value={value}
         locale={locale}
         copy
-        name={fill(
-          locale,
-          k(id === "proofs.a.vkey" ? "table.keyName" : "table.imageName")
-        )}
+        name={fill(locale, k(HASH_NAMES[id]))}
       />
+      {address && (
+        <>
+          {" "}
+          <a
+            className={`${EX_LINK} tw-whitespace-nowrap tw-text-[13px]`}
+            href={`${EXPLORER}/address/${value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {fill(locale, k("table.explorer"))}
+          </a>
+        </>
+      )}
     </span>
   );
 }
@@ -106,42 +130,68 @@ function ProgramsTable({
           {rich(locale, k("table.dayA"), {
             hours: facts.print("site.proofA.provedHours"),
             minutes: facts.print("site.proofA.provedMinutes"),
+            key: (
+              <HashFact facts={facts} id="proofs.day.vkeyA" locale={locale} />
+            ),
           })}
         </>
       ),
       b: (
         <>
           <Mark kind="notYet" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.dayB"), {
-            low: facts.print("proofs.dayB.gpuHoursLow"),
-            high: facts.print("proofs.dayB.gpuHoursHigh"),
-          })}
+          {rich(locale, k("table.dayB"))}
         </>
       ),
     },
     {
+      id: "verify",
+      label: rich(locale, k("table.verify")),
+      a: rich(locale, k("table.verifyA"), {
+        address: (
+          <HashFact
+            facts={facts}
+            id="proofs.verifiers.sp1Gateway"
+            locale={locale}
+            address
+          />
+        ),
+        selector: (
+          <code className="tw-font-mono tw-text-[13px]">
+            {facts.print("proofs.verifiers.sp1Selector")}
+          </code>
+        ),
+      }),
+      b: rich(locale, k("table.verifyB"), {
+        address: (
+          <HashFact
+            facts={facts}
+            id="proofs.verifiers.risc0Router"
+            locale={locale}
+            address
+          />
+        ),
+        selector: (
+          <code className="tw-font-mono tw-text-[13px]">
+            {facts.print("proofs.verifiers.risc0Selector")}
+          </code>
+        ),
+      }),
+    },
+    {
       id: "pair",
+      // A test pair carries no Proved mark: a skim must not read it as a
+      // day proved by both programs. Its label names it a test cycle.
       label: rich(locale, k("table.pair"), {
         cycle: facts.print("proofs.pairV14.cycle"),
         real: facts.cycleDate("proofs.pairV14.cycle"),
       }),
-      a: (
-        <>
-          <Mark kind="proved" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.pairA"), {
-            steps: facts.print("proofs.pairV14.stepsA"),
-          })}
-        </>
-      ),
-      b: (
-        <>
-          <Mark kind="proved" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.pairB"), {
-            steps: facts.print("proofs.pairV14.stepsB"),
-            words: facts.print("proofs.statement.words"),
-          })}
-        </>
-      ),
+      a: rich(locale, k("table.pairA"), {
+        steps: facts.print("proofs.pairV14.stepsA"),
+      }),
+      b: rich(locale, k("table.pairB"), {
+        steps: facts.print("proofs.pairV14.stepsB"),
+        words: facts.print("proofs.statement.words"),
+      }),
     },
   ];
   const head =
@@ -237,29 +287,59 @@ export default function TwoPrograms({
       heading={rich(locale, k("s3.heading"))}
       figure={
         <div className="tw-grid tw-gap-8">
-          <ProgramsTable locale={locale} facts={facts} />
-          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
+          <PhoneMore
+            more={fill(locale, k("s3.more"))}
+            less={fill(locale, k("s3.less"))}
+          >
+            <div className={PHONE_MORE_HIDDEN}>
+              <ProgramsTable locale={locale} facts={facts} />
+            </div>
+          </PhoneMore>
+          {/* The long case on the left; the short one and what the two
+              programs share stacked on the right, so both columns end
+              near one line. */}
+          <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-2">
             <Case title={rich(locale, k("case.flaw.title"))}>
               {rich(locale, k("case.flaw.body"), {
                 date: facts.print("proofs.sp1Advisory.published", "long"),
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
                 earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+                earliest: facts.print("proofs.sp1Advisory.earliest", "long"),
+                latestId: facts.print("proofs.sp1Advisory.latestId"),
+                latestDate: facts.print(
+                  "proofs.sp1Advisory.latestPublished",
+                  "long"
+                ),
+                r0Id: facts.print("proofs.risc0Advisory.id"),
+                r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+                selector: facts.print("proofs.verifiers.sp1Selector"),
+                frozen: facts.print("proofs.sp1Advisory.frozen"),
+                r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                r0Count: facts.print("proofs.risc0Advisory.count"),
+                r0Earliest: facts.print(
+                  "proofs.risc0Advisory.earliest",
+                  "long"
+                ),
+                zkvmA: facts.print("proofs.a.zkvm"),
+                zkvmB: facts.print("proofs.b.zkvm"),
               })}
             </Case>
-            <Case title={rich(locale, k("case.review.title"))}>
-              {rich(locale, k("case.review.body"), {
-                nettingDay: facts.print("netting.day"),
-                date: facts.print("proofs.vectorFinding.date"),
-                count: facts.print("proofs.vectorFinding.vectors"),
-              })}
-            </Case>
+            <div className="tw-grid tw-gap-4">
+              <Case title={rich(locale, k("case.review.title"))}>
+                {rich(locale, k("case.review.body"), {
+                  nettingDay: facts.print("netting.day"),
+                  date: facts.print("proofs.vectorFinding.date"),
+                  count: facts.print("proofs.vectorFinding.vectors"),
+                })}
+              </Case>
+              <LimitNote title={rich(locale, k("s3.limitTitle"))}>
+                {rich(locale, k("s3.limitBody"), {
+                  wrapper: facts.print("proofs.a.wrapper"),
+                })}
+              </LimitNote>
+            </div>
           </div>
-          <LimitNote title={rich(locale, k("s3.limitTitle"))}>
-            {rich(locale, k("s3.limitBody"), {
-              wrapper: facts.print("proofs.a.wrapper"),
-            })}
-          </LimitNote>
         </div>
       }
     >

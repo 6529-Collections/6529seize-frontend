@@ -49,6 +49,12 @@ export default function StillTrust({
                   ),
                   latestFixed: facts.print("proofs.sp1Advisory.latestFixed"),
                   zkvm: facts.print("proofs.a.zkvm"),
+                  earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+                  r0Id: facts.print("proofs.risc0Advisory.id"),
+                  r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+                  r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                  r0Count: facts.print("proofs.risc0Advisory.count"),
+                  zkvmB: facts.print("proofs.b.zkvm"),
                 }),
               },
               {
@@ -140,6 +146,13 @@ export default function StillTrust({
                     words: text("proofs.statement.words"),
                   }),
                   who: "read",
+                },
+                {
+                  // The step a reader can take today: the block hashes the
+                  // statement names are Ethereum's own.
+                  title: fill(locale, k("trail.hashes")),
+                  sub: fill(locale, k("trail.hashesSub")),
+                  who: "anyone",
                 },
               ]}
             />

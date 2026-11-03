@@ -47,10 +47,12 @@ describe("the hub, first version", () => {
     const { container } = withFacts(<HubLoop book={book} locale="en-US" />);
     const card = container.querySelector("[data-station-card]");
     expect(card).toHaveAttribute("data-station-card", "time");
-    // The card follows the copy: its own TDH heads it, the network's total
-    // stays on the loop and in the sentence.
+    // The card follows the copy: its own TDH heads it, and the sentence
+    // says where it comes from; the network's total stays on the loop.
     expect(card).toHaveTextContent("394 TDH");
-    expect(card).toHaveTextContent("Everyone's, on Oct 18: 2,082,190,981.");
+    expect(card).toHaveTextContent(
+      "A hundred whole days give the number above."
+    );
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -71,36 +73,55 @@ describe("the hub, first version", () => {
   it("lists three things checked today, with who can repeat each", () => {
     const { container } = render(<CheckableToday book={book} locale="en-US" />);
     const panel = container.querySelector("[data-ex-checkable]");
+    expect(panel).toHaveTextContent("10,273 of 10,273 identities");
     expect(panel).toHaveTextContent(
-      "10,273 of 10,273 identities: 6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
+      "6529.io's TDH equals two separately written recomputations in all 5 results since Oct 14."
     );
-    // The theorem counts are the bundled manifest's, read through the facts.
+    // The theorem counts are the bundled manifest's, read through the facts;
+    // the manifest is unsigned, and only 6529 can rerun the theorems.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about a model of TDH's rules, checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules. ${book.num("manifest.shownFalse.tdh")} earlier drafts about TDH were shown false and stay on record.`
+      `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about TDH`
     );
-    // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "One real day, half proved A zero-knowledge proof lets a contract check a program's output without rerunning it. Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
+      "About a model of TDH's rules, never a day. The manifest is unsigned; only 6529 can rerun them today."
     );
-    // What anyone can repeat today, and what needs private code.
+    // The proved day carries its retired rule in its stamp; a day would
+    // need both proofs (D128 is built, not deployed), and proof B has
+    // proved test cycles only.
+    expect(panel).toHaveTextContent("One real day, half a pair");
+    expect(panel).toHaveTextContent("Oct 11, retired rules");
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program and your own read of Ethereum; 6529's are private for now (D116)."
+      "Ethereum's verifier accepted proof A, read-only; B has proved test cycles only. Recording a day would need both (D128)."
     );
+    // Who runs everything today, and the reader's own record.
+    expect(panel).toHaveTextContent(
+      "6529 runs every check today; recomputing a day needs your own program (D116)."
+    );
+    expect(
+      within(panel as HTMLElement).getByRole("link", {
+        name: "Check your own record in the latest result",
+      })
+    ).toHaveAttribute("href", "/network/tdh#explain");
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
 
-  it("lists TDH live, the rest coming in order, with no link until they ship", () => {
+  it("lists TDH live, the rest coming in order, linking only what has shipped", () => {
     render(<HubChapters book={book} locale="en-US" />);
     const list = screen.getByRole("list", { name: "The chapters" });
     const rows = within(list).getAllByRole("listitem");
     expect(rows).toHaveLength(8);
-    expect(within(list).getAllByRole("link")).toHaveLength(1);
+    // TDH's row, and the one Validators page live before its chapter.
+    expect(
+      within(list)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"))
+    ).toEqual(["/network/tdh", "#cc0", "/explained/validators/hardware"]);
     expect(rows[0]).toHaveTextContent("checked every day since Oct 14");
     expect(rows[1]).toHaveTextContent(
-      "waits on: how cards were chosen before Main Stage"
+      "waits on: the history before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
-      'software 0.1.0, built and being tested; "run one" waits on its release'
+      "software 0.1.0, built and being tested; live already: Hardware"
     );
     expect(rows[6]).toHaveTextContent("6529 Stream Editions");
     expect(list).not.toHaveTextContent("NIC's full name");
@@ -116,8 +137,9 @@ describe("the hub, first version", () => {
     ]);
   });
 
-  it("answers CC0 in one minute, with where it stops and the absolute behind it", () => {
-    const { container } = render(<Cc0Answer locale="en-US" />);
+  it("answers CC0 in one minute, with where it stops and the absolute behind it", async () => {
+    const user = userEvent.setup();
+    const { container } = withFacts(<Cc0Answer book={book} locale="en-US" />);
     expect(container.querySelector("#cc0")).not.toBeNull();
     expect(
       screen.getByRole("heading", {
@@ -125,7 +147,7 @@ describe("the hub, first version", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector('[data-limit="limit"]')).toHaveTextContent(
-      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover the Punk itself."
+      "CC0 stops at 6529 Gradients, which are not CC0, and at others' rights, such as the CryptoPunk in Meme Card #1."
     );
     expect(
       screen.getByRole("link", { name: "Open Meme #2, full size" })
@@ -133,7 +155,28 @@ describe("the hub, first version", () => {
     expect(container.querySelector('[data-mark="absolute"]')).toHaveTextContent(
       "CC0 for The Memes, D89"
     );
-    expect(screen.getAllByRole("img")).toHaveLength(3);
+    expect(screen.getAllByRole("img", { name: /^Meme #\d+/ })).toHaveLength(3);
+    // The artist's three boxes, the copies read from the facts (D91).
+    expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
+      "5 copies of each of your cards, and 15 more to give to people you choose"
+    );
+    // D91 ends the team, museum and fund airdrops; the artist's stay. It
+    // never says they become a card's only free copies: the top-up into
+    // 6529Research (D90) and the Network Museum's copy (D94) continue.
+    expect(container.querySelector('[data-cc0="keep"]')).not.toHaveTextContent(
+      "only free copies"
+    );
+    expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
+      "the team, museum and fund airdrops end; yours stay (D91)."
+    );
+    expect(container.querySelector('[data-cc0="unstated"]')).not.toBeNull();
+    // The model: a Meme card may be sold; a Gradient may not, and the lens
+    // turns rose.
+    const lens = container.querySelector('[data-lens="licence"]');
+    expect(lens).toHaveTextContent("Yes.");
+    await user.click(screen.getByRole("button", { name: "A 6529 Gradient" }));
+    expect(lens).toHaveAttribute("data-broken", "1");
+    expect(lens).toHaveTextContent("Not without permission.");
   });
 
   it("shows the paths, the guide, the corrections log and the sources", () => {
@@ -151,7 +194,7 @@ describe("the hub, first version", () => {
     ).toHaveAttribute("href", "#cc0");
     expect(container.querySelectorAll("[data-mark]").length).toBeGreaterThan(8);
     expect(container.querySelector("#corrections")).toHaveTextContent(
-      "None yet."
+      "None yet; the log starts with the chapter's first public release."
     );
     expect(container.querySelector("[data-ex-hwk]")).toHaveTextContent(
       `through ${book.text("rules.newestDecision")}`

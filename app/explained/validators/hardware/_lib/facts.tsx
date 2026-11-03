@@ -240,6 +240,9 @@ export function withPageFacts(
  * Every line of the part-by-part guide with the id it prints under:
  * "part.gpu.answer", "part.memory.tier.good", "part.cpu.uses.2", "spend.1".
  * The drive and idle-power tables join under "drive.*" and "idle.*".
+ * Exported for the page's tests.
+ *
+ * @api
  */
 export function partFacts(): [string, Said][] {
   const out: [string, Said][] = [];

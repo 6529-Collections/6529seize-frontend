@@ -20,8 +20,9 @@ export type Lane =
   | { readonly pair: readonly [LaneStep, LaneStep]; readonly ok?: boolean };
 
 /**
- * A step's words. A lane of one step fills its box, its caption (the hash
- * or the count) at the box's foot, so every box in a row ends on content.
+ * A step's words, top down with one gap: kicker, title, then its caption
+ * (the hash or the count) right under the title, never pinned to the
+ * box's foot with an empty middle.
  */
 function StepText({
   step,
@@ -40,7 +41,7 @@ function StepText({
       </b>
       {step.cap !== undefined && (
         <span
-          className={`tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400 ${foot ? "tw-mt-auto tw-pt-2" : ""}`}
+          className={`tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400 ${foot ? "tw-pt-1" : ""}`}
         >
           {step.cap}
         </span>
@@ -52,7 +53,7 @@ function StepText({
 function Arrow() {
   return (
     <div
-      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto"
+      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto lg:tw-self-center"
       aria-hidden="true"
     >
       <svg
@@ -81,6 +82,8 @@ export default function Lanes({
     .join(" 28px ");
   return (
     <ol
+      // One row of boxes of one height, the arrows centred between them on
+      // one line; each box's words sit at its top.
       className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-p-0 lg:[grid-template-columns:var(--ex-lanes)]"
       style={{ ["--ex-lanes" as string]: columns }}
       aria-label={kt(locale, "explained.kit.lanes.aria", { label })}

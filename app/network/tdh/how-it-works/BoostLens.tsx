@@ -7,6 +7,7 @@ import BoostFigure from "@/components/explained/figures/BoostFigure";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Stepper } from "@/components/explained/lens/controls";
 import Lens, { Readout, RuleValue } from "@/components/explained/lens/Lens";
+import Predict from "@/components/explained/lens/Predict";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import { EX_LINK } from "@/components/explained/tokens";
@@ -16,9 +17,10 @@ import { formatDecimal } from "@/components/explained/layout/numbers";
 import Toggles from "@/components/explained/layout/Toggles";
 import { ht } from "./copy";
 import {
-  BOOST_START,
+  BOOST_OPEN,
   MAX_SETS,
   boostOf,
+  additionalSetsPlateau,
   boostRuleValues,
   extraSetsLimit,
   gradientLimit,
@@ -44,7 +46,7 @@ export default function BoostLens({
   const ceiling = useFact<number>("engine.boost.ceiling");
   const bonus = useFact<number>("rules.gradientBonus");
   const limit = gradientLimit();
-  const model = useBreakable<BoostState>(BOOST_START, (state) => ({
+  const model = useBreakable<BoostState>(BOOST_OPEN, (state) => ({
     ...state,
     gradients: limit + 1,
   }));
@@ -94,6 +96,7 @@ export default function BoostLens({
   ].map((part) => ({ ...part, value: part.value / MICRO }));
   const B = "tw-font-semibold tw-text-iron-50";
   const rv = boostRuleValues();
+  const addLimit = additionalSetsPlateau();
   const dec = (value: number, digits = 2) =>
     formatDecimal(locale, value, digits);
   const singles =
@@ -103,7 +106,7 @@ export default function BoostLens({
       text: (
         <>
           {ht(locale, "explained.tdh.how.boost.ruleSets")}
-          {" = "}
+          {" → "}
           <RuleValue>{formatCount(locale, state.sets)}</RuleValue>
         </>
       ),
@@ -115,8 +118,13 @@ export default function BoostLens({
       on: state.sets > 0,
     },
     {
-      // P26 §8.3's notation, the same in every language.
-      text: `ADD(s) = ${dec(rv.first)} × (1 − q^(s−1)) ÷ (1 − q), q = ${dec(rv.q, 4)}`,
+      // P26 §8.3's notation, the same in every language: in millionths,
+      // rounded half up, 0 for one set or none, constant from its limit on.
+      text: `ADD(s) = 0 if s ≤ 1, else HALFUP(${formatCount(locale, rv.firstMicro)} × (1 − q^(s−1)) ÷ (1 − q)) millionths, q = ${dec(rv.q, 4)}`,
+    },
+    {
+      text: `ADD(s) = ${formatCount(locale, addLimit.micro)} for every s ≥ ${formatCount(locale, addLimit.fromSets)}`,
+      on: state.sets >= addLimit.fromSets,
     },
     {
       text: ht(locale, "explained.tdh.how.boost.ruleSeasons", {
@@ -142,7 +150,7 @@ export default function BoostLens({
       text: (
         <>
           {ht(locale, "explained.tdh.how.boost.ruleBeta")}
-          {" = "}
+          {" → "}
           <RuleValue>
             {ht(locale, "explained.tdh.how.boost.ruleBetaValue", {
               cents: formatCount(locale, result.beta),
@@ -173,8 +181,19 @@ export default function BoostLens({
     });
   } else if ((state.genesis || state.nakamoto) && state.seasons < 1) {
     say = ht(locale, "explained.tdh.how.boost.saySingles");
+  } else if (state.gradients > 0 && state.seasons === 0) {
+    // Gradients alone: say why the boost is what it is.
+    say = ht(locale, "explained.tdh.how.boost.sayGradOnly", {
+      gradient: formatCents(locale, bonus.value),
+      count: formatCount(locale, state.gradients),
+      cents: formatCount(locale, result.beta),
+      boost: formatCents(locale, result.beta / 100),
+    });
   } else {
-    say = ht(locale, "explained.tdh.how.boost.say");
+    say = ht(locale, "explained.tdh.how.boost.say", {
+      cents: formatCount(locale, result.beta),
+      boost: formatCents(locale, result.beta / 100),
+    });
   }
 
   return (
@@ -184,17 +203,51 @@ export default function BoostLens({
       question={ht(locale, "explained.tdh.how.boost.question")}
       broken={broken}
       locale={locale}
+      // Guess first: does one more Gradient past the limit help? The
+      // answer moves the model to that case, its Break it.
+      predict={
+        <Predict
+          id="boost"
+          locale={locale}
+          question={ht(locale, "explained.tdh.how.boost.guess", {
+            next: formatCount(locale, limit + 1),
+          })}
+          options={[
+            {
+              label: ht(locale, "explained.tdh.how.boost.guessYes"),
+              right: false,
+            },
+            {
+              label: ht(locale, "explained.tdh.how.boost.guessNo"),
+              right: true,
+            },
+          ]}
+          onAnswer={() => {
+            if (!broken) toggleBreak();
+          }}
+          answer={ht(locale, "explained.tdh.how.boost.guessAnswer", {
+            max: formatCount(locale, limit),
+          })}
+        />
+      }
       stage={
         <>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
+            {/* A full set pays every season, so with one held the
+                season count is not the reader's to set. */}
             <Stepper
-              label={ht(locale, "explained.tdh.how.boost.seasons")}
-              value={state.seasons}
+              label={
+                state.sets > 0
+                  ? ht(locale, "explained.tdh.how.boost.seasonsFull")
+                  : ht(locale, "explained.tdh.how.boost.seasons")
+              }
+              value={state.sets > 0 ? paying : state.seasons}
               min={0}
               max={paying}
               onChange={(seasons) => model.set({ seasons })}
               locale={locale}
               attr="seasons"
+              disabled={state.sets > 0}
             />
             <Stepper
               label={ht(locale, "explained.tdh.how.boost.sets")}

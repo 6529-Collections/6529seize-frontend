@@ -17,5 +17,11 @@ export default function FooterWrapper() {
 
   if (hideFooter) return null;
 
-  return <Footer homeGallery={pathname === "/"} />;
+  // 6529 Explained sets its text in four tones; the footer's links join
+  // the lightest of them there rather than adding a fifth.
+  const explained = ["/explained", "/network/tdh"].some(
+    (path) => pathname === path || pathname?.startsWith(`${path}/`)
+  );
+
+  return <Footer homeGallery={pathname === "/"} lightLinks={explained} />;
 }

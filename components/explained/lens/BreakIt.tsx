@@ -33,7 +33,7 @@ export default function BreakIt({
   return (
     <button
       type="button"
-      className={`tw-inline-flex tw-min-h-[38px] tw-cursor-pointer tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-[1.5px] tw-border-dashed tw-px-4 tw-text-sm tw-font-semibold max-md:tw-min-h-11 max-md:tw-whitespace-normal ${pressed ? "tw-border-error tw-bg-error/[0.09] tw-text-error" : "tw-border-iron-400 tw-bg-transparent tw-text-iron-50 hover:tw-border-iron-300"} ${EX_FOCUS}`}
+      className={`tw-inline-flex tw-min-h-[38px] tw-cursor-pointer tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-[1.5px] tw-border-dashed tw-px-4 tw-text-sm tw-font-semibold max-md:tw-min-h-11 max-md:tw-w-full max-md:tw-justify-start max-md:tw-whitespace-normal max-md:tw-rounded-xl max-md:tw-py-2 max-md:tw-text-left ${pressed ? "tw-border-error tw-bg-error/[0.09] tw-text-error" : "tw-border-iron-400 tw-bg-transparent tw-text-iron-50 hover:tw-border-iron-300"} ${EX_FOCUS}`}
       aria-pressed={pressed}
       onClick={onToggle}
       data-break={id}

@@ -31,10 +31,12 @@ function labelLength(option: SegOption<string>): number {
 
 /**
  * Segmented buttons. On a phone, a group whose labels would wrap into
- * ragged rows becomes separate chips, each with its own edge, that wrap
- * onto as many rows as they need: every label is whole and every option is
- * in view, with nothing scrolled off-screen. `phone` forces a layout
- * ("stack" lists one option a row, "wrap" lets short labels wrap).
+ * ragged rows becomes a grid of equal cells, each with its own edge, two a
+ * row (one below 360 px): every label is whole and every option is in
+ * view, with nothing scrolled off-screen. `phone` forces a layout
+ * ("stack" lists one option a row, "wrap" lets short labels wrap); "list"
+ * lists one option a row at every width, each with its radio dot, for a
+ * long set of long labels that would wrap raggedly anywhere.
  */
 export function Seg<V extends string>({
   label,
@@ -51,7 +53,8 @@ export function Seg<V extends string>({
   readonly onChange: (value: V) => void;
   /** A data attribute carrying each option's value: "card" gives data-card="4". */
   readonly attr?: string;
-  readonly phone?: "auto" | "stack" | "row" | "wrap";
+  /** "grid3": three chips a row on a phone, for six short steps (3 × 2). */
+  readonly phone?: "auto" | "stack" | "row" | "wrap" | "list" | "grid3";
 }) {
   const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
   let layout = phone;
@@ -59,23 +62,39 @@ export function Seg<V extends string>({
     layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "row" : "wrap";
   }
   const groupRef = useRef<HTMLDivElement>(null);
+  if (layout === "list") {
+    return (
+      <SegList
+        label={label}
+        options={options}
+        value={value}
+        onChange={onChange}
+        {...(attr ? { attr } : {})}
+      />
+    );
+  }
   const group = {
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
-    row: "max-md:tw-flex max-md:tw-flex-wrap md:tw-inline-flex md:tw-flex-wrap",
+    // Equal cells on a phone, two a row, so a group never breaks into
+    // ragged rows of pills.
+    row: "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-2 max-[359px]:tw-grid-cols-1 md:tw-inline-flex md:tw-flex-wrap",
+    grid3:
+      "max-md:tw-grid max-md:tw-w-full max-md:tw-grid-cols-3 max-[359px]:tw-grid-cols-2 md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
   const button = {
     wrap: "tw-grow tw-rounded-full",
     stack:
       "max-md:tw-w-full max-md:tw-rounded-lg max-md:tw-px-3.5 max-md:tw-text-left md:tw-rounded-full",
-    row: "tw-rounded-full max-md:tw-text-left",
+    row: "tw-rounded-full max-md:tw-rounded-xl max-md:tw-text-center",
+    grid3: "tw-rounded-full",
   }[layout];
   // Seven options or more can take two rows on a wide screen, and a phone's
   // long labels always can: there they are separate chips, each with its
   // own edge, not one pill that breaks.
   const many = options.length >= MANY_OPTIONS;
-  const phoneChips = layout === "row";
+  const phoneChips = layout === "row" || layout === "grid3";
   let frame =
     "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full";
   if (many) {
@@ -104,6 +123,55 @@ export function Seg<V extends string>({
     >
       {/* Options keep their whole label on one line and move to the next
           row first; one wider than the whole control wraps inside it. */}
+      {options.map((option, index) => {
+        const on = option.value === value;
+        // An odd last option takes the whole row; below 360 px every
+        // option has a row of its own.
+        const span =
+          layout === "row" &&
+          index === options.length - 1 &&
+          options.length % 2 === 1
+            ? "max-md:tw-col-span-2 max-[359px]:tw-col-span-1"
+            : "";
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(option.value)}
+            {...(option.name ? { "aria-label": option.name } : {})}
+            {...(attr ? { [`data-${attr}`]: option.value } : {})}
+            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 ${chip} ${span} tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** One option a row, each with its radio dot: the wallets picker's look. */
+function SegList<V extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  attr,
+}: {
+  readonly label: string;
+  readonly options: readonly SegOption<V>[];
+  readonly value: V | null;
+  readonly onChange: (value: V) => void;
+  readonly attr?: string;
+}) {
+  return (
+    <div
+      className="tw-grid tw-w-full tw-max-w-[440px] tw-gap-1.5"
+      role="group"
+      aria-label={label}
+      data-seg-layout="list"
+    >
       {options.map((option) => {
         const on = option.value === value;
         return (
@@ -114,9 +182,13 @@ export function Seg<V extends string>({
             onClick={() => onChange(option.value)}
             {...(option.name ? { "aria-label": option.name } : {})}
             {...(attr ? { [`data-${attr}`]: option.value } : {})}
-            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 ${chip} tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            className={`tw-grid tw-min-h-11 tw-cursor-pointer tw-grid-cols-[18px_minmax(0,1fr)] tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2.5 tw-text-left tw-text-[15px] tw-font-semibold tw-leading-6 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-10 md:tw-py-2 ${on ? "tw-border-iron-300 tw-bg-iron-50/[0.06] tw-text-iron-50" : "tw-border-iron-800 tw-bg-transparent tw-text-iron-400 hover:tw-border-iron-600 hover:tw-text-iron-50"} ${EX_FOCUS}`}
           >
-            {option.label}
+            <span
+              className={`tw-mt-[3px] tw-block tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid ${on ? "tw-border-iron-50 [background:radial-gradient(#ECECEE_0_4px,transparent_5px)]" : "tw-border-iron-500"}`}
+              aria-hidden="true"
+            />
+            <span>{option.label}</span>
           </button>
         );
       })}
@@ -132,6 +204,7 @@ export function Stepper({
   onChange,
   locale,
   attr,
+  disabled = false,
 }: {
   /** What is counted: "Gradients". */
   readonly label: string;
@@ -142,6 +215,8 @@ export function Stepper({
   readonly locale: SupportedLocale;
   /** A data attribute naming the stepper, for the gates' states. */
   readonly attr?: string;
+  /** Set by another control: shown, but neither button moves it. */
+  readonly disabled?: boolean;
 }) {
   const button = `tw-size-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-text-lg tw-font-semibold tw-text-iron-50 disabled:tw-cursor-not-allowed disabled:tw-text-iron-400 md:tw-size-[38px] ${EX_FOCUS}`;
   return (
@@ -161,7 +236,7 @@ export function Stepper({
         <button
           type="button"
           className={button}
-          disabled={value <= min}
+          disabled={disabled || value <= min}
           onClick={() => onChange(Math.max(min, value - 1))}
           aria-label={kt(locale, "explained.kit.lens.fewer", { what: label })}
         >
@@ -176,7 +251,7 @@ export function Stepper({
         <button
           type="button"
           className={button}
-          disabled={value >= max}
+          disabled={disabled || value >= max}
           onClick={() => onChange(Math.min(max, value + 1))}
           aria-label={kt(locale, "explained.kit.lens.more", { what: label })}
         >

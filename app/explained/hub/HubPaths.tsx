@@ -24,7 +24,9 @@ const PATHS: readonly PathDef[] = [
     who: "path.first",
     route: "path.firstRoute",
     minutes: 6,
-    href: "/network/tdh",
+    // Lands on the record a first-card holder needs, "Just bought": the
+    // day their card starts to count, with what TDH is one screen above.
+    href: "/network/tdh#just-bought",
   },
   {
     who: "path.collect",
@@ -37,7 +39,6 @@ const PATHS: readonly PathDef[] = [
     route: "path.artRoute",
     minutes: 7,
     href: "#cc0",
-    more: true,
   },
   {
     who: "path.code",
@@ -61,7 +62,8 @@ const PATHS: readonly PathDef[] = [
     who: "path.writer",
     route: "path.writerRoute",
     minutes: 8,
-    href: "/network/tdh/verification",
+    // The quotable facts first: a real day proved, and what it cost.
+    href: "/network/tdh/proofs",
   },
   // The eighth: for a reader none of the seven describes. Eight paths fill
   // two rows of four.

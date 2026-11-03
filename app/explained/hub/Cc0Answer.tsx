@@ -11,10 +11,16 @@ import {
 } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { MEME_ART } from "@/app/network/tdh/overview/art";
-import { ht } from "./copy";
+import { withCc0 } from "@/components/explained/marks/Cc0";
+import Cc0Licence from "./Cc0Licence";
+import type { FactBook } from "@/lib/explained/facts";
+import { Fact } from "../_lib/facts";
+import { hrich, ht, type HubKey } from "./copy";
 
 /**
  * CC0, in one minute (MAP.md §3; TDH-DESIGN.md §7): three real CC0 cards,
+ * each named and marked free to use; the mockup's model (pick a work and a
+ * use); the artist's three boxes (give, keep, not written down);
  * "The art is free. Holding is what counts.", what an artist gives and
  * keeps, where CC0 stops (Card #1's Punk), the full image, the License
  * page, the CC0 deed and how holding counts, and the absolute behind it
@@ -25,9 +31,9 @@ import { ht } from "./copy";
 const FAN = [
   {
     art: MEME_ART[3],
-    place: "tw-left-0 tw-top-6 tw-rotate-[-5deg]",
+    place: "tw-left-[3%] tw-top-6 tw-rotate-[-5deg]",
   },
-  { art: MEME_ART[2], place: "tw-left-[30%] tw-top-0 tw-z-[2]" },
+  { art: MEME_ART[2], place: "tw-left-[31.5%] tw-top-0 tw-z-[2]" },
   {
     art: MEME_ART[4],
     place: "tw-left-[60%] tw-top-6 tw-rotate-[5deg]",
@@ -42,37 +48,102 @@ const MEME_ONE = "/the-memes/1";
 /** Creative Commons' deed for CC0 1.0: the dedication in plain words, and its notice on endorsement. */
 const CC0_DEED = "https://creativecommons.org/publicdomain/zero/1.0/";
 
+/** The artist's three boxes: what you give, keep, and what no one has written down. */
+const ARTIST: readonly {
+  readonly id: string;
+  readonly label: HubKey;
+  readonly body: HubKey;
+  readonly mark: "absolute" | "decided" | "open";
+  readonly refText?: string;
+  /** A source in words, translated, in place of a decision number. */
+  readonly refKey?: HubKey;
+}[] = [
+  {
+    // That the dedication cannot be withdrawn is the CC0 legal code's own
+    // word ("irrevocably", §2), not a decision of 6529's: D89 is the
+    // policy that The Memes stay CC0.
+    id: "give",
+    label: "cc0.giveLabel",
+    body: "cc0.give",
+    mark: "absolute",
+    refKey: "cc0.giveRef",
+  },
+  {
+    id: "keep",
+    label: "cc0.keepLabel",
+    body: "cc0.keepBody",
+    mark: "decided",
+    // The mark covers both decisions the box states: the paid mint's half
+    // (D79) and the airdrops' end (D91).
+    refText: "D79, D91",
+  },
+  {
+    id: "unstated",
+    label: "cc0.unstatedLabel",
+    body: "cc0.unstated",
+    mark: "open",
+  },
+];
+
 export default function Cc0Answer({
+  book,
   locale,
 }: {
+  readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
   return (
-    <section id="cc0" className={EX_LAYOUT.section}>
-      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-5 lg:tw-grid-cols-[500px_minmax(0,1fr)] lg:tw-gap-16">
-        <div
-          className="tw-relative tw-aspect-[350/300] tw-w-full lg:tw-sticky lg:tw-top-24 lg:tw-mt-2 lg:tw-aspect-[500/400] lg:tw-self-start"
-          // The three cards overlap as a fan by design.
-          data-tdh-check-ignore="card-gap"
-          role="group"
-          aria-label={ht(locale, "cc0.fanLabel")}
-        >
-          {FAN.map(({ art, place }) => (
-            <div key={art.id} className={`tw-absolute tw-w-[38%] ${place}`}>
-              <ArtCard
-                src={art.src}
-                fallbackSrc={art.original}
-                alt={ht(locale, "cc0.alt", { id: art.id, title: art.title })}
-                number={`#${art.id}`}
-                sizes="(max-width: 1024px) 40vw, 216px"
-              />
-            </div>
-          ))}
-        </div>
+    <section id="cc0" className={`${EX_LAYOUT.section} tw-scroll-mt-0`}>
+      <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-5 lg:tw-grid-cols-[500px_minmax(0,1fr)] lg:tw-gap-16">
+        {/* On a phone the heading and its answer come first, then the art
+            with its credits under it. */}
+        <figure className="tw-m-0 max-lg:tw-order-last">
+          <div
+            className="tw-relative tw-aspect-[350/262] tw-w-full lg:tw-aspect-[500/350]"
+            // The three cards overlap as a fan by design.
+            data-tdh-check-ignore="card-gap"
+            role="group"
+            aria-label={ht(locale, "cc0.fanLabel")}
+          >
+            {FAN.map(({ art, place }) => (
+              <div key={art.id} className={`tw-absolute tw-w-[37%] ${place}`}>
+                <ArtCard
+                  src={art.src}
+                  fallbackSrc={art.original}
+                  alt={ht(locale, "cc0.alt", { id: art.id, title: art.title })}
+                  number={`#${art.id}`}
+                  sizes="(max-width: 1024px) 40vw, 216px"
+                />
+              </div>
+            ))}
+          </div>
+          {/* The licence sits on the art: each card named, free to use,
+              and its card page, with its artist, edition and holders, one
+              tap away; the full image is the download beside the text. */}
+          <figcaption>
+            <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+              {FAN.map(({ art }) => (
+                <li key={art.id} className="tw-flex tw-items-center tw-gap-2">
+                  <span className="tw-text-xs tw-font-semibold tw-tracking-[0.04em] tw-text-iron-200">
+                    CC0
+                  </span>
+                  <Link className={EX_LINK} href={`/the-memes/${art.id}`}>
+                    {ht(locale, "cc0.fanCaption", {
+                      id: art.id,
+                      title: art.title,
+                    })}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </figcaption>
+        </figure>
         <div className="tw-max-w-[600px]">
-          <span className={EX_TEXT.label}>{ht(locale, "cc0.label")}</span>
+          <span className={EX_TEXT.label}>
+            {withCc0(ht(locale, "cc0.label"))}
+          </span>
           <h2 className={`${EX_TEXT.stmt} tw-mt-3`}>
-            {ht(locale, "cc0.title")}
+            {withCc0(ht(locale, "cc0.title"))}
           </h2>
           {/* The mark travels with the claim it qualifies. */}
           <div className="tw-mt-3">
@@ -83,49 +154,111 @@ export default function Cc0Answer({
               refText={ht(locale, "cc0.markRef")}
             />
           </div>
-          <p className={`${EX_TEXT.body} tw-m-0 tw-mb-[18px] tw-mt-4`}>
-            {ht(locale, "cc0.body")}
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+            {withCc0(ht(locale, "cc0.body"))}
           </p>
-          <p className={`${EX_TEXT.body} tw-m-0`} data-cc0="keep">
-            {ht(locale, "cc0.keep")}
-          </p>
-          <div className="tw-mt-8">
-            <LimitNote title={ht(locale, "cc0.limitTitle")}>
-              {ht(locale, "cc0.limit")}{" "}
-              <Link className={EX_LINK} href={MEME_ONE}>
-                {ht(locale, "cc0.limitLink")}
+          <ul className="tw-m-0 tw-mt-5 tw-flex tw-list-none tw-flex-col tw-items-start tw-gap-y-2 tw-p-0 tw-text-[15px] tw-leading-6 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5">
+            <li className="tw-flex tw-items-center tw-gap-1.5">
+              <Icon kind="down" className="tw-size-4 tw-text-iron-400" />
+              <a
+                className={EX_LINK}
+                href={DOWNLOAD.original}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {ht(locale, "cc0.download", { id: DOWNLOAD.id })}
+              </a>
+            </li>
+            <li className="tw-flex tw-items-center tw-gap-1.5">
+              <Icon kind="rule" className="tw-size-4 tw-text-iron-400" />
+              <Link className={EX_LINK} href="/about/license">
+                {withCc0(ht(locale, "cc0.chapter"))}
               </Link>
-            </LimitNote>
-          </div>
-          {/* One action, then the references as one row of links. */}
-          <p className="tw-m-0 tw-mt-6 md:tw-mt-[30px]">
-            <Link className={EX_BUTTON.cta} href="/network/tdh">
-              {ht(locale, "cc0.holding")}
-              <Icon kind="arrow" className="tw-size-4" />
-            </Link>
-          </p>
-          <p className="tw-m-0 tw-mt-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-5 tw-gap-y-2 tw-text-[15px] tw-leading-6">
-            <a
-              className={EX_LINK}
-              href={DOWNLOAD.original}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {ht(locale, "cc0.download", { id: DOWNLOAD.id })}
-            </a>
-            <Link className={EX_LINK} href="/about/license">
-              {ht(locale, "cc0.chapter")}
-            </Link>
-            <a
-              className={EX_LINK}
-              href={CC0_DEED}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {ht(locale, "cc0.deed")}
-            </a>
-          </p>
+            </li>
+            <li className="tw-flex tw-items-center tw-gap-1.5">
+              <Icon kind="arrow" className="tw-size-4 tw-text-iron-400" />
+              <a
+                className={EX_LINK}
+                href={CC0_DEED}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {withCc0(ht(locale, "cc0.deed"))}
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+      <div className="tw-mt-10 md:tw-mt-12">
+        <Cc0Licence locale={locale} />
+      </div>
+      <div className="tw-mt-10 md:tw-mt-12" data-cc0="artist">
+        <h3 className={EX_TEXT.h3}>{ht(locale, "cc0.artistTitle")}</h3>
+        {/* Each box is as tall as what it says: equal heights left two of
+            them with an empty half. */}
+        <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-3 tw-p-0 md:tw-grid-cols-3 md:tw-gap-4">
+          {ARTIST.map((box) => (
+            <li
+              key={box.id}
+              className="tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4"
+              data-cc0={box.id}
+            >
+              <span className={EX_TEXT.label}>{ht(locale, box.label)}</span>
+              <p className={`${EX_TEXT.body} tw-m-0`}>
+                {box.id === "keep"
+                  ? hrich(locale, box.body, {
+                      own: (
+                        <Fact
+                          book={book}
+                          id="memes.artistCopies"
+                          locale={locale}
+                        />
+                      ),
+                      choice: (
+                        <Fact
+                          book={book}
+                          id="memes.artistChoice"
+                          locale={locale}
+                        />
+                      ),
+                      from: (
+                        <Fact
+                          book={book}
+                          id="memes.artistOnlyFrom"
+                          locale={locale}
+                          style="long"
+                        />
+                      ),
+                    })
+                  : withCc0(ht(locale, box.body))}
+              </p>
+              <span className="tw-pt-1">
+                <Mark
+                  kind={box.mark}
+                  locale={locale}
+                  size="sm"
+                  {...(box.refText ? { refText: box.refText } : {})}
+                  {...(box.refKey ? { refText: ht(locale, box.refKey) } : {})}
+                />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {/* The limit, then the way on under it, on the section's left edge. */}
+      <div className="tw-mt-8 tw-flex tw-flex-col tw-items-start tw-gap-6">
+        <LimitNote title={withCc0(ht(locale, "cc0.limitTitle"))}>
+          {withCc0(ht(locale, "cc0.limit"))}{" "}
+          <Link className={EX_LINK} href={MEME_ONE}>
+            {ht(locale, "cc0.limitLink")}
+          </Link>
+        </LimitNote>
+        <p className="tw-m-0">
+          <Link className={EX_BUTTON.cta} href="/network/tdh">
+            {ht(locale, "cc0.holding")}
+            <Icon kind="arrow" className="tw-size-4" />
+          </Link>
+        </p>
       </div>
     </section>
   );

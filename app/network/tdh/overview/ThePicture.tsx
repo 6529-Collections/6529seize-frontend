@@ -6,6 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook, FactId } from "@/lib/explained/facts";
 import { Fact } from "@/app/explained/_lib/facts";
 import { orich, ot } from "./copy";
+import EditionSquash from "./EditionSquash";
 import NetworkSection from "./NetworkSection";
 import SectionLabel from "./SectionLabel";
 
@@ -109,7 +110,7 @@ export default function ThePicture({
         ) : (
           <Fact book={book} id="memes.editions" locale={locale} />
         )}
-        <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
+        <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
           {bold(ot(locale, "picture.captionLead"))}{" "}
           {orich(locale, "picture.caption", {
             h: <Fact book={book} id="engine.H" locale={locale} />,
@@ -117,6 +118,11 @@ export default function ThePicture({
           })}
         </figcaption>
       </figure>
+      {/* The same picture, moving: squash one edition from the rarest to
+          FirstGM's and its area holds. */}
+      <div className="tw-mt-10 md:tw-mt-12">
+        <EditionSquash locale={locale} />
+      </div>
       {network && <NetworkSection locale={locale} />}
     </section>
   );

@@ -120,13 +120,13 @@ describe("useSidebarSections", () => {
       { name: "TDH", href: "/network/tdh" },
       { name: "How TDH is calculated", href: "/network/tdh/how-it-works" },
       { name: "TDH specification", href: "/network/tdh/specification" },
-      { name: "TDH formal model", href: "/network/tdh/formal" },
+      { name: "TDH: how sure", href: "/network/tdh/formal" },
       {
         name: "TDH implementations",
         href: "/network/tdh/implementations",
       },
       {
-        name: "TDH verification",
+        name: "TDH: the daily check",
         href: "/network/tdh/verification",
         activePathPrefixes: ["/network/tdh/verification/"],
       },
@@ -148,11 +148,11 @@ describe("useSidebarSections", () => {
         activePathPrefixes: ["/network/nerd/"],
       },
       {
-        name: "TDH historic boosts",
+        name: "TDH: versions and boosts",
         href: "/network/tdh/historic-boosts",
       },
       {
-        name: "Wallet consolidation",
+        name: "TDH: your wallets",
         href: "/network/tdh/consolidation",
       },
     ]);

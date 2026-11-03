@@ -53,31 +53,37 @@ interface Scenario {
    * design that requires it (Decided, D128).
    */
   readonly evidence: "tested" | "decided";
-  /** Program B's honest output differs: B is why the contract refuses. */
-  readonly secondDiffers?: boolean;
+  /**
+   * What program B's layer shows. "differs": B's honest output differs, and
+   * that is why the contract refuses at its second check. "unproved": the
+   * forger submits the same wrong words for B too, and has no valid RISC
+   * Zero proof of them, so the contract refuses at its eighth check.
+   */
+  readonly second?: "differs" | "unproved";
 }
 
 export const SCENARIOS: readonly Scenario[] = [
   { id: "total", stoppedBy: "proof", line: "proofs", evidence: "tested" },
   { id: "log", stoppedBy: "program", line: "program", evidence: "tested" },
   { id: "blocks", stoppedBy: "contract", line: "anchors", evidence: "tested" },
-  // Program B is the reason these two stop, but the contract is what
-  // refuses them, at its second check: B's honest output differs. Past it,
-  // a forged pair would also need a valid RISC Zero proof of the same wrong
-  // words, the eighth check.
+  // A bug in program A: program B's honest output differs, and the
+  // contract refuses the pair at its second check.
   {
     id: "bugA",
     stoppedBy: "contract",
     line: "outputs",
     evidence: "tested",
-    secondDiffers: true,
+    second: "differs",
   },
+  // A flaw in SP1: the forger submits the same wrong words for both
+  // programs, so the outputs are equal and the second check passes. What
+  // stops it is the eighth: no valid RISC Zero proof of the wrong words.
   {
     id: "flaw",
     stoppedBy: "contract",
-    line: "outputs",
+    line: "proofs",
     evidence: "tested",
-    secondDiffers: true,
+    second: "unproved",
   },
   { id: "skip", stoppedBy: "contract", line: "chaining", evidence: "tested" },
   { id: "rule", stoppedBy: "contract", line: "network", evidence: "tested" },
@@ -91,7 +97,13 @@ export function scenarioById(id: ScenarioId): Scenario {
   return found;
 }
 
-export type LayerState = "passed" | "differs" | "stops" | "unreached" | "wrong";
+export type LayerState =
+  | "passed"
+  | "differs"
+  | "unproved"
+  | "stops"
+  | "unreached"
+  | "wrong";
 
 /**
  * Each layer's state for a scenario: the layers before the stop let it
@@ -110,8 +122,8 @@ export function layerStates(
       states[layer] = layer === "recorded" ? "wrong" : "passed";
     } else if (index < stop) {
       states[layer] =
-        layer === "second" && scenario.secondDiffers === true
-          ? "differs"
+        layer === "second" && scenario.second !== undefined
+          ? scenario.second
           : "passed";
     } else if (index === stop) {
       states[layer] = "stops";

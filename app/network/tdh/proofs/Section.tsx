@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 
+/** The statement row's split on this page: heading 5, prose 7. */
+const PROSE_FIRST = "lg:!tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)]";
+
 /**
  * A section of an evidence page (EXPLAINED.md §5.3, the mockups' `stmt`
  * row): its number and label above a statement heading on the left, the
@@ -17,6 +20,7 @@ export default function Section({
   children,
   figure,
   tight = false,
+  shortProse = false,
 }: {
   readonly id: string;
   readonly number: string;
@@ -27,6 +31,8 @@ export default function Section({
   /** What follows the full width: a model, a figure, a table. */
   readonly figure?: ReactNode;
   readonly tight?: boolean;
+  /** A paragraph no longer than the heading keeps the kit's 6 : 5. */
+  readonly shortProse?: boolean;
 }) {
   return (
     <section
@@ -36,15 +42,28 @@ export default function Section({
     >
       {/* A heading with no prose beside it takes the full measure, so the
           right half is never an empty block. */}
+      {/* This page's prose runs long beside its headings, so the row is
+          5 : 7 rather than the kit's 6 : 5: the prose gets the wider
+          measure and the heading column is not left empty under the
+          heading. */}
       <div
-        className={children === undefined ? "tw-max-w-[940px]" : EX_LAYOUT.stmt}
+        className={
+          children === undefined
+            ? "tw-max-w-[940px]"
+            : `${EX_LAYOUT.stmt} ${shortProse ? "" : PROSE_FIRST}`
+        }
       >
         <div>
           <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
             <span className="tw-text-primary-300">{number}</span>
             {` · ${label}`}
           </span>
-          <h2 id={`${id}-heading`} className={EX_TEXT.stmt}>
+          {/* At 400% zoom (a 320 px window) a short heading steps down a
+              size, so its words keep two to a line. */}
+          <h2
+            id={`${id}-heading`}
+            className={`${EX_TEXT.stmt} max-[359px]:tw-text-[24px] max-[359px]:tw-leading-[30px]`}
+          >
             {heading}
           </h2>
         </div>

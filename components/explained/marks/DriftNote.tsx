@@ -45,7 +45,7 @@ export default function DriftNote({
   }
   return (
     <aside
-      className="tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-3 tw-rounded-lg tw-border tw-border-l-[3px] tw-border-dashed tw-border-iron-700 tw-border-l-iron-400 tw-bg-white/[0.02] tw-px-[18px] tw-py-4 tw-text-base tw-leading-[25px] tw-text-iron-300"
+      className="tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-3 tw-rounded-lg tw-border tw-border-l-[3px] tw-border-dashed tw-border-iron-700 tw-border-l-iron-400 tw-bg-white/[0.02] tw-px-[18px] tw-py-4 tw-text-base tw-leading-[26px] tw-text-iron-300"
       style={{ borderLeftStyle: "solid" }}
       aria-label={`${label}: ${named}`}
       data-drift-by={by.join(" ")}

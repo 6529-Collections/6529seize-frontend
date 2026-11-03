@@ -26,8 +26,11 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   p52: "spec",
   runLog: "decision",
   sp1Update: "site",
+  sp1Earliest: "site",
   sp1Cve: "site",
   sp1Native: "site",
+  risc0Cve: "site",
+  risc0Advisories: "site",
 };
 
 function proofSource(key: SourceKey) {
@@ -116,6 +119,16 @@ export const PROOF_FACTS = {
   "proofs.day.costUsd": count("runbook", proofs.day.costUsd),
   "proofs.day.provedOn": fact("contracts", "day", proofs.day.provedOn),
 
+  // Program A's key for the day of Oct 11, under the retired rule (P53 §4.6).
+  "proofs.day.vkeyA": fact("programA", "hash", proofs.day.vkeyA),
+  /** Words program B's output shares with proof A's: all but the anchor's. */
+  "proofs.dayB.wordsEqual": fact(
+    "programB",
+    "count",
+    proofs.day.wordsA.filter((word, index) => word === proofs.day.wordsB[index])
+      .length,
+    { evidence: "tested" }
+  ),
   "proofs.dayB.total": fact("programB", "count", proofs.dayB.total, {
     unit: "TDH",
     evidence: "tested",
@@ -198,7 +211,38 @@ export const PROOF_FACTS = {
   "proofs.b.wrapper": fact("contracts", "text", proofs.programs.b.wrapper),
   "proofs.b.imageId": fact("contracts", "hash", proofs.programs.b.imageId),
 
+  "proofs.verifiers.sp1Gateway": fact(
+    "contracts",
+    "hash",
+    proofs.verifiers.sp1Gateway
+  ),
+  "proofs.verifiers.sp1Selector": fact(
+    "contracts",
+    "text",
+    proofs.verifiers.sp1Selector
+  ),
+  "proofs.verifiers.risc0Router": fact(
+    "contracts",
+    "hash",
+    proofs.verifiers.risc0Router
+  ),
+  "proofs.verifiers.risc0Selector": fact(
+    "contracts",
+    "text",
+    proofs.verifiers.risc0Selector
+  ),
+
   "proofs.contract.checks": count("contracts", proofs.contract.checks),
+  // How far back Ethereum serves a block hash to a contract: BLOCKHASH and
+  // the EIP-2935 history contract (the contracts record, "anchorHash").
+  "proofs.contract.blockhashWindow": count(
+    "contracts",
+    proofs.contract.blockhashWindow
+  ),
+  "proofs.contract.historyWindow": count(
+    "contracts",
+    proofs.contract.historyWindow
+  ),
   "proofs.contract.unitTests": fact(
     "contracts",
     "count",
@@ -216,6 +260,9 @@ export const PROOF_FACTS = {
     "day",
     proofs.contract.testedOn
   ),
+  // 6529's own audit, of the contract's first version: the run log of that
+  // day. The contract has changed in several rounds since.
+  "proofs.contract.auditedOn": fact("runLog", "day", proofs.contract.auditedOn),
   "proofs.contract.horizon": fact("contracts", "day", proofs.contract.horizon),
   "proofs.contract.retiredRuleId": fact(
     "contracts",
@@ -230,10 +277,23 @@ export const PROOF_FACTS = {
     proofs.sp1Advisory.published
   ),
   "proofs.sp1Advisory.fixed": fact("sp1Cve", "text", proofs.sp1Advisory.fixed),
+  // The version whose routes Succinct froze on mainnet after the flaw, as
+  // the contracts record found them on its fork.
+  "proofs.sp1Advisory.frozen": fact(
+    "contracts",
+    "text",
+    proofs.sp1Advisory.frozen
+  ),
   "proofs.sp1Advisory.earlier": fact(
     "sp1Update",
     "day",
     proofs.sp1Advisory.earlier
+  ),
+  // SP1's earliest published soundness flaw, from its advisories listing.
+  "proofs.sp1Advisory.earliest": fact(
+    "sp1Earliest",
+    "day",
+    proofs.sp1Advisory.earliest
   ),
   // SP1's newest advisory: its native verifier only, fixed before the SP1
   // that program A uses.
@@ -251,6 +311,29 @@ export const PROOF_FACTS = {
     "sp1Native",
     "text",
     proofs.sp1Advisory.latestFixed
+  ),
+
+  // RISC Zero's published flaw: fixed long before the version program B uses.
+  "proofs.risc0Advisory.id": fact("risc0Cve", "text", proofs.risc0Advisory.id),
+  "proofs.risc0Advisory.published": fact(
+    "risc0Cve",
+    "day",
+    proofs.risc0Advisory.published
+  ),
+  "proofs.risc0Advisory.fixed": fact(
+    "risc0Cve",
+    "text",
+    proofs.risc0Advisory.fixed
+  ),
+  // All of RISC Zero's published soundness flaws, not only the one above.
+  "proofs.risc0Advisory.count": count(
+    "risc0Advisories",
+    proofs.risc0Advisory.count
+  ),
+  "proofs.risc0Advisory.earliest": fact(
+    "risc0Advisories",
+    "day",
+    proofs.risc0Advisory.earliest
   ),
 
   "proofs.catchup.chainStart": count("p53", proofs.catchup.chainStart),

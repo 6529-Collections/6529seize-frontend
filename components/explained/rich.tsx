@@ -4,6 +4,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { tRich, type MessageKey } from "@/i18n/messages";
 import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
 import { fill } from "./i18n";
+import { withCc0 } from "./marks/Cc0";
 
 /**
  * Messages with nodes inside them (TDH-DESIGN.md §2). A key never contains
@@ -35,7 +36,9 @@ export function rich(
   }
   return parts.map((part, index) => (
     // The parts are one message's fixed segments, in order.
-    <Fragment key={index}>{part}</Fragment>
+    <Fragment key={index}>
+      {typeof part === "string" ? withCc0(part) : part}
+    </Fragment>
   ));
 }
 

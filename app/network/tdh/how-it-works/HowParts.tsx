@@ -1,11 +1,12 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import StampLine from "@/components/explained/marks/StampLine";
 import { EX_FOCUS } from "@/components/explained/tokens";
 import { ht, type HowKey } from "./copy";
 
 /**
  * The four parts under the header: Time, Rarity, Collections and You, each a
  * link to its part with a small drawing of its idea (a fourth day filled; a
- * tall narrow tile beside low wide ones; one hatched band; three wallets).
+ * tall narrow tile beside low wide ones; one hatched band; four wallets).
  * Drawn in HTML, ink and blue only.
  */
 const PARTS: readonly {
@@ -16,28 +17,28 @@ const PARTS: readonly {
   readonly drawing: "time" | "rarity" | "collections" | "you";
 }[] = [
   {
-    letter: "A",
+    letter: "I",
     id: "part-a",
     title: "explained.tdh.how.parts.a.title",
     line: "explained.tdh.how.parts.a.line",
     drawing: "time",
   },
   {
-    letter: "B",
+    letter: "II",
     id: "part-b",
     title: "explained.tdh.how.parts.b.title",
     line: "explained.tdh.how.parts.b.line",
     drawing: "rarity",
   },
   {
-    letter: "C",
+    letter: "III",
     id: "part-c",
     title: "explained.tdh.how.parts.c.title",
     line: "explained.tdh.how.parts.c.line",
     drawing: "collections",
   },
   {
-    letter: "D",
+    letter: "IV",
     id: "part-d",
     title: "explained.tdh.how.parts.d.title",
     line: "explained.tdh.how.parts.d.line",
@@ -79,10 +80,11 @@ function Drawing({
   }
   return (
     <>
-      {[0, 1, 2].map((wallet) => (
+      {/* Four wallets, as the line under the title says. */}
+      {[0, 1, 2, 3].map((wallet) => (
         <i
           key={wallet}
-          className={`${TILE} tw-h-[22px] tw-w-[32%] tw-rounded`}
+          className={`${TILE} tw-h-[22px] tw-w-[24%] tw-rounded`}
         />
       ))}
     </>
@@ -105,7 +107,7 @@ export default function HowParts({
           <a
             key={part.id}
             href={`#${part.id}`}
-            className={`tw-relative tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-[60px] tw-pt-3.5 tw-text-sm tw-leading-5 tw-no-underline hover:tw-border-iron-700 md:tw-px-[18px] md:tw-pb-[74px] md:tw-pt-[18px] md:tw-text-[15px] md:tw-leading-[22px] ${EX_FOCUS}`}
+            className={`tw-relative tw-flex tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-[60px] tw-pt-3.5 tw-text-sm tw-leading-[21px] tw-no-underline hover:tw-border-iron-700 md:tw-px-[18px] md:tw-pb-[74px] md:tw-pt-[18px] md:tw-text-[15px] md:tw-leading-[22px] ${EX_FOCUS}`}
           >
             <span className="tw-text-[13px] tw-font-bold tw-text-primary-300">
               {part.letter}
@@ -144,8 +146,9 @@ function Term({
     >
       {children}
       {/* The part's letter, on the line rather than raised, so it stays
-          inside the term's box. */}
-      <span className="tw-ml-1 tw-align-baseline tw-text-xs tw-font-bold tw-text-primary-300">
+          inside the term's box; a space, not a margin, keeps it a word
+          apart when the line is read aloud or copied. */}{" "}
+      <span className="tw-align-baseline tw-text-xs tw-font-bold tw-text-primary-300">
         {letter}
       </span>
     </a>
@@ -154,9 +157,11 @@ function Term({
 
 /**
  * The whole calculation on the first screen, in one line, each term
- * lettered with the part below that explains it: TDH is the sum, over every
- * card an identity holds (D), of whole days held (A) × rate (B) × boost (C),
- * each card rounded on its own.
+ * numbered with the part below that explains it: TDH is the sum, over every
+ * card an identity holds (IV), of whole days held (I) × rate (II) × boost
+ * (III), each card rounded on its own. The parts are numbered in Roman
+ * numerals, not lettered: A and B are the models' wallets, and B is P26's
+ * snapshot block.
  */
 export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -175,19 +180,19 @@ export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
         <span className="tw-text-iron-400">
           {ht(locale, "explained.tdh.how.formula.over")}
         </span>{" "}
-        <Term href="#part-d" letter="D">
+        <Term href="#part-d" letter="IV">
           {ht(locale, "explained.tdh.how.formula.cards")}
         </Term>
         {" : "}
-        <Term href="#part-a" letter="A">
+        <Term href="#part-a" letter="I">
           {ht(locale, "explained.tdh.how.formula.days")}
         </Term>
         {" × "}
-        <Term href="#part-b" letter="B">
+        <Term href="#part-b" letter="II">
           {ht(locale, "explained.tdh.how.formula.rate")}
         </Term>
         {" × "}
-        <Term href="#part-c" letter="C">
+        <Term href="#part-c" letter="III">
           {ht(locale, "explained.tdh.how.formula.boost")}
         </Term>
         {", "}
@@ -195,6 +200,20 @@ export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
           {ht(locale, "explained.tdh.how.formula.round")}
         </span>
       </p>
+      {/* The summary line is qualified as the models below it are. */}
+      <div className="tw-mt-2.5">
+        <StampLine
+          locale={locale}
+          marks={[
+            { kind: "proposed", refText: "P26" },
+            {
+              maturity: "live",
+              label: ht(locale, "explained.tdh.how.formula.live"),
+              refText: ht(locale, "explained.tdh.how.formula.liveRef"),
+            },
+          ]}
+        />
+      </div>
     </figure>
   );
 }

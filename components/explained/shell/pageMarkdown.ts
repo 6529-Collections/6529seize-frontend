@@ -23,12 +23,18 @@ function clean(text: string): string {
  * Laid out as its own box (a block, a flex or grid item, a cell): its text
  * is a separate word from its neighbours', even with no space in the HTML.
  */
-function boxed(element: Element): boolean {
+function displayOf(element: Element): string {
   if (typeof getComputedStyle !== "function") {
-    return false;
+    return "";
   }
-  // A test DOM has no layout: every display is "" or missing, and nothing is boxed.
-  const display = getComputedStyle(element).display ?? "";
+  // A test DOM has no layout: its computed display is "" or missing, and
+  // only an inline style says how an element is drawn.
+  const computed = getComputedStyle(element).display ?? "";
+  return computed || (element as HTMLElement).style?.display || "";
+}
+
+function boxed(element: Element): boolean {
+  const display = displayOf(element);
   return (
     display !== "" && !display.startsWith("inline") && display !== "contents"
   );
@@ -78,13 +84,22 @@ function inline(node: Node): string {
   return inner;
 }
 
+/**
+ * Not drawn at this width: a phone's inline label beside a table cell, a
+ * desktop's column header on a phone.
+ */
+function undrawn(element: Element): boolean {
+  return displayOf(element) === "none";
+}
+
 function skip(element: Element): boolean {
   return (
     SKIP.has(element.tagName) ||
     element.getAttribute("aria-hidden") === "true" ||
     element.hasAttribute("hidden") ||
     element.hasAttribute("data-ex-nocopy") ||
-    element.classList.contains("tw-sr-only")
+    element.classList.contains("tw-sr-only") ||
+    undrawn(element)
   );
 }
 
@@ -113,6 +128,28 @@ function listBlock(list: Element, ordered: boolean): string {
     .map((item, index) => `${bullet(index)} ${clean(inline(item))}`)
     .filter((item) => item.length > 2)
     .join("\n");
+}
+
+/**
+ * A code block's text, line by line: each line drawn as its own box (a
+ * block span, as the kit's code blocks draw them) ends with a newline, so
+ * the lines do not run together; controls and hidden parts are left out.
+ */
+function codeText(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent ?? "";
+  }
+  if (!(node instanceof Element) || skip(node)) {
+    return "";
+  }
+  return [...node.childNodes]
+    .map((child) => {
+      const text = codeText(child);
+      return child instanceof Element && boxed(child) && !text.endsWith("\n")
+        ? `${text}\n`
+        : text;
+    })
+    .join("");
 }
 
 /** Words of its own beside its child elements: a sentence with live values in it. */
@@ -149,7 +186,7 @@ function blockOf(child: Element): string | null {
     case "TABLE":
       return table(child);
     case "PRE":
-      return `\`\`\`\n${child.textContent}\n\`\`\``;
+      return `\`\`\`\n${codeText(child).replace(/\n+$/, "")}\n\`\`\``;
     default:
       // A leaf, or a run of text with values and marks inside it: one
       // paragraph. Anything else is walked into, so its parts keep their

@@ -1,5 +1,6 @@
 import { kt } from "@/components/explained/i18n";
 import NotFoundPage from "@/components/explained/shell/NotFoundPage";
+import { tdhPageLines } from "@/app/network/tdh/overview/InThisChapter";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import {
@@ -22,7 +23,13 @@ export default async function TdhNotFoundView({
   readonly searchParams: Promise<ExplainedParams>;
 }) {
   const locale = await resolveExplainedLocale(await searchParams);
-  return <NotFoundPage chapter="tdh" locale={locale} />;
+  return (
+    <NotFoundPage
+      chapter="tdh"
+      locale={locale}
+      descriptions={tdhPageLines(locale)}
+    />
+  );
 }
 
 export function generateMetadata() {

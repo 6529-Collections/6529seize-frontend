@@ -33,13 +33,13 @@ import {
   rateFromEditions,
 } from "@/app/network/tdh/how-it-works/models/identity";
 import { ENGINE } from "@/lib/explained/engine";
+import { traceOf } from "@/app/network/tdh/how-it-works/trace";
 import { stackValues } from "@/app/network/tdh/how-it-works/models/stacks";
 import {
   ROUND_TRIP,
   caseH,
   roundTripDays,
 } from "@/app/network/tdh/how-it-works/models/netting";
-import { ENGINE } from "@/lib/explained/engine";
 
 // The worked examples of How TDH is calculated, checked against the numbers
 // the P26 Python reference printed (plan, Appendix A).
@@ -383,5 +383,23 @@ describe("Sales and moves", () => {
       sold: 300,
       raw: 10,
     });
+  });
+});
+
+describe("The trace's daily rate (P26 §8.6)", () => {
+  it("is not what tomorrow's result adds: that is rounded per card", () => {
+    // One copy of a 310-copy card and one Gradient (RATE(3941, 101) =
+    // 3,902 cents), each held 100 whole days, boost 1.02: the Python
+    // reference gives 5,276 today and 5,330 tomorrow, so it adds 54 while
+    // the rate is 52.76 a day.
+    const today = traceOf(3941, 310, 400, 3902, 100);
+    const tomorrow = traceOf(3941, 310, 400, 3902, 101);
+    expect(today.rateCents).toBe(1271);
+    expect(today.betaCents).toBe(102);
+    expect(today.betaCents * (today.rateCents + today.gradRateCents)).toBe(
+      527_646
+    );
+    expect(today.final).toBe(5276);
+    expect(tomorrow.final - today.final).toBe(54);
   });
 });

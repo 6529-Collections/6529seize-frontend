@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import AreaTile from "@/components/explained/figures/AreaTile";
 import { kt } from "@/components/explained/i18n";
@@ -8,6 +8,8 @@ import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg, Slider } from "@/components/explained/lens/controls";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import Tag from "@/components/explained/marks/Tag";
+import { withCc0 } from "@/components/explained/marks/Cc0";
+import { EX_FOCUS, EX_MOTION } from "@/components/explained/tokens";
 import ArtCard from "@/components/explained/things/ArtCard";
 import CardPicker from "@/components/explained/things/CardPicker";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -122,7 +124,7 @@ function Factor({
         {value}
       </span>
       {why !== undefined && (
-        <span className="tw-col-start-1 tw-text-[13px] tw-leading-[18px] tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
+        <span className="tw-col-start-1 tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
           {why}
         </span>
       )}
@@ -184,32 +186,130 @@ function MachineArt({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <div className="max-[359px]:tw-w-24 md:tw-row-span-2">
-      <ArtCard
-        key={card.id}
-        src={card.art}
-        fallbackSrc={card.original ?? null}
-        alt={alt}
-        number={`#${card.id}`}
-        sizes="(max-width: 768px) 96px, 150px"
-        priority
-      />
-      <CardPicker
-        label={ot(locale, "machine.pick")}
-        value={value}
-        onChange={onPick}
-        cards={cards.map((entry) => ({
-          id: String(entry.id),
-          thumb: entry.art,
-          name:
-            entry.title === null
-              ? ot(locale, "machine.pickMinting", { id: entry.id })
-              : ot(locale, "machine.pickName", { id: entry.id }),
-          short: String(entry.id),
-        }))}
-      />
+    // On a phone the art and the picker are the grid's own items: the art
+    // beside the card's name, the thumbnails in one row under both.
+    <div className="max-md:tw-contents md:tw-row-span-2">
+      <div className="max-md:tw-col-start-1 max-md:tw-row-start-1 max-[359px]:tw-w-24">
+        <ArtCard
+          key={card.id}
+          src={card.art}
+          fallbackSrc={card.original ?? null}
+          alt={alt}
+          number={`#${card.id}`}
+          sizes="(max-width: 768px) 96px, 150px"
+          priority
+        />
+      </div>
+      <div className="max-md:tw-col-span-2 max-md:tw-row-start-2 max-[359px]:tw-col-span-1">
+        <CardPicker
+          label={ot(locale, "machine.pick")}
+          value={value}
+          onChange={onPick}
+          cards={cards.map((entry) => ({
+            id: String(entry.id),
+            thumb: entry.art,
+            name:
+              entry.title === null
+                ? ot(locale, "machine.pickMinting", { id: entry.id })
+                : ot(locale, "machine.pickName", { id: entry.id }),
+            short: String(entry.id),
+          }))}
+        />
+      </div>
     </div>
   );
+}
+
+/** The address's names for the machine's state. */
+const LINK = { card: "card", days: "days", boost: "boost", sold: "sold" };
+
+/**
+ * The machine's state in the address (the delight judges' "send what selling
+ * does"): read once on arrival, then kept in step with each change, with
+ * replaceState, so the back button is not filled with slider moves. Only
+ * values the machine can show are read.
+ */
+function useMachineLink(
+  model: ReturnType<
+    typeof useBreakable<{ card: string; days: number; beta: number }>
+  >,
+  cards: readonly MachineCard[]
+) {
+  const read = useRef(false);
+  const { set, toggleBreak } = model;
+  useEffect(() => {
+    if (read.current) return;
+    read.current = true;
+    const params = new URLSearchParams(globalThis.location.search);
+    const card = params.get(LINK.card);
+    const days = Number(params.get(LINK.days));
+    const boost = Number(params.get(LINK.boost));
+    const next: { card?: string; days?: number; beta?: number } = {};
+    if (card !== null && cards.some((entry) => String(entry.id) === card)) {
+      next.card = card;
+    }
+    if (
+      Number.isInteger(days) &&
+      days >= 0 &&
+      days <= MAX_DAYS &&
+      params.has(LINK.days)
+    ) {
+      next.days = days;
+    }
+    if (Number.isInteger(boost) && boost >= 100 && boost <= 300) {
+      next.beta = boost;
+    }
+    if (Object.keys(next).length > 0) set(next);
+    if (params.get(LINK.sold) === "1") toggleBreak();
+  }, [cards, set, toggleBreak]);
+  const { state, broken, saved } = model;
+  // The arrival itself writes nothing: a reader who moves nothing keeps a
+  // plain address.
+  const moved = useRef(false);
+  useEffect(() => {
+    if (!moved.current) {
+      moved.current = true;
+      return;
+    }
+    const url = new URL(globalThis.location.href);
+    const shown = broken && saved ? saved : state;
+    url.searchParams.set(LINK.card, shown.card);
+    url.searchParams.set(LINK.days, String(shown.days));
+    url.searchParams.set(LINK.boost, String(shown.beta));
+    if (broken) url.searchParams.set(LINK.sold, "1");
+    else url.searchParams.delete(LINK.sold);
+    globalThis.history.replaceState(globalThis.history.state, "", url);
+  }, [state, broken, saved]);
+}
+
+/**
+ * Send the machine's link: the phone's share sheet where there is one,
+ * else the clipboard. Either can be refused (no permission, an insecure
+ * page, the sheet closed); the button then says so instead of failing
+ * quietly.
+ */
+async function shareLink(title: string): Promise<"copied" | "failed" | "idle"> {
+  const url = globalThis.location.href;
+  const nav = globalThis.navigator;
+  const touch = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
+  if (touch && typeof nav.share === "function") {
+    try {
+      await nav.share({ title, url });
+      return "idle";
+    } catch (error) {
+      // The reader closed the sheet: nothing to report.
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return "idle";
+      }
+    }
+  }
+  try {
+    if (!nav.clipboard) return "failed";
+    await nav.clipboard.writeText(url);
+    return "copied";
+  } catch {
+    return "failed";
+  }
 }
 
 export default function Machine({
@@ -224,7 +324,10 @@ export default function Machine({
     { card: String(cards[0]?.id ?? ""), days: DEFAULT_DAYS, beta: 100 },
     (state) => ({ ...state, days: 0 })
   );
+  useMachineLink(model, cards);
+  const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle");
   const card = cards.find((entry) => String(entry.id) === model.state.card);
+
   if (facts === null || card === undefined) {
     return (
       <div
@@ -259,7 +362,7 @@ export default function Machine({
 
   return (
     <section
-      className={`tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-4 md:tw-p-[22px] ${model.broken ? "tw-border-error/45" : "tw-border-iron-900"}`}
+      className={`tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-4 md:tw-p-[22px] ${EX_MOTION.model} ${model.broken ? "tw-border-error/45" : "tw-border-iron-900"}`}
       data-lens="machine"
       data-broken={model.broken ? "1" : "0"}
       aria-label={ot(locale, "machine.label")}
@@ -273,11 +376,11 @@ export default function Machine({
           onPick={(id) => model.set({ card: id })}
           locale={locale}
         />
-        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-5 tw-text-iron-400">
+        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-[21px] tw-text-iron-400 max-md:tw-col-start-2 max-md:tw-row-start-1 max-[359px]:tw-col-start-1 max-[359px]:tw-row-start-auto">
           <b className={`tw-block ${BOLD}`}>{words.name}</b>
-          {words.copies}
+          <span>{withCc0(words.copies)}</span>
         </p>
-        <div className="tw-col-span-2 tw-mt-2 max-[359px]:tw-col-span-1 md:tw-col-span-1 md:tw-col-start-2 md:tw-mt-0">
+        <div className="tw-col-span-2 tw-mt-2 max-md:tw-row-start-3 max-[359px]:tw-col-span-1 max-[359px]:tw-row-start-auto md:tw-col-span-1 md:tw-col-start-2 md:tw-mt-0">
           <Factor
             label={ot(locale, "machine.days")}
             value={formatCount(locale, days)}
@@ -367,6 +470,21 @@ export default function Machine({
           onToggle={model.toggleBreak}
           label={breakItLabel(locale, ot(locale, "machine.breakEdge"))}
         />
+        {/* The machine's state is in the address: this copy, these days,
+            this boost, sold or not, as a link to send. */}
+        <button
+          type="button"
+          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+          onClick={() => {
+            void shareLink(ot(locale, "machine.label")).then(setCopied);
+          }}
+          data-copy-link=""
+          aria-live="polite"
+        >
+          {copied === "idle" && ot(locale, "machine.copyLink")}
+          {copied === "copied" && ot(locale, "machine.copied")}
+          {copied === "failed" && ot(locale, "machine.copyFailed")}
+        </button>
       </div>
     </section>
   );

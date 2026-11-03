@@ -61,7 +61,7 @@ export function RuleRail({
           <div
             // The rule's lines are a fixed sequence.
             key={index}
-            className={`tw-whitespace-break-spaces tw-py-0.5 tw-font-mono tw-text-[13px] tw-leading-[21px] md:tw-text-[13.5px] ${line.on ? ON_LINE : "tw-text-iron-400 " + closed}`}
+            className={`tw-whitespace-break-spaces tw-py-0.5 tw-font-mono tw-text-sm tw-leading-[21px] ${line.on ? ON_LINE : "tw-text-iron-300 " + closed}`}
             data-rule-on={line.on ? "1" : "0"}
           >
             <span
@@ -117,7 +117,7 @@ export function Readout({
         )}
       </span>
       <p
-        className="tw-m-0 tw-max-w-[600px] tw-text-base tw-leading-[25px] tw-text-iron-300"
+        className="tw-m-0 tw-max-w-[600px] tw-text-base tw-leading-[26px] tw-text-iron-300"
         aria-live="polite"
       >
         {say}
@@ -198,6 +198,8 @@ export default function Lens({
   return (
     <section
       className={`tw-scroll-mt-24 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 ${broken ? "tw-border-error/45" : "tw-border-iron-800"}`}
+      // An anchor for links into the model, as the glossary's: #model-<id>.
+      id={`model-${id}`}
       data-lens={id}
       data-broken={broken ? "1" : "0"}
       aria-label={label}

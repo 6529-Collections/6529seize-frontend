@@ -22,6 +22,12 @@ interface Row {
   readonly body: ReactNode;
   readonly mark: MarkKind;
   readonly refText: string;
+  /**
+   * A word in place of the mark's: the kernel's check and the axiom audit
+   * are reported by the build, which no reader can rerun yet. "Tested"
+   * there would read as "tested, not proved", which is not what they say.
+   */
+  readonly label?: string;
 }
 
 export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
@@ -37,7 +43,11 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         version: p.v("manifest.lean"),
         jobs: p.v("manifest.build.jobs"),
       }),
-      mark: "proved",
+      // A build report no reader can rerun while the source is private:
+      // provenance the reader takes on 6529's word, as the audit beside it,
+      // never the green Proved nor the Tested circle of the vectors.
+      mark: "assumed",
+      label: s("explained.tdh.sure.build.kernelMark"),
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
     {
@@ -61,7 +71,8 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
           native: code("native_decide"),
         }
       ),
-      mark: "tested",
+      mark: "assumed",
+      label: s("explained.tdh.sure.build.kernelMark"),
       refText: s("explained.tdh.sure.build.auditRef"),
     },
     {
@@ -136,7 +147,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
                 <span className="tw-block tw-text-[17px] tw-font-semibold tw-leading-[25px] tw-text-iron-50">
                   {row.what}
                 </span>
-                <p className="tw-m-0 tw-mt-1.5 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300">
+                <p className="tw-m-0 tw-mt-1.5 tw-max-w-[620px] tw-text-base tw-leading-[26px] tw-text-iron-300">
                   {row.body}
                 </p>
               </div>
@@ -146,6 +157,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
                   locale={locale}
                   size="sm"
                   refText={row.refText}
+                  {...(row.label ? { label: row.label } : {})}
                 />
               </span>
             </li>

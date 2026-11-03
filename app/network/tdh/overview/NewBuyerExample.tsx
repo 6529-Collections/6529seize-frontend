@@ -4,9 +4,11 @@ import Tag from "@/components/explained/marks/Tag";
 import { ageText } from "@/components/explained/age";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import type { SupportedLocale } from "@/i18n/locales";
+import { ENGINE } from "@/lib/explained/engine";
 import { factFromSnapshot } from "@/lib/explained/facts";
 import {
   formatCents,
+  formatCount,
   formatUtcClock,
   formatUtcDay,
   formatUtcWeekday,
@@ -20,7 +22,10 @@ import { firstCount, shareOfWindow } from "./explain";
  * the result after next, and the timeline shows why: the first snapshot
  * finds less than a whole day. The arrival is a constructed example
  * (`example.firstCard.arrivedAt`); the dates and the gap are computed from
- * it by P26 §4's rule, and the rate is the card's real one.
+ * it by P26 §4's rule, and the rate is the card's real one. What a day
+ * adds is P26 §8.2's BASE, rounded to a whole TDH once per card: the first
+ * whole day adds BASE(rate, 1), and each later day the floor or the ceiling
+ * of the rate a day, never the rate itself.
  */
 const EXAMPLE_CARD = 562;
 /** The timeline spans four days from the day before the arrival. */
@@ -57,6 +62,18 @@ export default function NewBuyerExample({
     `${(shareOfWindow(iso, start, WINDOW_DAYS) * 100).toFixed(2)}%`;
   const arrivalShare = at(arrived);
   const rateText = formatCents(locale, rate);
+  // The fact is the rate a day in TDH (12.71); P26 counts it in cents.
+  const cents = Math.round(rate * 100);
+  const first = ENGINE.baseTdh(cents, 1);
+  const lo = Math.floor(cents / 100);
+  const hi = Math.ceil(cents / 100);
+  const step =
+    lo === hi
+      ? formatCount(locale, lo)
+      : ot(locale, "explain.stepRange", {
+          lo: formatCount(locale, lo),
+          hi: formatCount(locale, hi),
+        });
   return (
     <div data-ans="new" data-ex-allow-number="">
       {/* The result speaks to "you" with real dates, so it carries its own
@@ -75,6 +92,8 @@ export default function NewBuyerExample({
           gap: ageText(locale, count.gapMinutes),
           firstDate: formatUtcWeekday(locale, count.firstDate),
           publish: formatUtcClock(locale, publish),
+          first: formatCount(locale, first),
+          step,
           rate: rateText,
         })}
       </p>
@@ -111,7 +130,7 @@ export default function NewBuyerExample({
           style={{ left: arrivalShare }}
         />
         <span
-          className="tw-absolute tw-top-[84px] -tw-translate-x-1/2 tw-whitespace-nowrap tw-text-[13px] tw-leading-[18px] tw-text-iron-400"
+          className="tw-absolute tw-top-[84px] -tw-translate-x-1/2 tw-whitespace-nowrap tw-text-[13px] tw-leading-5 tw-text-iron-400"
           style={{ left: arrivalShare }}
         >
           {ot(locale, "explain.arrives", {
@@ -119,7 +138,7 @@ export default function NewBuyerExample({
           })}
         </span>
       </div>
-      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {ot(locale, "explain.timeline")}
       </p>
     </div>

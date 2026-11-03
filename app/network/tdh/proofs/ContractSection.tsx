@@ -1,14 +1,37 @@
+import type { ReactNode } from "react";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { fill } from "@/components/explained/i18n";
 import StampLine from "@/components/explained/marks/StampLine";
 import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
+import { FactText } from "@/components/explained/facts/FactText";
 import { CONTRACT_CHECKS } from "./_lib/checks";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
 import Section, { Para } from "./Section";
+
+/**
+ * The whole transaction's gas, exactly: the contract's run plus its base
+ * cost and calldata, the sum of the table's rows. The record rounds it.
+ */
+function transactionTotal(
+  locale: SupportedLocale,
+  facts: PageFacts
+): ReactNode {
+  const execution = facts.num("proofs.pair.executionGas");
+  const intrinsic = facts.num("proofs.pair.intrinsicGas");
+  if (execution === null || intrinsic === null) {
+    return facts.print("proofs.pair.transactionGas");
+  }
+  // Derived from the record's own counts, so it carries their source.
+  return (
+    <FactText fact={facts.entry("proofs.pair.executionGas")} locale={locale}>
+      {formatCount(locale, execution + intrinsic)}
+    </FactText>
+  );
+}
 
 /**
  * One submission's gas, part by part: the two verifiers, the rest of the
@@ -76,11 +99,103 @@ function GasTable({
             {fill(locale, k("gas.total"))}
           </th>
           <td className="tw-whitespace-nowrap tw-py-2 tw-text-right tw-font-mono tw-text-[14px] tw-font-semibold tw-tabular-nums tw-text-iron-50">
-            {facts.print("proofs.pair.transactionGas")}
+            {transactionTotal(locale, facts)}
           </td>
         </tr>
       </tbody>
     </table>
+  );
+}
+
+/**
+ * One submission's gas as one bar beside its table: the two verifiers take
+ * most of it. The shares are the table's own numbers.
+ */
+function GasBar({
+  locale,
+  facts,
+}: {
+  readonly locale: SupportedLocale;
+  readonly facts: PageFacts;
+}) {
+  const execution = facts.num("proofs.pair.executionGas");
+  const verifyA = facts.num("proofs.gas.verifyA");
+  const verifyB = facts.num("proofs.gas.verifyB");
+  const intrinsic = facts.num("proofs.pair.intrinsicGas");
+  if (
+    execution === null ||
+    verifyA === null ||
+    verifyB === null ||
+    intrinsic === null
+  ) {
+    return null;
+  }
+  // The table's own rows: the rest is the run less the two verifiers.
+  const rest = Math.max(0, execution - verifyA - verifyB);
+  const total = verifyA + verifyB + rest + intrinsic;
+  if (total <= 0) return null;
+  const parts = [
+    {
+      id: "barA",
+      value: verifyA,
+      tone: "tw-bg-iron-100",
+      ink: "tw-text-[#0D0D0F]",
+    },
+    {
+      id: "barB",
+      value: verifyB,
+      tone: "tw-bg-iron-400",
+      ink: "tw-text-[#0D0D0F]",
+    },
+    {
+      id: "barRest",
+      value: rest,
+      tone: "tw-bg-iron-600",
+      ink: "tw-text-iron-50",
+    },
+    {
+      id: "barBase",
+      value: intrinsic,
+      tone: "tw-bg-iron-800",
+      ink: "tw-text-iron-50",
+    },
+  ] as const;
+  const pct = (value: number) => `${Math.round((value / total) * 100)}%`;
+  return (
+    <figure
+      className="tw-m-0 tw-self-start"
+      data-fig="gas-bar"
+      data-ex-allow-number=""
+    >
+      <figcaption className={`${EX_TEXT.label} tw-mb-3`}>
+        {fill(locale, k("gas.barLabel"))}
+      </figcaption>
+      <div
+        className="tw-flex tw-h-10 tw-w-full tw-overflow-hidden tw-rounded-md"
+        aria-hidden="true"
+      >
+        {parts.map((part) => (
+          <span
+            key={part.id}
+            className={`tw-grid tw-min-w-0 tw-place-items-center tw-border-0 tw-border-r-2 tw-border-solid tw-border-[#0D0D0F] tw-text-[13px] tw-font-semibold last:tw-border-r-0 ${part.tone} ${part.ink}`}
+            style={{ width: pct(part.value) }}
+          >
+            {part.value / total >= 0.12 ? pct(part.value) : null}
+          </span>
+        ))}
+      </div>
+      <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-4 tw-gap-y-1.5 tw-p-0 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300 sm:tw-grid-cols-2">
+        {parts.map((part) => (
+          <li key={part.id} className="tw-flex tw-items-center tw-gap-2">
+            <span
+              className={`tw-inline-block tw-size-2.5 tw-shrink-0 tw-rounded-sm ${part.tone}`}
+              aria-hidden="true"
+            />
+            {fill(locale, k(`gas.${part.id}`))} {pct(part.value)}
+          </li>
+        ))}
+      </ul>
+    </figure>
   );
 }
 
@@ -104,8 +219,26 @@ export default function ContractSection({
       heading={rich(locale, k("s4.heading"))}
       figure={
         <div className="tw-grid tw-gap-6">
+          {/* The gas table, its note directly under its total, and beside
+              them, from a desktop up, the same submission as one bar. */}
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-12 tw-gap-y-6 lg:tw-grid-cols-[minmax(0,620px)_minmax(0,1fr)] lg:tw-gap-y-4">
+            <p className={`${EX_TEXT.body} tw-m-0 lg:tw-col-span-2`}>
+              {rich(locale, k("s4.p2"))}
+            </p>
+            <div className="tw-grid tw-grid-cols-1 tw-gap-y-3">
+              <GasTable locale={locale} facts={facts} />
+              <p className={`${EX_TEXT.cap} tw-m-0 tw-max-w-[540px]`}>
+                {rich(locale, k("gas.note"), {
+                  submit: facts.print("proofs.pair.submitGas"),
+                  cold: facts.print("proofs.pair.coldCallGas"),
+                  total: transactionTotal(locale, facts),
+                })}
+              </p>
+            </div>
+            <GasBar locale={locale} facts={facts} />
+          </div>
           <ol
-            className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-p-0 md:tw-grid-cols-2 lg:tw-grid-cols-4"
+            className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-p-0 md:tw-grid-cols-2 lg:tw-grid-cols-1"
             aria-label={fill(locale, k("s4.checks"), {
               count: String(CONTRACT_CHECKS.length),
             })}
@@ -114,7 +247,7 @@ export default function ContractSection({
             {CONTRACT_CHECKS.map((check, index) => (
               <li
                 key={check.id}
-                className="tw-flex tw-flex-col tw-gap-1.5 tw-bg-iron-950 tw-px-5 tw-py-[18px]"
+                className="tw-flex tw-flex-col tw-gap-1.5 tw-bg-iron-950 tw-px-5 tw-py-[18px] lg:tw-grid lg:tw-grid-cols-[24px_minmax(0,200px)_minmax(0,1fr)_minmax(0,300px)] lg:tw-items-baseline lg:tw-gap-x-6 lg:tw-py-4"
                 data-check={check.id}
               >
                 <span className="tw-text-[13px] tw-font-semibold tw-text-primary-300">
@@ -128,24 +261,27 @@ export default function ContractSection({
                     bytes: facts.print("proofs.statement.bytes"),
                     words: facts.print("proofs.statement.words"),
                     horizon: facts.print("proofs.contract.horizon"),
+                    recent: facts.print("proofs.contract.blockhashWindow"),
+                    history: facts.print("proofs.contract.historyWindow"),
                   })}
                 </span>
-                {/* Every cell ends on its refusal, so the grid's lower edge
-                    lines up; the record names no error for two checks. */}
-                <span className="tw-mt-auto tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
-                  {fill(locale, k("check.refusal"))}
-                  {check.refusals.length > 0 ? (
-                    check.refusals.map((name) => (
+                {/* The refusals follow the check's own text: the errors
+                    the contract, or its two verifiers, revert with for that
+                    check. From a desktop up each check is one row of a
+                    ledger (number, name, what it checks, refused as), so no
+                    cell is left with a hole under a short text. */}
+                <span className="tw-flex tw-flex-col tw-gap-1 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400 lg:tw-pt-0">
+                  <span>{fill(locale, k("check.refusal"))}</span>
+                  <span className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5">
+                    {check.refusals.map((name) => (
                       <code
                         key={name}
                         className="tw-font-mono tw-text-[13px] tw-text-iron-50"
                       >
                         {name}
                       </code>
-                    ))
-                  ) : (
-                    <span>{fill(locale, k("check.refusalUnnamed"))}</span>
-                  )}
+                    ))}
+                  </span>
                 </span>
               </li>
             ))}
@@ -168,14 +304,14 @@ export default function ContractSection({
             </span>
           </div>
           <LimitNote title={rich(locale, k("s4.limitTitle"))}>
-            {rich(locale, k("s4.limitBody"))}
+            {rich(locale, k("s4.limitBody"), {
+              audited: facts.print("proofs.contract.auditedOn", "long"),
+            })}
           </LimitNote>
         </div>
       }
     >
       <Para>{rich(locale, k("s4.p1"), { decision: "D128" })}</Para>
-      <Para>{rich(locale, k("s4.p2"))}</Para>
-      <GasTable locale={locale} facts={facts} />
     </Section>
   );
 }

@@ -1,8 +1,9 @@
+"use client";
+
 import Link from "next/link";
-import { DAY, REGISTRY_V14 } from "@/components/explained/engine/tdh";
+import { DAY, REGISTRY_V14, finalTdh } from "@/components/explained/engine/tdh";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import {
   Para,
@@ -11,7 +12,10 @@ import {
   StatementLabel,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
+import { useState, type ReactNode } from "react";
+import { Seg, Slider } from "@/components/explained/lens/controls";
 import { ht, type HowKey } from "./copy";
+import { traceOf, type Trace } from "./trace";
 
 /**
  * Every step of P26, in its order (the owner's brief for this chapter: the
@@ -28,12 +32,27 @@ interface Step {
   readonly id: string;
   readonly href: string;
   readonly sections: string;
-  readonly rule: (n: (value: number) => string) => string;
+  /** `n` prints a count, `c` a multiplier to two decimals. */
+  readonly rule: (
+    n: (value: number) => string,
+    c: (value: number) => string
+  ) => string;
   /** A line that sums a longer rule up; the Specification states it exactly. */
   readonly summary?: boolean;
 }
 
 const STEPS: readonly Step[] = [
+  {
+    id: "logs",
+    href: "/network/tdh/specification#s3",
+    sections: "§3",
+    rule: () =>
+      [
+        "every log of the four contracts, once, decoded strictly",
+        "in canonical order; a debit with too few copies: no result",
+      ].join("\n"),
+    summary: true,
+  },
   {
     id: "snapshot",
     href: "#part-a",
@@ -44,13 +63,22 @@ const STEPS: readonly Step[] = [
     id: "eligible",
     href: "#step-3",
     sections: "§5.1",
-    rule: (n) => `firstMint ≤ T − ${n(R.eligibility_min_age_s)}`,
+    rule: (n) =>
+      [
+        `Memes, Gradients: firstMint ≤ T − ${n(R.eligibility_min_age_s)}`,
+        "NextGen:          minted at or before B",
+      ].join("\n"),
   },
   {
     id: "editions",
     href: "#part-b",
     sections: "§5.2",
-    rule: () => "E = max(minted + adj, floor), H = max(E)",
+    rule: (n) =>
+      [
+        "E = max(minted + adj, floor), H = max(E)",
+        `floor = min(totalMax, ${n(R.edition_floor_cap)}) if minted + adj < ${n(R.edition_floor_threshold)}`,
+        "  and totalMax > 0, else 0",
+      ].join("\n"),
   },
   {
     id: "rates",
@@ -58,16 +86,23 @@ const STEPS: readonly Step[] = [
     sections: "§5.3, §8.1",
     rule: (n) =>
       [
-        "Meme:     RATE(H, E), RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
+        "Meme:     RATE(H, E)",
         `Gradient: RATE(H, G), at least ${n(R.gradient_rate_minimum)} cents`,
-        `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)}`,
+        `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)},`,
+        "          Nc = tokens in collection c",
+        "RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
       ].join("\n"),
   },
   {
     id: "seasons",
     href: "#part-c",
     sections: "§5.4",
-    rule: () => "season k = Memes start_k … start_(k+1) − 1",
+    rule: (n, c) =>
+      [
+        "season k = Memes start_k … start_(k+1) − 1",
+        `pays ${c(R.season_bonus / 1_000_000)} when not the current season`,
+        `  and k ≤ ${n(R.last_boosted_season)}`,
+      ].join("\n"),
   },
   {
     id: "identities",
@@ -76,7 +111,8 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member freshly linked to all (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways to every other,`,
+        `  those links all from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 10)} (D136)`,
       ].join("\n"),
     summary: true,
   },
@@ -92,7 +128,10 @@ const STEPS: readonly Step[] = [
     href: "#step-8",
     sections: "§4.3, §7.2, §8.2",
     rule: (n) =>
-      `raw = Σ (T − a) div ${n(R.day_s)}; base = (rate × raw + 50) div 100`,
+      [
+        `raw = Σ (T − a) div ${n(R.day_s)}`,
+        "base = (rate × raw + 50) div 100",
+      ].join("\n"),
   },
   {
     id: "records",
@@ -106,6 +145,7 @@ const STEPS: readonly Step[] = [
     sections: "§8.3",
     rule: () =>
       "beta = HALFUP((10⁶ + meme_u + grad_u) ÷ 10⁴)\nmeme_u: seasons and sets, grad_u: Gradients, in millionths",
+    summary: true,
   },
   {
     id: "final",
@@ -116,53 +156,78 @@ const STEPS: readonly Step[] = [
   {
     id: "totals",
     href: "#part-n",
-    sections: "§8.5",
-    rule: () => "total = Σ identity finals",
+    sections: "§8.5, §8.7",
+    rule: () =>
+      [
+        "total = Σ identity finals",
+        "past §8.7's range (2⁵³, 2⁶⁴): no result, none published",
+      ].join("\n"),
+  },
+  {
+    // P26 §8.6: derived data, not part of §9's output, but the rate behind
+    // the overview's "tomorrow's result adds", so the calculation is whole.
+    id: "dailyRate",
+    href: "/network/tdh/specification#s8-6",
+    sections: "§8.6",
+    rule: () => "rate_e4 = beta × Σ r over days(a) > 0, in 10⁻⁴ TDH a day",
+  },
+  {
+    // P26 §9 defines the result, not its roots: their encoding and hashing
+    // are P28's and P53's (§4.1, §4.2), as the rule's last line says.
+    id: "output",
+    href: "/network/tdh/specification#s9",
+    sections: "§9",
+    rule: () =>
+      [
+        "header (N, B, hash(B), T,",
+        "  rule version, registry hash)",
+        "per identity: key, wallets, beta, final, per-token values",
+        "roots: P28 and P53 §4.1–§4.2, not P26",
+      ].join("\n"),
+    summary: true,
   },
 ];
 
 /**
- * One copy through every step (the full calculation by hand): a 310-copy
- * card held one whole hundred days, in a wallet of its own with one
- * Gradient. Every number is the engine's, on today's H.
+ * One rule line as code: the columns its padding lines up on a desktop
+ * collapse to one space on a phone, where the line wraps, and a date never
+ * breaks at its hyphens.
  */
-export interface Trace {
-  readonly h: number;
-  readonly edition: number;
-  readonly days: number;
-  readonly rateCents: number;
-  readonly base: number;
-  readonly betaCents: number;
-  readonly final: number;
+function ruleLine(line: string): ReactNode[] {
+  return line.split(/( {2,}|\d{4}-\d{2}-\d{2})/).map((part, index, all) => {
+    if (/^ {2,}$/.test(part)) {
+      // A line's own indent stays a two-space hang on a phone; padding
+      // inside it becomes one space.
+      const phone = index === 1 && all[0] === "" ? "  " : " ";
+      return (
+        // The parts of a line are fixed in order.
+        <span key={index}>
+          <span className="max-md:tw-hidden">{part}</span>
+          <span className="md:tw-hidden">{phone}</span>
+        </span>
+      );
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(part)) {
+      return (
+        // The parts of a line are fixed in order.
+        <span key={index} className="tw-whitespace-nowrap">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
 }
 
-export function traceOf(h: number, edition: number, nMemes: number): Trace {
-  const days = 100;
-  const rateCents = ENGINE.rateCents(h, edition);
-  const base = ENGINE.baseTdh(rateCents, days);
-  const betaCents = ENGINE.boostCents({
-    fullSets: 0,
-    gradients: 1,
-    completeSeasons: [],
-    genesis: false,
-    nakamoto: false,
-    nMemes,
-  });
-  return {
-    h,
-    edition,
-    days,
-    rateCents,
-    base,
-    betaCents,
-    final: ENGINE.finalTdh(base, betaCents),
-  };
-}
+/** The specification's binary64 tie (§8.4): FINAL(25, 114). */
+const FINAL_TIE = { base: 25, beta: 114 } as const;
 
 function traceLine(
   id: string,
   t: Trace,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  /** What tomorrow's result adds: the same holder a day later, rounded per card. */
+  tomorrow: number
 ): string | null {
   const n = (value: number) => formatCount(locale, value);
   const c = (cents: number) => formatCents(locale, cents / 100);
@@ -171,36 +236,108 @@ function traceLine(
     snapshot: {},
     eligible: {},
     editions: { E: n(t.edition), H: n(t.h) },
-    rates: { H: n(t.h), E: n(t.edition), cents: n(t.rateCents) },
+    rates: {
+      H: n(t.h),
+      E: n(t.edition),
+      cents: n(t.rateCents),
+      grad: n(t.gradRateCents),
+    },
     seasons: {},
     identities: {},
     stacks: { days: n(t.days) },
-    records: { base: n(t.base) },
+    records: {
+      card: n(t.base),
+      grad: n(t.gradBase),
+      base: n(t.base + t.gradBase),
+    },
     boost: { cents: n(t.betaCents), beta: c(t.betaCents) },
     totals: { final: n(t.final) },
+    // Both tokens are held a whole day or more, so both rates count. The
+    // rate is derived data (§8.6); a result adds BASE and FINAL rounded per
+    // card (§8.2, §8.4), so tomorrow's step is the engine's, not the rate.
+    dailyRate: {
+      name: "rate_e4",
+      e4: n(t.betaCents * (t.rateCents + t.gradRateCents)),
+      rate: formatCents(
+        locale,
+        (t.betaCents * (t.rateCents + t.gradRateCents)) / 10_000
+      ),
+      next: n(tomorrow),
+    },
   };
   // The base and the final are P26's notation with the trace's numbers in
   // them: code, not copy, as the rules beside them are. Beta is in cents.
   if (id === "base") {
-    return `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`;
+    // The card's line, then the Gradient's: one base per token.
+    return [
+      `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`,
+      `(${n(t.gradRateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.gradBase)}`,
+    ].join("\n");
   }
   if (id === "final") {
     // Zero-width spaces after each bracket let a narrow column break there.
-    return `HALFUP(\u200bB64(\u200b${n(t.base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(t.final)}`;
+    const one = (base: number, final: number) =>
+      `HALFUP(\u200bB64(\u200b${n(base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(final)}`;
+    // The tie a re-implementer meets at this step is the table's
+    // footnote (finalTieNote), so this row keeps to the worked numbers.
+    return [
+      one(t.base, t.cardFinal),
+      one(t.gradBase, t.gradFinal),
+      `${n(t.cardFinal)} + ${n(t.gradFinal)} = ${n(t.final)}`,
+    ].join("\n");
   }
   const params = values[id];
   return params === undefined ? null : ht(locale, key, params);
 }
 
+/** Step 11's footnote: the binary64 tie of §8.4, from the engine. */
+function finalTieNote(locale: SupportedLocale): string {
+  const n = (value: number) => formatCount(locale, value);
+  return ht(locale, "explained.tdh.how.trace.finalTie", {
+    call: `FINAL(${n(FINAL_TIE.base)}, ${n(FINAL_TIE.beta)})`,
+    final: n(finalTdh(FINAL_TIE.base, FINAL_TIE.beta)),
+    decimal: n(Math.floor((FINAL_TIE.base * FINAL_TIE.beta + 50) / 100)),
+  });
+}
+
+/** What the worked example is computed from, read on the server. */
+export interface TraceInputs {
+  readonly h: number;
+  readonly nMemes: number;
+  readonly gradRateCents: number;
+  /** The editions a reader can pick, the first shown first; none below the threshold. */
+  readonly editions: readonly number[];
+}
+
+const DAYS_MAX = 1000;
+
 export default function StepsInOrder({
   locale,
-  trace,
+  inputs,
 }: {
   readonly locale: SupportedLocale;
-  /** The worked example, or null when the editions could not be read. */
-  readonly trace: Trace | null;
+  /** The worked example's inputs, or null when the editions could not be read. */
+  readonly inputs: TraceInputs | null;
 }) {
   const n = (value: number) => formatCount(locale, value);
+  // The worked column is live: pick the card's edition and the days, and
+  // every line beside the rules recomputes, in P26's order.
+  const [edition, setEdition] = useState(inputs?.editions[0] ?? 0);
+  const [days, setDays] = useState(100);
+  const trace: Trace | null =
+    inputs === null
+      ? null
+      : traceOf(inputs.h, edition, inputs.nMemes, inputs.gradRateCents, days);
+  const tomorrow =
+    inputs === null || trace === null
+      ? 0
+      : traceOf(
+          inputs.h,
+          edition,
+          inputs.nMemes,
+          inputs.gradRateCents,
+          days + 1
+        ).final - trace.final;
   return (
     <Section id="steps">
       <Statement
@@ -214,15 +351,64 @@ export default function StepsInOrder({
         <Para>{ht(locale, "explained.tdh.how.order.body")}</Para>
       </Statement>
       <figure className="tw-m-0 tw-mt-12" data-fig="steps">
+        {trace !== null && inputs !== null && (
+          // The worked holder is a new example, so it is introduced before
+          // step 00 and the blue column reads as one story from the start;
+          // its two controls drive every blue line below.
+          <div
+            className="tw-mb-5 tw-grid tw-max-w-[860px] tw-gap-3"
+            data-lens="trace"
+          >
+            <p className="tw-m-0 tw-max-w-[580px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              {ht(locale, "explained.tdh.how.trace.caption", {
+                edition: n(trace.edition),
+                threshold: n(R.edition_floor_threshold),
+                days: n(trace.days),
+              })}
+            </p>
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
+              <Seg
+                label={ht(locale, "explained.tdh.how.trace.edition")}
+                attr="edition"
+                value={String(edition)}
+                onChange={(value) => setEdition(Number(value))}
+                options={inputs.editions.map((copies) => ({
+                  value: String(copies),
+                  label: ht(locale, "explained.tdh.how.trace.editionOption", {
+                    copies: n(copies),
+                  }),
+                }))}
+              />
+              <div className="tw-flex tw-min-w-[220px] tw-flex-1 tw-flex-col tw-gap-1">
+                <span className="tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
+                  {ht(locale, "explained.tdh.how.trace.daysValue", {
+                    days: n(days),
+                  })}
+                </span>
+                <Slider
+                  label={ht(locale, "explained.tdh.how.trace.days")}
+                  value={days}
+                  min={1}
+                  max={DAYS_MAX}
+                  attr="days"
+                  valueText={ht(locale, "explained.tdh.how.trace.daysValue", {
+                    days: n(days),
+                  })}
+                  onChange={setDays}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         <ol className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0">
           {STEPS.map((step, index) => (
             <li
               key={step.id}
-              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_120px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,190px)_minmax(0,1fr)_minmax(0,300px)_110px]"
+              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_140px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,150px)_minmax(0,1fr)_minmax(0,290px)_104px]"
               data-step={step.id}
             >
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-400">
-                {String(index + 1).padStart(2, "0")}
+                {String(index).padStart(2, "0")}
               </span>
               <Link
                 className={`tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-no-underline hover:tw-underline ${EX_FOCUS}`}
@@ -231,42 +417,79 @@ export default function StepsInOrder({
                 {ht(locale, `explained.tdh.how.order.${step.id}` as HowKey)}
               </Link>
               {/* An operator stays with what follows it, so a formula
-                  breaks between terms, never inside one. */}
-              <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
-                {step.rule(n).replace(/([≤−×÷=+→]) /g, "$1\u00a0")}
+                  breaks between terms, never inside one; a wrapped line
+                  hangs two characters in. */}
+              <code className="tw-col-start-2 tw-block tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
+                {step
+                  .rule(n, (value) => formatCents(locale, value))
+                  .replace(/([≤−×÷=+→]) /g, "$1\u00a0")
+                  .split("\n")
+                  .map((line, index) => (
+                    // Each rule line hangs on its own: a wrapped line's
+                    // rest sits two characters in, under its own start.
+                    <span
+                      // A rule's lines are fixed in order.
+                      key={index}
+                      className="tw-block tw-pl-[2ch] tw-indent-[-2ch]"
+                    >
+                      {ruleLine(line)}
+                    </span>
+                  ))}
+                {/* A gist is marked where it is read, beside the rule
+                    itself, so it is never taken for the exact rule. */}
+                {step.summary === true && (
+                  <span
+                    className="tw-mt-1 tw-block tw-font-sans tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400"
+                    data-abridged=""
+                  >
+                    {ht(locale, "explained.tdh.how.order.summary")}
+                  </span>
+                )}
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-start-2 tw-whitespace-pre-line tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
-                  {traceLine(step.id, trace, locale)}
+                  {traceLine(step.id, trace, locale, tomorrow)}
                 </span>
               )}
               <span
                 className={`tw-col-start-2 md:tw-col-start-4 md:tw-row-start-1 md:tw-text-right xl:tw-col-start-auto xl:tw-row-start-auto ${EX_TEXT.small}`}
               >
-                {`P26 ${step.sections}`}
-                {step.summary === true &&
-                  ` · ${ht(locale, "explained.tdh.how.order.summary")}`}
+                P26{" "}
+                {step.sections.split(", ").map((section, index) => (
+                  <span key={section}>
+                    {index > 0 && ", "}
+                    <Link
+                      className={`tw-text-inherit tw-underline tw-decoration-iron-600 tw-underline-offset-2 hover:tw-text-iron-50 ${EX_FOCUS}`}
+                      href={`/network/tdh/specification#s${section.slice(1).replace(".", "-")}`}
+                    >
+                      {section}
+                    </Link>
+                  </span>
+                ))}
               </span>
             </li>
           ))}
         </ol>
+        {trace !== null && (
+          // The one rounding trap of step 11, computed by the engine: the
+          // specification's tie (§8.4), where the decimal product rounds
+          // the other way.
+          <p
+            className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+            data-trace-note="final"
+          >
+            {finalTieNote(locale)}
+          </p>
+        )}
         <figcaption className="tw-mt-4 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
           {rich(locale, "explained.tdh.how.order.caption", {
             div: <code className={CODE}>div</code>,
             halfup: <code className={CODE}>HALFUP</code>,
             b64: <code className={CODE}>B64</code>,
           })}
-          {trace !== null && (
-            <>
-              {" "}
-              <span className="tw-text-iron-400">
-                {ht(locale, "explained.tdh.how.trace.caption")}
-              </span>
-            </>
-          )}
         </figcaption>
       </figure>
     </Section>

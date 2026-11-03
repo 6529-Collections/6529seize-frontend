@@ -113,8 +113,17 @@ export const EX_TEXT = {
   body: "tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-text-[18px] md:tw-leading-[29px]",
   /** cards, answers, tables: 15/24 */
   small: "tw-text-[15px] tw-leading-6",
-  /** captions: 15/23, ink-3 */
-  cap: "tw-text-[15px] tw-leading-[23px] tw-text-iron-400",
+  /**
+   * captions: 15/24, ink-3, for what a figure is and where it came from.
+   * One line height with `small`, so the chapter keeps to one 15 px size.
+   */
+  cap: "tw-text-[15px] tw-leading-6 tw-text-iron-400",
+  /**
+   * A short line that states a claim (a figure's finding, a card's answer,
+   * a check's limit): `small`, in ink-2. Grey ink-3 is for meta and
+   * sources; a claim set in it reads as a footnote.
+   */
+  claim: "tw-text-[15px] tw-leading-6 tw-text-iron-300",
   /** source lines only: 13/20 */
   meta: "tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400",
   /** label and eyebrow: 12/16 capitals */
@@ -140,8 +149,10 @@ export const EX_SPACE = [4, 8, 12, 16, 20, 24, 32, 48, 64, 80, 120] as const;
 export const EX_LAYOUT = {
   /** the page's gutters: 20 px on a phone, 48 px on a desktop */
   page: "tw-mx-auto tw-w-full tw-max-w-[1244px] tw-px-5 md:tw-px-12",
-  /** a section: 120 px above on a desktop, 76 on a phone */
-  section: "tw-pt-[76px] md:tw-pt-[120px]",
+  /** a section: 84 px above on a desktop, 72 on a phone, so text to text stays at 112 or less */
+  section: "tw-pt-[72px] md:tw-pt-[84px]",
+  /** the first section under a hero: 104 px on a desktop, so the hero keeps its first screen */
+  sectionAfterHero: "tw-pt-[72px] md:tw-pt-[104px]",
   /** a tight section: 80 px, 52 on a phone */
   sectionTight: "tw-pt-[52px] md:tw-pt-20",
   /** the paragraph gap: 18 px, 0.62 of a desktop line */
@@ -150,8 +161,10 @@ export const EX_LAYOUT = {
   ed: "tw-grid tw-grid-cols-1 tw-gap-y-4 lg:tw-grid-cols-[192px_minmax(0,660px)_minmax(0,236px)] lg:tw-gap-x-8 lg:tw-gap-y-0",
   edWide: "lg:tw-col-span-2",
   edFull: "lg:tw-col-span-3",
-  /** the statement row: heading left, prose right, 5 : 6, 64 px apart */
-  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:tw-gap-x-16",
+  /** the statement row: heading left, prose right, 6 : 5, 64 px apart, so a
+   * statement heading keeps to three lines; beside long prose the heading
+   * stays in view as the prose scrolls past it */
+  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-gap-x-16 lg:[&>*:first-child]:tw-sticky lg:[&>*:first-child]:tw-top-28",
 } as const;
 
 /** Radius (EXPLAINED.md §5.3): models 16, panels 12, controls 8, tags 4. */
@@ -180,6 +193,14 @@ export const EX_MOTION = {
   model:
     "tw-transition-all tw-duration-150 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
   live: "tw-transition-all tw-duration-[400ms] tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
+  /**
+   * A model's geometry (a bar's width, a dot's place): 160 ms on the 6529
+   * easing, instant under reduced motion. Inside a lens, elements with
+   * inline geometry and SVG shapes get it from the global rule in
+   * styles/globals.css; this class is for one outside a lens.
+   */
+  geometry:
+    "tw-transition-[left,top,width,height,transform] tw-duration-[160ms] tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none",
 } as const;
 
 /** The focus ring: 2 px blue, everywhere. */

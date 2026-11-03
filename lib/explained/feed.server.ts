@@ -1,5 +1,5 @@
+import { apiUrl } from "@/services/api/api-endpoints";
 import { cache } from "react";
-import { publicEnv } from "@/config/env";
 import { loadFormalManifest } from "@/lib/tdh/formal/loadFormalManifest.server";
 import {
   LATEST_DAY_REVALIDATE_SECONDS,
@@ -113,15 +113,24 @@ interface NftsRow {
   readonly id?: unknown;
   readonly mint_date?: unknown;
   readonly thumbnail?: unknown;
+  /** The original file: the card's art while no scaled image is listed. */
+  readonly image?: unknown;
+  readonly tdh?: unknown;
+  readonly tdh__raw?: unknown;
 }
 
 /** 6529.io's own image host: the only one a card's art is taken from. */
 const ART_HOST = "https://d3lqz0a4bldqgf.cloudfront.net/images/";
 
-/** Each Meme's first mint and its scaled art, from 6529.io's `nfts`. */
+/**
+ * Each Meme's first mint, its scaled art and the rate 6529.io's own TDH
+ * applies to it (`tdh ÷ tdh__raw`: its TDH over its days held), from
+ * 6529.io's `nfts`.
+ */
 interface CardMints {
   readonly mints: ReadonlyMap<number, string>;
   readonly art: ReadonlyMap<number, string>;
+  readonly rates: ReadonlyMap<number, number>;
 }
 
 /** "2026-10-16T09:06:23Z": an instant as the facts layer writes it. */
@@ -189,8 +198,9 @@ async function readAllPages<Row>(base: string): Promise<Row[] | null> {
 export async function loadFirstMints(): Promise<CardMints> {
   const mints = new Map<number, string>();
   const art = new Map<number, string>();
+  const rates = new Map<number, number>();
   const rows = await readAllPages<NftsRow>(
-    `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&`
+    apiUrl(`/api/nfts?contract=${REGISTRY_V14.memes}&`)
   );
   for (const row of rows ?? []) {
     if (typeof row.id !== "number") {
@@ -206,49 +216,108 @@ export async function loadFirstMints(): Promise<CardMints> {
       row.thumbnail.startsWith(ART_HOST)
     ) {
       art.set(row.id, row.thumbnail);
+    } else if (
+      typeof row.image === "string" &&
+      row.image.startsWith(ART_HOST)
+    ) {
+      art.set(row.id, row.image);
+    }
+    if (
+      typeof row.tdh === "number" &&
+      typeof row.tdh__raw === "number" &&
+      row.tdh > 0 &&
+      row.tdh__raw > 0
+    ) {
+      rates.set(row.id, row.tdh / row.tdh__raw);
     }
   }
-  return { mints, art };
+  return { mints, art, rates };
 }
 
 /**
- * One card from 6529.io's `memes_extended_data`. `edition_size` counts the
- * copies that exist now; `edition_size_floor` is the edition 6529.io's TDH
- * counts (P26 §5.2's E): the minted count, burns included, or the claim's
- * floor while fewer than 300 are minted. So from 300 on the floor field is
- * the minted count, and below 300 the size is.
+ * One card from 6529.io's `memes_extended_data`. `edition_size` sums the
+ * copies 6529.io's owner table holds now; `edition_size_floor` is the minted
+ * count 6529.io carried over for older cards, or a claim's floor (at most
+ * 310) for newer ones. Below 300 the owner total is the minted count and the
+ * floor is the claim's. From 300 on, P26 §5.2's E is the minted count, and
+ * the two fields can disagree: the owner total sits one copy off the minted
+ * count on some older cards (Meme #4: 301 held, 300 minted), and a claim's
+ * floor sits below the minted count once a card passes it (Meme #508: floor
+ * 310, 328 minted). Of the two, the facts layer takes the one whose rate
+ * RATE(H, E) is nearer the rate 6529.io's own TDH applies to the card
+ * (`appliedRate`), which the daily check finds equal to both programs'
+ * every day; without that rate, the larger.
  */
 function editionCard(
   id: number,
   season: number,
   size: number,
-  floor: unknown
+  floor: unknown,
+  appliedRate: number | null = null,
+  largest: number | null = null
 ): EditionCard {
   if (typeof floor !== "number" || !Number.isInteger(floor) || floor <= 0) {
     return { id, season, minted: size, firstMint: null };
   }
-  const minted =
-    size < REGISTRY_V14.edition_floor_threshold && floor > size
-      ? size
-      : Math.max(size, floor);
+  const threshold = REGISTRY_V14.edition_floor_threshold;
+  let minted = size < threshold && floor > size ? size : Math.max(size, floor);
+  const other = minted === size ? floor : size;
+  if (
+    appliedRate !== null &&
+    largest !== null &&
+    other !== minted &&
+    other >= threshold &&
+    minted >= threshold &&
+    Math.abs(largest / other - appliedRate) <
+      Math.abs(largest / minted - appliedRate)
+  ) {
+    minted = other;
+  }
   return { id, season, minted, firstMint: null, edition: floor };
 }
 
-/** This server's last good read of the editions, for a read that fails. */
-let lastEditions: EditionsInput | null = null;
+/** H's stand-in for choosing a minted count: the largest count served. */
+function largestServed(
+  rows: readonly (readonly [number, number | null])[]
+): number | null {
+  let largest = 0;
+  for (const [size, floor] of rows) {
+    largest = Math.max(largest, size, floor ?? 0);
+  }
+  return largest > 0 ? largest : null;
+}
+
+/**
+ * This server's last good read of the editions, for a read that fails. It
+ * lives on the process, not the module: a dev server compiles each route
+ * with its own copy of this module, and a reload replaces it, so a module
+ * variable fell back to the ship-time snapshot on a page whose own copy had
+ * never read the API, though another page had read it minutes before.
+ */
+const LAST_EDITIONS = Symbol.for("6529.explained.lastEditions");
+type EditionsHolder = { [LAST_EDITIONS]?: EditionsInput };
+function lastGoodEditions(): EditionsInput | null {
+  return (globalThis as EditionsHolder)[LAST_EDITIONS] ?? null;
+}
+function keepEditions(read: EditionsInput): void {
+  (globalThis as EditionsHolder)[LAST_EDITIONS] = read;
+}
 
 /** The editions as the API gave them at ship time (`data/editionsSnapshot.json`). */
 function snapshotEditions(): EditionsInput {
-  const cards = editionsSnapshot.cards.map((row) => {
-    const [id, season, size, floor, firstMint] = row as [
-      number,
-      number,
-      number,
-      number | null,
-      string | null,
-    ];
+  const rows = editionsSnapshot.cards as unknown as readonly (readonly [
+    number,
+    number,
+    number,
+    number | null,
+    string | null,
+    (number | null)?,
+  ])[];
+  const largest = largestServed(rows.map((row) => [row[2], row[3]]));
+  const cards = rows.map((row) => {
+    const [id, season, size, floor, firstMint, appliedRate] = row;
     return {
-      ...editionCard(id, season, size, floor),
+      ...editionCard(id, season, size, floor, appliedRate ?? null, largest),
       firstMint: firstMint ?? null,
     };
   });
@@ -264,30 +333,46 @@ function snapshotEditions(): EditionsInput {
 async function loadEditions(now: string): Promise<EditionsInput | null> {
   const firstMints = loadFirstMints();
   const rows = await readAllPages<EditionsRow>(
-    `${publicEnv.API_ENDPOINT}/api/memes_extended_data?`
+    apiUrl("/api/memes_extended_data?")
   );
-  const byId = new Map<number, EditionCard>();
-  for (const row of rows ?? []) {
-    if (
+  const valid = (rows ?? []).filter(
+    (
+      row
+    ): row is EditionsRow & {
+      id: number;
+      season: number;
+      edition_size: number;
+    } =>
       typeof row.id === "number" &&
       typeof row.season === "number" &&
       typeof row.edition_size === "number"
-    ) {
-      byId.set(
+  );
+  if (rows === null || valid.length === 0) {
+    return lastGoodEditions() ?? snapshotEditions();
+  }
+  const { mints, art, rates } = await firstMints;
+  const largest = largestServed(
+    valid.map((row) => [
+      row.edition_size,
+      typeof row.edition_size_floor === "number"
+        ? row.edition_size_floor
+        : null,
+    ])
+  );
+  const byId = new Map<number, EditionCard>();
+  for (const row of valid) {
+    byId.set(
+      row.id,
+      editionCard(
         row.id,
-        editionCard(
-          row.id,
-          row.season,
-          row.edition_size,
-          row.edition_size_floor
-        )
-      );
-    }
+        row.season,
+        row.edition_size,
+        row.edition_size_floor,
+        rates.get(row.id) ?? null,
+        largest
+      )
+    );
   }
-  if (rows === null || byId.size === 0) {
-    return lastEditions ?? snapshotEditions();
-  }
-  const { mints, art } = await firstMints;
   const read: EditionsInput = {
     cards: [...byId.values()]
       .map((card) => ({
@@ -301,23 +386,37 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
     claimLimits: SITE.claimLimits.values,
   };
   // A first mint never changes, so a read whose first mints failed takes
-  // them from the last good read, or else from the snapshot.
+  // them from the last good read, or else from the snapshot. Without the
+  // applied rates, a card whose floor is unchanged keeps the minted count
+  // that read chose, when it is still one of the two counts served.
   if (mints.size === 0) {
     const known = new Map(
-      (lastEditions ?? snapshotEditions()).cards.map((card) => [
+      (lastGoodEditions() ?? snapshotEditions()).cards.map((card) => [
         card.id,
-        card.firstMint,
+        card,
       ])
+    );
+    const served = new Map(
+      valid.map((row) => [row.id, row.edition_size] as const)
     );
     return {
       ...read,
-      cards: read.cards.map((card) => ({
-        ...card,
-        firstMint: known.get(card.id) ?? null,
-      })),
+      cards: read.cards.map((card) => {
+        const before = known.get(card.id);
+        const keep =
+          before !== undefined &&
+          before.edition === card.edition &&
+          (before.minted === card.edition ||
+            before.minted === served.get(card.id));
+        return {
+          ...card,
+          minted: keep ? before.minted : card.minted,
+          firstMint: before?.firstMint ?? null,
+        };
+      }),
     };
   }
-  lastEditions = read;
+  keepEditions(read);
   return read;
 }
 

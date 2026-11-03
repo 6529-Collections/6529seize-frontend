@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import Tag from "../marks/Tag";
@@ -29,11 +36,35 @@ export function SimulationSwitch({
   readonly defaultOn?: boolean;
 }) {
   const [on, setOn] = useState(defaultOn);
+  const frame = useRef<HTMLDivElement>(null);
+  const toggled = useRef(false);
+  // The two states differ in height: on a phone the failing state can end
+  // above the screen once the real one, taller, is swapped out. After a
+  // press, bring the switch's top back into view if it has left it.
+  useEffect(() => {
+    if (!toggled.current) return;
+    toggled.current = false;
+    const element = frame.current;
+    if (element && element.getBoundingClientRect().top < 0) {
+      element.scrollIntoView({ block: "start" });
+    }
+  }, [on]);
   return (
     <SimulationContext.Provider
-      value={{ on, toggle: () => setOn((value) => !value) }}
+      value={{
+        on,
+        toggle: () => {
+          toggled.current = true;
+          setOn((value) => !value);
+        },
+      }}
     >
-      <div data-lens={id} data-simulating={on ? "1" : "0"}>
+      <div
+        ref={frame}
+        className="tw-scroll-mt-28"
+        data-lens={id}
+        data-simulating={on ? "1" : "0"}
+      >
         {children}
       </div>
     </SimulationContext.Provider>

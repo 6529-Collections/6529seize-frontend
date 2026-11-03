@@ -10,6 +10,18 @@ describe("Footer", () => {
     expect(screen.getByRole("contentinfo")).toHaveClass("tw-border-iron-900");
   });
 
+  it("sets its links in iron-400 when asked for light links", () => {
+    const { unmount } = render(<Footer />);
+    expect(
+      screen.getByRole("link", { name: /@punk6529/i }).className
+    ).toContain("tw-text-iron-500");
+    unmount();
+    render(<Footer lightLinks />);
+    expect(
+      screen.getByRole("link", { name: /@punk6529/i }).className
+    ).toContain("tw-text-iron-400");
+  });
+
   it("renders social links with images", () => {
     render(<Footer />);
     const punk = screen.getByRole("link", { name: /@punk6529/i });

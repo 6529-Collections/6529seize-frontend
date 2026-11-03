@@ -34,14 +34,16 @@
       }
     ],
     "before": {
-      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards",
+      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards, 0.01 less for each, and 1.02 for any other holder of Genesis (Memes 1, 2 and 3)",
       "id": "tdh-before-1-1",
       "from": "2022-12-16",
       "to": "2023-07-13",
       "fullSet": 1.2,
       "fullSetMax": 1.3,
       "partialHigh": 1.05,
-      "partialLow": 1.01
+      "partialLow": 1.01,
+      "partialStep": 0.01,
+      "genesis": 1.02
     },
     "inVersion": {
       "source": "D136: 6529.io's four-wallet consolidation, live from 2026-10-15 inside TDH v1.4",
@@ -101,6 +103,7 @@
       "finalAfter": 60
     },
     "F": {
+      "base": 100,
       "wallet": 102,
       "identity": 208
     }
@@ -120,11 +123,23 @@
     "source": "decision D96; P53 §6.3 and §6.4",
     "percent": "19.99"
   },
+  "artistCopies": {
+    "source": "decision D91: today each card airdrops the artist 5 copies and 15 of the artist's choice; from 2027-01-01 the team, museum and fund airdrops end and the artist's remain",
+    "own": 5,
+    "choice": 15,
+    "onlyFrom": "2027-01-01"
+  },
   "programs": {
     "source": "6529's design record: P52 §3.4 (the run times of the 2026-10-11 cycle), the second implementation's findings of 2026-10-11, and 6529chain's tdh-formal workflow",
     "rustReferenceSeconds": 0.6,
     "cleanRoomChoices": 23,
     "randomPerChange": 1000
+  },
+  "vectorOrigin": {
+    "source": "6529chain design/tdh-reference/README.md at 4248444: vectors 01-18 have hand-derived expected values (18 updated for D131's transaction netting); the later ones were generated with the Python reference and their derivations checked by hand. The range 01-18 holds 19 files, as it includes 12b-final-ties: the 19 vectors the clean-room Rust reference passed on 2026-10-11",
+    "handDerived": 19,
+    "noVector": 17,
+    "noVectorSource": "6529chain design/tdh-reference/no-vector/ at 7522ef3: 17 files that are no vector at all (P26 §3.2), each made so that a lenient reader would pass it; every implementation must refuse each one whole"
   },
   "publicVectors": {
     "source": "the five public vectors served as /network/tdh/public-vectors.json (components/explained/engine/publicVectors.ts); a test checks the two lists agree",

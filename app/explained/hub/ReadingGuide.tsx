@@ -11,7 +11,7 @@ import { ht, type HubKey } from "./copy";
  * How to read these pages (EXPLAINED.md §3; MAP.md §3): the four questions
  * every claim answers, each with its marks and what each mark means.
  */
-const NOTE = "tw-text-sm tw-leading-5 tw-text-iron-400";
+const NOTE = "tw-text-[15px] tw-leading-6 tw-text-iron-400";
 
 const RULE: readonly { kind: MarkKind; note: HubKey }[] = [
   { kind: "decided", note: "guide.decided" },
@@ -28,6 +28,12 @@ const KNOW: readonly { kind: MarkKind; note?: HubKey }[] = [
   { kind: "assumed" },
   { kind: "notYet" },
 ];
+
+/** A mark and its note side by side: a wrapped note hangs beside its mark. */
+// Below 380 px (a zoomed window) a two-column row would leave the note a
+// word a line: there the note follows its mark instead.
+const HANG =
+  "tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 min-[380px]:tw-grid min-[380px]:tw-grid-cols-[auto_minmax(0,1fr)]";
 
 function Column({
   title,
@@ -66,12 +72,12 @@ export default function ReadingGuide({
           </p>
         </div>
       </div>
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-4 lg:tw-gap-5">
+      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 xl:tw-grid-cols-4 xl:tw-gap-5">
         <Column title={ht(locale, "guide.rule")}>
           {RULE.map((item) => (
-            <li key={item.kind} className={NOTE}>
-              <Mark kind={item.kind} locale={locale} size="sm" />{" "}
-              {ht(locale, item.note)}
+            <li key={item.kind} className={`${NOTE} ${HANG}`}>
+              <Mark kind={item.kind} locale={locale} size="md" />
+              <span>{ht(locale, item.note)}</span>
             </li>
           ))}
         </Column>
@@ -84,24 +90,25 @@ export default function ReadingGuide({
         </Column>
         <Column title={ht(locale, "guide.know")}>
           {KNOW.map((item) => (
-            <li key={item.kind} className={NOTE}>
-              <Mark kind={item.kind} locale={locale} size="sm" />
-              {item.note ? ` ${ht(locale, item.note)}` : ""}
+            <li key={item.kind} className={`${NOTE} ${HANG}`}>
+              <Mark kind={item.kind} locale={locale} size="md" />
+              <span>{item.note ? ht(locale, item.note) : ""}</span>
             </li>
           ))}
-          <li className={NOTE}>
-            <HalfPair a b={false} locale={locale} />{" "}
-            {ht(locale, "guide.halfPair")}
+          <li className={`${NOTE} ${HANG}`}>
+            <HalfPair a b={false} locale={locale} />
+            <span>{ht(locale, "guide.halfPair")}</span>
           </li>
         </Column>
         <Column title={ht(locale, "guide.since")}>
           <li className={NOTE}>{ht(locale, "guide.sinceLive")}</li>
-          <li className={NOTE}>
-            <Mark kind="drift" locale={locale} size="sm" />{" "}
-            {ht(locale, "guide.drift")}
+          <li className={`${NOTE} ${HANG}`}>
+            <Mark kind="drift" locale={locale} size="md" />
+            <span>{ht(locale, "guide.drift")}</span>
           </li>
-          <li className={NOTE}>
-            <Tag kind="example" locale={locale} /> {ht(locale, "guide.example")}
+          <li className={`${NOTE} ${HANG}`}>
+            <Tag kind="example" locale={locale} />
+            <span>{ht(locale, "guide.example")}</span>
           </li>
         </Column>
       </div>

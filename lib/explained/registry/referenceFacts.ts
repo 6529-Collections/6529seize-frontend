@@ -192,6 +192,10 @@ export interface BeforeRow {
   readonly fullSetMax: number;
   readonly partialHigh: number;
   readonly partialLow: number;
+  /** What each further missing card took off, without a full set. */
+  readonly partialStep: number;
+  /** A holder of Memes 1, 2 and 3 without a full set: at least this. */
+  readonly genesis: number;
   readonly [key: string]: string | number;
 }
 
@@ -330,6 +334,24 @@ export const REFERENCE_FACTS = {
     "hash",
     "§2, §10",
     (registry) => registry.manifold_lazy_claim
+  ),
+
+  // Where the vectors' expected values come from: the first ones derived by
+  // hand from P26, the rest generated with the Python reference and checked.
+  "vectors.handDerived": fromReference<number>(
+    "count",
+    "spec",
+    (data) => data.vectorOrigin.source,
+    (data) => data.vectorOrigin.handDerived,
+    "vectors"
+  ),
+
+  // The files that are no vector at all: every implementation refuses each.
+  "vectors.noVector": fromReference<number>(
+    "count",
+    "spec",
+    (data) => data.vectorOrigin.noVectorSource,
+    (data) => data.vectorOrigin.noVector
   ),
 
   // The public vectors.
@@ -579,6 +601,12 @@ export const REFERENCE_FACTS = {
     casesRef,
     (d) => d.cases.I.finalAfter
   ),
+  "cases.F.base": fromReference<number>(
+    "count",
+    "manifest",
+    casesRef,
+    (d) => d.cases.F.base
+  ),
   "cases.F.wallet": fromReference<number>(
     "count",
     "manifest",
@@ -616,6 +644,25 @@ export const REFERENCE_FACTS = {
     "spec",
     (d) => d.replay.source,
     (d) => d.replay.withoutSinks
+  ),
+  "memes.artistCopies": fromReference<number>(
+    "count",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.own
+  ),
+  "memes.artistChoice": fromReference<number>(
+    "count",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.choice
+  ),
+  // D91: from this day the team, museum and fund airdrops end; the artist's remain.
+  "memes.artistOnlyFrom": fromReference<string>(
+    "day",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.onlyFrom
   ),
   "validators.cap": fromReference<string>(
     "text",

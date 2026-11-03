@@ -124,6 +124,7 @@ export default async function ProofsPage({
               words: facts.print("proofs.statement.words"),
               total: facts.print("proofs.statement.bytes"),
               wordBytes: facts.print("proofs.statement.wordBytes"),
+              historyLogs: facts.print("proofs.day.historyLogs"),
             })}
           </Para>
           <Para>
@@ -139,6 +140,7 @@ export default async function ProofsPage({
         <Section
           id="guarantees"
           number="05"
+          shortProse
           label={fill(locale, k("s6.label"))}
           heading={rich(locale, k("s6.heading"))}
           figure={<Guarantees locale={locale} />}

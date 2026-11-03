@@ -30,7 +30,11 @@ interface Term {
   readonly values?: (p: ReturnType<typeof printers>) => RichValues;
   /** Another definition key when the facts call for it (a date now past). */
   readonly def?: (p: ReturnType<typeof printers>) => GlossaryKey | null;
+  /** The chapter's model that shows the term moving: a #model-<id> link. */
+  readonly model?: string;
 }
+
+const HOW = "/network/tdh/how-it-works";
 
 const LIVE: Status = { track: "live" };
 
@@ -45,6 +49,9 @@ export const TERMS: readonly Term[] = [
       since: p.v("versions.current.since", "long"),
       renamed: p.v("names.renamedAt", "long"),
       version: <CodeName>{p.v("rules.version")}</CodeName>,
+      first: p.v("tdh.days.first", "long"),
+      equal: p.v("tdh.days.equal"),
+      compared: p.v("tdh.days.compared"),
       versions: (
         <Link className={EX_LINK} href="/network/tdh/historic-boosts">
           {t(DEFAULT_LOCALE, "explained.tdh.glossary.v14.versions")}
@@ -54,10 +61,15 @@ export const TERMS: readonly Term[] = [
   },
   { id: "p26", status: { mark: "proposed" } },
   { id: "memes", status: LIVE },
-  { id: "cc0", status: { mark: "absolute", ref: "D89" } },
+  {
+    id: "cc0",
+    model: "/explained#model-licence",
+    status: { mark: "absolute", ref: "D89" },
+  },
   { id: "card", status: { word: "explained.tdh.glossary.convention" } },
   {
     id: "edition",
+    model: `${HOW}#model-rates`,
     status: LIVE,
     values: (p) => ({
       threshold: p.v("rules.editionThreshold"),
@@ -66,6 +78,7 @@ export const TERMS: readonly Term[] = [
   },
   {
     id: "firstgm",
+    model: "/network/tdh#model-squash",
     status: LIVE,
     values: (p) => ({
       id: p.v("rules.firstgmId"),
@@ -86,6 +99,7 @@ export const TERMS: readonly Term[] = [
   },
   {
     id: "rate",
+    model: `${HOW}#model-rates`,
     status: LIVE,
     values: (p) => ({
       h: p.v("engine.H"),
@@ -93,13 +107,25 @@ export const TERMS: readonly Term[] = [
       cap: p.v("rules.editionFloorCap"),
     }),
   },
+  {
+    id: "largest",
+    model: "/network/tdh#model-squash",
+    status: LIVE,
+    values: (p) => ({ h: p.v("engine.H") }),
+  },
   { id: "cents", status: { word: "explained.tdh.glossary.convention" } },
   { id: "arith", status: { mark: "proposed", ref: "P26 §8.1" } },
   { id: "raw", status: LIVE },
   { id: "base", status: LIVE },
-  { id: "boost", status: LIVE },
+  { id: "boost", model: `${HOW}#model-boost`, status: LIVE },
+  {
+    id: "beta",
+    model: `${HOW}#model-boost`,
+    status: { mark: "proposed", ref: "P26 §8.3" },
+  },
   {
     id: "season",
+    model: `${HOW}#model-boost`,
     status: LIVE,
     values: (p) => ({
       bonus: p.v("rules.seasonBonus"),
@@ -120,6 +146,7 @@ export const TERMS: readonly Term[] = [
   { id: "finalized", status: LIVE },
   {
     id: "identity",
+    model: `${HOW}#model-identity`,
     status: { mark: "decided", ref: "D136" },
     values: (p) => ({
       max: p.v("rules.maxWallets"),
@@ -127,7 +154,11 @@ export const TERMS: readonly Term[] = [
       gate: p.v("rules.gateDay", "long"),
     }),
   },
-  { id: "consolidation", status: { mark: "decided", ref: "D136" } },
+  {
+    id: "consolidation",
+    model: "/network/tdh/consolidation#model-wallets",
+    status: { mark: "decided", ref: "D136" },
+  },
   { id: "pairkey", status: { mark: "decided", ref: "D136" } },
   { id: "delegation", status: LIVE },
   {
@@ -140,9 +171,14 @@ export const TERMS: readonly Term[] = [
     status: LIVE,
     values: () => ({ dead: <CodeName>0x…dEaD</CodeName> }),
   },
-  { id: "netting", status: { mark: "decided", ref: "D131" } },
-  { id: "stack", status: LIVE },
+  {
+    id: "netting",
+    model: `${HOW}#model-netting`,
+    status: { mark: "decided", ref: "D131" },
+  },
+  { id: "stack", model: `${HOW}#model-stacks`, status: LIVE },
   { id: "underflow", status: LIVE },
+  { id: "canonical", status: { mark: "proposed", ref: "P26 §3.3" } },
   { id: "registry", status: { mark: "proposed", ref: "P26" } },
   {
     id: "vector",
@@ -178,6 +214,7 @@ export const TERMS: readonly Term[] = [
   { id: "groth16", status: { mark: "open", ref: "P52 §3.7" } },
   {
     id: "tproof",
+    model: "/network/tdh/proofs#model-words",
     status: { mark: "decided", ref: "D128" },
     values: (p) => ({ words: p.v("proofs.statement.words") }),
   },
@@ -187,6 +224,7 @@ export const TERMS: readonly Term[] = [
   },
   {
     id: "word",
+    model: "/network/tdh/proofs#model-words",
     status: { mark: "decided", ref: "D128" },
     values: (p) => ({
       words: p.v("proofs.statement.words"),
@@ -194,6 +232,7 @@ export const TERMS: readonly Term[] = [
     }),
   },
   { id: "anchor", status: { mark: "decided", ref: "D128" } },
+  { id: "route", status: LIVE },
   { id: "bloom", status: { word: "explained.tdh.glossary.convention" } },
   { id: "readonly", status: { word: "explained.tdh.glossary.convention" } },
   {
@@ -204,7 +243,10 @@ export const TERMS: readonly Term[] = [
   { id: "root", status: { mark: "decided", ref: "D112" } },
   { id: "comparison", status: { mark: "tested" } },
   { id: "classes", status: LIVE },
-  { id: "knowncause", status: { word: "explained.tdh.glossary.renamed" } },
+  {
+    id: "knowncause",
+    status: { word: "explained.tdh.glossary.convention" },
+  },
   { id: "simulated", status: { word: "explained.tdh.glossary.convention" } },
   {
     id: "cutover",
@@ -225,7 +267,7 @@ export const TERMS: readonly Term[] = [
   },
   {
     id: "validator",
-    status: { mark: "decided", ref: "D112, D137" },
+    status: { mark: "decided", ref: "D112, D137, D149" },
     values: (p) => ({ version: p.v("site.validator.version") }),
   },
   {

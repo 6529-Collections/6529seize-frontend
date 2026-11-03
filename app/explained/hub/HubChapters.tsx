@@ -1,10 +1,11 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { kt } from "@/components/explained/i18n";
 import ChapterIndex, {
   type ChapterIndexRow,
 } from "@/components/explained/shell/ChapterIndex";
-import { CHAPTERS } from "@/components/explained/shell/chapters";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { CHAPTERS, chapterById } from "@/components/explained/shell/chapters";
+import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { Fact } from "../_lib/facts";
@@ -80,10 +81,34 @@ function comingRow(
 ): Pick<ChapterIndexRow, "order" | "question" | "maturityLabel" | "note"> {
   const waitsOn = (what: string) =>
     kt(locale, "explained.kit.chapters.waitsOn", { what });
-  let note: ReactNode = waitsOn(ht(locale, def.waits ?? "chapter.nothing"));
+  // A chapter that waits only for its turn says nothing more: its order
+  // ("Then", "Later") already says when.
+  let note: ReactNode =
+    def.waits === null ? null : waitsOn(ht(locale, def.waits));
+  if (id === "memes") {
+    // Its one-minute CC0 answer is live on this page: link it here, as the
+    // Validators row links its live page.
+    note = hrich(locale, "chapter.memesNote", {
+      what: ht(locale, def.waits ?? "chapter.nothing"),
+      page: (
+        <Link className={EX_LINK} href="#cc0">
+          {ht(locale, "cc0.label")}
+        </Link>
+      ),
+    });
+  }
   if (id === "validators") {
+    // Its first page is live before the chapter is: link it here.
+    const live = chapterById("validators").read[0];
     note = hrich(locale, "chapter.validatorsNote", {
       version: <Fact book={book} id="site.validator.version" locale={locale} />,
+      page: live ? (
+        <Link className={EX_LINK} href={live.href}>
+          {kt(locale, live.title)}
+        </Link>
+      ) : (
+        ""
+      ),
     });
   }
   return {
@@ -128,18 +153,16 @@ export default function HubChapters({
   });
   return (
     <section id="chapters" className={EX_LAYOUT.section}>
-      <div className={EX_LAYOUT.stmt}>
-        <div>
-          <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
-            {ht(locale, "chapters.label")}
-          </span>
-          <h2 className={EX_TEXT.stmt}>{ht(locale, "chapters.title")}</h2>
-        </div>
-        <div className="lg:tw-pt-1.5">
-          <p className={`${EX_TEXT.body} tw-m-0`}>
-            {ht(locale, "chapters.body")}
-          </p>
-        </div>
+      {/* The line under the heading is its lede, set beneath it, so the
+          heading's block reads as one and nothing floats at the right. */}
+      <div className="tw-max-w-[760px]">
+        <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
+          {ht(locale, "chapters.label")}
+        </span>
+        <h2 className={EX_TEXT.stmt}>{ht(locale, "chapters.title")}</h2>
+        <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+          {ht(locale, "chapters.body")}
+        </p>
       </div>
       <div className="tw-mt-10 md:tw-mt-12">
         <ChapterIndex rows={rows} locale={locale} />

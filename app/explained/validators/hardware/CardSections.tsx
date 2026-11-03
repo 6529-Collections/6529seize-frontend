@@ -58,7 +58,7 @@ function OptionCard({
           {name}
         </h3>
         {recommended && (
-          <span className="tw-mt-1 tw-flex-none tw-rounded-full tw-bg-primary-500 tw-px-2.5 tw-py-1 tw-text-xs tw-font-bold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-white">
+          <span className="tw-mt-1.5 tw-flex-none tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-200">
             {CARD.recommended}
           </span>
         )}
@@ -384,10 +384,10 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
           return (
             <li
               key={item.title}
-              className={`tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4 first:tw-border-t-0 first:tw-pt-0 sm:tw-block sm:tw-rounded-2xl sm:tw-border sm:tw-bg-iron-950 sm:tw-p-5 sm:first:tw-border-t sm:first:tw-pt-5 ${warn ? "sm:tw-border-error/40" : ""}`}
+              className={`tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4 first:tw-border-t-0 first:tw-pt-0 sm:tw-block sm:tw-rounded-2xl sm:tw-border sm:tw-bg-iron-950 sm:tw-p-5 sm:first:tw-border-t sm:first:tw-pt-5 ${warn ? "sm:tw-border-dashed sm:tw-border-iron-600" : ""}`}
             >
               <span
-                className={`tw-grid tw-size-8 tw-place-items-center tw-rounded-lg tw-border tw-border-solid tw-text-sm tw-font-bold ${warn ? "tw-border-error/40 tw-bg-error/[0.1] tw-text-error" : "tw-border-primary-300/30 tw-bg-primary-400/[0.12] tw-text-primary-300"}`}
+                className={`tw-grid tw-size-8 tw-place-items-center tw-rounded-lg tw-border tw-border-solid tw-text-sm tw-font-bold ${warn ? "tw-border-dashed tw-border-iron-500 tw-text-iron-50" : "tw-border-iron-700 tw-text-iron-200"}`}
                 aria-hidden="true"
                 data-ex-allow-number=""
               >

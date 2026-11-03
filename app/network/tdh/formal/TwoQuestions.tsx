@@ -1,9 +1,10 @@
-import { CodeName } from "@/components/explained/reference/parts";
+import { CodeName, EdSection } from "@/components/explained/reference/parts";
 import AssuranceLadder, {
   type Rung,
 } from "@/components/explained/evidence/AssuranceLadder";
-import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import { EX_LAYOUT, EX_LINK } from "@/components/explained/tokens";
 import { FactScope } from "@/components/explained/facts/FactText";
+import ProvedWhere from "./ProvedWhere";
 import type { SureContext } from "./sureShared";
 
 /** Zero-knowledge proofs: the chapter's page on the zero-knowledge proofs. */
@@ -15,7 +16,7 @@ const PROOFS_HREF = "/network/tdh/proofs";
  * evidence stops.
  */
 export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
-  const { m, s, p, book, locale } = ctx;
+  const { m, s, p, book } = ctx;
   const passed = book.maybe<number>("manifest.vectors.total")?.value;
   const p26 = book.maybe<number>("rules.vectors")?.value;
   // "89 here; P26 now has 104" only while the manifest runs fewer vectors
@@ -52,7 +53,8 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
     {
       what: s("explained.tdh.sure.rule.proved"),
       detail: m("explained.tdh.sure.rule.provedDetail", {
-        count: p.v("manifest.sections.count"),
+        tdh: p.v("manifest.sections.tdh"),
+        p53: p.v("manifest.sections.p53"),
       }),
       marks: [
         { kind: "proved", refText: s("explained.tdh.sure.rule.provedRef") },
@@ -86,7 +88,9 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
     },
     {
       what: s("explained.tdh.sure.day.inputs"),
-      detail: m("explained.tdh.sure.day.inputsDetail"),
+      detail: m("explained.tdh.sure.day.inputsDetail", {
+        date: p.v("proofs.day.date"),
+      }),
       marks: [{ kind: "notYet" }],
     },
     {
@@ -94,6 +98,7 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
       detail: m("explained.tdh.sure.day.zkDetail", {
         cycle: p.v("site.proofA.cycle"),
         total: p.v("site.proofA.totalWithoutBurn"),
+        block: p.v("site.proofA.ethCallBlock"),
         version: <CodeName>{p.v("proofs.day.ruleVersion")}</CodeName>,
         link: (
           <a className={EX_LINK} href={PROOFS_HREF}>
@@ -113,24 +118,36 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
     },
   ];
   return (
-    <section id="layers" className={`tw-scroll-mt-24 ${EX_LAYOUT.section}`}>
-      <div className={EX_LAYOUT.stmt}>
-        <div>
-          <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
-            <span className="tw-text-primary-300">01</span>
-            {" · "}
-            {m("explained.tdh.sure.layers.label")}
-          </span>
-          <h2 className={EX_TEXT.stmt}>
-            {m("explained.tdh.sure.layers.title")}
-          </h2>
-        </div>
-        <div className="lg:tw-pt-1.5">
-          <p className={EX_LAYOUT.paragraph}>
-            {m("explained.tdh.sure.layers.body")}
-          </p>
-        </div>
-      </div>
+    // One section grammar for the whole page: the number and label in the
+    // gutter, the heading and its words beside them (EdSection), as every
+    // later section has it.
+    <EdSection
+      id="layers"
+      tight={false}
+      no="01"
+      label={m("explained.tdh.sure.layers.label")}
+      title={m("explained.tdh.sure.layers.title")}
+      full={<TwoQuestionsFigures ctx={ctx} rule={rule} day={day} />}
+    >
+      <p className={EX_LAYOUT.paragraph}>
+        {m("explained.tdh.sure.layers.body")}
+      </p>
+    </EdSection>
+  );
+}
+
+function TwoQuestionsFigures({
+  ctx,
+  rule,
+  day,
+}: {
+  readonly ctx: SureContext;
+  readonly rule: readonly Rung[];
+  readonly day: readonly Rung[];
+}) {
+  const { s, locale } = ctx;
+  return (
+    <>
       <FactScope
         className="tw-mt-10 md:tw-mt-12"
         ids={[
@@ -148,15 +165,26 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
               title: s("explained.tdh.sure.layers.rule"),
               rungs: rule,
               todayAfter: 3,
+              weight: 5,
             },
             {
               title: s("explained.tdh.sure.layers.day"),
               rungs: day,
               todayAfter: 1,
+              weight: 7,
             },
           ]}
         />
       </FactScope>
-    </section>
+      <FactScope
+        ids={[
+          "manifest.vectors.total",
+          "manifest.proved",
+          "manifest.shownFalse",
+        ]}
+      >
+        <ProvedWhere ctx={ctx} />
+      </FactScope>
+    </>
   );
 }

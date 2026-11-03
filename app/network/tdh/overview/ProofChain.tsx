@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { dateOfCycleDay } from "@/components/explained/engine/tdh";
+import { EX_LINK } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
-import { formatUtcDay } from "@/lib/explained/format";
+import { formatCount, formatUtcDay } from "@/lib/explained/format";
 import { ot } from "./copy";
 
 /**
@@ -40,6 +42,7 @@ export default function ProofChain({
   readonly locale: SupportedLocale;
 }) {
   const cycle = book.maybe<number>("site.proofA.cycle");
+  const block = book.maybe<number>("site.proofA.ethCallBlock");
   const date =
     cycle === null
       ? NOT_AVAILABLE
@@ -54,6 +57,8 @@ export default function ProofChain({
         <span>
           {ot(locale, "zk.lineA", {
             date,
+            block:
+              block === null ? NOT_AVAILABLE : formatCount(locale, block.value),
             version:
               book.maybe<string>("proofs.day.ruleVersion")?.value ??
               NOT_AVAILABLE,
@@ -64,6 +69,9 @@ export default function ProofChain({
         <Capsule letter="B" done={false} />
         <span>{ot(locale, "zk.lineB")}</span>
       </span>
+      <Link className={`${EX_LINK} tw-self-start`} href="/network/tdh/proofs">
+        {ot(locale, "know.linkProofs")}
+      </Link>
     </span>
   );
 }

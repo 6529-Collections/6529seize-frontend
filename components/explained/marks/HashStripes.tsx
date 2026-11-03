@@ -1,7 +1,9 @@
 /**
  * Hash stripes (EXPLAINED.md §4.2): sixteen bars from the first sixteen hex
- * digits of a hash, at equal lightness, so two hashes can be compared at a
- * glance. A fingerprint, never a status.
+ * digits of a hash, so two hashes can be compared at a glance. A
+ * fingerprint, never a status: drawn in the iron greys, one step of
+ * lightness a digit, so no bar borrows a status hue or a hue off the
+ * palette.
  */
 export function stripeHues(hex: string): number[] {
   return [...hex.replace(/^0x/, "").slice(0, 16)].map((digit) => {
@@ -11,7 +13,9 @@ export function stripeHues(hex: string): number[] {
 }
 
 export function stripeColor(hue: number): string {
-  return `oklch(66% 0.07 ${hue})`;
+  // The digit the value came from, 0 to 15, as a grey from dark to light.
+  const digit = Math.round(hue / 22.5);
+  return `oklch(${34 + digit * 3.6}% 0.008 285)`;
 }
 
 export default function HashStripes({

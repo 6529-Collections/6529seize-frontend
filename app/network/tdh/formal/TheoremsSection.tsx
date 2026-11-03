@@ -41,9 +41,13 @@ const MAIN_THEOREM: Readonly<Record<string, string>> = {
 
 /** A label in the theorem's facts list. */
 const TERM = "tw-font-semibold tw-text-iron-400";
-/** A note under the Lean, at most about 75 characters a line. */
+/**
+ * A note under the Lean, at most about 75 characters a line. Notes are 16 px
+ * apart, two thirds of a line, so the gloss and "Does not cover" read as two
+ * paragraphs.
+ */
 const NOTE =
-  "tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300";
+  "tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300";
 /** The validator cap a claim's words print (P53 §6.3). */
 const CAP = "validators.cap";
 
@@ -92,14 +96,21 @@ function Panel({
   const { m, s, p, locale } = ctx;
   const words = key(entry.id, "theorem.{id}.words");
   const read = key(entry.id, "theorem.{id}.read");
+  // How the proof goes, in two or three lines, where the page has them:
+  // what is inducted on, which lemma does the work, where a hypothesis is
+  // used (the netting claim tells it in parts, in §02).
+  const how = key(entry.id, "theorem.{id}.how");
   const what = key(section.id, "claim.{id}.what");
   const limit = key(section.id, "claim.{id}.limit");
   const values = {
     six: <CodeName>h6</CodeName>,
     cap: p.v(CAP),
     ungated: p.v("rules.ungatedMaxWallets"),
+    base: p.v("cases.F.base"),
     wallet: p.v("cases.F.wallet"),
     identity: p.v("cases.F.identity"),
+    firstRule: p.v("manifest.shownFalse.firstRule"),
+    day: p.v("netting.day"),
   };
   const where = entry.file
     ? breakAfter(`${entry.file}:${entry.line ?? ""}`, "/")
@@ -165,6 +176,7 @@ function Panel({
               className="tw-mt-3"
               code={entry.lean}
               comment="--"
+              hint={s("explained.tdh.sure.theorems.scrollHint")}
               label={s("explained.tdh.sure.theorems.codeLabel", {
                 name: entry.name ?? entry.id,
               })}
@@ -172,6 +184,14 @@ function Panel({
             {read && (
               <p className={NOTE} data-fact={section.fact.id}>
                 {m(read, values)}
+              </p>
+            )}
+            {how && (
+              <p className={NOTE} data-proof-idea="">
+                <b className="tw-font-semibold tw-text-iron-50">
+                  {s("explained.tdh.sure.theorems.how")}
+                </b>{" "}
+                {m(how, values)}
               </p>
             )}
           </>

@@ -86,10 +86,10 @@ describe("the facts layer", () => {
     expect(show("tdh.cutover.about")).toBe("Oct 23");
   });
 
-  it("marks the three days rewritten on Oct 16 and the two written on time", () => {
+  it("marks the three days written late on Oct 16 and the two written on time", () => {
     const days =
-      book.get<{ cycle: number; rewritten: boolean }[]>("tdh.days").value;
-    expect(days.map((day) => [day.cycle, day.rewritten])).toEqual([
+      book.get<{ cycle: number; late: boolean }[]>("tdh.days").value;
+    expect(days.map((day) => [day.cycle, day.late])).toEqual([
       [20740, true],
       [20741, true],
       [20742, true],
@@ -182,13 +182,13 @@ describe("the facts layer", () => {
   it("computes editions, rates and boosts with the engine on the real editions", () => {
     expect(show("memes.count")).toBe("562");
     expect(show("memes.seasons")).toBe("17");
-    expect(show("memes.readAt")).toBe("06:35 UTC");
+    expect(show("memes.readAt")).toBe("Oct 18, 06:35 UTC");
     expect(show("engine.H")).toBe("3,941");
     expect(show("meme.2.edition")).toBe("1,000");
     expect(show("meme.2.rate")).toBe("3.94");
     expect(show("meme.3.edition")).toBe("1,001");
-    expect(show("meme.4.edition")).toBe("301");
-    expect(show("meme.4.rate")).toBe("13.09");
+    expect(show("meme.4.edition")).toBe("300");
+    expect(show("meme.4.rate")).toBe("13.14");
     expect(show("meme.562.minted")).toBe("152");
     expect(show("meme.562.edition")).toBe("310");
     expect(show("engine.rate.310")).toBe("12.71");

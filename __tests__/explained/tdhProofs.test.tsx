@@ -172,7 +172,15 @@ describe("the proofs facts", () => {
       expect(entry.ref).not.toMatch(/0x[0-9a-f]{40}\b/i);
       expect(entry.ref).not.toMatch(/@/);
     }
-    const text = JSON.stringify(proofs);
+    // The only addresses are mainnet's public verifier contracts, kept apart.
+    const { verifiers, ...rest } = proofs;
+    expect(Object.keys(verifiers)).toEqual([
+      "sp1Gateway",
+      "sp1Selector",
+      "risc0Router",
+      "risc0Selector",
+    ]);
+    const text = JSON.stringify(rest);
     expect(text).not.toMatch(/\b0x[0-9a-fA-F]{40}\b(?![0-9a-fA-F])/);
   });
 });
@@ -185,10 +193,11 @@ describe("what a proof guarantees", () => {
       LAYERS.forEach((layer, index) => {
         let expected = "unreached";
         if (index < stop) {
-          // Program B's honest output differs: B is why the contract refuses.
+          // Program B's layer: its honest output differs, or the forger has
+          // no valid proof of the wrong words for it.
           expected =
-            layer === "second" && scenario.secondDiffers === true
-              ? "differs"
+            layer === "second" && scenario.second !== undefined
+              ? scenario.second
               : "passed";
         }
         if (index === stop) expected = "stops";
@@ -200,6 +209,13 @@ describe("what a proof guarantees", () => {
       });
       expect(RULE_LINES).toContain(scenario.line);
     }
+  });
+
+  it("stops a forged SP1 proof at RISC Zero's verifier, not at the outputs", () => {
+    // Two equal wrong outputs pass the second check; the eighth refuses B.
+    const flaw = scenarioById("flaw");
+    expect(flaw.line).toBe("proofs");
+    expect(layerStates(flaw, false).second).toBe("unproved");
   });
 
   it("records a mistake in the rules, since every layer lets it through", () => {
@@ -330,7 +346,7 @@ describe("the page's sections", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "What a proof of a day shows, what is proved so far, and what is not.",
+        name: "Proofs of a day",
       })
     ).toBeInTheDocument();
     expect(container.querySelector("[data-ex-lede]")).toBeInTheDocument();
@@ -346,6 +362,32 @@ describe("the page's sections", () => {
     expect(
       container.querySelector('[data-drift-by="D136 D137"]')
     ).not.toBeNull();
+    // The first figure, at every width: a day read and proved into a few
+    // hundred bytes, the verifier it reached, and where the pair stands.
+    const figure = container.querySelector<HTMLElement>(
+      '[data-fig="half-pair"]'
+    )!;
+    expect(figure).not.toBeNull();
+    expect(figure).toHaveTextContent("Read from Ethereum");
+    expect(figure).toHaveTextContent("mainnet's verifier, read-only");
+    expect(figure).toHaveTextContent("Recorded on Ethereum: nothing yet");
+    // The test pair is outlined, never a filled pair.
+    expect(
+      figure.querySelector('[data-halfpair="11"]:not([data-test-cycle])')
+    ).toBeNull();
+    expect(figure.querySelector("[data-test-cycle]")).not.toBeNull();
+    // The contract's checks, hollow: none has run on a real day.
+    expect(figure.querySelectorAll("[data-fig-contract] ol > li")).toHaveLength(
+      CONTRACT_CHECKS.length
+    );
+    // The read-only call's block links to an explorer.
+    expect(
+      within(figure)
+        .getAllByRole("link")
+        .some((link) =>
+          link.getAttribute("href")?.startsWith("https://etherscan.io/block/")
+        )
+    ).toBe(true);
     await user.click(
       screen.getByRole("button", { name: "Show a pair that fails" })
     );
@@ -384,14 +426,20 @@ describe("the page's sections", () => {
       CONTRACT_CHECKS.length
     );
     expect(container.querySelectorAll("[data-phase]")).toHaveLength(7);
-    expect(container.querySelectorAll("[data-row]")).toHaveLength(6);
+    expect(container.querySelectorAll("[data-row]")).toHaveLength(7);
     expect(
-      screen.getByText("Not deployed, and not audited.")
+      screen.getByText("Not deployed, and no outside audit.")
     ).toBeInTheDocument();
     // the record so far, under Where it stands: five steps, the last one not
-    // dated, and the two test pairs marked as test cycles
+    // dated, and the two test pairs marked as test cycles; the programs
+    // table gives its test pair no Proved mark
     expect(container.querySelectorAll("[data-record]")).toHaveLength(5);
-    expect(container.querySelectorAll("[data-test-cycle]")).toHaveLength(2);
+    expect(
+      container.querySelectorAll("[data-record] [data-test-cycle]")
+    ).toHaveLength(2);
+    expect(
+      container.querySelector('[data-row="pair"] [data-mark="proved"]')
+    ).toBeNull();
     expect(
       container.querySelectorAll('[data-fact="proofs.dayB.gpuHoursHigh"]')
         .length

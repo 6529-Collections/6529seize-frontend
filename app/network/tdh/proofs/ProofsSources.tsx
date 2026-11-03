@@ -38,9 +38,12 @@ export default function ProofsSources({
   // under its own identifier.
   const advisory = (
     id:
+      | "proofs.sp1Advisory.earliest"
       | "proofs.sp1Advisory.earlier"
       | "proofs.sp1Advisory.id"
-      | "proofs.sp1Advisory.latestId",
+      | "proofs.sp1Advisory.latestId"
+      | "proofs.risc0Advisory.id"
+      | "proofs.risc0Advisory.count",
     name: string
   ) => {
     const url = facts.entry(id)?.source.url;
@@ -99,6 +102,11 @@ export default function ProofsSources({
           {
             title: fill(locale, k("hwk.sp1.title")),
             body: rich(locale, k("hwk.sp1.body"), {
+              earliest: facts.print("proofs.sp1Advisory.earliest", "long"),
+              earliestLink: advisory(
+                "proofs.sp1Advisory.earliest",
+                "GHSA-f77q-r5qm-w4m8"
+              ),
               earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
               earlierLink: advisory(
                 "proofs.sp1Advisory.earlier",
@@ -115,6 +123,13 @@ export default function ProofsSources({
                 "proofs.sp1Advisory.latestId",
                 LATEST_ADVISORY
               ),
+              r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+              r0Link: advisory(
+                "proofs.risc0Advisory.id",
+                "GHSA-g3qg-6746-3mg9"
+              ),
+              r0Count: facts.print("proofs.risc0Advisory.count"),
+              r0AllLink: advisory("proofs.risc0Advisory.count", "risc0/risc0"),
             }),
           },
           {

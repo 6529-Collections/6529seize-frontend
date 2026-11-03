@@ -36,7 +36,7 @@ function Row({ row }: { readonly row: PageIndexRow }) {
           <Icon kind="arrow" />
         </span>
         {row.desc !== undefined && (
-          <span className="tw-col-start-2 tw-text-base tw-leading-6 tw-text-iron-400">
+          <span className="tw-col-start-2 tw-text-base tw-leading-[26px] tw-text-iron-400">
             {row.desc}
           </span>
         )}

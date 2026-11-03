@@ -21,7 +21,11 @@ import { defineFact, type FactDef } from "./types";
 const latest = (inputs: FactInputs) => inputs.feed?.latest.day;
 const rust = (inputs: FactInputs) => latest(inputs)?.implementations.rust;
 
-/** A file written later than 2 h 40 min after its day began was rewritten. */
+/**
+ * A file written later than 2 h 40 min after its day began is late or re-run
+ * (↻). The index does not say which: a day computed again (Oct 14 to 18) and
+ * a run that failed and ran later (Oct 23) look the same.
+ */
 const REWRITE_AFTER_MS = (2 * 60 + 40) * 60_000;
 /** The next result is published about 50 minutes after its snapshot. */
 const PUBLISH_AFTER_MS = 50 * 60_000;
@@ -73,8 +77,8 @@ export interface DaySummary {
   readonly sha256: string | null;
   /** When the day's file was written, if known. */
   readonly writtenAt: string | null;
-  /** Written more than 2 h 40 min after its day began: rewritten (↻). */
-  readonly rewritten: boolean;
+  /** Written more than 2 h 40 min after its day began: late or re-run (↻). */
+  readonly late: boolean;
   readonly [key: string]: string | number | boolean | null;
 }
 
@@ -93,7 +97,7 @@ function daySummaries(inputs: FactInputs): DaySummary[] | undefined {
     .map((day) => {
       const writtenAt =
         files.get(day.cycleDay)?.generatedAt ?? day.generatedAt ?? null;
-      const rewritten =
+      const late =
         writtenAt !== null &&
         Date.parse(writtenAt) - Date.parse(`${day.date}T00:00:00Z`) >
           REWRITE_AFTER_MS;
@@ -106,7 +110,7 @@ function daySummaries(inputs: FactInputs): DaySummary[] | undefined {
         total: day.totalTdh.rust,
         sha256: day.sha256,
         writtenAt,
-        rewritten,
+        late,
       };
     });
 }
@@ -399,7 +403,7 @@ export const FEED_FACTS = {
       if (days === undefined || days.some((day) => day.writtenAt === null)) {
         return undefined;
       }
-      return days.filter((day) => day.rewritten).length;
+      return days.filter((day) => day.late).length;
     },
   }),
   "tdh.days.first": defineFact<string>({

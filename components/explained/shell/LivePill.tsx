@@ -87,6 +87,13 @@ export default function LivePill({
       }
     >
       {!record && <Pulse live={!late} />}
+      {/* Below lg the lead is one word, so the clock never stands
+          unexplained on a phone: "Written 00:49 UTC". */}
+      {!record && (
+        <span className="lg:tw-hidden">
+          {kind === "read" ? lead : kt(locale, "explained.kit.live.written")}
+        </span>
+      )}
       <span className={record ? "" : "tw-hidden lg:tw-inline"}>{lead}</span>
       <b className="tw-font-semibold tw-text-iron-300">{clockText}</b>
       {!record && (

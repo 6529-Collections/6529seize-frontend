@@ -61,7 +61,9 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
       assumption: s("explained.tdh.sure.ledger.rerun"),
       mark: "notYet",
       covers: m("explained.tdh.sure.ledger.rerunCovers", {
-        commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
+        // A commitment is the whole hash, so the row prints all of it,
+        // free to wrap anywhere in a narrow column.
+        commit: <CodeName wrap>{p.v("manifest.commit", "long")}</CodeName>,
       }),
     },
   ];
@@ -104,7 +106,7 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
               {limits.map((limit, index) => (
                 <li
                   key={limit.id}
-                  className="tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3 tw-text-base tw-leading-6 tw-text-iron-300"
+                  className="tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3 tw-text-base tw-leading-[26px] tw-text-iron-300"
                 >
                   <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
                     {index + 1}

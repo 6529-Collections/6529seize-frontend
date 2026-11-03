@@ -48,13 +48,28 @@ function withFacts(node: ReactNode) {
   );
 }
 
+/** An element whose own text is exactly this, across inline children (CC0's slashed zero). */
+function exactText(text: string) {
+  return (_: string, element: Element | null) =>
+    element?.textContent === text &&
+    Array.from(element.children).every((child) => child.textContent !== text);
+}
+
 describe("the machine", () => {
+  // The machine keeps its state in the address: each test starts from a
+  // plain one.
+  beforeEach(() => {
+    globalThis.history.replaceState(null, "", "/network/tdh");
+  });
+
   it("opens on one copy of Meme #2 held 100 days: 394 TDH", () => {
     const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
     const machine = container.querySelector('[data-lens="machine"]');
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("Meme #2 · SeizeJPGs")).toBeInTheDocument();
-    expect(screen.getByText("1,000 copies · CC0")).toBeInTheDocument();
+    expect(
+      screen.getByText(exactText("1,000 copies · CC0"))
+    ).toBeInTheDocument();
     expect(
       screen.getByText("3,941, the largest edition, ÷ 1,000 copies")
     ).toBeInTheDocument();
@@ -64,16 +79,16 @@ describe("the machine", () => {
     );
   });
 
-  it("gives Meme #4 with one Gradient 1,335 TDH (TDH-DESIGN.md §5.1)", async () => {
+  it("gives Meme #4 (300 minted) with one Gradient 1,340 TDH", async () => {
     const user = userEvent.setup();
     const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
     await user.click(screen.getByRole("button", { name: "Meme #4" }));
     await user.click(
       container.querySelector('[data-beta="102"]') as HTMLElement
     );
-    expect(screen.getByText("1,335")).toBeInTheDocument();
+    expect(screen.getByText("1,340")).toBeInTheDocument();
     expect(screen.getByText("one Gradient")).toBeInTheDocument();
-    expect(screen.getByText("301 copies · CC0")).toBeInTheDocument();
+    expect(screen.getByText(exactText("300 copies · CC0"))).toBeInTheDocument();
   });
 
   it("counts the newest card at its floor while it is still minting", async () => {
@@ -83,7 +98,11 @@ describe("the machine", () => {
       screen.getByRole("button", { name: "Meme #562, still minting" })
     );
     expect(
-      screen.getByText("152 minted so far · counts as 310 · CC0")
+      screen.getByText(
+        exactText(
+          "152 minted so far · counts as 310, its floor, until minting ends · CC0"
+        )
+      )
     ).toBeInTheDocument();
     expect(screen.getByText("12.71")).toBeInTheDocument();
     expect(
@@ -106,6 +125,31 @@ describe("the machine", () => {
     await user.click(breakIt);
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("394")).toBeInTheDocument();
+  });
+
+  it("keeps its state in the address, and opens on a link to one", async () => {
+    const user = userEvent.setup();
+    withFacts(<Machine cards={CARDS} locale="en-US" />);
+    // Arriving writes nothing; a change writes the state, sold or not.
+    expect(globalThis.location.search).toBe("");
+    await user.click(screen.getByRole("button", { name: "Break it: sell it" }));
+    const params = new URLSearchParams(globalThis.location.search);
+    expect(params.get("card")).toBe("2");
+    expect(params.get("days")).toBe("100");
+    expect(params.get("sold")).toBe("1");
+  });
+
+  it("opens sold when the link says so", () => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/network/tdh?card=2&days=100&boost=100&sold=1"
+    );
+    const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
+    expect(container.querySelector('[data-lens="machine"]')).toHaveAttribute(
+      "data-broken",
+      "1"
+    );
   });
 
   it("says so, with no number, when the editions cannot be read", () => {
@@ -159,9 +203,17 @@ describe("Explain my TDH", () => {
       screen.getByText("Your card counts from Mon, Oct 19.")
     ).toBeInTheDocument();
     expect(screen.getByText(/found 4 h 55 min: not a whole day/)).toBeVisible();
+    // A day adds BASE, rounded once per card (P26 §8.2), never the rate.
+    expect(screen.getByText(/found 4 h 55 min/)).toHaveTextContent(
+      /counts its first whole day and adds \d+; each day after adds \d+ or \d+ \(\d+\.\d{2} a day, rounded per card\)\./
+    );
     await user.click(screen.getByRole("button", { name: "Not found" }));
     expect(
       screen.getByText("No wallet found by that name.")
+    ).toBeInTheDocument();
+    // A wallet appears in the next result; only its TDH waits a whole day.
+    expect(
+      screen.getByText(/appears in the next result, with no TDH until/)
     ).toBeInTheDocument();
   });
 
@@ -328,20 +380,33 @@ describe("the overview", () => {
       />
     );
     expect(container.querySelector('[data-fig="network"]')).not.toBeNull();
-    expect(screen.getByText("top 10")).toBeInTheDocument();
-    expect(screen.getByText("the other 100")).toBeInTheDocument();
+    // The finding is the title; each group is named on its own slice, a
+    // thin one with its share, at the bar's end.
     expect(
-      screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
-    ).toHaveTextContent(
-      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero TDH, fewer than the daily check compares. Read Oct 31, 09:12 UTC."
+      screen.getByRole("heading", {
+        name: "The top 100 identities hold 70.0% of all TDH.",
+      })
+    ).toBeInTheDocument();
+    const names = container.querySelector("[data-network-names]");
+    expect(names).toHaveTextContent("top 10");
+    expect(names).toHaveTextContent("the other 100 5.0%");
+    expect(screen.getByText(/^Read Oct 31, 09:12 UTC\./)).toHaveTextContent(
+      "Read Oct 31, 09:12 UTC. An identity is one to four linked wallets. It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
     );
+    expect(container.querySelector("[data-network-snapshot]")).toBeNull();
     const table = screen.getByRole("table");
+    expect(
+      within(table).getByRole("rowheader", { name: "top 10" })
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("rowheader", { name: "the other 100" })
+    ).toBeInTheDocument();
     expect(within(table).getAllByRole("row")).toHaveLength(5);
     expect(
       within(table).getByRole("rowheader", { name: "next 900" })
     ).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveAccessibleName(
-      "Today's TDH as one area, split by rank: the top identities' share of the total, and their share of the identities."
+      "All TDH added up, split by rank: the top identities' share of the total, and their share of the identities."
     );
   });
 });
@@ -358,10 +423,10 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call. One day under retired rules does not move the blue line."
+      "Proof A, in SP1: the day of Oct 11, under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepted it read-only at block 26,206,630. A proof under retired rules does not count toward today's evidence."
     );
     expect(zk).toHaveTextContent(
-      "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, programs A and B both proved one synthetic test cycle."
+      "Proof B, in RISC Zero, from code written apart: no mainnet day yet; under TDH v1.4, one test cycle."
     );
     expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
       "data-proved",

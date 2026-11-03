@@ -303,9 +303,14 @@ function ruleIdRow(ctx: Ctx): Row {
   const reported = day.text("ruleId");
   return {
     id: "ruleId",
-    value: hashOf(ctx, "ruleId", {
-      copy: kt(locale, "explained.kit.receipt.ruleId"),
-    }),
+    value: (
+      <>
+        {hashOf(ctx, "ruleId", {
+          copy: kt(locale, "explained.kit.receipt.ruleId"),
+        })}
+        {quiet(rich(locale, "explained.tdh.day.row.ruleIdNote"))}
+      </>
+    ),
     text: reported ?? plain(null, locale),
   };
 }

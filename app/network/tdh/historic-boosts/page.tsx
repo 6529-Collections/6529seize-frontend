@@ -147,30 +147,34 @@ export default async function VersionsPage({
       key: "tdh-1-4",
       id: "tdh-1-4",
       cells: {
-        version: (
-          <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+        version: m("explained.tdh.versions.name", {
+          version: p.v("versions.current.number"),
+        }),
+        // The live mark sits with the dates it qualifies, in the In effect
+        // cell; the rename is told under In the specification.
+        when: (
+          <span className="tw-flex tw-flex-col tw-items-start tw-gap-1.5">
             <span>
-              {m("explained.tdh.versions.name", {
-                version: p.v("versions.current.number"),
+              {m("explained.tdh.versions.current.when", {
+                fourWallets: p.v("versions.fourWallets"),
+                from: (
+                  <FactText
+                    fact={book.maybe("versions.current.since")}
+                    locale={locale}
+                  >
+                    {since ? day(since) : ""}
+                  </FactText>
+                ),
               })}
             </span>
             <Track maturity="live" locale={locale} size="sm" />
           </span>
         ),
-        when: m("explained.tdh.versions.current.when", {
-          fourWallets: p.v("versions.fourWallets"),
-          from: (
-            <FactText
-              fact={book.maybe("versions.current.since")}
-              locale={locale}
-            >
-              {since ? day(since) : ""}
-            </FactText>
-          ),
-        }),
         fullSet: m("explained.tdh.versions.current.fullSet", {
           today: p.v("engine.boost.fullSet"),
           ceiling: p.v("rules.fullSetCeiling"),
+          max: p.v("engine.boost.todayMax"),
+          all: p.v("engine.boost.ceiling"),
         }),
         seasons: m("explained.tdh.versions.current.seasons", {
           last: p.v("rules.lastBoostedSeason"),
@@ -213,6 +217,8 @@ export default async function VersionsPage({
               seasons: m("explained.tdh.versions.before.seasons", {
                 high: beforeText(formatCents(locale, before.partialHigh)),
                 low: beforeText(formatCents(locale, before.partialLow)),
+                step: beforeText(formatCents(locale, before.partialStep)),
+                genesis: beforeText(formatCents(locale, before.genesis)),
               }),
             },
           },
@@ -267,6 +273,8 @@ export default async function VersionsPage({
             <StackTable
               from="lg"
               caption={s("explained.tdh.versions.table")}
+              // The boost cells are short sentences, so they read left
+              // aligned like the rest; only a bare number would align right.
               columns={[
                 {
                   key: "version",
@@ -276,12 +284,10 @@ export default async function VersionsPage({
                 {
                   key: "fullSet",
                   label: s("explained.tdh.versions.col.fullSet"),
-                  numeric: true,
                 },
                 {
                   key: "seasons",
                   label: s("explained.tdh.versions.col.seasons"),
-                  numeric: true,
                 },
               ]}
               rows={rows}
@@ -304,20 +310,35 @@ export default async function VersionsPage({
                 })}
                 locale={locale}
               />
-              <figcaption className="tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+              {/* The caption says what the chart draws; the figures it
+                  rests on, with the editions' read time, follow it. */}
+              <figcaption className="tw-mt-2 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
                 {s("explained.tdh.versions.chart.caption")}
               </figcaption>
             </figure>
           )}
-          <Caption className="tw-mt-8 tw-scroll-mt-24" id="boost-figures">
-            {m("explained.tdh.versions.note", {
-              max: p.v("engine.boost.todayMax"),
-              gradients: p.v("rules.gradientMax"),
-              ceiling: p.v("engine.boost.ceiling"),
-              last: p.v("rules.lastBoostedSeason"),
-              date: p.v("memes.readOn", "long"),
-            })}
-          </Caption>
+          {historySteps.length > 1 && ceilingValue !== null && (
+            <Caption className="tw-mt-5 tw-scroll-mt-24" id="boost-figures">
+              {m("explained.tdh.versions.note", {
+                max: p.v("engine.boost.todayMax"),
+                gradients: p.v("rules.gradientMax"),
+                ceiling: p.v("engine.boost.ceiling"),
+                last: p.v("rules.lastBoostedSeason"),
+                date: p.v("memes.readOn", "long"),
+              })}
+            </Caption>
+          )}
+          {(historySteps.length <= 1 || ceilingValue === null) && (
+            <Caption className="tw-mt-8 tw-scroll-mt-24" id="boost-figures">
+              {m("explained.tdh.versions.note", {
+                max: p.v("engine.boost.todayMax"),
+                gradients: p.v("rules.gradientMax"),
+                ceiling: p.v("engine.boost.ceiling"),
+                last: p.v("rules.lastBoostedSeason"),
+                date: p.v("memes.readOn", "long"),
+              })}
+            </Caption>
+          )}
         </EdSection>
 
         <EdSection
@@ -379,11 +400,13 @@ export default async function VersionsPage({
                     )}
                   </p>
                 </div>
-                {/* Retired is a standing, not evidence: plain words, never
-                    the Not yet glyph, which answers "how do we know". */}
-                <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
-                  {s("explained.tdh.versions.v10.mark")}
-                </span>
+                {/* Retired is a standing, not evidence: the struck square
+                    of a standing replaced, never the Not yet glyph. */}
+                <Mark
+                  kind="retired"
+                  locale={locale}
+                  label={s("explained.tdh.versions.v10.mark")}
+                />
               </li>
             </ol>
           </FactScope>

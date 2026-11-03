@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import FactValue from "@/components/explained/facts/FactValue";
+import Mark from "@/components/explained/marks/Mark";
 import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
-import { EX_TEXT } from "@/components/explained/tokens";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
+import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
@@ -27,6 +29,8 @@ import {
 import { rich } from "@/components/explained/rich";
 import { wt } from "../copy";
 import WalletsLens from "../WalletsLens";
+import { HERO_LINKS, HERO_WALLETS } from "../walletPresets";
+import WalletGraph from "@/components/explained/figures/WalletGraph";
 import { RANDOM_LINK_GRAPHS, gateText } from "../walletFacts";
 import { dt } from "./copy";
 import ProtectsBox from "./ProtectsBox";
@@ -102,7 +106,39 @@ export default async function TdhConsolidationDesignPage({
           title={dt(locale, "explained.tdh.design.title")}
           titleClassName="tw-max-w-[900px] [text-wrap:balance]"
           lede={dt(locale, "explained.tdh.design.lede")}
-        />
+          aside={
+            // The chapter's four-wallet glyph, as beside Your wallets'
+            // opening: every pair linked both ways.
+            <figure className="tw-m-0">
+              <div aria-hidden="true">
+                <WalletGraph
+                  wallets={HERO_WALLETS}
+                  links={HERO_LINKS}
+                  groups={[["A", "B", "C", "D"]]}
+                  locale={locale}
+                />
+              </div>
+              <figcaption className={`tw-mt-2 ${EX_TEXT.cap}`}>
+                {rich(locale, "explained.tdh.wallets.heroCaption", {
+                  date: (
+                    <FactText fact={gate} locale={locale}>
+                      {when.day}
+                    </FactText>
+                  ),
+                })}
+              </figcaption>
+            </figure>
+          }
+        >
+          {/* The lede's "cannot" carries its evidence and its limit. */}
+          <div className="tw-mt-5">
+            <Mark
+              kind="tested"
+              refText={dt(locale, "explained.tdh.design.ledeMark")}
+              locale={locale}
+            />
+          </div>
+        </PageHead>
 
         <Section tight>
           <span id="consolidation-rules" />
@@ -131,16 +167,24 @@ export default async function TdhConsolidationDesignPage({
                 four: count(4),
               })}
             </Para>
-            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3 sm:tw-gap-5">
+            {/* A row of three from a small tablet up; on a phone each numeral
+                keeps its caption on its own line, three short lines, not
+                three tall columns. */}
+            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-5">
               {sizes.map((wallets, index) => {
                 const key = statKeys[index];
                 if (!key) return null;
                 return (
-                  <div key={wallets}>
-                    <span className={`tw-block ${EX_TEXT.numL}`}>
+                  <div
+                    key={wallets}
+                    className="max-sm:tw-flex max-sm:tw-items-baseline max-sm:tw-gap-3"
+                  >
+                    <span
+                      className={`tw-block max-sm:tw-min-w-[44px] ${EX_TEXT.numL}`}
+                    >
                       {count(wallets)}
                     </span>
-                    <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
+                    <span className={`tw-block sm:tw-mt-1 ${EX_TEXT.cap}`}>
                       {rich(locale, key, {
                         date: (
                           <FactText fact={gate} locale={locale}>
@@ -153,6 +197,15 @@ export default async function TdhConsolidationDesignPage({
                 );
               })}
             </div>
+            <p className={`tw-m-0 tw-mt-3 ${EX_TEXT.cap}`}>
+              {rich(locale, "explained.tdh.design.rule.statCap", {
+                date: (
+                  <FactText fact={gate} locale={locale}>
+                    {when.day}
+                  </FactText>
+                ),
+              })}
+            </p>
           </EdRow>
         </Section>
 
@@ -167,10 +220,12 @@ export default async function TdhConsolidationDesignPage({
           >
             <WalletsLens
               locale={locale}
-              start="batch"
+              // The first view differs from the hero's: D's first link,
+              // and the split it makes.
+              start="step1"
               label={dt(locale, "explained.tdh.design.order.lensLabel")}
               question={dt(locale, "explained.tdh.design.order.question")}
-              withRule={false}
+              withRule
               caption={wt(locale, "explained.tdh.wallets.lens.caption", {
                 date: when.day,
               })}
@@ -180,19 +235,27 @@ export default async function TdhConsolidationDesignPage({
                   options: [
                     {
                       value: "step1",
-                      label: dt(locale, "explained.tdh.design.order.first"),
+                      label: dt(locale, "explained.tdh.design.order.first", {
+                        n: "1",
+                      }),
                     },
                     {
                       value: "step2",
-                      label: dt(locale, "explained.tdh.design.order.second"),
+                      label: dt(locale, "explained.tdh.design.order.second", {
+                        n: "2",
+                      }),
                     },
                     {
                       value: "step3",
-                      label: dt(locale, "explained.tdh.design.order.third"),
+                      label: dt(locale, "explained.tdh.design.order.third", {
+                        n: "3",
+                      }),
                     },
+                    // The safe order in the same row, short enough that the
+                    // four fit beside the rule.
                     {
                       value: "batch",
-                      label: wt(locale, "explained.tdh.wallets.lens.batch"),
+                      label: dt(locale, "explained.tdh.design.order.safe"),
                     },
                   ],
                 },
@@ -234,21 +297,31 @@ export default async function TdhConsolidationDesignPage({
                 ],
               }}
             />
-            <Para className="tw-mt-6">
-              {rich(locale, "explained.tdh.design.protects.tested", {
-                graphs: (
-                  <RecordValue
-                    id={RANDOM_LINK_GRAPHS.id}
-                    source={RANDOM_LINK_GRAPHS.source}
-                    locale={locale}
-                  >
-                    {formatCount(locale, RANDOM_LINK_GRAPHS.value)}
-                  </RecordValue>
-                ),
-              })}
-            </Para>
+            {/* The mark sits on the claim it qualifies, 6529's own tests, in
+                a panel of its own under the two lists. */}
+            <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-[18px] md:tw-px-[22px]">
+              <Mark kind="tested" locale={locale} size="sm" />
+              <p className={`tw-m-0 tw-mt-2 tw-max-w-[660px] ${EX_TEXT.body}`}>
+                {rich(locale, "explained.tdh.design.protects.tested", {
+                  graphs: (
+                    <RecordValue
+                      id={RANDOM_LINK_GRAPHS.id}
+                      source={RANDOM_LINK_GRAPHS.source}
+                      locale={locale}
+                    >
+                      {formatCount(locale, RANDOM_LINK_GRAPHS.value)}
+                    </RecordValue>
+                  ),
+                })}
+              </p>
+            </div>
           </EdRow>
         </Section>
+        {/* Back and Next along the shelf, as on the other shelf pages. */}
+        <PlaceLinks
+          place={pagePlace("tdh", "design", locale)}
+          locale={locale}
+        />
       </article>
       <HowWeKnow
         locale={locale}
@@ -273,10 +346,18 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
     {
       title: dt(locale, "explained.tdh.design.hwk.analysis"),
       body: rich(locale, "explained.tdh.design.hwk.analysisBody", {
-        // Where the candidate rules were checked: the earlier TDH pages'
-        // Consolidation design, "How it was tested", and the grouping code
-        // it pins.
-        frontend: <code className="tw-font-mono">7f2f68700e</code>,
+        // Where the candidate rules' check is recorded: the four-wallet
+        // change's public tracking issue; the check's code is 6529's own.
+        issue: (
+          <a
+            className={EX_LINK}
+            href="https://github.com/6529-Collections/6529seize-frontend/issues/4214"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            #4214
+          </a>
+        ),
         backend: (
           <code className="tw-font-mono">6529seize-backend ee74952</code>
         ),

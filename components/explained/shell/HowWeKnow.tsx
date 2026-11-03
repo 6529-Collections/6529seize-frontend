@@ -38,17 +38,21 @@ export default function HowWeKnow({
 }) {
   const heading = kt(locale, "explained.kit.hwk.title");
   // Rows fill whole lines: four as two pairs (four across on a wide
-  // screen), two side by side, anything else in threes.
+  // screen), two side by side, anything else in threes; a last row left
+  // alone in threes spans the line, so it reads as the block's footnote,
+  // not a missing pair.
   const columns =
     rows.length % 4 === 0
       ? "md:tw-grid-cols-2 xl:tw-grid-cols-4"
       : rows.length === 2
         ? "md:tw-grid-cols-2"
-        : "md:tw-grid-cols-3";
+        : rows.length % 3 === 1
+          ? "md:tw-grid-cols-3 md:[&>*:last-child]:tw-col-span-3 md:[&>*:last-child]:tw-max-w-[660px]"
+          : "md:tw-grid-cols-3";
   return (
     <footer
       aria-label={heading}
-      className="tw-mt-[80px] tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pb-[72px] tw-pt-[30px] md:tw-mt-24 lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8"
+      className="tw-mt-16 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pb-[72px] tw-pt-[30px] lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8"
       data-ex-hwk=""
     >
       <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
@@ -63,7 +67,7 @@ export default function HowWeKnow({
               key={row.title}
               className="tw-text-sm tw-leading-[21px] tw-text-iron-400"
             >
-              <b className="tw-mb-0.5 tw-block tw-text-[15px] tw-font-semibold tw-text-iron-50">
+              <b className="tw-mb-0.5 tw-block tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
                 {row.title}
               </b>
               {row.body}

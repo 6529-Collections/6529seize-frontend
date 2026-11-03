@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount, shortHash } from "@/lib/explained/format";
 import { kt } from "../i18n";
+import BreakIt, { breakItLabel } from "../lens/BreakIt";
 import { Glyph } from "../marks/glyphs";
 import { EX_FOCUS } from "../tokens";
 
@@ -18,7 +19,13 @@ const SLOW_MS = 8000;
  */
 type HashState =
   | { readonly status: "computing" }
-  | { readonly status: "done"; readonly hex: string; readonly bytes: number }
+  | {
+      readonly status: "done";
+      readonly hex: string;
+      readonly bytes: number;
+      /** The file's bytes, kept so Break it can change one of them. */
+      readonly buffer: ArrayBuffer;
+    }
   | { readonly status: "unavailable" };
 
 async function digest(bytes: ArrayBuffer): Promise<string> {
@@ -50,7 +57,28 @@ async function hashFile(
     status: "done",
     hex: await digest(bytes),
     bytes: bytes.byteLength,
+    buffer: bytes,
   };
+}
+
+/**
+ * Break it: the file with one byte changed, the last digit in it turned
+ * into the next one, so the change is a number a forger would want, and
+ * the hash of the changed bytes. Done in this browser; nothing is sent.
+ */
+async function hashChanged(
+  buffer: ArrayBuffer
+): Promise<{ readonly hex: string; readonly at: number }> {
+  const bytes = new Uint8Array(buffer.slice(0));
+  let at = bytes.length - 1;
+  while (at >= 0 && (bytes[at] ?? 0) < 0x30) at -= 1;
+  while (at >= 0 && ((bytes[at] ?? 0) < 0x30 || (bytes[at] ?? 0) > 0x39)) {
+    at -= 1;
+  }
+  const index = Math.max(0, at);
+  const old = bytes[index] ?? 0x30;
+  bytes[index] = old >= 0x30 && old <= 0x38 ? old + 1 : 0x30;
+  return { hex: await digest(bytes.buffer), at: index };
 }
 
 export default function BrowserHash({
@@ -75,6 +103,14 @@ export default function BrowserHash({
   });
   let state: HashState = hashed.data ?? { status: "computing" };
   if (hashed.isError) state = { status: "unavailable" };
+  const [broken, setBroken] = useState(false);
+  const changed = useQuery({
+    queryKey: ["explained", "browser-hash-changed", src ?? null, text ?? null],
+    queryFn: () => (state.status === "done" ? hashChanged(state.buffer) : null),
+    enabled: broken && state.status === "done",
+    staleTime: Infinity,
+    retry: false,
+  });
   const [slow, setSlow] = useState(false);
   const computing = state.status === "computing";
   useEffect(() => {
@@ -89,7 +125,14 @@ export default function BrowserHash({
   let shown = kt(locale, "explained.kit.receipt.computing");
   let verdict: string | null = null;
   let mark: string = state.status;
-  if (state.status === "done") {
+  if (state.status === "done" && broken && changed.data) {
+    shown = shortHash(changed.data.hex);
+    mark = "differs";
+    verdict = kt(locale, "explained.kit.receipt.hashChanged", {
+      at: formatCount(locale, changed.data.at + 1),
+      bytes: formatCount(locale, state.bytes),
+    });
+  } else if (state.status === "done") {
     shown = shortHash(state.hex);
     const equal = state.hex === expected;
     mark = equal ? "equal" : "differs";
@@ -137,6 +180,23 @@ export default function BrowserHash({
             className="tw-mt-1 tw-size-[13px]"
           />
           <span>{verdict}</span>
+        </span>
+      )}
+      {state.status === "done" && (
+        <span className="tw-mt-1">
+          <BreakIt
+            id="byte"
+            pressed={broken}
+            onToggle={() => setBroken((value) => !value)}
+            label={
+              broken
+                ? kt(locale, "explained.kit.receipt.byteBack")
+                : breakItLabel(
+                    locale,
+                    kt(locale, "explained.kit.receipt.byteEdge")
+                  )
+            }
+          />
         </span>
       )}
     </span>

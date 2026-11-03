@@ -49,7 +49,7 @@ function SpecTable({ locale }: { readonly locale: SupportedLocale }) {
                   {CARD.tiers[tier].name}
                 </span>
                 {tier === "good" && (
-                  <span className="tw-rounded-full tw-bg-primary-500 tw-px-2 tw-py-0.5 tw-text-[12px] tw-font-bold tw-uppercase tw-tracking-[0.1em] tw-text-white">
+                  <span className="tw-text-[12px] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-200">
                     {CARD.recommended}
                   </span>
                 )}
@@ -67,7 +67,7 @@ function SpecTable({ locale }: { readonly locale: SupportedLocale }) {
           >
             <th
               scope="row"
-              className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-pr-4 tw-text-left tw-align-top tw-text-sm tw-font-semibold tw-text-iron-400"
+              className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-pr-4 tw-text-left tw-align-top tw-text-[15px] tw-font-semibold tw-text-iron-400"
             >
               {hw(locale, `spec.row.${row.id}`)}
             </th>
@@ -106,7 +106,7 @@ function TierBlocks({ locale }: { readonly locale: SupportedLocale }) {
             <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               {hw(locale, "spec.phone", { tier: CARD.tiers[tier].name })}
               {tier === "good" && (
-                <span className="tw-rounded-full tw-bg-primary-500 tw-px-2 tw-py-0.5 tw-text-[12px] tw-font-bold tw-uppercase tw-tracking-[0.1em] tw-text-white">
+                <span className="tw-text-[12px] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-200">
                   {CARD.recommended}
                 </span>
               )}

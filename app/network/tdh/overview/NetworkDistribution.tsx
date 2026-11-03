@@ -29,27 +29,31 @@ interface Tone {
 }
 
 // A stepped ramp, lightest at the top of the ranking: each group's bar and
-// ribbon are one step of it, so the four ribbons read apart. The rest keep
-// their hatch from bar to ribbon to bar.
+// ribbon are one step of it, at least 1.6:1 in luminance from the next, so
+// the four read apart in the bars and in the ribbons (one opacity for every
+// ribbon keeps the steps). The rest take the ramp's lowest step, a plain
+// fill: the 45° hatch means the boost and nothing else (EXPLAINED.md §4.2).
+// A step lighter than the bars' own ground, so the flows read on the panel.
+const BAND_ALPHA = 0.8;
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
-    fill: "rgba(232, 233, 237, 0.96)",
-    band: "rgba(232, 233, 237, 0.55)",
+    fill: "rgb(240, 241, 244)",
+    band: `rgba(240, 241, 244, ${BAND_ALPHA})`,
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
-    fill: "rgba(206, 207, 212, 0.7)",
-    band: "rgba(206, 207, 212, 0.36)",
+    fill: "rgb(164, 166, 177)",
+    band: `rgba(164, 166, 177, ${BAND_ALPHA})`,
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
-    fill: "rgba(170, 171, 178, 0.48)",
-    band: "rgba(170, 171, 178, 0.22)",
+    fill: "rgb(102, 104, 116)",
+    band: `rgba(102, 104, 116, ${BAND_ALPHA})`,
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.3) 0 3px, rgba(206, 207, 212, 0.1) 3px 8px)",
-    band: "url(#ex-network-hatch)",
+    fill: "rgb(58, 59, 67)",
+    band: `rgba(58, 59, 67, ${BAND_ALPHA})`,
     ink: "tw-text-iron-50",
   },
 };
@@ -164,18 +168,6 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
       className="tw-block tw-h-20 tw-w-full"
       aria-hidden="true"
     >
-      <defs>
-        <pattern
-          id="ex-network-hatch"
-          width="8"
-          height="8"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <rect width="8" height="8" fill="rgba(206, 207, 212, 0.06)" />
-          <rect width="3" height="8" fill="rgba(206, 207, 212, 0.2)" />
-        </pattern>
-      </defs>
       {bandShapes(items).map(({ key, top, bottom }) => {
         // Each group flows as a ribbon from its share of TDH (above) to
         // its share of identities (below): curved sides, a filled body.
@@ -206,36 +198,131 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
 
 /**
  * The groups too thin to carry their share inside the bar, named under it
- * at the left edge where they sit, so no slice of the drawing is unlabelled.
+ * at the end where they sit, so no slice of the drawing is unlabelled.
  */
 function Callouts({
   items,
   pick,
   locale,
+  every = false,
 }: {
   readonly items: readonly Share[];
   readonly pick: (share: Share) => number;
   readonly locale: SupportedLocale;
+  /** Name every group from a desktop up, not only the thin ones: the bar's
+   * own labels give shares, not names. */
+  readonly every?: boolean;
 }) {
-  const thin = items.filter((share) => pick(share) < LABEL_MIN_SHARE);
+  // Too thin for its label on a phone: named here, on a phone only when
+  // the bar carries it from a tablet up. Each name sits under its own end
+  // of the bar: a slice past the middle is named at the right edge, so the
+  // name is never read against the wrong slice.
+  let from = 0;
+  const placed = items.map((share) => {
+    const value = pick(share);
+    const centre = from + value / 2;
+    from += value;
+    return { share, value, right: centre > 0.5 };
+  });
+  const thin = every
+    ? placed
+    : placed.filter((item) => item.value < LABEL_MIN_SHARE_PHONE);
   if (thin.length === 0) return null;
+  const shown = (item: (typeof placed)[number]) => {
+    if (item.value < LABEL_MIN_SHARE) return "";
+    if (item.value < LABEL_MIN_SHARE_PHONE) {
+      return every ? "" : "md:tw-hidden";
+    }
+    return "max-lg:tw-hidden";
+  };
+  const callout = (item: (typeof placed)[number]) => (
+    <span
+      key={item.share.group.key}
+      className={`tw-inline-flex tw-items-center ${shown(item)}`}
+    >
+      <span
+        className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
+        style={{ background: TONES[item.share.group.key].fill }}
+      />
+      {`${groupName(locale, item.share.group)} ${percent(locale, item.value)}`}
+    </span>
+  );
   return (
     <span
-      className="tw-mt-1 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-text-[12px] tw-font-semibold tw-leading-4 tw-text-iron-300"
+      className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300"
       aria-hidden="true"
       data-network-callouts=""
     >
-      <span className="tw-text-iron-400">↑</span>
-      {thin.map((share) => (
-        <span key={share.group.key} className="tw-inline-flex tw-items-center">
+      <span className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+        {thin.filter((item) => !item.right).map(callout)}
+      </span>
+      <span className="tw-ml-auto tw-flex tw-flex-wrap tw-justify-end tw-gap-x-4 tw-gap-y-1 tw-text-right">
+        {thin.filter((item) => item.right).map(callout)}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * From a desktop up, each group named on its own slice of the TDH bar, at
+ * the slice's start; a slice too thin for its share inside the bar carries
+ * the share in its name, at the bar's end, with a tick down to it. The
+ * names are the legend, so the figure needs no other.
+ */
+function Names({
+  items,
+  locale,
+}: {
+  readonly items: readonly Share[];
+  readonly locale: SupportedLocale;
+}) {
+  let from = 0;
+  const placed = items.map((share) => {
+    const start = from;
+    from += share.tdh;
+    return { share, start, value: share.tdh };
+  });
+  const text =
+    "tw-absolute tw-top-0 tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
+  return (
+    <div
+      className="tw-relative tw-mb-1.5 tw-h-5 max-lg:tw-hidden"
+      aria-hidden="true"
+      data-network-names=""
+    >
+      {placed.map(({ share, start, value }) => {
+        const thin = value < LABEL_MIN_SHARE;
+        const atEnd = thin && start + value / 2 > 0.5;
+        const swatch = (
           <span
             className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
             style={{ background: TONES[share.group.key].fill }}
           />
-          {`${groupName(locale, share.group)} ${percent(locale, pick(share))}`}
-        </span>
-      ))}
-    </span>
+        );
+        const name = thin
+          ? `${groupName(locale, share.group)} ${percent(locale, value)}`
+          : groupName(locale, share.group);
+        return (
+          <span key={share.group.key}>
+            <span
+              className={`${text} ${atEnd ? "tw-right-0" : ""}`}
+              style={atEnd ? undefined : { left: `${start * 100}%` }}
+            >
+              {swatch}
+              {name}
+            </span>
+            {/* A thin slice named at the bar's end needs no tick: the
+                name ends where the slice does. */}
+            {thin && !atEnd && (
+              <span
+                className="tw-absolute tw-top-5 tw-h-1.5 tw-w-px tw-bg-iron-400"
+                style={{ left: `${(start + value / 2) * 100}%` }}
+              />
+            )}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -266,7 +353,7 @@ function ShareTable({
     </td>
   );
   return (
-    <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-[23px] tw-text-iron-300 max-sm:tw-block">
+    <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-6 tw-text-iron-300 max-sm:tw-block">
       <thead className="max-sm:tw-sr-only">
         <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
           <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
@@ -335,35 +422,74 @@ export default function NetworkDistribution({
     "tw-mb-1.5 tw-block tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
   return (
     <figure className="tw-m-0 tw-mt-14 md:tw-mt-16" data-fig="network">
-      <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
-      <h3 className={`${EX_TEXT.h3} tw-mt-2`}>{ot(locale, "network.title")}</h3>
-      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-6 lg:tw-grid-cols-[minmax(0,1fr)_340px]">
+      <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
+        <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
+        {/* A figure drawn from the kept snapshot says so beside its title,
+            not only in its caption. */}
+        {data.fromSnapshot && (
+          <span
+            className="tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-300"
+            data-network-snapshot=""
+          >
+            {ot(locale, "network.snapshotTag", {
+              read: readTime(locale, data.readAt),
+            })}
+          </span>
+        )}
+      </span>
+      {/* The finding is the title: the top hundred's share, from the facts. */}
+      <h3 className={`${EX_TEXT.h3} tw-mt-2`}>
+        {ot(locale, "network.title", {
+          count: formatCount(locale, top100.count),
+          share: percent(locale, top100.tdh / data.total),
+        })}
+      </h3>
+      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-6">
         <div role="img" aria-label={ot(locale, "network.aria")}>
           {/* The role="img" names the figure; its labels are drawing, as an SVG's would be. */}
           <span className={rowLabel} aria-hidden="true">
             {ot(locale, "network.tdhRow")}
           </span>
+          <Names items={items} locale={locale} />
+          {/* Below a desktop, the thin groups' shares of TDH, named above
+              the bar so the ribbons below it stay joined to it. */}
+          <div className="tw-mb-1.5 lg:tw-hidden [&>span]:tw-mt-0">
+            <Callouts
+              items={items}
+              pick={(share) => share.tdh}
+              locale={locale}
+            />
+          </div>
           <Bar items={items} pick={(share) => share.tdh} locale={locale} />
           <Bands items={items} />
           <Bar items={items} pick={(share) => share.people} locale={locale} />
+          <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
+            {ot(locale, "network.peopleRow")}
+          </span>
           <Callouts
             items={items}
             pick={(share) => share.people}
             locale={locale}
+            every
           />
-          <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
-            {ot(locale, "network.peopleRow")}
-          </span>
         </div>
-        <ShareTable items={items} locale={locale} />
+        {/* The figure's text: shown below a desktop, where the bars are
+            too narrow to name every slice; read out at every width. */}
+        <div className="lg:tw-sr-only">
+          <ShareTable items={items} locale={locale} />
+        </div>
       </div>
-      <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
-        {ot(locale, "network.caption", {
-          count: formatCount(locale, top100.count),
-          share: percent(locale, top100.tdh / data.total),
-          ranked: formatCount(locale, data.identities),
-          read: readTime(locale, data.readAt),
-        })}
+      <figcaption className={`${EX_TEXT.claim} tw-mt-5 tw-max-w-[760px]`}>
+        {ot(
+          locale,
+          data.fromSnapshot ? "network.captionSnapshot" : "network.caption",
+          {
+            count: formatCount(locale, top100.count),
+            share: percent(locale, top100.tdh / data.total),
+            ranked: formatCount(locale, data.identities),
+            read: readTime(locale, data.readAt),
+          }
+        )}
       </figcaption>
     </figure>
   );

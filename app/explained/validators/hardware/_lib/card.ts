@@ -48,7 +48,7 @@ export const CARD = {
   datacenter: {
     kicker: "Datacenter",
     title: "Two options",
-    note: "Rack mode: always on, can also serve as a bootstrap node",
+    note: "Rack mode: always on, and a natural bootstrap node",
   },
   dc: {
     rack: {

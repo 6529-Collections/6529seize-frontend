@@ -5,6 +5,10 @@ import TdhHowItWorksPage, {
 } from "@/app/network/tdh/how-it-works/page";
 import { createFactBook } from "@/lib/explained/facts";
 import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
+import {
+  BOOST_OPEN,
+  boostOf,
+} from "@/app/network/tdh/how-it-works/models/boost";
 
 /**
  * 1 How it works (TDH-DESIGN.md §4.2, §5.3 to §5.7) on the facts of the
@@ -76,9 +80,10 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("firstday");
-    // Guess first: the answer waits for the guess.
+    // The model opens answered, on the example arrival; Guess first is an
+    // optional prompt above it.
     expect(model).toHaveTextContent(
-      "Make your guess above, or pick when the copy arrives, to see the answer."
+      "The result dated Monday, Oct 19 counts its first whole day (28 h 55 min held). The one before found 4 h 55 min: not a whole day."
     );
     await user.click(within(model).getByRole("button", { name: "Oct 19" }));
     expect(model).toHaveTextContent(
@@ -133,7 +138,8 @@ describe("How TDH is calculated", () => {
       within(model).getByRole("button", { name: "152 (#562, minting)" })
     );
     expect(model).toHaveTextContent("152 minted, counted as 310.");
-    expect(model).toHaveTextContent("min(claim limit, 310) = 310");
+    // A value worked into a rule follows an arrow, never another "=".
+    expect(model).toHaveTextContent("min(claim limit, 310) → 310");
     expect(model).toHaveTextContent("H = 3,941 (FirstGM: 6,529 − 2,588)");
     // Break it: the copy that ends the floor raises every copy's rate.
     await user.click(breakIt("floor"));
@@ -144,21 +150,31 @@ describe("How TDH is calculated", () => {
     );
   });
 
-  it("The boost ladder: 1.02, a sixth Gradient adds nothing", async () => {
+  it("The boost ladder: a full set and five Gradients, and a sixth adds nothing", async () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("boost");
-    expect(model).toHaveTextContent("1.02boost");
+    // It opens on one full set and every Gradient that pays, so the bar
+    // shows its steps; the engine gives the boost on the fixture's cards.
+    const nMemes = createFactBook(fixtureFactInputs()).num("memes.count");
+    const open = boostOf(BOOST_OPEN, nMemes).beta;
+    const boost = (beta: number) => `${(beta / 100).toFixed(2)}boost`;
+    expect(model).toHaveTextContent(boost(open));
+    expect(model).toHaveTextContent("A full set pays every paying season at once");
     await user.click(
-      within(model).getByRole("button", { name: "One more: Gradients" })
+      within(model).getByRole("button", { name: "One fewer: Gradients" })
     );
-    expect(model).toHaveTextContent("1.04boost");
+    expect(model).toHaveTextContent(boost(open - 2));
     await user.click(breakIt("gradient"));
     expect(model).toHaveTextContent("A sixth Gradient adds nothing.");
-    expect(model).toHaveTextContent("1.10boost");
+    expect(model).toHaveTextContent(boost(open));
     expect(model).toHaveAttribute("data-broken", "1");
     await user.click(breakIt("gradient"));
-    expect(model).toHaveTextContent("1.04boost");
+    expect(model).toHaveTextContent(boost(open - 2));
+    // Genesis and Nakamoto count only without the first season.
+    await user.click(
+      within(model).getByRole("button", { name: "One fewer: Full sets" })
+    );
     await user.click(
       within(model).getByRole("button", { name: "Genesis #1 to #3" })
     );
@@ -209,6 +225,9 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("stacks");
+    // Opens on its question's answer: A sells one.
+    expect(model).toHaveTextContent("A's 10-day copy leaves");
+    await user.click(within(model).getByRole("button", { name: "Nothing" }));
     expect(model).toHaveTextContent("310 days");
     await user.click(
       within(model).getByRole("button", { name: "A sells one" })
@@ -255,13 +274,47 @@ describe("How TDH is calculated", () => {
   it("lists every step in P26's order, each linked to its model", async () => {
     await renderPage();
     const steps = document.querySelectorAll("[data-step]");
-    expect(steps).toHaveLength(12);
+    // From reading the logs (§3) to the output and its roots (§9), the
+    // daily rate (§8.6) included.
+    expect(steps).toHaveLength(15);
+    expect(steps[0]).toHaveTextContent("Reading the logs");
     expect(
-      within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
+      within(steps[steps.length - 3] as HTMLElement).getByRole("link", {
         name: "Totals",
       })
     ).toHaveAttribute("href", "#part-n");
-    expect(steps[1]).toHaveTextContent("firstMint ≤ T − 86,400");
+    expect(
+      within(steps[steps.length - 2] as HTMLElement).getByRole("link", {
+        name: "Daily rate",
+      })
+    ).toHaveAttribute("href", "/network/tdh/specification#s8-6");
+    // The daily rate is derived data (§8.6): tomorrow's step is a result
+    // a day later, rounded per card, never the rate itself.
+    expect(
+      document.querySelector('[data-trace="dailyRate"]')?.textContent
+    ).toMatch(
+      /rate_e4 = [\d,]+: [\d.]+ a day on average; tomorrow's result adds [\d,]+, rounded per card/
+    );
+    expect(
+      within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
+        name: "The output",
+      })
+    ).toHaveAttribute("href", "/network/tdh/specification#s9");
+    expect(steps[2]).toHaveTextContent("firstMint ≤ T − 86,400");
+    // The worked wallet holds a Gradient too: its base and its final are
+    // in the identity's, and the network's total adds both.
+    const records = document.querySelector('[data-trace="records"]');
+    expect(records?.textContent).toMatch(
+      /card and Gradient: [\d,]+ \+ [\d,]+ = [\d,]+/
+    );
+    // The card's final, the Gradient's, their sum, and the binary64 tie of
+    // §8.4 that a re-implementer meets at this step.
+    // The tie is the table's footnote, so the row keeps to its numbers.
+    const final = document.querySelector('[data-trace="final"]');
+    expect(final?.textContent?.split("\n")).toHaveLength(3);
+    expect(
+      document.querySelector('[data-trace-note="final"]')
+    ).toHaveTextContent("FINAL(25, 114) = 28, not 29");
   });
 
   it("prints the network from the latest day, every number a fact", async () => {

@@ -1,5 +1,5 @@
 {
-  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Program A's proof of 2026-10-11 and the first pair are under the retired tdh-v1.0; the pair of 2026-10-31 is under tdh-v1.4. Refresh at ship time with the fact gate. No person, account, host or address is named; program identities are hashes of public code.",
+  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Program A's proof of 2026-10-11 and the first pair are under the retired tdh-v1.0; the pair of 2026-10-31 is under tdh-v1.4. Refresh at ship time with the fact gate. No person, account or host is named; the only addresses are mainnet's public verifier contracts, and program identities are hashes of the programs' code.",
   "sources": {
     "contracts": {
       "ref": "the validator's contracts record (contracts/README.md), commit d49ffc7",
@@ -36,8 +36,12 @@
       "ref": "6529's design record, run log of 2026-10-15"
     },
     "sp1Update": {
-      "ref": "Succinct's SP1 security update of 2025-01-27 (advisory GHSA-c873-wfhp-wx5m): two soundness flaws disclosed, and the routers to the SP1 verifier contracts on mainnets frozen",
+      "ref": "SP1's security advisory GHSA-c873-wfhp-wx5m, published 2025-01-15: missing verifier checks and Fiat-Shamir observations in sp1-stark before 4.0.0, fixed in 4.0.0; Succinct's security update of 2025-01-27 disclosed them with the freezing of the routers to the SP1 verifier contracts on mainnets",
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-c873-wfhp-wx5m"
+    },
+    "sp1Earliest": {
+      "ref": "SP1's security advisories in succinctlabs/sp1, read 2026-11-03: the earliest published is GHSA-f77q-r5qm-w4m8, published 2024-10-28 (high): insufficient range checks of BabyBear arithmetic in the Gnark recursion circuit, fixed in 1.2.0; GHSA-8m24-3cfx-9fjw (2024-11-08, insufficient observation of the cumulative sum) and GHSA-c873-wfhp-wx5m (2025-01-15) followed",
+      "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-f77q-r5qm-w4m8"
     },
     "sp1Cve": {
       "ref": "GitHub's advisory database, GHSA-63x8-x938-vx33 (CVE-2026-40323): a soundness flaw in SP1 6's recursion circuit, fixed in 6.1.0",
@@ -46,6 +50,14 @@
     "sp1Native": {
       "ref": "SP1's security advisory GHSA-p7v2-jjv3-8p8f, published 2026-10-11 (high): mismatched tensor lengths in SP1 6's native Rust verifier, versions 6.0.0 to 6.8.0, fixed in 6.8.1; the on-chain Groth16 and PLONK verifiers were not affected",
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-p7v2-jjv3-8p8f"
+    },
+    "risc0Cve": {
+      "ref": "RISC Zero's security advisory GHSA-g3qg-6746-3mg9 (CVE-2025-52484), published in risc0/risc0 on 2025-06-18 (GitHub's advisory database lists it from 2025-06-20): an underconstrained rv32im circuit in RISC Zero's zkVM, risc0-zkvm 2.0.0 to 2.0.2, fixed in 2.1.0",
+      "url": "https://github.com/risc0/risc0/security/advisories/GHSA-g3qg-6746-3mg9"
+    },
+    "risc0Advisories": {
+      "ref": "RISC Zero's security advisories in risc0/risc0, read 2026-11-02: four soundness flaws, GHSA-5c79-r6x7-3jx9 (2024-09-25, multi-step instruction modes, fixed in 1.1.1), GHSA-g3qg-6746-3mg9 (CVE-2025-52484, 2025-06-18, fixed in 2.1.0), GHSA-f6rc-24x4-ppxp (CVE-2025-54873, 2025-08-04, signed division, fixed in risc0-zkvm 2.2.0 and the rv32im circuit 3.0.0) and GHSA-jqq4-c7wq-36h7 (CVE-2025-61588, 2025-10-01, the guest's sys_read, fixed in 2.3.2 and 3.0.3); each is fixed before RISC Zero 3.0.6",
+      "url": "https://github.com/risc0/risc0/security/advisories"
     }
   },
   "statement": {
@@ -56,6 +68,7 @@
   "day": {
     "date": "2026-10-11",
     "ruleVersion": "tdh-v1.0",
+    "vkeyA": "0x00d666ad2a6f6087e0f747a27890fc23573d53f71b6b7ed5ee32d9a683ec1595",
     "wordsA": [
       "9a1f1eb01d9e60d7da5cab32650af0204525f51d30e121a58a30fb52395a6529",
       "305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102",
@@ -213,22 +226,40 @@
       "imageId": "0x1dca211533ac7761e32d0ad76eef3fd72616bd1070328e4612e09e5d9c763a0d"
     }
   },
+  "verifiers": {
+    "sp1Gateway": "0x397A5f7f3dBd538f23DE225B51f532c34448dA9B",
+    "sp1Selector": "0x4388a21c",
+    "risc0Router": "0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319",
+    "risc0Selector": "0x73c457ba"
+  },
   "contract": {
     "checks": 8,
     "unitTests": 109,
     "forkTests": 42,
     "testedOn": "2026-10-31",
+    "auditedOn": "2026-10-15",
     "horizon": "2026-12-01T00:00:00Z",
-    "retiredRuleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22"
+    "retiredRuleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22",
+    "blockhashWindow": 256,
+    "historyWindow": 8191
   },
   "sp1Advisory": {
     "id": "CVE-2026-40323",
     "published": "2026-04-11",
     "fixed": "6.1.0",
-    "earlier": "2025-01-27",
+    "frozen": "6.0.0",
+    "earlier": "2025-01-15",
+    "earliest": "2024-10-28",
     "latestId": "GHSA-p7v2-jjv3-8p8f",
     "latestPublished": "2026-10-11",
     "latestFixed": "6.8.1"
+  },
+  "risc0Advisory": {
+    "id": "CVE-2025-52484",
+    "published": "2025-06-18",
+    "fixed": "2.1.0",
+    "count": 4,
+    "earliest": "2024-09-25"
   },
   "catchup": {
     "chainStart": 13360862,

@@ -185,16 +185,35 @@ export function walletCase(preset: WalletPreset): WalletCase {
 export function walletPositions(
   found: WalletCase
 ): Record<string, { readonly x: number; readonly y: number }> {
-  // The hull is a rounded box around its group, so a wallet left alone must
-  // sit outside every group's box: with one alone, the groups take the right
-  // and the lone wallets the left, as with five.
-  if (found.wallets.length < 5 && found.alone.length === 0) {
-    const corners: Record<string, { x: number; y: number }> = {
-      A: { x: 0.22, y: 0.24 },
-      B: { x: 0.78, y: 0.24 },
-      C: { x: 0.78, y: 0.74 },
-      D: { x: 0.22, y: 0.74 },
-    };
+  // Up to four wallets keep their corners of one square, the same on every
+  // drawing of the chapter. The hull is a rounded box around its group, so
+  // a wallet left alone must sit outside every group's box: when its corner
+  // falls inside one, the groups take the right and the lone wallets the
+  // left, as with five.
+  const corners: Record<string, { x: number; y: number }> = {
+    A: { x: 0.22, y: 0.24 },
+    B: { x: 0.78, y: 0.24 },
+    C: { x: 0.78, y: 0.74 },
+    D: { x: 0.22, y: 0.74 },
+  };
+  const inside = (letter: string, group: readonly string[]) => {
+    const at = corners[letter];
+    const xs = group.map((member) => corners[member]?.x ?? 0.5);
+    const ys = group.map((member) => corners[member]?.y ?? 0.5);
+    return (
+      at !== undefined &&
+      at.x >= Math.min(...xs) - 0.01 &&
+      at.x <= Math.max(...xs) + 0.01 &&
+      at.y >= Math.min(...ys) - 0.01 &&
+      at.y <= Math.max(...ys) + 0.01
+    );
+  };
+  const square =
+    found.wallets.length < 5 &&
+    found.alone.every(
+      (letter) => !found.groups.some((group) => inside(letter, group))
+    );
+  if (square) {
     return Object.fromEntries(
       found.wallets.map((letter) => [
         letter,
@@ -218,3 +237,24 @@ export function walletPositions(
   });
   return out;
 }
+
+/**
+ * The chapter's four-wallet glyph, beside the openings of Your wallets and
+ * Consolidation design: four wallets, every pair linked both ways, one
+ * identity; D's links fresh, made after the gate. The corners are the
+ * models' (walletPositions): C bottom right, D bottom left.
+ */
+export const HERO_WALLETS = [
+  { id: "A", x: 0.22, y: 0.24 },
+  { id: "B", x: 0.78, y: 0.24 },
+  { id: "C", x: 0.78, y: 0.76 },
+  { id: "D", x: 0.22, y: 0.76 },
+] as const;
+export const HERO_LINKS = [
+  { a: "A", b: "B", kind: "old" },
+  { a: "A", b: "C", kind: "old" },
+  { a: "B", b: "C", kind: "old" },
+  { a: "A", b: "D", kind: "fresh" },
+  { a: "B", b: "D", kind: "fresh" },
+  { a: "C", b: "D", kind: "fresh" },
+] as const;

@@ -1,11 +1,11 @@
 "use client";
 
 import { getImageProps } from "next/image";
-import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_HEX } from "../tokens";
+import StationGlyph from "./LoopGlyph";
 import { Label, SvgFrame, px as round2 } from "./svg";
 import { useMeasuredWidth } from "./useMeasuredWidth";
 
@@ -44,9 +44,8 @@ interface LoopProps {
   readonly locale: SupportedLocale;
 }
 
-/** The travelling copy, at the art's ratio (542:801). */
-const TOKEN_W = 26;
-const TOKEN_H = 38;
+/** The travelling copy: the card's art in a disc that fills a station's circle. */
+const TOKEN_R = 28;
 
 /**
  * On a phone, the loop's picture in small: the six stations round Verify,
@@ -57,7 +56,11 @@ const TOKEN_H = 38;
 const SIDE_MIN_COS = 0.3;
 const CHAR_UNITS = 8.2;
 
-function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
+function MiniRing({
+  stations,
+  focus,
+  verifyWord,
+}: Pick<LoopProps, "stations" | "focus"> & { readonly verifyWord: string }) {
   // Wide enough for each station's name outside its circle, at 15 px, which
   // stays legible (12 px on a phone, 9 at 400% zoom) when the ring scales.
   // As wide as the longest side name needs beside its circle: square in
@@ -110,14 +113,27 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
         stroke={EX_HEX.holds}
         strokeWidth={1.5}
       />
-      <path
-        d={`M${cx - 9} ${c}l6 6l12 -12`}
+      {/* Verify as the Tested mark, its glyph and its word: a tick is not
+          in the marks' grammar and would read as "verified". */}
+      <circle
+        cx={cx}
+        cy={c - 7}
+        r={7}
         fill="none"
         stroke={EX_HEX.holds}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth={1.8}
       />
+      <path d={`M${cx} ${c - 14}a7 7 0 0 1 0 14z`} fill={EX_HEX.holds} />
+      <text
+        x={cx}
+        y={c + 17}
+        textAnchor="middle"
+        fontSize={15}
+        fontWeight={600}
+        fill={EX_HEX.ink1}
+      >
+        {verifyWord}
+      </text>
       {stations.map((station, index) => {
         const angle = ((ANGLES[index] ?? 0) * Math.PI) / 180;
         const x = round2(cx + r * Math.cos(angle));
@@ -229,36 +245,33 @@ function useArcAngle(target: number): number {
 }
 
 /**
- * "Follow one copy": the copy, drawn as a card at the art's ratio (542:801)
- * with a real Meme's art inside a blue edge, travelling the ring between
- * stations. The art comes through the site's image route; with none, the
- * card keeps a blue face.
+ * "Follow one copy": the copy, the card's own art in a disc, travelling the
+ * ring and resting inside the selected station's circle, under its glyph
+ * (drawn before the stations, whose selected circle is see-through). The
+ * art comes through the site's image route; with none, the disc keeps a
+ * blue face.
  */
 function CopyToken({
   angle,
   at,
-  radius,
   art,
 }: {
   readonly angle: number;
-  readonly at: (degrees: number, r?: number) => [number, number];
-  readonly radius: number;
+  readonly at: (degrees: number) => [number, number];
   readonly art: string | null;
 }) {
   const shown = useArcAngle(angle);
   const clip = `ex-copy-${useId().replaceAll(":", "")}`;
-  const [tx, ty] = at(shown, radius - 54);
+  const [tx, ty] = at(shown);
   const href =
     art === null
       ? null
       : getImageProps({
           src: art,
           alt: "",
-          width: TOKEN_W * 2,
-          height: TOKEN_H * 2,
+          width: TOKEN_R * 4,
+          height: TOKEN_R * 4,
         }).props.src;
-  const x = -TOKEN_W / 2;
-  const y = -TOKEN_H / 2;
   return (
     <g
       aria-hidden="true"
@@ -267,38 +280,21 @@ function CopyToken({
     >
       <defs>
         <clipPath id={clip}>
-          <rect x={x} y={y} width={TOKEN_W} height={TOKEN_H} rx={3} />
+          <circle r={TOKEN_R} />
         </clipPath>
       </defs>
-      <rect
-        x={x}
-        y={y}
-        width={TOKEN_W}
-        height={TOKEN_H}
-        rx={3}
-        fill={EX_HEX.you}
-      />
+      <circle r={TOKEN_R} fill={EX_HEX.you} />
       {href !== null && (
         <image
           href={href}
-          x={x}
-          y={y}
-          width={TOKEN_W}
-          height={TOKEN_H}
+          x={-TOKEN_R}
+          y={-TOKEN_R}
+          width={TOKEN_R * 2}
+          height={TOKEN_R * 2}
           preserveAspectRatio="xMidYMid slice"
           clipPath={`url(#${clip})`}
         />
       )}
-      <rect
-        x={x}
-        y={y}
-        width={TOKEN_W}
-        height={TOKEN_H}
-        rx={3}
-        fill="none"
-        stroke={EX_HEX.youInk}
-        strokeWidth={1.5}
-      />
     </g>
   );
 }
@@ -311,7 +307,11 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
       data-fig="loop"
       data-loop-layout="list"
     >
-      <MiniRing stations={stations} focus={focus} />
+      <MiniRing
+        stations={stations}
+        focus={focus}
+        verifyWord={kt(locale, "explained.kit.loop.verify")}
+      />
       <ol
         className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0"
         aria-label={kt(locale, "explained.kit.loop.aria")}
@@ -334,14 +334,14 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
               >
                 {station.num}
               </span>
-              <span className="tw-col-span-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400 max-[359px]:tw-col-span-1">
+              <span className="tw-col-span-2 tw-text-[15px] tw-leading-6 tw-text-iron-400 max-[359px]:tw-col-span-1">
                 {station.sub}
               </span>
             </li>
           );
         })}
       </ol>
-      <p className="tw-m-0 tw-mt-2.5 tw-rounded-[10px] tw-border tw-border-dashed tw-border-iron-700 tw-px-3.5 tw-py-3 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2.5 tw-rounded-[10px] tw-border tw-border-dashed tw-border-iron-700 tw-px-3.5 tw-py-3 tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {kt(locale, "explained.kit.loop.listVerify", {
           identities: verify.identities,
         })}
@@ -372,86 +372,39 @@ function namePlace(
   return { x, y: below ? y + 48 : y - 54, anchor: "middle" };
 }
 
+/** A 13 px semibold character's width in Montserrat, at its widest (digits). */
+const CHAR_13PX_WIDE = 8.2;
+
 /**
- * A station's pictogram, drawn in its ring: a card, a wallet, a clock,
- * rising bars, a ballot and a mint press. Strokes only, in the station's
- * tone, so the ring reads as that station before its name does.
+ * A station's number in the lines it needs to stay inside the figure: whole
+ * words, each line no wider than the room between its anchor and the edge.
  */
-function StationGlyph({
-  kind,
-  x,
-  y,
-  tone,
-}: {
-  readonly kind: string;
-  readonly x: number;
-  readonly y: number;
-  readonly tone: string;
-}) {
-  const stroke = {
-    fill: "none",
-    stroke: tone,
-    strokeWidth: 1.6,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-  let body: React.ReactNode;
-  switch (kind) {
-    case "art":
-      body = (
-        <>
-          <rect x={-6.5} y={-9} width={13} height={18} rx={2} {...stroke} />
-          <path d="M-4 4.5L-1 0.5L1.5 3L3 1.5L4.5 4.5" {...stroke} />
-          <circle cx={2} cy={-4} r={1.6} {...stroke} />
-        </>
-      );
-      break;
-    case "hold":
-      body = (
-        <>
-          <rect x={-9} y={-6.5} width={18} height={13} rx={2.5} {...stroke} />
-          <path d="M3 -1.5H9V2.5H3a2 2 0 0 1 0-4z" {...stroke} />
-        </>
-      );
-      break;
-    case "time":
-      body = (
-        <>
-          <circle cx={0} cy={0} r={8.5} {...stroke} />
-          <path d="M0 -5V0L3.5 2.5" {...stroke} />
-        </>
-      );
-      break;
-    case "standing":
-      body = (
-        <path
-          d="M-7 7V2M-2.5 7V-1.5M2 7V-5M6.5 7V-8.5"
-          {...stroke}
-          strokeWidth={2.2}
-        />
-      );
-      break;
-    case "decide":
-      body = (
-        <>
-          <rect x={-8} y={-8} width={16} height={16} rx={2.5} {...stroke} />
-          <path d="M-4 0.5L-1 3.5L4.5 -3" {...stroke} />
-        </>
-      );
-      break;
-    default:
-      body = (
-        <>
-          <path d="M0 -9V2M-4 -2L0 2L4 -2" {...stroke} />
-          <path d="M-8 6H8" {...stroke} />
-        </>
-      );
+function fitLines(
+  text: string,
+  anchor: "start" | "middle" | "end",
+  x: number,
+  width: number
+): string[] {
+  const margin = 4;
+  let room = width - 2 * margin;
+  if (anchor === "end") room = x - margin;
+  else if (anchor === "start") room = width - x - margin;
+  else room = 2 * Math.min(x - margin, width - x - margin);
+  const most = Math.max(4, Math.floor(room / CHAR_13PX_WIDE));
+  if (text.length <= most) return [text];
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(" ")) {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > most && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
   }
-  return (
-    <g transform={`translate(${x} ${y})`} aria-hidden="true">
-      {body}
-    </g>
-  );
+  if (line) lines.push(line);
+  return lines;
 }
 
 function LoopCircle({
@@ -575,6 +528,20 @@ function LoopCircle({
         <Label x={cx} y={cy + 38} anchor="middle">
           {kt(locale, "explained.kit.loop.verifyToday")}
         </Label>
+        {/* "Follow one copy": the copy travels the ring and rests inside the
+            selected station, under its glyph. */}
+        <CopyToken
+          angle={
+            ANGLES[
+              Math.max(
+                0,
+                stations.findIndex((station) => station.key === focus)
+              )
+            ] ?? 0
+          }
+          at={(degrees) => at(degrees)}
+          art={tokenArt}
+        />
         {stations.map((station, index) => {
           const angle = ANGLES[index] ?? 0;
           const next = ANGLES[(index + 1) % ANGLES.length] ?? 0;
@@ -601,7 +568,14 @@ function LoopCircle({
                 strokeWidth={1.5}
                 markerEnd="url(#ex-loop-arrow)"
               />
-              <circle cx={px} cy={py} r={30} fill={EX_HEX.panel} />
+              {/* The selected circle lets the copy's art show through,
+                  dimmed under its glyph. */}
+              <circle
+                cx={px}
+                cy={py}
+                r={30}
+                fill={on ? "rgba(13,13,15,0.62)" : EX_HEX.panel}
+              />
               <circle
                 cx={px}
                 cy={py}
@@ -647,27 +621,23 @@ function LoopCircle({
                 fill={on ? EX_HEX.youInk : EX_HEX.ink2}
                 {...(station.fact ? { "data-fact": station.fact } : {})}
               >
-                {station.num}
+                {fitLines(station.num, anchor, tx, width).map(
+                  (line, row, lines) => (
+                    // A wrapped line keeps its space, so the label reads
+                    // whole to a screen reader and in copied text.
+                    <tspan key={line} x={tx} dy={row === 0 ? 0 : 16}>
+                      {row < lines.length - 1 ? `${line} ` : line}
+                    </tspan>
+                  )
+                )}
               </text>
             </g>
           );
         })}
-        {/* "Follow one copy": the copy travels the ring to the selected station. */}
-        <CopyToken
-          angle={
-            ANGLES[
-              Math.max(
-                0,
-                stations.findIndex((station) => station.key === focus)
-              )
-            ] ?? 0
-          }
-          at={at}
-          radius={radius}
-          art={tokenArt}
-        />
+        {/* CC0 leaves Art on its own short leader, under the ring and level
+            with Art's name, clear of the ring and of Hold. */}
         <path
-          d={`M${artBottom[0] - 32} ${artBottom[1] + 4} C${artBottom[0] - 90} ${artBottom[1] + 10} ${artBottom[0] - 150} ${artBottom[1] - 6} ${artBottom[0] - 200} ${artBottom[1] - 30}`}
+          d={`M${artBottom[0] - 28} ${artBottom[1] + 14} C${artBottom[0] - 34} ${artBottom[1] + 28} ${artBottom[0] - 44} ${artBottom[1] + 35} ${artBottom[0] - 60} ${artBottom[1] + 35}`}
           fill="none"
           stroke={EX_HEX.ink3}
           strokeWidth={1.3}
@@ -675,8 +645,8 @@ function LoopCircle({
           markerEnd="url(#ex-loop-arrow)"
         />
         <Label
-          x={Math.max(cc0.length * CHAR_13PX + 4, artBottom[0] - 206)}
-          y={artBottom[1] - 38}
+          x={Math.max(cc0.length * CHAR_13PX + 4, artBottom[0] - 68)}
+          y={artBottom[1] + 40}
           anchor="end"
           size={13}
           weight={600}

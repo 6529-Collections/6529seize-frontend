@@ -16,6 +16,8 @@ import { EX_BUTTON, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
 import { CONTRACT_CHECKS } from "./_lib/checks";
+import CastStrip from "./CastStrip";
+import ProofsFigure from "./ProofsFigure";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
@@ -71,19 +73,30 @@ function Header({
 }) {
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]" id="top">
-      <span className={EX_TEXT.label}>
-        {rich(locale, k("eyebrow"), {
-          chapter: <span>{chapterNumber}</span>,
-          n: <span className="tw-text-primary-300">{pageNumber}</span>,
-          page: pageTitle,
-        })}
-      </span>
-      <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
-        {rich(locale, k("h1"))}
-      </h1>
-      <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
-        {rich(locale, k("lede"))}
-      </p>
+      {/* From a desktop up, the title and the lede share the row, as the
+          page's statement rows do, so the right half is never empty; the
+          short title sits level with the lede's middle. */}
+      <div className="tw-min-w-0 lg:tw-grid lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-items-center lg:tw-gap-x-16">
+        <span className={`${EX_TEXT.label} lg:tw-col-span-2`}>
+          {rich(locale, k("eyebrow"), {
+            chapter: <span>{chapterNumber}</span>,
+            n: <span className="tw-text-primary-300">{pageNumber}</span>,
+            page: pageTitle,
+          })}
+        </span>
+        <h1 className={`${EX_TEXT.h1} tw-mt-4 tw-max-w-[900px]`}>
+          {rich(locale, k("h1"))}
+        </h1>
+        {/* The lede follows the title at every width: it is the page's one
+          plain definition of a zero-knowledge proof, so it comes before the
+          verdict's terms on a phone too. */}
+        <p
+          className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px] lg:tw-mt-0`}
+          data-ex-lede=""
+        >
+          {rich(locale, k("lede"))}
+        </p>
+      </div>
     </header>
   );
 }
@@ -166,7 +179,7 @@ function RealVerdict({
   readonly facts: PageFacts;
 }) {
   const p = (children: ReactNode) => (
-    <p className="tw-m-0 tw-mb-4 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300">
+    <p className="tw-m-0 tw-mb-4 tw-max-w-[620px] tw-text-base tw-leading-[26px] tw-text-iron-300">
       {children}
     </p>
   );
@@ -229,7 +242,6 @@ function RealVerdict({
           <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-3`}>
             {rich(locale, k("verdict.source"), {
               bytes: facts.print("proofs.statement.bytes"),
-              block: facts.print("site.proofA.ethCallBlock"),
             })}
           </p>
         </>
@@ -247,9 +259,11 @@ function RealVerdict({
           hours: facts.print("site.proofA.provedHours"),
           minutes: facts.print("site.proofA.provedMinutes"),
           seconds: facts.print("proofs.day.nativeSeconds"),
+          block: facts.block("site.proofA.ethCallBlock"),
         })
       )}
-      {p(rich(locale, k("verdict.bodyB")))}
+      {/* Program B's run of the day, 23 of the 25 words equal, is told in
+          the 25 words model ("Beside program B"), not here. */}
       {/* On a phone the limit comes first, under the headline. */}
       <div className="max-md:tw-order-first max-md:tw-mb-4">
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>
@@ -359,7 +373,7 @@ function SimulatedVerdict({
       }
       actions={<Actions locale={locale} facts={facts} />}
     >
-      <p className="tw-m-0 tw-text-base tw-leading-[25px] tw-text-iron-300">
+      <p className="tw-m-0 tw-text-base tw-leading-[26px] tw-text-iron-300">
         {rich(locale, k("sim.body"))}
       </p>
       <CheckStrip locale={locale} />
@@ -398,6 +412,12 @@ export default function ProofsHero({
           </WhenSimulated>
         </SimulationSwitch>
       </div>
+      {/* Who is who, before the figure: the verdict above already names
+          program A, program B and their proof systems. */}
+      <CastStrip locale={locale} />
+      {/* The verdict and its limit come first, on the first screen as the
+          evidence genre asks; the figure draws it right under them. */}
+      <ProofsFigure locale={locale} facts={facts} />
       <div className="tw-mt-6">
         <DriftNote by={["D136", "D137"]} locale={locale}>
           {rich(locale, k("drift"), {

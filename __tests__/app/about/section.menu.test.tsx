@@ -239,7 +239,7 @@ describe("About contents dropdown", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("menuitem", {
-        name: /go to page: tdh historic boosts/i,
+        name: /go to page: tdh: versions and boosts/i,
       })
     ).toHaveAttribute("href", "/network/tdh/historic-boosts");
   });
