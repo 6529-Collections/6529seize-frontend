@@ -130,17 +130,19 @@ const getDefaultTitleForRoute = (
   return DEFAULT_TITLE;
 };
 
+// usePathname() and useSearchParams() return null outside an App Router
+// context (for example in component tests), as main's provider allowed for.
 const isWaveRouteFor = (
-  pathname: string,
-  searchParams: Pick<URLSearchParams, "get">
+  pathname: string | null,
+  searchParams: Pick<URLSearchParams, "get"> | null
 ): boolean =>
-  STREAM_INDEX_ROUTES.some((route) => pathname.startsWith(route)) ||
-  (pathname === "/" && searchParams.get("view") === "waves");
+  STREAM_INDEX_ROUTES.some((route) => pathname?.startsWith(route)) ||
+  (pathname === "/" && searchParams?.get("view") === "waves");
 
 type RouteObservation = {
   readonly pathname: string;
   readonly locale: SupportedLocale;
-  readonly previousSearchParams: ReadonlyURLSearchParams;
+  readonly previousSearchParams: ReadonlyURLSearchParams | null;
   readonly isWaveRoute: boolean;
   readonly waveInUrl: string | null;
 };
@@ -296,7 +298,7 @@ function TitleQuerySync({
   readonly locale: SupportedLocale;
   readonly observeRoute: (observation: RouteObservation) => void;
 }) {
-  const searchParams = useSearchParams();
+  const searchParams: ReadonlyURLSearchParams | null = useSearchParams();
   const queryRef = useRef(searchParams);
   const isWaveRoute = isWaveRouteFor(pathname, searchParams);
   const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
@@ -348,7 +350,7 @@ export const useTitleText = (): TitleText => {
   } = useTitleContext("useTitleText");
   const myStream = useMyStreamOptional();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const searchParams: ReadonlyURLSearchParams | null = useSearchParams();
   const isWaveRoute = isWaveRouteFor(pathname, searchParams);
   const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
   const fallbackActiveWaveId =

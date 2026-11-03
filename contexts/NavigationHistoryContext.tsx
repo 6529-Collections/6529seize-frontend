@@ -12,7 +12,12 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  type ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
@@ -331,6 +336,16 @@ export const NavigationHistoryProvider: React.FC<{
   );
 };
 
+// useSearchParams() returns null outside an App Router context (for example
+// in component tests), as main's provider allowed for.
+function getFullPath(
+  pathname: string,
+  searchParams: ReadonlyURLSearchParams | null
+): string {
+  const query = searchParams?.toString();
+  return pathname + (query ? `?${query}` : "");
+}
+
 function NavigationQuerySync({
   observeUrl,
 }: {
@@ -338,8 +353,7 @@ function NavigationQuerySync({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const fullPath =
-    pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+  const fullPath = getFullPath(pathname, searchParams);
 
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- This leaf only moves NavigationHistoryProvider's own URL effect inside a Suspense boundary; it must run here, after page effects in the same commit, as the provider's effect did (shellQueryParity.test.tsx).
