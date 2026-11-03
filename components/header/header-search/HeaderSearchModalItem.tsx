@@ -12,8 +12,8 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import {
   GRADIENT_CONTRACT,
@@ -105,7 +105,7 @@ export const getNftCollectionMap = () => ({
     title: "6529 Gradient",
     path: "/6529-gradient",
   },
-  [NEXTGEN_CORE[NEXTGEN_CHAIN_ID].toLowerCase()]: {
+  [NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID].toLowerCase()]: {
     title: "NextGen",
     path: "/nextgen/token",
   },

@@ -1,7 +1,7 @@
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import { publicEnv } from "@/config/env";
 import {
   GRADIENT_CONTRACT,
@@ -130,7 +130,7 @@ export function useActivityData(
         url += `&contract=${MEMES_CONTRACT}`;
         break;
       case ContractFilter.NEXTGEN:
-        url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
+        url += `&contract=${NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID]}`;
         break;
       case ContractFilter.MEMELAB:
         url += `&contract=${MEMELAB_CONTRACT}`;
