@@ -73,7 +73,9 @@ const ARTIST: readonly {
     label: "cc0.keepLabel",
     body: "cc0.keepBody",
     mark: "decided",
-    refText: "D91",
+    // The mark covers both decisions the box states: the paid mint's half
+    // (D79) and the airdrops' end (D91).
+    refText: "D79, D91",
   },
   {
     id: "unstated",
@@ -192,7 +194,9 @@ export default function Cc0Answer({
       </div>
       <div className="tw-mt-10 md:tw-mt-12" data-cc0="artist">
         <h3 className={EX_TEXT.h3}>{ht(locale, "cc0.artistTitle")}</h3>
-        <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 md:tw-grid-cols-3 md:tw-gap-4">
+        {/* Each box is as tall as what it says: equal heights left two of
+            them with an empty half. */}
+        <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-3 tw-p-0 md:tw-grid-cols-3 md:tw-gap-4">
           {ARTIST.map((box) => (
             <li
               key={box.id}
@@ -228,7 +232,7 @@ export default function Cc0Answer({
                     })
                   : withCc0(ht(locale, box.body))}
               </p>
-              <span className="tw-mt-auto tw-pt-1">
+              <span className="tw-pt-1">
                 <Mark
                   kind={box.mark}
                   locale={locale}
@@ -241,14 +245,15 @@ export default function Cc0Answer({
           ))}
         </ul>
       </div>
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-12">
+      {/* The limit, then the way on under it, on the section's left edge. */}
+      <div className="tw-mt-8 tw-flex tw-flex-col tw-items-start tw-gap-6">
         <LimitNote title={withCc0(ht(locale, "cc0.limitTitle"))}>
           {withCc0(ht(locale, "cc0.limit"))}{" "}
           <Link className={EX_LINK} href={MEME_ONE}>
             {ht(locale, "cc0.limitLink")}
           </Link>
         </LimitNote>
-        <p className="tw-m-0 lg:tw-pt-4">
+        <p className="tw-m-0">
           <Link className={EX_BUTTON.cta} href="/network/tdh">
             {ht(locale, "cc0.holding")}
             <Icon kind="arrow" className="tw-size-4" />

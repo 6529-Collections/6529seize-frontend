@@ -102,6 +102,16 @@ function sayOf(
  * registrations the TDH v1.4 engine groups (P26 §6.2, §6.3); the figure
  * draws its result. Break it links a fifth wallet.
  */
+/** The readout's unit: how many identities the wallets form. */
+function identitiesUnit(locale: SupportedLocale, found: WalletCase): string {
+  const count = found.groups.length + found.alone.length;
+  return count === 1
+    ? wt(locale, "explained.tdh.wallets.lens.unitOne")
+    : wt(locale, "explained.tdh.wallets.lens.unit", {
+        count: formatCount(locale, count),
+      });
+}
+
 export default function WalletsLens({
   locale,
   start,
@@ -239,6 +249,7 @@ export default function WalletsLens({
               {groupsText(locale, found)}
             </span>
           }
+          unit={identitiesUnit(locale, found)}
           say={
             <>
               {said.lead && (

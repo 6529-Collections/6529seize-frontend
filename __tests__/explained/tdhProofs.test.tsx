@@ -346,7 +346,7 @@ describe("the page's sections", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Proofs of a day: Ethereum can check that a program ran, not that the rules are right.",
+        name: "Proofs of a day",
       })
     ).toBeInTheDocument();
     expect(container.querySelector("[data-ex-lede]")).toBeInTheDocument();

@@ -51,6 +51,8 @@
   "explained.tdh.wallets.lens.batch": "Oder sicher: D zuletzt, ein Batch",
   "explained.tdh.wallets.lens.caption": "Graue Linien: in beide Richtungen verknüpft vor dem {date}. Blaue Linien: in beide Richtungen verknüpft ab dem {date}. Eine gestrichelte Wallet zählt allein.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",
+  "explained.tdh.wallets.lens.unit": "{count} Identitäten",
+  "explained.tdh.wallets.lens.unitOne": "eine Identität",
   "explained.tdh.wallets.lens.sayFiveLead": "Höchstens vier.",
   "explained.tdh.wallets.lens.sayFive": "{alone} zählt für sich. Die Gruppe wird von der neuesten bestätigten Verknüpfung aus aufgebaut, also kann das Verknüpfen einer fünften Wallet eine ältere hinausdrängen (D136).",
   "explained.tdh.wallets.lens.sayMissing": "Jedes Paar muss in beide Richtungen verknüpft sein. Eine Wallet tritt einer Gruppe nur bei, wenn sie mit jedem Mitglied verknüpft ist.",

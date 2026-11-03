@@ -51,6 +51,8 @@
   "explained.tdh.wallets.lens.batch": "Or, safe: D last, one batch",
   "explained.tdh.wallets.lens.caption": "Grey lines: linked both ways before {date}. Blue lines: linked both ways from {date}. A dashed wallet counts alone.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",
+  "explained.tdh.wallets.lens.unit": "{count} identities",
+  "explained.tdh.wallets.lens.unitOne": "one identity",
   "explained.tdh.wallets.lens.sayFiveLead": "Four at most.",
   "explained.tdh.wallets.lens.sayFive": "{alone} counts on its own. The group is built from the newest confirmed link, so linking a fifth wallet can push an older one out (D136).",
   "explained.tdh.wallets.lens.sayMissing": "Every pair must be linked both ways. A wallet joins a group only if it is linked with every member.",

@@ -5,6 +5,10 @@ import TdhHowItWorksPage, {
 } from "@/app/network/tdh/how-it-works/page";
 import { createFactBook } from "@/lib/explained/facts";
 import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
+import {
+  BOOST_OPEN,
+  boostOf,
+} from "@/app/network/tdh/how-it-works/models/boost";
 
 /**
  * 1 How it works (TDH-DESIGN.md §4.2, §5.3 to §5.7) on the facts of the
@@ -146,21 +150,31 @@ describe("How TDH is calculated", () => {
     );
   });
 
-  it("The boost ladder: 1.02, a sixth Gradient adds nothing", async () => {
+  it("The boost ladder: a full set and five Gradients, and a sixth adds nothing", async () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("boost");
-    expect(model).toHaveTextContent("1.02boost");
+    // It opens on one full set and every Gradient that pays, so the bar
+    // shows its steps; the engine gives the boost on the fixture's cards.
+    const nMemes = createFactBook(fixtureFactInputs()).num("memes.count");
+    const open = boostOf(BOOST_OPEN, nMemes).beta;
+    const boost = (beta: number) => `${(beta / 100).toFixed(2)}boost`;
+    expect(model).toHaveTextContent(boost(open));
+    expect(model).toHaveTextContent("A full set pays every paying season at once");
     await user.click(
-      within(model).getByRole("button", { name: "One more: Gradients" })
+      within(model).getByRole("button", { name: "One fewer: Gradients" })
     );
-    expect(model).toHaveTextContent("1.04boost");
+    expect(model).toHaveTextContent(boost(open - 2));
     await user.click(breakIt("gradient"));
     expect(model).toHaveTextContent("A sixth Gradient adds nothing.");
-    expect(model).toHaveTextContent("1.10boost");
+    expect(model).toHaveTextContent(boost(open));
     expect(model).toHaveAttribute("data-broken", "1");
     await user.click(breakIt("gradient"));
-    expect(model).toHaveTextContent("1.04boost");
+    expect(model).toHaveTextContent(boost(open - 2));
+    // Genesis and Nakamoto count only without the first season.
+    await user.click(
+      within(model).getByRole("button", { name: "One fewer: Full sets" })
+    );
     await user.click(
       within(model).getByRole("button", { name: "Genesis #1 to #3" })
     );
@@ -274,9 +288,13 @@ describe("How TDH is calculated", () => {
         name: "Daily rate",
       })
     ).toHaveAttribute("href", "/network/tdh/specification#s8-6");
+    // The daily rate is derived data (§8.6): tomorrow's step is a result
+    // a day later, rounded per card, never the rate itself.
     expect(
       document.querySelector('[data-trace="dailyRate"]')?.textContent
-    ).toMatch(/rate_e4 = [\d,]+: about [\d.]+ more tomorrow/);
+    ).toMatch(
+      /rate_e4 = [\d,]+: [\d.]+ a day on average; tomorrow's result adds [\d,]+, rounded per card/
+    );
     expect(
       within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
         name: "The output",
@@ -291,9 +309,12 @@ describe("How TDH is calculated", () => {
     );
     // The card's final, the Gradient's, their sum, and the binary64 tie of
     // §8.4 that a re-implementer meets at this step.
+    // The tie is the table's footnote, so the row keeps to its numbers.
     const final = document.querySelector('[data-trace="final"]');
-    expect(final?.textContent?.split("\n")).toHaveLength(4);
-    expect(final).toHaveTextContent("FINAL(25, 114) = 28, not 29");
+    expect(final?.textContent?.split("\n")).toHaveLength(3);
+    expect(
+      document.querySelector('[data-trace-note="final"]')
+    ).toHaveTextContent("FINAL(25, 114) = 28, not 29");
   });
 
   it("prints the network from the latest day, every number a fact", async () => {

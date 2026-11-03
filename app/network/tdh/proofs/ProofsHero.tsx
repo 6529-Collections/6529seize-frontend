@@ -16,6 +16,7 @@ import { EX_BUTTON, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
 import { CONTRACT_CHECKS } from "./_lib/checks";
+import CastStrip from "./CastStrip";
 import ProofsFigure from "./ProofsFigure";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
@@ -73,8 +74,9 @@ function Header({
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]" id="top">
       {/* From a desktop up, the title and the lede share the row, as the
-          page's statement rows do, so the right half is never empty. */}
-      <div className="tw-min-w-0 lg:tw-grid lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-items-end lg:tw-gap-x-16">
+          page's statement rows do, so the right half is never empty; the
+          short title sits level with the lede's middle. */}
+      <div className="tw-min-w-0 lg:tw-grid lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-items-center lg:tw-gap-x-16">
         <span className={`${EX_TEXT.label} lg:tw-col-span-2`}>
           {rich(locale, k("eyebrow"), {
             chapter: <span>{chapterNumber}</span>,
@@ -82,7 +84,7 @@ function Header({
             page: pageTitle,
           })}
         </span>
-        <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
+        <h1 className={`${EX_TEXT.h1} tw-mt-4 tw-max-w-[900px]`}>
           {rich(locale, k("h1"))}
         </h1>
         {/* The lede follows the title at every width: it is the page's one
@@ -410,6 +412,9 @@ export default function ProofsHero({
           </WhenSimulated>
         </SimulationSwitch>
       </div>
+      {/* Who is who, before the figure: the verdict above already names
+          program A, program B and their proof systems. */}
+      <CastStrip locale={locale} />
       {/* The verdict and its limit come first, on the first screen as the
           evidence genre asks; the figure draws it right under them. */}
       <ProofsFigure locale={locale} facts={facts} />

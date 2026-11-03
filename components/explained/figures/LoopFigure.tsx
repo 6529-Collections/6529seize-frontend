@@ -44,9 +44,8 @@ interface LoopProps {
   readonly locale: SupportedLocale;
 }
 
-/** The travelling copy, at the art's ratio (542:801). */
-const TOKEN_W = 26;
-const TOKEN_H = 38;
+/** The travelling copy: the card's art in a disc that fills a station's circle. */
+const TOKEN_R = 28;
 
 /**
  * On a phone, the loop's picture in small: the six stations round Verify,
@@ -246,36 +245,33 @@ function useArcAngle(target: number): number {
 }
 
 /**
- * "Follow one copy": the copy, drawn as a card at the art's ratio (542:801)
- * with a real Meme's art inside a blue edge, travelling the ring between
- * stations. The art comes through the site's image route; with none, the
- * card keeps a blue face.
+ * "Follow one copy": the copy, the card's own art in a disc, travelling the
+ * ring and resting inside the selected station's circle, under its glyph
+ * (drawn before the stations, whose selected circle is see-through). The
+ * art comes through the site's image route; with none, the disc keeps a
+ * blue face.
  */
 function CopyToken({
   angle,
   at,
-  radius,
   art,
 }: {
   readonly angle: number;
-  readonly at: (degrees: number, r?: number) => [number, number];
-  readonly radius: number;
+  readonly at: (degrees: number) => [number, number];
   readonly art: string | null;
 }) {
   const shown = useArcAngle(angle);
   const clip = `ex-copy-${useId().replaceAll(":", "")}`;
-  const [tx, ty] = at(shown, radius - 54);
+  const [tx, ty] = at(shown);
   const href =
     art === null
       ? null
       : getImageProps({
           src: art,
           alt: "",
-          width: TOKEN_W * 2,
-          height: TOKEN_H * 2,
+          width: TOKEN_R * 4,
+          height: TOKEN_R * 4,
         }).props.src;
-  const x = -TOKEN_W / 2;
-  const y = -TOKEN_H / 2;
   return (
     <g
       aria-hidden="true"
@@ -284,38 +280,21 @@ function CopyToken({
     >
       <defs>
         <clipPath id={clip}>
-          <rect x={x} y={y} width={TOKEN_W} height={TOKEN_H} rx={3} />
+          <circle r={TOKEN_R} />
         </clipPath>
       </defs>
-      <rect
-        x={x}
-        y={y}
-        width={TOKEN_W}
-        height={TOKEN_H}
-        rx={3}
-        fill={EX_HEX.you}
-      />
+      <circle r={TOKEN_R} fill={EX_HEX.you} />
       {href !== null && (
         <image
           href={href}
-          x={x}
-          y={y}
-          width={TOKEN_W}
-          height={TOKEN_H}
+          x={-TOKEN_R}
+          y={-TOKEN_R}
+          width={TOKEN_R * 2}
+          height={TOKEN_R * 2}
           preserveAspectRatio="xMidYMid slice"
           clipPath={`url(#${clip})`}
         />
       )}
-      <rect
-        x={x}
-        y={y}
-        width={TOKEN_W}
-        height={TOKEN_H}
-        rx={3}
-        fill="none"
-        stroke={EX_HEX.youInk}
-        strokeWidth={1.5}
-      />
     </g>
   );
 }
@@ -549,6 +528,20 @@ function LoopCircle({
         <Label x={cx} y={cy + 38} anchor="middle">
           {kt(locale, "explained.kit.loop.verifyToday")}
         </Label>
+        {/* "Follow one copy": the copy travels the ring and rests inside the
+            selected station, under its glyph. */}
+        <CopyToken
+          angle={
+            ANGLES[
+              Math.max(
+                0,
+                stations.findIndex((station) => station.key === focus)
+              )
+            ] ?? 0
+          }
+          at={(degrees) => at(degrees)}
+          art={tokenArt}
+        />
         {stations.map((station, index) => {
           const angle = ANGLES[index] ?? 0;
           const next = ANGLES[(index + 1) % ANGLES.length] ?? 0;
@@ -575,7 +568,14 @@ function LoopCircle({
                 strokeWidth={1.5}
                 markerEnd="url(#ex-loop-arrow)"
               />
-              <circle cx={px} cy={py} r={30} fill={EX_HEX.panel} />
+              {/* The selected circle lets the copy's art show through,
+                  dimmed under its glyph. */}
+              <circle
+                cx={px}
+                cy={py}
+                r={30}
+                fill={on ? "rgba(13,13,15,0.62)" : EX_HEX.panel}
+              />
               <circle
                 cx={px}
                 cy={py}
@@ -634,22 +634,10 @@ function LoopCircle({
             </g>
           );
         })}
-        {/* "Follow one copy": the copy travels the ring to the selected station. */}
-        <CopyToken
-          angle={
-            ANGLES[
-              Math.max(
-                0,
-                stations.findIndex((station) => station.key === focus)
-              )
-            ] ?? 0
-          }
-          at={at}
-          radius={radius}
-          art={tokenArt}
-        />
+        {/* CC0 leaves Art on its own short leader, under the ring and level
+            with Art's name, clear of the ring and of Hold. */}
         <path
-          d={`M${artBottom[0] - 32} ${artBottom[1] + 4} C${artBottom[0] - 90} ${artBottom[1] + 10} ${artBottom[0] - 150} ${artBottom[1] - 6} ${artBottom[0] - 200} ${artBottom[1] - 30}`}
+          d={`M${artBottom[0] - 28} ${artBottom[1] + 14} C${artBottom[0] - 34} ${artBottom[1] + 28} ${artBottom[0] - 44} ${artBottom[1] + 35} ${artBottom[0] - 60} ${artBottom[1] + 35}`}
           fill="none"
           stroke={EX_HEX.ink3}
           strokeWidth={1.3}
@@ -657,8 +645,8 @@ function LoopCircle({
           markerEnd="url(#ex-loop-arrow)"
         />
         <Label
-          x={Math.max(cc0.length * CHAR_13PX + 4, artBottom[0] - 206)}
-          y={artBottom[1] - 38}
+          x={Math.max(cc0.length * CHAR_13PX + 4, artBottom[0] - 68)}
+          y={artBottom[1] + 40}
           anchor="end"
           size={13}
           weight={600}

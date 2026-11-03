@@ -51,6 +51,8 @@
   "explained.tdh.wallets.lens.batch": "Ou, sûr : D en dernier, un lot",
   "explained.tdh.wallets.lens.caption": "Lignes grises : liés dans les deux sens avant le {date}. Lignes bleues : liés dans les deux sens à partir du {date}. Un wallet en pointillé compte seul.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups} ; {alone}",
+  "explained.tdh.wallets.lens.unit": "{count} identités",
+  "explained.tdh.wallets.lens.unitOne": "une identité",
   "explained.tdh.wallets.lens.sayFiveLead": "Quatre au plus.",
   "explained.tdh.wallets.lens.sayFive": "{alone} compte seul. Le groupe se construit à partir du lien confirmé le plus récent, donc lier un cinquième wallet peut en écarter un plus ancien (D136).",
   "explained.tdh.wallets.lens.sayMissing": "Chaque paire doit être liée dans les deux sens. Un wallet ne rejoint un groupe que s'il est lié à chaque membre.",

@@ -17,7 +17,7 @@ import { formatDecimal } from "@/components/explained/layout/numbers";
 import Toggles from "@/components/explained/layout/Toggles";
 import { ht } from "./copy";
 import {
-  BOOST_START,
+  BOOST_OPEN,
   MAX_SETS,
   boostOf,
   additionalSetsPlateau,
@@ -46,7 +46,7 @@ export default function BoostLens({
   const ceiling = useFact<number>("engine.boost.ceiling");
   const bonus = useFact<number>("rules.gradientBonus");
   const limit = gradientLimit();
-  const model = useBreakable<BoostState>(BOOST_START, (state) => ({
+  const model = useBreakable<BoostState>(BOOST_OPEN, (state) => ({
     ...state,
     gradients: limit + 1,
   }));

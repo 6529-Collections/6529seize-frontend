@@ -249,7 +249,7 @@
   "explained.kit.rate.aria": "Rate against edition: every card's copies together add about the same each day.",
   "explained.kit.rate.axisX": "copies in the edition",
   "explained.kit.rate.axisY": "rate per copy per day",
-  "explained.kit.rate.locked": "{threshold}: no edition below it, locked ({ref})",
+  "explained.kit.rate.locked": "{threshold}: Nakamoto Threshold ({ref})",
   "explained.kit.rate.lockedShort": "{threshold}: locked",
   "explained.kit.rate.cards": "the {count} cards",
   "explained.kit.boost.aria": "The boost as parts, from one to the rule's ceiling.",

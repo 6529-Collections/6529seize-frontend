@@ -192,6 +192,10 @@ export interface BeforeRow {
   readonly fullSetMax: number;
   readonly partialHigh: number;
   readonly partialLow: number;
+  /** What each further missing card took off, without a full set. */
+  readonly partialStep: number;
+  /** A holder of Memes 1, 2 and 3 without a full set: at least this. */
+  readonly genesis: number;
   readonly [key: string]: string | number;
 }
 
@@ -653,7 +657,7 @@ export const REFERENCE_FACTS = {
     (d) => d.artistCopies.source,
     (d) => d.artistCopies.choice
   ),
-  // D91: from this day the artist's copies are a card's only free copies.
+  // D91: from this day the team, museum and fund airdrops end; the artist's remain.
   "memes.artistOnlyFrom": fromReference<string>(
     "day",
     "decision",

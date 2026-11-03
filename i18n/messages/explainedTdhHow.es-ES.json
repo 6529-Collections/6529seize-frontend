@@ -183,7 +183,7 @@
   "explained.tdh.how.rates.ruleCents": "     → {cents} céntimos",
   "explained.tdh.how.rates.ruleGloss": "B64: double más cercano · HALFUP: las mitades suben · céntimos: centésimas de TDH",
   "explained.tdh.how.rates.ruleHalfCent": "medio céntimo: E = {E} da {rate} céntimos, no {halfUp}",
-  "explained.tdh.how.rates.ruleSource": "P26 §5.2, §8.1. Un suelo solo se aplica por debajo de {threshold} minteadas; el {threshold} está bloqueado (D89). Los medios céntimos exactos se redondean como dice P26 §8.1: consulta la {link}.",
+  "explained.tdh.how.rates.ruleSource": "P26 §5.2, §8.1. Un suelo solo se aplica por debajo de {threshold} minteadas. Los medios céntimos exactos se redondean como dice P26 §8.1: consulta la {link}.",
   "explained.tdh.how.rates.ruleLink": "Especificación",
   "explained.tdh.how.rates.break": "mintear la copia número {threshold}",
   "explained.tdh.how.rates.tag": "Ediciones reales",
@@ -210,7 +210,7 @@
   "explained.tdh.how.boost.unit": "boost",
   "explained.tdh.how.boost.sayGradLead": "Un sexto Gradient no suma nada.",
   "explained.tdh.how.boost.sayGrad": "Los Gradients suman {gradient} cada uno, hasta {max}, así que con seis el boost es el de {max}; el sexto es una copia normal que gana su propia tasa.",
-  "explained.tdh.how.boost.saySets": "Con un set completo, cada temporada que paga cuenta a la vez ({count} hoy), más un bono decreciente por cada set adicional, nunca más de unos {extra} en total.",
+  "explained.tdh.how.boost.saySets": "Un set completo paga cada temporada que paga a la vez ({count} hoy); los sets adicionales suman como mucho unos {extra}.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 a #3) y Nakamoto (#4) solo cuentan para quien no tiene completa la primera temporada.",
   "explained.tdh.how.boost.say": "Un solo boost multiplica todo lo que tienes: aquí beta es {cents} centésimas: un boost de {boost}. La temporada más reciente cuenta en cuanto empieza la siguiente.",
   "explained.tdh.how.boost.break": "añadir un sexto Gradient",
@@ -288,7 +288,7 @@
   "explained.tdh.how.totals.break": "sumar las wallets en su lugar",
   "explained.tdh.how.order.label": "Todo junto",
   "explained.tdh.how.order.title": "El cálculo, paso a paso, en el orden de P26.",
-  "explained.tdh.how.order.body": "Cada paso de P26, desde leer los logs (§3) hasta la salida del día (§9); las raíces sobre ella son de P28 y P53. Cada uno enlaza con su modelo o la Especificación; una línea marcada como resumida es la idea, y su enlace la regla entera.",
+  "explained.tdh.how.order.body": "Cada paso de P26, desde leer los logs (§3) hasta la salida del día (§9). Cada uno enlaza con su modelo o la Especificación; una línea marcada como resumida es la idea, y su enlace la regla entera.",
   "explained.tdh.how.order.snapshot": "La instantánea",
   "explained.tdh.how.order.eligible": "Qué cartas cuentan",
   "explained.tdh.how.order.editions": "Ediciones y el mínimo",
@@ -314,7 +314,7 @@
   "explained.tdh.how.trace.records": "la base de la identidad, carta y Gradient: {card} + {grad} = {base}",
   "explained.tdh.how.trace.boost": "un Gradient: beta = {cents} centésimas, un boost de {beta}",
   "explained.tdh.how.trace.totals": "suma {final} al total de la red",
-  "explained.tdh.how.trace.caption": "En las líneas azules, un ejemplo paso a paso: una copia de una carta de {edition} copias ({threshold} o más minteadas, así que sin suelo) y un Gradient, ambos conservados {days} días enteros en una cartera no vinculada a ninguna otra. Ambos controles recalculan cada línea azul.",
+  "explained.tdh.how.trace.caption": "En las líneas azules, un ejemplo: una copia de una carta de {edition} copias ({threshold} o más minteadas, así que sin suelo) y un Gradient, ambos conservados {days} días enteros en una cartera no vinculada a ninguna otra. Ambos controles lo recalculan.",
   "explained.tdh.how.trace.edition": "La edición de la carta",
   "explained.tdh.how.trace.editionOption": "{copies} copias",
   "explained.tdh.how.trace.days": "Días enteros conservados",
@@ -335,5 +335,5 @@
   "explained.tdh.how.boost.sayGradOnly": "Cada Gradient suma {gradient}: con {count}, beta es {cents} centésimas, un boost de {boost}.",
   "explained.tdh.how.trace.finalTie": "El empate a vigilar: {call} = {final}, no {decimal}; el boost en binary64 queda justo por debajo de la mitad (§8.4).",
   "explained.tdh.how.order.dailyRate": "Tasa diaria",
-  "explained.tdh.how.trace.dailyRate": "{name} = {e4}: unos {rate} más mañana"
+  "explained.tdh.how.trace.dailyRate": "{name} = {e4}: {rate} al día de media; el resultado de mañana suma {next}, redondeado por carta"
 }

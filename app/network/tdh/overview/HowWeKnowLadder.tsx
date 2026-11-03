@@ -185,7 +185,9 @@ export default function HowWeKnowLadder({
           tracks={[{ rungs: rungs(book, locale), todayAfter: TODAY_AFTER }]}
         />
       </div>
-      <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 lg:tw-grid-cols-2 lg:tw-gap-6">
+      {/* The two columns end together: the statement at the top of the
+          right one, its three links at the foot, level with the box. */}
+      <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 lg:tw-grid-cols-2 lg:tw-items-stretch lg:tw-gap-6">
         <FailureSentence
           locale={locale}
           ifs={[ot(locale, "know.fail1"), ot(locale, "know.fail2")]}
@@ -194,9 +196,9 @@ export default function HowWeKnowLadder({
             proofs: <span>{PROOFS_RUNG}</span>,
           })}
         />
-        <div className="lg:tw-pt-2">
+        <div className="lg:tw-flex lg:tw-flex-col lg:tw-justify-between lg:tw-pt-2">
           <p className={EX_TEXT.candour}>{ot(locale, "know.candour")}</p>
-          <p className="tw-m-0 tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3">
+          <p className="tw-m-0 tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3 lg:tw-mt-6">
             <Link className={EX_BUTTON.link} href="/network/tdh/verification">
               {ot(locale, "know.link")}
               <Icon kind="arrow" className="tw-size-4" />

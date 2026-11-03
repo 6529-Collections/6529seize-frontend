@@ -249,7 +249,7 @@
   "explained.kit.rate.aria": "Tasa frente a edición: las copias de cada carta suman juntas más o menos lo mismo cada día.",
   "explained.kit.rate.axisX": "copias de la edición",
   "explained.kit.rate.axisY": "tasa por copia y día",
-  "explained.kit.rate.locked": "{threshold}: ninguna edición por debajo, bloqueado ({ref})",
+  "explained.kit.rate.locked": "{threshold}: umbral de Nakamoto ({ref})",
   "explained.kit.rate.lockedShort": "{threshold}: bloqueado",
   "explained.kit.rate.cards": "las {count} cartas",
   "explained.kit.boost.aria": "El boost por partes, de uno al techo de la regla.",

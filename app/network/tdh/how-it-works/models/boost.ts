@@ -32,6 +32,17 @@ export const BOOST_START: BoostState = {
   gradients: 1,
 };
 
+/**
+ * Where the ladder opens: one full set and every Gradient that pays, so the
+ * bar shows its steps (every paying season, the Gradients' band) near
+ * today's highest, and the Break it's sixth Gradient adds nothing to it.
+ */
+export const BOOST_OPEN: BoostState = {
+  ...BOOST_START,
+  sets: 1,
+  gradients: R.gradient_max_count,
+};
+
 /** How many full sets the stepper offers. */
 export const MAX_SETS = 3;
 

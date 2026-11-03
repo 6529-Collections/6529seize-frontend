@@ -88,8 +88,10 @@ export default function StacksLens({
       <div className="tw-mb-2 tw-text-sm tw-font-semibold tw-text-iron-300">
         {name}
       </div>
+      {/* A stack holds room for two copies; a wallet with none is one
+          short row, not an empty frame. */}
       <ol
-        className="tw-m-0 tw-flex tw-min-h-[100px] tw-list-none tw-flex-col-reverse tw-gap-2 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-800 tw-p-2"
+        className={`tw-m-0 tw-flex tw-list-none tw-flex-col-reverse tw-gap-2 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-800 tw-p-2 ${copies.length === 0 ? "" : "tw-min-h-[100px]"}`}
         aria-label={ht(locale, "explained.tdh.how.stacks.stackOf", { name })}
       >
         {copies.length === 0 && (

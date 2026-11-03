@@ -171,12 +171,15 @@ export default function AreaTile({
           );
         })}
         {showReference && (
-          <g>
-            <line
-              x1={PAD.left}
-              y1={referenceY}
-              x2={PAD.left + innerW}
-              y2={referenceY}
+          // The rarer card as a ghost of its own area, the same days wide:
+          // the band above a short card is the height it would reach.
+          <g data-area-reference="">
+            <rect
+              x={PAD.left}
+              y={referenceY}
+              width={Math.max(0, tileW)}
+              height={baseY - referenceY}
+              fill="rgba(206,207,212,0.04)"
               stroke={EX_HEX.ink4}
               strokeDasharray="3 4"
             />

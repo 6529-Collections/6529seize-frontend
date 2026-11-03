@@ -12,7 +12,7 @@ import {
   StatementLabel,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Seg, Slider } from "@/components/explained/lens/controls";
 import { ht, type HowKey } from "./copy";
 import { traceOf, type Trace } from "./trace";
@@ -188,13 +188,46 @@ const STEPS: readonly Step[] = [
   },
 ];
 
+/**
+ * One rule line as code: the columns its padding lines up on a desktop
+ * collapse to one space on a phone, where the line wraps, and a date never
+ * breaks at its hyphens.
+ */
+function ruleLine(line: string): ReactNode[] {
+  return line.split(/( {2,}|\d{4}-\d{2}-\d{2})/).map((part, index, all) => {
+    if (/^ {2,}$/.test(part)) {
+      // A line's own indent stays a two-space hang on a phone; padding
+      // inside it becomes one space.
+      const phone = index === 1 && all[0] === "" ? "  " : " ";
+      return (
+        // The parts of a line are fixed in order.
+        <span key={index}>
+          <span className="max-md:tw-hidden">{part}</span>
+          <span className="md:tw-hidden">{phone}</span>
+        </span>
+      );
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(part)) {
+      return (
+        // The parts of a line are fixed in order.
+        <span key={index} className="tw-whitespace-nowrap">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
 /** The specification's binary64 tie (§8.4): FINAL(25, 114). */
 const FINAL_TIE = { base: 25, beta: 114 } as const;
 
 function traceLine(
   id: string,
   t: Trace,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  /** What tomorrow's result adds: the same holder a day later, rounded per card. */
+  tomorrow: number
 ): string | null {
   const n = (value: number) => formatCount(locale, value);
   const c = (cents: number) => formatCents(locale, cents / 100);
@@ -219,7 +252,9 @@ function traceLine(
     },
     boost: { cents: n(t.betaCents), beta: c(t.betaCents) },
     totals: { final: n(t.final) },
-    // Both tokens are held a whole day or more, so both rates count.
+    // Both tokens are held a whole day or more, so both rates count. The
+    // rate is derived data (§8.6); a result adds BASE and FINAL rounded per
+    // card (§8.2, §8.4), so tomorrow's step is the engine's, not the rate.
     dailyRate: {
       name: "rate_e4",
       e4: n(t.betaCents * (t.rateCents + t.gradRateCents)),
@@ -227,6 +262,7 @@ function traceLine(
         locale,
         (t.betaCents * (t.rateCents + t.gradRateCents)) / 10_000
       ),
+      next: n(tomorrow),
     },
   };
   // The base and the final are P26's notation with the trace's numbers in
@@ -242,22 +278,26 @@ function traceLine(
     // Zero-width spaces after each bracket let a narrow column break there.
     const one = (base: number, final: number) =>
       `HALFUP(\u200bB64(\u200b${n(base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(final)}`;
+    // The tie a re-implementer meets at this step is the table's
+    // footnote (finalTieNote), so this row keeps to the worked numbers.
     return [
       one(t.base, t.cardFinal),
       one(t.gradBase, t.gradFinal),
       `${n(t.cardFinal)} + ${n(t.gradFinal)} = ${n(t.final)}`,
-      // The one rounding trap a re-implementer meets here, computed by
-      // the engine: the specification's tie (§8.4), where the decimal
-      // product rounds the other way.
-      ht(locale, "explained.tdh.how.trace.finalTie", {
-        call: `FINAL(${n(FINAL_TIE.base)}, ${n(FINAL_TIE.beta)})`,
-        final: n(finalTdh(FINAL_TIE.base, FINAL_TIE.beta)),
-        decimal: n(Math.floor((FINAL_TIE.base * FINAL_TIE.beta + 50) / 100)),
-      }),
     ].join("\n");
   }
   const params = values[id];
   return params === undefined ? null : ht(locale, key, params);
+}
+
+/** Step 11's footnote: the binary64 tie of §8.4, from the engine. */
+function finalTieNote(locale: SupportedLocale): string {
+  const n = (value: number) => formatCount(locale, value);
+  return ht(locale, "explained.tdh.how.trace.finalTie", {
+    call: `FINAL(${n(FINAL_TIE.base)}, ${n(FINAL_TIE.beta)})`,
+    final: n(finalTdh(FINAL_TIE.base, FINAL_TIE.beta)),
+    decimal: n(Math.floor((FINAL_TIE.base * FINAL_TIE.beta + 50) / 100)),
+  });
 }
 
 /** What the worked example is computed from, read on the server. */
@@ -288,6 +328,16 @@ export default function StepsInOrder({
     inputs === null
       ? null
       : traceOf(inputs.h, edition, inputs.nMemes, inputs.gradRateCents, days);
+  const tomorrow =
+    inputs === null || trace === null
+      ? 0
+      : traceOf(
+          inputs.h,
+          edition,
+          inputs.nMemes,
+          inputs.gradRateCents,
+          days + 1
+        ).final - trace.final;
   return (
     <Section id="steps">
       <Statement
@@ -382,7 +432,7 @@ export default function StepsInOrder({
                       key={index}
                       className="tw-block tw-pl-[2ch] tw-indent-[-2ch]"
                     >
-                      {line}
+                      {ruleLine(line)}
                     </span>
                   ))}
                 {/* A gist is marked where it is read, beside the rule
@@ -401,7 +451,7 @@ export default function StepsInOrder({
                   className="tw-col-start-2 tw-whitespace-pre-line tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
-                  {traceLine(step.id, trace, locale)}
+                  {traceLine(step.id, trace, locale, tomorrow)}
                 </span>
               )}
               <span
@@ -423,6 +473,17 @@ export default function StepsInOrder({
             </li>
           ))}
         </ol>
+        {trace !== null && (
+          // The one rounding trap of step 11, computed by the engine: the
+          // specification's tie (§8.4), where the decimal product rounds
+          // the other way.
+          <p
+            className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+            data-trace-note="final"
+          >
+            {finalTieNote(locale)}
+          </p>
+        )}
         <figcaption className="tw-mt-4 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
           {rich(locale, "explained.tdh.how.order.caption", {
             div: <code className={CODE}>div</code>,

@@ -249,7 +249,7 @@
   "explained.kit.rate.aria": "Rate gegen Auflage: die Kopien jeder Karte ergeben zusammen jeden Tag etwa gleich viel.",
   "explained.kit.rate.axisX": "Kopien der Auflage",
   "explained.kit.rate.axisY": "Rate pro Kopie und Tag",
-  "explained.kit.rate.locked": "{threshold}: keine Auflage darunter, festgeschrieben ({ref})",
+  "explained.kit.rate.locked": "{threshold}: Nakamoto-Schwelle ({ref})",
   "explained.kit.rate.lockedShort": "{threshold}: festgeschrieben",
   "explained.kit.rate.cards": "die {count} Karten",
   "explained.kit.boost.aria": "Der Boost in Teilen, von eins bis zur Obergrenze der Regel.",

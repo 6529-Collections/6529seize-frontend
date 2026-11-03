@@ -135,7 +135,7 @@
   "explained.tdh.spec.s8-5.title": "Totals",
   "explained.tdh.spec.s8-5.body": "The total is the sum of identity finals, never of wallet finals; a second total leaves out the burn addresses, which never enter any consensus weight ({dev13}).",
   "explained.tdh.spec.s8-6.title": "Daily rate",
-  "explained.tdh.spec.s8-6.body": "What a record adds for each further day it holds what it holds: its boost times its copies' token rates, counting only copies at least one whole day old. It is derived data, not part of a day's output (§9), and was not replayed against 6529.io, whose uploads do not carry it.",
+  "explained.tdh.spec.s8-6.body": "For each record, in ten-thousandths of a TDH a day: its boost times its copies' token rates, counting only copies a whole day old. Not what a result adds, which rounds per card (§8.2, §8.4). Derived data, not part of a day's output (§9); not replayed against 6529.io, whose uploads do not carry it.",
   "explained.tdh.spec.s8-7.title": "Numeric range",
   "explained.tdh.spec.s8-7.body": "A cycle has a result only inside this range, where the hardware and exact evaluations of {binary64} agree and every output value fits its type. Balances need their own bound: copies credited from the burn address, or held for less than a day, add to a balance but not to raw or base.",
   "explained.tdh.spec.s9.title": "Cycle output and roots",

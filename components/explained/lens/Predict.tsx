@@ -36,7 +36,9 @@ export default function Predict({
   const right = picked !== null && options[picked]?.right === true;
   return (
     <div
-      className="tw-mt-[18px] tw-grid tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-[18px] tw-py-4 md:tw-w-fit md:tw-max-w-full"
+      // From a wide desktop the box ends where the stage's column does,
+      // beside the rule rail, so every model's head keeps one right edge.
+      className="tw-mt-[18px] tw-grid tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/20 tw-px-[18px] tw-py-4 md:tw-w-fit md:tw-max-w-full xl:tw-w-[calc(100%-396px)]"
       data-predict={id}
       data-done={picked === null ? "0" : "1"}
     >

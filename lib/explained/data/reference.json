@@ -34,14 +34,16 @@
       }
     ],
     "before": {
-      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards",
+      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards, 0.01 less for each, and 1.02 for any other holder of Genesis (Memes 1, 2 and 3)",
       "id": "tdh-before-1-1",
       "from": "2022-12-16",
       "to": "2023-07-13",
       "fullSet": 1.2,
       "fullSetMax": 1.3,
       "partialHigh": 1.05,
-      "partialLow": 1.01
+      "partialLow": 1.01,
+      "partialStep": 0.01,
+      "genesis": 1.02
     },
     "inVersion": {
       "source": "D136: 6529.io's four-wallet consolidation, live from 2026-10-15 inside TDH v1.4",
@@ -122,7 +124,7 @@
     "percent": "19.99"
   },
   "artistCopies": {
-    "source": "decision D91: today each card airdrops the artist 5 copies and 15 of the artist's choice, and from 2027-01-01 these remain the only free copies",
+    "source": "decision D91: today each card airdrops the artist 5 copies and 15 of the artist's choice; from 2027-01-01 the team, museum and fund airdrops end and the artist's remain",
     "own": 5,
     "choice": 15,
     "onlyFrom": "2027-01-01"

@@ -77,34 +77,31 @@ describe("the hub, first version", () => {
     expect(panel).toHaveTextContent(
       "6529.io's TDH equals two separately written recomputations in all 5 results since Oct 14."
     );
-    // The theorem counts are the bundled manifest's, read through the facts.
-    // The days written late or re-run say they came out equal too.
-    expect(panel).toHaveTextContent("re-run (↻); all equal.");
+    // The theorem counts are the bundled manifest's, read through the facts;
+    // the manifest is unsigned, and only 6529 can rerun the theorems.
     expect(panel).toHaveTextContent(
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about TDH`
     );
-    // The validator theorems are told in words, the decision numbers left
-    // to How sure.
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules; ${book.num("manifest.proved.p53")} more are about the proposed validator rules, written before the cap changed. Lean proves things about rules, never a day. ${book.num("manifest.shownFalse.tdh")} statements about TDH shown false (${book.num("manifest.shownFalse")} in all) stay on record; only 6529 can rerun them today.`
+      "About a model of TDH's rules, never a day. The manifest is unsigned; only 6529 can rerun them today."
     );
-    // The proved day carries its retired rule in the same sentence, and the
-    // test pair under today's rules is told beside it.
+    // The proved day carries its retired rule in its stamp; a day would
+    // need both proofs (D128 is built, not deployed), and proof B has
+    // proved test cycles only.
     expect(panel).toHaveTextContent("One real day, half a pair");
-    // A day would need both proofs: D128 is built, not deployed; proof B
-    // has proved test cycles only.
+    expect(panel).toHaveTextContent("Oct 11, retired rules");
     expect(panel).toHaveTextContent(
-      "a day would need one from each of two programs"
+      "Ethereum's verifier accepted proof A, read-only; B has proved test cycles only. Recording a day would need both (D128)."
     );
-    expect(panel).toHaveTextContent("B: test cycles only");
+    // Who runs everything today, and the reader's own record.
     expect(panel).toHaveTextContent(
-      "Program A proved Oct 11 under retired rules, and mainnet's verifier accepted it read-only; both have proved a test cycle under TDH v1.4. Nothing is on Ethereum yet (D128)."
+      "6529 runs every check today; recomputing a day needs your own program (D116)."
     );
-    // Who runs everything today, then what anyone can check, then what
-    // needs private code.
-    expect(panel).toHaveTextContent(
-      "Today 6529 runs both recomputations and 6529.io's own. Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. Recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). See yours in each of those results."
-    );
+    expect(
+      within(panel as HTMLElement).getByRole("link", {
+        name: "Check your own record in the latest result",
+      })
+    ).toHaveAttribute("href", "/network/tdh#explain");
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
 
@@ -163,6 +160,15 @@ describe("the hub, first version", () => {
     expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
       "5 copies of each of your cards, and 15 more to give to people you choose"
     );
+    // D91 ends the team, museum and fund airdrops; the artist's stay. It
+    // never says they become a card's only free copies: the top-up into
+    // 6529Research (D90) and the Network Museum's copy (D94) continue.
+    expect(container.querySelector('[data-cc0="keep"]')).not.toHaveTextContent(
+      "only free copies"
+    );
+    expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
+      "the team, museum and fund airdrops end; yours stay (D91)."
+    );
     expect(container.querySelector('[data-cc0="unstated"]')).not.toBeNull();
     // The model: a Meme card may be sold; a Gradient may not, and the lens
     // turns rose.
@@ -188,7 +194,7 @@ describe("the hub, first version", () => {
     ).toHaveAttribute("href", "#cc0");
     expect(container.querySelectorAll("[data-mark]").length).toBeGreaterThan(8);
     expect(container.querySelector("#corrections")).toHaveTextContent(
-      "None yet."
+      "None yet; the log starts with the chapter's first public release."
     );
     expect(container.querySelector("[data-ex-hwk]")).toHaveTextContent(
       `through ${book.text("rules.newestDecision")}`

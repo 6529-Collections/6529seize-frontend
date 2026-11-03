@@ -153,18 +153,16 @@ export default function HubChapters({
   });
   return (
     <section id="chapters" className={EX_LAYOUT.section}>
-      <div className={EX_LAYOUT.stmt}>
-        <div>
-          <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
-            {ht(locale, "chapters.label")}
-          </span>
-          <h2 className={EX_TEXT.stmt}>{ht(locale, "chapters.title")}</h2>
-        </div>
-        <div className="lg:tw-pt-1.5">
-          <p className={`${EX_TEXT.body} tw-m-0`}>
-            {ht(locale, "chapters.body")}
-          </p>
-        </div>
+      {/* The line under the heading is its lede, set beneath it, so the
+          heading's block reads as one and nothing floats at the right. */}
+      <div className="tw-max-w-[760px]">
+        <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
+          {ht(locale, "chapters.label")}
+        </span>
+        <h2 className={EX_TEXT.stmt}>{ht(locale, "chapters.title")}</h2>
+        <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+          {ht(locale, "chapters.body")}
+        </p>
       </div>
       <div className="tw-mt-10 md:tw-mt-12">
         <ChapterIndex rows={rows} locale={locale} />

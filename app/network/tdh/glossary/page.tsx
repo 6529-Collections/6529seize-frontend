@@ -122,22 +122,32 @@ export default async function GlossaryPage({
           {m(key(term.id, "term"))}
         </>
       ),
+      // The source is a meta line under the meaning, so the meaning gets
+      // the row's width and the source no column of its own.
       meaning: (
-        <p className={`tw-m-0 tw-max-w-[640px] ${EX_TEXT.body}`}>
-          {m(term.def?.(p) ?? key(term.id, "def"), term.values?.(p) ?? {})}
-          {/* A door into the model that shows the term moving. */}
-          {term.model !== undefined && (
-            <>
-              {" "}
-              <Link
-                className={`${EX_LINK} tw-whitespace-nowrap`}
-                href={term.model}
-              >
-                {s("explained.tdh.glossary.seeIt")}
-              </Link>
-            </>
-          )}
-        </p>
+        <>
+          <p className={`tw-m-0 tw-max-w-[640px] ${EX_TEXT.body}`}>
+            {m(term.def?.(p) ?? key(term.id, "def"), term.values?.(p) ?? {})}
+            {/* A door into the model that shows the term moving. */}
+            {term.model !== undefined && (
+              <>
+                {" "}
+                <Link
+                  className={`${EX_LINK} tw-whitespace-nowrap`}
+                  href={term.model}
+                >
+                  {s("explained.tdh.glossary.seeIt")}
+                </Link>
+              </>
+            )}
+          </p>
+          <span
+            className={`${EX_TEXT.meta} tw-mt-1.5 tw-block tw-max-w-[640px]`}
+            data-glossary-source=""
+          >
+            {m(key(term.id, "src"))}
+          </span>
+        </>
       ),
       status: (
         <StatusCell
@@ -153,11 +163,6 @@ export default async function GlossaryPage({
               }
             : {})}
         />
-      ),
-      source: (
-        <span className="tw-text-sm tw-leading-[21px] tw-text-iron-400">
-          {m(key(term.id, "src"))}
-        </span>
       ),
     },
   }));
@@ -196,19 +201,23 @@ export default async function GlossaryPage({
           lede={m("explained.tdh.glossary.lede")}
         />
         {/* A jump index: the terms run in reading order, in these groups. */}
+        {/* Its label above, so the groups have the full measure and keep
+            to one line on a desktop. */}
         <nav
           aria-label={s("explained.tdh.glossary.jump")}
-          className="tw-mt-8 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-5 tw-gap-y-2 tw-text-[15px] tw-leading-6"
+          className="tw-mt-8"
           data-glossary-jump=""
         >
-          <span className={EX_TEXT.label}>
+          <span className={`${EX_TEXT.label} tw-block`}>
             {s("explained.tdh.glossary.jump")}
           </span>
-          {JUMPS.map((jump) => (
-            <a key={jump.id} className={EX_LINK} href={`#${jump.id}`}>
-              {s(jump.label)}
-            </a>
-          ))}
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-5 tw-gap-y-2 tw-text-[15px] tw-leading-6">
+            {JUMPS.map((jump) => (
+              <a key={jump.id} className={EX_LINK} href={`#${jump.id}`}>
+                {s(jump.label)}
+              </a>
+            ))}
+          </div>
         </nav>
         <section className={EX_LAYOUT.sectionTight}>
           <StackTable
@@ -219,23 +228,20 @@ export default async function GlossaryPage({
                 key: "term",
                 label: s("explained.tdh.glossary.col.term"),
                 phoneLabel: false,
+                width: "lg:tw-w-[220px]",
               },
               {
                 key: "meaning",
                 label: s("explained.tdh.glossary.col.meaning"),
                 phoneLabel: false,
               },
-              // On a phone, the status and the source read as one line
-              // under the meaning, without their column names each time.
+              // On a phone, the status reads as one line under the meaning
+              // and its source, without its column name each time.
               {
                 key: "status",
                 label: s("explained.tdh.glossary.col.status"),
                 phoneLabel: false,
-              },
-              {
-                key: "source",
-                label: s("explained.tdh.glossary.col.source"),
-                phoneLabel: false,
+                width: "lg:tw-w-[210px]",
               },
             ]}
             rows={rows}

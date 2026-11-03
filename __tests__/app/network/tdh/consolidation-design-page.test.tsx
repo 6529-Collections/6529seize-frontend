@@ -41,7 +41,10 @@ describe("Consolidation design", () => {
     expect(article).toHaveTextContent(
       "registers a consolidation in both directions in 6529's delegation contract. The contract numbers each kind of delegation, and consolidation is use case 999 (P26 §6.1), on Any Collection or The Memes. Two wallets need 2 registrations, three need 6, and four need 12."
     );
-    expect(article).toHaveTextContent("for four, the fourth's from Oct 15");
+    expect(article).toHaveTextContent("12for four");
+    expect(article).toHaveTextContent(
+      "Registrations, one each way for every pair; a fourth wallet's are made from Oct 15."
+    );
     expect(within(article).getByText("S3")).toBeInTheDocument();
     for (const id of [
       "consolidation-rules",
@@ -57,7 +60,7 @@ describe("Consolidation design", () => {
     }
   });
 
-  it("starts the signing order on D's batch, and one link at a time splits", async () => {
+  it("starts the signing order on D's first link, which splits, and the batch does not", async () => {
     const user = userEvent.setup();
     render(
       await TdhConsolidationDesignPage({ searchParams: Promise.resolve({}) })
@@ -65,11 +68,19 @@ describe("Consolidation design", () => {
     const model = document.querySelector<HTMLElement>('[data-lens="wallets"]')!;
     expect(model).toHaveAccessibleName("The signing order");
     expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
+      "A + D, B + C"
+    );
+    expect(model.querySelector("[data-readout]")).toHaveTextContent(
+      "2 identities"
+    );
+    await user.click(
+      within(model).getByRole("button", { name: "Safe: one batch" })
+    );
+    expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
       "A + B + C + D"
     );
-    await user.click(within(model).getByRole("button", { name: "Step 1 · D–A first" }));
-    expect(model.querySelector("[data-readout-groups]")).toHaveTextContent(
-      "A + D, B + C"
+    expect(model.querySelector("[data-readout]")).toHaveTextContent(
+      "one identity"
     );
   });
 

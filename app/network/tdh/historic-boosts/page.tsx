@@ -217,6 +217,8 @@ export default async function VersionsPage({
               seasons: m("explained.tdh.versions.before.seasons", {
                 high: beforeText(formatCents(locale, before.partialHigh)),
                 low: beforeText(formatCents(locale, before.partialLow)),
+                step: beforeText(formatCents(locale, before.partialStep)),
+                genesis: beforeText(formatCents(locale, before.genesis)),
               }),
             },
           },

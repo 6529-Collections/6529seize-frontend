@@ -9,7 +9,7 @@ import { Seg, Slider } from "@/components/explained/lens/controls";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import Tag from "@/components/explained/marks/Tag";
 import { withCc0 } from "@/components/explained/marks/Cc0";
-import { EX_FOCUS } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_MOTION } from "@/components/explained/tokens";
 import ArtCard from "@/components/explained/things/ArtCard";
 import CardPicker from "@/components/explained/things/CardPicker";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -362,7 +362,7 @@ export default function Machine({
 
   return (
     <section
-      className={`tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-4 md:tw-p-[22px] ${model.broken ? "tw-border-error/45" : "tw-border-iron-900"}`}
+      className={`tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-4 md:tw-p-[22px] ${EX_MOTION.model} ${model.broken ? "tw-border-error/45" : "tw-border-iron-900"}`}
       data-lens="machine"
       data-broken={model.broken ? "1" : "0"}
       aria-label={ot(locale, "machine.label")}

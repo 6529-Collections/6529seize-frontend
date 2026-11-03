@@ -33,7 +33,8 @@ interface Tone {
 // the four read apart in the bars and in the ribbons (one opacity for every
 // ribbon keeps the steps). The rest take the ramp's lowest step, a plain
 // fill: the 45° hatch means the boost and nothing else (EXPLAINED.md §4.2).
-const BAND_ALPHA = 0.62;
+// A step lighter than the bars' own ground, so the flows read on the panel.
+const BAND_ALPHA = 0.8;
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
     fill: "rgb(240, 241, 244)",
@@ -51,8 +52,8 @@ const TONES: Record<RankGroup["key"], Tone> = {
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "rgb(46, 47, 54)",
-    band: `rgba(46, 47, 54, ${BAND_ALPHA})`,
+    fill: "rgb(58, 59, 67)",
+    band: `rgba(58, 59, 67, ${BAND_ALPHA})`,
     ink: "tw-text-iron-50",
   },
 };
@@ -203,10 +204,14 @@ function Callouts({
   items,
   pick,
   locale,
+  every = false,
 }: {
   readonly items: readonly Share[];
   readonly pick: (share: Share) => number;
   readonly locale: SupportedLocale;
+  /** Name every group from a desktop up, not only the thin ones: the bar's
+   * own labels give shares, not names. */
+  readonly every?: boolean;
 }) {
   // Too thin for its label on a phone: named here, on a phone only when
   // the bar carries it from a tablet up. Each name sits under its own end
@@ -219,12 +224,21 @@ function Callouts({
     from += value;
     return { share, value, right: centre > 0.5 };
   });
-  const thin = placed.filter((item) => item.value < LABEL_MIN_SHARE_PHONE);
+  const thin = every
+    ? placed
+    : placed.filter((item) => item.value < LABEL_MIN_SHARE_PHONE);
   if (thin.length === 0) return null;
+  const shown = (item: (typeof placed)[number]) => {
+    if (item.value < LABEL_MIN_SHARE) return "";
+    if (item.value < LABEL_MIN_SHARE_PHONE) {
+      return every ? "" : "md:tw-hidden";
+    }
+    return "max-lg:tw-hidden";
+  };
   const callout = (item: (typeof placed)[number]) => (
     <span
       key={item.share.group.key}
-      className={`tw-inline-flex tw-items-center ${item.value < LABEL_MIN_SHARE ? "" : "md:tw-hidden"}`}
+      className={`tw-inline-flex tw-items-center ${shown(item)}`}
     >
       <span
         className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
@@ -297,7 +311,9 @@ function Names({
               {swatch}
               {name}
             </span>
-            {thin && (
+            {/* A thin slice named at the bar's end needs no tick: the
+                name ends where the slice does. */}
+            {thin && !atEnd && (
               <span
                 className="tw-absolute tw-top-5 tw-h-1.5 tw-w-px tw-bg-iron-400"
                 style={{ left: `${(start + value / 2) * 100}%` }}
@@ -454,6 +470,7 @@ export default function NetworkDistribution({
             items={items}
             pick={(share) => share.people}
             locale={locale}
+            every
           />
         </div>
         {/* The figure's text: shown below a desktop, where the bars are

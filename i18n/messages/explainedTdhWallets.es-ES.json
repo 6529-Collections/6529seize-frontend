@@ -51,6 +51,8 @@
   "explained.tdh.wallets.lens.batch": "O, seguro: D al final, un lote",
   "explained.tdh.wallets.lens.caption": "Líneas grises: vinculadas en ambos sentidos antes del {date}. Líneas azules: vinculadas en ambos sentidos desde el {date}. Una wallet discontinua cuenta sola.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",
+  "explained.tdh.wallets.lens.unit": "{count} identidades",
+  "explained.tdh.wallets.lens.unitOne": "una identidad",
   "explained.tdh.wallets.lens.sayFiveLead": "Cuatro como máximo.",
   "explained.tdh.wallets.lens.sayFive": "{alone} cuenta por su cuenta. El grupo se construye desde el vínculo confirmado más reciente, así que vincular una quinta wallet puede dejar fuera a una más antigua (D136).",
   "explained.tdh.wallets.lens.sayMissing": "Cada par debe estar vinculado en ambos sentidos. Una wallet solo se une a un grupo si está vinculada con cada miembro.",

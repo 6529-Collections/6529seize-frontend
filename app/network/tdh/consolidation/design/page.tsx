@@ -197,6 +197,15 @@ export default async function TdhConsolidationDesignPage({
                 );
               })}
             </div>
+            <p className={`tw-m-0 tw-mt-3 ${EX_TEXT.cap}`}>
+              {rich(locale, "explained.tdh.design.rule.statCap", {
+                date: (
+                  <FactText fact={gate} locale={locale}>
+                    {when.day}
+                  </FactText>
+                ),
+              })}
+            </p>
           </EdRow>
         </Section>
 
@@ -211,7 +220,9 @@ export default async function TdhConsolidationDesignPage({
           >
             <WalletsLens
               locale={locale}
-              start="batch"
+              // The first view differs from the hero's: D's first link,
+              // and the split it makes.
+              start="step1"
               label={dt(locale, "explained.tdh.design.order.lensLabel")}
               question={dt(locale, "explained.tdh.design.order.question")}
               withRule
@@ -240,16 +251,11 @@ export default async function TdhConsolidationDesignPage({
                         n: "3",
                       }),
                     },
-                  ],
-                },
-                // The safe order on a row of its own, as on Your wallets:
-                // beside the rule the four do not fit one row.
-                {
-                  label: wt(locale, "explained.tdh.wallets.lens.batch"),
-                  options: [
+                    // The safe order in the same row, short enough that the
+                    // four fit beside the rule.
                     {
                       value: "batch",
-                      label: wt(locale, "explained.tdh.wallets.lens.batch"),
+                      label: dt(locale, "explained.tdh.design.order.safe"),
                     },
                   ],
                 },

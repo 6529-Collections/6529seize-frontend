@@ -183,7 +183,7 @@
   "explained.tdh.how.rates.ruleCents": "     → {cents} cents",
   "explained.tdh.how.rates.ruleGloss": "B64: nearest double · HALFUP: halves round up · cents: hundredths of a TDH",
   "explained.tdh.how.rates.ruleHalfCent": "half cent: E = {E} gives {rate} cents, not {halfUp}",
-  "explained.tdh.how.rates.ruleSource": "P26 §5.2, §8.1. A floor applies only below {threshold} minted; the {threshold} is locked (D89). Exact half cents round as P26 §8.1 says: see the {link}.",
+  "explained.tdh.how.rates.ruleSource": "P26 §5.2, §8.1. A floor applies only below {threshold} minted. Exact half cents round as P26 §8.1 says: see the {link}.",
   "explained.tdh.how.rates.ruleLink": "Specification",
   "explained.tdh.how.rates.break": "mint copy number {threshold}",
   "explained.tdh.how.rates.tag": "Real editions",
@@ -210,7 +210,7 @@
   "explained.tdh.how.boost.unit": "boost",
   "explained.tdh.how.boost.sayGradLead": "A sixth Gradient adds nothing.",
   "explained.tdh.how.boost.sayGrad": "Gradients add {gradient} each, up to {max}, so with six the boost is what {max} give; the sixth is a plain copy that earns its own rate.",
-  "explained.tdh.how.boost.saySets": "Hold a full set and every paying season counts at once ({count} today), plus a shrinking bonus for each extra set, never more than about {extra} in all.",
+  "explained.tdh.how.boost.saySets": "A full set pays every paying season at once ({count} today); extra sets add at most about {extra}.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 to #3) and Nakamoto (#4) count only for a collector who does not hold all of the first season.",
   "explained.tdh.how.boost.say": "One boost multiplies everything you hold: here beta is {cents} hundredths: a boost of {boost}. The newest season counts once the next one begins.",
   "explained.tdh.how.boost.break": "add a sixth Gradient",
@@ -288,7 +288,7 @@
   "explained.tdh.how.totals.break": "add the wallets instead",
   "explained.tdh.how.order.label": "All of it",
   "explained.tdh.how.order.title": "The calculation, step by step, in P26's order.",
-  "explained.tdh.how.order.body": "Every step of P26, from reading the logs (§3) to the day's output (§9); its roots are P28's and P53's. Each links to its model or the Specification; a line marked abridged is the gist, and its link the full rule.",
+  "explained.tdh.how.order.body": "Every step of P26, from reading the logs (§3) to the day's output (§9). Each links to its model or the Specification; a line marked abridged is the gist, and its link the full rule.",
   "explained.tdh.how.order.snapshot": "The snapshot",
   "explained.tdh.how.order.eligible": "Which cards count",
   "explained.tdh.how.order.editions": "Editions and the floor",
@@ -314,7 +314,7 @@
   "explained.tdh.how.trace.records": "the identity's base, card and Gradient: {card} + {grad} = {base}",
   "explained.tdh.how.trace.boost": "one Gradient: beta = {cents} hundredths, a boost of {beta}",
   "explained.tdh.how.trace.totals": "adds {final} to the network's total",
-  "explained.tdh.how.trace.caption": "On the blue lines, one example through every step: one copy of a {edition}-copy card ({threshold} or more minted, so no floor) and one Gradient, both held {days} whole days in one wallet linked to no other. Both controls recompute every blue line.",
+  "explained.tdh.how.trace.caption": "On the blue lines, one example: one copy of a {edition}-copy card ({threshold} or more minted, so no floor) and one Gradient, both held {days} whole days in one wallet linked to no other. Both controls recompute it.",
   "explained.tdh.how.trace.edition": "The card's edition",
   "explained.tdh.how.trace.editionOption": "{copies} copies",
   "explained.tdh.how.trace.days": "Whole days held",
@@ -335,5 +335,5 @@
   "explained.tdh.how.boost.sayGradOnly": "Each Gradient adds {gradient}: with {count}, beta is {cents} hundredths, a boost of {boost}.",
   "explained.tdh.how.trace.finalTie": "The tie to watch: {call} = {final}, not {decimal}; the binary64 boost lies just below the half (§8.4).",
   "explained.tdh.how.order.dailyRate": "Daily rate",
-  "explained.tdh.how.trace.dailyRate": "{name} = {e4}: about {rate} more tomorrow"
+  "explained.tdh.how.trace.dailyRate": "{name} = {e4}: {rate} a day on average; tomorrow's result adds {next}, rounded per card"
 }

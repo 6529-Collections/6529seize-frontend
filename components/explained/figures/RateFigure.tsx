@@ -184,6 +184,8 @@ export default function RateFigure({
           stroke={EX_HEX.ink2}
           strokeWidth={1.5}
         />
+        {/* The line's own label at its top: the threshold's name and
+            decision, or on a narrow figure just the number, locked. */}
         <Label x={xAt(threshold) + 6} y={pad.top - 4} weight={600} tone="ink2">
           {narrow
             ? kt(locale, "explained.kit.rate.lockedShort", {

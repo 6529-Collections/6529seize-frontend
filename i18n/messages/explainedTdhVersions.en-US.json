@@ -25,7 +25,7 @@
   "explained.tdh.versions.before.tag": "before TDH v1.1",
   "explained.tdh.versions.before.when": "In the code from its first published commit, {from}, to {to}",
   "explained.tdh.versions.before.fullSet": "No seasons: {full} for a full set, up to {max} with more sets and Gradients",
-  "explained.tdh.versions.before.seasons": "A set short of a few cards paid {low} to {high}",
+  "explained.tdh.versions.before.seasons": "Without a full set: {high} for one card short, {step} less for each further card, down to {low} for five; a holder of the three Genesis cards got at least {genesis}",
   "explained.tdh.versions.note": "The table counts what seasons pay. With extra sets and {gradients} Gradients as well, the highest boost under TDH v1.4 today is about {max}, and the rule's ceiling about {ceiling} once season {last} is complete; How it works draws both. Today's values are computed by the TDH v1.4 engine on the editions read {date}.",
   "explained.tdh.versions.chart.label": "The full-set boost from seasons, version by version",
   "explained.tdh.versions.chart.ceiling": "{ceiling} at most from seasons",

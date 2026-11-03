@@ -295,6 +295,9 @@ export default function TwoPrograms({
               <ProgramsTable locale={locale} facts={facts} />
             </div>
           </PhoneMore>
+          {/* The long case on the left; the short one and what the two
+              programs share stacked on the right, so both columns end
+              near one line. */}
           <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-2">
             <Case title={rich(locale, k("case.flaw.title"))}>
               {rich(locale, k("case.flaw.body"), {
@@ -322,19 +325,21 @@ export default function TwoPrograms({
                 zkvmB: facts.print("proofs.b.zkvm"),
               })}
             </Case>
-            <Case title={rich(locale, k("case.review.title"))}>
-              {rich(locale, k("case.review.body"), {
-                nettingDay: facts.print("netting.day"),
-                date: facts.print("proofs.vectorFinding.date"),
-                count: facts.print("proofs.vectorFinding.vectors"),
-              })}
-            </Case>
+            <div className="tw-grid tw-gap-4">
+              <Case title={rich(locale, k("case.review.title"))}>
+                {rich(locale, k("case.review.body"), {
+                  nettingDay: facts.print("netting.day"),
+                  date: facts.print("proofs.vectorFinding.date"),
+                  count: facts.print("proofs.vectorFinding.vectors"),
+                })}
+              </Case>
+              <LimitNote title={rich(locale, k("s3.limitTitle"))}>
+                {rich(locale, k("s3.limitBody"), {
+                  wrapper: facts.print("proofs.a.wrapper"),
+                })}
+              </LimitNote>
+            </div>
           </div>
-          <LimitNote title={rich(locale, k("s3.limitTitle"))}>
-            {rich(locale, k("s3.limitBody"), {
-              wrapper: facts.print("proofs.a.wrapper"),
-            })}
-          </LimitNote>
         </div>
       }
     >

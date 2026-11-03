@@ -249,7 +249,7 @@
   "explained.kit.rate.aria": "Taux selon l'édition : les copies de chaque carte ajoutent ensemble à peu près autant chaque jour.",
   "explained.kit.rate.axisX": "copies dans l'édition",
   "explained.kit.rate.axisY": "taux par copie et par jour",
-  "explained.kit.rate.locked": "{threshold} : aucune édition en dessous, verrouillé ({ref})",
+  "explained.kit.rate.locked": "{threshold} : seuil de Nakamoto ({ref})",
   "explained.kit.rate.lockedShort": "{threshold} : verrouillé",
   "explained.kit.rate.cards": "les {count} cartes",
   "explained.kit.boost.aria": "Le boost par parties, de un au plafond de la règle.",
