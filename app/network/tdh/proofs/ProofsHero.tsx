@@ -72,8 +72,10 @@ function Header({
 }) {
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]" id="top">
-      <div className="tw-min-w-0">
-        <span className={EX_TEXT.label}>
+      {/* From a desktop up, the title and the lede share the row, as the
+          page's statement rows do, so the right half is never empty. */}
+      <div className="tw-min-w-0 lg:tw-grid lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-items-end lg:tw-gap-x-16">
+        <span className={`${EX_TEXT.label} lg:tw-col-span-2`}>
           {rich(locale, k("eyebrow"), {
             chapter: <span>{chapterNumber}</span>,
             n: <span className="tw-text-primary-300">{pageNumber}</span>,
@@ -83,11 +85,11 @@ function Header({
         <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
           {rich(locale, k("h1"))}
         </h1>
-        {/* The lede stays under the title at every width: it is the page's
-          one plain definition of a zero-knowledge proof, so it comes before
-          the verdict's terms on a phone too. */}
+        {/* The lede follows the title at every width: it is the page's one
+          plain definition of a zero-knowledge proof, so it comes before the
+          verdict's terms on a phone too. */}
         <p
-          className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`}
+          className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px] lg:tw-mt-0`}
           data-ex-lede=""
         >
           {rich(locale, k("lede"))}

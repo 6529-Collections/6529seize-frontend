@@ -202,9 +202,9 @@ export default function WalletsLens({
                     value={value}
                     onChange={(next) => model.set({ preset: next })}
                     options={group.options}
-                    // On a phone, chips that wrap onto a second row, each
-                    // with its own edge: still read as controls.
-                    phone="row"
+                    // On a phone, one preset a line: the steps are long
+                    // labels, and a pill broken over two lines reads badly.
+                    phone="stack"
                   />
                 </div>
               );

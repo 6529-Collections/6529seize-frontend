@@ -1,3 +1,4 @@
+import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { ageText } from "@/components/explained/age";
@@ -43,8 +44,11 @@ type SearchParams = Promise<{
 }>;
 
 const CHECK_ROUTE = "/network/tdh/verification";
-/** 6529.io's own uploads, for the days before the comparison began. */
-const UPLOADS_URL = "https://api.6529.io/api/consolidated_uploads";
+/**
+ * 6529.io's own uploads, for the days before the comparison began: a public
+ * listing a reader opens, so it is the production API's, pinned on purpose.
+ */
+const UPLOADS_URL = `${PUBLIC_PRODUCTION_API_BASE}/api/consolidated_uploads`;
 
 function firstValue(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
 import {
   resolveExplainedLocale,
@@ -124,6 +125,18 @@ export default async function GlossaryPage({
       meaning: (
         <p className={`tw-m-0 tw-max-w-[640px] ${EX_TEXT.body}`}>
           {m(term.def?.(p) ?? key(term.id, "def"), term.values?.(p) ?? {})}
+          {/* A door into the model that shows the term moving. */}
+          {term.model !== undefined && (
+            <>
+              {" "}
+              <Link
+                className={`${EX_LINK} tw-whitespace-nowrap`}
+                href={term.model}
+              >
+                {s("explained.tdh.glossary.seeIt")}
+              </Link>
+            </>
+          )}
         </p>
       ),
       status: (

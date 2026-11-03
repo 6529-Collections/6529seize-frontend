@@ -59,7 +59,7 @@ export default function WhyPicker({
   };
   return (
     <div
-      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:tw-gap-6"
+      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:tw-gap-6"
       data-lens="picker"
     >
       <div
@@ -91,7 +91,10 @@ export default function WhyPicker({
           );
         })}
       </div>
-      <div className="tw-min-w-0">
+      {/* The answer spans two rows, so the link under it sits under the
+          list from a tablet up, and the list's column does not end in a
+          hole beside a long answer. */}
+      <div className="tw-min-w-0 md:tw-row-span-2">
         <div aria-live="polite">
           {options.map((option) => (
             <div
@@ -106,8 +109,12 @@ export default function WhyPicker({
             </div>
           ))}
         </div>
-        {footer}
       </div>
+      {footer !== undefined && (
+        <div className="tw-min-w-0 md:tw-col-start-1 md:tw-row-start-2 md:[&>*:first-child]:tw-mt-0">
+          {footer}
+        </div>
+      )}
     </div>
   );
 }

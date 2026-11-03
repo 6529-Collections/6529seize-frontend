@@ -68,7 +68,7 @@
   "explained.tdh.overview.squash.tag": "{copies} × {rate}",
   "explained.tdh.overview.squash.aria": "Une édition de {copies} exemplaires à {rate} par jour chacun : la même aire que toute édition, contours de Meme #4 à FirstGM.",
   "explained.tdh.overview.squash.unit": "TDH par jour, toute l'édition",
-  "explained.tdh.overview.squash.say": "Un taux, c'est {h}, la plus grande édition, divisé par l'édition : seul l'arrondi au centime déplace l'aire.",
+  "explained.tdh.overview.squash.say": "Un taux, c'est {h}, la plus grande édition, divisé par l'édition : seul l'arrondi au centième de TDH déplace l'aire.",
   "explained.tdh.overview.squash.sayMinting": "Meme #{id} est encore en mint : {minted} exemplaires pour l'instant, chacun au taux de {edition} exemplaires, {rate}. Elle ajoute donc {total} par jour, moins qu'une édition terminée, jusqu'à ce que son dernier airdrop la complète à {edition}.",
   "explained.tdh.overview.squash.sayWhatIf": "Et si une sortie s'arrêtait à {minted} : elle compte comme {edition} exemplaires, chacun à {rate}, mais seuls {minted} existent, donc elle ajoute {total} par jour, moins qu'une édition terminée. Un dernier airdrop complète une telle sortie à {edition}.",
   "explained.tdh.overview.squash.break": "Meme #{id}, encore en mint",

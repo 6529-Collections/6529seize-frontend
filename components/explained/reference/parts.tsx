@@ -152,8 +152,9 @@ export function Caption({
 
 /**
  * A code name set in mono, never in capitals: `tdh-v1.4`, `DEV-2`,
- * `totalMax`. Short names stay on one line; a long identifier (`wrap`)
- * breaks anywhere rather than overflow its column.
+ * `totalMax`, at 0.88 of the text around it rounded down to a whole
+ * pixel, so no size is fractional. Short names stay on one line; a long
+ * identifier (`wrap`) breaks anywhere rather than overflow its column.
  */
 export function CodeName({
   children,
@@ -164,7 +165,7 @@ export function CodeName({
 }) {
   return (
     <code
-      className={`tw-font-mono tw-text-[0.88em] tw-normal-case tw-tracking-normal tw-text-iron-50 ${wrap ? "[overflow-wrap:anywhere]" : "tw-whitespace-nowrap"}`}
+      className={`tw-font-mono tw-text-[length:round(down,0.88em,1px)] tw-normal-case tw-tracking-normal tw-text-iron-50 ${wrap ? "[overflow-wrap:anywhere]" : "tw-whitespace-nowrap"}`}
     >
       {children}
     </code>
@@ -455,6 +456,7 @@ export function CodeBlock({
 export function Contents({
   items,
   label,
+  across = false,
 }: {
   readonly items: readonly {
     readonly href: string;
@@ -462,10 +464,14 @@ export function Contents({
     readonly title: ReactNode;
   }[];
   readonly label: string;
+  /** Every entry on one row from a desktop up, to the content's edge. */
+  readonly across?: boolean;
 }) {
   return (
     <nav aria-label={label}>
-      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0 md:tw-grid-cols-2">
+      <ol
+        className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0 md:tw-grid-cols-2 ${across ? "lg:tw-grid-cols-4" : ""}`}
+      >
         {items.map((item) => (
           <li key={item.href}>
             <Link

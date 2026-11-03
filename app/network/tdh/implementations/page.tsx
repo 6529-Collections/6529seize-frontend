@@ -182,8 +182,9 @@ export default async function ImplementationsPage({
           title={m("explained.tdh.impl.title")}
           lede={m("explained.tdh.impl.lede")}
         >
-          <div className="tw-mt-8 tw-max-w-[760px]">
+          <div className="tw-mt-8">
             <Contents
+              across
               label={s("explained.tdh.impl.toc.label")}
               items={[
                 {
@@ -227,22 +228,22 @@ export default async function ImplementationsPage({
                 {
                   key: "program",
                   label: s("explained.tdh.impl.col.program"),
-                  width: "lg:tw-w-[22%]",
+                  width: "lg:tw-w-[19%]",
                 },
                 {
                   key: "written",
                   label: s("explained.tdh.impl.col.written"),
-                  width: "lg:tw-w-[22%]",
+                  width: "lg:tw-w-[31%]",
                 },
                 {
                   key: "runs",
                   label: s("explained.tdh.impl.col.runs"),
-                  width: "lg:tw-w-[30%]",
+                  width: "lg:tw-w-[27%]",
                 },
                 {
                   key: "proved",
                   label: s("explained.tdh.impl.col.proved"),
-                  width: "lg:tw-w-[26%]",
+                  width: "lg:tw-w-[23%]",
                 },
               ]}
               rows={[

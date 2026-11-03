@@ -47,7 +47,9 @@ export default function ProvenanceTrail({
   readonly locale: SupportedLocale;
 }) {
   // Past five steps, columns get too narrow for their lines: a long trail
-  // stays a list on every width, each step one row of name, what and who.
+  // stays a list on every width, each step one row of name, what and who,
+  // the who next to the what as a ledger's columns, not pinned to the
+  // far edge.
   const long = steps.length > LONG_TRAIL;
   return (
     <ol
@@ -72,7 +74,7 @@ export default function ProvenanceTrail({
             key={step.title}
             className={
               long
-                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[220px_minmax(0,1fr)_minmax(0,240px)] lg:tw-items-baseline lg:tw-gap-x-8"
+                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[220px_minmax(0,440px)_minmax(0,240px)] lg:tw-items-baseline lg:tw-gap-x-8"
                 : "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-pb-0 lg:tw-pl-0 lg:tw-pr-3.5"
             }
             data-who={step.who}

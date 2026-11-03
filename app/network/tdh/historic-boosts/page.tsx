@@ -271,6 +271,8 @@ export default async function VersionsPage({
             <StackTable
               from="lg"
               caption={s("explained.tdh.versions.table")}
+              // The boost cells are short sentences, so they read left
+              // aligned like the rest; only a bare number would align right.
               columns={[
                 {
                   key: "version",
@@ -280,12 +282,10 @@ export default async function VersionsPage({
                 {
                   key: "fullSet",
                   label: s("explained.tdh.versions.col.fullSet"),
-                  numeric: true,
                 },
                 {
                   key: "seasons",
                   label: s("explained.tdh.versions.col.seasons"),
-                  numeric: true,
                 },
               ]}
               rows={rows}

@@ -68,7 +68,7 @@
   "explained.tdh.overview.squash.tag": "{copies} × {rate}",
   "explained.tdh.overview.squash.aria": "Eine Edition mit {copies} Exemplaren zu je {rate} am Tag: dieselbe Fläche wie jede Edition, umrissen von Meme #4 bis FirstGM.",
   "explained.tdh.overview.squash.unit": "TDH am Tag, die ganze Edition",
-  "explained.tdh.overview.squash.say": "Eine Rate ist {h}, die größte Auflage, geteilt durch die Auflage, also bewegt nur die Rundung auf den Cent die Fläche.",
+  "explained.tdh.overview.squash.say": "Eine Rate ist {h}, die größte Auflage, geteilt durch die Auflage, also bewegt nur die Rundung auf ein Hundertstel TDH die Fläche.",
   "explained.tdh.overview.squash.sayMinting": "Meme #{id} wird noch gemintet: bisher {minted} Exemplare, jedes zur Rate von {edition} Exemplaren, {rate}. Also fügt es {total} am Tag hinzu, weniger als eine fertige Auflage, bis sein letzter Airdrop es auf {edition} auffüllt.",
   "explained.tdh.overview.squash.sayWhatIf": "Angenommen, eine Ausgabe stoppt bei {minted}: Sie zählt als {edition} Exemplare, jedes zu {rate}, aber nur {minted} gibt es, also fügt sie {total} am Tag hinzu, weniger als eine fertige Auflage. Ein letzter Airdrop füllt eine solche Ausgabe auf {edition} auf.",
   "explained.tdh.overview.squash.break": "Meme #{id}, noch im Mint",

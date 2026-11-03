@@ -1,5 +1,5 @@
+import { apiUrl } from "@/services/api/api-endpoints";
 import { cache } from "react";
-import { publicEnv } from "@/config/env";
 import snapshot from "@/lib/explained/data/networkSnapshot.json";
 
 /**
@@ -74,7 +74,9 @@ function isoDate(header: string | null): string | null {
 }
 
 async function readPage(page: number): Promise<ReadPage | null> {
-  const url = `${publicEnv.API_ENDPOINT}/api/tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=boosted_tdh&sort_direction=DESC`;
+  const url = apiUrl(
+    `/api/tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=boosted_tdh&sort_direction=DESC`
+  );
   try {
     const response = await fetch(url, {
       headers: { accept: "application/json" },

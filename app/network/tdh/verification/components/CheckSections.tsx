@@ -456,15 +456,21 @@ function CheckCommand({
   if (url === null || hash === null) {
     return <FactValue fact={null} locale={locale} />;
   }
+  // On a phone the address breaks after its host, not mid-path.
+  const cut = url.indexOf("/", url.indexOf("//") + 2) + 1;
+  const host = cut > 0 ? url.slice(0, cut) : url;
+  const path = cut > 0 ? url.slice(cut) : "";
   return (
     <pre
-      className="tw-m-0 tw-mt-3 tw-whitespace-pre-wrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] tw-px-4 tw-py-3.5 tw-font-mono tw-text-[13px] tw-leading-[22px] tw-text-iron-300 [overflow-wrap:anywhere] md:tw-text-sm"
+      className="tw-m-0 tw-mt-3 tw-whitespace-pre-wrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] tw-px-4 tw-py-3.5 tw-font-mono tw-text-[13px] tw-leading-[22px] tw-text-iron-300 [overflow-wrap:break-word] md:tw-text-sm"
       data-fact={day.id("file.sha256")}
     >
       <span className="tw-text-iron-400">
         {pt(locale, "explained.tdh.check.cmd.comment")}
       </span>
-      {`\ncurl -s ${url} \\\n  | sha256sum\n`}
+      {`\ncurl -s ${host}`}
+      <wbr />
+      {`${path} \\\n  | sha256sum\n`}
       <span className="tw-text-iron-400">
         {/* The expected hash whole, on one line of its own: split over two
             comment lines it reads as two hashes. */}

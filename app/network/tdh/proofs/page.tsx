@@ -142,6 +142,7 @@ export default async function ProofsPage({
         <Section
           id="guarantees"
           number="05"
+          shortProse
           label={fill(locale, k("s6.label"))}
           heading={rich(locale, k("s6.heading"))}
           figure={<Guarantees locale={locale} />}

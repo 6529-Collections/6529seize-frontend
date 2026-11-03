@@ -29,6 +29,8 @@ import {
 import { rich } from "@/components/explained/rich";
 import { wt } from "../copy";
 import WalletsLens from "../WalletsLens";
+import { HERO_LINKS, HERO_WALLETS } from "../walletPresets";
+import WalletGraph from "@/components/explained/figures/WalletGraph";
 import { RANDOM_LINK_GRAPHS, gateText } from "../walletFacts";
 import { dt } from "./copy";
 import ProtectsBox from "./ProtectsBox";
@@ -104,6 +106,29 @@ export default async function TdhConsolidationDesignPage({
           title={dt(locale, "explained.tdh.design.title")}
           titleClassName="tw-max-w-[900px] [text-wrap:balance]"
           lede={dt(locale, "explained.tdh.design.lede")}
+          aside={
+            // The chapter's four-wallet glyph, as beside Your wallets'
+            // opening: every pair linked both ways.
+            <figure className="tw-m-0">
+              <div aria-hidden="true">
+                <WalletGraph
+                  wallets={HERO_WALLETS}
+                  links={HERO_LINKS}
+                  groups={[["A", "B", "C", "D"]]}
+                  locale={locale}
+                />
+              </div>
+              <figcaption className={`tw-mt-2 ${EX_TEXT.cap}`}>
+                {rich(locale, "explained.tdh.wallets.heroCaption", {
+                  date: (
+                    <FactText fact={gate} locale={locale}>
+                      {when.day}
+                    </FactText>
+                  ),
+                })}
+              </figcaption>
+            </figure>
+          }
         >
           {/* The lede's "cannot" carries its evidence and its limit. */}
           <div className="tw-mt-5">
@@ -142,16 +167,24 @@ export default async function TdhConsolidationDesignPage({
                 four: count(4),
               })}
             </Para>
-            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3 sm:tw-gap-5">
+            {/* A row of three from a small tablet up; on a phone each numeral
+                keeps its caption on its own line, three short lines, not
+                three tall columns. */}
+            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-5">
               {sizes.map((wallets, index) => {
                 const key = statKeys[index];
                 if (!key) return null;
                 return (
-                  <div key={wallets}>
-                    <span className={`tw-block ${EX_TEXT.numL}`}>
+                  <div
+                    key={wallets}
+                    className="max-sm:tw-flex max-sm:tw-items-baseline max-sm:tw-gap-3"
+                  >
+                    <span
+                      className={`tw-block max-sm:tw-min-w-[44px] ${EX_TEXT.numL}`}
+                    >
                       {count(wallets)}
                     </span>
-                    <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
+                    <span className={`tw-block sm:tw-mt-1 ${EX_TEXT.cap}`}>
                       {rich(locale, key, {
                         date: (
                           <FactText fact={gate} locale={locale}>
@@ -181,7 +214,7 @@ export default async function TdhConsolidationDesignPage({
               start="batch"
               label={dt(locale, "explained.tdh.design.order.lensLabel")}
               question={dt(locale, "explained.tdh.design.order.question")}
-              withRule={false}
+              withRule
               caption={wt(locale, "explained.tdh.wallets.lens.caption", {
                 date: when.day,
               })}
@@ -207,6 +240,13 @@ export default async function TdhConsolidationDesignPage({
                         n: "3",
                       }),
                     },
+                  ],
+                },
+                // The safe order on a row of its own, as on Your wallets:
+                // beside the rule the four do not fit one row.
+                {
+                  label: wt(locale, "explained.tdh.wallets.lens.batch"),
+                  options: [
                     {
                       value: "batch",
                       label: wt(locale, "explained.tdh.wallets.lens.batch"),
@@ -251,23 +291,24 @@ export default async function TdhConsolidationDesignPage({
                 ],
               }}
             />
-            {/* The mark sits on the claim it qualifies: 6529's own tests. */}
-            <div className="tw-mt-6">
+            {/* The mark sits on the claim it qualifies, 6529's own tests, in
+                a panel of its own under the two lists. */}
+            <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-[18px] md:tw-px-[22px]">
               <Mark kind="tested" locale={locale} size="sm" />
+              <p className={`tw-m-0 tw-mt-2 tw-max-w-[660px] ${EX_TEXT.body}`}>
+                {rich(locale, "explained.tdh.design.protects.tested", {
+                  graphs: (
+                    <RecordValue
+                      id={RANDOM_LINK_GRAPHS.id}
+                      source={RANDOM_LINK_GRAPHS.source}
+                      locale={locale}
+                    >
+                      {formatCount(locale, RANDOM_LINK_GRAPHS.value)}
+                    </RecordValue>
+                  ),
+                })}
+              </p>
             </div>
-            <Para className="tw-mt-2">
-              {rich(locale, "explained.tdh.design.protects.tested", {
-                graphs: (
-                  <RecordValue
-                    id={RANDOM_LINK_GRAPHS.id}
-                    source={RANDOM_LINK_GRAPHS.source}
-                    locale={locale}
-                  >
-                    {formatCount(locale, RANDOM_LINK_GRAPHS.value)}
-                  </RecordValue>
-                ),
-              })}
-            </Para>
           </EdRow>
         </Section>
         {/* Back and Next along the shelf, as on the other shelf pages. */}

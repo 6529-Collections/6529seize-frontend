@@ -125,6 +125,54 @@ function Lane({
   );
 }
 
+/**
+ * The bytes, from the day read to the proof, as a band under the stations
+ * from lg up: its height is the byte count on a log scale, so the day's
+ * input is the full height and the proof is what is left of it. Under the
+ * steps the band narrows as the run is proved; from the verifier on it is
+ * green, the proof accepted. Both counts are the figure's own facts.
+ */
+function BytesBand({
+  locale,
+  facts,
+}: {
+  readonly locale: SupportedLocale;
+  readonly facts: PageFacts;
+}) {
+  const input = facts.num("proofs.day.inputBytes");
+  const proof = facts.num("proofs.pair.proofBytesA");
+  if (input === null || proof === null || input <= 1 || proof <= 1) {
+    return null;
+  }
+  const H = 36;
+  const mid = H / 2;
+  const thin = Math.max(2, (H * Math.log10(proof)) / Math.log10(input));
+  const top = mid - thin / 2;
+  const bottom = mid + thin / 2;
+  return (
+    <div className="tw-mt-4 tw-hidden lg:tw-block" data-fig="bytes-band">
+      <svg
+        aria-hidden="true"
+        className="tw-block tw-h-9 tw-w-full"
+        viewBox={`0 0 1000 ${H}`}
+        preserveAspectRatio="none"
+      >
+        <polygon
+          points={`0,0 250,0 500,${top} 750,${top} 750,${bottom} 500,${bottom} 250,${H} 0,${H}`}
+          fill="rgba(206,207,212,0.2)"
+        />
+        <rect x="750" y={top} width="250" height={thin} fill="#3CCB7F" />
+      </svg>
+      <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-2`}>
+        {rich(locale, k("figure.bandCap"), {
+          input: facts.print("proofs.day.inputBytes"),
+          proof: facts.print("proofs.pair.proofBytesA"),
+        })}
+      </p>
+    </div>
+  );
+}
+
 export default function ProofsFigure({
   locale,
   facts,
@@ -176,30 +224,9 @@ export default function ProofsFigure({
             last
           />
         </ol>
-        {/* The bytes narrowing, from the day read to the proof: a band that
-            thins under the first three stations, then a hairline on. */}
-        <svg
-          aria-hidden="true"
-          className="tw-mt-4 tw-hidden tw-h-6 tw-w-full lg:tw-block"
-          viewBox="0 0 1000 24"
-          preserveAspectRatio="none"
-        >
-          <polygon
-            points="0,0 0,24 500,14 750,11.5 1000,11.5 1000,12.5 750,12.5 500,10"
-            fill="rgba(206,207,212,0.16)"
-          />
-          <line
-            x1="750"
-            y1="12"
-            x2="1000"
-            y2="12"
-            stroke="#3CCB7F"
-            strokeWidth="2"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+        <BytesBand locale={locale} facts={facts} />
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-6 lg:tw-grid-cols-[minmax(0,1fr)_300px] lg:tw-items-stretch">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-6 lg:tw-grid-cols-[minmax(0,1fr)_320px] lg:tw-items-stretch">
         <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0">
           <Lane
             mark={<HalfPair a b={false} word={false} locale={locale} />}
@@ -227,7 +254,7 @@ export default function ProofsFigure({
           />
         </ul>
         <div
-          className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-600 tw-px-4 tw-py-3.5"
+          className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-600 tw-px-4 tw-py-3.5 lg:tw-self-start"
           data-fig-contract=""
         >
           <div>
@@ -254,7 +281,7 @@ export default function ProofsFigure({
               ))}
             </ol>
           </div>
-          <span className="tw-block tw-border-0 tw-border-t tw-border-dashed tw-border-iron-700 tw-pt-3 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-300">
+          <span className="tw-block tw-text-balance tw-border-0 tw-border-t tw-border-dashed tw-border-iron-700 tw-pt-3 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-300">
             {fill(locale, t("recorded"))}
           </span>
         </div>

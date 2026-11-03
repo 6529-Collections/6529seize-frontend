@@ -68,7 +68,7 @@
   "explained.tdh.overview.squash.tag": "{copies} × {rate}",
   "explained.tdh.overview.squash.aria": "Una edición de {copies} copias a {rate} al día cada una: la misma área que cualquier edición, con el contorno de Meme #4 a FirstGM.",
   "explained.tdh.overview.squash.unit": "TDH al día, la edición entera",
-  "explained.tdh.overview.squash.say": "Una tasa es {h}, la edición más grande, dividida entre la edición, así que solo el redondeo al céntimo mueve el área.",
+  "explained.tdh.overview.squash.say": "Una tasa es {h}, la edición más grande, dividida entre la edición, así que solo el redondeo a la centésima de TDH mueve el área.",
   "explained.tdh.overview.squash.sayMinting": "Meme #{id} aún se está minteando: {minted} copias por ahora, cada una a la tasa de {edition} copias, {rate}. Así que añade {total} al día, menos que una edición terminada, hasta que su último airdrop la complete a {edition}.",
   "explained.tdh.overview.squash.sayWhatIf": "Y si un lanzamiento se detuviera en {minted}: cuenta como {edition} copias, cada una a {rate}, pero solo existen {minted}, así que añade {total} al día, menos que una edición terminada. Un último airdrop completa ese lanzamiento a {edition}.",
   "explained.tdh.overview.squash.break": "Meme #{id}, aún en mint",

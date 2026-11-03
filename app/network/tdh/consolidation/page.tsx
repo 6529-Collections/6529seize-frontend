@@ -29,8 +29,6 @@ import {
   pageLink,
   Para,
   Section,
-  Statement,
-  StatementLabel,
   You,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
@@ -38,6 +36,7 @@ import { wt, type WalletsKey } from "./copy";
 import PairPicture from "./PairPicture";
 import SignOrder from "./SignOrder";
 import WalletsLens from "./WalletsLens";
+import { HERO_LINKS, HERO_WALLETS } from "./walletPresets";
 import {
   CONFORMANCE_SOURCE,
   RANDOM_LINK_GRAPHS,
@@ -57,24 +56,6 @@ const DESIGN_HREF = "/network/tdh/consolidation/design";
  * wallet; what to know before starting; questions. Old anchors of the
  * consolidation guide land in their sections.
  */
-/**
- * The page's subject beside its opening: four wallets, every pair linked
- * both ways, one identity; D's links fresh, made after the gate.
- */
-const HERO_WALLETS = [
-  { id: "A", x: 0.22, y: 0.24 },
-  { id: "B", x: 0.78, y: 0.24 },
-  { id: "C", x: 0.22, y: 0.76 },
-  { id: "D", x: 0.78, y: 0.76 },
-] as const;
-const HERO_LINKS = [
-  { a: "A", b: "B", kind: "old" },
-  { a: "A", b: "C", kind: "old" },
-  { a: "B", b: "C", kind: "old" },
-  { a: "A", b: "D", kind: "fresh" },
-  { a: "B", b: "D", kind: "fresh" },
-  { a: "C", b: "D", kind: "fresh" },
-] as const;
 
 export default async function TdhYourWalletsPage({
   searchParams,
@@ -248,7 +229,8 @@ export default async function TdhYourWalletsPage({
               />
             </FactText>
           </div>
-          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2.5 md:tw-mt-[30px]">
+          {/* On a phone the three are one column of equal buttons. */}
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-2.5 sm:tw-flex sm:tw-flex-wrap md:tw-mt-[30px] max-sm:[&>*]:tw-justify-center">
             <Link className={EX_BUTTON.cta} href={GUIDED_SETUP_HREF}>
               {wt(locale, "explained.tdh.wallets.setup")}
             </Link>
@@ -304,20 +286,22 @@ export default async function TdhYourWalletsPage({
         </Section>
 
         <Section id="four">
-          <Statement
-            label={
-              <StatementLabel mark="02">
-                {wt(locale, "explained.tdh.wallets.rule.label")}
-              </StatementLabel>
-            }
-            title={wt(locale, "explained.tdh.wallets.rule.title")}
+          {/* The same header as 01 and 03: number and label in the gutter,
+              the heading beside them. */}
+          <EdRow
+            no="02"
+            label={wt(locale, "explained.tdh.wallets.rule.label")}
+            wide
           >
-            <Para>
+            <h2 className={EX_TEXT.h2}>
+              {wt(locale, "explained.tdh.wallets.rule.title")}
+            </h2>
+            <Para className="tw-mt-4">
               {rich(locale, "explained.tdh.wallets.rule.body", {
                 gate: day(when.full),
               })}
             </Para>
-          </Statement>
+          </EdRow>
           <div className="tw-mt-12">
             <WalletsLens
               locale={locale}

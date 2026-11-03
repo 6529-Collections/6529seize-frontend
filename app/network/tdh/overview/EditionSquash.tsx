@@ -21,7 +21,7 @@ import { ot } from "./copy";
  * rectangle, copies across and the rate up, from the rarest edition to
  * FirstGM's. The rate is H divided by the edition, so as the rectangle
  * widens it flattens, and its area, the TDH a whole edition adds a day,
- * stays at H give or take the rate's rounding to a cent. The rates are the
+ * stays at H give or take the rate's rounding to a hundredth. The rates are the
  * TDH v1.4 engine's on today's H; nothing is typed.
  *
  * It opens on a middle edition, Meme #2's, with the rarest and the largest

@@ -38,13 +38,17 @@ export default function HowWeKnow({
 }) {
   const heading = kt(locale, "explained.kit.hwk.title");
   // Rows fill whole lines: four as two pairs (four across on a wide
-  // screen), two side by side, anything else in threes.
+  // screen), two side by side, anything else in threes; a last row left
+  // alone in threes spans the line, so it reads as the block's footnote,
+  // not a missing pair.
   const columns =
     rows.length % 4 === 0
       ? "md:tw-grid-cols-2 xl:tw-grid-cols-4"
       : rows.length === 2
         ? "md:tw-grid-cols-2"
-        : "md:tw-grid-cols-3";
+        : rows.length % 3 === 1
+          ? "md:tw-grid-cols-3 md:[&>*:last-child]:tw-col-span-3 md:[&>*:last-child]:tw-max-w-[660px]"
+          : "md:tw-grid-cols-3";
   return (
     <footer
       aria-label={heading}

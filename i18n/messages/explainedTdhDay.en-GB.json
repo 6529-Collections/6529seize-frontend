@@ -50,7 +50,7 @@
   "explained.tdh.day.glance.python": "Python",
   "explained.tdh.day.glance.pythonRun": "{runtime}, from the same input",
   "explained.tdh.day.totals.label": "Two correct totals",
-  "explained.tdh.day.totals.body": "Today's file publishes only the total with the two burn addresses, as 6529.io counts it; validators will leave them out, since burn addresses can never take part in consensus (P26 §8.5). For {date}, the one day both are stated (P26 §13), they were {withBurn} and {withoutBurn}: the first is the sum of 6529.io's signed upload for that day, the second leaves out its two burn-address rows.",
+  "explained.tdh.day.totals.body": "Today's file publishes only the total with the two burn addresses, as 6529.io counts it; validators will leave them out, as burn addresses never take part in consensus (P26 §8.5). For {date}, P26 §13 states both: {withBurn}, the sum of 6529.io's signed upload that day, and {withoutBurn}, without its burn-address rows.",
   "explained.tdh.day.own.label": "Writing your own TDH?",
   "explained.tdh.day.own.body": "Match every identity's final TDH and the totals: the {spec} restates every rule, and {pin} lists what a day's run pins. Then diff your records, one by one, with 6529.io's signed uploads of {identities} and {wallets}, on Arweave, to find any miss. The roots' encodings (P28, P11) are not public yet, so the roots cannot be recomputed today.",
   "explained.tdh.day.own.spec": "Specification",

@@ -1,5 +1,5 @@
+import { apiUrl } from "@/services/api/api-endpoints";
 import { cache } from "react";
-import { publicEnv } from "@/config/env";
 import { loadFormalManifest } from "@/lib/tdh/formal/loadFormalManifest.server";
 import {
   LATEST_DAY_REVALIDATE_SECONDS,
@@ -200,7 +200,7 @@ export async function loadFirstMints(): Promise<CardMints> {
   const art = new Map<number, string>();
   const rates = new Map<number, number>();
   const rows = await readAllPages<NftsRow>(
-    `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&`
+    apiUrl(`/api/nfts?contract=${REGISTRY_V14.memes}&`)
   );
   for (const row of rows ?? []) {
     if (typeof row.id !== "number") {
@@ -333,7 +333,7 @@ function snapshotEditions(): EditionsInput {
 async function loadEditions(now: string): Promise<EditionsInput | null> {
   const firstMints = loadFirstMints();
   const rows = await readAllPages<EditionsRow>(
-    `${publicEnv.API_ENDPOINT}/api/memes_extended_data?`
+    apiUrl("/api/memes_extended_data?")
   );
   const valid = (rows ?? []).filter(
     (

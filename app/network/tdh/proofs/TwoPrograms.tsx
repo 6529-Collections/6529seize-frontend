@@ -295,7 +295,7 @@ export default function TwoPrograms({
               <ProgramsTable locale={locale} facts={facts} />
             </div>
           </PhoneMore>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
+          <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 md:tw-grid-cols-2">
             <Case title={rich(locale, k("case.flaw.title"))}>
               {rich(locale, k("case.flaw.body"), {
                 date: facts.print("proofs.sp1Advisory.published", "long"),

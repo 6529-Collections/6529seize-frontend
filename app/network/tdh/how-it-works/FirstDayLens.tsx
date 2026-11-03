@@ -216,7 +216,13 @@ export default function FirstDayLens({
             !shown
               ? "?"
               : result.first === null
-                ? ht(locale, "explained.tdh.how.firstday.none")
+                ? // Sold before a whole day, no result ever counts it.
+                  ht(
+                    locale,
+                    model.broken
+                      ? "explained.tdh.how.firstday.never"
+                      : "explained.tdh.how.firstday.none"
+                  )
                 : utcDay(locale, result.first)
           }
           say={
