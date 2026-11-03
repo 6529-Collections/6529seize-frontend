@@ -2,6 +2,9 @@
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
+// The divider row of a two-column Markdown table.
+const TWO_COLUMN_RULE = "| --- | --- |";
+
 export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "Setup takes about 30 minutes. Then the validator runs by itself.",
   "",
@@ -32,7 +35,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "To check what you installed, run the version command for your system:",
   "",
   "| System | Command |",
-  "| --- | --- |",
+  TWO_COLUMN_RULE,
   '| Mac app (Terminal) | `"/Applications/6529 Validator.app/Contents/Resources/validator" --version` |',
   "| Windows (a new PowerShell window) | `validator --version` |",
   "| `.deb` | `validator --version` |",
@@ -67,7 +70,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "All times are UTC. The page shows them in your time zone too.",
   "",
   "| Time | What happens |",
-  "| --- | --- |",
+  TWO_COLUMN_RULE,
   "| 00:00 | The day's cycle starts. |",
   "| About 00:15 | Ethereum finalizes the day's last block. Your validator computes and signs within minutes. |",
   "| Up to 2 hours later | A home validator sends its vote after a random wait, never after 18:00, so the time does not point to where it is. |",
@@ -97,7 +100,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "Once an hour the validator reads 6529's signed list of releases. When a newer one is out, the top bar says so, and the Update page shows its notes, its files and their SHA-256. To check at once:",
   "",
   "| System | Command |",
-  "| --- | --- |",
+  TWO_COLUMN_RULE,
   '| Mac app (Terminal) | `"/Applications/6529 Validator.app/Contents/Resources/validator" update check` |',
   "| Windows (PowerShell) | `validator update check --data-dir C:\\ProgramData\\6529-validator` |",
   "| `.deb` | `sudo -u validator6529 validator update check --data-dir /var/lib/6529-validator` |",
@@ -108,7 +111,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "## What is normal",
   "",
   "| You see | It means |",
-  "| --- | --- |",
+  TWO_COLUMN_RULE,
   "| Watcher, and the day your key counts from | Your key counts from the next cycle after you sign |",
   "| `NOT_GRANTED` for today, after you signed | The same: your key counts from the next cycle |",
   "| A slow first start | Tor takes a minute or two to connect |",
