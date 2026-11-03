@@ -7,6 +7,7 @@ import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import { useE2eeConversation, type UseE2eeResult } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
+import { isUsableDm } from "@/lib/e2ee/dm-conversations";
 import type {
   E2eeConversation,
   E2eeEngine,
@@ -27,6 +28,7 @@ import {
   useE2eeViewStyle,
 } from "../ui/E2eePageShell";
 import { E2eeBlockDialog } from "./E2eeBlockDialog";
+import { E2eeDmHistory } from "./E2eeDmHistory";
 import { E2eeComposer } from "./E2eeComposer";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
@@ -102,9 +104,13 @@ function useInitialSync(engine: E2eeEngine, missing: boolean): boolean {
 }
 
 const getDisabledReasonKey = (
-  conversation: E2eeConversation
+  conversation: E2eeConversation,
+  selfProfileId: string | null
 ): MessageKey | null => {
-  if (conversation.status !== "active") {
+  if (
+    conversation.status !== "active" ||
+    (conversation.kind === "dm" && !isUsableDm(conversation, selfProfileId))
+  ) {
     return "e2ee.composer.unavailable";
   }
   if (conversation.delayed) {
@@ -230,7 +236,9 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const editing = editingId
     ? (messages.find((m) => m.id === editingId) ?? null)
     : null;
-  const canAct = conversation.status === "active";
+  const canAct =
+    conversation.status === "active" &&
+    (conversation.kind !== "dm" || isUsableDm(conversation, profileId));
 
   return (
     <div
@@ -244,6 +252,12 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         searchPanelId={searchPanelId}
         onToggleSearch={() => setSearchOpen((open) => !open)}
         onOpenInfo={() => setInfoOpen(true)}
+      />
+      <E2eeDmHistory
+        conversation={conversation}
+        conversations={e2ee.conversations}
+        selfProfileId={profileId}
+        engine={engine}
       />
       {searchOpen ? (
         <div id={searchPanelId}>
@@ -267,7 +281,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         selfProfileId={profileId}
       />
       <E2eeNewDeviceNotice className="tw-flex-shrink-0 tw-px-4 tw-pt-2" />
-      {getDisabledReasonKey(conversation) === null ? (
+      {getDisabledReasonKey(conversation, profileId) === null ? (
         // One stop past the whole timeline for keyboard users.
         <button
           type="button"
@@ -340,7 +354,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         onCancelReply={() => setReplyToId(null)}
         editing={editing}
         onCancelEdit={() => setEditingId(null)}
-        disabledReasonKey={getDisabledReasonKey(conversation)}
+        disabledReasonKey={getDisabledReasonKey(conversation, profileId)}
         attachmentsEnabled={e2ee.attachmentsEnabled}
       />
 

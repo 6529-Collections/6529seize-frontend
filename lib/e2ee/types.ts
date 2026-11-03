@@ -133,6 +133,8 @@ export interface E2eeReportPreview {
 }
 
 export interface E2eeConversation {
+  /** Original DM peer, retained for titles after leaving; not a current member. */
+  dmPeer?: E2eeMember | null;
   g: string;
   kind: "dm" | "group";
   name: string | null;

@@ -1,3 +1,4 @@
+import { getDmPeerId } from "../dm-conversations";
 import { compareHistory } from "../history-order";
 import { safetyCodeFromFp } from "../digests";
 import { parseCredentialIdentity } from "../grant";
@@ -361,11 +362,28 @@ export class EngineStore {
         .at(-1);
       if (pending) last = pending;
     }
+    const members = this.buildMembers(record);
+    const peerId = getDmPeerId(
+      { ...record.metadata, members },
+      this.ownProfileId
+    );
+    const profile = peerId ? this.profiles.get(peerId) : null;
+    const dmPeer = peerId
+      ? (members.find((member) => member.profileId === peerId) ?? {
+          profileId: peerId,
+          handle: profile?.handle ?? null,
+          pfp: profile?.pfp ?? null,
+          wallets: [...(profile?.wallets ?? [])],
+          isAdmin: true,
+          devices: [],
+        })
+      : null;
     return {
+      dmPeer,
       g: record.g,
       kind: record.metadata.kind,
       name: record.metadata.name,
-      members: this.buildMembers(record),
+      members,
       admins: [...record.metadata.admins],
       createdBy: record.metadata.created_by,
       epoch: record.epoch,

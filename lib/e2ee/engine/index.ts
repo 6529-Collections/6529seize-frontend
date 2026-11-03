@@ -71,6 +71,7 @@ const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
+  private readonly dmCreations = new Map<string, Promise<string>>();
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -435,6 +436,38 @@ class E2eeEngineImpl implements E2eeEngineExt {
     name?: string | null;
   }): Promise<string> {
     this.requireReady();
+    const targets = [...new Set(input.profileIds)].filter(
+      (id) => id !== this.ctx.profileId
+    );
+    const peer =
+      input.kind === "dm" && targets.length === 1 ? targets[0] : undefined;
+    if (peer === undefined) return this.createNewConversation(input);
+    const pending = this.dmCreations.get(peer);
+    if (pending) return pending;
+    const existing = findDm(this.ctx, peer);
+    if (existing) return existing;
+    const creation = this.createDmAfterSync(input);
+    this.dmCreations.set(peer, creation);
+    try {
+      return await creation;
+    } finally {
+      this.dmCreations.delete(peer);
+    }
+  }
+
+  private async createDmAfterSync(
+    input: Parameters<E2eeEngineExt["createConversation"]>[0]
+  ): Promise<string> {
+    // Pick up invitations from the other participant or our other devices
+    // before deciding a new MLS group is needed. This is not a server pair lock.
+    await this.controller.syncAll();
+    this.requireReady();
+    return this.createNewConversation(input);
+  }
+
+  private async createNewConversation(
+    input: Parameters<E2eeEngineExt["createConversation"]>[0]
+  ): Promise<string> {
     const g = await createConversation(this.ctx, input, this.onDelayed);
     await resolveProfiles(this.ctx, input.profileIds);
     return g;

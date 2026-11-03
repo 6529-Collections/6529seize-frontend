@@ -95,6 +95,52 @@ describe("encrypted conversation list", () => {
     expect(summaries.at(-1)).toMatchObject({ unread: 0, hasUnread: false });
   });
 
+  it("shows one DM row for ended and concurrent chats, preserving unread counts and the active history", () => {
+    const pair = {
+      kind: "dm" as const,
+      admins: [SELF_ID, ALICE_ID],
+      members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+    };
+    const currentG = `0x${"a".repeat(64)}`;
+    const otherG = `0x${"b".repeat(64)}`;
+    const oldG = `0x${"c".repeat(64)}`;
+    const current = conversation({ ...pair, g: currentG, unread: 2 });
+    const other = conversation({ ...pair, g: otherG, unread: 4 });
+    const old = conversation({
+      ...pair,
+      g: oldG,
+      status: "left",
+      unread: 20,
+      updatedAt: current.updatedAt + 1,
+    });
+    mockPathname.mockReturnValue(`/messages/encrypted/${oldG}`);
+    setE2eeChatMuted(SELF_ID, otherG, true);
+    render(
+      <E2eeTestProvider
+        value={contextFor(
+          createFakeE2eeEngine({ conversations: [old, other, current] })
+        )}
+      >
+        <E2eeConversationListPage />
+        <E2eeMessagesSection />
+      </E2eeTestProvider>
+    );
+    for (const list of screen.getAllByRole("list")) {
+      const links = within(list).queryAllByRole("link");
+      if (links.length === 0) continue;
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute(
+        "href",
+        `/messages/encrypted/${currentG}`
+      );
+      expect(links[0]).toHaveTextContent("2 unread messages");
+    }
+    expect(screen.getByRole("link", { current: "page" })).toHaveAttribute(
+      "href",
+      `/messages/encrypted/${currentG}`
+    );
+  });
+
   it("shows an empty state with a way to start a chat", () => {
     render(
       <E2eeTestProvider value={contextFor(createFakeE2eeEngine())}>
