@@ -23,6 +23,7 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
+import { ConversationCreator } from "./conversation-creation";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
@@ -39,7 +40,6 @@ import { E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
-  createConversation,
   findDm,
   leave,
   removeMember,
@@ -71,6 +71,7 @@ const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
+  private readonly conversationCreator: ConversationCreator;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -79,6 +80,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
       onOwnRevoked: () => this.onOwnRejected(),
       afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
     });
+    this.conversationCreator = new ConversationCreator(
+      ctx,
+      () => this.controller.syncAll(),
+      () => this.requireReady(),
+      this.onDelayed
+    );
   }
 
   async init(): Promise<void> {
@@ -429,16 +436,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return checkEligibility(this.ctx, profileIds);
   };
 
-  async createConversation(input: {
-    profileIds: string[];
-    kind: "dm" | "group";
-    name?: string | null;
-  }): Promise<string> {
-    this.requireReady();
-    const g = await createConversation(this.ctx, input, this.onDelayed);
-    await resolveProfiles(this.ctx, input.profileIds);
-    return g;
-  }
+  createConversation = (
+    input: Parameters<E2eeEngineExt["createConversation"]>[0]
+  ) => this.conversationCreator.create(input);
 
   findDm = (profileId: string) => findDm(this.ctx, profileId);
 

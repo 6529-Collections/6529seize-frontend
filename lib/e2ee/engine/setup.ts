@@ -120,7 +120,10 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
     ctx.store.groups.set(record.g, runtime);
   }
   const names = new Set(
-    groups.flatMap((record) => record.members.map((m) => m.profileId))
+    groups.flatMap((record) => [
+      ...record.members.map((m) => m.profileId),
+      ...(record.metadata.kind === "dm" ? record.metadata.admins : []),
+    ])
   );
   await resolveProfiles(
     ctx,
@@ -131,6 +134,9 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
 export function memberProfileIds(ctx: EngineContext): string[] {
   const ids = new Set<string>();
   for (const runtime of ctx.store.groups.values()) {
+    if (runtime.record.metadata.kind === "dm") {
+      for (const id of runtime.record.metadata.admins) ids.add(id);
+    }
     for (const member of runtime.record.members) {
       if (member.profileId !== null) {
         ids.add(member.profileId);

@@ -93,4 +93,66 @@ describe("E2EE engine: direct messages", () => {
     expect(alice.primary.signCalls).toBe(1);
     expect(bob.primary.signCalls).toBe(1);
   });
+  it("coalesces simultaneous starts and permits a retry after failure", async () => {
+    const world = await createWorld();
+    try {
+      const alice = await addUser(world, "alice");
+      const a = alice.primary.engine;
+      await expect(
+        a.createConversation({ profileIds: ["bob"], kind: "dm" })
+      ).rejects.toThrow();
+      await addUser(world, "bob");
+      const groups = await Promise.all(
+        Array.from({ length: 3 }, () =>
+          a.createConversation({ profileIds: ["bob"], kind: "dm" })
+        )
+      );
+      expect(new Set(groups).size).toBe(1);
+      await settle(world);
+      expect(a.getConversations()).toHaveLength(1);
+      expect(
+        world.users.get("bob")?.primary.engine.getConversations()
+      ).toHaveLength(1);
+    } finally {
+      for (const device of world.devices) device.engine.dispose();
+    }
+  });
+
+  it("syncs incoming invitations before creating and retains peer identity after leaving", async () => {
+    const world = await createWorld();
+    try {
+      const alice = await addUser(world, "alice");
+      const bob = await addUser(world, "bob");
+      const a = alice.primary.engine;
+      const b = bob.primary.engine;
+      const old = await b.createConversation({
+        profileIds: ["alice"],
+        kind: "dm",
+      });
+      // Do not settle: Alice may not have processed Bob's invitation yet.
+      expect(
+        await a.createConversation({ profileIds: ["bob"], kind: "dm" })
+      ).toBe(old);
+      await settle(world);
+      await a.send(old, { text: "keep this history" });
+      await settle(world);
+      await b.leave(old);
+      await settle(world);
+      expect(a.findDm("bob")).toBeNull();
+      expect(a.getConversation(old)?.dmPeer).toMatchObject({
+        profileId: "bob",
+        handle: "bob",
+      });
+      const fresh = await a.restart(old);
+      expect(fresh).not.toBe(old);
+      await settle(world);
+      expect(a.findDm("bob")).toBe(fresh);
+      expect(b.findDm("alice")).toBe(fresh);
+      expect(texts(a.getMessages(old))).toEqual(["keep this history"]);
+      expect(texts(b.getMessages(old))).toEqual(["keep this history"]);
+      expect(a.getConversations()).toHaveLength(2);
+    } finally {
+      for (const device of world.devices) device.engine.dispose();
+    }
+  });
 });

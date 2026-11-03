@@ -355,4 +355,67 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     ]);
     expect(scan.found).toEqual([]);
   });
+  test("a restarted DM has one inbox entry and keeps earlier history reachable", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions.push(alice, bob);
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    const oldUrl = alice.page.url();
+    await sendMessage(alice.page, "An earlier encrypted message");
+    await openConversationFromList(bob.page, "alice");
+    await expectMessage(bob.page, "An earlier encrypted message");
+    await alice.page
+      .getByRole("button", { name: "Chat info", exact: true })
+      .click();
+    await alice.page
+      .getByRole("dialog", { name: "Chat info", exact: true })
+      .getByRole("button", { name: "Leave chat", exact: true })
+      .click();
+    await alice.page
+      .getByRole("dialog", { name: "Leave this chat?", exact: true })
+      .getByRole("button", { name: "Leave chat", exact: true })
+      .click();
+    const resume = alice.page.getByRole("button", {
+      name: "Continue encrypted chat",
+      exact: true,
+    });
+    await expect(resume).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await resume.click();
+    await expect(alice.page).not.toHaveURL(oldUrl, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    const freshUrl = alice.page.url();
+    await sendMessage(alice.page, "A fresh encrypted message");
+    await gotoPath(alice.page, ENCRYPTED_ROUTE);
+    const row = conversationListRow(alice.page, "bob");
+    await expect(row).toHaveCount(1);
+    await row.click();
+    await expect(alice.page).toHaveURL(freshUrl);
+    const history = alice.page.getByRole("combobox", {
+      name: "Chat history",
+      exact: true,
+    });
+    await expect(history.getByRole("option")).toHaveCount(2);
+    const oldGroup = new URL(oldUrl).pathname.split("/").at(-1)!;
+    await history.selectOption(oldGroup);
+    await expect(alice.page).toHaveURL(oldUrl);
+    await expectMessage(alice.page, "An earlier encrypted message");
+    await expect(composer(alice.page)).toHaveCount(0);
+    await alice.page
+      .getByRole("link", { name: "Open current chat", exact: true })
+      .click();
+    await expectMessage(alice.page, "A fresh encrypted message");
+    await expect(composer(alice.page)).toBeEnabled();
+    expect(
+      await alice.page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth
+      )
+    ).toBe(true);
+  });
 });
