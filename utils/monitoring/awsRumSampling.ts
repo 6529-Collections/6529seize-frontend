@@ -35,7 +35,7 @@ const readAwsRumSessionCookieDecision = (): boolean | undefined => {
 
 const readStoredDecision = (): boolean | undefined => {
   try {
-    const stored = globalThis.sessionStorage?.getItem(
+    const stored = globalThis.sessionStorage.getItem(
       AWS_RUM_SAMPLING_STORAGE_KEY
     );
     if (stored === "1") return true;
@@ -48,7 +48,7 @@ const readStoredDecision = (): boolean | undefined => {
 
 const storeDecision = (sampled: boolean): void => {
   try {
-    globalThis.sessionStorage?.setItem(
+    globalThis.sessionStorage.setItem(
       AWS_RUM_SAMPLING_STORAGE_KEY,
       sampled ? "1" : "0"
     );
