@@ -2439,7 +2439,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
+      await page.mouse.move(0, 0);
       const createStyle = await page
         .getByRole("button", { name: "Open create menu", exact: true })
         .evaluate((button) => {
@@ -2458,7 +2459,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             ].map((property) => [property, style.getPropertyValue(property)])
           );
         });
-      for (const name of ["Select all", "Reset votes"]) {
+      await selectAll.click();
+      // Compare resting styles, not the hover state left by the selection click.
+      await page.mouse.move(0, 0);
+      for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
         for (const [property, value] of Object.entries(createStyle)) {
           await expect(
@@ -2470,7 +2474,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
         );
       }
-      await selectAll.click();
       await expect(
         panel.getByRole("button", { name: "Deselect all", exact: true })
       ).toBeVisible();
@@ -2493,7 +2496,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await panel
         .getByRole("button", { name: "Deselect all", exact: true })
         .click();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("my-votes-full-width.png"),
@@ -2530,6 +2533,440 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(sandbox.requests).toHaveLength(0);
     });
   }
+
+  test("sorts complete My Votes pages, recovers errors and ignores a late previous order", async ({
+    page,
+  }, testInfo) => {
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|did not match|maximum update depth|too many re-renders/i.test(
+          message.text()
+        )
+      )
+        runtimeErrors.push(message.text());
+    });
+    const sandbox = await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 53 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `sorted-vote-${index}`,
+      drop_type: "SUBMISSION",
+      title: `Sorted artwork ${index}`,
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const orders: Record<string, typeof artworks> = {
+      vote_amount: artworks,
+      leaderboard: [artworks[52]!, ...artworks.slice(0, 52)],
+      last_voted: [...artworks].reverse(),
+    };
+    const values = new Map(
+      artworks.map((drop, index) => [drop.id, 53 - index])
+    );
+    const mutations: number[] = [];
+    let releaseVote: (() => void) | undefined;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/credits/me**",
+      (route) => {
+        const entryId = new URL(route.request().url()).searchParams.get(
+          "entry_id"
+        );
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: drop ? values.get(drop.id) : 0,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/entries/*/votes/me",
+      async (route) => {
+        const entryId = new URL(route.request().url()).pathname
+          .split("/")
+          .at(-3);
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        )!;
+        const { value } = route.request().postDataJSON() as { value: number };
+        if (value !== 0)
+          await new Promise<void>((resolve) => {
+            releaseVote = resolve;
+          });
+        mutations.push(value);
+        values.set(drop.id, value);
+        orders["last_voted"] = [
+          drop,
+          ...orders["last_voted"]!.filter((item) => item !== drop),
+        ];
+        orders["vote_amount"] = [...artworks].sort(
+          (a, b) => values.get(b.id)! - values.get(a.id)!
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: value,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    const reads: { sort: string; cursor: string | null }[] = [];
+    let holdRanking = true;
+    let releaseRanking: (() => void) | undefined;
+    let failRecent = true;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      async (route) => {
+        const url = new URL(route.request().url());
+        const sort = url.searchParams.get("sort") ?? "vote_amount";
+        const cursor = url.searchParams.get("cursor");
+        reads.push({ sort, cursor });
+        if (cursor && !cursor.startsWith(`${sort}:`)) {
+          return route.fulfill({
+            status: 400,
+            json: { message: "Wrong sort cursor" },
+          });
+        }
+        if (sort === "leaderboard" && holdRanking) {
+          holdRanking = false;
+          await new Promise<void>((resolve) => {
+            releaseRanking = resolve;
+          });
+        }
+        if (sort === "last_voted" && failRecent) {
+          failRecent = false;
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary failure" },
+          });
+        }
+        const start = cursor ? Number(cursor.split(":")[1]) : 0;
+        const end = start + 50;
+        const ordered = orders[sort]!.filter(
+          (drop) => values.get(drop.id) !== 0
+        );
+        const items = ordered.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: values.get(drop.id),
+              credit_spent: Math.abs(values.get(drop.id)!),
+              entry_status: "ACTIVE",
+            })),
+            cards: items.map((drop) => ({
+              ...resources.card(drop),
+              vote_summary: {
+                ...resources.card(drop).vote_summary,
+                user_vote: values.get(drop.id),
+                rank: orders["leaderboard"]!.indexOf(drop) + 1,
+              },
+            })),
+            has_more: end < ordered.length,
+            next_cursor: end < ordered.length ? `${sort}:${end}` : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const sort = panel.getByRole("button", { name: /^Sort by:/ });
+    const sortLabels: Record<string, string> = {
+      vote_amount: "Your vote amount",
+      leaderboard: "Leaderboard position",
+      last_voted: "Last voted",
+    };
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const sortOptions = isMobile
+      ? page.getByRole("dialog", { name: "Sort by", exact: true })
+      : page.getByRole("menu");
+    const selectSort = async (order: string) => {
+      await sort.click();
+      await sortOptions
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: sortLabels[order]!,
+          exact: true,
+        })
+        .click();
+      await expect(sortOptions).toHaveCount(0);
+    };
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    const readsBeforeSameSort = reads.length;
+    for (let repeat = 0; repeat < 8; repeat++) await selectSort("vote_amount");
+    expect(reads).toHaveLength(readsBeforeSameSort);
+    const selectAll = panel.getByRole("button", {
+      name: "Select all",
+      exact: true,
+    });
+    const reset = panel.getByRole("button", { name: /^Reset / });
+    await expect(reset).toHaveCount(0);
+    const sortBeforeSelection = (await sort.boundingBox())!;
+    const selectBeforeSelection = (await selectAll.boundingBox())!;
+    const firstCheckbox = panel
+      .getByRole("article")
+      .first()
+      .getByRole("checkbox");
+    await firstCheckbox.check();
+    await expect(reset).toBeEnabled();
+    const selectedCount = panel
+      .getByRole("status")
+      .filter({ hasText: "1 selected" });
+    await expect(selectedCount).toHaveText("1 selected");
+    const resetBounds = (await reset.boundingBox())!;
+    const countBounds = (await selectedCount.boundingBox())!;
+    expect(
+      Math.abs(
+        resetBounds.y +
+          resetBounds.height / 2 -
+          countBounds.y -
+          countBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
+    expect((await sort.boundingBox())!.x).toBe(sortBeforeSelection.x);
+    expect((await sort.boundingBox())!.y).toBe(sortBeforeSelection.y);
+    expect((await selectAll.boundingBox())!.x).toBe(selectBeforeSelection.x);
+    expect((await selectAll.boundingBox())!.y).toBe(selectBeforeSelection.y);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-selected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const controls = await Promise.all([
+        sort.boundingBox(),
+        selectAll.boundingBox(),
+        reset.boundingBox(),
+      ]);
+      expect(
+        controls.every(
+          (box) => box !== null && Math.abs(box.y - controls[0]!.y) < 1
+        )
+      ).toBe(true);
+      expect(controls[0]!.height).toBe(32);
+      await sort.click();
+      const amountOption = sortOptions.getByRole("menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      await amountOption.hover();
+      await expect(amountOption).toHaveCSS("font-size", "14px");
+      await expect(amountOption).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-menu.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await page.keyboard.press("Home");
+      await expect(amountOption).toHaveCSS("box-shadow", /2px/);
+      await page.keyboard.press("Escape");
+      await expect(sortOptions).toHaveCount(0);
+    }
+    await firstCheckbox.uncheck();
+    await expect(reset).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-unselected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    await sort.focus();
+    await sort.press(isMobile ? "Enter" : "ArrowDown");
+    await expect(
+      sortOptions.getByRole(isMobile ? "button" : "menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      })
+    ).toBeVisible();
+    if (isMobile) {
+      await expect(page.getByRole("menu")).toHaveCount(0);
+      const option = sortOptions.getByRole("button", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+    }
+    await page.keyboard.press("Escape");
+    await expect(sortOptions).toHaveCount(0);
+    await expect(sort).toBeFocused();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 0"
+    );
+    if (isMobile) {
+      await selectSort("leaderboard");
+    } else {
+      await sort.focus();
+      await expect(sort).toBeFocused();
+      await sort.press("ArrowDown");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Enter");
+    }
+    await expect.poll(() => releaseRanking !== undefined).toBe(true);
+    await expect(sort).toBeEnabled();
+    await selectSort("last_voted");
+    await expect(panel.getByRole("alert")).toBeVisible();
+    await panel.getByRole("button", { name: "Try again", exact: true }).click();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    releaseRanking?.();
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    for (const order of ["last_voted", "leaderboard", "vote_amount"]) {
+      await selectSort(order);
+      await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+        orders[order]![0]!.title
+      );
+      const more = panel.getByRole("button", {
+        name: "Load more",
+        exact: true,
+      });
+      if (await more.isVisible()) await more.scrollIntoViewIfNeeded();
+      await expect(panel.getByRole("article")).toHaveCount(53);
+      await expect(panel.getByRole("heading", { level: 3 })).toHaveText(
+        orders[order]!.map((drop) => drop.title)
+      );
+      expect(reads).toContainEqual({ sort: order, cursor: `${order}:50` });
+    }
+    await sort.scrollIntoViewIfNeeded();
+    await selectSort("leaderboard");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-sorting.png"),
+    });
+    await page.getByRole("tab", { name: "All votes", exact: true }).click();
+    await page.getByRole("tab", { name: "My Votes", exact: true }).click();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await page.reload();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    expect(sandbox.requests).toHaveLength(0);
+    expect(mutations).toHaveLength(0);
+    await selectSort("last_voted");
+    const newest = panel.getByRole("article", {
+      name: "Sorted artwork 52",
+      exact: true,
+    });
+    const edited = panel.getByRole("article", {
+      name: "Sorted artwork 51",
+      exact: true,
+    });
+    await newest.getByRole("spinbutton", { name: "Your vote" }).fill("4");
+    await edited.getByRole("spinbutton", { name: "Your vote" }).fill("99");
+    await edited
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect.poll(() => releaseVote !== undefined).toBe(true);
+    await expect(sort).toBeDisabled();
+    releaseVote?.();
+    await expect(sort).toBeEnabled();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(
+      newest.getByRole("spinbutton", { name: "Your vote" })
+    ).toHaveValue("4");
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    await edited.getByRole("checkbox").check();
+    await selectSort("vote_amount");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(panel.getByRole("button", { name: /^Reset / })).toHaveCount(0);
+    await edited.getByRole("checkbox").check();
+    await panel
+      .getByRole("button", { name: "Reset 1 vote", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Reset vote", exact: true })
+      .click();
+    await expect(edited).toHaveCount(0);
+    await expect(reset).toHaveCount(0);
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    expect(mutations).toEqual([99, 0]);
+    if ((page.viewportSize()?.width ?? 0) < 1024) {
+      await page.setViewportSize({ width: 320, height: 800 });
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "languages", {
+          configurable: true,
+          value: ["es-ES"],
+        });
+        globalThis.dispatchEvent(new Event("languagechange"));
+      });
+      const translatedSort = page.getByRole("button", {
+        name: /^Ordenar por:/,
+      });
+      await translatedSort.click();
+      const translatedSheet = page.getByRole("dialog", {
+        name: "Ordenar por",
+        exact: true,
+      });
+      await expect(
+        translatedSheet.getByRole("heading", { name: "Ordenar por" })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet-narrow-es.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await translatedSheet
+        .getByRole("button", {
+          name: "Posición en la clasificación",
+          exact: true,
+        })
+        .click();
+      await expect(translatedSheet).toHaveCount(0);
+      await expect(translatedSort).toHaveAccessibleName(
+        "Ordenar por: Posición en la clasificación"
+      );
+      expect(
+        (await translatedSort.boundingBox())!.height
+      ).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sorting-narrow-es.png"),
+      });
+    }
+    expect(runtimeErrors).toEqual([]);
+  });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
     page,
