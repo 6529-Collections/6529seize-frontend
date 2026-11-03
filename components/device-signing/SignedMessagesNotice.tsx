@@ -63,10 +63,12 @@ function getNoticeCopy(
 interface SignedMessagesNoticeProps {
   /** Enable and renewal prompts only show while the composer is empty. */
   readonly composerEmpty: boolean;
+  readonly hideRenewal?: boolean;
 }
 
 function SignedMessagesNoticeContent({
   composerEmpty,
+  hideRenewal,
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
   const titleId = useId();
@@ -82,7 +84,7 @@ function SignedMessagesNoticeContent({
     isRevoking,
   } = useSignedMessagesNotice({ composerEmpty });
 
-  if (!model) {
+  if (!model || (hideRenewal && model.kind === "renew")) {
     return null;
   }
   const isAlert = model.kind === "new-device";

@@ -1,4 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
@@ -8,6 +9,7 @@ import {
   contextFor,
   conversation,
   createFakeE2eeEngine,
+  device,
   DM_G,
   E2eeTestProvider,
   GROUP_G,
@@ -16,10 +18,19 @@ import {
   SELF_ID,
 } from "./fakeE2eeEngine";
 
+const mockSecurityState = jest.fn();
+const mockSearch = jest.fn(() => new URLSearchParams());
+jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
+  useDeviceSecurityState: () => mockSecurityState(),
+}));
+jest.mock("@/hooks/device-signing/useEnableSignedMessages", () => ({
+  useEnableSignedMessages: () => ({ canEnable: false, isEnabling: false }),
+}));
+
 const mockPathname = jest.fn(() => "/messages");
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearch(),
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -46,7 +57,66 @@ const conversations = [
 describe("encrypted conversation list", () => {
   beforeEach(() => {
     globalThis.localStorage.clear();
+    mockSecurityState.mockReturnValue({
+      proofGrant: null,
+      proofRenewal: null,
+      encryptionRenewal: null,
+    });
+    mockSearch.mockReturnValue(new URLSearchParams());
     mockPathname.mockReturnValue("/messages/encrypted");
+  });
+
+  it("shares a combined renewal dismissal between Waves and Messages", () => {
+    const expiresAt = Date.UTC(2026, 10, 10);
+    const thisDevice = device({
+      deviceKey: "combined-device",
+      authorProofGrantId: "combined-grant",
+      expiresAt,
+    });
+    mockSecurityState.mockReturnValue({
+      proofGrant: { id: "combined-grant", expires_at: expiresAt },
+      proofRenewal: 1000,
+      encryptionRenewal: 1000,
+    });
+    const context = contextFor(createFakeE2eeEngine({ thisDevice }));
+    const banner = (
+      <E2eeTestProvider value={context}>
+        <E2eeRenewalBanner />
+      </E2eeTestProvider>
+    );
+    const { rerender } = render(banner);
+    expect(
+      screen.getByRole("button", { name: "Renew author proof" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Renew encryption" })
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Dismiss renewal reminder" })
+    );
+    mockPathname.mockReturnValue("/waves/example");
+    rerender(
+      <E2eeTestProvider value={context}>
+        <E2eeRenewalBanner />
+      </E2eeTestProvider>
+    );
+    expect(
+      screen.queryByRole("button", { name: "Renew author proof" })
+    ).toBeNull();
+  });
+
+  it("previews renewal only on Waves and Messages without enabling signing", () => {
+    mockSearch.mockReturnValue(new URLSearchParams("showRenewal=true"));
+    mockPathname.mockReturnValue("/preferences");
+    const { rerender } = render(<E2eeRenewalBanner />);
+    expect(
+      screen.queryByRole("button", { name: "Renew encryption" })
+    ).toBeNull();
+    mockPathname.mockReturnValue("/messages/example");
+    rerender(<E2eeRenewalBanner />);
+    expect(
+      screen.getByRole("button", { name: "Renew encryption" })
+    ).toBeDisabled();
   });
 
   it("lists chats with previews, unread counts and status", () => {

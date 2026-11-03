@@ -53,6 +53,19 @@ function encryptionState(status: E2eeUiStatus): EncryptionState {
   }
 }
 
+function getProofStatus(
+  address: string | null,
+  loaded: boolean,
+  failed: boolean,
+  status: ReturnType<typeof getDeviceGrantStatus>
+): "unavailable" | "checking" | "unknown" | "on" | "off" | "expired" {
+  if (address === null) return "unavailable";
+  if (!loaded) return "checking";
+  if (failed) return "unknown";
+  if (status === "none") return "off";
+  return status === "expired" ? "expired" : "on";
+}
+
 export function useDeviceSecurityState() {
   const address = useSignedMessagesAccount();
   const local = useLocalDeviceKeys(address);
@@ -64,19 +77,17 @@ export function useDeviceSecurityState() {
   const matchesLocalKey =
     grant?.wallet.toLowerCase() === address &&
     local.publicKeys.includes(grant.device_key.toLowerCase());
-  const grantStatus = getDeviceGrantStatus(matchesLocalKey ? grant : null, now);
-  let proof: "expired" | "on" | "off" | "checking" | "unknown" | "unavailable" =
-    "off";
-  if (address === null) proof = "unavailable";
-  else if (!local.loaded || now === 0 || remote.isPending) proof = "checking";
-  else if (remote.isError) proof = "unknown";
-  else if (grantStatus === "active" || grantStatus === "renewal") proof = "on";
-  else if (grantStatus === "expired") proof = "expired";
+  const verifiedGrant = matchesLocalKey ? grant : null;
+  const grantStatus = getDeviceGrantStatus(verifiedGrant, now);
+  const proof = getProofStatus(
+    address,
+    local.loaded && now > 0 && !remote.isPending,
+    remote.isError,
+    grantStatus
+  );
   const encryptionDevice = encryption.thisDevice;
   const encryptionExpiry =
-    encryptionDevice && encryptionDevice.revokedAt === null
-      ? encryptionDevice.expiresAt
-      : null;
+    encryptionDevice?.revokedAt === null ? encryptionDevice.expiresAt : null;
   const encryptionExpired =
     now > 0 && encryptionExpiry !== null && encryptionExpiry <= now;
   const encrypted = encryptionExpired
@@ -103,6 +114,7 @@ export function useDeviceSecurityState() {
     canEnableEncryption,
     proofRenewal,
     encryptionRenewal,
+    proofGrant: verifiedGrant,
   };
 }
 
@@ -111,7 +123,12 @@ export function DeviceSecurityDetails({
   encrypted,
   proofRenewal,
   encryptionRenewal,
-}: Omit<ReturnType<typeof useDeviceSecurityState>, "canEnableEncryption">) {
+}: Readonly<
+  Omit<
+    ReturnType<typeof useDeviceSecurityState>,
+    "canEnableEncryption" | "proofGrant"
+  >
+>) {
   const locale = useBrowserLocale();
   const formatStatus = (status: typeof proof | typeof encrypted) => {
     const label = t(locale, `e2ee.deviceStatus.${status}`);

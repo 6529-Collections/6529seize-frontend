@@ -430,6 +430,7 @@ function toDeviceInfo(
     revokedAt: record.revoked_at,
     linkedAuthorProof:
       record.grant_message !== null && record.grant_message !== undefined,
+    ...(record.grant_message ? { authorProofGrantId: record.grant_id } : {}),
     isThisDevice: own,
     verified,
   };

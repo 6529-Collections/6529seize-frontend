@@ -20,7 +20,7 @@ const BrainMobileMessages: React.FC = () => {
       style={mobileWavesViewStyle}
     >
       {/* Encrypted chats (D109); renders nothing when the flag is off. */}
-      <E2eeRenewalBanner inboxReminder />
+      <E2eeRenewalBanner />
       <E2eeMessagesSection variant="app" />
       <DirectMessagesList scrollContainerRef={scrollContainerRef} />
     </div>

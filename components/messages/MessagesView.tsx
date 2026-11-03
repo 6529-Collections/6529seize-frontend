@@ -57,7 +57,7 @@ const MessagesView: React.FC = () => {
     <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
       {showPlaceholder ? (
         <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col">
-          <E2eeRenewalBanner inboxReminder className="tw-mx-3 tw-mt-2" />
+          <E2eeRenewalBanner className="tw-mx-3 tw-mt-2" />
           <div className="tw-min-h-0 tw-flex-1">{content}</div>
         </div>
       ) : (

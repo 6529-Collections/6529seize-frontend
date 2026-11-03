@@ -116,7 +116,11 @@ export const E2EE_MESSAGES = {
   "e2ee.renew.inboxButton": "Renew encryption",
   "e2ee.renew.inboxCombined":
     "Author proof and encrypted DMs expire on {date}.",
-  "e2ee.renew.dismiss": "Dismiss encryption renewal reminder",
+  "e2ee.renew.dismiss": "Dismiss renewal reminder",
+  "e2ee.renew.proofBody": "Author proof expires on {date}.",
+  "e2ee.renew.proofButton": "Renew author proof",
+  "e2ee.renew.preview":
+    "Preview of the author proof and encryption renewal reminder.",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
