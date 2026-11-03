@@ -1,4 +1,4 @@
-import { asE2eeApiError } from "../api";
+import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDevice, ApiE2eeSubmitEntryRequest } from "../api-types";
 import { credentialIdentity } from "../grant";
 import type { PendingCommitRecord } from "../records";

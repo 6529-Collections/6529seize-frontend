@@ -188,13 +188,16 @@ export async function downloadMedia(input: {
   api: E2eeApiClient;
   deviceKey: string;
   attachment: PayloadAttachment;
+  signal?: AbortSignal;
 }): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
   for (let index = 0; index < input.attachment.chunks; index += 1) {
+    input.signal?.throwIfAborted();
     const chunk = await input.api.getBlobChunk(
       input.attachment.blob,
       index,
-      input.deviceKey
+      input.deviceKey,
+      input.signal
     );
     chunks.push(base64ToBytes(chunk.data));
   }

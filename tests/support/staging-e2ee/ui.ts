@@ -168,11 +168,13 @@ export async function expectNothingUndecryptable(session: StagingE2eeSession) {
   ).toHaveCount(0);
 }
 
-export async function openChat(session: StagingE2eeSession, group: string) {
+export async function openChat(
+  session: StagingE2eeSession,
+  group: string,
+  timeout = SYNC_TIMEOUT_MS
+) {
   await gotoStaging(session.page, `${ENCRYPTED_ROUTE}/${group}`);
-  await expect(composer(session.page)).toBeVisible({
-    timeout: SYNC_TIMEOUT_MS,
-  });
+  await expect(composer(session.page)).toBeVisible({ timeout });
 }
 
 /**
