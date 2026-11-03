@@ -22,6 +22,7 @@ export const NOTIFICATIONS_INBOX_MESSAGES = {
   "notifications.inbox.vote": "{actor} voted on your drop",
   "notifications.inbox.poll": "{actor} voted in your poll",
   "notifications.inbox.react": "{actor} reacted to your drop",
+  "notifications.inbox.reactions": "New reactions to your drop",
   "notifications.inbox.boost": "{actor} boosted your drop",
   "notifications.inbox.rep": "{actor} updated your REP by {amount}",
   "notifications.inbox.nic": "{actor} updated your NIC by {amount}",
