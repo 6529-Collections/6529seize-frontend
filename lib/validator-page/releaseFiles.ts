@@ -7,120 +7,159 @@ export type ValidatorInstallerKind =
   | "deb-arm64"
   | "appimage";
 
-export type ValidatorInstaller = {
+/** What the page says about one file: the same words in every list. */
+type FileFacts = {
+  /** "Mac", "Windows", "Linux" or "Any". */
+  readonly system: string;
+  /** "Apple silicon or Intel", "x86-64", "ARM64", or "" for any. */
+  readonly cpu: string;
+  /** What kind of file it is: "App (.dmg)", "Terminal archive". */
+  readonly what: string;
+  /** Who signed it, or null when nobody did. */
+  readonly signedBy: string | null;
+};
+
+export type ValidatorInstaller = FileFacts & {
   readonly kind: ValidatorInstallerKind;
   readonly title: string;
-  /** The machines it is for. */
-  readonly forMachines: string;
-  /** How the file is signed, or that it is not. */
-  readonly signing: string;
+  /** One short line: the systems and CPUs it is for. */
+  readonly summary: string;
   readonly file: ValidatorReleaseFile;
 };
 
-type ValidatorArchive = {
+export type ValidatorFileEntry = FileFacts & {
   readonly title: string;
-  readonly signing: string | null;
   readonly file: ValidatorReleaseFile;
 };
 
 type ValidatorReleaseDownloads = {
   readonly installers: readonly ValidatorInstaller[];
-  readonly archives: readonly ValidatorArchive[];
+  readonly archives: readonly ValidatorFileEntry[];
   readonly checksums: ValidatorReleaseFile | null;
   readonly releaseJson: ValidatorReleaseFile | null;
 };
 
-const MAC_SIGNING = "Signed by 6529 Collection LLC and notarized by Apple.";
-const WINDOWS_SIGNING =
-  "Authenticode signature. Publisher: 6529 Collection LLC.";
-const LINUX_SIGNING = "Not signed. The SHA-256 is the check.";
+const MAC_SIGNED = "6529 Collection LLC, notarized by Apple";
+const WINDOWS_SIGNED = "6529 Collection LLC";
+const DEB = ".deb package";
+const TERMINAL_ARCHIVE = "Terminal archive";
+const WINDOWS_SUMMARY = "Windows 10 or 11 · 64-bit";
 
-const INSTALLERS: readonly {
-  readonly kind: ValidatorInstallerKind;
+const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
   readonly pattern: RegExp;
-  readonly title: string;
-  readonly forMachines: string;
-  readonly signing: string;
-}[] = [
+})[] = [
   {
     kind: "macos",
     pattern: /\.dmg$/,
-    title: "macOS",
-    forMachines: "Mac with Apple silicon or Intel, macOS 11 or later.",
-    signing: MAC_SIGNING,
+    title: "Mac",
+    summary: "macOS 11 or newer · Apple silicon or Intel",
+    system: "Mac",
+    cpu: "Apple silicon or Intel",
+    what: "App (.dmg)",
+    signedBy: MAC_SIGNED,
   },
   {
     kind: "windows",
     pattern: /-Setup-.+-x64\.exe$/,
     title: "Windows",
-    forMachines: "Windows 10 or 11, 64-bit.",
-    signing: WINDOWS_SIGNING,
+    summary: WINDOWS_SUMMARY,
+    system: "Windows",
+    cpu: "x86-64",
+    what: "Installer (Setup.exe)",
+    signedBy: WINDOWS_SIGNED,
   },
   {
     kind: "deb-x64",
     pattern: /_amd64\.deb$/,
-    title: "Linux .deb, x64",
-    forMachines: "Ubuntu 22.04 or later, Debian 12 or later, on Intel or AMD.",
-    signing: LINUX_SIGNING,
+    title: "Linux, x86-64",
+    summary: "Ubuntu 22.04, Debian 12 or newer · Intel or AMD",
+    system: "Linux",
+    cpu: "x86-64",
+    what: DEB,
+    signedBy: null,
   },
   {
     kind: "deb-arm64",
     pattern: /_arm64\.deb$/,
-    title: "Linux .deb, ARM64",
-    forMachines:
-      "Raspberry Pi 4 or 5 with a 64-bit OS, and other ARM64 machines on Ubuntu 22.04 or Debian 12 or later.",
-    signing: LINUX_SIGNING,
+    title: "Linux, ARM64",
+    summary: "Raspberry Pi 4 or 5, other ARM64 · 64-bit OS",
+    system: "Linux",
+    cpu: "ARM64",
+    what: DEB,
+    signedBy: null,
   },
   {
     kind: "appimage",
     pattern: /-x86_64\.AppImage$/,
-    title: "AppImage",
-    forMachines: "Other 64-bit Linux desktops. It runs only while it is open.",
-    signing: LINUX_SIGNING,
+    title: "Linux AppImage, x86-64",
+    summary: "Other Linux desktops · runs only while open",
+    system: "Linux",
+    cpu: "x86-64",
+    what: "AppImage",
+    signedBy: null,
   },
 ];
 
-// Setup.exe holds this installer. It goes under "Other downloads", or takes
+// Setup.exe holds this installer. It goes with the other files, or takes
 // the Windows button in a release without a Setup.exe.
 const WINDOWS_MSI_PATTERN = /-x64\.msi$/;
-const WINDOWS_MSI_TITLE = "Windows, .msi installer";
-const WINDOWS_MSI_SIGNING = `The installer inside Setup.exe, on its own. ${WINDOWS_SIGNING}`;
+const WINDOWS_MSI: FileFacts & { readonly title: string } = {
+  title: "Windows .msi, x86-64",
+  system: "Windows",
+  cpu: "x86-64",
+  what: "Installer (.msi), the one inside Setup.exe",
+  signedBy: WINDOWS_SIGNED,
+};
 
-const ARCHIVE_TARGETS: readonly {
+const ARCHIVE_TARGETS: readonly (FileFacts & {
   readonly target: string;
   readonly title: string;
-  readonly signing: string | null;
-}[] = [
+})[] = [
   {
     target: "aarch64-apple-darwin",
-    title: "macOS, Apple silicon",
-    signing: "The program is signed by 6529 Collection LLC and notarized.",
+    title: "Mac archive, Apple silicon",
+    system: "Mac",
+    cpu: "Apple silicon",
+    what: TERMINAL_ARCHIVE,
+    signedBy: MAC_SIGNED,
   },
   {
     target: "x86_64-apple-darwin",
-    title: "macOS, Intel",
-    signing: "The program is signed by 6529 Collection LLC and notarized.",
+    title: "Mac archive, Intel",
+    system: "Mac",
+    cpu: "Intel",
+    what: TERMINAL_ARCHIVE,
+    signedBy: MAC_SIGNED,
   },
   {
     target: "x86_64-pc-windows-msvc",
-    title: "Windows, x64",
-    signing: "validator.exe carries an Authenticode signature.",
+    title: "Windows archive, x86-64",
+    system: "Windows",
+    cpu: "x86-64",
+    what: TERMINAL_ARCHIVE,
+    signedBy: WINDOWS_SIGNED,
   },
   {
     target: "x86_64-unknown-linux-gnu",
-    title: "Linux, x64",
-    signing: null,
+    title: "Linux archive, x86-64",
+    system: "Linux",
+    cpu: "x86-64",
+    what: TERMINAL_ARCHIVE,
+    signedBy: null,
   },
   {
     target: "aarch64-unknown-linux-gnu",
-    title: "Linux, ARM64",
-    signing: null,
+    title: "Linux archive, ARM64",
+    system: "Linux",
+    cpu: "ARM64",
+    what: TERMINAL_ARCHIVE,
+    signedBy: null,
   },
 ];
 
-function describeArchive(file: ValidatorReleaseFile): ValidatorArchive {
+function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
   if (WINDOWS_MSI_PATTERN.test(file.name)) {
-    return { title: WINDOWS_MSI_TITLE, signing: WINDOWS_MSI_SIGNING, file };
+    return { ...WINDOWS_MSI, file };
   }
   const known = ARCHIVE_TARGETS.find(
     (entry) =>
@@ -128,23 +167,36 @@ function describeArchive(file: ValidatorReleaseFile): ValidatorArchive {
       (file.name.endsWith(`-${entry.target}.tar.gz`) ||
         file.name.endsWith(`-${entry.target}.zip`))
   );
+  if (!known) {
+    return {
+      title: file.name,
+      system: "Any",
+      cpu: "",
+      what: "Other file",
+      signedBy: null,
+      file,
+    };
+  }
   return {
-    title: known?.title ?? file.name,
-    signing: known?.signing ?? null,
+    title: known.title,
+    system: known.system,
+    cpu: known.cpu,
+    what: known.what,
+    signedBy: known.signedBy,
     file,
   };
 }
 
 /**
  * Sorts a release's files into the page's buttons by their names, which stay
- * the same from release to release. Files the page does not know go under
- * "Other downloads".
+ * the same from release to release. Files the page does not know go with the
+ * archives.
  */
 export function groupReleaseFiles(
   release: ValidatorRelease
 ): ValidatorReleaseDownloads {
   const installers: ValidatorInstaller[] = [];
-  const archives: ValidatorArchive[] = [];
+  const archives: ValidatorFileEntry[] = [];
   let checksums: ValidatorReleaseFile | null = null;
   let releaseJson: ValidatorReleaseFile | null = null;
 
@@ -162,8 +214,11 @@ export function groupReleaseFiles(
       installers.push({
         kind: installer.kind,
         title: installer.title,
-        forMachines: installer.forMachines,
-        signing: installer.signing,
+        summary: installer.summary,
+        system: installer.system,
+        cpu: installer.cpu,
+        what: installer.what,
+        signedBy: installer.signedBy,
         file,
       });
       continue;
@@ -172,16 +227,16 @@ export function groupReleaseFiles(
   }
 
   const msiIndex = archives.findIndex(
-    (archive) => archive.title === WINDOWS_MSI_TITLE
+    (archive) => archive.title === WINDOWS_MSI.title
   );
   const msi = archives[msiIndex];
   if (msi && !installers.some((item) => item.kind === "windows")) {
     archives.splice(msiIndex, 1);
     installers.push({
+      ...WINDOWS_MSI,
       kind: "windows",
       title: "Windows",
-      forMachines: "Windows 10 or 11, 64-bit.",
-      signing: WINDOWS_SIGNING,
+      summary: WINDOWS_SUMMARY,
       file: msi.file,
     });
   }
@@ -189,7 +244,7 @@ export function groupReleaseFiles(
   const order = INSTALLERS.map((entry) => entry.kind);
   installers.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   const archiveOrder = [
-    WINDOWS_MSI_TITLE,
+    WINDOWS_MSI.title,
     ...ARCHIVE_TARGETS.map((entry) => entry.title),
   ];
   archives.sort((a, b) => {
@@ -202,6 +257,37 @@ export function groupReleaseFiles(
     );
   });
   return { installers, archives, checksums, releaseJson };
+}
+
+/**
+ * Every file of a release for the table of all files: the installers, then
+ * the other files, then release.json. SHA256SUMS stays out; the page shows
+ * it on its own line.
+ */
+export function listReleaseFiles(
+  release: ValidatorRelease
+): readonly ValidatorFileEntry[] {
+  const { installers, archives, releaseJson } = groupReleaseFiles(release);
+  const entries: ValidatorFileEntry[] = installers.map((installer) => ({
+    title: installer.title,
+    system: installer.system,
+    cpu: installer.cpu,
+    what: installer.what,
+    signedBy: installer.signedBy,
+    file: installer.file,
+  }));
+  entries.push(...archives);
+  if (releaseJson) {
+    entries.push({
+      title: "Release record",
+      system: "Any",
+      cpu: "",
+      what: "release.json: its commit and each program's SHA-256",
+      signedBy: null,
+      file: releaseJson,
+    });
+  }
+  return entries;
 }
 
 /** The site path that hands out one file of one release. */

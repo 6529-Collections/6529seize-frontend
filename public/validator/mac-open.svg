@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="desk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#232b3b"/>
+      <stop offset="1" stop-color="#121722"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" rx="14" fill="url(#desk)"/>
+  <rect x="70" y="18" width="260" height="206" rx="12" fill="#000" opacity="0.35" transform="translate(0 4)"/>
+  <rect x="70" y="16" width="260" height="206" rx="12" fill="#2b2b2d" stroke="#ffffff" stroke-opacity="0.16"/>
+  <rect x="178" y="30" width="44" height="44" rx="10" fill="#000" stroke="#ffffff" stroke-opacity="0.2"/>
+  <svg x="187" y="39" width="26" height="26" viewBox="38.3 38.3 115.4 115.4"><g fill="#fff"><polygon points="38.3 99.4 85.82 99.4 85.82 106.18 38.3 106.18 38.3 112.97 92.6 112.97 92.6 92.6 45.09 92.6 45.09 85.82 146.91 85.82 146.91 92.6 99.4 92.6 99.4 112.97 153.69 112.97 153.69 106.18 106.18 106.18 106.18 99.4 153.69 99.4 153.69 79.03 38.3 79.03 38.3 99.4"/><path d="M38.3,140.12H146.91v6.79H38.3v6.79H153.7V119.76H38.3Zm6.79-13.57H146.91v6.78H45.09Z"/><path d="M153.7,45.09V38.3H38.3V72.24H153.7V51.88H45.09V45.09Zm-6.79,13.58v6.78H45.09V58.67Z"/></g></svg>
+  <g fill="#f5f5f7" font-size="12" font-weight="700" text-anchor="middle">
+    <text x="200" y="96">“6529 Validator” is an app</text>
+    <text x="200" y="111">downloaded from the Internet. Are</text>
+    <text x="200" y="126">you sure you want to open it?</text>
+  </g>
+  <rect x="112" y="140" width="176" height="5" rx="2.5" fill="#ffffff" fill-opacity="0.16"/>
+  <rect x="132" y="151" width="136" height="5" rx="2.5" fill="#ffffff" fill-opacity="0.16"/>
+  <rect x="86" y="174" width="110" height="28" rx="7" fill="#3c3c3f"/>
+  <rect x="204" y="174" width="110" height="28" rx="7" fill="#3c3c3f"/>
+  <g fill="#f5f5f7" font-size="12.5" font-weight="500" text-anchor="middle">
+    <text x="141" y="192">Cancel</text>
+    <text x="259" y="192">Open</text>
+  </g>
+  <rect x="199" y="169" width="120" height="38" rx="10" fill="none" stroke="#6aa5ff" stroke-width="2.5"/>
+</svg>
