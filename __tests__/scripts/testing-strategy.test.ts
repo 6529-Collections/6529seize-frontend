@@ -356,6 +356,12 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
+  it("builds when the first-load budget or its checker changes", () => {
+    for (const file of ["scripts/perf-budget.json", "scripts/perf-budget.cjs"]) {
+      expect(createCiPlan([file]).checks["build"]!.required).toBe(true);
+    }
+  });
+
   it("filters non-file related Jest discovery output before resolving paths", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),

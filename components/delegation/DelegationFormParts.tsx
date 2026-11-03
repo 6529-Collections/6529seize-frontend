@@ -3,9 +3,7 @@
 import Button from "@/components/utils/button/Button";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
-import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { t } from "@/i18n/messages";
@@ -25,7 +23,6 @@ import {
   notePostWriteSubmitted,
 } from "./collection-delegation/usePostWritePolling";
 import type { DelegationCollection } from "./delegation-constants";
-import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import {
   formatDelegationExpiryPreview,
   getMinDelegationExpiryDate,
@@ -33,6 +30,7 @@ import {
   getZonedDateEndEpochSeconds,
   type DelegationExpirySelection,
 } from "./delegation-expiry";
+import { getDelegationCollectionOptions } from "./delegation-options";
 import type {
   DelegationWriteParams,
   DelegationWriteSettledHandler,
@@ -189,8 +187,11 @@ function DelegationAddressInput(
   props: Readonly<{ label: string; setAddress: (address: string) => void }>
 ) {
   const { setAddress } = props;
+  // A pasted "name - 0x..." label is not trusted: an ENS name is resolved
+  // forward, and any other label leaves the address empty.
   const { inputValue, address, handleInputChange } = useEnsResolution({
     chainId: 1,
+    requireEnsResolution: true,
   });
 
   useEffect(() => {
@@ -329,14 +330,7 @@ export function DelegationFormCollectionFormGroup(
     consolidation?: boolean | undefined;
   }>
 ) {
-  const collections =
-    !props.subdelegation ||
-    areEqualAddresses(
-      props.subdelegation.collection.contract,
-      DELEGATION_ALL_ADDRESS
-    )
-      ? SUPPORTED_COLLECTIONS
-      : [props.subdelegation.collection];
+  const collections = getDelegationCollectionOptions(props.subdelegation);
 
   return (
     <DelegationFormRow>

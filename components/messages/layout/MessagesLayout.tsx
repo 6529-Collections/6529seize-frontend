@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import MessagesDesktop from "../MessagesDesktop";
-import MessagesMobile from "../MessagesMobile";
+import { createNativeOnlyBranch } from "@/components/layout/createNativeOnlyBranch";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
@@ -13,6 +13,26 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+
+function MessagesBranchLoadingFallback() {
+  const locale = useBrowserLocale();
+  return (
+    <StreamRouteLoadingShell
+      ariaLabel={t(locale, "webSidebar.account.loading")}
+      variant="messages"
+    />
+  );
+}
+
+// The mobile shell (BrainMobile) is rendered only inside the native app.
+const MessagesMobile = createNativeOnlyBranch(
+  () => import("../MessagesMobile"),
+  {
+    name: "messages shell",
+    loading: MessagesBranchLoadingFallback,
+    webBranch: MessagesDesktop,
+  }
+);
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {

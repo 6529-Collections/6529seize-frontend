@@ -16,7 +16,7 @@ import {
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
 import UpcomingMemePage from "@/components/the-memes/UpcomingMemePage";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -82,7 +82,9 @@ export default function DistributionPage(props: Readonly<Props>) {
     setFetching(true);
     const walletFilter =
       searchWallets.length === 0 ? "" : `&search=${searchWallets.join(",")}`;
-    const distributionUrl = `${publicEnv.API_ENDPOINT}/api/distributions?card_id=${nftId}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`;
+    const distributionUrl = apiUrl(
+      `/api/distributions?card_id=${String(nftId)}&contract=${props.contract}&page=${pageProps.page}${walletFilter}`
+    );
     try {
       const r = await fetchUrl<DBResponse>(distributionUrl);
       setTotalResults(r.count);
@@ -120,7 +122,9 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (nftId) {
-      const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${props.contract}/${nftId}`;
+      const distributionPhotosUrl = apiUrl(
+        `/api/distribution_photos/${props.contract}/${nftId}`
+      );
 
       const loadPhotosAndDistribution = async () => {
         try {
