@@ -42,14 +42,15 @@ const BROWSER_ALIASES = new Map(
       } as PublicEnv,
       ""
     ).turbopack?.resolveAlias ?? {}
-  ).flatMap(([specifier, target]) =>
-    typeof target === "object" &&
-    target !== null &&
-    "browser" in target &&
-    typeof target.browser === "string"
-      ? [[specifier, path.join(REPO_ROOT, target.browser)] as const]
-      : []
-  )
+  ).flatMap(([specifier, target]) => {
+    const browserTarget =
+      typeof target === "object" && !Array.isArray(target)
+        ? target["browser"]
+        : undefined;
+    return typeof browserTarget === "string"
+      ? [[specifier, path.join(REPO_ROOT, browserTarget)] as const]
+      : [];
+  })
 );
 const SOURCE_DIRS = [
   "abis",
@@ -84,12 +85,42 @@ const NAMESPACE_IMPORT =
   /(?:\bfrom\s*|\bimport\s*)["']@\/i18n\/namespaces\/([\w-]+)["']/gu;
 // Static imports and re-exports, side-effect imports, and dynamic imports.
 // Type-only imports are skipped below because they never reach a bundle.
+// Single `\s` separators keep the alternatives unambiguous, so a failed match
+// cannot backtrack across runs of whitespace.
 const MODULE_REFERENCE =
-  /\b(?:import|export)\s+(type\s+)?[^;'"`]*?\bfrom\s*["']([^"']+)["']|\bimport\s*["']([^"']+)["']|\bimport\(\s*["']([^"']+)["']\s*\)/gu;
-const USE_CLIENT = /^(?:\s|\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)*["']use client["']/u;
+  /\b(?:import|export)\s(type\s)?[^;'"`]*?\bfrom\s*["']([^"']+)["']|\bimport\s*["']([^"']+)["']|\bimport\(\s*["']([^"']+)["']\s*\)/gu;
 // `<Component messageKey="museum.title" />`: the text before a JSX prop value,
 // back to the element's opening tag.
 const JSX_PROP_OPENING = /<([A-Z]\w*)(?:\.\w+)*\s[^<]*[\w-]=\{?\s*$/u;
+
+// Whether a module starts with a "use client" directive, after whitespace and
+// comments. A single forward scan, so comment-heavy input cannot backtrack.
+function hasUseClientDirective(source: string): boolean {
+  let index = 0;
+  while (index < source.length) {
+    if (/\s/u.test(source.charAt(index))) {
+      index += 1;
+    } else if (source.startsWith("//", index)) {
+      const lineEnd = source.indexOf("\n", index + 2);
+      if (lineEnd === -1) {
+        return false;
+      }
+      index = lineEnd + 1;
+    } else if (source.startsWith("/*", index)) {
+      const commentEnd = source.indexOf("*/", index + 2);
+      if (commentEnd === -1) {
+        return false;
+      }
+      index = commentEnd + 2;
+    } else {
+      break;
+    }
+  }
+  return (
+    source.startsWith('"use client"', index) ||
+    source.startsWith("'use client'", index)
+  );
+}
 
 function loadNamespaces(): Namespace[] {
   if (!fs.existsSync(NAMESPACE_DIR)) {
@@ -170,7 +201,7 @@ function resolveModule(fromFile: string, specifier: string): string | null {
 function findBrowserModules(sources: ReadonlyMap<string, string>): Set<string> {
   const browserModules = new Set<string>();
   const pending = [...sources]
-    .filter(([, source]) => USE_CLIENT.test(source))
+    .filter(([, source]) => hasUseClientDirective(source))
     .map(([file]) => file);
   while (pending.length > 0) {
     const file = pending.pop()!;
@@ -242,6 +273,29 @@ const keyScanSources = [...sources].filter(
     !KEY_SCAN_IGNORED_DIRS.some((directory) => file.startsWith(directory))
 );
 
+describe("use client detection", () => {
+  it.each([
+    ['"use client";\nexport {};', true],
+    ["'use client'\nexport {};", true],
+    ['// header\n/* licence\n * text */\n\n"use client";', true],
+    ['﻿"use client";', true],
+    ['import x from "y";\n"use client";', false],
+    ['/* unterminated "use client";', false],
+    ['// only a comment "use client"', false],
+  ])("reads %j as %s", (source, expected) => {
+    expect(hasUseClientDirective(source)).toBe(expected);
+  });
+
+  it("scans comment-heavy input in linear time", () => {
+    const pathological = `/*${"*//*".repeat(100_000)}`;
+    const startedAt = performance.now();
+
+    expect(hasUseClientDirective(pathological)).toBe(false);
+    expect(hasUseClientDirective(`${pathological}*/"use client";`)).toBe(true);
+    expect(performance.now() - startedAt).toBeLessThan(1000);
+  });
+});
+
 describe("en-US message namespaces", () => {
   it("compose the complete dictionary with the root dictionary, without overlap", () => {
     const owners = new Map<string, string[]>();
@@ -309,7 +363,7 @@ describe("en-US message namespaces", () => {
           : null;
         if (
           elementModule &&
-          USE_CLIENT.test(sources.get(elementModule) ?? "")
+          hasUseClientDirective(sources.get(elementModule) ?? "")
         ) {
           keyProps.push(`${toRepoPath(file)}: <${element}> ${match[1]}`);
         }
