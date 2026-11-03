@@ -1,4 +1,4 @@
-import { asE2eeApiError } from "../api";
+import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";

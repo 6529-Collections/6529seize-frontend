@@ -220,6 +220,15 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
 
   test("keeps the public waves shell mountable", async ({ page }) => {
     const diagnostics = attachConsoleDiagnostics(page);
+    // A chunk named by the page (script tag or dynamic-import preload) that the
+    // server cannot serve leaves the waves branch stuck on its skeleton.
+    const missingNextAssets: string[] = [];
+    page.on("response", (response) => {
+      const { pathname } = new URL(response.url());
+      if (response.status() === 404 && pathname.startsWith("/_next/static/")) {
+        missingNextAssets.push(pathname);
+      }
+    });
 
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page, { readySelector: "#waves-content" });
@@ -250,6 +259,9 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
+    expect(missingNextAssets, "Next.js static assets that returned 404").toEqual(
+      []
+    );
     await expectRouteShellHealthy(page, diagnostics, {
       // Local feed API health gets separate coverage; keep this allowance
       // route-scoped because Chromium reports the resource 500 without a URL.

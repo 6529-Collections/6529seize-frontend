@@ -69,6 +69,12 @@
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
       // wasm-bindgen glue of the MLS module (scripts/build-mls-wasm.cjs).
       "lib/e2ee/wasm/generated/**": ["exports", "types"],
+      // Chain codec written against 6529chain's target design (Speed Demon
+      // W6 C1). No app importer yet; its focused Jest contracts, which knip
+      // excludes, are the consumers. The `decisions` data-source adapter
+      // (W6 C4) makes it reachable and removes these exemptions.
+      "lib/chain/codec/**": ["files", "exports", "types"],
+      "lib/chain/types/**": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
@@ -115,6 +121,12 @@
       // In-repo idb-keyval clone behind the bundler alias: it keeps the full
       // package API for aliased third-party consumers knip cannot see.
       "lib/storage/idb-keyval.ts": ["files", "exports"],
+      // Chain anchor source and validator certificate reader (Speed Demon
+      // W6 C3), written against 6529chain's target design. No app importer
+      // until PLAN-WAVES' v2 event anchor and a desktop validator panel use
+      // them; focused Jest contracts, which knip excludes, cover them.
+      "lib/chain/anchor/**": ["files", "exports", "types"],
+      "lib/chain/validator/**": ["files", "exports", "types"],
       "playwright.config.ts": ["exports"],
       "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],

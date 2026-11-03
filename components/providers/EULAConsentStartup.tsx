@@ -7,7 +7,7 @@ import {
 } from "@/constants/constants";
 import { Capacitor } from "@capacitor/core";
 import Cookies from "js-cookie";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 
 // Read once per document and never re-read. The value selects the provider's
 // key, so it describes how this document started, not current consent.
@@ -26,42 +26,29 @@ const getNativeIosCheckRequired = (): boolean => {
 };
 
 /**
- * Starts the native iOS EULA gate from the state the server could see.
+ * Starts the native iOS EULA gate in the browser on every route.
  *
- * Request-time pages read the native iOS and consent cookies on the server.
- * Prerendered pages cannot, so their HTML always holds the ungated tree.
- * Native startup styles keep that tree hidden; when the browser finds native
- * iOS without a current acceptance, the commit that reveals native iOS swaps in
- * a provider that starts in the blocking check instead.
+ * The server never reads the native iOS or consent cookies, so every page's
+ * HTML holds the ungated tree and can be prerendered. Native startup styles
+ * keep that tree hidden; when the browser finds native iOS without a current
+ * acceptance, the commit that reveals native iOS swaps in a provider that
+ * starts in the blocking check instead.
  */
 export default function EULAConsentStartup({
   children,
-  initialIsIos,
-  initialConsentVersion,
 }: {
   readonly children: ReactNode;
-  readonly initialIsIos: boolean;
-  readonly initialConsentVersion?: string | undefined;
 }) {
-  // Later root layout refreshes may carry new cookies; only the first render
-  // describes the HTML that hydrated.
-  const [serverStartedCheck] = useState(
-    () => initialIsIos && initialConsentVersion !== CURRENT_EULA_VERSION
-  );
   const nativeIosCheck = useSyncExternalStore(
     subscribe,
     getNativeIosCheckRequired,
     getServerSnapshot
   );
-  const startCheckInBrowser = nativeIosCheck && !serverStartedCheck;
 
   return (
     <EULAConsentProvider
-      key={startCheckInBrowser ? "native-ios-eula-check" : "eula-consent"}
-      initialIsIos={initialIsIos || startCheckInBrowser}
-      initialConsentVersion={
-        startCheckInBrowser ? undefined : initialConsentVersion
-      }
+      key={nativeIosCheck ? "native-ios-eula-check" : "eula-consent"}
+      initialIsIos={nativeIosCheck}
     >
       {children}
     </EULAConsentProvider>

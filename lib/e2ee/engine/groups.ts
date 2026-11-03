@@ -1,3 +1,4 @@
+import { cacheMessage } from "./history";
 import type {
   LeafActivity,
   StoredGroup,
@@ -18,6 +19,10 @@ export function newRuntime(record: StoredGroup): GroupRuntime {
   return {
     record,
     messages: new Map(),
+    originals: new Map(),
+    windowIds: null,
+    followingLatest: true,
+    historyLoaded: false,
     dirty: new Set(),
     deleted: new Set(),
     outbox: new Map(),
@@ -170,9 +175,15 @@ export function addNotices(
   const onlySafety =
     notices.length === 1 && notices[0]?.type === "safety_code_changed";
   if (onlySafety) {
-    const ordered = [...runtime.messages.values()].sort(compareMessages);
+    const tail = runtime.record.history?.tail;
+    const ordered = [
+      ...runtime.messages.values(),
+      ...(tail ? [tail] : []),
+    ].sort(compareMessages);
     const replace = collapsibleSafetyNotice(ordered.filter((m) => !m.pending));
     if (replace) {
+      if (tail?.id === replace && !runtime.messages.has(replace))
+        cacheMessage(runtime, structuredClone(tail));
       runtime.messages.delete(replace);
       runtime.dirty.delete(replace);
       runtime.deleted.add(replace);

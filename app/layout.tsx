@@ -39,12 +39,10 @@ import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
-import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
+import { NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
 import localFont from "next/font/local";
 import { cookies, headers } from "next/headers";
-import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
-import { getRequestOrigin } from "@/config/requestOrigin";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
 
 export const fetchCache = "force-no-store";
@@ -78,18 +76,12 @@ export default async function RootLayout({
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
   // Routes render per request by default. A page that exports
   // `dynamic = "force-static"` is prerendered and sees empty cookies and
-  // headers here; the shell then resolves native iOS EULA state in the
-  // browser and uses the configured origin for the environment badge.
+  // headers here. The native iOS EULA gate starts in the browser on every
+  // route (EULAConsentStartup); only the purchasing check reads the request.
   const [cookieStore, requestHeaders] = await Promise.all([
     cookies(),
     headers(),
   ]);
-  const initialOrigin = getRequestOrigin(
-    requestHeaders,
-    publicEnv.BASE_ENDPOINT
-  );
-  const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
-  const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
   const serverRendersNftPurchasing = canServerRenderNftPurchasing({
     hasNativeIosCookie: cookieStore.has(NATIVE_IOS_COOKIE),
     userAgent: requestHeaders.get("user-agent"),
@@ -172,16 +164,10 @@ export default async function RootLayout({
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <EnvironmentOriginProvider origin={initialOrigin}>
-            <Providers
-              initialIsIos={initialIsIos}
-              initialEulaConsentVersion={initialEulaConsentVersion}
-              canServerRenderNftPurchasing={serverRendersNftPurchasing}
-            >
-              <DynamicHeadTitle />
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </Providers>
-          </EnvironmentOriginProvider>
+          <Providers canServerRenderNftPurchasing={serverRendersNftPurchasing}>
+            <DynamicHeadTitle />
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </Providers>
         </AwsRumProvider>
       </body>
     </html>

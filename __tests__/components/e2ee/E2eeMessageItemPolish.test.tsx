@@ -45,6 +45,38 @@ describe("E2eeMessageItem polish", () => {
     jest.useRealTimers();
   });
 
+  it("waits for a reply lookup before saying the original is unavailable", async () => {
+    const engine = createFakeE2eeEngine();
+    let finish:
+      | ((value: ReturnType<typeof message> | null) => void)
+      | undefined;
+    engine.getMessage = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(
+      <ul>
+        <E2eeMessageItem
+          message={message({ id: "reply", reply: "missing" })}
+          conversation={conversation()}
+          engine={engine}
+          selfProfileId={SELF_ID}
+          replyTarget={null}
+          compact={false}
+          canAct
+          actions={actions}
+        />
+      </ul>
+    );
+    expect(screen.queryByText("Original message unavailable")).toBeNull();
+    await act(async () => finish?.(null));
+    expect(
+      await screen.findByText("Original message unavailable")
+    ).toBeInTheDocument();
+  });
+
   it("says it is waiting for a connection after 10 s, and resets on a new send", () => {
     jest.useFakeTimers();
     const sentAt = Date.now();
