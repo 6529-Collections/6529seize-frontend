@@ -27,7 +27,6 @@ import {
 } from "react";
 import { Tooltip } from "react-tooltip";
 
-import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import {
   HEADER_SHARE_LOCALE,
