@@ -777,7 +777,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
       // A superseded tab must stop before changing the account's device name.
       await checkpoint(this.ctx, { skipWasm: true });
-      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
+      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
       await this.ctx.api.renameDevice(device.deviceKey, label);
     });
     await this.refreshMe();

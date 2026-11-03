@@ -40882,6 +40882,7 @@ components:
           type: string
           minLength: 1
           maxLength: 48
+          pattern: ^[A-Za-z0-9 ._()-]+$
     ApiRepCategoriesPage:
       type: object
       required:

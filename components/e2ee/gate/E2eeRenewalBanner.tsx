@@ -45,14 +45,14 @@ function RenewalBannerRoute(props: RenewalBannerProps) {
   const pathname = usePathname();
   const search = useSearchParams();
   const inMessages =
-    pathname === "/messages" || pathname?.startsWith("/messages/");
-  const inWaves = pathname === "/waves" || pathname?.startsWith("/waves/");
+    pathname === "/messages" || pathname.startsWith("/messages/");
+  const inWaves = pathname === "/waves" || pathname.startsWith("/waves/");
   if (!inMessages && !inWaves) return null;
   return (
     <RenewalBannerContent
       {...props}
       inMessages={Boolean(inMessages)}
-      preview={search?.get("showRenewal") === "true"}
+      preview={search.get("showRenewal") === "true"}
     />
   );
 }
@@ -79,16 +79,14 @@ function getRenewalReminder(
   const showProof = combined || (!inMessages && proofDue);
   const showEncryption = combined || (inMessages && encryptionDue);
   const previewOnly = preview && !showProof && !showEncryption;
-  const proofKey = showProof ? proofGrant?.id : "";
+  const proofKey = showProof ? proofGrant.id : "";
   const encryptionKey = showEncryption
-    ? `${thisDevice?.deviceKey}:${thisDevice?.expiresAt}`
+    ? `${thisDevice.deviceKey}:${thisDevice.expiresAt}`
     : "";
   const reminder = previewOnly
     ? `preview:${profileId ?? ""}`
     : `${profileId ?? ""}:${proofKey}:${encryptionKey}`;
-  const expiry = showEncryption
-    ? thisDevice?.expiresAt
-    : proofGrant?.expires_at;
+  const expiry = showEncryption ? thisDevice.expiresAt : proofGrant?.expires_at;
   let message: MessageKey = "e2ee.renew.body";
   if (combined) message = "e2ee.renew.inboxCombined";
   else if (showProof) message = "e2ee.renew.proofBody";

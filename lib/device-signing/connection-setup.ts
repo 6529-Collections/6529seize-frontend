@@ -78,7 +78,7 @@ export async function prepareConnectionDeviceSetup(input: {
       input.target === "desktop" ? "6529 Desktop" : "6529 Mobile"
     );
     state = mls.exportState();
-    const sealed = await sealConnectionSetup(
+    return await sealConnectionSetup(
       {
         version: 1,
         profileId: input.profileId,
@@ -96,7 +96,6 @@ export async function prepareConnectionDeviceSetup(input: {
       },
       input.target
     );
-    return sealed;
   } finally {
     privateBytes?.fill(0);
     state?.fill(0);
