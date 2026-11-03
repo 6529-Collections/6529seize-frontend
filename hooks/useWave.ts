@@ -2,6 +2,7 @@
 
 import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { getWaveSubmissionClosure } from "@/helpers/waves/submission-closure";
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -82,6 +83,8 @@ function getSubmissionStatus(
   if (!wave) return SubmissionStatus.NOT_STARTED;
 
   try {
+    if (getWaveSubmissionClosure(wave, now)) return SubmissionStatus.ENDED;
+
     const start = wave.participation.period?.min ?? null;
     const end = wave.participation.period?.max ?? null;
 
@@ -254,10 +257,11 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave, now]
   );
 
-  const participationEndTime = useMemo(
-    () => wave?.participation.period?.max ?? now,
-    [wave, now]
-  );
+  const participationEndTime = useMemo(() => {
+    const closure = wave ? getWaveSubmissionClosure(wave, now) : null;
+    if (closure) return closure.closedAt ?? 0;
+    return wave?.participation.period?.max ?? now;
+  }, [wave, now]);
 
   const votingStartTime = useMemo(
     () => wave?.voting.period?.min ?? now,

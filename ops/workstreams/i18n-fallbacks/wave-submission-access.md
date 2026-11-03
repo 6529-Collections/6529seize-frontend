@@ -7,7 +7,11 @@
   `WaveHeaderRestrictionButton`.
 - Untranslated surface: `waves.access.*` messages for submission audiences,
   signing requirements, loading/unavailable details, rules navigation, and the
-  chat-versus-submission audience summary.
+  chat-versus-submission audience summary. All submission cards use the same
+  compact group row, with `waves.access.otherRules` as supporting text for
+  public groups while submissions remain open. Ended submission cards also use
+  `waves.dropEligibility.ended`, `waves.access.closedOn`, and
+  `waves.access.publicGroup`; closing dates use the viewer's locale.
 - Current fallback: the components use the browser locale; missing translations
   resolve to the complete `en-US` source dictionary.
 - User impact: supported non-source locales see English access explanations.

@@ -310,7 +310,7 @@ const competition = (id: string, title: string) => ({
     identity_submission_strategy: null,
     identity_submission_duplicates: null,
     starts_at: null,
-    ends_at: null,
+    ends_at: null as number | null,
     terms: null,
   },
   voting: {
@@ -1421,6 +1421,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
   });
 
+  test("keeps leaderboard post text separated from its author across header breakpoints", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const leaderboard = page.getByRole("list", { name: "Leaderboard drops" });
+    const author = leaderboard.getByRole("link", {
+      name: "playwright",
+      exact: true,
+    });
+    const content = leaderboard.getByText("Immutable alpha entry content", {
+      exact: true,
+    });
+    for (const width of testInfo.project.name === "web-desktop-chromium"
+      ? [768, 1023, 1024, 1280]
+      : [390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(content).toBeVisible();
+      await expect(author).toBeVisible();
+      await expect
+        .poll(async () => {
+          const authorBox = await author.boundingBox();
+          const contentBox = await content.boundingBox();
+          if (!authorBox || !contentBox) return Number.NEGATIVE_INFINITY;
+          return contentBox.y - (authorBox.y + authorBox.height);
+        })
+        .toBeGreaterThanOrEqual(6);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`leaderboard-author-spacing-${width}.png`),
+      });
+    }
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
   }) => {
@@ -2079,6 +2116,80 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("explains ended submissions with a date and compact public group", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    await sandbox.legacyPrimary("alpha");
+    const beta = competition("beta", "Beta");
+    sandbox.setCompetition("beta", {
+      participation: {
+        ...beta.participation,
+        ends_at: Date.UTC(2024, 11, 3, 8, 33),
+      },
+      permissions: { ...beta.permissions, submit: false },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+    await dismissNextDevTools(page);
+    const action = page.getByRole("button", {
+      name: "Enter Beta",
+      exact: true,
+    });
+    await expect(action).toHaveAccessibleDescription(
+      "Submission period has ended"
+    );
+    await action.press("Enter");
+    const details = page.getByRole("dialog", { name: "Enter Beta" });
+    await expect(details).toBeFocused();
+    await expect(details).toContainText("Submission period has ended");
+    await expect(details).toContainText("Closed December 3, 2024");
+    await expect(details.getByText("Public", { exact: true })).toBeVisible();
+    await expect(details).not.toContainText("don't have permission");
+    await expect(details).not.toContainText(
+      "Other submission rules still apply"
+    );
+    await expect(details).not.toContainText("Chat access is separate");
+    await expectNoHorizontalOverflow(page);
+    await page.keyboard.press("Tab");
+    const rules = details.getByRole("link", { name: "View submission rules" });
+    await expect(rules).toBeFocused();
+    await rules.press("Enter");
+    await expect(
+      page.getByRole("tab", { name: "Settings", exact: true }).first()
+    ).toHaveAttribute("aria-selected", "true");
+    await page.goto(`/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`);
+    const submissions = page.getByText("Submissions closed", { exact: true });
+    const voting = page.getByText("Voting open", { exact: true });
+    await expect(submissions).toBeInViewport({ ratio: 1 });
+    await expect(voting).toBeInViewport({ ratio: 1 });
+    await expect(submissions.locator("..")).toContainText("Dec 3, 2024");
+    await expect(voting.locator("..")).toContainText("No end date");
+    for (const [status, detail] of [
+      [submissions, submissions.locator("..").getByText("Dec 3, 2024")],
+      [voting, voting.locator("..").getByText("No end date")],
+    ] as const) {
+      await expect
+        .poll(async () => {
+          const statusBox = await status.boundingBox();
+          const detailBox = await detail.boundingBox();
+          if (!statusBox || !detailBox) return Number.POSITIVE_INFINITY;
+          return Math.abs(statusBox.y - detailBox.y);
+        })
+        .toBeLessThanOrEqual(3);
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("submission-statuses.png"),
+    });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("keeps the non-default competition in a copied submission rules link", async ({
     page,
     baseURL,
@@ -2102,11 +2213,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Enter Beta", exact: true })
       .press("Enter");
     const details = page.getByRole("dialog", { name: "Enter Beta" });
-    await expect(
-      details.getByText("Public. Other submission rules still apply.", {
-        exact: true,
-      })
-    ).toBeVisible();
+    await expect(details.getByText("Public", { exact: true })).toBeVisible();
+    await expect(details).toContainText("Other submission rules still apply.");
     await expect(details).not.toContainText("Sandbox Submission Club");
     const href = await page
       .getByRole("dialog", { name: "Enter Beta" })

@@ -47,6 +47,23 @@ describe("useWave", () => {
     expect(result.current.isMemesWave).toBe(true);
   });
 
+  it("closes manually ended competitions without a scheduled deadline", () => {
+    const wave = {
+      ...baseWave,
+      participation: { ...baseWave.participation, period: {} },
+      competition: {
+        wave_id: baseWave.id,
+        lifecycle: "ENDED",
+        participation: { ends_at: null },
+        capabilities: [],
+      },
+    };
+    const { result } = renderHook(() => useWave(wave));
+    expect(result.current.participation.status).toBe(SubmissionStatus.ENDED);
+    expect(result.current.participation.canSubmitNow).toBe(false);
+    expect(result.current.participation.endTime).toBe(0);
+  });
+
   it("flags curation wave", () => {
     const wave = { ...baseWave, id: "curation" };
     const { result } = renderHook(() => useWave(wave));

@@ -65,6 +65,10 @@ availability. Submission availability is exposed through the Chat tab
   `Submit drop` action to see the submission restriction, submission group, and
   `View submission rules` link to Settings. Public groups link to their
   criteria and members; hidden and direct-message groups show only `Private group`.
+- Ended submissions keep the lock and show `Submission period has ended`, a
+  known closing date, and a compact submission-group row. They do not present
+  closure as missing permission. See
+  [Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md).
 - Following `View submission rules` and returning to Chat preserves an ordinary
   text draft in the same browser tab. This does not save attachments or media.
 - If Chat was opened from a competition, the rules link retains that competition,

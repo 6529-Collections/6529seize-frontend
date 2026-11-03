@@ -86,6 +86,14 @@ default competition keeps its existing no-submission-action behavior. Only
 notification read acknowledgements are allowed for this fixture; posting fails
 closed.
 
+The same fixture covers an ended submission period with submission permission
+false: the lock explains closure and its date, shows a compact public group,
+and keeps keyboard navigation to the selected competition's rules usable.
+The fixture also checks closed-submission and open-voting schedule sections,
+inline status/detail alignment, and viewport containment on desktop and mobile.
+The leaderboard card fixture also checks the gap between author and post text
+at phone, medium, and both sides of the desktop action-button breakpoint.
+
 PR selection for `test:e2e:native-competition-sandbox` is owned by
 `scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
 native competitions plus shared submission dialogs, leaderboard controls and

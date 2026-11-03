@@ -96,6 +96,36 @@ describe("WaveSubmissionAccessDetails", () => {
       );
   });
 
+  it("keeps ended submissions compact while retaining the selected rules link", () => {
+    selectCompetition({ group_id: null, signature_required: true });
+    render(<WaveSubmissionAccessDetails wave={makeWave()} isClosed />);
+    expect(screen.getByText("Submission group")).toBeVisible();
+    expect(screen.getByText("Public", { exact: true })).toBeVisible();
+    expect(
+      screen.queryByText("Chat access is separate from submission access.")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Submissions require a wallet signature.")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View submission rules" })
+    ).toHaveAttribute(
+      "href",
+      "/waves/wave-1?tab=configuration&competition=beta"
+    );
+  });
+
+  it("still conceals private group metadata for ended submissions", () => {
+    selectCompetition({ group_id: "private-group", signature_required: false });
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { name: "Secret Club", visible: false, is_private: true },
+    });
+    render(<WaveSubmissionAccessDetails wave={makeWave()} isClosed />);
+    expect(screen.getByText("Private group")).toBeVisible();
+    expect(screen.queryByText("Secret Club")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+
   it("uses selected public competition access instead of the legacy group and signature", () => {
     selectCompetition();
     render(
@@ -111,9 +141,7 @@ describe("WaveSubmissionAccessDetails", () => {
       waveId: "wave-1",
       competitionId: "beta",
     });
-    expect(
-      screen.getByText("Public. Other submission rules still apply.")
-    ).toBeVisible();
+    expect(screen.getByText("Public", { exact: true })).toBeVisible();
     expect(screen.queryByText("Legacy Club")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Submissions require a wallet signature.")
@@ -145,9 +173,7 @@ describe("WaveSubmissionAccessDetails", () => {
       waveId: "wave-1",
       competitionId: "beta",
     });
-    expect(
-      screen.getByText("Public. Other submission rules still apply.")
-    ).toBeVisible();
+    expect(screen.getByText("Public", { exact: true })).toBeVisible();
     expect(screen.queryByText("Legacy Club")).not.toBeInTheDocument();
   });
 
@@ -203,7 +229,7 @@ describe("WaveSubmissionAccessDetails", () => {
       render(<WaveSubmissionAccessDetails wave={makeWave()} />);
       expect(screen.getByText(expected)).toBeVisible();
       expect(
-        screen.queryByText("Public. Other submission rules still apply.")
+        screen.queryByText("Public", { exact: true })
       ).not.toBeInTheDocument();
       expect(useCompetitionDetail).not.toHaveBeenCalled();
     }
@@ -277,7 +303,7 @@ describe("WaveSubmissionAccessDetails", () => {
       render(<WaveSubmissionAccessDetails wave={makeWave()} />);
       expect(screen.getByText(expected)).toBeVisible();
       expect(
-        screen.queryByText("Public. Other submission rules still apply.")
+        screen.queryByText("Public", { exact: true })
       ).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "View submission rules" })
@@ -399,13 +425,16 @@ describe("WaveSubmissionAccessDetails", () => {
       />
     );
     expect(screen.getByText("Group unavailable")).toBeVisible();
-    expect(screen.queryByText(/Public\./)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Public", { exact: true })
+    ).not.toBeInTheDocument();
   });
 
   it("does not imply that public group access overrides submission rules", () => {
     render(<WaveSubmissionAccessDetails wave={makeWave()} />);
+    expect(screen.getByText("Public", { exact: true })).toBeVisible();
     expect(
-      screen.getByText("Public. Other submission rules still apply.")
+      screen.getByText("Other submission rules still apply.")
     ).toBeVisible();
   });
 });

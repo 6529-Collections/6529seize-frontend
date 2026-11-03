@@ -1565,6 +1565,7 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   loginRequired: "Please log in to make submissions",
+  ended: "Submission period has ended",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -1617,7 +1618,9 @@ const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
   loading: "Loading submission access…",
   unavailable: "Submission access details are unavailable.",
   submissionScope: "Submission group",
-  publicScope: "Public. Other submission rules still apply.",
+  publicGroup: "Public",
+  closedOn: "Closed {date}",
+  otherRules: "Other submission rules still apply.",
   independent: "Chat access is separate from submission access.",
   signature: "Submissions require a wallet signature.",
   viewRules: "View submission rules",
@@ -2201,8 +2204,14 @@ const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
   {
-    votingOngoing: "Voting ongoing",
-    droppingOngoing: "Dropping open",
+    votingOngoing: "Voting open",
+    droppingOngoing: "Submissions open",
+    submissionsClosed: "Submissions closed",
+    submissionsOpenIn: "Submissions open in",
+    submissionsCloseIn: "Submissions close in",
+    votingClosed: "Voting closed",
+    votingOpensIn: "Voting opens in",
+    votingClosesIn: "Voting closes in",
     noEndDate: "No end date",
     nextWinnersIn: "Next winners announced in",
     countdown: "{hours}h {minutes}m",

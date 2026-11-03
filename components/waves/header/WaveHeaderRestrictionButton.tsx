@@ -1,9 +1,14 @@
 "use client";
 
 import clsx from "clsx";
-import { Suspense, useId, type ReactNode } from "react";
+import { Suspense, useId, useMemo, type ReactNode } from "react";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getWaveSubmissionClosure } from "@/helpers/waves/submission-closure";
+import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
 
 interface WaveHeaderRestrictionButtonProps {
@@ -29,24 +34,47 @@ export default function WaveHeaderRestrictionButton({
   "data-full-width": fullWidth,
 }: WaveHeaderRestrictionButtonProps) {
   const reasonId = useId();
+  const locale = useBrowserLocale();
+  const closure = useMemo(
+    () =>
+      accessWave
+        ? getWaveSubmissionClosure(accessWave, Time.currentMillis())
+        : null,
+    [accessWave]
+  );
+  const displayedReason = closure
+    ? t(locale, "waves.dropEligibility.ended")
+    : reason;
 
   return (
     <HoverCard
       ariaLabel={label}
       content={
         <div className="tw-w-[min(82vw,18rem)] tw-whitespace-normal tw-break-words tw-p-1">
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400">
+          <p className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
             {label}
           </p>
-          <p className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
-            {reason}
+          <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {displayedReason}
           </p>
+          {typeof closure?.closedAt === "number" && (
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+              {t(locale, "waves.access.closedOn", {
+                date: formatDate(locale, closure.closedAt, {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }),
+              })}
+            </p>
+          )}
           {accessWave && (
             <div className="tw-mt-3">
               <Suspense fallback={null}>
                 <WaveSubmissionAccessDetails
                   wave={accessWave}
                   onViewRules={onViewRules}
+                  isClosed={closure !== null}
                 />
               </Suspense>
             </div>
@@ -75,7 +103,7 @@ export default function WaveHeaderRestrictionButton({
       >
         {children}
         <span id={reasonId} className="tw-sr-only">
-          {reason}
+          {displayedReason}
         </span>
       </button>
     </HoverCard>

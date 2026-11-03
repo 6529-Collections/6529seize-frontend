@@ -535,7 +535,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       label: chatSubmitDropLabels.label,
       compactLabel: chatSubmitDropLabels.compactLabel,
       restrictionMessage: chatSubmitDropRestrictionMessage,
-      accessWave: wave,
+      accessWave: submissionWave ?? wave,
       onViewRules:
         isApp || availableTabs.includes(MyStreamWaveTab.CONFIGURATION)
           ? viewSubmissionRules
@@ -551,6 +551,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       chatSubmitDropRestrictionMessage,
       isApp,
       viewSubmissionRules,
+      submissionWave,
       wave,
       openChatSubmitDrop,
       showChatSubmitDropAction,

@@ -102,6 +102,13 @@ Entry behavior differs by wave type:
   Loading and unavailable states keep the rules link usable.
   Hidden and direct-message groups show only `Private group`. These details
   appear on demand; restricted submissions do not add an access panel to chat.
+- When the submission period or competition has ended, the lock remains and
+  its card says `Submission period has ended`, with `Closed {date}` when the
+  closing date is known. The submission group appears on one compact row above
+  `View submission rules`. This explains closure without claiming that the
+  viewer fails the group requirements; a public group does not reopen submissions.
+  An early competition end uses the earlier closing date. If no closing date is
+  available, the card omits the date.
 - Available Memes desktop submit labels are responsive: compact desktop widths
   can show `Submit Work`, while extra-wide desktop shows
   `Submit Work to The Memes`.
