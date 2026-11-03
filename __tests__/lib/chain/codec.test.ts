@@ -6,7 +6,13 @@ import { createHash } from "node:crypto";
 import { hashTypedData, keccak256, stringToBytes, type Hex, type TypedDataDefinition } from "viem";
 
 import { decodeCe, encodeCe, hexBytes, sortSetEntries, toHex } from "@/lib/chain/codec/ce";
-import { encodeType, typeHash } from "@/lib/chain/codec/eip712";
+import {
+  domainSeparator,
+  encodeType,
+  hashStruct,
+  typedDataDigest,
+  typeHash,
+} from "@/lib/chain/codec/eip712";
 import {
   checkHeaderRules,
   checkSignatureList,
@@ -87,7 +93,8 @@ import {
 } from "./fixtures/design-vectors";
 
 const ZERO32: Hex = `0x${"00".repeat(32)}`;
-const kc = (text: string): Hex => keccak256(stringToBytes(text));
+const SECP256K1_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const kc =(text: string): Hex => keccak256(stringToBytes(text));
 const cidRaw = (text: string): Hex =>
   `0x01551220${createHash("sha256").update(text).digest("hex")}`;
 
@@ -448,6 +455,45 @@ describe("bodies without published digests", () => {
   );
 });
 
+describe("EIP-712 integer words agree with viem at every boundary", () => {
+  const numbers = struct("Numbers", [
+    ["u", u64],
+    ["i", i64],
+  ]);
+  const domain = { name: "6529 Network", version: "1", salt: EXAMPLE_DEVNET.networkId } as const;
+  const ours = (message: { u: bigint; i: bigint }): Hex =>
+    typedDataDigest(domainSeparator(domain), hashStruct(numbers, message));
+  const theirs = (message: { u: bigint; i: bigint }): Hex =>
+    hashTypedData({
+      domain,
+      types: {
+        Numbers: [
+          { name: "u", type: "uint64" },
+          { name: "i", type: "int64" },
+        ],
+      },
+      primaryType: "Numbers",
+      message,
+    });
+
+  it.each([
+    ["uint64 max, int64 min", { u: 2n ** 64n - 1n, i: -(2n ** 63n) }],
+    ["uint64 0, int64 max", { u: 0n, i: 2n ** 63n - 1n }],
+  ])("hashes %s like viem", (_name, message) => {
+    expect(ours(message)).toBe(theirs(message));
+  });
+
+  it.each([
+    ["uint64 -1", { u: -1n, i: 0n }],
+    ["uint64 2^64", { u: 2n ** 64n, i: 0n }],
+    ["int64 2^63", { u: 0n, i: 2n ** 63n }],
+    ["int64 -2^63 - 1", { u: 0n, i: -(2n ** 63n) - 1n }],
+  ])("refuses %s, as viem does", (_name, message) => {
+    expect(codeOf(() => ours(message))).toBe(ChainResultCode.FIELD_BOUND);
+    expect(() => theirs(message)).toThrow();
+  });
+});
+
 describe("CE grammar (P28 §2.6)", () => {
   const optionalWord = optional(bytes32);
   const namesSet = set(u16, 4);
@@ -530,6 +576,34 @@ describe("SignedTx admission checks", () => {
     expect(codeOf(() => decodeSignedTx(newVersion))).toBe(ChainResultCode.UNKNOWN_VERSION);
   });
 
+  it("compares NETWORK_ID case-insensitively and returns it canonical", () => {
+    const upper = `0x${EXAMPLE_DEVNET.networkId.slice(2).toUpperCase()}` as Hex;
+    const decoded = decodeSignedTx(signedE3(), { expectedNetworkId: upper });
+    expect(decoded.tx.networkId).toBe(EXAMPLE_DEVNET.networkId);
+    expect(decoded.tx.networkId).toBe(decoded.tx.networkId.toLowerCase());
+  });
+
+  it("refuses OVERSIZE after decoding, in P40 §2.3 order", () => {
+    // Two 12 KiB proofs decode under the schema but exceed MAX_TX_BYTES.
+    const bigProof = `0x${"00".repeat(12 * 1024)}` as Hex;
+    const oversize = encodeSignedTx({
+      networkId: EXAMPLE_DEVNET.networkId,
+      header: e3Header,
+      op: VOTE_SET,
+      body: e3Body,
+      signatures: [
+        { role: 0, keyType: 2, sig: `0x${"22".repeat(64)}`, proof: bigProof },
+        { role: 1, keyType: 1, sig: `0x${"11".repeat(64)}1b`, proof: bigProof },
+      ],
+    });
+    expect(oversize.length).toBeGreaterThan(16 * 1024);
+    expect(codeOf(() => decodeSignedTx(oversize))).toBe(ChainResultCode.OVERSIZE);
+    // Step 1 (decoding) comes before step 2 (size): trailing bytes win.
+    const padded = new Uint8Array(17 * 1024);
+    padded.set(signedE3());
+    expect(codeOf(() => decodeSignedTx(padded))).toBe(ChainResultCode.TRAILING_BYTES);
+  });
+
   it("names the failing body field in the detail (P40 §2.6)", () => {
     const wire = signedE3();
     const truncated = wire.slice(0, 2 + 2 + 32 + 173 + 4 + 40);
@@ -589,6 +663,22 @@ describe("SignedTx admission checks", () => {
     expect(checkSignatureList(e1Header, [good, { ...good, role: 1 }])?.code).toBe(
       ChainResultCode.SIGNATURE_LIST
     );
+  });
+
+  it.each([
+    ["r = 0", `0x${"00".repeat(32)}${"11".repeat(32)}1b`],
+    ["s = 0", `0x${"11".repeat(32)}${"00".repeat(32)}1b`],
+    ["r = n", `0x${SECP256K1_N.toString(16)}${"11".repeat(32)}1b`],
+    ["s = n/2 + 1", `0x${"11".repeat(32)}${((SECP256K1_N >> 1n) + 1n).toString(16)}1c`],
+  ])("refuses a keyType-1 signature with %s", (_name, sig) => {
+    const entry: TxSignature = { role: 0, keyType: 1, sig: sig as Hex, proof: "0x" };
+    expect(checkSignatureList(e1Header, [entry])?.code).toBe(ChainResultCode.NONCANONICAL_SIGNATURE);
+  });
+
+  it("accepts the boundary values r = n - 1 and s = n/2", () => {
+    const sig = `0x${(SECP256K1_N - 1n).toString(16)}${(SECP256K1_N >> 1n).toString(16).padStart(64, "0")}1c`;
+    const entry: TxSignature = { role: 0, keyType: 1, sig: sig as Hex, proof: "0x" };
+    expect(checkSignatureList(e1Header, [entry])).toBeNull();
   });
 });
 

@@ -118,7 +118,7 @@ export function isPhase1Cid(value: Hex): boolean {
   if ((raw.length !== 36 && raw.length !== 37) || raw[0] !== 0x01) {
     return false;
   }
-  if (raw[raw.length - 34] !== 0x12 || raw[raw.length - 33] !== 0x20) {
+  if (raw.at(-34) !== 0x12 || raw.at(-33) !== 0x20) {
     return false;
   }
   const first = raw[1] ?? 0;
@@ -316,7 +316,8 @@ function capabilityGrantRules(
   return firstFailure([
     ...granteeKeyChecks(body, ctx),
     ...grantOpsChecks(body),
-    ...body.scopes.map(scopeCheck),
+    // The index is deliberate: it becomes the detail's 1-based item.
+    ...body.scopes.map((scope, index) => scopeCheck(scope, index)),
     ...budgetChecks(body.budgets),
     ...grantWindowChecks(body, ctx),
   ]);
