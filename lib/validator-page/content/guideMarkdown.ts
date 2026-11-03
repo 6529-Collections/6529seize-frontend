@@ -41,7 +41,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "| `.deb` | `validator --version` |",
   "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
   "",
-  "It prints `validator 0.1.0 (<commit>, TDH v1.4, rule version tdh-v1.4)`. The commit in the brackets must match the one listed for your release on the [releases page](/validator/releases). If it shows another commit, you have a different build, so tell us.",
+  "It prints `validator 0.1.0-rc.5 (29a8caf, TDH v1.4)`. If the brackets show another commit, you have a different build, so tell us. The [releases page](/validator/releases) lists each release's full commit.",
   "",
   "## Make the key and sign the authorization",
   "",
