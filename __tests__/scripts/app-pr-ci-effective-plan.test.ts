@@ -184,6 +184,8 @@ describe("effective App PR CI plan", () => {
     "hooks/useMemesWaveFooterStats.ts",
     "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
     "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntime.tsx",
+    "hooks/useNativeKeyboard.ts",
+    "tests/support/surfaceSimulation.ts",
     "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
     "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
     "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",

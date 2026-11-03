@@ -143,6 +143,7 @@ export async function installSurfaceSimulation(
             : // Current surface simulations do not exercise native file URL conversion.
               (filePath: string) => filePath;
         let listenerIdCounter = 0;
+        const keyboardListenerTeardowns = new Map<string, () => void>();
         Object.defineProperty(runtime, "Capacitor", {
           configurable: true,
           writable: true,
@@ -167,9 +168,21 @@ export async function installSurfaceSimulation(
                 simulatedKey === "App.addListener" ||
                 simulatedKey === "Keyboard.addListener"
               ) {
-                return Promise.resolve(
-                  `playwright-${platform}-${pluginName}-${++listenerIdCounter}`
-                );
+                const callbackId = `playwright-${platform}-${pluginName}-${++listenerIdCounter}`;
+                if (
+                  pluginName === "Keyboard" &&
+                  typeof callback === "function"
+                ) {
+                  const { eventName } = options as { eventName: string };
+                  const eventType = `playwright:${eventName}`;
+                  const listener = (event: Event) =>
+                    callback((event as CustomEvent).detail);
+                  globalThis.addEventListener(eventType, listener);
+                  keyboardListenerTeardowns.set(callbackId, () =>
+                    globalThis.removeEventListener(eventType, listener)
+                  );
+                }
+                return Promise.resolve(callbackId);
               }
               return existingNativeCallback?.(
                 pluginName,
@@ -184,6 +197,11 @@ export async function installSurfaceSimulation(
               options: unknown
             ) => {
               const simulatedKey = `${pluginName}.${methodName}`;
+              if (simulatedKey === "Keyboard.removeListener") {
+                const { callbackId } = options as { callbackId: string };
+                keyboardListenerTeardowns.get(callbackId)?.();
+                keyboardListenerTeardowns.delete(callbackId);
+              }
               if (Object.hasOwn(simulatedNativeResponses, simulatedKey)) {
                 return Promise.resolve(simulatedNativeResponses[simulatedKey]);
               }

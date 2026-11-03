@@ -153,6 +153,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/wave-loading-sandbox.spec.ts",
         "components/brain/my-stream/MyStreamWaveChat.tsx",
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
+        "hooks/useNativeKeyboard.ts",
+        "tests/support/surfaceSimulation.ts",
         "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
         "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
         "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",

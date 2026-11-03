@@ -2,6 +2,7 @@ import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeed
 import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
+  waitForRouteReady,
   expectAxeClean,
   expectNoHorizontalOverflow,
   test,
@@ -9,6 +10,8 @@ import {
 import {
   getSandboxApiOrigin,
   installLocalSandboxBrowserMutationGuard,
+  dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -982,3 +985,107 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
     await opened.close();
   }
 });
+for (const surface of [
+  { name: "wave", path: `/waves/${WAVE}` },
+  { name: "DM", path: "/messages/00000000-0000-4000-8000-000000000532" },
+]) {
+  test(`docks the Android ${surface.name} composer after resize-first keyboard events`, async ({
+    baseURL,
+    context,
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Uses the Android bridge in the mobile Chromium sandbox"
+    );
+    await installSurfaceSimulation(context, "capacitor-android-sim", baseURL);
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    await page.setViewportSize({ width: 412, height: 840 });
+    await page.goto(surface.path, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await expect(composer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await composer.fill("Keyboard check.");
+    const readBottom = () =>
+      composer.evaluate((element) => element.getBoundingClientRect().bottom);
+    const initialBottom = await readBottom();
+    for (const keyboardHeight of [320, 280]) {
+      const viewportHeight = 840 - keyboardHeight;
+      await page.setViewportSize({ width: 412, height: viewportHeight });
+      // Run the real resize fallback before native bridge delivery. No CSS
+      // keyboard values are injected: this exercises the hook and its consumers.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          })
+      );
+      await emitKeyboardEvent(page, "keyboardWillShow", keyboardHeight);
+      await emitKeyboardEvent(page, "keyboardDidShow", keyboardHeight);
+      await expect(page.locator("html")).toHaveCSS(
+        "--native-keyboard-inset-bottom",
+        "0px"
+      );
+      await expect.poll(readBottom).toBeGreaterThan(viewportHeight - 24);
+      await expect.poll(readBottom).toBeLessThanOrEqual(viewportHeight);
+      await expect(composer).toBeInViewport();
+      const latestMessage =
+        surface.name === "DM"
+          ? page
+              .getByText(
+                "Synthetic local-only direct message body for Playwright.",
+                { exact: true }
+              )
+              .first()
+          : page
+              .getByRole("link", {
+                name: "https://example.com/6529-composer-preview",
+                exact: true,
+              })
+              .first();
+      await expect(latestMessage).toBeInViewport();
+      await expectNoHorizontalOverflow(page);
+      await dismissNextDevTools(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `android-keyboard-open-${keyboardHeight}.png`
+        ),
+      });
+      await emitKeyboardEvent(page, "keyboardWillHide");
+      await emitKeyboardEvent(page, "keyboardDidHide");
+      await page.setViewportSize({ width: 412, height: 840 });
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-native-keyboard-visible"
+      );
+      await expect.poll(readBottom).toBeCloseTo(initialBottom, 0);
+      await expect(composer).toContainText("Keyboard check.");
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("android-keyboard-closed.png"),
+    });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+}
+
+async function emitKeyboardEvent(
+  page: Page,
+  eventName: string,
+  keyboardHeight = 0
+) {
+  await page.evaluate(
+    ({ eventName, keyboardHeight }) => {
+      globalThis.dispatchEvent(
+        new CustomEvent(`playwright:${eventName}`, {
+          detail: { keyboardHeight },
+        })
+      );
+    },
+    { eventName, keyboardHeight }
+  );
+}
