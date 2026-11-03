@@ -1,9 +1,7 @@
-import {
-  faCopy,
-  faExternalLink,
-  faRotate,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-solid-svg-icons/faCopy";
+import { faExternalLink } from "@fortawesome/free-solid-svg-icons/faExternalLink";
+import { faRotate } from "@fortawesome/free-solid-svg-icons/faRotate";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import {
   ArrowDownTrayIcon,
   ComputerDesktopIcon,
@@ -162,7 +160,7 @@ export function HeaderShareModalView({
           className="tw-unselectable"
         />
         <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
-          <FontAwesomeIcon icon={faExternalLink} aria-hidden="true" />
+          <FontAwesomeSvgIcon icon={faExternalLink} aria-hidden="true" />
           <span className="tw-whitespace-nowrap">
             {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
           </span>
@@ -390,7 +388,7 @@ export function HeaderShareModalView({
             data-tooltip-id="copy-url-tooltip"
             onClick={() => void copyUrl(url)}
           >
-            <FontAwesomeIcon
+            <FontAwesomeSvgIcon
               icon={faCopy}
               aria-hidden="true"
               className={`tw-size-4 ${urlCopied ? "tw-text-green-500" : ""}`}
@@ -414,7 +412,7 @@ export function HeaderShareModalView({
               : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
           }`}
         >
-          <FontAwesomeIcon
+          <FontAwesomeSvgIcon
             icon={faRotate}
             aria-hidden="true"
             className={`tw-size-4 ${isConnectionShareLoading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
@@ -524,7 +522,7 @@ export function HeaderShareModalView({
               : ""
           }`}
         >
-          <FontAwesomeIcon
+          <FontAwesomeSvgIcon
             icon={faCopy}
             className={`${SHARE_ACTION_ICON_CLASS_NAME} ${
               urlCopied ? "!tw-text-success" : ""
