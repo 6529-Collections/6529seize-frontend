@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
@@ -163,6 +163,61 @@ describe("encrypted conversation list", () => {
     ).getByRole("link");
     expect(row).toHaveAttribute("href", "/messages/encrypted/b");
     expect(row).toHaveTextContent("1 unread message");
+  });
+
+  it("keeps unread histories unread until viewed and previews the history it opens", () => {
+    const pair = {
+      kind: "dm" as const,
+      admins: [SELF_ID, ALICE_ID],
+      members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+    };
+    const earlier = conversation({ ...pair, g: "a", unread: 2 });
+    const incoming = conversation({
+      ...pair,
+      g: "b",
+      unread: 3,
+      updatedAt: earlier.updatedAt + 1,
+      lastMessage: message({
+        id: "incoming",
+        g: "b",
+        text: "new incoming history",
+      }),
+    });
+    const muted = conversation({
+      ...pair,
+      g: "c",
+      unread: 9,
+      updatedAt: earlier.updatedAt + 2,
+      lastMessage: message({
+        id: "muted",
+        g: "c",
+        text: "muted history preview",
+      }),
+    });
+    setE2eeChatMuted(SELF_ID, "c", true);
+    const engine = createFakeE2eeEngine({
+      conversations: [earlier, incoming, muted],
+    });
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationListPage />
+      </E2eeTestProvider>
+    );
+    const getRow = () =>
+      within(screen.getByRole("list", { name: "Encrypted chats" })).getByRole(
+        "link"
+      );
+    expect(getRow()).toHaveTextContent("5 unread messages");
+    expect(getRow()).toHaveTextContent("new incoming history");
+    expect(getRow()).not.toHaveTextContent("muted history preview");
+    expect(getRow()).toHaveAttribute("href", "/messages/encrypted/b");
+    act(() =>
+      engine.update({
+        conversations: [earlier, { ...incoming, unread: 0 }, muted],
+      })
+    );
+    expect(getRow()).toHaveTextContent("2 unread messages");
+    expect(getRow()).toHaveAttribute("href", "/messages/encrypted/a");
   });
 
   it("shows an empty state with a way to start a chat", () => {

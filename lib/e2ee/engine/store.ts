@@ -330,6 +330,28 @@ export class EngineStore {
     return [...byProfile.values()];
   }
 
+  private buildDmPeer(
+    record: StoredGroup,
+    members: E2eeMember[]
+  ): E2eeMember | null {
+    const peerId = getDmPeerId(
+      { ...record.metadata, members },
+      this.ownProfileId
+    );
+    const profile = peerId ? this.profiles.get(peerId) : null;
+    const dmPeer = peerId
+      ? (members.find((member) => member.profileId === peerId) ?? {
+          profileId: peerId,
+          handle: profile?.handle ?? null,
+          pfp: profile?.pfp ?? null,
+          wallets: [...(profile?.wallets ?? [])],
+          isAdmin: true,
+          devices: [],
+        })
+      : null;
+    return dmPeer;
+  }
+
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
     const record = runtime.record;
     const ordered = record.history
@@ -363,21 +385,7 @@ export class EngineStore {
       if (pending) last = pending;
     }
     const members = this.buildMembers(record);
-    const peerId = getDmPeerId(
-      { ...record.metadata, members },
-      this.ownProfileId
-    );
-    const profile = peerId ? this.profiles.get(peerId) : null;
-    const dmPeer = peerId
-      ? (members.find((member) => member.profileId === peerId) ?? {
-          profileId: peerId,
-          handle: profile?.handle ?? null,
-          pfp: profile?.pfp ?? null,
-          wallets: [...(profile?.wallets ?? [])],
-          isAdmin: true,
-          devices: [],
-        })
-      : null;
+    const dmPeer = this.buildDmPeer(record, members);
     return {
       dmPeer,
       g: record.g,

@@ -53,7 +53,7 @@ export function compareDmSessions(
   return a.g < b.g ? -1 : Number(a.g > b.g);
 }
 
-export interface E2eeConversationThread {
+interface E2eeConversationThread {
   readonly key: string;
   readonly current: E2eeConversation;
   readonly sessions: readonly E2eeConversation[];
