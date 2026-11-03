@@ -3,7 +3,13 @@
 import { useEffect } from "react";
 
 function openFoldForHash() {
-  const id = decodeURIComponent(globalThis.location.hash.slice(1));
+  let id: string;
+  try {
+    id = decodeURIComponent(globalThis.location.hash.slice(1));
+  } catch {
+    // A malformed hash in a shared link names no fold.
+    return;
+  }
   const target = id ? document.getElementById(id) : null;
   if (!target) {
     return;

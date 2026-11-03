@@ -12,7 +12,11 @@ import { useVisitorPlatform } from "./useVisitorPlatform";
 import ValidatorDownloadRow, {
   type ValidatorDownloadOption,
 } from "./ValidatorDownloadRow";
-import { PRIMARY_BUTTON, TEXT_BUTTON } from "./validatorStyles";
+import {
+  PRIMARY_BUTTON,
+  SECONDARY_BUTTON,
+  TEXT_BUTTON,
+} from "./validatorStyles";
 
 function kindsFor(platform: VisitorPlatform): ValidatorInstallerKind[] {
   switch (platform.system) {
@@ -69,6 +73,12 @@ export default function ValidatorDownloadChooser({
     .filter((option): option is ValidatorDownloadOption => !!option);
   const bothLinux =
     primary.length === 2 && primary.every((item) => item.kind !== "macos");
+  // Neither .deb installs on Fedora; the AppImage does, on x86-64 only, so
+  // a Linux visitor who may be on x86-64 sees it too.
+  const appImage =
+    platform.system === "linux" && platform.cpu !== "arm64"
+      ? options.find((option) => option.kind === "appimage")
+      : undefined;
 
   return (
     <div>
@@ -96,6 +106,22 @@ export default function ValidatorDownloadChooser({
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
           On a Raspberry Pi or another ARM computer, choose ARM64.
         </p>
+      )}
+      {appImage && (
+        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+          <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
+            The .deb is for Ubuntu, Debian and Mint. On Fedora or another Linux
+            on Intel or AMD:
+          </span>
+          <a
+            href={appImage.href}
+            className={SECONDARY_BUTTON}
+            aria-label={`Download the AppImage, ${appImage.fileName}`}
+          >
+            <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+            Download the AppImage
+          </a>
+        </div>
       )}
       <button
         type="button"

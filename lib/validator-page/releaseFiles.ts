@@ -253,6 +253,8 @@ export function groupReleaseFiles(
       kind: "windows",
       title: "Windows",
       summary: WINDOWS_SUMMARY,
+      // With no Setup.exe in the release, the .msi is the installer.
+      what: "Installer (.msi)",
       file: msi.file,
     });
   }

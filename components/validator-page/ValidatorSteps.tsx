@@ -182,6 +182,9 @@ function LinuxCommands({
   );
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black tw-p-4 max-lg:tw-max-w-md">
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+        Ubuntu, Debian, Mint and Raspberry Pi OS
+      </p>
       {commands.map((entry) => (
         <div key={entry.cpu}>
           {commands.length > 1 && (
@@ -200,6 +203,10 @@ function LinuxCommands({
           </div>
         </div>
       ))}
+      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+        On Fedora or another Linux on Intel or AMD, use the AppImage instead:
+        make it executable and open it.
+      </p>
     </div>
   );
 }

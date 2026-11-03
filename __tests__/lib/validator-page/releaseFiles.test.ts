@@ -65,6 +65,9 @@ describe("groupReleaseFiles", () => {
     expect(
       groups.installers.find((item) => item.kind === "windows")?.file.name
     ).toBe("6529-Validator-0.1.0-x64.msi");
+    expect(
+      groups.installers.find((item) => item.kind === "windows")?.what
+    ).toBe("Installer (.msi)");
     expect(groups.archives.map((item) => item.title)).not.toContain(
       "Windows .msi, x86-64"
     );
