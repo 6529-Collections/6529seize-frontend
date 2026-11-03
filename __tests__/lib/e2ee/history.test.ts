@@ -255,6 +255,7 @@ it("upgrades an indexed v2 checkpoint without rewriting its history", async () =
   current.close();
 });
 
+// The 1,500-message IndexedDB fixture and nine page reads need extra time under coverage.
 it("retains at most two pages while browsing and preserves offscreen summary counts", async () => {
   const storage = createIndexedDbE2eeStorage(new IDBFactory());
   const rows = Array.from({ length: 1500 }, (_, i) => message(i + 1));
@@ -288,7 +289,7 @@ it("retains at most two pages while browsing and preserves offscreen summary cou
   runtime.dirty.add(target.id);
   updateHistorySummary(ctx, runtime);
   expect(runtime.record.history).toMatchObject({ count: 1500, unread: 1499 });
-});
+}, 30_000);
 
 it("refreshes dirty snapshots while unchanged messages retain their identity", () => {
   const store = new EngineStore("p", {} as DeviceDirectory);
