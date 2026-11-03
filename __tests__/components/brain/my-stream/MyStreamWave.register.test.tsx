@@ -36,12 +36,22 @@ const mockUseCompetitionSubmissionWave = jest.fn(
     retry: jest.fn(),
   })
 );
-jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
-  useCompetitionSubmissionWave: (
-    wave: ApiWave | null | undefined,
-    enabled?: boolean
-  ) => mockUseCompetitionSubmissionWave(wave, enabled),
-}));
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => {
+  const { useMemo } = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    useCompetitionSubmissionWave(
+      wave: ApiWave | null | undefined,
+      enabled = true
+    ) {
+      // Match the real hook's stable wave identity across header updates.
+      return useMemo(
+        () => mockUseCompetitionSubmissionWave(wave, enabled),
+        [wave, enabled]
+      );
+    },
+  };
+});
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
