@@ -220,6 +220,73 @@ describe("encrypted conversation list", () => {
     expect(getRow()).toHaveAttribute("href", "/messages/encrypted/a");
   });
 
+  it.each(["left", "invalid", "restored"] as const)(
+    "preserves unread and mention counts on a %s group chat",
+    (status) => {
+      render(
+        <E2eeTestProvider
+          value={contextFor(
+            createFakeE2eeEngine({
+              conversations: [conversation({ status, unread: 3, mentions: 1 })],
+            })
+          )}
+        >
+          <E2eeConversationListPage />
+        </E2eeTestProvider>
+      );
+      const row = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getByRole("link");
+      expect(row).toHaveTextContent("3 unread messages");
+      expect(row).toHaveTextContent("1 mention");
+    }
+  );
+
+  it.each([false, true])(
+    "keeps the displayed ended DM history counts and mute state (muted: %s)",
+    (muted) => {
+      const pair = {
+        kind: "dm" as const,
+        admins: [SELF_ID, ALICE_ID],
+        members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+      };
+      const earlier = conversation({
+        ...pair,
+        g: "old",
+        status: "left",
+        unread: 9,
+      });
+      const latest = conversation({
+        ...pair,
+        g: "latest",
+        status: "left",
+        unread: 2,
+        mentions: 1,
+        updatedAt: earlier.updatedAt + 1,
+      });
+      setE2eeChatMuted(SELF_ID, latest.g, muted);
+      render(
+        <E2eeTestProvider
+          value={contextFor(
+            createFakeE2eeEngine({ conversations: [earlier, latest] })
+          )}
+        >
+          <E2eeConversationListPage />
+        </E2eeTestProvider>
+      );
+      const row = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getByRole("link");
+      expect(row).toHaveAttribute("href", "/messages/encrypted/latest");
+      expect(within(row).queryByText("2 unread messages") !== null).toBe(
+        !muted
+      );
+      expect(within(row).queryByText("1 mention") !== null).toBe(!muted);
+      expect(within(row).queryByText("Muted") !== null).toBe(muted);
+      expect(row).not.toHaveTextContent("9 unread messages");
+    }
+  );
+
   it("shows an empty state with a way to start a chat", () => {
     render(
       <E2eeTestProvider value={contextFor(createFakeE2eeEngine())}>

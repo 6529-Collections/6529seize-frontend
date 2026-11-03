@@ -401,7 +401,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       name: "Chat history",
       exact: true,
     });
-    await expect(history.locator("option")).toHaveCount(2);
+    await expect(history.getByRole("option")).toHaveCount(2);
     const oldGroup = new URL(oldUrl).pathname.split("/").at(-1)!;
     await history.selectOption(oldGroup);
     await expect(alice.page).toHaveURL(oldUrl);

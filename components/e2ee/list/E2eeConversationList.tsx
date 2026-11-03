@@ -302,7 +302,9 @@ export function E2eeConversationList({
         const activeSessions = thread.sessions.filter(
           (session) => session.status === "active"
         );
-        const unmuted = activeSessions.filter(
+        const countedSessions =
+          activeSessions.length > 0 ? activeSessions : [thread.current];
+        const unmuted = countedSessions.filter(
           (session) => !muted.has(session.g)
         );
         const incoming = unmuted
@@ -323,7 +325,7 @@ export function E2eeConversationList({
               (session) => session.g === activeGroup
             )}
             collapsed={collapsed}
-            muted={activeSessions.length > 0 && unmuted.length === 0}
+            muted={unmuted.length === 0}
           />
         );
       })}

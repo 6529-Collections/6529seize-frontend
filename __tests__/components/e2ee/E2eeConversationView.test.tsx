@@ -18,6 +18,7 @@ import {
   E2eeTestProvider,
   GROUP_G,
   message,
+  member,
   SELF_ID,
 } from "./fakeE2eeEngine";
 import { SPLIT_VIEW_BANNER } from "../../../tests/support/e2ee/e2eeCopy";
@@ -405,6 +406,91 @@ describe("E2eeConversationView", () => {
       )
     );
   });
+
+  it.each(["left", "invalid", "active"] as const)(
+    "keeps safety actions for retained %s DM history without allowing message changes",
+    async (status) => {
+      const convo = conversation({
+        g: DM_G,
+        kind: "dm",
+        admins: [SELF_ID, ALICE_ID],
+        members: [member(SELF_ID, "me")],
+        status,
+      });
+      const engine = renderView(convo, [
+        message({
+          id: "old-peer",
+          g: DM_G,
+          text: "retained message",
+          reactions: { "🔥": [ALICE_ID] },
+        }),
+        message({
+          id: "old-self",
+          g: DM_G,
+          senderProfileId: SELF_ID,
+          text: "my old message",
+        }),
+      ]);
+      expect(
+        screen.queryByLabelText("Encrypted message")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "Message actions" })
+      ).toHaveLength(1);
+      expect(screen.getByRole("button", { name: /🔥/ })).toBeDisabled();
+      fireEvent.click(screen.getByRole("button", { name: "Message actions" }));
+      await screen.findByRole("menuitem", {
+        name: "Report illegal or severe harm",
+      });
+      expect(
+        screen.queryByRole("menuitem", { name: "Reply" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("menuitem", { name: /React with/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("menuitem", { name: /^(Edit|Delete)$/ })
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("menuitem", { name: /^Block / }));
+      const blockDialog = await screen.findByRole("dialog", {
+        name: /^Block /,
+      });
+      fireEvent.click(
+        within(blockDialog).getByRole("button", { name: "Block" })
+      );
+      await waitFor(() => expect(mockBlock).toHaveBeenCalledTimes(1));
+      fireEvent.click(screen.getByRole("button", { name: "Message actions" }));
+      fireEvent.click(
+        await screen.findByRole("menuitem", {
+          name: "Report illegal or severe harm",
+        })
+      );
+      const reportDialog = await screen.findByRole("dialog", {
+        name: "Report illegal or severe harm",
+      });
+      fireEvent.click(
+        within(reportDialog).getByRole("radio", {
+          name: "A credible threat of violence",
+        })
+      );
+      const submit = within(reportDialog).getByRole("button", {
+        name: "Send report",
+      });
+      await waitFor(() => expect(submit).toBeEnabled());
+      fireEvent.click(submit);
+      await waitFor(() =>
+        expect(engine.report).toHaveBeenCalledWith(
+          DM_G,
+          "old-peer",
+          "CREDIBLE_THREAT_OF_VIOLENCE",
+          undefined,
+          { includeOriginal: false }
+        )
+      );
+      expect(engine.react).not.toHaveBeenCalled();
+      expect(engine.send).not.toHaveBeenCalled();
+    }
+  );
 
   it("puts mute, block and message settings before reporting", async () => {
     renderView();
