@@ -118,6 +118,12 @@
       // In-repo idb-keyval clone behind the bundler alias: it keeps the full
       // package API for aliased third-party consumers knip cannot see.
       "lib/storage/idb-keyval.ts": ["files", "exports"],
+      // Chain anchor source and validator certificate reader (Speed Demon
+      // W6 C3), written against 6529chain's target design. No app importer
+      // until PLAN-WAVES' v2 event anchor and a desktop validator panel use
+      // them; focused Jest contracts, which knip excludes, cover them.
+      "lib/chain/anchor/**": ["files", "exports", "types"],
+      "lib/chain/validator/**": ["files", "exports", "types"],
       "playwright.config.ts": ["exports"],
       "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],
