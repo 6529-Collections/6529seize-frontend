@@ -1,7 +1,7 @@
 import { act, render } from "@testing-library/react";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import React, {
+import {
   createContext,
   startTransition,
   useContext,
@@ -125,6 +125,9 @@ function Page() {
 }
 
 let history: ReturnType<typeof useNavigationHistoryContext> | null = null;
+// Read through a function: Probe assigns `history` during renders, which
+// control-flow narrowing inside run() cannot see.
+const currentHistory = () => history;
 let commitId = 0;
 let lastObserved: string | null = null;
 // Set by a navigation step; the next commit is that navigation's own render.
@@ -254,17 +257,17 @@ async function run(steps: readonly string[]): Promise<string[]> {
     log.push(`--- ${step}`);
     awaitingNavigationCommit = true;
     await act(async () => {
-      if (step === "BACK") history?.goBack();
+      if (step === "BACK") currentHistory()?.goBack();
       else mockNavigate(parse(step));
     });
     await act(async () => {});
     await commitMetadata();
   }
   log.push("--- back stack");
-  for (let i = 0; i < 10 && history?.canGoBack; i++) {
+  for (let i = 0; i < 10 && currentHistory()?.canGoBack; i++) {
     awaitingNavigationCommit = true;
     await act(async () => {
-      history?.goBack();
+      currentHistory()?.goBack();
     });
     await act(async () => {});
   }
