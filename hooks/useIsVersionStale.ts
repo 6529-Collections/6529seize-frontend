@@ -16,14 +16,31 @@ type VersionStatusResponse = {
   readonly stale?: unknown;
 };
 
-export function useIsVersionStale(interval = 120_000, enabled = true) {
+/**
+ * Whether the URL carries the `showNewVersionToast=true` preview flag. It
+ * follows client-side query changes, so a deep link can force the update
+ * control after mount. Render it under Suspense: it reads search params.
+ */
+export function useVersionPreviewFlag(): boolean {
   const searchParams = useSearchParams();
-  const shouldForceShowNewVersionToast =
-    searchParams.get(SHOW_NEW_VERSION_TOAST_PARAM) === "true";
-  const [stale, setStale] = useState(shouldForceShowNewVersionToast);
+  return searchParams.get(SHOW_NEW_VERSION_TOAST_PARAM) === "true";
+}
+
+/**
+ * Polls the deployed version. `shouldForceShowNewVersionToast` comes from
+ * useVersionPreviewFlag; while it is still null (the reader has not rendered
+ * yet) nothing is checked, so a forced preview never polls first.
+ */
+export function useIsVersionStale(
+  interval = 120_000,
+  enabled = true,
+  // null: not known yet.
+  shouldForceShowNewVersionToast: boolean | null = false
+) {
+  const [stale, setStale] = useState(shouldForceShowNewVersionToast === true);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || shouldForceShowNewVersionToast === null) {
       return;
     }
 
