@@ -46,7 +46,7 @@ export default function HeaderQRScanner({
   readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-  const baseEndpoint = publicEnv.BASE_ENDPOINT ?? "https://6529.io";
+  const baseEndpoint = publicEnv.BASE_ENDPOINT;
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();
@@ -126,7 +126,6 @@ export default function HeaderQRScanner({
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
-      let path = "";
       let queryParams: Record<string, string | number> = {};
 
       if (url.origin === baseEndpoint) {
@@ -165,22 +164,18 @@ export default function HeaderQRScanner({
           stringQueryParams
         ).toString();
 
-        switch (scope) {
-          case DeepLinkScope.NAVIGATE:
-            path = `/${pathParts.join("/")}`;
-            break;
-          default:
-            console.warn("Unknown Deep Link Scope", scope);
-            setToast({
-              message: invalidQRCodeMessage,
-              type: "error",
-            });
-            return;
+        if (scope !== DeepLinkScope.NAVIGATE) {
+          console.warn("Unknown Deep Link Scope", scope);
+          setToast({
+            message: invalidQRCodeMessage,
+            type: "error",
+          });
+          return;
         }
 
         // Navigate to the extracted path
         onScanSuccess();
-        const routerPath = `${path}${
+        const routerPath = `/${pathParts.join("/")}${
           queryParamsString ? `?${queryParamsString}` : ""
         }`;
         router.push(routerPath);
