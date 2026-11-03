@@ -195,9 +195,7 @@ test.describe("Coming up local decision time", () => {
     const decisionLabel = page
       .getByRole("region", { name: "Coming up", exact: true })
       .locator("time");
-    await expect(decisionLabel).toHaveText(
-      "Next decision tomorrow at 00:00."
-    );
+    await expect(decisionLabel).toHaveText("Next decision tomorrow at 00:00.");
     await expect(decisionLabel).toHaveAttribute(
       "datetime",
       decision.toISOString()
@@ -287,7 +285,9 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
       const heading = await region
         .getByText("Subscription Minting", { exact: true })
         .boundingBox();
-      const action = region.getByRole("link", { name: /^(Set up|Manage|Choose drops)$/ });
+      const action = region.getByRole("link", {
+        name: /^(Set up|Manage|Choose drops)$/,
+      });
       const actionBox = await action.boundingBox();
       const infoBox = await region
         .getByRole("link", { name: "Learn more about The Memes subscriptions" })
@@ -1138,43 +1138,30 @@ test.describe("Home Page @smoke @medium @large", () => {
     page,
   }, testInfo) => {
     const section = page.getByRole("region", { name: "What is 6529?" });
-    const articles = section.getByRole("article");
-    const waveImages = page
-      .getByRole("region", { name: "What is 6529?" })
-      .getByRole("article")
-      .filter({
-        has: page.getByRole("heading", {
-          name: "Where the network coordinates",
-        }),
-      })
-      .locator("img");
+    const steps = section.getByRole("listitem");
     const links = section.getByRole("link");
     await expect(section).toBeVisible();
-    await expect(articles).toHaveCount(3);
+    await expect(steps).toHaveCount(4);
+    await expect(section.getByText("Running", { exact: true })).toBeVisible();
     await expect(links).toHaveText([
-      "Browse The Memes",
-      "Browse Waves",
-      "Explore Main Stage",
+      "Open Main Stage",
+      "How TDH works",
+      "Visit the Network Museum",
     ]);
     for (const width of [390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
-      const boxes = await articles.evaluateAll((items) =>
+      const columns = width < 768 ? 1 : width < 1024 ? 2 : 4;
+      const boxes = await steps.evaluateAll((items) =>
         items.map((item) => {
-          const { x, y, width, height } = item.getBoundingClientRect();
-          return { x, y, width, height };
+          const { x, y } = item.getBoundingClientRect();
+          return { x, y };
         })
       );
       for (const [index, box] of boxes.entries()) {
-        if (index === 0) continue;
-        const previous = boxes[index - 1]!;
-        if (width < 768) {
-          expect(box.y).toBeGreaterThanOrEqual(
-            previous.y + previous.height - 1
-          );
-          expect(Math.abs(box.x - previous.x)).toBeLessThan(1);
-        } else {
-          expect(Math.abs(box.y - previous.y)).toBeLessThan(1);
-          expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
+        const rowStart = boxes[index - (index % columns)]!;
+        expect(Math.abs(box.y - rowStart.y)).toBeLessThan(1);
+        if (index % columns === 0) {
+          expect(Math.abs(box.x - boxes[0]!.x)).toBeLessThan(1);
         }
       }
       await links.first().focus();
@@ -1185,20 +1172,6 @@ test.describe("Home Page @smoke @medium @large", () => {
         if (index < 2) await page.keyboard.press("Tab");
       }
       await expectNoHorizontalOverflow(page);
-      await expect(waveImages).toHaveCount(4);
-      await waveImages.first().scrollIntoViewIfNeeded();
-      await expect
-        .poll(() =>
-          waveImages.evaluateAll((images) =>
-            images.every(
-              (image) =>
-                image instanceof HTMLImageElement &&
-                image.complete &&
-                image.naturalWidth > 0
-            )
-          )
-        )
-        .toBe(true);
       await section.screenshot({
         path: testInfo.outputPath(`what-is-${width}.png`),
       });
@@ -1207,7 +1180,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(links.first()).toHaveCSS("transition-property", "none");
     await expect(
       section
-        .getByRole("link", { name: "Browse The Memes", exact: true })
+        .getByRole("link", { name: "Open Main Stage", exact: true })
         .locator("svg")
     ).toHaveCSS("transition-property", "none");
   });
@@ -1249,8 +1222,12 @@ test.describe("Home Page @smoke @medium @large", () => {
       "Create profile",
       "Join a Wave",
     ]);
-    await expect(start.getByRole("heading", { name: "Collect or create" })).toBeVisible();
-    await expect(start.getByRole("link", { name: "Collect or create", exact: true })).toHaveCount(0);
+    await expect(
+      start.getByRole("heading", { name: "Collect or create" })
+    ).toBeVisible();
+    await expect(
+      start.getByRole("link", { name: "Collect or create", exact: true })
+    ).toHaveCount(0);
     for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1100 });
       for (const action of await actions.all()) {
@@ -1285,10 +1262,19 @@ test.describe("Home Page @smoke @medium @large", () => {
     }
     await Promise.all([
       page.waitForURL(/\/about\/apply$/, { waitUntil: "domcontentloaded" }),
-      start.getByRole("link", { name: "submit your own art", exact: true }).click(),
+      start
+        .getByRole("link", { name: "submit your own art", exact: true })
+        .click(),
     ]);
-    await expect(page.getByRole("heading", { name: "Apply", exact: true, level: 1 })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Seeking a Nomination (New Artists)", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Apply", exact: true, level: 1 })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Seeking a Nomination (New Artists)",
+        exact: true,
+      })
+    ).toBeVisible();
   });
 
   test("homepage wave cards use desktop artwork overlays and preserve mobile details", async ({
@@ -1321,12 +1307,19 @@ test.describe("Home Page @smoke @medium @large", () => {
         await card.scrollIntoViewIfNeeded();
         const hasArtwork = (await card.getByRole("img").count()) > 0;
         const expectedTint = width >= 768 && hasArtwork ? "58 7 7" : "";
-        await expect.poll(() => card.evaluate((element) => {
-          const details = element.lastElementChild!;
-          return getComputedStyle(details).getPropertyValue("--card-tint").trim();
-        })).toBe(expectedTint);
-        const gradient = await card.evaluate((element) =>
-          getComputedStyle(element.lastElementChild!).backgroundImage
+        await expect
+          .poll(() =>
+            card.evaluate((element) => {
+              const details = element.lastElementChild!;
+              return getComputedStyle(details)
+                .getPropertyValue("--card-tint")
+                .trim();
+            })
+          )
+          .toBe(expectedTint);
+        const gradient = await card.evaluate(
+          (element) =>
+            getComputedStyle(element.lastElementChild!).backgroundImage
         );
         if (width < 768) {
           expect(gradient).toBe("none");
@@ -1361,7 +1354,10 @@ test.describe("Home Page @smoke @medium @large", () => {
           };
         });
         if (width < 768) {
-          expect(layout.cover.width).toBeCloseTo((layout.card.width - 2) / 3, 0);
+          expect(layout.cover.width).toBeCloseTo(
+            (layout.card.width - 2) / 3,
+            0
+          );
           expect(layout.cover.right).toBeCloseTo(layout.details.left, 0);
           expect(layout.cover.top).toBeCloseTo(layout.details.top, 0);
         } else {
@@ -1454,7 +1450,8 @@ test.describe("Home Page @smoke @medium @large", () => {
       expect(layout.cover.width).toBeCloseTo(layout.card.width, 0);
       expect(layout.cover.height).toBeCloseTo(layout.card.height, 0);
       expect(layout.card.height).toBeCloseTo(
-        width < 768 ? Math.max(layout.card.width, 288) : layout.card.width, 0
+        width < 768 ? Math.max(layout.card.width, 288) : layout.card.width,
+        0
       );
       expect(layout.details.top).toBeGreaterThan(layout.card.top);
       expect(layout.metrics.bottom).toBeLessThan(layout.card.bottom);
@@ -1804,7 +1801,8 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(compact.timer.top).toBeGreaterThanOrEqual(compact.row.top + 12);
     expect(
       Math.abs(
-        compact.timer.left + compact.timer.width / 2 -
+        compact.timer.left +
+          compact.timer.width / 2 -
           (compact.row.left + compact.row.width / 2)
       )
     ).toBeLessThanOrEqual(1);
@@ -1844,10 +1842,13 @@ test.describe("Home Page @smoke @medium @large", () => {
           };
         });
         // The timer stays centered in its own row below the complete heading.
-        expect(mobileLayout.timer.top).toBeGreaterThan(mobileLayout.phase.bottom);
+        expect(mobileLayout.timer.top).toBeGreaterThan(
+          mobileLayout.phase.bottom
+        );
         expect(
           Math.abs(
-            mobileLayout.timer.left + mobileLayout.timer.width / 2 -
+            mobileLayout.timer.left +
+              mobileLayout.timer.width / 2 -
               (mobileLayout.box.left + mobileLayout.box.width / 2)
           )
         ).toBeLessThanOrEqual(1);
@@ -1960,15 +1961,25 @@ test.describe("Home Page @smoke @medium @large", () => {
       await page.mouse.move(0, 0);
       await expect(waveLink).toHaveCSS("transform", "none");
       const before = await waveLink.boundingBox();
-      await waveLink.screenshot({ path: testInfo.outputPath("wave-card-rest.png") });
+      await waveLink.screenshot({
+        path: testInfo.outputPath("wave-card-rest.png"),
+      });
       await waveLink.hover();
       // The requested desktop motion replaces the former border-only feedback.
-      await expect(waveLink).toHaveCSS("border-color", "rgba(255, 255, 255, 0.2)");
-      await expect(waveLink).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, -4)");
-      await expect(page.getByRole("link", { name: /^View wave / }).first().locator("img")).toHaveCSS(
-        "transform",
-        "matrix(1.06, 0, 0, 1.06, 0, 0)"
+      await expect(waveLink).toHaveCSS(
+        "border-color",
+        "rgba(255, 255, 255, 0.2)"
       );
+      await expect(waveLink).toHaveCSS(
+        "transform",
+        "matrix(1, 0, 0, 1, 0, -4)"
+      );
+      await expect(
+        page
+          .getByRole("link", { name: /^View wave / })
+          .first()
+          .locator("img")
+      ).toHaveCSS("transform", "matrix(1.06, 0, 0, 1.06, 0, 0)");
       await expect(
         // Wave names and ordering differ between deployed environments.
         // Keep checking the hovered card's actual title color.
@@ -1981,7 +1992,9 @@ test.describe("Home Page @smoke @medium @large", () => {
       expect(after!.y).toBeCloseTo(before!.y - 4, 0);
       expect(after!.width).toBe(before!.width);
       expect(after!.height).toBe(before!.height);
-      await waveLink.screenshot({ path: testInfo.outputPath("wave-card-hover.png") });
+      await waveLink.screenshot({
+        path: testInfo.outputPath("wave-card-hover.png"),
+      });
 
       await viewAll.hover();
       await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
@@ -2027,8 +2040,18 @@ test.describe("Home Page @smoke @medium @large", () => {
     if (isDesktopWebProject(testInfo.project.name)) {
       await waveLink.hover();
       await expect(waveLink).toHaveCSS("transform", "none");
-      await expect(page.getByRole("link", { name: /^View wave / }).first().locator("img")).toHaveCSS("transform", "none");
-      await expect(page.getByRole("link", { name: /^View wave / }).first().locator("img")).toHaveCSS("transition-property", "none");
+      await expect(
+        page
+          .getByRole("link", { name: /^View wave / })
+          .first()
+          .locator("img")
+      ).toHaveCSS("transform", "none");
+      await expect(
+        page
+          .getByRole("link", { name: /^View wave / })
+          .first()
+          .locator("img")
+      ).toHaveCSS("transition-property", "none");
     }
     await expect(viewAll).not.toHaveCSS("box-shadow", "none");
     await expectNoHorizontalOverflow(page);

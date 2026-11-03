@@ -38,18 +38,23 @@ sections:
    - Mobile uses two equal-width buttons with 48px touch targets; larger layouts
      keep the actions together beneath the copy.
 4. Logged-out visitors see `What is 6529?` between the hero and latest-drop slot:
-   - `Art with purpose`: `Browse The Memes` opens `/the-memes`.
-   - `Where the network coordinates`: “Waves are open spaces to discuss, create,
-     and vote together.” `Browse Waves` opens `/waves`.
-   - `A real say`: “Vote on what 6529 funds, builds, and mints next.”
-     `Explore Main Stage` opens The Memes - Main Stage Wave at
-     `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
-   - Desktop and tablet use three open columns with subtle vertical dividers.
-     Mobile stacks the topics with horizontal dividers and keyboard-accessible
-     text links. The artwork, wave tiles, and voting bars are decorative; they
-     do not show live vote totals or individual wave presence. The four wave
-     tiles use fixed local thumbnails of The Memes Main Stage, Memes-Chat,
-     maybe’s dive bar, and 6529 Tech Feedback.
+   - One paragraph answers the question: 6529 is building a network for
+     uncensorable organizations in any field, with no company in control,
+     6529 included, and The Memes and the 6529 Network Museum are its first
+     proofs of concept.
+   - Four steps follow, each with a stage mark that pairs a shape with a word
+     (`Running`, `In testing`, `In design`), so the stage never rests on colour:
+     - `Holders choose the art` (`Running`): `Open Main Stage` opens The Memes -
+       Main Stage Wave at `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
+     - `Holders check the numbers` (`In testing`): `How TDH works` opens
+       `/network/tdh`.
+     - `The organizations to come` (`In design`): `Visit the Network Museum`
+       opens `/museum/network`.
+     - `AI on members' machines` (`In design`): no link.
+   - Each step sits under a top rule whose line style follows its stage: solid
+     for running, dashed for testing, dotted for design.
+   - Desktop shows four columns, tablet two, and mobile stacks the steps. Links
+     are keyboard-accessible text links. The section has no images.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
