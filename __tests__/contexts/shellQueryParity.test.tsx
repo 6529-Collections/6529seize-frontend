@@ -12,6 +12,14 @@ import {
 } from "react";
 
 // Behaviour-parity harness for the shell providers that read search params.
+//
+// Scope: this proves equivalence between the refactor and main under a
+// modeled App Router (the mocked next/navigation below), not real Next
+// timing. Both sides are recorded with this same model, so a mismatch is a
+// real difference between the implementations; a match does not prove the
+// model matches Next. End-to-end title and Back behavior stays covered by the
+// Playwright specs.
+//
 // It drives TitleProvider, NavigationHistoryProvider and DynamicHeadTitle the
 // way the App Router does:
 // - a navigation updates pathname and search params in one transition render;

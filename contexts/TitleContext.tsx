@@ -131,11 +131,11 @@ const getDefaultTitleForRoute = (
 };
 
 const isWaveRouteFor = (
-  pathname: string | null,
-  searchParams: Pick<URLSearchParams, "get"> | null
+  pathname: string,
+  searchParams: Pick<URLSearchParams, "get">
 ): boolean =>
-  STREAM_INDEX_ROUTES.some((route) => pathname?.startsWith(route)) ||
-  (pathname === "/" && searchParams?.get("view") === "waves");
+  STREAM_INDEX_ROUTES.some((route) => pathname.startsWith(route)) ||
+  (pathname === "/" && searchParams.get("view") === "waves");
 
 type RouteObservation = {
   readonly pathname: string;
