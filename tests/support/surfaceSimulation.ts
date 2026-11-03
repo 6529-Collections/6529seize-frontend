@@ -143,6 +143,18 @@ export async function installSurfaceSimulation(
             : // Current surface simulations do not exercise native file URL conversion.
               (filePath: string) => filePath;
         let listenerIdCounter = 0;
+        const keyboardListeners = new Map<
+          string,
+          { eventName: string; remove: () => void }
+        >();
+        Object.defineProperty(runtime, "__playwrightKeyboardListeners", {
+          configurable: true,
+          get: () =>
+            Array.from(
+              keyboardListeners.values(),
+              ({ eventName }) => eventName
+            ),
+        });
         Object.defineProperty(runtime, "Capacitor", {
           configurable: true,
           writable: true,
@@ -167,9 +179,26 @@ export async function installSurfaceSimulation(
                 simulatedKey === "App.addListener" ||
                 simulatedKey === "Keyboard.addListener"
               ) {
-                return Promise.resolve(
-                  `playwright-${platform}-${pluginName}-${++listenerIdCounter}`
-                );
+                const callbackId = `playwright-${platform}-${pluginName}-${++listenerIdCounter}`;
+                if (
+                  pluginName === "Keyboard" &&
+                  typeof callback === "function"
+                ) {
+                  const { eventName } = options as { eventName: string };
+                  const eventType = `playwright:${eventName}`;
+                  const listener = (event: Event) => {
+                    callback((event as CustomEvent).detail);
+                    // Acknowledge callback delivery independently of layout.
+                    event.preventDefault();
+                  };
+                  globalThis.addEventListener(eventType, listener);
+                  keyboardListeners.set(callbackId, {
+                    eventName,
+                    remove: () =>
+                      globalThis.removeEventListener(eventType, listener),
+                  });
+                }
+                return Promise.resolve(callbackId);
               }
               return existingNativeCallback?.(
                 pluginName,
@@ -184,6 +213,11 @@ export async function installSurfaceSimulation(
               options: unknown
             ) => {
               const simulatedKey = `${pluginName}.${methodName}`;
+              if (simulatedKey === "Keyboard.removeListener") {
+                const { callbackId } = options as { callbackId: string };
+                keyboardListeners.get(callbackId)?.remove();
+                keyboardListeners.delete(callbackId);
+              }
               if (Object.hasOwn(simulatedNativeResponses, simulatedKey)) {
                 return Promise.resolve(simulatedNativeResponses[simulatedKey]);
               }
