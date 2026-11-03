@@ -33,9 +33,13 @@ describe("TDH page inputs", () => {
       document.body.appendChild(container);
       container.innerHTML = renderToString(render());
       const input = container.querySelector("input");
+      expect(input).toBeInstanceOf(HTMLInputElement);
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
       // Something outside of React (a test harness or a browser extension)
       // adds an inline style to the server-rendered input before hydration.
-      input?.style.setProperty("caret-color", "transparent");
+      input.style.setProperty("caret-color", "transparent");
       const errorSpy = jest.spyOn(console, "error").mockImplementation();
 
       await act(async () => {
