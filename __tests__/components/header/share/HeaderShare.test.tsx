@@ -2386,6 +2386,38 @@ describe("HeaderShare", () => {
     });
   });
 
+  it("runs the enter transition when the modal mounts already open", async () => {
+    // The lazy wrapper mounts the modal on the first open, with show=true.
+    const frames: FrameRequestCallback[] = [];
+    const requestFrame = jest
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback) => frames.push(callback));
+    try {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+      renderWithProviders(
+        <HeaderConnectModal show={true} onClose={jest.fn()} />
+      );
+
+      const modal = screen.getByTestId("header-share-modal");
+      expect(modal).toHaveClass("tw-opacity-0", "tw-scale-95");
+      expect(modal).not.toHaveClass("tw-opacity-100");
+      expect(frames.length).toBeGreaterThan(0);
+
+      act(() => {
+        for (const frame of frames.splice(0)) frame(0);
+      });
+      await waitFor(() =>
+        expect(screen.getByTestId("header-share-modal")).toHaveClass(
+          "tw-opacity-100",
+          "tw-scale-100"
+        )
+      );
+    } finally {
+      requestFrame.mockRestore();
+    }
+  });
+
   describe("QR Code Generation", () => {
     beforeEach(() => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
