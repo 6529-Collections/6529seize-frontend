@@ -920,6 +920,9 @@ async function installCompetitionApi(
   });
   return {
     requests,
+    setVote: (id: string, value: number) => {
+      votes[id] = value;
+    },
     setAnonymousEntry: (id: string, hidden: boolean) => {
       if (hidden) anonymousEntries.add(id);
       else anonymousEntries.delete(id);
@@ -2970,6 +2973,60 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     }
     expect(runtimeErrors).toEqual([]);
+  });
+
+  test("reuses fresh My Votes limits across sorts and refreshes them after voting", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date());
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    let creditReads = 0;
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/credits/me") &&
+        url.searchParams.get("entry_id") === "entry-alpha"
+      )
+        creditReads++;
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const vote = panel.getByRole("spinbutton", {
+      name: "Your vote",
+      exact: true,
+    });
+    await expect(vote).toHaveValue("25");
+    await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
+    expect(creditReads).toBe(1);
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    for (const label of [
+      "Leaderboard position",
+      "Last voted",
+      "Your vote amount",
+    ]) {
+      await panel.getByRole("button", { name: /^Sort by:/ }).click();
+      const options = isMobile
+        ? page.getByRole("dialog", { name: "Sort by", exact: true })
+        : page.getByRole("menu");
+      await options
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: label,
+          exact: true,
+        })
+        .click();
+      await expect(options).toHaveCount(0);
+      await expect(vote).toHaveValue("25");
+      expect(creditReads).toBe(1);
+    }
+    expect(sandbox.requests).toHaveLength(0);
+    await vote.fill("40");
+    await panel.getByRole("button", { name: "Save vote", exact: true }).click();
+    await expect.poll(() => creditReads).toBe(2);
+    await expect(vote).toHaveValue("40");
+    await expect(panel.getByText(/^Available in wave\s*60$/)).toBeVisible();
+    expect(sandbox.requests).toHaveLength(1);
+    expect(sandbox.requests[0]?.body["value"]).toBe(40);
   });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
