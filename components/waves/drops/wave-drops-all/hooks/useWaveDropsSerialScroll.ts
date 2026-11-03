@@ -8,6 +8,10 @@ import {
   type RefObject,
 } from "react";
 import { delay } from "../utils/delay";
+import {
+  observeSerialScrollTarget,
+  type SerialScrollAnchor,
+} from "../utils/observeSerialScrollTarget";
 
 type VirtualizedWaveDropsResult = ReturnType<typeof useVirtualizedWaveDrops>;
 type WaveMessagesResult = VirtualizedWaveDropsResult["waveMessages"];
@@ -131,59 +135,35 @@ export const useWaveDropsSerialScroll = ({
   }
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
-  const scrollAnchorRef = useRef<{
-    readonly target: HTMLDivElement;
-    readonly isActive: () => boolean;
-    readonly release: () => void;
-  } | null>(null);
+  const scrollAnchorRef = useRef<SerialScrollAnchor | null>(null);
 
   const holdScrollTarget = useCallback(
     (container: HTMLDivElement, target: HTMLDivElement) => {
       if (scrollAnchorRef.current?.target === target)
         return scrollAnchorRef.current;
       scrollAnchorRef.current?.release();
-      const controls = container.parentElement ?? container;
-      let active = true;
       // Placeholder hydration and media loading can move a settled target. Keep
       // it visible until the reader interacts; never hold ordinary wave entry.
-      const observer =
-        typeof IntersectionObserver === "undefined"
-          ? null
-          : new IntersectionObserver(
-              () => {
-                if (!active) return;
-                if (!container.contains(target)) {
-                  release();
-                  return;
-                }
-                if (!isElementVisibleInContainer({ container, target })) {
-                  scrollElementIntoContainerCenter({
-                    behavior: "auto",
-                    container,
-                    target,
-                  });
-                }
-              },
-              { root: container, threshold: [0, 1] }
-            );
-      function release() {
-        active = false;
-        observer?.disconnect();
-        for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
-          controls.removeEventListener(event, release, true);
-        }
-        if (scrollAnchorRef.current?.target === target)
-          scrollAnchorRef.current = null;
-      }
-      const anchor = { target, release, isActive: () => active };
+      const anchor = observeSerialScrollTarget({
+        container,
+        target,
+        onTarget: (currentTarget) => {
+          if (
+            !isElementVisibleInContainer({ container, target: currentTarget })
+          ) {
+            scrollElementIntoContainerCenter({
+              behavior: "auto",
+              container,
+              target: currentTarget,
+            });
+          }
+        },
+        onRelease: () => {
+          if (scrollAnchorRef.current === anchor)
+            scrollAnchorRef.current = null;
+        },
+      });
       scrollAnchorRef.current = anchor;
-      observer?.observe(target);
-      for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
-        controls.addEventListener(event, release, {
-          capture: true,
-          passive: true,
-        });
-      }
       return anchor;
     },
     []
