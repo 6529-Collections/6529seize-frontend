@@ -422,7 +422,7 @@ function toDeviceInfo(
       : "web";
   return {
     deviceKey: record.device_key.toLowerCase(),
-    label: own && ctx.device ? ctx.device.label : record.label,
+    label: record.label,
     platform,
     createdAt: record.created_at,
     lastSeenAt: record.last_seen_at,

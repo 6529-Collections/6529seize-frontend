@@ -1,6 +1,18 @@
 import DevicesPreferencesSettings from "@/components/preferences/DevicesPreferencesSettings";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+
+const mockRenameDevice = jest.fn();
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: (...args: unknown[]) => mockRenameDevice(...args),
+}));
 
 const mockEncryptionQuery = jest.fn();
 let mockEncryptionEnabled = false;
@@ -242,6 +254,42 @@ describe("DevicesPreferencesSettings", () => {
         /clears this device’s local encrypted chat history/
       )
     ).toBeVisible();
+  });
+
+  it("renames a linked grant through the same device record Mobile uses", async () => {
+    mockEncryptionEnabled = true;
+    mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+    mockQuery = { ...mockQuery, data: [phone] };
+    const deviceKey = `0x${"cc".repeat(32)}`;
+    const refetch = jest.fn();
+    mockRenameDevice.mockResolvedValueOnce({ label: "My phone" });
+    mockEncryptionQuery.mockReturnValue({
+      isSuccess: true,
+      refetch,
+      data: [
+        {
+          device_key: deviceKey,
+          grant_id: phone.id,
+          grant_message: "combined grant",
+          label: "6529 app on iOS",
+          revoked_at: null,
+          grant: { expires_at: (NOW + DAY) / 1000 },
+        },
+      ],
+    });
+
+    render(<DevicesPreferencesSettings />);
+    fireEvent.click(screen.getByText("Rename device"));
+    fireEvent.change(screen.getByLabelText("Device name"), {
+      target: { value: "My phone" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+
+    await waitFor(() => expect(refetch).toHaveBeenCalled());
+    expect(mockRenameDevice).toHaveBeenCalledWith({
+      endpoint: `e2ee/devices/${deviceKey}/label`,
+      body: { label: "My phone" },
+    });
   });
 
   it("revokes a device after confirmation", async () => {

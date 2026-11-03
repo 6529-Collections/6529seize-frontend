@@ -28,7 +28,8 @@ import Link from "next/link";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
-import { commonApiFetch } from "@/services/api/common-api";
+import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 type GrantStatus = "active" | "expired" | "revoked";
 
@@ -99,13 +100,6 @@ function getGrantDates(
   ];
 }
 
-function getDeviceLabel(grantLabel: string, linkedLabel?: string): string {
-  if (grantLabel === "6529 Mobile" && linkedLabel?.startsWith("6529 app on ")) {
-    return linkedLabel.replace("6529 app", "6529 Mobile");
-  }
-  return grantLabel;
-}
-
 function DeviceGrantRow({
   grant,
   linkedDevice,
@@ -113,17 +107,21 @@ function DeviceGrantRow({
   isThisDevice,
   nowMs,
   onRevoke,
+  onRename,
+  canRename,
 }: {
   readonly grant: ApiDeviceGrant;
   readonly linkedDevice: ApiE2eeDevice | undefined;
   readonly canRevoke: boolean;
   readonly isThisDevice: boolean;
   readonly nowMs: number;
+  readonly onRename: (name: string) => Promise<void>;
+  readonly canRename: boolean;
   readonly onRevoke: (grant: ApiDeviceGrant) => void;
 }) {
   const locale = useBrowserLocale();
   const status = getStatus(grant, nowMs);
-  const label = getDeviceLabel(grant.device_label, linkedDevice?.label);
+  const label = linkedDevice?.label ?? grant.device_label;
   const statusKey: MessageKey = `signedMessages.devices.status.${status}`;
 
   return (
@@ -189,6 +187,16 @@ function DeviceGrantRow({
           {t(locale, "signedMessages.devices.revoke")}
         </Button>
       )}
+      {canRename &&
+        grant.revoked_at === null &&
+        (!linkedDevice || linkedDevice.revoked_at === null) && (
+          <details className="tw-basis-full">
+            <summary className="tw-cursor-pointer tw-text-sm tw-text-primary-300">
+              {t(locale, "e2ee.devices.rename.action")}
+            </summary>
+            <RenameDevice label={label} onRename={onRename} />
+          </details>
+        )}
     </li>
   );
 }
@@ -253,6 +261,25 @@ export default function DevicesPreferencesSettings() {
       return data.devices;
     },
   });
+  const renameDevice = async (device: ApiE2eeDevice, name: string) => {
+    await commonApiPost<{ label: string }, ApiE2eeDevice>({
+      endpoint: `e2ee/devices/${encodeURIComponent(device.device_key)}/label`,
+      body: { label: name },
+    });
+    await encryptionDevices.refetch();
+  };
+  const renameGrant = async (grant: ApiDeviceGrant, name: string) => {
+    const device = linkedDevices.get(grant.id);
+    if (device) {
+      await renameDevice(device, name);
+      return;
+    }
+    await commonApiPost<{ label: string }, ApiDeviceGrant>({
+      endpoint: `device-grants/${encodeURIComponent(grant.id)}/label`,
+      body: { label: name },
+    });
+    await query.refetch();
+  };
   const local = useLocalDeviceKeys(listAddress);
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
@@ -370,6 +397,8 @@ export default function DevicesPreferencesSettings() {
               isThisDevice={ownKeys.has(grant.device_key.toLowerCase())}
               nowMs={nowMs}
               onRevoke={setPendingRevoke}
+              canRename={!encryptionEnabled || encryptionDevices.isSuccess}
+              onRename={(name) => renameGrant(grant, name)}
             />
           ))}
           {separateDevices.map((device) => (
@@ -403,6 +432,17 @@ export default function DevicesPreferencesSettings() {
                 )}
               </p>
               {device.revoked_at === null && (
+                <details>
+                  <summary className="tw-cursor-pointer tw-text-sm tw-text-primary-300">
+                    {t(locale, "e2ee.devices.rename.action")}
+                  </summary>
+                  <RenameDevice
+                    label={device.label}
+                    onRename={(name) => renameDevice(device, name)}
+                  />
+                </details>
+              )}
+              {device.revoked_at === null && (
                 <Link
                   href={getEncryptedDevicesRoute()}
                   className="tw-text-sm tw-text-primary-300"
@@ -424,10 +464,8 @@ export default function DevicesPreferencesSettings() {
             ? "e2ee.devices.revokeCombinedTitle"
             : "signedMessages.devices.revokeProofTitle",
           {
-            label: getDeviceLabel(
-              pendingRevoke?.device_label ?? "",
-              pendingLinkedDevice?.label
-            ),
+            label:
+              pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
           }
         )}
         message={t(
