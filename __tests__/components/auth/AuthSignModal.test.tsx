@@ -72,9 +72,7 @@ describe("AuthSignModal onboarding", () => {
   it("cancels sign-in with the explicit Cancel button", async () => {
     const props = makeProps();
     render(<AuthSignModal {...props} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: "Cancel", exact: true })
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(props.onCancelSignRequest).toHaveBeenCalledTimes(1);
   });
   it("ignores clicks outside the dialog surface", () => {

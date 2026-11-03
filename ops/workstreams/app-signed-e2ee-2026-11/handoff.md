@@ -151,5 +151,7 @@ Staging has app grants on. Use a throwaway wallet with a profile.
 5. Desktop only: with the window unfocused, have the other account send a
    message. A "New encrypted message" notification appears; selecting it
    opens that chat.
-6. Revoke the app's grant in Devices. Encrypted messages stop on that app too.
+6. Revoke the app's signing grant in Devices. A combined grant also revokes the
+   encrypted device linked to it. With separate setup, encryption remains active
+   until you revoke the encrypted device through its own linked grant.
 7. Repeat steps 1 to 4 with a WalletConnect wallet on the phone.
