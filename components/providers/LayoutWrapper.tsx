@@ -19,16 +19,19 @@ import {
 } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ComponentType, ReactNode } from "react";
 
-type LayoutComponentType = ComponentType<{
+type LayoutProps = {
   readonly children: ReactNode;
   readonly isSmall?: boolean;
-}>;
+};
+type LayoutComponentType = ComponentType<LayoutProps>;
 
 // Only the Capacitor app uses the native layout (bottom navigation and the
-// mobile waves/messages shell), so web visitors never download it.
-const nativeLayoutLoader = createLazyComponentLoader<{
-  readonly children: ReactNode;
-}>(() => import("@/components/layout/MobileLayout"));
+// mobile waves/messages shell), so web visitors never download it. The loaded
+// component receives the same props as WebLayout, `isSmall` included;
+// MobileLayout ignores it, as it did when it was imported statically.
+const nativeLayoutLoader = createLazyComponentLoader<LayoutProps>(
+  () => import("@/components/layout/MobileLayout")
+);
 const LoadedNativeLayout = nativeLayoutLoader.Loaded;
 
 // NATIVE_STARTUP_SCRIPT marks the document while the head is parsed, before
@@ -36,7 +39,7 @@ const LoadedNativeLayout = nativeLayoutLoader.Loaded;
 // arrives with hydration instead of after it.
 if (
   typeof document !== "undefined" &&
-  document.documentElement.hasAttribute("data-native-runtime")
+  document.documentElement.dataset["nativeRuntime"] !== undefined
 ) {
   nativeLayoutLoader.preload();
 }
