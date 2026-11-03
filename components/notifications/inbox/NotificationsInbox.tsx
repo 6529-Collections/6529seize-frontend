@@ -41,7 +41,7 @@ export default function NotificationsInbox({
     identity: handle,
     causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
   });
-  const notifications = query.rawItems.filter((item) =>
+  const notifications = query.items.filter((item) =>
     isNotificationVisible(item, hideNftPurchasing)
   );
   const markRead = useMutation({
@@ -78,9 +78,8 @@ export default function NotificationsInbox({
     return () => clearTimeout(timeout);
   }, [handle, query.isSuccess, markNotificationRead]);
 
-  const openNotification = (id: number) => {
-    if (notifications.find((item) => item.id === id)?.read_at === null)
-      markRead.mutate(id);
+  const openNotification = (unreadIds: number[]) => {
+    for (const id of unreadIds) markRead.mutate(id);
     onClose();
   };
   let message: string | null = null;

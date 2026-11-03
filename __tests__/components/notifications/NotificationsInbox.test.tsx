@@ -56,7 +56,7 @@ function setProfile(handle: string | null, proxy = false) {
 
 function setQuerySuccess(isSuccess: boolean) {
   jest.mocked(useNotificationsQuery).mockReturnValue({
-    rawItems: [],
+    items: [],
     isSuccess,
     isPending: !isSuccess,
   } as unknown as ReturnType<typeof useNotificationsQuery>);
