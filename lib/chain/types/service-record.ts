@@ -79,10 +79,28 @@ export type ServiceRecord = ServiceRecordV0;
 /** VS4/VS7/GW4: clients use at least two operators per function. */
 export const SERVICE_MIN_OPERATORS = 2;
 
-/** Distinct operators offering `role`. VS9: distinct records do not prove distinct operators. */
+/**
+ * The operator key used to count distinct operators.
+ *
+ * VS1 identifies an operator by its principal, so a principal ID (compared
+ * case-insensitively, as hex) is the key. A record without a principal
+ * falls back to its self-declared name, case-folded and trimmed. That
+ * fallback is a heuristic, not an identity: one operator can publish
+ * records under several names, and VS9 says distinct records never prove
+ * distinct operators. Callers must not treat the count as a guarantee.
+ */
+export function operatorKey(record: ServiceRecord): string {
+  const principal = record.operator.principal;
+  if (principal !== null) {
+    return `principal:${principal.toLowerCase()}`;
+  }
+  return `name:${record.operator.name.trim().toLowerCase()}`;
+}
+
+/** Distinct operator keys offering `role` (a heuristic count; see `operatorKey`). */
 export function operatorsFor(records: readonly ServiceRecord[], role: ServiceRole): string[] {
-  const names = records
+  const keys = records
     .filter((record) => record.services.some((offer) => offer.role === role))
-    .map((record) => record.operator.principal ?? record.operator.name);
-  return [...new Set(names)];
+    .map((record) => operatorKey(record));
+  return [...new Set(keys)];
 }

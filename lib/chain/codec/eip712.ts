@@ -97,7 +97,15 @@ function collectDependencies(primary: StructType): StructType[] {
       }
     }
   }
-  return [...found.values()].sort((a, b) => (a.name < b.name ? -1 : 1));
+  return [...found.values()].sort((a, b) => compareNames(a.name, b.name));
+}
+
+/** Code-unit order (ASCII for EIP-712 type names), 0 when equal. */
+function compareNames(a: string, b: string): number {
+  if (a === b) {
+    return 0;
+  }
+  return a < b ? -1 : 1;
 }
 
 /** EIP-712 `encodeType`: the primary type, then its dependencies by name. */
@@ -109,10 +117,13 @@ export function typeHash(primary: StructType): Hex {
   return keccak256(utf8.encode(encodeType(primary)));
 }
 
-function word(value: bigint, bits: number): Uint8Array {
+/** One 32-byte ABI word; uintN in [0, 2^N - 1], intN in [-2^(N-1), 2^(N-1) - 1]. */
+function word(value: bigint, bits: number, signed: boolean): Uint8Array {
   const out = new Uint8Array(WORD);
-  const limit = 1n << BigInt(bits);
-  if (value >= limit || value < -(limit >> 1n)) {
+  const size = BigInt(bits);
+  const min = signed ? -(1n << (size - 1n)) : 0n;
+  const max = signed ? (1n << (size - 1n)) - 1n : (1n << size) - 1n;
+  if (value < min || value > max) {
     throw new ChainCodecError(ChainResultCode.FIELD_BOUND, "integer out of range");
   }
   let unsigned = value < 0n ? (1n << 256n) + value : value;
@@ -164,12 +175,12 @@ function encodeData(type: CeType, value: unknown): Uint8Array {
   switch (type.kind) {
     case "uint":
     case "int":
-      return word(intValue(value), type.bits);
+      return word(intValue(value), type.bits, type.kind === "int");
     case "bool":
       if (typeof value !== "boolean") {
         throw new ChainCodecError(ChainResultCode.MALFORMED, "expected a boolean");
       }
-      return word(value ? 1n : 0n, 8);
+      return word(value ? 1n : 0n, 8, false);
     case "address":
       return padLeft(hexBytes(value));
     case "bytesN":

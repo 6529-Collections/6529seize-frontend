@@ -260,6 +260,8 @@ export function findOperation(opType: number, opVersion: number): OperationSchem
   );
 }
 
+const OP_TYPE_CODES: ReadonlySet<number> = new Set(Object.values(OpType));
+
 export function isKnownOpType(opType: number): boolean {
-  return Object.values(OpType).some((code) => code === opType);
+  return OP_TYPE_CODES.has(opType);
 }

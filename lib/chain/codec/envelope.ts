@@ -18,7 +18,7 @@
  */
 import type { Hex } from "viem";
 
-import { CeReader, CeWriter, isZeroValue } from "./ce";
+import { CeReader, CeWriter, hexBytes, isZeroValue } from "./ce";
 import { domainSeparator, hashStruct, typeHash, typedDataDigest } from "./eip712";
 import {
   ChainCodecError,
@@ -313,9 +313,11 @@ function readOperation(reader: CeReader): OperationSchema {
 }
 
 /**
- * Decodes and checks a SignedTx. The schema must be known before the body
- * can be read, so 0x0105-0x0107 can surface before a body's 0x0101, while
- * P40 §2.3 lists decoding first; the design does not order these further.
+ * Decodes and checks a SignedTx in P40 §2.3's order: decoding (step 1),
+ * size (step 2), network (step 3). The schema must be known before the
+ * body can be read, so 0x0105-0x0107 (step 4) can surface before a body's
+ * 0x0101; the design does not order these further. P28 itself defines no
+ * error precedence.
  */
 export function decodeSignedTx(
   input: Uint8Array,
@@ -336,10 +338,16 @@ export function decodeSignedTx(
     (e) => e.at(["signatures"], resultDetail(SIGNATURE_LIST_FIELD))
   );
   reader.end();
+  // P40 §2.3 step 2 follows decoding (step 1); decoding is bounded by the
+  // schema maxima, so reading an oversize input first costs no more than
+  // reading it at all. Gateways may still cap request bodies earlier.
   if (input.length > MAX_TX_BYTES) {
     throw new ChainCodecError(ChainResultCode.OVERSIZE, `${input.length} bytes`);
   }
-  if (options.expectedNetworkId !== undefined && carriedNetwork !== options.expectedNetworkId.toLowerCase()) {
+  if (
+    options.expectedNetworkId !== undefined &&
+    carriedNetwork.toLowerCase() !== options.expectedNetworkId.toLowerCase()
+  ) {
     throw new ChainCodecError(ChainResultCode.WRONG_NETWORK, "carried NETWORK_ID differs");
   }
   const tx: SignedTx = { networkId: carriedNetwork, header, op, body, signatures };
@@ -430,8 +438,10 @@ export function checkHeaderRules(header: TxHeader, opType: number): ChainCodecEr
   return identityRules(header, opType) ?? windowAndFeeRules(header);
 }
 
-const SECP256K1_HALF_ORDER =
-  0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0n;
+const SECP256K1_ORDER =
+  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const SECP256K1_HALF_ORDER = SECP256K1_ORDER >> 1n;
+const SECP256K1_SIGNATURE_BYTES = 65;
 
 function signatureLengthFor(keyType: number): number | null {
   if (keyType === KeyType.SECP256K1) {
@@ -452,11 +462,35 @@ function listRule(reason: string, item: number): ChainCodecError {
   );
 }
 
-/** P28 §7.8: v in {27, 28} and low s, so each signature has one encoding. */
+function bigFromBytes(raw: Uint8Array): bigint {
+  let value = 0n;
+  for (const byte of raw) {
+    value = (value << 8n) | BigInt(byte);
+  }
+  return value;
+}
+
+/**
+ * P28 §7.8 / P40 §2.1: 65 bytes r || s || v, v in {27, 28}, low s. The
+ * design states no range for r or a lower bound for s on keyType 1 (it
+ * does for keyType 5: 1 <= r, s < n); a signature outside them cannot
+ * verify, so the client also requires 1 <= r < n and 1 <= s <= n/2.
+ */
 function secp256k1Canonical(sig: Hex): boolean {
-  const s = BigInt(`0x${sig.slice(66, 130)}`);
-  const v = Number.parseInt(sig.slice(130, 132), 16);
-  return (v === 27 || v === 28) && s <= SECP256K1_HALF_ORDER;
+  const raw = hexBytes(sig);
+  if (raw.length !== SECP256K1_SIGNATURE_BYTES) {
+    return false;
+  }
+  const r = bigFromBytes(raw.subarray(0, 32));
+  const s = bigFromBytes(raw.subarray(32, 64));
+  const v = raw[64];
+  return (
+    (v === 27 || v === 28) &&
+    r >= 1n &&
+    r < SECP256K1_ORDER &&
+    s >= 1n &&
+    s <= SECP256K1_HALF_ORDER
+  );
 }
 
 function entryRule(entry: TxSignature, index: number): ChainCodecError | null {
@@ -471,7 +505,7 @@ function entryRule(entry: TxSignature, index: number): ChainCodecError | null {
   if (entry.keyType === KeyType.SECP256K1 && !secp256k1Canonical(entry.sig)) {
     return new ChainCodecError(
       ChainResultCode.NONCANONICAL_SIGNATURE,
-      "high s or bad v",
+      "r or s out of range, high s, or bad v",
       ["signatures", index],
       resultDetail(SIGNATURE_LIST_FIELD, index + 1)
     );
