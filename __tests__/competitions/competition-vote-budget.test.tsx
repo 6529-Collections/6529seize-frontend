@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useCompetitionVoteBudget } from "@/components/competitions/CompetitionVote";
 import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
-import { commonApiFetch } from "@/services/api/common-api";
 import {
+  fetchCompetitionCredits,
   invalidateCompetition,
   invalidateCompetitionWave,
 } from "@/services/api/competitions-api";
@@ -21,8 +21,9 @@ jest.mock("@/components/auth/Auth", () => ({
     activeProfileProxy: mockProxy ? { id: mockProxy } : null,
   }),
 }));
-jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
+jest.mock("@/services/api/competitions-api", () => ({
+  ...jest.requireActual("@/services/api/competitions-api"),
+  fetchCompetitionCredits: jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
   useCompetitionSignatureFor: jest.fn(),
@@ -63,10 +64,12 @@ beforeEach(() => {
   mockProfile = "alice";
   mockProxy = null;
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => ({
-    ...initialBudget,
-    entry_id: params?.["entry_id"] ?? null,
-  }));
+  jest
+    .mocked(fetchCompetitionCredits)
+    .mockImplementation(async (_identity, entryId) => ({
+      ...initialBudget,
+      entry_id: entryId ?? null,
+    }));
 });
 afterEach(() => {
   client.clear();
@@ -83,12 +86,12 @@ it("reuses fresh limits on remount and reads again after the freshness window", 
   const fresh = mountBudget();
   expect(fresh.result.current.data).toEqual(initialBudget);
   expect(fresh.result.current.isFetching).toBe(false);
-  expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(1);
   fresh.unmount();
   clock.mockReturnValue(now + 15_001);
   const expired = mountBudget();
   await waitFor(() => expect(expired.result.current.isFetching).toBe(false));
-  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(2);
 });
 
 it.each(["bob", "delegated"])(
@@ -97,7 +100,7 @@ it.each(["bob", "delegated"])(
     const view = mountBudget();
     await waitFor(() => expect(view.result.current.isSuccess).toBe(true));
     let resolveBudget!: (budget: ApiCompetitionCreditBudget) => void;
-    jest.mocked(commonApiFetch).mockReturnValueOnce(
+    jest.mocked(fetchCompetitionCredits).mockReturnValueOnce(
       new Promise((resolve) => {
         resolveBudget = resolve;
       })
@@ -111,7 +114,7 @@ it.each(["bob", "delegated"])(
       resolveBudget({ ...initialBudget, max_vote: 30 });
     });
     await waitFor(() => expect(view.result.current.data?.max_vote).toBe(30));
-    expect(commonApiFetch).toHaveBeenCalledTimes(2);
+    expect(fetchCompetitionCredits).toHaveBeenCalledTimes(2);
   }
 );
 
@@ -135,15 +138,17 @@ it.each([40, 0])(
     await waitFor(() =>
       expect(voted.result.current.data?.current_vote).toBe(value)
     );
-    jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => ({
-      ...confirmed,
-      entry_id: params?.["entry_id"] ?? null,
-      max_vote: params?.["entry_id"] === "entry" ? 100 : 100 - value,
-    }));
+    jest
+      .mocked(fetchCompetitionCredits)
+      .mockImplementation(async (_identity, entryId) => ({
+        ...confirmed,
+        entry_id: entryId ?? null,
+        max_vote: entryId === "entry" ? 100 : 100 - value,
+      }));
     await act(async () => {
       await invalidateCompetition(client, identity);
     });
-    expect(commonApiFetch).toHaveBeenCalledTimes(4);
+    expect(fetchCompetitionCredits).toHaveBeenCalledTimes(4);
     await waitFor(() =>
       expect(other.result.current.data?.max_vote).toBe(100 - value)
     );
@@ -155,11 +160,11 @@ it("refreshes invalidated limits even while the row is unmounted", async () => {
   await waitFor(() => expect(view.result.current.isSuccess).toBe(true));
   view.unmount();
   await invalidateCompetitionWave(client, identity.waveId);
-  expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(1);
   jest
-    .mocked(commonApiFetch)
+    .mocked(fetchCompetitionCredits)
     .mockResolvedValue({ ...initialBudget, max_vote: 50 });
   const refreshed = mountBudget();
   await waitFor(() => expect(refreshed.result.current.data?.max_vote).toBe(50));
-  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(2);
 });
