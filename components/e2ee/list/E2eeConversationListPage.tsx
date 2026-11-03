@@ -94,7 +94,7 @@ export function E2eeConversationListPage() {
     >
       <E2eeRouteGate>
         {({ conversations, profileId }) => (
-          <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />
             <E2eeRenewalBanner className="tw-mx-2" />
             {conversations.length === 0 ? (
