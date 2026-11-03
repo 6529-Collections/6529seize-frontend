@@ -116,6 +116,13 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   and `Dimensions` instead of showing empty values.
 - At the exact phase start timestamp, the state changes from `Upcoming` to
   `Live`; at the exact phase end timestamp, it leaves the active countdown.
+  These transitions happen without a page refresh, even when the contract data
+  has not changed. Returning to a hidden tab or inactive app catches up to the
+  current phase timing.
+- A later scheduled phase stays `Upcoming` until its claim is configured onchain.
+  If its scheduled start passes before that update arrives, the `Mint` link is
+  hidden until the claim advances; the card does not announce an unopened phase
+  as `Live`.
 - During Europe/Athens daylight-saving transitions, UTC/local countdown values
   can shift by one hour while phase wall-clock targets stay fixed to Athens
   windows.
@@ -131,8 +138,9 @@ the card has an explicit mapping, a `Main Stage Submission` action.
 
 ## Limitations / Notes
 
-- Timing and phase labels are based on Manifold claim data and periodic polling,
-  so visible updates can lag a few seconds.
+- The configured claim's start and end times update the status automatically.
+  Supply changes and onchain configuration of a later phase still depend on
+  periodic contract reads, so those updates can lag a few seconds.
 - For multi-phase drops, countdown state follows the currently matched phase and
   can continue across phase boundaries until the drop is sold out or the final
   phase ends.
