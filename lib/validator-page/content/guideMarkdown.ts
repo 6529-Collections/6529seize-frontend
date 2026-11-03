@@ -69,7 +69,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "- the key it names ends in the same 8 characters;",
   '- it says: "These keys may sign daily TDH roots for this account and nothing else. They cannot move NFTs or funds."',
   "",
-  "If your wallet refuses a message with no chain, use Foundry's `cast` (`docs/install/grant.md`).",
+  "If your wallet refuses a message with no chain, use Foundry's `cast` (`docs/install/grant.md`, in each archive under Other downloads on the [download page](/validator)).",
   "",
   "If your account already authorizes a computer, the page says so before you sign, and Keys shows how to add this one beside it.",
   "",
