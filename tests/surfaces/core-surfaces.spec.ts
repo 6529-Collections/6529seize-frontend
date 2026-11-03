@@ -228,8 +228,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     const explained = await expectTdhExplainer(page);
     if (explained) {
       const chapter = page.getByRole("region", {
-        name: "In this chapter",
-        exact: true,
+        name: /^\d+ pages to go deeper, then the shelf\.$/,
       });
       await expect(chapter).toBeVisible();
       for (const [name, href] of [
