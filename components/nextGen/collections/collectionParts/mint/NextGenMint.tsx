@@ -21,7 +21,7 @@ import {
   useMintSharedState,
   useSharedState,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
@@ -240,7 +240,7 @@ export default function NextGenMint(props: Readonly<Props>) {
     if (props.collection.merkle_root) {
       const controller = new AbortController();
       const merkleRoot = props.collection.merkle_root;
-      const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
+      const url = apiUrl(`/api/nextgen/merkle_roots/${merkleRoot}`);
       fetchUrl<CollectionWithMerkle | null>(url, {
         signal: controller.signal,
       })
