@@ -183,7 +183,7 @@ function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
   const healthy = complete && !renewalDue;
   const attention = renewalDue || (partial && !complete);
   let statusColor = "tw-text-iron-400";
-  if (healthy) statusColor = "tw-text-green-400";
+  if (healthy) statusColor = "tw-text-green";
   if (attention) statusColor = "tw-text-amber-300";
   const Icon = healthy ? ShieldCheckIcon : ShieldExclamationIcon;
   if ("presentation" in props && props.presentation === "inline") {
