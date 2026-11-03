@@ -16,7 +16,7 @@ import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilter
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -359,11 +359,11 @@ export default function MemePage({
       async function loadTransactions() {
         try {
           const response = await fetchUrl<DBResponse<Transaction>>(
-            `${
-              publicEnv.API_ENDPOINT
-            }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
-              ","
-            )}&id=${nftId}`,
+            apiUrl(
+              `/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
+                ","
+              )}&id=${nftId}`
+            ),
             { signal: controller.signal }
           );
           if (controller.signal.aborted) {

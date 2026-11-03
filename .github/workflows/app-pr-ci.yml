@@ -1088,6 +1088,14 @@ jobs:
           set -euo pipefail
           ./bin/6529 run build:ci
 
+      # Turbopack builds no longer print First Load JS. Compare the shared and
+      # per-route first-load JavaScript with scripts/perf-budget.json.
+      - name: Check first-load JavaScript budget
+        if: matrix.lane == 'build'
+        run: |
+          set -euo pipefail
+          ./bin/6529 run perf:budget --report test-results/app-pr-ci/perf-budget.json
+
       - name: Create exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         env:

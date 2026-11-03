@@ -1,0 +1,314 @@
+{
+  "provenance": "Hand-built to the validator local API's format 1 (6529validator claude/blissful-perlman-914dca at 00024be: crates/node-api/src/status.rs CertificateView and CycleRecord; values follow crates/node-ui/tools/fixtures.mjs). A synthetic 4-account devnet (weights 400/300/200/100, W = 1000) seen from the 400 account's node. Not captured from `validator devnet init`: running the validator was outside this change. Replace with a captured devnet run when one is recorded.",
+  "network": {
+    "kind": "devnet",
+    "chain_id": "6529-validator-devnet-local"
+  },
+  "cycles": [
+    {
+      "format": 1,
+      "day": 20758,
+      "state": "CERTIFIED",
+      "waiting": null,
+      "not_signed": null,
+      "window": {
+        "opens": 1793491200,
+        "closes": 1793559600,
+        "final_at": 1793561400,
+        "frozen_at": 1794096000,
+        "late": false
+      },
+      "finalized_unix": 1793492160,
+      "history_kind": "REPLAY",
+      "header": {
+        "cycle_day": 20758,
+        "boundary": 1793491200,
+        "tdh_rule_id": "0x0000000100000001000000010000000100000001000000010000000100000001",
+        "cutoff_number": 26020758,
+        "cutoff_hash": "0x0000000200000002000000020000000200000002000000020000000200000002",
+        "cutoff_timestamp": 1793491189,
+        "wallet_root": "0x0000000300000003000000030000000300000003000000030000000300000003",
+        "wallet_count": 12,
+        "identity_count": 10,
+        "total_tdh": 1200000,
+        "token_root": "0x0000000400000004000000040000000400000004000000040000000400000004",
+        "token_count": 1
+      },
+      "cycle_root": "0x0002075800020758000207580002075800020758000207580002075800020758",
+      "history_root": null,
+      "history_count": null,
+      "source": {
+        "class": "VERIFIED",
+        "source_text": "devnet-replay",
+        "servers": [],
+        "anchor_number": 26020758
+      },
+      "dual_run": {
+        "implementations": 3,
+        "outcome": "AGREED",
+        "differences": [],
+        "millis": [
+          840,
+          910,
+          0
+        ]
+      },
+      "keys": [
+        {
+          "key_id": "0x6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a",
+          "outcome": "SIGNED",
+          "reason": null,
+          "signed_unix": 1793492300,
+          "published_unix": 1793492300,
+          "grant_hash": "0xabababababababababababababababababababababababababababababababab",
+          "in_certificate": true
+        }
+      ],
+      "certificate": {
+        "cycle_day": 20758,
+        "cycle_root": "0x0002075800020758000207580002075800020758000207580002075800020758",
+        "level": "STRONG",
+        "signed_weight": 900,
+        "w": 1000,
+        "weight_own_node": 0,
+        "weight_verified": 900,
+        "raw_signed_tdh": 900000,
+        "raw_registered_tdh": 1000000,
+        "network_tdh": 1200000,
+        "signing_accounts": 3,
+        "roster_count": 4,
+        "roster_root": "0x0002075900020759000207590002075900020759000207590002075900020759",
+        "weight_basis": "0x0002075700020757000207570002075700020757000207570002075700020757",
+        "flags": [
+          "FINAL"
+        ],
+        "excluded_accounts": 0,
+        "verified_here": true,
+        "ours": true,
+        "key_count": 4,
+        "signed_keys": 3,
+        "roster_accounts": 4,
+        "signer_weights": [
+          300,
+          200
+        ],
+        "unsigned_weights": [
+          100
+        ],
+        "own_weight": 400,
+        "own_signed": 400,
+        "reported_by": 0,
+        "strong_unix": 1793493360
+      },
+      "other_roots": [],
+      "compare": null,
+      "compute_millis": 34500,
+      "computed_unix": 1793492220,
+      "updated_unix": 1793561400
+    },
+    {
+      "format": 1,
+      "day": 20759,
+      "state": "SIGNED",
+      "waiting": null,
+      "not_signed": null,
+      "window": {
+        "opens": 1793577600,
+        "closes": 1793646000,
+        "final_at": 1793647800,
+        "frozen_at": 1794182400,
+        "late": false
+      },
+      "finalized_unix": 1793578560,
+      "history_kind": "REPLAY",
+      "header": {
+        "cycle_day": 20759,
+        "boundary": 1793577600,
+        "tdh_rule_id": "0x0000000100000001000000010000000100000001000000010000000100000001",
+        "cutoff_number": 26020759,
+        "cutoff_hash": "0x0000000200000002000000020000000200000002000000020000000200000002",
+        "cutoff_timestamp": 1793577589,
+        "wallet_root": "0x0000000300000003000000030000000300000003000000030000000300000003",
+        "wallet_count": 12,
+        "identity_count": 10,
+        "total_tdh": 1200000,
+        "token_root": "0x0000000400000004000000040000000400000004000000040000000400000004",
+        "token_count": 1
+      },
+      "cycle_root": "0x0002075900020759000207590002075900020759000207590002075900020759",
+      "history_root": null,
+      "history_count": null,
+      "source": {
+        "class": "VERIFIED",
+        "source_text": "devnet-replay",
+        "servers": [],
+        "anchor_number": 26020759
+      },
+      "dual_run": {
+        "implementations": 3,
+        "outcome": "AGREED",
+        "differences": [],
+        "millis": [
+          840,
+          910,
+          0
+        ]
+      },
+      "keys": [
+        {
+          "key_id": "0x6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a",
+          "outcome": "SIGNED",
+          "reason": null,
+          "signed_unix": 1793578700,
+          "published_unix": 1793578700,
+          "grant_hash": "0xabababababababababababababababababababababababababababababababab",
+          "in_certificate": true
+        }
+      ],
+      "certificate": {
+        "cycle_day": 20759,
+        "cycle_root": "0x0002075900020759000207590002075900020759000207590002075900020759",
+        "level": "MAJORITY",
+        "signed_weight": 600,
+        "w": 1000,
+        "weight_own_node": 0,
+        "weight_verified": 600,
+        "raw_signed_tdh": 600000,
+        "raw_registered_tdh": 1000000,
+        "network_tdh": 1200000,
+        "signing_accounts": 2,
+        "roster_count": 4,
+        "roster_root": "0x0002076000020760000207600002076000020760000207600002076000020760",
+        "weight_basis": "0x0002075800020758000207580002075800020758000207580002075800020758",
+        "flags": [],
+        "excluded_accounts": 0,
+        "verified_here": true,
+        "ours": true,
+        "key_count": 4,
+        "signed_keys": 2,
+        "roster_accounts": 4,
+        "signer_weights": [
+          200
+        ],
+        "unsigned_weights": [
+          300,
+          100
+        ],
+        "own_weight": 400,
+        "own_signed": 400,
+        "reported_by": 0,
+        "strong_unix": null
+      },
+      "other_roots": [],
+      "compare": null,
+      "compute_millis": 34500,
+      "computed_unix": 1793578620,
+      "updated_unix": 1793581200
+    },
+    {
+      "format": 1,
+      "day": 20760,
+      "state": "OPEN",
+      "waiting": null,
+      "not_signed": null,
+      "window": {
+        "opens": 1793664000,
+        "closes": 1793732400,
+        "final_at": 1793734200,
+        "frozen_at": 1794268800,
+        "late": false
+      },
+      "finalized_unix": null,
+      "history_kind": null,
+      "header": null,
+      "cycle_root": null,
+      "history_root": null,
+      "history_count": null,
+      "source": null,
+      "dual_run": null,
+      "keys": [],
+      "certificate": null,
+      "other_roots": [],
+      "compare": null,
+      "compute_millis": null,
+      "computed_unix": null,
+      "updated_unix": 1793664000
+    }
+  ],
+  "certificates": {
+    "20758": [
+      {
+        "cycle_day": 20758,
+        "cycle_root": "0x0002075800020758000207580002075800020758000207580002075800020758",
+        "level": "STRONG",
+        "signed_weight": 900,
+        "w": 1000,
+        "weight_own_node": 0,
+        "weight_verified": 900,
+        "raw_signed_tdh": 900000,
+        "raw_registered_tdh": 1000000,
+        "network_tdh": 1200000,
+        "signing_accounts": 3,
+        "roster_count": 4,
+        "roster_root": "0x0002075900020759000207590002075900020759000207590002075900020759",
+        "weight_basis": "0x0002075700020757000207570002075700020757000207570002075700020757",
+        "flags": [
+          "FINAL"
+        ],
+        "excluded_accounts": 0,
+        "verified_here": true,
+        "ours": true,
+        "key_count": 4,
+        "signed_keys": 3,
+        "roster_accounts": 4,
+        "signer_weights": [
+          300,
+          200
+        ],
+        "unsigned_weights": [
+          100
+        ],
+        "own_weight": 400,
+        "own_signed": 400,
+        "reported_by": 0,
+        "strong_unix": 1793493360
+      }
+    ],
+    "20759": [
+      {
+        "cycle_day": 20759,
+        "cycle_root": "0x0002075900020759000207590002075900020759000207590002075900020759",
+        "level": "MAJORITY",
+        "signed_weight": 600,
+        "w": 1000,
+        "weight_own_node": 0,
+        "weight_verified": 600,
+        "raw_signed_tdh": 600000,
+        "raw_registered_tdh": 1000000,
+        "network_tdh": 1200000,
+        "signing_accounts": 2,
+        "roster_count": 4,
+        "roster_root": "0x0002076000020760000207600002076000020760000207600002076000020760",
+        "weight_basis": "0x0002075800020758000207580002075800020758000207580002075800020758",
+        "flags": [],
+        "excluded_accounts": 0,
+        "verified_here": true,
+        "ours": true,
+        "key_count": 4,
+        "signed_keys": 2,
+        "roster_accounts": 4,
+        "signer_weights": [
+          200
+        ],
+        "unsigned_weights": [
+          300,
+          100
+        ],
+        "own_weight": 400,
+        "own_signed": 400,
+        "reported_by": 0,
+        "strong_unix": null
+      }
+    ]
+  }
+}

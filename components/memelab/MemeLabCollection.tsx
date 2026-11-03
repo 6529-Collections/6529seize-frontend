@@ -4,7 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Button from "@/components/utils/button/Button";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
@@ -89,9 +89,9 @@ export default function LabCollection({
       return;
     }
     let cancelled = false;
-    const nftsUrl = `${
-      publicEnv.API_ENDPOINT
-    }/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`;
+    const nftsUrl = apiUrl(
+      `/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}`
+    );
 
     async function loadCollection() {
       setLoadFailed(false);
@@ -100,9 +100,11 @@ export default function LabCollection({
         const responseNfts =
           responseNftMetas.length > 0
             ? await fetchAllPages<LabNFT>(
-                `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${responseNftMetas
-                  .map((n: LabExtendedData) => n.id)
-                  .join(",")}`
+                apiUrl(
+                  `/api/nfts_memelab?id=${responseNftMetas
+                    .map((n: LabExtendedData) => n.id)
+                    .join(",")}`
+                )
               )
             : [];
         if (cancelled) {
@@ -264,11 +266,7 @@ export default function LabCollection({
             volumeType={volumeType}
             locale={locale}
           />
-          <div
-            ref={resultsRef}
-            tabIndex={-1}
-            className="focus:tw-outline-none"
-          >
+          <div ref={resultsRef} tabIndex={-1} className="focus:tw-outline-none">
             {printNftsContent()}
           </div>
         </div>

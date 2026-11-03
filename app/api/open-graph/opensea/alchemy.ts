@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { getStagingApiKey } from "@/config/serverEnv";
 
 import { extractAlchemyMetadata } from "./shared";
@@ -100,7 +100,7 @@ const fetchProxyMetadataCandidate = (
   tokenIdCandidate: string
 ): Promise<AlchemyMetadataCandidateResult> =>
   requestMetadataCandidate(
-    `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+    apiUrl("/alchemy-proxy/token-metadata"),
     {
       method: "POST",
       headers: {

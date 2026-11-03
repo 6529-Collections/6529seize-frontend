@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { isProductionBuildPhase } from "@/config/nextPhase";
 import { getServerEnvOrThrow, getStagingApiKey } from "@/config/serverEnv";
 import { API_AUTH_COOKIE } from "@/constants/constants";
@@ -39,8 +39,9 @@ const originalFetch = getOriginalFetch();
 const isApiRequest = (url: string | URL): boolean => {
   const urlString = typeof url === "string" ? url : url.toString();
   try {
-    const parsedUrl = new URL(urlString, publicEnv.API_ENDPOINT);
-    return parsedUrl.origin === new URL(publicEnv.API_ENDPOINT).origin;
+    const apiBase = getApiBase();
+    const parsedUrl = new URL(urlString, apiBase);
+    return parsedUrl.origin === new URL(apiBase).origin;
   } catch {
     return false;
   }
@@ -197,7 +198,7 @@ const createSsrFetch =
       (input instanceof Request ? input.method : undefined) ??
       "GET"
     ).toUpperCase();
-    const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
+    const path = extractPathFromUrl(url, getApiBase());
 
     if (!path) {
       return originalFetch(input, init);
