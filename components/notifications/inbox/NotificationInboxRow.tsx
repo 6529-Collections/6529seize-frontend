@@ -51,6 +51,14 @@ export default function NotificationInboxRow({
     : [];
   const identity =
     "related_identity" in notification ? notification.related_identity : null;
+  let pfpUrl = identity?.is_anonymous ? null : identity?.pfp;
+  if (group) {
+    pfpUrl = group.drop.wave.picture;
+  } else if (
+    notification.cause === ApiNotificationCause.VotingCreditsReturned
+  ) {
+    pfpUrl = notification.related_wave?.pfp;
+  }
   const encryptedPreview = useEncryptedNotificationPreview(
     notification.cause === ApiNotificationCause.E2EeMessage
       ? (notification.additional_context.encrypted_group ?? null)
@@ -69,9 +77,11 @@ export default function NotificationInboxRow({
           <ArtworkNotificationThumbnail notification={notification} />
         ) : (
           <ProfileAvatar
-            pfpUrl={group || identity?.is_anonymous ? null : identity?.pfp}
+            pfpUrl={pfpUrl}
             alt=""
-            fallbackContent={<BellIcon className="tw-size-5 tw-text-iron-400" />}
+            fallbackContent={
+              <BellIcon className="tw-size-5 tw-text-iron-400" />
+            }
           />
         )}
         <div className="tw-min-w-0 tw-flex-1">

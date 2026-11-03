@@ -334,6 +334,9 @@ const mapVotingCreditsReturnedNotification = (
       cause: ApiNotificationCause.VotingCreditsReturned,
       created_at: notification.created_at,
       read_at: notification.read_at,
+      ...(notification.related_wave
+        ? { related_wave: notification.related_wave }
+        : {}),
       additional_context: {
         event_id: context.event_id,
         reason: context.reason,
