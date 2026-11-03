@@ -3484,7 +3484,6 @@ export const EN_US_MESSAGES = {
   "waves.signIn.newHere":
     "New here? Sign a message with your wallet to get started.",
   "auth.signModal.authenticationRequest": "Sign in to 6529",
-  "auth.signModal.cancelSignIn": "Cancel sign-in",
   "auth.signModal.walletAddress": "Wallet address",
   "auth.signModal.noTransaction": "No transaction or gas fees.",
   "auth.signModal.connectionShareLead":
@@ -3520,8 +3519,6 @@ export const EN_US_MESSAGES = {
     "Your wallet, profile, or network changed. Select the profile again to continue.",
   "auth.proxySwitch.failed":
     "Couldn't switch profiles. Your current profile is still selected. Please try again.",
-  "auth.signModal.messageVersion":
-    "Version 1 in your wallet refers to the SIWE message version.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",

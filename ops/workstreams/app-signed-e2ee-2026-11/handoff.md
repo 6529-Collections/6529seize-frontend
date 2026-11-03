@@ -51,7 +51,7 @@ Backend before frontend before testing the updated app builds.
   flow; Connect Device authentication update resumes after connection. The
   encryption provider adopts a signing-first combined grant on an already
   open setup page. The mobile/quick-DM warning and composer banner layouts
-  are fixed, and browser sign-in explains that the wallet’s Version 1 label refers to SIWE.
+  are fixed. Sign-in uses Cancel or Escape; it has no top-right close button or version explanation, and backdrop clicks do not dismiss it.
 
 
 ## What was verified, and where

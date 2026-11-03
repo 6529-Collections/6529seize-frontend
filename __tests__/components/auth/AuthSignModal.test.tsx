@@ -1,4 +1,3 @@
-import { getSessionClientType } from "@/services/auth/session-v2.utils";
 import { formatSessionUpgradeTimeLeft } from "@/components/auth/authSessionUpgrade";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AuthSignModal } from "@/components/auth/AuthSignModal";
@@ -8,9 +7,6 @@ import type { ComponentProps } from "react";
 const mockAddress = "0x1111111111111111111111111111111111111111";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: mockAddress }),
-}));
-jest.mock("@/services/auth/session-v2.utils", () => ({
-  getSessionClientType: jest.fn(() => "web"),
 }));
 const makeProps = (): ComponentProps<typeof AuthSignModal> => ({
   enableWalletAuthentication: true,
@@ -43,30 +39,16 @@ describe("AuthSignModal onboarding", () => {
     );
     expect(screen.getByText(mockAddress)).toBeInTheDocument();
     expect(screen.getByText("No transaction or gas fees.")).toBeInTheDocument();
-    expect(screen.queryByText(/JWT/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/JWT|SIWE|Version 1/u)).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button").map((button) => button.textContent)
+    ).toEqual(["Cancel", "Sign message"]);
     expect(props.onConfirmSignRequest).not.toHaveBeenCalled();
     const button = screen.getByRole("button", { name: "Sign message" });
     expect(button).toHaveFocus();
     await userEvent.click(button);
     expect(props.onConfirmSignRequest).toHaveBeenCalledTimes(1);
   });
-  it.each(["native", "desktop"] as const)(
-    "keeps sign-in confirmation available on %s",
-    async (clientType) => {
-      jest.mocked(getSessionClientType).mockReturnValue(clientType);
-      try {
-        const props = makeProps();
-        render(<AuthSignModal {...props} />);
-        expect(screen.queryByText(/Version 1/u)).not.toBeInTheDocument();
-        await userEvent.click(
-          screen.getByRole("button", { name: "Sign message" })
-        );
-        expect(props.onConfirmSignRequest).toHaveBeenCalledTimes(1);
-      } finally {
-        jest.mocked(getSessionClientType).mockReturnValue("web");
-      }
-    }
-  );
   it("announces wallet confirmation and prevents duplicate signing or cancellation", () => {
     const props = makeProps();
     render(
@@ -87,13 +69,21 @@ describe("AuthSignModal onboarding", () => {
     expect(props.onCancelSignRequest).not.toHaveBeenCalled();
     expect(props.onConfirmSignRequest).not.toHaveBeenCalled();
   });
-  it("uses the existing cancellation callback for the close control", async () => {
+  it("cancels sign-in with the explicit Cancel button", async () => {
     const props = makeProps();
     render(<AuthSignModal {...props} />);
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel sign-in" })
+      screen.getByRole("button", { name: "Cancel", exact: true })
     );
     expect(props.onCancelSignRequest).toHaveBeenCalledTimes(1);
+  });
+  it("ignores clicks outside the dialog surface", () => {
+    const props = makeProps();
+    render(<AuthSignModal {...props} />);
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(dialog);
+    expect(props.onCancelSignRequest).not.toHaveBeenCalled();
+    expect(dialog).toHaveAttribute("open");
   });
   it("uses the existing cancellation callback for Escape before signing", () => {
     const props = makeProps();
