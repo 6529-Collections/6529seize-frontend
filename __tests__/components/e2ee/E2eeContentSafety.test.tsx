@@ -300,7 +300,9 @@ describe("E2eeReportDialog", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Report illegal or severe harm",
     });
-    expect(within(dialog).getByText("What this report sends")).toBeVisible();
+    expect(
+      await within(dialog).findByText("What this report sends")
+    ).toBeVisible();
     expect(within(dialog).getByText("a threat edited in")).toBeVisible();
     expect(within(dialog).queryByText("see you at noon")).toBeNull();
 

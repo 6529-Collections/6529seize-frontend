@@ -1,3 +1,4 @@
+import { trimHistory, updateHistorySummary, cacheMessage } from "./history";
 import type { E2eeApiClient } from "../api";
 import { MlsClient } from "../mls-adapter";
 import type {
@@ -99,6 +100,63 @@ interface CheckpointExtra {
   skipWasm?: boolean;
 }
 
+interface PreviousHistorySummary {
+  runtime: GroupRuntime;
+  history: StoredGroup["history"];
+  readSeq: number;
+}
+
+function restoreHistorySummaries(
+  ctx: EngineContext,
+  previousSummaries: readonly PreviousHistorySummary[]
+): void {
+  // Dirty records remain retryable; their summary deltas must apply once.
+  for (const previous of previousSummaries) {
+    const { runtime, history, readSeq } = previous;
+    if (history) {
+      runtime.record.history = history;
+      if (runtime.record.readSeq > readSeq) {
+        history.unread = 0;
+        history.mentions = 0;
+      }
+    } else delete runtime.record.history;
+    ctx.store.touch(runtime.record.g);
+  }
+}
+
+function finishHistoryCheckpoint(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): void {
+  for (const id of runtime.dirty) {
+    const message = runtime.messages.get(id);
+    if (message) {
+      // Replace mutated objects so unchanged UI snapshots keep their identity.
+      cacheMessage(runtime, structuredClone(message));
+      if (runtime.followingLatest) runtime.windowIds?.add(id);
+    }
+  }
+  for (const id of runtime.deleted) {
+    runtime.originals.delete(id);
+    runtime.windowIds?.delete(id);
+  }
+  runtime.dirty.clear();
+  runtime.deleted.clear();
+  if (runtime.followingLatest && runtime.windowIds) {
+    const latest = [...runtime.messages.values()]
+      .filter((message) => runtime.windowIds?.has(message.id))
+      .sort((a, b) =>
+        a.pending === b.pending
+          ? a.seq - b.seq
+          : Number(a.pending) - Number(b.pending)
+      )
+      .slice(-100);
+    runtime.windowIds = new Set(latest.map((message) => message.id));
+  }
+  trimHistory(runtime, ctx.openConversation === runtime.record.g);
+  ctx.store.touch(runtime.record.g);
+}
+
 /**
  * Persists the WASM state together with the given group records and their
  * changed messages in one atomic write. Called BEFORE submitting anything the
@@ -193,8 +251,14 @@ export async function checkpoint(
   extra: CheckpointExtra = {}
 ): Promise<void> {
   const runtimes = extra.groups ?? [];
+  const previousSummaries = runtimes.map((runtime) => ({
+    runtime,
+    history: runtime.record.history,
+    readSeq: runtime.record.readSeq,
+  }));
   const state =
     ctx.mls && extra.skipWasm !== true ? ctx.mls.exportState() : null;
+  for (const runtime of runtimes) updateHistorySummary(ctx, runtime);
   const writes = groupWrites(runtimes);
   const batch = compact({
     ...writes,
@@ -205,16 +269,18 @@ export async function checkpoint(
     ...(extra.outbox ? { outbox: extra.outbox } : {}),
     ...(extra.deleteOutbox ? { deleteOutbox: extra.deleteOutbox } : {}),
   });
-  await persist(ctx, (expectedVersion) =>
-    ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
-  );
+  try {
+    await persist(ctx, (expectedVersion) =>
+      ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
+    );
+  } catch (error) {
+    restoreHistorySummaries(ctx, previousSummaries);
+    throw error;
+  }
   if (state) {
     ctx.lastState = state;
   }
-  for (const runtime of runtimes) {
-    runtime.dirty.clear();
-    runtime.deleted.clear();
-  }
+  for (const runtime of runtimes) finishHistoryCheckpoint(ctx, runtime);
 }
 
 /** Status check that also defeats stale narrowing across awaits. */
@@ -237,6 +303,15 @@ export async function rollback(ctx: EngineContext): Promise<void> {
     const runtime = ctx.store.groups.get(record.g);
     if (runtime) {
       runtime.record = record;
+      runtime.messages.clear();
+      runtime.originals.clear();
+      runtime.dirty.clear();
+      runtime.deleted.clear();
+      const rows = await ctx.storage.pageMessages(ctx.profileId, record.g);
+      for (const row of rows) cacheMessage(runtime, row);
+      runtime.windowIds = null;
+      runtime.followingLatest = true;
+      trimHistory(runtime, ctx.openConversation === record.g);
     }
   }
   ctx.store.touch();
