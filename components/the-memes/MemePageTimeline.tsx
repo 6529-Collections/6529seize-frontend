@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NFTHistory } from "@/entities/INFT";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -23,7 +23,9 @@ export function MemePageTimeline(props: {
       setNftHistory(response);
     }
     if (props.nft) {
-      const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;
+      const initialUrlHistory = apiUrl(
+        `/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`
+      );
       fetchHistory(initialUrlHistory);
     }
   }, [props.nft]);
