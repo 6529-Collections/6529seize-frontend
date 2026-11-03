@@ -92,6 +92,16 @@ type Rule = {
   readonly exemptions: Readonly<Record<string, string>>;
 };
 
+// The host after each "//" in source text (URLs, protocol-relative URLs and
+// preconnect hints), compared exactly so look-alike hosts do not count.
+const URL_AUTHORITY = /\/\/([\w.-]+)/gu;
+const PRODUCTION_API_HOST = "api.6529.io";
+
+const namesHost = (source: string, host: string): boolean =>
+  Array.from(source.matchAll(URL_AUTHORITY), (match) =>
+    match[1]?.toLowerCase()
+  ).includes(host);
+
 const RULES: readonly Rule[] = [
   {
     name: "direct API_ENDPOINT read",
@@ -111,8 +121,7 @@ const RULES: readonly Rule[] = [
   },
   {
     name: "hardcoded production API host",
-    // A plain substring scan of source text, not URL validation.
-    matches: (source) => source.includes("//api.6529.io"),
+    matches: (source) => namesHost(source, PRODUCTION_API_HOST),
     exemptions: {
       [HELPER]: "PUBLIC_PRODUCTION_API_BASE names the production API once.",
       "app/tools/api/page.tsx":
