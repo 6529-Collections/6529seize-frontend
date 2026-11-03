@@ -82,6 +82,7 @@ jest.mock("@/components/header/useChainSwitcher", () => ({
 jest.mock("@/components/header/share/HeaderShare", () => ({
   HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
     show ? <div role="dialog" aria-label="Connect Device modal" /> : null,
+  preloadHeaderQRModal: jest.fn(),
 }));
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
 jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
