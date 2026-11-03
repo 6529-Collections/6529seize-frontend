@@ -428,7 +428,8 @@ function toDeviceInfo(
     lastSeenAt: record.last_seen_at,
     expiresAt: record.grant.expires_at * 1000,
     revokedAt: record.revoked_at,
-    linkedAuthorProof: record.grant_message != null,
+    linkedAuthorProof:
+      record.grant_message !== null && record.grant_message !== undefined,
     isThisDevice: own,
     verified,
   };

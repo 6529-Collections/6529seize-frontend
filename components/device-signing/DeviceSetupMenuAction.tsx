@@ -20,8 +20,12 @@ export default function DeviceSetupMenuAction({
   const locale = useBrowserLocale();
   const { proof, encrypted, canEnableEncryption } = useDeviceSecurityState();
   const canEnableProof = proof === "off";
-  const className =
-    "tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-iron-700 hover:tw-text-iron-50";
+  const encryptionLabel = canEnableProof
+    ? "e2ee.deviceStatus.enableBoth"
+    : "e2ee.deviceStatus.enableEncryption";
+  const actionLabel = canEnableEncryption
+    ? encryptionLabel
+    : "e2ee.deviceStatus.enableProof";
   return (
     <>
       <div className="tw-px-3 tw-text-xs tw-text-iron-400 [@media(hover:hover)]:tw-hidden">
@@ -35,20 +39,13 @@ export default function DeviceSetupMenuAction({
               : getPreferencesHref({ tab: "devices" })
           }
           onClick={onClose}
-          className={className}
+          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-iron-700 hover:tw-text-iron-50"
         >
           <FontAwesomeIcon
             icon={faShieldHalved}
             className="tw-w-5 tw-shrink-0"
           />
-          {t(
-            locale,
-            canEnableEncryption
-              ? canEnableProof
-                ? "e2ee.deviceStatus.enableBoth"
-                : "e2ee.deviceStatus.enableEncryption"
-              : "e2ee.deviceStatus.enableProof"
-          )}
+          {t(locale, actionLabel)}
         </Link>
       )}
     </>

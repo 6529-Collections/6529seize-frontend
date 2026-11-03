@@ -254,12 +254,16 @@ export default function DevicesPreferencesSettings() {
     : [];
   const linkedDevices = new Map(
     encryptedDevices
-      .filter((device) => device.grant_message != null)
+      .filter(
+        (device) =>
+          device.grant_message !== null && device.grant_message !== undefined
+      )
       .map((device) => [device.grant_id, device])
   );
   const separateDevices = encryptedDevices.filter(
     (device) =>
-      device.grant_message == null ||
+      device.grant_message === null ||
+      device.grant_message === undefined ||
       !grants.some((grant) => grant.id === device.grant_id)
   );
   const canVerifyRevocation =
@@ -368,7 +372,8 @@ export default function DevicesPreferencesSettings() {
               <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">
                 {t(
                   locale,
-                  device.grant_message == null
+                  device.grant_message === null ||
+                    device.grant_message === undefined
                     ? "e2ee.devices.permission"
                     : "e2ee.devices.combinedPermissions"
                 )}{" "}
