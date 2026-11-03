@@ -1,5 +1,6 @@
 import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-documentation";
+import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
 import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
 
@@ -17,6 +18,7 @@ import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-td
 export const EN_US_MESSAGES = {
   ...EN_US_ROOT_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...MUSEUM_MESSAGES,
   ...NETWORK_TDH_MESSAGES,
   ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
 } as const;
