@@ -46,6 +46,12 @@ const POINTS: readonly {
   { key: "e2ee.enroll.point.noBackup", Icon: ArchiveBoxXMarkIcon },
 ];
 
+const SIGN_LABEL = {
+  both: "e2ee.enroll.signBoth",
+  posts: "e2ee.enroll.signPosts",
+  dms: "e2ee.enroll.signDms",
+} as const;
+
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 
 const subscribeNever = () => () => undefined;
@@ -206,24 +212,24 @@ export function E2eeEnrollmentCard({
                 })
             : undefined,
         });
-        if (outcome === "declined") {
-          setErrorKey(ENROLL_REJECTED_KEY);
-          return { success: false, reason: "rejected" };
+        switch (outcome) {
+          case "declined":
+            setErrorKey(ENROLL_REJECTED_KEY);
+            return { success: false, reason: "rejected" };
+          case "stopped":
+            return { success: false, reason: "context-changed" };
+          case "partial":
+            setAlternateScope("dms");
+            onScopeChange?.("dms");
+            setErrorKey("e2ee.enroll.combinedPartial");
+            return { success: false, reason: "unavailable" };
+          case "fallback":
+            setOfferSeparateSetup(true);
+            setErrorKey("e2ee.enroll.combinedUnavailable");
+            return { success: false, reason: "unavailable" };
+          case "done":
+            return { success: true };
         }
-        if (outcome === "stopped")
-          return { success: false, reason: "context-changed" };
-        if (outcome === "partial") {
-          setAlternateScope("dms");
-          onScopeChange?.("dms");
-          setErrorKey("e2ee.enroll.combinedPartial");
-          return { success: false, reason: "unavailable" };
-        }
-        if (outcome === "fallback") {
-          setOfferSeparateSetup(true);
-          setErrorKey("e2ee.enroll.combinedUnavailable");
-          return { success: false, reason: "unavailable" };
-        }
-        return { success: true };
       } catch (error) {
         setErrorKey(getEnrollErrorKey(error));
         return {
@@ -247,16 +253,6 @@ export function E2eeEnrollmentCard({
   const canSign = includesEncryption
     ? engine?.getStatus() === "needs-enrollment"
     : requestSignedMessagesGrant !== undefined;
-  const visibleErrorKey =
-    errorKey ??
-    (!waiting && engineError === E2EE_SIGNATURE_REJECTED
-      ? ENROLL_REJECTED_KEY
-      : null);
-  const declined = visibleErrorKey === ENROLL_REJECTED_KEY;
-  const failureKey = declined ? null : visibleErrorKey;
-  let statusKey: MessageKey | null = null;
-  if (declined) statusKey = ENROLL_REJECTED_KEY;
-  else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
 
   return (
     <section
@@ -312,14 +308,7 @@ export function E2eeEnrollmentCard({
             aria-busy={waiting || encryptionLoading}
             className="!tw-whitespace-normal tw-text-center"
           >
-            {t(
-              locale,
-              selectedScope === "both"
-                ? "e2ee.enroll.signBoth"
-                : selectedScope === "posts"
-                  ? "e2ee.enroll.signPosts"
-                  : "e2ee.enroll.signDms"
-            )}
+            {t(locale, SIGN_LABEL[selectedScope])}
           </Button>
           {onClose && (
             <Button
@@ -367,37 +356,75 @@ export function E2eeEnrollmentCard({
             </div>
           )}
           {includesEncryption && !canSign && !waiting && (
-            <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+            <output className="tw-m-0 tw-text-sm tw-text-iron-300">
               {t(
                 locale,
                 encryptionLoading ? "e2ee.loading" : "e2ee.enroll.unavailable"
               )}
-            </p>
+            </output>
           )}
-          {!visibleErrorKey ? (
-            <SignedMessagesEnableStatus
-              status={flow.status}
-              onReconnect={flow.reconnect}
-            />
-          ) : null}
-          {/* One polite region for waiting and for declining (a choice). */}
-          <output
-            className={`tw-block tw-text-center tw-text-sm tw-text-iron-300 ${
-              statusKey ? "" : "tw-sr-only"
-            }`}
-          >
-            {statusKey ? t(locale, statusKey) : null}
-          </output>
-          {failureKey ? (
-            <p
-              role="alert"
-              className="tw-m-0 tw-text-center tw-text-sm tw-text-rose-300"
-            >
-              {t(locale, failureKey)}
-            </p>
-          ) : null}
+          <EnrollmentFeedback
+            errorKey={errorKey}
+            engineError={engineError}
+            waiting={waiting}
+            flow={flow}
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+function EnrollmentFeedback({
+  errorKey,
+  engineError,
+  waiting,
+  flow,
+}: {
+  readonly errorKey: MessageKey | null;
+  readonly engineError: string | null;
+  readonly waiting: boolean;
+  readonly flow: Pick<
+    ReturnType<typeof useEnableSignedMessages>,
+    "status" | "reconnect"
+  >;
+}) {
+  const locale = useBrowserLocale();
+  const visibleErrorKey =
+    errorKey ??
+    (!waiting && engineError === E2EE_SIGNATURE_REJECTED
+      ? ENROLL_REJECTED_KEY
+      : null);
+  const declined = visibleErrorKey === ENROLL_REJECTED_KEY;
+  const failureKey = declined ? null : visibleErrorKey;
+  let statusKey: MessageKey | null = null;
+  if (declined) statusKey = ENROLL_REJECTED_KEY;
+  else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
+
+  return (
+    <>
+      {!visibleErrorKey ? (
+        <SignedMessagesEnableStatus
+          status={flow.status}
+          onReconnect={flow.reconnect}
+        />
+      ) : null}
+      {/* One polite region for waiting and for declining (a choice). */}
+      <output
+        className={`tw-block tw-text-center tw-text-sm tw-text-iron-300 ${
+          statusKey ? "" : "tw-sr-only"
+        }`}
+      >
+        {statusKey ? t(locale, statusKey) : null}
+      </output>
+      {failureKey ? (
+        <p
+          role="alert"
+          className="tw-m-0 tw-text-center tw-text-sm tw-text-rose-300"
+        >
+          {t(locale, failureKey)}
+        </p>
+      ) : null}
+    </>
   );
 }

@@ -38,6 +38,21 @@ function getQRScannerErrorToastMessage({
   );
 }
 
+function getDeviceSetupRoute(
+  url: URL,
+  content: string,
+  appScheme: string,
+  address: string
+): string | null {
+  if (
+    !url.hash ||
+    url.searchParams.get("address")?.toLowerCase() !== address.toLowerCase()
+  ) {
+    return null;
+  }
+  return getConnectionShareRoute({ content, appScheme });
+}
+
 export default function HeaderQRScanner({
   onScanSuccess,
   appSidebar = false,
@@ -131,13 +146,13 @@ export default function HeaderQRScanner({
     try {
       const url = new URL(content);
       if (deviceSetupAddress !== undefined) {
-        const route = getConnectionShareRoute({ content, appScheme });
-        if (
-          !route ||
-          !url.hash ||
-          url.searchParams.get("address")?.toLowerCase() !==
-            deviceSetupAddress.toLowerCase()
-        ) {
+        const route = getDeviceSetupRoute(
+          url,
+          content,
+          appScheme,
+          deviceSetupAddress
+        );
+        if (!route) {
           setToast({ message: invalidQRCodeMessage, type: "error" });
           return;
         }

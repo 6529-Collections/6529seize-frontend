@@ -117,9 +117,6 @@ export async function turnOnWithCombinedSignIn({
   const revoked = revokeReplacedGrant(replacedGrantId, e2ee);
   const status = e2ee.adopted ? await engine.enrollWithLoginGrant() : null;
   await revoked;
-  return status !== null && SETTLED_STATUSES.includes(status)
-    ? "done"
-    : e2ee.grantSaved
-      ? "partial"
-      : "fallback";
+  if (status !== null && SETTLED_STATUSES.includes(status)) return "done";
+  return e2ee.grantSaved ? "partial" : "fallback";
 }
