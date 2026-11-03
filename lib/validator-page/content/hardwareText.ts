@@ -74,7 +74,7 @@ export const SYSTEMS: readonly {
     download: "Download for Linux",
     image: "/linux.png",
     works:
-      "Ubuntu 22.04, Debian 12, Linux Mint 21 or Fedora 36, or newer, on a 64-bit Intel, AMD or ARM processor.",
+      "Ubuntu 22.04, Debian 12 or Linux Mint 21 or newer, on Intel, AMD or ARM. Fedora 36 or newer on Intel or AMD.",
     check: "A Raspberry Pi 4 or 5 works with the 64-bit Raspberry Pi OS.",
     note: "Older Linux releases can't run it.",
   },

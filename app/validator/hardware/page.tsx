@@ -27,6 +27,8 @@ const CARD_FILES: Record<
   linux: [
     { kind: "deb-x64", label: "Linux, x86-64" },
     { kind: "deb-arm64", label: "Linux, ARM64" },
+    // Fedora and other Linux without apt: x86-64 only.
+    { kind: "appimage", label: "AppImage, x86-64" },
   ],
 };
 

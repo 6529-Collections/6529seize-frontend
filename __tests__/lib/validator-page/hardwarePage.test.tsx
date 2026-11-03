@@ -99,6 +99,7 @@ describe("/validator/hardware", () => {
       ["Download for Windows", "6529-Validator-Setup-0.1.0-x64.exe"],
       ["Linux, x86-64", "6529-validator_0.1.0_amd64.deb"],
       ["Linux, ARM64", "6529-validator_0.1.0_arm64.deb"],
+      ["AppImage, x86-64", "6529-Validator-0.1.0-x86_64.AppImage"],
     ]) {
       expect(html).toContain(
         `href="/validator/download/0.1.0-test.2/${file}" class="${SECONDARY_BUTTON}" aria-label="${label}, ${file}"`
@@ -131,6 +132,9 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
     expect(windows?.note).toContain("Windows 11 runs it through emulation");
     expect(windows?.note).toContain("Windows 10 on ARM can't run it");
     expect(linux?.works).toMatch(/Ubuntu 22\.04, Debian 12/);
+    // Neither .deb installs on Fedora; only the AppImage does, on x86-64.
+    expect(linux?.works).toContain("Fedora 36 or newer on Intel or AMD.");
+    expect(text).not.toMatch(/Fedora[^.]*ARM/);
     expect(linux?.check).toContain("Raspberry Pi 4 or 5");
     expect(linux?.check).toContain("64-bit Raspberry Pi OS");
   });
