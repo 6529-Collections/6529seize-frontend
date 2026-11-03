@@ -78,6 +78,27 @@ and run a non-empty pack set sequentially. Deployed-environment entries are
 validated as explicitly read-only and must use the exact approved base URL.
 Their artifacts can be preserved per pack with `--artifact-root <path>`.
 
+The restricted-submission fixture in that pack covers public chat, on-demand
+access details, copied competition rules links, and draft preservation through
+Settings. Keyboard coverage checks Enter/Space, Tab/Shift+Tab, Escape, and focus
+after routing. Available chat stays free of access panels. A wave without a
+default competition keeps its existing no-submission-action behavior. Only
+notification read acknowledgements are allowed for this fixture; posting fails
+closed.
+
+The same fixture covers an ended submission period with submission permission
+false: the lock explains closure and its date, shows a compact public group,
+and keeps keyboard navigation to the selected competition's rules usable.
+The fixture also checks closed-submission and open-voting schedule sections,
+inline status/detail alignment, and viewport containment on desktop and mobile.
+Closing-date expectations are literal in UTC, Los Angeles, Auckland, and
+Honolulu. Each timezone also checks that a manual closure date takes precedence
+over a distinct future scheduled deadline.
+The leaderboard card fixture also checks the gap between author and post text
+at phone, medium, and both sides of the desktop action-button breakpoint.
+The open-card deadline case advances the browser clock without navigation and
+checks that the restriction and supporting copy switch to the ended state.
+
 PR selection for `test:e2e:native-competition-sandbox` is owned by
 `scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
 native competitions plus shared submission dialogs, leaderboard controls and
@@ -326,7 +347,7 @@ App PR CI:
   session that compiles every critical-shell route outgrows the 16 GB runner's
   memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
   `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
-  false` because CI dev servers always start cold.
+false` because CI dev servers always start cold.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name

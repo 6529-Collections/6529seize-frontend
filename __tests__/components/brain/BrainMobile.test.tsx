@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
+import { useBrainMobileSubmissionRules } from "@/components/brain/mobile/BrainMobileSubmissionRulesContext";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { useWaveData } from "@/hooks/useWaveData";
 import {
@@ -38,6 +39,10 @@ let mockSearchParams = new URLSearchParams();
 let mockPathname = "/";
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSetActiveContentTab = jest.fn();
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ setActiveContentTab: mockSetActiveContentTab }),
+}));
 let mockCurrentWaveView: { waveId: string; view: BrainView } | null = null;
 const mockRememberWaveView = jest.fn();
 
@@ -147,7 +152,13 @@ jest.mock("@/components/brain/mobile/BrainMobileTabs", () => ({
   __esModule: true,
   default: (props: any) => {
     latestTabsProps = props;
-    return <div data-testid="tabs" />;
+    return (
+      <div data-testid="tabs">
+        <button ref={props.onConfigurationButtonRef} type="button">
+          Shell Configuration
+        </button>
+      </div>
+    );
   },
 }));
 
@@ -337,9 +348,27 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
   default: () => <div data-testid="faq" />,
 }));
 
+jest.mock(
+  "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="configuration">Configuration</div>,
+  })
+);
+
 const { useAuth } = require("@/components/auth/Auth");
 
 // Tests
+
+/** Exercise the rules navigation exposed to nested mobile Wave content. */
+function SubmissionRulesTrigger() {
+  const viewRules = useBrainMobileSubmissionRules();
+  return (
+    <button type="button" onClick={viewRules ?? undefined}>
+      View submission rules
+    </button>
+  );
+}
 
 describe("BrainMobile", () => {
   const createWave = (isDirectMessage = false) =>
@@ -460,6 +489,40 @@ describe("BrainMobile", () => {
     dropData = { id: "d1" };
     render(<BrainMobile>child</BrainMobile>);
     expect(screen.getByTestId("drop")).toBeInTheDocument();
+  });
+
+  it("opens rules through the app view and focuses its persistent tab", async () => {
+    mockPathname = "/waves/1";
+    mockSearchParams.set("tab", "chat");
+    mockCurrentWaveView = { waveId: "1", view: BrainView.DEFAULT };
+    waveData = createWave();
+    render(
+      <BrainMobile>
+        <SubmissionRulesTrigger />
+      </BrainMobile>
+    );
+
+    const rulesTrigger = screen.getByRole("button", {
+      name: "View submission rules",
+    });
+    fireEvent.click(rulesTrigger);
+
+    await waitFor(() =>
+      expect(latestTabsProps.activeView).toBe(BrainView.CONFIGURATION)
+    );
+    expect(
+      screen.getByRole("button", { name: "Shell Configuration" })
+    ).toHaveFocus();
+    expect(mockRememberWaveView).toHaveBeenCalledWith({
+      waveId: "1",
+      view: BrainView.CONFIGURATION,
+    });
+    // The shared content stays mounted while the shell resolves the rules route.
+    // Navigation and focus must not depend on destroying the chat subtree.
+    expect(screen.getByRole("button", { name: "View submission rules" })).toBe(
+      rulesTrigger
+    );
+    expect(rulesTrigger).not.toHaveFocus();
   });
 
   it("shows notifications view when path matches", async () => {
