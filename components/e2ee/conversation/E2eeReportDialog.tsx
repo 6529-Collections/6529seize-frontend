@@ -1,6 +1,8 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+import { useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { ApiE2eeReportCategory } from "@/generated/models/ApiE2eeReportCategory";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -49,16 +51,16 @@ const CATEGORIES: readonly {
 
 const EMPTY_PREVIEW: E2eeReportPreview = { latest: null, original: null };
 
-function readPreview(
+async function readPreview(
   engine: E2eeEngine,
   g: string,
   message: E2eeMessage | null
-): E2eeReportPreview {
+): Promise<E2eeReportPreview> {
   if (!message) {
     return EMPTY_PREVIEW;
   }
   try {
-    return engine.reportPreview(g, message.id);
+    return await engine.reportPreview(g, message.id);
   } catch {
     return EMPTY_PREVIEW;
   }
@@ -204,10 +206,19 @@ export function E2eeReportDialog({
   const [includeOriginal, setIncludeOriginal] = useState(false);
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
-  const preview = useMemo(
-    () => readPreview(engine, g, message),
-    [engine, g, message]
-  );
+  const { data: preview = EMPTY_PREVIEW } = useQuery({
+    queryKey: [
+      "e2ee-report-preview",
+      engine.getThisDevice()?.deviceKey,
+      g,
+      message?.id,
+      message?.editedAt,
+    ],
+    queryFn: () => readPreview(engine, g, message),
+    enabled: message !== null,
+    gcTime: 0,
+    staleTime: 0,
+  });
 
   const reset = () => {
     setCategory(null);
@@ -225,13 +236,14 @@ export function E2eeReportDialog({
   };
 
   const submit = async () => {
-    if (!message || !preview.latest) {
+    if (!message) {
       return;
     }
     if (category === null) {
       setErrorKey("e2ee.report.chooseCategory");
       return;
     }
+    if (!preview.latest) return;
     setPending(true);
     setErrorKey(null);
     try {

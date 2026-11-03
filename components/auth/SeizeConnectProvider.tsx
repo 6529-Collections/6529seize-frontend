@@ -33,7 +33,7 @@ import {
   logError,
   logSecurityEvent,
 } from "@/utils/security-logger";
-import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
+import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
 import {
   AppKitModalBridge,
   createAppKitModalBridgeStore,

@@ -6,6 +6,7 @@ import SafeCollectingSectionPage, {
   generateMetadata as generateSectionMetadata,
 } from "@/app/safe-collecting/[...section]/page";
 import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 describe("Safe Collecting route", () => {
   it.each([
@@ -76,16 +77,47 @@ describe("Safe Collecting route", () => {
     const element = await SafeCollectingPage({
       searchParams: Promise.resolve({
         address: "name.eth",
-        collection: "collection",
+        collection: "MEMES",
         use_case: "2",
       }),
     });
     expect(element.props).toMatchObject({
       section: DelegationCenterSection.CENTER,
       addressQuery: "name.eth",
-      collectionQuery: "collection",
+      collectionQuery: MEMES_CONTRACT,
       useCaseQuery: 2,
     });
+  });
+
+  it("maps the Safe Collecting airdrop link to The Memes contract", async () => {
+    const element = await SafeCollectingSectionPage({
+      params: Promise.resolve({ section: ["register-delegation"] }),
+      searchParams: Promise.resolve({ collection: "MEMES", use_case: "3" }),
+    });
+    expect(element.props).toMatchObject({
+      section: DelegationCenterSection.REGISTER_DELEGATION,
+      collectionQuery: MEMES_CONTRACT,
+      useCaseQuery: 3,
+    });
+  });
+
+  it.each([
+    [{ collection: "collection", use_case: "999" }],
+    [{ collection: "0x1", use_case: "998" }],
+    [{ collection: "", use_case: "-1" }],
+  ])("drops prefill values that are not form options: %j", async (query) => {
+    for (const element of [
+      await SafeCollectingPage({ searchParams: Promise.resolve(query) }),
+      await SafeCollectingSectionPage({
+        params: Promise.resolve({ section: ["register-delegation"] }),
+        searchParams: Promise.resolve(query),
+      }),
+    ]) {
+      expect(element.props).toMatchObject({
+        collectionQuery: "",
+        useCaseQuery: 0,
+      });
+    }
   });
 
   it("ignores ambiguous repeated prefill parameters", async () => {

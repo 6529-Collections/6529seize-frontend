@@ -22,7 +22,7 @@ import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -333,7 +333,7 @@ export default function TheMemesComponent({
       query.set("season", apiSeasonIds.join(","));
     }
 
-    return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
+    return apiUrl(`/api/memes_extended_data?${query.toString()}`);
   }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
   const [fetching, setFetching] = useState(initialData === undefined);

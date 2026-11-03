@@ -25,7 +25,7 @@ import {
   MemePageTitleSkeleton,
 } from "@/components/the-memes/MemePageSkeleton";
 import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -498,7 +498,7 @@ export default function GradientPageComponent({
 
   useEffect(() => {
     const abortController = new AbortController();
-    const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
+    const initialUrlNfts = apiUrl("/api/nfts/gradients?&page_size=101");
     fetchNfts(initialUrlNfts, [], abortController.signal);
     return () => abortController.abort();
   }, [fetchNfts]);

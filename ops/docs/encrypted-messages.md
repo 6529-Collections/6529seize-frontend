@@ -152,6 +152,10 @@ the same people already chosen. Earlier messages are not copied.
   right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
+- Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
+  same limits as the attach control. Text copied together with an image is
+  pasted into the message as well. Pasting attaches images only while the
+  attach control is shown, so not while you edit a message.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
@@ -167,6 +171,26 @@ the same people already chosen. Earlier messages are not copied.
 - The timeline shows notices such as people joining, leaving or being removed,
   new devices (with the wallet that signed them) or removed devices, renames,
   admin changes and safety-code changes.
+
+### Browsing saved history
+
+A chat opens at its newest saved messages. **Load older messages** reads the
+previous part of this device's history; **Load newer messages** moves forward
+again. **New messages** returns to the latest messages. Incoming messages do
+not move you away from older history you are reading.
+
+Photos load when you approach them while scrolling. Moving away can release
+them from memory; returning to a photo may download it again. This does not
+remove its message or attachment keys from your saved history.
+
+Search covers all messages saved on this device, including older messages
+outside the current view. Use **Previous results** and **Next results** to
+browse a long result list. Replies and search results can open that older
+history. Encrypted backups also include the complete saved history.
+
+A device catching up after being offline still needs to process the messages
+it has not received yet. Opening already synced history does not repeat that
+work. Keep the app open while a large import catches up.
 
 ### Safety code
 
