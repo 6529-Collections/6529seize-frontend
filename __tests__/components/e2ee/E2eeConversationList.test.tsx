@@ -125,9 +125,10 @@ describe("encrypted conversation list", () => {
         <E2eeMessagesSection />
       </E2eeTestProvider>
     );
-    for (const list of screen.getAllByRole("list")) {
+    const lists = screen.getAllByRole("list", { name: "Encrypted chats" });
+    expect(lists).toHaveLength(2);
+    for (const list of lists) {
       const links = within(list).queryAllByRole("link");
-      if (links.length === 0) continue;
       expect(links).toHaveLength(1);
       expect(links[0]).toHaveAttribute(
         "href",
