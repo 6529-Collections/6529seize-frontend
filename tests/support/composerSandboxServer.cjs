@@ -826,6 +826,9 @@ const mentionDrop = notificationDrop({
   content: "Mentioned @playwright inside the sandbox notification flow.",
 });
 
+// Keep the destination drop content stable while exercising compact title tokens.
+mentionDrop.title = "@[playwright] and #[QUORUM]";
+
 const reactionDrop = notificationDrop({
   id: SANDBOX_NOTIFICATION_REACTION_DROP_ID,
   serialNo: 3,
