@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { WalletConsolidation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -14,7 +14,7 @@ import type {
 const MAX_LINKED_CONSOLIDATION_WALLETS = 6;
 
 function getConsolidationsUrl(address: string) {
-  return `${publicEnv.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
+  return apiUrl(`/api/consolidations/${address}?show_incomplete=true`);
 }
 
 async function fetchConsolidationRows(

@@ -1,8 +1,8 @@
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
-import { publicEnv } from "@/config/env";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -105,7 +105,7 @@ export function useActivityData(
 
     let isCurrentRequest = true;
     setFetching(true);
-    let url = `${publicEnv.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
+    let url = apiUrl(`/api/transactions?page_size=${pageSize}&page=${page}`);
 
     switch (typeFilter) {
       case TypeFilter.SALES:
@@ -130,7 +130,7 @@ export function useActivityData(
         url += `&contract=${MEMES_CONTRACT}`;
         break;
       case ContractFilter.NEXTGEN:
-        url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
+        url += `&contract=${NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID]}`;
         break;
       case ContractFilter.MEMELAB:
         url += `&contract=${MEMELAB_CONTRACT}`;

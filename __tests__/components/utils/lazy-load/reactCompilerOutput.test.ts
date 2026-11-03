@@ -91,6 +91,10 @@ describe("lazy-load modules under the React Compiler", () => {
       "components/waves/LazyCreateDropGifPicker.tsx",
       "LoadedCreateDropGifPicker",
     ],
+    [
+      "components/header/share/header-share/lazyHeaderQRModal.tsx",
+      "LoadedHeaderQRModal",
+    ],
   ])("renders the loaded component by identifier in %s", (file, loaded) => {
     const types = jsxElementTypes(compileWithReactCompiler(file));
 

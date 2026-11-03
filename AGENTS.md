@@ -253,6 +253,10 @@ is available, use it; otherwise read the relevant files in
 - New API calls should normally use `services/api/common-api.ts` helpers so
   staging auth, wallet JWT auth, URL construction, structured errors, abort
   handling, and monitoring stay consistent.
+- When code must build a 6529 API URL itself, use `apiUrl(path)` or
+  `getApiBase()` from `services/api/api-endpoints.ts`. Never read
+  `publicEnv.API_ENDPOINT` or hardcode the API host; the contract test
+  `__tests__/contracts/api-endpoint-boundary.test.ts` enforces this.
 - React Query cache keys and broad invalidation live in
   `components/react-query-wrapper/ReactQueryWrapper.tsx`. Reuse `QueryKey` and
   existing invalidation/update helpers before creating new cache patterns.

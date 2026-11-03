@@ -33,6 +33,14 @@ const CONTRACTS = [
     ],
   },
   {
+    test: "__tests__/contracts/api-endpoint-boundary.test.ts",
+    inputs: [
+      /^(?:app|components|contexts|entities|helpers|hooks|lib|services|utils|wagmiConfig)\/.*\.[cm]?[jt]sx?$/u,
+      /^standalone\/standalone-memes-mint\/src\/(?:app|components)\/.*\.[cm]?[jt]sx?$/u,
+      /^(?:proxy|instrumentation|instrumentation-client)\.ts$/u,
+    ],
+  },
+  {
     test: "__tests__/styles/link-focus-visibility.test.ts",
     inputs: [/^styles\/globals\.css$/u],
   },
@@ -65,6 +73,10 @@ const CONTRACTS = [
       /^\.github\/workflows\/coverage-floor\.yml$/u,
       /^scripts\/coverage-floor(?:-baseline)?\.(?:cjs|json)$/u,
     ],
+  },
+  {
+    test: "__tests__/scripts/perf-budget.test.ts",
+    inputs: [/^scripts\/perf-budget\.json$/u],
   },
   {
     test: "__tests__/scripts/dependency-governance-workflow.test.ts",

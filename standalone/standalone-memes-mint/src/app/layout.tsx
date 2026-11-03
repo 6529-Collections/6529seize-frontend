@@ -9,6 +9,7 @@ import Providers from "@/components/providers/Providers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { SeizeSettingsMode } from "@/types/enums";
 import type { Viewport } from "next";
 
@@ -54,7 +55,7 @@ export default function RootLayout({
           type="image/svg+xml"
           sizes="any"
         />
-        <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
+        <link rel="preconnect" href={getApiBase()} crossOrigin="" />
       </head>
       <body>
         <Providers

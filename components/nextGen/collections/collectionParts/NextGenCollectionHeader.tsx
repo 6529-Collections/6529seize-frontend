@@ -15,7 +15,7 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -106,7 +106,9 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   useEffect(() => {
     const controller = new AbortController();
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
+    const url = apiUrl(
+      `/api/nextgen/merkle_roots/${props.collection.merkle_root}`
+    );
     fetchUrl<CollectionWithMerkle | null>(url, { signal: controller.signal })
       .then((response) => {
         if (controller.signal.aborted) {

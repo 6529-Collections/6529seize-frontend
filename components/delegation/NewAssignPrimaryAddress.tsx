@@ -53,7 +53,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     subdelegation,
     ens,
     onHide,
-    new_primary_address_query: newPrimaryAddressQuery,
+    new_primary_address_query: primaryAddressQuery,
     setNewPrimaryAddressQuery,
     onSetToast,
   } = props;
@@ -139,6 +139,14 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     },
     enabled: !!connectedProfile?.primary_wallet,
   });
+
+  // An address preset selects the listed option itself, so the field shows
+  // the address that will be written even when the link's letter case differs.
+  const newPrimaryAddressQuery =
+    tdhAddress?.consolidation_key
+      .split("-")
+      .find((candidate) => areEqualAddresses(candidate, primaryAddressQuery)) ??
+    primaryAddressQuery;
 
   useEffect(() => {
     if (tdhAddress) {

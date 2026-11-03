@@ -34,6 +34,13 @@ Everything in `publicEnvSchema` (`config/env.schema.ts`) is serialized into
 `PUBLIC_RUNTIME`, which `next.config.ts` inlines into browser bundles. The same
 applies to every key in the `env` block. Neither may hold a credential.
 
+`next.config.ts` validates that value with zod when it bakes a build, and
+again when the production server starts. Server code reads it through the
+validating `config/env.ts`. Browser bundles resolve `@/config/env` to
+`config/env.browser.ts` (a `turbopack.resolveAlias` browser condition in
+`config/nextConfig.ts`), which reads the baked value without zod, so the
+validator stays out of the client bundle.
+
 Server-only values are read at request time through `config/serverEnv.ts`:
 
 - `STAGING_API_KEY`: the `x-6529-auth` value server-side requests send to a
