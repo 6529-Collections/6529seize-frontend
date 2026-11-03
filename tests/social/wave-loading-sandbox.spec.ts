@@ -1078,14 +1078,22 @@ async function emitKeyboardEvent(
   eventName: string,
   keyboardHeight = 0
 ) {
-  await page.evaluate(
+  await page.waitForFunction((eventName) => {
+    const runtime = globalThis as typeof globalThis & {
+      __playwrightKeyboardListeners?: string[];
+    };
+    return runtime.__playwrightKeyboardListeners?.includes(eventName);
+  }, eventName);
+  const delivered = await page.evaluate(
     ({ eventName, keyboardHeight }) => {
-      globalThis.dispatchEvent(
+      return !globalThis.dispatchEvent(
         new CustomEvent(`playwright:${eventName}`, {
           detail: { keyboardHeight },
+          cancelable: true,
         })
       );
     },
     { eventName, keyboardHeight }
   );
+  expect(delivered, `Native callback received ${eventName}`).toBe(true);
 }
