@@ -3521,7 +3521,7 @@ export const EN_US_MESSAGES = {
   "auth.proxySwitch.failed":
     "Couldn't switch profiles. Your current profile is still selected. Please try again.",
   "auth.signModal.messageVersion":
-    "Your wallet may show Version 1. That is the sign-in message format, not the version of your 6529 authentication.",
+    "Version 1 in your wallet refers to the SIWE message version.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
