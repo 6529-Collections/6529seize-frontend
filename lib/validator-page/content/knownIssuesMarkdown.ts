@@ -18,7 +18,7 @@ export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
   '6. Windows may show "Windows protected your PC" until it has seen the signed file often. Workaround: **More info**, check that the publisher is 6529 Collection LLC, **Run anyway**.',
   "7. A program copied without its `release.json` reports itself as a development build. Workaround: on the terminal path, keep the archive's folder whole.",
   '8. Linux needs glibc 2.35 or newer. Older systems fail with "GLIBC_2.3x not found". Workaround: Ubuntu 22.04, Debian 12, Raspberry Pi OS Bookworm or newer.',
-  "9. Windows on ARM is untested. It runs the x64 build through emulation. Report what you see.",
+  "9. Windows on ARM is untested. Windows 11 on ARM runs the x64 build through emulation; Windows 10 on ARM can't run it. Report what you see.",
   "10. The app's window and menu-bar logo on a Mac were tested on build machines only. Report what you see, with a screenshot.",
   "",
   "## Running",
