@@ -24,9 +24,9 @@ const COLLECTION_PRESET_ALIASES: ReadonlyMap<string, DelegationCollection> =
  * The collections the delegation forms list. A delegation manager acting for
  * one collection can register only that collection.
  */
-export function getDelegationCollectionOptions(
-  subdelegation?: { readonly collection: DelegationCollection } | undefined
-): readonly DelegationCollection[] {
+export function getDelegationCollectionOptions(subdelegation?: {
+  readonly collection: DelegationCollection;
+}): readonly DelegationCollection[] {
   if (
     !subdelegation ||
     areEqualAddresses(subdelegation.collection.contract, DELEGATION_ALL_ADDRESS)
