@@ -7,13 +7,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
-
-jest.mock("react-dom", () => ({
-  ...jest.requireActual("react-dom"),
-  createPortal: (children: React.ReactNode) => children,
-}));
 
 const hoverCardAriaLabel = "Test hover card";
 
@@ -197,6 +193,203 @@ describe("HoverCard", () => {
     fireEvent.mouseDown(document.body);
 
     await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+  });
+
+  it.each(["Enter", " "])(
+    "focuses click-opened details with %s and restores focus on Escape",
+    async (key) => {
+      render(
+        <HoverCard
+          content={<a href="/rules">View rules</a>}
+          ariaLabel={hoverCardAriaLabel}
+          delayShow={0}
+          openOnClick
+          focusOnKeyboardActivation
+        >
+          <button type="button">Trigger</button>
+        </HoverCard>
+      );
+      const trigger = screen.getByRole("button", { name: "Trigger" });
+      act(() => trigger.focus());
+      // Keyboard activation must also work after focus has already opened it.
+      await screen.findByRole("dialog");
+
+      fireEvent.keyDown(trigger, { key });
+
+      expect(screen.getByRole("dialog")).toHaveFocus();
+      act(() => screen.getByRole("link", { name: "View rules" }).focus());
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      );
+    }
+  );
+
+  it.each([true, false])(
+    "preserves link Enter activation with openOnClick=%s",
+    (openOnClick) => {
+      render(
+        <HoverCard
+          content="Details"
+          ariaLabel={hoverCardAriaLabel}
+          openOnClick={openOnClick}
+        >
+          <a href="/destination">Trigger</a>
+        </HoverCard>
+      );
+      expect(
+        fireEvent.keyDown(screen.getByRole("link"), { key: "Enter" })
+      ).toBe(true);
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    }
+  );
+
+  describe("portal keyboard boundaries", () => {
+    beforeEach(() => {
+      // JSDOM has no layout; the real browser regression checks visibility too.
+      jest
+        .spyOn(HTMLElement.prototype, "getClientRects")
+        .mockReturnValue([
+          { width: 20, height: 20 } as DOMRect,
+        ] as unknown as DOMRectList);
+    });
+    afterEach(() => jest.restoreAllMocks());
+
+    it("returns to the trigger backwards and continues after it forwards", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <button type="button">Before</button>
+          <HoverCard
+            content={
+              <>
+                <a href="/group">Inspect group</a>
+                <a href="/rules">View rules</a>
+              </>
+            }
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button" hidden>
+            Hidden
+          </button>
+          <button type="button" disabled>
+            Disabled
+          </button>
+          <div inert>
+            <button type="button">Inert</button>
+          </div>
+          <button type="button">After</button>
+          <button type="button">End of page</button>
+        </>
+      );
+      const trigger = screen.getByRole("button", { name: "Trigger" });
+      act(() => trigger.focus());
+      await user.keyboard("{Enter}");
+      const card = screen.getByRole("dialog");
+      expect(card.parentElement).toBe(document.body);
+      await user.tab({ shift: true });
+      expect(trigger).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("link", { name: "Inspect group" })).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(trigger).toHaveFocus();
+      await user.keyboard("{Enter}");
+      await user.tab();
+      await user.tab();
+      expect(screen.getByRole("link", { name: "View rules" })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("returns a card with no links to the next control after its trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <HoverCard
+            content="Details"
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button">After</button>
+        </>
+      );
+      act(() => screen.getByRole("button", { name: "Trigger" }).focus());
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("leaves Tab outside the card and prevented content events alone", () => {
+      render(
+        <>
+          <HoverCard
+            content={
+              <button type="button" onKeyDown={(event) => event.preventDefault()}>
+                Custom control
+              </button>
+            }
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button">After</button>
+        </>
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Trigger" }));
+      const outside = screen.getByRole("button", { name: "After" });
+      act(() => outside.focus());
+      expect(fireEvent.keyDown(outside, { key: "Tab" })).toBe(true);
+      expect(outside).toHaveFocus();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      const customControl = screen.getByRole("button", { name: "Custom control" });
+      act(() => customControl.focus());
+      expect(fireEvent.keyDown(customControl, { key: "Tab" })).toBe(false);
+      expect(customControl).toHaveFocus();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("continues from the portal to a native summary after its trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <HoverCard
+            content={<a href="/rules">View rules</a>}
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <details>
+            <summary>More details</summary>Extra content
+          </details>
+          <button type="button">After details</button>
+        </>
+      );
+      act(() => screen.getByRole("button", { name: "Trigger" }).focus());
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("link", { name: "View rules" })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByText("More details")).toHaveFocus();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });

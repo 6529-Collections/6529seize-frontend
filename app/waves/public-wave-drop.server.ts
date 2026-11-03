@@ -1,6 +1,6 @@
 import "next/dist/compiled/server-only";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
@@ -87,12 +87,9 @@ function toPublicPart(
 }
 
 async function fetchAnonymous<T>(path: string): Promise<T | null> {
-  const response = await anonymousSsrFetch(
-    `${publicEnv.API_ENDPOINT}/api/v2/${path}`,
-    {
-      cache: "no-store",
-    }
-  );
+  const response = await anonymousSsrFetch(apiUrl(`/api/v2/${path}`), {
+    cache: "no-store",
+  });
   return response.ok ? ((await response.json()) as T) : null;
 }
 

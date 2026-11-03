@@ -15,8 +15,8 @@ jest.mock("@/constants/constants", () => ({
   GRADIENT_CONTRACT: "0x0C58Ef43fF3032005e472cB5709f8908aCb00205",
   MEMES_CONTRACT: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
 }));
-jest.mock("@/components/nextGen/nextgen_contracts", () => ({
-  NEXTGEN_CORE: {
+jest.mock("@/components/nextGen/nextgen_addresses", () => ({
+  NEXTGEN_CORE_ADDRESSES: {
     1: "0xNextGenCore",
   },
   NEXTGEN_CHAIN_ID: 1,

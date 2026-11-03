@@ -1,6 +1,7 @@
 import {
   getInboxDestination,
   getInboxDrop,
+  getInboxPreview,
   getInboxSummary,
 } from "@/components/notifications/inbox/notificationInbox.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -82,6 +83,31 @@ it("falls back safely when the related reply is unavailable", () => {
   expect(
     getInboxDestination({ ...replied, related_drops: [original] }, "viewer")
   ).toBe("/waves/public-wave?serialNo=42");
+});
+
+it("renders mention and wave tokens as readable text across drop parts", () => {
+  const drop = {
+    ...reply,
+    title: null,
+    parts: [
+      { content: "@[GelatoGenesis] when block screenshot feature?" },
+      { content: "Ideas from #[QUORUM]. Keep [ordinary brackets] and @all." },
+    ],
+  } as ApiDrop;
+  expect(getInboxPreview({ ...replied, related_drops: [drop] })).toBe(
+    "@GelatoGenesis when block screenshot feature? Ideas from #QUORUM. Keep [ordinary brackets] and @all."
+  );
+});
+
+it("normalizes a title before truncating and handles missing drops", () => {
+  const title = `@[GelatoGenesis] #[QUORUM] ${"x".repeat(260)}`;
+  expect(
+    getInboxPreview({
+      ...replied,
+      related_drops: [{ ...reply, title }],
+    })
+  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`.slice(0, 240));
+  expect(getInboxPreview({ ...replied, related_drops: [] })).toBe("");
 });
 
 it("does not expose an anonymous actor's handle in copy or profile links", () => {

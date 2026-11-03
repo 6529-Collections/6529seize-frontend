@@ -60,6 +60,9 @@ delegations for one collection scope.
   - standard delegations: update `New Delegate Address`, optional `Expiry Date`,
     and optional `Tokens`
   - consolidation and delegation-manager rows: update delegate address only
+  - the new delegate address takes a wallet address or an ENS name; a pasted
+    `name - 0x...` value uses the ENS name's address, and a label that is not
+    an ENS name is not accepted
 - Use manager actions for a selected original delegator:
   - `Register Delegation`
   - `Register Delegation Manager`
