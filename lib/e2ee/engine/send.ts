@@ -1,4 +1,10 @@
-import { asE2eeApiError } from "../api";
+import {
+  duplicateImport,
+  loadMessage,
+  preparePayload,
+  loadHistoryPage,
+} from "./history";
+import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeNotifyHint, ApiE2eeNotifyKind } from "../api-types";
 import { mediaFromFile, uploadMedia } from "../media";
 import {
@@ -20,12 +26,7 @@ import {
   type EngineContext,
 } from "./context";
 import { E2eeError, RetryableError } from "./errors";
-import {
-  importedText,
-  isDuplicateImport,
-  isValidImported,
-  toImportedPayload,
-} from "./imported";
+import { importedText, isValidImported, toImportedPayload } from "./imported";
 import { applyPayload } from "./messages";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
@@ -136,11 +137,21 @@ async function enqueue(
     id: payload.id,
     g: runtime.record.g,
     payload,
-    notify: computeNotify(ctx, runtime, payload),
+    notify: [],
     createdAt: ctx.now(),
     sealed: null,
   };
   await ctx.queue.run(async () => {
+    if (
+      payload.t === "msg" &&
+      ctx.openConversation === runtime.record.g &&
+      !runtime.followingLatest
+    )
+      await loadHistoryPage(ctx, runtime);
+    if (!(await preparePayload(ctx, runtime, payload))) return;
+    if (payload.t === "msg" && payload.reply)
+      await loadMessage(ctx, runtime, payload.reply);
+    item.notify = computeNotify(ctx, runtime, payload);
     if (payload.t === "msg") {
       const echo = localEcho(ctx, runtime.record.g, payload);
       runtime.messages.set(echo.id, echo);
@@ -229,7 +240,7 @@ export async function queueImported(
     throw new E2eeError("E2EE_INVALID_INPUT", "E2EE_IMPORT_INVALID");
   }
   const id = newMessageId();
-  if (isDuplicateImport(runtime, id, imp)) {
+  if (await ctx.queue.run(() => duplicateImport(ctx, runtime, id, imp))) {
     return false;
   }
   const attachments: PayloadAttachment[] = [];
@@ -289,7 +300,7 @@ async function markSent(
 ): Promise<void> {
   runtime.outbox.delete(item.id);
   runtime.record.sentSeqs.push(sent.seq);
-  const echo = runtime.messages.get(item.id);
+  const echo = await loadMessage(ctx, runtime, item.id);
   if (echo && item.payload.t === "msg") {
     echo.pending = false;
     echo.seq = sent.seq;
@@ -315,10 +326,8 @@ async function dropItem(
   code: string | null
 ): Promise<void> {
   runtime.outbox.delete(item.id);
-  if (
-    item.payload.t === "msg" &&
-    runtime.messages.get(item.id)?.pending === true
-  ) {
+  const echo = await loadMessage(ctx, runtime, item.id);
+  if (item.payload.t === "msg" && echo?.pending === true) {
     runtime.messages.delete(item.id);
     runtime.dirty.delete(item.id);
     runtime.deleted.add(item.id);

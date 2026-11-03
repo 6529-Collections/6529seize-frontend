@@ -87,21 +87,26 @@ Rules to keep:
 `fetchCache = "force-no-store"`. Routes therefore render per request by
 default. That default protects routes whose shell reads request data:
 
-- The native iOS EULA gate uses the `native-ios` and `eula-consent` cookies.
-- The environment badge uses the request host.
+- The NFT purchasing gate reads the `native-ios` cookie and the user agent to
+  decide whether purchasing content may be in the server HTML.
 - The global server `fetch` wrapper (`lib/fetch/ssrFetch.ts`) reads the
   visitor's auth cookies for API requests. Calling `cookies()` keeps any route
   that fetches from the API out of static generation.
 
-Fixed-content pages opt out with `export const dynamic = "force-static"`. Next.js
-then prerenders them, gives them a cacheable `Cache-Control` header, and returns
-empty cookies, headers, and search params to the shared shell:
+The rest of the shared shell renders the same HTML on every route, whether it
+is prerendered or rendered per request:
 
 - `components/providers/EULAConsentStartup.tsx` resolves the native iOS gate in
-  the browser. Native startup styles keep the prerendered page hidden. If the
-  browser finds native iOS without a current acceptance, the commit that
-  reveals the app replaces the page with the blocking check.
-- The environment badge uses the build's configured `BASE_ENDPOINT` origin.
+  the browser. Native startup styles keep the page hidden. If the browser finds
+  native iOS without a current acceptance, the commit that reveals the app
+  replaces the page with the blocking check.
+- The environment badge renders the build's configured `BASE_ENDPOINT` origin.
+  Each deployment is built for one host. A browser on another host, such as a
+  local server on a different port, gets its own badge right after hydration.
+
+Fixed-content pages opt out with `export const dynamic = "force-static"`. Next.js
+then prerenders them, gives them a cacheable `Cache-Control` header, and returns
+empty cookies, headers, and search params to the shared shell.
 
 `__tests__/contracts/static-content-pages.test.ts` requires the opt-in on every
 migrated WordPress content page. It also rejects request data, search params,
