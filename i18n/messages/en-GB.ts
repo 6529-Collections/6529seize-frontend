@@ -30,6 +30,10 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.myVotes.sort": "Sort by",
+  "waves.myVotes.sort.voteAmount": "Your vote amount",
+  "waves.myVotes.sort.leaderboard": "Leaderboard position",
+  "waves.myVotes.sort.lastVoted": "Last voted",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
