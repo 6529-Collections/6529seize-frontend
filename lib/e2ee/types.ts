@@ -1,3 +1,4 @@
+import type { HistoryPageOptions } from "./history-order";
 import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
 import type { BackupStateStore } from "./backup/state";
@@ -149,6 +150,8 @@ export interface E2eeConversation {
   lastMessage: E2eeMessage | null;
   unread: number;
   mentions: number;
+  /** A local saved-history read failed; retry without changing MLS state. */
+  historyError?: boolean;
   updatedAt: number;
 }
 
@@ -248,9 +251,33 @@ export interface E2eeEngine {
     options?: { includeOriginal?: boolean }
   ): Promise<void>;
   /** Exactly what `report` would send, decoded from the signed payloads. */
-  reportPreview(g: string, id: string): E2eeReportPreview;
-  search(query: string, g?: string): Promise<E2eeMessage[]>; // local only
-  getAttachment(g: string, id: string, blob: string): Promise<Blob>;
+  reportPreview(
+    g: string,
+    id: string
+  ): E2eeReportPreview | Promise<E2eeReportPreview>;
+  /** Page already processed local records; no ciphertext replay. */
+  loadHistory?(
+    g: string,
+    options?: HistoryPageOptions & { around?: string }
+  ): Promise<void>;
+  getMessage?(g: string, id: string): Promise<E2eeMessage | null>;
+  findImportedMessage?(
+    g: string,
+    waveId: string,
+    dropId: string,
+    part: number
+  ): Promise<E2eeMessage | null>;
+  search(
+    query: string,
+    g?: string,
+    signal?: AbortSignal
+  ): Promise<E2eeMessage[]>; // local only
+  getAttachment(
+    g: string,
+    id: string,
+    blob: string,
+    signal?: AbortSignal
+  ): Promise<Blob>;
 
   // devices
   /** Trusts the device's wallet for its owner, then adds it to their chats. */
@@ -332,7 +359,7 @@ export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;
 
 export interface E2eeEngineExt extends E2eeEngine {
   /** Copies of the decrypted history for the encrypted backup (no MLS state). */
-  backupHistory(): BackupHistory;
+  backupHistory(): Promise<BackupHistory> | BackupHistory;
   /** Merges restored history; unknown chats are added read-only. */
   importBackupHistory(
     history: BackupHistory

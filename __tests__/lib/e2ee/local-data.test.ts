@@ -29,7 +29,10 @@ describe("removing encrypted messages from this browser", () => {
         wasmState: new Uint8Array([1]),
       });
       // The backup state database exists too.
-      fake.factory.open(E2EE_BACKUP_DB_NAME, 1);
+      const backupOpen = fake.factory.open(E2EE_BACKUP_DB_NAME, 1);
+      backupOpen.onsuccess = () => {
+        backupOpen.result.onversionchange = () => backupOpen.result.close();
+      };
       await new Promise((resolve) => setTimeout(resolve, 5));
       expect(fake.has(E2EE_DB_NAME)).toBe(true);
       expect(fake.has(E2EE_BACKUP_DB_NAME)).toBe(true);
