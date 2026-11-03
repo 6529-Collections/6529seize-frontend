@@ -89,11 +89,21 @@ function getGrantDates(
         });
   return [
     t(locale, "signedMessages.devices.granted", {
-      date: date(grant.issued_at),
+      date: formatDate(locale, grant.created_at, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
     }),
     ending,
     lastUsed,
   ];
+}
+
+function getDeviceLabel(grantLabel: string, linkedLabel?: string): string {
+  if (grantLabel === "6529 Mobile" && linkedLabel?.startsWith("6529 app on ")) {
+    return linkedLabel.replace("6529 app", "6529 Mobile");
+  }
+  return grantLabel;
 }
 
 function DeviceGrantRow({
@@ -113,14 +123,15 @@ function DeviceGrantRow({
 }) {
   const locale = useBrowserLocale();
   const status = getStatus(grant, nowMs);
+  const label = getDeviceLabel(grant.device_label, linkedDevice?.label);
   const statusKey: MessageKey = `signedMessages.devices.status.${status}`;
 
   return (
-    <li className="tw-flex tw-flex-wrap tw-items-start tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0">
+    <li className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0">
       <div className="tw-min-w-0 tw-flex-1 tw-basis-60">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <span className="tw-break-words tw-font-semibold tw-text-iron-100">
-            {grant.device_label}
+            {label}
           </span>
           {isThisDevice && (
             <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-primary-300">
@@ -172,7 +183,7 @@ function DeviceGrantRow({
           variant="destructiveOutline"
           onClick={() => onRevoke(grant)}
           aria-label={t(locale, "signedMessages.devices.revokeLabel", {
-            label: grant.device_label,
+            label,
           })}
         >
           {t(locale, "signedMessages.devices.revoke")}
@@ -413,7 +424,10 @@ export default function DevicesPreferencesSettings() {
             ? "e2ee.devices.revokeCombinedTitle"
             : "signedMessages.devices.revokeProofTitle",
           {
-            label: pendingRevoke?.device_label ?? "",
+            label: getDeviceLabel(
+              pendingRevoke?.device_label ?? "",
+              pendingLinkedDevice?.label
+            ),
           }
         )}
         message={t(

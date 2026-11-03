@@ -104,7 +104,7 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
   const Icon = PLATFORM_ICONS[device.platform];
   const isActive = device.revokedAt === null;
   return (
-    <li className="tw-flex tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
+    <li className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
       <Icon
         aria-hidden="true"
         className="tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
