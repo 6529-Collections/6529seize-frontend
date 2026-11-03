@@ -17,16 +17,15 @@ import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import { loadDefaultWasm } from "@/lib/e2ee/wasm-loader";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
-  registerAppDeviceGrant,
-  revokeDeviceGrant,
-} from "@/services/api/device-grants-api";
-import {
   appGrantTimes,
   buildAppGrantTypedData,
   computeAppGrantId,
 } from "./app-grant";
 import { appGrantToRequest } from "./app-grant-request";
-import { installSharedDeviceKey } from "./device-key-store";
+import {
+  installSharedDeviceKey,
+  readUsableDeviceGrant,
+} from "./device-key-store";
 import { isEd25519Supported } from "./ed25519";
 import { DEFAULT_DEVICE_SCOPES } from "./grant-message";
 import {
@@ -47,7 +46,6 @@ export async function prepareConnectionDeviceSetup(input: {
   const mls = MlsClient.create(await loadDefaultWasm());
   let privateBytes: Uint8Array | null = null;
   let state: Uint8Array | null = null;
-  let registeredId: string | null = null;
   try {
     const pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, [
       "sign",
@@ -79,13 +77,6 @@ export async function prepareConnectionDeviceSetup(input: {
       signed.signature,
       input.target === "desktop" ? "6529 Desktop" : "6529 Mobile"
     );
-    const grant = await registerAppDeviceGrant(request);
-    registeredId = grant.id;
-    if (
-      grant.id !== computeAppGrantId(buildAppGrantTypedData(fields).message) ||
-      !input.isCurrent()
-    )
-      throw new Error("Device setup grant mismatch");
     state = mls.exportState();
     const sealed = await sealConnectionSetup(
       {
@@ -105,11 +96,7 @@ export async function prepareConnectionDeviceSetup(input: {
       },
       input.target
     );
-    return { ...sealed, grantId: registeredId };
-  } catch (error) {
-    if (registeredId)
-      await revokeDeviceGrant(registeredId).catch(() => undefined);
-    throw error;
+    return sealed;
   } finally {
     privateBytes?.fill(0);
     state?.fill(0);
@@ -160,7 +147,7 @@ async function importSigningPair(
   }
 }
 
-/** Authenticates the wallet grant on the server, then imports target-bound fresh keys locally. */
+/** Imports target-bound keys and registers the grant from the receiving app. */
 export async function acceptConnectionDeviceSetup(input: {
   readonly envelope: string;
   readonly secret: string;
@@ -174,57 +161,96 @@ export async function acceptConnectionDeviceSetup(input: {
     input.wallet,
     input.target
   );
-  const grant = await commonApiPost<typeof bundle.request, ApiDeviceGrant>({
-    endpoint: "device-grants",
-    body: bundle.request,
-    includeWalletAuth: false,
-    headers: { Authorization: `Bearer ${input.accessToken}` },
-  });
   const identity = await commonApiFetch<ApiIdentity>({
     endpoint: `identities/${encodeURIComponent(input.wallet)}`,
     includeWalletAuth: false,
   });
+  const terms = bundle.request.grant;
   if (
     identity.id !== bundle.profileId ||
-    grant.wallet.toLowerCase() !== input.wallet.toLowerCase() ||
-    grant.device_key !== bundle.request.grant.device_key ||
-    grant.revoked_at !== null ||
-    grant.expires_at <= Date.now() + 60000
+    terms.wallet !== input.wallet.toLowerCase() ||
+    terms.expires_at * 1000 <= Date.now() + 60000
   )
     throw new Error("Device setup grant mismatch");
   const pair = (await isEd25519Supported())
-    ? await importSigningPair(bundle.privateKey, grant.device_key)
+    ? await importSigningPair(bundle.privateKey, terms.device_key)
     : null;
+  const grantId = computeAppGrantId(
+    buildAppGrantTypedData({
+      wallet: terms.wallet,
+      deviceKeyHex: terms.device_key,
+      scopes: terms.scopes,
+      mls: {
+        deviceKeyHex: terms.mls_device_key,
+        ciphersuite: terms.ciphersuite,
+      },
+      issuedAtSeconds: terms.issued_at,
+      expiresAtSeconds: terms.expires_at,
+      origin: terms.origin,
+    }).message
+  );
   const state = base64ToBytes(bundle.mlsState);
   const device = await createLoginE2eeDevice({ state });
   state.fill(0);
   try {
-    if (device.deviceKeyHex !== bundle.request.grant.mls_device_key)
+    if (device.deviceKeyHex !== terms.mls_device_key)
       throw new Error("Device setup encryption key mismatch");
-    if (pair)
-      await installSharedDeviceKey({
-        address: input.wallet.toLowerCase(),
-        publicKeyHex: grant.device_key,
-        keyPair: pair,
-        grant,
-        ownProfileId: identity.id,
-        lastSeq: 0,
-      });
-    const adopted = await device.adopt({
-      profileId: identity.id,
-      wallet: input.wallet,
-      grantId: grant.id,
-      walletSignature: bundle.request.wallet_signature,
-      origin: bundle.request.grant.origin,
-      issuedAtSeconds: bundle.request.grant.issued_at,
-      expiresAtSeconds: bundle.request.grant.expires_at,
-      platform: input.target === "desktop" ? "desktop" : "phone",
+    const existing = await getDefaultE2eeStorage().getDevice(identity.id);
+    if (
+      existing?.registered &&
+      (!pair || (await readUsableDeviceGrant(input.wallet, Date.now())))
+    )
+      return;
+
+    const grant = await commonApiPost<typeof bundle.request, ApiDeviceGrant>({
+      endpoint: "device-grants",
+      body: bundle.request,
+      includeWalletAuth: false,
+      headers: { Authorization: `Bearer ${input.accessToken}` },
     });
     if (
-      !adopted &&
-      !(await getDefaultE2eeStorage().getDevice(identity.id))?.registered
+      grant.id !== grantId ||
+      grant.wallet.toLowerCase() !== terms.wallet ||
+      grant.device_key !== terms.device_key ||
+      grant.revoked_at !== null ||
+      grant.expires_at <= Date.now() + 60000
     )
-      throw new Error("Device setup could not be saved");
+      throw new Error("Device setup grant mismatch");
+    let adopted: boolean;
+    try {
+      adopted = await device.adopt({
+        profileId: identity.id,
+        wallet: input.wallet,
+        grantId,
+        walletSignature: bundle.request.wallet_signature,
+        origin: bundle.request.grant.origin,
+        issuedAtSeconds: bundle.request.grant.issued_at,
+        expiresAtSeconds: bundle.request.grant.expires_at,
+        platform: input.target === "desktop" ? "desktop" : "phone",
+      });
+      if (
+        !adopted &&
+        !(await getDefaultE2eeStorage().getDevice(identity.id))?.registered
+      )
+        throw new Error("Device setup could not be saved");
+      if (pair)
+        await installSharedDeviceKey({
+          address: input.wallet.toLowerCase(),
+          publicKeyHex: grant.device_key,
+          keyPair: pair,
+          grant,
+          ownProfileId: identity.id,
+          lastSeq: 0,
+        });
+    } catch (error) {
+      await commonApiPost({
+        endpoint: `device-grants/${grant.id}/revoke`,
+        body: {},
+        includeWalletAuth: false,
+        headers: { Authorization: `Bearer ${input.accessToken}` },
+      }).catch(() => undefined);
+      throw error;
+    }
     // Keeping an already registered MLS device is intentional: never replace its history.
     if (adopted) {
       setE2eeEnrollmentMarker(identity.id, true);
