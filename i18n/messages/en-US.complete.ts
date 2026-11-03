@@ -1,5 +1,7 @@
 import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
 import { STREAM_NAMESPACE_MESSAGES } from "@/i18n/namespaces/stream";
+import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
+import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -15,6 +17,8 @@ import { STREAM_NAMESPACE_MESSAGES } from "@/i18n/namespaces/stream";
 export const EN_US_MESSAGES = {
   ...EN_US_ROOT_MESSAGES,
   ...STREAM_NAMESPACE_MESSAGES,
+  ...NETWORK_TDH_MESSAGES,
+  ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

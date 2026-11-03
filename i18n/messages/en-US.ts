@@ -37,8 +37,6 @@ import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import museumMessages from "@/i18n/messages/museum.en-US.json";
-import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
-import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
 import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
@@ -4713,8 +4711,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...emmaSnapshotsMessages,
   ...emmaMessages,
   ...museumMessages,
-  ...networkMetricsMessages,
-  ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
   ...networkTdhSharedMessages,
   ...networkTdhVerifyMessages,

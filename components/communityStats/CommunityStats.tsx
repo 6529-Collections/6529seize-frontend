@@ -12,6 +12,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t as translate, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { fetchUrl } from "@/services/6529api";
 import {
   BarElement,
