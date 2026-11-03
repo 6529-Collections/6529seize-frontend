@@ -35,16 +35,21 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.route("**/api/v2/notifications?*", async (route) => {
       const response = await route.fetch();
       const data = (await response.json()) as ApiNotificationsResponseV2;
-      const wave = {
-        ...data.notifications[0]!.related_wave!,
-        pfp: "/favicon.png",
-      };
+      const relatedWave = data.notifications.find(
+        (notification) => notification.related_wave
+      )?.related_wave;
+      if (!relatedWave)
+        throw new Error("Sandbox notifications need a related wave");
+      const wave = { ...relatedWave, pfp: "/favicon.png" };
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_wave: wave,
       }));
       data.notifications.push({
-        id: 1005,
+        id:
+          Math.max(
+            ...data.notifications.map((notification) => notification.id)
+          ) + 1,
         cause: ApiNotificationCause.VotingCreditsReturned,
         created_at: Date.now(),
         read_at: 1,
