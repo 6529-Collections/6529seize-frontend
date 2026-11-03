@@ -138,6 +138,11 @@ function normalizeKeyboardHeight(height: number | null | undefined): number {
 }
 
 function getKeyboardEventLayoutTransitionMs(): number {
+  if (currentState.isAndroid) {
+    // Android updates viewport geometry during its own keyboard animation.
+    // A second CSS animation lags that geometry and can trigger focus panning.
+    return 0;
+  }
   const matchMedia = globalThis.matchMedia;
   return typeof matchMedia === "function" &&
     matchMedia(REDUCED_MOTION_MEDIA_QUERY).matches
@@ -269,10 +274,13 @@ function getKeyboardLayoutInset(
     return normalizeKeyboardHeight(keyboardHeight);
   }
 
-  // Android WebViews can shrink the layout viewport themselves. Only publish
-  // the keyboard overlap that has not already been removed from 100dvh.
+  // Android WebViews can resize the layout or pan the visual viewport to the
+  // focused input. Subtract both once, for native events and viewport updates.
+  const viewportPan = normalizeKeyboardHeight(
+    globalThis.visualViewport?.offsetTop
+  );
   return normalizeKeyboardHeight(
-    Math.max(0, keyboardHeight - getLayoutViewportShrinkHeight())
+    Math.max(0, keyboardHeight - getLayoutViewportShrinkHeight() - viewportPan)
   );
 }
 
@@ -312,26 +320,27 @@ function getViewportKeyboardHeight(): number {
     return 0;
   }
 
+  const viewportOffsetTop = currentState.isAndroid
+    ? 0
+    : visualViewport.offsetTop;
   const visualViewportShrinkHeight =
     keyboardClosedViewportHeight > 0
-      ? keyboardClosedViewportHeight -
-        visualViewport.offsetTop -
-        visualViewportHeight
+      ? keyboardClosedViewportHeight - viewportOffsetTop - visualViewportHeight
       : 0;
   const windowHeight = typeof window !== "undefined" ? window.innerHeight : 0;
   const viewportBottomOverlap =
     windowHeight > 0
-      ? windowHeight - visualViewport.offsetTop - visualViewportHeight
+      ? windowHeight - viewportOffsetTop - visualViewportHeight
       : 0;
-  const unappliedViewportShrinkHeight = currentState.isAndroid
-    ? visualViewportShrinkHeight - getLayoutViewportShrinkHeight()
-    : visualViewportShrinkHeight;
-
+  // Keep total keyboard height on Android, even after WebView resize or pan.
+  // Removing that evidence can save the shrunken viewport as the closed
+  // baseline before native events arrive. getKeyboardLayoutInset subtracts
+  // the movement already applied by the WebView exactly once.
   // Use the closed-viewport shrink when available, but keep bottom overlap as
   // the first-focus/offsetTop fallback for WebViews that do not expose a stable
   // pre-keyboard baseline.
   return normalizeKeyboardHeight(
-    Math.max(unappliedViewportShrinkHeight, viewportBottomOverlap)
+    Math.max(visualViewportShrinkHeight, viewportBottomOverlap)
   );
 }
 
@@ -484,6 +493,12 @@ function setupBrowserKeyboardFallbackListeners(): void {
     scheduleKeyboardHideFallback();
   };
   const handleViewportChange = () => {
+    if (currentState.isAndroid) {
+      // Android has already moved the visual viewport when this event arrives.
+      // Deferring the matching inset leaves a frame of double compensation.
+      syncKeyboardVisibilityFromViewport();
+      return;
+    }
     if (viewportAnimationFrame !== null) {
       return;
     }
