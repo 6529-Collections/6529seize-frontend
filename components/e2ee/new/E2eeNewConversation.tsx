@@ -322,8 +322,9 @@ export function E2eeNewConversation() {
       title={t(locale, "e2ee.new.title")}
       backHref={getEncryptedMessagesRoute()}
       backLabel={t(locale, "e2ee.conversation.back")}
+      showBackLabel
     >
-      <E2eeRouteGate>
+      <E2eeRouteGate enrollmentDescription={t(locale, "e2ee.enroll.startChat")}>
         {(e2ee) => <NewConversationForm e2ee={e2ee} />}
       </E2eeRouteGate>
     </E2eePageShell>

@@ -67,6 +67,13 @@ stay saved in this browser for the next sign-in.
 
 ## Turning it on
 
+The blue **+** in the Encrypted section opens **New encrypted chat**. If this
+device needs setup, the card explains that you can then choose who to chat with.
+The **Encrypted messages** row with a chevron opens your conversations instead;
+its setup card explains that turning on this device lets you open those chats.
+Both use the same device setup. On the new-chat page, **Back to encrypted
+messages** returns to the conversations page without starting setup.
+
 The first time you open encrypted messages on a device, a card explains what
 happens:
 

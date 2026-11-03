@@ -20,6 +20,8 @@ interface E2eePageShellProps {
   readonly subtitle?: ReactNode | undefined;
   readonly backHref?: string | undefined;
   readonly backLabel?: string | undefined;
+  /** Shows the back label above the page title instead of an icon-only link. */
+  readonly showBackLabel?: boolean | undefined;
   /** Hide the back link where the messages side pane is visible. */
   readonly backOnSmallScreensOnly?: boolean | undefined;
   readonly actions?: ReactNode | undefined;
@@ -32,6 +34,7 @@ export function E2eePageShell({
   subtitle,
   backHref,
   backLabel,
+  showBackLabel = false,
   backOnSmallScreensOnly = false,
   actions,
   children,
@@ -42,17 +45,25 @@ export function E2eePageShell({
       style={style}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
     >
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
+      <div
+        className={`${showBackLabel ? "tw-flex-wrap" : ""} tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3`}
+      >
         {backHref !== undefined && backLabel !== undefined ? (
           <Link
             href={backHref}
             aria-label={backLabel}
-            className={`${backOnSmallScreensOnly ? "lg:tw-hidden" : ""} tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400`}
+            className={`${backOnSmallScreensOnly ? "lg:tw-hidden" : ""} ${showBackLabel ? "tw-min-h-9 tw-max-w-full tw-gap-2 tw-px-2 tw-py-1 tw-text-sm" : "tw-size-9"} tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400`}
           >
-            <ArrowLeftIcon aria-hidden="true" className="tw-size-5" />
+            <ArrowLeftIcon
+              aria-hidden="true"
+              className="tw-size-5 tw-flex-shrink-0"
+            />
+            {showBackLabel ? <span>{backLabel}</span> : null}
           </Link>
         ) : null}
-        <div className="tw-min-w-0 tw-flex-1">
+        <div
+          className={`${showBackLabel ? "tw-basis-full" : ""} tw-min-w-0 tw-flex-1`}
+        >
           <h1 className="tw-m-0 tw-line-clamp-2 tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-truncate">
             {title}
           </h1>

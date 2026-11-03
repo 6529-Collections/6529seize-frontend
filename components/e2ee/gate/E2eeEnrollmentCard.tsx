@@ -51,6 +51,7 @@ interface E2eeEnrollmentCardProps {
   readonly engine: E2eeEngine | null;
   readonly enrolling: boolean;
   readonly engineError: string | null;
+  readonly description?: string | undefined;
   /** Extra context under the points (who signs, where to turn it off). */
   readonly details?: ReactNode | undefined;
 }
@@ -63,6 +64,7 @@ export function E2eeEnrollmentCard({
   engine,
   enrolling,
   engineError,
+  description,
   details,
 }: E2eeEnrollmentCardProps) {
   const locale = useBrowserLocale();
@@ -131,6 +133,11 @@ export function E2eeEnrollmentCard({
         >
           {t(locale, "e2ee.enroll.title")}
         </h2>
+        {description ? (
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {description}
+          </p>
+        ) : null}
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "e2ee.enroll.intro")}
         </p>

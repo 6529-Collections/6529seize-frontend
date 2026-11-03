@@ -22,7 +22,7 @@ import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
 import { E2eeConversationList } from "./E2eeConversationList";
 
 const ACTION_LINK_CLASS =
-  "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 export function E2eeNewChatLink({
   compact = false,
@@ -39,7 +39,9 @@ export function E2eeNewChatLink({
       href={getNewEncryptedChatRoute()}
       aria-label={compact ? label : undefined}
       title={compact || iconOnlyOnMobile ? label : undefined}
-      className={`${ACTION_LINK_CLASS} tw-border-primary-500 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600`}
+      className={`${ACTION_LINK_CLASS} ${
+        compact ? "tw-w-9 tw-justify-center tw-px-0" : "tw-px-3"
+      } tw-border-primary-500 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600`}
     >
       <PlusIcon aria-hidden="true" className="tw-size-4" />
       {compact ? null : (
@@ -59,7 +61,7 @@ function DevicesLink() {
     <Link
       href={getEncryptedDevicesRoute()}
       aria-label={t(locale, "e2ee.devices.open")}
-      className={`${ACTION_LINK_CLASS} tw-border-white/10 tw-bg-white/[0.07] tw-text-iron-100 desktop-hover:hover:tw-bg-white/10`}
+      className={`${ACTION_LINK_CLASS} tw-border-white/10 tw-bg-white/[0.07] tw-px-3 tw-text-iron-100 desktop-hover:hover:tw-bg-white/10`}
     >
       <DevicePhoneMobileIcon aria-hidden="true" className="tw-size-4" />
       <span className="tw-hidden sm:tw-inline">
@@ -90,7 +92,9 @@ export function E2eeConversationListPage() {
         ) : null
       }
     >
-      <E2eeRouteGate>
+      <E2eeRouteGate
+        enrollmentDescription={t(locale, "e2ee.enroll.openConversations")}
+      >
         {({ conversations, profileId }) => (
           <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />

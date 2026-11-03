@@ -58,6 +58,10 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.title": "Turn on encrypted messages",
   "e2ee.enroll.intro":
     "Encrypted chats can be read only by the people in them.",
+  "e2ee.enroll.openConversations":
+    "Turn on encrypted messages on this device to open your encrypted conversations.",
+  "e2ee.enroll.startChat":
+    "Turn on encrypted messages on this device, then choose who to chat with.",
   "e2ee.enroll.point.signature":
     "One wallet signature lets this device send and read encrypted messages for 180 days.",
   "e2ee.enroll.point.noFunds":

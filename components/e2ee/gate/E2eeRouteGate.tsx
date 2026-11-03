@@ -28,6 +28,8 @@ interface E2eeRouteGateProps {
   readonly children: (e2ee: UseE2eeResult) => ReactNode;
   /** Wraps the non-ready states (for pages whose ready view has its own header). */
   readonly shell?: ((content: ReactNode) => ReactNode) | undefined;
+  /** Explains what this page opens after device setup. */
+  readonly enrollmentDescription?: string | undefined;
 }
 
 /**
@@ -36,7 +38,11 @@ interface E2eeRouteGateProps {
  * enrollment, the device limit and load errors. Children render only when
  * the engine is ready.
  */
-export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
+export function E2eeRouteGate({
+  children,
+  shell,
+  enrollmentDescription,
+}: E2eeRouteGateProps) {
   const e2ee = useE2ee();
   if (e2ee.status === "ready") {
     return children(e2ee);
@@ -44,11 +50,19 @@ export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
   if (e2ee.status === "disabled") {
     return null;
   }
-  const content = <E2eeGateState e2ee={e2ee} />;
+  const content = (
+    <E2eeGateState e2ee={e2ee} enrollmentDescription={enrollmentDescription} />
+  );
   return shell ? shell(content) : content;
 }
 
-function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
+function E2eeGateState({
+  e2ee,
+  enrollmentDescription,
+}: {
+  readonly e2ee: UseE2eeResult;
+  readonly enrollmentDescription?: string | undefined;
+}) {
   const locale = useBrowserLocale();
   switch (e2ee.status) {
     case "proxy":
@@ -111,6 +125,7 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           engine={e2ee.engine}
           enrolling={e2ee.status === "enrolling"}
           engineError={e2ee.error}
+          description={enrollmentDescription}
           details={<E2eeEnrollmentIdentity />}
         />
       );
