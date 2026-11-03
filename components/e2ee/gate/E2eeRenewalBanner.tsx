@@ -57,22 +57,19 @@ function RenewalBannerRoute(props: RenewalBannerProps) {
   );
 }
 
-function RenewalBannerContent({
-  className,
-  inMessages,
-  preview,
-}: RenewalBannerProps & {
-  readonly inMessages: boolean;
-  readonly preview: boolean;
-}) {
-  const locale = useBrowserLocale();
-  const { engine, thisDevice, profileId } = useE2ee();
-  const { proofGrant, proofRenewal, encryptionRenewal } =
-    useDeviceSecurityState();
-  const signing = useEnableSignedMessages();
-  const [pending, setPending] = useState(false);
-  const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
-
+function getRenewalReminder(
+  {
+    proofGrant,
+    proofRenewal,
+    encryptionRenewal,
+  }: ReturnType<typeof useDeviceSecurityState>,
+  {
+    thisDevice,
+    profileId,
+  }: Pick<ReturnType<typeof useE2ee>, "thisDevice" | "profileId">,
+  inMessages: boolean,
+  preview: boolean
+) {
   const proofDue = proofRenewal !== null && proofGrant !== null;
   const encryptionDue = encryptionRenewal !== null && thisDevice !== null;
   const combined =
@@ -89,6 +86,35 @@ function RenewalBannerContent({
   const reminder = previewOnly
     ? `preview:${profileId ?? ""}`
     : `${profileId ?? ""}:${proofKey}:${encryptionKey}`;
+  const expiry = showEncryption
+    ? thisDevice?.expiresAt
+    : proofGrant?.expires_at;
+  let message: MessageKey = "e2ee.renew.body";
+  if (combined) message = "e2ee.renew.inboxCombined";
+  else if (showProof) message = "e2ee.renew.proofBody";
+  else if (previewOnly) message = "e2ee.renew.preview";
+
+  return { showProof, showEncryption, previewOnly, reminder, expiry, message };
+}
+
+function RenewalBannerContent({
+  className,
+  inMessages,
+  preview,
+}: RenewalBannerProps & {
+  readonly inMessages: boolean;
+  readonly preview: boolean;
+}) {
+  const locale = useBrowserLocale();
+  const device = useE2ee();
+  const { engine } = device;
+  const security = useDeviceSecurityState();
+  const signing = useEnableSignedMessages();
+  const [pending, setPending] = useState(false);
+  const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+
+  const { showProof, showEncryption, previewOnly, reminder, expiry, message } =
+    getRenewalReminder(security, device, inMessages, preview);
   const dismissed = useSyncExternalStore(
     subscribe,
     () => dismissals.has(reminder),
@@ -96,15 +122,8 @@ function RenewalBannerContent({
   );
   if ((!showProof && !showEncryption && !previewOnly) || dismissed) return null;
 
-  const expiry = showEncryption
-    ? thisDevice?.expiresAt
-    : proofGrant?.expires_at;
   const expiryDate = expiry === undefined ? "" : formatDate(locale, expiry);
   const busy = pending || signing.isEnabling;
-  let message: MessageKey = "e2ee.renew.body";
-  if (combined) message = "e2ee.renew.inboxCombined";
-  else if (showProof) message = "e2ee.renew.proofBody";
-  else if (previewOnly) message = "e2ee.renew.preview";
 
   const renew = async () => {
     if (!engine) return;
