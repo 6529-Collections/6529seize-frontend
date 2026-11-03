@@ -20,7 +20,7 @@ import { withinTimeBudget } from "./time-budget";
  * "auto": an ordinary sign-in also grants this device when it has no grant
  * outside the renewal window. "required": sign in only to grant this device.
  */
-export type DeviceGrantMode = "auto" | "required";
+export type DeviceGrantMode = "auto" | "required" | "off";
 
 export interface LoginDeviceGrant {
   readonly address: string;

@@ -46,7 +46,7 @@ describe("Turn on signed messages in the apps", () => {
     });
   });
 
-  it("grants the encrypted-messages key too and wakes the engine", async () => {
+  it("grants only the signing key when encryption is not requested", async () => {
     await expect(requestAppSignedMessagesGrant(params())).resolves.toEqual({
       success: true,
     });
@@ -56,10 +56,10 @@ describe("Turn on signed messages in the apps", () => {
         ownProfileId: "profile-1",
         origin: globalThis.location.host,
         platform: "phone",
-        e2eeDevice: E2EE_DEVICE,
+        e2eeDevice: null,
       })
     );
-    expect(mockSetMarker).toHaveBeenCalledWith("profile-1", true);
+    expect(mockPrepareE2ee).not.toHaveBeenCalled();
   });
 
   it("asks for no encrypted-messages key without a profile", async () => {
@@ -78,6 +78,7 @@ describe("Turn on signed messages in the apps", () => {
       e2ee: { grantId: GRANT_ID, grantSaved: true, adopted: true },
     });
     expect(mockPrepareE2ee).toHaveBeenCalledWith({ required: true });
+    expect(mockSetMarker).toHaveBeenCalledWith("profile-1", true);
   });
 
   it("signs nothing when turning on encrypted messages without a key", async () => {

@@ -9,12 +9,6 @@ import {
   within,
 } from "@testing-library/react";
 
-let mockIsCapacitor = false;
-jest.mock("@/hooks/useCapacitor", () => ({
-  __esModule: true,
-  default: () => ({ isCapacitor: mockIsCapacitor }),
-}));
-
 const mockRenameDevice = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: (...args: unknown[]) => mockRenameDevice(...args),
@@ -146,7 +140,6 @@ const phone = grant({
 
 describe("DevicesPreferencesSettings", () => {
   beforeEach(() => {
-    mockIsCapacitor = false;
     mockEncryptionEnabled = false;
     mockEncryptionQuery.mockReset().mockReturnValue({});
     mockAccount = ADDRESS;
@@ -318,84 +311,31 @@ describe("DevicesPreferencesSettings", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it.each([
-    [false, "Turn on signed posts in this browser"],
-    [true, "Turn on signed posts on this device"],
-  ])(
-    "offers signed post setup for native app = %s",
-    async (isNative, label) => {
-      mockIsCapacitor = isNative;
-      render(<DevicesPreferencesSettings />);
-
-      expect(screen.getByText("No authorized devices yet.")).toBeVisible();
-      await act(async () => {
-        fireEvent.click(
-          screen.getByRole("button", {
-            name: label,
-          })
-        );
-      });
-      expect(mockRequestGrant).toHaveBeenCalledTimes(1);
-      expect(mockReport).toHaveBeenCalledWith("devices", "start");
-    }
-  );
-
-  it("connects a wallet that is not live before signing, and says so", async () => {
+  it("opens the shared setup before connecting or signing", () => {
     mockConnection = { ...mockConnection, canSignActiveWallet: false };
-    const { rerender } = render(<DevicesPreferencesSettings />);
-
-    await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Turn on signed posts in this browser",
-        })
-      );
-    });
-    expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Connect your wallet to continue. If it's locked, unlock it first."
-    );
-
-    mockConnection = { ...mockConnection, seizeConnectOpen: true };
-    await act(async () => {
-      rerender(<DevicesPreferencesSettings />);
-    });
-    mockConnection = {
-      ...mockConnection,
-      seizeConnectOpen: false,
-      canSignActiveWallet: true,
-    };
-    await act(async () => {
-      rerender(<DevicesPreferencesSettings />);
-    });
-    expect(mockRequestGrant).toHaveBeenCalledTimes(1);
-  });
-
-  it("explains a failure next to the turn-on action", async () => {
-    mockRequestGrant.mockResolvedValue({
-      success: false,
-      reason: "device-key",
-    });
+    const setup = jest.fn();
+    window.addEventListener("6529:device-setup", setup, { once: true });
     render(<DevicesPreferencesSettings />);
-    await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Turn on signed posts in this browser",
-        })
-      );
-    });
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "This browser couldn't prepare its signing key. Please try again."
+    expect(screen.getByText("No authorized devices yet.")).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Enable Signed Posts" })
     );
+
+    expect(setup).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: "posts" })
+    );
+    expect(mockSeizeConnectFresh).not.toHaveBeenCalled();
+    expect(mockRequestGrant).not.toHaveBeenCalled();
   });
 
   it("hides the turn-on action when this browser already has a grant or cannot hold a key", () => {
     mockLocalGrant = grant();
+    mockQuery = { ...mockQuery, data: [mockLocalGrant] };
     const { rerender } = render(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Turn on signed posts in this browser",
+        name: "Enable Signed Posts",
       })
     ).toBeNull();
 
@@ -404,7 +344,7 @@ describe("DevicesPreferencesSettings", () => {
     rerender(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Turn on signed posts in this browser",
+        name: "Enable Signed Posts",
       })
     ).toBeNull();
   });

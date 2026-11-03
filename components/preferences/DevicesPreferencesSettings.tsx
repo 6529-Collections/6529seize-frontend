@@ -1,8 +1,13 @@
 "use client";
 
+import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
+import {
+  DEVICE_SETUP_TITLE,
+  getDeviceSetupScope,
+  openDeviceSetup,
+} from "@/components/device-signing/deviceSetup";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import Button from "@/components/utils/button/Button";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
@@ -11,17 +16,13 @@ import {
   useDeviceGrants,
   useRevokeDeviceGrant,
 } from "@/hooks/device-signing/useDeviceGrants";
-import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
-import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useCapacitor from "@/hooks/useCapacitor";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import { t } from "@/i18n/messages";
-import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { useId, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -202,42 +203,20 @@ function DeviceGrantRow({
   );
 }
 
-function EnableSignedMessagesButton({
-  address,
-  hasActiveLocalGrant,
-}: {
-  readonly address: string | null;
-  readonly hasActiveLocalGrant: boolean;
-}) {
+function EnableSignedMessagesButton() {
   const locale = useBrowserLocale();
-  const { isCapacitor } = useCapacitor();
-  const account = useSignedMessagesAccount();
-  const { canEnable, enable, isEnabling, reconnect, status } =
-    useEnableSignedMessages();
-
-  if (!canEnable || !account || account !== address || hasActiveLocalGrant) {
-    return null;
-  }
+  const { proof, canEnableEncryption } = useDeviceSecurityState();
+  const scope = getDeviceSetupScope(proof, canEnableEncryption);
+  if (!scope) return null;
   return (
     <div className="tw-mt-4">
       <Button
         size="sm"
         variant="secondary"
-        loading={isEnabling}
-        onClick={() => enable("devices")}
+        onClick={() => openDeviceSetup(scope)}
       >
-        {t(
-          locale,
-          isCapacitor
-            ? "signedMessages.devices.enableOnDevice"
-            : "signedMessages.devices.enable"
-        )}
+        {t(locale, DEVICE_SETUP_TITLE[scope])}
       </Button>
-      <SignedMessagesEnableStatus
-        status={status}
-        onReconnect={reconnect}
-        className="tw-mt-2"
-      />
     </div>
   );
 }
@@ -318,7 +297,6 @@ export default function DevicesPreferencesSettings() {
     ? linkedDevices.get(pendingRevoke.id)
     : undefined;
   const ownKeys = new Set(local.publicKeys);
-  const localStatus = getDeviceGrantStatus(local.grant, nowMs);
 
   const confirmRevoke = async () => {
     if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
@@ -346,12 +324,7 @@ export default function DevicesPreferencesSettings() {
           {t(locale, "signedMessages.devices.proxy")}
         </p>
       ) : (
-        <EnableSignedMessagesButton
-          address={listAddress}
-          hasActiveLocalGrant={
-            localStatus === "active" || localStatus === "renewal"
-          }
-        />
+        <EnableSignedMessagesButton />
       )}
       {(query.isLoading ||
         (encryptionEnabled && encryptionDevices.isLoading)) && (

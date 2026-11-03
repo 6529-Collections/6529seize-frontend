@@ -12,6 +12,10 @@ import {
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import {
+  DEVICE_SETUP_EVENT,
+  type DeviceSetupScope,
+} from "@/components/device-signing/deviceSetup";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
 import type { E2eeBackupManager } from "@/lib/e2ee/backup";
@@ -165,7 +169,20 @@ function E2eeProviderEnabled({
     takeOver: false,
   });
   const hasMarker = useEnrollmentMarker(profileId);
-  const wantsEngine = isEncryptedMessagesPathname(pathname) || hasMarker;
+  const [setupSession, setSetupSession] = useState<string | null>(null);
+  useEffect(() => {
+    const start = (event: Event) => {
+      if ((event as CustomEvent<DeviceSetupScope>).detail !== "posts") {
+        setSetupSession(sessionKey);
+      }
+    };
+    window.addEventListener(DEVICE_SETUP_EVENT, start);
+    return () => window.removeEventListener(DEVICE_SETUP_EVENT, start);
+  }, [sessionKey]);
+  const wantsEngine =
+    isEncryptedMessagesPathname(pathname) ||
+    hasMarker ||
+    (sessionKey !== null && sessionKey === setupSession);
 
   // Each profile/wallet session gets a new generation, so an engine from an
   // earlier session is never mistaken for the current one. Once wanted, a

@@ -69,8 +69,8 @@ const announceEnrollmentMarker = (profileId: string): void => {
 
 /**
  * "Turn on signed messages" in 6529 Mobile and Desktop: one EIP-712 app
- * grant for this device's signing key and, for a wallet with a profile while
- * encrypted messages are on, its encrypted-messages key too.
+ * grant for this device's signing key, with an encrypted-messages key only
+ * when combined setup explicitly requests it.
  */
 export async function requestAppSignedMessagesGrant({
   address,
@@ -80,9 +80,10 @@ export async function requestAppSignedMessagesGrant({
   encryptedMessages = false,
 }: AppSignedMessagesGrantParams): Promise<SignedMessagesGrantResult> {
   const platform = detectE2eePlatform() === "desktop" ? "desktop" : "phone";
-  const e2eeDevice = ownProfileId
-    ? await prepareLoginE2eeDevice({ required: encryptedMessages })
-    : null;
+  const e2eeDevice =
+    ownProfileId && encryptedMessages
+      ? await prepareLoginE2eeDevice({ required: encryptedMessages })
+      : null;
   if (encryptedMessages && !e2eeDevice) {
     // A signing-only grant would not turn on encrypted messages; they keep
     // their own grant prompt instead of a second signature.

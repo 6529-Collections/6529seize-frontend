@@ -174,7 +174,7 @@ export default function HeaderUserMenuDropdown({
     <div>
       {isOpen && (
         <div
-          className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
+          className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-80 tw-max-w-[calc(100vw-2rem)] tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
           style={{
             left: "calc(var(--layout-margin, 0px) + 1.5rem)",
           }}

@@ -31,7 +31,7 @@ jest.mock("@/components/e2ee/gate/e2eeCombinedTurnOn", () => ({
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
-const BUTTON = { name: "Enable encryption (one\u00a0signature)" };
+const BUTTON = { name: "Sign to enable both" };
 
 const renderCard = () => {
   const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
@@ -47,6 +47,7 @@ const renderCard = () => {
       }
     >
       <E2eeEnrollmentCard
+        scope="both"
         engine={engine}
         enrolling={false}
         engineError={null}
@@ -67,6 +68,7 @@ const renderCard = () => {
           }
         >
           <E2eeEnrollmentCard
+            scope="both"
             engine={engine}
             enrolling={false}
             engineError={null}
@@ -135,12 +137,19 @@ describe("E2eeEnrollmentCard turn-on", () => {
     );
   });
 
-  it("uses the separate grant prompt when the combined sign-in is not possible", async () => {
+  it("requires a separate approval when combined setup is unavailable", async () => {
     mockTurnOn.mockResolvedValue("fallback");
     const engine = renderCard();
 
     fireEvent.click(screen.getByRole("button", BUTTON));
 
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Enable Encrypted DMs" })
+    );
+    expect(engine.enroll).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to enable encrypted DMs" })
+    );
     await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
   });
 

@@ -41,8 +41,12 @@ function getQRScannerErrorToastMessage({
 export default function HeaderQRScanner({
   onScanSuccess,
   appSidebar = false,
+  actionLabel,
+  deviceSetupAddress,
 }: {
   readonly onScanSuccess: () => void;
+  readonly actionLabel?: string;
+  readonly deviceSetupAddress?: string | undefined;
   readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
@@ -126,6 +130,21 @@ export default function HeaderQRScanner({
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
+      if (deviceSetupAddress !== undefined) {
+        const route = getConnectionShareRoute({ content, appScheme });
+        if (
+          !route ||
+          !url.hash ||
+          url.searchParams.get("address")?.toLowerCase() !==
+            deviceSetupAddress.toLowerCase()
+        ) {
+          setToast({ message: invalidQRCodeMessage, type: "error" });
+          return;
+        }
+        onScanSuccess();
+        router.push(route);
+        return;
+      }
       let queryParams: Record<string, string | number> = {};
 
       if (url.origin === baseEndpoint) {
@@ -193,6 +212,19 @@ export default function HeaderQRScanner({
       });
     }
   };
+
+  if (actionLabel) {
+    return (
+      <button
+        type="button"
+        disabled={scanning}
+        onClick={startScan}
+        className="tw-min-h-11 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-text-sm tw-text-iron-100"
+      >
+        {actionLabel}
+      </button>
+    );
+  }
 
   if (appSidebar) {
     return (

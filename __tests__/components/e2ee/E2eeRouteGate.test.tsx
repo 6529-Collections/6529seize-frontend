@@ -89,7 +89,7 @@ describe("E2eeRouteGate", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Enable encryption (one\u00a0signature)",
+        name: "Sign to enable encrypted DMs",
       })
     );
     await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
@@ -106,7 +106,7 @@ describe("E2eeRouteGate", () => {
     renderGate(contextFor(engine));
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Enable encryption (one\u00a0signature)",
+        name: "Sign to enable encrypted DMs",
       })
     );
     const declined = await screen.findByText(
