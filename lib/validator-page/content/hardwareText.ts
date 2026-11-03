@@ -36,7 +36,7 @@ export const MINIMUM: readonly {
   },
 ];
 
-export type HardwareSystem = "mac" | "windows" | "linux";
+type HardwareSystem = "mac" | "windows" | "linux";
 
 /** Which systems run rc.5, in plain words, with how to check each. */
 export const SYSTEMS: readonly {
@@ -153,7 +153,7 @@ export const RASPBERRY_PI_PRICE = {
   store: "PiShop.us",
 };
 
-export type HardwareTier = "acceptable" | "good" | "great";
+type HardwareTier = "acceptable" | "good" | "great";
 
 /**
  * The owner's approved tiers (2026-10-31), in their words, with that day's
