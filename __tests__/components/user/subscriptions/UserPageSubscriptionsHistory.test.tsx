@@ -101,7 +101,7 @@ describe("UserPageSubscriptionsHistory", () => {
     ).toBeVisible();
     expect(
       screen.getByText(
-        `Airdrop Address: ${address} - Balance after redemption: 9.20589 ETH`
+        "Airdrop Address: 0xfb47...ebd4 - Balance after redemption: 9.20589 ETH"
       )
     ).toBeVisible();
     expect(
@@ -112,17 +112,15 @@ describe("UserPageSubscriptionsHistory", () => {
     rerender(
       <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 2 }} />
     );
-    await user.click(
-      screen.getByRole("tab", { name: "Log History" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Log History" }));
     expect(screen.getByRole("tabpanel", { name: "Log History" })).toBeVisible();
     expect(screen.getByText(props.logs.data[0]!.log)).toBeVisible();
-    expect(screen.getByText(props.logs.data[0]!.additional_info!)).toBeVisible();
+    expect(
+      screen.getByText(props.logs.data[0]!.additional_info!)
+    ).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setLogsPage).toHaveBeenCalledWith(2);
-    await user.click(
-      screen.getByRole("tab", { name: "Top Up History" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Top Up History" }));
     expect(
       screen.getByRole("tabpanel", { name: "Top Up History" })
     ).toBeVisible();
@@ -150,9 +148,10 @@ describe("UserPageSubscriptionsHistory", () => {
       .setup()
       .click(screen.getByRole("tab", { name: "Log History" }));
     rerender(<HistoryTestView {...props} logsLoading />);
-    expect(
-      screen.getByRole("tab", { name: "Log History" })
-    ).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Log History" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
     expect(screen.getByText("Loading Log History")).toBeInTheDocument();
     rerender(<HistoryTestView {...props} logs={page([])} />);
     expect(screen.getByText("No logs found")).toBeVisible();
@@ -165,11 +164,10 @@ describe("UserPageSubscriptionsHistory", () => {
       screen.getByRole("tab", { name: "Redeemed Subscriptions" })
     );
     await user.keyboard("{ArrowRight}");
-    expect(
-      screen.getByRole("tab", { name: "Log History" })
-    ).toHaveFocus();
-    expect(
-      screen.getByRole("tab", { name: "Log History" })
-    ).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Log History" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "Log History" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
   });
 });

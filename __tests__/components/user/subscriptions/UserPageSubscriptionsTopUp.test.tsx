@@ -1,6 +1,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSubscriptionDisclosure } from "@/components/user/subscriptions/useSubscriptionDisclosure";
 import UserPageSubscriptionsTopUp from "@/components/user/subscriptions/UserPageSubscriptionsTopUp";
 import {
   MEMES_MINT_PRICE,
@@ -400,6 +401,53 @@ describe("UserPageSubscriptionsTopUp", () => {
       expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
     });
   });
+
+  it("hands focus to transaction status and returns to the picker after success", async () => {
+    const user = userEvent.setup();
+    const onTransactionConfirmed = jest.fn();
+    const view = () => (
+      <UserPageSubscriptionsTopUp
+        onCancel={jest.fn()}
+        onTransactionConfirmed={onTransactionConfirmed}
+      />
+    );
+    const { rerender } = render(view());
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+    sendTransaction.isPending = true;
+    rerender(view());
+    await waitFor(() =>
+      expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    );
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.getByText("Confirm in your wallet")).toBeVisible();
+    expect(screen.getByRole("dialog")).toContainElement(
+      document.activeElement as HTMLElement
+    );
+
+    sendTransaction.isPending = false;
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isSuccess = true;
+    rerender(view());
+    expect(screen.getByText("Top Up Successful!")).toBeVisible();
+    sendTransaction.reset.mockClear();
+    await user.click(screen.getByRole("button", { name: "Close modal" }));
+    expect(sendTransaction.reset).toHaveBeenCalledTimes(1);
+    sendTransaction.data = undefined;
+    waitSendTransaction.isSuccess = false;
+    rerender(view());
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
+    );
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Choose a top-up amount" })
+    ).toBeDisabled();
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("UserPageSubscriptionsTopUp hash anchor", () => {
@@ -428,10 +476,26 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     } as ReturnType<typeof useCookieConsent>);
   }
 
+  function TopUpHarness() {
+    const topUp = useSubscriptionDisclosure(TOP_UP_ID);
+    return (
+      <>
+        <button type="button" onClick={() => topUp.setExpanded(true)}>
+          Top up
+        </button>
+        <a href={`#${TOP_UP_ID}`}>Open top-up link</a>
+        <UserPageSubscriptionsTopUp
+          expanded={topUp.expanded}
+          onCancel={() => topUp.setExpanded(false)}
+        />
+      </>
+    );
+  }
+
   function renderGated() {
     return (
       <NftPurchasingGate>
-        <UserPageSubscriptionsTopUp />
+        <TopUpHarness />
       </NftPurchasingGate>
     );
   }
@@ -454,6 +518,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     waitSendTransaction.isSuccess = false;
     waitSendTransaction.isError = false;
     waitSendTransaction.error = undefined;
+    jest.clearAllMocks();
     scrollIntoView = jest
       .spyOn(Element.prototype, "scrollIntoView")
       .mockImplementation(() => undefined);
@@ -466,44 +531,81 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     setHash("");
   });
 
-  it("renders the top-up section with the id the notification links to", () => {
-    render(<UserPageSubscriptionsTopUp />);
-
-    const section = screen.getByRole("region", { name: "Top up" });
-    expect(section).toHaveAttribute("id", TOP_UP_ID);
-    expect(section).toHaveClass("tw-scroll-mt-24");
-  });
-
-  it("scrolls to and focuses the panel for the top-up hash", async () => {
+  it("opens the notification hash as a focused dialog without scrolling the page", async () => {
     setHash(`#${TOP_UP_ID}`);
-    render(<UserPageSubscriptionsTopUp />);
-
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
-    expect(scrollIntoView.mock.contexts[0]).toBe(
-      screen.getByRole("region", { name: "Top up" })
+    render(renderGated());
+    const dialog = await screen.findByRole("dialog", { name: "Top up" });
+    expect(dialog).toHaveAttribute("id", TOP_UP_ID);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
     );
-    expect(screen.getByRole("region", { name: "Top up" })).toHaveFocus();
     await settleFrames();
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it("neither scrolls nor moves focus on an ordinary load", async () => {
-    render(<UserPageSubscriptionsTopUp />);
-    await settleFrames();
+  it.each(["", "#profile-subscriptions-history"])(
+    "keeps the dialog closed and focus unchanged for an unrelated hash %s",
+    async (hash) => {
+      setHash(hash);
+      render(renderGated());
+      await settleFrames();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(document.body).toHaveFocus();
+    }
+  );
 
-    expect(scrollIntoView).not.toHaveBeenCalled();
-    expect(document.body).toHaveFocus();
+  it("retains the custom amount and restores the opener after Close and Escape", async () => {
+    render(renderGated());
+    const user = userEvent.setup();
+    const opener = screen.getByRole("button", { name: "Top up", exact: true });
+    await user.click(opener);
+    await user.type(
+      screen.getByRole("spinbutton", { name: "Other card count" }),
+      "2"
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Close", exact: true })
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(opener).toHaveFocus();
+    await user.click(opener);
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveValue(2);
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(opener).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
-  it("ignores a hash that names another section", async () => {
-    setHash("#profile-subscriptions-history");
-    render(<UserPageSubscriptionsTopUp />);
-    await settleFrames();
-
+  it("opens repeated same-page hash links without scrolling or sending ETH", async () => {
+    render(renderGated());
+    const user = userEvent.setup();
+    const link = screen.getByRole("link", { name: "Open top-up link" });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await user.click(link);
+      expect(
+        await screen.findByRole("dialog", { name: "Top up" })
+      ).toBeVisible();
+      expect(window.location.hash).toBe(`#${TOP_UP_ID}`);
+      await user.click(
+        screen.getByRole("button", { name: "Close", exact: true })
+      );
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      );
+      expect(link).toHaveFocus();
+    }
     expect(scrollIntoView).not.toHaveBeenCalled();
-    expect(document.body).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
   it("never scrolls to or reveals the section on restricted iOS", async () => {
@@ -535,7 +637,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(document.body).toHaveFocus();
   });
 
-  it("scrolls once the country check resolves to US on iOS", async () => {
+  it("opens the dialog once the country check resolves to US on iOS", async () => {
     setEnvironment({ isIos: true, country: "", isCountryPending: true });
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(renderGated());
@@ -545,13 +647,15 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     setEnvironment({ isIos: true, country: "US" });
     rerender(renderGated());
 
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
-    expect(screen.getByRole("region", { name: "Top up" })).toHaveFocus();
+    expect(await screen.findByRole("dialog", { name: "Top up" })).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Top-up on 6529.io" })
+    ).toBeVisible();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it("scrolls for a late-mounting section on Android and web", async () => {
+  it("opens the dialog for a late-mounting section on Android and web", async () => {
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(<p>Loading profile</p>);
     await settleFrames();
@@ -559,8 +663,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
 
     rerender(renderGated());
 
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
+    expect(await screen.findByRole("dialog", { name: "Top up" })).toBeVisible();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

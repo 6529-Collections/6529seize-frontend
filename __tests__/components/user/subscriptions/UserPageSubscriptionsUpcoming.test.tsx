@@ -148,6 +148,26 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText("Upcoming Drops")).toBeInTheDocument();
   });
 
+  it.each([
+    { automatic: false, text: "You have to opt-in to each specific drop" },
+    {
+      automatic: true,
+      text: "Automatic airdrops of all eligible drops unless you opt-out",
+    },
+  ])(
+    "shows the mode explanation only to the owner (automatic=$automatic)",
+    ({ automatic, text }) => {
+      const details = { ...mockDetails, automatic };
+      const owner = renderComponent({ details });
+      expect(screen.getByText(text)).toBeVisible();
+      owner.unmount();
+
+      renderComponent({ details, readonly: true });
+      expect(screen.queryByText(text)).not.toBeInTheDocument();
+      expect(screen.getByText("The Memes #1")).toBeVisible();
+    }
+  );
+
   it("displays first 3 subscriptions by default", () => {
     renderComponent();
     expect(screen.getByText("The Memes #1")).toBeInTheDocument();
@@ -215,11 +235,12 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("formats upcoming mint days as UTC calendar days", () => {
     const format = jest.spyOn(localeFormat, "formatUtcDate");
     renderComponent();
-    expect(format).toHaveBeenCalledWith(
-      "en-US",
-      mockUpcomingRows[0].utcDay,
-      { weekday: "short", year: "numeric", month: "short", day: "numeric" }
-    );
+    expect(format).toHaveBeenCalledWith("en-US", mockUpcomingRows[0].utcDay, {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
     format.mockRestore();
   });
 

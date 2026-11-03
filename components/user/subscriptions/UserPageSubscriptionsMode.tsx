@@ -7,7 +7,8 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+import SubscriptionSettingSelect from "./SubscriptionSettingSelect";
+import { formatSubscriptionCoverageDeadline } from "./coverage/subscriptionCoverage.helpers";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
@@ -15,6 +16,7 @@ export default function UserPageSubscriptionsMode(
     details: SubscriptionDetails | undefined;
     readonly: boolean;
     refresh: () => void;
+    layout?: "row" | "inline";
   }>
 ) {
   const locale = useBrowserLocale();
@@ -28,21 +30,17 @@ export default function UserPageSubscriptionsMode(
     setIsAuto(props.details?.automatic ?? false);
   }, [props.details]);
 
-  const toggleMode = async (): Promise<void> => {
-    if (isUpdating) {
+  const setMode = async (auto: boolean): Promise<void> => {
+    if (isDisabled || auto === isAuto) {
       return;
     }
     setIsUpdating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsUpdating(false);
-      return;
-    }
-    const auto = !isAuto;
     interface SubscribeModeBody {
       automatic: boolean;
     }
     try {
+      const { success } = await requestAuth();
+      if (!success) return;
       const response = await commonApiPost<
         SubscribeModeBody,
         SubscribeModeBody
@@ -77,20 +75,38 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-2 sm:tw-gap-2.5">
-      <label
-        htmlFor="subscription-mode"
-        className="tw-whitespace-nowrap tw-text-[13px] tw-text-iron-300 sm:tw-text-sm"
-      >
-        {t(locale, "subscriptions.coverage.mode.automatic")}
-      </label>
-      <UserPageSubscriptionsToggle
-        disabled={isDisabled}
-        id="subscription-mode"
-        checked={isAuto}
-        onChange={toggleMode}
-        ariaLabel={t(locale, "subscriptions.mode.label")}
-      />
-    </div>
+    <SubscriptionSettingSelect
+      layout={props.layout ?? "row"}
+      label={t(locale, "subscriptions.details.mode")}
+      detail={
+        props.details && props.details.last_update > 0
+          ? formatSubscriptionCoverageDeadline(
+              locale,
+              new Date(props.details.last_update)
+            )
+          : undefined
+      }
+      value={isAuto}
+      valueLabel={
+        !props.details ? t(locale, "subscriptions.settings.loading") : undefined
+      }
+      disabled={isDisabled}
+      busy={isUpdating}
+      onChange={(auto) => {
+        void setMode(auto);
+      }}
+      options={[
+        {
+          value: false,
+          label: t(locale, "subscriptions.coverage.mode.manual"),
+          description: t(locale, "subscriptions.mode.manualDescription"),
+        },
+        {
+          value: true,
+          label: t(locale, "subscriptions.coverage.mode.automatic"),
+          description: t(locale, "subscriptions.mode.automaticDescription"),
+        },
+      ]}
+    />
   );
 }

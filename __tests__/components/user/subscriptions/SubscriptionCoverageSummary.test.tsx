@@ -91,26 +91,25 @@ describe("SubscriptionCoverageSummary", () => {
     userEvent.setup().click(screen.getByRole("button", { name: "Details" }));
 
   it("makes a partially funded drop actionable and preserves exact recommendation and deadline", async () => {
-    const onToggleTopUp = jest.fn();
-    renderSummary(createCoverage(), { onToggleTopUp });
+    renderSummary(createCoverage());
     expect(
       screen.getByRole("heading", {
-        name: "Your next drop is not fully funded",
+        name: "0 drops funded Action required",
       })
     ).toBeVisible();
-    expect(screen.getByText("Status")).not.toBeVisible();
+    expect(screen.queryByText("Status")).not.toBeInTheDocument();
     expect(
       screen.getAllByText(
         "Top up by Oct 12, 2026, 14:30 UTC to receive The Memes #561."
       )[0]
     ).toBeVisible();
-    await userEvent
-      .setup()
-      .click(screen.getByRole("button", { name: "Top up" }));
-    expect(onToggleTopUp).toHaveBeenCalledTimes(1);
     await openDetails();
-    expect(screen.getByText("Action required")).toBeVisible();
-    expect(screen.getByText("0 drops funded")).toBeVisible();
+    const report = within(
+      document.getElementById("subscription-coverage-details")!
+    );
+    expect(report.queryByText("Action required")).not.toBeInTheDocument();
+    expect(report.queryByText("0 drops funded")).not.toBeInTheDocument();
+    expect(report.getByText("Next unfunded")).toBeVisible();
     expect(
       screen.getByText(
         "Recommended: add 0.40732 ETH for 7 funded drops through The Memes #567."
@@ -118,7 +117,7 @@ describe("SubscriptionCoverageSummary", () => {
     ).toBeVisible();
   });
 
-  it("uses a short funded-through headline and retains the token and full date in Details", async () => {
+  it("leads with funded count, status and full funded-through date, with the explanation at the top of Details", async () => {
     renderSummary(
       createCoverage({
         status: ApiSubscriptionCoverageStatus.Covered,
@@ -133,60 +132,81 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(
-      screen.getByRole("heading", { name: "Covered until Oct 12" })
+      screen.getByRole("heading", { name: "8 drops funded Covered" })
     ).toBeVisible();
-    await openDetails();
-    expect(screen.getByText("Covered", { exact: true })).toBeVisible();
-    expect(screen.getByText("8 drops funded")).toBeVisible();
+    const headline = screen.getByRole("heading", {
+      name: "8 drops funded Covered",
+    });
+    const summary = headline.parentElement!;
+    expect(within(summary).getByText(/Funded through/)).toHaveTextContent(
+      "Funded through The Memes #560 · Oct 12, 2026"
+    );
     expect(
-      screen.getByRole("link", { name: "The Memes #560" })
+      within(summary).getByRole("link", { name: "The Memes #560" })
     ).toHaveAttribute("href", "/the-memes/560");
-    expect(screen.getByText(/Oct 12, 2026/)).toBeVisible();
+    const explanation = "Your immediate intended drops are fully funded.";
+    expect(screen.getByText(explanation)).not.toBeVisible();
+    await openDetails();
+    const report = document.getElementById("subscription-coverage-details")!;
+    for (const label of ["Status", "Drops funded", "Funded through"]) {
+      expect(within(report).queryByText(label)).not.toBeInTheDocument();
+    }
+    expect(screen.getAllByText("Covered", { exact: true })).toHaveLength(1);
+    expect(screen.getAllByText("8 drops funded")).toHaveLength(1);
+    expect(within(report).getByText(explanation)).toBeVisible();
+    expect(screen.getAllByText(explanation)).toHaveLength(1);
+    expect(
+      screen.getAllByRole("link", { name: "The Memes #560" })
+    ).toHaveLength(1);
+    expect(within(report).getByText("Balance capacity")).toBeVisible();
+    expect(within(report).getByText("Forecast use")).toBeVisible();
+    expect(
+      within(report)
+        .getByText(explanation)
+        .compareDocumentPosition(report.querySelector("dl")!) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
-  it.each([
-    {
-      firstSubscribed: true,
-      count: 12,
-      expected: "Next: The Memes #569 · Minting today · 12 cards.",
-    },
-    {
-      firstSubscribed: false,
-      count: 1,
-      expected: "Next: The Memes #570 · Nov 4, 2026 · 1 card.",
-    },
-  ])(
-    "keeps the next intended drop, date and quantity accurate ($firstSubscribed)",
-    ({ firstSubscribed, count, expected }) => {
-      jest.useFakeTimers({ now: new Date("2026-11-02T00:01:00Z") });
+  it.each([true, false])(
+    "keeps only the covered description and balance metrics in Details (owner: %s)",
+    async (isOwner) => {
       renderSummary(
-        createCoverage({ status: ApiSubscriptionCoverageStatus.Covered }),
-        {
-          subscriptions: [
-            {
-              consolidation_key: "profile-key",
-              contract: "contract",
-              token_id: 569,
-              subscribed: firstSubscribed,
-              subscribed_count: count,
-            },
-            {
-              consolidation_key: "profile-key",
-              contract: "contract",
-              token_id: 570,
-              subscribed: true,
-              subscribed_count: count,
-            },
-          ],
-        }
+        createCoverage({
+          status: ApiSubscriptionCoverageStatus.Covered,
+          funded_through: {
+            token_id: 560,
+            mint_at: new Date("2026-10-12T15:40:00Z"),
+          },
+          next_unfunded: null,
+          recommended_top_up: null,
+        }),
+        { isOwner, details: { automatic: true, last_update: 123456 } }
       );
-      const drop = screen.getByText(
-        firstSubscribed ? "The Memes #569" : "The Memes #570",
-        { selector: "strong" }
-      );
-      expect(drop.closest("p")).toHaveTextContent(expected);
-      if (!firstSubscribed)
-        expect(screen.queryByText("Minting today")).not.toBeInTheDocument();
+      await openDetails();
+      const report = document.getElementById("subscription-coverage-details")!;
+      expect(
+        Array.from(report.querySelectorAll("dt"), (field) => field.textContent)
+      ).toEqual(["Balance capacity", "Forecast use"]);
+      expect(within(report).queryByText(/^Next:/)).not.toBeInTheDocument();
+      expect(
+        within(report).queryByText(/Automatic since/)
+      ).not.toBeInTheDocument();
+      expect(
+        within(report).queryByText(
+          "Automatic airdrops of all eligible drops unless you opt-out"
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        within(report).getByText(
+          "Your immediate intended drops are fully funded."
+        )
+      ).toBeVisible();
+      expect(
+        within(report).getByText(
+          "Projected from current eligibility, settings, balance, and the published Meme schedule."
+        )
+      ).toBeVisible();
     }
   );
 
@@ -201,7 +221,7 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(
-      screen.getByRole("heading", { name: "Covered until Oct 12" })
+      screen.getByRole("heading", { name: "1 drop funded Action required" })
     ).toBeVisible();
     expect(
       screen.queryByRole("heading", {
@@ -228,14 +248,13 @@ describe("SubscriptionCoverageSummary", () => {
   ])("preserves the shared status vocabulary for %s", async (status, label) => {
     renderSummary(createCoverage({ status }));
     await openDetails();
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(label);
     expect(
-      within(
-        document.getElementById("subscription-coverage-details")!
-      ).getByText(label, { exact: true })
-    ).toBeVisible();
+      screen.queryByText("Status", { exact: true })
+    ).not.toBeInTheDocument();
   });
 
-  it("guides a non-minter without a false zero-runway headline", () => {
+  it("keeps the original not-set-up information without added empty runway rows", async () => {
     renderSummary(
       createCoverage({
         status: ApiSubscriptionCoverageStatus.NotSetUp,
@@ -246,43 +265,69 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(screen.getByRole("heading", { name: "Not set up" })).toBeVisible();
-    expect(screen.getByText("0 drops funded")).not.toBeVisible();
+    await openDetails();
+    expect(screen.queryByText("0 drops funded")).not.toBeInTheDocument();
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+    expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
+    expect(screen.queryByText("None", { exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByText("Mode", { exact: true })).not.toBeInTheDocument();
+    expect(screen.getByText("Balance capacity")).toBeVisible();
+    expect(screen.getByText("Forecast use")).toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Top up" })
-    ).toBeVisible();
+      screen.getAllByText(
+        "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time."
+      )
+    ).toHaveLength(1);
   });
 
-  it.each([undefined, false, true])(
-    "preserves Not configured when coverage mode is null (legacy automatic: %s)",
-    async (automatic) => {
-      renderSummary(createCoverage({ mode: null }), {
-        details:
-          automatic === undefined ? undefined : { automatic, last_update: 0 },
-      });
+  it.each([
+    ApiSubscriptionCoverageStatus.NoCurrentEligibility,
+    ApiSubscriptionCoverageStatus.NoUpcomingSelections,
+    ApiSubscriptionCoverageStatus.Unknown,
+  ])(
+    "matches the original absence of a funded count for %s",
+    async (status) => {
+      renderSummary(
+        createCoverage({ status, funded_through: null, next_unfunded: null })
+      );
       await openDetails();
-      const mode = screen.getByText("Mode", { exact: true }).parentElement!;
-      expect(within(mode).getByText("Not configured")).toBeVisible();
-      expect(
-        screen.queryByText("You have to opt-in to each specific drop")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Drops funded")).not.toBeInTheDocument();
+      expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+      expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
+      expect(screen.getByText("Balance capacity")).toBeVisible();
+      expect(screen.getByText("Forecast use")).toBeVisible();
     }
   );
 
-  it("distinguishes unavailable coverage from a confirmed unconfigured mode", async () => {
-    const { rerender } = renderSummary(undefined, { coverage: undefined });
+  it.each([
+    null,
+    ApiSubscriptionCoverageMode.Manual,
+    ApiSubscriptionCoverageMode.Automatic,
+  ])(
+    "omits the settings fields from Details for coverage mode %s",
+    async (mode) => {
+      renderSummary(createCoverage({ mode }));
+      await openDetails();
+      const report = within(
+        document.getElementById("subscription-coverage-details")!
+      );
+      for (const label of ["Mode", "Eligibility", "Edition Preference"]) {
+        expect(
+          report.queryByText(label, { exact: true })
+        ).not.toBeInTheDocument();
+      }
+      expect(report.getByText("Balance capacity")).toBeVisible();
+    }
+  );
+
+  it("keeps coverage recovery available without reintroducing settings fields", async () => {
+    renderSummary(undefined, { coverage: undefined });
     await openDetails();
-    const mode = () => screen.getByText("Mode", { exact: true }).parentElement!;
-    expect(within(mode()).getByText("Unavailable")).toBeVisible();
-    rerender(
-      <SubscriptionCoverageSummary
-        coverage={createCoverage({ mode: null })}
-        isError={false}
-        isLoading={false}
-        isOwner
-        onRefresh={jest.fn()}
-      />
-    );
-    expect(within(mode()).getByText("Not configured")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Refresh coverage" })
+    ).toBeVisible();
+    expect(screen.queryByText("Mode", { exact: true })).not.toBeInTheDocument();
+    expect(screen.getByText("Forecast use")).toBeVisible();
   });
 
   it.each([
@@ -315,7 +360,8 @@ describe("SubscriptionCoverageSummary", () => {
       expect(
         within(report).getByRole("heading", { name: "Subscription coverage" })
       ).toBeVisible();
-      expect(within(report).getByText(description)).toBeVisible();
+      expect(screen.getAllByText(description)).toHaveLength(1);
+      expect(screen.getByText(description)).toBeVisible();
       expect(
         within(report).queryByRole("link", { name: "Review settings" })
       ).not.toBeInTheDocument();
@@ -332,11 +378,6 @@ describe("SubscriptionCoverageSummary", () => {
       ApiSubscriptionCoverageStatus.NotSetUp,
       "Set up",
       "#profile-subscriptions-settings",
-    ],
-    [
-      ApiSubscriptionCoverageStatus.NoUpcomingSelections,
-      "Choose drops",
-      "#profile-subscriptions-upcoming",
     ],
     [
       ApiSubscriptionCoverageStatus.ActionRequired,
@@ -356,11 +397,15 @@ describe("SubscriptionCoverageSummary", () => {
     }
   );
 
-  it("distinguishes choosing drops from topping up an empty balance", () => {
+  it("shows Choose drops below the summary without opening Details, including with an empty balance", async () => {
     const coverage = createCoverage({
       status: ApiSubscriptionCoverageStatus.NoUpcomingSelections,
     });
     const { rerender } = renderSummary(coverage);
+    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
     expect(screen.getByRole("link", { name: "Choose drops" })).toHaveAttribute(
       "href",
       "#profile-subscriptions-upcoming"
@@ -374,12 +419,24 @@ describe("SubscriptionCoverageSummary", () => {
         onRefresh={jest.fn()}
       />
     );
+    expect(screen.getByRole("link", { name: "Choose drops" })).toHaveAttribute(
+      "href",
+      "#profile-subscriptions-upcoming"
+    );
     expect(
-      screen.queryByRole("link", { name: "Choose drops" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Top up, then turn on the drops you want below.")
+      screen.getByText(
+        "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last."
+      )
     ).toBeVisible();
+    await openDetails();
+    expect(screen.getAllByRole("link", { name: "Choose drops" })).toHaveLength(
+      1
+    );
+    expect(
+      within(
+        document.getElementById("subscription-coverage-details")!
+      ).queryByRole("link", { name: "Choose drops" })
+    ).not.toBeInTheDocument();
   });
 
   it("states when no authoritative deadline is available without inventing one", async () => {
@@ -398,12 +455,14 @@ describe("SubscriptionCoverageSummary", () => {
     ).toBeVisible();
   });
 
-  it("does not turn unavailable eligibility or capacity into a false zero", async () => {
+  it("does not turn unavailable capacity into a false zero", async () => {
     renderSummary(
       createCoverage({ eligibility_count: null, mint_capacity: null })
     );
     await openDetails();
-    expect(screen.getByText("Eligibility unavailable")).toBeVisible();
+    expect(
+      screen.queryByText("Eligibility", { exact: true })
+    ).not.toBeInTheDocument();
     expect(screen.getByText("mint capacity unavailable")).toBeVisible();
   });
 
@@ -455,7 +514,7 @@ describe("SubscriptionCoverageSummary", () => {
     renderSummary(createCoverage(), { isOwner: false });
     expect(
       screen.getByRole("heading", {
-        name: "The next intended drop is not fully funded",
+        name: "0 drops funded Action required",
       })
     ).toBeVisible();
     expect(

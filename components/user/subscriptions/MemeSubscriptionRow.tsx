@@ -391,39 +391,44 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-lg tw-px-5 tw-py-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-md:tw-px-4">
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-gap-2">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
+    <div className="tw-min-h-[60px] tw-px-5 tw-py-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-md:tw-px-4">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-flex-wrap max-sm:tw-gap-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2 max-sm:tw-basis-40">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <span className="tw-break-words tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-[22px] tw-text-iron-100 sm:tw-whitespace-nowrap">
-              {props.title} #{props.subscription.token_id}
-            </span>
             {props.date && (
-              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[13px] tw-font-normal tw-tabular-nums tw-leading-[18px]">
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[15px] tw-font-semibold tw-tabular-nums tw-leading-[22px] tw-text-iron-100">
                 {props.minting_today ? (
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
                     locale={locale}
-                    className="tw-text-[13px] tw-font-medium tw-text-primary-300"
+                    className="tw-text-[15px] tw-font-semibold tw-text-primary-300"
                   />
                 ) : (
-                  <span className="tw-text-iron-500">
+                  <time
+                    dateTime={props.date.utcDay.toISOString()}
+                    className="tw-min-w-0 tw-break-words"
+                  >
                     {formatUtcDate(locale, props.date.utcDay, {
                       weekday: "short",
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </span>
+                  </time>
                 )}
-                <span className="tw-text-iron-600" aria-hidden="true">
-                  /
+                <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-text-iron-400">
+                  <span className="tw-text-iron-600" aria-hidden="true">
+                    /
+                  </span>
+                  <span>
+                    SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                  </span>
                 </span>
-                <span className="tw-text-iron-400">
-                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-                </span>
-              </span>
+              </div>
             )}
+            <span className="tw-break-words tw-text-[13px] tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-300">
+              {props.title} #{props.subscription.token_id}
+            </span>
           </div>
           {hasNoAllocation && (
             <output className="tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
@@ -440,7 +445,7 @@ export default function MemeSubscriptionRow(
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 max-sm:tw-gap-2">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 max-sm:tw-ml-auto max-sm:tw-gap-2">
           {isSubmitting && <Spinner />}
           {renderCountSelector({
             disableWhenSingleOption: true,

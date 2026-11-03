@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/** Keep the tab's existing hash destinations reachable inside disclosures. */
+/** Open the top-up dialog for existing hash links without moving the page. */
 export function useSubscriptionDisclosure(
   id: string,
   enabled = true,
@@ -37,6 +37,10 @@ export function useSubscriptionDisclosure(
         link.hash !== `#${id}`
       )
         return;
+      event.preventDefault();
+      if (window.location.hash !== link.hash) {
+        window.history.pushState(window.history.state, "", link.href);
+      }
       setExpanded(true);
       // A repeated click on the current hash does not emit hashchange.
       if (frame !== undefined) cancelAnimationFrame(frame);
@@ -46,11 +50,11 @@ export function useSubscriptionDisclosure(
     };
     const initialFrame = requestAnimationFrame(revealHash);
     window.addEventListener("hashchange", revealHash);
-    document.addEventListener("click", revealLink);
+    document.addEventListener("click", revealLink, true);
     return () => {
       cancelAnimationFrame(initialFrame);
       window.removeEventListener("hashchange", revealHash);
-      document.removeEventListener("click", revealLink);
+      document.removeEventListener("click", revealLink, true);
       if (frame !== undefined) cancelAnimationFrame(frame);
     };
   }, [id, enabled, focusId]);

@@ -90,7 +90,7 @@ export default function UserPageSubscriptionsHistory(
     >
       <TabList
         aria-label={t(locale, "subscriptions.history.title")}
-        className="tw-mb-4 tw-flex tw-flex-wrap tw-gap-2"
+        className="tw-no-scrollbar -tw-mx-1 tw-mb-4 tw-flex tw-flex-nowrap tw-gap-2 tw-overflow-x-auto tw-overscroll-x-contain tw-p-1"
       >
         {tabs.map((tab) => (
           <Tab
@@ -99,8 +99,7 @@ export default function UserPageSubscriptionsHistory(
               getButtonClasses({
                 variant: selected ? "filterSelected" : "filter",
                 size: null,
-                className:
-                  "tw-h-8 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none",
+                className: `tw-h-8 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none ${selected ? "" : "!tw-border-iron-800 !tw-bg-transparent !tw-font-normal desktop-hover:hover:!tw-bg-white/[0.04]"}`,
               })
             }
           >
@@ -281,8 +280,8 @@ function RedeemedEntry(
             {props.redeem.count}
           </div>
           <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-            Airdrop Address: {props.redeem.address} - Balance after redemption:{" "}
-            {props.redeem.balance_after} ETH
+            Airdrop Address: {formatAddress(props.redeem.address)} - Balance
+            after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">

@@ -153,13 +153,54 @@ view during resizing. Redeemed loads first; the other histories load when select
 with cached pages and refreshes after confirmed transactions. The profile
 subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
-Profile subscription facts describe the short coverage answer and balance,
-Details for the Subscription coverage report, original explanations and actions,
-mode timestamp, and the distinction between Not configured and Unavailable.
-Inline Top up shows both supplied funding projections before selection, with
-More for Year/Epoch and Show/Hide Deep Time Subscriptions for Period/Era/Eon.
-Upcoming Drops keeps the Automatic switch; Minting Settings starts closed.
-Wrapped coverage actions align left beneath the heading. The facts retain all five
+Profile subscription facts describe a funded-drop count with a status badge,
+then Funded through with the Meme link and full date when supplied. Covered
+uses a green check icon. Without a funded-through point, the original status
+explanation stays in the summary. Covered Details contains its title, relocated
+original explanation, Balance capacity, Forecast use and the projection note.
+Mode, eligibility, edition preference, the mode explanation and the first
+upcoming drop are not repeated in Details. Warning states retain Next unfunded,
+recommendations, deadlines and owner recovery controls; a deadline already in
+the summary appears only there. The original mode update date is under the
+value in Minting settings, without the added since wording.
+Top up opens a desktop dialog or mobile bottom sheet. Its compact option rows
+show both supplied projections before selection and include Year/Epoch directly.
+Show/Hide Deep Time Subscriptions retains Period/Era/Eon. Other retains the ETH
+preview, and the full-width submit action and recipient follow the choices.
+Closing restores focus and preserves the draft selection. Existing notification
+links open the dialog without scrolling the background, and the original
+transaction-status dialog replaces the picker while a transaction is in progress.
+The picker retains the original blue radio controls and blue selection emphasis.
+Rows use smooth color transitions without moving on hover. The original submit
+button retains its lightning icon and original wording.
+Upcoming Drops leads each row with its existing date or Minting Today wording,
+the season beside it, and the Meme number smaller below. Decorative timeline
+markers connect the rows; the original mode explanation appears below the
+section heading for the owner only. Show More is a footer inside the dark panel. Minting settings
+is an always-visible inline group between coverage and Upcoming Drops, using
+the same subtle dark surface. Mode, Edition Preference and the full Airdrop
+Address stack in one column on medium and smaller screens, with subtle dividers,
+left-aligned labels, right-aligned values and supporting text below each row.
+The inline layout starts at 1280px. Dropdown options and descriptions, eligibility,
+ENS, tooltip and edit link are preserved.
+Subscription balance and the owner-only Top up action sit in the page header;
+Learn more is beside the title. The compact status panel follows, with Details
+at the right on wide screens. Below 768px, Details is a full-width row below
+the summary, with a subtle divider above it, its label on the left and its
+chevron on the right. Owners have Choose drops below the status description on
+the left; it scrolls to and focuses Upcoming Drops without opening Details. The report
+shows its metrics as left-label, right-value rows with subtle dividers below
+768px, and keeps the metrics grid on wider screens. Status, funded-drop
+count and Funded through stay in the summary above without duplicate report rows.
+History retains compact
+label-only pills, a light active pill, transparent outlined inactive pills with
+a faint hover fill, and its original entry tables. Redeemed addresses use the
+original shortened format. The pills stay on one
+horizontally scrollable row on narrow screens. Redeemed
+is selected initially, and arrow keys move between tabs. Cached pages,
+independent pagination and transaction refreshes are unchanged. Funded counts
+keep the original coverage-state conditions; absent dates do not create empty
+rows, and an identical explanation is displayed only once. The facts retain all five
 section anchors, exact supplied top-up amounts, full history records, pagination,
 and the existing owner, visitor, proxy, and regional iOS rules.
 

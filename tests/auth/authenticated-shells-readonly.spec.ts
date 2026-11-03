@@ -401,19 +401,25 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("heading", { name: "Upcoming Drops" })
     ).toBeVisible();
-    const settings = page.getByRole("button", { name: /^Minting Settings/ });
-    await expect(settings).toHaveAttribute("aria-expanded", "false");
+    const settings = page.getByRole("region", {
+      name: "Minting settings",
+      exact: true,
+    });
+    await expect(settings).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Subscription History", exact: true })
     ).toBeVisible();
     await page.getByRole("button", { name: "Details", exact: true }).click();
-    await expect(page.getByText("Mode", { exact: true })).toBeVisible();
-    await settings.click();
+    await expect(
+      page
+        .locator("#subscription-coverage-details")
+        .getByText("Balance capacity", { exact: true })
+    ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Airdrop Address" })
     ).toBeVisible();
     await expect(
-      page.getByRole("group", { name: "Edition Preference" })
+      settings.getByRole("button", { name: /^Edition Preference/ })
     ).toBeVisible();
     await expect(
       page.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
@@ -421,27 +427,31 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expectNoHorizontalOverflow(page);
   });
 
-  test("scrolls to and focuses the top-up section from the notification link", async ({
+  test("opens and focuses the top-up dialog from the notification link", async ({
     page,
   }) => {
     const path = `${PROFILE_BASE_PATH}/subscriptions`;
     const hash = "#profile-subscriptions-top-up";
 
-    // The section mounts after hydration, so the browser's own hash scroll
-    // finds nothing. Read-only: navigates and observes, never submits.
+    // Existing notification anchors open the dialog after hydration.
+    // Read-only: navigates and observes, never submits.
     await page.goto(`${path}${hash}`, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await expect(page).toHaveURL(
       (url) => url.pathname === path && url.hash === hash
     );
 
-    const topUp = page.getByRole("region", { name: "Top up" });
+    const topUp = page.getByRole("dialog", { name: "Top up" });
     await expect(topUp).toHaveAttribute("id", hash.slice(1));
-    await expect(topUp).toBeFocused();
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeFocused();
     await expect(
       topUp.getByRole("heading", { name: "Top up", exact: true })
     ).toBeVisible();
-    await expect(topUp).toBeInViewport();
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeInViewport();
   });
 
   test("subscriptions preserve full details, compact top up and history pagination", async ({
@@ -451,9 +461,79 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const { address } = await installSubscriptionFixtures(page);
     await gotoReady(page, `${PROFILE_BASE_PATH}/subscriptions`);
     await expect(
-      page.getByRole("heading", { name: "Running low, covered until Nov 4" })
+      page.getByRole("heading", { name: "3 drops funded Running low" })
     ).toBeVisible();
-    await page.getByRole("button", { name: "Refresh balance" }).focus();
+    const overview = page.locator("#profile-subscriptions-overview");
+    const headlineBox = await overview
+      .getByRole("heading", { level: 2 })
+      .boundingBox();
+    const descriptionBox = await overview
+      .locator("#profile-subscriptions-overview-title + p")
+      .boundingBox();
+    const detailsBox = await overview
+      .getByRole("button", { name: "Details", exact: true })
+      .boundingBox();
+    const headerActions = page.locator("#subscription-header-actions");
+    const topUpBox = await headerActions
+      .getByRole("button", { name: "Top up", exact: true })
+      .boundingBox();
+    const balanceBox = await headerActions
+      .getByText("Subscription balance", { exact: true })
+      .boundingBox();
+    const overviewBox = await overview.boundingBox();
+    expect(headlineBox).not.toBeNull();
+    expect(descriptionBox).not.toBeNull();
+    expect(detailsBox).not.toBeNull();
+    expect(topUpBox).not.toBeNull();
+    expect(balanceBox).not.toBeNull();
+    expect(overviewBox).not.toBeNull();
+    expect(topUpBox!.y + topUpBox!.height).toBeLessThanOrEqual(overviewBox!.y);
+    expect(balanceBox!.y + balanceBox!.height).toBeLessThanOrEqual(
+      overviewBox!.y
+    );
+    if (page.viewportSize()!.width >= 768) {
+      expect(detailsBox!.x).toBeGreaterThanOrEqual(
+        headlineBox!.x + headlineBox!.width
+      );
+    } else {
+      expect(detailsBox!.y).toBeGreaterThanOrEqual(
+        descriptionBox!.y + descriptionBox!.height
+      );
+      expect(detailsBox!.width).toBeGreaterThanOrEqual(overviewBox!.width - 40);
+      const detailsChevron = await overview
+        .getByRole("button", { name: "Details", exact: true })
+        .locator("svg")
+        .boundingBox();
+      expect(detailsChevron).not.toBeNull();
+      expect(
+        Math.abs(
+          detailsBox!.x +
+            detailsBox!.width -
+            detailsChevron!.x -
+            detailsChevron!.width
+        )
+      ).toBeLessThanOrEqual(1);
+    }
+    const amount = headerActions.getByText("0.4 ETH", { exact: true });
+    const refreshBalance = headerActions.getByRole("button", {
+      name: "Refresh balance",
+    });
+    await expect(amount).toBeVisible();
+    const amountBox = await amount.boundingBox();
+    const refreshBox = await refreshBalance.boundingBox();
+    expect(amountBox).not.toBeNull();
+    expect(refreshBox).not.toBeNull();
+    expect(refreshBox!.x).toBeGreaterThanOrEqual(
+      amountBox!.x + amountBox!.width
+    );
+    expect(
+      Math.abs(
+        amountBox!.y +
+          amountBox!.height / 2 -
+          (refreshBox!.y + refreshBox!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    await refreshBalance.focus();
     await expect(
       page.getByRole("tooltip", { name: "Refresh balance" })
     ).toBeVisible();
@@ -462,9 +542,47 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       upcoming.getByText("Mon, Nov 2, 2026", { exact: true })
     ).toBeVisible();
     await expect(upcoming.getByText("/ 2", { exact: true })).toHaveCount(3);
+    const settings = page.getByRole("region", {
+      name: "Minting settings",
+      exact: true,
+    });
+    const mode = settings.getByRole("button", { name: /^Mode .*Automatic$/ });
+    await expect(mode).toBeVisible();
+    const modeDate = settings.getByText("Oct 2, 2026, 19:03 UTC", {
+      exact: true,
+    });
+    await expect(modeDate).toBeVisible();
+    const modeValueBox = await mode
+      .getByText("Automatic", { exact: true })
+      .boundingBox();
+    const modeDateBox = await modeDate.boundingBox();
+    expect(modeValueBox).not.toBeNull();
+    expect(modeDateBox).not.toBeNull();
+    expect(modeDateBox!.y).toBeGreaterThanOrEqual(
+      modeValueBox!.y + modeValueBox!.height
+    );
+    if (page.viewportSize()!.width < 1280) {
+      const modeRowBox = await mode.boundingBox();
+      expect(modeRowBox).not.toBeNull();
+      expect(modeDateBox!.x).toBeLessThanOrEqual(modeValueBox!.x);
+      expect(
+        Math.abs(
+          modeDateBox!.x +
+            modeDateBox!.width -
+            modeRowBox!.x -
+            modeRowBox!.width
+        )
+      ).toBeLessThanOrEqual(1);
+      await expect(modeDate).toHaveCSS("text-align", "right");
+    } else {
+      expect(Math.abs(modeDateBox!.x - modeValueBox!.x)).toBeLessThanOrEqual(1);
+    }
     await expect(
-      upcoming.getByRole("switch", { name: "Automatic subscription mode" })
-    ).toBeChecked();
+      upcoming.getByText(
+        "Automatic airdrops of all eligible drops unless you opt-out",
+        { exact: true }
+      )
+    ).toBeVisible();
     await expect(
       upcoming.getByRole("switch", {
         name: "Toggle subscription for The Memes #568",
@@ -475,22 +593,19 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("tooltip", { name: "No changes allowed on minting day" })
     ).toBeVisible();
-    const upcomingHeading = await upcoming
-      .getByRole("heading", { name: "Upcoming Drops" })
-      .boundingBox();
-    const automatic = await upcoming
-      .getByRole("switch", { name: "Automatic subscription mode" })
-      .boundingBox();
-    expect(upcomingHeading).not.toBeNull();
-    expect(automatic).not.toBeNull();
-    expect(
-      Math.abs(
-        upcomingHeading!.y +
-          upcomingHeading!.height / 2 -
-          automatic!.y -
-          automatic!.height / 2
-      )
-    ).toBeLessThan(12);
+    const upcomingBox = await upcoming.boundingBox();
+    const settingsBox = await settings.boundingBox();
+    const modeBox = await mode.boundingBox();
+    expect(upcomingBox).not.toBeNull();
+    expect(settingsBox).not.toBeNull();
+    expect(modeBox).not.toBeNull();
+    expect(settingsBox!.y + settingsBox!.height).toBeLessThanOrEqual(
+      upcomingBox!.y
+    );
+    expect(modeBox!.x).toBeGreaterThanOrEqual(settingsBox!.x);
+    expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(
+      settingsBox!.x + settingsBox!.width
+    );
     const showMore = upcoming.getByRole("button", { name: "Show More" });
     const footer = await showMore.boundingBox();
     const list = await upcoming
@@ -504,9 +619,22 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       upcoming.getByText("Next unfunded", { exact: true })
     ).toHaveCount(1);
-    await upcoming.getByRole("link", { name: "Top up", exact: true }).click();
-    const topUp = page.getByRole("region", { name: "Top up", exact: true });
-    await expect(topUp).toBeFocused();
+    const topUpLink = upcoming.getByRole("link", {
+      name: "Top up",
+      exact: true,
+    });
+    await topUpLink.click();
+    const topUp = page.getByRole("dialog", { name: "Top up", exact: true });
+    const topUpBackdrop = topUp.locator('[class~="tw-bg-gray-700/60"]');
+    await expect(topUpBackdrop).toBeVisible();
+    await expect(topUpBackdrop).toHaveCSS(
+      "background-color",
+      "rgba(55, 65, 81, 0.6)"
+    );
+    await expect(topUpBackdrop).toHaveCSS("opacity", "1");
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeFocused();
     await expect(
       topUp.getByRole("heading", { name: "Top up", exact: true })
     ).toBeVisible();
@@ -536,14 +664,26 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(customInputBox).not.toBeNull();
     expect(customInputBox!.width).toBeGreaterThanOrEqual(100);
     await customCount.fill("2");
+    const customRow = topUp
+      .getByRole("radio", { name: "Other", exact: true })
+      .locator("..");
+    await expect(customRow).toHaveCSS("border-bottom-left-radius", "11px");
+    await expect(customRow).toHaveCSS("border-bottom-right-radius", "11px");
     await expect(topUp.getByRole("status")).toHaveText("0.13058 ETH");
     await expect(topUp.getByText("0.13058 ETH", { exact: true })).toBeVisible();
     await expect(customCount).toHaveAccessibleDescription("0.13058 ETH");
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "subscriptions-custom-preview");
     await customCount.fill("");
-    await expect(topUp.getByRole("status")).toBeEmpty();
+    await expect(
+      topUp.getByRole("status", { includeHidden: true })
+    ).toBeEmpty();
     await topUp.getByRole("radio", { name: /^Recommended/ }).click();
+    const recommendedRow = topUp
+      .getByRole("radio", { name: /^Recommended/ })
+      .locator("..");
+    await expect(recommendedRow).toHaveCSS("border-top-left-radius", "11px");
+    await expect(recommendedRow).toHaveCSS("border-top-right-radius", "11px");
     await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")
     ).toBeVisible();
@@ -563,7 +703,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
     ).toBeVisible();
-    await topUp.getByRole("button", { name: "More", exact: true }).click();
+    await expect(
+      topUp.getByRole("radio", { name: /^Remaining Year/ })
+    ).toBeVisible();
+    await expect(
+      topUp.getByRole("radio", { name: /^Remaining Epoch/ })
+    ).toBeVisible();
     const deepTime = topUp.getByRole("button", {
       name: "Show Deep Time Subscriptions",
       exact: true,
@@ -573,6 +718,17 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeHidden();
     await deepTime.click();
+    const deepRows = topUp.locator("#subscription-top-up-deep-time label");
+    await expect(deepRows.first()).toHaveCSS("border-top-left-radius", "11px");
+    await expect(deepRows.first()).toHaveCSS("border-top-right-radius", "11px");
+    await expect(deepRows.last()).toHaveCSS(
+      "border-bottom-left-radius",
+      "11px"
+    );
+    await expect(deepRows.last()).toHaveCSS(
+      "border-bottom-right-radius",
+      "11px"
+    );
     await expect(
       topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeVisible();
@@ -596,23 +752,209 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
     ).toBeVisible();
-    await topUp.getByRole("button", { name: "Cancel", exact: true }).click();
+    await topUp.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(topUp).toBeHidden();
+    await expect(topUpLink).toBeFocused();
+    // A repeated current-hash link still opens, retaining the selected amount.
+    await topUpLink.click();
     await expect(
-      page.getByRole("button", { name: "Top up", exact: true })
-    ).toBeFocused();
-    await page.getByRole("button", { name: "Details", exact: true }).click();
-    await expect(
-      page.getByText("Automatic since Oct 2, 2026, 19:03 UTC")
-    ).toBeVisible();
-    await page.getByRole("button", { name: /^Minting Settings/ }).click();
-    await expect(
-      page.getByRole("radio", { name: "All eligible", exact: true })
+      topUp.getByRole("radio", { name: /^Minimum for next drop/ })
     ).toBeChecked();
+    await topUp
+      .getByRole("heading", { name: "Top up", exact: true })
+      .press("Escape");
+    await expect(topUp).toBeHidden();
+    await expect(topUpLink).toBeFocused();
+    const topUpButton = page.getByRole("button", {
+      name: "Top up",
+      exact: true,
+    });
+    await topUpButton.click();
+    await expect(topUpBackdrop).toBeVisible();
+    await expect(topUpBackdrop).toHaveCSS("opacity", "1");
+    const surface = topUp.locator('[id^="headlessui-dialog-panel-"]');
+    const viewport = page.viewportSize()!;
+    // Wait for the sheet's opening slide before measuring its final position.
+    await expect
+      .poll(async () => {
+        const box = await surface.boundingBox();
+        if (!box) return Number.POSITIVE_INFINITY;
+        return viewport.width < 768
+          ? Math.abs(box.y + box.height - viewport.height)
+          : Math.abs(box.x + box.width / 2 - viewport.width / 2);
+      })
+      .toBeLessThanOrEqual(2);
+    const surfaceBox = await surface.boundingBox();
+    expect(surfaceBox).not.toBeNull();
+    if (viewport.width < 768) {
+      expect(
+        Math.abs(surfaceBox!.y + surfaceBox!.height - viewport.height)
+      ).toBeLessThanOrEqual(2);
+      expect(surfaceBox!.width).toBeLessThanOrEqual(viewport.width);
+    } else {
+      expect(
+        Math.abs(surfaceBox!.x + surfaceBox!.width / 2 - viewport.width / 2)
+      ).toBeLessThanOrEqual(2);
+      expect(surfaceBox!.y).toBeGreaterThan(0);
+      expect(surfaceBox!.width).toBeLessThanOrEqual(512);
+    }
+    await topUp
+      .getByRole("heading", { name: "Top up", exact: true })
+      .press("Shift+Tab");
+    expect(
+      await topUp.evaluate((element) =>
+        element.contains(document.activeElement)
+      )
+    ).toBe(true);
+    await page.keyboard.press("Tab");
+    expect(
+      await topUp.evaluate((element) =>
+        element.contains(document.activeElement)
+      )
+    ).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(topUpButton).toBeFocused();
+    const detailsButton = page.getByRole("button", {
+      name: "Details",
+      exact: true,
+    });
+    await expect(detailsButton).toHaveAttribute("aria-expanded", "false");
+    const chooseDrops = page.getByRole("link", {
+      name: "Choose drops",
+      exact: true,
+    });
+    await expect(chooseDrops).toBeVisible();
+    const summaryDescription = page
+      .locator("#profile-subscriptions-overview p")
+      .first();
+    const summaryDescriptionBox = await summaryDescription.boundingBox();
+    const chooseDropsBox = await chooseDrops.boundingBox();
+    expect(summaryDescriptionBox).not.toBeNull();
+    expect(chooseDropsBox).not.toBeNull();
+    expect(
+      Math.abs(chooseDropsBox!.x - summaryDescriptionBox!.x)
+    ).toBeLessThanOrEqual(2);
+    expect(chooseDropsBox!.y).toBeGreaterThanOrEqual(
+      summaryDescriptionBox!.y + summaryDescriptionBox!.height
+    );
+    await chooseDrops.click();
+    await expect(
+      upcoming.getByRole("heading", { name: "Upcoming Drops", exact: true })
+    ).toBeFocused();
+    await expect(
+      upcoming.getByRole("heading", { name: "Upcoming Drops", exact: true })
+    ).toBeInViewport();
+    await expect(
+      settings.getByText("Oct 2, 2026, 19:03 UTC", { exact: true })
+    ).toBeVisible();
+    await detailsButton.click();
+    const coverageReport = page.locator("#subscription-coverage-details");
+    for (const label of [
+      "Status",
+      "Drops funded",
+      "Funded through",
+      "Mode",
+      "Eligibility",
+      "Edition Preference",
+    ]) {
+      await expect(
+        coverageReport.getByText(label, { exact: true })
+      ).toHaveCount(0);
+    }
+    await expect(coverageReport.getByText(/^Next:/)).toHaveCount(0);
+    await expect(
+      coverageReport.getByText(
+        "Automatic airdrops of all eligible drops unless you opt-out",
+        { exact: true }
+      )
+    ).toHaveCount(0);
+    await expect(
+      coverageReport.getByText("Only a few intended drops remain fully funded.")
+    ).toBeVisible();
+    const reportDescriptionBox = await coverageReport
+      .getByText("Only a few intended drops remain fully funded.")
+      .boundingBox();
+    const reportNumbersBox = await coverageReport.locator("dl").boundingBox();
+    expect(reportDescriptionBox).not.toBeNull();
+    expect(reportNumbersBox).not.toBeNull();
+    expect(
+      reportDescriptionBox!.y + reportDescriptionBox!.height
+    ).toBeLessThanOrEqual(reportNumbersBox!.y);
+    if (page.viewportSize()!.width < 768) {
+      for (const label of ["Balance capacity", "Forecast use"]) {
+        const row = coverageReport
+          .getByText(label, { exact: true })
+          .locator("..");
+        const labelBox = await row.locator("dt").boundingBox();
+        const valueBox = await row.locator("dd").boundingBox();
+        const rowBox = await row.boundingBox();
+        expect(labelBox).not.toBeNull();
+        expect(valueBox).not.toBeNull();
+        expect(rowBox).not.toBeNull();
+        expect(valueBox!.x).toBeGreaterThanOrEqual(
+          labelBox!.x + labelBox!.width
+        );
+        expect(Math.abs(labelBox!.y - valueBox!.y)).toBeLessThanOrEqual(2);
+        expect(
+          Math.abs(valueBox!.x + valueBox!.width - rowBox!.x - rowBox!.width)
+        ).toBeLessThanOrEqual(1);
+      }
+    }
+    await mode.click();
+    for (const option of await page.getByRole("option").all()) {
+      await expect(option).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(option).toHaveCSS("box-shadow", "none");
+    }
+    await page.getByRole("listbox").press("Escape");
+    await mode.press("Enter");
+    await expect(
+      page.getByRole("option", { name: "Automatic", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("option", { name: "Automatic", exact: true })
+    ).not.toHaveCSS("box-shadow", "none");
+    await expect(
+      page.getByRole("option", { name: "Manual", exact: true })
+    ).toHaveAccessibleDescription("You have to opt-in to each specific drop");
+    await page.getByRole("listbox").press("ArrowUp");
+    await expect(
+      page.getByRole("option", { name: "Manual", exact: true })
+    ).not.toHaveCSS("box-shadow", "none");
+    await page.getByRole("listbox").press("Escape");
+    await expect(mode).toBeFocused();
+    await expect(mode).toHaveText(/Automatic/);
+    const editions = settings.getByRole("button", {
+      name: /^Edition Preference/,
+    });
+    await editions.click();
+    for (const option of await page.getByRole("option").all()) {
+      await expect(option).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(option).toHaveCSS("box-shadow", "none");
+    }
+    const editionRowBox = await editions.boundingBox();
+    const editionOptionsBox = await page.getByRole("listbox").boundingBox();
+    expect(editionRowBox).not.toBeNull();
+    expect(editionOptionsBox).not.toBeNull();
+    expect(editionOptionsBox!.x).toBeGreaterThanOrEqual(8);
+    expect(editionOptionsBox!.x + editionOptionsBox!.width).toBeLessThanOrEqual(
+      page.viewportSize()!.width - 8
+    );
+    await expect(
+      page.getByRole("option", { name: "All eligible", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expectSingleLineLabel(
       page
-        .getByRole("group", { name: "Edition Preference" })
+        .getByRole("option", { name: "One edition", exact: true })
         .getByText("One edition", { exact: true })
     );
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscriptions-settings-dropdown"
+    );
+    await page.getByRole("listbox").press("Escape");
+    await expect(editions).toBeFocused();
     await expect(
       page.getByRole("button", { name: address, exact: true })
     ).toBeVisible();

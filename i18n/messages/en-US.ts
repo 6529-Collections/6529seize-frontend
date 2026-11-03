@@ -3786,7 +3786,7 @@ export const EN_US_MESSAGES = {
     "{status} · through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
-  "subscriptions.page.settingsTitle": "Minting Settings",
+  "subscriptions.page.settingsTitle": "Minting settings",
   "subscriptions.page.learnMore": "Learn more",
   "subscriptions.page.topUpTitle": "Top up",
   "subscriptions.balance.title": "Subscription balance",

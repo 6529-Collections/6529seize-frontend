@@ -2,11 +2,15 @@
 
 ## Overview
 
-The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
-subscription answer and balance, followed by Upcoming Drops. Details and Minting
-Settings sit at the right of the coverage card header on wider screens and align
-left beneath the heading on phones. Details, Top up, and Minting Settings open when needed. Subscription History is a separate,
-always-visible section with pills for each history view.
+The `Subscriptions` tab at `/{user}/subscriptions` puts Subscription balance,
+refresh and the owner-only Top up action beside the Subscription minting heading.
+Learn more sits beside the title. A compact coverage panel follows, with Details
+on its right on wide screens. Minting settings groups Mode, Edition Preference
+and Airdrop Address below the status, followed by Upcoming Drops and Subscription
+History. Settings stack in one column on medium and smaller screens and share the subtle dark surface of
+Upcoming Drops, which retains decorative timeline markers. History retains its
+compact pill tabs and original tables. Redeemed rows use the original shortened address format.
+Details and Top up open when needed.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
 are documented in
@@ -15,8 +19,8 @@ are documented in
 ## Location in the Site
 
 - Route: `/{user}/subscriptions`
-- Sections: coverage answer and `Subscription balance`, `Minting Settings`,
-  `Upcoming Drops`, `Subscription History`, and inline `Top up` for owners
+- Sections: coverage answer and `Subscription balance`, `Minting settings`,
+  `Upcoming Drops`, `Subscription History`, and a `Top up` dialog for owners
 
 ## Entry Points
 
@@ -42,20 +46,20 @@ first render.
   the identity block on smaller layouts. The current state and contextual
   action share the row's second line, and the whole row opens the relevant
   settings, upcoming-drops, or top-up section.
-- Open a subscription top-up notification. It links to the `Top up` section
-  (`/{user}/subscriptions#profile-subscriptions-top-up`); once the section has
-  loaded the page scrolls to it and moves keyboard and screen-reader focus to
-  its heading, with smooth scrolling skipped when reduced motion is on.
+- Open a subscription top-up notification. It links to `Top up`
+  (`/{user}/subscriptions#profile-subscriptions-top-up`); once loaded, the
+  dialog opens and moves keyboard and screen-reader focus to its heading
+  without scrolling the page behind it.
   Where Subscriptions are hidden (the iOS app outside the US) the tab
   redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
 - Use `Learn more` at the right of the `Subscription minting` title above the
   coverage card to open `/about/subscriptions`.
 - Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
-  `#profile-subscriptions-top-up`, `#profile-subscriptions-upcoming`, and
-  `#profile-subscriptions-history` scroll to and focus their section heading.
-  Settings and Top up open automatically when linked to. History is already
-  visible.
+  `#profile-subscriptions-upcoming`, and `#profile-subscriptions-history`
+  scroll to and focus their section heading. `#profile-subscriptions-top-up`
+  opens and focuses the Top up dialog automatically. Minting settings and History are
+  already visible.
 
 ## Common Scenarios
 
@@ -73,53 +77,89 @@ first render.
 
 ## User Journey
 
-1. Open `/{user}/subscriptions` and read the short coverage answer, next intended
-   drop, and Subscription balance. A funded-through date is a projection.
-   The next-drop name is emphasized, and a drop minting today has a green
-   `Minting today` label. The card quantity remains visible.
+1. Open `/{user}/subscriptions` and read the coverage summary and Subscription
+   balance. Covered, Plan a top up, Running low and Action required show the
+   original funded-drop count with its colored status badge, including zero.
+   When supplied, Funded through shows the Meme link and full date including
+   the year. Covered uses a green check icon. This date is a projection.
+   Without a funded-through point, the status explanation stays in the summary.
+   An owner with Action required still sees the supplied top-up deadline here.
    The balance refresh icon shows its label on hover or keyboard focus.
-2. Open `Details` for the `Subscription coverage` report: Status, Drops funded, Funded through, Next unfunded,
-   Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
-   and Edition Preference. The available mint count is retained as Balance
-   capacity in Details instead of repeating it beside the ETH balance.
-   Status and mode explanations, recommendations,
-   authoritative deadlines, the projection note, and Refresh coverage remain here.
-   Owners also get the status-specific action: Set up, Choose drops,
-   Top up subscriptions, or Review settings. A confirmed unconfigured mode shows
-   `Not configured`; unavailable mode data shows `Unavailable`.
-3. Owners can open `Top up` inside the answer card. Choose Recommended or
-   Minimum for next drop when supplied, 1 Card, Remaining SZN, or Other.
-   Entering an Other count shows a separate ETH preview and the same amount
-   on the Top up button.
+2. Open `Details` for the `Subscription coverage` report. Below 768px, Details
+   is a full-width row below the summary, with a subtle divider, its label on
+   the left and the chevron on the right. For Covered profiles,
+   it contains the original status explanation, Balance capacity, Forecast use,
+   and the projection note. Below 768px, report rows show labels on the left,
+   values on the right and subtle dividers; wider screens keep the metrics grid.
+   Status, the funded-drop count and Funded through stay
+   in the summary above and are not repeated as report rows. The first upcoming
+   drop stays in Upcoming Drops. Mode, its update date, eligibility and edition
+   preference stay in Minting settings. The available mint count appears once
+   as Balance capacity instead of repeating it beside the ETH balance.
+   Next unfunded, recommendations and authoritative deadlines remain available
+   when supplied, without empty None rows. A deadline already displayed in the
+   summary is not repeated in Details. Owners retain Refresh coverage and the
+   status-specific Set up, Top up subscriptions or Review settings action.
+   Choose drops sits below the summary description instead. An explanation
+   already shown above Details is not repeated.
+3. Owners have `Top up` beside Subscription balance in the page header.
+   `Choose drops` sits on the left below the status description and scrolls to
+   and focuses Upcoming Drops without opening Details.
+   Top up opens a centered
+   dialog on desktop or a bottom sheet on phones. Options retain the original
+   blue radio controls and smooth color transitions, with a blue selected-row tint.
+   Rows stay in place on hover. The original submit button includes its lightning
+   icon and original wording.
+   Choose Recommended or Minimum
+   for next drop when supplied, 1 Card, Remaining SZN, Remaining Year,
+   Remaining Epoch, or Other. Entering an Other count shows a separate ETH
+   preview and the same amount on the Top up button.
    Recommended and Minimum each show their supplied projected funding outcome
-   beneath the option before selection. `More` reveals Remaining Year,
-   Remaining Epoch, and `Show Deep Time Subscriptions`. That control reveals
+   beneath the option before selection. `Show Deep Time Subscriptions` reveals
    Remaining Period, Era, and Eon and becomes `Hide Deep Time Subscriptions`.
-   Cancel closes the panel and returns focus
-   to the Top up button. Direct top-up links focus the inline panel; its
-   accessible title is retained without an extra visible heading.
-4. Open `Minting Settings` from the coverage card header to choose One edition or
-   All eligible and read the full Airdrop Address. Owners can use its edit link
-   to open delegation registration. Settings starts closed and expands inside
-   the coverage card; its direct section link still opens and focuses it.
-5. Use `Upcoming Drops` to review the first three drops, change individual
-   selections or quantities, or turn Automatic mode on or off. `Show More`
-   reveals the remaining rows. Minting Today rows are locked; focus, tap, or
-   hover the label for the explanation.
+   Close, Escape, or the backdrop dismisses the dialog and returns focus to
+   the opener. Reopening retains the draft selection and Other count.
+4. Use `Upcoming Drops` to review the first three drops and change individual
+   selections or quantities. The `Show More` footer inside the timeline panel reveals the
+   remaining rows. Minting
+   Today rows are locked; focus, tap, or hover the label for the explanation.
+5. Use `Minting settings` between the coverage panel and Upcoming Drops. Mode,
+   Edition Preference and Airdrop Address stack in one column below 1280px,
+   with subtle row dividers, labels on the left and values on the right. The
+   mode date, eligibility and full wallet address sit beneath their corresponding
+   values or labels. Wider screens use the inline layout. Mode opens Manual and Automatic; Edition
+   Preference opens One edition and All eligible. Each dropdown retains the
+   original option descriptions and marks the saved choice. Arrow keys move
+   through options, Enter selects, and Escape closes without changing the
+   setting. Eligibility remains beside Edition Preference. The full address,
+   ENS name, tooltip and owner edit link remain available. The mode's UTC
+   last-update timestamp appears under its saved value, without added wording. Visitors can read saved values
+   but cannot change them. Direct settings links still focus the section heading.
 6. In the always-visible `Subscription History` section, choose Redeemed
-   Subscriptions, Log History, or Top Up History. The selected pill is light,
-   the others are dark, and the
-   labels have no counts. Pills wrap on narrow screens. One history view is shown
-   at a time, retaining its original entry text, dates, addresses, transaction
+   Subscriptions, Log History, or Top Up History. The selected pill is light;
+   inactive pills are transparent with subtle outlines and a faint fill on hover.
+   The labels have no counts. Pills stay on one horizontally scrollable row on
+   narrow screens. One history view is shown at a time, retaining its original
+   entry text, dates, addresses, transaction
    links, empty state, and independent pagination.
 
 ## Current Behavior
 
-- Top up uses the original cards with radio selectors at the top right, stacked
-  card counts and ETH amounts, and a gentle lift and shadow on hover. Reduced
-  motion disables that animation. Other keeps its count input and ETH preview.
-  The panel has a visible Top up heading, with both funding projections retained.
-- Coverage status ramps with urgency and pairs a colored dot with text:
+- Settings use compact inline controls on the same subtle dark surface as
+  Upcoming Drops and wrap without truncating addresses.
+  Upcoming Drops uses a date-first timeline with the original mode explanation
+  below its heading for the owner only. Show More stays in the panel footer.
+
+- Top up uses a compact list of fully clickable rows, with radio selectors on
+  the left, card counts and original labels in the middle, and ETH amounts on
+  the right. Blue radio and selected-row colors transition smoothly while rows
+  stay in place; reduced motion disables the transitions. Other has a distinct
+  bordered count input and ETH preview.
+  The dialog retains both supplied funding projections. A full-width confirmation
+  button and recipient address follow all amount choices.
+  During a transaction, the existing transaction-status dialog replaces the
+  amount picker. Dismissing success or error returns to the amount picker.
+- Coverage status ramps with urgency and pairs its color with text:
   - `Covered`: at least 7 consecutive intended drops are fully funded
   - `Plan a top up`: 4-6 drops are fully funded
   - `Running low`: 2-3 drops are fully funded
@@ -136,10 +176,13 @@ first render.
 - Coverage uses fully funded intended drops, not raw card credits, because
   eligibility, all-editions settings, manual choices, and opt-outs can change
   consumption per drop.
-- `Mode` and its UTC last-update timestamp are in Details. The Automatic
-  switch is beside Upcoming Drops.
-- `Edition Preference` shows `Eligibility xN` and uses two radio options with
-  a visible selected state and keyboard arrow navigation.
+- `Mode` is editable in Minting settings above Upcoming Drops. Its original
+  UTC last-update timestamp appears below the saved value, without "since".
+- The `Mode` and `Edition Preference` controls open dropdowns with the
+  original option descriptions, a selected checkmark, and keyboard navigation.
+  Pointer opening shows no automatic option highlight; hovering highlights a row,
+  and keyboard navigation shows a visible focus ring on the active option.
+  `Edition Preference` also shows `Eligibility xN`.
 - `Top up`:
   - sends ETH to the configured subscriptions address on the configured chain
   - uses exact backend-provided ETH for recommended and minimum options,
@@ -159,7 +202,9 @@ first render.
   - only the next unfunded token identified by coverage gets a `Next unfunded`
     marker, with a Top up link for owners; stale coverage does not mark rows
   - shows first 3 rows by default; `Show More` expands the list
-  - upcoming dates include the weekday, day, month, and year in UTC
+  - each row leads with the UTC date, retaining the abbreviated weekday and
+    month plus the year, or `Minting Today` with its existing tooltip
+  - the season sits beside the date in muted text; the Meme number is smaller below
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
   - a subscribed first row shows `No subscription allocation` once distribution
@@ -185,15 +230,15 @@ first render.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
-  - a separate heading and pills are always visible, with no expand/collapse
-    control; the pills retain their selected state while data refreshes or the
+  - a separate heading and compact pills are always visible, with no expand/collapse
+    control; the selected history is preserved while data refreshes or the
     window resizes
   - Redeemed Subscriptions loads first; Log History and Top Up History load when
-    selected. Recently loaded pages are reused when switching tabs, and each
+    selected. Recently loaded pages are reused when switching histories, and each
     history keeps its own page number
   - after a confirmed transaction or balance refresh, the selected history
     refreshes immediately; other cached histories refresh when selected
-  - pagination when a tab has more than 10 rows
+  - pagination when a history has more than 10 rows
 
 ## Consolidation Changes
 
@@ -262,12 +307,12 @@ processed; they do not automatically recover rows stranded by earlier failures.
 
 ## Responsive Behavior
 
-- The answer card, Minting Settings, and Upcoming Drops keep a
+- The answer card, Minting settings, and Upcoming Drops keep a
   consistent layout at each width.
 - Subscription settings wrap without clipping on narrow screens.
 - Upcoming-drop titles and dates wrap beside bordered quantity pickers and
-  toggles without horizontal scrolling. Top-up chips and segmented controls
-  expand across the available width on phones.
+  toggles without horizontal scrolling. Top up becomes a bottom sheet on phones,
+  with internally scrollable options and a full-width confirmation button.
 - Top-up options and history rows wrap without horizontal page overflow.
 
 ## Edge Cases

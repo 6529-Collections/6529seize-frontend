@@ -10,10 +10,9 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import { t } from "@/i18n/messages";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
-import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useState, type ReactNode } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
@@ -32,6 +31,13 @@ export default function UserPageSubscriptionsUpcoming(
   }>
 ) {
   const locale = useBrowserLocale();
+  const modeDescription =
+    props.details?.automatic === true
+      ? "subscriptions.mode.automaticDescription"
+      : "subscriptions.mode.manualDescription";
+  const description = props.details
+    ? t(locale, modeDescription)
+    : t(locale, "subscriptions.settings.loading");
   useScrollToHashOnMount("profile-subscriptions-upcoming", {
     focusId: "profile-subscriptions-upcoming-title",
   });
@@ -72,21 +78,21 @@ export default function UserPageSubscriptionsUpcoming(
     );
   } else if (subscriptions.length > 0) {
     content = (
-      <div className="tw-flex tw-flex-col tw-py-1.5">
+      <div className="tw-flex tw-flex-col">
         {subscriptions.map((subscription, index) => {
           const isNextUnfunded =
             props.coverage?.next_unfunded?.token_id === subscription.token_id;
           return (
             <div
               key={subscription.token_id}
-              className={
-                index > 0 && !isNextUnfunded
-                  ? "tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
-                  : undefined
-              }
+              className={`tw-relative tw-pl-7 before:tw-absolute before:tw-bottom-0 before:tw-left-6 before:tw-top-0 before:tw-w-px before:tw-bg-white/[0.06] before:tw-content-[''] ${isNextUnfunded ? "first:before:tw-top-[95px] last:before:tw-bottom-[calc(100%-95px)]" : "first:before:tw-top-[35px] last:before:tw-bottom-[calc(100%-35px)]"}`}
             >
+              <span
+                aria-hidden="true"
+                className={`tw-absolute tw-left-6 tw-z-10 tw-size-3.5 -tw-translate-x-1/2 tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 ${isNextUnfunded ? "tw-top-[88px]" : "tw-top-7"}`}
+              />
               {isNextUnfunded && (
-                <div className="tw-mx-4 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-dashed tw-border-amber-400/35 tw-text-sm tw-font-medium tw-text-amber-300">
+                <div className="tw-mx-4 tw-flex tw-min-h-[60px] tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-dashed tw-border-amber-400/35 tw-text-sm tw-font-medium tw-text-amber-300 md:tw-mx-5">
                   <span>
                     {t(locale, "subscriptions.coverage.nextUnfunded")}
                   </span>
@@ -136,14 +142,7 @@ export default function UserPageSubscriptionsUpcoming(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-upcoming"
       title={t(locale, "subscriptions.upcoming.title")}
-      action={
-        <UserPageSubscriptionsMode
-          profileKey={props.profileKey}
-          details={props.details}
-          readonly={props.readonly}
-          refresh={props.refresh}
-        />
-      }
+      description={props.readonly ? undefined : description}
     >
       <>
         <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
@@ -155,7 +154,7 @@ export default function UserPageSubscriptionsUpcoming(
                 type="button"
                 aria-expanded={expanded}
                 onClick={() => setExpanded(!expanded)}
-                className="tw-block tw-min-h-11 tw-w-full tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-py-3 tw-text-[13px] tw-font-medium tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100"
+                className="tw-flex tw-min-h-[60px] tw-w-full tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-py-3 tw-pl-11 tw-pr-5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-pl-12"
               >
                 {t(
                   locale,
@@ -163,6 +162,10 @@ export default function UserPageSubscriptionsUpcoming(
                     ? "subscriptions.upcoming.showLess"
                     : "subscriptions.upcoming.showMore"
                 )}
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className={`tw-size-4 ${expanded ? "tw-rotate-180" : ""}`}
+                />
               </button>
             )}
         </div>

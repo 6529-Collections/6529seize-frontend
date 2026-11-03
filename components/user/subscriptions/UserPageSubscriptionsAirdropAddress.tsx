@@ -21,6 +21,7 @@ export interface AirdropAddressResult {
 export default function UserPageSubscriptionsAirdropAddress(
   props: Readonly<{
     show_edit: boolean;
+    layout?: "row" | "inline";
     airdrop?: AirdropAddressResult | undefined;
     fetching?: boolean | undefined;
   }>
@@ -29,23 +30,42 @@ export default function UserPageSubscriptionsAirdropAddress(
   const airdropAddress = props.airdrop?.airdrop_address;
   const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
   const editHref = `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
+  const addressColumns =
+    airdropAddress?.ens && props.show_edit
+      ? "tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+      : "tw-grid-cols-2";
+  const editColumn = airdropAddress?.ens ? "tw-col-start-3" : "tw-col-start-2";
+  const layoutClasses =
+    props.layout === "inline"
+      ? `tw-grid tw-min-h-11 tw-items-baseline tw-gap-y-2 tw-py-4 ${addressColumns} xl:tw-flex xl:tw-gap-y-1 xl:tw-py-2`
+      : "tw-flex tw-min-h-[60px] tw-items-center tw-justify-between tw-gap-4 tw-gap-y-1 tw-py-3 max-sm:tw-flex-col max-sm:tw-items-start";
 
   return (
-    <div className="tw-min-w-0">
-      <div className="tw-flex tw-items-center">
-        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+    <div className={`tw-min-w-0 tw-gap-x-3 ${layoutClasses}`}>
+      <div className="tw-flex tw-shrink-0 tw-items-center">
+        <h3
+          className={`tw-m-0 ${props.layout === "inline" ? "tw-text-sm tw-font-normal tw-text-iron-400" : "tw-text-[15px] tw-font-medium tw-text-iron-100"}`}
+        >
           {t(locale, "subscriptions.airdrop.title")}
         </h3>
       </div>
-      <div className="tw-mt-1 tw-min-h-8">
+      <div
+        className={`tw-min-w-0 tw-flex-1 max-sm:tw-w-full ${props.layout === "inline" ? "tw-contents xl:tw-block" : ""}`}
+      >
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
+          <div
+            className={`tw-min-w-0 tw-items-center tw-gap-3 ${props.layout === "inline" ? "tw-contents xl:tw-flex xl:tw-justify-start" : "tw-flex tw-justify-end max-sm:tw-justify-start"}`}
+          >
             {airdropAddress && (
-              <span className="tw-min-w-0 tw-break-all">
+              <span
+                className={`tw-min-w-0 tw-break-all ${props.layout === "inline" ? "tw-contents xl:tw-flex xl:tw-flex-wrap xl:tw-items-baseline xl:tw-gap-x-3 xl:tw-gap-y-1" : ""}`}
+              >
                 {airdropAddress.ens && (
-                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-100">
+                  <span
+                    className={`tw-text-sm tw-font-medium tw-text-iron-100 ${props.layout === "inline" ? "tw-col-start-2 tw-row-start-1 tw-min-w-0 tw-text-right xl:tw-text-left" : "tw-mb-1 tw-block"}`}
+                  >
                     {airdropAddress.ens}
                   </span>
                 )}
@@ -53,7 +73,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  className={`tw-block tw-w-full tw-break-all tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
+                  className={`tw-block tw-break-all tw-border-0 tw-bg-transparent tw-p-0 tw-leading-5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${props.layout === "inline" ? "tw-col-span-full tw-row-start-2 tw-w-full tw-max-w-full tw-shrink-0 tw-text-right xl:tw-w-auto xl:tw-text-left" : "tw-w-full tw-text-left"} ${
                     airdropAddress.ens
                       ? "tw-text-xs tw-text-iron-500"
                       : "tw-text-[13px] tw-text-iron-300"
@@ -81,7 +101,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   href={editHref}
                   aria-label={t(locale, "subscriptions.airdrop.change")}
                   data-tooltip-id="subscriptions-change-airdrop-address"
-                  className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 md:tw-size-7"
+                  className={`tw-row-start-1 tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 md:tw-size-7 ${props.layout === "inline" ? editColumn : ""}`}
                 >
                   <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
                 </Link>
