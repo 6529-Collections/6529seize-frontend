@@ -19,6 +19,9 @@ import {
 Element.prototype.scrollTo = jest.fn();
 Element.prototype.scrollIntoView = jest.fn();
 
+jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
+  E2eeRenewalBanner: () => null,
+}));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
   useRouter: () => ({

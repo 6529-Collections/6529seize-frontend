@@ -173,7 +173,7 @@ describe("SignedWriteDecisionHost", () => {
     await expect(second).resolves.toBe("unsigned");
   });
 
-  it("offers to turn signed messages back on when the grant can no longer sign", async () => {
+  it("offers to turn signed posts back on when the grant can no longer sign", async () => {
     const user = userEvent.setup();
     mockRequestGrant.mockResolvedValueOnce({ success: true });
     render(<SignedWriteDecisionHost />);
@@ -188,36 +188,36 @@ describe("SignedWriteDecisionHost", () => {
     ).not.toBeInTheDocument();
 
     await user.click(
-      screen.getByRole("button", { name: "Turn on signed messages" })
+      screen.getByRole("button", { name: "Turn on signed posts" })
     );
     expect(mockRequestGrant).toHaveBeenCalledTimes(1);
     await expect(decision).resolves.toBe("retry");
   });
 
-  it("keeps the choice open when turning signed messages on fails", async () => {
+  it("keeps the choice open when turning signed posts on fails", async () => {
     const user = userEvent.setup();
     mockRequestGrant.mockResolvedValueOnce({ success: false });
     render(<SignedWriteDecisionHost />);
     const decision = ask({ action: "post", reason: "grant-unusable" });
 
     await user.click(
-      await screen.findByRole("button", { name: "Turn on signed messages" })
+      await screen.findByRole("button", { name: "Turn on signed posts" })
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Couldn't turn on signed messages."
+      "Couldn't turn on signed posts."
     );
     await user.click(screen.getByRole("button", { name: "Send unsigned" }));
     await expect(decision).resolves.toBe("unsigned");
   });
 
-  it("offers only the unsigned choice, focused, when signed messages cannot be turned on here", async () => {
+  it("offers only the unsigned choice, focused, when signed posts cannot be turned on here", async () => {
     mockCanEnable = false;
     render(<SignedWriteDecisionHost />);
     void ask({ action: "post", reason: "grant-unusable" });
 
     await screen.findByRole("alertdialog");
     expect(
-      screen.queryByRole("button", { name: "Turn on signed messages" })
+      screen.queryByRole("button", { name: "Turn on signed posts" })
     ).not.toBeInTheDocument();
     await waitFor(() =>
       expect(

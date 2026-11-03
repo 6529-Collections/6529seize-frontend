@@ -527,18 +527,21 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
 }
 
 function enrollmentHeading(page: Page) {
-  return page.getByRole("heading", { name: "Turn on encrypted messages" });
+  return page.getByRole("heading", {
+    name: /^(Turn on encrypted messages|Post Signing & DM Encryption)$/,
+  });
 }
 
 export function enrollmentButton(page: Page) {
   return page.getByRole("button", {
-    name: "Enable encryption (one signature)",
+    name: /^Sign to enable (both|encrypted DMs)$/,
   });
 }
 
 /** What the encrypted messages gate shows instead of chats, if anything. */
 const GATE_STATES = [
   { state: "enrollment", text: "Turn on encrypted messages" },
+  { state: "enrollment", text: "Post Signing & DM Encryption" },
   {
     state: "no connected wallet (the scripted wallet did not reconnect)",
     text: "Connect the wallet for this profile to use encrypted messages.",

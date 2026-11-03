@@ -38,11 +38,30 @@ function getQRScannerErrorToastMessage({
   );
 }
 
+function getDeviceSetupRoute(
+  url: URL,
+  content: string,
+  appScheme: string,
+  address: string
+): string | null {
+  if (
+    !url.hash ||
+    url.searchParams.get("address")?.toLowerCase() !== address.toLowerCase()
+  ) {
+    return null;
+  }
+  return getConnectionShareRoute({ content, appScheme });
+}
+
 export default function HeaderQRScanner({
   onScanSuccess,
   appSidebar = false,
+  actionLabel,
+  deviceSetupAddress,
 }: {
   readonly onScanSuccess: () => void;
+  readonly actionLabel?: string;
+  readonly deviceSetupAddress?: string | undefined;
   readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
@@ -123,9 +142,37 @@ export default function HeaderQRScanner({
     }
   };
 
+  const handleDeviceSetupQRCode = (
+    url: URL,
+    content: string,
+    address: string
+  ) => {
+    const route = getDeviceSetupRoute(url, content, appScheme, address);
+    if (!route) {
+      setToast({ message: invalidQRCodeMessage, type: "error" });
+      return;
+    }
+    onScanSuccess();
+    router.push(route);
+  };
+
+  const handleConnectionShareQRCode = (content: string) => {
+    const route = getConnectionShareRoute({ content, appScheme });
+    if (!route) {
+      setToast({ message: invalidQRCodeMessage, type: "error" });
+      return;
+    }
+    onScanSuccess();
+    router.push(route);
+  };
+
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
+      if (deviceSetupAddress !== undefined) {
+        handleDeviceSetupQRCode(url, content, deviceSetupAddress);
+        return;
+      }
       let queryParams: Record<string, string | number> = {};
 
       if (url.origin === baseEndpoint) {
@@ -134,13 +181,7 @@ export default function HeaderQRScanner({
         router.push(resolvedPath);
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
-          const route = getConnectionShareRoute({ content, appScheme });
-          if (!route) {
-            setToast({ message: invalidQRCodeMessage, type: "error" });
-            return;
-          }
-          onScanSuccess();
-          router.push(route);
+          handleConnectionShareQRCode(content);
           return;
         }
         const resolvedUrl = content.replace(`${appScheme}://`, "");
@@ -193,6 +234,19 @@ export default function HeaderQRScanner({
       });
     }
   };
+
+  if (actionLabel) {
+    return (
+      <button
+        type="button"
+        disabled={scanning}
+        onClick={startScan}
+        className="tw-min-h-11 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-text-sm tw-text-iron-100"
+      >
+        {actionLabel}
+      </button>
+    );
+  }
 
   if (appSidebar) {
     return (

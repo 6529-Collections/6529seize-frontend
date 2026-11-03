@@ -12,6 +12,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useId } from "react";
+import { useDeviceSecurityState } from "./DeviceSecurityStatus";
+import { openDeviceSetup } from "./deviceSetup";
 import SignedMessagesEnableStatus from "./SignedMessagesEnableStatus";
 import {
   useSignedMessagesNotice,
@@ -72,6 +74,7 @@ function SignedMessagesNoticeContent({
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
   const titleId = useId();
+  const { canEnableEncryption } = useDeviceSecurityState();
   const {
     model,
     canEnable,
@@ -98,7 +101,11 @@ function SignedMessagesNoticeContent({
       void revoke(model.grant);
       return;
     }
-    enable(model.kind === "enable" ? "notice" : "renew");
+    if (model.kind === "enable" || model.kind === "expired") {
+      openDeviceSetup(canEnableEncryption ? "both" : "posts");
+      return;
+    }
+    enable("renew");
   };
 
   return (

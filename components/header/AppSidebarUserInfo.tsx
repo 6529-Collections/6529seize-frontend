@@ -1,3 +1,4 @@
+import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStatus";
 import Image from "next/image";
 import Link from "next/link";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -161,6 +162,9 @@ export default function AppSidebarUserInfo({
         </div>
         <AppSidebarConnectedAccounts onNavigate={onNavigate} />
       </div>
+      {isAuthenticated && !activeProfileProxy && (
+        <DeviceSecurityStatus presentation="inline" />
+      )}
       <AppSidebarUserStats
         handle={handleOrWallet}
         tdh={tdh}

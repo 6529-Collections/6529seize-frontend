@@ -202,7 +202,7 @@ describe("DevicesPreferencesSettings", () => {
     expect(within(rows[0]!).getByText("Active")).toBeVisible();
     expect(
       within(rows[0]!).getByText(
-        "Author proof · Can post, edit, delete, and react"
+        "Signed posts · Can post, edit, delete, and react"
       )
     ).toBeVisible();
     expect(within(rows[0]!).getByText(/Last used/)).toBeVisible();
@@ -247,7 +247,7 @@ describe("DevicesPreferencesSettings", () => {
     );
 
     const dialog = screen.getByRole("dialog", {
-      name: "Revoke author proof and encrypted DM access for Safari on iPhone?",
+      name: "Revoke access to signed posts and encrypted DMs for Safari on iPhone?",
     });
     expect(
       within(dialog).getByText(
@@ -301,7 +301,7 @@ describe("DevicesPreferencesSettings", () => {
       screen.getByRole("button", { name: "Revoke Safari on iPhone" })
     );
     const dialog = screen.getByRole("dialog", {
-      name: "Revoke author proof for Safari on iPhone?",
+      name: "Revoke signed posts for Safari on iPhone?",
     });
     await act(async () => {
       fireEvent.click(within(dialog).getByRole("button", { name: "Revoke" }));
@@ -311,77 +311,31 @@ describe("DevicesPreferencesSettings", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("explains an empty list and offers to turn on signed messages here", async () => {
+  it("opens the shared setup before connecting or signing", () => {
+    mockConnection = { ...mockConnection, canSignActiveWallet: false };
+    const setup = jest.fn();
+    window.addEventListener("6529:device-setup", setup, { once: true });
     render(<DevicesPreferencesSettings />);
 
     expect(screen.getByText("No authorized devices yet.")).toBeVisible();
-    await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Turn on signed messages in this browser",
-        })
-      );
-    });
-    expect(mockRequestGrant).toHaveBeenCalledTimes(1);
-    expect(mockReport).toHaveBeenCalledWith("devices", "start");
-  });
-
-  it("connects a wallet that is not live before signing, and says so", async () => {
-    mockConnection = { ...mockConnection, canSignActiveWallet: false };
-    const { rerender } = render(<DevicesPreferencesSettings />);
-
-    await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Turn on signed messages in this browser",
-        })
-      );
-    });
-    expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Connect your wallet to continue. If it's locked, unlock it first."
+    fireEvent.click(
+      screen.getByRole("button", { name: "Enable Signed Posts" })
     );
 
-    mockConnection = { ...mockConnection, seizeConnectOpen: true };
-    await act(async () => {
-      rerender(<DevicesPreferencesSettings />);
-    });
-    mockConnection = {
-      ...mockConnection,
-      seizeConnectOpen: false,
-      canSignActiveWallet: true,
-    };
-    await act(async () => {
-      rerender(<DevicesPreferencesSettings />);
-    });
-    expect(mockRequestGrant).toHaveBeenCalledTimes(1);
-  });
-
-  it("explains a failure next to the turn-on action", async () => {
-    mockRequestGrant.mockResolvedValue({
-      success: false,
-      reason: "device-key",
-    });
-    render(<DevicesPreferencesSettings />);
-    await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Turn on signed messages in this browser",
-        })
-      );
-    });
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "This browser couldn't prepare its signing key. Please try again."
+    expect(setup).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: "posts" })
     );
+    expect(mockSeizeConnectFresh).not.toHaveBeenCalled();
+    expect(mockRequestGrant).not.toHaveBeenCalled();
   });
 
   it("hides the turn-on action when this browser already has a grant or cannot hold a key", () => {
     mockLocalGrant = grant();
+    mockQuery = { ...mockQuery, data: [mockLocalGrant] };
     const { rerender } = render(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Turn on signed messages in this browser",
+        name: "Enable Signed Posts",
       })
     ).toBeNull();
 
@@ -390,7 +344,7 @@ describe("DevicesPreferencesSettings", () => {
     rerender(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Turn on signed messages in this browser",
+        name: "Enable Signed Posts",
       })
     ).toBeNull();
   });

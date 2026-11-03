@@ -9,9 +9,15 @@ import { revokeDeviceGrant } from "@/services/api/device-grants-api";
  * - done: this device is on, or at the device limit (the gate shows it)
  * - declined: the user cancelled the signature; nothing changed
  * - stopped: the wallet or network changed mid-way; nothing more is asked
- * - fallback: no combined grant was possible; use the separate grant prompt
+ * - partial: the signing grant was saved, but encryption did not complete
+ * - fallback: no combined grant was saved; offer separate setup
  */
-type CombinedTurnOnOutcome = "done" | "declined" | "stopped" | "fallback";
+type CombinedTurnOnOutcome =
+  | "done"
+  | "declined"
+  | "stopped"
+  | "partial"
+  | "fallback";
 
 interface CombinedTurnOnInput {
   readonly engine: E2eeEngine;
@@ -72,13 +78,13 @@ async function needsNewDevice(engine: E2eeEngine): Promise<boolean> {
 }
 
 /**
- * NC8: "Turn on encrypted messages" grants this device's signing key and its
+ * Combined setup grants this device's signing key and its
  * encrypted-messages key with one signature, with one expiry and one thing
  * to revoke: a combined sign-in (personal_sign) on the website, an app grant
  * (EIP-712) in 6529 Mobile and Desktop. The engine then registers the key
  * with no second prompt. Proxies, a resumable device, apps with app grants
- * off and any problem before the signature keep the separate EIP-712 grant
- * prompt ("fallback").
+ * off and any problem before the signature can be handled by separate
+ * setup, with fresh approval.
  */
 export async function turnOnWithCombinedSignIn({
   engine,
@@ -101,8 +107,7 @@ export async function turnOnWithCombinedSignIn({
     }
     // Any other failure (no MLS key in time, a signing-only
     // or failed challenge, a wallet that could not sign the sign-in message,
-    // a failed login) still turns encrypted messages on, through their own
-    // EIP-712 prompt; its errors and a decline show on the card as before.
+    // a failed login) lets the user choose separate setup explicitly.
     return result.reason === "context-changed" ? "stopped" : "fallback";
   }
   const e2ee = result.e2ee;
@@ -112,7 +117,6 @@ export async function turnOnWithCombinedSignIn({
   const revoked = revokeReplacedGrant(replacedGrantId, e2ee);
   const status = e2ee.adopted ? await engine.enrollWithLoginGrant() : null;
   await revoked;
-  return status !== null && SETTLED_STATUSES.includes(status)
-    ? "done"
-    : "fallback";
+  if (status !== null && SETTLED_STATUSES.includes(status)) return "done";
+  return e2ee.grantSaved ? "partial" : "fallback";
 }

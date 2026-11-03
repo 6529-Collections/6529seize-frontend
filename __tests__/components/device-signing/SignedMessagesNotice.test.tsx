@@ -120,23 +120,22 @@ describe("SignedMessagesNotice", () => {
     };
   });
 
-  it("offers to turn on signed messages with one signature while the composer is empty", async () => {
+  it("opens setup before requesting any wallet signature", () => {
+    const setup = jest.fn();
+    window.addEventListener("6529:device-setup", setup, { once: true });
     render(<SignedMessagesNotice composerEmpty />);
 
     expect(
       screen.getByRole("region", {
-        name: "Turn on signed messages (one signature)",
+        name: "Turn on signed posts (one signature)",
       })
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
 
-    expect(mockRequestGrant).toHaveBeenCalledTimes(1);
-    await waitFor(() =>
-      expect(mockSetToast).toHaveBeenCalledWith({
-        message: "Signed messages are on in this browser.",
-        type: "success",
-      })
+    expect(setup).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: "posts" })
     );
+    expect(mockRequestGrant).not.toHaveBeenCalled();
   });
 
   it("stays out of the way while the user is typing", () => {
@@ -165,13 +164,13 @@ describe("SignedMessagesNotice", () => {
   it("reminds in the grant's last 14 days and after it expires", () => {
     mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW + 5 * DAY }) };
     const { rerender } = render(<SignedMessagesNotice composerEmpty />);
-    expect(screen.getByText(/^Signed messages end on/)).toBeVisible();
+    expect(screen.getByText(/^Signed posts end on/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Renew" })).toBeVisible();
 
     mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW - DAY }) };
     rerender(<SignedMessagesNotice composerEmpty />);
     expect(
-      screen.getByText("Signed messages have ended in this browser")
+      screen.getByText("Signed posts have ended in this browser")
     ).toBeVisible();
   });
 
@@ -186,11 +185,14 @@ describe("SignedMessagesNotice", () => {
     expect(screen.queryByTestId("signed-messages-notice")).toBeNull();
   });
 
-  describe("turning on", () => {
-    const renderNotice = () => render(<SignedMessagesNotice composerEmpty />);
+  describe("renewing", () => {
+    const renderNotice = () => {
+      mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW + 5 * DAY }) };
+      return render(<SignedMessagesNotice composerEmpty />);
+    };
     const turnOn = () =>
       act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
+        fireEvent.click(screen.getByRole("button", { name: "Renew" }));
       });
     const status = () => screen.getByRole("status");
     /** A grant whose signature request stays open until answered. */
@@ -232,7 +234,7 @@ describe("SignedMessagesNotice", () => {
       expect(status()).toHaveTextContent(
         "Connect your wallet to continue. If it's locked, unlock it first."
       );
-      expect(screen.getByRole("button", { name: "Turn on" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Renew" })).toBeDisabled();
       expect(mockRequestGrant).not.toHaveBeenCalled();
 
       await rerenderWith(rerender, { seizeConnectOpen: true });
@@ -247,7 +249,7 @@ describe("SignedMessagesNotice", () => {
       );
       await waitFor(() =>
         expect(mockSetToast).toHaveBeenCalledWith({
-          message: "Signed messages are on in this browser.",
+          message: "Signed posts are on in this browser.",
           type: "success",
         })
       );
@@ -268,8 +270,8 @@ describe("SignedMessagesNotice", () => {
       expect(status()).toHaveTextContent(
         "Your wallet didn't connect. Unlock it and try again."
       );
-      expect(screen.getByRole("button", { name: "Turn on" })).toBeEnabled();
-      expect(mockReport).toHaveBeenCalledWith("notice", "connect-cancelled");
+      expect(screen.getByRole("button", { name: "Renew" })).toBeEnabled();
+      expect(mockReport).toHaveBeenCalledWith("renew", "connect-cancelled");
     });
 
     it("names the account to switch to and offers to reconnect", async () => {
@@ -327,7 +329,7 @@ describe("SignedMessagesNotice", () => {
         "Signature canceled. Nothing changed, and you can try again any time."
       );
       expect(screen.queryByRole("alert")).toBeNull();
-      expect(screen.getByRole("button", { name: "Turn on" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Renew" })).toBeEnabled();
     });
 
     it("explains any other failure as an alert", async () => {
@@ -340,7 +342,7 @@ describe("SignedMessagesNotice", () => {
         "Couldn't reach 6529.io to start signing. Check your connection and try again."
       );
       expect(mockReport).toHaveBeenCalledWith(
-        "notice",
+        "renew",
         "challenge-failed",
         "browser"
       );
@@ -418,7 +420,7 @@ describe("SignedMessagesNotice", () => {
         });
         expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
         expect(mockReport).toHaveBeenCalledWith(
-          "notice",
+          "renew",
           "walletconnect-no-answer",
           "remote"
         );
@@ -448,7 +450,7 @@ describe("SignedMessagesNotice", () => {
           screen.getByRole("button", { name: "Reconnect wallet" })
         ).toBeVisible();
         expect(mockReport).toHaveBeenCalledWith(
-          "notice",
+          "renew",
           "walletconnect-session",
           "remote"
         );

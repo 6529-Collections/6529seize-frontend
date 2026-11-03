@@ -86,10 +86,10 @@ describe("encrypted conversation list", () => {
     );
     const { rerender } = render(banner);
     expect(
-      screen.getByRole("button", { name: "Renew author proof" })
+      screen.getByRole("button", { name: "Renew signed posts" })
     ).toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Renew encryption" })
+      screen.getByRole("button", { name: "Renew encrypted DMs" })
     ).toBeVisible();
     fireEvent.click(
       screen.getByRole("button", { name: "Dismiss renewal reminder" })
@@ -101,7 +101,7 @@ describe("encrypted conversation list", () => {
       </E2eeTestProvider>
     );
     expect(
-      screen.queryByRole("button", { name: "Renew author proof" })
+      screen.queryByRole("button", { name: "Renew signed posts" })
     ).toBeNull();
   });
 
@@ -110,12 +110,12 @@ describe("encrypted conversation list", () => {
     mockPathname.mockReturnValue("/preferences");
     const { rerender } = render(<E2eeRenewalBanner />);
     expect(
-      screen.queryByRole("button", { name: "Renew encryption" })
+      screen.queryByRole("button", { name: "Renew encrypted DMs" })
     ).toBeNull();
     mockPathname.mockReturnValue("/messages/example");
     rerender(<E2eeRenewalBanner />);
     expect(
-      screen.getByRole("button", { name: "Renew encryption" })
+      screen.getByRole("button", { name: "Renew encrypted DMs" })
     ).toBeDisabled();
   });
 

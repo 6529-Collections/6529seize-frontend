@@ -88,7 +88,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can turn this device off at any time from the Devices page in encrypted messages.",
+    "You can revoke these permissions in Preferences → Device Permissions.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
@@ -103,9 +103,29 @@ export const E2EE_MESSAGES = {
     "6529 cannot read your encrypted messages. It only delivers them.",
   "e2ee.enroll.point.noBackup":
     "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
+  "e2ee.enroll.point.noBackupApp":
+    "Your history is stored on your devices. If you lose all of them or clear the app data on the last device that holds your history, you lose it unless you turn on encrypted backup in Encrypted messages → Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
   "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
+  "e2ee.enroll.oneSignatureBoth":
+    "One wallet signature enables both permissions.",
+  "e2ee.enroll.signBoth": "Sign to enable both",
+  "e2ee.enroll.signPosts": "Sign to enable signed posts",
+  "e2ee.enroll.signDms": "Sign to enable encrypted DMs",
+  "e2ee.enroll.signingSection": "Signed Posts",
+  "e2ee.enroll.encryptionSection": "Encrypted DMs",
+  "e2ee.enroll.signingApp":
+    "Your wallet signs once. This device then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
+  "e2ee.enroll.combinedPartial":
+    "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.",
+  "e2ee.enroll.combinedUnavailable":
+    "Combined setup could not complete. You can try again or set up one permission at a time.",
+  "e2ee.enroll.unavailable":
+    "Open Encrypted messages to check whether this device can be set up.",
+  "e2ee.enroll.browserApproval": "Use a browser to approve",
+  "e2ee.enroll.browserApprovalHelp":
+    "In your browser, open Connect Device and set up signed posts and encrypted DMs. Then scan the QR code here.",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
@@ -120,14 +140,14 @@ export const E2EE_MESSAGES = {
 
   "e2ee.renew.body":
     "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
-  "e2ee.renew.inboxButton": "Renew encryption",
+  "e2ee.renew.inboxButton": "Renew encrypted DMs",
   "e2ee.renew.inboxCombined":
-    "Author proof and encrypted DMs expire on {date}.",
+    "Signed posts and encrypted DMs expire on {date}.",
   "e2ee.renew.dismiss": "Dismiss renewal reminder",
-  "e2ee.renew.proofBody": "Author proof expires on {date}.",
-  "e2ee.renew.proofButton": "Renew author proof",
+  "e2ee.renew.proofBody": "Signed posts expire on {date}.",
+  "e2ee.renew.proofButton": "Renew signed posts",
   "e2ee.renew.preview":
-    "Preview of the author proof and encryption renewal reminder.",
+    "Preview of the signed posts and encrypted DMs renewal reminder.",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
@@ -632,19 +652,19 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
-  "e2ee.deviceStatus.proofLine": "Author proof: {status}",
+  "e2ee.deviceStatus.proofLine": "Signed posts: {status}",
   "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
-  "e2ee.deviceStatus.enableBoth": "Enable author proof and encryption",
-  "e2ee.deviceStatus.enableProof": "Enable author proof",
-  "e2ee.deviceStatus.enableEncryption": "Enable encryption",
-  "e2ee.devices.managePermission": "Manage encrypted DM access",
+  "e2ee.deviceStatus.enableBoth": "Post Signing & DM Encryption",
+  "e2ee.deviceStatus.enableProof": "Enable Signed Posts",
+  "e2ee.deviceStatus.enableEncryption": "Enable Encrypted DMs",
+  "e2ee.devices.managePermission": "Manage access to encrypted DMs",
   "e2ee.devices.permission": "Encrypted DMs",
   "e2ee.devices.combinedPermissions":
-    "Author proof and encrypted DMs (shared grant)",
+    "Signed posts and encrypted DMs (shared grant)",
   "e2ee.devices.revokeCombinedTitle":
-    "Revoke author proof and encrypted DM access for {label}?",
+    "Revoke access to signed posts and encrypted DMs for {label}?",
   "e2ee.devices.revokeEncryptionTitle":
-    "Revoke encrypted DM access for {label}?",
+    "Revoke access to encrypted DMs for {label}?",
   "e2ee.devices.revokeHistory":
     "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
   "e2ee.deviceStatus.summary":

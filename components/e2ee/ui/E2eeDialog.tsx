@@ -19,6 +19,7 @@ interface E2eeDialogProps {
   readonly closeLabel: string;
   readonly children?: ReactNode | undefined;
   readonly footer?: ReactNode | undefined;
+  readonly hideCloseButton?: boolean;
   readonly size?: "sm" | "md" | undefined;
 }
 
@@ -36,6 +37,7 @@ export function E2eeDialog({
   children,
   footer,
   size = "sm",
+  hideCloseButton = false,
 }: E2eeDialogProps) {
   const widthClass = size === "md" ? "tw-max-w-xl" : "tw-max-w-md";
   return (
@@ -54,14 +56,16 @@ export function E2eeDialog({
               <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
                 {title}
               </DialogTitle>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label={closeLabel}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                <XMarkIcon aria-hidden="true" className="tw-size-5" />
-              </button>
+              {!hideCloseButton && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label={closeLabel}
+                  className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                >
+                  <XMarkIcon aria-hidden="true" className="tw-size-5" />
+                </button>
+              )}
             </div>
             {hasContent(description) ? (
               <Description className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
