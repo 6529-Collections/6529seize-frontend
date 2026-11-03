@@ -376,9 +376,11 @@ export default function ValidatorDownloadPage({
           Use any machine you have
         </h2>
         <p className={`tw-mb-4 tw-mt-3 ${BODY}`}>
-          The hardware guide in each archive,{" "}
-          <code className={CODE}>docs/install/hardware.md</code>, lists tiers of
-          machines. For the test phase:
+          The{" "}
+          <Link href="/validator/hardware" className={LINK}>
+            hardware page
+          </Link>{" "}
+          says what your computer needs. For the test phase:
         </p>
         <blockquote className="tw-m-0 tw-rounded-r-lg tw-border-0 tw-border-l-4 tw-border-solid tw-border-primary-400/70 tw-bg-iron-900/50 tw-px-5 tw-py-4">
           <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
