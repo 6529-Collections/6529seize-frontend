@@ -64,3 +64,13 @@ it("opens the winning entry when the push includes its competition entry id", ()
     resolvePushRedirectUrl({ ...creditReturn, competition_entry_id: "entry" })
   ).toBe("/waves/wave/competitions/competition?entry=entry");
 });
+
+it("opens the single artwork view when a competition push includes its drop id", () => {
+  expect(
+    resolvePushRedirectUrl({
+      ...creditReturn,
+      competition_entry_id: "entry",
+      drop_id: "artwork",
+    })
+  ).toBe("/waves/wave/competitions/competition?drop=artwork");
+});

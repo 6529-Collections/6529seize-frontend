@@ -1,3 +1,4 @@
+import { installArtworkNotificationImage } from "../support/artworkNotification";
 import {
   captureSafeScreenshot,
   expect,
@@ -14,6 +15,9 @@ import {
 import AxeBuilder from "@axe-core/playwright";
 
 test.describe("Notifications inbox sandbox @auth @local-only", () => {
+  test.beforeEach(async ({ page }) => {
+    await installArtworkNotificationImage(page);
+  });
   useLocalSandboxMutationGuard(
     test,
     "PLAYWRIGHT_AUTH_SANDBOX",
@@ -52,9 +56,16 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       name: /^sandbox-alice submitted Sandbox artwork to The Memes – Main Stage\./,
     });
     await expect(artwork).toBeVisible();
+    const thumbnail = artwork.getByRole("presentation");
+    await expect(thumbnail).toBeVisible();
+    await expect
+      .poll(() =>
+        thumbnail.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      )
+      .toBeGreaterThan(0);
     await expect(artwork).toHaveAttribute(
       "href",
-      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?entry=20000000-0000-4000-8000-000000000001"
+      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
     );
     expect(page.url()).toBe(route);
     await expect
@@ -174,6 +185,38 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           request.path === "/api/notifications/read"
       )
     ).toBe(true);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("desktop artwork alert opens the single submission", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    await inbox
+      .getByRole("link", { name: /^sandbox-alice submitted Sandbox artwork/ })
+      .click();
+    await expect(inbox).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { name: "Sandbox artwork", exact: true })
+    ).toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 

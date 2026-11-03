@@ -54,12 +54,12 @@ const artwork: INotificationArtistArtwork = {
   },
 };
 
-it("names artwork alerts and opens their exact entry even with a related drop", () => {
+it("names artwork alerts and opens their single submission view", () => {
   expect(getInboxSummary(artwork, "en-US")).toBe(
     "alice submitted Open skies to The Memes Main Stage."
   );
   expect(getInboxDestination(artwork, "viewer")).toBe(
-    "/waves/public-wave/competitions/competition?entry=entry"
+    "/waves/public-wave/competitions/competition?drop=original"
   );
 });
 

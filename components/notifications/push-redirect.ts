@@ -1,5 +1,8 @@
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import {
+  getCompetitionDropRoute,
+  getCompetitionRoute,
+} from "@/helpers/competition.helpers";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import {
   getEncryptedMessagesRoute,
@@ -31,6 +34,8 @@ const redirectConfig = {
     competition_entry_id?: string;
   }) => {
     if (competition_id) {
+      if (drop_id)
+        return getCompetitionDropRoute(wave_id, competition_id, drop_id);
       const entryQuery = competition_entry_id
         ? `?entry=${encodeURIComponent(competition_entry_id)}`
         : "";

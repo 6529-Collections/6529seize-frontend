@@ -1,5 +1,8 @@
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import {
+  getCompetitionDropRoute,
+  getCompetitionRoute,
+} from "@/helpers/competition.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -9,7 +12,6 @@ import {
   type TypedNotification,
   type INotificationVotingCreditsReturned,
   type INotificationCompetitionLifecycle,
-  type INotificationArtistArtwork,
 } from "@/types/feed.types";
 
 const NOTIFICATIONS_ROUTE = "/notifications";
@@ -40,7 +42,6 @@ function getInboxCompetitionDestination(
   notification:
     | INotificationVotingCreditsReturned
     | INotificationCompetitionLifecycle
-    | INotificationArtistArtwork
 ): string {
   const context = notification.additional_context;
   const route = getCompetitionRoute(context.wave_id, context.competition_id);
@@ -58,7 +59,12 @@ export function getInboxDestination(
   handle: string
 ): string {
   if (notification.cause === ApiNotificationCause.ArtistArtworkSubmitted) {
-    return getInboxCompetitionDestination(notification);
+    const context = notification.additional_context;
+    return getCompetitionDropRoute(
+      context.wave_id,
+      context.competition_id,
+      context.drop_id
+    );
   }
   const drop = getInboxDrop(notification);
   if (drop) {

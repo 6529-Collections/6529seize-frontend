@@ -12,7 +12,7 @@ when they submit new artwork to **The Memes – Main Stage**. The menu shows
 - New alerts appear in [Notifications](feature-notifications-feed.md), where the
   **Artwork alerts** filter shows these rows.
 - The desktop notification panel also shows the artist, artwork title and competition.
-  Select the row to open the specific submission.
+  Select the row to open the specific submission in the single-artwork viewer.
 
 For signed-in viewers, the control appears for profiles with an artist activity badge: active Main Stage
 submissions, Main Stage wins, or earlier Meme artist credits. If you already have
@@ -28,7 +28,7 @@ Open the artist’s profile from a submission, search result, or profile link.
 1. Sign in with your own profile and open the artist’s profile.
 2. Open **Profile actions** and wait for the saved **On** or **Off** state to load. Select **Artwork alerts** and wait for confirmation.
 3. New Main Stage submissions by that artist can appear in Notifications.
-4. Open the artwork title in the full feed, or the notification panel row, to view the specific submission.
+4. Open the artwork title in the full feed, or the notification panel row, to open the single-artwork viewer directly. Closing the viewer returns to its competition.
 5. Open **Profile actions** and select **Artwork alerts** again to turn future alerts off.
 
 ## Common Scenarios
@@ -37,7 +37,11 @@ Open the artist’s profile from a submission, search result, or profile link.
   alerts, and disabling alerts each leave the other preference unchanged.
 - Existing followers start with artwork alerts off.
 - Enabling alerts does not send notifications for older submissions.
+- App push alerts also open the single-artwork viewer directly.
 - Untitled submissions use **untitled artwork** as the notification link.
+- Alerts show an artwork thumbnail in the notification panel and full feed.
+  Video and other media use the artist's preview image when available. If there
+  is no image or it cannot load, a bell appears instead.
 - Your saved choice remains after reopening the profile. Each connected profile
   has its own preferences.
 

@@ -1,3 +1,4 @@
+import { installArtworkNotificationImage } from "../support/artworkNotification";
 import {
   captureSafeScreenshot,
   expect,
@@ -70,9 +71,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     "Notifications sandbox requires the local mock API runner."
   );
 
-  test("shows artist artwork alerts and preserves the specific submission link", async ({
+  test("shows artist artwork alerts and opens the single submission", async ({
     page,
   }, testInfo) => {
+    await installArtworkNotificationImage(page);
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     const artwork = page.getByRole("link", {
@@ -84,7 +86,7 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     });
     await expect(artwork).toHaveAttribute(
       "href",
-      /\/competitions\/10000000-0000-4000-8000-000000000001\?entry=20000000-0000-4000-8000-000000000001$/
+      /\/competitions\/10000000-0000-4000-8000-000000000001\?drop=00000000-0000-4000-8000-000000000560$/
     );
     const trigger = page.getByRole("button", {
       name: /^Filter notifications:/,
@@ -118,8 +120,26 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     );
     await expect(artwork).toBeVisible();
     await expect(page.getByText("mentioned you")).toHaveCount(0);
+    const thumbnail = page.getByRole("presentation");
+    await expect(thumbnail).toBeVisible();
+    await expect
+      .poll(() =>
+        thumbnail.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      )
+      .toBeGreaterThan(0);
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "artist-artwork-notification");
+    await artwork.click();
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { name: "Sandbox artwork", exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "artist-artwork-submission");
   });
 
   test("renders positive notification states and keeps mark-read local", async ({

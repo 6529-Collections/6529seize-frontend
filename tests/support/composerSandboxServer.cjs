@@ -854,6 +854,115 @@ const artworkNotificationDrop = notificationDrop({
   content: "A study of light, motion and shared spaces.",
   author: notificationActor,
 });
+artworkNotificationDrop.title = "Sandbox artwork";
+artworkNotificationDrop.drop_type = "SUBMISSION";
+artworkNotificationDrop.wave = notificationWaveOverview;
+artworkNotificationDrop.media = [
+  {
+    url: "https://6529.io/artwork-documentation/examples/an-alteration.png",
+    mime_type: "image/png",
+  },
+];
+
+const artworkCompetition = {
+  id: "10000000-0000-4000-8000-000000000001",
+  wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+  title: "The Memes – Main Stage",
+  description: "Local artwork notification preview.",
+  type: "RANK",
+  lifecycle: "PUBLISHED",
+  computed_phase: "VOTING_OPEN",
+  config_version: 1,
+  participation: {
+    group_id: null,
+    signature_required: false,
+    max_entries_per_participant: null,
+    required_metadata: [],
+    required_media: [],
+    submission_type: null,
+    identity_submission_strategy: null,
+    identity_submission_duplicates: null,
+    starts_at: null,
+    ends_at: null,
+    terms: null,
+  },
+  voting: {
+    group_id: null,
+    credit_type: "TDH",
+    credit_scope: "WAVE",
+    credit_category: null,
+    credit_creditor: null,
+    credit_nfts: [],
+    signature_required: false,
+    starts_at: null,
+    ends_at: null,
+    max_votes_per_identity_to_entry: null,
+    forbid_negative_votes: false,
+  },
+  decisions: {
+    strategy: null,
+    next_decision_time: null,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+    max_winners: null,
+    time_lock_ms: null,
+  },
+  winners: {
+    max_winners: null,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+  },
+  outcome_config: [],
+  presentation: [],
+  capabilities: ["MAIN_STAGE"],
+  permissions: {
+    view: true,
+    submit: false,
+    vote: false,
+    administer: false,
+    edit_rules_after_activity: false,
+    edit_credit_rules: false,
+  },
+  created_at: CREATED_AT,
+  updated_at: CREATED_AT,
+  published_at: CREATED_AT,
+  ended_at: null,
+  cancelled_at: null,
+  archived_at: null,
+};
+const artworkEntry = {
+  id: "20000000-0000-4000-8000-000000000001",
+  wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+  competition_id: artworkCompetition.id,
+  drop_id: artworkNotificationDrop.id,
+  submitter: notificationActor,
+  status: "ACTIVE",
+  config_version: 1,
+  submitted_at: CREATED_AT,
+  rank: null,
+  won_at: null,
+  decision_id: null,
+};
+const artworkVoteSummary = {
+  rating: 100,
+  realtime_rating: 100,
+  rating_prediction: 100,
+  user_vote: 0,
+  rank: 1,
+  raters_count: 1,
+  top_raters: [{ profile: notificationReactorOne, rating: 100 }],
+  over_threshold_since_ms: null,
+};
+const artworkCompetitionPath = `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}/competitions/${artworkCompetition.id}`;
+const artworkEntryContext = {
+  entry: artworkEntry,
+  vote_summary: artworkVoteSummary,
+  awards: [],
+  drop: artworkNotificationDrop,
+  metadata: [],
+};
 
 const sandboxNotifications = [
   {
@@ -2469,6 +2578,68 @@ function writeEmptyResponse(res, status) {
 
 const mockApiExactReadRoutes = new Map([
   [
+    `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`,
+    () => ({
+      id: SANDBOX_NOTIFICATION_WAVE_ID,
+      name: notificationWave.name,
+      picture: null,
+      legacy_primary_competition_id: artworkCompetition.id,
+      permissions: { view: true, administer: false, create_competition: false },
+    }),
+  ],
+  [artworkCompetitionPath, () => artworkCompetition],
+  [
+    `${artworkCompetitionPath}/pauses`,
+    () => ({ data: [], has_more: false, next_cursor: null }),
+  ],
+  [
+    `${artworkCompetitionPath}/leaderboard`,
+    () => ({
+      data: [
+        {
+          competition_id: artworkCompetition.id,
+          entry_id: artworkEntry.id,
+          drop_id: artworkNotificationDrop.id,
+          rating: 100,
+          real_time_rating: 100,
+          rank: 1,
+          submitted_at: CREATED_AT,
+        },
+      ],
+      cards: [artworkEntryContext],
+      has_more: false,
+      next_cursor: null,
+    }),
+  ],
+  [`${artworkCompetitionPath}/entries/${artworkEntry.id}`, () => artworkEntry],
+  [
+    `${artworkCompetitionPath}/entry-contexts`,
+    () => ({ competition: artworkCompetition, data: [artworkEntryContext] }),
+  ],
+  [
+    `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}/drops/${artworkNotificationDrop.id}/competition-context`,
+    () => ({
+      competition: artworkCompetition,
+      entry: artworkEntry,
+      vote_summary: artworkVoteSummary,
+    }),
+  ],
+  [
+    `/api/v2/drops/${artworkNotificationDrop.id}`,
+    () => ({ drop: artworkNotificationDrop, wave: notificationWaveOverview }),
+  ],
+  [
+    `/api/v2/drops/${artworkNotificationDrop.id}/vote-summary`,
+    () => ({
+      vote_distribution: {
+        positive_total: 100,
+        negative_total: 0,
+        positive_votes: [{ voter: notificationReactorOne, vote: 100 }],
+        negative_votes: [],
+      },
+    }),
+  ],
+  [
     "/api/groups",
     () => [
       sandboxPreviewGroup,
@@ -2680,6 +2851,13 @@ function handleGroupRead(pathname, res) {
 }
 
 function handleNotificationRead(pathname, url, res) {
+  if (pathname === "/api/v2/drops" && url.searchParams.has("ids")) {
+    const ids = url.searchParams.get("ids").split(",");
+    return writeJsonResponse(res, {
+      ...emptyPage(),
+      data: ids.includes(artworkNotificationDrop.id) ? [artworkNotificationDrop] : [],
+    });
+  }
   if (pathname !== "/api/v2/notifications") {
     return false;
   }
