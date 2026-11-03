@@ -16,6 +16,7 @@ import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { MessageKey } from "@/i18n/messages/en-US";
@@ -209,6 +210,7 @@ function EnableSignedMessagesButton({
   readonly hasActiveLocalGrant: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const account = useSignedMessagesAccount();
   const { canEnable, enable, isEnabling, reconnect, status } =
     useEnableSignedMessages();
@@ -224,7 +226,12 @@ function EnableSignedMessagesButton({
         loading={isEnabling}
         onClick={() => enable("devices")}
       >
-        {t(locale, "signedMessages.devices.enable")}
+        {t(
+          locale,
+          isCapacitor
+            ? "signedMessages.devices.enableOnDevice"
+            : "signedMessages.devices.enable"
+        )}
       </Button>
       <SignedMessagesEnableStatus
         status={status}

@@ -99,6 +99,8 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",
   "signedMessages.devices.enable": "Turn on signed posts in this browser",
+  "signedMessages.devices.enableOnDevice":
+    "Turn on signed posts on this device",
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
   "signedMessages.marker.label": "Signed by its author",
