@@ -19,6 +19,18 @@ describe("validator page text", () => {
     }
   );
 
+  it("gives every validator command per system, since the Mac app is not on the PATH", () => {
+    const outsideTables = VALIDATOR_GUIDE_MARKDOWN.split("\n").filter(
+      (line) => !line.startsWith("|")
+    );
+    expect(outsideTables.join("\n")).not.toMatch(
+      /`validator (?:--version|update|status)/
+    );
+    expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
+      '`"/Applications/6529 Validator.app/Contents/Resources/validator" update check`'
+    );
+  });
+
   it("keeps the owner's line word for word and names the DM account", () => {
     expect(VALIDATOR_GUIDE_MARKDOWN).toContain(
       "6529 never starts a DM with you or asks for a seed phrase."
