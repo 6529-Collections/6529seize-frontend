@@ -15,7 +15,7 @@ import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOpti
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ImageScale } from "@/helpers/image.helpers";
