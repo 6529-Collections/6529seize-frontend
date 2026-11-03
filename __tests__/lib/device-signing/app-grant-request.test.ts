@@ -96,6 +96,16 @@ describe("requestAppDeviceGrant", () => {
     mockSaveDeviceGrant.mockResolvedValue(true);
   });
 
+  it("releases the prepared encryption device when no owning profile exists", async () => {
+    const device = e2eeDevice();
+    const result = await requestAppDeviceGrant(
+      baseRequest({ ownProfileId: null, e2eeDevice: device })
+    );
+    expect(result).toMatchObject({ success: true, e2eeAdopted: false });
+    expect(device.adopt).not.toHaveBeenCalled();
+    expect(device.dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("registers a signing-only grant and stores it like a sign-in grant", async () => {
     const registerGrant = jest.fn(baseRequest().registerGrant);
     const result = await requestAppDeviceGrant(baseRequest({ registerGrant }));

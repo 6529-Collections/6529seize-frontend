@@ -288,32 +288,31 @@ export function AuthSignModal({
               ? t(locale, "auth.signModal.confirmInWallet")
               : ""}
           </output>
-          {!isConnectionShareUpgradePrompt &&
-            getSessionClientType() === "web" && (
-              <Button
-                type="button"
-                data-auth-sign-primary
-                onClick={onConfirmSignRequest}
-                disabled={isSignRequestInProgress}
-                aria-busy={isSignRequestInProgress}
-                aria-label={
-                  isSigningPending
-                    ? t(locale, "auth.signModal.confirmInWallet")
-                    : signModalConfirmText
-                }
-                variant="action"
-                size="lg"
-                className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
-              >
-                {isSigningPending ? (
-                  <span className={styles["signModalButtonContent"]}>
-                    {t(locale, "auth.signModal.confirmInWallet")} <DotLoader />
-                  </span>
-                ) : (
-                  signModalConfirmText
-                )}
-              </Button>
-            )}
+          {!isConnectionShareUpgradePrompt && (
+            <Button
+              type="button"
+              data-auth-sign-primary
+              onClick={onConfirmSignRequest}
+              disabled={isSignRequestInProgress}
+              aria-busy={isSignRequestInProgress}
+              aria-label={
+                isSigningPending
+                  ? t(locale, "auth.signModal.confirmInWallet")
+                  : signModalConfirmText
+              }
+              variant="action"
+              size="lg"
+              className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
+            >
+              {isSigningPending ? (
+                <span className={styles["signModalButtonContent"]}>
+                  {t(locale, "auth.signModal.confirmInWallet")} <DotLoader />
+                </span>
+              ) : (
+                signModalConfirmText
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </dialog>,

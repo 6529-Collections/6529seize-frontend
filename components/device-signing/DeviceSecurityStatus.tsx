@@ -84,11 +84,13 @@ function DeviceSecurityStatusContent({
   );
 }
 
+export const isDeviceSecurityStatusEnabled = (): boolean =>
+  isSignedMessagesEnabled() || isE2eeEnabled();
+
 /** Describes this app/browser, independently of whether its wallet is connected. */
 export default function DeviceSecurityStatus(props: {
   readonly descriptionId: string;
 }) {
-  if (!isSignedMessagesEnabled() && !isE2eeEnabled())
-    return <span id={props.descriptionId} className="tw-sr-only" />;
+  if (!isDeviceSecurityStatusEnabled()) return null;
   return <DeviceSecurityStatusContent {...props} />;
 }

@@ -27,7 +27,9 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "@/components/auth/Auth";
 import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
-import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStatus";
+import DeviceSecurityStatus, {
+  isDeviceSecurityStatusEnabled,
+} from "@/components/device-signing/DeviceSecurityStatus";
 import WebSidebarAccountAvatar from "./WebSidebarAccountAvatar";
 import { useSidebarIdentity } from "./useSidebarIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -336,7 +338,11 @@ function WebSidebarUser({
             : "webSidebar.accountMenu.openAriaLabel"
         )}
         aria-expanded={showUserMenu}
-        aria-describedby={`${accountDescriptionId} ${deviceStatusId}`}
+        aria-describedby={
+          isDeviceSecurityStatusEnabled()
+            ? `${accountDescriptionId} ${deviceStatusId}`
+            : accountDescriptionId
+        }
         aria-controls="user-menu"
       >
         <span id={accountDescriptionId} className="tw-sr-only">

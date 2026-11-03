@@ -1,3 +1,4 @@
+import { getSessionClientType } from "@/services/auth/session-v2.utils";
 import { formatSessionUpgradeTimeLeft } from "@/components/auth/authSessionUpgrade";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AuthSignModal } from "@/components/auth/AuthSignModal";
@@ -7,6 +8,9 @@ import type { ComponentProps } from "react";
 const mockAddress = "0x1111111111111111111111111111111111111111";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: mockAddress }),
+}));
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
 }));
 const makeProps = (): ComponentProps<typeof AuthSignModal> => ({
   enableWalletAuthentication: true,
@@ -46,6 +50,23 @@ describe("AuthSignModal onboarding", () => {
     await userEvent.click(button);
     expect(props.onConfirmSignRequest).toHaveBeenCalledTimes(1);
   });
+  it.each(["native", "desktop"] as const)(
+    "keeps sign-in confirmation available on %s",
+    async (clientType) => {
+      jest.mocked(getSessionClientType).mockReturnValue(clientType);
+      try {
+        const props = makeProps();
+        render(<AuthSignModal {...props} />);
+        expect(screen.queryByText(/Version 1/u)).not.toBeInTheDocument();
+        await userEvent.click(
+          screen.getByRole("button", { name: "Sign message" })
+        );
+        expect(props.onConfirmSignRequest).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.mocked(getSessionClientType).mockReturnValue("web");
+      }
+    }
+  );
   it("announces wallet confirmation and prevents duplicate signing or cancellation", () => {
     const props = makeProps();
     render(

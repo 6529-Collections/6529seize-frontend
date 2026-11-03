@@ -120,7 +120,9 @@ async function adoptE2eeDevice(
   signature: string
 ): Promise<boolean> {
   const device = request.e2eeDevice;
-  if (!device || request.ownProfileId === null) {
+  if (!device) return false;
+  if (request.ownProfileId === null) {
+    device.dispose();
     return false;
   }
   return await device.adopt({
