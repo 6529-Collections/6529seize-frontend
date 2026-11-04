@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { useSetTitle } from "@/contexts/TitleContext";
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
@@ -9,7 +9,7 @@ export default function CommunityDownloadsRememes() {
   return (
     <CommunityDownloadsComponent
       title="Rememes"
-      url={`${publicEnv.API_ENDPOINT}/api/rememes_uploads`}
+      url={apiUrl("/api/rememes_uploads")}
     />
   );
 }

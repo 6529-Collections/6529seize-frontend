@@ -20,7 +20,7 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { NULL_ADDRESS } from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
 import {
@@ -176,7 +176,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         const controller = new AbortController();
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
-        const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
+        const url = apiUrl(
+          `/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`
+        );
         fetchUrl<ProofResponse[]>(url, { signal: controller.signal })
           .then((response: ProofResponse[]) => {
             if (controller.signal.aborted) {

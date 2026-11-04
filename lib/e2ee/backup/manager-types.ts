@@ -11,7 +11,7 @@ export interface BackupEngine {
   getStatus(): E2eeEngineStatus;
   getThisDevice(): E2eeDeviceInfo | null;
   subscribe(listener: () => void): () => void;
-  backupHistory(): BackupHistory;
+  backupHistory(): BackupHistory | Promise<BackupHistory>;
   importBackupHistory(
     history: BackupHistory
   ): Promise<{ conversations: number; messages: number }>;

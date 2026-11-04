@@ -2,7 +2,7 @@
 
 import type { Paginated } from "@/components/pagination/Pagination";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -53,7 +53,7 @@ export function useMemeLabCatalog(
         sort_direction: ageApiDirection,
       });
       return fetchUrl<Paginated<LabNFT>>(
-        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?${params.toString()}`,
+        apiUrl(`/api/nfts_memelab?${params.toString()}`),
         { signal }
       );
     },
@@ -64,7 +64,7 @@ export function useMemeLabCatalog(
   const completeNftsQuery = useQuery({
     queryKey: [QueryKey.NFTS, { scope: "meme-lab-catalog-complete" }],
     queryFn: ({ signal }) =>
-      fetchAllPages<LabNFT>(`${publicEnv.API_ENDPOINT}/api/nfts_memelab`, {
+      fetchAllPages<LabNFT>(apiUrl("/api/nfts_memelab"), {
         signal,
       }),
     enabled: !isAgeSort,
@@ -74,10 +74,9 @@ export function useMemeLabCatalog(
   const metadataQuery = useQuery({
     queryKey: [QueryKey.NFTS, { scope: "meme-lab-catalog-metadata" }],
     queryFn: ({ signal }) =>
-      fetchAllPages<LabExtendedData>(
-        `${publicEnv.API_ENDPOINT}/api/lab_extended_data`,
-        { signal }
-      ),
+      fetchAllPages<LabExtendedData>(apiUrl("/api/lab_extended_data"), {
+        signal,
+      }),
     enabled: !isAgeSort && needsMetadata,
     staleTime: MEME_LAB_STALE_TIME,
   });

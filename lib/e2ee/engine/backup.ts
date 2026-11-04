@@ -1,3 +1,5 @@
+import { historyKey, type HistoryKey } from "../history-order";
+import { loadMessage, trimHistory } from "./history";
 import type { BackupHistory, BackupMessageRecord } from "../backup/format";
 import type { StoredGroup, StoredMessage } from "../records";
 import { checkpoint, type EngineContext } from "./context";
@@ -9,7 +11,14 @@ import type { GroupRuntime } from "./store";
  * the decrypted history (never MLS state) and hands restored history back.
  */
 
-export function backupHistory(ctx: EngineContext): BackupHistory {
+function withoutPending(message: StoredMessage): BackupMessageRecord {
+  const { pending: _pending, ...rest } = message;
+  return rest;
+}
+
+export async function backupHistory(
+  ctx: EngineContext
+): Promise<BackupHistory> {
   const out: BackupHistory = { groups: [], messages: [] };
   for (const runtime of ctx.store.groups.values()) {
     const record = runtime.record;
@@ -23,12 +32,17 @@ export function backupHistory(ctx: EngineContext): BackupHistory {
       joinedAt: record.joinedAt,
       updatedAt: record.updatedAt,
     });
-    for (const message of runtime.messages.values()) {
-      if (message.pending) {
-        continue;
-      }
-      const { pending: _pending, ...rest } = structuredClone(message);
-      out.messages.push(rest);
+    let after: HistoryKey = [0, Number.NEGATIVE_INFINITY, 0, ""];
+    for (;;) {
+      const rows = await ctx.storage.pageMessages(ctx.profileId, record.g, {
+        after,
+        limit: 200,
+      });
+      if (!rows.length) break;
+      out.messages.push(
+        ...rows.filter((message) => !message.pending).map(withoutPending)
+      );
+      after = historyKey(rows.at(-1)!);
     }
   }
   return out;
@@ -116,13 +130,16 @@ export async function importBackupHistory(
       conversations += 1;
     }
     for (const message of restored) {
-      if (runtime.messages.has(message.id)) {
+      if (await loadMessage(ctx, runtime, message.id)) {
+        trimHistory(runtime, ctx.openConversation === g);
         continue;
       }
       const stored: StoredMessage = { ...message, g, pending: false };
       runtime.messages.set(message.id, stored);
       runtime.dirty.add(message.id);
       imported += 1;
+      if (runtime.dirty.size >= 100)
+        await checkpoint(ctx, { groups: [runtime], skipWasm: true });
     }
     touched.push(runtime);
     ctx.store.touch(g);

@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { BaseNFT } from "@/entities/INFT";
 import { fetchUrl } from "@/services/6529api";
@@ -33,7 +33,7 @@ const lookupNftCached = cache(
     try {
       const params = new URLSearchParams({ contract, id });
       const response = await fetchUrl<DBResponse<BaseNFT>>(
-        `${publicEnv.API_ENDPOINT}/api/${apiPath}?${params.toString()}`
+        apiUrl(`/api/${apiPath}?${params.toString()}`)
       );
       const nft = response.data[0];
       return nft === undefined

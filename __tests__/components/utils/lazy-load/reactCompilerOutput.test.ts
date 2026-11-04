@@ -79,6 +79,10 @@ describe("lazy-load modules under the React Compiler", () => {
       "components/waves/drops/search/LazyWaveDropsSearchModal.tsx",
       ["CancelOnEscapeWhileLoading", "LoadedWaveDropsSearchModal"],
     ],
+    [
+      "components/utils/lazy-load/createLazyDialog.tsx",
+      ["CancelOnEscapeWhileLoading", "LoadedDialog"],
+    ],
   ])("renders only its own components in %s", (file, components) => {
     const types = jsxElementTypes(compileWithReactCompiler(file));
 
@@ -90,6 +94,10 @@ describe("lazy-load modules under the React Compiler", () => {
     [
       "components/waves/LazyCreateDropGifPicker.tsx",
       "LoadedCreateDropGifPicker",
+    ],
+    [
+      "components/header/share/header-share/lazyHeaderQRModal.tsx",
+      "LoadedHeaderQRModal",
     ],
   ])("renders the loaded component by identifier in %s", (file, loaded) => {
     const types = jsxElementTypes(compileWithReactCompiler(file));

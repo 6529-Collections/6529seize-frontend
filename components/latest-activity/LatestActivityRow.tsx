@@ -35,7 +35,10 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
@@ -576,7 +579,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           {areEqualAddresses(
             props.tr.contract,
-            NEXTGEN_CORE[NEXTGEN_CHAIN_ID]
+            NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID]
           ) && !props.showNftIdentity
             ? printDescriptionNextgen()
             : printDescription()}

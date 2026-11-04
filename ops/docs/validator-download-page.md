@@ -12,6 +12,7 @@ validators fetch to find updates.
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
 | `/validator/guide` | The tester guide | Password |
+| `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
 | `/validator/releases` | Every release, newest first, with its files' SHA-256 | Password |
 | `/validator/download/<version>/<file>` | A 302 to a presigned S3 URL that works for 5 minutes | Password |
@@ -69,21 +70,17 @@ The pages read everything about releases from a private S3 bucket in the
 production account (`us-east-1`). Block Public Access is on and versioning
 is on. The Elastic Beanstalk instance role reads it with its own short-lived
 credentials; the `validator-releases-read` inline policy allows
-`s3:GetObject` on `feed/*`, `releases/*` and `content/*` only. No AWS keys
-are configured.
+`s3:GetObject` on `feed/*` and `releases/*` (and on `content/*`, which the
+pages no longer read). No AWS keys are configured.
 
 | Key | Content |
 | --- | --- |
 | `feed/releases.json` | The signed release feed |
 | `feed/releases.json.sig` | Its signature |
 | `releases/<version>/<file>` | Each release's files, `SHA256SUMS` and `release.json` included |
-| `content/bootstrap-peers.json` | The addresses of 6529's sentries, for the guide's peer steps |
 
-The sentry addresses stay out of this public repository. The guide holds
-tokens such as `{{SENTRY_1_TCP}}`, and the page fills them from
-`content/bootstrap-peers.json`: `sentries[0]` and `sentries[1]`, each with
-`peer_id`, `tcp`, `quic` and `onion`. Upload a new file when an address
-changes; the guide shows it within a minute.
+Peer addresses never go on the pages or in this public repository. From
+0.1.0-rc.5 testers add no peers, so the guide names none.
 
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, so the signature
@@ -100,9 +97,13 @@ No site deploy is needed.
    the feed last, so the page never lists a file that is not there yet.
 
 The pages show the new release within a minute. The download buttons pick
-each file by its name: `.dmg`, `-x64.msi`, `_amd64.deb`, `_arm64.deb`,
-`-x86_64.AppImage`, and `validator-<version>-<target>` archives under
-"Other downloads".
+each file by its name: `.dmg`, `-Setup-<version>-x64.exe`, `_amd64.deb`,
+`_arm64.deb` and `-x86_64.AppImage`. The big button is the visitor's
+system, from the User-Agent (and, in Chromium, the CPU from its client
+hints); "Other systems" lists all five. The Windows `-x64.msi` and the
+`validator-<version>-<target>` archives are under "Linux and the
+terminal" and "All files and checksums"; in a release without a
+`Setup.exe`, the `.msi` takes the Windows button.
 
 ### The feed fields the site reads
 
@@ -113,7 +114,12 @@ ISO 8601 date or time), and may have `commit`, `software_id`, `notes` and
 
 ## Text
 
-The guide and the known issues are Markdown in
-`lib/validator-page/content/`. Testers send status files and logs by
-encrypted DM in the 6529 app to 6529's account, 6529validators
-(`VALIDATOR_STATUS_DM_ACCOUNT` in `lib/validator-page/content/pageText.ts`).
+The three steps are in `components/validator-page/ValidatorSteps.tsx`, with
+their pictures in `public/validator/`: drawings of the macOS and Windows
+dialogs, and screenshots of the release's app. The guide's closed sections
+and the known issues are Markdown in `lib/validator-page/content/`, built
+from the tester package's TESTERS.md (its "More" sections) and
+KNOWN-ISSUES.md. The hardware page's text and numbers are in
+`hardwareText.ts` there, each checked against the release it names. Testers
+post their results in the Ministry of Validation wave with the template in
+`pageText.ts`, and post no logs or status files.
