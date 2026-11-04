@@ -203,10 +203,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     const runId = newRunId();
     // A signs in again once the profile exists, as returning users do, and
-    // enrolls with that one sign-in signature. B signs in before having a
-    // profile (a signing-only grant), then turns encrypted messages on from
-    // the enrollment button: one more combined sign-in signature, which
-    // replaces and revokes that grant.
+    // then grants permissions explicitly when sign-in is authentication-only.
+    // B signs in before creating its profile. Explicit enrollment grants
+    // the device once and replaces any earlier signing-only grant.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
@@ -246,8 +245,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const { a, b } = requireWorld();
     for (const session of [a, b]) {
       // NC8 on the website: the device's one grant is a combined sign-in
-      // grant, from A's sign-in or from B's enrollment button (one more
-      // sign-in signature, checked at enrollment). No device signs an
+      // grant, from a combined sign-in or from explicit enrollment (one more
+      // consent signature, checked at enrollment). No device signs an
       // EIP-712 MlsDeviceGrant.
       expect(
         session.wallet.typedDataSignatures("MlsDeviceGrant"),
