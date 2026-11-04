@@ -48,8 +48,10 @@ describe("Sentry build release options", () => {
   });
 
   it("keeps the release out of the bundle", () => {
-    expect(finalEnv({ ...SENTRY_BUILD_RELEASE_OPTIONS })).not.toHaveProperty(
-      "_sentryRelease"
-    );
+    const env = finalEnv({ ...SENTRY_BUILD_RELEASE_OPTIONS });
+
+    expect(env).not.toHaveProperty("_sentryRelease");
+    // Under any key: Next inlines every `env` value it finds referenced.
+    expect(JSON.stringify(env)).not.toContain(BUILD_COMMIT);
   });
 });
