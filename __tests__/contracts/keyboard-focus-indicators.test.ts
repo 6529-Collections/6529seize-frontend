@@ -121,7 +121,7 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
     reason: OPTIONS_REASON,
   },
   {
-    file: "components/e2ee/conversation/E2eeMessageItem.tsx",
+    file: "components/e2ee/conversation/E2eeMessageActionsMenu.tsx",
     marker: "tw-ring-iron-700/80 focus:tw-outline-none",
     literalHash:
       "1e441db33583131ce10a4ce24f5de2395ab46d8a8d1d6374e9e08ed489011ac1",
