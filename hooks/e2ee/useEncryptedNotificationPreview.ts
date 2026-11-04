@@ -15,11 +15,17 @@ export function useEncryptedNotificationPreview(
     encrypted.status === "ready" &&
     activeProfileProxy === null &&
     encrypted.profileId === profileId;
-  const { messages } = useE2eeConversation(allowed ? group : null);
+  const { conversation, messages } = useE2eeConversation(
+    allowed ? group : null
+  );
   const needsSetup =
     encrypted.status === "idle" || encrypted.status === "needs-enrollment";
   if (!allowed || !group) return { preview: null, needsSetup };
-  const incoming = messages.filter(
+  // The saved summary is available on restore before the paged timeline opens.
+  const candidates = conversation?.lastMessage
+    ? [conversation.lastMessage, ...messages]
+    : messages;
+  const incoming = candidates.filter(
     (message) =>
       message.kind === "message" &&
       !message.deleted &&
