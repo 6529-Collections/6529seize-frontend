@@ -1,4 +1,8 @@
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
+import {
+  attachHistoryStartupDiagnostics,
+  installHistoryStartupDiagnostics,
+} from "../support/staging-e2ee/startup-diagnostics";
 import { performance } from "node:perf_hooks";
 import {
   seedProcessedHistory,
@@ -578,9 +582,16 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       if (url.pathname === `/api/e2ee/groups/${dm}/log`)
         logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
     });
+    await installHistoryStartupDiagnostics(a.page);
     const upgrading = performance.now();
     // A one-time 100k-record schema upgrade has its own budget; warm opens retain the normal timeout.
-    await openChat(a, dm, 5 * 60_000);
+    try {
+      await openChat(a, dm, 5 * 60_000);
+    } finally {
+      await attachHistoryStartupDiagnostics(a.page, testInfo).catch((error) => {
+        console.warn("History startup diagnostics unavailable:", error);
+      });
+    }
     const input = a.page.getByRole("textbox", { name: "Encrypted message" });
     await expect(input).toBeEnabled({ timeout: 5 * 60_000 });
     await expect(
