@@ -745,9 +745,8 @@ async function prepareSignedPosts(session: StagingE2eeSession) {
   // Older builds combine both permissions from this gate instead.
   if (
     !(await page
-      .getByRole("heading", {
-        name: "Post Signing & DM Encryption",
-        exact: true,
+      .getByRole("button", {
+        name: /^Sign to enable (both|Encrypted DMs)$/u,
       })
       .isVisible())
   ) {
