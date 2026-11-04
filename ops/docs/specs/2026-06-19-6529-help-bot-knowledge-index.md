@@ -7,6 +7,10 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The encrypted-messages record covers the composer emoji board, native and 6529
+custom emojis, insertion during edits, the full reaction picker, readable
+shortcode fallbacks, collection-load recovery, and the separate emoji history.
+
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
 keeps original video downloads deferred until Play; Promo Video retains metadata

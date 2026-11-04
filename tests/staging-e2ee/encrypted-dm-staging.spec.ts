@@ -37,6 +37,7 @@ import {
 } from "../support/staging-e2ee/session";
 import {
   attachFile,
+  composer,
   expectDecrypted,
   expectNothingUndecryptable,
   imagePixels,
@@ -327,6 +328,72 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "A's sends were not observed, so the plaintext check would be vacuous"
     ).toBeGreaterThan(0);
     expectPrivateAndClean([a, b], needles({ hello, reply }));
+  });
+
+  test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {
+    const { a, b, runId } = requireWorld();
+    const prefix = qaMessage(runId, "emoji board");
+    const input = composer(a.page);
+    await input.fill(`${prefix} `);
+    const choose = async (
+      session: StagingE2eeSession,
+      query: string,
+      name: string
+    ) => {
+      const dialog = session.page.getByRole("dialog", {
+        name: "Choose an emoji",
+      });
+      await dialog.getByPlaceholder("Search", { exact: true }).fill(query);
+      await dialog
+        .getByRole("button", { name, exact: true })
+        .click({ timeout: UI_TIMEOUT_MS });
+      await expect(dialog).toHaveCount(0);
+    };
+    await a.page.getByRole("button", { name: "Add emoji" }).click();
+    await choose(a, "grinning", "😀");
+    await a.page.getByRole("button", { name: "Add emoji" }).click();
+    await choose(a, "gm", ":gm:");
+    const draft = `${prefix} 😀:gm:`;
+    await expect(input).toHaveValue(draft);
+    await input.press("Enter");
+    const row = (session: StagingE2eeSession) =>
+      session.page
+        .getByRole("list", { name: "Messages", exact: true })
+        .getByRole("listitem")
+        .filter({ hasText: prefix });
+    await expect(
+      row(b).getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+    await expect(row(b)).toContainText("😀");
+    await row(b).hover();
+    await row(b).getByRole("button", { name: "Message actions" }).click();
+    await b.page.getByRole("menuitem", { name: "More reactions" }).click();
+    await choose(b, "gm", ":gm:");
+    await expect(row(a).getByRole("button", { name: /:gm:.*1/u })).toBeVisible({
+      timeout: SYNC_TIMEOUT_MS,
+    });
+    const reaction = row(b).getByRole("button", { name: /:gm:.*1/u });
+    await expect(reaction).toHaveAttribute("aria-pressed", "true");
+    await reaction.click();
+    await expect(row(a).getByRole("button", { name: /:gm:.*1/u })).toHaveCount(
+      0,
+      { timeout: SYNC_TIMEOUT_MS }
+    );
+    for (const session of [a, b]) {
+      expect(
+        session.evidence.requests.filter(
+          (request) =>
+            request.url.includes("6529-emoji/") ||
+            request.url.includes("/api/profile-cms/assets")
+        )
+      ).toEqual([]);
+      expect(
+        await session.page.evaluate(() =>
+          localStorage.getItem("emoji-mart.frequently")
+        )
+      ).toBeNull();
+    }
+    expectPrivateAndClean([a, b], needles({ draft, custom: ":gm:" }));
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
