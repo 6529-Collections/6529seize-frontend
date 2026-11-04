@@ -65,7 +65,9 @@ export default function GlobalError({
   const hasDetails = Boolean(digest) || stackTrace !== "";
 
   return (
-    <html lang={locale}>
+    // data-version: the browser's VERSION when this replaces the root layout
+    // on a server-rendered page (config/env.browser.ts).
+    <html lang={locale} data-version={publicEnv.VERSION}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{t(locale, "globalError.documentTitle")}</title>

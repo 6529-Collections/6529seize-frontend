@@ -5,6 +5,30 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.chat-resume",
+      "kind": "workflow",
+      "aliases": ["background tab catch-up", "load missed messages"],
+      "title": "Returning to an open wave tab",
+      "keywords": [
+        "wave",
+        "chat",
+        "background",
+        "tab",
+        "missed messages",
+        "loading",
+        "resume"
+      ],
+      "summary": "Returning to an open wave refreshes its latest messages together while preserving the conversation and unsent draft.",
+      "facts": [
+        "If you were at the bottom, the conversation follows the latest messages. If you were reading older messages, it keeps your place; use the bottom control to return to latest.",
+        "After a long absence, Load missed messages marks a gap between cached history and the latest page. It loads a page when approached or selected, without delaying current messages.",
+        "If missed history fails to load, select Could not load missed messages. Try again. Already loaded messages remain available."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "chat", "recovery"],
+      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+    },
+    {
       "id": "waves.selected-post-preview",
       "kind": "workflow",
       "title": "Read a selected public Wave post without JavaScript",

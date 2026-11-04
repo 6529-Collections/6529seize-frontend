@@ -3200,6 +3200,11 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.notification":
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
+  "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
+  "waves.historyGap.loading": "Loading missed messages…",
+  "waves.historyGap.retry": "Could not load missed messages. Try again",
+
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,

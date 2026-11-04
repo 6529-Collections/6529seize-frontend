@@ -413,6 +413,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   // An evicted wave gives up its requests, timers and per-wave state, so it
   // loads from scratch when it is opened again.
+  // Tombstone pruning can also evict never-cached waves. Both cancellation
+  // methods tolerate absent requests and state for those wave IDs.
   useEffect(
     () =>
       subscribeToEvictions((waveId) => {

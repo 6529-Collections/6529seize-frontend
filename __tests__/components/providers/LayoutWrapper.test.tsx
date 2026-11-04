@@ -188,10 +188,23 @@ describe("LayoutWrapper layout selection", () => {
     expect(mounted).toHaveBeenCalledTimes(1);
   });
 
-  it("always uses MobileLayout inside the native app", () => {
+  it("always uses MobileLayout inside the native app", async () => {
     setDeviceInfo({ isApp: true, hasTouchScreen: true, isMobileDevice: true });
     setViewportWidth(390);
-    renderLayout();
-    expect(screen.getByTestId("mobile-layout")).toBeInTheDocument();
+    const { container } = renderLayout();
+    // The native layout loads on demand; the startup placeholder stays up
+    // until it arrives, so the web chrome underneath is never revealed.
+    expect(
+      container.querySelector('[data-native-startup="pending"]')
+    ).not.toBeNull();
+    // The hidden web tree keeps its hydration shape while waiting. Small-screen
+    // chrome would register its header and clear the native one on unmount.
+    expect(screen.getByTestId("web-layout")).toBeInTheDocument();
+    expect(screen.queryByTestId("small-screen-layout")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("mobile-layout")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-native-startup="ready"]')
+    ).not.toBeNull();
+    expect(screen.queryByTestId("small-screen-layout")).not.toBeInTheDocument();
   });
 });
