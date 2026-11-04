@@ -390,6 +390,16 @@ jobs:
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
 
+      # Purge after every instance serves the new release and before the
+      # announcement prompts open tabs to reload, so they reload new pages.
+      # Skipped until the production cutover in
+      # ops/docs/developer/cloudfront-page-cache.md sets the variable.
+      - name: Purge production page edge cache
+        if: vars.PRODUCTION_PAGE_DISTRIBUTION_ID != ''
+        env:
+          PRODUCTION_PAGE_DISTRIBUTION_ID: ${{ vars.PRODUCTION_PAGE_DISTRIBUTION_ID }}
+        run: ops/scripts/purge-page-edge-cache.sh "$PRODUCTION_PAGE_DISTRIBUTION_ID" 6529.io
+
       - name: Publish announced production version
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

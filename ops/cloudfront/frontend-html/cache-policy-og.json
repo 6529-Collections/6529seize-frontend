@@ -1,0 +1,24 @@
+{
+  "Name": "frontend-og-metadata",
+  "Comment": "6529 frontend /api/og-metadata: crawler cards keyed on path, query and the staging access cookie, origin Cache-Control decides",
+  "DefaultTTL": 0,
+  "MinTTL": 0,
+  "MaxTTL": 86400,
+  "ParametersInCacheKeyAndForwardedToOrigin": {
+    "EnableAcceptEncodingGzip": true,
+    "EnableAcceptEncodingBrotli": true,
+    "HeadersConfig": {
+      "HeaderBehavior": "none"
+    },
+    "CookiesConfig": {
+      "CookieBehavior": "whitelist",
+      "Cookies": {
+        "Quantity": 1,
+        "Items": ["x-6529-auth"]
+      }
+    },
+    "QueryStringsConfig": {
+      "QueryStringBehavior": "all"
+    }
+  }
+}

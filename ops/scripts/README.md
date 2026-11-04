@@ -17,6 +17,11 @@ wrapper expects that location.
 - `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
   adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
   status phases for the Deploy Hub pilot.
+- `purge-page-edge-cache.sh`: purges the CloudFront page distribution after a
+  deployment answers and waits for completion. See
+  [Page edge cache](../docs/developer/cloudfront-page-cache.md).
+- `sync-cloudfront-origin-facing.mjs`: refreshes the CloudFront origin-facing
+  address ranges the client rate limiter skips; `--check` reports drift.
 - `mobile-lab/`: phone-emulated load measurements of the live site with the
   mobile plan's stage 0 budgets; run by the `Mobile lab` workflow after web
   deploys. See its README.
