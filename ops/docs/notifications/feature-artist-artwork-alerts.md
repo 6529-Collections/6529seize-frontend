@@ -47,8 +47,10 @@ Open the artist’s profile from a submission, search result, or profile link.
 
 ## Edge Cases
 
-- Signed-out viewers do not see the control. Sign in through the account menu
-  first. Proxy profiles cannot manage artwork alerts.
+- The control appears only after your own-profile session is verified. It stays
+  hidden while sign-in is unresolved, when signed out, and when using a proxy.
+  An unknown preference is never shown as **Off**. Sign in through the account
+  menu first, then reopen **Profile actions** to load your saved choice.
 - Only Main Stage submissions qualify. Chat, other competitions, proposals,
   curation, comments, votes, reactions, and edits do not trigger artwork alerts.
 - A new dedicated resubmission can qualify as a new entry; retrying the same

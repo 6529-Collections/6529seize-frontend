@@ -225,15 +225,54 @@ it("cancels pending authentication when the viewer switches profiles", async () 
   );
 });
 
-it("disables proxy management without reading a different profile’s preference", () => {
+it("hides proxy management without reading or displaying a different profile’s preference", () => {
   setup({
     activeProfileProxy: {
       id: "proxy",
     } as AuthContextType["activeProfileProxy"],
     isDirectProfileSession: false,
   });
-  expect(screen.getByRole("button", { name })).toBeDisabled();
+  expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
   expect(fetchPreference).not.toHaveBeenCalled();
+});
+
+it.each([false, undefined])(
+  "does not display Off for an unverified session (%s), then loads the saved opt-in after recovery",
+  async (isDirectProfileSession) => {
+    fetchPreference.mockResolvedValue({ enabled: true });
+    const { rerenderAuth } = setup({ isDirectProfileSession });
+    expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+    expect(fetchPreference).not.toHaveBeenCalled();
+
+    rerenderAuth({ isDirectProfileSession: true });
+    expect(fetchPreference).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name })).toHaveTextContent("On")
+    );
+    expect(postPreference).not.toHaveBeenCalled();
+    expect(deletePreference).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name })).toHaveTextContent("Off")
+    );
+    expect(deletePreference).toHaveBeenCalledTimes(1);
+    expect(postPreference).not.toHaveBeenCalled();
+  }
+);
+
+it("hides a saved preference when the direct session becomes unresolved", async () => {
+  fetchPreference.mockResolvedValue({ enabled: true });
+  const { rerenderAuth } = setup();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name })).toHaveTextContent("On")
+  );
+  rerenderAuth({ isDirectProfileSession: false });
+  expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+  expect(fetchPreference).toHaveBeenCalledTimes(1);
+  expect(postPreference).not.toHaveBeenCalled();
+  expect(deletePreference).not.toHaveBeenCalled();
 });
 
 it("permits turning existing alerts off for a blocked artist", async () => {

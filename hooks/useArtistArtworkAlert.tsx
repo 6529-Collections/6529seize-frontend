@@ -98,14 +98,15 @@ export default function useArtistArtworkAlert(
       void queryClient.invalidateQueries({ queryKey });
     },
   });
-  const enabled = canManage && preference.data?.enabled === true;
-  if (!connectedProfile?.id || isAuthenticated !== true) return null;
+  // An unresolved or proxy session has not read this profile's preference.
+  // Never present that unknown state as Off.
+  if (!canManage) return null;
+  const enabled = preference.data?.enabled === true;
   if (!hasArtistActivity && !enabled) return null;
 
   const loading =
-    fetchingProfile ||
-    (canManage && (preference.isPending || preference.isFetching));
-  const failed = canManage && preference.isError;
+    fetchingProfile || preference.isPending || preference.isFetching;
+  const failed = preference.isError;
   const savedStateLabel = t(
     locale,
     enabled ? "artworkAlerts.on" : "artworkAlerts.off"
@@ -116,15 +117,7 @@ export default function useArtistArtworkAlert(
   } else if (failed) {
     stateLabel = t(locale, "artworkAlerts.retry");
   }
-  const description = activeProfileProxy
-    ? t(locale, "artworkAlerts.ownProfile")
-    : t(locale, "artworkAlerts.mainStage");
-
   async function onClick() {
-    if (!canManage) {
-      await requestAuth();
-      return;
-    }
     if (failed) {
       await preference.refetch();
       return;
@@ -147,13 +140,12 @@ export default function useArtistArtworkAlert(
           </span>
         </span>
         <span className="tw-mt-1 tw-block tw-text-balance tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
-          {description}
+          {t(locale, "artworkAlerts.mainStage")}
         </span>
       </span>
     ),
     icon: <BellIcon className="tw-size-4" aria-hidden="true" />,
     disabled:
-      !!activeProfileProxy ||
       (blocked && !enabled && !failed) ||
       loading ||
       mutation.isPending,
