@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
+import { KEEP_ON_MINUTES } from "@/lib/validator-page/content/hardwareText";
 import { VALIDATOR_KNOWN_ISSUES_MARKDOWN } from "@/lib/validator-page/content/knownIssuesMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
@@ -78,6 +79,15 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "[the download page](/validator)"
     );
+  });
+
+  it("keeps the computer on for the hardware page's time, with no random wait (D161)", () => {
+    expect(fold("keep-it-awake")).toContain(
+      `keep it awake for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC`
+    );
+    for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
+      expect(page).not.toMatch(/random|two hours|three hours|2 hours/i);
+    }
   });
 
   it("carries the mainnet join test's timing and the test phase's machines", () => {
