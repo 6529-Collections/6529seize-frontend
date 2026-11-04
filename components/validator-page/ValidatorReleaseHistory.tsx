@@ -1,3 +1,4 @@
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
@@ -11,6 +12,7 @@ import {
 } from "@/lib/validator-page/releaseFiles";
 import CopyChecksumButton from "./CopyChecksumButton";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
+import { SECONDARY_BUTTON } from "./validatorStyles";
 
 const BODY = "tw-text-base tw-leading-7 tw-text-iron-300";
 const LINK =
@@ -83,6 +85,7 @@ function ReleaseEntry({
       <h3 className="tw-mb-3 tw-mt-6 tw-text-base tw-font-semibold tw-text-iron-50">
         Files
       </h3>
+
       <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-border-0 tw-border-y tw-border-solid tw-border-white/[0.06] tw-p-0">
         {release.files.map((file) => {
           const size = formatFileSize(file.size);
@@ -91,15 +94,29 @@ function ReleaseEntry({
               key={file.name}
               className="tw-flex tw-flex-col tw-gap-2 tw-py-3"
             >
-              <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3">
-                <a
-                  href={getReleaseDownloadPath(release, file)}
-                  className={`${LINK} tw-break-all tw-font-mono tw-text-sm`}
-                >
-                  {file.name}
-                </a>
-                {size && (
-                  <span className="tw-text-sm tw-text-iron-500">{size}</span>
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2">
+                <span className="tw-min-w-0">
+                  <span className="tw-break-all tw-font-mono tw-text-sm tw-text-iron-100">
+                    {file.name}
+                  </span>
+                  {size && (
+                    <span className="tw-ml-3 tw-text-sm tw-text-iron-500">
+                      {size}
+                    </span>
+                  )}
+                </span>
+                {isLatest && (
+                  <a
+                    href={getReleaseDownloadPath(release, file)}
+                    className={SECONDARY_BUTTON}
+                    aria-label={`Download ${file.name}`}
+                  >
+                    <ArrowDownTrayIcon
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                    Download
+                  </a>
                 )}
               </div>
               <div className="tw-flex tw-items-start tw-gap-3">
@@ -140,7 +157,8 @@ export default function ValidatorReleaseHistory({
           <a href="/validator/releases.json.sig" className={LINK}>
             releases.json.sig
           </a>
-          .
+          . Only the newest release can be downloaded; older ones stay here for
+          the record.
         </p>
       </ValidatorPageHeader>
       {snapshot.releases.length === 0 ? (

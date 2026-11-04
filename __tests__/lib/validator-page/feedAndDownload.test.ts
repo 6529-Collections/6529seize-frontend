@@ -127,15 +127,15 @@ describe("release feed endpoints and downloads", () => {
       ),
     });
     const pinned = await resolveReleaseDownload([
-      "0.1.0-test.1",
+      "0.1.0-test.2",
       "6529-Validator-0.1.0.dmg",
     ]);
     expect(pinned).toEqual({
       state: "found",
-      url: expect.stringContaining("releases/0.1.0-test.1/"),
+      url: expect.stringContaining("releases/0.1.0-test.2/"),
     });
     expect(mockPresign).toHaveBeenLastCalledWith(
-      "releases/0.1.0-test.1/6529-Validator-0.1.0.dmg",
+      "releases/0.1.0-test.2/6529-Validator-0.1.0.dmg",
       expect.objectContaining({
         expiresInSeconds: 300,
         responseParams: {
@@ -159,6 +159,8 @@ describe("release feed endpoints and downloads", () => {
     for (const path of [
       ["feed", "releases.json"],
       ["0.1.0-test.1", "SHA256SUMS"],
+      // An older release stays listed, but its files are not handed out.
+      ["0.1.0-test.1", "6529-Validator-0.1.0.dmg"],
       ["..", "..", "secret"],
       ["unknown.bin"],
       [],
