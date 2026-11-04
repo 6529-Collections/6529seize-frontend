@@ -26,6 +26,7 @@ import { assertNoDevAuthInDeployableBuild } from "@/config/devAuthBuildGuard";
 import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
+// Release Bus v2 acceptance: force full-build evidence for the coupled beta.
 
 // ───────
 // Helpers
