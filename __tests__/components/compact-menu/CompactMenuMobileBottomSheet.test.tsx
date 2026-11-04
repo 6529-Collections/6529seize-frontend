@@ -11,19 +11,50 @@ jest.mock(
       children,
       isOpen,
       title,
+      onAfterLeave,
     }: {
       readonly children: ReactNode;
       readonly isOpen: boolean;
       readonly title: string;
-    }) =>
-      isOpen ? (
-        <div role="dialog" aria-label={title}>
-          {children}
-        </div>
-      ) : null
+      readonly onAfterLeave?: () => void;
+    }) => (
+      <>
+        {isOpen && (
+          <div role="dialog" aria-label={title}>
+            {children}
+          </div>
+        )}
+        <button type="button" onClick={onAfterLeave}>
+          Finish closing
+        </button>
+      </>
+    )
 );
 
 describe("CompactMenuMobileBottomSheet", () => {
+  it("runs a deferred action once after the sheet finishes closing", async () => {
+    const user = userEvent.setup();
+    const openDialog = jest.fn();
+    render(
+      <CompactMenuMobileBottomSheet
+        title="Actions"
+        ariaLabel="Actions"
+        trigger="Open"
+        items={[{ id: "dialog", label: "Open dialog", onSelect: openDialog }]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("button", { name: "Open dialog" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(openDialog).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+  });
+
   it("runs immediate saves even if a quick close skips the exit animation callback", async () => {
     const save = jest.fn();
     const openDialog = jest.fn();
