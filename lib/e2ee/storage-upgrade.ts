@@ -13,7 +13,7 @@ interface GroupSummary {
   history: HistorySummary;
 }
 const keyFor = (profileId: string, g: string) => JSON.stringify([profileId, g]);
-// Bound memory while reducing read batches for a large legacy history.
+// Read at most 1,000 records at a time rather than hydrating the full history.
 const UPGRADE_READ_BATCH_SIZE = 1_000;
 
 function accumulate(
