@@ -788,8 +788,8 @@ async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
 interface PrepareSessionOptions {
   /**
    * After creating a new user's profile, sign in again on a fresh device,
-   * as a returning user does. That sign-in must carry the combined grant
-   * (NC8), which enrolls the device with no second signature.
+   * as a returning user does. Authentication-only sign-ins still need the
+   * explicit permission step; a combined sign-in can already enroll it.
    */
   readonly signInAgainWithProfile?: boolean;
 }
@@ -817,10 +817,6 @@ export async function prepareEnrolledSession(
         await session.close();
         session = await openStagingSession(browser, testInfo, user, label);
         await signInThroughWalletModal(session);
-        expect(
-          enrolledByCombinedSignIn(session),
-          `${label}: a sign-in with a profile must carry the combined encrypted-messages grant`
-        ).toBe(true);
       }
     }
     await enrollDevice(session);

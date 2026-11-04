@@ -204,8 +204,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     const runId = newRunId();
     // A signs in again once the profile exists, as returning users do, and
-    // enrolls with that one sign-in signature. B signs in before having a
-    // profile (a signing-only grant), then signs once for Encrypted DMs.
+    // then grants permissions explicitly when sign-in is authentication-only.
+    // B signs in before creating its profile. Explicit enrollment grants
+    // the device once and replaces any earlier signing-only grant.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
@@ -334,8 +335,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   });
 
   test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {
-    const { a, b, runId } = requireWorld();
+    const current = requireWorld();
+    const { a, b, runId } = current;
     const prefix = qaMessage(runId, "emoji board");
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
     const input = composer(a.page);
     await input.fill(`${prefix} `);
     const choose = async (
