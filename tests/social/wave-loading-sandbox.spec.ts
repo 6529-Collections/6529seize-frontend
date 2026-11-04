@@ -1,4 +1,6 @@
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
@@ -243,6 +245,120 @@ useLocalSandboxMutationGuard(
 );
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("removes a successfully left open wave from Joined and restores it on rejoin", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.skip(
+    !!testInfo.project.use.isMobile,
+    "The desktop keeps the collection visible beside the open wave."
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const origin = getSandboxApiOrigin(baseURL);
+  const detailResponse = await page.request.get(`${origin}/api/waves/${WAVE}`);
+  const overviewResponse = await page.request.get(`${origin}/api/v2/waves`);
+  expect(detailResponse.ok()).toBe(true);
+  expect(overviewResponse.ok()).toBe(true);
+  const detail = (await detailResponse.json()) as ApiWave;
+  const overview = ((await overviewResponse.json()) as ApiWaveOverviewPage)
+    .data[0];
+  expect(overview).toBeDefined();
+  if (!overview) throw new Error("Missing sandbox wave overview");
+  let joined = true;
+  let failLeave = true;
+  const actions = () => (joined ? ["DROP_CREATED"] : []);
+  const row = () => ({
+    ...overview,
+    id: WAVE,
+    name: detail.name,
+    context_profile_context: {
+      ...overview.context_profile_context,
+      subscribed: joined,
+      pinned: false,
+    },
+  });
+  await page.route(`**/api/waves/${WAVE}`, (route) =>
+    route.fulfill({
+      json: { ...detail, subscribed_actions: actions(), pinned: false },
+    })
+  );
+  await page.route(`**/api/waves/${WAVE}/subscriptions`, (route) => {
+    if (route.request().method() === "DELETE" && failLeave)
+      return route.fulfill({ status: 500, json: { message: "Leave failed" } });
+    joined = route.request().method() !== "DELETE";
+    return route.fulfill({ json: { actions: actions() } });
+  });
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [row()], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: joined ? [row()] : [],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
+    })
+  );
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  const filters = page.getByRole("group", { name: "Wave list filter" });
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  const list = page.getByRole("region", {
+    name: "Following waves list",
+    exact: true,
+  });
+  const waveRow = list.getByRole("link", { name: detail.name, exact: true });
+  await expect(waveRow).toBeVisible();
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  const about = page.getByRole("complementary", { name: "Wave details" });
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    page.getByText("Couldn't leave this wave.", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  failLeave = false;
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    about.getByRole("button", { name: "Join", exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  await filters.getByRole("button", { name: "All", exact: true }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "All recent waves list", exact: true })
+      .getByRole("link", { name: detail.name, exact: true })
+  ).toBeVisible();
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(waveRow).toHaveCount(0);
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Join", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
 });
 
 function gate() {
