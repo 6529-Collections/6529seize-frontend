@@ -228,7 +228,7 @@ describe("useWaveDataFetching", () => {
       result.current.registerWave("wave1", true);
     });
     expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
-    expect(fetchNewestWaveMessages.mock.calls[1]?.[1]).toBe(2);
+    expect(fetchNewestWaveMessages.mock.calls[1]?.[1]).toBe(null);
     const currentSignal = fetchNewestWaveMessages.mock
       .calls[1]?.[3] as AbortSignal;
     expect(currentSignal.aborted).toBe(false);
@@ -279,7 +279,7 @@ describe("useWaveDataFetching", () => {
     expect(fetchWaveMessages).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
+  it("commits a seed without waiting for rendering, then syncs the latest page", async () => {
     jest.useFakeTimers();
     formatWaveMessages.mockImplementation(
       (
@@ -344,8 +344,8 @@ describe("useWaveDataFetching", () => {
       });
     });
 
-    expect(result.current.store.getData("wave1")).toBeUndefined();
-    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(true);
+    expect(result.current.store.getData("wave1")?.drops[0]?.id).toBe("seed");
+    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(false);
 
     await act(async () => {
       result.current.fetching.registerWave("wave1", true);
@@ -366,7 +366,7 @@ describe("useWaveDataFetching", () => {
     expect(fetchWaveMessages).not.toHaveBeenCalled();
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      1,
+      null,
       WAVE_DROPS_PARAMS.limit,
       expect.any(Object),
       expect.any(Function)
@@ -618,7 +618,7 @@ describe("useWaveDataFetching", () => {
     expect(createController).toHaveBeenCalledWith("wave1-newest-sync");
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      5,
+      null,
       50,
       newestSyncController.signal,
       expect.any(Function)
@@ -673,7 +673,7 @@ describe("useWaveDataFetching", () => {
 
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      5,
+      null,
       50,
       newestSyncController.signal,
       expect.any(Function)

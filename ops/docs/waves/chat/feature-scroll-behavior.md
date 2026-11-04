@@ -61,6 +61,13 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Rapid pagination state flips can briefly toggle the top loading bar, but do
   not replace the active scroll container.
 
+## Returning to an Open Tab
+
+- Returning to a wave refreshes its latest messages together, while keeping the existing conversation and unsent draft.
+- If you were at bottom, the thread follows the latest messages. If you were reading older drops, it keeps your place; use the bottom control to return to latest.
+- After a long absence, missed history between the cached conversation and the latest page is marked by `Load missed messages`. It loads a page when you approach that boundary, or when you select the button. You can read current messages without waiting for the entire missing history.
+- If a missed-history request fails, use `Could not load missed messages. Try again`. Already loaded messages remain available.
+
 ## Failure and Recovery
 
 - If a drop's thread fails to load, an error and `Try again` replace the empty
