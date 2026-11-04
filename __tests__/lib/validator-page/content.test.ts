@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
+import { KEEP_ON_MINUTES } from "@/lib/validator-page/content/hardwareText";
 import { VALIDATOR_KNOWN_ISSUES_MARKDOWN } from "@/lib/validator-page/content/knownIssuesMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
@@ -57,32 +58,40 @@ describe("validator page text", () => {
       '`"/Applications/6529 Validator.app/Contents/Resources/validator" update check`'
     );
     expect(fold("where-it-lives")).toContain(
-      "`validator 0.1.0-rc.5 (29a8caf, TDH v1.4)`"
+      "`validator 0.1.0-rc.6 (6a26503, TDH v1.4)`"
     );
   });
 
-  it("shows rc.5's 23 known issues in order", () => {
+  it("shows rc.6's 18 known issues in order, the blank window among them", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
+    expect(numbers).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
+    // B99: the app's window can go blank until rc.7.
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toMatch(
-      /^18\. On a Mac where the validator was set up as a system service/m
+      /^8\. The app's window can go blank, white or black\./m
     );
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain("`--mode datacenter`");
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
-      "[the download page](/validator)"
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain("commit `6a26503`");
+  });
+
+  it("keeps the computer on for the hardware page's time, with no random wait (D161)", () => {
+    expect(fold("keep-it-awake")).toContain(
+      `keep it awake for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC`
     );
+    for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
+      expect(page).not.toMatch(/random|two hours|three hours|2 hours/i);
+    }
   });
 
   it("carries the mainnet join test's timing and the test phase's machines", () => {
     const ready = fold("how-long-it-takes-to-be-ready");
-    expect(ready).toContain("a new install was ready in about 50 minutes");
+    expect(ready).toContain("was ready in about 50 minutes");
+    expect(ready).toContain("In 6529's test on 4 November");
     expect(ready).toContain(
       "In the test phase, 6529 runs validators and sentries on AWS in the United States, Germany and Singapore. The goal is a network that many holders run, at home and in offices."
     );
