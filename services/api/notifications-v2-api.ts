@@ -480,6 +480,28 @@ const mapNotificationV2 = (
   if (notification.cause === ApiNotificationCause.CompetitionLifecycle) {
     return mapCompetitionLifecycleNotification(notification);
   }
+  if (notification.cause === ApiNotificationCause.E2EeMessage) {
+    const { encrypted_group, encrypted_message_seq } =
+      notification.additional_context;
+    return [
+      {
+        id: notification.id,
+        cause: ApiNotificationCause.E2EeMessage,
+        created_at: notification.created_at,
+        read_at: notification.read_at,
+        related_identity: notification.related_identity
+          ? mapIdentityOverviewToProfileMin(notification.related_identity)
+          : null,
+        // Previews are decrypted locally. Retain routing metadata only.
+        additional_context: {
+          ...(typeof encrypted_group === "string" && { encrypted_group }),
+          ...(typeof encrypted_message_seq === "number" && {
+            encrypted_message_seq,
+          }),
+        },
+      },
+    ];
+  }
   if (!notification.related_identity) {
     console.error(
       `Notification ${notification.id} is missing its related identity`
