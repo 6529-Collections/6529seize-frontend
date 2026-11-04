@@ -3214,6 +3214,8 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.notification":
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.loading": "Loading emoji picker...",
+  "emoji.picker.unavailable": "Emoji picker is unavailable.",
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
