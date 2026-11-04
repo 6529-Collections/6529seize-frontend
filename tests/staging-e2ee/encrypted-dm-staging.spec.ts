@@ -330,8 +330,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   });
 
   test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {
-    const { a, b, runId } = requireWorld();
+    const current = requireWorld();
+    const { a, b, runId } = current;
     const prefix = qaMessage(runId, "emoji board");
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
     const input = composer(a.page);
     await input.fill(`${prefix} `);
     const choose = async (
