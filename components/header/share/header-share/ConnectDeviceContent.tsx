@@ -134,17 +134,14 @@ export function ConnectDeviceChoices({
             <Button
               variant="primary"
               size="md"
-              aria-disabled={desktopSetupUnavailable || undefined}
-              aria-description={
-                desktopSetupUnavailable ? comingSoon : undefined
-              }
-              data-tooltip-id={desktopSetupUnavailable ? tooltipId : undefined}
               className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2 aria-disabled:!tw-cursor-not-allowed aria-disabled:tw-opacity-50"
-              onClick={
-                desktopSetupUnavailable
-                  ? undefined
-                  : () => setConnectionMode("secure")
-              }
+              {...(desktopSetupUnavailable
+                ? {
+                    "aria-disabled": true,
+                    "aria-description": comingSoon,
+                    "data-tooltip-id": tooltipId,
+                  }
+                : { onClick: () => setConnectionMode("secure") })}
             >
               {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
             </Button>
