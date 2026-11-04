@@ -3,6 +3,23 @@
 // checks, memory and disk measured on rc.5 on 2026-11-03, the first start
 // from 6529's mainnet join test that day. Prices were read on 2026-10-31.
 
+/**
+ * How long a home validator must stay on from 00:15 UTC to calculate, sign
+ * and send the day's vote. Since D161 it sends the vote as soon as it has
+ * signed, with no random wait, so this is minutes, not hours.
+ * The figure comes from the validator repository's rc.6 measurement
+ * (claude/rc6-no-publish-delay). KEEP_ON_SOURCE names it; the page's test
+ * fails while it says PENDING, so the page can't ship without it.
+ */
+export const KEEP_ON_MINUTES = 30;
+export const KEEP_ON_SOURCE = "PENDING";
+
+/** "00:45": the time, in UTC, until which the computer should stay on. */
+export function keepOnUntilUtc(): string {
+  const minutes = 15 + KEEP_ON_MINUTES;
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
 /** The day the rc.5 measurements on this page were made. */
 export const MEASURED_ON = "3 November 2026";
 /** The day the prices on this page were read. */
@@ -31,7 +48,7 @@ export const MINIMUM: readonly {
   },
   {
     label: "Time on",
-    value: "3 hours a day",
+    value: `${KEEP_ON_MINUTES} minutes a day`,
     detail: "From 00:15 UTC, with sleep turned off.",
   },
 ];
@@ -120,7 +137,7 @@ export const PARTS: readonly {
   {
     key: "power",
     part: "Power",
-    answer: "On and awake for about three hours a day.",
+    answer: `On and awake for about ${KEEP_ON_MINUTES} minutes a day, from 00:15 UTC.`,
     why: "A mini PC left on all day uses about $1.60 of power a month at the US average price.",
   },
   {
@@ -134,7 +151,7 @@ export const PARTS: readonly {
 /** The day, in UTC, for the timeline figure. Hours from midnight. */
 export const DAY = {
   signs: 0.25,
-  keepOnUntil: 3.25,
+  keepOnUntil: 0.25 + KEEP_ON_MINUTES / 60,
   windowCloses: 19,
 } as const;
 
@@ -274,13 +291,11 @@ export const QUESTIONS: readonly {
 }[] = [
   {
     question: "Can I use a laptop?",
-    answer:
-      "Yes. Keep it plugged in, with the lid open and sleep turned off for at least three hours from 00:15 UTC.",
+    answer: `Yes. Keep it plugged in, with the lid open and sleep turned off, for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC.`,
   },
   {
     question: "Can I turn it off at night?",
-    answer:
-      "Yes, if it was on for about three hours from 00:15 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.",
+    answer: `Yes, once it has signed, about ${KEEP_ON_MINUTES} minutes after 00:15 UTC. If it's off then, it signs when it next starts, until 19:00 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.`,
   },
   {
     question: "Do I need my own Ethereum node?",

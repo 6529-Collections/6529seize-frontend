@@ -24,7 +24,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "- Linux desktop: Settings › Power, and turn Automatic Suspend off.",
       "- Laptops: keep it plugged in with the lid open.",
       "",
-      "If the computer can't stay on all day, keep it awake for about three hours from 00:15 UTC, when the day's result is ready to sign.",
+      "If the computer can't stay on all day, keep it awake for about 30 minutes from 00:15 UTC. In that time the validator calculates the day's result, signs it and sends its vote.",
     ]),
   },
   {
