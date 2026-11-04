@@ -530,6 +530,9 @@ function getNetworkErrorSamplingEvent(
 Sentry.init({
   ...(dsn && { dsn }),
   enabled: sentryEnabled,
+  // Read at runtime, not baked by the Sentry build plugin, so this chunk keeps
+  // its name across deploys that do not change its code (next.config.ts).
+  release: publicEnv.VERSION,
 
   integrations(integrations) {
     const configuredIntegrations = [

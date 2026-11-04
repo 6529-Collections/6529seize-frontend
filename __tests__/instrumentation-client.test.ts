@@ -1124,6 +1124,11 @@ describe("instrumentation-client", () => {
     mockCaptureRouterTransitionStart.mockReset();
   });
 
+  it("reports the runtime VERSION as the release", () => {
+    // jest.setup.js bakes VERSION "test-version" into PUBLIC_RUNTIME.
+    expect(loadSentryConfig().release).toBe("test-version");
+  });
+
   it("configures filtering for exclusively third-party frames", () => {
     const config = loadSentryConfig();
     const defaultIntegrations = [{ name: "default" }];

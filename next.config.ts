@@ -13,6 +13,7 @@ import { NextConfig } from "next";
 import { PRODUCTION_ASSET_PREFIX } from "@/config/assetPrefix";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
 import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
+import { SENTRY_BUILD_RELEASE_OPTIONS } from "@/config/sentryBuildRelease";
 import {
   loadAssetsFlagAtRuntime,
   resolveAssetsFlagFromEnv,
@@ -176,6 +177,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
 const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   ...SENTRY_BUILD_OWNERSHIP_OPTIONS,
+  // No build-time release, so the client Sentry chunk is the same across
+  // deploys; the Sentry.init calls set it from VERSION instead.
+  ...SENTRY_BUILD_RELEASE_OPTIONS,
 
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
