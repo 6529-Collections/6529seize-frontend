@@ -17,7 +17,10 @@ it("recovers from HTTP failure and an empty successful response, using only inli
     .mockResolvedValueOnce({ ok: true, json: async () => [] })
     .mockResolvedValueOnce({
       ok: true,
-      json: async () => [{ id: "gm", src: "data:image/webp;base64,UklGRg==" }],
+      json: async () => [
+        { id: "gm", src: "data:image/webp;base64,UklGRg==" },
+        { id: "g", src: "data:image/webp;base64,UklGRg==" },
+      ],
     });
   globalThis.fetch = fetchMock;
   render(
@@ -25,6 +28,12 @@ it("recovers from HTTP failure and an empty successful response, using only inli
       <Retry />
       <p>
         <E2eeEmojiText text="Hi :gm: :unknown: 😀" />
+      </p>
+      <p data-testid="wrong-delimiter">
+        <E2eeEmojiText text=":gm." />
+      </p>
+      <p data-testid="missing-delimiter">
+        <E2eeEmojiText text=":gm" />
       </p>
     </E2eeEmojiProvider>
   );
@@ -37,6 +46,9 @@ it("recovers from HTTP failure and an empty successful response, using only inli
   const image = await screen.findByRole("img", { name: ":gm:" });
   expect(image).toHaveAttribute("src", "data:image/webp;base64,UklGRg==");
   expect(image.parentElement).toHaveTextContent("Hi :unknown: 😀");
+  expect(screen.getByTestId("wrong-delimiter")).toHaveTextContent(":gm.");
+  expect(screen.getByTestId("missing-delimiter")).toHaveTextContent(":gm");
+  expect(screen.getAllByRole("img")).toHaveLength(1);
   expect(fetchMock).toHaveBeenCalledTimes(3);
   for (const call of fetchMock.mock.calls)
     expect(call).toEqual([
