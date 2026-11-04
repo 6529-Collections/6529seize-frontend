@@ -1,7 +1,8 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import YAML from "yaml";
 
 type EffectivePlan = {
   checks: {
@@ -178,11 +179,15 @@ describe("effective App PR CI plan", () => {
     "tests/social/wave-loading-sandbox.spec.ts",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
+    "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
+    "hooks/useVirtualizedWaveMessages.ts",
     "hooks/useMemesQuickVoteSessionState.ts",
     "hooks/memesQuickVote.queue.state.ts",
     "hooks/useMemesWaveFooterStats.ts",
     "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
     "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntime.tsx",
+    "hooks/useNativeKeyboard.ts",
+    "tests/support/surfaceSimulation.ts",
     "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
     "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
     "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
@@ -453,4 +458,308 @@ it("does not select PDF coverage for unrelated content", () => {
   expect(
     executePlan(["README.md"]).checks.playwright_pdf_attachments.required
   ).toBe(false);
+});
+
+type WorkflowStep = {
+  env?: Record<string, string>;
+  id?: string;
+  name?: string;
+  run?: string;
+  with?: Record<string, unknown>;
+};
+
+const gitBash = path.join(
+  process.env["ProgramFiles"] ?? "",
+  "Git/bin/bash.exe"
+);
+const bash =
+  process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
+
+/**
+ * Builds the history behind the reported failure: the event payload names an
+ * older base, while GitHub built the run's merge commit on a newer main tip.
+ */
+function mergeTreeFixture() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "app-pr-ci-merge-tree-"));
+  const git = (...args: string[]) =>
+    execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  const commit = (file: string, message: string) => {
+    fs.writeFileSync(path.join(root, file), `${message}\n`);
+    git("add", file);
+    git("commit", "--quiet", "-m", message);
+    return git("rev-parse", "HEAD");
+  };
+  git("init", "--quiet");
+  git("config", "user.name", "Merge tree fixture");
+  git("config", "user.email", "merge-tree@example.invalid");
+  git("config", "commit.gpgsign", "false");
+  const payloadBase = commit("base.txt", "Base named by the event payload");
+  git("checkout", "--quiet", "-b", "feature");
+  const head = commit("feature.txt", "Pull request head");
+  git("checkout", "--quiet", "--detach", payloadBase);
+  const mergeBase = commit("main.txt", "Main moved before GitHub merged");
+  git("merge", "--quiet", "--no-ff", "--no-edit", head);
+  const merge = git("rev-parse", "HEAD");
+  git("checkout", "--quiet", "--detach", mergeBase);
+  const laterMain = commit("later.txt", "Main moved again before checkout");
+  git("update-ref", "refs/remotes/origin/main", laterMain);
+  git("checkout", "--quiet", "--detach", merge);
+  return { git, head, merge, mergeBase, payloadBase, root };
+}
+
+function requireRunStep(
+  steps: WorkflowStep[],
+  match: (step: WorkflowStep) => boolean,
+  label: string
+): WorkflowStep & { run: string } {
+  const step = steps.find(match);
+  if (!step?.run) throw new Error(`Missing workflow step: ${label}`);
+  return { ...step, run: step.run };
+}
+
+function runWorkflowScript(
+  script: string,
+  cwd: string,
+  env: Record<string, string>
+) {
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "app-pr-ci-step-"));
+  const outputPath = path.join(outputDir, "output");
+  fs.writeFileSync(outputPath, "");
+  try {
+    const result = spawnSync(bash, ["-c", script], {
+      cwd,
+      encoding: "utf8",
+      timeout: 20_000,
+      env: {
+        ...process.env,
+        ...env,
+        GITHUB_OUTPUT: outputPath.replaceAll("\\", "/"),
+      },
+    });
+    expect(result.error).toBeUndefined();
+    return {
+      output: fs.readFileSync(outputPath, "utf8"),
+      status: result.status,
+      stdout: result.stdout,
+    };
+  } finally {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+  }
+}
+
+describe("App PR CI merge-tree base", () => {
+  const workflowPath = path.join(
+    process.cwd(),
+    ".github/workflows/app-pr-ci.yml"
+  );
+  const source = fs.readFileSync(workflowPath, "utf8");
+  const workflow = YAML.parse(source);
+  const planJob = workflow.jobs.plan;
+  const planSteps = planJob.steps as WorkflowStep[];
+  const appChecks = workflow.jobs["app-checks"];
+  const appSteps = appChecks.steps as WorkflowStep[];
+  const resolveIndex = planSteps.findIndex(({ id }) => id === "merge_tree");
+  const resolve = requireRunStep(
+    planSteps,
+    ({ id }) => id === "merge_tree",
+    "Resolve exact merge-tree base"
+  );
+  const evidence = requireRunStep(
+    appSteps,
+    ({ name }) => name === "Create exact PR merge-tree CI evidence",
+    "Create exact PR merge-tree CI evidence"
+  );
+  const resolveScript = resolve.run;
+  // Only the identity assertions run here; the rest needs the quality lane.
+  const evidenceAssertions = evidence.run.split(
+    "rm -rf exact-pr-ci-evidence"
+  )[0]!;
+
+  it("never takes a diff, selection or evidence base from the event payload", () => {
+    expect(source).not.toContain("pull_request.base.sha");
+    expect(source).not.toMatch(/github\.event\.pull_request\.base\b/u);
+  });
+
+  it("publishes the merge commit's first parent before any plan step uses it", () => {
+    const mergeTreeBase = "${{ steps.merge_tree.outputs.base_sha }}";
+    expect(planJob.outputs.base_sha).toBe(mergeTreeBase);
+    expect(resolve.env).toEqual({
+      BASE_REF: "${{ github.base_ref }}",
+      EXPECTED_HEAD_SHA: "${{ github.event.pull_request.head.sha }}",
+      EXPECTED_MERGE_SHA: "${{ github.sha }}",
+    });
+    const checkoutIndex = planSteps.findIndex(
+      ({ name }) => name === "Checkout code"
+    );
+    // The default pull_request checkout is the merge commit, with history.
+    expect(planSteps[checkoutIndex]?.with?.["ref"]).toBeUndefined();
+    expect(planSteps[checkoutIndex]?.with?.["fetch-depth"]).toBe(0);
+    expect(resolveIndex).toBe(checkoutIndex + 1);
+    const baseConsumers = planSteps.filter(({ env }) => env?.["BASE_SHA"]);
+    expect(baseConsumers.map(({ name }) => name)).toEqual([
+      "Verify Sentry workflow offline contracts",
+      "Create CI plan and security reports",
+      "Apply protected Museum browser-lane floor",
+    ]);
+    for (const step of baseConsumers) {
+      expect(step.env?.["BASE_SHA"]).toBe(mergeTreeBase);
+      expect(planSteps.indexOf(step)).toBeGreaterThan(resolveIndex);
+    }
+  });
+
+  it("feeds every app-check diff, selection and evidence base from the plan", () => {
+    const planBase = "${{ needs.plan.outputs.base_sha }}";
+    expect(appChecks.env.BASE_SHA).toBe(planBase);
+    expect(
+      appSteps.find(({ name }) => name === "Classify dependency risk")?.env
+    ).toEqual({ DEPENDENCY_RISK_BASE_REF: planBase });
+    expect(evidence.env).toMatchObject({
+      EXPECTED_BASE_SHA: planBase,
+      EXPECTED_HEAD_SHA: "${{ github.event.pull_request.head.sha }}",
+      EXPECTED_MERGE_SHA: "${{ github.sha }}",
+    });
+  });
+
+  it("names every failed evidence assertion without changing what it asserts", () => {
+    const assertions = evidenceAssertions
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("[[ ") || line.startsWith("test "));
+    expect(assertions).toHaveLength(9);
+    for (const assertion of assertions) {
+      expect(assertion).toMatch(/ \|\| \{ echo "::error::[^"]+"; exit 1; \}$/u);
+    }
+    expect(assertions).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(
+          /^test "\$\(git rev-parse HEAD\)" = "\$EXPECTED_MERGE_SHA" \|\| /u
+        ),
+        expect.stringMatching(
+          /^test "\$\(git rev-parse HEAD\^1\)" = "\$EXPECTED_BASE_SHA" \|\| /u
+        ),
+      ])
+    );
+  });
+
+  describe("against a merge commit built on a newer base", () => {
+    const fixture = mergeTreeFixture();
+    afterAll(() => {
+      fs.rmSync(fixture.root, { recursive: true, force: true });
+    });
+    const resolveEnv = {
+      BASE_REF: "main",
+      EXPECTED_HEAD_SHA: fixture.head,
+      EXPECTED_MERGE_SHA: fixture.merge,
+    };
+    const evidenceEnv = (base: string) => ({
+      BUILD_REQUIRED: "true",
+      DEPLOYMENT_CONTRACT_REQUIRED: "true",
+      EXPECTED_BASE_SHA: base,
+      EXPECTED_HEAD_SHA: fixture.head,
+      EXPECTED_MERGE_SHA: fixture.merge,
+      MUSEUM_BROWSER_REQUIRED: "false",
+      TEST_TYPECHECK_REQUIRED: "false",
+    });
+
+    it("resolves the base GitHub merged, not the payload snapshot", () => {
+      expect(fixture.mergeBase).not.toBe(fixture.payloadBase);
+      const result = runWorkflowScript(resolveScript, fixture.root, resolveEnv);
+      expect(result.status).toBe(0);
+      expect(result.output).toBe(`base_sha=${fixture.mergeBase}\n`);
+    });
+
+    it("passes the exact evidence identity checks with the resolved base", () => {
+      const result = runWorkflowScript(
+        evidenceAssertions,
+        fixture.root,
+        evidenceEnv(fixture.mergeBase)
+      );
+      expect(result.status).toBe(0);
+    });
+
+    it("fails loudly when evidence is given the payload snapshot base", () => {
+      const result = runWorkflowScript(
+        evidenceAssertions,
+        fixture.root,
+        evidenceEnv(fixture.payloadBase)
+      );
+      expect(result.status).toBe(1);
+      expect(result.stdout).toContain(
+        `::error::Merge commit first parent ${fixture.mergeBase} is not the plan base ${fixture.payloadBase}.`
+      );
+    });
+
+    it.each([
+      [
+        "the PR head is not the second parent",
+        { EXPECTED_HEAD_SHA: "PAYLOAD_BASE" },
+        "is not the PR head",
+      ],
+      [
+        "HEAD is not the run's merge commit",
+        { EXPECTED_MERGE_SHA: "PAYLOAD_BASE" },
+        "is not the run's merge commit",
+      ],
+      [
+        "the merge SHA is not exact",
+        { EXPECTED_MERGE_SHA: "main" },
+        "Run merge commit is not an exact 40-hex SHA",
+      ],
+      ["the base branch is empty", { BASE_REF: "" }, "PR base branch is empty"],
+    ])("fails closed when %s", (_case, overrides, message) => {
+      const env = Object.fromEntries(
+        Object.entries({ ...resolveEnv, ...overrides }).map(([key, value]) => [
+          key,
+          value === "PAYLOAD_BASE" ? fixture.payloadBase : value,
+        ])
+      );
+      const result = runWorkflowScript(resolveScript, fixture.root, env);
+      expect(result.status).toBe(1);
+      expect(result.stdout).toContain("::error::");
+      expect(result.stdout).toContain(message);
+      expect(result.output).toBe("");
+    });
+
+    it("fails closed when the checked-out commit is not a merge", () => {
+      fixture.git("checkout", "--quiet", "--detach", fixture.head);
+      try {
+        const result = runWorkflowScript(resolveScript, fixture.root, {
+          ...resolveEnv,
+          EXPECTED_MERGE_SHA: fixture.head,
+        });
+        expect(result.status).toBe(1);
+        expect(result.stdout).toContain("does not have exactly two parents");
+        expect(result.output).toBe("");
+      } finally {
+        fixture.git("checkout", "--quiet", "--detach", fixture.merge);
+      }
+    });
+
+    it("fails closed when the merge base is not base-branch history", () => {
+      const laterMain = fixture.git("rev-parse", "refs/remotes/origin/main");
+      fixture.git(
+        "update-ref",
+        "refs/remotes/origin/main",
+        fixture.payloadBase
+      );
+      try {
+        const result = runWorkflowScript(
+          resolveScript,
+          fixture.root,
+          resolveEnv
+        );
+        expect(result.status).toBe(1);
+        expect(result.stdout).toContain(
+          `::error::Merge commit first parent ${fixture.mergeBase} is not on origin/main.`
+        );
+        expect(result.output).toBe("");
+      } finally {
+        fixture.git("update-ref", "refs/remotes/origin/main", laterMain);
+      }
+    });
+  });
 });

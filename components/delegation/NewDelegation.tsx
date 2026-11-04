@@ -4,6 +4,7 @@ import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -14,6 +15,14 @@ import {
   EMPTY_DELEGATION_EXPIRY,
   getDelegationExpiryError,
 } from "./delegation-expiry";
+import {
+  findDelegationCollectionOption,
+  findDelegationUseCaseOption,
+  getDelegationCollectionOptions,
+} from "./delegation-options";
+import DelegationRegistrationSummary, {
+  type DelegationRegistration,
+} from "./DelegationRegistrationSummary";
 import {
   getGasError,
   type DelegationWriteSettledHandler,
@@ -63,11 +72,20 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
   const [newDelegationToken, setNewDelegationToken] = useState<
     number | undefined
   >(undefined);
+  const collectionOptions = getDelegationCollectionOptions(props.subdelegation);
+  // Link presets seed a field only when they match one of its options;
+  // anything else leaves the field on its "Select" placeholder.
   const [newDelegationUseCase, setNewDelegationUseCase] = useState<number>(
-    props.use_case_query ?? 0
+    () => findDelegationUseCaseOption(props.use_case_query)?.use_case ?? 0
   );
   const [newDelegationCollection, setNewDelegationCollection] =
-    useState<string>(props.collection_query ?? "0");
+    useState<string>(
+      () =>
+        findDelegationCollectionOption(
+          props.collection_query,
+          collectionOptions
+        )?.contract ?? "0"
+    );
 
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
@@ -76,44 +94,52 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     setGasError(error ? getGasError(error) : undefined);
   };
 
-  const expiryArg =
-    showExpiryCalendar && newDelegationExpiry.expiresAt !== null
-      ? newDelegationExpiry.expiresAt
-      : NEVER_DATE;
+  // The write and the summary above the submit button both read this one
+  // object, so the summary always shows exactly what will be signed. It may
+  // be incomplete; the write is enabled only once validate() passes.
+  const registration: DelegationRegistration = {
+    originalDelegator: props.subdelegation?.originalDelegator,
+    collection: newDelegationCollection,
+    delegate: newDelegationToAddress,
+    expiry: showExpiryCalendar ? newDelegationExpiry.expiresAt : NEVER_DATE,
+    useCase: newDelegationUseCase,
+    allTokens: !showTokensInput,
+    tokenId: showTokensInput ? newDelegationToken : 0,
+  };
+  const registrationArgs = [
+    registration.collection,
+    registration.delegate,
+    // A missing date fails validate(), so this fallback is never signed.
+    registration.expiry ?? NEVER_DATE,
+    registration.useCase,
+    registration.allTokens,
+    registration.tokenId,
+  ];
+  const canWrite = validate().length === 0;
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
-        args: [
-          props.subdelegation.originalDelegator,
-          newDelegationCollection,
-          newDelegationToAddress,
-          expiryArg,
-          newDelegationUseCase,
-          !showTokensInput,
-          showTokensInput ? newDelegationToken : 0,
-        ],
-        functionName:
-          validate().length === 0
-            ? "registerDelegationAddressUsingSubDelegation"
-            : undefined,
+        args: [props.subdelegation.originalDelegator, ...registrationArgs],
+        functionName: canWrite
+          ? "registerDelegationAddressUsingSubDelegation"
+          : undefined,
       }
     : {
         address: DELEGATION_CONTRACT.contract,
         abi: DELEGATION_ABI,
         chainId: DELEGATION_CONTRACT.chain_id,
-        args: [
-          newDelegationCollection,
-          newDelegationToAddress,
-          expiryArg,
-          newDelegationUseCase,
-          !showTokensInput,
-          showTokensInput ? newDelegationToken : 0,
-        ],
-        functionName:
-          validate().length === 0 ? "registerDelegationAddress" : undefined,
+        args: registrationArgs,
+        functionName: canWrite ? "registerDelegationAddress" : undefined,
       };
+
+  const signerLabel = t(
+    locale,
+    props.subdelegation
+      ? "delegation.register.manager.label"
+      : "delegation.register.delegator.label"
+  );
 
   function clearErrors() {
     setGasError(undefined);
@@ -121,14 +147,19 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
 
   function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
-    if (!newDelegationCollection || newDelegationCollection === "0") {
-      newErrors.push("Missing or invalid Collection");
+    if (
+      !findDelegationCollectionOption(
+        newDelegationCollection,
+        collectionOptions
+      )
+    ) {
+      newErrors.push(t(locale, "delegation.register.error.collection"));
     }
-    if (!newDelegationUseCase) {
-      newErrors.push("Missing or invalid Use Case");
+    if (!findDelegationUseCaseOption(newDelegationUseCase)) {
+      newErrors.push(t(locale, "delegation.register.error.useCase"));
     }
     if (!newDelegationToAddress || !isValidEthAddress(newDelegationToAddress)) {
-      newErrors.push("Missing or invalid Address");
+      newErrors.push(t(locale, "delegation.register.error.address"));
     } else if (
       (props.subdelegation &&
         newDelegationToAddress.toUpperCase() ===
@@ -136,7 +167,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
       (!props.subdelegation &&
         newDelegationToAddress.toUpperCase() === props.address.toUpperCase())
     ) {
-      newErrors.push("Invalid Address - cannot delegate to your own wallet");
+      newErrors.push(t(locale, "delegation.register.error.ownWallet"));
     }
     const expiryError = showExpiryCalendar
       ? getDelegationExpiryError(
@@ -149,7 +180,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
       newErrors.push(expiryError);
     }
     if (showTokensInput && !newDelegationToken) {
-      newErrors.push("Missing or invalid Token ID");
+      newErrors.push(t(locale, "delegation.register.error.tokenId"));
     }
 
     return newErrors;
@@ -157,11 +188,14 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
 
   return (
     <DelegationFormShell
-      title={`Register Delegation${
-        props.subdelegation ? " as Delegation Manager" : ""
-      }`}
-      description="Register utility rights for another wallet. NFTs stay in the delegator wallet."
-      closeTitle="Delegation"
+      title={t(
+        locale,
+        props.subdelegation
+          ? "delegation.register.titleAsManager"
+          : "delegation.register.title"
+      )}
+      description={t(locale, "delegation.register.description")}
+      closeTitle={t(locale, "delegation.register.closeTitle")}
       onHide={props.onHide}
     >
       <form>
@@ -172,16 +206,19 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         )}
         <DelegationFormRow>
           <DelegationFormLabel
-            title={props.subdelegation ? "Delegation Manager" : "Delegator"}
-            tooltip={`Address ${
-              props.subdelegation ? `executing` : `registering`
-            } the delegation`}
+            title={signerLabel}
+            tooltip={t(
+              locale,
+              props.subdelegation
+                ? "delegation.register.manager.tooltip"
+                : "delegation.register.delegator.tooltip"
+            )}
           />
           <DelegationFormField>
             <DelegationAddressDisabledInput
               address={props.address}
               ens={props.ens}
-              label={props.subdelegation ? "Delegation Manager" : "Delegator"}
+              label={signerLabel}
             />
           </DelegationFormField>
         </DelegationFormRow>
@@ -197,14 +234,17 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         />
         <DelegationFormDelegateAddressFormGroup
           setAddress={setNewDelegationToAddress}
-          title="Delegate Address"
-          tooltip="Delegate to Address e.g. your hot wallet"
+          title={t(locale, "delegation.register.delegate.label")}
+          tooltip={t(locale, "delegation.register.delegate.tooltip")}
         />
         <DelegationFormRow>
-          <DelegationFormLabel title="Use Case" tooltip="Delegation Use Case" />
+          <DelegationFormLabel
+            title={t(locale, "delegation.register.useCase.label")}
+            tooltip={t(locale, "delegation.register.useCase.tooltip")}
+          />
           <DelegationFormField>
             <DelegationFormSelect
-              aria-label="Use Case"
+              aria-label={t(locale, "delegation.register.useCase.label")}
               value={newDelegationUseCase}
               onChange={(e) => {
                 const newCase = parseInt(e.target.value);
@@ -216,7 +256,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               }}
             >
               <option value={0} disabled>
-                Select Use Case
+                {t(locale, "delegation.register.useCase.placeholder")}
               </option>
               {DELEGATION_USE_CASES.map((uc) => {
                 return (
@@ -224,7 +264,10 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     key={`add-delegation-select-use-case-${uc.use_case}`}
                     value={uc.use_case}
                   >
-                    #{uc.use_case} - {uc.display}
+                    {t(locale, "delegation.register.useCase.option", {
+                      number: uc.use_case,
+                      name: uc.display,
+                    })}
                   </option>
                 );
               })}
@@ -233,19 +276,19 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         </DelegationFormRow>
         <DelegationFormRow>
           <DelegationFormLabel
-            title="Expiry Date"
-            tooltip="Expiry date for delegation (optional)"
+            title={t(locale, "delegation.register.expiry.label")}
+            tooltip={t(locale, "delegation.register.expiry.tooltip")}
           />
           <DelegationFormField>
             <DelegationRadio
               checked={!showExpiryCalendar}
-              label="Never"
+              label={t(locale, "delegation.register.expiry.never")}
               name="expiryRadio"
               onChange={() => setShowExpiryCalendar(false)}
             />
             <DelegationRadio
               checked={showExpiryCalendar}
-              label="Select Date"
+              label={t(locale, "delegation.register.expiry.selectDate")}
               name="expiryRadio"
               onChange={() => setShowExpiryCalendar(true)}
             />
@@ -259,19 +302,19 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         </DelegationFormRow>
         <DelegationFormRow>
           <DelegationFormLabel
-            title="Tokens"
-            tooltip="Tokens involved in the delegation (optional)"
+            title={t(locale, "delegation.register.tokens.label")}
+            tooltip={t(locale, "delegation.register.tokens.tooltip")}
           />
           <DelegationFormField>
             <DelegationRadio
               checked={!showTokensInput}
-              label="All"
+              label={t(locale, "delegation.register.tokens.all")}
               name="tokenIdRadio"
               onChange={() => setShowTokensInput(false)}
             />
             <DelegationRadio
               checked={showTokensInput}
-              label="Select Token ID"
+              label={t(locale, "delegation.register.tokens.selectTokenId")}
               name="tokenIdRadio"
               onChange={() => setShowTokensInput(true)}
             />
@@ -284,22 +327,30 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         </DelegationFormRow>
         <DelegationFormRow>
           <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-col-span-12">
-            Note: The currently supported use cases on 6529.io are: #1 - All, #2
-            - Minting/Allowlist, #3 - Airdrops{" "}
+            {t(locale, "delegation.register.supportedUseCases.note")}{" "}
             <Link
               href={`/safe-collecting/faq/use-cases-overview`}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={t(
+                locale,
+                "delegation.register.supportedUseCases.link"
+              )}
             >
               <FontAwesomeIcon
+                aria-hidden="true"
                 className="hover:tw-text-primary-200 tw-ml-2 tw-h-4 tw-w-4 tw-text-primary-300 tw-transition-colors"
                 icon={faInfoCircle}
               ></FontAwesomeIcon>
             </Link>
           </div>
         </DelegationFormRow>
+        <DelegationRegistrationSummary
+          registration={registration}
+          collectionOptions={collectionOptions}
+        />
         <DelegationSubmitGroups
-          title={"Registering Delegation"}
+          title={t(locale, "delegation.register.submit.progressTitle")}
           writeParams={contractWriteDelegationConfigParams}
           showCancel={true}
           gasError={gasError}
@@ -307,7 +358,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
           validate={validate}
           onHide={props.onHide}
           onSetToast={props.onSetToast}
-          submitBtnLabel="Register Delegation"
+          submitBtnLabel={t(locale, "delegation.register.submit.label")}
         />
       </form>
     </DelegationFormShell>

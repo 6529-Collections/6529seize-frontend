@@ -19,11 +19,14 @@ import {
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
   getSandboxApiOrigin,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
+const ACCESS_WAVE = "00000000-0000-4000-8000-000000000566";
 const PROFILE = "00000000-0000-4000-8000-000000000531";
 const MEMES_WAVE = composerSandboxConstants.linkedDropMemesWaveId;
 const entryDropId = (id: string) =>
@@ -307,7 +310,7 @@ const competition = (id: string, title: string) => ({
     identity_submission_strategy: null,
     identity_submission_duplicates: null,
     starts_at: null,
-    ends_at: null,
+    ends_at: null as number | null,
     terms: null,
   },
   voting: {
@@ -330,7 +333,7 @@ const competition = (id: string, title: string) => ({
     winning_max_threshold: null,
     winning_threshold_min_duration_ms: 0,
     max_winners: null,
-    time_lock_ms: null,
+    time_lock_ms: null as number | null,
   },
   winners: {
     max_winners: null,
@@ -360,7 +363,7 @@ const competition = (id: string, title: string) => ({
   created_at: 1,
   updated_at: 1,
   published_at: 1,
-  ended_at: null,
+  ended_at: null as number | null,
   cancelled_at: null,
   archived_at: null,
 });
@@ -420,7 +423,8 @@ async function installArtworkCompetitionResources(
   waveId: string,
   fixtureWave: unknown,
   getDrops: () => SandboxArtwork[],
-  onRead?: (url: URL) => void
+  onRead?: (url: URL) => void,
+  getRank?: (drop: SandboxArtwork) => number
 ) {
   const entry = (dropId: string) => ({
     id: dropId === entryDropId("alpha") ? "entry-alpha" : `entry-${dropId}`,
@@ -450,11 +454,13 @@ async function installArtworkCompetitionResources(
         | undefined
     )?.voting;
     return {
-      rating: voting?.total_votes_given ?? 0,
-      realtime_rating: voting?.current_calculated_vote ?? 0,
+      rating: voting?.current_calculated_vote ?? 0,
+      realtime_rating: voting?.total_votes_given ?? 0,
       rating_prediction: voting?.predicted_final_vote ?? 0,
       user_vote: voting?.context_profile_context?.current ?? 0,
-      rank: getDrops().findIndex((item) => item.id === drop.id) + 1,
+      rank:
+        getRank?.(drop) ??
+        getDrops().findIndex((item) => item.id === drop.id) + 1,
       raters_count: voting?.voters_count ?? 0,
       top_raters: [],
       over_threshold_since_ms: null,
@@ -916,6 +922,9 @@ async function installCompetitionApi(
 
   return {
     requests,
+    setVote: (id: string, value: number) => {
+      votes[id] = value;
+    },
     setAnonymousEntry: (id: string, hidden: boolean) => {
       if (hidden) anonymousEntries.add(id);
       else anonymousEntries.delete(id);
@@ -967,6 +976,37 @@ async function installCompetitionApi(
       );
       expect(response.ok()).toBe(true);
       const wave = await response.json();
+      const legacyCompetition = competitions.find((item) => item.id === id);
+      if (legacyCompetition) {
+        legacyCompetition.participation.group_id =
+          wave.participation.scope.group?.id ?? null;
+        legacyCompetition.participation.signature_required =
+          wave.participation.signature_required;
+      }
+      const group = wave.participation.scope.group;
+      if (group) {
+        const groupResponse = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/groups/${composerSandboxConstants.previewGroupId}`
+        );
+        expect(groupResponse.ok()).toBe(true);
+        const groupFixture = await groupResponse.json();
+        await page.route(
+          `**/api/groups/${encodeURIComponent(group.id)}`,
+          (route) =>
+            route.fulfill({
+              json: {
+                id: group.id,
+                name: group.name,
+                visible: true,
+                is_private: group.is_hidden,
+                is_direct_message: group.is_direct_message ?? false,
+                group: groupFixture.group,
+                created_at: 1,
+                created_by: wave.author,
+              },
+            })
+        );
+      }
       wave.id = waveId;
       wave.description_drop.wave.id = waveId;
       wave.wave.type = "RANK";
@@ -990,6 +1030,30 @@ async function installCompetitionApi(
     },
     selectionReads: () => selectionReads,
   };
+}
+
+/** Open contextual rules with the keyboard while leaving a chat draft pending. */
+async function openLockedSubmissionRules(page: Page, draft: string) {
+  await page
+    .getByRole("textbox", { name: "Write a chat message" })
+    .last()
+    .fill(draft);
+  await page
+    .getByRole("button", { name: "Submit drop", exact: true })
+    .press("Enter");
+  const details = page.getByRole("dialog", { name: "Submit drop" });
+  await expect(details).toBeFocused();
+  await expect(
+    details.getByRole("link", {
+      name: "Inspect Sandbox Submission Club group criteria and members",
+    })
+  ).toBeVisible();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(
+    details.getByRole("link", { name: "View submission rules" })
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
 }
 
 async function openAppearanceDraft(
@@ -1427,6 +1491,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       leaderboard.getByRole("link", { name: /Anonymous/ })
     ).toHaveCount(0);
+  });
+
+  test("keeps leaderboard post text separated from its author across header breakpoints", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const leaderboard = page.getByRole("list", { name: "Leaderboard drops" });
+    const author = leaderboard.getByRole("link", {
+      name: "playwright",
+      exact: true,
+    });
+    const content = leaderboard.getByText("Immutable alpha entry content", {
+      exact: true,
+    });
+    for (const width of testInfo.project.name === "web-desktop-chromium"
+      ? [768, 1023, 1024, 1280]
+      : [390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(content).toBeVisible();
+      await expect(author).toBeVisible();
+      await expect
+        .poll(async () => {
+          const authorBox = await author.boundingBox();
+          const contentBox = await content.boundingBox();
+          if (!authorBox || !contentBox) return Number.NEGATIVE_INFINITY;
+          return contentBox.y - (authorBox.y + authorBox.height);
+        })
+        .toBeGreaterThanOrEqual(6);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`leaderboard-author-spacing-${width}.png`),
+      });
+    }
+    await expectNoUnsafeSandboxMutations(baseURL);
   });
 
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
@@ -1942,6 +2043,498 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  test("explains restricted submissions without interrupting a chat draft", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const groupResponse = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/groups/sandbox-submission-club`
+    );
+    expect(groupResponse.ok()).toBe(true);
+    expect(await groupResponse.json()).toMatchObject({
+      id: "sandbox-submission-club",
+      name: "Sandbox Submission Club",
+      visible: true,
+      is_private: false,
+      group: { tdh: { min: 100 }, level: { min: 1 } },
+    });
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      permissions: {
+        ...competition("alpha", "Access").permissions,
+        submit: false,
+      },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
+    await dismissNextDevTools(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const draft = "Chat access is independent of submission access.";
+    await composer.fill(draft);
+    // Submission restrictions must not add permission UI to an available chat.
+    await expect(page.getByText("Access details", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      page.getByRole("link", { name: "View submission rules" })
+    ).toHaveCount(0);
+    await expect(composer).toContainText(draft);
+    await expect(
+      page.getByRole("button", { name: "Post", exact: true }).last()
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+
+    await page
+      .getByRole("button", { name: "Submit drop", exact: true })
+      .press("Enter");
+    const restriction = page.getByRole("dialog", { name: "Submit drop" });
+    await expect(restriction).toBeFocused();
+    await expect(restriction).toContainText(
+      "You don't have permission to submit in this wave"
+    );
+    await expect(
+      restriction.getByRole("link", {
+        name: "Inspect Sandbox Submission Club group criteria and members",
+      })
+    ).toBeVisible();
+    await expect(
+      restriction.getByRole("link", { name: "View submission rules" })
+    ).toHaveAttribute("href", `/waves/${ACCESS_WAVE}?tab=configuration`);
+    await expect(restriction).toContainText(
+      "Chat access is separate from submission access."
+    );
+    await expectNoHorizontalOverflow(page);
+    const screenshot = testInfo.outputPath("submission-access-details.png");
+    await page.screenshot({ path: screenshot });
+    await testInfo.attach("submission-access-details", {
+      path: screenshot,
+      contentType: "image/png",
+    });
+    await page.keyboard.press("Escape");
+    const lockedSubmit = page.getByRole("button", {
+      name: "Submit drop",
+      exact: true,
+    });
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    // Capture the native next control before opening the body-level portal.
+    await page.keyboard.press("Tab");
+    const nextPageControl = await page.evaluateHandle(
+      () => document.activeElement
+    );
+    await lockedSubmit.press("Space");
+    await expect(restriction).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    await page.keyboard.press("Space");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() =>
+        nextPageControl.evaluate(
+          (element) => element === document.activeElement
+        )
+      )
+      .toBe(true);
+    await expect(restriction).toHaveCount(0);
+    await nextPageControl.dispose();
+    await lockedSubmit.focus();
+    await page.keyboard.press("Space");
+    await expect(restriction).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      restriction.getByRole("link", {
+        name: "Inspect Sandbox Submission Club group criteria and members",
+      })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      restriction.getByRole("link", { name: "View submission rules" })
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("tab", { name: "Settings", exact: true }).first()
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("tabpanel").filter({
+        has: page.getByRole("region", { name: "Settings", exact: true }),
+      })
+    ).toBeFocused();
+    await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: "Write a chat message" }).last()
+    ).toContainText(draft);
+    await expect(page.getByText("Access details", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      page.getByRole("button", { name: "Post", exact: true }).last()
+    ).toBeEnabled();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  for (const { timezoneId, fullDate, shortDate } of [
+    {
+      timezoneId: "UTC",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "America/Los_Angeles",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "Pacific/Auckland",
+      fullDate: "December 3, 2024",
+      shortDate: "Dec 3, 2024",
+    },
+    {
+      timezoneId: "Pacific/Honolulu",
+      fullDate: "December 2, 2024",
+      shortDate: "Dec 2, 2024",
+    },
+  ]) {
+    test.describe(`ended submission dates in ${timezoneId}`, () => {
+      test.use({ timezoneId });
+
+      test("explains ended submissions with a date and compact public group", async ({
+        page,
+        baseURL,
+      }, testInfo) => {
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          false,
+          ACCESS_WAVE
+        );
+        await sandbox.legacyPrimary("alpha");
+        const beta = competition("beta", "Beta");
+        const closesAt = Date.UTC(2024, 11, 3, 8, 33);
+        sandbox.setCompetition("beta", {
+          participation: {
+            ...beta.participation,
+            ends_at: closesAt,
+          },
+          permissions: { ...beta.permissions, submit: false },
+        });
+        await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+        await dismissNextDevTools(page);
+        const action = page.getByRole("button", {
+          name: "Enter Beta",
+          exact: true,
+        });
+        await expect(action).toHaveAccessibleDescription(
+          "Submission period has ended"
+        );
+        await action.press("Enter");
+        const details = page.getByRole("dialog", { name: "Enter Beta" });
+        await expect(details).toBeFocused();
+        await expect(details).toContainText("Submission period has ended");
+        await expect(details).toContainText(`Closed ${fullDate}`);
+        await expect(
+          details.getByText("Public", { exact: true })
+        ).toBeVisible();
+        await expect(details).not.toContainText("don't have permission");
+        await expect(details).not.toContainText(
+          "Other submission rules still apply"
+        );
+        await expect(details).not.toContainText("Chat access is separate");
+        await expectNoHorizontalOverflow(page);
+        await page.keyboard.press("Tab");
+        const rules = details.getByRole("link", {
+          name: "View submission rules",
+        });
+        await expect(rules).toBeFocused();
+        await rules.press("Enter");
+        await expect(
+          page.getByRole("tab", { name: "Settings", exact: true }).first()
+        ).toHaveAttribute("aria-selected", "true");
+        await page.goto(
+          `/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`
+        );
+        const submissions = page.getByText("Submissions closed", {
+          exact: true,
+        });
+        const voting = page.getByText("Voting open", { exact: true });
+        const submissionsRow = page
+          .getByText("Submissions closed", { exact: true })
+          .locator("..");
+        const votingRow = page
+          .getByText("Voting open", { exact: true })
+          .locator("..");
+        await expect(submissions).toBeInViewport({ ratio: 1 });
+        await expect(voting).toBeInViewport({ ratio: 1 });
+        await expect(submissionsRow).toContainText(shortDate);
+        await expect(votingRow).toContainText("No end date");
+        for (const [status, detail] of [
+          [submissions, submissionsRow.getByText(shortDate)],
+          [voting, votingRow.getByText("No end date")],
+        ] as const) {
+          await expect
+            .poll(async () => {
+              const statusBox = await status.boundingBox();
+              const detailBox = await detail.boundingBox();
+              if (!statusBox || !detailBox) return Number.POSITIVE_INFINITY;
+              return Math.abs(statusBox.y - detailBox.y);
+            })
+            .toBeLessThanOrEqual(3);
+        }
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("submission-statuses.png"),
+        });
+        sandbox.setCompetition("beta", {
+          lifecycle: "ENDED",
+          ended_at: closesAt,
+          participation: {
+            ...beta.participation,
+            ends_at: Date.UTC(2099, 11, 3, 8, 33),
+          },
+          permissions: { ...beta.permissions, submit: false },
+        });
+        await page.reload();
+        await expect(submissions).toBeInViewport({ ratio: 1 });
+        await expect(submissionsRow).toContainText(shortDate);
+        await expect(submissionsRow).not.toContainText("2099");
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
+    });
+  }
+
+  test("updates an open restriction card when submissions end", async ({
+    page,
+    baseURL,
+  }) => {
+    const startsAt = Date.UTC(2026, 10, 3, 12);
+    await page.clock.install({ time: new Date(startsAt) });
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    await sandbox.legacyPrimary("alpha");
+    const beta = competition("beta", "Beta");
+    sandbox.setCompetition("beta", {
+      participation: { ...beta.participation, ends_at: startsAt + 60_000 },
+      permissions: { ...beta.permissions, submit: false },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+    await dismissNextDevTools(page);
+    const action = page.getByRole("button", {
+      name: "Enter Beta",
+      exact: true,
+    });
+    await action.press("Enter");
+    const details = page.getByRole("dialog", { name: "Enter Beta" });
+    await expect(details).toContainText("don't have permission");
+    await expect(details).toContainText("Other submission rules still apply");
+
+    await page.clock.fastForward(61_000);
+
+    await expect(action).toHaveAccessibleDescription(
+      "Submission period has ended"
+    );
+    await expect(details).toBeVisible();
+    await expect(details).toContainText("Submission period has ended");
+    await expect(details).not.toContainText("don't have permission");
+    await expect(details).not.toContainText(
+      "Other submission rules still apply"
+    );
+    await expect(
+      details.getByRole("link", { name: "View submission rules" })
+    ).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("keeps the non-default competition in a copied submission rules link", async ({
+    page,
+    baseURL,
+  }) => {
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("beta", {
+      permissions: {
+        ...competition("beta", "Beta").permissions,
+        submit: false,
+      },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+    await dismissNextDevTools(page);
+    await page
+      .getByRole("button", { name: "Enter Beta", exact: true })
+      .press("Enter");
+    const details = page.getByRole("dialog", { name: "Enter Beta" });
+    await expect(details.getByText("Public", { exact: true })).toBeVisible();
+    await expect(details).toContainText("Other submission rules still apply.");
+    await expect(details).not.toContainText("Sandbox Submission Club");
+    const href = await page
+      .getByRole("dialog", { name: "Enter Beta" })
+      .getByRole("link", { name: "View submission rules" })
+      .getAttribute("href");
+    expect(href).toBe(
+      `/waves/${ACCESS_WAVE}?tab=configuration&competition=beta`
+    );
+    if (!href)
+      throw new Error(
+        "The submission rules link must have a real destination."
+      );
+    // Loading the copied URL bypasses the normal onNavigate callback.
+    await page.goto(href);
+    await expect(page).toHaveURL(
+      `/waves/${ACCESS_WAVE}/competitions/beta?tab=rules`,
+      {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      }
+    );
+    await expect(
+      page.getByRole("tab", { name: "Settings", exact: true }).first()
+    ).toHaveAttribute("aria-selected", "true");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+  test("opens locked submission rules on the web competition route and restores Chat", async ({
+    page,
+    baseURL,
+  }) => {
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      permissions: {
+        ...competition("alpha", "Access").permissions,
+        submit: false,
+      },
+    });
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
+    await dismissNextDevTools(page);
+    const draft =
+      "Keep my chat draft when opening competition submission rules.";
+    await openLockedSubmissionRules(page, draft);
+    await expect(page).toHaveURL(
+      `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+    const configuration = page
+      .getByRole("tab", { name: "Settings", exact: true })
+      .first();
+    await expect(configuration).toHaveAttribute("aria-selected", "true");
+    const configurationPanel = page.getByRole("tabpanel").filter({
+      has: page.getByRole("region", { name: "Settings", exact: true }),
+    });
+    await expect(configurationPanel).toBeFocused();
+    await expect(configurationPanel).toHaveCSS("outline-style", "solid");
+    await expect(configurationPanel).toHaveCSS("outline-width", "2px");
+    await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: "Write a chat message" }).last()
+    ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+  for (const destination of ["shared-wave", "default-competition"] as const) {
+    test(`opens submission settings in the app and restores Chat (${destination})`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      // The native app shell has no desktop variant. Web keyboard navigation
+      // remains covered by the access-details desktop and phone cases.
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        false,
+        ACCESS_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      sandbox.setCompetition("alpha", {
+        permissions: {
+          ...competition("alpha", "Access").permissions,
+          submit: false,
+        },
+      });
+      if (destination === "shared-wave") sandbox.setDefault(null);
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+      await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
+      await dismissNextDevTools(page);
+      const navigation = page.getByRole("navigation", {
+        name: "Wave sections",
+      });
+      const chat = navigation.getByRole("button", {
+        name: "Chat",
+        exact: true,
+      });
+      await chat.click(); // Exercise an explicit mobile view selection as well.
+      await expect(chat).toHaveAttribute("aria-current", "true");
+      const draft = "Keep my chat draft when opening app submission rules.";
+      const configuration = navigation.getByRole("button", {
+        name: "Settings",
+        exact: true,
+      });
+      if (destination === "shared-wave") {
+        // Current main has no submission action without a selected/default competition.
+        await expect(
+          page.getByRole("button", { name: "Submit drop", exact: true })
+        ).toHaveCount(0);
+        await page
+          .getByRole("textbox", { name: "Write a chat message" })
+          .last()
+          .fill(draft);
+        await configuration.click();
+      } else {
+        await openLockedSubmissionRules(page, draft);
+      }
+      await expect(page).toHaveURL(
+        destination === "shared-wave"
+          ? `/waves/${ACCESS_WAVE}?tab=configuration`
+          : `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(configuration).toHaveAttribute("aria-current", "true");
+      await expect(configuration).toBeFocused();
+      await expect(chat).not.toHaveAttribute("aria-current", "true");
+      await chat.click();
+      await expect(chat).toHaveAttribute("aria-current", "true");
+      await expect(
+        page.getByRole("textbox", { name: "Write a chat message" }).last()
+      ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
   for (const app of [false, true]) {
     test(`keeps vote lists readable in the ${app ? "app" : "web"} layout`, async ({
       page,
@@ -2439,7 +3032,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
+      await page.mouse.move(0, 0);
       const createStyle = await page
         .getByRole("button", { name: "Open create menu", exact: true })
         .evaluate((button) => {
@@ -2458,7 +3052,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             ].map((property) => [property, style.getPropertyValue(property)])
           );
         });
-      for (const name of ["Select all", "Reset votes"]) {
+      await selectAll.click();
+      // Compare resting styles, not the hover state left by the selection click.
+      await page.mouse.move(0, 0);
+      for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
         for (const [property, value] of Object.entries(createStyle)) {
           await expect(
@@ -2470,7 +3067,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
         );
       }
-      await selectAll.click();
       await expect(
         panel.getByRole("button", { name: "Deselect all", exact: true })
       ).toBeVisible();
@@ -2493,7 +3089,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await panel
         .getByRole("button", { name: "Deselect all", exact: true })
         .click();
-      await expect(resetVotes).toBeDisabled();
+      await expect(resetVotes).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("my-votes-full-width.png"),
@@ -2530,6 +3126,494 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(sandbox.requests).toHaveLength(0);
     });
   }
+
+  test("sorts complete My Votes pages, recovers errors and ignores a late previous order", async ({
+    page,
+  }, testInfo) => {
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|did not match|maximum update depth|too many re-renders/i.test(
+          message.text()
+        )
+      )
+        runtimeErrors.push(message.text());
+    });
+    const sandbox = await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 53 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `sorted-vote-${index}`,
+      drop_type: "SUBMISSION",
+      title: `Sorted artwork ${index}`,
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const orders: Record<string, typeof artworks> = {
+      vote_amount: artworks,
+      leaderboard: [artworks[52]!, ...artworks.slice(0, 52)],
+      last_voted: [...artworks].reverse(),
+    };
+    const values = new Map(
+      artworks.map((drop, index) => [drop.id, 53 - index])
+    );
+    const mutations: number[] = [];
+    let releaseVote: (() => void) | undefined;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/credits/me**",
+      (route) => {
+        const entryId = new URL(route.request().url()).searchParams.get(
+          "entry_id"
+        );
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: drop ? values.get(drop.id) : 0,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/entries/*/votes/me",
+      async (route) => {
+        const entryId = new URL(route.request().url()).pathname
+          .split("/")
+          .at(-3);
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        )!;
+        const { value } = route.request().postDataJSON() as { value: number };
+        if (value !== 0)
+          await new Promise<void>((resolve) => {
+            releaseVote = resolve;
+          });
+        mutations.push(value);
+        values.set(drop.id, value);
+        orders["last_voted"] = [
+          drop,
+          ...orders["last_voted"]!.filter((item) => item !== drop),
+        ];
+        orders["vote_amount"] = [...artworks].sort(
+          (a, b) => values.get(b.id)! - values.get(a.id)!
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: value,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    const reads: { sort: string; cursor: string | null }[] = [];
+    let holdRanking = true;
+    let releaseRanking: (() => void) | undefined;
+    let failRecent = true;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      async (route) => {
+        const url = new URL(route.request().url());
+        const sort = url.searchParams.get("sort") ?? "vote_amount";
+        const cursor = url.searchParams.get("cursor");
+        reads.push({ sort, cursor });
+        if (cursor && !cursor.startsWith(`${sort}:`)) {
+          return route.fulfill({
+            status: 400,
+            json: { message: "Wrong sort cursor" },
+          });
+        }
+        if (sort === "leaderboard" && holdRanking) {
+          holdRanking = false;
+          await new Promise<void>((resolve) => {
+            releaseRanking = resolve;
+          });
+        }
+        if (sort === "last_voted" && failRecent) {
+          failRecent = false;
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary failure" },
+          });
+        }
+        const start = cursor ? Number(cursor.split(":")[1]) : 0;
+        const end = start + 50;
+        const ordered = orders[sort]!.filter(
+          (drop) => values.get(drop.id) !== 0
+        );
+        const items = ordered.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: values.get(drop.id),
+              credit_spent: Math.abs(values.get(drop.id)!),
+              entry_status: "ACTIVE",
+            })),
+            cards: items.map((drop) => ({
+              ...resources.card(drop),
+              vote_summary: {
+                ...resources.card(drop).vote_summary,
+                user_vote: values.get(drop.id),
+                rank: orders["leaderboard"]!.indexOf(drop) + 1,
+              },
+            })),
+            has_more: end < ordered.length,
+            next_cursor: end < ordered.length ? `${sort}:${end}` : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const sort = panel.getByRole("button", { name: /^Sort by:/ });
+    const sortLabels: Record<string, string> = {
+      vote_amount: "Your vote amount",
+      leaderboard: "Leaderboard position",
+      last_voted: "Last voted",
+    };
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const sortOptions = isMobile
+      ? page.getByRole("dialog", { name: "Sort by", exact: true })
+      : page.getByRole("menu");
+    const selectSort = async (order: string) => {
+      await sort.click();
+      await sortOptions
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: sortLabels[order]!,
+          exact: true,
+        })
+        .click();
+      await expect(sortOptions).toHaveCount(0);
+    };
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    const readsBeforeSameSort = reads.length;
+    for (let repeat = 0; repeat < 8; repeat++) await selectSort("vote_amount");
+    expect(reads).toHaveLength(readsBeforeSameSort);
+    const selectAll = panel.getByRole("button", {
+      name: "Select all",
+      exact: true,
+    });
+    const reset = panel.getByRole("button", { name: /^Reset / });
+    await expect(reset).toHaveCount(0);
+    const sortBeforeSelection = (await sort.boundingBox())!;
+    const selectBeforeSelection = (await selectAll.boundingBox())!;
+    const firstCheckbox = panel
+      .getByRole("article")
+      .first()
+      .getByRole("checkbox");
+    await firstCheckbox.check();
+    await expect(reset).toBeEnabled();
+    const selectedCount = panel
+      .getByRole("status")
+      .filter({ hasText: "1 selected" });
+    await expect(selectedCount).toHaveText("1 selected");
+    const resetBounds = (await reset.boundingBox())!;
+    const countBounds = (await selectedCount.boundingBox())!;
+    expect(
+      Math.abs(
+        resetBounds.y +
+          resetBounds.height / 2 -
+          countBounds.y -
+          countBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
+    expect((await sort.boundingBox())!.x).toBe(sortBeforeSelection.x);
+    expect((await sort.boundingBox())!.y).toBe(sortBeforeSelection.y);
+    expect((await selectAll.boundingBox())!.x).toBe(selectBeforeSelection.x);
+    expect((await selectAll.boundingBox())!.y).toBe(selectBeforeSelection.y);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-selected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const controls = await Promise.all([
+        sort.boundingBox(),
+        selectAll.boundingBox(),
+        reset.boundingBox(),
+      ]);
+      expect(
+        controls.every(
+          (box) => box !== null && Math.abs(box.y - controls[0]!.y) < 1
+        )
+      ).toBe(true);
+      expect(controls[0]!.height).toBe(32);
+      await sort.click();
+      const amountOption = sortOptions.getByRole("menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      await amountOption.hover();
+      await expect(amountOption).toHaveCSS("font-size", "14px");
+      await expect(amountOption).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-menu.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await page.keyboard.press("Home");
+      await expect(amountOption).toHaveCSS("box-shadow", /2px/);
+      await page.keyboard.press("Escape");
+      await expect(sortOptions).toHaveCount(0);
+    }
+    await firstCheckbox.uncheck();
+    await expect(reset).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-reset-unselected.png"),
+      style: "nextjs-portal { display: none; }",
+      animations: "disabled",
+    });
+    await sort.focus();
+    await sort.press(isMobile ? "Enter" : "ArrowDown");
+    await expect(
+      sortOptions.getByRole(isMobile ? "button" : "menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      })
+    ).toBeVisible();
+    if (isMobile) {
+      await expect(page.getByRole("menu")).toHaveCount(0);
+      const option = sortOptions.getByRole("button", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+    }
+    await page.keyboard.press("Escape");
+    await expect(sortOptions).toHaveCount(0);
+    await expect(sort).toBeFocused();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 0"
+    );
+    if (isMobile) {
+      await selectSort("leaderboard");
+    } else {
+      await sort.focus();
+      await expect(sort).toBeFocused();
+      await sort.press("ArrowDown");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Enter");
+    }
+    await expect.poll(() => releaseRanking !== undefined).toBe(true);
+    await expect(sort).toBeEnabled();
+    await selectSort("last_voted");
+    await expect(panel.getByRole("alert")).toBeVisible();
+    await panel.getByRole("button", { name: "Try again", exact: true }).click();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    releaseRanking?.();
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    for (const order of ["last_voted", "leaderboard", "vote_amount"]) {
+      await selectSort(order);
+      await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+        orders[order]![0]!.title
+      );
+      const more = panel.getByRole("button", {
+        name: "Load more",
+        exact: true,
+      });
+      if (await more.isVisible()) await more.scrollIntoViewIfNeeded();
+      await expect(panel.getByRole("article")).toHaveCount(53);
+      await expect(panel.getByRole("heading", { level: 3 })).toHaveText(
+        orders[order]!.map((drop) => drop.title)
+      );
+      expect(reads).toContainEqual({ sort: order, cursor: `${order}:50` });
+    }
+    await sort.scrollIntoViewIfNeeded();
+    await selectSort("leaderboard");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-sorting.png"),
+    });
+    await page.getByRole("tab", { name: "All votes", exact: true }).click();
+    await page.getByRole("tab", { name: "My Votes", exact: true }).click();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await page.reload();
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    expect(sandbox.requests).toHaveLength(0);
+    expect(mutations).toHaveLength(0);
+    await selectSort("last_voted");
+    const newest = panel.getByRole("article", {
+      name: "Sorted artwork 52",
+      exact: true,
+    });
+    const edited = panel.getByRole("article", {
+      name: "Sorted artwork 51",
+      exact: true,
+    });
+    await newest.getByRole("spinbutton", { name: "Your vote" }).fill("4");
+    await edited.getByRole("spinbutton", { name: "Your vote" }).fill("99");
+    await edited
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect.poll(() => releaseVote !== undefined).toBe(true);
+    await expect(sort).toBeDisabled();
+    releaseVote?.();
+    await expect(sort).toBeEnabled();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(
+      newest.getByRole("spinbutton", { name: "Your vote" })
+    ).toHaveValue("4");
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    await edited.getByRole("checkbox").check();
+    await selectSort("vote_amount");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(panel.getByRole("button", { name: /^Reset / })).toHaveCount(0);
+    await edited.getByRole("checkbox").check();
+    await panel
+      .getByRole("button", { name: "Reset 1 vote", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Reset vote", exact: true })
+      .click();
+    await expect(edited).toHaveCount(0);
+    await expect(reset).toHaveCount(0);
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    expect(mutations).toEqual([99, 0]);
+    if ((page.viewportSize()?.width ?? 0) < 1024) {
+      await page.setViewportSize({ width: 320, height: 800 });
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "languages", {
+          configurable: true,
+          value: ["es-ES"],
+        });
+        globalThis.dispatchEvent(new Event("languagechange"));
+      });
+      const translatedSort = page.getByRole("button", {
+        name: /^Ordenar por:/,
+      });
+      await translatedSort.click();
+      const translatedSheet = page.getByRole("dialog", {
+        name: "Ordenar por",
+        exact: true,
+      });
+      await expect(
+        translatedSheet.getByRole("heading", { name: "Ordenar por" })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet-narrow-es.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await translatedSheet
+        .getByRole("button", {
+          name: "Posición en la clasificación",
+          exact: true,
+        })
+        .click();
+      await expect(translatedSheet).toHaveCount(0);
+      await expect(translatedSort).toHaveAccessibleName(
+        "Ordenar por: Posición en la clasificación"
+      );
+      expect(
+        (await translatedSort.boundingBox())!.height
+      ).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sorting-narrow-es.png"),
+      });
+    }
+    expect(runtimeErrors).toEqual([]);
+  });
+
+  test("reuses fresh My Votes limits across sorts and refreshes them after voting", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date());
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    let creditReads = 0;
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/credits/me") &&
+        url.searchParams.get("entry_id") === "entry-alpha"
+      )
+        creditReads++;
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const vote = panel.getByRole("spinbutton", {
+      name: "Your vote",
+      exact: true,
+    });
+    await expect(vote).toHaveValue("25");
+    await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
+    expect(creditReads).toBe(1);
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    for (const label of [
+      "Leaderboard position",
+      "Last voted",
+      "Your vote amount",
+    ]) {
+      await panel.getByRole("button", { name: /^Sort by:/ }).click();
+      const options = isMobile
+        ? page.getByRole("dialog", { name: "Sort by", exact: true })
+        : page.getByRole("menu");
+      await options
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: label,
+          exact: true,
+        })
+        .click();
+      await expect(options).toHaveCount(0);
+      await expect(vote).toHaveValue("25");
+      expect(creditReads).toBe(1);
+    }
+    expect(sandbox.requests).toHaveLength(0);
+    await vote.fill("40");
+    await panel.getByRole("button", { name: "Save vote", exact: true }).click();
+    await expect.poll(() => creditReads).toBe(2);
+    await expect(vote).toHaveValue("40");
+    await expect(panel.getByText(/^Available in wave\s*60$/)).toBeVisible();
+    expect(sandbox.requests).toHaveLength(1);
+    expect(sandbox.requests[0]?.body["value"]).toBe(40);
+  });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
     page,
@@ -4835,6 +5919,86 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
     await expect(dialog).toHaveCount(0);
   });
+
+  for (const { chatEnabled, hideGroupMetadata, label } of [
+    { chatEnabled: true, hideGroupMetadata: false, label: "restricted" },
+    {
+      chatEnabled: true,
+      hideGroupMetadata: true,
+      label: "hidden without metadata",
+    },
+    { chatEnabled: false, hideGroupMetadata: true, label: "disabled" },
+  ]) {
+    test(`reviews competition access with parent chat ${label}`, async ({
+      page,
+    }) => {
+      await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      const parent = await response.json();
+      parent.visibility.scope.group = null;
+      parent.chat.enabled = chatEnabled;
+      parent.chat.scope.group = hideGroupMetadata
+        ? { is_hidden: true }
+        : {
+            id: "parent-chat-club",
+            name: "Parent Chat Club",
+            is_hidden: true,
+          };
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: parent })
+      );
+      await page.goto(ROOT);
+      await openNewCompetition(page);
+      await page
+        .getByRole("combobox", { name: "Competition type", exact: true })
+        .click();
+      await page.getByRole("option", { name: "Approve", exact: true }).click();
+      await page
+        .getByLabel("Competition name", { exact: true })
+        .fill("Parent chat review");
+      await dismissNextDevTools(page);
+      // Use normal keyboard activation so the development toolbar cannot cover Next.
+      for (let step = 0; step < 4; step++) {
+        await page
+          .getByRole("button", { name: "Next", exact: true })
+          .press("Enter");
+      }
+      await page
+        .getByRole("textbox", { name: "Approval threshold", exact: true })
+        .fill("50");
+      await page
+        .getByRole("button", { name: "Next", exact: true })
+        .press("Enter");
+      await page
+        .getByRole("radio", { name: "Manual", exact: true })
+        .press("Space");
+      await page
+        .getByRole("textbox", { name: "Manual action", exact: true })
+        .fill("Recognize the winner");
+      await page.getByRole("button", { name: "Save", exact: true }).click();
+      for (let step = 0; step < 2; step++) {
+        await page
+          .getByRole("button", { name: "Next", exact: true })
+          .press("Enter");
+      }
+      await expect(
+        page.getByText(
+          chatEnabled
+            ? "Chat is limited to its selected group. Submission group access is public. Voting access is separate."
+            : "Chat is disabled. Submission group access is public. Voting access is separate.",
+          { exact: true }
+        )
+      ).toBeVisible();
+      // Competition review omits parent-wave access rows; only the accurate
+      // summary above describes chat, including when its group ID is hidden.
+      await expect(page.getByText("Chat access", { exact: true })).toHaveCount(
+        0
+      );
+      await expectNoHorizontalOverflow(page);
+    });
+  }
 
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
@@ -7763,7 +8927,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             await chat.click();
             await expect(messages).toBeVisible({ timeout: 500 });
           }
-          expect(initialReads).toHaveLength(beforeReads);
+          // Cached activation now refreshes the newest page without a serial
+          // cursor. While it is held, tab churn must reuse that single request.
+          expect(initialReads).toHaveLength(beforeReads + 1);
           await expectNoHorizontalOverflow(page);
           await page.screenshot({
             path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
@@ -10489,6 +11655,121 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
       }
     }
+    expect(sandbox.requests).toEqual([]);
+  });
+
+  test("orders Main Stage by checkpoint projection and retains it after reload", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      decisions: {
+        ...competition("alpha", "Main Stage").decisions,
+        strategy: {
+          first_decision_time: 1,
+          subsequent_decisions: [86400000],
+          is_rolling: true,
+        } as never,
+        time_lock_ms: 60000,
+      },
+    });
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    const artworks = [
+      {
+        id: entryDropId("alpha"),
+        title: "Late votes",
+        raw: 100,
+        current: 10,
+        projected: 50,
+      },
+      {
+        id: entryDropId("beta"),
+        title: "Earlier votes",
+        raw: 70,
+        current: 41,
+        projected: 69,
+      },
+    ].map((item) => ({
+      ...fixture.drops[0],
+      id: item.id,
+      title: item.title,
+      drop_type: "SUBMISSION",
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        voting: {
+          is_open: true,
+          total_votes_given: item.raw,
+          current_calculated_vote: item.current,
+          predicted_final_vote: item.projected,
+          voters_count: 1,
+          place: 1,
+        },
+      },
+    }));
+    let projected = false;
+    const sorts: string[] = [];
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => (projected ? [...artworks].reverse() : artworks),
+      (url) => {
+        const sort = url.searchParams.get("sort") ?? "rating";
+        sorts.push(sort);
+        projected = sort === "decision_rating";
+      },
+      (drop) => (drop.id === entryDropId("alpha") ? 30 : 23)
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const entries = page
+      .getByRole("list", { name: "Leaderboard drops" })
+      .locator("[data-competition-entry]");
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      "entry-alpha",
+      { timeout: 30000 }
+    );
+    await expect(entries.first()).toContainText("30th");
+    const mobile = testInfo.project.name === "web-mobile-chromium";
+    if (mobile) {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+    }
+    const option = page.getByRole(mobile ? "menuitem" : "tab", {
+      name: "Projected Vote",
+      exact: true,
+    });
+    await expect(option).toBeVisible();
+    await option.click();
+    await expect.poll(() => sorts.at(-1)).toBe("decision_rating");
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      `entry-${entryDropId("beta")}`
+    );
+    await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
+    await expect(entries.first()).not.toContainText("23rd");
+    await page.reload();
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      `entry-${entryDropId("beta")}`
+    );
+    await expect(entries.first()).toContainText("1st");
+    await page.getByRole("tab", { name: "List view", exact: true }).click();
+    await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
+    expect(sorts).toContain("rating");
     expect(sandbox.requests).toEqual([]);
   });
 

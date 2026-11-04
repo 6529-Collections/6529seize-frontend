@@ -12,10 +12,11 @@ validators fetch to find updates.
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
 | `/validator/guide` | The tester guide | Password |
+| `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
-| `/validator/releases` | Every release, newest first, with its files' SHA-256 | Password |
-| `/validator/download/<version>/<file>` | A 302 to a presigned S3 URL that works for 5 minutes | Password |
-| `/validator/download/<file>` | The same, for the newest release that has the file | Password |
+| `/validator/releases` | Every release, newest first, with its files' SHA-256; only the newest has download buttons | Password |
+| `/validator/download/<version>/<file>` | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes | Password |
+| `/validator/download/<file>` | The same, for the newest release | Password |
 | `/validator/releases.json` | The signed release feed, byte for byte | Public |
 | `/validator/releases.json.sig` | The feed's signature, byte for byte | Public |
 
@@ -83,8 +84,10 @@ Peer addresses never go on the pages or in this public repository. From
 
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, so the signature
-verifies against what validators download. Only files the feed lists can be
-downloaded.
+verifies against what validators download. Only the newest release's files
+can be downloaded: an older release stays in the feed and on the history
+page, with its SHA-256, and its files answer 404 (the owner: rc.1 to rc.4
+never, and rc.5 not once rc.6 is out).
 
 ### Add a release
 
@@ -97,9 +100,12 @@ No site deploy is needed.
 
 The pages show the new release within a minute. The download buttons pick
 each file by its name: `.dmg`, `-Setup-<version>-x64.exe`, `_amd64.deb`,
-`_arm64.deb` and `-x86_64.AppImage`. The Windows `-x64.msi` and the
-`validator-<version>-<target>` archives go under "Other downloads"; in a
-release without a `Setup.exe`, the `.msi` takes the Windows button.
+`_arm64.deb` and `-x86_64.AppImage`. The big button is the visitor's
+system, from the User-Agent (and, in Chromium, the CPU from its client
+hints); "Other systems" lists all five. The Windows `-x64.msi` and the
+`validator-<version>-<target>` archives are under "Linux and the
+terminal" and "All files and checksums"; in a release without a
+`Setup.exe`, the `.msi` takes the Windows button.
 
 ### The feed fields the site reads
 
@@ -110,7 +116,12 @@ ISO 8601 date or time), and may have `commit`, `software_id`, `notes` and
 
 ## Text
 
-The guide and the known issues are Markdown in
-`lib/validator-page/content/`. Testers send status files and logs by
-encrypted DM in the 6529 app to 6529's account, 6529validators
-(`VALIDATOR_STATUS_DM_ACCOUNT` in `lib/validator-page/content/pageText.ts`).
+The three steps are in `components/validator-page/ValidatorSteps.tsx`, with
+their pictures in `public/validator/`: drawings of the macOS and Windows
+dialogs, and screenshots of the release's app. The guide's closed sections
+and the known issues are Markdown in `lib/validator-page/content/`, built
+from the tester package's TESTERS.md (its "More" sections) and
+KNOWN-ISSUES.md. The hardware page's text and numbers are in
+`hardwareText.ts` there, each checked against the release it names. Testers
+post their results in the Ministry of Validation wave with the template in
+`pageText.ts`, and post no logs or status files.

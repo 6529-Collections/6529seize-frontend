@@ -2,7 +2,7 @@
 
 import Pagination from "@/components/pagination/Pagination";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
@@ -41,7 +41,9 @@ export default function NextGenCollections() {
     setCollectionsError(false);
     const statusFilter =
       selectedStatus !== null ? `&status=${selectedStatus}` : "";
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${page}${statusFilter}`;
+    const url = apiUrl(
+      `/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${page}${statusFilter}`
+    );
 
     void fetchUrl<DBResponse<NextGenCollection>>(url)
       .then((response) => {

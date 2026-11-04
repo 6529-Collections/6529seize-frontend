@@ -23,9 +23,14 @@ describe("useIsVersionStale", () => {
     jest.useRealTimers();
   });
 
+  // Composed as VersionStatusProvider composes them: the preview flag reader
+  // feeds the poller.
   function TestComponent({ interval }: { interval?: number | undefined }) {
-    const { useIsVersionStale } = require("@/hooks/useIsVersionStale");
-    const stale = useIsVersionStale(interval);
+    const {
+      useIsVersionStale,
+      useVersionPreviewFlag,
+    } = require("@/hooks/useIsVersionStale");
+    const stale = useIsVersionStale(interval, true, useVersionPreviewFlag());
     return <span>{stale ? "stale" : "fresh"}</span>;
   }
 

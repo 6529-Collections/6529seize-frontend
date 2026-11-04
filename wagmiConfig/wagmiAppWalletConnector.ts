@@ -10,8 +10,9 @@ import type { Address, Chain, Hex, WalletClient } from "viem";
 import { createWalletClient, fallback, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { createConnector } from "wagmi";
+import { APP_WALLET_CONNECTOR_TYPE } from "./appWalletConnectorType";
 
-export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
+export { APP_WALLET_CONNECTOR_TYPE };
 
 interface CreateAppWalletConnectorOptions {
   appWallet: AppWallet;

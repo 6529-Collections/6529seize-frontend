@@ -92,8 +92,12 @@ afterEach(() => {
 });
 
 describe("profile header subscription status around hydration", () => {
-  it("renders nothing on the server and starts no request before the platform is known", () => {
-    expect(renderToString(tree())).toBe("");
+  it("renders only blank reserved space on the server and starts no request before the platform is known", () => {
+    const html = renderToString(tree());
+    expect(html).toContain('data-testid="subscription-status-space"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).not.toContain("Loading subscription coverage");
+    expect(html).not.toContain("href=");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

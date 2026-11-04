@@ -5,8 +5,8 @@ import {
   isIosWkWebViewUserAgent,
 } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
 import {
-  getProductionAssetPrefix,
   PRODUCTION_ASSET_HOSTNAME,
+  PRODUCTION_ASSET_PREFIX,
 } from "@/config/assetPrefix";
 import type { Event } from "@sentry/nextjs";
 
@@ -15,7 +15,8 @@ const CYCLIC_JSON_MESSAGE =
 const WKWEBVIEW_USER_AGENT =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
 const MOBILE_SAFARI_USER_AGENT = `${WKWEBVIEW_USER_AGENT} Version/18.7 Safari/604.1`;
-const PRODUCTION_ASSET_PREFIX = getProductionAssetPrefix("test-release");
+// Pages built before the shared prefix load from their commit's prefix.
+const LEGACY_COMMIT_ASSET_PREFIX = `https://${PRODUCTION_ASSET_HOSTNAME}/web_build/${"a".repeat(40)}`;
 
 type ScheduledTimer = {
   handler: ((...args: unknown[]) => unknown) | string;
@@ -301,12 +302,15 @@ describe("cyclic JSON timer diagnostics", () => {
     expect(serializedDiagnostics).not.toContain("secret-extension-id");
   });
 
-  it("recognizes production CDN chunks and removes the capture-site frame", () => {
+  it.each([
+    ["shared", PRODUCTION_ASSET_PREFIX],
+    ["legacy per-commit", LEGACY_COMMIT_ASSET_PREFIX],
+  ])("recognizes production CDN chunks under the %s prefix and removes the capture-site frame", (_, assetPrefix) => {
     const diagnostics = captureDiagnostics([
       "Error: cyclic-json-timer-schedule",
-      `cyclicJsonTimerDiagnosticSetTimeout@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:21:99680`,
+      `cyclicJsonTimerDiagnosticSetTimeout@${assetPrefix}/_next/static/chunks/diagnostics.js:21:99680`,
       "injectedCallback@https://wallet.example/inpage.js:790:281",
-      `scheduleRefresh@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/app/waves.js:51:8567`,
+      `scheduleRefresh@${assetPrefix}/_next/static/chunks/app/waves.js:51:8567`,
     ]);
 
     expect(diagnostics).toEqual({
