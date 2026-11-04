@@ -75,8 +75,9 @@ job's full download/deploy window by at least 15 minutes.
 
 Staging permissions cover its artifact prefix in `seize-web` in `us-east-1`
 and commands on its existing SSM-managed server in `eu-west-1`. Production
-permissions cover its versioned artifact prefix, the existing Elastic Beanstalk
-environment and deployment resources, and its announcement distribution.
+permissions cover its versioned artifact prefix, create-only writes to the
+shared static prefix, the existing Elastic Beanstalk environment and deployment
+resources, and its announcement distribution.
 IAM roles are global. Infrastructure or resource replacements require an
 administrative policy review; deployment roles cannot edit their own policies.
 
@@ -219,6 +220,40 @@ metadata and final signal. Per-deploy frontend and backend notes post to the
 `Deploys · Production` wave; `6529 Releases` receives one AI-written daily
 digest plus individual Desktop and mobile app release notes. CI wave
 notifications are best effort and use deploy run IDs to correlate E2E replies.
+
+## Production static assets
+
+Production pages load `_next/static` from the asset distribution at
+`https://dnclu2fna0b2b.cloudfront.net/web_build/shared/` (`config/assetPrefix.ts`).
+Next names those files by content hash or scopes them by the build ID, so every
+build shares the prefix: a file that did not change keeps its URL, and browsers
+reuse their cached copy after a deploy instead of downloading it again.
+
+`Web Deploy - PROD` publishes the verified artifact's static files with
+`ops/scripts/publish-shared-static-assets.cjs` before Elastic Beanstalk
+changes. It lists the prefix, compares each existing name's stored SHA-256
+checksum with the verified file, and uploads only new names with
+`If-None-Match: *` and a SHA-256 checksum that S3 verifies. If an existing
+name holds different bytes, it fails without writing anything. Each run uploads
+`production-shared-static-publication-<run ID>` evidence with uploaded and
+reused file and byte counts. The Elastic Beanstalk bundle stays at
+`web_build/<commit SHA>/package.zip`.
+
+A collision means a name was not content-addressed, or a shortened content
+hash collided. Never delete or overwrite the stored object: pages already use
+it. Find the cause; Next's `outputHashSalt` setting changes every hashed name
+if the build must ship before the cause is fixed. That deploy uploads every
+file again, returning visitors download everything once, and the old objects
+stay.
+
+Objects in the shared prefix are never replaced or deleted, and the bucket has
+no expiry rule, so pages from any earlier build, including tabs open across
+several deploys, keep finding their files. Builds made before the shared
+prefix load from their own `web_build/<commit SHA>/` prefix, which is also kept.
+A revert of the shared prefix therefore needs no cleanup: the reverted build
+publishes to its commit prefix again, and shared objects stay for pages that
+still use them. Staging serves static files from its own server
+(`ASSETS_FROM_S3=false`) and does not use either prefix.
 
 ## Sitemap generation
 
