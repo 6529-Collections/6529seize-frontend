@@ -21,8 +21,7 @@ function finalEnv(options: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe("Sentry build release options", () => {
-  const saved: Partial<Record<(typeof RELEASE_ENV_KEYS)[number], string>> =
-    {};
+  const saved: Record<string, string | undefined> = {};
 
   beforeEach(() => {
     for (const key of RELEASE_ENV_KEYS) {
