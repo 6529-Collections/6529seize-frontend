@@ -6,6 +6,8 @@ import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import {
   DATA_CENTER,
   DAY,
+  KEEP_ON_MINUTES,
+  keepOnUntilUtc,
   LARGE_HOLDERS,
   MEASURED_ON,
   MINIMUM,
@@ -223,9 +225,10 @@ function DayFigure() {
         When it needs to be on
       </h2>
       <p className={INTRO}>
-        At about 00:15 UTC each day, the validator calculates and signs within
-        minutes. At home it then waits a random time, up to two hours, before it
-        sends its vote. Signing stays open until 19:00 UTC.
+        At about 00:15 UTC each day, the validator calculates the day&apos;s
+        TDH, signs it and sends its vote, all within about {KEEP_ON_MINUTES}{" "}
+        minutes. If the computer is off then, it signs when it next starts.
+        Signing stays open until 19:00 UTC.
       </p>
       <LocalSigningTimes />
       <figure
@@ -233,7 +236,7 @@ function DayFigure() {
       >
         <div
           role="img"
-          aria-label="A day in UTC: keep the computer on from 00:15 to about 03:15. Signing stays open until 19:00."
+          aria-label={`A day in UTC: keep the computer on from 00:15 to about ${keepOnUntilUtc()}. Signing stays open until 19:00.`}
         >
           <div className="tw-relative tw-h-9 tw-overflow-hidden tw-rounded-md tw-bg-iron-800/60">
             <div
@@ -263,7 +266,7 @@ function DayFigure() {
               aria-hidden="true"
               className="tw-size-3 tw-flex-none tw-rounded-sm tw-bg-primary-500"
             />
-            Keep it on: 00:15 to about 03:15 UTC
+            Keep it on: 00:15 to about {keepOnUntilUtc()} UTC
           </span>
           <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-200">
             <span
