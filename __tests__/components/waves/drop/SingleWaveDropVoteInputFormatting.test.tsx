@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SingleWaveDropVoteInput } from "@/components/waves/drop/SingleWaveDropVoteInput";
+import type { SupportedLocale } from "@/i18n/locales";
+
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+
+afterEach(() => {
+  mockLocale = "en-US";
+});
 
 function StatefulVoteInput({
   initialValue,
@@ -86,6 +96,43 @@ describe("SingleWaveDropVoteInput thousands separators", () => {
 
     expect(input).toHaveValue("19,234");
     expect(input.selectionStart).toBe(2);
+  });
+
+  it("keeps the caret in place when deleting a separator leaves the value unchanged", async () => {
+    const user = userEvent.setup();
+    render(<StatefulVoteInput initialValue={1234} />);
+    const input = getInput();
+
+    // Delete the comma: 1,|234 -> value stays 1234, display stays 1,234.
+    await user.type(input, "{Backspace}", {
+      initialSelectionStart: 2,
+      initialSelectionEnd: 2,
+    });
+
+    expect(input).toHaveValue("1,234");
+    expect(input.selectionStart).toBe(1);
+  });
+
+  it("groups digits the way the viewer's locale does", () => {
+    mockLocale = "de-DE";
+    const { unmount } = render(<StatefulVoteInput initialValue={5_000_000} />);
+    expect(getInput()).toHaveValue("5.000.000");
+    unmount();
+
+    mockLocale = "fr-FR";
+    render(<StatefulVoteInput initialValue={5_000_000} />);
+    expect(getInput().value.replaceAll(/\s/g, " ")).toBe("5 000 000");
+  });
+
+  it("reads a value grouped the locale's way as the full number", () => {
+    mockLocale = "de-DE";
+    const onValue = jest.fn();
+    render(<StatefulVoteInput initialValue="" onValue={onValue} />);
+
+    fireEvent.change(getInput(), { target: { value: "5.000.000" } });
+
+    expect(onValue).toHaveBeenLastCalledWith(5_000_000);
+    expect(getInput()).toHaveValue("5.000.000");
   });
 
   it("still allows an empty field and a lone minus sign while typing", () => {
