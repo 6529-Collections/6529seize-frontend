@@ -1,5 +1,6 @@
 import Pagination from "@/components/pagination/Pagination";
 import { getButtonClasses } from "@/components/utils/button/buttonStyles";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
 import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
@@ -11,17 +12,21 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import type { ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
-  "tw-min-w-0 tw-rounded-xl tw-px-4 tw-py-3.5 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40";
+  "tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-4 tw-transition-colors last:tw-border-b-0 desktop-hover:hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none md:tw-px-5 md:tw-py-5";
+const HISTORY_FOOTER_CLASS =
+  "tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-3 md:tw-shrink-0 md:tw-justify-end md:tw-border-t-0 md:tw-pt-0";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -45,6 +50,11 @@ export default function UserPageSubscriptionsHistory(
   }>
 ) {
   const locale = useBrowserLocale();
+  const historyTopRef = useRef<HTMLDivElement>(null);
+  const activePanelRef = useRef<HTMLDivElement>(null);
+  const pendingPageScroll = useRef<{ tabId: string; page: number } | null>(
+    null
+  );
   const tabs = [
     {
       id: "redeemed",
@@ -83,8 +93,31 @@ export default function UserPageSubscriptionsHistory(
       )),
     },
   ];
+  const activeTabId = tabs[props.selectedIndex]?.id;
+  const activePage = tabs[props.selectedIndex]?.page;
+  const activeLoading = tabs[props.selectedIndex]?.loading;
+
+  useEffect(() => {
+    const pending = pendingPageScroll.current;
+    if (!pending) return;
+    if (pending.tabId !== activeTabId) {
+      pendingPageScroll.current = null;
+      return;
+    }
+    if (activeLoading || activePage !== pending.page) return;
+
+    pendingPageScroll.current = null;
+    // New rows must be committed before scrolling; the loading panel is shorter.
+    const top =
+      historyTopRef.current?.closest("section") ?? historyTopRef.current;
+    activePanelRef.current?.focus({ preventScroll: true });
+    top?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [activeTabId, activePage, activeLoading]);
+
   return (
     <TabGroup
+      ref={historyTopRef}
+      className="tw-scroll-mt-24"
       selectedIndex={props.selectedIndex}
       onChange={props.onSelectionChange}
     >
@@ -111,6 +144,7 @@ export default function UserPageSubscriptionsHistory(
         {tabs.map((tab) => (
           <TabPanel
             key={tab.id}
+            ref={tab.id === activeTabId ? activePanelRef : null}
             aria-busy={tab.loading === true}
             className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
@@ -120,7 +154,7 @@ export default function UserPageSubscriptionsHistory(
             ) : (
               <>
                 {tab.rows.length ? (
-                  <div className="tw-flex tw-flex-col tw-rounded-xl tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-white/[0.03]">
+                  <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-white/[0.03]">
                     {tab.rows}
                   </div>
                 ) : (
@@ -129,7 +163,11 @@ export default function UserPageSubscriptionsHistory(
                 <HistoryPagination
                   page={tab.page}
                   count={tab.count}
-                  setPage={tab.setPage}
+                  setPage={(page) => {
+                    pendingPageScroll.current =
+                      page === tab.page ? null : { tabId: tab.id, page };
+                    tab.setPage(page);
+                  }}
                 />
               </>
             )}
@@ -179,12 +217,13 @@ function HistoryPagination({
   }
 
   return (
-    <div className="tw-mt-4 tw-text-center">
+    <div className="tw-mt-4 tw-flex tw-justify-center max-md:[&_button]:tw-min-h-10 max-md:[&_button]:tw-min-w-10 max-md:[&_input]:tw-h-10 max-md:[&_input]:tw-w-10">
       <Pagination
         page={page}
         pageSize={HISTORY_PAGE_SIZE}
         totalResults={count}
         setPage={setPage}
+        variant="compact"
       />
     </div>
   );
@@ -195,11 +234,12 @@ function TopUpEntry(
     topUp: SubscriptionTopUp;
   }>
 ) {
+  const locale = useBrowserLocale();
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
-          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-text-iron-100">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-4">
+        <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
+          <span className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-sm tw-text-emerald-300 md:tw-text-[15px]">
             <b className="tw-font-semibold tw-tabular-nums">
               + {props.topUp.amount}
             </b>
@@ -207,25 +247,21 @@ function TopUpEntry(
               <EthereumIcon />
             </span>
           </span>
-          <span className="tw-break-all tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-            from: {props.topUp.from_wallet}
-          </span>
+          <p className="tw-m-0 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere] md:tw-text-sm">
+            {tRich(locale, "subscriptions.history.fromWallet", {
+              address: (
+                <span key="sender" className="tw-font-medium tw-text-iron-200">
+                  {props.topUp.from_wallet}
+                </span>
+              ),
+            })}
+          </p>
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
-          <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
+        <div className={HISTORY_FOOTER_CLASS}>
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-text-sm">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </span>
-          <a
-            className="tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={getTransactionLink(mainnet.id, props.topUp.hash)}
-            aria-label="View transaction on Etherscan"
-          >
-            <span className="tw-size-5">
-              <EtherscanIcon />
-            </span>
-          </a>
+          <HistoryTransactionLink transaction={props.topUp.hash} />
         </div>
       </div>
     </div>
@@ -239,19 +275,25 @@ function LogEntry(
 ) {
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-        <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-300">
-            {props.log.log}
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2.5 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-4">
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2.5">
+            <span
+              aria-hidden="true"
+              className="tw-mt-2 tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-iron-500"
+            />
+            <p className="tw-m-0 tw-min-w-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 [overflow-wrap:anywhere] md:tw-text-[15px]">
+              {props.log.log}
+            </p>
           </div>
           {props.log.additional_info && (
-            <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500 max-sm:tw-break-all">
-              {props.log.additional_info}
+            <div className="tw-mt-1.5 tw-text-pretty tw-pl-4 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere] md:tw-text-sm">
+              <LogDetailsText text={props.log.additional_info} />
             </div>
           )}
         </div>
         {props.log.created_at && (
-          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
+          <span className="tw-whitespace-nowrap tw-pl-4 tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-shrink-0 md:tw-pl-0 md:tw-text-sm">
             {getDateDisplay(new Date(props.log.created_at))}
           </span>
         )}
@@ -260,49 +302,143 @@ function LogEntry(
   );
 }
 
+function LogDetailsText({ text }: Readonly<{ text: string }>) {
+  // Preserve every original separator and value while applying text emphasis.
+  return text.split(/( - )/u).flatMap<ReactNode>((part, position) => {
+    const separator = part.indexOf(": ");
+    if (separator < 0) {
+      return part;
+    }
+    const valueStart = separator + 2;
+    return [
+      part.slice(0, valueStart),
+      <span
+        key={`${position}:${part}`}
+        className="tw-font-medium tw-text-iron-200"
+      >
+        {part.slice(valueStart)}
+      </span>,
+    ];
+  });
+}
+
 function RedeemedEntry(
   props: Readonly<{
     redeem: RedeemedSubscription;
   }>
 ) {
+  const locale = useBrowserLocale();
   const contractName = areEqualAddresses(props.redeem.contract, MEMES_CONTRACT)
-    ? "Meme"
-    : `Contract ${formatAddress(props.redeem.contract)}`;
+    ? t(locale, "subscriptions.history.meme")
+    : t(locale, "subscriptions.history.contract", {
+        address: formatAddress(props.redeem.contract),
+      });
   const transactionDate =
     props.redeem.transaction_date ?? props.redeem.created_at;
 
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-        <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-300">
-            Redeemed Subscription for {contractName} #{props.redeem.token_id} x
-            {props.redeem.count}
-          </div>
-          <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-            Airdrop Address: {formatAddress(props.redeem.address)} - Balance
-            after redemption: {props.redeem.balance_after} ETH
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-4">
+        <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
+          <p className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 md:tw-text-[15px]">
+            {tRich(locale, "subscriptions.history.redeemedEntryTitle", {
+              contract: contractName,
+              token: formatInteger(locale, props.redeem.token_id),
+              count: (
+                <span
+                  key="quantity"
+                  className="tw-ml-1 tw-inline-flex tw-whitespace-nowrap tw-rounded-md tw-bg-primary-300/[0.08] tw-px-2 tw-py-0.5 tw-align-middle tw-text-xs tw-font-medium tw-leading-5 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-300/20"
+                >
+                  {t(locale, "subscriptions.history.quantity", {
+                    count: formatInteger(locale, props.redeem.count),
+                  })}
+                </span>
+              ),
+            })}
+          </p>
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-1 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 md:tw-flex-row md:tw-flex-wrap md:tw-items-baseline md:tw-gap-x-2 md:tw-text-sm">
+            <p className="tw-m-0 tw-min-w-0 [overflow-wrap:anywhere]">
+              {tRich(locale, "subscriptions.history.redeemedAddress", {
+                address: (
+                  <span
+                    key="address"
+                    className="tw-font-medium tw-text-iron-200"
+                  >
+                    {formatAddress(props.redeem.address)}
+                  </span>
+                ),
+              })}
+            </p>
+            <span
+              aria-hidden="true"
+              className="tw-hidden tw-text-iron-600 md:tw-inline"
+            >
+              {" - "}
+            </span>
+            <p className="tw-m-0 tw-min-w-0 tw-text-pretty [overflow-wrap:anywhere]">
+              {tRich(locale, "subscriptions.history.redeemedBalance", {
+                balance: (
+                  <span
+                    key="balance"
+                    className="tw-whitespace-nowrap tw-font-medium tw-text-iron-100"
+                  >
+                    {props.redeem.balance_after} ETH
+                  </span>
+                ),
+              })}
+            </p>
           </div>
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
+        <div className={HISTORY_FOOTER_CLASS}>
           {transactionDate && (
-            <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
+            <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-text-sm">
               {getDateDisplay(new Date(transactionDate))}
             </span>
           )}
-          <a
-            className="tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={getTransactionLink(mainnet.id, props.redeem.transaction)}
-            aria-label="View transaction on Etherscan"
-          >
-            <span className="tw-size-5">
-              <EtherscanIcon />
-            </span>
-          </a>
+          <HistoryTransactionLink transaction={props.redeem.transaction} />
         </div>
       </div>
     </div>
+  );
+}
+
+function HistoryTransactionLink({
+  transaction,
+}: Readonly<{ transaction: string }>) {
+  const locale = useBrowserLocale();
+  const tooltipId = useId();
+  const label = t(locale, "subscriptions.history.viewTransaction");
+  return (
+    <>
+      <a
+        className="tw-group tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        target="_blank"
+        rel="noopener noreferrer"
+        href={getTransactionLink(mainnet.id, transaction)}
+        aria-label={label}
+        aria-describedby={tooltipId}
+        data-tooltip-id={tooltipId}
+      >
+        <span
+          aria-hidden="true"
+          className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/[0.08] tw-transition-colors desktop-hover:group-hover:tw-bg-iron-800 desktop-hover:group-hover:tw-text-iron-100 motion-reduce:tw-transition-none"
+        >
+          <span className="tw-size-4">
+            <EtherscanIcon />
+          </span>
+        </span>
+      </a>
+      <BodyPortalTooltip
+        id={tooltipId}
+        place="top"
+        offset={8}
+        delayShow={250}
+        opacity={1}
+        openEvents={{ mouseover: true, focus: true }}
+        style={TOOLTIP_STYLES}
+      >
+        {label}
+      </BodyPortalTooltip>
+    </>
   );
 }

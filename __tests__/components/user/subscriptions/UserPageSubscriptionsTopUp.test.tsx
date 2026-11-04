@@ -119,26 +119,54 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
-  it("sends transaction when 1 Card option is selected and Send is clicked", async () => {
+  it.each(["dialog", "inline"] as const)(
+    "sends the same transaction from the %s presentation",
+    async (presentation) => {
+      const user = userEvent.setup();
+      render(<UserPageSubscriptionsTopUp presentation={presentation} />);
+
+      const oneCardOption = screen.getByRole("radio", {
+        name: "1 Card",
+      });
+      await user.click(oneCardOption);
+
+      const sendButton = screen.getByRole("button", {
+        name: "Top up 0.06529 ETH",
+      });
+      expect(sendButton).not.toBeDisabled();
+      await user.click(sendButton);
+
+      expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+        chainId: SUBSCRIPTIONS_CHAIN.id,
+        to: SUBSCRIPTIONS_ADDRESS,
+        value: parseEther(MEMES_MINT_PRICE.toString()),
+      });
+    }
+  );
+
+  it("preserves the draft amount when switching between inline and dialog", async () => {
     const user = userEvent.setup();
-    render(<UserPageSubscriptionsTopUp />);
-
-    const oneCardOption = screen.getByRole("radio", {
-      name: "1 Card",
-    });
-    await user.click(oneCardOption);
-
-    const sendButton = screen.getByRole("button", {
-      name: "Top up 0.06529 ETH",
-    });
-    expect(sendButton).not.toBeDisabled();
-    await user.click(sendButton);
-
-    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
-      chainId: SUBSCRIPTIONS_CHAIN.id,
-      to: SUBSCRIPTIONS_ADDRESS,
-      value: parseEther(MEMES_MINT_PRICE.toString()),
-    });
+    const { rerender } = render(
+      <UserPageSubscriptionsTopUp presentation="inline" />
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await user.type(
+      screen.getByRole("spinbutton", { name: "Other card count" }),
+      "2"
+    );
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    rerender(<UserPageSubscriptionsTopUp presentation="dialog" />);
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveValue(2);
+    expect(screen.getByRole("radio", { name: "Other" })).toBeChecked();
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
   it("shows success message when transaction succeeded", async () => {

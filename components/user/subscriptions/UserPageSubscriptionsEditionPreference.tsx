@@ -96,7 +96,12 @@ export default function UserPageSubscriptionsEditionPreference(
             })
           : t(locale, "subscriptions.settings.loading")
       }
-      checked={isAllEditions}
+      checked={
+        props.readonly
+          ? (props.details?.subscribe_all_editions ?? false)
+          : isAllEditions
+      }
+      readOnly={props.readonly}
       loading={!props.details}
       disabled={isDisabled}
       busy={isUpdatingAllEditions}

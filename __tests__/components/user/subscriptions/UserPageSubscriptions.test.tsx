@@ -7,6 +7,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { ContextType, ReactElement, ReactNode } from "react";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import * as commonApi from "@/services/api/common-api";
 import * as memeCalendarHelpers from "@/components/meme-calendar/meme-calendar.helpers";
 
@@ -24,6 +25,7 @@ function renderWithAuth(
 }
 
 const mockCoverageRefetch = jest.fn();
+let mockCoverageStatus: Status | undefined;
 
 // Mock child components
 jest.mock(
@@ -54,11 +56,17 @@ jest.mock("@/components/user/subscriptions/UserPageSubscriptionsTopUp", () => ({
   default: ({
     onTransactionConfirmed,
     expanded,
+    presentation,
   }: {
     onTransactionConfirmed: () => void;
     expanded: boolean;
+    presentation: "inline" | "dialog";
   }) => (
-    <div data-testid="subscriptions-topup" data-expanded={expanded}>
+    <div
+      data-testid="subscriptions-topup"
+      data-expanded={expanded}
+      data-presentation={presentation}
+    >
       TopUp Component
       <button onClick={onTransactionConfirmed}>Confirm transaction</button>
     </div>
@@ -69,9 +77,10 @@ jest.mock(
   "@/components/user/subscriptions/coverage/SubscriptionCoverageSummary",
   () => ({
     __esModule: true,
-    default: ({ action, children }: any) => (
+    default: ({ action, topUpAction, children }: any) => (
       <div data-testid="subscription-coverage-summary">
         Coverage summary{action}
+        {topUpAction}
         {children}
       </div>
     ),
@@ -82,7 +91,7 @@ jest.mock(
   "@/components/user/subscriptions/coverage/useSubscriptionCoverage",
   () => ({
     useSubscriptionCoverage: () => ({
-      data: undefined,
+      data: mockCoverageStatus ? { status: mockCoverageStatus } : undefined,
       isError: false,
       isLoading: false,
       refetch: mockCoverageRefetch,
@@ -166,6 +175,7 @@ describe("UserPageSubscriptions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoverageStatus = undefined;
     mockCommonApiFetch.mockResolvedValue({});
     mockGetCardsRemainingUntilEndOf.mockReturnValue(5);
     mockIsMintingToday.mockReturnValue(false);
@@ -210,6 +220,50 @@ describe("UserPageSubscriptions", () => {
   });
 
   describe("Connected Account Detection", () => {
+    it.each([Status.NotSetUp, Status.NoUpcomingSelections])(
+      "shows top up inline for an owner in %s, without a modal opener",
+      (status) => {
+        mockCoverageStatus = status;
+        renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
+          connectedProfile: mockProfile,
+        });
+        expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
+          "data-presentation",
+          "inline"
+        );
+        expect(
+          screen.queryByRole("button", { name: "Top up", exact: true })
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it.each([Status.NotSetUp, Status.NoUpcomingSelections])(
+      "keeps top up absent for a visitor in %s",
+      (status) => {
+        mockCoverageStatus = status;
+        renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
+          connectedProfile: null,
+        });
+        expect(
+          screen.queryByTestId("subscriptions-topup")
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it("keeps top up in the dialog for a funded owner", () => {
+      mockCoverageStatus = Status.Covered;
+      renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
+        connectedProfile: mockProfile,
+      });
+      expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
+        "data-presentation",
+        "dialog"
+      );
+      expect(
+        screen.getByRole("button", { name: "Top up", exact: true })
+      ).toBeInTheDocument();
+    });
+
     it("opens the existing top-up flow from the status card", async () => {
       renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
         connectedProfile: mockProfile,
@@ -391,6 +445,7 @@ describe("UserPageSubscriptions", () => {
       jest.clearAllMocks();
 
       await user.click(screen.getByText("Refresh"));
+      expect(mockCoverageRefetch).toHaveBeenCalledTimes(1);
 
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledTimes(4);

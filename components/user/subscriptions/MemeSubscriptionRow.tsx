@@ -16,7 +16,13 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useQueryClient } from "@tanstack/react-query";
-import { useContext, useEffect, useMemo, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactElement,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
@@ -31,10 +37,12 @@ function MintingTodayLabel({
   tokenId,
   locale,
   className = "",
+  showIndicator = false,
 }: {
   readonly tokenId: number;
   readonly locale: ReturnType<typeof useBrowserLocale>;
   readonly className?: string | undefined;
+  readonly showIndicator?: boolean;
 }) {
   const tooltipId = `minting-today-${tokenId}`;
 
@@ -46,6 +54,15 @@ function MintingTodayLabel({
         data-tooltip-id={tooltipId}
         aria-describedby={tooltipId}
       >
+        {showIndicator && (
+          <span
+            aria-hidden="true"
+            className="tw-relative tw-mr-1 tw-inline-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center"
+          >
+            <span className="tw-absolute tw-size-3.5 tw-animate-ping tw-rounded-full tw-bg-primary-300 tw-opacity-30 motion-reduce:tw-animate-none" />
+            <span className="tw-relative tw-size-2 tw-rounded-full tw-bg-primary-300" />
+          </span>
+        )}
         {t(locale, "profile.subscriptions.mintingToday.label")}
         <FontAwesomeIcon
           icon={faInfoCircle}
@@ -69,6 +86,24 @@ function MintingTodayLabel({
   );
 }
 
+function ReadOnlySubscriptionStatus({
+  subscribed,
+}: Readonly<{ subscribed: boolean }>) {
+  const locale = useBrowserLocale();
+  return (
+    <span
+      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-5 sm:tw-text-sm ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
+    >
+      {t(
+        locale,
+        subscribed
+          ? "subscriptions.upcoming.subscribed"
+          : "subscriptions.upcoming.notSubscribed"
+      )}
+    </span>
+  );
+}
+
 export default function MemeSubscriptionRow(
   props: Readonly<{
     profileKey: string;
@@ -79,6 +114,7 @@ export default function MemeSubscriptionRow(
     minting_today?: boolean | undefined;
     first: boolean;
     date: SeasonMintRow | null;
+    artwork?: ReactElement | undefined;
     refresh: () => void;
     variant?: "default" | "compact";
     balanceLabel?: string;
@@ -285,6 +321,29 @@ export default function MemeSubscriptionRow(
       return null;
     }
 
+    if (props.readonly && !isCompact) {
+      return (
+        <span
+          role="group"
+          aria-label={t(locale, "subscriptions.upcoming.quantity", {
+            title: props.title,
+            token: formatInteger(locale, props.subscription.token_id),
+          })}
+          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-tabular-nums tw-leading-5"
+        >
+          <span className="tw-font-medium tw-text-iron-100">
+            {formatInteger(
+              locale,
+              Math.max(0, Math.min(selectedCount, props.eligibilityCount))
+            )}
+          </span>{" "}
+          <span className="tw-text-iron-500">
+            / {formatInteger(locale, props.eligibilityCount)}
+          </span>
+        </span>
+      );
+    }
+
     const isCountSelectDisabled =
       props.eligibilityCount < 1 ||
       (disableWhenSingleOption && props.eligibilityCount <= 1) ||
@@ -391,17 +450,27 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-min-h-[60px] tw-px-5 tw-py-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-md:tw-px-4">
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-flex-wrap max-sm:tw-gap-2">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2 max-sm:tw-basis-40">
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+    <div
+      className={`tw-min-h-[60px] tw-pl-4 tw-pr-4 sm:tw-pl-5 sm:tw-pr-6 ${props.minting_today ? "tw-py-6" : "tw-py-5"}`}
+    >
+      <div
+        className={`tw-grid tw-min-w-0 tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex sm:tw-justify-between sm:tw-gap-5 ${props.artwork ? "tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-grid-cols-[minmax(0,1fr)_auto]"}`}
+      >
+        {props.artwork && (
+          <div className="tw-row-span-2 tw-shrink-0">{props.artwork}</div>
+        )}
+        <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-flex-col sm:tw-gap-2">
+          <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-col sm:tw-gap-0.5">
             {props.date && (
-              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[15px] tw-font-semibold tw-tabular-nums tw-leading-[22px] tw-text-iron-100">
+              <div
+                className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 ${props.artwork ? "tw-col-start-2 tw-row-start-1" : "tw-col-span-full"}`}
+              >
                 {props.minting_today ? (
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
                     locale={locale}
-                    className="tw-text-[15px] tw-font-semibold tw-text-primary-300"
+                    showIndicator
+                    className="tw-text-base tw-font-semibold tw-text-primary-300"
                   />
                 ) : (
                   <time
@@ -426,17 +495,19 @@ export default function MemeSubscriptionRow(
                 </span>
               </div>
             )}
-            <span className="tw-break-words tw-text-[13px] tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-300">
+            <span
+              className={`tw-row-start-2 tw-min-w-0 tw-break-words tw-tabular-nums ${props.minting_today ? "tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl sm:tw-leading-9" : "tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"} ${props.artwork ? "tw-col-start-2" : "tw-col-start-1"}`}
+            >
               {props.title} #{props.subscription.token_id}
             </span>
           </div>
           {hasNoAllocation && (
-            <output className="tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
+            <output className="tw-col-span-full tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "profile.subscriptions.noAllocation")}
             </output>
           )}
           {finalWithMetadata && (
-            <span className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
+            <span className="tw-col-span-full tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
               Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
               {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
               {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
@@ -445,18 +516,24 @@ export default function MemeSubscriptionRow(
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 max-sm:tw-ml-auto max-sm:tw-gap-2">
+        <div
+          className={`tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 ${props.artwork ? "tw-col-span-full tw-row-start-3" : "tw-col-start-2 tw-row-start-2"} ${props.readonly ? "max-sm:tw-flex-col max-sm:tw-items-end max-sm:tw-gap-0.5" : "max-sm:tw-gap-2"}`}
+        >
           {isSubmitting && <Spinner />}
           {renderCountSelector({
             disableWhenSingleOption: true,
           })}
-          <UserPageSubscriptionsToggle
-            disabled={isToggleDisabled}
-            id={id}
-            checked={subscribed}
-            onChange={submit}
-            ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-          />
+          {props.readonly ? (
+            <ReadOnlySubscriptionStatus subscribed={subscribed} />
+          ) : (
+            <UserPageSubscriptionsToggle
+              disabled={isToggleDisabled}
+              id={id}
+              checked={subscribed}
+              onChange={submit}
+              ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+            />
+          )}
         </div>
       </div>
     </div>

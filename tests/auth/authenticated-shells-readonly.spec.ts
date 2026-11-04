@@ -8,7 +8,12 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
-import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
+import {
+  installSubscriptionFixtures,
+  subscriptionCoverageFixture,
+} from "../support/subscriptionFixtures";
+import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
+import { ApiSubscriptionCoverageMode } from "../../generated/models/ApiSubscriptionCoverageMode";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 
 const plan = {
@@ -409,11 +414,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("heading", { name: "Subscription History", exact: true })
     ).toBeVisible();
-    await page.getByRole("button", { name: "Details", exact: true }).click();
     await expect(
       page
-        .locator("#subscription-coverage-details")
-        .getByText("Balance capacity", { exact: true })
+        .locator("#subscription-overview-actions")
+        .getByText("Forecast use", { exact: true })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Airdrop Address" })
@@ -433,6 +437,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
   test("opens and focuses the top-up dialog from the notification link", async ({
     page,
   }) => {
+    await installSubscriptionFixtures(page);
     const path = `${PROFILE_BASE_PATH}/subscriptions`;
     const hash = "#profile-subscriptions-top-up";
 
@@ -457,36 +462,162 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeInViewport();
   });
 
+  test("shows top up inline for an owner without selected drops and focuses its deep link", async ({
+    page,
+  }, testInfo) => {
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    await page.route(
+      (url) => url.pathname.includes("/subscriptions/consolidation/coverage/"),
+      async (route) => {
+        await route.fulfill({
+          json: subscriptionCoverageFixture({
+            status: ApiSubscriptionCoverageStatus.NoUpcomingSelections,
+            mode: ApiSubscriptionCoverageMode.Manual,
+            balance_eth: "0",
+            mint_capacity: 0,
+            allocated_mints: 0,
+            fully_funded_drops: 0,
+            funded_through: null,
+            next_unfunded: null,
+            minimum_top_up: null,
+            recommended_top_up: null,
+          }),
+        });
+      }
+    );
+    await page.route(
+      (url) => url.pathname.includes("/subscriptions/consolidation/details/"),
+      async (route) => {
+        await route.fulfill({
+          json: {
+            balance: 0,
+            automatic: false,
+            subscribe_all_editions: false,
+            subscription_eligibility_count: 1,
+            last_update: 0,
+          },
+        });
+      }
+    );
+    await page.route(
+      (url) =>
+        url.pathname.includes("/subscriptions/consolidation/upcoming-memes/"),
+      async (route) => {
+        await route.fulfill({
+          json: [568, 569, 570].map((token_id) => ({
+            token_id,
+            contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            subscribed: false,
+            subscribed_count: 0,
+          })),
+        });
+      }
+    );
+    await page.goto(
+      `${PROFILE_BASE_PATH}/subscriptions#profile-subscriptions-top-up`,
+      { waitUntil: "domcontentloaded" }
+    );
+    await waitForRouteReady(page);
+    const topUp = page.getByRole("region", { name: "Top up", exact: true });
+    await expect(
+      page.getByRole("button", { name: "Refresh coverage", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Refresh balance", exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Top up" })).toHaveCount(0);
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeFocused();
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeInViewport();
+    await topUp.getByRole("radio", { name: "1 Card", exact: true }).check();
+    await expect(
+      topUp.getByRole("button", { name: "Top up 0.06529 ETH", exact: true })
+    ).toBeEnabled();
+    await topUp.getByRole("spinbutton", { name: "Other card count" }).fill("2");
+    await expect(
+      topUp.getByRole("radio", { name: "Other", exact: true })
+    ).toBeChecked();
+    await expect(
+      topUp.getByRole("button", { name: "Top up 0.13058 ETH", exact: true })
+    ).toBeEnabled();
+    await topUp
+      .getByRole("button", {
+        name: "Show Deep Time Subscriptions",
+        exact: true,
+      })
+      .click();
+    await expect(
+      topUp.getByRole("radio", { name: /^Remaining Period/ })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscriptions-empty-inline-top-up"
+    );
+    await page.getByRole("link", { name: "Choose drops", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "Upcoming Drops", exact: true })
+    ).toBeFocused();
+    // Inspect the choices without submitting ETH or changing subscriptions.
+  });
+
   test("subscriptions preserve full details, compact top up and history pagination", async ({
     page,
   }, testInfo) => {
     await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
     const { address } = await installSubscriptionFixtures(page);
+    await page.route(
+      (url) => url.pathname.endsWith("/memes_latest"),
+      (route) =>
+        route.fulfill({
+          json: {
+            id: 568,
+            contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+            thumbnail: "/profile-cms/templates/memes/1.webp",
+          },
+        })
+    );
     await gotoReady(page, `${PROFILE_BASE_PATH}/subscriptions`);
     await expect(
       page.getByRole("heading", { name: "3 drops funded Running low" })
     ).toBeVisible();
     const overview = page.locator("#profile-subscriptions-overview");
+    const statusHeading = overview.getByRole("heading", { level: 2 });
+    await expect(statusHeading.locator("svg")).toHaveCount(0);
+    const statusBadgeBox = await statusHeading
+      .getByText("Running low", { exact: true })
+      .boundingBox();
+    const fundedCountBox = await statusHeading
+      .getByText("3 drops funded", { exact: true })
+      .boundingBox();
+    expect(statusBadgeBox).not.toBeNull();
+    expect(fundedCountBox).not.toBeNull();
+    expect(statusBadgeBox!.y + statusBadgeBox!.height).toBeLessThanOrEqual(
+      fundedCountBox!.y
+    );
     const headlineBox = await overview
       .getByRole("heading", { level: 2 })
       .boundingBox();
     const descriptionBox = await overview
       .locator("#profile-subscriptions-overview-title + p")
       .boundingBox();
-    const detailsBox = await overview
-      .getByRole("button", { name: "Details", exact: true })
-      .boundingBox();
     const overviewActions = page.locator("#subscription-overview-actions");
-    const topUpBox = await overviewActions
-      .getByRole("button", { name: "Top up", exact: true })
-      .boundingBox();
+    const topUpButton = overviewActions.getByRole("button", {
+      name: "Top up",
+      exact: true,
+    });
+    const topUpBox = await topUpButton.boundingBox();
     const balanceBox = await overviewActions
       .getByText("Subscription balance", { exact: true })
       .boundingBox();
     const overviewBox = await overview.boundingBox();
     expect(headlineBox).not.toBeNull();
     expect(descriptionBox).not.toBeNull();
-    expect(detailsBox).not.toBeNull();
     expect(topUpBox).not.toBeNull();
     expect(balanceBox).not.toBeNull();
     expect(overviewBox).not.toBeNull();
@@ -500,36 +631,60 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         overviewBox!.y + overviewBox!.height
       );
     }
-    expect(detailsBox!.y).toBeGreaterThanOrEqual(
+    await expect(
+      overview.getByRole("button", { name: "Details", exact: true })
+    ).toHaveCount(0);
+    expect(balanceBox!.y).toBeGreaterThanOrEqual(
       descriptionBox!.y + descriptionBox!.height
     );
     const chooseDropsControlBox = await overview
       .getByRole("link", { name: "Choose drops", exact: true })
       .boundingBox();
     expect(chooseDropsControlBox).not.toBeNull();
-    expect(detailsBox!.x).toBeGreaterThanOrEqual(
-      chooseDropsControlBox!.x + chooseDropsControlBox!.width
+    expect(chooseDropsControlBox!.y).toBeGreaterThanOrEqual(
+      descriptionBox!.y + descriptionBox!.height
     );
-    expect(
-      Math.abs(detailsBox!.y - chooseDropsControlBox!.y)
-    ).toBeLessThanOrEqual(1);
-    if (page.viewportSize()!.width >= 768) {
-      expect(balanceBox!.x).toBeGreaterThanOrEqual(
-        headlineBox!.x + headlineBox!.width
-      );
-      expect(topUpBox!.x).toBeGreaterThanOrEqual(
-        headlineBox!.x + headlineBox!.width
-      );
-    }
+    const forecast = overviewActions.getByRole("button", {
+      name: "Forecast use",
+      exact: true,
+    });
+    await expect(
+      overviewActions.getByText("Forecast use", { exact: true })
+    ).toBeVisible();
+    await forecast.focus();
+    const forecastTooltip = page.getByRole("tooltip").filter({
+      hasText:
+        "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+    });
+    await expect(forecastTooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(forecastTooltip).toBeHidden();
+    await forecast.click();
+    await expect(forecastTooltip).toBeVisible();
+    await page.keyboard.press("Escape");
     const amount = overviewActions.getByText("0.4 ETH", { exact: true });
     const refreshBalance = overviewActions.getByRole("button", {
       name: "Refresh balance",
     });
     await expect(amount).toBeVisible();
+    const availableMints = overviewActions.getByText("(6 mints available)", {
+      exact: true,
+    });
+    await expect(availableMints).toBeVisible();
+    const availableMintsBox = await availableMints.boundingBox();
+    expect(availableMintsBox).not.toBeNull();
     const amountBox = await amount.boundingBox();
     const refreshBox = await refreshBalance.boundingBox();
     expect(amountBox).not.toBeNull();
     expect(refreshBox).not.toBeNull();
+    // The compact reference keeps capacity inline when it fits on desktop.
+    // On phones it remains its own line beneath the balance.
+    expect(availableMintsBox!.y).toBeGreaterThanOrEqual(amountBox!.y);
+    if (page.viewportSize()!.width < 640) {
+      expect(availableMintsBox!.y).toBeGreaterThanOrEqual(
+        amountBox!.y + amountBox!.height
+      );
+    }
     expect(refreshBox!.x).toBeGreaterThanOrEqual(
       amountBox!.x + amountBox!.width
     );
@@ -586,7 +741,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         modeDateBox!.x + modeDateBox!.width - modeRowBox!.x - modeRowBox!.width
       )
     ).toBeLessThanOrEqual(1);
-    await expect(modeDate).toHaveCSS("text-align", "right");
+    await expect(modeDate).toHaveCSS(
+      "text-align",
+      page.viewportSize()!.width >= 1024 ? "left" : "right"
+    );
     await expect(
       upcoming.getByText(
         "Automatic airdrops of all eligible drops unless you opt-out",
@@ -599,6 +757,17 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       })
     ).toBeDisabled();
     await expect(upcoming.getByRole("combobox").first()).toBeDisabled();
+    const mintingArtwork = upcoming.locator("img");
+    await expect(mintingArtwork).toHaveCount(1);
+    await expect(mintingArtwork).toHaveAttribute("alt", "");
+    await expect
+      .poll(() =>
+        mintingArtwork.evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+        )
+      )
+      .toBe(true);
+    await expect(upcoming.getByText("SZN17", { exact: true })).toHaveCount(3);
     await upcoming.getByRole("button", { name: "Minting Today" }).focus();
     await expect(
       page.getByRole("tooltip", { name: "No changes allowed on minting day" })
@@ -616,7 +785,104 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(
       settingsBox!.x + settingsBox!.width
     );
+    const ownerViewport = page.viewportSize()!;
+    for (const width of [390, 768, 1023, 1024, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expectNoHorizontalOverflow(page);
+      if (width < 640) {
+        await expect(overviewActions).toHaveCSS("border-top-width", "1px");
+        const forecastRow = forecast.locator("../..");
+        await expect(forecastRow).toHaveCSS("border-top-width", "1px");
+        const mobileActionsBox = await overviewActions.boundingBox();
+        const mobileTopUpBox = await topUpButton.boundingBox();
+        expect(mobileActionsBox).not.toBeNull();
+        expect(mobileTopUpBox).not.toBeNull();
+        expect(
+          Math.abs(mobileTopUpBox!.width - mobileActionsBox!.width)
+        ).toBeLessThanOrEqual(1);
+        expect(mobileTopUpBox!.height).toBeGreaterThanOrEqual(44);
+        const mobileAmountBox = await amount.boundingBox();
+        const mobileRefreshBox = await refreshBalance.boundingBox();
+        expect(mobileAmountBox).not.toBeNull();
+        expect(mobileRefreshBox).not.toBeNull();
+        expect(mobileRefreshBox!.x).toBeGreaterThanOrEqual(
+          mobileAmountBox!.x + mobileAmountBox!.width
+        );
+        expect(
+          Math.abs(mobileAmountBox!.y - mobileRefreshBox!.y)
+        ).toBeLessThanOrEqual(1);
+        await expectSingleLineLabel(
+          overviewActions.getByText("Forecast use", { exact: true })
+        );
+      }
+      const artworkBox = await mintingArtwork.boundingBox();
+      const mintingLabelBox = await upcoming
+        .getByRole("button", { name: "Minting Today" })
+        .boundingBox();
+      expect(artworkBox).not.toBeNull();
+      expect(mintingLabelBox).not.toBeNull();
+      expect(artworkBox!.x + artworkBox!.width).toBeLessThanOrEqual(
+        mintingLabelBox!.x
+      );
+      const overviewSectionBox = await page
+        .locator("#profile-subscriptions")
+        .boundingBox();
+      const settingsSectionBox = await settings.boundingBox();
+      expect(overviewSectionBox).not.toBeNull();
+      expect(settingsSectionBox).not.toBeNull();
+      if (width >= 1024) {
+        expect(settingsSectionBox!.x).toBeGreaterThanOrEqual(
+          overviewSectionBox!.x + overviewSectionBox!.width
+        );
+        expect(
+          Math.abs(settingsSectionBox!.y - overviewSectionBox!.y)
+        ).toBeLessThanOrEqual(1);
+      } else {
+        expect(settingsSectionBox!.y).toBeGreaterThanOrEqual(
+          overviewSectionBox!.y + overviewSectionBox!.height
+        );
+      }
+      const controls = settings.locator("[data-setting-controls]");
+      await expect(controls).toHaveCount(2);
+      for (const control of await controls.all()) {
+        const layout = await control.evaluate((element) => {
+          const groupBox = element
+            .closest('[role="group"]')!
+            .getBoundingClientRect();
+          const labels = Array.from(element.querySelectorAll("label[for]"));
+          const controls = Array.from(
+            element.querySelectorAll("label[for], input")
+          );
+          return {
+            contained: controls.every((control) => {
+              const box = control.getBoundingClientRect();
+              return (
+                box.left >= groupBox.left && box.right <= groupBox.right + 1
+              );
+            }),
+            labelLineCounts: labels.map((label) => {
+              const range = document.createRange();
+              range.selectNodeContents(label);
+              return new Set(
+                Array.from(range.getClientRects(), (rect) => rect.top)
+              ).size;
+            }),
+          };
+        });
+        expect(layout.contained).toBe(true);
+        expect(layout.labelLineCounts).toEqual([1, 1]);
+      }
+      const learnMore = page.getByRole("link", {
+        name: "Learn more",
+        exact: true,
+      });
+      await expect(learnMore).toHaveCSS("font-size", "13px");
+      const learnMoreBox = await learnMore.boundingBox();
+      expect(learnMoreBox!.height).toBeGreaterThanOrEqual(44);
+    }
+    await page.setViewportSize(ownerViewport);
     const showMore = upcoming.getByRole("button", { name: "Show More" });
+    await expect(showMore).toHaveCSS("justify-content", "center");
     const footer = await showMore.boundingBox();
     const list = await upcoming
       .getByRole("button", { name: "Show More" })
@@ -624,6 +890,13 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       .boundingBox();
     expect(footer).not.toBeNull();
     expect(list).not.toBeNull();
+    const firstDrop = await showMore
+      .locator("..")
+      .locator(":scope > div > div")
+      .first()
+      .boundingBox();
+    expect(firstDrop).not.toBeNull();
+    expect(firstDrop!.y).toBeGreaterThan(list!.y);
     expect(Math.abs(footer!.width - list!.width)).toBeLessThanOrEqual(2);
     await showMore.click();
     await expect(
@@ -677,8 +950,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const customRow = topUp
       .getByRole("radio", { name: "Other", exact: true })
       .locator("..");
-    await expect(customRow).toHaveCSS("border-bottom-left-radius", "11px");
-    await expect(customRow).toHaveCSS("border-bottom-right-radius", "11px");
+    await expect(customRow).toHaveCSS("border-bottom-left-radius", "12px");
+    await expect(customRow).toHaveCSS("border-bottom-right-radius", "12px");
     await expect(topUp.getByRole("status")).toHaveText("0.13058 ETH");
     await expect(topUp.getByText("0.13058 ETH", { exact: true })).toBeVisible();
     await expect(customCount).toHaveAccessibleDescription("0.13058 ETH");
@@ -692,8 +965,18 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const recommendedRow = topUp
       .getByRole("radio", { name: /^Recommended/ })
       .locator("..");
-    await expect(recommendedRow).toHaveCSS("border-top-left-radius", "11px");
-    await expect(recommendedRow).toHaveCSS("border-top-right-radius", "11px");
+    await expect(recommendedRow).toHaveCSS("border-top-left-radius", "12px");
+    await expect(recommendedRow).toHaveCSS("border-top-right-radius", "12px");
+    // Each option is now its own card; selection must not square off any corner.
+    await expect(recommendedRow).toHaveCSS("border-bottom-left-radius", "12px");
+    await expect(recommendedRow).toHaveCSS(
+      "border-bottom-right-radius",
+      "12px"
+    );
+    await expect(topUp.getByRole("radio", { name: /^Recommended/ })).toHaveCSS(
+      "border-color",
+      "rgb(82, 139, 255)"
+    );
     await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")
     ).toBeVisible();
@@ -729,15 +1012,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeHidden();
     await deepTime.click();
     const deepRows = topUp.locator("#subscription-top-up-deep-time label");
-    await expect(deepRows.first()).toHaveCSS("border-top-left-radius", "11px");
-    await expect(deepRows.first()).toHaveCSS("border-top-right-radius", "11px");
+    await expect(deepRows.first()).toHaveCSS("border-top-left-radius", "12px");
+    await expect(deepRows.first()).toHaveCSS("border-top-right-radius", "12px");
     await expect(deepRows.last()).toHaveCSS(
       "border-bottom-left-radius",
-      "11px"
+      "12px"
     );
     await expect(deepRows.last()).toHaveCSS(
       "border-bottom-right-radius",
-      "11px"
+      "12px"
     );
     await expect(
       topUp.getByRole("radio", { name: /^Remaining Period/ })
@@ -775,10 +1058,6 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       .press("Escape");
     await expect(topUp).toBeHidden();
     await expect(topUpLink).toBeFocused();
-    const topUpButton = page.getByRole("button", {
-      name: "Top up",
-      exact: true,
-    });
     await topUpButton.click();
     await expect(topUpBackdrop).toBeVisible();
     await expect(topUpBackdrop).toHaveCSS("opacity", "1");
@@ -828,7 +1107,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       name: "Details",
       exact: true,
     });
-    await expect(detailsButton).toHaveAttribute("aria-expanded", "false");
+    await expect(detailsButton).toHaveCount(0);
     const chooseDrops = page.getByRole("link", {
       name: "Choose drops",
       exact: true,
@@ -857,10 +1136,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       settings.getByText("Oct 2, 2026, 19:03 UTC", { exact: true })
     ).toBeVisible();
-    await detailsButton.click();
     const coverageReport = page.locator("#subscription-coverage-details");
     for (const label of [
       "Status",
+      "Balance capacity",
       "Drops funded",
       "Funded through",
       "Mode",
@@ -879,10 +1158,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       )
     ).toHaveCount(0);
     await expect(
-      coverageReport.getByText("Only a few intended drops remain fully funded.")
+      coverageReport.getByText(
+        "Your balance covers only a few more selected drops."
+      )
     ).toBeVisible();
     const reportDescriptionBox = await coverageReport
-      .getByText("Only a few intended drops remain fully funded.")
+      .getByText("Your balance covers only a few more selected drops.")
       .boundingBox();
     const reportNumbersBox = await coverageReport.locator("dl").boundingBox();
     expect(reportDescriptionBox).not.toBeNull();
@@ -890,26 +1171,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(
       reportDescriptionBox!.y + reportDescriptionBox!.height
     ).toBeLessThanOrEqual(reportNumbersBox!.y);
-    if (page.viewportSize()!.width < 768) {
-      for (const label of ["Balance capacity", "Forecast use"]) {
-        const row = coverageReport
-          .getByText(label, { exact: true })
-          .locator("..");
-        const labelBox = await row.locator("dt").boundingBox();
-        const valueBox = await row.locator("dd").boundingBox();
-        const rowBox = await row.boundingBox();
-        expect(labelBox).not.toBeNull();
-        expect(valueBox).not.toBeNull();
-        expect(rowBox).not.toBeNull();
-        expect(valueBox!.x).toBeGreaterThanOrEqual(
-          labelBox!.x + labelBox!.width
-        );
-        expect(Math.abs(labelBox!.y - valueBox!.y)).toBeLessThanOrEqual(2);
-        expect(
-          Math.abs(valueBox!.x + valueBox!.width - rowBox!.x - rowBox!.width)
-        ).toBeLessThanOrEqual(1);
-      }
-    }
+    await expect(
+      overviewActions.getByText("Forecast use", { exact: true })
+    ).toBeVisible();
+    await expect(
+      coverageReport.getByText("Forecast use", { exact: true })
+    ).toHaveCount(0);
     await expect(mode).toBeChecked();
     await expect(mode).toBeEnabled();
     await expect(settings.getByText("Manual", { exact: true })).toBeVisible();
@@ -961,10 +1228,59 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await tab.click();
       const panel = page.getByRole("tabpanel", { name: title, exact: true });
       await expect(panel).toBeVisible();
+      if (title === "Redeemed Subscriptions") {
+        if (page.viewportSize()!.width < 768) {
+          const addressLine = await panel
+            .locator("p")
+            .filter({ hasText: /^Airdrop Address:/ })
+            .first()
+            .boundingBox();
+          const balanceLine = await panel
+            .locator("p")
+            .filter({ hasText: /^Balance after redemption:/ })
+            .first()
+            .boundingBox();
+          expect(addressLine).not.toBeNull();
+          expect(balanceLine).not.toBeNull();
+          expect(balanceLine!.y).toBeGreaterThanOrEqual(
+            addressLine!.y + addressLine!.height
+          );
+        }
+        const transaction = panel
+          .getByRole("link", { name: "View transaction on Etherscan" })
+          .first();
+        const transactionTarget = await transaction.boundingBox();
+        const transactionVisual = await transaction
+          .locator("span[aria-hidden=true]")
+          .boundingBox();
+        expect(transactionTarget).not.toBeNull();
+        expect(transactionVisual).not.toBeNull();
+        expect(transactionTarget!.width).toBeGreaterThanOrEqual(44);
+        expect(transactionTarget!.height).toBeGreaterThanOrEqual(44);
+        expect(transactionVisual!.width).toBeLessThan(transactionTarget!.width);
+        expect(transactionVisual!.height).toBeLessThan(
+          transactionTarget!.height
+        );
+        await transaction.focus();
+        await expect(
+          page.getByRole("tooltip", { name: "View transaction on Etherscan" })
+        ).toBeVisible();
+        await expect(transaction).toHaveAttribute(
+          "href",
+          /^https:\/\/etherscan\.io\/tx\//
+        );
+        await expect(transaction).toHaveAttribute("target", "_blank");
+      }
       await panel.getByRole("button", { name: "Next page" }).click();
       await expect(
         panel.getByRole("textbox", { name: "Page number" })
       ).toHaveValue("2");
+      await expect(panel).toBeFocused();
+      await expect(tab).toHaveAttribute("aria-selected", "true");
+      await expect(tab).toBeInViewport();
+      await expect(
+        page.getByRole("heading", { name: "Subscription History", exact: true })
+      ).toBeInViewport();
       await expectNoHorizontalOverflow(page);
     }
     await page.getByRole("tab", { name: "Log History", exact: true }).click();

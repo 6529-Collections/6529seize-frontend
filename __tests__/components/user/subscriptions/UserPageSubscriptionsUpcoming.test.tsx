@@ -1,11 +1,28 @@
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
+import {
+  getUpcomingMintsAcrossSeasons,
+  isMintingToday,
+} from "@/components/meme-calendar/meme-calendar.helpers";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import * as localeFormat from "@/i18n/format";
+import { useNowMinting } from "@/hooks/useNowMinting";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
+
+jest.mock("@/hooks/useNowMinting", () => ({ useNowMinting: jest.fn() }));
+
+const mockNowMintingResult = {
+  nft: undefined,
+  isFetched: true,
+  isFetching: false,
+  isLoading: false,
+  error: null,
+  refetch: jest.fn(),
+};
 
 const mockInvalidateQueries = jest.fn();
 
@@ -104,6 +121,11 @@ describe("UserPageSubscriptionsUpcoming", () => {
   const mockSetToast = jest.fn();
 
   beforeEach(() => {
+    jest.mocked(isMintingToday).mockReturnValue(false);
+    jest
+      .mocked(getUpcomingMintsAcrossSeasons)
+      .mockReturnValue(mockUpcomingRows);
+    jest.mocked(useNowMinting).mockReturnValue(mockNowMintingResult);
     useQueryMock.mockImplementation(({ enabled }) => ({
       data: enabled
         ? {
@@ -147,6 +169,91 @@ describe("UserPageSubscriptionsUpcoming", () => {
     renderComponent();
     expect(screen.getByText("Upcoming Drops")).toBeInTheDocument();
   });
+
+  it("shows the season on every drop row instead of beside the heading", () => {
+    renderComponent();
+    expect(screen.getAllByText("SZN2")).toHaveLength(3);
+    expect(
+      screen.getByRole("heading", { name: "Upcoming Drops" }).parentElement
+    ).not.toHaveTextContent("SZN");
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("SZN2")).toHaveLength(4);
+  });
+
+  it("keeps season changes identifiable when the expanded list spans seasons", () => {
+    jest
+      .mocked(getUpcomingMintsAcrossSeasons)
+      .mockReturnValue([
+        ...mockUpcomingRows.slice(0, 3),
+        { ...mockUpcomingRows[3]!, seasonIndex: 2 },
+      ]);
+    renderComponent();
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("SZN2")).toHaveLength(3);
+    expect(screen.getAllByText("SZN3")).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { name: "Upcoming Drops" }).parentElement
+    ).not.toHaveTextContent("SZN");
+    fireEvent.click(screen.getByRole("button", { name: "Show Less" }));
+    expect(screen.queryByText("SZN3")).not.toBeInTheDocument();
+  });
+
+  it("does not request current artwork on days without a Minting Today row", () => {
+    renderComponent();
+    expect(useNowMinting).not.toHaveBeenCalled();
+  });
+
+  it("shows matching current artwork and keeps the mint-day lock when the image fails", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    jest.mocked(useNowMinting).mockReturnValue({
+      ...mockNowMintingResult,
+      nft: {
+        id: 1,
+        contract: "0x123",
+        thumbnail: "https://example.com/meme-1.jpg",
+      } as ApiMemesExtendedData,
+    });
+    const { container } = renderComponent();
+    const image = container.querySelector("img");
+    expect(image).toHaveAttribute("src", "https://example.com/meme-1.jpg");
+    expect(
+      screen.getByRole("switch", {
+        name: "Toggle subscription for The Memes #1",
+      })
+    ).toBeDisabled();
+    fireEvent.error(image!);
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Minting Today" })).toBeVisible();
+    expect(screen.getByText("The Memes #1")).toBeVisible();
+    expect(
+      screen.getByRole("switch", {
+        name: "Toggle subscription for The Memes #1",
+      })
+    ).toBeDisabled();
+  });
+
+  it.each([
+    { id: 2, contract: "0x123" },
+    { id: 1, contract: "0x456" },
+  ])(
+    "omits artwork for a different token or contract ($id, $contract)",
+    (nft) => {
+      jest.mocked(isMintingToday).mockReturnValue(true);
+      jest.mocked(useNowMinting).mockReturnValue({
+        ...mockNowMintingResult,
+        nft: {
+          ...nft,
+          thumbnail: "https://example.com/other.jpg",
+        } as ApiMemesExtendedData,
+      });
+      const { container } = renderComponent({ readonly: true });
+      expect(container.querySelector("img")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Minting Today" })
+      ).toBeVisible();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    }
+  );
 
   it.each([
     { automatic: false, text: "You have to opt-in to each specific drop" },
@@ -255,17 +362,13 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText(/Minting Today/)).toBeInTheDocument();
   });
 
-  it("disables toggles in readonly mode", () => {
+  it("shows saved subscription statuses instead of toggles in readonly mode", () => {
     renderComponent({ readonly: true });
-
-    const toggles = screen.getAllByRole("button");
-    const subscriptionToggles = toggles.filter((toggle) =>
-      toggle.getAttribute("aria-label")?.includes("Toggle subscription")
-    );
-
-    subscriptionToggles.forEach((toggle) => {
-      expect(toggle).toBeDisabled();
-    });
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Subscribed", { exact: true })).toHaveLength(2);
+    expect(screen.getByText("Not subscribed", { exact: true })).toBeVisible();
+    fireEvent.click(screen.getByText("Not subscribed", { exact: true }));
+    expect(mockRequestAuth).not.toHaveBeenCalled();
   });
 
   it("handles empty subscriptions list", () => {

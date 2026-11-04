@@ -18,6 +18,7 @@ function setup({
   readonly = false,
   allEditions = false,
   loading = false,
+  eligibility = 2,
 } = {}) {
   const requestAuth = jest.fn().mockResolvedValue({ success: true });
   const refresh = jest.fn();
@@ -28,7 +29,11 @@ function setup({
       details={
         loading
           ? undefined
-          : { ...details, subscribe_all_editions: allEditions }
+          : {
+              ...details,
+              subscribe_all_editions: allEditions,
+              subscription_eligibility_count: eligibility,
+            }
       }
       readonly={readonly}
       refresh={refresh}
@@ -141,15 +146,54 @@ describe("Edition Preference", () => {
     expect(getEditions()).not.toBeChecked();
   });
 
-  it("keeps visitors read-only and explanations owner-only", async () => {
-    const { requestAuth, user } = setup({ readonly: true });
-    expect(getEditions()).toBeDisabled();
-    await user.click(getEditions());
-    expect(requestAuth).not.toHaveBeenCalled();
+  it.each([
+    { allEditions: false, eligibility: 2 },
+    { allEditions: true, eligibility: 12 },
+    { allEditions: true, eligibility: 0 },
+  ])(
+    "shows only the saved visitor preference with eligibility %j",
+    async ({ allEditions, eligibility }) => {
+      const { requestAuth, user, refresh } = setup({
+        readonly: true,
+        allEditions,
+        eligibility,
+      });
+      const value = screen.getByText(
+        allEditions ? "All eligible" : "One edition",
+        { exact: true }
+      );
+      expect(value).toBeVisible();
+      expect(screen.getByText(`Eligibility x${eligibility}`)).toBeVisible();
+      expect(
+        screen.queryByText(allEditions ? "One edition" : "All eligible", {
+          exact: true,
+        })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(screen.queryByText(/You will receive/)).not.toBeInTheDocument();
+      await user.click(value);
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+      expect(refresh).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not show a false visitor preference or eligibility while settings load", () => {
+    setup({ readonly: true, loading: true });
+    expect(screen.getAllByText("Loading settings")).toHaveLength(1);
+    expect(
+      screen.getByRole("group", { name: "Edition Preference" })
+    ).toHaveAttribute("aria-busy", "true");
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("All eligible", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Eligibility/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     expect(post).not.toHaveBeenCalled();
-    expect(screen.queryByText(/You will receive/)).not.toBeInTheDocument();
-    expect(screen.getByText("One edition", { exact: true })).toBeVisible();
-    expect(screen.getByText("All eligible", { exact: true })).toBeVisible();
   });
 
   it("waits for saved settings before allowing updates", () => {

@@ -40,7 +40,7 @@ describe("UserPageSubscriptionsMode", () => {
     post.mockResolvedValue({ automatic: true });
   });
 
-  it("keeps the original UTC timestamp with the Mode toggle", () => {
+  it("keeps the original UTC timestamp with the read-only Mode value", () => {
     renderWithAuth(
       <UserPageSubscriptionsMode
         profileKey="p1"
@@ -54,9 +54,11 @@ describe("UserPageSubscriptionsMode", () => {
         refresh={jest.fn()}
       />
     );
-    expect(getMode()).toBeChecked();
-    expect(getMode()).toBeDisabled();
-    expect(getMode()).toHaveAccessibleDescription("Feb 20, 2026, 23:01 UTC");
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.getByText("Automatic", { exact: true })).toBeVisible();
+    expect(
+      screen.queryByText("Manual", { exact: true })
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Feb 20, 2026, 23:01 UTC")).toBeVisible();
     expect(screen.queryByText(/since/)).not.toBeInTheDocument();
   });
@@ -179,14 +181,53 @@ describe("UserPageSubscriptionsMode", () => {
     expect(getMode()).not.toBeChecked();
   });
 
-  it.each([{ readonly: true }, { loading: true }])(
-    "disables editing for %j",
-    async (state) => {
-      const { user, requestAuth } = setup(state);
-      expect(getMode()).toBeDisabled();
-      await user.click(getMode());
+  it.each([false, true])(
+    "shows only the saved visitor Mode (automatic=%s) without editing controls",
+    async (automatic) => {
+      const { user, requestAuth, refresh } = setup({
+        readonly: true,
+        automatic,
+      });
+      const value = screen.getByText(automatic ? "Automatic" : "Manual", {
+        exact: true,
+      });
+      expect(value).toBeVisible();
+      expect(
+        screen.queryByText(automatic ? "Manual" : "Automatic", { exact: true })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+      expect(screen.queryByText(/UTC/)).not.toBeInTheDocument();
+      await user.click(value);
       expect(requestAuth).not.toHaveBeenCalled();
       expect(post).not.toHaveBeenCalled();
+      expect(refresh).not.toHaveBeenCalled();
     }
   );
+
+  it("does not show a false visitor Mode while settings load", () => {
+    setup({ readonly: true, loading: true });
+    expect(screen.getAllByText("Loading settings")).toHaveLength(1);
+    expect(screen.getByRole("group", { name: "Mode" })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+    expect(
+      screen.queryByText("Manual", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Automatic", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("keeps the owner switch disabled while settings load", async () => {
+    const { user, requestAuth } = setup({ loading: true });
+    expect(getMode()).toBeDisabled();
+    await user.click(getMode());
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(post).not.toHaveBeenCalled();
+  });
 });

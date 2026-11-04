@@ -15,6 +15,7 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import { CalendarDaysIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useState, type ReactNode } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
+import MintingTodaySubscriptionRow from "./MintingTodaySubscriptionRow";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const UPCOMING_SKELETON_ROWS = ["first", "second", "third"] as const;
@@ -82,15 +83,21 @@ export default function UserPageSubscriptionsUpcoming(
         {subscriptions.map((subscription, index) => {
           const isNextUnfunded =
             props.coverage?.next_unfunded?.token_id === subscription.token_id;
+          const mintingToday = index === 0 && isMintingToday();
+          const Row = mintingToday
+            ? MintingTodaySubscriptionRow
+            : MemeSubscriptionRow;
           return (
             <div
               key={subscription.token_id}
-              className={`tw-relative tw-pl-7 before:tw-absolute before:tw-bottom-0 before:tw-left-6 before:tw-top-0 before:tw-w-px before:tw-bg-white/[0.06] before:tw-content-[''] ${isNextUnfunded ? "first:before:tw-top-[95px] last:before:tw-bottom-[calc(100%-95px)]" : "first:before:tw-top-[35px] last:before:tw-bottom-[calc(100%-35px)]"}`}
+              className="tw-relative before:tw-absolute before:tw-inset-x-4 before:tw-top-0 before:tw-h-px before:tw-bg-white/[0.06] before:tw-content-[''] first:before:tw-hidden sm:before:tw-inset-x-5"
             >
-              <span
-                aria-hidden="true"
-                className={`tw-absolute tw-left-6 tw-z-10 tw-size-3.5 -tw-translate-x-1/2 tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 ${isNextUnfunded ? "tw-top-[88px]" : "tw-top-7"}`}
-              />
+              {mintingToday && (
+                <span
+                  aria-hidden="true"
+                  className={`tw-pointer-events-none tw-absolute tw-inset-x-2 tw-bottom-0 tw-rounded-xl tw-bg-primary-300/[0.03] tw-ring-1 tw-ring-inset tw-ring-primary-300/20 sm:tw-inset-x-3 ${isNextUnfunded ? "tw-top-[60px]" : "tw-top-0"}`}
+                />
+              )}
               {isNextUnfunded && (
                 <div className="tw-mx-4 tw-flex tw-min-h-[60px] tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-dashed tw-border-amber-400/35 tw-text-sm tw-font-medium tw-text-amber-300 md:tw-mx-5">
                   <span>
@@ -106,7 +113,7 @@ export default function UserPageSubscriptionsUpcoming(
                   )}
                 </div>
               )}
-              <MemeSubscriptionRow
+              <Row
                 profileKey={props.profileKey}
                 title="The Memes"
                 subscription={subscription}
@@ -115,7 +122,7 @@ export default function UserPageSubscriptionsUpcoming(
                 }
                 readonly={props.readonly}
                 refresh={props.refresh}
-                minting_today={index === 0 && isMintingToday()}
+                minting_today={mintingToday}
                 first={index === 0}
                 date={rows[index] ?? null}
               />
@@ -151,7 +158,7 @@ export default function UserPageSubscriptionsUpcoming(
       }
     >
       <>
-        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
+        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-py-4">
           {content}
           {!props.loading &&
             subscriptions.length > 0 &&
@@ -160,7 +167,7 @@ export default function UserPageSubscriptionsUpcoming(
                 type="button"
                 aria-expanded={expanded}
                 onClick={() => setExpanded(!expanded)}
-                className="tw-flex tw-min-h-[60px] tw-w-full tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-py-3 tw-pl-11 tw-pr-5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-pl-12"
+                className="tw-flex tw-min-h-[60px] tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-5 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100"
               >
                 {t(
                   locale,

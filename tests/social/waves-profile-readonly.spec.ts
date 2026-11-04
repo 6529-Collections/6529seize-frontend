@@ -603,6 +603,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const linkBox = await learnMore.boundingBox();
     expect(titleBox).not.toBeNull();
     expect(linkBox).not.toBeNull();
+    const overviewHeaderBox = await overview.boundingBox();
+    expect(overviewHeaderBox).not.toBeNull();
+    expect(
+      Math.abs(
+        linkBox!.x +
+          linkBox!.width -
+          overviewHeaderBox!.x -
+          overviewHeaderBox!.width
+      )
+    ).toBeLessThanOrEqual(1);
     expect(linkBox!.x).toBeGreaterThan(titleBox!.x + titleBox!.width);
     expect(
       Math.abs(
@@ -637,7 +647,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       exact: true,
     });
     await expect(mintingSettings).toBeVisible();
-    await expect(details).toHaveAttribute("aria-expanded", "false");
+    await expect(details).toHaveCount(0);
+    const statusHeading = coverage.getByRole("heading", { level: 2 });
+    await expect(statusHeading.locator("svg")).toHaveCount(0);
+    const statusText = statusHeading.locator(":scope > span");
+    if ((await statusText.count()) === 2) {
+      const badgeBox = await statusText.nth(1).boundingBox();
+      const countBox = await statusText.nth(0).boundingBox();
+      expect(badgeBox).not.toBeNull();
+      expect(countBox).not.toBeNull();
+      expect(badgeBox!.y + badgeBox!.height).toBeLessThanOrEqual(countBox!.y);
+    }
     const coverageBox = await coverage.boundingBox();
     const headlineBox = await coverage
       .getByRole("heading", { level: 2 })
@@ -649,51 +669,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(coverageBox).not.toBeNull();
     expect(headlineBox).not.toBeNull();
     expect(balanceBox).not.toBeNull();
-    const detailsBox = await details.boundingBox();
     const descriptionBox = await coverage
       .locator("#profile-subscriptions-overview-title + p")
       .boundingBox();
-    expect(detailsBox).not.toBeNull();
     expect(descriptionBox).not.toBeNull();
-    expect(detailsBox!.x).toBeGreaterThanOrEqual(coverageBox!.x);
-    expect(detailsBox!.x + detailsBox!.width).toBeLessThanOrEqual(
-      coverageBox!.x + coverageBox!.width
+    expect(balanceBox!.y).toBeGreaterThanOrEqual(
+      descriptionBox!.y + descriptionBox!.height
     );
-    expect(balanceBox!.y).toBeGreaterThanOrEqual(coverageBox!.y);
     expect(balanceBox!.y + balanceBox!.height).toBeLessThanOrEqual(
       coverageBox!.y + coverageBox!.height
     );
-    expect(detailsBox!.y).toBeGreaterThanOrEqual(
-      descriptionBox!.y + descriptionBox!.height
+    const forecast = coverage.getByRole("button", {
+      name: "Forecast use",
+      exact: true,
+    });
+    await expect(
+      coverage.getByText("Forecast use", { exact: true })
+    ).toBeVisible();
+    await forecast.click();
+    const forecastTooltip = page.getByRole("tooltip").filter({
+      hasText:
+        "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+    });
+    await expect(forecastTooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(forecastTooltip).toBeHidden();
+    await expect(mintingSettings.getByRole("switch")).toHaveCount(0);
+    const visitorMode = mintingSettings.getByRole("group", {
+      name: "Mode",
+      exact: true,
+    });
+    const visitorEditions = mintingSettings.getByRole("group", {
+      name: "Edition Preference",
+      exact: true,
+    });
+    await expect(visitorMode.locator("[data-setting-value]")).toHaveText(
+      /^(Manual|Automatic)$/
     );
-    expect(Math.abs(detailsBox!.x - headlineBox!.x)).toBeLessThanOrEqual(1);
-    if (page.viewportSize()!.width >= 768) {
-      expect(balanceBox!.x).toBeGreaterThanOrEqual(
-        headlineBox!.x + headlineBox!.width
-      );
-    }
+    await expect(visitorMode.getByText(/^(Manual|Automatic)$/)).toHaveCount(1);
+    await expect(visitorEditions.locator("[data-setting-value]")).toHaveText(
+      /^(One edition|All eligible)$/
+    );
     await expect(
-      mintingSettings.getByRole("switch", {
-        name: "Automatic subscription mode",
-        exact: true,
-      })
-    ).toBeDisabled();
-    await expect(
-      mintingSettings.getByRole("switch", {
-        name: "All eligible editions",
-        exact: true,
-      })
-    ).toBeDisabled();
-    for (const choice of [
-      "Manual",
-      "Automatic",
-      "One edition",
-      "All eligible",
-    ]) {
-      await expect(
-        mintingSettings.getByText(choice, { exact: true })
-      ).toBeVisible();
-    }
+      visitorEditions.getByText(/^(One edition|All eligible)$/)
+    ).toHaveCount(1);
+    await expect(visitorEditions.getByText(/^Eligibility x/)).toBeVisible();
+    await expect(visitorMode.getByRole("button")).toHaveCount(0);
+    await expect(visitorEditions.getByRole("button")).toHaveCount(0);
     await expect(mintingSettings.getByText(/^You will receive/)).toHaveCount(0);
     await expect(
       page
@@ -709,9 +731,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     const settingsBox = await mintingSettings.boundingBox();
-    const upcomingBox = await page
-      .getByRole("region", { name: "Upcoming Drops", exact: true })
-      .boundingBox();
+    const upcoming = page.getByRole("region", {
+      name: "Upcoming Drops",
+      exact: true,
+    });
+    await expect(upcoming.getByRole("switch")).toHaveCount(0);
+    await expect(upcoming.getByRole("combobox")).toHaveCount(0);
+    await expect(
+      upcoming.getByRole("button", { name: "Show More", exact: true })
+    ).toHaveCSS("justify-content", "center");
+    await expect(
+      upcoming.getByText(/^(Subscribed|Not subscribed)$/)
+    ).toHaveCount(3);
+    const upcomingBox = await upcoming.boundingBox();
     expect(settingsBox).not.toBeNull();
     expect(upcomingBox).not.toBeNull();
     expect(settingsBox!.y + settingsBox!.height).toBeLessThanOrEqual(
@@ -719,6 +751,20 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     const initialViewport = page.viewportSize()!;
     await page.setViewportSize({ width: 1024, height: initialViewport.height });
+    await expectNoHorizontalOverflow(page);
+    const desktopOverview = await page
+      .locator("#profile-subscriptions")
+      .boundingBox();
+    const desktopSettings = await mintingSettings.boundingBox();
+    expect(desktopOverview).not.toBeNull();
+    expect(desktopSettings).not.toBeNull();
+    expect(desktopSettings!.x).toBeGreaterThanOrEqual(
+      desktopOverview!.x + desktopOverview!.width
+    );
+    expect(
+      Math.abs(desktopSettings!.y - desktopOverview!.y)
+    ).toBeLessThanOrEqual(1);
+    await page.setViewportSize({ width: 390, height: initialViewport.height });
     const settingControls = [
       mintingSettings.getByRole("group", { name: "Mode", exact: true }),
       mintingSettings.getByRole("group", {
@@ -746,11 +792,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeLessThanOrEqual(1);
     const modeValue = mintingSettings
       .getByRole("group", { name: "Mode", exact: true })
-      .locator("[data-setting-controls]");
+      .locator("[data-setting-value]");
     const modeLabelBox = await mintingSettings
       .getByText("Mode", { exact: true })
       .boundingBox();
     const modeValueBox = await modeValue.boundingBox();
+    await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
+      "text-align",
+      "right"
+    );
     expect(modeLabelBox).not.toBeNull();
     expect(modeValueBox).not.toBeNull();
     expect(modeValueBox!.x).toBeGreaterThan(
@@ -763,6 +813,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByText("Edition Preference", { exact: true })
       .boundingBox();
     expect(eligibilityBox).not.toBeNull();
+    await expect(visitorEditions.getByText(/^Eligibility x/)).toHaveCSS(
+      "text-align",
+      "right"
+    );
     expect(editionLabelBox).not.toBeNull();
     expect(eligibilityBox!.y).toBeGreaterThanOrEqual(
       editionLabelBox!.y + editionLabelBox!.height
@@ -770,12 +824,55 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const addressBox = await mintingSettings
       .getByRole("button", { name: /^0x[0-9a-fA-F]{40}$/ })
       .boundingBox();
+    await expect(
+      mintingSettings.getByRole("button", { name: /^0x[0-9a-fA-F]{40}$/ })
+    ).toHaveText(/^0x[0-9a-fA-F]{40}$/);
     expect(addressBox).not.toBeNull();
     expect(addressBox!.y).toBeGreaterThanOrEqual(
       settingBoxes[2]!.y + settingBoxes[2]!.height
     );
+    for (const width of [768, 1023]) {
+      await page.setViewportSize({ width, height: initialViewport.height });
+      const inlineLabels = await Promise.all(
+        (await mintingSettings.getByRole("heading", { level: 3 }).all()).map(
+          (label) => label.boundingBox()
+        )
+      );
+      for (const [index, label] of inlineLabels.entries()) {
+        expect(label).not.toBeNull();
+        expect(Math.abs(label!.y - inlineLabels[0]!.y)).toBeLessThanOrEqual(1);
+        if (index > 0) {
+          const previous = inlineLabels[index - 1]!;
+          expect(label!.x).toBeGreaterThan(previous.x + previous.width);
+        }
+      }
+    }
+    await page.setViewportSize({ width: 1920, height: initialViewport.height });
+    const inlineModeValue = await modeValue.boundingBox();
+    const inlineModeDate = await visitorMode
+      .locator('[id$="-detail"]')
+      .boundingBox();
+    expect(inlineModeValue).not.toBeNull();
+    expect(inlineModeDate).not.toBeNull();
+    const sidebarModeLabel = await visitorMode
+      .getByRole("heading", { name: "Mode", exact: true })
+      .boundingBox();
+    expect(sidebarModeLabel).not.toBeNull();
+    expect(inlineModeValue!.y).toBeGreaterThanOrEqual(
+      sidebarModeLabel!.y + sidebarModeLabel!.height
+    );
+    expect(
+      Math.abs(inlineModeValue!.x - sidebarModeLabel!.x)
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(inlineModeDate!.y - inlineModeValue!.y)
+    ).toBeLessThanOrEqual(4);
+    await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
+      "text-align",
+      "left"
+    );
     await page.setViewportSize(initialViewport);
-    await expect(details).toHaveAttribute("aria-expanded", "false");
+    await expect(details).toHaveCount(0);
     const tabs = history.getByRole("tablist");
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole("tab")).toHaveText([
@@ -801,6 +898,29 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(logs).toHaveAttribute("aria-selected", "true");
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize({ width: 390, height: viewport.height });
+    await expect(
+      upcoming.getByRole("button", { name: "Show More", exact: true })
+    ).toHaveCSS("justify-content", "center");
+    for (const quantity of await upcoming
+      .getByRole("group", {
+        name: /^Subscription quantity for The Memes #/,
+      })
+      .all()) {
+      await expect(quantity).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      const quantityBox = await quantity.boundingBox();
+      const upcomingMobileBox = await upcoming.boundingBox();
+      expect(quantityBox).not.toBeNull();
+      expect(upcomingMobileBox).not.toBeNull();
+      expect(quantityBox!.x).toBeGreaterThanOrEqual(upcomingMobileBox!.x);
+      expect(quantityBox!.x + quantityBox!.width).toBeLessThanOrEqual(
+        upcomingMobileBox!.x + upcomingMobileBox!.width
+      );
+    }
+    for (const status of await upcoming
+      .getByText(/^(Subscribed|Not subscribed)$/)
+      .all()) {
+      await expect(status).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    }
     const pillLayout = await tabs.evaluate((element) => ({
       width: element.clientWidth,
       contentWidth: element.scrollWidth,

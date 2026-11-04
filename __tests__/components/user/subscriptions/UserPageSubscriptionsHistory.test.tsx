@@ -80,11 +80,20 @@ function makeProps() {
   };
 }
 
+function mockHistoryScroll() {
+  const root = screen.getByRole("tablist").parentElement;
+  if (!root) throw new Error("History root is missing");
+  const scroll = jest.fn();
+  root.scrollIntoView = scroll;
+  return scroll;
+}
+
 describe("UserPageSubscriptionsHistory", () => {
   it("keeps full original entries and independent pagination in all three tabs", async () => {
     const user = userEvent.setup();
     const props = makeProps();
     const { rerender } = render(<HistoryTestView {...props} />);
+    mockHistoryScroll();
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "Redeemed Subscriptions",
       "Log History",
@@ -96,14 +105,13 @@ describe("UserPageSubscriptionsHistory", () => {
     expect(
       screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
     ).toBeVisible();
-    expect(
-      screen.getByText("Redeemed Subscription for Meme #568 x2")
-    ).toBeVisible();
-    expect(
-      screen.getByText(
-        "Airdrop Address: 0xfb47...ebd4 - Balance after redemption: 9.20589 ETH"
-      )
-    ).toBeVisible();
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(
+      "Redeemed Subscription for Meme #568 x2"
+    );
+    expect(screen.getByText("x2", { exact: true })).toBeVisible();
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(
+      "Airdrop Address: 0xfb47...ebd4 - Balance after redemption: 9.20589 ETH"
+    );
     expect(
       screen.getByRole("link", { name: "View transaction on Etherscan" })
     ).toHaveAttribute("href", expect.stringContaining("0x123"));
@@ -115,16 +123,19 @@ describe("UserPageSubscriptionsHistory", () => {
     await user.click(screen.getByRole("tab", { name: "Log History" }));
     expect(screen.getByRole("tabpanel", { name: "Log History" })).toBeVisible();
     expect(screen.getByText(props.logs.data[0]!.log)).toBeVisible();
-    expect(
-      screen.getByText(props.logs.data[0]!.additional_info!)
-    ).toBeVisible();
+    const logDetails = screen
+      .getByText(address, { exact: true })
+      .closest("div");
+    expect(logDetails).toBeVisible();
+    expect(logDetails?.textContent).toBe(props.logs.data[0]!.additional_info);
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setLogsPage).toHaveBeenCalledWith(2);
     await user.click(screen.getByRole("tab", { name: "Top Up History" }));
     expect(
       screen.getByRole("tabpanel", { name: "Top Up History" })
     ).toBeVisible();
-    expect(screen.getByText(`from: ${address}`)).toBeVisible();
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(`from: ${address}`);
+    expect(screen.getByText(address, { exact: true })).toBeVisible();
     expect(screen.getByRole("tabpanel")).not.toHaveTextContent("—");
     expect(
       screen.getByRole("link", { name: "View transaction on Etherscan" })
@@ -157,6 +168,107 @@ describe("UserPageSubscriptionsHistory", () => {
     expect(screen.getByText("No logs found")).toBeVisible();
   });
 
+  it("scrolls once and focuses the new page only after its rows finish loading", async () => {
+    const props = makeProps();
+    const { rerender } = render(<HistoryTestView {...props} />);
+    const scroll = mockHistoryScroll();
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "Next page" }));
+    expect(props.setRedeemedPage).toHaveBeenCalledWith(2);
+    expect(scroll).not.toHaveBeenCalled();
+
+    const nextPage = { ...props.redeemed, page: 2 };
+    rerender(
+      <HistoryTestView {...props} redeemed={nextPage} redeemedLoading />
+    );
+    expect(scroll).not.toHaveBeenCalled();
+    rerender(
+      <HistoryTestView {...props} redeemed={nextPage} redeemedLoading={false} />
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    expect(scroll).toHaveBeenCalledWith({
+      block: "start",
+      behavior: "instant",
+    });
+    expect(
+      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
+    ).toHaveFocus();
+
+    rerender(
+      <HistoryTestView {...props} redeemed={nextPage} redeemedLoading />
+    );
+    rerender(
+      <HistoryTestView {...props} redeemed={nextPage} redeemedLoading={false} />
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+  });
+
+  it("also returns to the top when the requested page is already cached", async () => {
+    const props = makeProps();
+    const { rerender } = render(<HistoryTestView {...props} />);
+    const scroll = mockHistoryScroll();
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "Go to last page" }));
+    expect(props.setRedeemedPage).toHaveBeenCalledWith(34);
+    rerender(
+      <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 34 }} />
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
+    ).toHaveFocus();
+  });
+
+  it("cancels the pending scroll if the viewer switches history tabs", async () => {
+    const props = makeProps();
+    const { rerender } = render(<HistoryTestView {...props} />);
+    const scroll = mockHistoryScroll();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Next page" }));
+    await user.click(screen.getByRole("tab", { name: "Log History" }));
+    rerender(
+      <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 2 }} />
+    );
+    expect(scroll).not.toHaveBeenCalled();
+    expect(screen.getByRole("tab", { name: "Log History" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    await user.click(
+      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
+    );
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
+  it("does not scroll for background refreshes or tab selection", async () => {
+    const props = makeProps();
+    const { rerender } = render(<HistoryTestView {...props} />);
+    const scroll = mockHistoryScroll();
+    rerender(<HistoryTestView {...props} redeemedLoading />);
+    rerender(<HistoryTestView {...props} redeemedLoading={false} />);
+    await userEvent
+      .setup()
+      .click(screen.getByRole("tab", { name: "Log History" }));
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
+  it("cancels an old scroll request when the current page is resubmitted", async () => {
+    const props = makeProps();
+    const { rerender } = render(<HistoryTestView {...props} />);
+    const scroll = mockHistoryScroll();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Next page" }));
+    await user.click(screen.getByRole("textbox", { name: "Page number" }));
+    await user.keyboard("{Enter}");
+    expect(props.setRedeemedPage).toHaveBeenLastCalledWith(1);
+    rerender(
+      <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 2 }} />
+    );
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
   it("supports arrow-key tab navigation", async () => {
     render(<HistoryTestView {...makeProps()} />);
     const user = userEvent.setup();
@@ -169,5 +281,44 @@ describe("UserPageSubscriptionsHistory", () => {
       "aria-selected",
       "true"
     );
+  });
+
+  it.each([
+    "No additional allocation details",
+    "Mode: Manual - Note: keep exact text: 1 - 2",
+  ])(
+    "preserves log detail text exactly while styling its values: %s",
+    async (text) => {
+      const props = makeProps();
+      props.logs.data[0]!.additional_info = text;
+      render(<HistoryTestView {...props} />);
+      await userEvent
+        .setup()
+        .click(screen.getByRole("tab", { name: "Log History" }));
+      expect(
+        screen.getByText((_content, element) => element?.textContent === text)
+      ).toBeVisible();
+    }
+  );
+
+  it("shows the shared transaction tooltip on keyboard focus without changing the link", async () => {
+    render(<HistoryTestView {...makeProps()} />);
+    const user = userEvent.setup();
+    await user.tab();
+    await user.tab();
+    expect(screen.getByRole("tabpanel")).toHaveFocus();
+    await user.tab();
+    const link = screen.getByRole("link", {
+      name: "View transaction on Etherscan",
+    });
+    expect(link).toHaveFocus();
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAttribute("href", expect.stringContaining("0x123"));
+    expect(
+      await screen.findByRole("tooltip", {
+        name: "View transaction on Etherscan",
+      })
+    ).toBeVisible();
   });
 });

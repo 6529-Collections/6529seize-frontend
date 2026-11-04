@@ -1,7 +1,7 @@
 import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
 import UserPageSubscriptionsAirdropAddress from "@/components/user/subscriptions/UserPageSubscriptionsAirdropAddress";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 describe("UserPageSubscriptionsAirdropAddress", () => {
   const airdrop = {
@@ -31,5 +31,20 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
     expect(
       screen.queryByRole("link", { name: /Change airdrop address/i })
     ).toBeNull();
+  });
+
+  it("shows the full visitor address beside its ENS name and in the tooltip", async () => {
+    const address = "0x7d88f221e9ecef9eef118e0d0e8a47f81b37e0b6";
+    render(
+      <UserPageSubscriptionsAirdropAddress
+        show_edit={false}
+        layout="inline"
+        airdrop={{ ...airdrop, airdrop_address: { address, ens: "alice.eth" } }}
+      />
+    );
+    const addressButton = screen.getByRole("button", { name: address });
+    expect(addressButton).toHaveTextContent(address);
+    fireEvent.focus(addressButton);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(address);
   });
 });

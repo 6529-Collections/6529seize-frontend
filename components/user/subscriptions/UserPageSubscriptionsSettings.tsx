@@ -34,10 +34,14 @@ export default function UserPageSubscriptionsSettings({
   return (
     <UserPageSubscriptionsSection
       id="profile-subscriptions-settings"
+      className="lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-flex lg:tw-flex-col"
+      headerClassName="lg:tw-min-h-11"
       title={t(locale, "subscriptions.page.settingsTitle")}
     >
-      <div className="tw-flex tw-flex-col tw-items-stretch tw-gap-x-8 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 tw-px-4 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] md:tw-px-5 xl:tw-flex-row xl:tw-flex-wrap xl:tw-items-baseline xl:tw-gap-y-3 xl:tw-divide-y-0 xl:tw-py-3">
-        <div className="tw-w-full tw-min-w-0 tw-max-w-full xl:tw-w-auto">
+      <div
+        className={`tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-4 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 tw-px-4 tw-py-[18px] sm:tw-p-5 md:tw-divide-y-0 lg:tw-flex lg:tw-flex-1 lg:tw-flex-col lg:tw-justify-between lg:tw-gap-6 lg:tw-p-7 ${readonly ? "md:tw-grid-cols-3" : "md:tw-grid-cols-2"}`}
+      >
+        <div className="tw-w-full tw-min-w-0 tw-max-w-full">
           <UserPageSubscriptionsMode
             layout="inline"
             profileKey={profileKey}
@@ -46,7 +50,7 @@ export default function UserPageSubscriptionsSettings({
             refresh={refresh}
           />
         </div>
-        <div className="tw-w-full tw-min-w-0 tw-max-w-full xl:tw-w-auto">
+        <div className="tw-w-full tw-min-w-0 tw-max-w-full">
           <UserPageSubscriptionsEditionPreference
             layout="inline"
             profileKey={profileKey}
@@ -55,7 +59,9 @@ export default function UserPageSubscriptionsSettings({
             refresh={refresh}
           />
         </div>
-        <div className="tw-w-full tw-min-w-0 xl:tw-w-auto xl:tw-flex-1 xl:tw-basis-[24rem]">
+        <div
+          className={`tw-w-full tw-min-w-0 tw-max-w-full ${readonly ? "" : "md:tw-col-span-2 lg:tw-col-span-1"}`}
+        >
           <UserPageSubscriptionsAirdropAddress
             layout="inline"
             show_edit={!readonly}

@@ -83,6 +83,9 @@ export default function UserPageSubscriptionsMode(
       new Date(props.details.last_update)
     );
   }
+  const displayedAuto = props.readonly
+    ? (props.details?.automatic ?? false)
+    : isAuto;
 
   return (
     <SubscriptionSettingToggle
@@ -94,7 +97,9 @@ export default function UserPageSubscriptionsMode(
           ? "profile-subscriptions-upcoming-description"
           : undefined
       }
-      checked={isAuto}
+      checked={displayedAuto}
+      readOnly={props.readonly}
+      readOnlyTone={displayedAuto ? "positive" : "neutral"}
       loading={!props.details}
       disabled={isDisabled}
       busy={isUpdating}

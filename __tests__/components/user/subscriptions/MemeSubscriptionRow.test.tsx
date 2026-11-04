@@ -47,6 +47,51 @@ describe("MemeSubscriptionRow", () => {
     jest.clearAllMocks();
   });
 
+  it.each([
+    { subscribed: true, label: "Subscribed" },
+    { subscribed: false, label: "Not subscribed" },
+  ])(
+    "shows a non-interactive saved $label status to visitors",
+    ({ subscribed, label }) => {
+      const requestAuth = jest.fn();
+      const refresh = jest.fn();
+      render(
+        <AuthContext.Provider value={createMockAuthContext({ requestAuth })}>
+          <MemeSubscriptionRow
+            profileKey="test-key"
+            title="The Memes"
+            subscription={{
+              token_id: 478,
+              contract: "0x123",
+              consolidation_key: "test-key",
+              subscribed,
+              subscribed_count: 2,
+            }}
+            eligibilityCount={3}
+            readonly
+            refresh={refresh}
+            first={false}
+            date={null}
+          />
+        </AuthContext.Provider>
+      );
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+      fireEvent.click(screen.getByText(label, { exact: true }));
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(commonApiPost).not.toHaveBeenCalled();
+      expect(refresh).not.toHaveBeenCalled();
+      if (subscribed) {
+        expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+        expect(
+          screen.getByRole("group", {
+            name: "Subscription quantity for The Memes #478",
+          })
+        ).toHaveTextContent("2 / 3");
+        expect(screen.getByText("/ 3", { exact: true })).toBeVisible();
+      }
+    }
+  );
+
   it("shows the subscribed compact view without toggle controls", () => {
     renderWithAuth(
       <MemeSubscriptionRow
@@ -261,7 +306,8 @@ describe("Upcoming quantity eligibility changes", () => {
   const row = (
     eligibilityCount: number,
     subscribedCount = 11,
-    variant: "default" | "compact" = "default"
+    variant: "default" | "compact" = "default",
+    readOnly = false
   ) => (
     <AuthContext.Provider value={auth}>
       <MemeSubscriptionRow
@@ -269,7 +315,7 @@ describe("Upcoming quantity eligibility changes", () => {
         title="The Memes"
         subscription={{ ...subscription, subscribed_count: subscribedCount }}
         eligibilityCount={eligibilityCount}
-        readonly={false}
+        readonly={readOnly}
         refresh={jest.fn()}
         minting_today={false}
         first={false}
@@ -282,6 +328,23 @@ describe("Upcoming quantity eligibility changes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useQueryMock.mockReturnValue({ data: null });
+  });
+
+  it("keeps the saved request when visitor quantities are capped by changing eligibility", () => {
+    const { rerender } = render(row(10, 11, "default", true));
+    const quantity = screen.getByRole("group", {
+      name: "Subscription quantity for The Memes #558",
+    });
+    expect(quantity).toHaveTextContent("10 / 10");
+    rerender(row(12, 11, "default", true));
+    expect(quantity).toHaveTextContent("11 / 12");
+    rerender(row(0, 11, "default", true));
+    expect(quantity).toHaveTextContent("0 / 0");
+    rerender(row(12, 11, "default", true));
+    expect(quantity).toHaveTextContent("11 / 12");
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(auth.requestAuth).not.toHaveBeenCalled();
   });
 
   it("restores the saved manual quantity after eligibility drops and recovers without posting", () => {

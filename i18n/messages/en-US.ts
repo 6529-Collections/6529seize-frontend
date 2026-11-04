@@ -3647,6 +3647,20 @@ export const EN_US_MESSAGES = {
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
   "subscriptions.page.refreshError":
     "Some subscription data could not be refreshed. Previously loaded data may be out of date.",
+  "subscriptions.upcoming.subscribed": "Subscribed",
+  "subscriptions.upcoming.notSubscribed": "Not subscribed",
+  "subscriptions.upcoming.quantity":
+    "Subscription quantity for {title} #{token}",
+  "subscriptions.history.viewTransaction": "View transaction on Etherscan",
+  "subscriptions.history.meme": "Meme",
+  "subscriptions.history.contract": "Contract {address}",
+  "subscriptions.history.quantity": "x{count}",
+  "subscriptions.history.redeemedEntryTitle":
+    "Redeemed Subscription for {contract} #{token} {count}",
+  "subscriptions.history.redeemedAddress": "Airdrop Address: {address}",
+  "subscriptions.history.redeemedBalance":
+    "Balance after redemption: {balance}",
+  "subscriptions.history.fromWallet": "from: {address}",
   "subscriptions.page.retry": "Retry",
   "subscriptions.airdrop.title": "Airdrop Address",
   "subscriptions.airdrop.change": "Change airdrop address",
@@ -3767,21 +3781,23 @@ export const EN_US_MESSAGES = {
   "subscriptions.coverage.recommendedThrough":
     "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
   "subscriptions.coverage.notSetUp.description":
-    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+    "Set up subscriptions to receive eligible Meme drops automatically or select individual drops.",
   "subscriptions.coverage.noEligibility.description":
-    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+    "This profile is not currently eligible for an upcoming Meme mint. Adding funds does not change eligibility.",
   "subscriptions.coverage.noSelections.description":
-    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+    "No drops are selected in Manual mode. Choose a drop to see how long your balance will last.",
   "subscriptions.coverage.unknown.description":
-    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+    "Some forecast information is missing. Review settings or refresh when the schedule is available.",
   "subscriptions.coverage.covered.description":
-    "Your immediate intended drops are fully funded.",
+    "Your next selected drops are fully funded.",
   "subscriptions.coverage.earlyWarning.description":
-    "You are covered for now. Plan a top up before the funded runway ends.",
+    "You are covered for now. Plan a top up before coverage ends.",
   "subscriptions.coverage.runningLow.description":
-    "Only a few intended drops remain fully funded.",
+    "Your balance covers only a few more selected drops.",
   "subscriptions.coverage.actionRequired.description":
-    "The immediate next intended drop is not fully funded.",
+    "Your next selected drop is not fully funded.",
+  "subscriptions.coverage.actionRequired.oneFundedDescription":
+    "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",

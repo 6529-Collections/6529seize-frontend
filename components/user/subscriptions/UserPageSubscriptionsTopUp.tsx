@@ -9,8 +9,12 @@ import {
   useSyncExternalStore,
 } from "react";
 import { Tooltip } from "react-tooltip";
-import styles from "./UserPageSubscriptions.module.css";
+import {
+  getTopUpOptionClass,
+  TOP_UP_RADIO_CLASS,
+} from "./subscriptionTopUpStyles";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { BoltIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import CardCountOption from "./SubscriptionTopUpOption";
 import { formatEther, parseEther } from "viem";
@@ -44,6 +48,7 @@ import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscription
 import { formatAddress } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
@@ -255,12 +260,19 @@ export default function UserPageSubscriptionsTopUp({
   onTransactionConfirmed,
   onCancel,
   expanded = true,
+  presentation = "dialog",
 }: Readonly<{
   coverage?: ApiSubscriptionCoverage | undefined;
   onTransactionConfirmed?: (() => void) | undefined;
   onCancel?: (() => void) | undefined;
   expanded?: boolean;
+  presentation?: "dialog" | "inline";
 }>) {
+  const isInline = presentation === "inline";
+  useScrollToHashOnMount(TOP_UP_SECTION_ID, {
+    enabled: isInline,
+    focusId: `${TOP_UP_SECTION_ID}-title`,
+  });
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
   const selectionDescriptionId = useId();
@@ -467,7 +479,9 @@ export default function UserPageSubscriptionsTopUp({
   };
   const topUpContent = (
     <>
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/10 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 [&>:first-child]:tw-rounded-t-[11px] [&>:last-child]:tw-rounded-b-[11px]">
+      <div
+        className={`tw-grid tw-grid-cols-1 tw-gap-2 ${isInline ? "sm:tw-grid-cols-2 lg:tw-grid-cols-3" : ""}`}
+      >
         <CoverageTopUpOptions
           coverage={coverage}
           selectedOption={selectedOption}
@@ -487,29 +501,29 @@ export default function UserPageSubscriptionsTopUp({
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
-        <div
-          className={`tw-relative tw-flex tw-min-h-[76px] tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-transition-colors tw-duration-300 tw-ease-out motion-reduce:tw-transition-none ${selectedOption === "other" ? "tw-bg-primary-500/10 tw-ring-1 tw-ring-inset tw-ring-primary-400/40" : ""}`}
-        >
+        <div className={getTopUpOptionClass(selectedOption === "other")}>
           <label
             htmlFor="subscription-top-up-other"
-            className="tw-absolute tw-inset-0 tw-cursor-pointer"
+            className="tw-absolute tw-inset-0 tw-cursor-pointer tw-rounded-xl"
           >
             <span className="tw-sr-only">
               {t(locale, "subscriptions.topUp.customLabel")}
             </span>
           </label>
-          <input
-            id="subscription-top-up-other"
-            type="radio"
-            name="subscription-top-up-card-count"
-            value="other"
-            checked={selectedOption === "other"}
-            onChange={handleSelectOther}
-            aria-label={t(locale, "subscriptions.topUp.other")}
-            className={`${styles["radioInput"] ?? ""} tw-shrink-0 [&:not(:checked)]:tw-border-iron-500`}
-          />
-          <div className="tw-pointer-events-none tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-            <span className="tw-text-base tw-font-medium tw-text-iron-100">
+          <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
+            <input
+              id="subscription-top-up-other"
+              type="radio"
+              name="subscription-top-up-card-count"
+              value="other"
+              checked={selectedOption === "other"}
+              onChange={handleSelectOther}
+              aria-label={t(locale, "subscriptions.topUp.other")}
+              className={TOP_UP_RADIO_CLASS}
+            />
+          </span>
+          <div className="tw-pointer-events-none tw-relative tw-grid tw-min-h-20 tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_6rem] tw-grid-rows-[1rem_minmax(2.75rem,1fr)] tw-gap-x-3 tw-gap-y-2">
+            <span className="tw-col-start-1 tw-row-start-1 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
               {t(locale, "subscriptions.topUp.other")}
             </span>
             <input
@@ -521,7 +535,7 @@ export default function UserPageSubscriptionsTopUp({
               aria-label={t(locale, "subscriptions.topUp.customLabel")}
               aria-describedby={selectionDescriptionId}
               value={memeCount}
-              className="tw-pointer-events-auto tw-min-h-11 tw-w-28 tw-max-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-font-normal tw-tabular-nums tw-text-iron-100 [color-scheme:dark] placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
+              className="tw-pointer-events-auto tw-col-start-2 tw-row-start-2 tw-min-h-11 tw-w-full tw-min-w-0 tw-self-end tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-font-normal tw-tabular-nums tw-text-iron-100 [color-scheme:dark] placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
               onFocus={() => setSelectedOption("other")}
               onChange={(event) => {
                 setError("");
@@ -534,7 +548,7 @@ export default function UserPageSubscriptionsTopUp({
               role="status"
               aria-live="polite"
               aria-atomic="true"
-              className="tw-basis-full tw-text-right tw-text-sm tw-text-iron-400 empty:tw-hidden"
+              className="tw-col-start-1 tw-row-start-2 tw-min-w-0 tw-self-end tw-break-words tw-text-left tw-text-sm tw-tabular-nums tw-leading-5 tw-text-primary-300"
             >
               {selectedOption === "other" &&
                 selectedTopUp !== null &&
@@ -567,7 +581,9 @@ export default function UserPageSubscriptionsTopUp({
         />
       </button>
       <div id="subscription-top-up-deep-time" hidden={!showDeep}>
-        <div className="tw-mt-2 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/10 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 [&>:first-child]:tw-rounded-t-[11px] [&>:last-child]:tw-rounded-b-[11px]">
+        <div
+          className={`tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-2 ${isInline ? "sm:tw-grid-cols-2 lg:tw-grid-cols-3" : ""}`}
+        >
           {printRemainingMints(
             remainingMintsForPeriod,
             "Period",
@@ -581,66 +597,82 @@ export default function UserPageSubscriptionsTopUp({
     </>
   );
 
+  const form = (
+    <div className={isInline ? "tw-p-4 md:tw-p-5" : "tw-px-5 md:tw-px-6"}>
+      <p
+        className={`tw-text-sm tw-leading-6 tw-text-iron-400 ${isInline ? "tw-mb-4 tw-mt-0" : "tw-mb-5 tw-mt-2"}`}
+      >
+        {t(locale, "subscriptions.topUp.chooseAmount")}
+      </p>
+      {isIos ? iOsContent : topUpContent}
+      {!isIos && (
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          loading={isSending}
+          disabled={isSendDisabled}
+          onClick={handleSend}
+          aria-label={submitLabel}
+          fullWidth
+          className="tw-mt-5"
+        >
+          <BoltIcon className="tw-size-4" aria-hidden="true" />
+          {submitLabel}
+        </Button>
+      )}
+      <div className="tw-mb-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+        {t(locale, "subscriptions.topUp.sendingTo")}{" "}
+        <span className="tw-font-medium tw-text-iron-300">
+          {SUBSCRIPTIONS_ADDRESS_ENS}
+        </span>
+        <button
+          type="button"
+          data-tooltip-id="subscription-address"
+          aria-describedby="subscription-address"
+          className="tw-min-h-8 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {formatAddress(SUBSCRIPTIONS_ADDRESS)}
+        </button>
+        <Tooltip
+          id="subscription-address"
+          openEvents={{ mouseover: true, focus: true, click: true }}
+        >
+          {SUBSCRIPTIONS_ADDRESS}
+        </Tooltip>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <MobileWrapperDialog
-        id={TOP_UP_SECTION_ID}
-        title={t(locale, "subscriptions.page.topUpTitle")}
-        isOpen={expanded && transactionModal.status === null}
-        onClose={() => onCancel?.()}
-        dismissible={Boolean(onCancel)}
-        tabletModal
-        tall
-        fitVisualViewport
-        focusTitleOnOpen
-        maxWidthClass="md:tw-max-w-lg"
-        headerClassName="!tw-px-5 md:!tw-px-6"
-        titleClassName="!tw-text-xl"
-        surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl"
-      >
-        <div className="tw-px-5 md:tw-px-6">
-          <p className="tw-mb-5 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(locale, "subscriptions.topUp.chooseAmount")}
-          </p>
-          {isIos ? iOsContent : topUpContent}
-          {!isIos && (
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              loading={isSending}
-              disabled={isSendDisabled}
-              onClick={handleSend}
-              aria-label={submitLabel}
-              fullWidth
-              className="tw-mt-5"
-            >
-              <BoltIcon className="tw-size-4" aria-hidden="true" />
-              {submitLabel}
-            </Button>
-          )}
-          <div className="tw-mb-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-1 tw-text-xs tw-leading-5 tw-text-iron-500">
-            {t(locale, "subscriptions.topUp.sendingTo")}{" "}
-            <span className="tw-font-medium tw-text-iron-300">
-              {SUBSCRIPTIONS_ADDRESS_ENS}
-            </span>
-            <button
-              type="button"
-              data-tooltip-id="subscription-address"
-              aria-describedby="subscription-address"
-              className="tw-min-h-8 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-            </button>
-            <Tooltip
-              id="subscription-address"
-              openEvents={{ mouseover: true, focus: true, click: true }}
-            >
-              {SUBSCRIPTIONS_ADDRESS}
-            </Tooltip>
-          </div>
-        </div>
-      </MobileWrapperDialog>
+      {isInline ? (
+        <UserPageSubscriptionsSection
+          id={TOP_UP_SECTION_ID}
+          title={t(locale, "subscriptions.page.topUpTitle")}
+          className="lg:tw-col-span-2"
+        >
+          {form}
+        </UserPageSubscriptionsSection>
+      ) : (
+        <MobileWrapperDialog
+          id={TOP_UP_SECTION_ID}
+          title={t(locale, "subscriptions.page.topUpTitle")}
+          isOpen={expanded && transactionModal.status === null}
+          onClose={() => onCancel?.()}
+          dismissible={Boolean(onCancel)}
+          tabletModal
+          tall
+          fitVisualViewport
+          focusTitleOnOpen
+          maxWidthClass="md:tw-max-w-lg"
+          headerClassName="!tw-px-5 md:!tw-px-6"
+          titleClassName="!tw-text-xl"
+          surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl"
+        >
+          {form}
+        </MobileWrapperDialog>
+      )}
       {mounted && transactionModal.status ? (
         <OnchainTransactionModal
           status={transactionModal.status}
