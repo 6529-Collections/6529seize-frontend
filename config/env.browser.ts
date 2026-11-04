@@ -36,8 +36,9 @@ function readPageVersion(): string | undefined {
   if (typeof document === "undefined") {
     return undefined;
   }
-  const version = document.documentElement.getAttribute("data-version");
-  return version || undefined;
+  // <html data-version>
+  const version = document.documentElement.dataset["version"];
+  return version === "" ? undefined : version;
 }
 
 function readPublicEnv(): PublicEnv {

@@ -45,7 +45,7 @@ it("renders VERSION on the <html> start tag for the browser", () => {
     path.join(process.cwd(), "config/env.browser.ts"),
     "utf8"
   );
-  expect(browserEnv).toContain('getAttribute("data-version")');
+  expect(browserEnv).toContain('documentElement.dataset["version"]');
 });
 
 function sourceFiles(directory: string): string[] {

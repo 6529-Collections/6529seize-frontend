@@ -151,6 +151,14 @@ describe("config/env.browser", () => {
     ).toBe("deployed-commit");
   });
 
+  it("leaves VERSION unset when the attribute is empty", () => {
+    setPageVersion("");
+
+    expect(
+      loadModule(BROWSER_MODULE, bakeBrowserRuntime()).publicEnv
+    ).not.toHaveProperty("VERSION");
+  });
+
   it("leaves VERSION unset on a page without the attribute", () => {
     expect(
       loadModule(BROWSER_MODULE, bakeBrowserRuntime()).publicEnv
