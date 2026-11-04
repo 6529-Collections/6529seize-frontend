@@ -11,7 +11,6 @@ import {
 } from "@/lib/validator-page/releaseFeed";
 import {
   KEEP_ON_MINUTES,
-  KEEP_ON_SOURCE,
   keepOnUntilUtc,
   MINIMUM,
   PARTS,
@@ -160,9 +159,8 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
   });
 
   it("has no random wait before the vote, and its time on comes from rc.6 (D161)", async () => {
-    // The figure must come from the validator repository's rc.6
-    // measurement before the page ships.
-    expect(KEEP_ON_SOURCE).not.toBe("PENDING");
+    // 6ba7861f, docs/install/windows.md: on from about 00:15 to 00:30 UTC.
+    expect(KEEP_ON_MINUTES).toBe(15);
     accessCookie = createAccessCookieValue(PASSWORD);
     const html = await renderRoute();
     for (const page of [text, html]) {

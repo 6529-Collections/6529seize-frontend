@@ -13,8 +13,6 @@
  * stay on all day needs to be awake from about 00:15 to 00:30 UTC.
  */
 export const KEEP_ON_MINUTES = 15;
-/** Where KEEP_ON_MINUTES comes from; the page's test fails while PENDING. */
-export const KEEP_ON_SOURCE = "6ba7861f";
 
 /** "00:30": the time, in UTC, until which the computer should stay on. */
 export function keepOnUntilUtc(): string {
