@@ -912,6 +912,18 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     });
   });
   return {
+    missMessages(count: number) {
+      for (let index = 0; index < count; index++) {
+        const serial = (drops[0]?.serial_no ?? 151) + 1;
+        drops.unshift({
+          ...template,
+          id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+          serial_no: serial,
+          created_at: 1714000000000 + serial * 60000,
+          content: `Shared link fixture post ${serial}`,
+        });
+      }
+    },
     post: (serial: number) =>
       page
         .getByRole("region", {
@@ -943,6 +955,119 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     },
   };
 }
+
+test("resume shows the latest page before missed history and preserves the composer", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  let olderRequests = 0;
+  let failHistory = true;
+  const history = gate();
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_OLDER"
+    ) {
+      olderRequests++;
+      await history.ready;
+      if (failHistory) {
+        failHistory = false;
+        return route.fulfill({
+          status: 400,
+          json: { message: "History unavailable" },
+        });
+      }
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  await composer.fill("Keep this unsent draft");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  try {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+    await expect(composer).toHaveText("Keep this unsent draft");
+    // A blocked history request must not keep the current conversation stale.
+    await expect(fixture.post(1151)).toBeInViewport();
+    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    await gap.scrollIntoViewIfNeeded();
+    await expect.poll(() => olderRequests).toBeGreaterThan(0);
+    await expect(gap).toBeDisabled();
+    await page.screenshot({
+      path: testInfo.outputPath("resume-missed-history.png"),
+    });
+    history.release();
+    await expect(gap).toContainText(
+      "Could not load missed messages. Try again"
+    );
+    await gap.click();
+    await expect(fixture.post(1101)).toBeAttached();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+    ).toBeAttached();
+    await expect(composer).toHaveText("Keep this unsent draft");
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    history.release();
+  }
+});
+
+test("resume preserves an older reading position while loading the latest page", async ({
+  page,
+  baseURL,
+}) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // Offscreen placeholders hydrate as they enter view and replace the text
+  // node, so reacquire the locator until the reader's position has settled.
+  await expect(async () => {
+    await fixture.post(120).scrollIntoViewIfNeeded({ timeout: 1000 });
+    await expect(fixture.post(120)).toBeInViewport({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByRole("button", { name: "Scroll to bottom", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  await expect(fixture.post(120)).toBeInViewport();
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(1151)).toBeInViewport();
+});
 
 test("shared post stays in view after URL cleanup and delayed loading", async ({
   page,

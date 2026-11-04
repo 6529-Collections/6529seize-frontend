@@ -37,6 +37,12 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.historyGap.load": "Verpasste Nachrichten laden",
+  "waves.historyGap.loaded": "Verpasste Nachrichten geladen",
+  "waves.historyGap.loading": "Verpasste Nachrichten werden geladen…",
+  "waves.historyGap.retry":
+    "Nachrichten konnten nicht geladen werden. Erneut versuchen",
+
   "waves.myVotes.sort": "Sortieren nach",
   "waves.myVotes.sort.voteAmount": "Deine Stimmenzahl",
   "waves.myVotes.sort.leaderboard": "Ranglistenposition",

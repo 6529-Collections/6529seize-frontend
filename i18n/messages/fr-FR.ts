@@ -37,6 +37,12 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.historyGap.load": "Charger les messages manqués",
+  "waves.historyGap.loaded": "Messages manqués chargés",
+  "waves.historyGap.loading": "Chargement des messages manqués…",
+  "waves.historyGap.retry":
+    "Impossible de charger les messages manqués. Réessayer",
+
   "waves.myVotes.sort": "Trier par",
   "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
   "waves.myVotes.sort.leaderboard": "Position au classement",
