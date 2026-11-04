@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { finishVersionReloadWhenReady } from "@/components/version-update/versionReload";
 import FooterWrapper from "@/components/footer/FooterWrapper";
-import { createLazyComponentLoader } from "@/components/utils/lazy-load/createLazyComponentLoader";
+import MobileLayout from "@/components/layout/MobileLayout";
 import NativeStartupBoundary from "@/components/layout/NativeStartupBoundary";
 import WebLayout from "@/components/layout/WebLayout";
 import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
@@ -18,31 +18,6 @@ import {
   scheduleMobileLaunchFlush,
 } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ComponentType, ReactNode } from "react";
-
-type LayoutProps = {
-  readonly children: ReactNode;
-  readonly isSmall?: boolean;
-};
-type LayoutComponentType = ComponentType<LayoutProps>;
-
-// Only the Capacitor app uses the native layout (bottom navigation and the
-// mobile waves/messages shell), so web visitors never download it. The loaded
-// component receives the same props as WebLayout, `isSmall` included;
-// MobileLayout ignores it, as it did when it was imported statically.
-const nativeLayoutLoader = createLazyComponentLoader<LayoutProps>(
-  () => import("@/components/layout/MobileLayout")
-);
-const LoadedNativeLayout = nativeLayoutLoader.Loaded;
-
-// NATIVE_STARTUP_SCRIPT marks the document while the head is parsed, before
-// any app JavaScript runs. Start the native layout download right away so it
-// arrives with hydration instead of after it.
-if (
-  typeof document !== "undefined" &&
-  document.documentElement.dataset["nativeRuntime"] !== undefined
-) {
-  nativeLayoutLoader.preload();
-}
 
 const getTouchTabletViewportSnapshot = (): boolean => {
   if (typeof window === "undefined") {
@@ -85,16 +60,6 @@ export default function LayoutWrapper({
     getTouchTabletViewportServerSnapshot
   );
   const pathname = usePathname();
-  const [nativeLayoutFailed, setNativeLayoutFailed] = useState(false);
-  const isNativeLayoutLoaded = nativeLayoutLoader.useIsReady({
-    enabled: isApp && !nativeLayoutFailed,
-    onError: () => {
-      // The loader logs the error itself; this names the failed surface so a
-      // broken app launch is easy to find in logs and Sentry.
-      console.error("Failed to load the native layout");
-      setNativeLayoutFailed(true);
-    },
-  });
 
   const isAccessOrRestricted =
     pathname.startsWith("/access") || pathname.startsWith("/restricted");
@@ -119,13 +84,10 @@ export default function LayoutWrapper({
     };
   }, [pathname]);
 
-  // Until the native layout arrives, keep the web tree mounted behind the
-  // native startup placeholder, exactly as before isApp resolves. If it cannot
-  // load, show the web layout rather than leave the app on the placeholder.
-  const isNativeLayoutReady = isApp && isNativeLayoutLoaded;
-  const LayoutComponent: LayoutComponentType = isNativeLayoutReady
-    ? LoadedNativeLayout
-    : WebLayout;
+  const LayoutComponent: ComponentType<{
+    readonly children: ReactNode;
+    readonly isSmall?: boolean;
+  }> = isApp ? MobileLayout : WebLayout;
 
   // hasTouchScreen covers touch-first hardware; isMobileDevice (UA-based)
   // keeps phones on the small layout even when a mouse or trackpad is
@@ -141,9 +103,7 @@ export default function LayoutWrapper({
   }
 
   return (
-    <NativeStartupBoundary
-      isNativeLayout={isNativeLayoutReady || (isApp && nativeLayoutFailed)}
-    >
+    <NativeStartupBoundary isNativeLayout={isApp}>
       <LayoutComponent isSmall={isSmallLayout}>
         <ErrorBoundary
           key={refreshKey}
