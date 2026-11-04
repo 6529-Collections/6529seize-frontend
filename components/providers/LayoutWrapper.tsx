@@ -130,7 +130,15 @@ export default function LayoutWrapper({
   // hasTouchScreen covers touch-first hardware; isMobileDevice (UA-based)
   // keeps phones on the small layout even when a mouse or trackpad is
   // attached. Hybrid touch laptops match neither, so they stay on WebLayout.
+  // While the app waits for the native layout, the hidden web tree keeps the
+  // shape it had during hydration. Switching it to small-screen chrome would
+  // register the small header with LayoutContext, and that header's unmount
+  // cleanup would then clear the native header's registration once the native
+  // layout mounts, leaving native content sized without its header.
+  const isWaitingForNativeLayout =
+    isApp && !isNativeLayoutReady && !nativeLayoutFailed;
   const isSmallLayout =
+    !isWaitingForNativeLayout &&
     (hasTouchScreen || isMobileDevice) &&
     (isSmallScreen || isTouchTabletViewport);
 

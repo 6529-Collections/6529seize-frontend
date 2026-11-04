@@ -197,6 +197,10 @@ describe("LayoutWrapper layout selection", () => {
     expect(
       container.querySelector('[data-native-startup="pending"]')
     ).not.toBeNull();
+    // The hidden web tree keeps its hydration shape while waiting. Small-screen
+    // chrome would register its header and clear the native one on unmount.
+    expect(screen.getByTestId("web-layout")).toBeInTheDocument();
+    expect(screen.queryByTestId("small-screen-layout")).not.toBeInTheDocument();
     expect(await screen.findByTestId("mobile-layout")).toBeInTheDocument();
     expect(
       container.querySelector('[data-native-startup="ready"]')
