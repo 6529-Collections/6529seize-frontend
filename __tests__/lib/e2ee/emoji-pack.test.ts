@@ -6,6 +6,7 @@ it("accepts inline catalog assets and rejects URLs, invalid IDs and duplicates",
   expect(parseE2eeEmojiPack([emoji])).toEqual([emoji]);
   for (const invalid of [
     null,
+    [],
     {},
     [null],
     [emoji, emoji],
@@ -13,7 +14,18 @@ it("accepts inline catalog assets and rejects URLs, invalid IDs and duplicates",
     [{ ...emoji, id: "x".repeat(63) }],
     [{ ...emoji, src: "https://example.com/track.webp" }],
     [{ ...emoji, src: "data:image/svg+xml;base64,PHN2Zz4=" }],
+    ...["A", "AAA", "AAAA==", "AA=", "A===", "=AAA", "AAA=AAAA"].map(
+      (encoded) => [{ ...emoji, src: `data:image/png;base64,${encoded}` }]
+    ),
   ]) {
     expect(() => parseE2eeEmojiPack(invalid)).toThrow();
   }
 });
+
+it.each(["AAAA", "AAA=", "AA=="])(
+  "accepts correctly padded base64: %s",
+  (encoded) => {
+    const valid = { ...emoji, src: `data:image/png;base64,${encoded}` };
+    expect(parseE2eeEmojiPack([valid])).toEqual([valid]);
+  }
+);

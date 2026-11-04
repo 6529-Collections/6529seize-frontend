@@ -9,6 +9,8 @@ import {
 } from "@/contexts/EmojiContext";
 
 import { notifyReactionHistoryChange } from "@/helpers/reactions/reactionHistory";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { prepareEmojiMartData } from "./prepareEmojiMartData";
 
 export interface EmojiPickerSelection {
@@ -68,9 +70,10 @@ export default function LazyEmojiPicker({
   customEmojis,
   privateMode = false,
   perLine,
-  loadingLabel = "Loading emoji picker...",
-  errorLabel = "Emoji picker is unavailable.",
+  loadingLabel,
+  errorLabel,
 }: LazyEmojiPickerProps) {
+  const locale = useBrowserLocale();
   const {
     categories,
     categoryIcons,
@@ -128,7 +131,9 @@ export default function LazyEmojiPicker({
         aria-live="polite"
         className="tw-p-3 tw-text-sm tw-text-iron-300"
       >
-        {pickerLoadState.status === "error" ? errorLabel : loadingLabel}
+        {pickerLoadState.status === "error"
+          ? (errorLabel ?? t(locale, "emoji.picker.unavailable"))
+          : (loadingLabel ?? t(locale, "emoji.picker.loading"))}
       </div>
     );
   }

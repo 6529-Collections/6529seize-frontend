@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   E2eeEmojiProvider,
   useE2eeEmojis,
@@ -10,10 +10,11 @@ function Retry() {
   return failed ? <button onClick={retry}>Retry pack</button> : null;
 }
 
-it("keeps shortcodes readable after failure, retries the whole pack and renders known emojis using only inline images", async () => {
+it("recovers from HTTP failure and an empty successful response, using only inline images", async () => {
   const fetchMock = jest
     .fn()
     .mockResolvedValueOnce({ ok: false })
+    .mockResolvedValueOnce({ ok: true, json: async () => [] })
     .mockResolvedValueOnce({
       ok: true,
       json: async () => [{ id: "gm", src: "data:image/webp;base64,UklGRg==" }],
@@ -27,11 +28,16 @@ it("keeps shortcodes readable after failure, retries the whole pack and renders 
       </p>
     </E2eeEmojiProvider>
   );
-  fireEvent.click(await screen.findByRole("button", { name: "Retry pack" }));
+  const retry = await screen.findByRole("button", { name: "Retry pack" });
+  await act(async () => {
+    fireEvent.click(retry);
+  });
+  expect(screen.queryByRole("img", { name: ":gm:" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Retry pack" }));
   const image = await screen.findByRole("img", { name: ":gm:" });
   expect(image).toHaveAttribute("src", "data:image/webp;base64,UklGRg==");
   expect(image.parentElement).toHaveTextContent("Hi :unknown: 😀");
-  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(fetchMock).toHaveBeenCalledTimes(3);
   for (const call of fetchMock.mock.calls)
     expect(call).toEqual([
       "/api/e2ee/emoji-pack",

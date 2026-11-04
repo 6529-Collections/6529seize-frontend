@@ -11,7 +11,7 @@ import { CUSTOM_EMOJI_ID } from "@/lib/e2ee/emoji-pack";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import { useE2eeEmojis } from "./E2eeEmojiProvider";
 
-export function emojiSelectionText(emoji: EmojiPickerSelection): string | null {
+function emojiSelectionText(emoji: EmojiPickerSelection): string | null {
   if (emoji.native) return emoji.native;
   return emoji.id && CUSTOM_EMOJI_ID.test(emoji.id) ? `:${emoji.id}:` : null;
 }

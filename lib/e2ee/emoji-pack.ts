@@ -7,10 +7,10 @@ export interface E2eeCustomEmoji {
 export const E2EE_EMOJI_PACK_PATH = "/api/e2ee/emoji-pack";
 export const CUSTOM_EMOJI_ID = /^[A-Za-z0-9_+-]{1,62}$/u;
 const INLINE_RASTER =
-  /^data:image\/(?:webp|png|gif|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/u;
+  /^data:image\/(?:webp|png|gif|jpeg);base64,([A-Za-z0-9+/]+={0,2})$/u;
 
 export function parseE2eeEmojiPack(value: unknown): E2eeCustomEmoji[] {
-  if (!Array.isArray(value) || value.length > 200) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 200) {
     throw new Error("Invalid emoji pack");
   }
   const seen = new Set<string>();
@@ -19,12 +19,15 @@ export function parseE2eeEmojiPack(value: unknown): E2eeCustomEmoji[] {
       throw new Error("Invalid emoji");
     }
     const { id, src } = entry as Record<string, unknown>;
+    const encoded =
+      typeof src === "string" ? INLINE_RASTER.exec(src)?.[1] : undefined;
     if (
       typeof id !== "string" ||
       !CUSTOM_EMOJI_ID.test(id) ||
       seen.has(id) ||
       typeof src !== "string" ||
-      !INLINE_RASTER.test(src)
+      !encoded ||
+      encoded.length % 4 !== 0
     ) {
       throw new Error("Invalid emoji");
     }

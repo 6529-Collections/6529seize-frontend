@@ -143,6 +143,9 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     await openMessageActions(bob.page, received);
     await bob.page.getByRole("menuitem", { name: "More reactions" }).click();
     await chooseEmoji(bob.page, "gm", ":gm:");
+    await expect(
+      received.getByRole("button", { name: "Message actions" })
+    ).toBeFocused();
     const reaction = received.getByRole("button", { name: /:gm:.*1/u });
     await expect(reaction).toHaveAttribute("aria-pressed", "true", {
       timeout: E2EE_SYNC_TIMEOUT_MS,
