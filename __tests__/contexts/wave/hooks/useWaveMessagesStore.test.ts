@@ -62,9 +62,39 @@ describe("useWaveMessagesStore", () => {
     }
   });
 
+  it("publishes a hidden-tab deletion on resume without requiring another update", () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    try {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      const listener = jest.fn();
+      act(() => {
+        result.current.updateData({ key: "wave1", drops: [baseDrop] });
+        result.current.subscribe("wave1", listener);
+      });
+      listener.mockClear();
+      act(() => {
+        visibility.mockReturnValue("hidden");
+        result.current.removeDrop("wave1", "d1");
+      });
+      expect(result.current.getData("wave1")?.drops).toEqual([]);
+      expect(listener).not.toHaveBeenCalled();
+      act(() => {
+        visibility.mockReturnValue("visible");
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({ drops: [] })
+      );
+    } finally {
+      visibility.mockRestore();
+    }
+  });
+
   it("does not resurrect a drop deleted before it enters the cache", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     act(() => {
+      result.current.trackActiveWave("wave1");
       result.current.removeDrop("wave1", "d1");
       result.current.updateData({ key: "wave1", drops: [baseDrop] });
     });

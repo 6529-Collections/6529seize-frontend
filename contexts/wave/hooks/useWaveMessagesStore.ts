@@ -721,11 +721,13 @@ function useWaveMessagesStore() {
   const removeDrops = useCallback(
     (waveId: string, dropIds: readonly string[]) => {
       if (storeGeneration !== storeGenerationRef.current) return;
+      const currentWave = waveMessagesRef.current[waveId];
+      if (!currentWave && !isWaveInUse(waveId) && !hasServerFeedSeed(waveId))
+        return;
       const deleted =
         deletedDropIdsRef.current.get(waveId) ?? new Set<string>();
       dropIds.forEach((id) => deleted.add(id));
       deletedDropIdsRef.current.set(waveId, deleted);
-      const currentWave = waveMessagesRef.current[waveId];
       if (!currentWave || dropIds.length === 0) return;
       const removed = new Set(dropIds);
       const drops = currentWave.drops.filter((drop) => !removed.has(drop.id));
@@ -738,7 +740,7 @@ function useWaveMessagesStore() {
       dirtyWaveIdsRef.current.add(waveId);
       flushNotifications();
     },
-    [flushNotifications, storeGeneration]
+    [flushNotifications, hasServerFeedSeed, isWaveInUse, storeGeneration]
   );
 
   const removeDrop = useCallback(

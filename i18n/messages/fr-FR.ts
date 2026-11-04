@@ -29,6 +29,7 @@ const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
   "waves.historyGap.load": "Charger les messages manqués",
+  "waves.historyGap.loaded": "Messages manqués chargés",
   "waves.historyGap.loading": "Chargement des messages manqués…",
   "waves.historyGap.retry":
     "Impossible de charger les messages manqués. Réessayer",

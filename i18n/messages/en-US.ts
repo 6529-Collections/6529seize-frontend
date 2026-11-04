@@ -3186,6 +3186,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
   "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
   "waves.historyGap.loading": "Loading missed messages…",
   "waves.historyGap.retry": "Could not load missed messages. Try again",
 

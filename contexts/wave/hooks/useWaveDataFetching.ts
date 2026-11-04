@@ -267,10 +267,11 @@ function useSyncExistingWaveNewestMessages({
               : current.historyGaps;
           updateData({
             key: waveId,
-            drops: formatWaveMessages(
-              waveId,
-              reconcileWaveSnapshot(result.drops, wave.drops, current.drops)
-            ).drops,
+            drops:
+              formatWaveMessages(
+                waveId,
+                reconcileWaveSnapshot(result.drops, wave.drops, current.drops)
+              ).drops ?? [],
             latestFetchedSerialNo: result.highestSerialNo,
             historyGaps,
           });

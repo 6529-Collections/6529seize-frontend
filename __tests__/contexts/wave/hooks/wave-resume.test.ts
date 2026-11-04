@@ -90,9 +90,8 @@ it("keeps live edits and deletions received while the latest snapshot is in flig
       drops: [fullDrop(2), fullDrop(3)],
     })
   );
-  let pending!: Promise<void>;
   act(() => {
-    pending = result.current.fetching.registerWave("wave", true);
+    result.current.fetching.registerWave("wave", true);
   });
   act(() => {
     result.current.store.updateData({
@@ -104,7 +103,7 @@ it("keeps live edits and deletions received while the latest snapshot is in flig
   });
   await act(async () => {
     finish({ drops: [drop(2), drop(3), drop(4), drop(5)], highestSerialNo: 5 });
-    await pending;
+    await Promise.resolve();
   });
   const rows = result.current.store.getData("wave")?.drops;
   expect(rows?.find((row) => row.id === "post-2")).toMatchObject({
@@ -170,6 +169,24 @@ it("closes a gap at the cached boundary and keeps a failed gap retryable", async
   });
   expect(result.current.store.getData("wave")?.historyGaps).toEqual([]);
   expect(result.current.store.getData("wave")?.drops).toHaveLength(3);
+});
+
+it("closes an authoritative empty history interval while preserving cached rows", async () => {
+  const { result } = setup();
+  const gap = { newerThan: 1, olderThan: 10 };
+  act(() =>
+    result.current.store.updateData({ key: "wave", historyGaps: [gap] })
+  );
+  history.mockResolvedValue([]);
+  await act(async () => {
+    await result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap,
+    });
+  });
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([]);
+  expect(result.current.store.getData("wave")?.drops).toHaveLength(1);
 });
 
 it("discards an in-flight history response after a profile switch", async () => {

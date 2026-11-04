@@ -2,7 +2,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import type { WaveHistoryGap } from "@/contexts/wave/hooks/types";
 
-/** A response must not overwrite a live edit received while it was in flight. */
+/** Protect edits received in flight. All writes still pass through the store's
+ * tombstone filter, which also rejects deletions of IDs absent from this snapshot. */
 export function reconcileWaveSnapshot(
   fetched: readonly ApiDrop[],
   before: readonly Drop[],

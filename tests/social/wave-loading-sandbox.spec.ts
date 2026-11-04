@@ -1005,9 +1005,7 @@ test("resume shows the latest page before missed history and preserves the compo
     await expect(composer).toHaveText("Keep this unsent draft");
     // A blocked history request must not keep the current conversation stale.
     await expect(fixture.post(1151)).toBeInViewport();
-    const gap = page
-      .getByRole("button", { name: "Load missed messages", exact: true })
-      .last();
+    const gap = page.getByRole("button", { name: /missed messages/ }).last();
     await gap.scrollIntoViewIfNeeded();
     await expect.poll(() => olderRequests).toBeGreaterThan(0);
     await expect(gap).toBeDisabled();
@@ -1020,6 +1018,9 @@ test("resume shows the latest page before missed history and preserves the compo
     );
     await gap.click();
     await expect(fixture.post(1101)).toBeAttached();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+    ).toBeAttached();
     await expect(composer).toHaveText("Keep this unsent draft");
     await expectNoHorizontalOverflow(page);
   } finally {

@@ -22,6 +22,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.jso
 
 export const EN_GB_MESSAGES = {
   "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
   "waves.historyGap.loading": "Loading missed messages…",
   "waves.historyGap.retry": "Could not load missed messages. Try again",
 

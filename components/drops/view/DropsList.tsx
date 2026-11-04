@@ -108,6 +108,16 @@ const DropsList = memo(
       ({ drop, partId }) => onReply({ drop, partId }),
       [onReply]
     );
+    const [historyAnnouncement, setHistoryAnnouncement] = useState<{
+      waveId: string | undefined;
+      message: string;
+    } | null>(null);
+    const announceHistory = useCallback(
+      (message: string) => {
+        setHistoryAnnouncement({ waveId, message });
+      },
+      [waveId]
+    );
 
     const handleReplyClick = useCallback(
       (dropSerialNo: number) => onReplyClick(dropSerialNo),
@@ -378,10 +388,11 @@ const DropsList = memo(
         const historyGap =
           gap && waveId ? (
             <WaveHistoryGap
-              key={`gap-${gap.newerThan}-${gap.olderThan}`}
+              key={`gap-${gap.newerThan}`}
               waveId={waveId}
               gap={gap}
               scrollContainerRef={scrollContainerRef}
+              onAnnounce={announceHistory}
             />
           ) : null;
         return [historyGap, boostCard, unreadDivider, dropElement].filter(
@@ -401,10 +412,18 @@ const DropsList = memo(
       historyGaps,
       waveId,
       scrollContainerRef,
+      announceHistory,
     ]);
 
     return (
-      <WaveDropMobileMenuProvider>{renderedDrops}</WaveDropMobileMenuProvider>
+      <WaveDropMobileMenuProvider>
+        <span className="tw-sr-only" role="status" aria-live="polite">
+          {historyAnnouncement?.waveId === waveId
+            ? historyAnnouncement?.message
+            : ""}
+        </span>
+        {renderedDrops}
+      </WaveDropMobileMenuProvider>
     );
   }
 );

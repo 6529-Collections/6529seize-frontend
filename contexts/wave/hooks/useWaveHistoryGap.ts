@@ -57,6 +57,7 @@ export function useWaveHistoryGap({
             )
           )
             return null;
+          // Successful empty pages exhaust the interval; request failures return null above.
           const oldest = Math.min(...drops.map((drop) => drop.serial_no));
           if (drops.length > 0 && oldest >= gap.olderThan) return null;
           const historyGaps = current.historyGaps.filter(
