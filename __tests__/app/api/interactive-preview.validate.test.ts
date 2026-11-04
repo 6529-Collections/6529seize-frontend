@@ -1,4 +1,4 @@
-import { validateInteractivePreview } from "@/components/waves/memes/submission/actions/validateInteractivePreview";
+import { validateInteractivePreview } from "@/app/api/interactive-preview/validateInteractivePreview";
 import { INTERACTIVE_MEDIA_GATEWAY_BASE_URL } from "@/components/waves/memes/submission/constants/security";
 
 const CID_V1 = "bafybeigdyrztobg3tv6zj5n6xvztf4k5p3xf7r6xkqfq5jz3o5quftdjum";
