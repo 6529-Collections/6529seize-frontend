@@ -2,7 +2,7 @@
 
 import type { Dispatch } from "react";
 import { useCallback, useEffect, useRef } from "react";
-import { validateInteractivePreview } from "../actions/validateInteractivePreview";
+import { requestInteractivePreviewValidation } from "@/services/api/interactive-preview-api";
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
@@ -181,7 +181,7 @@ function useExternalMediaValidation({
 
     const runValidation = async (): Promise<void> => {
       try {
-        const result = await validateInteractivePreview({
+        const result = await requestInteractivePreviewValidation({
           provider,
           path: sanitizedHash,
         });
@@ -213,7 +213,7 @@ function useExternalMediaValidation({
         validationRequestKeyRef.current = null;
       } catch (error) {
         console.error(
-          "[useArtworkSubmissionForm] validateInteractivePreview failed",
+          "[useArtworkSubmissionForm] interactive preview check failed",
           {
             provider,
             sanitizedHash,
