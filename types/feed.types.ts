@@ -216,7 +216,11 @@ export type INotificationEncryptedMessage = Omit<
   "related_identity"
 > & {
   readonly cause: ApiNotificationCause.E2EeMessage;
-  readonly additional_context: { readonly encrypted_group?: string };
+  readonly related_identity?: ApiProfileMin | null;
+  readonly additional_context: {
+    readonly encrypted_group?: string;
+    readonly encrypted_message_seq?: number;
+  };
 };
 
 export type INotificationArtistArtwork = NotificationBase &

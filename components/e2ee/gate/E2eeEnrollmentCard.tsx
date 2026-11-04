@@ -3,7 +3,6 @@
 import {
   ArchiveBoxXMarkIcon,
   EyeSlashIcon,
-  PencilSquareIcon,
   FingerPrintIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
@@ -23,7 +22,8 @@ import {
   DEVICE_SETUP_TITLE,
   type DeviceSetupScope,
 } from "@/components/device-signing/deviceSetup";
-import HeaderQRScanner from "@/components/header/share/HeaderQRScanner";
+import { faSignature } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useCapacitor from "@/hooks/useCapacitor";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -52,6 +52,18 @@ const SIGN_LABEL = {
   dms: "e2ee.enroll.signDms",
 } as const;
 
+function getPermissionPointKey(
+  key: MessageKey,
+  scope: DeviceSetupScope,
+  isNative: boolean
+): MessageKey {
+  if (key === "e2ee.enroll.point.signature" && scope === "both")
+    return "e2ee.enroll.encryptionCombined";
+  if (key === "e2ee.enroll.point.noBackup" && isNative)
+    return "e2ee.enroll.point.noBackupApp";
+  return key;
+}
+
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 
 const subscribeNever = () => () => undefined;
@@ -72,10 +84,13 @@ function SetupPermissionCopy({
   const locale = useBrowserLocale();
   const includesSigning = scope !== "dms";
   const includesEncryption = scope !== "posts";
+  const signingCopy = isNative
+    ? "e2ee.enroll.signingApp"
+    : "signedMessages.notice.enable.body";
   return (
     <>
       {scope === "both" && (
-        <p className="tw-mb-4 tw-text-sm tw-text-iron-300">
+        <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-text-iron-300">
           {t(locale, "e2ee.enroll.oneSignatureBoth")}
         </p>
       )}
@@ -84,16 +99,15 @@ function SetupPermissionCopy({
           <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
             {t(locale, "e2ee.enroll.signingSection")}
           </h3>
-          <p className="tw-mt-2 tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            <PencilSquareIcon
+          <p className="tw-mt-2 tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-5 tw-text-iron-200">
+            <FontAwesomeIcon
+              icon={faSignature}
               aria-hidden="true"
               className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-iron-400"
             />
             {t(
               locale,
-              isNative
-                ? "e2ee.enroll.signingApp"
-                : "signedMessages.notice.enable.body"
+              scope === "both" ? "e2ee.enroll.signingCombined" : signingCopy
             )}
           </p>
         </>
@@ -101,34 +115,29 @@ function SetupPermissionCopy({
       {includesEncryption && (
         <>
           {includesSigning && (
-            <h3 className="tw-m-0 tw-mt-4 tw-text-sm tw-font-semibold tw-text-iron-50">
+            <h3 className="tw-m-0 tw-mt-3 tw-text-sm tw-font-semibold tw-text-iron-50">
               {t(locale, "e2ee.enroll.encryptionSection")}
             </h3>
           )}
-          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
             {t(locale, "e2ee.enroll.intro")}
           </p>
-          <ul className="tw-m-0 tw-mt-4 tw-flex tw-list-none tw-flex-col tw-gap-3 tw-p-0">
+          <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-3 tw-p-0">
             {POINTS.map(({ key, Icon }) => (
               <li key={key} className="tw-flex tw-items-start tw-gap-3">
                 <Icon
                   aria-hidden="true"
                   className="tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
                 />
-                <span className="tw-text-sm tw-leading-6 tw-text-iron-200">
-                  {t(
-                    locale,
-                    isNative && key === "e2ee.enroll.point.noBackup"
-                      ? "e2ee.enroll.point.noBackupApp"
-                      : key
-                  )}
+                <span className="tw-text-sm tw-leading-5 tw-text-iron-200">
+                  {t(locale, getPermissionPointKey(key, scope, isNative))}
                 </span>
               </li>
             ))}
           </ul>
         </>
       )}
-      <p className="tw-mb-0 tw-mt-4 tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+      <p className="tw-mb-0 tw-mt-3 tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-5 tw-text-iron-200">
         <ShieldCheckIcon
           aria-hidden="true"
           className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-iron-400"
@@ -259,14 +268,14 @@ export function E2eeEnrollmentCard({
       aria-labelledby={onClose ? undefined : headingId}
       className={
         onClose
-          ? undefined
+          ? "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
           : "tw-mx-auto tw-flex tw-w-full tw-max-w-xl tw-flex-col tw-gap-4 tw-px-4 tw-py-8"
       }
     >
       <div
         className={
           onClose
-            ? undefined
+            ? "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
             : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
         }
       >
@@ -275,63 +284,54 @@ export function E2eeEnrollmentCard({
             id={headingId}
             className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
           >
-            {t(
-              locale,
-              selectedScope === "dms"
-                ? "e2ee.enroll.title"
-                : DEVICE_SETUP_TITLE[selectedScope]
-            )}
+            {t(locale, DEVICE_SETUP_TITLE[selectedScope])}
           </h2>
         )}
         <div
           className={
             onClose
-              ? "tw-max-h-[max(7rem,calc(100dvh-18rem))] tw-overflow-y-auto"
+              ? "tw-min-h-0 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
               : undefined
           }
         >
           <SetupPermissionCopy scope={selectedScope} isNative={isCapacitor} />
           {details}
           {isSafari && includesEncryption ? (
-            <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-leading-6 tw-text-amber-100">
+            <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-leading-5 tw-text-amber-100">
               {t(locale, "e2ee.enroll.safari")}
             </p>
           ) : null}
         </div>
-        <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-3">
-          <Button
-            variant="action"
-            size="lg"
-            onClick={() => flow.enable("encrypted-messages")}
-            loading={waiting}
-            disabled={!canSign}
-            aria-busy={waiting || encryptionLoading}
-            className="!tw-whitespace-normal tw-text-center"
+        <div className="tw-mt-4 tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
+          <div
+            className={
+              onClose
+                ? "tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start"
+                : "tw-grid"
+            }
           >
-            {t(locale, SIGN_LABEL[selectedScope])}
-          </Button>
-          {onClose && (
             <Button
-              variant="secondary"
+              variant="action"
               size="lg"
-              disabled={waiting}
-              onClick={onClose}
+              onClick={() => flow.enable("encrypted-messages")}
+              loading={waiting}
+              disabled={!canSign}
+              aria-busy={waiting || encryptionLoading}
+              className="!tw-whitespace-normal tw-text-center"
             >
-              {t(locale, "e2ee.action.cancel")}
+              {t(locale, SIGN_LABEL[selectedScope])}
             </Button>
-          )}
-          {isCapacitor && address && selectedScope === "both" && !waiting && (
-            <>
-              <p className="tw-m-0 tw-text-sm tw-text-iron-400">
-                {t(locale, "e2ee.enroll.browserApprovalHelp")}
-              </p>
-              <HeaderQRScanner
-                onScanSuccess={() => onClose?.()}
-                actionLabel={t(locale, "e2ee.enroll.browserApproval")}
-                deviceSetupAddress={address}
-              />
-            </>
-          )}
+            {onClose && (
+              <Button
+                variant="secondary"
+                size="lg"
+                disabled={waiting}
+                onClick={onClose}
+              >
+                {t(locale, "e2ee.action.cancel")}
+              </Button>
+            )}
+          </div>
           {offerSeparateSetup && selectedScope === "both" && !waiting && (
             <div className="tw-flex tw-flex-wrap tw-gap-2">
               {(["posts", "dms"] as const).map((permission) => (

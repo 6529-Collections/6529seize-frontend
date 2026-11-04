@@ -115,8 +115,7 @@ export interface StagingE2eeSession {
   /**
    * Whether the wallet already had a profile when it signed in. A combined
    * sign-in grant (NC8) enrolls only such a wallet: a new wallet has no
-   * profile to hold the key yet, so its sign-in grants signing only and the
-   * enrollment button signs in once more with the combined grant.
+   * profile to hold the key yet, so its sign-in grants signing only.
    */
   hadProfileAtSignIn: boolean;
   /** The id of the device grant the latest sign-in stored, if any. */
@@ -528,19 +527,19 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
 
 function enrollmentHeading(page: Page) {
   return page.getByRole("heading", {
-    name: /^(Turn on encrypted messages|Post Signing & DM Encryption)$/,
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
   });
 }
 
-export function enrollmentButton(page: Page) {
+function enrollmentButton(page: Page) {
   return page.getByRole("button", {
-    name: /^Sign to enable (both|encrypted DMs)$/,
+    name: /^Sign to enable (both|Encrypted DMs)$/,
   });
 }
 
 /** What the encrypted messages gate shows instead of chats, if anything. */
 const GATE_STATES = [
-  { state: "enrollment", text: "Turn on encrypted messages" },
+  { state: "enrollment", text: "Enable Encrypted DMs" },
   { state: "enrollment", text: "Post Signing & DM Encryption" },
   {
     state: "no connected wallet (the scripted wallet did not reconnect)",
@@ -624,8 +623,8 @@ const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>
 /**
  * NC8: the combined sign-in enrolled this browser. That takes a wallet that
  * already had a profile; a new wallet signs in with a signing-only grant
- * (the server omits the MLS key without a profile), so it turns encrypted
- * messages on from the enrollment button instead.
+ * (the server omits the MLS key without a profile), so it enables only
+ * Encrypted DMs from the enrollment card after creating a profile.
  */
 const enrolledByCombinedSignIn = (session: StagingE2eeSession): boolean =>
   session.hadProfileAtSignIn && signedInWithCombinedGrant(session);
@@ -669,11 +668,15 @@ async function expectEnrolledBySignIn(session: StagingE2eeSession) {
 /**
  * Turns on encrypted messages for this device. After a combined sign-in
  * (NC8) that already happened with the sign-in signature; otherwise the
- * enrollment button signs in once more with the combined grant (website).
+ * enrollment card grants only the permissions this browser still needs.
  */
 export async function enrollDevice(session: StagingE2eeSession) {
   if (enrolledByCombinedSignIn(session)) {
     await expectEnrolledBySignIn(session);
+    return;
+  }
+  if (session.signInGrantId) {
+    await enrollWithEncryptionOnly(session, session.signInGrantId);
     return;
   }
   await enrollWithCombinedTurnOn(session);
@@ -691,26 +694,61 @@ const waitForPost = (page: Page, pathname: string) => {
   return response;
 };
 
-/**
- * NC8 on the website (owner decision: one grant per browser): the button's
- * combined sign-in grants the signing key and the encrypted-messages key
- * with one more personal_sign and no EIP-712 `MlsDeviceGrant`. The device
- * registers through POST /api/e2ee/devices/login-grant with that grant, and
- * the browser's earlier signing-only grant is revoked.
- */
+async function enrollWithEncryptionOnly(
+  session: StagingE2eeSession,
+  signingGrantId: string
+) {
+  const { page, wallet, evidence } = session;
+  await gotoStaging(page, ENCRYPTED_ROUTE);
+  const button = page.getByRole("button", {
+    name: "Sign to enable Encrypted DMs",
+    exact: true,
+  });
+  await expect(button).toBeEnabled({ timeout: FIRST_LOAD_TIMEOUT_MS });
+
+  const signInsBefore = wallet.count("personal_sign");
+  const typedGrantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
+  const registration = waitForPost(page, "/api/e2ee/devices");
+  await button.click();
+
+  const response = await registration;
+  expect(
+    response.ok(),
+    `${session.label}: encryption-only registration answered HTTP ${response.status()}`
+  ).toBe(true);
+  await expect(enrollmentHeading(page)).toHaveCount(0, {
+    timeout: UI_TIMEOUT_MS,
+  });
+  await expect(
+    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+  ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+
+  expect(wallet.count("personal_sign")).toBe(signInsBefore);
+  expect(wallet.typedDataSignatures("MlsDeviceGrant")).toHaveLength(
+    typedGrantsBefore + 1
+  );
+  expect(
+    evidence
+      .requestsMatching("POST", /\/api\/device-grants\/[^/]+\/revoke$/u)
+      .some(({ url }) =>
+        new URL(url).pathname.endsWith(`/${signingGrantId}/revoke`)
+      ),
+    `${session.label}: encryption-only setup revoked the Signed Posts grant`
+  ).toBe(false);
+}
+
+/** When both permissions are missing, one sign-in signature grants both. */
 async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
   const { page, wallet } = session;
   await gotoStaging(page, ENCRYPTED_ROUTE);
   await expectEnrollmentCard(session);
   const signaturesBefore = wallet.count("personal_sign");
   const typedGrantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
-  const replacedGrantId = session.signInGrantId;
   const login = waitForPost(page, "/api/auth/session-login");
   const registration = waitForPost(page, "/api/e2ee/devices/login-grant");
-  const revocation = replacedGrantId
-    ? waitForPost(page, `/api/device-grants/${replacedGrantId}/revoke`)
-    : null;
-  await enrollmentButton(page).click();
+  await page
+    .getByRole("button", { name: "Sign to enable both", exact: true })
+    .click();
 
   const loginResponse = await login;
   expect(
@@ -729,13 +767,6 @@ async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
   ).toBe(true);
   const body = response.request().postDataJSON() as { grant_id?: string };
   expect(body.grant_id?.toLowerCase()).toBe(grantId);
-  if (revocation) {
-    const revoked = await revocation;
-    expect(
-      revoked.ok(),
-      `${session.label}: revoking the replaced signing-only grant answered HTTP ${revoked.status()}`
-    ).toBe(true);
-  }
   await expect(enrollmentHeading(page)).toHaveCount(0, {
     timeout: UI_TIMEOUT_MS,
   });

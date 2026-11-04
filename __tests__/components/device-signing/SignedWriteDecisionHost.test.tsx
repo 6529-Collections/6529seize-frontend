@@ -188,7 +188,7 @@ describe("SignedWriteDecisionHost", () => {
     ).not.toBeInTheDocument();
 
     await user.click(
-      screen.getByRole("button", { name: "Turn on signed posts" })
+      screen.getByRole("button", { name: "Turn on Signed Posts" })
     );
     expect(mockRequestGrant).toHaveBeenCalledTimes(1);
     await expect(decision).resolves.toBe("retry");
@@ -201,7 +201,7 @@ describe("SignedWriteDecisionHost", () => {
     const decision = ask({ action: "post", reason: "grant-unusable" });
 
     await user.click(
-      await screen.findByRole("button", { name: "Turn on signed posts" })
+      await screen.findByRole("button", { name: "Turn on Signed Posts" })
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Couldn't turn on signed posts."
@@ -217,7 +217,7 @@ describe("SignedWriteDecisionHost", () => {
 
     await screen.findByRole("alertdialog");
     expect(
-      screen.queryByRole("button", { name: "Turn on signed posts" })
+      screen.queryByRole("button", { name: "Turn on Signed Posts" })
     ).not.toBeInTheDocument();
     await waitFor(() =>
       expect(

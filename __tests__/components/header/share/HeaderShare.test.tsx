@@ -994,17 +994,22 @@ describe("HeaderShare", () => {
         const normalShare =
           session.createConnectionShare.getMockImplementation();
         let issued = 0;
+        let finishRefresh = () => {};
+        const refreshPending = new Promise<void>((resolve) => {
+          finishRefresh = resolve;
+        });
         session.createConnectionShare.mockImplementation(
-          (request: { encryptedDeviceSetup?: string }) => {
+          async (request: { encryptedDeviceSetup?: string }) => {
             if (!request.encryptedDeviceSetup) return normalShare(request);
             issued += 1;
-            return Promise.resolve({
+            if (issued === 2) await refreshPending;
+            return {
               address,
               role: null,
               target_client_type: target,
               expires_at: new Date(Date.now() + 60_000).toISOString(),
               connection_share_code: `combined-${issued}`,
-            });
+            };
           }
         );
         try {
@@ -1041,6 +1046,8 @@ describe("HeaderShare", () => {
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
+          expect(screen.queryByTitle(/combined-1/)).not.toBeInTheDocument();
+          finishRefresh();
           expect(await screen.findByTitle(/combined-2/)).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(2);
           await userEvent.click(screen.getByRole("button", { name: "Back" }));

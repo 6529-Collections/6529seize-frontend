@@ -309,7 +309,7 @@ export function HeaderShareModalView({
               refresh();
             }
           }}
-          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
+          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
             loading
               ? "tw-cursor-wait tw-opacity-50"
               : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
@@ -583,7 +583,7 @@ export function HeaderShareModalView({
           target={activeSubTab === SubMode.DESKTOP ? "desktop" : "native"}
           renderLink={(link, refresh, loading) => (
             <>
-              <h3 className="tw-m-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-50">
+              <h3 className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
                 {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.asSecure", {
                   name,
                 })}
@@ -629,7 +629,7 @@ export function HeaderShareModalView({
 
     return (
       <>
-        <h3 className="tw-m-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
           {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.as", { name })}
         </h3>
         <div
@@ -751,7 +751,7 @@ export function HeaderShareModalView({
         </div>
         <div
           data-testid="header-share-modal-content"
-          className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-3"
+          className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-2"
         >
           {isConnectMode ? (
             <ConnectDeviceContent account={account}>

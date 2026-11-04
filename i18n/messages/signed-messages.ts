@@ -21,8 +21,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Don't see it? Open the wallet app on your phone. If nothing is waiting there, reconnect your wallet.",
   "signedMessages.enable.status.stalled":
     "Still nothing on your phone? Reconnect your wallet to pair it again. You'll be asked to sign again once it reconnects.",
-  "signedMessages.enable.status.rejected":
-    "Signature canceled. Nothing changed, and you can try again any time.",
+  "signedMessages.enable.status.rejected": "Signature cancelled.",
   "signedMessages.enable.status.notConnected":
     "Your wallet didn't connect. Unlock it and try again.",
   "signedMessages.enable.status.networkSwitchCanceled":
@@ -47,7 +46,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Your wallet or network changed while signing. Please try again.",
   "signedMessages.notice.ariaLabel": "Signed posts",
   "signedMessages.notice.dismiss": "Dismiss",
-  "signedMessages.notice.enable.title": "Turn on signed posts (one signature)",
+  "signedMessages.notice.enable.title": "Turn on Signed Posts (one signature)",
   "signedMessages.notice.enable.body":
     "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "signedMessages.notice.enable.action": "Turn on",
@@ -98,9 +97,9 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.loading": "Loading devices",
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",
-  "signedMessages.devices.enable": "Turn on signed posts in this browser",
+  "signedMessages.devices.enable": "Turn on Signed Posts in this browser",
   "signedMessages.devices.enableOnDevice":
-    "Turn on signed posts on this device",
+    "Turn on Signed Posts on this device",
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
   "signedMessages.marker.label": "Signed by its author",
@@ -165,7 +164,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.prompt.sendUnsigned": "Send unsigned",
   "signedMessages.prompt.saveUnsigned": "Save unsigned",
   "signedMessages.prompt.doUnsigned": "Do it unsigned",
-  "signedMessages.prompt.enable": "Turn on signed posts",
+  "signedMessages.prompt.enable": "Turn on Signed Posts",
   "signedMessages.prompt.enableFailed":
     "Couldn't turn on signed posts. Try again, or continue unsigned.",
   "signedMessages.prompt.cancel": "Cancel",

@@ -17,9 +17,11 @@ import {
 export default function DeviceSetupMenuAction({
   onClose,
   showStatus = true,
+  mobile = false,
 }: {
   readonly onClose: () => void;
   readonly showStatus?: boolean;
+  readonly mobile?: boolean;
 }) {
   const locale = useBrowserLocale();
   const details = useDeviceSecurityState();
@@ -39,9 +41,16 @@ export default function DeviceSetupMenuAction({
             onClose();
             openDeviceSetup(scope);
           }}
-          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-iron-700 hover:tw-text-iron-50"
+          className={`tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-left tw-text-iron-300 tw-transition-colors ${
+            mobile
+              ? "tw-gap-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold active:tw-bg-iron-700 active:tw-text-iron-200"
+              : "tw-min-h-11 tw-gap-3 tw-px-3 tw-text-md tw-font-medium hover:tw-bg-iron-700 hover:tw-text-iron-50"
+          }`}
         >
-          <FontAwesomeIcon icon={faUserShield} className="tw-w-5 tw-shrink-0" />
+          <FontAwesomeIcon
+            icon={faUserShield}
+            className={mobile ? "tw-size-6 tw-shrink-0" : "tw-w-5 tw-shrink-0"}
+          />
           {t(locale, DEVICE_SETUP_TITLE[scope])}
         </button>
       )}

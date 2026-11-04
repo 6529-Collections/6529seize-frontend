@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ConnectedProfileDeviceBadge } from "@/components/device-signing/DeviceSecurityStatus";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -90,6 +91,11 @@ function ConnectedAccountRow({
             />
           )}
         </div>
+        <ConnectedProfileDeviceBadge
+          address={account.address}
+          profileId={profile?.id}
+          isActive={account.isActive}
+        />
         {showUnreadBadge && (
           <div className="tw-absolute tw-right-[-8px] tw-top-[-8px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
             {unreadBadgeLabel}

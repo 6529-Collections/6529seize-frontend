@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
+import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
@@ -39,6 +39,16 @@ export default function NotificationInboxRow({
         .map((entry) => entry.id)
     ),
   ];
+  if (notification.cause === ApiNotificationCause.E2EeMessage) {
+    return (
+      <li>
+        <NotificationEncryptedMessage
+          notification={notification}
+          onOpen={() => onOpen(unreadIds)}
+        />
+      </li>
+    );
+  }
   const reactors = group
     ? [
         ...new Map(
@@ -59,12 +69,7 @@ export default function NotificationInboxRow({
   ) {
     pfpUrl = notification.related_wave?.pfp;
   }
-  const encryptedPreview = useEncryptedNotificationPreview(
-    notification.cause === ApiNotificationCause.E2EeMessage
-      ? (notification.additional_context.encrypted_group ?? null)
-      : null
-  );
-  const preview = encryptedPreview ?? getInboxPreview(notification);
+  const preview = getInboxPreview(notification);
   return (
     <li>
       <Link

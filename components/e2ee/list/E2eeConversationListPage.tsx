@@ -75,11 +75,17 @@ export function E2eeConversationListPage() {
   const locale = useBrowserLocale();
   useOpenWakeChat();
   // Devices and new chats only make sense once this device is turned on.
-  const ready = useE2ee().status === "ready";
+  const { status } = useE2ee();
+  const ready = status === "ready";
+  const showingSetup = status === "needs-enrollment" || status === "enrolling";
   return (
     <E2eePageShell
-      title={t(locale, "e2ee.title")}
-      subtitle={<E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />}
+      title={showingSetup ? undefined : t(locale, "e2ee.title")}
+      subtitle={
+        ready ? (
+          <E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />
+        ) : undefined
+      }
       backHref={getMessagesBaseRoute(false)}
       backLabel={t(locale, "e2ee.section.plaintext")}
       backOnSmallScreensOnly

@@ -38493,9 +38493,10 @@ components:
           format: int64
         encrypted_group:
           type: string
-          description: >-
-            Opaque encrypted-chat handle. No sender or message content is stored
-            in the notification.
+          description: Opaque encrypted-chat handle.
+        encrypted_message_seq:
+          type: integer
+          description: Sequence of the message to preview from local decrypted history.
         reason:
           $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:

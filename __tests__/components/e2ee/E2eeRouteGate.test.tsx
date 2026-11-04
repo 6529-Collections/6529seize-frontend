@@ -89,7 +89,7 @@ describe("E2eeRouteGate", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Sign to enable encrypted DMs",
+        name: "Sign to enable Encrypted DMs",
       })
     );
     await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
@@ -106,12 +106,10 @@ describe("E2eeRouteGate", () => {
     renderGate(contextFor(engine));
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Sign to enable encrypted DMs",
+        name: "Sign to enable Encrypted DMs",
       })
     );
-    const declined = await screen.findByText(
-      "You cancelled the signature. Nothing was turned on."
-    );
+    const declined = await screen.findByText("Signature cancelled.");
     // Declining is a choice: announced politely, never as an alert.
     expect(declined.tagName).toBe("OUTPUT");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

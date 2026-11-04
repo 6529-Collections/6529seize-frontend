@@ -363,7 +363,11 @@ function WebSidebarUser({
                   ? "desktop-hover:group-hover/user:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_0_14px_rgba(255,255,255,0.06)] desktop-hover:group-hover/user:tw-brightness-[1.05]"
                   : ""
               }`}
-              title={connectionIndicator.title}
+              title={
+                isDeviceSecurityStatusEnabled()
+                  ? undefined
+                  : connectionIndicator.title
+              }
             >
               <WebSidebarAccountAvatar
                 key={`${address}:${resolvedPfp ?? "default"}`}
@@ -378,6 +382,7 @@ function WebSidebarUser({
             <DeviceSecurityStatus
               descriptionId={deviceStatusId}
               menuOpen={showUserMenu}
+              connection={connectionIndicator}
             />
             {hasUnreadOnOtherConnectedProfiles && (
               <div
