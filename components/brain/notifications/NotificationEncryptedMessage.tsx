@@ -46,23 +46,27 @@ export default function NotificationEncryptedMessage({
       }
     >
       <div className="tw-min-h-10 tw-pl-[3.25rem]">
-        <div className="tw-relative tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
+        <div className="tw-relative tw-break-words tw-text-sm tw-leading-6">
           {handle ? (
             <>
               <Link
                 href={`/${encodeURIComponent(handle)}`}
                 prefetch={false}
-                className="tw-rounded tw-text-inherit hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&>div]:tw-z-10"
+                className="tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline [&>div]:tw-z-10"
               >
                 {avatar}
                 <span className="tw-relative tw-z-10">{handle}</span>
               </Link>{" "}
-              <span>{t(locale, "e2ee.notification.senderAction")}</span>
+              <span className="tw-text-iron-400">
+                {t(locale, "e2ee.notification.senderAction")}
+              </span>
             </>
           ) : (
             <>
               {avatar}
-              <span>{t(locale, "e2ee.notification.newMessage")}</span>
+              <span className="tw-font-semibold tw-text-iron-50">
+                {t(locale, "e2ee.notification.newMessage")}
+              </span>
             </>
           )}{" "}
           <NotificationTimestamp createdAt={notification.created_at} />
