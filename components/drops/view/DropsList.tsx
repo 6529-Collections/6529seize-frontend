@@ -19,6 +19,8 @@ import ContentModerationDropGate from "@/components/content-moderation/ContentMo
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
 import UnreadDivider from "./UnreadDivider";
+import { WaveHistoryGap } from "@/components/waves/drops/WaveHistoryGap";
+import type { WaveHistoryGap as HistoryGap } from "@/contexts/wave/hooks/types";
 import {
   DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
   type BoostedDropsDisplayPreference,
@@ -36,6 +38,8 @@ type DropActionHandler = ({
 }) => void;
 
 interface DropsListProps {
+  readonly historyGaps?: readonly HistoryGap[] | undefined;
+  readonly waveId?: string | undefined;
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   readonly drops: DropType[];
   readonly showWaveInfo: boolean;
@@ -97,6 +101,8 @@ const DropsList = memo(
     isVotingClosed = false,
     isVotingControlsLocked = false,
     moderationPresentation = "default",
+    historyGaps,
+    waveId,
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -364,7 +370,23 @@ const DropsList = memo(
           </HighlightDropWrapper>
         );
 
-        return [boostCard, unreadDivider, dropElement].filter(Boolean);
+        const gap = historyGaps?.find(
+          (item) =>
+            drop.serial_no >= item.olderThan &&
+            (!previousDrop || previousDrop.serial_no < item.olderThan)
+        );
+        const historyGap =
+          gap && waveId ? (
+            <WaveHistoryGap
+              key={`gap-${gap.newerThan}-${gap.olderThan}`}
+              waveId={waveId}
+              gap={gap}
+              scrollContainerRef={scrollContainerRef}
+            />
+          ) : null;
+        return [historyGap, boostCard, unreadDivider, dropElement].filter(
+          Boolean
+        );
       });
     }, [
       orderedDrops,
@@ -376,6 +398,9 @@ const DropsList = memo(
       virtualScrollRootMargin,
       moderationPresentation,
       signatureGroups,
+      historyGaps,
+      waveId,
+      scrollContainerRef,
     ]);
 
     return (

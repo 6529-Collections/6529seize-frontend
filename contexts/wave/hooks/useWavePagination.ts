@@ -3,7 +3,8 @@
 import { useCallback, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
-import type { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater, WaveHistoryGap } from "./types";
+import { useWaveHistoryGap } from "./useWaveHistoryGap";
 import {
   fetchLightWaveMessages,
   fetchWaveMessages,
@@ -24,6 +25,7 @@ export type NextPageProps = NextPageFullProps | NextPageLightProps;
 interface NextPageFullProps {
   readonly waveId: string;
   readonly type: DropSize.FULL;
+  readonly gap?: WaveHistoryGap | undefined;
 }
 
 interface NextPageLightProps {
@@ -52,6 +54,13 @@ export function useWavePagination({
     createController,
     cleanupController,
   } = useWaveAbortController("pagination");
+
+  const fetchHistoryGap = useWaveHistoryGap({
+    getData,
+    updateData,
+    createController,
+    cleanupController,
+  });
 
   // Track pagination loading state
   const paginationStates = useRef<Record<string, PaginationState>>({});
@@ -250,6 +259,9 @@ export function useWavePagination({
    */
   const fetchNextPage = useCallback(
     async (props: NextPageProps): Promise<(ApiDrop | ApiDropId)[] | null> => {
+      if (props.type === DropSize.FULL && props.gap) {
+        return fetchHistoryGap(props.waveId, props.gap);
+      }
       // Get current state
       const currentData = getData(props.waveId);
       if (!currentData) {
@@ -328,6 +340,7 @@ export function useWavePagination({
       updateWithPaginatedData,
       handlePaginationError,
       cleanupController,
+      fetchHistoryGap,
     ]
   );
 
@@ -339,6 +352,7 @@ export function useWavePagination({
       // Cancel the abort controller
       cancelAbort(waveId, "pagination_cancelled");
       cancelAbort(`${waveId}-around`, "pagination_cancelled");
+      cancelAbort(`${waveId}-gap`, "pagination_cancelled");
       delete aroundSerialNoStates.current[waveId];
 
       // Forget pagination state; the next page request starts a fresh one

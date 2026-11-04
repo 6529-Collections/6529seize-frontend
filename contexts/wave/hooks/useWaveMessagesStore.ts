@@ -77,12 +77,24 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
 
 const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
 
+function mergeWaveDrops(
+  current: Drop[],
+  incoming: Drop[],
+  mergePolicy: "standard" | "preserve-existing",
+  deleted: Set<string> | undefined
+): Drop[] {
+  const available = incoming.filter((drop) => !deleted?.has(drop.id));
+  return mergePolicy === "preserve-existing"
+    ? mergeDrops(available, current)
+    : mergeDrops(current, available);
+}
+
 export type Listener = (data: WaveMessages | undefined) => void;
 type EvictionListener = (waveId: string) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported
-type QueuedWaveMessagesUpdate = {
+type WaveMessagesCommit = {
   readonly update: WaveMessagesUpdate;
   readonly mergePolicy: "standard" | "preserve-existing";
   readonly onApplied?: (() => void) | undefined;
@@ -105,8 +117,9 @@ function useWaveMessagesStore() {
   const activeWaveIdRef = useRef<string | null>(null);
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
-  const updateQueueRef = useRef<QueuedWaveMessagesUpdate[]>([]);
-  const isProcessingRef = useRef<boolean>(false);
+  const dirtyWaveIdsRef = useRef(new Set<string>());
+  const notificationFrameRef = useRef<number | null>(null);
+  const deletedDropIdsRef = useRef(new Map<string, Set<string>>());
   const pendingServerFeedSeedsRef = useRef<Map<string, PendingServerFeedSeed>>(
     new Map()
   );
@@ -123,6 +136,45 @@ function useWaveMessagesStore() {
   const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
   const storeGenerationRef = useRef(0);
   const [storeGeneration, setStoreGeneration] = useState(0);
+
+  const flushNotifications = useCallback(() => {
+    if (document.visibilityState === "hidden") return;
+    const dirtyWaveIds = [...dirtyWaveIdsRef.current];
+    dirtyWaveIdsRef.current.clear();
+    if (dirtyWaveIds.length === 0) return;
+    forceRender();
+    for (const waveId of dirtyWaveIds) {
+      const value = waveMessagesRef.current[waveId];
+      listenersRef.current[waveId]?.forEach((listener) => listener(value));
+    }
+  }, []);
+
+  const scheduleNotification = useCallback(
+    (waveId: string) => {
+      dirtyWaveIdsRef.current.add(waveId);
+      if (
+        document.visibilityState === "hidden" ||
+        notificationFrameRef.current !== null
+      )
+        return;
+      notificationFrameRef.current = requestAnimationFrame(() => {
+        notificationFrameRef.current = null;
+        flushNotifications();
+      });
+    },
+    [flushNotifications]
+  );
+
+  useEffect(() => {
+    document.addEventListener("visibilitychange", flushNotifications);
+    return () => {
+      document.removeEventListener("visibilitychange", flushNotifications);
+      if (notificationFrameRef.current !== null) {
+        cancelAnimationFrame(notificationFrameRef.current);
+        notificationFrameRef.current = null;
+      }
+    };
+  }, [flushNotifications]);
 
   const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
     if (
@@ -153,7 +205,8 @@ function useWaveMessagesStore() {
       completedInitialRegistrationsRef.current.clear();
       committedServerFeedSeedsRef.current.clear();
       serverFeedSeedReadyCallbacksRef.current.clear();
-      updateQueueRef.current = [];
+      dirtyWaveIdsRef.current.clear();
+      deletedDropIdsRef.current.clear();
       authoritativePaginationWaveIdsRef.current.clear();
       residentWaveIdsRef.current.clear();
       evictedWaveIdsRef.current.clear();
@@ -233,9 +286,8 @@ function useWaveMessagesStore() {
     serverFeedSeedReadyCallbacksRef.current.delete(waveId);
     authoritativePaginationWaveIdsRef.current.delete(waveId);
     residentWaveIdsRef.current.delete(waveId);
-    updateQueueRef.current = updateQueueRef.current.filter(
-      ({ update }) => update.key !== waveId
-    );
+    dirtyWaveIdsRef.current.delete(waveId);
+    deletedDropIdsRef.current.delete(waveId);
   }, []);
 
   const evictLeastRecentlyUsedWaves = useCallback(
@@ -269,7 +321,7 @@ function useWaveMessagesStore() {
     [isWaveInUse, releaseWaveState]
   );
 
-  // Runs after each queued update applies: a wave cached for the first time
+  // Runs after each update applies: a wave cached for the first time
   // becomes the most recently used one and may push older waves out.
   const admitWave = useCallback(
     (waveId: string): void => {
@@ -314,114 +366,97 @@ function useWaveMessagesStore() {
     }
   }, []); // No dependencies needed
 
-  const processQueue = useCallback(function processQueueItem(): void {
-    if (isProcessingRef.current || updateQueueRef.current.length === 0) {
-      return;
-    }
+  const applyUpdate = useCallback(
+    ({
+      generation,
+      mergePolicy,
+      onApplied,
+      update,
+    }: WaveMessagesCommit): void => {
+      if (generation !== storeGenerationRef.current) return;
 
-    isProcessingRef.current = true;
-    const queuedUpdate = updateQueueRef.current.shift();
-
-    if (!queuedUpdate) {
-      isProcessingRef.current = false;
-      return; // Should not happen based on length check, but safety first
-    }
-    const { generation, mergePolicy, onApplied, update } = queuedUpdate;
-
-    const newWaveMessages = { ...waveMessagesRef.current };
-    const existingWaveMessages = newWaveMessages[update.key];
-    if (!existingWaveMessages) {
-      newWaveMessages[update.key] = {
-        id: update.key,
-        isLoading: false,
-        isLoadingNextPage: false,
-        hasNextPage: false,
-        drops: [],
-        latestFetchedSerialNo: null,
-      };
-    }
-
-    const updatedWaveMessages = {
-      ...newWaveMessages[update.key]!,
-    };
-    const hasAuthoritativePagination =
-      authoritativePaginationWaveIdsRef.current.has(update.key);
-
-    if (
-      update.isLoading !== undefined &&
-      (mergePolicy === "standard" || existingWaveMessages === undefined)
-    ) {
-      updatedWaveMessages.isLoading = update.isLoading;
-    }
-    if (
-      update.isLoadingNextPage !== undefined &&
-      (mergePolicy === "standard" || existingWaveMessages === undefined)
-    ) {
-      updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
-    }
-    if (
-      update.hasNextPage !== undefined &&
-      (mergePolicy === "standard" ||
-        existingWaveMessages === undefined ||
-        !hasAuthoritativePagination)
-    ) {
-      updatedWaveMessages.hasNextPage = update.hasNextPage;
-    }
-    if (update.drops !== undefined) {
-      updatedWaveMessages.drops =
-        mergePolicy === "preserve-existing"
-          ? mergeDrops(update.drops, updatedWaveMessages.drops)
-          : mergeDrops(updatedWaveMessages.drops, update.drops);
-    }
-
-    if (typeof update.latestFetchedSerialNo === "number") {
-      updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
-        updatedWaveMessages.latestFetchedSerialNo,
-        update.latestFetchedSerialNo
-      );
-    }
-
-    const notifyValue = updatedWaveMessages as WaveMessages;
-    const nextState = {
-      ...newWaveMessages,
-      [update.key]: updatedWaveMessages,
-    };
-    // Drops-only realtime/target updates create a default false cursor but do
-    // not own pagination until a feed or page result supplies messages.
-    const hasMessagesForPagination =
-      (existingWaveMessages?.drops.length ?? 0) > 0 ||
-      (update.drops?.length ?? 0) > 0;
-    if (
-      update.hasNextPage !== undefined &&
-      (mergePolicy === "preserve-existing" || hasMessagesForPagination)
-    ) {
-      authoritativePaginationWaveIdsRef.current.add(update.key);
-    }
-    waveMessagesRef.current = nextState as Record<string, WaveMessages>;
-    forceRender();
-    onApplied?.();
-
-    // Notify listeners after the state update for this item
-    // Use setTimeout to ensure notification happens after the current execution context,
-    // allowing React's batching to potentially complete.
-    setTimeout(() => {
-      const keyListeners = listenersRef.current[update.key];
-      if (
-        keyListeners &&
-        generation === storeGenerationRef.current &&
-        waveMessagesRef.current[update.key] === notifyValue
-      ) {
-        keyListeners.forEach((listener) => listener(notifyValue));
+      const newWaveMessages = { ...waveMessagesRef.current };
+      const existingWaveMessages = newWaveMessages[update.key];
+      if (!existingWaveMessages) {
+        newWaveMessages[update.key] = {
+          id: update.key,
+          isLoading: false,
+          isLoadingNextPage: false,
+          hasNextPage: false,
+          drops: [],
+          latestFetchedSerialNo: null,
+        };
       }
 
-      // Finished processing this item, allow the next one
-      isProcessingRef.current = false;
-      // Trigger processing for the next item if queue is not empty
-      globalThis.queueMicrotask(processQueueItem);
-    }, 0);
-  }, []); // Dependencies: forceRender (stable), listenersRef (stable)
+      const updatedWaveMessages = {
+        ...newWaveMessages[update.key]!,
+      };
+      const hasAuthoritativePagination =
+        authoritativePaginationWaveIdsRef.current.has(update.key);
 
-  // Function to add an update to the queue and trigger processing
+      if (
+        update.isLoading !== undefined &&
+        (mergePolicy === "standard" || existingWaveMessages === undefined)
+      ) {
+        updatedWaveMessages.isLoading = update.isLoading;
+      }
+      if (
+        update.isLoadingNextPage !== undefined &&
+        (mergePolicy === "standard" || existingWaveMessages === undefined)
+      ) {
+        updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
+      }
+      if (
+        update.hasNextPage !== undefined &&
+        (mergePolicy === "standard" ||
+          existingWaveMessages === undefined ||
+          !hasAuthoritativePagination)
+      ) {
+        updatedWaveMessages.hasNextPage = update.hasNextPage;
+      }
+      if (update.drops !== undefined) {
+        updatedWaveMessages.drops = mergeWaveDrops(
+          updatedWaveMessages.drops,
+          update.drops,
+          mergePolicy,
+          deletedDropIdsRef.current.get(update.key)
+        );
+      }
+
+      if (update.historyGaps !== undefined) {
+        updatedWaveMessages.historyGaps = update.historyGaps;
+      }
+
+      if (typeof update.latestFetchedSerialNo === "number") {
+        updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
+          updatedWaveMessages.latestFetchedSerialNo,
+          update.latestFetchedSerialNo
+        );
+      }
+
+      const nextState = {
+        ...newWaveMessages,
+        [update.key]: updatedWaveMessages,
+      };
+      // Drops-only realtime/target updates create a default false cursor but do
+      // not own pagination until a feed or page result supplies messages.
+      const hasMessagesForPagination =
+        (existingWaveMessages?.drops.length ?? 0) > 0 ||
+        (update.drops?.length ?? 0) > 0;
+      if (
+        update.hasNextPage !== undefined &&
+        (mergePolicy === "preserve-existing" || hasMessagesForPagination)
+      ) {
+        authoritativePaginationWaveIdsRef.current.add(update.key);
+      }
+      waveMessagesRef.current = nextState as Record<string, WaveMessages>;
+      scheduleNotification(update.key);
+      onApplied?.();
+    },
+    [scheduleNotification]
+  );
+
+  // Commit immediately; rendering never blocks subsequent writes.
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
       if (update.isLoading === true) {
@@ -431,16 +466,14 @@ function useWaveMessagesStore() {
         // A late result for an evicted wave would leave a partial cache.
         return;
       }
-      updateQueueRef.current.push({
+      applyUpdate({
         update,
         mergePolicy: "standard",
         onApplied: () => admitWave(update.key),
         generation: storeGenerationRef.current,
       });
-      // Start processing if not already running
-      processQueue();
     },
-    [admitWave, processQueue]
+    [admitWave, applyUpdate]
   );
 
   const registerPendingServerFeedSeed = useCallback(
@@ -566,7 +599,7 @@ function useWaveMessagesStore() {
       if (onReady) {
         serverFeedSeedReadyCallbacksRef.current.set(waveId, onReady);
       }
-      updateQueueRef.current.push({
+      applyUpdate({
         update: seedUpdate,
         mergePolicy: "preserve-existing",
         generation: seedGeneration,
@@ -579,10 +612,9 @@ function useWaveMessagesStore() {
           releaseServerFeedSeedIfReady(waveId);
         },
       });
-      processQueue();
       return true;
     },
-    [admitWave, processQueue, releaseServerFeedSeedIfReady]
+    [admitWave, applyUpdate, releaseServerFeedSeedIfReady]
   );
 
   const completeInitialServerFeedRegistration = useCallback(
@@ -689,6 +721,10 @@ function useWaveMessagesStore() {
   const removeDrops = useCallback(
     (waveId: string, dropIds: readonly string[]) => {
       if (storeGeneration !== storeGenerationRef.current) return;
+      const deleted =
+        deletedDropIdsRef.current.get(waveId) ?? new Set<string>();
+      dropIds.forEach((id) => deleted.add(id));
+      deletedDropIdsRef.current.set(waveId, deleted);
       const currentWave = waveMessagesRef.current[waveId];
       if (!currentWave || dropIds.length === 0) return;
       const removed = new Set(dropIds);
@@ -699,12 +735,10 @@ function useWaveMessagesStore() {
         ...waveMessagesRef.current,
         [waveId]: updatedWave,
       };
-      forceRender();
-      listenersRef.current[waveId]?.forEach((listener) =>
-        listener(updatedWave)
-      );
+      dirtyWaveIdsRef.current.add(waveId);
+      flushNotifications();
     },
-    [storeGeneration]
+    [flushNotifications, storeGeneration]
   );
 
   const removeDrop = useCallback(

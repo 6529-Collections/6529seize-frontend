@@ -31,6 +31,7 @@ import {
 } from "./waveFeedTelemetry";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import type { WaveDataStoreUpdater, WaveMessagesUpdate } from "./types";
+import { addWaveHistoryGap, reconcileWaveSnapshot } from "../utils/wave-resume";
 
 const FETCH_NEWEST_LIMIT = 50;
 const MAX_FETCH_NEWEST_ITERATIONS = 20;
@@ -182,7 +183,8 @@ function useSyncExistingWaveNewestMessages({
   createController,
   getData,
   isCapacitor,
-  syncNewestMessages,
+  updateData,
+  updateEligibility,
 }: {
   readonly cleanupController: (
     waveId: string,
@@ -191,7 +193,8 @@ function useSyncExistingWaveNewestMessages({
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
   readonly isCapacitor: boolean;
-  readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
+  readonly updateData: WaveDataStoreUpdater["updateData"];
+  readonly updateEligibility: UpdateEligibility;
 }) {
   const inFlight = useRef(
     new Map<
@@ -229,11 +232,14 @@ function useSyncExistingWaveNewestMessages({
 
       const promise = (async () => {
         try {
-          const result = await syncNewestMessages(
+          const result = await fetchNewestWaveMessages(
             waveId,
-            highestSerialNo,
-            controller.signal
+            null,
+            FETCH_NEWEST_LIMIT,
+            controller.signal,
+            updateEligibility
           );
+          throwIfAborted(controller.signal);
           if (result.drops === null) {
             trackWaveFeedLoadFailure({
               error: createWaveFeedUnavailableError(),
@@ -245,6 +251,29 @@ function useSyncExistingWaveNewestMessages({
             });
             return;
           }
+
+          const current = getData(waveId);
+          if (!current) return;
+          const oldestFetchedSerialNo = Math.min(
+            ...result.drops.map((drop) => drop.serial_no)
+          );
+          const historyGaps =
+            oldestFetchedSerialNo > highestSerialNo &&
+            result.drops.length === FETCH_NEWEST_LIMIT
+              ? addWaveHistoryGap(current.historyGaps ?? [], {
+                  newerThan: highestSerialNo,
+                  olderThan: oldestFetchedSerialNo,
+                })
+              : current.historyGaps;
+          updateData({
+            key: waveId,
+            drops: formatWaveMessages(
+              waveId,
+              reconcileWaveSnapshot(result.drops, wave.drops, current.drops)
+            ).drops,
+            latestFetchedSerialNo: result.highestSerialNo,
+            historyGaps,
+          });
 
           trackWaveFeedLoadSuccess({
             dropCount: result.drops.length,
@@ -278,7 +307,8 @@ function useSyncExistingWaveNewestMessages({
       createController,
       getData,
       isCapacitor,
-      syncNewestMessages,
+      updateData,
+      updateEligibility,
     ]
   );
 }
@@ -305,7 +335,8 @@ export function useWaveDataFetching({
     createController,
     getData,
     isCapacitor,
-    syncNewestMessages,
+    updateData,
+    updateEligibility,
   });
   const { clearInitialBackfillTimeout, scheduleNativeInitialBackfill } =
     useNativeInitialBackfill({

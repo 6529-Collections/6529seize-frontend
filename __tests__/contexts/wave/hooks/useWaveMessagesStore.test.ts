@@ -15,6 +15,62 @@ describe("useWaveMessagesStore", () => {
     type: "FULL",
   } as any;
 
+  it("commits a background burst without timers and paints the final state once on resume", () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    visibility.mockReturnValue("hidden");
+    try {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      const listener = jest.fn();
+      act(() => result.current.subscribe("wave1", listener));
+      listener.mockClear();
+      act(() => {
+        for (let serial = 1; serial <= 1000; serial++) {
+          result.current.updateData({
+            key: "wave1",
+            drops: [
+              {
+                ...baseDrop,
+                id: `burst-${serial}`,
+                serial_no: serial,
+                title: `Burst ${serial}`,
+              },
+            ],
+          });
+        }
+        result.current.removeDrop("wave1", "burst-500");
+        result.current.updateData({
+          key: "wave1",
+          drops: [
+            {
+              ...baseDrop,
+              id: "burst-500",
+              serial_no: 500,
+            },
+          ],
+        });
+      });
+      expect(result.current.getData("wave1")?.drops).toHaveLength(999);
+      expect(listener).not.toHaveBeenCalled();
+      act(() => {
+        visibility.mockReturnValue("visible");
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0]?.[0].drops).toHaveLength(999);
+    } finally {
+      visibility.mockRestore();
+    }
+  });
+
+  it("does not resurrect a drop deleted before it enters the cache", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      result.current.removeDrop("wave1", "d1");
+      result.current.updateData({ key: "wave1", drops: [baseDrop] });
+    });
+    expect(result.current.getData("wave1")?.drops).toEqual([]);
+  });
+
   it("allows subscription and updates data", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
@@ -265,7 +321,7 @@ describe("useWaveMessagesStore", () => {
     expect(merged?.drops.map((drop) => drop.id)).toEqual(
       expect.arrayContaining(["d1", "cached-older", "server-new"])
     );
-    expect(listener).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(listener).toHaveBeenCalledTimes(1));
     expect(result.current.hasServerFeedSeed("wave1")).toBe(true);
 
     act(() => result.current.completeInitialServerFeedRegistration("wave1"));
