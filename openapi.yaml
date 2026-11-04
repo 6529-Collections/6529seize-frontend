@@ -6326,11 +6326,15 @@ paths:
         - name: sort
           in: query
           required: false
+          description: >-
+            Sort by current weighted rating, raw vote total, or next-decision
+            weighted projection (decision_rating).
           schema:
             type: string
             enum:
               - rating
               - real_time_rating
+              - decision_rating
               - submitted_at
               - trend
               - price
