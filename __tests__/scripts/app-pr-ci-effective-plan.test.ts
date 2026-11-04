@@ -180,6 +180,7 @@ describe("effective App PR CI plan", () => {
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
+    "hooks/useVirtualizedWaveMessages.ts",
     "hooks/useMemesQuickVoteSessionState.ts",
     "hooks/memesQuickVote.queue.state.ts",
     "hooks/useMemesWaveFooterStats.ts",

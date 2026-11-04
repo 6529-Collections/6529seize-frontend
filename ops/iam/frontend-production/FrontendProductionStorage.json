@@ -16,6 +16,45 @@
       }
     },
     {
+      "Sid": "ProductionSharedStaticCreateOnly",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject"],
+      "Resource": ["arn:aws:s3:::seize-web/web_build/shared/_next/static/*"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Null": {
+          "s3:if-none-match": "false"
+        }
+      }
+    },
+    {
+      "Sid": "ProductionSharedStaticRead",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": ["arn:aws:s3:::seize-web/web_build/shared/_next/static/*"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ProductionSharedStaticListing",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::seize-web"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "StringLike": {
+          "s3:prefix": ["web_build/shared/_next/static/*"]
+        }
+      }
+    },
+    {
       "Sid": "ProductionArtifactBucketMetadata",
       "Effect": "Allow",
       "Action": ["s3:GetBucketLocation", "s3:GetBucketPolicy"],
