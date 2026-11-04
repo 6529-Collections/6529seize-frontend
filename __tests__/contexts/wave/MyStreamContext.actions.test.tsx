@@ -196,7 +196,7 @@ const buildDrop = (id: string, serialNo: number): Drop =>
 
 const flushStoreNotifications = async () => {
   await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   });
 };
 
