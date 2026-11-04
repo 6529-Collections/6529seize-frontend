@@ -157,7 +157,7 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
       });
       messages.createIndex("group", ["profileId", "g"]);
       messages.createIndex("profile", "profileId");
-      for (let seq = 1; seq <= 550; seq++)
+      for (let seq = 1; seq <= 2050; seq++)
         messages.put({ ...message(seq), profileId: "p" });
       const groups = req.result.createObjectStore("groups", {
         keyPath: ["profileId", "g"],
@@ -180,14 +180,14 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
   expect(await storage.getStateVersion("p")).toBe(42);
   expect(await storage.getDevice("p")).toMatchObject({ deviceKey: "device" });
   expect(await storage.pageMessages("p", "g", { limit: 1 })).toEqual([
-    message(550),
+    message(2050),
   ]);
-  expect(await storage.listMessages("p", "g")).toHaveLength(550);
+  expect(await storage.listMessages("p", "g")).toHaveLength(2050);
   expect((await storage.listGroups("p"))[0]?.history).toMatchObject({
-    count: 550,
-    unread: 544,
+    count: 2050,
+    unread: 2044,
     mentions: 0,
-    maxSeq: 550,
+    maxSeq: 2050,
   });
 }, 30_000);
 

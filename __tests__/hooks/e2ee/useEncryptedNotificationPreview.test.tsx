@@ -47,6 +47,27 @@ it("previews only readable incoming local messages", () => {
   expect(mockConversation).toHaveBeenLastCalledWith("group");
 });
 
+it("uses the saved local summary before the timeline is loaded after a reload", () => {
+  mockConversation.mockReturnValue({
+    messages: [],
+    conversation: {
+      lastMessage: {
+        seq: 5,
+        kind: "message",
+        senderProfileId: "other",
+        text: "Saved local preview",
+      },
+    },
+  });
+  const { result, rerender } = renderHook(
+    ({ seq }) => useEncryptedNotificationPreview("group", seq),
+    { initialProps: { seq: 5 } }
+  );
+  expect(result.current.preview).toBe("Saved local preview");
+  rerender({ seq: 4 });
+  expect(result.current.preview).toBeNull();
+});
+
 it.each(["needs-enrollment", "loading", "error"])(
   "uses a generic entry when local encryption is %s",
   (status) => {

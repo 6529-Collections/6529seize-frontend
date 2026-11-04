@@ -13,6 +13,8 @@ interface GroupSummary {
   history: HistorySummary;
 }
 const keyFor = (profileId: string, g: string) => JSON.stringify([profileId, g]);
+// Bound memory while reducing read batches for a large legacy history.
+const UPGRADE_READ_BATCH_SIZE = 1_000;
 
 function accumulate(
   entry: GroupSummary,
@@ -57,7 +59,10 @@ export function backfillHistory(
     const next = (after?: IDBValidKey) => {
       const range =
         after === undefined ? undefined : IDBKeyRange.lowerBound(after, true);
-      const read = messages.getAll(range, 200) as IDBRequest<ProfileMessage[]>;
+      const read = messages.getAll(
+        range,
+        UPGRADE_READ_BATCH_SIZE
+      ) as IDBRequest<ProfileMessage[]>;
       read.onsuccess = () => {
         const rows = read.result;
         if (!rows.length) {
