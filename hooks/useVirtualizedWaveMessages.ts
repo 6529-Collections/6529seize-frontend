@@ -37,6 +37,7 @@ interface AppendTrackingState {
   readonly hasInitialized: boolean;
   readonly previousTotal: number;
   readonly effectiveLimit: number;
+  readonly oldestRenderedSerialNo: number | null;
 }
 
 interface WaveMessagesSnapshot {
@@ -67,6 +68,7 @@ const createAppendTrackingState = (
   hasInitialized: false,
   previousTotal: 0,
   effectiveLimit,
+  oldestRenderedSerialNo: null,
 });
 
 const isSameAppendTrackingState = (
@@ -76,7 +78,8 @@ const isSameAppendTrackingState = (
   currentState.scopeKey === nextState.scopeKey &&
   currentState.hasInitialized === nextState.hasInitialized &&
   currentState.previousTotal === nextState.previousTotal &&
-  currentState.effectiveLimit === nextState.effectiveLimit;
+  currentState.effectiveLimit === nextState.effectiveLimit &&
+  currentState.oldestRenderedSerialNo === nextState.oldestRenderedSerialNo;
 
 const getScopedVirtualLimit = ({
   scopeKey,
@@ -146,6 +149,23 @@ const getNextVirtualLimitAfterAppend = ({
   return Math.min(totalDrops, currentLimit + pageSize);
 };
 
+/**
+ * Newer drops are inserted ahead of the rendered window. Grow the window by
+ * as many rows, so a page of newer drops cannot unmount a row the reader is
+ * looking at, such as the target of a shared link.
+ */
+const getRetainedVirtualLimit = ({
+  drops,
+  oldestRenderedSerialNo,
+}: {
+  readonly drops: readonly Drop[];
+  readonly oldestRenderedSerialNo: number | null;
+}): number =>
+  oldestRenderedSerialNo === null
+    ? 0
+    : drops.findIndex((drop) => drop.serial_no === oldestRenderedSerialNo) +
+      1;
+
 export function useVirtualizedWaveMessages(
   waveId: string,
   dropId: string | null,
@@ -214,7 +234,7 @@ export function useVirtualizedWaveMessages(
       : null);
   const activeDropMessages = dropId ? fullWaveMessagesForDrop : null;
   const activeMessages = activeDropMessages ?? activeFullWaveMessages;
-  const hasActiveMessages = Boolean(activeMessages);
+  const hasActiveMessages = activeMessages !== null;
   const activeMessagesCount = activeMessages?.drops.length ?? 0;
   const virtualLimit = getScopedVirtualLimit({
     scopeKey,
@@ -224,13 +244,20 @@ export function useVirtualizedWaveMessages(
   const persistedEffectiveLimit = scopedAppendTrackingState.effectiveLimit;
   const baseVirtualLimit = Math.max(virtualLimit, persistedEffectiveLimit);
   const effectiveVirtualLimit = hasActiveMessages
-    ? getNextVirtualLimitAfterAppend({
-        currentLimit: baseVirtualLimit,
-        hasInitialized: scopedAppendTrackingState.hasInitialized,
-        pageSize,
-        previousTotal: scopedAppendTrackingState.previousTotal,
-        totalDrops: activeMessagesCount,
-      })
+    ? Math.max(
+        getNextVirtualLimitAfterAppend({
+          currentLimit: baseVirtualLimit,
+          hasInitialized: scopedAppendTrackingState.hasInitialized,
+          pageSize,
+          previousTotal: scopedAppendTrackingState.previousTotal,
+          totalDrops: activeMessagesCount,
+        }),
+        getRetainedVirtualLimit({
+          drops: activeMessages.drops,
+          oldestRenderedSerialNo:
+            scopedAppendTrackingState.oldestRenderedSerialNo,
+        })
+      )
     : baseVirtualLimit;
   const hasMoreLocal = hasActiveMessages
     ? activeMessagesCount > effectiveVirtualLimit
@@ -242,6 +269,10 @@ export function useVirtualizedWaveMessages(
         hasInitialized:
           scopedAppendTrackingState.hasInitialized || activeMessagesCount > 0,
         effectiveLimit: effectiveVirtualLimit,
+        oldestRenderedSerialNo:
+          activeMessages.drops[
+            Math.min(effectiveVirtualLimit, activeMessagesCount) - 1
+          ]?.serial_no ?? null,
       }
     : createAppendTrackingState(scopeKey, pageSize);
 

@@ -21,6 +21,10 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.myVotes.sort": "Sort by",
+  "waves.myVotes.sort.voteAmount": "Your vote amount",
+  "waves.myVotes.sort.leaderboard": "Leaderboard position",
+  "waves.myVotes.sort.lastVoted": "Last voted",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
@@ -237,6 +241,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   "waves.drop.actions.menuLabel": "Drop actions",
   "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
+  "waves.drop.actions.showMore": "Show more",
+  "waves.drop.actions.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",

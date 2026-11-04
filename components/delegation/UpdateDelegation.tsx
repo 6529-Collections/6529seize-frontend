@@ -67,7 +67,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     inputValue: delegationToInput,
     address: delegationToAddress,
     handleInputChange: handleDelegationInputChange,
-  } = useEnsResolution({ chainId: 1 });
+  } = useEnsResolution({ chainId: 1, requireEnsResolution: true });
 
   const [gasError, setGasError] = useState<string>();
   const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {

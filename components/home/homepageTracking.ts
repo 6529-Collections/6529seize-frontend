@@ -8,7 +8,6 @@ export const HOMEPAGE_EVENT_NAMES = {
 const HOMEPAGE_SECTIONS = [
   "Introduction",
   "Get started",
-  "What is 6529?",
   "How to start",
   "Latest drop",
   "Next drop",
@@ -22,9 +21,7 @@ const HOMEPAGE_ACTIONS = [
   "Open network health",
   "Get started",
   "Connect wallet",
-  "Browse Memes",
   "Browse Waves",
-  "How voting works",
   "Create profile",
   "View collections",
   "Open artwork",

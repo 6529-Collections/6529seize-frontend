@@ -9,7 +9,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { NFT } from "@/entities/INFT";
@@ -72,7 +72,7 @@ export default function GradientsComponent() {
   useEffect(() => {
     let isMounted = true;
 
-    const url = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?page_size=101`;
+    const url = apiUrl("/api/nfts/gradients?page_size=101");
     fetchAllPages<GradientNFT>(url)
       .then((raw) => {
         if (!isMounted) {

@@ -1,17 +1,24 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import WaveItemFollow from '@/components/waves/list/WaveItemFollow';
-import { AuthContext } from '@/components/auth/Auth';
-import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { useMutation } from '@tanstack/react-query';
-import { commonApiPost, commonApiDeleteWithBody } from '@/services/api/common-api';
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import WaveItemFollow from "@/components/waves/list/WaveItemFollow";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useMutation } from "@tanstack/react-query";
+import {
+  commonApiPost,
+  commonApiDeleteWithBody,
+} from "@/services/api/common-api";
 
-jest.mock('@tanstack/react-query');
-jest.mock('@/services/api/common-api');
+jest.mock("@tanstack/react-query");
+jest.mock("@/services/api/common-api");
+const recordMembership = jest.fn();
+jest.mock("@/hooks/waves/useWaveSidebarMembership", () => ({
+  useRecordWaveSidebarMembership: () => recordMembership,
+}));
 
 const onWaveFollowChange = jest.fn();
 
 const baseAuth = {
-  connectedProfile: { handle: 'h' },
+  connectedProfile: { handle: "h" },
   activeProfileProxy: null,
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
   setToast: jest.fn(),
@@ -32,42 +39,54 @@ const baseAuth = {
   };
 });
 
-describe('WaveItemFollow', () => {
+describe("WaveItemFollow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('subscribes when not yet subscribed', async () => {
+  it("subscribes when not yet subscribed", async () => {
     render(
       <AuthContext.Provider value={baseAuth as any}>
-        <ReactQueryWrapperContext.Provider value={{ onWaveFollowChange } as any}>
-          <WaveItemFollow wave={{ id: 'w', subscribed_actions: [] } as any} />
+        <ReactQueryWrapperContext.Provider
+          value={{ onWaveFollowChange } as any}
+        >
+          <WaveItemFollow wave={{ id: "w", subscribed_actions: [] } as any} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(screen.getByRole("button"));
       await Promise.resolve();
     });
     expect(commonApiPost).toHaveBeenCalled();
-    expect(onWaveFollowChange).toHaveBeenCalledWith({ waveId: 'w', following: true });
+    expect(onWaveFollowChange).toHaveBeenCalledWith({
+      waveId: "w",
+      following: true,
+    });
+    expect(recordMembership).toHaveBeenCalledWith("w", true);
   });
 
-  it('unsubscribes when already subscribed', async () => {
+  it("unsubscribes when already subscribed", async () => {
     render(
       <AuthContext.Provider value={baseAuth as any}>
-        <ReactQueryWrapperContext.Provider value={{ onWaveFollowChange } as any}>
-          <WaveItemFollow wave={{ id: 'w', subscribed_actions: [1] } as any} />
+        <ReactQueryWrapperContext.Provider
+          value={{ onWaveFollowChange } as any}
+        >
+          <WaveItemFollow wave={{ id: "w", subscribed_actions: [1] } as any} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(screen.getByRole("button"));
       await Promise.resolve();
     });
     expect(commonApiDeleteWithBody).toHaveBeenCalled();
-    expect(onWaveFollowChange).toHaveBeenCalledWith({ waveId: 'w', following: false });
+    expect(onWaveFollowChange).toHaveBeenCalledWith({
+      waveId: "w",
+      following: false,
+    });
+    expect(recordMembership).toHaveBeenCalledWith("w", false);
   });
 });

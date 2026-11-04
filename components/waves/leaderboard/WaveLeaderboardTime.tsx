@@ -229,13 +229,13 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       ) : (
         !isCurationWave && (
           <div
-            className={`tw-overflow-hidden tw-bg-iron-950 tw-py-2 ${
+            className={`tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-py-2 ${
               useFullBleedCompactTimeline
                 ? "tw-px-5 sm:tw-px-7"
                 : "tw-rounded-lg tw-px-3"
             }`}
           >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-3">
+            <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-6 tw-gap-y-2">
               <CompactDroppingPhaseCard wave={wave} />
               <CompactVotingPhaseCard wave={wave} />
               {nextDecisionTime !== null && (

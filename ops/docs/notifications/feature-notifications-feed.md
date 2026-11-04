@@ -29,10 +29,17 @@ The desktop sidebar bell opens a floating inbox beside the sidebar while the
 current page stays in place. Compact rows show the actor, activity, a short drop
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
+Reactions to the same drop share one row with reactor avatars and one drop
+preview, including reactions loaded through `Load more`. Mentions and wave tags
+in previews appear as `@handle` and `#wave`, without storage brackets.
+
+Grouped reactions and returned voting credits use the wave picture as their
+main image. A single reaction uses the person's profile picture. The bell is
+the fallback when the relevant picture is unavailable.
 
 Opening this inbox automatically marks notifications read for the active
 profile after the inbox loads. Closing it does not change read state. Selecting
-a row marks that notification read if needed and opens its destination.
+a row marks its unread notifications read if needed and opens its destination.
 `Mark all as read` clears any new unread notifications and retries a failed
 automatic read request. Read failures show an error; loading failures offer
 `Try again`. The empty inbox shows `No notifications yet`.
