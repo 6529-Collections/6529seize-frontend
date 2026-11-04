@@ -1,5 +1,5 @@
 // The tester guide's closed sections at /validator/guide, as Markdown. Built
-// from the rc.5 tester package: the sections under "More" in TESTERS.md.
+// from the tester package: the sections under "More" in TESTERS.md.
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
@@ -31,9 +31,9 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "how-long-it-takes-to-be-ready",
     title: "How long it takes to be ready",
     markdown: joinMarkdown([
-      "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 1 November.",
+      "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 3 November.",
       "",
-      "In 6529's test on 3 November, through Tor, a new install was ready in about 50 minutes: 10 to find the agreed day, 11 to download the history and 30 to rebuild and match it. The last step reads every Ethereum block since 1 November, so it takes a little longer each day. Leave the validator running until the app says it is ready.",
+      "In 6529's test on 4 November, through Tor, a new install showed the network's newest agreed day in under a minute, and was ready in about 50 minutes: 8 to find the agreed day, 9 to download the history and 33 to rebuild and match it. The last step reads every Ethereum block since 3 November, so it takes a little longer each day. Leave the validator running until the app says it is ready.",
       "",
       "In the test phase, 6529 runs validators and sentries on AWS in the United States, Germany and Singapore. The goal is a network that many holders run, at home and in offices.",
     ]),
@@ -60,7 +60,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "| `.deb` | `validator --version` |",
       "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
       "",
-      "It prints `validator 0.1.0-rc.5 (29a8caf, TDH v1.4)`. If it shows another commit, tell us.",
+      "It prints `validator 0.1.0-rc.6 (6a26503, TDH v1.4)`. If it shows another commit, tell us.",
     ]),
   },
   {
@@ -140,14 +140,14 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "chmod +x 6529-Validator-0.1.0-x86_64.AppImage",
       "```",
       "",
-      "For a terminal install on any system, each terminal archive holds the program and its install guide, in `docs/install/`. Skip that guide's Sigstore step: test releases don't have one. On a cloud server, keep the defaults, with Tor on.",
+      "For a terminal install on any system, each terminal archive holds the program and its install guide, in `docs/install/`. On a cloud server, keep the defaults, with Tor on.",
     ]),
   },
   {
     id: "known-issues",
     title: "Known issues",
     markdown: joinMarkdown([
-      "The [known issues](/validator/known-issues) list each one with its workaround. Two dates matter: a new install must start before about 17 November, 01:30 UTC, and 0.1.0 stops signing on 1 December.",
+      "The [known issues](/validator/known-issues) list each one with its workaround. Two dates matter: a new install must start before about 2026-11-19 22:00 UTC, and 0.1.0 stops signing on 1 December.",
     ]),
   },
 ];
