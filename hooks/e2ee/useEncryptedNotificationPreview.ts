@@ -22,6 +22,7 @@ export function useEncryptedNotificationPreview(
     encrypted.status === "idle" || encrypted.status === "needs-enrollment";
   if (!allowed || !group) return { preview: null, needsSetup };
   // The saved summary is available on restore before the paged timeline opens.
+  // Warm timeline entries take precedence if the summary is also in the window.
   const candidates = conversation?.lastMessage
     ? [conversation.lastMessage, ...messages]
     : messages;
