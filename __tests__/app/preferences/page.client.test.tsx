@@ -9,10 +9,11 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock(
-  "@/components/user/utils/set-up-profile/UserSetUpProfileCta",
-  () => () => <a href="/0x123">Create profile</a>
-);
+jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => {
+  const { default: Link } =
+    jest.requireActual<typeof import("next/link")>("next/link");
+  return () => <Link href="/0x123">Create profile</Link>;
+});
 jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
   <div>Notification settings panel</div>
 ));
@@ -75,10 +76,13 @@ describe("PreferencesPageClient", () => {
       name: "Notifications & Messages",
     });
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
-    expect(notificationsTab).toHaveClass("tw-bg-primary-500");
+    expect(notificationsTab).toHaveClass(
+      "tw-bg-primary-500/10",
+      "@[42rem]/preferences:tw-border-primary-400"
+    );
     expect(
       screen.getByRole("navigation", { name: "Preference sections" })
-    ).toHaveClass("tw-grid-cols-2", "@[42rem]/preferences:tw-auto-cols-fr");
+    ).toHaveClass("tw-grid-cols-2", "@[42rem]/preferences:tw-flex");
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass(
       "tw-min-h-dvh",

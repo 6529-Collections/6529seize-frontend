@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
@@ -21,8 +22,8 @@ import {
 } from "./legacyDmRetention";
 import { useEncryptedEquivalent } from "./useEncryptedEquivalent";
 
-const LINK_CLASS =
-  "tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+const ACTION_CLASS =
+  "tw-max-w-full tw-min-h-8 tw-break-words tw-px-2.5 tw-py-1 tw-text-center tw-text-xs !tw-whitespace-normal";
 
 /**
  * Unencrypted DM threads (D146): a permanent notice that the history leaves
@@ -92,7 +93,11 @@ function LegacyDmBanner({
     encryptedAction = (
       <Link
         href={getEncryptedConversationRoute(encryptedG)}
-        className={LINK_CLASS}
+        className={getButtonClasses({
+          variant: "secondary",
+          size: null,
+          className: `${ACTION_CLASS} tw-no-underline`,
+        })}
       >
         {t(locale, "e2ee.legacy.action.openEncrypted")}
       </Link>
@@ -101,7 +106,8 @@ function LegacyDmBanner({
     encryptedAction = (
       <Button
         variant="secondary"
-        size="xs"
+        size={null}
+        className={ACTION_CLASS}
         loading={start.pending}
         onClick={() => void start.start()}
       >
@@ -113,18 +119,19 @@ function LegacyDmBanner({
   return (
     <section
       aria-label={t(locale, "e2ee.legacy.region")}
-      className="tw-mx-2 tw-mb-2"
+      className="tw-mx-2 tw-mb-2 tw-@container/legacy-dm"
     >
       <E2eeBanner
         tone="warning"
         live={false}
-        stackActions
+        compactActions
         action={
           isProxy ? null : (
             <>
               <Button
-                variant="secondary"
-                size="xs"
+                variant="ghost"
+                size={null}
+                className={`${ACTION_CLASS} !tw-text-amber-100`}
                 onClick={() => setDialog("export")}
               >
                 {t(locale, "e2ee.legacy.action.export")}
@@ -132,7 +139,8 @@ function LegacyDmBanner({
               {canMove ? (
                 <Button
                   variant="secondary"
-                  size="xs"
+                  size={null}
+                  className={ACTION_CLASS}
                   onClick={() => setDialog("import")}
                 >
                   {t(locale, "e2ee.legacy.action.move")}

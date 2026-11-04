@@ -434,8 +434,8 @@ hold.
 
 Direct messages started before encrypted chats are stored by 6529 in plain
 text. Every such conversation shows a notice above the message box:
-**Not end-to-end encrypted. This history will be deleted from 6529’s servers
-on Dec 1, 2026, unless we’re legally required to keep it.** (the date follows
+**Not end-to-end encrypted. 6529 deletes this history from its servers on
+Dec 1, 2026 unless legally required to keep it.** (the date follows
 your language settings). The notice
 offers:
 

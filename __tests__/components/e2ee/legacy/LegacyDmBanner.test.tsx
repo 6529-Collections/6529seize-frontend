@@ -74,7 +74,7 @@ describe("LegacyDmComposerGate", () => {
     expect(
       screen.getByRole("region", { name: "Unencrypted chat notice" })
     ).toHaveTextContent(
-      "Not end-to-end encrypted. This history will be deleted from 6529’s servers on Dec 1, 2026, unless we’re legally required to keep it."
+      "Not end-to-end encrypted. 6529 deletes this history from its servers on Dec 1, 2026 unless legally required to keep it."
     );
     expect(screen.getByLabelText("composer")).toBeInTheDocument();
     fireEvent.click(
