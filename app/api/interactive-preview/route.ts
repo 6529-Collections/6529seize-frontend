@@ -20,6 +20,12 @@ import { validateInteractivePreview } from "./validateInteractivePreview";
 // - every response is no-store.
 // The outbound request and its allow-lists live, unchanged, in
 // validateInteractivePreview.
+//
+// Behind CloudFront (staging and production) the page behaviour forwards all
+// viewer headers (Managed-AllViewer), so Node sees the viewer's Origin and Host
+// and the two match for the site's own pages. X-Forwarded-Host needs no trust:
+// a cross-site page cannot set it without a CORS preflight, which this route
+// never approves, and a non-browser client can send any Origin anyway.
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" } as const;
 const MAX_BODY_BYTES = 2 * 1024;

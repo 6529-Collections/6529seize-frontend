@@ -679,7 +679,39 @@ describe("useArtworkSubmissionForm", () => {
     );
   });
 
-  it("surfaces gateway validation errors from server action", async () => {
+  it("shows the retry message when the check itself fails", async () => {
+    // requestInteractivePreviewValidation throws for every non-2xx answer
+    // from the route (400, 403, 413, 415, 429, 5xx) and for network errors;
+    // the route's own error text never reaches the creator.
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    (requestInteractivePreviewValidation as jest.Mock).mockRejectedValue(
+      new Error("Interactive preview check failed with status 429")
+    );
+
+    const { result } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.setMediaSource("url");
+    });
+    act(() => {
+      result.current.setExternalMediaHash(CID_V1);
+    });
+
+    await waitFor(() => {
+      expect(result.current.externalMediaError).toBe(
+        "Unable to verify media URL. Try again later."
+      );
+    });
+
+    expect(result.current.isExternalMediaValid).toBe(false);
+    expect(result.current.externalMediaPreviewUrl).toBe("");
+    expect(result.current.externalMediaValidationStatus).toBe("invalid");
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("surfaces gateway validation errors from the route", async () => {
     (requestInteractivePreviewValidation as jest.Mock).mockResolvedValue({
       ok: false,
       reason: "Gateway returned 404.",

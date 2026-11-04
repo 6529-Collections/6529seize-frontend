@@ -67,7 +67,7 @@ describe("requestInteractivePreviewValidation", () => {
     });
   });
 
-  it.each([403, 413, 429, 500])(
+  it.each([400, 403, 413, 415, 429, 500])(
     "throws when the route answers %s",
     async (status) => {
       respond(status, { error: "rejected" });
