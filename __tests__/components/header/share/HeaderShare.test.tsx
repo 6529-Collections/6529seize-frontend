@@ -961,7 +961,7 @@ describe("HeaderShare", () => {
     });
 
     it.each(["native", "desktop"] as const)(
-      "starts combined %s approval from the choice and asks again on refresh",
+      "offers combined %s setup with the appropriate availability",
       async (target) => {
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
@@ -1022,6 +1022,24 @@ describe("HeaderShare", () => {
             await userEvent.click(
               screen.getByRole("button", { name: "6529 Desktop" })
             );
+            const secureButton = screen.getByRole("button", {
+              name: "Connect with Post Signing & DM Encryption",
+            });
+            expect(secureButton).toHaveAttribute("aria-disabled", "true");
+            expect(secureButton).toHaveAttribute(
+              "aria-description",
+              "Coming soon"
+            );
+            expect(
+              screen.getByRole("button", { name: "Connect only" })
+            ).toBeEnabled();
+            await userEvent.hover(secureButton);
+            expect(await screen.findByRole("tooltip")).toHaveTextContent(
+              "Coming soon"
+            );
+            await userEvent.click(secureButton);
+            expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
+            return;
           }
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
           await userEvent.click(
@@ -1036,13 +1054,8 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
           expect(
-            screen.queryByAltText("Private device setup QR code") !== null
-          ).toBe(target === "native");
-          if (target === "desktop") {
-            expect(
-              screen.getByTestId("desktop-connection-panel")
-            ).toBeVisible();
-          }
+            screen.getByAltText("Private device setup QR code")
+          ).toBeVisible();
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
@@ -1053,7 +1066,7 @@ describe("HeaderShare", () => {
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(
             screen.getByRole("button", {
-              name: target === "desktop" ? "6529 Desktop" : "6529 Mobile",
+              name: "6529 Mobile",
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {

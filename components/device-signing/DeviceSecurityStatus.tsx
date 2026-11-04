@@ -204,8 +204,10 @@ type SecurityDetails = Parameters<typeof DeviceSecurityDetails>[0];
 
 function ConnectionStatusLine({
   connection,
+  alignWithShield = false,
 }: {
   readonly connection: ConnectionIndicator;
+  readonly alignWithShield?: boolean;
 }) {
   const dotClass = {
     disconnected: "tw-bg-iron-500",
@@ -213,11 +215,25 @@ function ConnectionStatusLine({
     authorized_connected: "tw-bg-green",
   }[connection.state];
   return (
-    <span className="tw-flex tw-items-center tw-gap-2">
+    <span
+      className={
+        alignWithShield
+          ? "tw-flex tw-items-start tw-gap-1"
+          : "tw-flex tw-items-center tw-gap-2"
+      }
+    >
       <span
         aria-hidden="true"
-        className={`tw-size-1.5 tw-shrink-0 tw-rounded-full ${dotClass}`}
-      />
+        className={
+          alignWithShield
+            ? "tw-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center"
+            : "tw-contents"
+        }
+      >
+        <span
+          className={`tw-size-1.5 tw-shrink-0 tw-rounded-full ${dotClass}`}
+        />
+      </span>
       {connection.title}
     </span>
   );
@@ -270,10 +286,10 @@ function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
     if (props.presentation === "mobile-badge")
       return <DeviceSecurityBadge details={details} />;
     return (
-      <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300">
-        <ShieldIcon details={details} inline />
-        <div className="tw-grid tw-min-w-0 tw-gap-1">
-          <ConnectionStatusLine connection={props.connection} />
+      <div className="tw-grid tw-min-w-0 tw-gap-0.5 tw-text-xs tw-leading-5 tw-text-iron-300">
+        <ConnectionStatusLine connection={props.connection} alignWithShield />
+        <div className="tw-flex tw-items-start tw-gap-1">
+          <ShieldIcon details={details} inline />
           <DeviceSecurityDetails {...details} inline />
         </div>
       </div>
@@ -295,7 +311,7 @@ function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
           openEvents={{ mouseenter: true, focus: true }}
           closeEvents={{ mouseleave: true, blur: true }}
           globalCloseEvents={{ escape: true }}
-          style={TOOLTIP_STYLES}
+          style={{ ...TOOLTIP_STYLES, padding: "6px 10px" }}
         >
           <div className="tailwind-scope tw-grid tw-gap-1.5 tw-font-normal">
             <ConnectionStatusLine connection={props.connection} />

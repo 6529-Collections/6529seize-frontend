@@ -3694,6 +3694,7 @@ export const EN_US_MESSAGES = {
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
     "Connect with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopComingSoon": "Coming soon",
   "headerShare.connectModal.as": "Connect as {name}",
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",

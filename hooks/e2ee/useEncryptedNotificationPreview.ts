@@ -15,26 +15,27 @@ export function useEncryptedNotificationPreview(
     encrypted.status === "ready" &&
     activeProfileProxy === null &&
     encrypted.profileId === profileId;
-  const { conversation, messages } = useE2eeConversation(
-    allowed ? group : null
-  );
+  const previewGroup = allowed && sequence !== undefined ? group : null;
+  const { conversation, messages } = useE2eeConversation(previewGroup);
   const needsSetup =
     encrypted.status === "idle" || encrypted.status === "needs-enrollment";
-  if (!allowed || !group) return { preview: null, needsSetup };
-  // The saved summary is available on restore before the paged timeline opens.
-  // Warm timeline entries take precedence if the summary is also in the window.
-  const candidates = conversation?.lastMessage
-    ? [conversation.lastMessage, ...messages]
-    : messages;
-  const incoming = candidates.filter(
-    (message) =>
-      message.kind === "message" &&
-      !message.deleted &&
-      !message.undecryptable &&
-      !message.pending &&
-      message.senderProfileId !== profileId &&
-      (sequence === undefined || message.seq === sequence)
-  );
-  const preview = incoming.at(-1)?.text.slice(0, 240) ?? "";
+  if (!previewGroup) return { preview: null, needsSetup };
+
+  // The saved summary can be available before the timeline loads. A timeline
+  // entry for this sequence takes precedence even if it is deleted or locked.
+  const savedMessage = conversation?.lastMessage;
+  const incoming =
+    messages.find((message) => message.seq === sequence) ??
+    (savedMessage?.seq === sequence ? savedMessage : undefined);
+  if (
+    incoming?.kind !== "message" ||
+    incoming.deleted ||
+    incoming.undecryptable ||
+    incoming.pending ||
+    incoming.senderProfileId === profileId
+  ) {
+    return { preview: null, needsSetup };
+  }
+  const preview = incoming.text.slice(0, 240);
   return { preview: preview === "" ? null : preview, needsSetup };
 }
