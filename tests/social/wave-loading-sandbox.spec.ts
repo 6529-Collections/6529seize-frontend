@@ -1033,10 +1033,19 @@ test("resume preserves an older reading position while loading the latest page",
   baseURL,
 }) => {
   const fixture = await sharedPostFixture(page, baseURL);
-  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+  await page.goto(`/waves/${WAVE}`, {
     waitUntil: "domcontentloaded",
   });
-  await expect(fixture.post(20)).toBeInViewport({ timeout: 30000 });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // Offscreen placeholders hydrate as they enter view and replace the text
+  // node, so reacquire the locator until the reader's position has settled.
+  await expect(async () => {
+    await fixture.post(120).scrollIntoViewIfNeeded({ timeout: 1000 });
+    await expect(fixture.post(120)).toBeInViewport({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByRole("button", { name: "Scroll to bottom", exact: true })
+  ).toBeVisible();
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
@@ -1053,7 +1062,7 @@ test("resume preserves an older reading position while loading the latest page",
     document.dispatchEvent(new Event("visibilitychange"));
   });
   await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
-  await expect(fixture.post(20)).toBeInViewport();
+  await expect(fixture.post(120)).toBeInViewport();
   await page
     .getByRole("button", { name: "Scroll to bottom", exact: true })
     .click();
