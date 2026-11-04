@@ -524,7 +524,11 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       boosts: 0,
       moderation: { status: "VISIBLE", can_view: true },
     };
-    let first = true;
+    // Single-candidate requests belong to the footer until it shows its
+    // trigger. A footer that remounts while the page settles aborts and
+    // repeats its request, so do not count requests. Later single requests
+    // are quick-vote refreshes.
+    let footerPending = true;
     let fail = false;
     let candidate = drop;
     await page.route("**/*meme-lab*", (route) =>
@@ -535,8 +539,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       const isBatch = new URL(route.request().url()).pathname.endsWith(
         "/undiscovered-drops"
       );
-      const footer = !isBatch && first;
-      if (footer) first = false;
+      const footer = !isBatch && footerPending;
       if (!footer) await content.ready;
       await route.fulfill(
         fail && !footer
@@ -556,6 +559,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         .getByRole("button", { name: /^Uncast Power,/ })
         .filter({ visible: true });
       await expect(trigger).toBeVisible();
+      footerPending = false;
       // Sample every rendered frame, including the first frame before effects settle.
       await page.evaluate(() => {
         const positions: number[] = [];
@@ -653,8 +657,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
       fail = true;
-      first = true;
+      footerPending = true;
       await page.reload({ waitUntil: "domcontentloaded" });
+      await trigger.waitFor();
+      footerPending = false;
       await trigger.click();
       // A failed background window cannot replace the cached artwork with an error.
       await expect(

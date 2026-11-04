@@ -1,0 +1,212 @@
+{
+  "CallerReference": "frontend-html-staging-2026-11-02",
+  "Comment": "staging.6529.io frontend pages (Node behind nginx on the staging instance)",
+  "Enabled": true,
+  "Aliases": {
+    "Quantity": 1,
+    "Items": ["staging.6529.io"]
+  },
+  "ViewerCertificate": {
+    "ACMCertificateArn": "arn:aws:acm:us-east-1:987989283142:certificate/39d34d5f-a624-4127-8bbe-1aa07384664b",
+    "SSLSupportMethod": "sni-only",
+    "MinimumProtocolVersion": "TLSv1.2_2021"
+  },
+  "HttpVersion": "http2and3",
+  "IsIPV6Enabled": true,
+  "PriceClass": "PriceClass_All",
+  "Origins": {
+    "Quantity": 2,
+    "Items": [
+      {
+        "Id": "staging-node-https",
+        "DomainName": "origin.staging.6529.io",
+        "OriginPath": "",
+        "CustomHeaders": { "Quantity": 0 },
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "https-only",
+          "OriginSslProtocols": { "Quantity": 1, "Items": ["TLSv1.2"] },
+          "OriginReadTimeout": 60,
+          "OriginKeepaliveTimeout": 60
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10,
+        "OriginShield": { "Enabled": false }
+      },
+      {
+        "Id": "staging-nginx-http-acme",
+        "DomainName": "origin.staging.6529.io",
+        "OriginPath": "",
+        "CustomHeaders": { "Quantity": 0 },
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "http-only",
+          "OriginSslProtocols": { "Quantity": 1, "Items": ["TLSv1.2"] },
+          "OriginReadTimeout": 30,
+          "OriginKeepaliveTimeout": 5
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10,
+        "OriginShield": { "Enabled": false }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "staging-node-https",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 7,
+      "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+      "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+    },
+    "Compress": true,
+    "CachePolicyId": "3d5e2933-ef97-4ca2-b075-14d8de39deff",
+    "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+    "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+    "SmoothStreaming": false,
+    "FieldLevelEncryptionId": "",
+    "LambdaFunctionAssociations": { "Quantity": 0 },
+    "FunctionAssociations": { "Quantity": 0 }
+  },
+  "CacheBehaviors": {
+    "Quantity": 6,
+    "Items": [
+      {
+        "PathPattern": "/.well-known/acme-challenge/*",
+        "TargetOriginId": "staging-nginx-http-acme",
+        "ViewerProtocolPolicy": "allow-all",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": false,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      },
+      {
+        "PathPattern": "/_next/static/*",
+        "TargetOriginId": "staging-node-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": true,
+        "CachePolicyId": "1ecaa93f-7a0c-42f7-8775-0700dadbda9c",
+        "OriginRequestPolicyId": "afacd8ea-6f91-46f3-8fb3-b0fec7c4d1fb",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      },
+      {
+        "PathPattern": "/_next/image*",
+        "TargetOriginId": "staging-node-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": false,
+        "CachePolicyId": "62848582-2076-4e33-894e-f6c575a59a64",
+        "OriginRequestPolicyId": "afacd8ea-6f91-46f3-8fb3-b0fec7c4d1fb",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      },
+      {
+        "PathPattern": "/api/og-metadata/*",
+        "TargetOriginId": "staging-node-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": true,
+        "CachePolicyId": "d1fd2602-5e5a-4a50-ac66-82af1ad19c52",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      },
+      {
+        "PathPattern": "/validator*",
+        "TargetOriginId": "staging-node-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 7,
+          "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": true,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      },
+      {
+        "PathPattern": "/my-stream*",
+        "TargetOriginId": "staging-node-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 7,
+          "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+          "CachedMethods": { "Quantity": 2, "Items": ["GET", "HEAD"] }
+        },
+        "Compress": true,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": { "Quantity": 0 },
+        "FunctionAssociations": { "Quantity": 0 }
+      }
+    ]
+  },
+  "CustomErrorResponses": {
+    "Quantity": 11,
+    "Items": [
+      { "ErrorCode": 400, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 403, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 404, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 405, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 414, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 416, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 500, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 501, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 502, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 503, "ErrorCachingMinTTL": 0 },
+      { "ErrorCode": 504, "ErrorCachingMinTTL": 0 }
+    ]
+  },
+  "Logging": {
+    "Enabled": false,
+    "IncludeCookies": false,
+    "Bucket": "",
+    "Prefix": ""
+  },
+  "Restrictions": {
+    "GeoRestriction": { "RestrictionType": "none", "Quantity": 0 }
+  },
+  "WebACLId": "",
+  "DefaultRootObject": ""
+}

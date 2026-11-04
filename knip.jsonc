@@ -22,6 +22,7 @@
       "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
       "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
       "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
+      "ops/scripts/sync-cloudfront-origin-facing.mjs", // documented CloudFront range refresh CLI
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
@@ -125,6 +126,7 @@
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
       // Invoked from workflow YAML; pure helpers are exported for focused tests.
       "ops/scripts/elastic-beanstalk-readiness.cjs": ["exports"],
+      "ops/scripts/publish-shared-static-assets.cjs": ["exports"],
       "services/**": ["files"],
       // In-repo idb-keyval clone behind the bundler alias: it keeps the full
       // package API for aliased third-party consumers knip cannot see.

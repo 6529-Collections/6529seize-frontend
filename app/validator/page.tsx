@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 
 import ValidatorDownloadPage from "@/components/validator-page/ValidatorDownloadPage";
+import { detectFromUserAgent } from "@/lib/validator-page/detectSystem";
 import {
   getLockedView,
   getValidatorMetadata,
@@ -14,8 +16,16 @@ export default async function ValidatorRoute() {
   if (locked) {
     return locked;
   }
-  const snapshot = await getReleaseFeedSnapshot();
-  return <ValidatorDownloadPage snapshot={snapshot} />;
+  const [snapshot, requestHeaders] = await Promise.all([
+    getReleaseFeedSnapshot(),
+    headers(),
+  ]);
+  return (
+    <ValidatorDownloadPage
+      snapshot={snapshot}
+      platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
+    />
+  );
 }
 
 export const metadata: Metadata = getValidatorMetadata(
