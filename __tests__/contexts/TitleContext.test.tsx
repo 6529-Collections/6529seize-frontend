@@ -2,7 +2,7 @@ import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import {
   TitleProvider,
   useSetWaveData,
-  useTitle,
+  useTitleText,
   useTitleActions,
 } from "@/contexts/TitleContext";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -39,7 +39,7 @@ function TitleHarness({
   } | null;
 }) {
   useSetWaveData(waveData);
-  const { title } = useTitle();
+  const { title } = useTitleText();
   return <div>{title}</div>;
 }
 
@@ -380,7 +380,7 @@ describe("TitleContext setters", () => {
         [newItemsCount]
       );
       useSetWaveData(waveData);
-      const { title } = useTitle();
+      const { title } = useTitleText();
       return (
         <button
           type="button"

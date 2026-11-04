@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useWaveInformation } from "./WaveInformationContext";
 import {
   createContext,
+  Suspense,
   useContext,
   useEffect,
   useCallback,
@@ -11,7 +12,12 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  type ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { Capacitor } from "@capacitor/core";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
@@ -116,13 +122,11 @@ export const NavigationHistoryProvider: React.FC<{
   const { hardBack } = useViewContext();
   const information = useWaveInformation();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
 
-  const fullPath =
-    pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+  // The first entry never carries the query (mainSegment drops it).
   const historyRef = useRef<StackEntry[]>([
-    { type: "route", path: mainSegment(fullPath) },
+    { type: "route", path: mainSegment(pathname) },
   ]);
   const [{ index, canGoBack }, setPosition] = useState({
     index: 0,
@@ -175,36 +179,41 @@ export const NavigationHistoryProvider: React.FC<{
     });
   }, []);
 
-  useEffect(() => {
-    const url = fullPath;
-    if (skipNext.current) {
-      skipNext.current = false;
-      prevPathRef.current = url;
-      const current = historyRef.current.at(-1);
-      if (current?.type === "route" && Capacitor.isNativePlatform()) {
-        current.href = url + globalThis.location.hash;
+  // Called from NavigationQuerySync's effect. That leaf is rendered after this
+  // provider's children, so it runs after page effects and before any
+  // ancestor's, in the same commit: where this provider's effect used to run.
+  const observeUrl = useCallback(
+    (url: string, currentPathname: string) => {
+      if (skipNext.current) {
+        skipNext.current = false;
+        prevPathRef.current = url;
+        const current = historyRef.current.at(-1);
+        if (current?.type === "route" && Capacitor.isNativePlatform()) {
+          current.href = url + globalThis.location.hash;
+        }
+        return;
       }
-      return;
-    }
 
-    if (url === prevPathRef.current) return;
-    prevPathRef.current = url;
+      if (url === prevPathRef.current) return;
+      prevPathRef.current = url;
 
-    const pathKey = getHistoryRoutePath(url, pathname);
-    let i = historyRef.current.length - 1;
-    while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
-    const lastRoute = i >= 0 ? historyRef.current[i] : null;
-    const isDuplicate =
-      lastRoute?.type === "route" && lastRoute.path === pathKey;
-    const href = Capacitor.isNativePlatform()
-      ? url + globalThis.location.hash
-      : undefined;
-    if (isDuplicate) {
-      if (href) historyRef.current[i] = { ...lastRoute, href };
-    } else {
-      pushStack({ type: "route", path: pathKey, ...(href && { href }) });
-    }
-  }, [fullPath, pathname, searchParams, pushStack]);
+      const pathKey = getHistoryRoutePath(url, currentPathname);
+      let i = historyRef.current.length - 1;
+      while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
+      const lastRoute = i >= 0 ? historyRef.current[i] : null;
+      const isDuplicate =
+        lastRoute?.type === "route" && lastRoute.path === pathKey;
+      const href = Capacitor.isNativePlatform()
+        ? url + globalThis.location.hash
+        : undefined;
+      if (isDuplicate) {
+        if (href) historyRef.current[i] = { ...lastRoute, href };
+      } else {
+        pushStack({ type: "route", path: pathKey, ...(href && { href }) });
+      }
+    },
+    [pushStack]
+  );
 
   const pushView = useCallback(
     (view: ViewKey) => {
@@ -315,8 +324,44 @@ export const NavigationHistoryProvider: React.FC<{
     ]
   );
 
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={value}>
+      {children}
+      {/* Reads the query, so it owns a Suspense boundary: a prerendered page
+          renders this provider and its children without the query. */}
+      <Suspense fallback={null}>
+        <NavigationQuerySync observeUrl={observeUrl} />
+      </Suspense>
+    </Context.Provider>
+  );
 };
+
+// useSearchParams() returns null outside an App Router context (for example
+// in component tests), as main's provider allowed for.
+function getFullPath(
+  pathname: string,
+  searchParams: ReadonlyURLSearchParams | null
+): string {
+  const query = searchParams?.toString();
+  return pathname + (query ? `?${query}` : "");
+}
+
+function NavigationQuerySync({
+  observeUrl,
+}: {
+  readonly observeUrl: (url: string, pathname: string) => void;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fullPath = getFullPath(pathname, searchParams);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- This leaf only moves NavigationHistoryProvider's own URL effect inside a Suspense boundary; it must run here, after page effects in the same commit, as the provider's effect did (shellQueryParity.test.tsx).
+    observeUrl(fullPath, pathname);
+  }, [fullPath, pathname, searchParams, observeUrl]);
+
+  return null;
+}
 
 export const useNavigationHistoryContext =
   (): NavigationHistoryContextValue => {
