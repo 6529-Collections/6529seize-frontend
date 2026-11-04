@@ -146,6 +146,25 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
+  it("rejects a deleted drop in a late first feed after its wave's tombstones were pruned", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const evicted = jest.fn();
+    act(() => {
+      result.current.subscribeToEvictions(evicted);
+      result.current.removeDrop("pruned-wave", baseDrop.id);
+      for (let index = 0; index < 50; index++) {
+        result.current.removeDrop(`other-${index}`, baseDrop.id);
+      }
+    });
+    expect(evicted).toHaveBeenCalledWith("pruned-wave");
+
+    // This is the first feed, after pruning; it includes the deleted id.
+    act(() => {
+      result.current.updateData({ key: "pruned-wave", drops: [baseDrop] });
+    });
+    expect(result.current.getData("pruned-wave")).toBeUndefined();
+  });
+
   it("retains a just-touched deletion at capacity and cancels only the oldest unknown wave", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const evicted = jest.fn();
