@@ -70,7 +70,9 @@ const deletePreference = jest.mocked(commonApiDelete);
 const name = /^Artwork alerts/;
 
 function setup(
-  overrides: Partial<AuthContextType> = {},
+  overrides: Partial<Omit<AuthContextType, "isDirectProfileSession">> & {
+    readonly isDirectProfileSession?: boolean | undefined;
+  } = {},
   blocked = false,
   hasArtistActivity = true,
   options: { open?: boolean; showPersonalActions?: boolean } = {}
