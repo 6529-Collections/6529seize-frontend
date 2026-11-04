@@ -9,7 +9,7 @@ let mockSearchParams = new URLSearchParams();
 
 jest.mock("@/contexts/TitleContext", () => ({
   DEFAULT_TITLE: "6529.io",
-  useTitle: () => ({
+  useTitleText: () => ({
     title: mockTitle,
     isTitleOwned: mockIsTitleOwned,
     titlePathname: mockTitlePathname,
