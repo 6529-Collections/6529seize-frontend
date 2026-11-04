@@ -143,6 +143,19 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
     expect(text).not.toMatch(/glibc|libc6|\bapt\b|\.deb\b|\.dmg\b|`|sudo /);
   });
 
+  it("makes no claim about ETH, staking, pay or who signs", async () => {
+    accessCookie = createAccessCookieValue(PASSWORD);
+    const html = await renderRoute();
+    for (const page of [text, html]) {
+      expect(page).not.toMatch(
+        /staked|staking|need ETH|no ETH|nobody is paid|only signer/i
+      );
+    }
+    expect(QUESTIONS.map((q) => q.question)).toContain(
+      "Do I need my own Ethereum node?"
+    );
+  });
+
   it("covers every part a holder asks about", () => {
     expect(PARTS.map((part) => part.key)).toEqual([
       "cpu",
