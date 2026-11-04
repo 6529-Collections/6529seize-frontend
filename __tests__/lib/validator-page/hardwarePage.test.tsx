@@ -10,6 +10,8 @@ import {
   type ReleaseFeedSnapshot,
 } from "@/lib/validator-page/releaseFeed";
 import {
+  KEEP_ON_MINUTES,
+  keepOnUntilUtc,
   MINIMUM,
   PARTS,
   QUESTIONS,
@@ -153,6 +155,20 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
     }
     expect(QUESTIONS.map((q) => q.question)).toContain(
       "Do I need my own Ethereum node?"
+    );
+  });
+
+  it("has no random wait before the vote, and its time on comes from rc.6 (D161)", async () => {
+    // 6ba7861f, docs/install/windows.md: on from about 00:15 to 00:30 UTC.
+    expect(KEEP_ON_MINUTES).toBe(15);
+    accessCookie = createAccessCookieValue(PASSWORD);
+    const html = await renderRoute();
+    for (const page of [text, html]) {
+      expect(page).not.toMatch(/random|two hours|three hours|3 hours|03:15/i);
+    }
+    expect(html).toContain(`${KEEP_ON_MINUTES} minutes a day`);
+    expect(html).toContain(
+      `Keep it on: 00:15 to about ${keepOnUntilUtc()} UTC`
     );
   });
 
