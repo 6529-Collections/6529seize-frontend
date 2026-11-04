@@ -42,6 +42,10 @@ UI state.
   - waves with `time_lock_ms`: `Projected Vote`, ordered by the weighted score
     at the next selection checkpoint. Recent votes may have less weight at that
     checkpoint, so this can differ from raw vote totals.
+    Rank badges in this view show each submission's position in the projected
+    results, including across loaded pages. With a filter active, positions are
+    within the filtered results. Switching back to `Current Vote` restores the
+    current-vote ranks; recorded winner places stay unchanged.
   - curation waves only: `Price`
 - In tab layout, the active sort stays filled and brighter than the inactive
   options so the current mode remains easy to scan.
