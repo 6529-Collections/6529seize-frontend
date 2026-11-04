@@ -114,13 +114,16 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
         () => document.documentElement.scrollWidth > innerWidth
       )
     ).toBe(false);
-    const clipped = await dialog.locator("em-emoji-picker").evaluate((host) => {
-      const scroll = host.shadowRoot!.querySelector(".scroll")!;
-      const bounds = scroll.getBoundingClientRect();
-      return [...scroll.querySelectorAll("button")].some(
-        (button) => button.getBoundingClientRect().right > bounds.right + 1
-      );
-    });
+    const clipped = await alice.page
+      .getByRole("dialog", { name: "Choose an emoji" })
+      .locator("em-emoji-picker")
+      .evaluate((host) => {
+        const scroll = host.shadowRoot!.querySelector(".scroll")!;
+        const bounds = scroll.getBoundingClientRect();
+        return [...scroll.querySelectorAll("button")].some(
+          (button) => button.getBoundingClientRect().right > bounds.right + 1
+        );
+      });
     expect(clipped, "Every emoji column fits inside the picker").toBe(false);
     await alice.page.screenshot({
       path: testInfo.outputPath("encrypted-emoji-picker.png"),
