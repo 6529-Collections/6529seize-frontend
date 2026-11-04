@@ -646,6 +646,33 @@ describe("UserPageHeader", () => {
       });
   });
 
+  it.each([
+    { connectedProfile: null, hasActions: false },
+    { connectedProfile: { id: "viewer", handle: null }, hasActions: true },
+  ])(
+    "keeps profile actions scoped to connected viewers: $hasActions",
+    ({ connectedProfile, hasActions }) => {
+      render(
+        <AuthContext.Provider value={{ ...auth, connectedProfile }}>
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={5}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+      expect(screen.queryByTestId("profile-actions-menu") !== null).toBe(
+        hasActions
+      );
+    }
+  );
+
   it("does not show preferences when viewing another profile", () => {
     render(
       <AuthContext.Provider value={auth}>

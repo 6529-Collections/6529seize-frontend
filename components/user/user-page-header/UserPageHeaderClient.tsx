@@ -555,7 +555,8 @@ export default function UserPageHeaderClient({
     cmsWebsiteHref && profile.handle
       ? { href: cmsWebsiteHref, handle: profile.handle }
       : null;
-  const followHandle = !isMyProfile && profile.handle ? profile.handle : null;
+  const followHandle =
+    !isMyProfile && profile.handle && connectedProfile ? profile.handle : null;
   const profileBlockState = useProfileBlockState({
     profileId: profile.id,
     profileHandle: profile.handle,
