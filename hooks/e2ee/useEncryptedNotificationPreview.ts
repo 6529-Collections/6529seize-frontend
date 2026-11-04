@@ -15,19 +15,20 @@ export function useEncryptedNotificationPreview(
     encrypted.status === "ready" &&
     activeProfileProxy === null &&
     encrypted.profileId === profileId;
-  const { messages } = useE2eeConversation(allowed ? group : null);
+  const previewGroup = allowed && sequence !== undefined ? group : null;
+  const { messages } = useE2eeConversation(previewGroup);
   const needsSetup =
     encrypted.status === "idle" || encrypted.status === "needs-enrollment";
-  if (!allowed || !group) return { preview: null, needsSetup };
-  const incoming = messages.filter(
+  if (!previewGroup) return { preview: null, needsSetup };
+  const incoming = messages.find(
     (message) =>
+      message.seq === sequence &&
       message.kind === "message" &&
       !message.deleted &&
       !message.undecryptable &&
       !message.pending &&
-      message.senderProfileId !== profileId &&
-      (sequence === undefined || message.seq === sequence)
+      message.senderProfileId !== profileId
   );
-  const preview = incoming.at(-1)?.text.slice(0, 240) ?? "";
+  const preview = incoming?.text.slice(0, 240) ?? "";
   return { preview: preview === "" ? null : preview, needsSetup };
 }

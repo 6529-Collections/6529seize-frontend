@@ -19,18 +19,21 @@ beforeEach(() => {
   mockConversation.mockReturnValue({
     messages: [
       {
+        seq: 1,
         kind: "message",
         senderProfileId: "other",
         text: "Readable local preview",
       },
-      { kind: "message", senderProfileId: "self", text: "Own reply" },
+      { seq: 2, kind: "message", senderProfileId: "self", text: "Own reply" },
       {
+        seq: 3,
         kind: "message",
         senderProfileId: "other",
         text: "Deleted",
         deleted: true,
       },
       {
+        seq: 4,
         kind: "message",
         senderProfileId: "other",
         text: "Locked",
@@ -41,10 +44,26 @@ beforeEach(() => {
 });
 
 it("previews only readable incoming local messages", () => {
+  const { result, rerender } = renderHook(
+    ({ seq }) => useEncryptedNotificationPreview("group", seq),
+    { initialProps: { seq: 1 } }
+  );
+  expect(result.current).toEqual({
+    preview: "Readable local preview",
+    needsSetup: false,
+  });
+  expect(mockConversation).toHaveBeenLastCalledWith("group");
+  for (const seq of [2, 3, 4]) {
+    rerender({ seq });
+    expect(result.current.preview).toBeNull();
+  }
+});
+
+it("keeps older notifications without a sequence generic even with local messages", () => {
   expect(
     renderHook(() => useEncryptedNotificationPreview("group")).result.current
-  ).toEqual({ preview: "Readable local preview", needsSetup: false });
-  expect(mockConversation).toHaveBeenLastCalledWith("group");
+  ).toEqual({ preview: null, needsSetup: false });
+  expect(mockConversation).toHaveBeenLastCalledWith(null);
 });
 
 it.each(["needs-enrollment", "loading", "error"])(
@@ -52,7 +71,7 @@ it.each(["needs-enrollment", "loading", "error"])(
   (status) => {
     mockEncrypted.status = status;
     expect(
-      renderHook(() => useEncryptedNotificationPreview("group")).result.current
+      renderHook(() => useEncryptedNotificationPreview("group", 1)).result.current
     ).toEqual({ preview: null, needsSetup: status === "needs-enrollment" });
     expect(mockConversation).toHaveBeenLastCalledWith(null);
   }
@@ -61,7 +80,7 @@ it.each(["needs-enrollment", "loading", "error"])(
 it("never leaks a previous profile's plaintext or previews while using a proxy", () => {
   mockEncrypted.profileId = "previous";
   const { result, rerender } = renderHook(() =>
-    useEncryptedNotificationPreview("group")
+    useEncryptedNotificationPreview("group", 1)
   );
   expect(result.current.preview).toBeNull();
   mockEncrypted.profileId = "self";
