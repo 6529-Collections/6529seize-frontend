@@ -117,20 +117,25 @@ export const SliderThumb: FC<SliderThumbProps> = ({
       <div
         className={`tw-absolute ${tooltipBottomClassName} tw-left-1/2 tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-border tw-text-center tw-transition-transform tw-duration-200 tw-ease-out ${visualState.tooltipClasses}`}
         style={{
-          transform: `translateX(calc(-50% + ${tooltipOffset}%))`,
+          transform: `translateX(${tooltipOffset - 50}%)`,
         }}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-1">
-          <span className="tw-min-w-0 tw-truncate tw-leading-[14px]">
+          {/* The value always shows in full; the unit gives way when space runs out. */}
+          <span className="tw-shrink-0 tw-leading-[14px]">
             {formatNumberWithCommas(numericVoteValue)}
           </span>
-          <span className="tw-sr-only group-[.is-vote-panel]/inline-vote:tw-not-sr-only group-[.is-vote-panel]/inline-vote:tw-shrink-0 group-[.is-vote-panel]/inline-vote:tw-font-medium">
+          <span className="tw-sr-only group-[.is-vote-panel]/inline-vote:tw-not-sr-only group-[.is-vote-panel]/inline-vote:tw-min-w-0 group-[.is-vote-panel]/inline-vote:tw-truncate group-[.is-vote-panel]/inline-vote:tw-font-medium">
             {label}
           </span>
         </span>
         {isMini && (
           <div
-            className={`tw-absolute tw-bottom-[-4px] tw-left-1/2 tw-h-2 tw-w-2 -tw-translate-x-1/2 tw-rotate-45 tw-border-b tw-border-r ${visualState.tooltipArrowClasses}`}
+            className={`tw-absolute tw-bottom-[-4px] tw-h-2 tw-w-2 -tw-translate-x-1/2 tw-rotate-45 tw-border-b tw-border-r ${visualState.tooltipArrowClasses}`}
+            // The bubble slides with the thumb, so the arrow follows the thumb within it.
+            style={{
+              left: `${Math.max(12, Math.min(88, 50 - tooltipOffset))}%`,
+            }}
           />
         )}
       </div>
