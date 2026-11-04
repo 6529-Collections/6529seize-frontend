@@ -126,11 +126,45 @@ describe("useWaveMessagesStore", () => {
       for (let index = 0; index < 60; index++) {
         result.current.removeDrop(`unknown-${index}`, "d1");
       }
-      result.current.updateData({ key: "unknown-0", drops: [baseDrop] });
+      result.current.updateData({
+        key: "unknown-0",
+        drops: [{ ...baseDrop, id: "never-deleted" }],
+      });
       result.current.updateData({ key: "unknown-59", drops: [baseDrop] });
     });
     expect(result.current.getData("unknown-0")).toBeUndefined();
     expect(result.current.getData("unknown-59")?.drops).toEqual([]);
+    act(() => {
+      result.current.updateData({ key: "unknown-0", isLoading: true });
+      result.current.updateData({
+        key: "unknown-0",
+        drops: [{ ...baseDrop, id: "fresh-feed" }],
+      });
+    });
+    expect(result.current.getData("unknown-0")?.drops[0]?.id).toBe(
+      "fresh-feed"
+    );
+  });
+
+  it("retains a just-touched deletion at capacity and cancels only the oldest unknown wave", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const evicted = jest.fn();
+    act(() => {
+      result.current.subscribeToEvictions(evicted);
+      for (let index = 0; index < 50; index++)
+        result.current.removeDrop(`unknown-${index}`, "d1");
+      result.current.removeDrop("unknown-0", "d2");
+      result.current.removeDrop("unknown-50", "d1");
+      result.current.updateData({ key: "unknown-0", drops: [baseDrop] });
+      result.current.updateData({
+        key: "unknown-1",
+        drops: [{ ...baseDrop, id: "never-deleted" }],
+      });
+    });
+    expect(evicted).toHaveBeenCalledTimes(1);
+    expect(evicted).toHaveBeenCalledWith("unknown-1");
+    expect(result.current.getData("unknown-0")?.drops).toEqual([]);
+    expect(result.current.getData("unknown-1")).toBeUndefined();
   });
 
   it("clears normal updates when a profile switch precedes deferred delivery", async () => {
