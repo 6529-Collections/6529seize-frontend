@@ -95,6 +95,7 @@ function ConnectedAccountRow({
           address={account.address}
           profileId={profile?.id}
           isActive={account.isActive}
+          compact
         />
         {showUnreadBadge && (
           <div className="tw-absolute tw-right-[-8px] tw-top-[-8px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">

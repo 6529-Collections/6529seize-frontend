@@ -13,6 +13,7 @@ import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee, type E2eeUiStatus } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatRelativeTime } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
@@ -27,7 +28,6 @@ import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 type EncryptionState =
   | "expired"
@@ -194,7 +194,10 @@ type DeviceSecurityStatusProps =
       readonly menuOpen: boolean;
       readonly connection: ConnectionIndicator;
     }
-  | { readonly presentation: "mobile-badge" }
+  | {
+      readonly presentation: "mobile-badge";
+      readonly compact?: boolean | undefined;
+    }
   | {
       readonly presentation: "inline";
       readonly connection: ConnectionIndicator;
@@ -241,10 +244,10 @@ function ConnectionStatusLine({
 
 function ShieldIcon({
   details,
-  inline = false,
+  size = "badge",
 }: {
   readonly details: SecurityDetails;
-  readonly inline?: boolean;
+  readonly size?: "inline" | "badge" | "compact";
 }) {
   const { proof, encrypted, proofRenewal, encryptionRenewal } = details;
   const complete = proof === "on" && encrypted === "on";
@@ -256,22 +259,31 @@ function ShieldIcon({
   if (healthy) statusColor = "tw-text-green";
   if (attention) statusColor = "tw-text-amber-300";
   const Icon = healthy ? ShieldCheckIcon : ShieldExclamationIcon;
+  const sizeClass = {
+    inline: "tw-size-5",
+    badge: "tw-size-4",
+    compact: "tw-size-3",
+  }[size];
   return (
     <Icon
       aria-hidden="true"
-      className={`${inline ? "tw-size-5" : "tw-size-4"} tw-shrink-0 ${statusColor}`}
+      className={`${sizeClass} tw-shrink-0 ${statusColor}`}
     />
   );
 }
 
 function DeviceSecurityBadge({
   details,
+  compact = false,
 }: {
   readonly details: SecurityDetails;
+  readonly compact?: boolean | undefined;
 }) {
   return (
-    <span className="tw-absolute -tw-bottom-1 -tw-right-1 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-2 tw-ring-iron-950">
-      <ShieldIcon details={details} />
+    <span
+      className={`tw-absolute tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-ring-iron-950 ${compact ? "-tw-bottom-0.5 -tw-right-0.5 tw-size-4 tw-ring-1" : "-tw-bottom-1 -tw-right-1 tw-size-5 tw-ring-2"}`}
+    >
+      <ShieldIcon details={details} size={compact ? "compact" : "badge"} />
       <span className="tw-sr-only">
         <DeviceSecurityDetails {...details} />
       </span>
@@ -284,12 +296,12 @@ function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
   const isTouchDevice = useIsTouchDevice();
   if ("presentation" in props) {
     if (props.presentation === "mobile-badge")
-      return <DeviceSecurityBadge details={details} />;
+      return <DeviceSecurityBadge details={details} compact={props.compact} />;
     return (
       <div className="tw-grid tw-min-w-0 tw-gap-0.5 tw-text-xs tw-leading-5 tw-text-iron-300">
         <ConnectionStatusLine connection={props.connection} alignWithShield />
         <div className="tw-flex tw-items-start tw-gap-1">
-          <ShieldIcon details={details} inline />
+          <ShieldIcon details={details} size="inline" />
           <DeviceSecurityDetails {...details} inline />
         </div>
       </div>
@@ -305,13 +317,18 @@ function DeviceSecurityStatusContent(props: DeviceSecurityStatusProps) {
       {!isTouchDevice && !props.menuOpen && (
         <BodyPortalTooltip
           id={`${props.descriptionId}-tooltip`}
-          place="right"
+          place="right-end"
           delayShow={400}
           opacity={1}
           openEvents={{ mouseenter: true, focus: true }}
           closeEvents={{ mouseleave: true, blur: true }}
           globalCloseEvents={{ escape: true }}
-          style={{ ...TOOLTIP_STYLES, padding: "6px 10px" }}
+          style={{
+            ...TOOLTIP_STYLES,
+            padding: "8px 12px",
+            maxWidth: "min(20rem, 50vw)",
+            overflowWrap: "anywhere",
+          }}
         >
           <div className="tailwind-scope tw-grid tw-gap-1.5 tw-font-normal">
             <ConnectionStatusLine connection={props.connection} />
@@ -339,9 +356,11 @@ function readProfileEncryptionState(
 function InactiveProfileBadge({
   address,
   profileId,
+  compact,
 }: {
   readonly address: string;
   readonly profileId?: string | null | undefined;
+  readonly compact?: boolean | undefined;
 }) {
   const wallet = address.toLowerCase();
   const now = useMinuteClock();
@@ -375,6 +394,7 @@ function InactiveProfileBadge({
   }
   return (
     <DeviceSecurityBadge
+      compact={compact}
       details={{
         proof,
         encrypted,
@@ -390,18 +410,27 @@ interface ConnectedProfileDeviceBadgeProps {
   readonly address: string;
   readonly profileId?: string | null | undefined;
   readonly isActive?: boolean;
+  readonly compact?: boolean | undefined;
 }
 
 function ConnectedProfileBadgeContent({
   address,
   profileId,
   isActive,
+  compact,
 }: ConnectedProfileDeviceBadgeProps) {
   const { activeProfileProxy } = useAuth();
   return isActive && !activeProfileProxy ? (
-    <DeviceSecurityStatusContent presentation="mobile-badge" />
+    <DeviceSecurityStatusContent
+      presentation="mobile-badge"
+      compact={compact}
+    />
   ) : (
-    <InactiveProfileBadge address={address} profileId={profileId} />
+    <InactiveProfileBadge
+      address={address}
+      profileId={profileId}
+      compact={compact}
+    />
   );
 }
 

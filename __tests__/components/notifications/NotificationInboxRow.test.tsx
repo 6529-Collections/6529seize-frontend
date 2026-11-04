@@ -13,6 +13,11 @@ import type {
 } from "@/types/feed.types";
 import { isGroupedReactionsItem } from "@/types/feed.types";
 
+jest.mock("next/navigation", () => ({
+  ...jest.requireActual("next/navigation"),
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
 jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
   useEncryptedNotificationPreview: jest.fn(),
 }));
@@ -241,6 +246,8 @@ it("links the sender avatar and handle separately from encrypted chat setup", ()
           id: "alice",
           handle: "alice",
           pfp: "https://example.com/avatar.png",
+          level: 80,
+          artist_of_prevote_cards: [1],
         } as ApiProfileMin,
         additional_context: {
           encrypted_group: "0xgroup",
@@ -254,6 +261,10 @@ it("links the sender avatar and handle separately from encrypted chat setup", ()
   const sender = screen.getByRole("link", { name: "alice" });
   expect(sender).toHaveAttribute("href", "/alice");
   expect(sender.querySelector("img")).toBeInTheDocument();
+  expect(screen.getByRole("img", { name: "Level 80" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "View 1 minted meme" })
+  ).toBeInTheDocument();
   const setup = screen.getByRole("link", { name: "Set up Encrypted DMs" });
   expect(setup).toHaveAttribute("href", "/messages/encrypted/0xgroup");
   fireEvent.click(sender);
