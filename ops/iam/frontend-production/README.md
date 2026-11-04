@@ -30,6 +30,11 @@ version>/`, plus the exact `web_build/current-production-version.json` object.
   Before publishing, it requires the distribution domain to match the
   announcement endpoint. A lookup, mismatch, or invalidation failure fails the
   job instead of silently claiming publication success.
+- Read, invalidate, and read invalidation status only on the production page
+  distribution `E3KTTDJUNHRYW9`, so a deployment can purge the edge cache
+  once the new release answers. It cannot change or delete the distribution.
+  The purge step stays skipped until `PRODUCTION_PAGE_DISTRIBUTION_ID` is set.
+  See [page edge cache](../../docs/developer/cloudfront-page-cache.md).
 - Get/pass only the existing `ec2-seize-prod` role and read its instance
   profile. Passing is limited to Elastic Beanstalk and EC2. No IAM policy,
   credential, trust, service-linked-role, or identity writes are allowed.
