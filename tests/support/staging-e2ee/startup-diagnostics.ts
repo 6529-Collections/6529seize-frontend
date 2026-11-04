@@ -12,9 +12,13 @@ interface OpenTiming {
   error?: string;
 }
 
-/** Observe native requests without recording keys, records, or plaintext. */
+/**
+ * Observe native requests without recording keys, records, or plaintext.
+ * Wrappers persist for the document lifetime; repeated installation is a no-op.
+ */
 export async function installHistoryStartupDiagnostics(page: Page) {
   await page.addInitScript((key) => {
+    if (Reflect.get(globalThis, key)) return;
     const state = {
       opens: [] as OpenTiming[],
       messageReads: 0,
@@ -71,7 +75,8 @@ export async function installHistoryStartupDiagnostics(page: Page) {
         ) {
           state.messageReads++;
           request.addEventListener("success", () => {
-            state.messageRowsRead += request.result.length;
+            if (Array.isArray(request.result))
+              state.messageRowsRead += request.result.length;
             state.lastReadAt = performance.now();
           });
         }
