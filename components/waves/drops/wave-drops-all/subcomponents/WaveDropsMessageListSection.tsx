@@ -115,6 +115,8 @@ export const WaveDropsMessageListSection: React.FC<
             scrollContainerRef={scrollContainerRef}
             onReplyClick={queueSerialTarget}
             drops={waveMessages?.drops ?? []}
+            historyGaps={waveMessages?.historyGaps}
+            waveId={waveMessages?.id}
             showWaveInfo={false}
             onReply={onReply}
             showReplyAndQuote={true}

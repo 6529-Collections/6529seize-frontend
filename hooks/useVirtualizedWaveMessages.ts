@@ -163,8 +163,7 @@ const getRetainedVirtualLimit = ({
 }): number =>
   oldestRenderedSerialNo === null
     ? 0
-    : drops.findIndex((drop) => drop.serial_no === oldestRenderedSerialNo) +
-      1;
+    : drops.findIndex((drop) => drop.serial_no === oldestRenderedSerialNo) + 1;
 
 export function useVirtualizedWaveMessages(
   waveId: string,
@@ -401,6 +400,7 @@ export function useVirtualizedWaveMessages(
     isLoading: visibleFullWaveMessages.isLoading,
     isLoadingNextPage: visibleFullWaveMessages.isLoadingNextPage,
     latestFetchedSerialNo: visibleFullWaveMessages.latestFetchedSerialNo,
+    historyGaps: visibleFullWaveMessages.historyGaps,
     drops: virtualizedDrops,
     allDropsCount,
     loadMoreLocally,

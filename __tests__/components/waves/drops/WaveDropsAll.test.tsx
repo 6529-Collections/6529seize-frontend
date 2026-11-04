@@ -888,7 +888,8 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       expect(scrollButtonProps.isAtBottom).toBe(false);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("calls forcePinToBottom when scroll button is clicked", async () => {
@@ -1067,7 +1068,8 @@ describe("WaveDropsAll", () => {
 
       // Verify scroll button receives isAtBottom state
       expect(scrollButtonProps.isAtBottom).toBe(true);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("integrates with useScrollBehavior hook for scroll intent detection", async () => {
