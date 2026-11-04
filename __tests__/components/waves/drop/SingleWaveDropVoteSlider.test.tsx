@@ -266,4 +266,52 @@ describe("SingleWaveDropVoteSlider", () => {
     });
     expect(tooltips.length).toBeGreaterThan(0);
   });
+
+  it("keeps the value whole and lets the unit truncate in the vote panel bubble", () => {
+    render(
+      <SingleWaveDropVoteSlider
+        {...defaultProps}
+        minValue={0}
+        maxValue={90487675}
+        voteValue={15000000}
+        label="TDH + XTDH"
+      />
+    );
+
+    const value = screen.getAllByText("15,000,000")[0]!;
+    expect(value).toHaveClass("tw-shrink-0");
+    expect(value).not.toHaveClass("tw-truncate");
+    const unit = screen.getAllByText("TDH + XTDH")[0]!;
+    expect(unit.className).toContain(
+      "group-[.is-vote-panel]/inline-vote:tw-truncate"
+    );
+    // The bubble has room for value and unit inside the vote panel.
+    expect(value.closest("[style]")?.className).toContain(
+      "group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]"
+    );
+  });
+
+  // The track scale is not linear, so only the ends and zero have exact shifts.
+  it.each([
+    [-100, "0%"],
+    [0, "-50%"],
+    [100, "-100%"],
+  ])(
+    "slides the bubble with the thumb so it stays on the track (value %d)",
+    (voteValue, shift) => {
+      render(
+        <SingleWaveDropVoteSlider
+          {...defaultProps}
+          voteValue={voteValue}
+          label="TDH + XTDH"
+        />
+      );
+
+      const bubble = screen
+        .getAllByText("TDH + XTDH")[0]!
+        .closest<HTMLElement>(".tw-whitespace-nowrap");
+      // Left edge at the start, centered in the middle, right edge at the end.
+      expect(bubble?.style.transform).toBe(`translateX(${shift})`);
+    }
+  );
 });

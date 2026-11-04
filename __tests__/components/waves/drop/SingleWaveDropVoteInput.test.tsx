@@ -31,7 +31,8 @@ describe("SingleWaveDropVoteInput", () => {
     const input = screen.getByDisplayValue("42");
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute("type", "text");
-    expect(input).toHaveAttribute("pattern", "-?[0-9]*");
+    // Thousands separators are shown in the field, so the pattern allows them.
+    expect(input).toHaveAttribute("pattern", "-?[0-9,]*");
     expect(input).toHaveAttribute("inputMode", "numeric");
   });
 

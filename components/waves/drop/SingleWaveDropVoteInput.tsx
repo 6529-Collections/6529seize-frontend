@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -23,6 +24,36 @@ const MEMETIC_VALUES: number[] = [
 const QUICK_PERCENTAGES: number[] = [-100, -50, 50, 100];
 
 const getCurrentTimeMs = (): number => Date.now();
+
+const countDigits = (text: string): number => text.replaceAll(/\D/g, "").length;
+
+/** The vote as shown in the field: whole numbers get thousands separators. */
+const formatVoteInputValue = (value: number | string): string => {
+  if (value === "" || value === "-") {
+    return value;
+  }
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric)
+    ? formatNumberWithCommas(numeric)
+    : String(value);
+};
+
+/** The caret position just after the `digits`-th digit of `text`. */
+const getCaretAfterDigits = (text: string, digits: number): number => {
+  if (digits <= 0) {
+    return text.startsWith("-") ? 1 : 0;
+  }
+  let seen = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    if (/\d/.test(text.charAt(index))) {
+      seen += 1;
+      if (seen === digits) {
+        return index + 1;
+      }
+    }
+  }
+  return text.length;
+};
 
 const getInputShellClasses = (
   isPositiveVote: boolean,
@@ -101,12 +132,19 @@ export const SingleWaveDropVoteInput: React.FC<
   const pressStartTime = useRef<number | null>(null);
   const isPressed = useRef<boolean>(false);
   const voteValueRef = useRef<number | string>(voteValue);
+  // Separators move as digits are typed, so remember how many digits sat
+  // before the caret and restore that position after the reformat.
+  const pendingCaretRef = useRef<{
+    readonly input: HTMLInputElement;
+    readonly digits: number;
+  } | null>(null);
+  const displayValue = formatVoteInputValue(voteValue);
   const allowsNegativeValues = minValue < 0;
   const quickPercentages = allowsNegativeValues
     ? QUICK_PERCENTAGES
     : QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
   const mobileQuickPercentages = quickPercentages;
-  const inputPattern = allowsNegativeValues ? "-?[0-9]*" : "[0-9]*";
+  const inputPattern = allowsNegativeValues ? "-?[0-9,]*" : "[0-9,]*";
   const numericVoteValue =
     typeof voteValue === "number" && Number.isFinite(voteValue)
       ? voteValue
@@ -231,7 +269,13 @@ export const SingleWaveDropVoteInput: React.FC<
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const input = e.target;
+    const caret = input.selectionStart ?? input.value.length;
+    pendingCaretRef.current = {
+      input,
+      digits: countDigits(input.value.slice(0, caret)),
+    };
+    const inputValue = input.value.replaceAll(",", "");
 
     if (inputValue === "") {
       commitVoteValue(inputValue);
@@ -270,6 +314,16 @@ export const SingleWaveDropVoteInput: React.FC<
     voteValueRef.current = voteValue;
   }, [voteValue]);
 
+  useLayoutEffect(() => {
+    const pending = pendingCaretRef.current;
+    pendingCaretRef.current = null;
+    if (pending?.input !== document.activeElement) {
+      return;
+    }
+    const position = getCaretAfterDigits(pending.input.value, pending.digits);
+    pending.input.setSelectionRange(position, position);
+  }, [displayValue]);
+
   useEffect(() => {
     return () => {
       clearTimers();
@@ -294,7 +348,7 @@ export const SingleWaveDropVoteInput: React.FC<
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-tabular-nums tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out ${inputShellClasses} ${inputTextClasses} ${inputCaretClasses}`}
-            value={voteValue}
+            value={displayValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
@@ -331,7 +385,7 @@ export const SingleWaveDropVoteInput: React.FC<
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
-            value={voteValue}
+            value={displayValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
