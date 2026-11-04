@@ -48,6 +48,7 @@ function CompetitionLeaderboardEntry({
   entry,
   viewMode,
   sort,
+  position,
   isVotingClosed,
   contextCard,
   updatedAt,
@@ -57,6 +58,7 @@ function CompetitionLeaderboardEntry({
   readonly updatedAt: number;
   readonly viewMode: LeaderboardViewMode;
   readonly sort: WaveDropsLeaderboardSort;
+  readonly position: number;
   readonly isVotingClosed: boolean;
 }) {
   const { wave, competition } = useCompetition();
@@ -98,8 +100,13 @@ function CompetitionLeaderboardEntry({
   )
     return <CompetitionState error retry={() => void dropQuery.refetch()} />;
   if (!dropQuery.data) return null;
+  const drop = dropQuery.data.drop;
   const props = {
-    drop: dropQuery.data.drop,
+    drop:
+      sort === WaveDropsLeaderboardSort.RATING_PREDICTION &&
+      !drop.winning_context
+        ? { ...drop, rank: position }
+        : drop,
     onDropClick,
     onDropContentClick: onDropClick,
     winningThreshold:
@@ -195,7 +202,10 @@ export default function CompetitionLeaderboard({
       ? { price_currency: "ETH" }
       : {}),
   });
-  const entries = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const entries =
+    query.data?.pages
+      .flatMap((page) => page.data)
+      .map((entry, index) => ({ ...entry, position: index + 1 })) ?? [];
   const presentation = useMemo(
     () => competitionPresentationWave(wave, competition),
     [wave, competition]
@@ -293,6 +303,7 @@ export default function CompetitionLeaderboard({
               updatedAt={query.dataUpdatedAt}
               viewMode={viewMode}
               sort={sort}
+              position={entry.position}
               isVotingClosed={ended || maxReached}
             />
           )}
