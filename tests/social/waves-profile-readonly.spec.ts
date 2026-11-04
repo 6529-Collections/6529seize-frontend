@@ -23,6 +23,8 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 
+import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
+
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import {
   captureSafeScreenshot,
@@ -539,6 +541,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
     await expectProfileShell(page, "Subscriptions");
+    if (page.viewportSize()!.width < 1024) {
+      await page
+        .getByRole("button", { name: "Minting settings", exact: true })
+        .click();
+      await expect(
+        page
+          .getByRole("dialog", { name: "Minting settings", exact: true })
+          .getByRole("heading", { name: "Minting settings", exact: true })
+      ).toBeFocused();
+    }
     const address = page.getByRole("button", {
       name: /^0x[0-9a-fA-F]{40}$/,
     });
@@ -566,9 +578,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectNoHorizontalOverflow(page);
   });
 
-  test("shows subscription history directly and preserves its selected pill across resizing", async ({
+  test("keeps desktop history inline and preserves its selected pill in mobile sheets", async ({
     page,
   }, testInfo) => {
+    // Fixed settings ensure the saved UTC date and pagination are covered.
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    // Desktop anchors stay inline; mobile settings/history use shared sheets.
+    await page.setViewportSize({ width: 1280, height: 900 });
     const historyRequests: string[] = [];
     page.on("request", (request) => {
       const match =
@@ -619,10 +636,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         linkBox!.y + linkBox!.height / 2 - (titleBox!.y + titleBox!.height / 2)
       )
     ).toBeLessThanOrEqual(1);
-    const history = page.getByRole("region", {
-      name: "Subscription History",
-      exact: true,
-    });
+    const history = page
+      .getByRole("region", {
+        name: "Subscription History",
+        exact: true,
+      })
+      .or(
+        page.getByRole("dialog", { name: "Subscription History", exact: true })
+      );
     await expect(
       history.getByRole("heading", {
         name: "Subscription History",
@@ -638,10 +659,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const coverage = page
       .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#profile-subscriptions-overview");
-    const mintingSettings = page.getByRole("region", {
-      name: "Minting settings",
-      exact: true,
-    });
+    const mintingSettings = page
+      .getByRole("region", {
+        name: "Minting settings",
+        exact: true,
+      })
+      .or(page.getByRole("dialog", { name: "Minting settings", exact: true }));
     const details = coverage.getByRole("button", {
       name: "Details",
       exact: true,
@@ -652,11 +675,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(statusHeading.locator("svg")).toHaveCount(0);
     const statusText = statusHeading.locator(":scope > span");
     if ((await statusText.count()) === 2) {
-      const badgeBox = await statusText.nth(1).boundingBox();
-      const countBox = await statusText.nth(0).boundingBox();
-      expect(badgeBox).not.toBeNull();
-      expect(countBox).not.toBeNull();
-      expect(badgeBox!.y + badgeBox!.height).toBeLessThanOrEqual(countBox!.y);
+      // Read both positions in one frame, including during hash scrolling.
+      const { badgeBottom, countTop } = await statusText.evaluateAll(
+        ([count, badge]) => ({
+          badgeBottom: badge!.getBoundingClientRect().bottom,
+          countTop: count!.getBoundingClientRect().top,
+        })
+      );
+      expect(badgeBottom).toBeLessThanOrEqual(countTop);
     }
     const coverageBox = await coverage.boundingBox();
     const headlineBox = await coverage
@@ -764,7 +790,33 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(
       Math.abs(desktopSettings!.y - desktopOverview!.y)
     ).toBeLessThanOrEqual(1);
+    await page.evaluate(() =>
+      history.replaceState(history.state, "", location.pathname)
+    );
     await page.setViewportSize({ width: 390, height: initialViewport.height });
+    const settingsOpener = page.getByRole("button", {
+      name: "Minting settings",
+      exact: true,
+    });
+    const compactBox = await settingsOpener.boundingBox();
+    const mobileDropsBox = await upcoming.boundingBox();
+    expect(compactBox).not.toBeNull();
+    expect(mobileDropsBox).not.toBeNull();
+    expect(compactBox!.y).toBeGreaterThanOrEqual(
+      mobileDropsBox!.y + mobileDropsBox!.height
+    );
+    await settingsOpener.click();
+    await expect(
+      mintingSettings.getByRole("heading", {
+        name: "Minting settings",
+        exact: true,
+      })
+    ).toBeFocused();
+    // Let the shared sheet finish entering before comparing row geometry.
+    await mintingSettings
+      .getByRole("heading", { name: "Minting settings", exact: true })
+      .click({ trial: true });
+    await expect(mintingSettings.getByRole("switch")).toHaveCount(0);
     const settingControls = [
       mintingSettings.getByRole("group", { name: "Mode", exact: true }),
       mintingSettings.getByRole("group", {
@@ -847,7 +899,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         }
       }
     }
+    await mintingSettings
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(settingsOpener).toBeFocused();
     await page.setViewportSize({ width: 1920, height: initialViewport.height });
+    await expect(
+      page.getByRole("dialog", { name: "Minting settings", exact: true })
+    ).toHaveCount(0);
     const inlineModeValue = await modeValue.boundingBox();
     const inlineModeDate = await visitorMode
       .locator('[id$="-detail"]')
@@ -894,9 +953,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       width: viewport.width < 640 ? 900 : 390,
       height: viewport.height,
     });
+    const historyOpener = page.getByRole("button", {
+      name: "Subscription History",
+      exact: true,
+    });
+    await historyOpener.click();
+    await expect(
+      history.getByRole("heading", {
+        name: "Subscription History",
+        exact: true,
+      })
+    ).toBeFocused();
     await expect(tabs).toBeVisible();
     await expect(logs).toHaveAttribute("aria-selected", "true");
     await expectNoHorizontalOverflow(page);
+    await history.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(historyOpener).toBeFocused();
     await page.setViewportSize({ width: 390, height: viewport.height });
     await expect(
       upcoming.getByRole("button", { name: "Show More", exact: true })
@@ -921,6 +993,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .all()) {
       await expect(status).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     }
+    await historyOpener.click();
     const pillLayout = await tabs.evaluate((element) => ({
       width: element.clientWidth,
       contentWidth: element.scrollWidth,
@@ -939,14 +1012,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await expect(topUps).toBeFocused();
     await expect(topUps).toHaveAttribute("aria-selected", "true");
-    const visiblePill = await topUps.boundingBox();
-    const pillStrip = await tabs.boundingBox();
-    expect(visiblePill).not.toBeNull();
-    expect(pillStrip).not.toBeNull();
-    expect(visiblePill!.x).toBeGreaterThanOrEqual(pillStrip!.x);
-    expect(visiblePill!.x + visiblePill!.width).toBeLessThanOrEqual(
-      pillStrip!.x + pillStrip!.width
-    );
+    await expect
+      .poll(() =>
+        topUps.evaluate((tab) => {
+          const pill = tab.getBoundingClientRect();
+          const strip = tab
+            .closest('[role="tablist"]')!
+            .getBoundingClientRect();
+          return pill.left >= strip.left && pill.right <= strip.right;
+        })
+      )
+      .toBe(true);
     await expect(history.getByRole("tabpanel")).toHaveAttribute(
       "aria-busy",
       "false"

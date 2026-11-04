@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/** Open the top-up dialog for existing hash links without moving the page. */
+/** Open a subscription dialog for existing hash links without moving the page. */
 export function useSubscriptionDisclosure(
   id: string,
   enabled = true,

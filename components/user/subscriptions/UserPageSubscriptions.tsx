@@ -21,6 +21,7 @@ import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsSettings from "./UserPageSubscriptionsSettings";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import UserPageSubscriptionsResponsivePanel from "./UserPageSubscriptionsResponsivePanel";
 import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
@@ -80,11 +81,6 @@ export default function UserPageSubscriptions(
   useScrollToHashOnMount("profile-subscriptions-overview", {
     enabled: !!profileKey,
     focusId: "profile-subscriptions-overview-title",
-  });
-
-  useScrollToHashOnMount("profile-subscriptions-history", {
-    enabled: !!profileKey,
-    focusId: "profile-subscriptions-history-title",
   });
 
   const [fetchErrors, setFetchErrors] = useState<Record<string, boolean>>({});
@@ -293,43 +289,49 @@ export default function UserPageSubscriptions(
             }}
           />
         )}
-        <UserPageSubscriptionsSettings
-          profileKey={profileKey}
-          details={details}
-          readonly={!isConnectedAccount}
-          refresh={refresh}
-          airdrop={airdropResult}
-          fetchingAirdrop={fetchingAirdropAddress}
-        />
+        <div className="tw-min-w-0 lg:tw-col-span-2">
+          <UserPageSubscriptionsUpcoming
+            profileKey={profileKey}
+            details={details}
+            memes_subscriptions={memeSubscriptions}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+            loading={fetchingMemeSubscriptions}
+            coverage={coverageQuery.isError ? undefined : coverageQuery.data}
+          />
+        </div>
+        <div className="tw-min-w-0 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 lg:tw-contents lg:tw-divide-y-0">
+          <UserPageSubscriptionsSettings
+            profileKey={profileKey}
+            details={details}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+            airdrop={airdropResult}
+            fetchingAirdrop={fetchingAirdropAddress}
+          />
+          <UserPageSubscriptionsResponsivePanel
+            key={profileKey}
+            id="profile-subscriptions-history"
+            title={t(locale, "subscriptions.history.title")}
+            className="lg:tw-col-span-2"
+          >
+            <UserPageSubscriptionsHistory
+              key={profileKey}
+              selectedIndex={history.selectedIndex}
+              onSelectionChange={history.setSelectedIndex}
+              topups={history.topups}
+              redeemed={history.redeemed}
+              logs={history.logs}
+              topUpsLoading={history.topupsLoading}
+              redeemedLoading={history.redeemedLoading}
+              logsLoading={history.logsLoading}
+              setRedeemedPage={(page) => history.setPage("redeemed", page)}
+              setTopUpPage={(page) => history.setPage("topups", page)}
+              setLogsPage={(page) => history.setPage("logs", page)}
+            />
+          </UserPageSubscriptionsResponsivePanel>
+        </div>
       </div>
-      <UserPageSubscriptionsUpcoming
-        profileKey={profileKey}
-        details={details}
-        memes_subscriptions={memeSubscriptions}
-        readonly={!isConnectedAccount}
-        refresh={refresh}
-        loading={fetchingMemeSubscriptions}
-        coverage={coverageQuery.isError ? undefined : coverageQuery.data}
-      />
-      <UserPageSubscriptionsSection
-        id="profile-subscriptions-history"
-        title={t(locale, "subscriptions.history.title")}
-      >
-        <UserPageSubscriptionsHistory
-          key={profileKey}
-          selectedIndex={history.selectedIndex}
-          onSelectionChange={history.setSelectedIndex}
-          topups={history.topups}
-          redeemed={history.redeemed}
-          logs={history.logs}
-          topUpsLoading={history.topupsLoading}
-          redeemedLoading={history.redeemedLoading}
-          logsLoading={history.logsLoading}
-          setRedeemedPage={(page) => history.setPage("redeemed", page)}
-          setTopUpPage={(page) => history.setPage("topups", page)}
-          setLogsPage={(page) => history.setPage("logs", page)}
-        />
-      </UserPageSubscriptionsSection>
     </div>
   );
 }

@@ -406,19 +406,24 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("heading", { name: "Upcoming Drops" })
     ).toBeVisible();
-    const settings = page.getByRole("region", {
-      name: "Minting settings",
-      exact: true,
-    });
-    await expect(settings).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Subscription History", exact: true })
-    ).toBeVisible();
+    const settings = page
+      .getByRole("region", {
+        name: "Minting settings",
+        exact: true,
+      })
+      .or(page.getByRole("dialog", { name: "Minting settings", exact: true }));
+
     await expect(
       page
         .locator("#subscription-overview-actions")
         .getByText("Forecast use", { exact: true })
     ).toBeVisible();
+    if (page.viewportSize()!.width < 1024) {
+      await page
+        .getByRole("button", { name: "Minting settings", exact: true })
+        .click();
+    }
+    await expect(settings).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Airdrop Address" })
     ).toBeVisible();
@@ -427,6 +432,17 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         name: "All eligible editions",
         exact: true,
       })
+    ).toBeVisible();
+    if (page.viewportSize()!.width < 1024) {
+      await settings
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+      await page
+        .getByRole("button", { name: "Subscription History", exact: true })
+        .click();
+    }
+    await expect(
+      page.getByRole("heading", { name: "Subscription History", exact: true })
     ).toBeVisible();
     await expect(
       page.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
@@ -569,6 +585,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
   test("subscriptions preserve full details, compact top up and history pagination", async ({
     page,
   }, testInfo) => {
+    // Check the inline desktop layout first, then every mobile sheet breakpoint.
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
     const { address } = await installSubscriptionFixtures(page);
     await page.route(
@@ -704,10 +722,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       upcoming.getByText("Mon, Nov 2, 2026", { exact: true })
     ).toBeVisible();
     await expect(upcoming.getByText("/ 2", { exact: true })).toHaveCount(3);
-    const settings = page.getByRole("region", {
-      name: "Minting settings",
-      exact: true,
-    });
+    const settings = page
+      .getByRole("region", {
+        name: "Minting settings",
+        exact: true,
+      })
+      .or(page.getByRole("dialog", { name: "Minting settings", exact: true }));
     const modeGroup = settings.getByRole("group", {
       name: "Mode",
       exact: true,
@@ -827,6 +847,26 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       const overviewSectionBox = await page
         .locator("#profile-subscriptions")
         .boundingBox();
+      const settingsOpener = page.getByRole("button", {
+        name: "Minting settings",
+        exact: true,
+      });
+      if (width < 1024) {
+        const openerBox = await settingsOpener.boundingBox();
+        const dropsBox = await upcoming.boundingBox();
+        expect(openerBox).not.toBeNull();
+        expect(dropsBox).not.toBeNull();
+        expect(openerBox!.y).toBeGreaterThanOrEqual(
+          dropsBox!.y + dropsBox!.height
+        );
+        await settingsOpener.click();
+        await expect(
+          settings.getByRole("heading", {
+            name: "Minting settings",
+            exact: true,
+          })
+        ).toBeFocused();
+      }
       const settingsSectionBox = await settings.boundingBox();
       expect(overviewSectionBox).not.toBeNull();
       expect(settingsSectionBox).not.toBeNull();
@@ -838,9 +878,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           Math.abs(settingsSectionBox!.y - overviewSectionBox!.y)
         ).toBeLessThanOrEqual(1);
       } else {
-        expect(settingsSectionBox!.y).toBeGreaterThanOrEqual(
-          overviewSectionBox!.y + overviewSectionBox!.height
-        );
+        await expect(
+          page.getByRole("dialog", { name: "Minting settings", exact: true })
+        ).toBeVisible();
+        await expect(mode).toBeEnabled();
+        await expect(mode).toBeChecked();
       }
       const controls = settings.locator("[data-setting-controls]");
       await expect(controls).toHaveCount(2);
@@ -871,6 +913,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         });
         expect(layout.contained).toBe(true);
         expect(layout.labelLineCounts).toEqual([1, 1]);
+      }
+      if (width < 1024) {
+        await settings
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(settingsOpener).toBeFocused();
       }
       const learnMore = page.getByRole("link", {
         name: "Learn more",
@@ -1215,6 +1263,16 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("button", { name: address, exact: true })
     ).toBeVisible();
+    // The same histories and pagination remain usable in the mobile sheet.
+    await page.setViewportSize({ width: 390, height: 900 });
+    const historyOpener = page.getByRole("button", {
+      name: "Subscription History",
+      exact: true,
+    });
+    await historyOpener.click();
+    await expect(
+      page.getByRole("dialog", { name: "Subscription History", exact: true })
+    ).toBeVisible();
     await expectSingleLineLabel(
       page.getByRole("tab", { name: "Top Up History", exact: true })
     );
@@ -1295,6 +1353,25 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       testInfo,
       "subscriptions-details-history"
     );
+    await page
+      .getByRole("dialog", { name: "Subscription History", exact: true })
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(historyOpener).toBeFocused();
+    await historyOpener.click();
+    await expect(
+      page.getByRole("tab", { name: "Log History", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("textbox", { name: "Page number" })
+    ).toHaveValue("2");
+    await page.setViewportSize(ownerViewport);
+    await expect(
+      page.getByRole("dialog", { name: "Subscription History", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("textbox", { name: "Page number" })
+    ).toHaveValue("2");
   });
 
   test("renders the own-profile proxy shell without creating a proxy", async ({

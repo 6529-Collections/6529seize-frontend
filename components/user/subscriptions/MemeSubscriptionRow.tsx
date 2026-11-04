@@ -460,7 +460,9 @@ export default function MemeSubscriptionRow(
           <div className="tw-row-span-2 tw-shrink-0">{props.artwork}</div>
         )}
         <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-flex-col sm:tw-gap-2">
-          <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-col sm:tw-gap-0.5">
+          <div
+            className={`tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-col ${props.minting_today ? "sm:tw-gap-2" : "sm:tw-gap-0.5"}`}
+          >
             {props.date && (
               <div
                 className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 ${props.artwork ? "tw-col-start-2 tw-row-start-1" : "tw-col-span-full"}`}
@@ -470,7 +472,7 @@ export default function MemeSubscriptionRow(
                     tokenId={props.subscription.token_id}
                     locale={locale}
                     showIndicator
-                    className="tw-text-base tw-font-semibold tw-text-primary-300"
+                    className="tw-text-sm tw-font-medium tw-text-primary-300"
                   />
                 ) : (
                   <time
@@ -496,7 +498,7 @@ export default function MemeSubscriptionRow(
               </div>
             )}
             <span
-              className={`tw-row-start-2 tw-min-w-0 tw-break-words tw-tabular-nums ${props.minting_today ? "tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl sm:tw-leading-9" : "tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"} ${props.artwork ? "tw-col-start-2" : "tw-col-start-1"}`}
+              className={`tw-row-start-2 tw-min-w-0 tw-break-words tw-tabular-nums ${props.minting_today ? "tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50" : "tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"} ${props.artwork ? "tw-col-start-2" : "tw-col-start-1"}`}
             >
               {props.title} #{props.subscription.token_id}
             </span>

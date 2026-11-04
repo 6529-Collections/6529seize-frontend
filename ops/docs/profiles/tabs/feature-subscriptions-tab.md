@@ -19,11 +19,13 @@ From 1024px, Subscription minting occupies the left two-thirds and Minting setti
 sits in the right column, with its three settings stacked. In that sidebar,
 setting labels are brighter, values and supporting details sit beneath them on
 the left, and owner switches sit on the right. Both original owner choice labels
-remain visible. The full Airdrop Address stays readable and can wrap. Below that width the
-sections stack; visitor settings use three columns from 768px, while owner settings
-use two columns from 768px until the sidebar starts at 1024px. Owner labels remain above their
-controls. Both views stack on phones and share the subtle dark surface of Upcoming
-Drops. History retains its compact pill tabs and original entries. Redeemed rows
+remain visible. The full Airdrop Address stays readable and can wrap. Below 1024px,
+Minting settings and Subscription History become two compact rows together after
+Upcoming Drops. The settings row summarizes the saved mode and edition preference.
+Each row opens its full content in the shared mobile bottom sheet. Inside settings,
+visitor settings use three columns from 768px and owner settings use two; phones
+stack the groups with dividers. Owner labels remain above their controls.
+History retains its compact pill tabs and original entries. Redeemed rows
 use the original shortened address format. Other owner states open Top up when needed.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
@@ -73,9 +75,10 @@ first render.
   coverage card to open `/about/subscriptions`.
 - Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
   `#profile-subscriptions-upcoming`, and `#profile-subscriptions-history`
-  scroll to and focus their section heading. `#profile-subscriptions-top-up`
-  focuses the inline form or opens and focuses the Top up dialog automatically. Minting settings and History are
-  already visible.
+  scroll to and focus their section heading on desktop. Below 1024px, settings
+  and history links open the matching sheet and focus its heading instead.
+  `#profile-subscriptions-top-up` focuses the inline form or opens and focuses the
+  Top up dialog automatically.
 
 ## Common Scenarios
 
@@ -150,7 +153,8 @@ first render.
    selections or quantities. The `Show More` footer inside the drops panel reveals the
    remaining rows. Minting
    Today rows are locked; focus, tap, or hover the label for the explanation.
-5. Use `Minting settings` beside the coverage panel from 1024px, or between the coverage panel and Upcoming Drops on narrower screens. Mode,
+5. Use `Minting settings` beside the coverage panel from 1024px. On narrower
+   screens, tap its compact row after Upcoming Drops to open the settings sheet. Mode,
    Edition Preference and Airdrop Address stack in one column below 768px,
    with subtle dividers between rows, labels on the left and values on the right. The
    mode date and eligibility align right beneath their values in visitor view. From 768px, visitor
@@ -172,8 +176,10 @@ first render.
    available, and wraps within its setting when needed. The address tooltip on
    hover, focus or tap and the owner edit link remain available.
    The mode's UTC last-update timestamp keeps its original wording. Visitors can read saved values
-   but cannot change them. Direct settings links still focus the section heading.
-6. In the always-visible `Subscription History` section, choose Redeemed
+   but cannot change them. Direct settings links focus the section or sheet heading.
+   Close, Escape or the backdrop dismisses the sheet and returns focus to its row.
+6. Open `Subscription History`: it is inline on desktop, or a compact row below
+   Minting settings on screens below 1024px. In its sheet or section, choose Redeemed
    Subscriptions, Log History, or Top Up History. The selected pill is light;
    inactive pills are transparent with subtle outlines and a faint fill on hover.
    The labels have no counts. Pills stay on one horizontally scrollable row on
@@ -232,7 +238,7 @@ first render.
 - Coverage uses fully funded intended drops, not raw card credits, because
   eligibility, all-editions settings, manual choices, and opt-outs can change
   consumption per drop.
-- `Mode` is editable in Minting settings above Upcoming Drops. Its original
+- `Mode` is editable in Minting settings. Its original
   UTC last-update timestamp appears below the saved value, without "since".
 - Owners use the original shared `Mode` and `Edition Preference` switches, with both
   choices visible and a native keyboard-focus indicator. The original accessible
@@ -302,9 +308,11 @@ first render.
     amount, the sender below and the same mobile footer. Etherscan links
     use the shared body-portal tooltip and standard tooltip styles on hover or
     keyboard focus, retaining the same transaction destination and new-tab behavior.
-  - a separate heading and compact pills are always visible, with no expand/collapse
-    control; the selected history is preserved while data refreshes or the
-    window resizes
+  - from 1024px, a separate heading and compact pills stay inline. Below that
+    width, the Subscription History row at the bottom opens a shared bottom sheet
+  - the selected history and each page number are preserved when the sheet closes
+    and reopens, data refreshes, or the window resizes. Close, Escape or the
+    backdrop dismisses the sheet and returns focus to its row
   - Redeemed Subscriptions loads first; Log History and Top Up History load when
     selected. Recently loaded pages are reused when switching histories, and each
     history keeps its own page number

@@ -128,6 +128,12 @@ export default function UserPageSubscriptionsHistory(
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
+            onFocus={(event) =>
+              event.currentTarget.scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+              })
+            }
             className={({ selected }) =>
               getButtonClasses({
                 variant: selected ? "filterSelected" : "filter",
