@@ -91,6 +91,47 @@ describe("fetchNotificationsV2", () => {
     mockRetiredCompetitionFlag.mockReturnValue(false);
   });
 
+  it.each([identity("sender"), null])(
+    "retains encrypted inbox metadata with sender %j",
+    async (sender) => {
+      const group = `0x${"ab".repeat(32)}`;
+      jest.mocked(commonApiFetch).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 124,
+            created_at: 1000,
+            read_at: null,
+            cause: ApiNotificationCause.E2EeMessage,
+            related_identity: sender,
+            related_drops: [],
+            additional_context: {
+              encrypted_group: group,
+              encrypted_message_seq: 7,
+              text: "never trust server plaintext for an encrypted preview",
+            },
+          },
+        ],
+      });
+      const response = await fetchNotificationsV2({ limit: "30" });
+      expect(response.notifications).toEqual([
+        expect.objectContaining({
+          id: 124,
+          cause: ApiNotificationCause.E2EeMessage,
+          related_identity: sender
+            ? expect.objectContaining({ handle: "sender" })
+            : null,
+          additional_context: {
+            encrypted_group: group,
+            encrypted_message_seq: 7,
+          },
+        }),
+      ]);
+      expect(response.unread_count).toBe(1);
+      expect(response.nextPageParam).toBe(124);
+    }
+  );
+
   it("retains artwork submission context and drops malformed artist alerts", async () => {
     const context = {
       artist_id: "artist-id",
