@@ -283,9 +283,9 @@ export const QUESTIONS: readonly {
       "Yes, if it was on for about three hours from 00:15 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.",
   },
   {
-    question: "Do I need ETH, or my own Ethereum node?",
+    question: "Do I need my own Ethereum node?",
     answer:
-      "No. Nothing is staked. The validator reads public Ethereum servers and checks every answer itself.",
+      "No. The validator reads public Ethereum servers and checks every answer itself.",
   },
   {
     question: "Will other people see my home address?",
