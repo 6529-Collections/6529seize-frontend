@@ -33,6 +33,21 @@ it("starts native detection before any other head script", () => {
   expect(element).not.toContain("strategy=");
 });
 
+// Browser bundles carry no VERSION, so the chunk holding the baked public env
+// keeps its name across deploys. config/env.browser.ts reads it from <html>.
+it("renders VERSION on the <html> start tag for the browser", () => {
+  const htmlStart = layout.slice(
+    layout.indexOf("<html"),
+    layout.indexOf(">", layout.indexOf("<html"))
+  );
+  expect(htmlStart).toContain("data-version={publicEnv.VERSION}");
+  const browserEnv = readFileSync(
+    path.join(process.cwd(), "config/env.browser.ts"),
+    "utf8"
+  );
+  expect(browserEnv).toContain('documentElement.dataset["version"]');
+});
+
 function sourceFiles(directory: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {

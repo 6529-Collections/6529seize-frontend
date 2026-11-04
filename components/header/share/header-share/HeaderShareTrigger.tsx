@@ -97,13 +97,45 @@ function HeaderShareContent({
   );
 }
 
+// Shown only when the boundary below renders without the query: in a
+// prerendered page's HTML, until the browser renders the button. It holds the
+// button's 46px row (tw-h-[2.875rem]) so the sidebar utilities below it do
+// not move, and is left out wherever the button itself would be.
+function HeaderShareSpace() {
+  const capacitor = useCapacitor();
+  const isMobileDevice = useIsMobileDevice();
+  const pathname = usePathname();
+
+  if (
+    capacitor.isCapacitor ||
+    isMobileDevice ||
+    !isPageShareSupported({
+      activeView: null,
+      pathname,
+      surface: "desktop-web",
+    })
+  ) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="header-share-space"
+      className="tw-px-3"
+    >
+      <div className="tw-h-[2.875rem]" />
+    </div>
+  );
+}
+
 export default function HeaderShare({
   isCollapsed = false,
 }: {
   readonly isCollapsed?: boolean | undefined;
 }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<HeaderShareSpace />}>
       <HeaderShareContent isCollapsed={isCollapsed} />
     </Suspense>
   );

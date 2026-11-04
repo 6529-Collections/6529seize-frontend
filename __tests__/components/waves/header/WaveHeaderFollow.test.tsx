@@ -3,7 +3,8 @@ import React from "react";
 import WaveHeaderFollow from "@/components/waves/header/WaveHeaderFollow";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   commonApiPost,
   commonApiDeleteWithBody,
@@ -11,6 +12,14 @@ import {
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/services/api/common-api");
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({ key: "alice" }),
+}));
+
+const { QueryClient } = jest.requireActual<
+  typeof import("@tanstack/react-query")
+>("@tanstack/react-query");
+const queryClient = new QueryClient();
 
 (useMutation as jest.Mock).mockImplementation((opts) => ({
   mutateAsync: async () => {
@@ -31,7 +40,11 @@ describe("WaveHeaderFollow", () => {
     setToast: jest.fn(),
   } as any;
   const rq = { onWaveFollowChange: jest.fn() } as any;
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    jest.mocked(useQueryClient).mockReturnValue(queryClient);
+  });
 
   it("follows when not subscribed", async () => {
     render(
@@ -50,6 +63,9 @@ describe("WaveHeaderFollow", () => {
       waveId: "w",
       following: true,
     });
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toEqual([]);
   });
 
   it("unfollows when already subscribed", async () => {
@@ -71,6 +87,9 @@ describe("WaveHeaderFollow", () => {
       waveId: "w",
       following: false,
     });
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toEqual(["w"]);
   });
 
   it("supports full-width header layout", () => {

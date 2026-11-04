@@ -71,7 +71,7 @@ const updateSidebarWaves = ({
     }
 
     didUpdate = true;
-    if (!removeWave) {
+    if (!removeWave || (!following && wave.followedSubwavesCount > 0)) {
       updatedWaves.push(updateSidebarWaveFollowing(wave, following));
     }
   }

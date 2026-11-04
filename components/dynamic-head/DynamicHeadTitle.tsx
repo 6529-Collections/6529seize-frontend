@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
+import { DEFAULT_TITLE, useTitleText } from "@/contexts/TitleContext";
 import { STREAM_INDEX_ROUTES } from "@/contexts/title.helpers";
 import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -22,7 +22,7 @@ function hasWaveDropMetadata(
 }
 
 function DynamicHeadTitleContent() {
-  const { title, isTitleOwned, titlePathname } = useTitle();
+  const { title, isTitleOwned, titlePathname } = useTitleText();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = searchParams.toString();

@@ -333,7 +333,7 @@ const competition = (id: string, title: string) => ({
     winning_max_threshold: null,
     winning_threshold_min_duration_ms: 0,
     max_winners: null,
-    time_lock_ms: null,
+    time_lock_ms: null as number | null,
   },
   winners: {
     max_winners: null,
@@ -423,7 +423,8 @@ async function installArtworkCompetitionResources(
   waveId: string,
   fixtureWave: unknown,
   getDrops: () => SandboxArtwork[],
-  onRead?: (url: URL) => void
+  onRead?: (url: URL) => void,
+  getRank?: (drop: SandboxArtwork) => number
 ) {
   const entry = (dropId: string) => ({
     id: dropId === entryDropId("alpha") ? "entry-alpha" : `entry-${dropId}`,
@@ -453,11 +454,13 @@ async function installArtworkCompetitionResources(
         | undefined
     )?.voting;
     return {
-      rating: voting?.total_votes_given ?? 0,
-      realtime_rating: voting?.current_calculated_vote ?? 0,
+      rating: voting?.current_calculated_vote ?? 0,
+      realtime_rating: voting?.total_votes_given ?? 0,
       rating_prediction: voting?.predicted_final_vote ?? 0,
       user_vote: voting?.context_profile_context?.current ?? 0,
-      rank: getDrops().findIndex((item) => item.id === drop.id) + 1,
+      rank:
+        getRank?.(drop) ??
+        getDrops().findIndex((item) => item.id === drop.id) + 1,
       raters_count: voting?.voters_count ?? 0,
       top_raters: [],
       over_threshold_since_ms: null,
@@ -8924,7 +8927,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             await chat.click();
             await expect(messages).toBeVisible({ timeout: 500 });
           }
-          expect(initialReads).toHaveLength(beforeReads);
+          // Cached activation now refreshes the newest page without a serial
+          // cursor. While it is held, tab churn must reuse that single request.
+          expect(initialReads).toHaveLength(beforeReads + 1);
           await expectNoHorizontalOverflow(page);
           await page.screenshot({
             path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
@@ -11650,6 +11655,121 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
       }
     }
+    expect(sandbox.requests).toEqual([]);
+  });
+
+  test("orders Main Stage by checkpoint projection and retains it after reload", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      decisions: {
+        ...competition("alpha", "Main Stage").decisions,
+        strategy: {
+          first_decision_time: 1,
+          subsequent_decisions: [86400000],
+          is_rolling: true,
+        } as never,
+        time_lock_ms: 60000,
+      },
+    });
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    const artworks = [
+      {
+        id: entryDropId("alpha"),
+        title: "Late votes",
+        raw: 100,
+        current: 10,
+        projected: 50,
+      },
+      {
+        id: entryDropId("beta"),
+        title: "Earlier votes",
+        raw: 70,
+        current: 41,
+        projected: 69,
+      },
+    ].map((item) => ({
+      ...fixture.drops[0],
+      id: item.id,
+      title: item.title,
+      drop_type: "SUBMISSION",
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        voting: {
+          is_open: true,
+          total_votes_given: item.raw,
+          current_calculated_vote: item.current,
+          predicted_final_vote: item.projected,
+          voters_count: 1,
+          place: 1,
+        },
+      },
+    }));
+    let projected = false;
+    const sorts: string[] = [];
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => (projected ? [...artworks].reverse() : artworks),
+      (url) => {
+        const sort = url.searchParams.get("sort") ?? "rating";
+        sorts.push(sort);
+        projected = sort === "decision_rating";
+      },
+      (drop) => (drop.id === entryDropId("alpha") ? 30 : 23)
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const entries = page
+      .getByRole("list", { name: "Leaderboard drops" })
+      .locator("[data-competition-entry]");
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      "entry-alpha",
+      { timeout: 30000 }
+    );
+    await expect(entries.first()).toContainText("30th");
+    const mobile = testInfo.project.name === "web-mobile-chromium";
+    if (mobile) {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+    }
+    const option = page.getByRole(mobile ? "menuitem" : "tab", {
+      name: "Projected Vote",
+      exact: true,
+    });
+    await expect(option).toBeVisible();
+    await option.click();
+    await expect.poll(() => sorts.at(-1)).toBe("decision_rating");
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      `entry-${entryDropId("beta")}`
+    );
+    await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
+    await expect(entries.first()).not.toContainText("23rd");
+    await page.reload();
+    await expect(entries.first()).toHaveAttribute(
+      "data-competition-entry",
+      `entry-${entryDropId("beta")}`
+    );
+    await expect(entries.first()).toContainText("1st");
+    await page.getByRole("tab", { name: "List view", exact: true }).click();
+    await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
+    expect(sorts).toContain("rating");
     expect(sandbox.requests).toEqual([]);
   });
 

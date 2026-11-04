@@ -1,4 +1,6 @@
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
@@ -243,6 +245,120 @@ useLocalSandboxMutationGuard(
 );
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("removes a successfully left open wave from Joined and restores it on rejoin", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.skip(
+    !!testInfo.project.use.isMobile,
+    "The desktop keeps the collection visible beside the open wave."
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const origin = getSandboxApiOrigin(baseURL);
+  const detailResponse = await page.request.get(`${origin}/api/waves/${WAVE}`);
+  const overviewResponse = await page.request.get(`${origin}/api/v2/waves`);
+  expect(detailResponse.ok()).toBe(true);
+  expect(overviewResponse.ok()).toBe(true);
+  const detail = (await detailResponse.json()) as ApiWave;
+  const overview = ((await overviewResponse.json()) as ApiWaveOverviewPage)
+    .data[0];
+  expect(overview).toBeDefined();
+  if (!overview) throw new Error("Missing sandbox wave overview");
+  let joined = true;
+  let failLeave = true;
+  const actions = () => (joined ? ["DROP_CREATED"] : []);
+  const row = () => ({
+    ...overview,
+    id: WAVE,
+    name: detail.name,
+    context_profile_context: {
+      ...overview.context_profile_context,
+      subscribed: joined,
+      pinned: false,
+    },
+  });
+  await page.route(`**/api/waves/${WAVE}`, (route) =>
+    route.fulfill({
+      json: { ...detail, subscribed_actions: actions(), pinned: false },
+    })
+  );
+  await page.route(`**/api/waves/${WAVE}/subscriptions`, (route) => {
+    if (route.request().method() === "DELETE" && failLeave)
+      return route.fulfill({ status: 500, json: { message: "Leave failed" } });
+    joined = route.request().method() !== "DELETE";
+    return route.fulfill({ json: { actions: actions() } });
+  });
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [row()], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: joined ? [row()] : [],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
+    })
+  );
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  const filters = page.getByRole("group", { name: "Wave list filter" });
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  const list = page.getByRole("region", {
+    name: "Following waves list",
+    exact: true,
+  });
+  const waveRow = list.getByRole("link", { name: detail.name, exact: true });
+  await expect(waveRow).toBeVisible();
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  const about = page.getByRole("complementary", { name: "Wave details" });
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    page.getByText("Couldn't leave this wave.", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  failLeave = false;
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    about.getByRole("button", { name: "Join", exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  await filters.getByRole("button", { name: "All", exact: true }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "All recent waves list", exact: true })
+      .getByRole("link", { name: detail.name, exact: true })
+  ).toBeVisible();
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(waveRow).toHaveCount(0);
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Join", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
 });
 
 function gate() {
@@ -796,6 +912,18 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     });
   });
   return {
+    missMessages(count: number) {
+      for (let index = 0; index < count; index++) {
+        const serial = (drops[0]?.serial_no ?? 151) + 1;
+        drops.unshift({
+          ...template,
+          id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+          serial_no: serial,
+          created_at: 1714000000000 + serial * 60000,
+          content: `Shared link fixture post ${serial}`,
+        });
+      }
+    },
     post: (serial: number) =>
       page
         .getByRole("region", {
@@ -827,6 +955,119 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     },
   };
 }
+
+test("resume shows the latest page before missed history and preserves the composer", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  let olderRequests = 0;
+  let failHistory = true;
+  const history = gate();
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_OLDER"
+    ) {
+      olderRequests++;
+      await history.ready;
+      if (failHistory) {
+        failHistory = false;
+        return route.fulfill({
+          status: 400,
+          json: { message: "History unavailable" },
+        });
+      }
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  await composer.fill("Keep this unsent draft");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  try {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+    await expect(composer).toHaveText("Keep this unsent draft");
+    // A blocked history request must not keep the current conversation stale.
+    await expect(fixture.post(1151)).toBeInViewport();
+    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    await gap.scrollIntoViewIfNeeded();
+    await expect.poll(() => olderRequests).toBeGreaterThan(0);
+    await expect(gap).toBeDisabled();
+    await page.screenshot({
+      path: testInfo.outputPath("resume-missed-history.png"),
+    });
+    history.release();
+    await expect(gap).toContainText(
+      "Could not load missed messages. Try again"
+    );
+    await gap.click();
+    await expect(fixture.post(1101)).toBeAttached();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+    ).toBeAttached();
+    await expect(composer).toHaveText("Keep this unsent draft");
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    history.release();
+  }
+});
+
+test("resume preserves an older reading position while loading the latest page", async ({
+  page,
+  baseURL,
+}) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // Offscreen placeholders hydrate as they enter view and replace the text
+  // node, so reacquire the locator until the reader's position has settled.
+  await expect(async () => {
+    await fixture.post(120).scrollIntoViewIfNeeded({ timeout: 1000 });
+    await expect(fixture.post(120)).toBeInViewport({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByRole("button", { name: "Scroll to bottom", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  await expect(fixture.post(120)).toBeInViewport();
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(1151)).toBeInViewport();
+});
 
 test("shared post stays in view after URL cleanup and delayed loading", async ({
   page,
