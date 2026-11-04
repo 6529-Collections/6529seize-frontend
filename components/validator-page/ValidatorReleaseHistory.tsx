@@ -47,8 +47,10 @@ function ReleaseEntry({
   const headingId = `release-${release.version}`;
   return (
     <article
+      // The feed's notes_url links here: /validator/releases#0.1.0-rc.6.
+      id={release.version}
       aria-labelledby={headingId}
-      className={`${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
+      className={`${ABOUT_CARD_CLASS_NAME} tw-scroll-mt-24 tw-p-5 sm:tw-p-6`}
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <h2
