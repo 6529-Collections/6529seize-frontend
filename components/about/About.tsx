@@ -52,16 +52,25 @@ const ABOUT_LEGAL_CONTENT_CLASS = [
 // Server Component: static sections (legal, FAQ, tech, ...) render on the server
 // and ship no client JS. Only sections that need hooks, effects or browser APIs
 // are client leaves ("use client" in their own file). Minting and Subscriptions
-// stay client leaves behind NftPurchasingGate: their copy is server-rendered
-// only for requests that are clearly not the native iOS app, and the gate
-// checks again before hydration and on the client.
+// stay client leaves behind NftPurchasingGate: their copy is never in the
+// server HTML. The browser mounts it after hydration (on iOS once the country
+// check allows it); until then a viewport-tall blank space keeps the footer
+// out of view so the copy does not push it.
 export default function About({ section }: { readonly section: AboutSection }) {
   if (
     section === AboutSection.MINTING ||
     section === AboutSection.SUBSCRIPTIONS
   ) {
     return (
-      <NftPurchasingGate redirectTo="/about">
+      <NftPurchasingGate
+        redirectTo="/about"
+        placeholder={
+          <div
+            aria-hidden="true"
+            className="tw-min-h-[calc(100dvh-100px)]"
+          />
+        }
+      >
         <AboutContent section={section} />
       </NftPurchasingGate>
     );

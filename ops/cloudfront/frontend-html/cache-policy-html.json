@@ -1,0 +1,34 @@
+{
+  "Name": "frontend-html-origin-controlled",
+  "Comment": "6529 frontend pages: origin Cache-Control decides, RSC variants and auth cookies keyed, max 1 day",
+  "DefaultTTL": 0,
+  "MinTTL": 0,
+  "MaxTTL": 86400,
+  "ParametersInCacheKeyAndForwardedToOrigin": {
+    "EnableAcceptEncodingGzip": true,
+    "EnableAcceptEncodingBrotli": true,
+    "HeadersConfig": {
+      "HeaderBehavior": "whitelist",
+      "Headers": {
+        "Quantity": 5,
+        "Items": [
+          "rsc",
+          "next-router-prefetch",
+          "next-router-state-tree",
+          "next-router-segment-prefetch",
+          "next-url"
+        ]
+      }
+    },
+    "CookiesConfig": {
+      "CookieBehavior": "whitelist",
+      "Cookies": {
+        "Quantity": 3,
+        "Items": ["x-6529-auth", "wallet-auth", "validator_access"]
+      }
+    },
+    "QueryStringsConfig": {
+      "QueryStringBehavior": "all"
+    }
+  }
+}

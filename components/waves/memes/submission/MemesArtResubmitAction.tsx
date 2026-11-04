@@ -1,7 +1,7 @@
 "use client";
 
 import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import Button from "@/components/utils/button/Button";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";

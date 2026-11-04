@@ -71,7 +71,7 @@ export const WaveLeaderboardDropContent: React.FC<
   return (
     <div
       className={`${
-        contentPresentation === "quorumCompact" ? "" : "-tw-mt-0.5"
+        contentPresentation === "quorumCompact" ? "" : "tw-mt-1.5"
       } tw-flex tw-flex-col tw-gap-y-1`}
     >
       <ProposalCardContextLabelVisibilityProvider visible={false}>

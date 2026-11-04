@@ -7,16 +7,24 @@ import { useEffect, type ReactNode } from "react";
 export default function NftPurchasingGate({
   children,
   redirectTo,
+  placeholder = null,
 }: {
   readonly children: ReactNode;
   // App-internal path only.
   readonly redirectTo?: `/${string}`;
+  // Blank, aria-hidden space with the content's first-render size, never
+  // purchasing UI. It holds the slot while the content may still appear
+  // (server HTML, hydration, a pending iOS country check expected to be US),
+  // so mounting the content does not move the page.
+  readonly placeholder?: ReactNode;
 }) {
-  const { hideNftPurchasing, shouldRedirect } = useNftPurchasingVisibility();
+  const { hideNftPurchasing, shouldRedirect, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
   if (hideNftPurchasing) {
-    return shouldRedirect && redirectTo ? (
-      <PurchasingRedirect href={redirectTo} />
-    ) : null;
+    if (shouldRedirect && redirectTo) {
+      return <PurchasingRedirect href={redirectTo} />;
+    }
+    return reservesNftPurchasingSpace ? placeholder : null;
   }
   return children;
 }

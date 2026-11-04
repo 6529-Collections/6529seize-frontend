@@ -148,4 +148,38 @@ describe("toggleWaveFollowing", () => {
         ?.pages[0]?.waves.map((wave) => wave.id)
     ).toEqual(["w2"]);
   });
+
+  it("keeps a left parent in Joined while a subwave is still followed", () => {
+    const client = new QueryClient();
+    const key = [
+      QueryKey.WAVES_V2,
+      {
+        only_waves_followed_by_authenticated_user: true,
+        pagination: "snapshot",
+      },
+    ];
+    client.setQueryData(key, {
+      pages: [
+        {
+          waves: [{ id: "parent", subscribed: true, followedSubwavesCount: 1 }],
+        },
+      ],
+      pageParams: [1],
+    });
+    toggleWaveFollowing({
+      waveId: "parent",
+      following: false,
+      queryClient: client,
+    });
+    expect(client.getQueryData(key)).toEqual({
+      pages: [
+        {
+          waves: [
+            { id: "parent", subscribed: false, followedSubwavesCount: 1 },
+          ],
+        },
+      ],
+      pageParams: [1],
+    });
+  });
 });

@@ -1,7 +1,10 @@
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
+  waitForRouteReady,
   expectAxeClean,
   expectNoHorizontalOverflow,
   test,
@@ -9,6 +12,8 @@ import {
 import {
   getSandboxApiOrigin,
   installLocalSandboxBrowserMutationGuard,
+  dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -240,6 +245,120 @@ useLocalSandboxMutationGuard(
 );
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("removes a successfully left open wave from Joined and restores it on rejoin", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.skip(
+    !!testInfo.project.use.isMobile,
+    "The desktop keeps the collection visible beside the open wave."
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const origin = getSandboxApiOrigin(baseURL);
+  const detailResponse = await page.request.get(`${origin}/api/waves/${WAVE}`);
+  const overviewResponse = await page.request.get(`${origin}/api/v2/waves`);
+  expect(detailResponse.ok()).toBe(true);
+  expect(overviewResponse.ok()).toBe(true);
+  const detail = (await detailResponse.json()) as ApiWave;
+  const overview = ((await overviewResponse.json()) as ApiWaveOverviewPage)
+    .data[0];
+  expect(overview).toBeDefined();
+  if (!overview) throw new Error("Missing sandbox wave overview");
+  let joined = true;
+  let failLeave = true;
+  const actions = () => (joined ? ["DROP_CREATED"] : []);
+  const row = () => ({
+    ...overview,
+    id: WAVE,
+    name: detail.name,
+    context_profile_context: {
+      ...overview.context_profile_context,
+      subscribed: joined,
+      pinned: false,
+    },
+  });
+  await page.route(`**/api/waves/${WAVE}`, (route) =>
+    route.fulfill({
+      json: { ...detail, subscribed_actions: actions(), pinned: false },
+    })
+  );
+  await page.route(`**/api/waves/${WAVE}/subscriptions`, (route) => {
+    if (route.request().method() === "DELETE" && failLeave)
+      return route.fulfill({ status: 500, json: { message: "Leave failed" } });
+    joined = route.request().method() !== "DELETE";
+    return route.fulfill({ json: { actions: actions() } });
+  });
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [row()], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: joined ? [row()] : [],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
+    })
+  );
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  const filters = page.getByRole("group", { name: "Wave list filter" });
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  const list = page.getByRole("region", {
+    name: "Following waves list",
+    exact: true,
+  });
+  const waveRow = list.getByRole("link", { name: detail.name, exact: true });
+  await expect(waveRow).toBeVisible();
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  const about = page.getByRole("complementary", { name: "Wave details" });
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    page.getByText("Couldn't leave this wave.", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  failLeave = false;
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    about.getByRole("button", { name: "Join", exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  await filters.getByRole("button", { name: "All", exact: true }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "All recent waves list", exact: true })
+      .getByRole("link", { name: detail.name, exact: true })
+  ).toBeVisible();
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(waveRow).toHaveCount(0);
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Join", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
 });
 
 function gate() {
@@ -521,7 +640,11 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       boosts: 0,
       moderation: { status: "VISIBLE", can_view: true },
     };
-    let first = true;
+    // Single-candidate requests belong to the footer until it shows its
+    // trigger. A footer that remounts while the page settles aborts and
+    // repeats its request, so do not count requests. Later single requests
+    // are quick-vote refreshes.
+    let footerPending = true;
     let fail = false;
     let candidate = drop;
     await page.route("**/*meme-lab*", (route) =>
@@ -532,8 +655,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       const isBatch = new URL(route.request().url()).pathname.endsWith(
         "/undiscovered-drops"
       );
-      const footer = !isBatch && first;
-      if (footer) first = false;
+      const footer = !isBatch && footerPending;
       if (!footer) await content.ready;
       await route.fulfill(
         fail && !footer
@@ -553,6 +675,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         .getByRole("button", { name: /^Uncast Power,/ })
         .filter({ visible: true });
       await expect(trigger).toBeVisible();
+      footerPending = false;
       // Sample every rendered frame, including the first frame before effects settle.
       await page.evaluate(() => {
         const positions: number[] = [];
@@ -650,8 +773,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
       fail = true;
-      first = true;
+      footerPending = true;
       await page.reload({ waitUntil: "domcontentloaded" });
+      await trigger.waitFor();
+      footerPending = false;
       await trigger.click();
       // A failed background window cannot replace the cached artwork with an error.
       await expect(
@@ -982,3 +1107,115 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
     await opened.close();
   }
 });
+for (const surface of [
+  { name: "wave", path: `/waves/${WAVE}` },
+  { name: "DM", path: "/messages/00000000-0000-4000-8000-000000000532" },
+]) {
+  test(`docks the Android ${surface.name} composer after resize-first keyboard events`, async ({
+    baseURL,
+    context,
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Uses the Android bridge in the mobile Chromium sandbox"
+    );
+    await installSurfaceSimulation(context, "capacitor-android-sim", baseURL);
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    await page.setViewportSize({ width: 412, height: 840 });
+    await page.goto(surface.path, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await expect(composer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await composer.fill("Keyboard check.");
+    const readBottom = () =>
+      composer.evaluate((element) => element.getBoundingClientRect().bottom);
+    const initialBottom = await readBottom();
+    for (const keyboardHeight of [320, 280]) {
+      const viewportHeight = 840 - keyboardHeight;
+      await page.setViewportSize({ width: 412, height: viewportHeight });
+      // Run the real resize fallback before native bridge delivery. No CSS
+      // keyboard values are injected: this exercises the hook and its consumers.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          })
+      );
+      await emitKeyboardEvent(page, "keyboardWillShow", keyboardHeight);
+      await emitKeyboardEvent(page, "keyboardDidShow", keyboardHeight);
+      await expect(page.locator("html")).toHaveCSS(
+        "--native-keyboard-inset-bottom",
+        "0px"
+      );
+      await expect.poll(readBottom).toBeGreaterThan(viewportHeight - 24);
+      await expect.poll(readBottom).toBeLessThanOrEqual(viewportHeight);
+      await expect(composer).toBeInViewport();
+      const latestMessage =
+        surface.name === "DM"
+          ? page
+              .getByText(
+                "Synthetic local-only direct message body for Playwright.",
+                { exact: true }
+              )
+              .first()
+          : page
+              .getByRole("link", {
+                name: "https://example.com/6529-composer-preview",
+                exact: true,
+              })
+              .first();
+      await expect(latestMessage).toBeInViewport();
+      await expectNoHorizontalOverflow(page);
+      await dismissNextDevTools(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `android-keyboard-open-${keyboardHeight}.png`
+        ),
+      });
+      await emitKeyboardEvent(page, "keyboardWillHide");
+      await emitKeyboardEvent(page, "keyboardDidHide");
+      await page.setViewportSize({ width: 412, height: 840 });
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-native-keyboard-visible"
+      );
+      await expect.poll(readBottom).toBeCloseTo(initialBottom, 0);
+      await expect(composer).toContainText("Keyboard check.");
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("android-keyboard-closed.png"),
+    });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+}
+
+async function emitKeyboardEvent(
+  page: Page,
+  eventName: string,
+  keyboardHeight = 0
+) {
+  await page.waitForFunction((eventName) => {
+    const runtime = globalThis as typeof globalThis & {
+      __playwrightKeyboardListeners?: string[];
+    };
+    return runtime.__playwrightKeyboardListeners?.includes(eventName);
+  }, eventName);
+  const delivered = await page.evaluate(
+    ({ eventName, keyboardHeight }) => {
+      return !globalThis.dispatchEvent(
+        new CustomEvent(`playwright:${eventName}`, {
+          detail: { keyboardHeight },
+          cancelable: true,
+        })
+      );
+    },
+    { eventName, keyboardHeight }
+  );
+  expect(delivered, `Native callback received ${eventName}`).toBe(true);
+}
