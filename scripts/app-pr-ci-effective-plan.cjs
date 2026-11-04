@@ -156,6 +156,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "hooks/useNativeKeyboard.ts",
         "tests/support/surfaceSimulation.ts",
         "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
+        // The chat render window; this pack runs wave-loading-sandbox.spec.ts.
+        "hooks/useVirtualizedWaveMessages.ts",
         "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
         "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
         "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",

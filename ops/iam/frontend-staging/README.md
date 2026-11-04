@@ -22,6 +22,10 @@ rejects an artifact bucket region other than the approved `us-east-1`.
   These APIs do not support resource-level authorization. Invocation read
   access therefore includes other known command IDs in that region, while
   command execution remains restricted to the approved server.
+- Read, invalidate, and invalidation status only on the staging page
+  distribution `E1DKA1VIRRUKKC`, so a deployment can purge the edge cache
+  once the new release answers. It cannot change or delete the distribution.
+  See [page edge cache](../../docs/developer/cloudfront-page-cache.md).
 
 No IAM administration, role passing, secret-value access, backend Lambda
 deployment, production artifact writes, or unrelated resource mutations are
