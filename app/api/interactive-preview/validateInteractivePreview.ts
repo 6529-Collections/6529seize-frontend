@@ -1,7 +1,8 @@
-'use server';
-
-import type {
-  InteractiveMediaValidationResult} from "../constants/security";
+// Server-side check behind POST /api/interactive-preview (./route.ts), which
+// owns the request guards. This used to be a Server Action, but Next gives
+// actions new IDs on every build, so the wave-page chunks that referenced it
+// got new names on every deploy.
+import type { InteractiveMediaValidationResult } from "@/components/waves/memes/submission/constants/security";
 import {
   INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES,
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
@@ -9,8 +10,8 @@ import {
   isInteractiveMediaAllowedHost,
   isInteractiveMediaContentIdentifier,
   isInteractiveMediaContentPathAllowed,
-} from "../constants/security";
-import type { InteractiveMediaProvider } from "../constants/media";
+} from "@/components/waves/memes/submission/constants/security";
+import type { InteractiveMediaProvider } from "@/components/waves/memes/submission/constants/media";
 import { discardResponse } from "@/lib/fetch/fetchDeadline";
 
 type GatewayRequestMethod = "HEAD" | "GET";
