@@ -5,16 +5,18 @@
 
 /**
  * How long a home validator must stay on from 00:15 UTC to calculate, sign
- * and send the day's vote. Since D161 it sends the vote as soon as it has
- * signed, with no random wait, so this is minutes, not hours.
- * The figure comes from the validator repository's rc.6 measurement
- * (claude/rc6-no-publish-delay). KEEP_ON_SOURCE names it; the page's test
- * fails while it says PENDING, so the page can't ship without it.
+ * and send the day's vote. Since D161 it sends the vote right after it
+ * signs, with no random wait. From the validator's docs at 6ba7861f
+ * (docs/install/windows.md): the day's data is ready 13 to 20 minutes
+ * after 00:00 UTC, the validator signs within a minute or two of that, and
+ * it sends the signature right after it signs, so a computer that can't
+ * stay on all day needs to be awake from about 00:15 to 00:30 UTC.
  */
-export const KEEP_ON_MINUTES = 30;
-export const KEEP_ON_SOURCE = "PENDING";
+export const KEEP_ON_MINUTES = 15;
+/** Where KEEP_ON_MINUTES comes from; the page's test fails while PENDING. */
+export const KEEP_ON_SOURCE = "6ba7861f";
 
-/** "00:45": the time, in UTC, until which the computer should stay on. */
+/** "00:30": the time, in UTC, until which the computer should stay on. */
 export function keepOnUntilUtc(): string {
   const minutes = 15 + KEEP_ON_MINUTES;
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
@@ -295,7 +297,7 @@ export const QUESTIONS: readonly {
   },
   {
     question: "Can I turn it off at night?",
-    answer: `Yes, once it has signed, about ${KEEP_ON_MINUTES} minutes after 00:15 UTC. If it's off then, it signs when it next starts, until 19:00 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.`,
+    answer: `Yes, once it has signed, by about ${keepOnUntilUtc()} UTC. If it's off then, it signs when it next starts, until 19:00 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.`,
   },
   {
     question: "Do I need my own Ethereum node?",
