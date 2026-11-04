@@ -29,7 +29,7 @@ Wave and DM rows in the left list control which thread is open.
   not pin or join the wave.
 - Successfully leaving the open wave removes it from `Joined` without closing
   its content. It stays removed while switching collections in the current
-  session; joining again restores it. A parent stays visible if you still
+  page session; joining again restores it. A parent stays visible if you still
   belong to one of its subwaves. A failed leave keeps the joined row.
 - When the direct link targets a subwave, its visible root parent is surfaced,
   its subwaves are loaded, the parent opens, and the active child row is

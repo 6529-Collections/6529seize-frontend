@@ -10,7 +10,7 @@ import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { recordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
+import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
 
 jest.mock("@/hooks/useWavesV2", () => {
   const actual = jest.requireActual("@/hooks/useWavesV2");

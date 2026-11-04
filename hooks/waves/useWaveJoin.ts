@@ -112,6 +112,7 @@ export function useWaveJoin(
         endpoint: getSubscriptionEndpoint(wave.id),
         body: { actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS },
       });
+      // Record only after the final subscription request succeeds.
       recordMembership(wave.id, false);
       onWaveFollowChange({ waveId: wave.id, following: false });
     },

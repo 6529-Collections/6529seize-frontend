@@ -69,6 +69,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      // Record only after the final subscription request succeeds.
       recordMembership(wave.id, false);
     },
     onSuccess: () => {

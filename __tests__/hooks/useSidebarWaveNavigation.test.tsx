@@ -10,7 +10,7 @@ import {
 } from "@/hooks/useWaveSidebarCollection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
-import { recordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
+import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
 
 let mockViewer = { key: "alice", canUseCollections: true, enabled: true };
 jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
@@ -138,6 +138,28 @@ it("does not let one viewer's leave suppress another viewer's active wave", asyn
   mockViewer = { key: "bob", canUseCollections: true, enabled: true };
   rerender();
   expect(result.current.visibleWaves).toHaveLength(2);
+});
+
+it("starts a new page's query client without the previous page's leave overrides", async () => {
+  selectCollection("joined");
+  const first = setup("other");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient: first.client,
+      viewerIdentityKey: "alice",
+      waveId: "other",
+      following: false,
+    })
+  );
+  await waitFor(() =>
+    expect(first.result.current.visibleWaves).toHaveLength(1)
+  );
+  first.unmount();
+  const nextPage = setup("other");
+  expect(nextPage.result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+    "other",
+  ]);
 });
 
 it("removes an unjoined active parent fallback when its active child is left", async () => {

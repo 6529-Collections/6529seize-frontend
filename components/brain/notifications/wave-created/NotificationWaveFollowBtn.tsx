@@ -57,6 +57,7 @@ export default function NotificationWaveFollowBtn({
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      // Membership is confirmed before the optional all-messages preference.
       recordMembership(wave.id, true);
       await commonApiPost({
         endpoint: `notifications/wave-subscription/${wave.id}`,
@@ -94,6 +95,7 @@ export default function NotificationWaveFollowBtn({
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      // Record only after the final subscription request succeeds.
       recordMembership(wave.id, false);
     },
     onSuccess: () => {

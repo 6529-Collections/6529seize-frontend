@@ -1,44 +1,20 @@
 "use client";
 
+import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  skipToken,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+  getWaveSidebarMembershipQueryKey,
+  recordWaveSidebarMembership,
+} from "@/helpers/waves/wave-sidebar-membership";
 import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 
 const EMPTY_WAVE_IDS: readonly string[] = [];
 
-const membershipKey = (viewerIdentityKey: string | null) =>
-  [QueryKey.WAVE_SIDEBAR_MEMBERSHIP, viewerIdentityKey] as const;
-
-/** Successful leaves override the active-route fallback until the viewer rejoins. */
-export function recordWaveSidebarMembership({
-  queryClient,
-  viewerIdentityKey,
-  waveId,
-  following,
-}: {
-  readonly queryClient: QueryClient;
-  readonly viewerIdentityKey: string | null;
-  readonly waveId: string;
-  readonly following: boolean;
-}) {
-  if (!viewerIdentityKey) return;
-  queryClient.setQueryData<readonly string[]>(
-    membershipKey(viewerIdentityKey),
-    (previous = EMPTY_WAVE_IDS) => {
-      const remaining = previous.filter((id) => id !== waveId);
-      return following ? remaining : [...remaining, waveId];
-    }
-  );
-}
-
 export function useWaveSidebarMembership(viewerIdentityKey: string | null) {
+  // QueryClientSetup creates an in-memory client per mounted app, with no
+  // persister. Server prefetches never write this key. Infinity preserves the
+  // override across sidebar remounts; a page reload starts with an empty client.
   const { data } = useQuery<readonly string[]>({
-    queryKey: membershipKey(viewerIdentityKey),
+    queryKey: getWaveSidebarMembershipQueryKey(viewerIdentityKey),
     queryFn: skipToken,
     initialData: EMPTY_WAVE_IDS,
     gcTime: Infinity,

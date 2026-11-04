@@ -38,6 +38,7 @@ import {
   getNonPinnedFilter,
   getShouldLoadMainWaves,
   getViewerIdentityKey,
+  getVisibleSidebarSubwaves,
   isKnownWaveForCurrentViewer,
   SIDEBAR_DISCOVERY_SECTION_ALL,
   SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
@@ -664,26 +665,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       return [];
     }
 
-    const visibleSubwaves = new Map<string, SidebarWave>();
-    const activeSubwave = activeSidebarContext.subwave;
-    if (activeSubwave !== null) {
-      visibleSubwaves.set(activeSubwave.id, activeSubwave);
-    }
-
-    subwaves.forEach((wave) => {
-      if (
-        !isJoinedMode ||
-        (!leftWaveIds.includes(wave.id) &&
-          (wave.subscribed ||
-            wave.id === activeSubwave?.id ||
-            topSectionWaveIds.has(wave.parentWaveId ?? "")))
-      ) {
-        // The overview is fresher than the temporary full-wave route context.
-        visibleSubwaves.set(wave.id, wave);
-      }
-    });
-
-    return [...combinedWaves, ...visibleSubwaves.values()];
+    return [
+      ...combinedWaves,
+      ...getVisibleSidebarSubwaves({
+        subwaves,
+        activeSubwave: activeSidebarContext.subwave,
+        isJoinedMode,
+        leftWaveIds,
+        topSectionWaveIds,
+      }),
+    ];
   }, [
     combinedWaves,
     activeSidebarContext.subwave,
