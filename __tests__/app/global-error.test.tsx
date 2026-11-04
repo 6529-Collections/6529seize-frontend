@@ -103,6 +103,7 @@ const loadServerDocument = (serverHtml: string) => {
 
 const resetDocument = () => {
   document.documentElement.removeAttribute("lang");
+  document.documentElement.removeAttribute("data-version");
   document.head.replaceChildren();
   document.body.replaceChildren();
 };
@@ -169,7 +170,8 @@ describe("GlobalError", () => {
       />
     );
 
-    expect(html).toContain('<html lang="en-US">');
+    // data-version carries VERSION to the browser (config/env.browser.ts).
+    expect(html).toContain('<html lang="en-US" data-version="test-version">');
     expect(html).toContain("Welcome to the 6529 Page of Doom");
     expect(html).toContain("Try Again");
     expect(html).toContain("<title>6529 Error</title>");
