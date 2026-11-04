@@ -405,7 +405,8 @@ async function installArtworkCompetitionResources(
   waveId: string,
   fixtureWave: unknown,
   getDrops: () => SandboxArtwork[],
-  onRead?: (url: URL) => void
+  onRead?: (url: URL) => void,
+  getRank?: (drop: SandboxArtwork) => number
 ) {
   const entry = (dropId: string) => ({
     id: dropId === entryDropId("alpha") ? "entry-alpha" : `entry-${dropId}`,
@@ -439,7 +440,9 @@ async function installArtworkCompetitionResources(
       realtime_rating: voting?.total_votes_given ?? 0,
       rating_prediction: voting?.predicted_final_vote ?? 0,
       user_vote: voting?.context_profile_context?.current ?? 0,
-      rank: getDrops().findIndex((item) => item.id === drop.id) + 1,
+      rank:
+        getRank?.(drop) ??
+        getDrops().findIndex((item) => item.id === drop.id) + 1,
       raters_count: voting?.voters_count ?? 0,
       top_raters: [],
       over_threshold_since_ms: null,
@@ -11705,7 +11708,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const sort = url.searchParams.get("sort") ?? "rating";
         sorts.push(sort);
         projected = sort === "decision_rating";
-      }
+      },
+      (drop) => (drop.id === entryDropId("alpha") ? 30 : 23)
     );
     await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
     await dismissNextDevTools(page);
@@ -11717,6 +11721,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       "entry-alpha",
       { timeout: 30000 }
     );
+    await expect(entries.first()).toContainText("30th");
     const mobile = testInfo.project.name === "web-mobile-chromium";
     if (mobile) {
       await page
@@ -11735,11 +11740,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       `entry-${entryDropId("beta")}`
     );
     await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
+    await expect(entries.first()).not.toContainText("23rd");
     await page.reload();
     await expect(entries.first()).toHaveAttribute(
       "data-competition-entry",
       `entry-${entryDropId("beta")}`
     );
+    await expect(entries.first()).toContainText("1st");
+    await page.getByRole("tab", { name: "List view", exact: true }).click();
+    await expect(entries.first()).toContainText("Earlier votes");
+    await expect(entries.first()).toContainText("1st");
+    await expect(entries.nth(1)).toContainText("2nd");
     expect(sorts).toContain("rating");
     expect(sandbox.requests).toEqual([]);
   });
