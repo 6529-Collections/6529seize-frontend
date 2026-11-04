@@ -8927,7 +8927,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             await chat.click();
             await expect(messages).toBeVisible({ timeout: 500 });
           }
-          expect(initialReads).toHaveLength(beforeReads);
+          // Cached activation now refreshes the newest page without a serial
+          // cursor. While it is held, tab churn must reuse that single request.
+          expect(initialReads).toHaveLength(beforeReads + 1);
           await expectNoHorizontalOverflow(page);
           await page.screenshot({
             path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
