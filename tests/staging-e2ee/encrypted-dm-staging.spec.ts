@@ -205,8 +205,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const runId = newRunId();
     // A signs in again once the profile exists, as returning users do, and
     // then grants permissions explicitly when sign-in is authentication-only.
-    // B signs in before creating its profile. Explicit enrollment grants
-    // the device once and replaces any earlier signing-only grant.
+    // B signs in before creating its profile, then prepares Signed Posts
+    // to exercise encryption-only setup on permission-scoped builds.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
@@ -219,7 +219,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         browser,
         testInfo,
         createThrowawayUser("B"),
-        "B"
+        "B",
+        { signedPostsFirst: true }
       );
       world = { runId, a, b, extra: [], dm: null };
     } catch (error) {
