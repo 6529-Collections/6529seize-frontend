@@ -9,7 +9,7 @@ import type { PublicEnv } from "./env.schema";
  * the page (`<html data-version>`, rendered by app/layout.tsx); no browser code
  * reads VERSION_BUILD_TIMESTAMP.
  */
-export type BrowserPublicEnv = Omit<
+type BrowserPublicEnv = Omit<
   PublicEnv,
   "VERSION" | "VERSION_BUILD_TIMESTAMP"
 >;
