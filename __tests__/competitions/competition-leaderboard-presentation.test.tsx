@@ -276,6 +276,7 @@ it("requests checkpoint projection ordering independently of raw votes and filte
   render(<CompetitionLeaderboard />);
   fireEvent.click(screen.getByRole("button", { name: "Projected Vote" }));
   expect(latestLeaderboardParams().sort).toBe("decision_rating");
+  expect(latestLeaderboardParams()).not.toHaveProperty("direction");
   fireEvent.click(screen.getByRole("checkbox", { name: "Additional Action" }));
   expect(latestLeaderboardParams()).toMatchObject({
     sort: "decision_rating",

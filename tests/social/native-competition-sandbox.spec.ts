@@ -11655,7 +11655,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
 
   test("orders Main Stage by checkpoint projection and retains it after reload", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
@@ -11667,7 +11667,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           subsequent_decisions: [86400000],
           is_rolling: true,
         } as never,
-        time_lock_ms: 1000,
+        time_lock_ms: 60000,
       },
     });
     const response = await page.request.get(
@@ -11723,26 +11723,26 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
     await dismissNextDevTools(page);
-    const entries = page.locator("[data-competition-entry]");
+    const entries = page
+      .getByRole("list", { name: "Leaderboard drops" })
+      .locator("[data-competition-entry]");
     await expect(entries.first()).toHaveAttribute(
       "data-competition-entry",
       "entry-alpha",
       { timeout: 30000 }
     );
-    const sortMenu = page.getByRole("button", {
-      name: "Sort: Current Vote",
-      exact: true,
-    });
-    if (await sortMenu.isVisible()) await sortMenu.click();
-    const option = page.getByRole("menuitem", {
+    const mobile = testInfo.project.name === "web-mobile-chromium";
+    if (mobile) {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+    }
+    const option = page.getByRole(mobile ? "menuitem" : "tab", {
       name: "Projected Vote",
       exact: true,
     });
-    if (await option.isVisible()) await option.click();
-    else
-      await page
-        .getByRole("tab", { name: "Projected Vote", exact: true })
-        .click();
+    await expect(option).toBeVisible();
+    await option.click();
     await expect.poll(() => sorts.at(-1)).toBe("decision_rating");
     await expect(entries.first()).toHaveAttribute(
       "data-competition-entry",
