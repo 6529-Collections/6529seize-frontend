@@ -1,5 +1,10 @@
 "use client";
 
+import { faSignature } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
+import UserLevel from "@/components/user/utils/level/UserLevel";
+import { shortenAddress } from "@/helpers/address.helpers";
 import { Capacitor } from "@capacitor/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,6 +49,7 @@ interface AcceptConnectionSharingProps {
   address: string;
   role: string | undefined;
   setupSecret: { current: string };
+  includesDeviceSetup: boolean;
 }
 
 type SharedProfile = ReturnType<typeof useIdentity>["profile"];
@@ -186,14 +192,41 @@ function ConnectionLimitCard() {
   );
 }
 
+function IncomingDevicePermissions() {
+  return (
+    <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3 tw-text-sm">
+      <p className="tw-mb-2 tw-mt-0 tw-text-iron-400">
+        {t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.incoming.permissions")}
+      </p>
+      <div className="tw-flex tw-items-center tw-gap-2 tw-font-semibold">
+        <FontAwesomeIcon
+          icon={faSignature}
+          aria-hidden="true"
+          className="tw-size-4 tw-text-iron-400"
+        />
+        {t(ACCEPT_CONNECTION_LOCALE, "e2ee.enroll.signingSection")}
+      </div>
+      <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-font-semibold">
+        <LockClosedIcon
+          aria-hidden="true"
+          className="tw-size-4 tw-text-iron-400"
+        />
+        {t(ACCEPT_CONNECTION_LOCALE, "e2ee.enroll.encryptionSection")}
+      </div>
+    </div>
+  );
+}
+
 function IncomingConnectionCard({
   profile,
   profileLoading,
   address,
+  includesDeviceSetup,
 }: Readonly<{
   profile: SharedProfile;
   profileLoading: boolean;
   address: string;
+  includesDeviceSetup: boolean;
 }>) {
   const profileName = getSharedProfileName(profile, address);
 
@@ -217,10 +250,20 @@ function IncomingConnectionCard({
             alt={profileName}
             level={profile?.level ?? 0}
             size={56}
+            showLevel={false}
           />
           <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-truncate tw-text-base tw-font-medium tw-text-white">
-              {profileName}
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-medium tw-text-white">
+              <span className="tw-truncate">{profileName}</span>
+              {profile && (
+                <UserLevel
+                  level={profile.level}
+                  size="xxs"
+                  asSpan
+                  showLabel={false}
+                  circle
+                />
+              )}
             </div>
             {profile ? (
               <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
@@ -232,22 +275,19 @@ function IncomingConnectionCard({
                       ACCEPT_CONNECTION_LOCALE,
                       profile.tdh ?? 0
                     ),
-                    level: formatInteger(
-                      ACCEPT_CONNECTION_LOCALE,
-                      profile.level ?? 0
-                    ),
                   }
                 )}
               </div>
             ) : null}
             {address ? (
               <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
-                {address}
+                {shortenAddress(address)}
               </div>
             ) : null}
           </div>
         </div>
       )}
+      {includesDeviceSetup && <IncomingDevicePermissions />}
     </section>
   );
 }
@@ -292,12 +332,17 @@ function AcceptConnectionButton({
   acceptingConnection,
   disabled = false,
   onAccept,
+  includesDeviceSetup,
 }: Readonly<{
   acceptingConnection: boolean;
   disabled?: boolean;
   onAccept: () => void;
+  includesDeviceSetup: boolean;
 }>) {
   const isDisabled = acceptingConnection || disabled;
+  const acceptLabel = includesDeviceSetup
+    ? "acceptConnection.action.acceptWithSetup"
+    : "acceptConnection.action.accept";
 
   return (
     <div className="tw-flex tw-justify-center">
@@ -315,7 +360,7 @@ function AcceptConnectionButton({
             <Spinner dimension={18} />
           </>
         ) : (
-          t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.action.accept")
+          t(ACCEPT_CONNECTION_LOCALE, acceptLabel)
         )}
       </button>
     </div>
@@ -519,6 +564,7 @@ function ConnectionSharingContent({
   isIncomingConnectionAlreadyStored,
   isStorageLimitReached,
   onAccept,
+  includesDeviceSetup,
 }: Readonly<{
   flow: ConnectionFlow;
   profile: SharedProfile;
@@ -530,6 +576,7 @@ function ConnectionSharingContent({
   isIncomingConnectionAlreadyStored: boolean;
   isStorageLimitReached: boolean;
   onAccept: () => void;
+  includesDeviceSetup: boolean;
 }>) {
   if (flow === "pending") {
     return null;
@@ -561,6 +608,7 @@ function ConnectionSharingContent({
           profile={profile}
           profileLoading={profileLoading}
           address={address}
+          includesDeviceSetup={includesDeviceSetup}
         />
         <CurrentProfileNotice
           connectedAddress={connectedAddress}
@@ -573,6 +621,7 @@ function ConnectionSharingContent({
           acceptingConnection={acceptingConnection}
           disabled={isStorageLimitReached}
           onAccept={onAccept}
+          includesDeviceSetup={includesDeviceSetup}
         />
       </div>
     );
@@ -679,6 +728,9 @@ function AcceptConnectionSharing(
           connectedAddress={connectedAddress}
           connectedProfile={connectedProfile}
           acceptingConnection={acceptingConnection}
+          includesDeviceSetup={
+            flow === "native-share" && props.includesDeviceSetup
+          }
           isIncomingConnectionAlreadyStored={isIncomingConnectionAlreadyStored}
           isStorageLimitReached={isStorageLimitReached}
           onAccept={() => {
@@ -703,6 +755,7 @@ export default function AcceptConnectionSharingPage() {
   // a new `_t`) on the mounted page is cleaned again.
   const linkQuery = searchParams.toString();
   const setupSecret = useRef("");
+  const [setupLinkQuery, setSetupLinkQuery] = useState<string | null>(null);
   const capturedQuery = useRef<string | null>(null);
 
   // A layout effect runs before paint and before passive effects, such as
@@ -716,12 +769,23 @@ export default function AcceptConnectionSharingPage() {
     const unlockKey = fragment.get(SETUP_SECRET_PARAM);
     if (unlockKey) setupSecret.current = unlockKey;
     removeConnectionSecretsFromAddressBar();
+    // Publish the link type after scrubbing the URL. Strict Mode may replay
+    // this effect after the fragment has already been removed.
+    const setupQuery = setupSecret.current ? linkQuery : null;
+    let active = true;
+    queueMicrotask(() => {
+      if (active) setSetupLinkQuery(setupQuery);
+    });
+    return () => {
+      active = false;
+    };
   }, [linkQuery]);
 
   return (
     <AcceptConnectionSharing
       connectionShareCode={connectionShareCode}
       setupSecret={setupSecret}
+      includesDeviceSetup={setupLinkQuery === linkQuery}
       token={token}
       address={address}
       role={role}

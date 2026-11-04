@@ -127,7 +127,7 @@ describe("SignedMessagesNotice", () => {
 
     expect(
       screen.getByRole("region", {
-        name: "Turn on signed posts (one signature)",
+        name: "Turn on Signed Posts (one signature)",
       })
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
@@ -325,9 +325,7 @@ describe("SignedMessagesNotice", () => {
       await turnOn();
       await answer({ success: false, reason: "rejected" });
 
-      expect(status()).toHaveTextContent(
-        "Signature canceled. Nothing changed, and you can try again any time."
-      );
+      expect(status()).toHaveTextContent("Signature cancelled.");
       expect(screen.queryByRole("alert")).toBeNull();
       expect(screen.getByRole("button", { name: "Renew" })).toBeEnabled();
     });

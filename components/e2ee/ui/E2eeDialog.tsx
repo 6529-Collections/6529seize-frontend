@@ -20,6 +20,7 @@ interface E2eeDialogProps {
   readonly children?: ReactNode | undefined;
   readonly footer?: ReactNode | undefined;
   readonly hideCloseButton?: boolean;
+  readonly scrollBody?: boolean;
   readonly size?: "sm" | "md" | undefined;
 }
 
@@ -38,6 +39,7 @@ export function E2eeDialog({
   footer,
   size = "sm",
   hideCloseButton = false,
+  scrollBody = false,
 }: E2eeDialogProps) {
   const widthClass = size === "md" ? "tw-max-w-xl" : "tw-max-w-md";
   return (
@@ -47,12 +49,20 @@ export function E2eeDialog({
       className="tailwind-scope tw-relative tw-z-[1000]"
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80 motion-safe:tw-animate-sidebar-account-fade-in" />
-      <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center sm:tw-items-center">
+      <div
+        className={
+          scrollBody
+            ? "tw-fixed tw-inset-x-0 tw-bottom-[env(safe-area-inset-bottom)] tw-top-[env(safe-area-inset-top)] tw-overflow-y-auto tw-p-4"
+            : "tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4"
+        }
+      >
+        <div
+          className={`tw-flex tw-min-h-full tw-justify-center ${scrollBody ? "tw-items-center" : "tw-items-end sm:tw-items-center"}`}
+        >
           <DialogPanel
-            className={`tw-w-full ${widthClass} tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl motion-safe:tw-animate-sidebar-control-in`}
+            className={`tw-w-full ${widthClass} ${scrollBody ? "tw-flex tw-max-h-[calc((100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))_*_0.85)] tw-flex-col" : ""} tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl motion-safe:tw-animate-sidebar-control-in`}
           >
-            <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+            <div className="tw-flex tw-shrink-0 tw-items-start tw-justify-between tw-gap-4">
               <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
                 {title}
               </DialogTitle>
@@ -73,7 +83,15 @@ export function E2eeDialog({
               </Description>
             ) : null}
             {hasContent(children) ? (
-              <div className="tw-mt-4">{children}</div>
+              <div
+                className={
+                  scrollBody
+                    ? "tw-mt-3 tw-flex tw-min-h-0 tw-flex-col"
+                    : "tw-mt-4"
+                }
+              >
+                {children}
+              </div>
             ) : null}
             {hasContent(footer) ? (
               <div className="tw-mt-5 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">

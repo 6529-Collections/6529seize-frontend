@@ -81,8 +81,7 @@ happens:
   this browser's data, you lose it, unless you turn on encrypted backup in
   Devices (see [Encrypted backup](#encrypted-backup)).
 
-Select **Turn on encrypted messages (one signature)** and approve the signature
-in your wallet. If your wallet is disconnected, the button connects it first
+Select **Sign to enable both** for combined setup or **Sign to enable Encrypted DMs** for encryption alone, then approve in your wallet. If your wallet is disconnected, the button connects it first
 and continues to the signature automatically. Cancelling the signature changes
 nothing. A signing-first combined grant is handed to the encryption engine
 without another signature, including when the setup page was already open.
@@ -482,12 +481,13 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Setup through connection sharing
 
-From **Connect Device**, select Mobile or Desktop, then **Set up signed posts
-and encrypted DMs on this device**. Approve the receiving device with the
-wallet on the source browser. Open or scan the new private link on your own
-receiving app; it signs in and installs fresh device keys without connecting
-that wallet in the app. The short-lived link can be redeemed once and must
-not be shared with anyone else. Proxy sessions cannot authorize this setup.
+In **Connect Device**, select **6529 Mobile** or **6529 Desktop**, then
+choose **Connect with Post Signing & DM Encryption**. Approve with your
+wallet in the source browser. Open the private link or use **Scan QR Code**
+in the receiving app. The app shows the permissions before you select
+**Accept and enable both**. The app signs you in and sets up permissions
+without connecting the wallet there. The link expires shortly and works once.
+Use it only on a device you own. Proxy sessions cannot authorize this setup.
 
 Existing source keys and history are not copied. Already usable keys and
 registered encrypted-message history on the receiving app are preserved.

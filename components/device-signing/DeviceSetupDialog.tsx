@@ -27,6 +27,7 @@ export default function DeviceSetupDialog({
       onClose={onClose}
       size="md"
       hideCloseButton
+      scrollBody
     >
       <E2eeEnrollmentCard
         scope={scope}

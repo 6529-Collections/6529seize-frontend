@@ -314,7 +314,9 @@ describe("mobile app links", () => {
       constructor(value: string | URL, base?: string | URL) {
         super(value, base);
         const text = String(value);
-        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(text);
+        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(
+          text
+        );
         if (!schemePrefix) {
           return;
         }

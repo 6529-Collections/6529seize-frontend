@@ -148,7 +148,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
     );
     expect(engine.enroll).not.toHaveBeenCalled();
     fireEvent.click(
-      screen.getByRole("button", { name: "Sign to enable encrypted DMs" })
+      screen.getByRole("button", { name: "Sign to enable Encrypted DMs" })
     );
     await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
   });
@@ -159,9 +159,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
 
     fireEvent.click(screen.getByRole("button", BUTTON));
 
-    const declined = await screen.findByText(
-      "You cancelled the signature. Nothing was turned on."
-    );
+    const declined = await screen.findByText("Signature cancelled.");
     expect(declined.tagName).toBe("OUTPUT");
     expect(engine.enroll).not.toHaveBeenCalled();
   });
@@ -194,9 +192,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
     fireEvent.click(screen.getByRole("button", BUTTON));
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockTurnOn).not.toHaveBeenCalled();
-    expect(
-      screen.queryByText("You cancelled the signature. Nothing was turned on.")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Signature cancelled.")).not.toBeInTheDocument();
     mockCanSign = true;
     engine.rerenderCard();
     await waitFor(() => expect(mockTurnOn).toHaveBeenCalledTimes(1));

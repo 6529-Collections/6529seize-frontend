@@ -3573,13 +3573,16 @@ export const EN_US_MESSAGES = {
   "acceptConnection.limit.message":
     "You can keep up to {maxCount} connected profiles. Sign out from one profile, then scan this connection link again.",
   "acceptConnection.incoming.title": "Incoming connection from",
-  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh} - Level: {level}",
+  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh}",
+  "acceptConnection.incoming.permissions":
+    "Accepting also enables these on this device",
   "acceptConnection.currentProfile.prefix": "Your current profile",
   "acceptConnection.currentProfile.willStayAvailable": "will stay available.",
   "acceptConnection.currentProfile.switchAfterAccepting":
     "You can switch between both after accepting.",
   "acceptConnection.action.processing": "Processing",
   "acceptConnection.action.accept": "Accept connection",
+  "acceptConnection.action.acceptWithSetup": "Accept and enable both",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
@@ -3709,6 +3712,9 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.profiles": "Profiles",
   "headerUserMenu.addProfile": "Add profile",
   "appSidebar.openingAccountConnection": "Opening account connection",
+  "appSidebar.copyAddress": "Copy wallet address",
+  "appSidebar.addressCopied": "Address copied",
+  "appSidebar.addressCopyFailed": "Couldn’t copy the wallet address.",
   "appSidebar.openProfile": "Open {name} profile",
   "appSidebar.accountSwitchFailed":
     "Failed to switch connected account. Please try again.",

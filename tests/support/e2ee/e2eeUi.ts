@@ -28,13 +28,13 @@ export async function gotoPath(page: Page, path: string) {
 
 export function enrollmentHeading(page: Page): Locator {
   return page.getByRole("heading", {
-    name: /^(Turn on encrypted messages|Post Signing & DM Encryption)$/,
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
   });
 }
 
 export function enrollButton(page: Page): Locator {
   return page.getByRole("button", {
-    name: /^Sign to enable (both|encrypted DMs)$/,
+    name: /^Sign to enable (both|Encrypted DMs)$/,
   });
 }
 
@@ -45,7 +45,7 @@ export async function expectEnrollmentCard(page: Page) {
     timeout: FIRST_LOAD_TIMEOUT_MS,
   });
   const card = page.getByRole("region", {
-    name: /^(Turn on encrypted messages|Post Signing & DM Encryption)$/,
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
   });
   await expect(card.getByText(NO_BACKUP_WARNING)).toBeVisible();
   await expect(enrollButton(page)).toBeEnabled({

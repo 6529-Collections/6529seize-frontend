@@ -1,6 +1,8 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import { faSignature } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -8,7 +10,6 @@ import { t } from "@/i18n/messages";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import {
   ExclamationTriangleIcon,
-  FingerPrintIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useId } from "react";
@@ -95,7 +96,7 @@ function SignedMessagesNoticeContent({
     return null;
   }
   const copy = getNoticeCopy(locale, model);
-  const Icon = isAlert ? ExclamationTriangleIcon : FingerPrintIcon;
+  const iconClass = "tw-col-start-1 tw-row-start-1 tw-size-5 tw-shrink-0";
   const onAction = () => {
     if (model.kind === "new-device") {
       void revoke(model.grant);
@@ -118,12 +119,18 @@ function SignedMessagesNoticeContent({
           : "tw-border-white/10 tw-bg-iron-950"
       }`}
     >
-      <Icon
-        aria-hidden="true"
-        className={`tw-col-start-1 tw-row-start-1 tw-size-5 tw-flex-shrink-0 ${
-          isAlert ? "tw-text-red" : "tw-text-iron-400"
-        }`}
-      />
+      {isAlert ? (
+        <ExclamationTriangleIcon
+          aria-hidden="true"
+          className={`${iconClass} tw-text-red`}
+        />
+      ) : (
+        <FontAwesomeIcon
+          icon={faSignature}
+          aria-hidden="true"
+          className={`${iconClass} tw-text-iron-400`}
+        />
+      )}
       <div className="tw-contents">
         <p
           id={titleId}

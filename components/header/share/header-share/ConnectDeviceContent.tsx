@@ -59,7 +59,7 @@ export function ConnectDeviceContent({
                   {account.handle}
                 </p>
               )}
-              <p className="tw-m-0 tw-break-all tw-text-xs tw-text-iron-400">
+              <p className="tw-m-0 tw-break-all tw-font-mono tw-text-[11px] tw-text-iron-400">
                 {account.address}
               </p>
             </div>
@@ -77,7 +77,7 @@ export function ConnectDeviceFooter({
   readonly onBack: () => void;
 }) {
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
+    <div className="tw-flex tw-items-center tw-gap-2">
       <Button variant="secondary" size="sm" onClick={onBack}>
         <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
         {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.back")}

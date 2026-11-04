@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
-import { formatAddress } from "@/helpers/Helpers";
+import { shortenAddress } from "@/helpers/address.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
 import { t } from "@/i18n/messages";
@@ -28,7 +28,7 @@ export default function AppSidebarUserInfo({
     isConnected,
     connectedAccountUnreadNotifications,
   } = useSeizeConnectContext();
-  const { activeProfileProxy } = useAuth();
+  const { activeProfileProxy, setToast } = useAuth();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -55,7 +55,21 @@ export default function AppSidebarUserInfo({
     if (address) return address.slice(0, 6);
     return "";
   })();
-  const connectedWalletLabel = address ? formatAddress(address) : null;
+  const copyAddress = async () => {
+    if (!address) return;
+    try {
+      await navigator.clipboard.writeText(address);
+      setToast({
+        message: t(locale, "appSidebar.addressCopied"),
+        type: "success",
+      });
+    } catch {
+      setToast({
+        message: t(locale, "appSidebar.addressCopyFailed"),
+        type: "error",
+      });
+    }
+  };
 
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
@@ -106,14 +120,13 @@ export default function AppSidebarUserInfo({
             aria-label={t(locale, "appSidebar.openProfile", {
               name: profileLinkLabel,
             })}
-            className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-flex-col tw-items-start tw-gap-3 tw-rounded-lg tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900"
+            className="tw-inline-flex tw-self-start tw-rounded-lg tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900"
           >
             <div className="tw-flex tw-items-center tw-gap-2">
               {avatarSrc ? (
                 <div className="tw-relative tw-h-12 tw-w-12">
                   <div
                     className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
-                    title={connectionIndicator.title}
                   >
                     <Image
                       src={avatarSrc}
@@ -132,6 +145,9 @@ export default function AppSidebarUserInfo({
                       />
                     )}
                   </div>
+                  {isAuthenticated && !activeProfileProxy && (
+                    <DeviceSecurityStatus presentation="mobile-badge" />
+                  )}
                   {showUnreadBadge && (
                     <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
                       {unreadBadgeLabel}
@@ -145,25 +161,35 @@ export default function AppSidebarUserInfo({
                 />
               )}
             </div>
-            <span className="tw-max-w-full tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
-              {label}
-            </span>
           </Link>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start">
-            {connectedWalletLabel && (
-              <span className="tw-my-1 tw-block tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
-                {connectedWalletLabel}
-              </span>
-            )}
-            <div className="tw-my-1">
-              <UserLevel level={level} size="xs" />
-            </div>
+          <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+            <Link
+              href={profileHref}
+              {...profileLinkClickProps}
+              className="tw-truncate tw-rounded-sm tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-text-lg"
+            >
+              {label}
+            </Link>
+            <UserLevel level={level} size="xxs" showLabel={false} circle />
           </div>
+          {address && (
+            <button
+              type="button"
+              onClick={() => void copyAddress()}
+              aria-label={t(locale, "appSidebar.copyAddress")}
+              className="tw-self-start tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {shortenAddress(address)}
+            </button>
+          )}
         </div>
         <AppSidebarConnectedAccounts onNavigate={onNavigate} />
       </div>
       {isAuthenticated && !activeProfileProxy && (
-        <DeviceSecurityStatus presentation="inline" />
+        <DeviceSecurityStatus
+          presentation="inline"
+          connection={connectionIndicator}
+        />
       )}
       <AppSidebarUserStats
         handle={handleOrWallet}

@@ -687,7 +687,11 @@ describe("AcceptConnectionSharing page", () => {
       );
       expect(window.location.hash).toBe("");
       expect(window.location.search).not.toContain("connection_share_code");
-      fireEvent.click(screen.getByText("Accept connection"));
+      expect(await screen.findByText("Signed Posts")).toBeInTheDocument();
+      expect(screen.getByText("Encrypted DMs")).toBeInTheDocument();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Accept and enable both" })
+      );
       await waitFor(() =>
         expect(mockAcceptDeviceSetup).toHaveBeenCalledWith({
           envelope: "v1.ciphertext",

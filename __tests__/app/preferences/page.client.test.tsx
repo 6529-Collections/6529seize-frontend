@@ -75,15 +75,10 @@ describe("PreferencesPageClient", () => {
       name: "Notifications & Messages",
     });
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
-    expect(notificationsTab).toHaveClass(
-      "tw-border-b-2",
-      "tw-border-primary-400",
-      "tw-px-1",
-      "tw-py-4"
-    );
+    expect(notificationsTab).toHaveClass("tw-bg-primary-500");
     expect(
       screen.getByRole("navigation", { name: "Preference sections" })
-    ).toHaveClass("tw-gap-x-3", "lg:tw-gap-x-4");
+    ).toHaveClass("tw-grid-cols-2", "@[42rem]/preferences:tw-auto-cols-fr");
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass(
       "tw-min-h-dvh",

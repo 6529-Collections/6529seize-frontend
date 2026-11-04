@@ -155,6 +155,7 @@ export default function AppUserConnect({
       </Link>
       {isDeviceSecurityStatusEnabled() && (
         <DeviceSetupMenuAction
+          mobile
           onClose={onNavigate}
           showStatus={!hasValidWalletAuth || Boolean(activeProfileProxy)}
         />

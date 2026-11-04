@@ -130,7 +130,10 @@ export default function DeviceConnectionShare({
   const onEnabled = useCallback(() => undefined, []);
   const flow = useEnableSignedMessages({ requestGrant, onEnabled });
   const { enable } = flow;
-  const refresh = () => enable("connection-share");
+  const refresh = () => {
+    setLink(null);
+    enable("connection-share");
+  };
   useEffect(() => {
     // Start after the wallet flow has its initial snapshot. Cancel the
     // scheduled start if the user backs out or React replays the mount.

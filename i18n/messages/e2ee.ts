@@ -85,7 +85,6 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
-  "e2ee.enroll.title": "Turn on encrypted messages",
   "e2ee.enroll.intro":
     "Encrypted chats can be read only by the people in them.",
   "e2ee.enroll.point.signature":
@@ -102,12 +101,16 @@ export const E2EE_MESSAGES = {
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
   "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
   "e2ee.enroll.oneSignatureBoth":
-    "One wallet signature enables both permissions.",
+    "One wallet signature enables both permissions for 180 days.",
   "e2ee.enroll.signBoth": "Sign to enable both",
-  "e2ee.enroll.signPosts": "Sign to enable signed posts",
-  "e2ee.enroll.signDms": "Sign to enable encrypted DMs",
+  "e2ee.enroll.signPosts": "Sign to enable Signed Posts",
+  "e2ee.enroll.signDms": "Sign to enable Encrypted DMs",
   "e2ee.enroll.signingSection": "Signed Posts",
   "e2ee.enroll.encryptionSection": "Encrypted DMs",
+  "e2ee.enroll.signingCombined":
+    "This device signs your posts, edits, deletes, and reactions so others can verify they came from you.",
+  "e2ee.enroll.encryptionCombined":
+    "This device can send and read encrypted messages.",
   "e2ee.enroll.signingApp":
     "Your wallet signs once. This device then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "e2ee.enroll.combinedPartial":
@@ -116,11 +119,8 @@ export const E2EE_MESSAGES = {
     "Combined setup could not complete. You can try again or set up one permission at a time.",
   "e2ee.enroll.unavailable":
     "Open Encrypted messages to check whether this device can be set up.",
-  "e2ee.enroll.browserApproval": "Use a browser to approve",
-  "e2ee.enroll.browserApprovalHelp":
-    "In your browser, open Connect Device and set up signed posts and encrypted DMs. Then scan the QR code here.",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
-  "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
+  "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
 
   "e2ee.deviceLimit.title": "Too many devices",
@@ -645,7 +645,7 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
-  "e2ee.deviceStatus.proofLine": "Signed posts: {status}",
+  "e2ee.deviceStatus.proofLine": "Signed Posts: {status}",
   "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
   "e2ee.deviceStatus.enableBoth": "Post Signing & DM Encryption",
   "e2ee.deviceStatus.enableProof": "Enable Signed Posts",
