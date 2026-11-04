@@ -27,8 +27,8 @@ export const E2EE_MESSAGES = {
 
   "e2ee.notification.newMessage": "New encrypted message",
   "e2ee.notification.open": "Open encrypted chat",
-  "e2ee.notification.locked":
-    "Set up encrypted messages on this device to read it.",
+  "e2ee.notification.setup": "Set up Encrypted DMs",
+  "e2ee.notification.senderAction": "sent you an encrypted message",
   "e2ee.badge.encrypted": "End-to-end encrypted",
   "e2ee.badge.encryptedShort": "Encrypted",
   "e2ee.title": "Encrypted messages",

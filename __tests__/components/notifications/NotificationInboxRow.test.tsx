@@ -14,10 +14,12 @@ import type {
 import { isGroupedReactionsItem } from "@/types/feed.types";
 
 jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
-  useEncryptedNotificationPreview: jest.fn(() => null),
+  useEncryptedNotificationPreview: jest.fn(),
 }));
 beforeEach(() => {
-  jest.mocked(useEncryptedNotificationPreview).mockReturnValue(null);
+  jest
+    .mocked(useEncryptedNotificationPreview)
+    .mockReturnValue({ preview: null, needsSetup: false });
 });
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -187,7 +189,9 @@ it("uses the group's latest drop even when the first reaction is older", () => {
 it.each([null, "A locally decrypted message"])(
   "preserves encrypted notification fallback or local preview (%s)",
   (preview) => {
-    jest.mocked(useEncryptedNotificationPreview).mockReturnValue(preview);
+    jest
+      .mocked(useEncryptedNotificationPreview)
+      .mockReturnValue({ preview, needsSetup: !preview });
     const notification: INotificationEncryptedMessage = {
       id: 12,
       created_at: 12,
@@ -203,9 +207,14 @@ it.each([null, "A locally decrypted message"])(
         onOpen={onOpen}
       />
     );
-    expect(useEncryptedNotificationPreview).toHaveBeenCalledWith("0xgroup");
+    expect(useEncryptedNotificationPreview).toHaveBeenCalledWith(
+      "0xgroup",
+      undefined
+    );
     expect(screen.getByText("New encrypted message")).toBeInTheDocument();
-    if (preview) expect(screen.getByText(preview)).toBeInTheDocument();
+    expect(
+      screen.getByText(preview ?? "Set up Encrypted DMs")
+    ).toBeInTheDocument();
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
       "/messages/encrypted/0xgroup"
@@ -214,3 +223,41 @@ it.each([null, "A locally decrypted message"])(
     expect(onOpen).toHaveBeenCalledWith([12]);
   }
 );
+
+it("links the sender avatar and handle separately from encrypted chat setup", () => {
+  jest.mocked(useEncryptedNotificationPreview).mockReturnValue({
+    preview: null,
+    needsSetup: true,
+  });
+  const onOpen = jest.fn();
+  render(
+    <NotificationInboxRow
+      notification={{
+        id: 13,
+        created_at: 13,
+        read_at: null,
+        cause: ApiNotificationCause.E2EeMessage,
+        related_identity: {
+          id: "alice",
+          handle: "alice",
+          pfp: "https://example.com/avatar.png",
+        } as ApiProfileMin,
+        additional_context: {
+          encrypted_group: "0xgroup",
+          encrypted_message_seq: 8,
+        },
+      }}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+  const sender = screen.getByRole("link", { name: "alice" });
+  expect(sender).toHaveAttribute("href", "/alice");
+  expect(sender.querySelector("img")).toBeInTheDocument();
+  const setup = screen.getByRole("link", { name: "Set up Encrypted DMs" });
+  expect(setup).toHaveAttribute("href", "/messages/encrypted/0xgroup");
+  fireEvent.click(sender);
+  expect(onOpen).not.toHaveBeenCalled();
+  fireEvent.click(setup);
+  expect(onOpen).toHaveBeenCalledWith([13]);
+});

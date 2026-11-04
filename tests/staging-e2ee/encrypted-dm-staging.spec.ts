@@ -26,6 +26,7 @@ import {
   e2eeConsoleProblems,
   ENCRYPTED_ROUTE,
   expectEnrollmentCard,
+  gotoStaging,
   hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
@@ -290,6 +291,16 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(sent.postData() ?? "").not.toContain(hello);
 
     await openChatFromList(b, dm, a.user.handle);
+    await expectDecrypted(b, hello);
+
+    await gotoStaging(b.page, "/notifications");
+    const notice = b.page.getByRole("article").filter({
+      has: b.page.getByRole("link", { name: hello, exact: true }),
+    });
+    await expect(
+      notice.getByRole("link", { name: a.user.handle, exact: true })
+    ).toHaveAttribute("href", `/${a.user.handle}`, { timeout: UI_TIMEOUT_MS });
+    await notice.getByRole("link", { name: hello, exact: true }).click();
     await expectDecrypted(b, hello);
 
     await sendEncrypted(b, reply);

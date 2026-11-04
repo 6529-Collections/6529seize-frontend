@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LockClosedIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import { getInboxDestination } from "@/components/notifications/inbox/notificationInbox.helpers";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -9,39 +10,84 @@ import NotificationTimestamp from "./subcomponents/NotificationTimestamp";
 
 export default function NotificationEncryptedMessage({
   notification,
+  onOpen,
 }: {
   readonly notification: INotificationEncryptedMessage;
+  readonly onOpen?: () => void;
 }) {
   const locale = useBrowserLocale();
-  const preview = useEncryptedNotificationPreview(
-    notification.additional_context.encrypted_group ?? null
+  const { preview, needsSetup } = useEncryptedNotificationPreview(
+    notification.additional_context.encrypted_group ?? null,
+    notification.additional_context.encrypted_message_seq
   );
+  const sender = notification.related_identity;
+  const handle = sender?.is_anonymous ? null : sender?.handle;
+  const fallbackAvatar = (
+    <LockClosedIcon aria-hidden="true" className="tw-size-5 tw-text-iron-400" />
+  );
+
   return (
-    <article className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
-      <div className="tw-flex tw-items-start tw-gap-3">
-        <LockClosedIcon
-          aria-hidden="true"
-          className="tw-size-5 tw-shrink-0 tw-text-iron-300"
-        />
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {t(locale, "e2ee.notification.newMessage")}
-            </h3>
-            <NotificationTimestamp createdAt={notification.created_at} />
-          </div>
-          <p className="tw-mt-2 tw-line-clamp-2 tw-break-words tw-text-sm tw-text-iron-300">
-            {preview ?? t(locale, "e2ee.notification.locked")}
-          </p>
-          <Link
-            href={getInboxDestination(notification, "")}
-            prefetch={false}
-            className="tw-text-sm tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            {t(locale, "e2ee.notification.open")}
-          </Link>
-        </div>
+    <article
+      className={
+        onOpen
+          ? "tw-relative tw-rounded-lg tw-px-4 tw-py-3 desktop-hover:hover:tw-bg-iron-800"
+          : "tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 desktop-hover:hover:tw-bg-iron-900"
+      }
+    >
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-font-semibold tw-text-iron-50">
+        {handle ? (
+          <>
+            <Link
+              href={`/${encodeURIComponent(handle)}`}
+              prefetch={false}
+              className="tw-relative tw-z-10 tw-inline-flex tw-items-center tw-gap-3 tw-rounded tw-text-inherit hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              <ProfileAvatar
+                pfpUrl={sender?.pfp}
+                alt=""
+                fallbackContent={fallbackAvatar}
+              />
+              <span>{handle}</span>
+            </Link>
+            <span>{t(locale, "e2ee.notification.senderAction")}</span>
+          </>
+        ) : (
+          <>
+            <ProfileAvatar
+              pfpUrl={null}
+              alt=""
+              fallbackContent={fallbackAvatar}
+            />
+            <span>{t(locale, "e2ee.notification.newMessage")}</span>
+          </>
+        )}
+        <NotificationTimestamp createdAt={notification.created_at} />
+        {onOpen && notification.read_at === null && (
+          <span className="tw-text-xs tw-text-primary-300">
+            {t(locale, "notifications.inbox.unread")}
+          </span>
+        )}
       </div>
+      <Link
+        href={getInboxDestination(notification, "")}
+        prefetch={false}
+        {...(onOpen && { onClick: onOpen })}
+        className="tw-ml-[3.25rem] tw-mt-1 tw-block tw-break-words tw-text-sm tw-text-primary-300 after:tw-absolute after:tw-inset-0 after:tw-rounded-xl focus-visible:tw-outline-none focus-visible:after:tw-ring-2 focus-visible:after:tw-ring-inset focus-visible:after:tw-ring-primary-400"
+      >
+        <span className="tw-line-clamp-2">
+          {preview ??
+            t(
+              locale,
+              needsSetup ? "e2ee.notification.setup" : "e2ee.notification.open"
+            )}
+          {!preview && needsSetup && (
+            <ArrowRightIcon
+              aria-hidden="true"
+              className="tw-ml-1 tw-inline-block tw-size-3"
+            />
+          )}
+        </span>
+      </Link>
     </article>
   );
 }
