@@ -722,8 +722,7 @@ function useWaveMessagesStore() {
     (waveId: string, dropIds: readonly string[]) => {
       if (storeGeneration !== storeGenerationRef.current) return;
       const currentWave = waveMessagesRef.current[waveId];
-      if (!currentWave && !isWaveInUse(waveId) && !hasServerFeedSeed(waveId))
-        return;
+      // Deletes can precede the first cached message or an in-flight feed.
       const deleted =
         deletedDropIdsRef.current.get(waveId) ?? new Set<string>();
       dropIds.forEach((id) => deleted.add(id));
@@ -740,7 +739,7 @@ function useWaveMessagesStore() {
       dirtyWaveIdsRef.current.add(waveId);
       flushNotifications();
     },
-    [flushNotifications, hasServerFeedSeed, isWaveInUse, storeGeneration]
+    [flushNotifications, storeGeneration]
   );
 
   const removeDrop = useCallback(

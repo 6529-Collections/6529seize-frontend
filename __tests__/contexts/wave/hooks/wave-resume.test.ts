@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { DropSize } from "@/helpers/waves/drop.helpers";
+import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
 import { useWaveDataFetching } from "@/contexts/wave/hooks/useWaveDataFetching";
 import { useWavePagination } from "@/contexts/wave/hooks/useWavePagination";
@@ -34,7 +34,7 @@ function drop(serial: number): ApiDrop {
     metadata: [],
   } as unknown as ApiDrop;
 }
-const fullDrop = (serial: number) => ({
+const fullDrop = (serial: number): ExtendedDrop => ({
   ...drop(serial),
   type: DropSize.FULL,
   stableKey: `post-${serial}`,

@@ -94,7 +94,6 @@ describe("useWaveMessagesStore", () => {
   it("does not resurrect a drop deleted before it enters the cache", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     act(() => {
-      result.current.trackActiveWave("wave1");
       result.current.removeDrop("wave1", "d1");
       result.current.updateData({ key: "wave1", drops: [baseDrop] });
     });
