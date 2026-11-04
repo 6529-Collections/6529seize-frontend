@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { Time } from "@/helpers/time";
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
@@ -14,6 +15,10 @@ jest.mock("@/helpers/time", () => ({
 }));
 
 describe("useWave", () => {
+  beforeEach(() => {
+    jest.mocked(Time.currentMillis).mockReturnValue(2000);
+  });
+
   const baseWave: any = {
     id: "wave1",
     participation: {
@@ -46,6 +51,64 @@ describe("useWave", () => {
     const { result } = renderHook(() => useWave(wave));
     expect(result.current.isMemesWave).toBe(true);
   });
+
+  it("closes manually ended competitions without a scheduled deadline", () => {
+    const wave = {
+      ...baseWave,
+      participation: { ...baseWave.participation, period: {} },
+      competition: {
+        wave_id: baseWave.id,
+        lifecycle: "ENDED",
+        participation: { ends_at: null },
+        capabilities: [],
+      },
+    };
+    const { result } = renderHook(() => useWave(wave));
+    expect(result.current.participation.status).toBe(SubmissionStatus.ENDED);
+    expect(result.current.participation.canSubmitNow).toBe(false);
+    expect(result.current.participation.endTime).toBe(0);
+  });
+
+  it.each([null, 9000])(
+    "preserves a manual closure received after mount with deadline %s",
+    (scheduledEnd) => {
+      const wave = {
+        ...baseWave,
+        participation: {
+          ...baseWave.participation,
+          period: { min: 1000, max: scheduledEnd },
+        },
+        competition: {
+          wave_id: baseWave.id,
+          lifecycle: "ACTIVE",
+          ended_at: null as number | null,
+          participation: { ends_at: scheduledEnd },
+          capabilities: [],
+        },
+      };
+      const { result, rerender } = renderHook(
+        ({ currentWave }) => useWave(currentWave),
+        { initialProps: { currentWave: wave } }
+      );
+      expect(result.current.participation.status).toBe(SubmissionStatus.ACTIVE);
+
+      jest.mocked(Time.currentMillis).mockReturnValue(5000);
+      rerender({
+        currentWave: {
+          ...wave,
+          competition: {
+            ...wave.competition,
+            lifecycle: "ENDED",
+            ended_at: 4000,
+          },
+        },
+      });
+
+      expect(result.current.participation.status).toBe(SubmissionStatus.ENDED);
+      expect(result.current.participation.canSubmitNow).toBe(false);
+      expect(result.current.participation.endTime).toBe(4000);
+    }
+  );
 
   it("flags curation wave", () => {
     const wave = { ...baseWave, id: "curation" };

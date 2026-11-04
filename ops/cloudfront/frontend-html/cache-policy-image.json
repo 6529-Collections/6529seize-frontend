@@ -1,0 +1,28 @@
+{
+  "Name": "frontend-next-image",
+  "Comment": "6529 frontend /_next/image: keyed on url, w, q and Accept (AVIF/WebP negotiation), origin Cache-Control decides",
+  "DefaultTTL": 0,
+  "MinTTL": 0,
+  "MaxTTL": 31536000,
+  "ParametersInCacheKeyAndForwardedToOrigin": {
+    "EnableAcceptEncodingGzip": false,
+    "EnableAcceptEncodingBrotli": false,
+    "HeadersConfig": {
+      "HeaderBehavior": "whitelist",
+      "Headers": {
+        "Quantity": 1,
+        "Items": ["Accept"]
+      }
+    },
+    "CookiesConfig": {
+      "CookieBehavior": "none"
+    },
+    "QueryStringsConfig": {
+      "QueryStringBehavior": "whitelist",
+      "QueryStrings": {
+        "Quantity": 3,
+        "Items": ["url", "w", "q"]
+      }
+    }
+  }
+}

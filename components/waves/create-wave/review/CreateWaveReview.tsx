@@ -16,16 +16,20 @@ import CreateWaveRulesGroupMembers from "../rules/CreateWaveRulesGroupMembers";
 import { getOnlyMeGroupDescription } from "../services/waveGroupService";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import CreateWaveReviewDescription from "./CreateWaveReviewDescription";
+import WaveAccessPreview from "../../WaveAccessPreview";
 
+/** Review selected wave settings and their audience before creating the wave. */
 export default function CreateWaveReview({
   config,
   isCompetition = false,
+  chatRestricted,
   groupsCache,
   description,
   parentWaveName,
 }: {
   readonly config: CreateWaveConfig;
   readonly isCompetition?: boolean;
+  readonly chatRestricted?: boolean | undefined;
   readonly groupsCache: Readonly<Record<string, ApiGroupFull>>;
   readonly description: CreateDropConfig | null;
   readonly parentWaveName?: string | null | undefined;
@@ -103,6 +107,12 @@ export default function CreateWaveReview({
         showTitle={false}
         variant="form"
         renderRowValue={renderRuleValue}
+      />
+      <WaveAccessPreview
+        waveType={config.overview.type}
+        groups={config.groups}
+        chatEnabled={config.chat.enabled}
+        chatRestricted={chatRestricted}
       />
       {description && <CreateWaveReviewDescription description={description} />}
     </div>
