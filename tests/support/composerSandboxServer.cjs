@@ -44,6 +44,7 @@ const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_SUBMITTED_POLL_ID = "00000000-0000-4000-8000-000000000545";
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
+const SANDBOX_ACCESS_WAVE_ID = "00000000-0000-4000-8000-000000000566";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
   "00000000-0000-4000-8000-000000000541";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
@@ -230,6 +231,12 @@ const sandboxPreviewGroup = {
     is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
     is_beneficiary_of_grant: null,
   },
+};
+
+const sandboxSubmissionGroup = {
+  ...sandboxPreviewGroup,
+  id: "sandbox-submission-club",
+  name: "Sandbox Submission Club",
 };
 
 const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
@@ -740,6 +747,34 @@ const signatureWave = {
   },
 };
 
+// Access fixture shared by SSR and client fetches. Only the existing notification
+// read acknowledgement is allowed; attempts to post to this wave fail closed.
+const accessWave = {
+  ...localWave,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: "Local Access Sandbox Wave",
+  participation: {
+    ...localWave.participation,
+    authenticated_user_eligible: false,
+    scope: {
+      group: {
+        id: sandboxSubmissionGroup.id,
+        name: sandboxSubmissionGroup.name,
+        is_hidden: false,
+      },
+    },
+  },
+  wave: { ...localWave.wave, type: "RANK" },
+  metrics: { ...localWave.metrics, drops_count: 0 },
+};
+const accessWaveOverview = {
+  ...localWaveOverview,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: accessWave.name,
+  total_drops_count: 0,
+  has_competition: true,
+};
+
 const dmWaveOverview = {
   ...localWaveOverview,
   id: SANDBOX_DM_WAVE_ID,
@@ -1023,6 +1058,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_NOTIFICATION_WAVE_ID,
   SANDBOX_CREATED_WAVE_ID,
   SANDBOX_SIGNATURE_WAVE_ID,
+  SANDBOX_ACCESS_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {
@@ -1847,16 +1883,43 @@ function isExpectedCreateWaveConfig(wave) {
 }
 
 function isExpectedCreateWaveHubBody(body) {
-  if (!isPlainObject(body) || !hasOnlyAllowedKeys(body, ["idempotency_key", "name", "picture", "description_drop", "visibility", "chat", "admin_group", "admin_drop_deletion_enabled"], ["parent_wave_id"])) return false;
+  if (
+    !isPlainObject(body) ||
+    !hasOnlyAllowedKeys(
+      body,
+      [
+        "idempotency_key",
+        "name",
+        "picture",
+        "description_drop",
+        "visibility",
+        "chat",
+        "admin_group",
+        "admin_drop_deletion_enabled",
+      ],
+      ["parent_wave_id"]
+    )
+  )
+    return false;
   const description = body.description_drop?.parts?.[0]?.content;
-  return typeof body.idempotency_key === "string" && /^[0-9a-f-]{36}$/i.test(body.idempotency_key) &&
-    typeof body.name === "string" && body.name.startsWith("Sandbox ") && body.name.length <= 250 &&
-    body.picture === null && typeof description === "string" && description.length <= 100000 &&
+  return (
+    typeof body.idempotency_key === "string" &&
+    /^[0-9a-f-]{36}$/i.test(body.idempotency_key) &&
+    typeof body.name === "string" &&
+    body.name.startsWith("Sandbox ") &&
+    body.name.length <= 250 &&
+    body.picture === null &&
+    typeof description === "string" &&
+    description.length <= 100000 &&
     isExpectedDescriptionDrop(body.description_drop, description) &&
-    hasKnownSandboxGroupScope(body.visibility) && isExpectedCreateWaveChatConfig(body.chat) &&
-    hasOnlyKeys(body.admin_group, ["group_id"]) && isKnownSandboxGroupId(body.admin_group.group_id) &&
+    hasKnownSandboxGroupScope(body.visibility) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    hasOnlyKeys(body.admin_group, ["group_id"]) &&
+    isKnownSandboxGroupId(body.admin_group.group_id) &&
     typeof body.admin_drop_deletion_enabled === "boolean" &&
-    (body.parent_wave_id === undefined || body.parent_wave_id === SANDBOX_WAVE_ID);
+    (body.parent_wave_id === undefined ||
+      body.parent_wave_id === SANDBOX_WAVE_ID)
+  );
 }
 
 function isExpectedResumedDraftChatWaveBody(body) {
@@ -2227,10 +2290,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 
   if (pathname === "/api/drops") {
     // The diagnostics reset bounds this synthetic chat submit to one accepted request.
-    return (
-      isExpectedChatDropBody(body) &&
-      !hasAcceptedDropSubmit()
-    );
+    return isExpectedChatDropBody(body) && !hasAcceptedDropSubmit();
   }
 
   if (pathname === `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`) {
@@ -2443,9 +2503,10 @@ function loggedRequestBody(pathname, body) {
       : null;
     return {
       name: typeof body.name === "string" ? body.name : null,
-      admin_group_id: body.admin_group?.group_id ?? body.wave?.admin_group?.group_id ?? null,
+      admin_group_id:
+        body.admin_group?.group_id ?? body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
-      wave_type: nativeHub ? "CHAT" : body.wave?.type ?? null,
+      wave_type: nativeHub ? "CHAT" : (body.wave?.type ?? null),
       decisions_strategy: body.wave?.decisions_strategy ?? null,
       voting_period_max: body.voting?.period?.max ?? null,
       participation_period_max: body.participation?.period?.max ?? null,
@@ -2657,6 +2718,11 @@ const mockApiExactReadRoutes = new Map([
     `/api/waves/${SANDBOX_DM_WAVE_ID}`,
     () => e2eeSandboxApi?.decorateDirectMessageWave(dmWave) ?? dmWave,
   ],
+  [`/api/waves/${SANDBOX_ACCESS_WAVE_ID}`, () => accessWave],
+  [
+    `/api/v2/waves/${SANDBOX_ACCESS_WAVE_ID}/drops`,
+    () => ({ wave: accessWaveOverview, drops: [] }),
+  ],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
@@ -2820,6 +2886,8 @@ function handleGroupRead(pathname, res) {
     group = sandboxAdminGroup;
   } else if (groupId === sandboxPreviewGroup.id) {
     group = sandboxPreviewGroup;
+  } else if (groupId === sandboxSubmissionGroup.id) {
+    group = sandboxSubmissionGroup;
   }
   if (group) {
     return writeJsonResponse(res, group);
@@ -2917,7 +2985,13 @@ const mockApiKnownPostRoutes = [
     matches: (pathname) => pathname === "/api/v3/waves",
     respond: (res, body) => {
       sandboxCreatedWaveType = "CHAT";
-      return writeJsonResponse(res, { id: SANDBOX_CREATED_WAVE_ID, name: body.name, picture: body.picture, legacy_primary_competition_id: null, permissions: { view: true, administer: true, create_competition: true } });
+      return writeJsonResponse(res, {
+        id: SANDBOX_CREATED_WAVE_ID,
+        name: body.name,
+        picture: body.picture,
+        legacy_primary_competition_id: null,
+        permissions: { view: true, administer: true, create_competition: true },
+      });
     },
   },
   {

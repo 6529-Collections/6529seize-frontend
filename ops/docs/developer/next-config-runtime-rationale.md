@@ -90,43 +90,62 @@ Rules to keep:
 
 ## Request-Time Root Layout and Static Content Pages
 
-`app/layout.tsx` reads cookies and request headers, and the root layout sets
-`fetchCache = "force-no-store"`. Routes therefore render per request by
-default. That default protects routes whose shell reads request data:
-
-- The NFT purchasing gate reads the `native-ios` cookie and the user agent to
-  decide whether purchasing content may be in the server HTML.
-- The global server `fetch` wrapper (`lib/fetch/ssrFetch.ts`) reads the
-  visitor's auth cookies for API requests. Calling `cookies()` keeps any route
-  that fetches from the API out of static generation.
-
-The rest of the shared shell renders the same HTML on every route, whether it
-is prerendered or rendered per request:
+`app/layout.tsx` reads nothing from the request. Every visitor gets the same
+shell HTML, and the browser makes the per-device decisions:
 
 - `components/providers/EULAConsentStartup.tsx` resolves the native iOS gate in
   the browser. Native startup styles keep the page hidden. If the browser finds
   native iOS without a current acceptance, the commit that reveals the app
   replaces the page with the blocking check.
+- The NFT purchasing gate (`useNftPurchasingVisibility`, `NftPurchasingGate`)
+  never puts purchasing content in the server HTML. Web and Android mount it in
+  the first render after hydration; the iOS app waits for the country check.
+  Visible slots render blank, aria-hidden space with the content's first-render
+  size until then, so mounting does not move the page.
 - The environment badge renders the build's configured `BASE_ENDPOINT` origin.
   Each deployment is built for one host. A browser on another host, such as a
   local server on a different port, gets its own badge right after hydration.
 
-Fixed-content pages opt out with `export const dynamic = "force-static"`. Next.js
-then prerenders them, gives them a cacheable `Cache-Control` header, and returns
-empty cookies, headers, and search params to the shared shell.
+Routes still render per request by default: the layout calls `connection()`,
+and it sets `fetchCache = "force-no-store"`. See Static Rendering Readiness for
+why each remains.
+
+Fixed-content pages opt out with `export const dynamic = "force-static"`.
+Next.js then prerenders them, gives them a cacheable `Cache-Control` header, and
+returns empty cookies, headers, and search params to the shared shell.
 
 `__tests__/contracts/static-content-pages.test.ts` requires the opt-in on every
 migrated WordPress content page. It also rejects request data, search params,
 and `fetch` in those pages, because `force-static` hides request data and
 caches fetches at build time.
 
-Making static rendering the default for all routes needs more work. Removing
-the cookie and header reads alone breaks `next build`: once a route is eligible
-for prerendering, shell components that call `useSearchParams()` outside a
-`<Suspense>` boundary stop the build. These components include
-`VersionStatusProvider`, `MixpanelSetup`, `MyStreamProvider`, `TitleProvider`,
-`WaveInformationProvider`, `NavigationHistoryProvider`, `QuickDirectMessagesGate`,
-and the sidebar Share trigger and QR modal.
+### Static Rendering Readiness
+
+- `connection()` keeps the remaining routes request-time. Without it, any
+  route Next tries to prerender fails `next build`, because shell components
+  call `useSearchParams()` outside a `<Suspense>` boundary. Callers rendered on
+  every route include `VersionStatusProvider` (`useIsVersionStale`),
+  `MixpanelSetup`, `MyStreamProvider` (`useActiveWaveManager`),
+  `TitleProvider`, `WaveInformationProvider`, `NavigationHistoryProvider`,
+  `QuickDirectMessagesGate`, `DynamicHeadTitle`, and the sidebar Share trigger
+  and QR modal. Each must read search params without suspending the page
+  (for example a small reader inside its own `<Suspense>`) before
+  `connection()` can go.
+- `fetchCache = "force-no-store"` keeps every route that fetches while it
+  renders request-time, so its data is never frozen into a build-time page.
+  Routes that fetch nothing are unaffected by it. It also blocks a page from
+  opting into ISR with its own cache policy, so remove it only together with an
+  explicit policy for each data route. Do not give those routes a `revalidate`
+  while `lib/fetch/ssrFetch.ts` reads the visitor's cookies on every
+  first-party request at runtime (but not at build): Next would fail the
+  revalidation with "Page changed from static to dynamic at runtime".
+- A `force-static` page renders the shell with empty search params on the
+  server and real ones in the browser, so shell UI that reads search params in
+  the hydration render mismatches for URLs that carry them. The home page (`/`)
+  fetches nothing and builds as a static page with `force-static`, but a
+  desktop load of `/?view=messages` then fails hydration (React error 418) and
+  re-renders on the client. Make the shell's search-param readers
+  hydration-safe before opting `/` in.
 
 ### CSP Nonces
 

@@ -6,6 +6,7 @@ import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 export type ValidatorSection =
   | "download"
   | "guide"
+  | "hardware"
   | "known-issues"
   | "releases";
 
@@ -16,6 +17,7 @@ const SECTIONS: readonly {
 }[] = [
   { key: "download", href: "/validator", label: "Download" },
   { key: "guide", href: "/validator/guide", label: "Tester guide" },
+  { key: "hardware", href: "/validator/hardware", label: "Hardware" },
   {
     key: "known-issues",
     href: "/validator/known-issues",

@@ -205,6 +205,124 @@ beforeEach(() => {
 });
 
 describe("DropPartMarkdown", () => {
+  it.each(["\n", "\n\n"])(
+    "counts list items rather than generated HTML whitespace (%j)",
+    (separator) => {
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={Array.from(
+            { length: 20 },
+            (_, index) => `- List item ${index + 1}`
+          ).join(separator)}
+          onQuoteClick={jest.fn()}
+          collapsedPreview
+        />
+      );
+      expect(screen.getAllByRole("listitem")).toHaveLength(10);
+      expect(screen.queryByText("List item 11")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps lists, links and emphasis in the preview and restores the complete body", () => {
+    const partContent = [
+      "## Status update",
+      "",
+      "Original paragraph.",
+      "",
+      "3) **Finished** [Task 1](https://example.com/task-1) with *care* and `code`.",
+      ...Array.from(
+        { length: 20 },
+        (_, index) => `${index + 4}) Another formatted item ${index}.`
+      ),
+      "",
+      "[Final link](https://example.com/final)",
+    ].join("\n");
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      partContent,
+      onQuoteClick: jest.fn(),
+      hideLinkPreviews: true,
+    };
+    const { container, rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const expectPreview = () => {
+      expect(
+        screen.getByRole("heading", { name: "Status update" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(screen.getByRole("list")).toHaveClass(
+        PARENTHESIZED_ORDERED_LIST_CLASS_NAME
+      );
+      expect(screen.getByRole("link", { name: "Task 1" })).toHaveAttribute(
+        "href",
+        "https://example.com/task-1"
+      );
+      expect(container.querySelector("strong")).toHaveTextContent("Finished");
+      expect(container.querySelector("em")).toHaveTextContent("care");
+      expect(container.querySelector("code")).toHaveTextContent("code");
+      expect(
+        screen.queryByRole("link", { name: "Final link" })
+      ).not.toBeInTheDocument();
+    };
+    expectPreview();
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(21);
+    expect(screen.getByRole("link", { name: "Final link" })).toHaveAttribute(
+      "href",
+      "https://example.com/final"
+    );
+    rerender(<DropPartMarkdown {...props} collapsedPreview />);
+    expectPreview();
+  });
+
+  it("keeps existing media mounted and preserves bare-URL preview behavior on expansion", () => {
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      onQuoteClick: jest.fn(),
+      partContent: `![Image](/one.png)\n\nhttps://example.com/article\n\n${"Long readable text. ".repeat(90)}`,
+    };
+    const { rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const image = screen.getByRole("img", { name: "Drop media" });
+    expect(screen.getByTestId("link-preview")).toHaveAttribute(
+      "data-href",
+      "https://example.com/article"
+    );
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getByRole("img", { name: "Drop media" })).toBe(image);
+  });
+
+  it("shortens authored lines inside a formatted block without flattening it", () => {
+    const partContent = Array.from(
+      { length: 20 },
+      (_, i) => `> Line ${i + 1}`
+    ).join("\n");
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={partContent}
+        onQuoteClick={jest.fn()}
+        collapsedPreview
+      />
+    );
+    expect(container.querySelector("blockquote")).toHaveTextContent("Line 1");
+    expect(container.querySelector("blockquote")).not.toHaveTextContent(
+      "Line 20"
+    );
+    expect(container.querySelector("blockquote")?.textContent).toContain("\n");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;

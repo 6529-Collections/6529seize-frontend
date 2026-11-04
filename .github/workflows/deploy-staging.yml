@@ -23,6 +23,9 @@ env:
   STAGING_BRANCH: "1a-staging"
   STAGING_REPO_DIR: ${{ vars.STAGING_REPO_DIR || '/home/ubuntu/6529seize-frontend' }}
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
+  # CloudFront distribution serving staging.6529.io pages; see
+  # ops/docs/developer/cloudfront-page-cache.md.
+  STAGING_PAGE_DISTRIBUTION_ID: ${{ vars.STAGING_PAGE_DISTRIBUTION_ID || 'E1DKA1VIRRUKKC' }}
 
 jobs:
   build-staging-artifact:
@@ -608,6 +611,11 @@ jobs:
             --delay-ms 10000 \
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
+
+      # The edge keeps prerendered pages for up to a day; purge it only after
+      # the new release answers, so a refill cannot capture the old build.
+      - name: Purge staging page edge cache
+        run: ops/scripts/purge-page-edge-cache.sh "$STAGING_PAGE_DISTRIBUTION_ID" staging.6529.io
 
       - name: Upload exact staging version evidence
         if: always()
