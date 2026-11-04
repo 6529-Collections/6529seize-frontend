@@ -120,6 +120,19 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
+  it("prunes unknown-wave deletion metadata without admitting late stale writes", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      for (let index = 0; index < 60; index++) {
+        result.current.removeDrop(`unknown-${index}`, "d1");
+      }
+      result.current.updateData({ key: "unknown-0", drops: [baseDrop] });
+      result.current.updateData({ key: "unknown-59", drops: [baseDrop] });
+    });
+    expect(result.current.getData("unknown-0")).toBeUndefined();
+    expect(result.current.getData("unknown-59")?.drops).toEqual([]);
+  });
+
   it("clears normal updates when a profile switch precedes deferred delivery", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();

@@ -6,6 +6,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { fetchWaveMessages } from "../utils/wave-messages-utils";
 import { reconcileWaveSnapshot } from "../utils/wave-resume";
 import type { WaveDataStoreUpdater, WaveHistoryGap } from "./types";
+import type { WaveAbortTrigger } from "./useWaveAbortController";
 
 const GAP_PAGE_LIMIT = 50;
 
@@ -14,25 +15,28 @@ export function useWaveHistoryGap({
   updateData,
   createController,
   cleanupController,
+  cancelFetch,
 }: Pick<WaveDataStoreUpdater, "getData" | "updateData"> & {
   readonly createController: (key: string) => AbortController;
   readonly cleanupController: (
     key: string,
     controller: AbortController
   ) => void;
+  readonly cancelFetch: (key: string, trigger: WaveAbortTrigger) => void;
 }) {
   const inFlight = useRef(
     new Map<
       string,
       {
         controller: AbortController;
+        waveId: string;
         promise: Promise<ApiDrop[] | null>;
       }
     >()
   );
-  return useCallback(
+  const fetchHistoryGap = useCallback(
     (waveId: string, gap: WaveHistoryGap) => {
-      const key = `${waveId}-gap`;
+      const key = `${waveId}-gap-${gap.newerThan}-${gap.olderThan}`;
       const pending = inFlight.current.get(key);
       if (pending && !pending.controller.signal.aborted) return pending.promise;
       const before = getData(waveId);
@@ -96,9 +100,18 @@ export function useWaveHistoryGap({
           }
         }
       })();
-      inFlight.current.set(key, { controller, promise });
+      inFlight.current.set(key, { controller, promise, waveId });
       return promise;
     },
     [cleanupController, createController, getData, updateData]
   );
+  const cancelHistoryGaps = useCallback(
+    (waveId: string) => {
+      for (const [key, request] of inFlight.current) {
+        if (request.waveId === waveId) cancelFetch(key, "pagination_cancelled");
+      }
+    },
+    [cancelFetch]
+  );
+  return { fetchHistoryGap, cancelHistoryGaps };
 }

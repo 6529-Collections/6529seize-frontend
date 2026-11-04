@@ -55,11 +55,12 @@ export function useWavePagination({
     cleanupController,
   } = useWaveAbortController("pagination");
 
-  const fetchHistoryGap = useWaveHistoryGap({
+  const { fetchHistoryGap, cancelHistoryGaps } = useWaveHistoryGap({
     getData,
     updateData,
     createController,
     cleanupController,
+    cancelFetch: cancelAbort,
   });
 
   // Track pagination loading state
@@ -352,7 +353,7 @@ export function useWavePagination({
       // Cancel the abort controller
       cancelAbort(waveId, "pagination_cancelled");
       cancelAbort(`${waveId}-around`, "pagination_cancelled");
-      cancelAbort(`${waveId}-gap`, "pagination_cancelled");
+      cancelHistoryGaps(waveId);
       delete aroundSerialNoStates.current[waveId];
 
       // Forget pagination state; the next page request starts a fresh one
@@ -367,7 +368,7 @@ export function useWavePagination({
         });
       }
     },
-    [cancelAbort, getData, updateData]
+    [cancelAbort, cancelHistoryGaps, getData, updateData]
   );
 
   /**

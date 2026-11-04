@@ -218,3 +218,92 @@ it("discards an in-flight history response after a profile switch", async () => 
   });
   expect(result.current.store.getData("wave")).toBeUndefined();
 });
+
+it("loads distinct gaps on one wave independently and deduplicates each interval", async () => {
+  const { result } = setup();
+  const first = { newerThan: 1, olderThan: 100 };
+  const second = { newerThan: 200, olderThan: 300 };
+  act(() =>
+    result.current.store.updateData({
+      key: "wave",
+      historyGaps: [first, second],
+    })
+  );
+  let finishFirst!: (rows: ApiDrop[]) => void;
+  let finishSecond!: (rows: ApiDrop[]) => void;
+  history
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishFirst = resolve;
+      })
+    )
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishSecond = resolve;
+      })
+    );
+  act(() => {
+    void result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap: first,
+    });
+    void result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap: second,
+    });
+    void result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap: first,
+    });
+  });
+  expect(history).toHaveBeenCalledTimes(2);
+  await act(async () => {
+    finishSecond([drop(299)]);
+    await Promise.resolve();
+  });
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([first]);
+  await act(async () => {
+    finishFirst([drop(99)]);
+    await Promise.resolve();
+  });
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([]);
+  expect(result.current.store.getData("wave")?.drops).toHaveLength(3);
+});
+
+it("cancels every missed-history request when its wave is released", async () => {
+  const { result } = setup();
+  const gaps = [
+    { newerThan: 1, olderThan: 100 },
+    { newerThan: 200, olderThan: 300 },
+  ];
+  act(() =>
+    result.current.store.updateData({ key: "wave", historyGaps: gaps })
+  );
+  let finish!: (rows: ApiDrop[]) => void;
+  history.mockReturnValue(
+    new Promise((resolve) => {
+      finish = resolve;
+    })
+  );
+  act(() => {
+    for (const gap of gaps) {
+      void result.current.pagination.fetchNextPage({
+        waveId: "wave",
+        type: DropSize.FULL,
+        gap,
+      });
+    }
+    result.current.pagination.cancelPaginationFetch("wave");
+  });
+  expect(history.mock.calls).toHaveLength(2);
+  expect(history.mock.calls.every((call) => call[2]?.aborted)).toBe(true);
+  await act(async () => {
+    finish([drop(99)]);
+    await Promise.resolve();
+  });
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual(gaps);
+  expect(result.current.store.getData("wave")?.drops).toHaveLength(1);
+});

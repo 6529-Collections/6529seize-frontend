@@ -76,6 +76,7 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
 };
 
 const cloneDrop = (drop: Drop): Drop => cloneValue(drop);
+const MAX_UNCACHED_TOMBSTONE_WAVES = 50;
 
 function mergeWaveDrops(
   current: Drop[],
@@ -718,16 +719,41 @@ function useWaveMessagesStore() {
 
   // Bind destructive cache callbacks to the rendered profile generation so a
   // caller holding an old callback cannot mutate a newly populated profile.
+  const pruneUncachedTombstones = useCallback(() => {
+    const uncached = [...deletedDropIdsRef.current.keys()].filter(
+      (waveId) =>
+        !waveMessagesRef.current[waveId] &&
+        !isWaveInUse(waveId) &&
+        !hasServerFeedSeed(waveId)
+    );
+    const expired = uncached.slice(
+      0,
+      Math.max(0, uncached.length - MAX_UNCACHED_TOMBSTONE_WAVES)
+    );
+    for (const waveId of expired) {
+      deletedDropIdsRef.current.delete(waveId);
+      // Pruning metadata also invalidates late writes, until a fresh load begins.
+      rememberEvictedWave(evictedWaveIdsRef.current, waveId);
+      evictionListenersRef.current.forEach((listener) => listener(waveId));
+    }
+  }, [hasServerFeedSeed, isWaveInUse]);
+
   const removeDrops = useCallback(
     (waveId: string, dropIds: readonly string[]) => {
-      if (storeGeneration !== storeGenerationRef.current) return;
+      if (
+        storeGeneration !== storeGenerationRef.current ||
+        dropIds.length === 0
+      )
+        return;
       const currentWave = waveMessagesRef.current[waveId];
       // Deletes can precede the first cached message or an in-flight feed.
       const deleted =
         deletedDropIdsRef.current.get(waveId) ?? new Set<string>();
       dropIds.forEach((id) => deleted.add(id));
+      deletedDropIdsRef.current.delete(waveId);
       deletedDropIdsRef.current.set(waveId, deleted);
-      if (!currentWave || dropIds.length === 0) return;
+      pruneUncachedTombstones();
+      if (!currentWave) return;
       const removed = new Set(dropIds);
       const drops = currentWave.drops.filter((drop) => !removed.has(drop.id));
       if (drops.length === currentWave.drops.length) return;
@@ -739,7 +765,7 @@ function useWaveMessagesStore() {
       dirtyWaveIdsRef.current.add(waveId);
       flushNotifications();
     },
-    [flushNotifications, storeGeneration]
+    [flushNotifications, pruneUncachedTombstones, storeGeneration]
   );
 
   const removeDrop = useCallback(
