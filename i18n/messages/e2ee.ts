@@ -575,7 +575,7 @@ export const E2EE_MESSAGES = {
   // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
   "e2ee.legacy.banner.label": "Not end-to-end encrypted.",
   "e2ee.legacy.banner.deletion":
-    "This history will be deleted from 6529’s servers on {date}, unless we’re legally required to keep it.",
+    "6529 deletes this history from its servers on {date} unless legally required to keep it.",
   "e2ee.legacy.banner.closed":
     "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}, except anything we’re legally required to keep.",
   "e2ee.legacy.region": "Unencrypted chat notice",

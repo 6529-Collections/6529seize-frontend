@@ -109,7 +109,7 @@ export default function PreferencesPageClient({
 
         <nav
           aria-label={t(locale, "preferences.tabs.ariaLabel")}
-          className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-2 tw-rounded-xl tw-bg-iron-950 tw-p-2 @[42rem]/preferences:tw-inline-grid @[42rem]/preferences:tw-auto-cols-fr @[42rem]/preferences:tw-grid-flow-col @[42rem]/preferences:tw-grid-cols-none"
+          className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-2 @[42rem]/preferences:tw-flex @[42rem]/preferences:tw-flex-wrap @[42rem]/preferences:tw-gap-4"
         >
           {getVisibleTabs().map((tab) => {
             const isActive = tab.id === activeTab;
@@ -121,10 +121,10 @@ export default function PreferencesPageClient({
                   fromProfile: returnToProfile,
                 })}
                 aria-current={isActive ? "page" : undefined}
-                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset @[42rem]/preferences:tw-max-w-48 @[42rem]/preferences:tw-px-4 motion-reduce:tw-transition-none ${
+                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-break-words tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 @[42rem]/preferences:tw-rounded-none @[42rem]/preferences:tw-border-b-2 @[42rem]/preferences:tw-border-solid motion-reduce:tw-transition-none ${
                   isActive
-                    ? "tw-bg-primary-500 tw-text-white focus-visible:tw-ring-white"
-                    : "tw-bg-iron-900 tw-text-iron-100 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800"
+                    ? "tw-bg-primary-500/10 tw-text-primary-300 @[42rem]/preferences:tw-border-primary-400 @[42rem]/preferences:tw-bg-transparent"
+                    : "tw-text-iron-300 @[42rem]/preferences:tw-border-transparent desktop-hover:hover:tw-text-iron-50"
                 }`}
               >
                 {t(locale, tab.labelKey)}

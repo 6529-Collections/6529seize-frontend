@@ -23,6 +23,7 @@ import {
   type INotificationVotingCreditsReturned,
   type INotificationDropPollVoted,
   type INotificationDropReacted,
+  type INotificationEncryptedMessage,
   type INotificationSubscriptionCoverage,
   type NotificationCause,
   type NotificationPollVoteOption,
@@ -430,9 +431,32 @@ const mapMemeCollaborationNotification = (
   ];
 };
 
+const mapEncryptedMessageNotification = (
+  notification: ApiNotificationV2
+): INotificationEncryptedMessage => {
+  const { encrypted_group, encrypted_message_seq } =
+    notification.additional_context;
+  return {
+    id: notification.id,
+    cause: ApiNotificationCause.E2EeMessage,
+    created_at: notification.created_at,
+    read_at: notification.read_at,
+    related_identity: notification.related_identity
+      ? mapIdentityOverviewToProfileMin(notification.related_identity)
+      : null,
+    additional_context: {
+      ...(encrypted_group === undefined ? {} : { encrypted_group }),
+      ...(encrypted_message_seq === undefined ? {} : { encrypted_message_seq }),
+    },
+  };
+};
+
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
+  if (notification.cause === ApiNotificationCause.E2EeMessage) {
+    return [mapEncryptedMessageNotification(notification)];
+  }
   if (notification.cause === ApiNotificationCause.VotingCreditsReturned) {
     return mapVotingCreditsReturnedNotification(notification);
   }
