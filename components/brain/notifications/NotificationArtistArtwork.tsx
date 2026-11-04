@@ -12,6 +12,10 @@ export default function NotificationArtistArtwork({
   readonly notification: INotificationArtistArtwork;
 }) {
   const locale = useBrowserLocale();
+  const identity = notification.related_identity;
+  const artist = identity.is_anonymous
+    ? t(locale, "competitions.anonymousAuthor")
+    : (identity.handle ?? t(locale, "notifications.unknownProfile"));
   const context = notification.additional_context;
   const title = context.artwork_title?.trim() ?? "";
   const artworkLabel =
@@ -28,7 +32,7 @@ export default function NotificationArtistArtwork({
       <ArtworkNotificationThumbnail notification={notification} />
       <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400 [overflow-wrap:anywhere]">
         {tRich(locale, "artworkAlerts.notification", {
-          artist: notification.related_identity.handle,
+          artist,
           artwork: (
             <Link
               key="artwork"
