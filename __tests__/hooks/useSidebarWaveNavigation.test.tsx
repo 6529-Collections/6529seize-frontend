@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useWaveSidebarCollection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
+import { recordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
 
 let mockViewer = { key: "alice", canUseCollections: true, enabled: true };
 jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
@@ -29,7 +30,7 @@ function selectCollection(collection: WaveSidebarCollection) {
   act(() => result.current[1](collection));
   unmount();
 }
-function setup() {
+function setup(activeContainerId?: string, activeWaveId?: string) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -45,10 +46,16 @@ function setup() {
   return {
     ...renderHook(
       ({ list }: { list: typeof waves } = { list: waves }) =>
-        useSidebarWaveNavigation({ waves: list, scrollContainerRef }),
+        useSidebarWaveNavigation({
+          waves: list,
+          scrollContainerRef,
+          activeContainerId,
+          activeWaveId,
+        }),
       { wrapper, initialProps: { list: waves } }
     ),
     container,
+    client,
   };
 }
 beforeEach(() => {
@@ -76,6 +83,84 @@ it("switches collections without making Pinned a prerequisite for All and restor
   act(() => result.current.setCollection("all"));
   expect(result.current.visibleWaves).toHaveLength(3);
   expect(container.scrollTop).toBe(300);
+});
+
+it("removes an explicitly left active wave from Joined and restores its direct-link fallback after rejoining", async () => {
+  selectCollection("joined");
+  const { result, client, rerender } = setup("other");
+  expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+    "other",
+  ]);
+  const record = (following: boolean) =>
+    recordWaveSidebarMembership({
+      queryClient: client,
+      viewerIdentityKey: "alice",
+      waveId: "other",
+      following,
+    });
+  act(() => record(false));
+  await waitFor(() =>
+    expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+      "joined",
+    ])
+  );
+  rerender({
+    list: waves.map((wave) =>
+      wave.id === "other" ? { ...wave, isFollowing: true } : wave
+    ),
+  });
+  expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+  ]);
+  act(() => result.current.setCollection("all"));
+  expect(result.current.visibleWaves).toHaveLength(3);
+  act(() => result.current.setCollection("joined"));
+  expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+  ]);
+  act(() => record(true));
+  await waitFor(() => expect(result.current.visibleWaves).toHaveLength(2));
+});
+
+it("does not let one viewer's leave suppress another viewer's active wave", async () => {
+  selectCollection("joined");
+  const { result, client, rerender } = setup("other");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient: client,
+      viewerIdentityKey: "alice",
+      waveId: "other",
+      following: false,
+    })
+  );
+  await waitFor(() => expect(result.current.visibleWaves).toHaveLength(1));
+  mockViewer = { key: "bob", canUseCollections: true, enabled: true };
+  rerender();
+  expect(result.current.visibleWaves).toHaveLength(2);
+});
+
+it("removes an unjoined active parent fallback when its active child is left", async () => {
+  selectCollection("joined");
+  const { result, client, rerender } = setup("other", "child");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient: client,
+      viewerIdentityKey: "alice",
+      waveId: "child",
+      following: false,
+    })
+  );
+  await waitFor(() => expect(result.current.visibleWaves).toHaveLength(1));
+  rerender({
+    list: waves.map((wave) =>
+      wave.id === "other" ? { ...wave, isFollowedSubwaveContainer: true } : wave
+    ),
+  });
+  expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+    "other",
+  ]);
 });
 
 it("keeps search open for an empty query until explicitly closed", () => {

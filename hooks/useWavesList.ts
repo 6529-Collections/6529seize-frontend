@@ -23,6 +23,7 @@ import {
 } from "./useWaveSubwaves";
 import { useWavesListRefetch } from "./useWavesListRefetch";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { useWaveSidebarMembership } from "./waves/useWaveSidebarMembership";
 import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -91,10 +92,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
   const activeWave = options.activeWave ?? null;
-  const activeSidebarContext = useMemo(
-    () => getActiveSidebarContext(activeWave),
-    [activeWave]
-  );
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
@@ -135,6 +132,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasAuthenticatedProfile,
     hasValidWalletAuthorization,
   });
+  const leftWaveIds = useWaveSidebarMembership(viewerIdentityKey);
+  const activeSidebarContext = useMemo(
+    () =>
+      getActiveSidebarContext(
+        isJoinedMode && leftWaveIds.includes(activeWave?.id ?? "")
+          ? null
+          : activeWave
+      ),
+    [activeWave, isJoinedMode, leftWaveIds]
+  );
 
   const nonPinnedFilter = getNonPinnedFilter(isConnectedIdentity);
 
@@ -666,9 +673,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     subwaves.forEach((wave) => {
       if (
         !isJoinedMode ||
-        wave.subscribed ||
-        wave.id === activeSubwave?.id ||
-        topSectionWaveIds.has(wave.parentWaveId ?? "")
+        (!leftWaveIds.includes(wave.id) &&
+          (wave.subscribed ||
+            wave.id === activeSubwave?.id ||
+            topSectionWaveIds.has(wave.parentWaveId ?? "")))
       ) {
         // The overview is fresher than the temporary full-wave route context.
         visibleSubwaves.set(wave.id, wave);
@@ -683,6 +691,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     shouldLoadMainWaves,
     subwaves,
     topSectionWaveIds,
+    leftWaveIds,
   ]);
 
   // New drops counting logic has been removed and will be managed by context

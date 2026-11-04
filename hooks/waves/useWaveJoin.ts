@@ -9,6 +9,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useRecordWaveSidebarMembership } from "./useWaveSidebarMembership";
 import { t } from "@/i18n/messages";
 import {
   commonApiDeleteWithBody,
@@ -47,6 +48,7 @@ export function useWaveJoin(
 ): WaveJoinControls {
   const { setToast, requestAuth } = useAuth();
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
+  const recordMembership = useRecordWaveSidebarMembership();
   const locale = useBrowserLocale();
   const [isPending, setIsPending] = useState(false);
   const pendingRef = useRef(false);
@@ -82,6 +84,7 @@ export function useWaveJoin(
       });
       // The join is recorded as soon as the server accepts it; the optional
       // all-messages subscription below must not undo or misreport it.
+      recordMembership(wave.id, true);
       onWaveFollowChange({ waveId: wave.id, following: true });
       if (subscribeToAllDrops) {
         try {
@@ -109,8 +112,7 @@ export function useWaveJoin(
         endpoint: getSubscriptionEndpoint(wave.id),
         body: { actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS },
       });
-    },
-    onSuccess: () => {
+      recordMembership(wave.id, false);
       onWaveFollowChange({ waveId: wave.id, following: false });
     },
     onError: showError("waves.join.leaveErrorTitle"),

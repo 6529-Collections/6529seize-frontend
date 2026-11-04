@@ -91,6 +91,9 @@ helper keeps its desktop label and opens nomination guidance.
 - Subwaves have their own `Join`; joining a subwave does not join its parent.
 - The header and `About` buttons use the same join request and update the
   wave list immediately, including the `Joined` collection.
+- Leaving removes the open wave from `Joined` while keeping its content open.
+  A parent remains if you still belong to one of its subwaves. Failed requests
+  keep the joined row; joining again restores a wave you left.
 
 ## Permission Rules
 

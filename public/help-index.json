@@ -7145,6 +7145,7 @@
         "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
         "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
         "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Successfully leaving the open wave removes it from the sidebar's Joined collection without closing its content. It stays removed when switching collections during the current session, and joining again restores it. A parent stays visible if you still belong to one of its subwaves. A failed leave keeps the joined row.",
         "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
         "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
         "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",

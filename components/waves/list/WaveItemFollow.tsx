@@ -13,11 +13,13 @@ import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubsc
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import Button from "@/components/utils/button/Button";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useRecordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
 
 export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy, setToast, requestAuth } =
     useContext(AuthContext);
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
+  const recordMembership = useRecordWaveSidebarMembership();
   const isSubscribed = !!wave.subscribed_actions.length;
   const label = isSubscribed ? "Following" : "Follow";
   const canSubscribe = !!connectedProfile?.handle && !activeProfileProxy;
@@ -35,6 +37,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      recordMembership(wave.id, true);
     },
     onSuccess: () => {
       onWaveFollowChange({
@@ -66,6 +69,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      recordMembership(wave.id, false);
     },
     onSuccess: () => {
       onWaveFollowChange({
