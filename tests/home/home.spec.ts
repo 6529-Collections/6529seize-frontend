@@ -15,7 +15,10 @@ import {
   zeroHash,
 } from "viem";
 import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis/abis";
-import { getAppEnvironment } from "../../config/appEnvironment";
+import {
+  getAppEnvironment,
+  isLocalAppEnvironment,
+} from "../../config/appEnvironment";
 import {
   isDesktopWebProject,
   isMobileWebProject,
@@ -37,6 +40,72 @@ const loadingTestArtwork = {
   collection: "The Memes",
   season: 1,
 };
+
+async function expectDesktopEnvironmentOverlay(page: Page) {
+  const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+  const logo = sidebar.getByRole("img", { name: "6529Seize", exact: true });
+  const home = sidebar.getByRole("link", { name: /^6529Seize/ });
+  await expect(home).toHaveAttribute("href", "/");
+  await expect(home).toHaveCSS("width", "40px");
+  await expect(home).toHaveCSS("height", "40px");
+  const railBox = await sidebar.boundingBox();
+  const logoBox = await logo.boundingBox();
+  const scrollBox = await page
+    .getByLabel("Primary sidebar", { exact: true })
+    .locator('[data-sidebar-scroll="true"]')
+    .boundingBox();
+  // The production header is 64px tall after the rail's 8px top padding.
+  // Every environment uses these same logo and navigation coordinates.
+  expect(logoBox!.x).toBe(railBox!.x + 20);
+  expect(logoBox!.y).toBe(railBox!.y + 20);
+  expect(scrollBox!.y).toBe(railBox!.y + 72);
+
+  const environment = getAppEnvironment(page.url());
+  if (!environment.badge) {
+    await expect(
+      sidebar.getByRole("img", { name: /^Environment:/ })
+    ).toHaveCount(0);
+    return;
+  }
+  const label = `Environment: ${environment.badge} (${environment.host})`;
+  const badge = sidebar.getByRole("img", { name: label, exact: true });
+  await expect(home).toHaveAccessibleName(`6529Seize ${label}`);
+  await expect(badge).toHaveCSS("pointer-events", "none");
+  await expect(badge).toHaveCSS("position", "absolute");
+  const badgeBox = await badge.boundingBox();
+  expect(badgeBox!.x + badgeBox!.width / 2).toBeCloseTo(
+    logoBox!.x + logoBox!.width / 2,
+    0
+  );
+  expect(badgeBox!.y + badgeBox!.height / 2).toBeCloseTo(
+    logoBox!.y + logoBox!.height / 2,
+    0
+  );
+  const port = new URL(page.url()).port;
+  const expectedLines =
+    isLocalAppEnvironment(page.url()) && port
+      ? ["LCL", port]
+      : [environment.badge];
+  const lines = sidebar
+    .getByRole("img", { name: label, exact: true })
+    .locator(":scope > span");
+  await expect(lines).toHaveText(expectedLines);
+  if (expectedLines.length === 2) {
+    const first = await lines.nth(0).boundingBox();
+    const second = await lines.nth(1).boundingBox();
+    expect(second!.y).toBeGreaterThanOrEqual(first!.y + first!.height);
+  }
+  expect(
+    await badge.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const target = element.ownerDocument.elementFromPoint(
+        box.x + box.width / 2,
+        box.y + box.height / 2
+      );
+      return target?.closest("a") === element.closest("a");
+    })
+  ).toBe(true);
+}
 
 async function installLoadingTestArtwork(page: Page) {
   await page.route("**/home-loading-fixture.png", (route) =>
@@ -2031,6 +2100,25 @@ test("mobile web starts with its header and full-width content before hydration 
     );
     await expect(header).toBeVisible();
     await expect(header).toHaveAttribute("aria-busy", "false");
+    const environment = getAppEnvironment(page.url());
+    if (environment.badge) {
+      const badge = header.getByLabel(
+        `Environment: ${environment.badge} (${environment.host})`,
+        { exact: true }
+      );
+      await expect(badge).toHaveText(environment.badge);
+      await expect(badge).not.toHaveCSS("position", "absolute");
+      await expect(badge).toHaveAttribute("data-tooltip-id");
+      const badgeBox = await badge.boundingBox();
+      const logoBox = await header
+        .getByRole("img", { name: "6529Seize" })
+        .boundingBox();
+      expect(badgeBox!.x).toBeGreaterThanOrEqual(logoBox!.x + logoBox!.width);
+      expect(badgeBox!.y + badgeBox!.height / 2).toBeCloseTo(
+        logoBox!.y + logoBox!.height / 2,
+        0
+      );
+    }
     await expect(header.getByRole("status")).toHaveCount(0);
     await expect(
       header.getByRole("button", { name: "Open menu" })
@@ -2133,6 +2221,7 @@ test("desktop account updates do not move utilities, including in short expanded
       .locator("[data-sidebar-account]");
     await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
     await expect(search).toBeVisible();
+    await expectDesktopEnvironmentOverlay(page);
     const beforeSearch = await search.boundingBox();
     const beforeAccount = await account.boundingBox();
     expect(beforeSearch).not.toBeNull();
@@ -2209,6 +2298,7 @@ test("desktop account updates do not move utilities, including in short expanded
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
     await page.keyboard.press("Enter");
     await expect(sidebarToggle).toHaveAttribute("aria-expanded", "true");
+    await expectDesktopEnvironmentOverlay(page);
     await expect(sidebarToggle).toHaveCSS("width", "20px");
     const expandedToggleBox = await sidebarToggle.boundingBox();
     expect(expandedToggleBox).not.toBeNull();
@@ -2249,6 +2339,22 @@ test("desktop account updates do not move utilities, including in short expanded
     expect(searchBox).not.toBeNull();
     expect(updateBox).not.toBeNull();
     expect(searchBox!.y).toBeCloseTo(updateBox!.y + updateBox!.height, 0);
+    const home = sidebar.getByRole("link", { name: /^6529Seize/ });
+    // Overlay center, logo edge, and keyboard activation all retain link semantics.
+    await home.click();
+    await expect(page).toHaveURL(new URL("/", page.url()).toString());
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    await home.click({ position: { x: 1, y: 1 } });
+    await expect(page).toHaveURL(new URL("/", page.url()).toString());
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    await home.focus();
+    await expect(home).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(sidebarToggle).toBeFocused();
+    await home.focus();
+    await expect(home).not.toHaveCSS("box-shadow", "none");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new URL("/", page.url()).toString());
   } finally {
     releaseVersion();
   }
