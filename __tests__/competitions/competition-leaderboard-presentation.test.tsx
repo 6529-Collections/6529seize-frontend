@@ -107,6 +107,10 @@ jest.mock(
           />
         )}
         <button onClick={() => onSortChange("PRICE")}>Price</button>
+        <button onClick={() => onSortChange("RATING_PREDICTION")}>
+          Projected Vote
+        </button>
+        <button onClick={() => onSortChange("REALTIME_VOTE")}>Raw votes</button>
         {onPriceRangeChange && (
           <button
             onClick={() => onPriceRangeChange({ minPrice: 0.1, maxPrice: 2 })}
@@ -265,4 +269,19 @@ it("keeps curation price filtering and sorting scoped to the selected competitio
       max_price: "2",
     }
   );
+});
+
+it("requests checkpoint projection ordering independently of raw votes and filters", () => {
+  mockCapabilities = ["MAIN_STAGE"];
+  render(<CompetitionLeaderboard />);
+  fireEvent.click(screen.getByRole("button", { name: "Projected Vote" }));
+  expect(latestLeaderboardParams().sort).toBe("decision_rating");
+  expect(latestLeaderboardParams()).not.toHaveProperty("direction");
+  fireEvent.click(screen.getByRole("checkbox", { name: "Additional Action" }));
+  expect(latestLeaderboardParams()).toMatchObject({
+    sort: "decision_rating",
+    is_additional_action_promised: "true",
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Raw votes" }));
+  expect(latestLeaderboardParams().sort).toBe("real_time_rating");
 });

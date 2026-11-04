@@ -38,7 +38,7 @@ import WaveLeaderboardError from "@/components/waves/leaderboard/WaveLeaderboard
 const sorts: Partial<Record<WaveDropsLeaderboardSort, string>> = {
   RANK: "rating",
   REALTIME_VOTE: "real_time_rating",
-  RATING_PREDICTION: "real_time_rating",
+  RATING_PREDICTION: "decision_rating",
   TREND: "trend",
   CREATED_AT: "submitted_at",
   PRICE: "price",
