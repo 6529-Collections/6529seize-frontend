@@ -122,11 +122,11 @@ export default function NotificationsInbox({
           )}
           <button
             type="button"
-            className={ACTION_CLASS}
+            className="tw-inline-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
             onClick={onClose}
             aria-label={t(locale, "notifications.inbox.close")}
           >
-            <XMarkIcon aria-hidden="true" className="tw-size-5" />
+            <XMarkIcon aria-hidden="true" className="tw-size-5 tw-shrink-0" />
           </button>
         </div>
       </div>
