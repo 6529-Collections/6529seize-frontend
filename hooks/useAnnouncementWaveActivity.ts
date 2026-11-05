@@ -8,6 +8,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
+import type { SidebarWave } from "@/types/waves.types";
 
 // Wave metrics include replies. The main feed excludes collapsed replies and
 // supplies the correct timestamp even after a reload or deletion.
@@ -69,4 +70,22 @@ export function useAnnouncementWaveTimestamp({
     }
   );
   return data ?? null;
+}
+
+export function useAnnouncementWaveActivity(
+  wave: SidebarWave | null,
+  viewerIdentityKey: string | null
+): SidebarWave | null {
+  const timestamp = useAnnouncementWaveTimestamp({
+    waveId: wave?.id ?? null,
+    enabled: wave?.repliesCollapsed === true,
+    viewerIdentityKey,
+  });
+  return useMemo(
+    () =>
+      wave?.repliesCollapsed
+        ? { ...wave, latestTopLevelDropTimestamp: timestamp }
+        : wave,
+    [wave, timestamp]
+  );
 }

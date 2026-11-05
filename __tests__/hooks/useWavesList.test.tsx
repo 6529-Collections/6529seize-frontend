@@ -12,8 +12,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
 
-jest.mock("@/hooks/useAnnouncementWaveTimestamp", () => ({
-  useAnnouncementWaveTimestamp: jest.fn(() => null),
+jest.mock("@/hooks/useAnnouncementWaveActivity", () => ({
+  useAnnouncementWaveActivity: jest.fn((wave) => wave),
 }));
 
 jest.mock("@/hooks/useWavesV2", () => {

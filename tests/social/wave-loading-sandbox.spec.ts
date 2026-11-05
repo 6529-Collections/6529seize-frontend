@@ -1475,6 +1475,33 @@ test("announcement replies preserve the unread badge and top-level timestamp", a
   send();
   await expect(row.getByText("1m", { exact: true })).toBeVisible();
   await expect(avatar.getByText("1", { exact: true })).toBeVisible();
+  // Full updates must refresh the time immediately too, without a reload or poll.
+  latest = {
+    ...latest,
+    id: "announcement-full-root",
+    created_at: Date.now(),
+    serial_no: 503,
+  };
+  for (const socket of sockets)
+    socket.send(
+      JSON.stringify({
+        type: "DROP_UPDATE",
+        data: {
+          id: latest.id,
+          wave: { id: ANNOUNCEMENTS },
+          serial_no: 503,
+          author: { id: "another-reader", handle: "someone-else" },
+          created_at: latest.created_at,
+          drop_type: "CHAT",
+          parts: [],
+          parts_count: 1,
+        },
+      })
+    );
+  await expect(row.getByText("Just now", { exact: true })).toBeVisible({
+    timeout: 5000,
+  });
+  await expect(avatar.getByText("2", { exact: true })).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("announcement-sidebar.png"),
   });

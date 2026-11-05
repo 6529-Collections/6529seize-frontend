@@ -54,7 +54,8 @@ Timestamp source and precedence:
 For Announcements with collapsed replies, the time shows the latest top-level
 announcement. Replies do not move it forward. It refreshes when a new
 announcement arrives or a post is deleted, and is checked periodically. While
-the initial timestamp is loading, the line stays hidden.
+the initial timestamp is loading, or when there are no top-level announcements,
+the line stays hidden.
 
 ## Live Refresh, Unread, and Mute Behavior
 

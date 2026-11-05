@@ -10,7 +10,13 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 
@@ -378,7 +384,8 @@ function useNewDropCounter(
 
   const currentProfileId = useRef(connectedProfile?.id);
   const currentDropHandler = useRef(handleDropUpdate);
-  useEffect(() => {
+  // Commit the viewer and handler together before async resolutions can run.
+  useLayoutEffect(() => {
     currentProfileId.current = connectedProfile?.id;
     currentDropHandler.current = handleDropUpdate;
   }, [connectedProfile?.id, handleDropUpdate]);
@@ -462,8 +469,6 @@ function useNewDropCounter(
         connectedProfile?.id,
         enabled,
         otherListWaveIds,
-        refetchWaves,
-        unknownWaveRefetchCooldownMs,
         waves,
         resolveDropUpdateRef,
       ]

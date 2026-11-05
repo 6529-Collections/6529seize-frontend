@@ -165,6 +165,53 @@ describe("useNewDropCounter", () => {
     }
   );
 
+  it("discards a compact resolution after switching profiles", async () => {
+    let finish = (_drop: unknown) => {};
+    fetchDropByIdBatched.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    let profileId = "me-id";
+    const switchingWrapper = ({ children }: React.PropsWithChildren) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: profileId, handle: "me" },
+          } as React.ContextType<typeof AuthContext>
+        }
+      >
+        {children}
+      </AuthContext.Provider>
+    );
+    const { result, rerender } = renderHook(
+      () =>
+        useNewDropCounter(
+          null,
+          [{ ...waves[1], repliesCollapsed: true }],
+          jest.fn()
+        ),
+      { wrapper: switchingWrapper }
+    );
+    emitDropUpdateRef({
+      drop_id: "late",
+      wave_id: "wave2",
+      serial_no: 13,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+    profileId = "new-profile";
+    rerender();
+    await act(async () => {
+      finish({
+        wave: { id: "wave2" },
+        author: { handle: "other" },
+        created_at: 60,
+        serial_no: 13,
+      });
+    });
+    expect(result.current.newDropsCounts["wave2"]).toBeUndefined();
+  });
+
   it("increments counts and resets all", () => {
     const refetch = jest.fn();
     const { result } = renderHook(

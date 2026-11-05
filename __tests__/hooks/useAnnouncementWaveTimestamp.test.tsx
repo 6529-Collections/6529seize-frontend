@@ -1,7 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
-import { useAnnouncementWaveTimestamp } from "@/hooks/useAnnouncementWaveTimestamp";
+import {
+  useAnnouncementWaveActivity,
+  useAnnouncementWaveTimestamp,
+} from "@/hooks/useAnnouncementWaveActivity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { WsMessageType } from "@/helpers/Types";
 
@@ -116,4 +119,25 @@ it("does not request an absent or disabled wave", () => {
   expect(result.current).toBeNull();
   emit(WsMessageType.DROP_DELETE, { wave_id: "announcements" });
   expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it("removes the timestamp override when replies switch back to inline", async () => {
+  fetchMock.mockResolvedValue({ drops: [{ created_at: 100 }] });
+  const { wrapper } = setup();
+  const { result, rerender } = renderHook(
+    ({ repliesCollapsed }) =>
+      useAnnouncementWaveActivity(
+        {
+          id: "announcements",
+          repliesCollapsed,
+        } as import("@/types/waves.types").SidebarWave,
+        "reader"
+      ),
+    { wrapper, initialProps: { repliesCollapsed: true } }
+  );
+  await waitFor(() =>
+    expect(result.current?.latestTopLevelDropTimestamp).toBe(100)
+  );
+  rerender({ repliesCollapsed: false });
+  expect(result.current).not.toHaveProperty("latestTopLevelDropTimestamp");
 });

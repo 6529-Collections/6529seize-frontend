@@ -17,7 +17,7 @@ import {
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
-import { useAnnouncementWaveTimestamp } from "./useAnnouncementWaveTimestamp";
+import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
   useWaveSubwavesMap,
@@ -329,7 +329,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         : null,
     [fetchedAnnouncementWave]
   );
-  const announcementWave = useMemo(() => {
+  const announcementWaveSource = useMemo(() => {
     const resolvedWave =
       trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
     if (
@@ -342,11 +342,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     return resolvedWave;
   }, [trackedAnnouncementWave, fetchedAnnouncementSidebarWave]);
 
-  const announcementTimestamp = useAnnouncementWaveTimestamp({
-    waveId: announcementWave?.id ?? null,
-    enabled: announcementWave?.repliesCollapsed === true,
-    viewerIdentityKey,
-  });
+  const announcementWave = useAnnouncementWaveActivity(
+    announcementWaveSource,
+    viewerIdentityKey
+  );
 
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
@@ -536,9 +535,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     if (announcementWave) {
       allWavesArray.push({
         ...announcementWave,
-        ...(announcementWave.repliesCollapsed
-          ? { latestTopLevelDropTimestamp: announcementTimestamp }
-          : {}),
         isPinned: pinnedWavesSet.has(announcementWave.id),
       });
     }
@@ -551,7 +547,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     separatelyFetchedPinnedWaves,
     pinnedIds,
     announcementWave,
-    announcementTimestamp,
     isAnnouncementsWave,
     isJoinedMode,
     shouldLoadMainWaves,
