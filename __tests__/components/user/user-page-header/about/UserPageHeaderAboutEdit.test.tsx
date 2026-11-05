@@ -5,7 +5,6 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import { useState } from "react";
 
 jest.mock("react-use", () => ({ useKeyPressEvent: jest.fn() }));
 
@@ -40,18 +39,11 @@ let mutationError: Error | null = null;
 });
 
 function AboutEditHarness({ onClose = jest.fn() }: { onClose?: () => void }) {
-  const [value, setValue] = useState("old");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   return (
     <UserPageHeaderAboutEdit
       profile={{ query: "alice" } as any}
       statement={{ id: "about", statement_value: "old" } as any}
       onClose={onClose}
-      value={value}
-      onValueChange={setValue}
-      errorMsg={errorMsg}
-      onErrorMsgChange={setErrorMsg}
     />
   );
 }
