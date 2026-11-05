@@ -227,10 +227,16 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     const save = page.getByRole("button", { name: "Save", exact: true });
     const failures = [
       ["Unavailable", "Couldn't save About"],
-      ["hate speech", "Hate speech warning"],
-      ["personal insults", "Personal insult warning"],
-      ["inappropriate language", "Language warning"],
-      ["doxxing of another person", "Privacy warning"],
+      ["About statement rejected for hate speech", "Hate speech warning"],
+      [
+        "About statement rejected for personal insults",
+        "Personal insult warning",
+      ],
+      ["About statement denied for inappropriate language", "Language warning"],
+      [
+        "About statement rejected for doxxing of another person",
+        "Privacy warning",
+      ],
     ] as const;
     for (const [error, title] of failures) {
       await page.route(

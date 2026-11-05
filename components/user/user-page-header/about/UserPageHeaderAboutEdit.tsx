@@ -9,7 +9,6 @@ import type {
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
@@ -17,24 +16,20 @@ import { useContext, useEffect, useId, useRef, useState } from "react";
 import { useKeyPressEvent } from "react-use";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 import UserPageHeaderAboutEditError from "./UserPageHeaderAboutEditError";
+import {
+  AboutEditError,
+  AboutStatementSaveError,
+} from "./about-statement-errors";
 import UserPageHeaderAboutInput from "./UserPageHeaderAboutInput";
 export default function UserPageHeaderAboutEdit({
   profile,
   statement,
   onClose,
-  value: controlledValue,
-  onValueChange: controlledOnValueChange,
-  errorMsg: controlledErrorMsg,
-  onErrorMsgChange: controlledOnErrorMsgChange,
   autoFocus = false,
 }: {
   readonly profile: ApiIdentity;
   readonly statement: CicStatement | null;
   readonly onClose: () => void;
-  readonly value?: string | undefined;
-  readonly onValueChange?: ((value: string) => void) | undefined;
-  readonly errorMsg?: string | null | undefined;
-  readonly onErrorMsgChange?: ((errorMsg: string | null) => void) | undefined;
   readonly autoFocus?: boolean | undefined;
 }) {
   const { onProfileStatementAdd, onProfileStatementRemove } = useContext(
@@ -45,15 +40,8 @@ export default function UserPageHeaderAboutEdit({
 
   const aboutInputId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [internalValue, setInternalValue] = useState(
-    statement?.statement_value ?? ""
-  );
-  const [internalErrorMsg, setInternalErrorMsg] = useState<string | null>(null);
-  const value = controlledValue ?? internalValue;
-  const errorMsg =
-    controlledErrorMsg === undefined ? internalErrorMsg : controlledErrorMsg;
-  const onValueChange = controlledOnValueChange ?? setInternalValue;
-  const onErrorMsgChange = controlledOnErrorMsgChange ?? setInternalErrorMsg;
+  const [value, setValue] = useState(statement?.statement_value ?? "");
+  const [error, setError] = useState<AboutStatementSaveError | null>(null);
   const profileStatementTarget =
     [profile.query, profile.handle, profile.primary_wallet]
       .map((value) => value?.trim() ?? "")
@@ -79,7 +67,7 @@ export default function UserPageHeaderAboutEdit({
   const saveStatementMutation = useMutation({
     mutationFn: async (statementValue: string) => {
       setLoading(true);
-      onErrorMsgChange(null);
+      setError(null);
       if (statement && statementValue.trim().length === 0) {
         await commonApiDelete({
           endpoint: `profiles/${profileStatementTarget}/cic/statements/${statement.id}`,
@@ -100,7 +88,7 @@ export default function UserPageHeaderAboutEdit({
       });
     },
     onSuccess: (_data, statementValue) => {
-      onErrorMsgChange(null);
+      setError(null);
       setToast({
         message: getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.success"
@@ -114,13 +102,8 @@ export default function UserPageHeaderAboutEdit({
       }
       onClose();
     },
-    onError: (error) => {
-      onErrorMsgChange(
-        getToastErrorDetails(error) ??
-          getUserProfileHeaderMessage(
-            "user.profileHeader.aboutEdit.errors.saveFailed"
-          )
-      );
+    onError: (cause) => {
+      setError(new AboutStatementSaveError(cause));
     },
     onSettled: () => {
       setLoading(false);
@@ -151,10 +134,11 @@ export default function UserPageHeaderAboutEdit({
           id={aboutInputId}
           value={value}
           onChange={(nextValue) => {
-            onErrorMsgChange(null);
-            onValueChange(nextValue);
+            setError(null);
+            setValue(nextValue);
           }}
-          errorMsg={errorMsg}
+          errorMsg={error?.message ?? null}
+          errorType={error?.type ?? AboutEditError.UNKNOWN}
           required={!statement}
           inputRef={inputRef}
         />
@@ -184,11 +168,12 @@ export default function UserPageHeaderAboutEdit({
         </div>
       </form>
       <AnimatePresence mode="wait" initial={false}>
-        {errorMsg && (
+        {error && (
           <UserPageHeaderAboutEditError
             id={`${aboutInputId}-profile-about-error`}
-            msg={errorMsg}
-            closeError={() => onErrorMsgChange(null)}
+            msg={error.message}
+            errorType={error.type}
+            closeError={() => setError(null)}
           />
         )}
       </AnimatePresence>

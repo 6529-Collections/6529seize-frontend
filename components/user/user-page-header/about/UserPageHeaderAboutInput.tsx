@@ -1,4 +1,4 @@
-import { AboutEditError, getAboutErrorType } from "./about-statement-errors";
+import { AboutEditError } from "./about-statement-errors";
 import type { Ref } from "react";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -9,6 +9,7 @@ export default function UserPageHeaderAboutInput({
   value,
   onChange,
   errorMsg,
+  errorType,
   required = false,
   inputRef,
 }: {
@@ -16,6 +17,7 @@ export default function UserPageHeaderAboutInput({
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly errorMsg: string | null;
+  readonly errorType: AboutEditError;
   readonly required?: boolean;
   readonly inputRef?: Ref<HTMLTextAreaElement>;
 }) {
@@ -36,10 +38,7 @@ export default function UserPageHeaderAboutInput({
         aria-label={getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.textareaLabel"
         )}
-        aria-invalid={
-          errorMsg !== null &&
-          getAboutErrorType(errorMsg) !== AboutEditError.UNKNOWN
-        }
+        aria-invalid={errorMsg !== null && errorType !== AboutEditError.UNKNOWN}
         aria-describedby={
           errorMsg
             ? `${id}-character-count ${id}-profile-about-error`

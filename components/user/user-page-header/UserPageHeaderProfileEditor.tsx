@@ -18,6 +18,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 import UserPageHeaderAboutEditError from "./about/UserPageHeaderAboutEditError";
+import { AboutEditError } from "./about/about-statement-errors";
 import UserPageHeaderAboutInput from "./about/UserPageHeaderAboutInput";
 import type { useProfileEditor } from "./useProfileEditor";
 import { getUserProfileHeaderMessage as message } from "./user-page-header.messages";
@@ -213,11 +214,12 @@ export default function UserPageHeaderProfileEditor({
               editor.updateDraft({ about: value });
               editor.setAboutError(null);
             }}
-            errorMsg={editor.aboutError}
+            errorMsg={editor.aboutError?.message ?? null}
+            errorType={editor.aboutError?.type ?? AboutEditError.UNKNOWN}
           />
         </div>
       </fieldset>
-      {(editor.error ?? editor.aboutError) && (
+      {(editor.error !== null || editor.aboutError !== null) && (
         <div
           ref={errorRef}
           tabIndex={-1}
@@ -227,7 +229,8 @@ export default function UserPageHeaderProfileEditor({
           {editor.aboutError ? (
             <UserPageHeaderAboutEditError
               id={`${aboutInputId}-profile-about-error`}
-              msg={editor.aboutError}
+              msg={editor.aboutError.message}
+              errorType={editor.aboutError.type}
               closeError={() => editor.setAboutError(null)}
             />
           ) : (

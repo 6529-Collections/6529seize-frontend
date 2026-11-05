@@ -1,5 +1,6 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { AboutEditError } from "@/components/user/user-page-header/about/about-statement-errors";
 import { useProfileEditor } from "@/components/user/user-page-header/useProfileEditor";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -143,14 +144,15 @@ it("clears an existing About with DELETE", async () => {
 
 it("preserves every draft field after a moderation error", async () => {
   const { result } = setup();
-  post.mockRejectedValueOnce(new Error("hate speech"));
+  post.mockRejectedValueOnce(new Error("Request rejected for hate speech"));
   act(() =>
     result.current.updateDraft({ about: "Safe fixture", name: "renamed" })
   );
   await act(async () => {
     expect(await result.current.save()).toBe(false);
   });
-  expect(result.current.aboutError).toBe("hate speech.");
+  expect(result.current.aboutError?.type).toBe(AboutEditError.HATE_SPEECH);
+  expect(result.current.aboutError?.message).toBe("Request was rejected.");
   expect(result.current.about).toBe("Safe fixture");
   expect(result.current.name).toBe("renamed");
   expect(onProfileEdit).not.toHaveBeenCalled();

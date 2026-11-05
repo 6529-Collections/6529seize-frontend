@@ -25,6 +25,7 @@ import {
 } from "@/services/api/common-api";
 import { usePathname, useRouter } from "next/navigation";
 import { useContext, useRef, useState } from "react";
+import { AboutStatementSaveError } from "./about/about-statement-errors";
 import { getUserProfileHeaderMessage as message } from "./user-page-header.messages";
 
 export interface ProfileEditorProps {
@@ -107,8 +108,6 @@ async function prepareProfileUpdate(
   return body;
 }
 
-class AboutSaveError extends Error {}
-
 async function saveAbout(
   target: string,
   value: string,
@@ -134,10 +133,7 @@ async function saveAbout(
       },
     });
   } catch (cause) {
-    throw new AboutSaveError(
-      getToastErrorDetails(cause) ??
-        message("user.profileHeader.aboutEdit.errors.saveFailed")
-    );
+    throw new AboutStatementSaveError(cause);
   }
 }
 
@@ -168,7 +164,9 @@ export function useProfileEditor(props: ProfileEditorProps) {
   const [savedStatement, setSavedStatement] = useState(props.statement);
   const [draft, setDraft] = useState(() => initialDraft(props));
   const [error, setError] = useState<string | null>(null);
-  const [aboutError, setAboutError] = useState<string | null>(null);
+  const [aboutError, setAboutError] = useState<AboutStatementSaveError | null>(
+    null
+  );
   const updateDraft = (patch: Partial<ProfileDraft>) =>
     setDraft((current) => ({ ...current, ...patch }));
   const savedCover = getBannerImageUrl(savedProfile.banner1);
@@ -274,7 +272,7 @@ export function useProfileEditor(props: ProfileEditorProps) {
       const details =
         getToastErrorDetails(cause) ??
         message("user.profileHeader.edit.saveFailed");
-      if (cause instanceof AboutSaveError) setAboutError(details);
+      if (cause instanceof AboutStatementSaveError) setAboutError(cause);
       else
         setError(
           savedAny

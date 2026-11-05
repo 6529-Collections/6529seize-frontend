@@ -49,14 +49,14 @@ const getErrorText = (): {
 export default function UserPageHeaderAboutEditError({
   id = "profile-about-error",
   msg,
+  errorType = getAboutErrorType(msg),
   closeError,
 }: {
   readonly id?: string;
   readonly msg: string;
+  readonly errorType?: AboutEditError;
   readonly closeError: () => void;
 }) {
-  const errorType = getAboutErrorType(msg);
-
   const errorText =
     errorType === AboutEditError.UNKNOWN
       ? {
