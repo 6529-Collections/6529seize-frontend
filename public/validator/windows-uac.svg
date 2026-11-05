@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" font-family="'Segoe UI', 'Segoe UI Variable Text', system-ui, -apple-system, Arial, sans-serif">
+  <rect width="400" height="240" rx="14" fill="#0e1422"/>
+  <rect x="50" y="14" width="300" height="212" rx="8" fill="#f3f3f3" stroke="#ffffff" stroke-opacity="0.3"/>
+  <text x="68" y="36" fill="#3b3b3b" font-size="11">User Account Control</text>
+  <g fill="#1b1b1b" font-size="13.5" font-weight="600">
+    <text x="68" y="60">Do you want to allow this app to make</text>
+    <text x="68" y="77">changes to your device?</text>
+  </g>
+  <rect x="68" y="91" width="24" height="24" rx="5" fill="#000"/>
+  <svg x="72" y="95" width="16" height="16" viewBox="38.3 38.3 115.4 115.4"><g fill="#fff"><polygon points="38.3 99.4 85.82 99.4 85.82 106.18 38.3 106.18 38.3 112.97 92.6 112.97 92.6 92.6 45.09 92.6 45.09 85.82 146.91 85.82 146.91 92.6 99.4 92.6 99.4 112.97 153.69 112.97 153.69 106.18 106.18 106.18 106.18 99.4 153.69 99.4 153.69 79.03 38.3 79.03 38.3 99.4"/><path d="M38.3,140.12H146.91v6.79H38.3v6.79H153.7V119.76H38.3Zm6.79-13.57H146.91v6.78H45.09Z"/><path d="M153.7,45.09V38.3H38.3V72.24H153.7V51.88H45.09V45.09Zm-6.79,13.58v6.78H45.09V58.67Z"/></g></svg>
+  <text x="102" y="108" fill="#1b1b1b" font-size="12.5" font-weight="600">6529 Validator</text>
+  <text x="68" y="138" fill="#2b2b2b" font-size="11.5">Verified publisher: 6529 Collection LLC</text>
+  <rect x="60" y="124" width="232" height="21" rx="5" fill="none" stroke="#d97706" stroke-width="2.25"/>
+  <rect x="68" y="152" width="150" height="5" rx="2.5" fill="#000" fill-opacity="0.12"/>
+  <text x="68" y="178" fill="#0a5fb4" font-size="11">Show more details</text>
+  <rect x="68" y="190" width="128" height="26" rx="4" fill="#fdfdfd" stroke="#c8c8c8"/>
+  <rect x="204" y="190" width="128" height="26" rx="4" fill="#fdfdfd" stroke="#c8c8c8"/>
+  <g fill="#1b1b1b" font-size="12" text-anchor="middle">
+    <text x="132" y="207">Yes</text>
+    <text x="268" y="207">No</text>
+  </g>
+</svg>

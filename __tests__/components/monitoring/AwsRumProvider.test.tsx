@@ -121,10 +121,26 @@ type MockHttpPlugin = {
   readonly getLoadedContext: () => MockPluginContext;
 };
 
+const AWS_RUM_SAMPLING_STORAGE_KEY = "6529:aws-rum-session-sampled";
+
+const setAwsRumSessionCookie = (record: boolean): void => {
+  document.cookie = `cwr_s=${btoa(
+    JSON.stringify({ sessionId: "test-session", record, eventCount: 1 })
+  )}; path=/`;
+};
+
+const clearAwsRumSessionCookie = (): void => {
+  document.cookie = "cwr_s=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+};
+
 describe("AwsRumProvider", () => {
   let warnSpy: jest.SpyInstance;
+  let randomSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    window.sessionStorage.clear();
+    clearAwsRumSessionCookie();
+    randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
     Object.assign(publicEnv, originalPublicEnv, {
       NODE_ENV: "production",
       AWS_RUM_APP_ID: "test-app-id",
@@ -142,6 +158,9 @@ describe("AwsRumProvider", () => {
 
   afterEach(() => {
     warnSpy.mockRestore();
+    randomSpy.mockRestore();
+    window.sessionStorage.clear();
+    clearAwsRumSessionCookie();
     Object.assign(publicEnv, originalPublicEnv);
   });
 
@@ -161,7 +180,8 @@ describe("AwsRumProvider", () => {
       "test-version",
       "eu-west-1",
       expect.objectContaining({
-        sessionSampleRate: 0.5,
+        // The provider sampled the session before importing the SDK.
+        sessionSampleRate: 1,
         releaseId: "test-version",
         disableAutoPageView: true,
         telemetries: [],
@@ -406,10 +426,79 @@ describe("AwsRumProvider", () => {
     expect(mockAwsRum).not.toHaveBeenCalled();
   });
 
+  it("does not download or start AWS RUM for an unsampled session", async () => {
+    randomSpy.mockReturnValue(0.5);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(AWS_RUM_SAMPLING_STORAGE_KEY)).toBe(
+        "0"
+      )
+    );
+    expect(mockAwsRum).not.toHaveBeenCalled();
+    expect(mockFetchPlugin).not.toHaveBeenCalled();
+    expect(window.awsRum).toBeUndefined();
+  });
+
+  it("keeps a tab's stored sampling decision across reloads", async () => {
+    window.sessionStorage.setItem(AWS_RUM_SAMPLING_STORAGE_KEY, "0");
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(randomSpy).not.toHaveBeenCalled();
+    expect(mockAwsRum).not.toHaveBeenCalled();
+  });
+
+  it("joins a recorded AWS RUM session that another tab started", async () => {
+    window.sessionStorage.setItem(AWS_RUM_SAMPLING_STORAGE_KEY, "0");
+    setAwsRumSessionCookie(true);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    expect(randomSpy).not.toHaveBeenCalled();
+  });
+
+  it("stays out of an AWS RUM session the SDK did not sample", async () => {
+    setAwsRumSessionCookie(false);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(randomSpy).not.toHaveBeenCalled();
+    expect(mockAwsRum).not.toHaveBeenCalled();
+  });
+
   it("uses default AWS RUM values when optional env values are empty strings", async () => {
     publicEnv.AWS_RUM_REGION = "";
     publicEnv.AWS_RUM_SAMPLE_RATE = "";
     publicEnv.VERSION = "";
+    // Just under the 0.2 default sample rate.
+    randomSpy.mockReturnValue(0.19);
 
     render(
       <AwsRumProvider>
@@ -424,7 +513,7 @@ describe("AwsRumProvider", () => {
       "1.0.0",
       "us-east-1",
       expect.objectContaining({
-        sessionSampleRate: 0.2,
+        sessionSampleRate: 1,
         releaseId: "1.0.0",
       })
     );
@@ -432,6 +521,8 @@ describe("AwsRumProvider", () => {
 
   it("uses the default AWS RUM sample rate when the env value is invalid", async () => {
     publicEnv.AWS_RUM_SAMPLE_RATE = "not-a-number";
+    // Just over the 0.2 default sample rate.
+    randomSpy.mockReturnValue(0.21);
 
     render(
       <AwsRumProvider>
@@ -439,16 +530,12 @@ describe("AwsRumProvider", () => {
       </AwsRumProvider>
     );
 
-    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
-
-    expect(mockAwsRum).toHaveBeenCalledWith(
-      "test-app-id",
-      "test-version",
-      "eu-west-1",
-      expect.objectContaining({
-        sessionSampleRate: 0.2,
-      })
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(AWS_RUM_SAMPLING_STORAGE_KEY)).toBe(
+        "0"
+      )
     );
+    expect(mockAwsRum).not.toHaveBeenCalled();
   });
 
   it("does not initialize AWS RUM after unmounting before the import resolves", async () => {

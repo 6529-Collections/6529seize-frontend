@@ -57,7 +57,11 @@ describe("NotificationsCauseFilter", () => {
   beforeEach(() => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      });
     (usePrefetchNotifications as jest.Mock).mockReturnValue(prefetch);
     prefetch.mockClear();
     mockedUseIsMobileLayoutViewport.mockReturnValue(false);
@@ -121,7 +125,11 @@ describe("NotificationsCauseFilter", () => {
       mockedUseIsMobileLayoutViewport.mockReturnValue(isMobile);
       jest
         .mocked(useNftPurchasingVisibility)
-        .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+        .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
       render(<FilterHarness />, { wrapper: Wrapper });
       await userEvent.click(
         screen.getByRole("button", { name: "Filter notifications: All" })
@@ -228,7 +236,11 @@ describe("NotificationsCauseFilter", () => {
   it("preserves the coverage exclusion when prefetching a restricted category", async () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const user = userEvent.setup();
     render(<FilterHarness />, { wrapper: Wrapper });
     await user.click(

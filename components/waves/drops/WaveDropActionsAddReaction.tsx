@@ -67,12 +67,13 @@ const WaveDropActionsAddReaction: React.FC<{
 
     if (showPicker) {
       document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleEscape);
+      // Emoji Mart consumes key events in its shadow-root search input.
+      document.addEventListener("keydown", handleEscape, true);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleEscape, true);
     };
   }, [showPicker]);
 

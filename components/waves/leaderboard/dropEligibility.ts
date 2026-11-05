@@ -33,6 +33,14 @@ export const getWaveDropEligibility = ({
   isCurationWave,
   participation,
 }: WaveDropEligibilityInput): WaveDropEligibility => {
+  if (participation?.status === SubmissionStatus.ENDED) {
+    return {
+      canCreateDrop: false,
+      restrictionMessage: t(DEFAULT_LOCALE, "waves.dropEligibility.ended"),
+      restrictionLink: null,
+    };
+  }
+
   if (!isLoggedIn) {
     return {
       canCreateDrop: false,
@@ -87,14 +95,6 @@ export const getWaveDropEligibility = ({
     return {
       canCreateDrop: false,
       restrictionMessage: "Submissions haven't started yet",
-      restrictionLink: null,
-    };
-  }
-
-  if (participation?.status === SubmissionStatus.ENDED) {
-    return {
-      canCreateDrop: false,
-      restrictionMessage: "Submission period has ended",
       restrictionLink: null,
     };
   }

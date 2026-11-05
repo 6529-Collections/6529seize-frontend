@@ -64,7 +64,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     "Following coverage requires the local mock API runner."
   );
 
-  test.beforeEach(async ({ page, baseURL }) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const apiOrigin = new URL(getSandboxApiOrigin(baseURL));
     // Model the local shell socket; this profile test does not need wave events.
     await page.routeWebSocket(
@@ -100,10 +100,11 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       "",
     ].join(".");
     await page.addInitScript(
-      ({ address, token }) => {
+      ({ address, token, guest }) => {
         // Keep analytics outside this profile fixture; external writes stay blocked.
         document.cookie = "essential-cookies-consent=true; path=/";
         document.cookie = "performance-cookies-consent=false; path=/";
+        if (guest) return;
         localStorage.setItem("6529-wallet-active-address", address);
         localStorage.setItem(
           "6529-wallet-accounts",
@@ -120,8 +121,235 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
           ])
         );
       },
-      { address: wallet, token: jwt }
+      { address: wallet, token: jwt, guest: testInfo.tags.includes("@guest") }
     );
+  });
+
+  test(
+    "hides artwork alerts from signed-out artist profile visitors",
+    { tag: "@guest" },
+    async ({ page, baseURL, request }, testInfo) => {
+      const api = getSandboxApiOrigin(baseURL);
+      expect(
+        (await request.post(`${api}/__composer-sandbox/artist-activity`)).ok()
+      ).toBe(true);
+      const preferenceReads: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().endsWith("/artwork-alerts"))
+          preferenceReads.push(request.url());
+      });
+      await page.goto("/following-artist-0");
+      await expect(
+        page.getByRole("heading", { name: "following-artist-0", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Profile actions", exact: true })
+      ).toHaveCount(0);
+      expect(preferenceReads).toEqual([]);
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-signed-out.png"),
+      });
+    }
+  );
+
+  test("keeps artist artwork alerts separate from Follow and persists toggles", async ({
+    page,
+    baseURL,
+    request,
+  }, testInfo) => {
+    // Keep wallet balance reads deterministic; the sandbox blocks external RPC.
+    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+      const payload = route.request().postDataJSON() as
+        | { id: number; method: string }
+        | { id: number; method: string }[];
+      const results: Record<string, string> = {
+        eth_chainId: "0x1",
+        eth_blockNumber: "0x1",
+        eth_getBalance: "0x0",
+      };
+      const respond = (call: { id: number; method: string }) => {
+        if (call.method === "eth_call")
+          return {
+            jsonrpc: "2.0",
+            id: call.id,
+            error: {
+              code: -32000,
+              message: "Contract reads are unavailable in this profile fixture",
+            },
+          };
+        expect(Object.keys(results)).toContain(call.method);
+        return { jsonrpc: "2.0", id: call.id, result: results[call.method] };
+      };
+      await route.fulfill({
+        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+      });
+    });
+    const api = getSandboxApiOrigin(baseURL);
+    let enabled = false;
+    let following = false;
+    let followWrites = 0;
+    let alertWrites = 0;
+    let alertReads = 0;
+    await page.route(
+      `${api}/api/identities/following-artist-0/artwork-alerts`,
+      (route) => {
+        const method = route.request().method();
+        if (method === "GET") alertReads++;
+        if (method !== "GET") {
+          enabled = method === "POST";
+          alertWrites++;
+        }
+        return route.fulfill({ json: { enabled } });
+      }
+    );
+    await page.route(
+      `${api}/api/**identities/following-artist-0/subscriptions`,
+      (route) => {
+        const method = route.request().method();
+        if (method !== "GET") {
+          following = method === "POST";
+          followWrites++;
+        }
+        return route.fulfill({
+          json: { actions: following ? ["DROP_CREATED"] : [] },
+        });
+      }
+    );
+    await openOwnProfile(page);
+    const loadProfile = async (reload = false) => {
+      const readsBeforeNavigation = alertReads;
+      if (reload) await page.reload();
+      else await page.goto("/following-artist-0");
+      await expect(
+        page.getByRole("button", { name: "Follow", exact: true })
+      ).toBeVisible();
+      expect(alertReads).toBe(readsBeforeNavigation);
+    };
+    await loadProfile();
+    const mobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const openActions = () =>
+      page
+        .getByRole("button", { name: "Profile actions", exact: true })
+        .click();
+    const openAlerts = async (state: "On" | "Off") => {
+      await openActions();
+      const alert = page.getByRole(mobile ? "button" : "menuitem", {
+        name: new RegExp(`^Artwork alerts.*${state}`),
+      });
+      await expect(alert).toBeEnabled({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      return alert;
+    };
+    const closeActions = async () => {
+      if (mobile) {
+        const dialog = page.getByRole("dialog", {
+          name: "Profile actions",
+          exact: true,
+        });
+        await dialog
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(dialog).toHaveCount(0);
+      } else {
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("menu")).toHaveCount(0);
+      }
+    };
+    await expect(
+      page.getByRole("button", { name: "Follow", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Artwork alerts/ })
+    ).toHaveCount(0);
+    await openActions();
+    await expect.poll(() => alertReads).toBe(1);
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: /^Artwork alerts/,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: "Mute notifications",
+        exact: true,
+      })
+    ).toBeVisible();
+    await closeActions();
+    expect(
+      (await request.post(`${api}/__composer-sandbox/artist-activity`)).ok()
+    ).toBe(true);
+    await loadProfile(true);
+    const alert = await openAlerts("Off");
+    if (!mobile) {
+      await alert.hover();
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-pointer-focus.png"),
+      });
+      await page.keyboard.press("Home");
+      await expect(alert).not.toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-keyboard-focus.png"),
+      });
+      const mute = page.getByRole("menuitem", {
+        name: "Mute notifications",
+        exact: true,
+      });
+      await page.keyboard.press("ArrowDown");
+      await expect(mute).not.toHaveCSS("box-shadow", "none");
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await alert.hover();
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByRole("button", { name: "Profile actions", exact: true })
+      ).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(alert).not.toHaveCSS("box-shadow", "none");
+    }
+    await alert.press("Enter");
+    await expect.poll(() => enabled).toBe(true);
+    expect(followWrites).toBe(0);
+    await openAlerts("On");
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, {
+      include: [mobile ? '[role="dialog"]' : '[role="menu"]'],
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("artwork-alerts-enabled.png"),
+    });
+    await closeActions();
+    await page.screenshot({
+      path: testInfo.outputPath("artwork-alerts-profile-header.png"),
+    });
+    await page.getByRole("button", { name: "Follow", exact: true }).click();
+    await page.getByRole("button", { name: "Unfollow", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Follow", exact: true })
+    ).toBeVisible();
+    expect(alertWrites).toBe(1);
+    expect(
+      (await request.delete(`${api}/__composer-sandbox/artist-activity`)).ok()
+    ).toBe(true);
+    await loadProfile(true);
+    await (await openAlerts("On")).click();
+    await expect.poll(() => enabled).toBe(false);
+    await openActions();
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: /^Artwork alerts/,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: "Block profile",
+        exact: true,
+      })
+    ).toBeVisible();
+    await closeActions();
+    expect(alertWrites).toBe(2);
+    expect(followWrites).toBe(2);
   });
 
   test("opens the responsive list, paginates, unfollows and navigates using existing rows", async ({

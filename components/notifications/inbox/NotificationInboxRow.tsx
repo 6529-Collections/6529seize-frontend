@@ -2,6 +2,8 @@ import Link from "next/link";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
+import ArtworkNotificationThumbnail from "@/components/notifications/ArtworkNotificationThumbnail";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -48,6 +50,14 @@ export default function NotificationInboxRow({
     : [];
   const identity =
     "related_identity" in notification ? notification.related_identity : null;
+  let pfpUrl = identity?.is_anonymous ? null : identity?.pfp;
+  if (group) {
+    pfpUrl = group.drop.wave.picture;
+  } else if (
+    notification.cause === ApiNotificationCause.VotingCreditsReturned
+  ) {
+    pfpUrl = notification.related_wave?.pfp;
+  }
   const preview = getInboxPreview(notification);
   return (
     <li>
@@ -57,11 +67,15 @@ export default function NotificationInboxRow({
         onClick={() => onOpen(unreadIds)}
         className="focus-visible:tw-outline-inset tw-flex tw-gap-3 tw-rounded-lg tw-px-4 tw-py-3 tw-text-left tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800"
       >
-        <ProfileAvatar
-          pfpUrl={group || identity?.is_anonymous ? null : identity?.pfp}
-          alt=""
-          fallbackContent={<BellIcon className="tw-size-5 tw-text-iron-400" />}
-        />
+        {notification.cause === ApiNotificationCause.ArtistArtworkSubmitted ? (
+          <ArtworkNotificationThumbnail notification={notification} />
+        ) : (
+          <ProfileAvatar
+            pfpUrl={pfpUrl}
+            alt=""
+            fallbackContent={<BellIcon className="tw-size-5 tw-text-iron-400" />}
+          />
+        )}
         <div className="tw-min-w-0 tw-flex-1">
           <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
             {group

@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -10,6 +10,7 @@ import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
 
 jest.mock("@/hooks/useWavesV2", () => {
   const actual = jest.requireActual("@/hooks/useWavesV2");
@@ -1470,6 +1471,69 @@ test("surfaces and loads a direct-linked subwave under its parent in Joined", ()
     "direct-parent",
     "direct-child",
   ]);
+});
+
+test("does not reinsert an explicitly left active root into Joined, while All keeps its route context", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  useWavesV2Mock.mockReturnValue({ waves: [], status: "success" });
+  const activeWave = createLegacyApiWave("left-root", 500);
+  const { result, rerender } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "left-root",
+      following: false,
+    })
+  );
+  await waitFor(() => expect(result.current.waves).toEqual([]));
+  useShowFollowingWavesMock.mockReturnValue([false]);
+  rerender();
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+});
+
+test("hides a left active subwave even under a joined pinned parent", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const parent = createSidebarWave({
+    id: "parent",
+    latestDropTimestamp: 500,
+    subscribed: true,
+    pinned: true,
+  });
+  const child = {
+    ...createSidebarWave({ id: "child", latestDropTimestamp: 400 }),
+    parentWaveId: "parent",
+  };
+  useWavesV2Mock.mockReturnValue({ waves: [parent], status: "success" });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [child],
+    subwavesByParentId: new Map(),
+  });
+  const activeWave = {
+    ...createLegacyApiWave("child", 400),
+    parent_wave: createApiWaveOverview("parent", 500),
+  };
+  const { result } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    "parent",
+    "child",
+  ]);
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "child",
+      following: false,
+    })
+  );
+  await waitFor(() =>
+    expect(result.current.waves.map((wave) => wave.id)).toEqual(["parent"])
+  );
 });
 
 test("exposes loading parent ids while requested subwaves are fetching", () => {

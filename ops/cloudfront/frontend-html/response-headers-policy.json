@@ -1,0 +1,27 @@
+{
+  "Name": "frontend-edge-headers",
+  "Comment": "6529 frontend: app security headers pass through; these fill in only when a response lacks them; adds Server-Timing",
+  "SecurityHeadersConfig": {
+    "StrictTransportSecurity": {
+      "Override": false,
+      "AccessControlMaxAgeSec": 31536000,
+      "IncludeSubdomains": true,
+      "Preload": true
+    },
+    "ContentTypeOptions": {
+      "Override": false
+    },
+    "FrameOptions": {
+      "Override": false,
+      "FrameOption": "SAMEORIGIN"
+    },
+    "ReferrerPolicy": {
+      "Override": false,
+      "ReferrerPolicy": "same-origin"
+    }
+  },
+  "ServerTimingHeadersConfig": {
+    "Enabled": true,
+    "SamplingRate": 100
+  }
+}
