@@ -38,6 +38,15 @@ Use this area when you need behavior for:
 
 ### Mentions and Markdown
 
+Type `@` and at least 3 handle characters to find people. The menu shows up to
+5 suggestions, with a profile's level badge beside its handle when known.
+An exact handle match comes first, followed by higher-level profiles. Missing
+levels are omitted. Global mentions and Quick Tags have no level badge.
+
+These suggestions work in wave chats, replies, edits, ordinary DMs, and draft
+wave descriptions. Draft suggestions respect the selected Visibility group.
+Use the arrow keys and Enter, click, or tap to choose a person.
+
 Type `~hi~` or `~~hi~~` for strikethrough. Completing the closing tilde or pair
 of tildes replaces the markers with visibly struck-through text in the composer,
 matching the posted message. Both forms also display as strikethrough when

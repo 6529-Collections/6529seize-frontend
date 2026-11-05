@@ -1,6 +1,14 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useKeyPressEvent } from "react-use";
 import MentionsTypeaheadMenu from "@/components/drops/create/lexical/plugins/mentions/MentionsTypeaheadMenu";
+
+import { MentionTypeaheadOption } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 
 jest.mock("react-use", () => ({
   useKeyPressEvent: jest.fn(),
@@ -8,13 +16,14 @@ jest.mock("react-use", () => ({
 
 const mockUseKeyPressEvent = useKeyPressEvent as jest.Mock;
 
-const createOption = (handle = "alice") => ({
-  key: `option-${handle}`,
-  handle,
-  display: `${handle} display`,
-  picture: null,
-  setRefElement: jest.fn(),
-});
+const createOption = (handle = "alice") =>
+  new MentionTypeaheadOption({
+    id: handle,
+    handle,
+    display: `${handle} display`,
+    picture: null,
+    level: 42,
+  });
 
 const anchorRectNearKeyboard = {
   x: 0,
@@ -37,6 +46,77 @@ describe("MentionsTypeaheadMenu", () => {
     jest.restoreAllMocks();
   });
 
+  it("shows a known level in the selectable row without adding a nested button", () => {
+    const option = createOption();
+    const select = jest.fn();
+    render(
+      <MentionsTypeaheadMenu
+        selectedIndex={0}
+        options={[option]}
+        setHighlightedIndex={jest.fn()}
+        selectOptionAndCleanUp={select}
+        anchorElement={null}
+      />
+    );
+    const row = screen.getByRole("button", { name: /alice.*Level 42/i });
+    expect(within(row).getByRole("img", { name: "Level 42" })).toBeVisible();
+    expect(within(row).queryByRole("button")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("img", { name: "Level 42" }));
+    expect(select).toHaveBeenCalledWith(option);
+  });
+
+  it("shows level zero as a known level", () => {
+    const option = createOption();
+    option.level = 0;
+    render(
+      <MentionsTypeaheadMenu
+        selectedIndex={0}
+        options={[option]}
+        setHighlightedIndex={jest.fn()}
+        selectOptionAndCleanUp={jest.fn()}
+        anchorElement={null}
+      />
+    );
+    expect(screen.getByRole("img", { name: "Level 0" })).toBeVisible();
+  });
+
+  it.each([null, Number.NaN, -1, 101, 1.5])(
+    "omits an unknown or invalid level (%s)",
+    (level) => {
+      const option = createOption();
+      option.level = level;
+      render(
+        <MentionsTypeaheadMenu
+          selectedIndex={0}
+          options={[option]}
+          setHighlightedIndex={jest.fn()}
+          selectOptionAndCleanUp={jest.fn()}
+          anchorElement={null}
+        />
+      );
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /alice/i })).toBeVisible();
+    }
+  );
+
+  it.each(["group", "alias"] as const)(
+    "never adds a level to a %s option",
+    (type) => {
+      const option = createOption("@all");
+      option.type = type;
+      render(
+        <MentionsTypeaheadMenu
+          selectedIndex={0}
+          options={[option]}
+          setHighlightedIndex={jest.fn()}
+          selectOptionAndCleanUp={jest.fn()}
+          anchorElement={null}
+        />
+      );
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    }
+  );
+
   it("selects the highlighted option when space is pressed", () => {
     const option = createOption();
     const setHighlightedIndex = jest.fn();
@@ -48,7 +128,7 @@ describe("MentionsTypeaheadMenu", () => {
     render(
       <MentionsTypeaheadMenu
         selectedIndex={0}
-        options={[option] as any}
+        options={[option]}
         setHighlightedIndex={setHighlightedIndex}
         selectOptionAndCleanUp={selectOptionAndCleanUp}
         anchorElement={document.createElement("div")}
@@ -78,7 +158,7 @@ describe("MentionsTypeaheadMenu", () => {
       const { container } = render(
         <MentionsTypeaheadMenu
           selectedIndex={0}
-          options={[createOption()] as any}
+          options={[createOption()]}
           setHighlightedIndex={jest.fn()}
           selectOptionAndCleanUp={jest.fn()}
           anchorElement={document.createElement("div")}
@@ -100,7 +180,7 @@ describe("MentionsTypeaheadMenu", () => {
     const { container } = render(
       <MentionsTypeaheadMenu
         selectedIndex={null}
-        options={[createOption()] as any}
+        options={[createOption()]}
         setHighlightedIndex={jest.fn()}
         selectOptionAndCleanUp={jest.fn()}
         anchorElement={null}
@@ -120,7 +200,7 @@ describe("MentionsTypeaheadMenu", () => {
     render(
       <MentionsTypeaheadMenu
         selectedIndex={0}
-        options={[option] as any}
+        options={[option]}
         setHighlightedIndex={setHighlightedIndex}
         selectOptionAndCleanUp={selectOptionAndCleanUp}
         anchorElement={document.createElement("div")}

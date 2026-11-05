@@ -6827,6 +6827,7 @@
         "all"
       ],
       "facts": [
+        "Type @ and at least 3 handle characters to see up to 5 suggestions in wave chats, replies, edits, ordinary DMs, and draft wave descriptions. Known profile levels appear beside handles. An exact handle match comes first, then higher-level profiles. Unknown levels are omitted, and global mentions and Quick Tags have no level badge. Draft descriptions respect the selected Visibility group.",
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
         "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
@@ -6848,6 +6849,7 @@
       "related_paths": ["/waves", "/{user}/brain"],
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
+        "ops/docs/waves/composer/README.md",
         "ops/docs/waves/composer/feature-wave-mentions.md",
         "ops/docs/waves/composer/feature-global-mentions.md",
         "ops/docs/waves/composer/feature-personal-mention-shortcuts.md",
