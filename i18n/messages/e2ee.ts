@@ -379,7 +379,7 @@ export const E2EE_MESSAGES = {
   "e2ee.notice.safetyCodeChanged": "The safety code changed",
 
   "e2ee.composer.label": "Encrypted message",
-  "e2ee.composer.placeholder": "Write a message",
+  "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
   "e2ee.composer.removeAttachment": "Remove {name}",

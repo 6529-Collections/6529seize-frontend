@@ -75,7 +75,7 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
 
     // Submit the sandbox drop we will edit: own-authored and inside the edit window.
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
     // Real pointer click on purpose: regression coverage for the quick-DM
@@ -389,7 +389,7 @@ async function gotoSandboxWave(page: Page, nativeHeader: boolean) {
         })
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
-    page.getByRole("textbox", { name: "Write a chat message" }).last()
+    page.getByRole("textbox", { name: "Write a message" }).last()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);

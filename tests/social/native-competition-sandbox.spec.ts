@@ -1021,7 +1021,7 @@ async function installCompetitionApi(
 /** Open contextual rules with the keyboard while leaving a chat draft pending. */
 async function openLockedSubmissionRules(page: Page, draft: string) {
   await page
-    .getByRole("textbox", { name: "Write a chat message" })
+    .getByRole("textbox", { name: "Write a message" })
     .last()
     .fill(draft);
   await page
@@ -2061,7 +2061,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
     await dismissNextDevTools(page);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const draft = "Chat access is independent of submission access.";
     await composer.fill(draft);
@@ -2163,7 +2163,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeFocused();
     await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
     await expect(
-      page.getByRole("textbox", { name: "Write a chat message" }).last()
+      page.getByRole("textbox", { name: "Write a message" }).last()
     ).toContainText(draft);
     await expect(page.getByText("Access details", { exact: true })).toHaveCount(
       0
@@ -2438,7 +2438,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(configurationPanel).toHaveCSS("outline-width", "2px");
     await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
     await expect(
-      page.getByRole("textbox", { name: "Write a chat message" }).last()
+      page.getByRole("textbox", { name: "Write a message" }).last()
     ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
@@ -2496,7 +2496,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           page.getByRole("button", { name: "Submit drop", exact: true })
         ).toHaveCount(0);
         await page
-          .getByRole("textbox", { name: "Write a chat message" })
+          .getByRole("textbox", { name: "Write a message" })
           .last()
           .fill(draft);
         await configuration.click();
@@ -2515,7 +2515,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await chat.click();
       await expect(chat).toHaveAttribute("aria-current", "true");
       await expect(
-        page.getByRole("textbox", { name: "Write a chat message" }).last()
+        page.getByRole("textbox", { name: "Write a message" }).last()
       ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       await expectNoHorizontalOverflow(page);
       await expectNoUnsafeSandboxMutations(baseURL);
@@ -8402,7 +8402,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .click();
       await expect(chat).toBeVisible();
       const editor = page.getByRole("textbox", {
-        name: "Write a chat message",
+        name: "Write a message",
         exact: true,
       });
       await editor.fill("Main Stage draft stays in Main Stage");
@@ -8846,7 +8846,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           releaseFeed();
           await expect(messages).toBeVisible({ timeout: 30000 });
           const editor = page.getByRole("textbox", {
-            name: "Write a chat message",
+            name: "Write a message",
             exact: true,
           });
           await editor.fill("Draft survives a same-wave tab visit");

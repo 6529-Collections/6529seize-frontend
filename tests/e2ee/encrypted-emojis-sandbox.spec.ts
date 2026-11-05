@@ -82,7 +82,10 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     });
     const input = composer(alice.page);
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
-    await expect(input).toHaveAttribute("placeholder", "Write a message");
+    await expect(input).toHaveAttribute(
+      "placeholder",
+      "Write an encrypted message"
+    );
     const inputBounds = await input.boundingBox();
     const emojiBounds = await emojiTrigger.boundingBox();
     expect(inputBounds).not.toBeNull();

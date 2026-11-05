@@ -690,7 +690,7 @@ export const EN_GB_MESSAGES = {
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
   "waves.composer.placeholder.createDrop": "Create a drop",
-  "waves.composer.placeholder.writeChatMessage": "Write a chat message",
+  "waves.composer.placeholder.writeChatMessage": "Write a message",
   "waves.composer.placeholder.dropReply": "Drop a reply",
   "waves.composer.placeholder.postReply": "Post a reply",
   "waves.composer.placeholder.quoteDrop": "Quote a drop",
