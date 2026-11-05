@@ -6,6 +6,13 @@ export const getCompetitionsRoute = (waveId: string) =>
 export const getCompetitionRoute = (waveId: string, competitionId: string) =>
   `${getCompetitionsRoute(waveId)}/${encodeURIComponent(competitionId)}`;
 
+export const getCompetitionDropRoute = (
+  waveId: string,
+  competitionId: string,
+  dropId: string
+) =>
+  `${getCompetitionRoute(waveId, competitionId)}?drop=${encodeURIComponent(dropId)}`;
+
 export const isCompetitionPathname = (pathname: string | null) => {
   const segments = (pathname ?? "").split("/").filter(Boolean);
   return (

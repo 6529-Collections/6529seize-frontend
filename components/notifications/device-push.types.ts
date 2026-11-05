@@ -12,5 +12,6 @@ export interface DevicePushData {
   wave_id?: string;
   competition_id?: string;
   competition_entry_id?: string;
+  competition_drop_id?: string;
   drop_id?: string;
 }
