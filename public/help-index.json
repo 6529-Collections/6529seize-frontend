@@ -6644,8 +6644,8 @@
       ],
       "keywords": ["profile", "banner", "picture", "avatar", "edit", "owner"],
       "facts": [
-        "Profile banner and picture editing are documented profile navigation features.",
-        "Editing controls require the owner or authorized profile permissions.",
+        "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
+        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop offers Choose a Meme with loading and retry states, or a file upload. Cover editing supports Gradient and Image modes.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",

@@ -201,7 +201,8 @@ continues to apply.
 
 The profile-header record describes the single desktop `Edit` action, the
 combined five-field editor, the existing smaller-screen field menu, and saving
-or clearing About statements. Keep those instructions aligned with the header.
+or clearing About statements. Profile media records use the same desktop editor
+and smaller-layout field menu. Keep these instructions aligned with the header.
 
 ## Problem Statement
 

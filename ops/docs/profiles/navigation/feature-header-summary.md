@@ -56,15 +56,15 @@ The profile header appears on profile routes under `/{user}` and shows:
    - winners-only: opens `Winning Artworks`
    - both: opens `Active Submissions` first
 7. Actions depend on viewer context:
-   - own profile with handle and no active proxy: fine-pointer desktop layouts
-     expose direct edit controls on the banner, profile picture, name,
-     classification, and About
-   - smaller and touch-first layouts show an `Edit profile` action that opens
-     an editing hub for those same identity fields
+   - own profile with a handle and a confirmed direct session: desktop layouts
+     show `Edit` beside `Preferences`, opening Profile cover, Profile picture,
+     Profile name, Classification, and About statement together
+   - smaller layouts keep the circular `Edit profile` action, opening a field
+     menu and then the selected editor; no active proxy can edit
    - `Preferences` remains a distinct owner action for privacy, direct-message,
      and notification settings; it sits in the right-side action area below the
      banner on desktop, remains an icon-only action beside `Edit profile` in the
-     banner's top-right corner on touch-first and phone layouts, and sits to the
+     banner's top-right corner on smaller layouts, and sits to the
      right of the identity on smaller fine-pointer layouts
    - subscription coverage remains a separate status and navigation surface:
      a subtle row beneath Preferences on desktop layouts, and a full-width
