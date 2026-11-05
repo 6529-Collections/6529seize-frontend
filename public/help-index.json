@@ -7453,6 +7453,7 @@
       "facts": [
         "Wave quote link cards are documented under drop actions.",
         "Supported source links and rendering behavior are covered in the quote-link docs.",
+        "Direct same-origin /waves/{waveId} links without a serial number can show wave preview cards. Names truncate with an ellipsis when space is limited. Narrow cards put Follow or Following below the wave details; wider cards keep it beside the name.",
         "If a quote card fails, the original link can still be opened or copied where available."
       ],
       "canonical_path": "/waves",
