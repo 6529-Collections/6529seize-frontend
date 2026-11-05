@@ -216,9 +216,6 @@ importers:
       focus-trap-react:
         specifier: 11.0.6
         version: 11.0.6(@types/react-dom@19.2.3(@types/react@19.2.3))(@types/react@19.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      form-data:
-        specifier: 4.0.6
-        version: 4.0.6
       framer-motion:
         specifier: 11.18.2
         version: 11.18.2(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

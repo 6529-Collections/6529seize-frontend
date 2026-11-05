@@ -37,7 +37,11 @@ cookie again.
   an HMAC whose key comes from the password through scrypt, so changing the
   password signs every tester out.
 - A link from another site arrives without the `SameSite=Strict` cookie,
-  so the gate reloads the page once from 6529.io, which sends it.
+  so the gate reloads the page once from 6529.io, which sends it. The
+  reload keeps the link's section: rc.7's Tor screens link
+  `/validator#send-feedback`, and the password form carries the section to
+  `/validator/unlock` and back. Keep the `send-feedback` id on the download
+  page.
 
 The password is never in the repository. Production reads it from the
 `VALIDATOR_PAGE_PASSWORD` environment variable, which the
@@ -87,7 +91,9 @@ hour if S3 fails. It serves the two feed files unchanged, so the signature
 verifies against what validators download. Only the newest release's files
 can be downloaded: an older release stays in the feed and on the history
 page, with its SHA-256, and its files answer 404 (the owner: rc.1 to rc.4
-never, and rc.5 not once rc.6 is out).
+never, and rc.5 not once rc.6 is out). Newest is by version, as the
+validator orders its signed list (Semantic Versioning: `0.1.0-rc.7` <
+`0.1.0-rc.10` < `0.1.0` < `0.1.1-rc.1`); dates play no part.
 
 ### Add a release
 
