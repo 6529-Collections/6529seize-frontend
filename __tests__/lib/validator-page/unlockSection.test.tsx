@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 
 import ValidatorPasswordForm from "@/components/validator-page/ValidatorPasswordForm";
 
@@ -7,8 +7,21 @@ jest.mock("@/lib/validator-page/accessGate", () => ({
   VALIDATOR_UNLOCK_PATH: "/validator/unlock",
 }));
 
-function formAction(container: HTMLElement): string | null {
-  return container.querySelector("form")?.getAttribute("action") ?? null;
+/** The address the form posts to once the tester presses Open. */
+function submittedAction(): string | null {
+  const { container } = render(
+    <ValidatorPasswordForm nextPath="/validator" notice={null} />
+  );
+  const form = container.querySelector("form");
+  if (!form) {
+    throw new Error("no form");
+  }
+  expect(form.getAttribute("method")).toBe("post");
+  expect(form.getAttribute("action")).toBe("/validator/unlock");
+  // jsdom does not navigate; the submit event is what the browser fires
+  // before it reads the form's action.
+  fireEvent.submit(form);
+  return form.getAttribute("action");
 }
 
 describe("the password form keeps a link's section", () => {
@@ -21,25 +34,16 @@ describe("the password form keeps a link's section", () => {
   // the browser keeps it over the redirect back to the page.
   it("posts to the unlock address with the page's section", () => {
     globalThis.history.replaceState(null, "", "/validator#send-feedback");
-    const { container } = render(
-      <ValidatorPasswordForm nextPath="/validator" notice={null} />
-    );
-    expect(formAction(container)).toBe("/validator/unlock#send-feedback");
+    expect(submittedAction()).toBe("/validator/unlock#send-feedback");
   });
 
   it("posts to the unlock address alone without a section", () => {
     globalThis.history.replaceState(null, "", "/validator");
-    const { container } = render(
-      <ValidatorPasswordForm nextPath="/validator" notice={null} />
-    );
-    expect(formAction(container)).toBe("/validator/unlock");
+    expect(submittedAction()).toBe("/validator/unlock");
   });
 
   it("ignores a fragment that is no section name", () => {
     globalThis.history.replaceState(null, "", "/validator#a%22b/../c");
-    const { container } = render(
-      <ValidatorPasswordForm nextPath="/validator" notice={null} />
-    );
-    expect(formAction(container)).toBe("/validator/unlock");
+    expect(submittedAction()).toBe("/validator/unlock");
   });
 });
