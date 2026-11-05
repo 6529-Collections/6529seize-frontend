@@ -39,7 +39,7 @@ The profile header appears on profile routes under `/{user}` and shows:
    - title row (display name, CIC icon, level, optional artist badge)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
      exists)
-   - About panel (when a BIO exists, or when the viewer can edit)
+   - About panel (when an About statement exists)
    - stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 4. Use quick stats:
    - `TDH` -> `/{user}/collected`
@@ -115,8 +115,6 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   its label, current state, and contextual action kept inline when space allows.
   It remains a full-width contextual row on smaller layouts and can wrap when
   translated or dynamic content cannot fit.
-- Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
-  retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - `Following` shows the total number of identities you follow, including rows
   not yet loaded. The list loads when you open it and shows profile images,
