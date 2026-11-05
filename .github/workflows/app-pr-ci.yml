@@ -591,7 +591,8 @@ jobs:
       contents: read
       issues: read
     strategy:
-      fail-fast: true
+      # Finish build and quality evidence even when independent browser checks fail.
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:
