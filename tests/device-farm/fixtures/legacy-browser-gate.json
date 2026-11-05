@@ -3,6 +3,6 @@
   "flagScript": "window.__6529LegacyBrowser=true;",
   "syntaxScript": "void class{static{window.__6529LegacyBrowser=false}};",
   "noticeScript": "(function(){try{if(window.__6529LegacyBrowser!==true)return;var n=navigator;var ios=/iPad|iPhone|iPod/.test(n.userAgent)||(n.platform===\"MacIntel\"&&n.maxTouchPoints>1);document.documentElement.setAttribute(\"data-legacy-browser\",ios?\"ios\":\"other\")}catch(e){}})();",
-  "noticeHtml": "<div id=\"legacy-browser-notice\"><section data-legacy-variant=\"ios\" aria-labelledby=\"legacy-browser-notice-ios\"><h1 id=\"legacy-browser-notice-ios\">6529 needs iOS 16.4 or later</h1><p>Update in Settings &gt; General &gt; Software Update, then open 6529 again.</p></section><section data-legacy-variant=\"other\" aria-labelledby=\"legacy-browser-notice-other\"><h1 id=\"legacy-browser-notice-other\">6529 needs a newer browser</h1><p>Update your browser to its latest version, then open 6529 again.</p></section></div>",
+  "noticeHtml": "<div id=\"legacy-browser-notice\"><section data-legacy-variant=\"ios\" aria-labelledby=\"legacy-browser-notice-ios\"><h1 id=\"legacy-browser-notice-ios\">6529 Mobile needs iOS 16.4 or later</h1><p>Update in Settings &gt; General &gt; Software Update, then open 6529 Mobile again.</p></section><section data-legacy-variant=\"other\" aria-labelledby=\"legacy-browser-notice-other\"><h1 id=\"legacy-browser-notice-other\">6529 needs a newer browser</h1><p>Update your browser to its latest version, then open 6529 again.</p></section></div>",
   "attribute": "data-legacy-browser"
 }

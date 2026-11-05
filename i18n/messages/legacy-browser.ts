@@ -4,9 +4,9 @@
  * to these strings until translated.
  */
 export const LEGACY_BROWSER_MESSAGES = {
-  "legacyBrowser.ios.title": "6529 needs iOS 16.4 or later",
+  "legacyBrowser.ios.title": "{appName} needs iOS 16.4 or later",
   "legacyBrowser.ios.body":
-    "Update in Settings > General > Software Update, then open 6529 again.",
+    "Update in Settings > General > Software Update, then open {appName} again.",
   "legacyBrowser.other.title": "6529 needs a newer browser",
   "legacyBrowser.other.body":
     "Update your browser to its latest version, then open 6529 again.",
