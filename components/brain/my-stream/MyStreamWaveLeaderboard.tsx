@@ -30,7 +30,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import { normalizeWaveLeaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {

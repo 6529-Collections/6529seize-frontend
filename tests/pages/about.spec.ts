@@ -207,11 +207,14 @@ test.describe("About Pages @smoke @medium @large", () => {
       await route.continue();
     });
     try {
-      await page.goto("/about/subscriptions", { waitUntil: "commit" });
+      // A section whose copy is in the server HTML. Minting and Subscription
+      // Minting copy mounts only after hydration (purchasing content is never
+      // server-rendered), so it cannot show the pre-hydration state.
+      await page.goto("/about/faq", { waitUntil: "commit" });
       await expect(
         page.getByRole("heading", {
           level: 1,
-          name: "Subscription Minting",
+          name: "6529 FAQ",
           exact: true,
         })
       ).toBeVisible();

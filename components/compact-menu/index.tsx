@@ -1,7 +1,7 @@
 "use client";
 
-import { Fragment } from "react";
-import { Menu, MenuItems, Transition } from "@headlessui/react";
+import { useEffect, useState } from "react";
+import { Menu, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
 import { CompactMenuItemsPanel } from "./subcomponents/CompactMenuItemsPanel";
@@ -13,6 +13,7 @@ export function CompactMenu({
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   className,
   triggerClassName,
   triggerAsChild,
@@ -35,13 +36,22 @@ export function CompactMenu({
   "aria-label": ariaLabel,
   unstyledItems,
 }: Readonly<CompactMenuProps>) {
+  const [keyboardNavigation, setKeyboardNavigation] = useState(false);
   return (
-    <Menu as="div" className={clsx("tw-relative", className)}>
+    <Menu
+      as="div"
+      className={clsx("tw-relative", className)}
+      onKeyDownCapture={() => setKeyboardNavigation(true)}
+      onPointerDownCapture={() => setKeyboardNavigation(false)}
+      onPointerMoveCapture={() => setKeyboardNavigation(false)}
+    >
       {({ open, close }) => (
         <CompactMenuContent
+          keyboardNavigation={keyboardNavigation}
           trigger={trigger}
           items={items}
           onItemSelect={onItemSelect}
+          onOpenChange={onOpenChange}
           triggerClassName={triggerClassName}
           triggerAsChild={triggerAsChild}
           unstyledTrigger={unstyledTrigger}
@@ -77,14 +87,17 @@ interface CompactMenuContentProps extends Omit<
   readonly anchor: CompactMenuProps["anchor"];
   readonly menuWidthClassName: CompactMenuProps["menuWidthClassName"];
   readonly ariaLabel: CompactMenuProps["aria-label"];
+  readonly keyboardNavigation: boolean;
   readonly isOpen: boolean;
   readonly close: () => void;
 }
 
 function CompactMenuContent({
+  keyboardNavigation,
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   triggerClassName,
   triggerAsChild = false,
   unstyledTrigger = false,
@@ -108,9 +121,11 @@ function CompactMenuContent({
   isOpen,
   close,
 }: Readonly<CompactMenuContentProps>) {
-  const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(
-    isOpen,
-    autoFocusItem
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+  const { menuItemsRef } = useCompactMenuFocus(
+    autoFocusItem || keyboardNavigation
   );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
@@ -126,42 +141,33 @@ function CompactMenuContent({
         isOpen={isOpen}
         close={close}
       />
-      <Transition
-        as={Fragment}
-        enter="tw-transition tw-duration-150 tw-ease-out"
-        enterFrom="tw-translate-y-1 tw-opacity-0"
-        enterTo="tw-translate-y-0 tw-opacity-100"
-        leave="tw-transition tw-duration-100 tw-ease-in"
-        leaveFrom="tw-translate-y-0 tw-opacity-100"
-        leaveTo="tw-translate-y-1 tw-opacity-0"
-        afterEnter={focusInitialMenuItem}
+      <MenuItems
+        ref={menuItemsRef}
+        data-keyboard-navigation={keyboardNavigation}
+        anchor={menuAnchor}
+        className={clsx(
+          "tw-group/compact-menu",
+          unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
+          menuWidthClassName,
+          menuClassName
+        )}
       >
-        <MenuItems
-          ref={menuItemsRef}
-          anchor={menuAnchor}
-          className={clsx(
-            unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
-            menuWidthClassName,
-            menuClassName
-          )}
-        >
-          <CompactMenuItemsPanel
-            items={items}
-            activeItemId={activeItemId}
-            onItemSelect={onItemSelect}
-            close={close}
-            closeOnSelect={closeOnSelect}
-            header={header}
-            headerClassName={headerClassName}
-            itemClassName={itemClassName}
-            activeItemClassName={activeItemClassName}
-            inactiveItemClassName={inactiveItemClassName}
-            focusItemClassName={focusItemClassName}
-            itemsWrapperClassName={itemsWrapperClassName}
-            unstyledItems={unstyledItems}
-          />
-        </MenuItems>
-      </Transition>
+        <CompactMenuItemsPanel
+          items={items}
+          activeItemId={activeItemId}
+          onItemSelect={onItemSelect}
+          close={close}
+          closeOnSelect={closeOnSelect}
+          header={header}
+          headerClassName={headerClassName}
+          itemClassName={itemClassName}
+          activeItemClassName={activeItemClassName}
+          inactiveItemClassName={inactiveItemClassName}
+          focusItemClassName={focusItemClassName}
+          itemsWrapperClassName={itemsWrapperClassName}
+          unstyledItems={unstyledItems}
+        />
+      </MenuItems>
     </>
   );
 }

@@ -15,7 +15,7 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -89,7 +89,8 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
   const pathname = usePathname() || "";
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -105,7 +106,9 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
 
   useEffect(() => {
     const controller = new AbortController();
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
+    const url = apiUrl(
+      `/api/nextgen/merkle_roots/${props.collection.merkle_root}`
+    );
     fetchUrl<CollectionWithMerkle | null>(url, { signal: controller.signal })
       .then((response) => {
         if (controller.signal.aborted) {
@@ -155,6 +158,12 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           >
             {getButtonLabel()}
           </ButtonLink>
+        )}
+        {/* Blank space with the large button's height (size="lg" is
+            tw-min-h-11 in buttonStyles.ts) while it may still mount, so the
+            countdown card does not grow after hydration. */}
+        {!hideMintBtn && hideNftPurchasing && reservesNftPurchasingSpace && (
+          <div aria-hidden="true" className="tw-h-11" />
         )}
         <DistributionLink collection={props.collection} />
       </div>

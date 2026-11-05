@@ -2,6 +2,7 @@
 
 import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { getWaveSubmissionClosure } from "@/helpers/waves/submission-closure";
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -82,6 +83,8 @@ function getSubmissionStatus(
   if (!wave) return SubmissionStatus.NOT_STARTED;
 
   try {
+    if (getWaveSubmissionClosure(wave, now)) return SubmissionStatus.ENDED;
+
     const start = wave.participation.period?.min ?? null;
     const end = wave.participation.period?.max ?? null;
 
@@ -125,7 +128,7 @@ function getSubmissionStatus(
  * @returns An object containing processed wave information and state
  */
 export function useWave(wave: ApiWave | null | undefined): WaveInfo {
-  // Current time for all timestamp comparisons (consistent throughout the hook)
+  // Stable fallback timestamp for unset boundaries and pause calculations.
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
@@ -254,10 +257,14 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave, now]
   );
 
-  const participationEndTime = useMemo(
-    () => wave?.participation.period?.max ?? now,
-    [wave, now]
-  );
+  const participationEndTime = useMemo(() => {
+    // A refreshed API snapshot may have ended after this hook was mounted.
+    const closure = wave
+      ? getWaveSubmissionClosure(wave, Time.currentMillis())
+      : null;
+    if (closure) return closure.closedAt ?? 0;
+    return wave?.participation.period?.max ?? now;
+  }, [wave, now]);
 
   const votingStartTime = useMemo(
     () => wave?.voting.period?.min ?? now,
@@ -284,8 +291,8 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
    * Determine the current status of the submission period
    */
   const submissionStatus = useMemo(
-    () => getSubmissionStatus(wave, now),
-    [wave, now]
+    () => getSubmissionStatus(wave, Time.currentMillis()),
+    [wave]
   );
 
   /**

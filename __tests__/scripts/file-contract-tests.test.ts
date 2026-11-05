@@ -15,6 +15,7 @@ const HOVER = "__tests__/contracts/hover-revealed-controls.test.ts";
 const WAVES = "__tests__/contracts/waves-multi-competition-phase-1.test.ts";
 const FOCUS = "__tests__/contracts/keyboard-focus-indicators.test.ts";
 const COVERAGE = "__tests__/scripts/coverage-floor.test.ts";
+const API_ENDPOINTS = "__tests__/contracts/api-endpoint-boundary.test.ts";
 
 describe("filesystem contract selection", () => {
   it.each([
@@ -35,6 +36,16 @@ describe("filesystem contract selection", () => {
     "__tests__/contracts/support/keyboardFocusIndicators.ts",
   ])("selects the keyboard focus indicator scan for %s", (file) => {
     expect(selectFileContractTests([file])).toContain(FOCUS);
+  });
+
+  it.each([
+    "services/api/common-api.ts",
+    "components/the-memes/MemePage.tsx",
+    "app/api/og-metadata/drops/[id]/route.ts",
+    "proxy.ts",
+    "standalone/standalone-memes-mint/src/app/layout.tsx",
+  ])("selects the API endpoint boundary scan for %s", (file) => {
+    expect(selectFileContractTests([file])).toContain(API_ENDPOINTS);
   });
 
   it("selects the global focus style test for the stylesheet it reads", () => {

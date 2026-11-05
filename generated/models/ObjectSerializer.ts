@@ -15,6 +15,8 @@ export * from '../models/ApiAlchemyContractMetadataBatchResponse';
 export * from '../models/ApiAlchemyContractMetadataRequest';
 export * from '../models/ApiAlchemyContractMetadataResult';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
+export * from '../models/ApiArtistArtworkAlert';
+export * from '../models/ApiArtistArtworkNotificationContext';
 export * from '../models/ApiArtistNameItem';
 export * from '../models/ApiArtworkAssetC2paResult';
 export * from '../models/ApiArtworkAssetFormatIdentification';
@@ -252,6 +254,7 @@ export * from '../models/ApiCompetitionLeaderboardPage';
 export * from '../models/ApiCompetitionLifecycle';
 export * from '../models/ApiCompetitionMyVote';
 export * from '../models/ApiCompetitionMyVotePage';
+export * from '../models/ApiCompetitionMyVotesSort';
 export * from '../models/ApiCompetitionOutcome';
 export * from '../models/ApiCompetitionOutcomePage';
 export * from '../models/ApiCompetitionPage';
@@ -993,6 +996,8 @@ import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyCon
 import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
 import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
+import { ApiArtistArtworkAlert } from '../models/ApiArtistArtworkAlert';
+import { ApiArtistArtworkNotificationContext } from '../models/ApiArtistArtworkNotificationContext';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
 import { ApiArtworkAssetC2paResult, ApiArtworkAssetC2paResultStatusEnum        , ApiArtworkAssetC2paResultTrustEnum      , ApiArtworkAssetC2paResultIntegrityEnum   } from '../models/ApiArtworkAssetC2paResult';
 import { ApiArtworkAssetFormatIdentification, ApiArtworkAssetFormatIdentificationStatusEnum       , ApiArtworkAssetFormatIdentificationIdentificationScopeEnum   } from '../models/ApiArtworkAssetFormatIdentification';
@@ -1230,6 +1235,7 @@ import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboa
 import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
 import { ApiCompetitionMyVote      } from '../models/ApiCompetitionMyVote';
 import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
+import { ApiCompetitionMyVotesSort } from '../models/ApiCompetitionMyVotesSort';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
@@ -1613,7 +1619,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                             } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                                } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -2058,6 +2064,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCompetitionDecisionStatus",
     "ApiCompetitionEntryStatus",
     "ApiCompetitionLifecycle",
+    "ApiCompetitionMyVotesSort",
     "ApiCompetitionParticipationConfigRequiredMediaEnum",
     "ApiCompetitionRulesInputTypeEnum",
     "ApiCompetitionSortDirection",
@@ -2274,6 +2281,8 @@ let typeMap: {[index: string]: any} = {
     "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
     "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
+    "ApiArtistArtworkAlert": ApiArtistArtworkAlert,
+    "ApiArtistArtworkNotificationContext": ApiArtistArtworkNotificationContext,
     "ApiArtistNameItem": ApiArtistNameItem,
     "ApiArtworkAssetC2paResult": ApiArtworkAssetC2paResult,
     "ApiArtworkAssetFormatIdentification": ApiArtworkAssetFormatIdentification,

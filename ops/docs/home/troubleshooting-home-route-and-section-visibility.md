@@ -57,7 +57,7 @@ This page covers:
 - `Boosted Drops` missing: it was removed from the homepage. Boosted-drop
   preferences within Waves remain available.
 - `How to start` missing: it appears only after wallet state resolves without
-  valid authentication, like the hero actions and What is 6529? section.
+  valid authentication, like the hero actions.
 - `Most active waves` missing:
   - While loading, section shows skeleton cards.
   - Hidden when hot-waves is empty or request fails.
