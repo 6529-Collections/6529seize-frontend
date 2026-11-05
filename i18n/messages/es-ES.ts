@@ -1174,7 +1174,7 @@ export const ES_ES_MESSAGES = {
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
   "waves.composer.placeholder.createDrop": "Crear un drop",
-  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje de chat",
+  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje",
   "waves.composer.placeholder.dropReply": "Responder con un drop",
   "waves.composer.placeholder.postReply": "Publicar una respuesta",
   "waves.composer.placeholder.quoteDrop": "Citar un drop",

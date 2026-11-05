@@ -2306,7 +2306,7 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
   "waves.composer.placeholder",
   {
     createDrop: "Create a drop",
-    writeChatMessage: "Write a chat message",
+    writeChatMessage: "Write a message",
     dropReply: "Drop a reply",
     postReply: "Post a reply",
     quoteDrop: "Quote a drop",

@@ -124,7 +124,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       })
     ).toBeVisible();
     await page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last()
       .fill("Typing without posting");
     await expect.poll(() => deliveredTyping).toBeGreaterThan(0);
@@ -181,7 +181,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.evaluate((element) => {
       const bytes = new Uint8Array([
@@ -283,7 +283,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(page.getByText(PREVIEW_DESCRIPTION).first()).toBeVisible();
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill("Checking the local composer without sending.");
     await expect(
@@ -580,7 +580,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     const draftText = "Draft that must survive the new-version reload.";
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(draftText);
     // The draft autosave is debounced (400ms); wait for it to persist.
@@ -605,7 +605,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await dismissNextDevTools(page);
 
     const restoredComposer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await expect(restoredComposer).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -630,7 +630,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     const isIosSurface = testInfo.project.name === "capacitor-ios-sim";
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const wrapper = composer.locator(
       "xpath=ancestor::div[contains(@class, 'tw-sticky') and contains(@class, 'tw-overflow-y-auto')][1]"
@@ -696,7 +696,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await gotoSandboxWave(page);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const positions = await composer.evaluate(async (element) => {
       const root = document.documentElement;
@@ -746,7 +746,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
     await expect(
@@ -866,7 +866,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const postButton = page.getByRole("button", { name: "Post" }).last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
@@ -1072,7 +1072,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_STORM_INITIAL_PART);
     await showDropActionsIfCollapsed(page);
@@ -1414,7 +1414,7 @@ async function gotoSandboxWave(page: Page) {
       .first()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
-    page.getByRole("textbox", { name: "Write a chat message" }).last()
+    page.getByRole("textbox", { name: "Write a message" }).last()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);

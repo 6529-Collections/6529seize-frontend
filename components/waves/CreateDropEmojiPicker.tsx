@@ -175,7 +175,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
                 right: "auto",
                 zIndex: desktopZIndex,
               }}
-              className="tw-m-0 tw-max-w-none tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-text-inherit tw-shadow-lg"
+              className="tw-m-0 tw-max-w-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-p-[1px] tw-text-inherit tw-shadow-lg"
             >
               {pickerNotice}
               <LazyEmojiPicker
