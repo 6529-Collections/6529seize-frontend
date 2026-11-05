@@ -92,7 +92,7 @@
 .htmlContainer h3,
 .htmlContainer h4,
 .htmlContainer h5 {
-  font-family: "Montserrat", sans-serif !important;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif !important;
   float: none;
 }
 .htmlContainer ul li {

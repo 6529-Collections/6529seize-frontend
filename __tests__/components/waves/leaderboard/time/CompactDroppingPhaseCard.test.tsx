@@ -8,6 +8,7 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 }));
 const useWave = jest.fn();
 jest.mock("@/hooks/useWave", () => ({
+  ...jest.requireActual("@/hooks/useWave"),
   useWave: (...args: any[]) => useWave(...args),
 }));
 
@@ -19,17 +20,20 @@ const perpetualWave: any = {
 
 beforeEach(() => jest.clearAllMocks());
 
-test("shows countdown when not completed", () => {
+test.each([
+  [true, "Submissions open in"],
+  [false, "Submissions close in"],
+])("shows the correct countdown for upcoming=%s", (isUpcoming, label) => {
   useWaveTimers.mockReturnValue({
     participation: {
       isCompleted: false,
-      isUpcoming: true,
+      isUpcoming,
       timeLeft: { days: 1, hours: 2, minutes: 3 },
     },
   });
   useWave.mockReturnValue({ participation: { startTime: 0, endTime: 100 } });
   render(<CompactDroppingPhaseCard wave={wave} />);
-  expect(screen.getByText("Dropping starts in")).toBeInTheDocument();
+  expect(screen.getByText(label)).toBeInTheDocument();
   expect(screen.getByText("1d 2h 3m")).toBeInTheDocument();
 });
 
@@ -41,9 +45,18 @@ test("shows completion message when completed", () => {
       timeLeft: { days: 0, hours: 0, minutes: 0 },
     },
   });
-  useWave.mockReturnValue({ participation: { startTime: 0, endTime: 100 } });
+  const endsAt = Date.UTC(2024, 11, 3, 8, 33);
+  useWave.mockReturnValue({ participation: { startTime: 0, endTime: endsAt } });
   render(<CompactDroppingPhaseCard wave={wave} />);
-  expect(screen.getByText("Dropping complete")).toBeInTheDocument();
+  expect(screen.getByText("Submissions closed")).toBeInTheDocument();
+  expect(screen.getByText("Dec 3, 2024")).toHaveAttribute(
+    "dateTime",
+    new Date(endsAt).toISOString()
+  );
+  expect(screen.getByText("Dec 3, 2024")).toHaveAccessibleName(
+    /December 3, 2024/
+  );
+  expect(screen.queryByText("0h 0m")).not.toBeInTheDocument();
 });
 
 test("shows open state instead of a countdown for open-ended submissions", () => {
@@ -58,7 +71,36 @@ test("shows open state instead of a countdown for open-ended submissions", () =>
     participation: { startTime: 0, endTime: Number.MAX_SAFE_INTEGER },
   });
   render(<CompactDroppingPhaseCard wave={perpetualWave} />);
-  expect(screen.getByText("Dropping open")).toBeInTheDocument();
+  expect(screen.getByText("Submissions open")).toBeInTheDocument();
   expect(screen.getByText("No end date")).toBeInTheDocument();
-  expect(screen.queryByText(/ends in/)).toBeNull();
+  expect(screen.queryByText(/close in/)).toBeNull();
 });
+
+test.each([null, Date.UTC(2099, 0, 1)])(
+  "shows closed submissions after a manual end with scheduled deadline %s",
+  (scheduledEnd) => {
+    useWaveTimers.mockReturnValue({
+      participation: {
+        isCompleted: false,
+        isUpcoming: false,
+        timeLeft: { days: 99999, hours: 0, minutes: 0 },
+      },
+    });
+    useWave.mockReturnValue({
+      participation: { startTime: 0, endTime: 0, status: "ENDED" },
+    });
+    const { container } = render(
+      <CompactDroppingPhaseCard
+        wave={{
+          ...perpetualWave,
+          participation: { period: { min: 1, max: scheduledEnd } },
+        }}
+      />
+    );
+    expect(screen.getByText("Submissions closed")).toBeInTheDocument();
+    expect(screen.queryByText("Submissions open")).not.toBeInTheDocument();
+    expect(screen.queryByText("No end date")).not.toBeInTheDocument();
+    expect(screen.queryByText(/99999/)).not.toBeInTheDocument();
+    expect(container.querySelector("time")).toBeNull();
+  }
+);

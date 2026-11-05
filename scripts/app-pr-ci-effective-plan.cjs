@@ -153,6 +153,11 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/wave-loading-sandbox.spec.ts",
         "components/brain/my-stream/MyStreamWaveChat.tsx",
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
+        "hooks/useNativeKeyboard.ts",
+        "tests/support/surfaceSimulation.ts",
+        "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
+        // The chat render window; this pack runs wave-loading-sandbox.spec.ts.
+        "hooks/useVirtualizedWaveMessages.ts",
         "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
         "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
         "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
@@ -203,6 +208,11 @@ function applyEffectiveAppPrCiPlan(plan) {
     [
       "tests/media/submission-artwork-sandbox.spec.ts",
       "tests/media/waveImagePreviewCases.ts",
+      "tests/support/videoArtworkSandbox.ts",
+      "components/waves/drop/WaveDropAdditionalInfo.tsx",
+      "components/waves/drop/WaveDropAdditionalInfoVideo.tsx",
+      "hooks/useChatVideoPoster.ts",
+      "public/video-preview-placeholder.svg",
       "components/waves/drop/MemesDropArtworkHero.tsx",
       "components/drops/view/item/content/media/DropImagePreview.tsx",
       "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",

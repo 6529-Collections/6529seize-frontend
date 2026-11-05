@@ -3,6 +3,7 @@
 import {
   PaperAirplaneIcon,
   PaperClipIcon,
+  FaceSmileIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -29,14 +30,18 @@ import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { getMemberName, tCount } from "../e2eeFormat";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eeEmojiPicker } from "./E2eeEmojiPicker";
 import { collectMentionIds } from "./e2eeMentions";
 import {
   addComposerFiles,
   type ComposerError,
+  type ComposerText,
   E2EE_MAX_TEXT_LENGTH,
   handleMentionKey,
   isSendKey,
+  type PasteNotice,
   useMentionPicker,
+  usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 
@@ -318,6 +323,36 @@ function ComposerTopBars({
   );
 }
 
+/**
+ * Announces images taken from a paste. They become attachments instead of
+ * text in the box, so a screen reader would otherwise say nothing.
+ */
+function PastedImagesStatus({
+  locale,
+  notice,
+}: {
+  readonly locale: SupportedLocale;
+  readonly notice: PasteNotice | null;
+}) {
+  return (
+    <output className="tw-sr-only">
+      {notice ? (
+        // A new node per paste, so the same count is announced again.
+        <span key={notice.id}>
+          {tCount(
+            locale,
+            {
+              one: "e2ee.composer.pastedImages.one",
+              other: "e2ee.composer.pastedImages.other",
+            },
+            notice.count
+          )}
+        </span>
+      ) : null}
+    </output>
+  );
+}
+
 function ComposerFooter({
   locale,
   hintId,
@@ -418,6 +453,8 @@ export function E2eeComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const emojiSelection = useRef({ start: 0, end: 0 });
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
@@ -457,15 +494,38 @@ export function E2eeComposer({
   const isEmpty = text.trim().length === 0 && files.length === 0;
   const isUploading = uploading.length > 0;
   const tooLong = text.length > E2EE_MAX_TEXT_LENGTH;
+  // Editing changes only the text, and the server can switch attachments off.
+  const canAttach = editing === null && attachmentsEnabled;
 
-  const pickMention = (member: E2eeMember) => {
-    const next = mentions.apply(text, member);
-    if (!next) {
-      return;
-    }
+  /** Puts `next.text` in the box with the caret at `next.caret`. */
+  const placeText = (next: ComposerText) => {
     setText(next.text);
     globalThis.requestAnimationFrame(() => {
       textareaRef.current?.setSelectionRange(next.caret, next.caret);
+    });
+  };
+
+  const pickMention = (member: E2eeMember) => {
+    const next = mentions.apply(text, member);
+    if (next) {
+      placeText(next);
+    }
+  };
+
+  const pickEmoji = (emoji: string) => {
+    const { start, end } = emojiSelection.current;
+    const next = {
+      text: text.slice(0, start) + emoji + text.slice(end),
+      caret: start + emoji.length,
+    };
+    setText(next.text);
+    mentions.update(next.text, next.caret);
+    // Let the dialog release its focus trap and restore its trigger first.
+    globalThis.requestAnimationFrame(() => {
+      globalThis.requestAnimationFrame(() => {
+        textareaRef.current?.focus({ preventScroll: true });
+        textareaRef.current?.setSelectionRange(next.caret, next.caret);
+      });
     });
   };
 
@@ -552,13 +612,27 @@ export function E2eeComposer({
     mentions.update(event.target.value, event.target.selectionStart);
   };
 
-  const onFilesChosen = (event: ChangeEvent<HTMLInputElement>) => {
-    const chosen = Array.from(event.target.files ?? []);
-    event.target.value = "";
-    const result = addComposerFiles(files, chosen);
+  const addFiles = (incoming: readonly File[]) => {
+    const result = addComposerFiles(files, incoming);
     setFiles(result.files);
     setError(result.error);
+    return result.files;
   };
+
+  const onFilesChosen = (event: ChangeEvent<HTMLInputElement>) => {
+    addFiles(Array.from(event.target.files ?? []));
+    event.target.value = "";
+  };
+
+  const paste = usePastedImages({
+    canAttach,
+    files,
+    addFiles,
+    onText: (next) => {
+      placeText(next);
+      mentions.update(next.text, next.caret);
+    },
+  });
 
   if (disabledReasonKey) {
     return (
@@ -607,7 +681,7 @@ export function E2eeComposer({
             label={t(locale, "e2ee.composer.mentions.label")}
           />
         ) : null}
-        {editing || !attachmentsEnabled ? null : (
+        {canAttach ? (
           <>
             <input
               ref={fileInputRef}
@@ -628,7 +702,24 @@ export function E2eeComposer({
               <PaperClipIcon aria-hidden="true" className="tw-size-5" />
             </button>
           </>
-        )}
+        ) : null}
+        <button
+          type="button"
+          className={ICON_BUTTON}
+          aria-label={t(locale, "e2ee.emoji.insert")}
+          aria-haspopup="dialog"
+          onClick={() => {
+            const input = textareaRef.current;
+            emojiSelection.current = {
+              start: input?.selectionStart ?? text.length,
+              end: input?.selectionEnd ?? text.length,
+            };
+            mentions.close();
+            setEmojiOpen(true);
+          }}
+        >
+          <FaceSmileIcon aria-hidden="true" className="tw-size-5" />
+        </button>
         <label className="tw-sr-only" htmlFor={textareaId}>
           {t(locale, "e2ee.composer.label")}
         </label>
@@ -639,6 +730,7 @@ export function E2eeComposer({
           value={text}
           onChange={onChange}
           onKeyDown={onKeyDown}
+          onPaste={paste.onPaste}
           onSelect={(event) =>
             mentions.update(
               event.currentTarget.value,
@@ -669,7 +761,13 @@ export function E2eeComposer({
           <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
         </button>
       </div>
+      <PastedImagesStatus locale={locale} notice={paste.notice} />
       <ComposerFooter locale={locale} hintId={hintId} error={error} />
+      <E2eeEmojiPicker
+        open={emojiOpen}
+        onClose={() => setEmojiOpen(false)}
+        onSelect={pickEmoji}
+      />
     </div>
   );
 }

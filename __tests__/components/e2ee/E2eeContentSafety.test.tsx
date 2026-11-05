@@ -137,7 +137,10 @@ describe("imported messages", () => {
         imported: imported({ authorProfileId: SELF_ID, authorHandle: "x" }),
       })
     );
-    expect(screen.getByText("You")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "me" })).toHaveAttribute(
+      "href",
+      "/me"
+    );
     expect(screen.getByText("Moved by alice")).toBeVisible();
   });
 });
@@ -297,7 +300,9 @@ describe("E2eeReportDialog", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Report illegal or severe harm",
     });
-    expect(within(dialog).getByText("What this report sends")).toBeVisible();
+    expect(
+      await within(dialog).findByText("What this report sends")
+    ).toBeVisible();
     expect(within(dialog).getByText("a threat edited in")).toBeVisible();
     expect(within(dialog).queryByText("see you at noon")).toBeNull();
 

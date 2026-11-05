@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 
-import ValidatorDocPage from "@/components/validator-page/ValidatorDocPage";
-import { fillBootstrapPeers } from "@/lib/validator-page/bootstrapPeers";
-import { VALIDATOR_GUIDE_MARKDOWN } from "@/lib/validator-page/content/guideMarkdown";
+import ValidatorGuidePage from "@/components/validator-page/ValidatorGuidePage";
+import { detectFromUserAgent } from "@/lib/validator-page/detectSystem";
 import {
   getLockedView,
   getValidatorMetadata,
 } from "@/lib/validator-page/pageAccess";
+import { getReleaseFeedSnapshot } from "@/lib/validator-page/releaseFeed";
+import { getDebNames } from "@/lib/validator-page/releaseFiles";
 
 export default async function ValidatorGuideRoute() {
   await connection();
@@ -15,26 +17,19 @@ export default async function ValidatorGuideRoute() {
   if (locked) {
     return locked;
   }
-  const { markdown, complete } = await fillBootstrapPeers(
-    VALIDATOR_GUIDE_MARKDOWN
-  );
+  const [snapshot, requestHeaders] = await Promise.all([
+    getReleaseFeedSnapshot(),
+    headers(),
+  ]);
   return (
-    <ValidatorDocPage
-      section="guide"
-      eyebrow="Tester guide"
-      title="Set up the 6529 validator"
-      markdown={markdown}
-      notice={
-        complete
-          ? undefined
-          : "The sentry addresses could not be loaded. Reload the page in a minute."
-      }
-      withContents
+    <ValidatorGuidePage
+      platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
+      debs={getDebNames(snapshot.releases[0])}
     />
   );
 }
 
 export const metadata: Metadata = getValidatorMetadata(
   "Tester guide | 6529 Validator",
-  "Install the 6529 validator, sign the grant and add the peers."
+  "Set up the 6529 validator in three steps."
 );

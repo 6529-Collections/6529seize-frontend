@@ -120,8 +120,9 @@ never ask for a signature per message.
 ## Starting a chat
 
 1. Open `/messages/encrypted` and select **New encrypted chat**.
-2. Search for people and add them. Each person shows whether they can receive
-   encrypted messages:
+2. Search for people and tap or click a result to add them. The search clears
+   and the person appears in the selected list. Each person shows whether they
+   can receive encrypted messages:
    - **Can receive encrypted messages**
    - **Doesn’t accept messages from you**: their direct-message setting does
      not allow you.
@@ -139,8 +140,30 @@ the same people already chosen. Earlier messages are not copied.
 
 ## In a chat
 
+- In a direct chat, select the person's name or avatar in the header or chat
+  introduction to open their profile. Group titles stay as group titles.
+- Message authors have the same profile links, level, artist badges and
+  profile-wave badge as ordinary messages, where those apply. Hover over a
+  name or avatar on desktop for the profile card. Select a profile-wave badge
+  for the usual wave navigation or mobile preview.
+- Select a highlighted member mention to open that person's profile. If a
+  profile cannot be resolved, its unavailable details are omitted; messages
+  remain readable on this device.
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
+- Select **Add emoji** beside the message box to open the emoji board. Search
+  or browse standard emojis, skin tones, and the **6529** custom collection.
+  The selection replaces highlighted text or goes at the cursor. You can also
+  use the board while editing. Custom emojis appear as `:name:` in the message
+  box and as images in sent and received messages.
+- In a message's menu, choose a quick reaction or **More reactions** to open
+  the full emoji board, including custom emojis. Select an existing reaction
+  to add or remove yours. Emoji choices in encrypted chats do not enter the
+  ordinary chats' frequently-used emoji history.
+- Custom emojis load together as one public collection, independently of the
+  messages in a chat. If the collection cannot load, the board keeps standard
+  emojis available and offers **Try again**. Custom emojis in messages remain
+  readable as `:name:` until available; older apps may also show this text.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
   device like messages. Images show inline and other files are downloads.
   An image larger than about 50 megapixels shows as a file to download
@@ -149,6 +172,10 @@ the same people already chosen. Earlier messages are not copied.
   right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
+- Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
+  same limits as the attach control. Text copied together with an image is
+  pasted into the message as well. Pasting attaches images only while the
+  attach control is shown, so not while you edit a message.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
@@ -164,6 +191,26 @@ the same people already chosen. Earlier messages are not copied.
 - The timeline shows notices such as people joining, leaving or being removed,
   new devices (with the wallet that signed them) or removed devices, renames,
   admin changes and safety-code changes.
+
+### Browsing saved history
+
+A chat opens at its newest saved messages. **Load older messages** reads the
+previous part of this device's history; **Load newer messages** moves forward
+again. **New messages** returns to the latest messages. Incoming messages do
+not move you away from older history you are reading.
+
+Photos load when you approach them while scrolling. Moving away can release
+them from memory; returning to a photo may download it again. This does not
+remove its message or attachment keys from your saved history.
+
+Search covers all messages saved on this device, including older messages
+outside the current view. Use **Previous results** and **Next results** to
+browse a long result list. Replies and search results can open that older
+history. Encrypted backups also include the complete saved history.
+
+A device catching up after being offline still needs to process the messages
+it has not received yet. Opening already synced history does not repeat that
+work. Keep the app open while a large import catches up.
 
 ### Safety code
 

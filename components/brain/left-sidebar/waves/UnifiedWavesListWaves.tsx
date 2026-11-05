@@ -231,6 +231,7 @@ const UnifiedWavesListWaves = forwardRef<
       scrollContainerRef,
       enabled: !isDirectMessage,
       activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
+      activeWaveId,
     });
     const collectionLoading =
       isLoading ||

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import MyStreamWaveCreateActionsMenu from "./MyStreamWaveCreateActionsMenu";

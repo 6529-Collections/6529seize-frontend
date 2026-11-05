@@ -8,6 +8,7 @@ import {
   expectMemeArtworkScrolling,
 } from "./imageArtworkLayoutCases";
 import type { Locator, Page } from "@playwright/test";
+import path from "node:path";
 
 import {
   expect,
@@ -846,6 +847,131 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.getByRole("button", { name: "Download media" })
     ).toBeVisible();
   });
+
+  test("recovers a historical Timeline image using the same Arweave transaction", async ({
+    page,
+  }) => {
+    const tx = "IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
+    const primary = `https://arweave.net/${tx}/timeline-history.png`;
+    const fallback = `https://media.6529.io/arweave/${tx}/timeline-history.png`;
+    const requests: string[] = [];
+    await page.route("**/api/nft_history/**", async (route) => {
+      await route.fulfill({
+        json: {
+          data: [
+            {
+              nft_id: 1,
+              contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+              uri: `https://arweave.net/${tx}`,
+              transaction_date: "2024-01-01T00:00:00Z",
+              created_at: "2024-01-01T00:00:00Z",
+              transaction_hash: `0x${"1".repeat(64)}`,
+              block: 1,
+              description: {
+                event: "Edit",
+                changes: [{ key: "image", from: primary, to: "" }],
+              },
+            },
+          ],
+          next: null,
+        },
+      });
+    });
+    await page.route(primary, async (route) => {
+      requests.push(route.request().url());
+      await route.fulfill({ status: 503, body: "Unavailable" });
+    });
+    await page.route(fallback, async (route) => {
+      requests.push(route.request().url());
+      await route.fulfill({
+        contentType: "image/png",
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
+    });
+    await gotoReady(page, "/the-memes/1?focus=timeline");
+    const timeline = page.getByRole("region", {
+      name: "The Memes card timeline",
+    });
+    const preview = timeline.getByRole("img");
+    await expect(preview).toHaveAttribute("src", fallback);
+    await expect
+      .poll(() =>
+        preview.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      )
+      .toBeGreaterThan(0);
+    expect(requests).toEqual([primary, fallback]);
+    await expect(
+      timeline.getByRole("link", { name: "Open metadata URI" })
+    ).toHaveAttribute("href", `https://arweave.net/${tx}`);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  for (const recordedFormat of [true, false]) {
+    test(`keeps a removed Timeline video paused until Play with ${recordedFormat ? "recorded" : "missing"} historical format`, async ({
+      page,
+    }) => {
+      const primary =
+        "https://arweave.net/RNN6a_VraO1wM7Cmmv95okPU0Zqsnt3sc_CEBMNqNBw";
+      const changes = [{ key: "animation", from: primary, to: "" }];
+      if (recordedFormat)
+        changes.push({ key: "animation_details::format", from: "MP4", to: "" });
+      await page.route("**/api/nft_history/**", async (route) => {
+        await route.fulfill({
+          json: {
+            data: [
+              {
+                nft_id: 1,
+                contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                uri: "https://example.com/historical-metadata",
+                transaction_date: "2024-01-01T00:00:00Z",
+                created_at: "2024-01-01T00:00:00Z",
+                transaction_hash: `0x${"1".repeat(64)}`,
+                block: 1,
+                description: { event: "Edit", changes },
+              },
+            ],
+            next: null,
+          },
+        });
+      });
+      await page.route(primary, async (route) => {
+        await route.fulfill({
+          contentType: "video/mp4",
+          headers: { "access-control-allow-origin": "*" },
+          path: path.resolve("tests/media/fixtures/portrait.mp4"),
+        });
+      });
+      await gotoReady(page, "/the-memes/1?focus=timeline");
+      const timeline = page.getByRole("region", {
+        name: "The Memes card timeline",
+      });
+      const video = timeline.getByLabel("Removed Animation preview video");
+      // Mobile attaches a never-opened video source only once it is in view.
+      await video.scrollIntoViewIfNeeded();
+      await expect(video).toHaveAttribute("src", primary);
+      await expect(video).toHaveAttribute(
+        "aria-label",
+        "Removed Animation preview video"
+      );
+      await expect(timeline.getByRole("img")).toHaveCount(0);
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+        )
+        .toBeGreaterThan(0);
+      await expect(video).toHaveJSProperty("autoplay", false);
+      await expect(video).toHaveJSProperty("paused", true);
+      await timeline
+        .getByRole("button", { name: "Play video", exact: true })
+        .first()
+        .click();
+      await expect(video).toHaveJSProperty("paused", false);
+      await expectNoHorizontalOverflow(page);
+    });
+  }
 
   test("renders The Memes activity focus with locale-preserving links", async ({
     baseURL,

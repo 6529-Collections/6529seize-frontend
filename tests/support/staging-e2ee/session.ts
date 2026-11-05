@@ -261,7 +261,7 @@ export async function gotoStaging(page: Page, path: string) {
   return await page.goto(path, { waitUntil: "domcontentloaded" });
 }
 
-const ENCRYPTED_ROUTE_TITLE = /Encrypted messages/u;
+const ENCRYPTED_ROUTE_TITLE = /Your encrypted chats/u;
 const ENCRYPTED_COPY = /encrypted messages/iu;
 
 /**
@@ -688,6 +688,55 @@ const waitForPost = (page: Page, pathname: string) => {
   return response;
 };
 
+/** Prepare an existing Signed Posts permission for the DM-only journey. */
+async function prepareSignedPosts(session: StagingE2eeSession) {
+  const { page, wallet, evidence } = session;
+  await gotoStaging(page, ENCRYPTED_ROUTE);
+  await expectEnrollmentCard(session);
+  // Older builds combine both permissions from this gate instead.
+  if (
+    !(await page
+      .getByRole("button", {
+        name: /^Sign to enable (both|Encrypted DMs)$/u,
+      })
+      .isVisible())
+  ) {
+    return;
+  }
+  // Fixture preparation opens the public consent dialog; the wallet and API
+  // still create and store the real signing-only grant through the app.
+  await page.evaluate(() => {
+    window.dispatchEvent(
+      new CustomEvent("6529:device-setup", { detail: "posts" })
+    );
+  });
+  const dialog = page.getByRole("dialog", { name: "Enable Signed Posts" });
+  const signaturesBefore = wallet.count("personal_sign");
+  const encryptionRegistrations = () =>
+    evidence.requestsMatching(
+      "POST",
+      /^\/api\/e2ee\/devices(?:\/login-grant)?$/u
+    ).length;
+  const registrationsBefore = encryptionRegistrations();
+  const login = waitForPost(page, "/api/auth/session-login");
+  await dialog
+    .getByRole("button", { name: "Sign to enable Signed Posts", exact: true })
+    .click();
+  const response = await login;
+  expect(response.ok(), `${session.label}: Signed Posts setup failed`).toBe(
+    true
+  );
+  const grantId = await storedGrantId(response);
+  expect(
+    grantId,
+    `${session.label}: Signed Posts setup stored no grant`
+  ).not.toBeNull();
+  await expect(dialog).toHaveCount(0);
+  expect(wallet.count("personal_sign")).toBe(signaturesBefore + 1);
+  expect(encryptionRegistrations()).toBe(registrationsBefore);
+  session.signInGrantId = grantId;
+}
+
 /**
  * NC8 on the website (owner decision: one grant per browser): the button's
  * combined sign-in grants the signing key and the encrypted-messages key
@@ -754,10 +803,12 @@ async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
 interface PrepareSessionOptions {
   /**
    * After creating a new user's profile, sign in again on a fresh device,
-   * as a returning user does. That sign-in must carry the combined grant
-   * (NC8), which enrolls the device with no second signature.
+   * as a returning user does. Authentication-only sign-ins still need the
+   * explicit permission step; a combined sign-in can already enroll it.
    */
   readonly signInAgainWithProfile?: boolean;
+  /** Exercise DM-only setup with Signed Posts already enabled. */
+  readonly signedPostsFirst?: boolean;
 }
 
 /** Signs in, creates the throwaway profile when needed, then enrolls. */
@@ -783,11 +834,10 @@ export async function prepareEnrolledSession(
         await session.close();
         session = await openStagingSession(browser, testInfo, user, label);
         await signInThroughWalletModal(session);
-        expect(
-          enrolledByCombinedSignIn(session),
-          `${label}: a sign-in with a profile must carry the combined encrypted-messages grant`
-        ).toBe(true);
       }
+    }
+    if (options.signedPostsFirst && !session.signInGrantId) {
+      await prepareSignedPosts(session);
     }
     await enrollDevice(session);
     return session;

@@ -11,6 +11,7 @@ import Button from "@/components/utils/button/Button";
 import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useRecordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -37,6 +38,7 @@ export default function NotificationWaveFollowBtn({
 }) {
   const { setToast, requestAuth } = useAuth();
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
+  const recordMembership = useRecordWaveSidebarMembership();
   const [followingOverride, setFollowingOverride] = useState<boolean | null>(
     null
   );
@@ -55,6 +57,8 @@ export default function NotificationWaveFollowBtn({
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      // Membership is confirmed before the optional all-messages preference.
+      recordMembership(wave.id, true);
       await commonApiPost({
         endpoint: `notifications/wave-subscription/${wave.id}`,
         body: {},
@@ -91,6 +95,8 @@ export default function NotificationWaveFollowBtn({
           actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
         },
       });
+      // Record only after the final subscription request succeeds.
+      recordMembership(wave.id, false);
     },
     onSuccess: () => {
       setFollowingOverride(false);

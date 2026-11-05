@@ -30,12 +30,12 @@ const persistEditorState = (
 };
 
 /**
- * Persist an in-progress chat message across a full reload (e.g. the
- * new-version toast). Keyed by wave and scoped to the PRIMARY composer:
+ * Persist an in-progress chat message across a reload or a temporary tab
+ * change. Keyed by wave and scoped to the PRIMARY composer:
  * the stream composer is a single instance whose `activeDrop` can flip to
  * reply/quote (see MyStreamWaveChat), so `draftWaveId` is derived live.
  * The autosave effect early-returns whenever it is null, which is what
- * guarantees reply/quote/edit content is never written under the primary
+ * guarantees submission/reply/quote/edit content is never written under the primary
  * wave key — no cross-mode bleed.
  *
  * Restoration happens only at editor-creation time (initialConfig), so the
@@ -47,11 +47,13 @@ const persistEditorState = (
  */
 export const useWaveDraftPersistence = ({
   waveId,
+  isDropMode,
   activeDrop,
   editorState,
   dropEditorRefreshKey,
 }: {
   readonly waveId: string;
+  readonly isDropMode: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly editorState: EditorState | null;
   readonly dropEditorRefreshKey: number;
@@ -59,7 +61,8 @@ export const useWaveDraftPersistence = ({
   readonly initialDraftJson: string | null;
 } => {
   const { editingDropId } = useEditingDrop();
-  const draftWaveId = activeDrop === null && !editingDropId ? waveId : null;
+  const draftWaveId =
+    !isDropMode && activeDrop === null && !editingDropId ? waveId : null;
   const mountRefreshKeyRef = useRef(dropEditorRefreshKey);
   const isMountEditor = dropEditorRefreshKey === mountRefreshKeyRef.current;
   const [initialDraftJson] = useState<string | null>(() =>
@@ -103,5 +106,7 @@ export const useWaveDraftPersistence = ({
     };
   }, []);
 
-  return { initialDraftJson: isMountEditor ? initialDraftJson : null };
+  return {
+    initialDraftJson: draftWaveId && isMountEditor ? initialDraftJson : null,
+  };
 };

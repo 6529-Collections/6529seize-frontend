@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "0dbc21f06d787470d3af59d57a4e19c1191374e9900ed6d83bf874da98a7eeed",
+    "pnpm_lock_sha256": "0b44f2ab9da31a554cd7f88b647ba3f2fb366110050703f29c254683d88c415f",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -738,7 +738,6 @@
     "__tests__/hooks/useLongPressInteraction.test.ts": 7,
     "__tests__/hooks/useManifoldClaim.test.tsx": 6,
     "__tests__/hooks/useMemesQuickVoteQueue.test.tsx": 1,
-    "__tests__/hooks/useNativeKeyboard.test.ts": 4,
     "__tests__/hooks/useNFTCollections.test.ts": 7,
     "__tests__/hooks/useSecureSign-wagmi.test.ts": 1,
     "__tests__/hooks/useSecureSign.test.ts": 5,

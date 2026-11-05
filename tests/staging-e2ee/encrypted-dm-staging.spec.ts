@@ -1,3 +1,9 @@
+import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
+import { performance } from "node:perf_hooks";
+import {
+  seedProcessedHistory,
+  browserPerformanceSnapshot,
+} from "../support/staging-e2ee/performance";
 import type { Browser, TestInfo } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
@@ -31,6 +37,7 @@ import {
 } from "../support/staging-e2ee/session";
 import {
   attachFile,
+  composer,
   expectDecrypted,
   expectNothingUndecryptable,
   imagePixels,
@@ -196,10 +203,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     const runId = newRunId();
     // A signs in again once the profile exists, as returning users do, and
-    // enrolls with that one sign-in signature. B signs in before having a
-    // profile (a signing-only grant), then turns encrypted messages on from
-    // the enrollment button: one more combined sign-in signature, which
-    // replaces and revokes that grant.
+    // then grants permissions explicitly when sign-in is authentication-only.
+    // B signs in before creating its profile, then prepares Signed Posts
+    // to exercise encryption-only setup on permission-scoped builds.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
@@ -212,7 +218,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         browser,
         testInfo,
         createThrowawayUser("B"),
-        "B"
+        "B",
+        { signedPostsFirst: true }
       );
       world = { runId, a, b, extra: [], dm: null };
     } catch (error) {
@@ -239,8 +246,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const { a, b } = requireWorld();
     for (const session of [a, b]) {
       // NC8 on the website: the device's one grant is a combined sign-in
-      // grant, from A's sign-in or from B's enrollment button (one more
-      // sign-in signature, checked at enrollment). No device signs an
+      // grant, from a combined sign-in or from explicit enrollment (one more
+      // consent signature, checked at enrollment). No device signs an
       // EIP-712 MlsDeviceGrant.
       expect(
         session.wallet.typedDataSignatures("MlsDeviceGrant"),
@@ -297,6 +304,19 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await sendEncrypted(b, reply);
     await expectDecrypted(a, reply);
     await expect(messageRow(b.page, hello)).toHaveCount(1);
+    const sender = messageRow(b.page, hello);
+    await expect(
+      sender.getByRole("link", { name: a.user.handle, exact: true })
+    ).toHaveAttribute("href", `/${a.user.handle}`);
+    await expect(
+      sender.getByRole("link", { name: `View ${a.user.handle}'s profile` })
+    ).toHaveAttribute("href", `/${a.user.handle}`);
+    await expect(sender.getByLabel(/^Level \d+$/u)).toBeVisible();
+    await expect(
+      b.page
+        .getByRole("heading", { level: 1, name: a.user.handle })
+        .getByRole("link")
+    ).toHaveAttribute("href", `/${a.user.handle}`);
     await expectNothingUndecryptable(a);
     await expectNothingUndecryptable(b);
 
@@ -308,6 +328,76 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "A's sends were not observed, so the plaintext check would be vacuous"
     ).toBeGreaterThan(0);
     expectPrivateAndClean([a, b], needles({ hello, reply }));
+  });
+
+  test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const prefix = qaMessage(runId, "emoji board");
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
+    const input = composer(a.page);
+    await input.fill(`${prefix} `);
+    const choose = async (
+      session: StagingE2eeSession,
+      query: string,
+      name: string
+    ) => {
+      const dialog = session.page.getByRole("dialog", {
+        name: "Choose an emoji",
+      });
+      await dialog.getByPlaceholder("Search", { exact: true }).fill(query);
+      await dialog
+        .getByRole("button", { name, exact: true })
+        .click({ timeout: UI_TIMEOUT_MS });
+      await expect(dialog).toHaveCount(0);
+    };
+    await a.page.getByRole("button", { name: "Add emoji" }).click();
+    await choose(a, "grinning", "😀");
+    await a.page.getByRole("button", { name: "Add emoji" }).click();
+    await choose(a, "gm", ":gm:");
+    const draft = `${prefix} 😀:gm:`;
+    await expect(input).toHaveValue(draft);
+    await input.press("Enter");
+    const row = (session: StagingE2eeSession) =>
+      session.page
+        .getByRole("list", { name: "Messages", exact: true })
+        .getByRole("listitem")
+        .filter({ hasText: prefix });
+    await expect(
+      row(b).getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+    await expect(row(b)).toContainText("😀");
+    await row(b).hover();
+    await row(b).getByRole("button", { name: "Message actions" }).click();
+    await b.page.getByRole("menuitem", { name: "More reactions" }).click();
+    await choose(b, "gm", ":gm:");
+    await expect(row(a).getByRole("button", { name: /:gm:.*1/u })).toBeVisible({
+      timeout: SYNC_TIMEOUT_MS,
+    });
+    const reaction = row(b).getByRole("button", { name: /:gm:.*1/u });
+    await expect(reaction).toHaveAttribute("aria-pressed", "true");
+    await reaction.click();
+    await expect(row(a).getByRole("button", { name: /:gm:.*1/u })).toHaveCount(
+      0,
+      { timeout: SYNC_TIMEOUT_MS }
+    );
+    for (const session of [a, b]) {
+      expect(
+        session.evidence.requests.filter(
+          (request) =>
+            request.url.includes("6529-emoji/") ||
+            request.url.includes("/api/profile-cms/assets")
+        )
+      ).toEqual([]);
+      expect(
+        await session.page.evaluate(() =>
+          localStorage.getItem("emoji-mart.frequently")
+        )
+      ).toBeNull();
+    }
+    expectPrivateAndClean([a, b], needles({ draft, custom: ":gm:" }));
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
@@ -456,5 +546,182 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({ beforeRevoke, afterRevoke }),
       new Map([[b2, b2Mark]])
     );
+  });
+  test("a synced 100,000-message photo history stays bounded and responsive", async ({}, testInfo) => {
+    const current = requireWorld();
+    const { a, b } = current;
+    const dm = await ensureDm(current);
+    if (!a.user.profileId) throw new Error("Missing QA profile");
+    await openChat(a, dm);
+    const preparing = performance.now();
+    const fixture = await seedProcessedHistory(a.page, dm, a.user.profileId);
+    await testInfo.attach("long-history-fixture.json", {
+      body: Buffer.from(
+        JSON.stringify({
+          ...fixture,
+          preparationMs: performance.now() - preparing,
+        })
+      ),
+      contentType: "application/json",
+    });
+    const blobRequests: string[] = [];
+    const logCursors: number[] = [];
+    a.page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (request.method() === "GET" && /e2ee\/blobs\//u.test(url.pathname))
+        blobRequests.push(url.pathname);
+      if (url.pathname === `/api/e2ee/groups/${dm}/log`)
+        logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
+    });
+    const upgrading = performance.now();
+    // A one-time 100k-record schema upgrade has its own budget; warm opens retain the normal timeout.
+    await openChat(a, dm, 5 * 60_000);
+    const input = a.page.getByRole("textbox", { name: "Encrypted message" });
+    await expect(input).toBeEnabled({ timeout: 5 * 60_000 });
+    await expect(
+      a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .first()
+    ).toBeAttached({
+      timeout: 5 * 60_000,
+    });
+    const migrationMs = performance.now() - upgrading;
+    await a.page.goto("https://staging.6529.io/api/version");
+    const opened = performance.now();
+    await openChat(a, dm);
+    await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .first()
+    ).toBeAttached({
+      timeout: UI_TIMEOUT_MS,
+    });
+    const openingMs = performance.now() - opened;
+    const typing = performance.now();
+    await input.pressSequentially(
+      "Typing stays responsive while a large saved photo history is open."
+    );
+    const typingMs = performance.now() - typing;
+    await expect(input).toHaveValue(
+      "Typing stays responsive while a large saved photo history is open."
+    );
+    await input.fill("");
+    const snapshot = await browserPerformanceSnapshot(a.page);
+    expect(snapshot.placeholders).toBeLessThanOrEqual(200);
+    expect(snapshot.renderedRows).toBeLessThan(60);
+    expect(blobRequests.length).toBeLessThan(10);
+    expect(typingMs).toBeLessThan(2000);
+    await expect
+      .poll(() => logCursors.length, { timeout: UI_TIMEOUT_MS })
+      .toBeGreaterThan(0);
+    expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
+      true
+    );
+    await testInfo.attach("long-history-opening.json", {
+      body: Buffer.from(
+        JSON.stringify({
+          fixture,
+          migrationMs,
+          openingMs,
+          typingMs,
+          ...snapshot,
+          blobRequests: blobRequests.length,
+          logCursors,
+        })
+      ),
+      contentType: "application/json",
+    });
+    const scroll = a.page.getByRole("list", { name: "Messages" });
+    await scroll.evaluate((element) => {
+      const container = element.closest<HTMLElement>("[data-e2ee-scroll]")!;
+      container.scrollTop = 0;
+    });
+    const anchor = await a.page
+      .getByRole("list", { name: "Messages" })
+      .locator("[data-e2ee-row]")
+      .first()
+      .evaluate((element) => ({
+        id: (element as HTMLElement).dataset["e2eeRow"]!,
+        top: element.getBoundingClientRect().top,
+      }));
+    await a.page.getByRole("button", { name: "Load older messages" }).click();
+    await expect
+      .poll(() =>
+        a.page
+          .getByRole("list", { name: "Messages" })
+          .locator("[data-e2ee-row]")
+          .count()
+      )
+      .toBeGreaterThan(100);
+    expect(
+      await a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .count()
+    ).toBeLessThanOrEqual(200);
+    await expect
+      .poll(() =>
+        scroll.evaluate((element, saved) => {
+          const row = [
+            ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
+          ].find((item) => item.dataset["e2eeRow"] === saved.id);
+          return row
+            ? Math.abs(row.getBoundingClientRect().top - saved.top)
+            : Number.POSITIVE_INFINITY;
+        }, anchor)
+      )
+      .toBeLessThan(4);
+    await expect(input).toBeEnabled();
+    const searching = performance.now();
+    await a.page.getByRole("button", { name: "Search this chat" }).click();
+    await a.page
+      .getByRole("searchbox", { name: "Search messages on this device" })
+      .fill("performance fixture 0");
+    await expect(a.page.getByText("1 result", { exact: true })).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await a.page.getByText("performance fixture 0", { exact: true }).click();
+    const oldestRow = messageRow(a.page, "performance fixture 0");
+    await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const oldestPhoto = oldestRow.getByRole("img", { name: /^Image:/u });
+    await expect(oldestPhoto).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
+    const searchJumpMs = performance.now() - searching;
+    await testInfo.attach("long-history-performance.json", {
+      body: Buffer.from(
+        JSON.stringify(
+          {
+            fixture,
+            migrationMs,
+            openingMs,
+            typingMs,
+            searchJumpMs,
+            ...snapshot,
+            blobRequests: blobRequests.length,
+            logCursors,
+          },
+          null,
+          2
+        )
+      ),
+      contentType: "application/json",
+    });
+    await a.page.screenshot({ path: testInfo.outputPath("long-history.png") });
+    expectPrivateAndClean([a, b], new Map());
+  });
+
+  test("a receiver catches up with a real imported staging backlog", async ({}, testInfo) => {
+    test.setTimeout(30 * 60_000);
+    const { a, b } = requireWorld();
+    const result = await measureStagingCatchUp(a, b);
+    await testInfo.attach("real-mls-catch-up-performance.json", {
+      body: Buffer.from(JSON.stringify(result, null, 2)),
+      contentType: "application/json",
+    });
   });
 });

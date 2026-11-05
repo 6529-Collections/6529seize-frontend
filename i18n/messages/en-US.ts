@@ -782,6 +782,8 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
+  showMore: "Show more",
+  showLess: "Show less",
 } as const);
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
@@ -927,6 +929,10 @@ const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
 } as const);
 
 const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
+  sort: "Sort by",
+  "sort.voteAmount": "Your vote amount",
+  "sort.leaderboard": "Leaderboard position",
+  "sort.lastVoted": "Last voted",
   total: "Total",
   votesGivenNow: "Votes given now",
   projectedAtDecision: "Projected vote count at decision time",
@@ -1565,6 +1571,7 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   loginRequired: "Please log in to make submissions",
+  ended: "Submission period has ended",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -1613,6 +1620,36 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
+  loading: "Loading submission access…",
+  unavailable: "Submission access details are unavailable.",
+  submissionScope: "Submission group",
+  publicGroup: "Public",
+  closedOn: "Closed {date}",
+  otherRules: "Other submission rules still apply.",
+  independent: "Chat access is separate from submission access.",
+  signature: "Submissions require a wallet signature.",
+  viewRules: "View submission rules",
+  "preview.chatPublic": "People with wave access can chat.",
+  "preview.chatGroup": "Chat is limited to its selected group.",
+  "preview.chatDisabledSubmitPublic":
+    "Chat is disabled. Submission group access is public. Voting access is separate.",
+  "preview.chatDisabledSubmitGroup":
+    "Chat is disabled. Only the submission group can submit. Voting access is separate.",
+  "preview.bothPublic":
+    "People with wave access can chat and submit. Voting access is separate.",
+  "preview.chatPublicSubmitGroup":
+    "People with wave access can chat, but only the submission group can submit. Voting access is separate.",
+  "preview.chatGroupSubmitPublic":
+    "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  "preview.chatGroupSubmitGroup":
+    "Chat is limited to its selected group. Only the submission group can submit. Voting access is separate.",
+  "preview.sameGroup":
+    "Chat and submissions use the same selected group. Voting access is separate.",
+  "preview.differentGroups":
+    "Chat and submissions use different access groups. Permission for one does not grant the other. Voting access is separate.",
+} as const);
+
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
@@ -1653,6 +1690,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "editAccess.chatLabel": "Chat",
   "editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "editAccess.loading": "Loading current criteria…",
   "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
   "editAccess.loadErrorDescription":
@@ -2173,8 +2212,14 @@ const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
   {
-    votingOngoing: "Voting ongoing",
-    droppingOngoing: "Dropping open",
+    votingOngoing: "Voting open",
+    droppingOngoing: "Submissions open",
+    submissionsClosed: "Submissions closed",
+    submissionsOpenIn: "Submissions open in",
+    submissionsCloseIn: "Submissions close in",
+    votingClosed: "Voting closed",
+    votingOpensIn: "Voting opens in",
+    votingClosesIn: "Voting closes in",
     noEndDate: "No end date",
     nextWinnersIn: "Next winners announced in",
     countdown: "{hours}h {minutes}m",
@@ -2953,6 +2998,59 @@ const DELEGATION_EXPIRY_MESSAGES = objectMessages("delegation.expiry", {
     "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.",
 } as const);
 
+const DELEGATION_REGISTER_MESSAGES = objectMessages("delegation.register", {
+  title: "Register Delegation",
+  titleAsManager: "Register Delegation as Delegation Manager",
+  description:
+    "Register utility rights for another wallet. NFTs stay in the delegator wallet.",
+  closeTitle: "Delegation",
+  "delegator.label": "Delegator",
+  "delegator.tooltip": "Address registering the delegation",
+  "manager.label": "Delegation Manager",
+  "manager.tooltip": "Address executing the delegation",
+  "delegate.label": "Delegate Address",
+  "delegate.tooltip": "Delegate to Address e.g. your hot wallet",
+  "useCase.label": "Use Case",
+  "useCase.tooltip": "Delegation Use Case",
+  "useCase.placeholder": "Select Use Case",
+  "useCase.option": "#{number} - {name}",
+  "expiry.label": "Expiry Date",
+  "expiry.tooltip": "Expiry date for delegation (optional)",
+  "expiry.never": "Never",
+  "expiry.selectDate": "Select Date",
+  "tokens.label": "Tokens",
+  "tokens.tooltip": "Tokens involved in the delegation (optional)",
+  "tokens.all": "All",
+  "tokens.selectTokenId": "Select Token ID",
+  "supportedUseCases.note":
+    "Note: The currently supported use cases on 6529.io are: #1 - All, #2 - Minting/Allowlist, #3 - Airdrops",
+  "supportedUseCases.link":
+    "Which use cases are supported? (opens in a new tab)",
+  "submit.progressTitle": "Registering Delegation",
+  "submit.label": "Register Delegation",
+  "error.collection": "Missing or invalid Collection",
+  "error.useCase": "Missing or invalid Use Case",
+  "error.address": "Missing or invalid Address",
+  "error.ownWallet": "Invalid Address - cannot delegate to your own wallet",
+  "error.tokenId": "Missing or invalid Token ID",
+} as const);
+
+const DELEGATION_SUMMARY_MESSAGES = objectMessages("delegation.summary", {
+  title: "Review before signing",
+  description:
+    "Your wallet will ask you to sign a transaction with exactly these values. Fill in anything marked Not set before you submit.",
+  notSet: "Not set",
+  originalDelegator: "Original delegator",
+  collection: "Collection",
+  useCase: "Use case",
+  delegate: "Delegate address",
+  expiry: "Expiry",
+  expiryNever: "Never",
+  tokens: "Tokens",
+  tokensAll: "All tokens",
+  tokenId: "Token ID {tokenId}",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "wave.byAuthor": "by {author}",
   "wave.serial": "Wave #{serial}",
@@ -3087,6 +3185,28 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "artworkAlerts.label": "Artwork alerts",
+  "artworkAlerts.on": "On",
+  "artworkAlerts.off": "Off",
+  "artworkAlerts.saving": "Please wait…",
+  "artworkAlerts.mainStage":
+    "Get notified when this artist submits to The Memes Main Stage.",
+  "artworkAlerts.enabled": "Artwork alerts are on.",
+  "artworkAlerts.disabled": "Artwork alerts are off.",
+  "artworkAlerts.retry": "Try again",
+  "artworkAlerts.saveFailed": "Couldn’t save artwork alerts.",
+  "artworkAlerts.tryAgain": "Please try again.",
+  "artworkAlerts.sessionChanged": "Your session changed. Please try again.",
+  "artworkAlerts.notification":
+    "{artist} submitted {artwork} to {competition}.",
+  "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.loading": "Loading emoji picker...",
+  "emoji.picker.unavailable": "Emoji picker is unavailable.",
+  "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
+  "waves.historyGap.loading": "Loading missed messages…",
+  "waves.historyGap.retry": "Could not load missed messages. Try again",
+
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
@@ -3379,6 +3499,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
+  ...DELEGATION_REGISTER_MESSAGES,
+  ...DELEGATION_SUMMARY_MESSAGES,
   ...join6529Messages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",
@@ -4530,6 +4652,7 @@ export const EN_US_MESSAGES = {
   "drop.media.videoLoadFailed": "Couldn’t load video.",
   "drop.media.retry": "Retry",
   "drop.media.gifAnimationAlt": "Animated GIF",
+  "drop.media.expandedGifAnimationAlt": "Expanded GIF animation",
   "drop.media.playAnimation": "Play animation",
   "drop.media.pauseAnimation": "Pause animation",
   "drop.media.openPreview": "Open image preview",
@@ -4548,6 +4671,8 @@ export const EN_US_MESSAGES = {
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
   "media.interactive.untrustedContent": "Untrusted interactive content",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "walletAddress.copy.optionsAriaLabel": "Copy wallet options",
   "walletAddress.copy.ensAriaLabel": "Copy ENS name",
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
@@ -4595,6 +4720,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_DIALOG_MESSAGES,
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
+  ...WAVE_ACCESS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
   "waves.subwaves.accessWarning.message":
@@ -4753,6 +4879,12 @@ export const EN_US_MESSAGES = {
   "waves.discovery.label": "Wave discovery",
   "waves.discovery.expandSection": "Expand {section}",
   "waves.discovery.collapseSection": "Collapse {section}",
+  "waves.publicDrop.title": "Drop #{number}",
+  "waves.publicDrop.image": "{title} — image {number}",
+  "waves.publicDrop.media": "Open attachment {number} ({type})",
+  "waves.publicDrop.published": "Published {date} (UTC)",
+  "waves.publicDrop.moreParts":
+    "Connect your wallet to read the rest of this storm.",
   "waves.discovery.voteList": "Active voting waves",
   "waves.discovery.viewAll": "View all",
   "waves.discovery.viewVotes": "View all active votes",

@@ -23,6 +23,7 @@ import {
 } from "./useWaveSubwaves";
 import { useWavesListRefetch } from "./useWavesListRefetch";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { useWaveSidebarMembership } from "./waves/useWaveSidebarMembership";
 import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -37,6 +38,7 @@ import {
   getNonPinnedFilter,
   getShouldLoadMainWaves,
   getViewerIdentityKey,
+  getVisibleSidebarSubwaves,
   isKnownWaveForCurrentViewer,
   SIDEBAR_DISCOVERY_SECTION_ALL,
   SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
@@ -91,10 +93,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
   const activeWave = options.activeWave ?? null;
-  const activeSidebarContext = useMemo(
-    () => getActiveSidebarContext(activeWave),
-    [activeWave]
-  );
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
@@ -135,6 +133,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasAuthenticatedProfile,
     hasValidWalletAuthorization,
   });
+  const leftWaveIds = useWaveSidebarMembership(viewerIdentityKey);
+  const activeSidebarContext = useMemo(
+    () =>
+      getActiveSidebarContext(
+        isJoinedMode && leftWaveIds.includes(activeWave?.id ?? "")
+          ? null
+          : activeWave
+      ),
+    [activeWave, isJoinedMode, leftWaveIds]
+  );
 
   const nonPinnedFilter = getNonPinnedFilter(isConnectedIdentity);
 
@@ -412,10 +420,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
 
     const activeContainerWave = activeSidebarContext.containerWave;
     const activeContainerWaveId = activeContainerWave?.id ?? null;
+    // Joined follows its loaded snapshot. Eagerly adding older pins would
+    // conceal missing batches and push the pagination trigger past those pins.
     const sourceWaves = [
       ...(activeContainerWave ? [activeContainerWave] : []),
       ...mainWaves,
-      ...separatelyFetchedPinnedWaves,
+      ...(isJoinedMode ? [] : separatelyFetchedPinnedWaves),
     ];
 
     sourceWaves.forEach((wave) => {
@@ -655,25 +665,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       return [];
     }
 
-    const visibleSubwaves = new Map<string, SidebarWave>();
-    const activeSubwave = activeSidebarContext.subwave;
-    if (activeSubwave !== null) {
-      visibleSubwaves.set(activeSubwave.id, activeSubwave);
-    }
-
-    subwaves.forEach((wave) => {
-      if (
-        !isJoinedMode ||
-        wave.subscribed ||
-        wave.id === activeSubwave?.id ||
-        topSectionWaveIds.has(wave.parentWaveId ?? "")
-      ) {
-        // The overview is fresher than the temporary full-wave route context.
-        visibleSubwaves.set(wave.id, wave);
-      }
-    });
-
-    return [...combinedWaves, ...visibleSubwaves.values()];
+    return [
+      ...combinedWaves,
+      ...getVisibleSidebarSubwaves({
+        subwaves,
+        activeSubwave: activeSidebarContext.subwave,
+        isJoinedMode,
+        leftWaveIds,
+        topSectionWaveIds,
+      }),
+    ];
   }, [
     combinedWaves,
     activeSidebarContext.subwave,
@@ -681,6 +682,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     shouldLoadMainWaves,
     subwaves,
     topSectionWaveIds,
+    leftWaveIds,
   ]);
 
   // New drops counting logic has been removed and will be managed by context

@@ -4,7 +4,7 @@ import RememeImage from "@/components/nft-image/RememeImage";
 import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
 import { RememeSort } from "@/components/rememes/rememesTypes";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT, Rememe } from "@/entities/INFT";
@@ -140,7 +140,9 @@ function buildRememesUrl(memeId: number, page: number, sorting: RememeSort) {
       ? "&sort=created_at&sort_direction=desc"
       : "";
 
-  return `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${page}${sort}`;
+  return apiUrl(
+    `/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${page}${sort}`
+  );
 }
 
 function getRememeName(rememe: Rememe) {
@@ -195,7 +197,7 @@ export function MemePageReferencesSubMenu(props: {
   useEffect(() => {
     if (props.show && props.nft) {
       void fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
+        apiUrl(`/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`)
       )
         .then((response: DBResponse) => {
           setMemeLabNfts({

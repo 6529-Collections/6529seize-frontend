@@ -43,6 +43,23 @@
       }
     },
     {
+      "Sid": "StagingPageCachePurge",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+      ],
+      "Resource": [
+        "arn:aws:cloudfront::987989283142:distribution/E1DKA1VIRRUKKC"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
       "Sid": "StagingCommandStatus",
       "Effect": "Allow",
       "Action": ["ssm:DescribeInstanceInformation", "ssm:GetCommandInvocation"],

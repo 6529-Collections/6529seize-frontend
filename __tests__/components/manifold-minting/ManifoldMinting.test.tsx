@@ -27,6 +27,7 @@ jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
   useNftPurchasingVisibility: jest.fn(() => ({
     hideNftPurchasing: false,
     shouldRedirect: false,
+      reservesNftPurchasingSpace: false,
   })),
 }));
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
@@ -398,6 +399,7 @@ describe("Purchasing visibility", () => {
     visibility.mockImplementation(() => ({
       hideNftPurchasing: false,
       shouldRedirect: false,
+      reservesNftPurchasingSpace: false,
     }));
   });
 
@@ -405,6 +407,7 @@ describe("Purchasing visibility", () => {
     visibility.mockImplementation(() => ({
       hideNftPurchasing: true,
       shouldRedirect: true,
+      reservesNftPurchasingSpace: false,
     }));
     useManifoldClaim.mockReturnValue(createMockClaimState());
 

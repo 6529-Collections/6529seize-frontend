@@ -198,9 +198,12 @@ export default function SafeCollectingSetupPaths({
                     <ButtonLink
                       href={step.primary.href}
                       variant="secondary"
-                      size="sm"
+                      size={null}
+                      className="tw-min-h-9 tw-max-w-full tw-px-3 tw-py-2 tw-text-xs"
                     >
-                      {message(locale, value, step.key, step.primary.key)}
+                      <span className="tw-whitespace-normal">
+                        {message(locale, value, step.key, step.primary.key)}
+                      </span>
                     </ButtonLink>
                     {step.secondary && (
                       <Link

@@ -151,7 +151,7 @@ jest.mock("@/components/brain/BrainDesktopDrop", () => ({
   default: () => <div data-testid="drop-overlay" />,
 }));
 
-jest.mock("@/components/waves/create-wave/CreateWaveModal", () => ({
+jest.mock("@/components/waves/create-wave/LazyCreateWaveModal", () => ({
   __esModule: true,
   default: () => <div data-testid="create-wave-modal" />,
 }));

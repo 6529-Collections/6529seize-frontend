@@ -3,8 +3,11 @@ import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import { VALIDATOR_UNLOCK_PATH } from "@/lib/validator-page/accessGate";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
+import ValidatorUnlockForm from "./ValidatorUnlockForm";
 
 type ValidatorGateNotice = "wrong" | "wait" | null;
+
+const FORM_ID = "validator-unlock";
 
 const NOTICES: Record<Exclude<ValidatorGateNotice, null>, string> = {
   wrong: "That password is not right. Check it and try again.",
@@ -31,8 +34,8 @@ export default function ValidatorPasswordForm({
             password 6529 gave you.
           </p>
         </ValidatorPageHeader>
-        <form
-          method="post"
+        <ValidatorUnlockForm
+          id={FORM_ID}
           action={VALIDATOR_UNLOCK_PATH}
           className={`${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
         >
@@ -70,7 +73,7 @@ export default function ValidatorPasswordForm({
             <LockClosedIcon aria-hidden="true" className="tw-size-5" />
             Open
           </button>
-        </form>
+        </ValidatorUnlockForm>
         <p className="tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-500">
           After the password, this browser keeps access for 30 days.
         </p>

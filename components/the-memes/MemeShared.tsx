@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import {
@@ -117,7 +117,7 @@ async function getMetadataProps(
     let nft = prefetchedNft ?? undefined;
     if (prefetchedNft === undefined) {
       const response = await fetchUrl<DBResponse<BaseNFT>>(
-        `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
+        apiUrl(`/api/${urlPath}?${query}`)
       );
       nft = Array.isArray(response.data) ? response.data[0] : undefined;
     }

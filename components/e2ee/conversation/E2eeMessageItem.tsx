@@ -1,20 +1,9 @@
 "use client";
 
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import {
-  ArrowUturnLeftIcon,
-  BellIcon,
-  BellSlashIcon,
-  ChatBubbleLeftEllipsisIcon,
-  EllipsisHorizontalIcon,
-  ExclamationTriangleIcon,
-  FlagIcon,
-  NoSymbolIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { memo, type ReactNode, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { memo, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -23,6 +12,7 @@ import type {
   E2eeConversation,
   E2eeEngine,
   E2eeMessage,
+  E2eeMember,
 } from "@/lib/e2ee/types";
 import {
   findMember,
@@ -32,7 +22,8 @@ import {
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
-import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eeProfileLink } from "../ui/E2eeProfileLink";
+import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitLinks } from "./e2eeLinks";
 import {
@@ -41,30 +32,17 @@ import {
   importedAuthorName,
 } from "./E2eeImportedNote";
 import { splitMentions } from "./e2eeMentions";
+import {
+  E2eeMessageActionsMenu,
+  type E2eeMessageActions,
+} from "./E2eeMessageActionsMenu";
+import { E2eeEmojiText } from "./E2eeEmojiText";
 
-const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
+export type { E2eeMessageActions } from "./E2eeMessageActionsMenu";
 
 export const getMessageDomId = (id: string) => `e2ee-message-${id}`;
 
 const REPLY_SNIPPET_MAX = 80;
-
-export interface E2eeMessageActions {
-  readonly onReply: (message: E2eeMessage) => void;
-  readonly onEdit: (message: E2eeMessage) => void;
-  readonly onDelete: (message: E2eeMessage) => void;
-  readonly onReport: (message: E2eeMessage) => void;
-  /** Block the sender (Block, mute and DM settings come before Report). */
-  readonly onBlock: (message: E2eeMessage) => void;
-  readonly onToggleMute: () => void;
-  /** Whether this chat is muted on this device. */
-  readonly muted: boolean;
-  readonly onReact: (
-    message: E2eeMessage,
-    reaction: string,
-    on: boolean
-  ) => void;
-  readonly onJumpTo: (id: string) => void;
-}
 
 interface E2eeMessageItemProps {
   readonly message: E2eeMessage;
@@ -77,6 +55,7 @@ interface E2eeMessageItemProps {
   readonly actions: E2eeMessageActions;
   /** Arrived after the chat was opened: ease in (respects reduced motion). */
   readonly appear?: boolean | undefined;
+  readonly inViewportRow?: boolean;
 }
 
 function MessageBody({
@@ -125,11 +104,12 @@ function MessageBody({
     message.mentions
   );
   return (
-    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
+    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-md tw-leading-6 tw-text-iron-100">
       {segments.flatMap((segment) =>
         segment.kind === "mention" ? (
-          <span
+          <E2eeProfileLink
             key={segment.start}
+            member={findMember(conversation.members, segment.profileId)}
             className={`tw-rounded tw-px-0.5 tw-font-semibold ${
               segment.profileId === selfProfileId
                 ? "tw-bg-primary-500/25 tw-text-primary-300"
@@ -137,7 +117,7 @@ function MessageBody({
             }`}
           >
             {segment.value}
-          </span>
+          </E2eeProfileLink>
         ) : (
           splitLinks(segment.value, segment.start).map((part) =>
             part.kind === "link" ? (
@@ -151,7 +131,9 @@ function MessageBody({
                 {part.value}
               </a>
             ) : (
-              <span key={part.start}>{part.value}</span>
+              <span key={part.start}>
+                <E2eeEmojiText text={part.value} />
+              </span>
             )
           )
         )
@@ -263,7 +245,9 @@ function Reactions({
                   : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-600"
               }`}
             >
-              <span aria-hidden="true">{reaction}</span>
+              <span aria-hidden="true">
+                <E2eeEmojiText text={reaction} />
+              </span>
               <span aria-hidden="true">
                 {formatInteger(locale, profileIds.length)}
               </span>
@@ -275,193 +259,22 @@ function Reactions({
   );
 }
 
-function ActionMenuItem({
-  onClick,
-  icon,
-  children,
-  tone = "default",
-}: {
-  readonly onClick: () => void;
-  readonly icon: ReactNode;
-  readonly children: ReactNode;
-  readonly tone?: "default" | "danger" | undefined;
-}) {
-  return (
-    <MenuItem>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
-          tone === "danger" ? "tw-text-rose-300" : "tw-text-iron-100"
-        }`}
-      >
-        {icon}
-        {children}
-      </button>
-    </MenuItem>
-  );
-}
-
-const MENU_ITEM_CLASS =
-  "tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 tw-no-underline data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400";
-
-/**
- * Everyday tools for someone else's message: mute, block and who can
- * message you come first; reporting is for severe or illegal harm only.
- */
-function SafetyMenuItems({
-  message,
-  senderName,
-  actions,
-  iconClass,
-}: {
-  readonly message: E2eeMessage;
-  readonly senderName: string;
-  readonly actions: E2eeMessageActions;
-  readonly iconClass: string;
-}) {
-  const locale = useBrowserLocale();
-  return (
-    <>
-      <ActionMenuItem
-        onClick={actions.onToggleMute}
-        icon={
-          actions.muted ? (
-            <BellIcon aria-hidden="true" className={iconClass} />
-          ) : (
-            <BellSlashIcon aria-hidden="true" className={iconClass} />
-          )
-        }
-      >
-        {t(locale, actions.muted ? "e2ee.message.unmute" : "e2ee.message.mute")}
-      </ActionMenuItem>
-      {message.senderProfileId ? (
-        <ActionMenuItem
-          onClick={() => actions.onBlock(message)}
-          icon={<NoSymbolIcon aria-hidden="true" className={iconClass} />}
-        >
-          {t(locale, "e2ee.message.block", { name: senderName })}
-        </ActionMenuItem>
-      ) : null}
-      <MenuItem>
-        <Link href="/preferences" className={MENU_ITEM_CLASS}>
-          <ChatBubbleLeftEllipsisIcon
-            aria-hidden="true"
-            className={iconClass}
-          />
-          {t(locale, "e2ee.message.messageSettings")}
-        </Link>
-      </MenuItem>
-      <ActionMenuItem
-        tone="danger"
-        onClick={() => actions.onReport(message)}
-        icon={<FlagIcon aria-hidden="true" className={iconClass} />}
-      >
-        {t(locale, "e2ee.message.report")}
-      </ActionMenuItem>
-    </>
-  );
-}
-
-function MessageActionsMenu({
-  message,
-  isOwn,
-  selfProfileId,
-  senderName,
-  actions,
-}: {
-  readonly message: E2eeMessage;
-  readonly isOwn: boolean;
-  readonly selfProfileId: string | null;
-  readonly senderName: string;
-  readonly actions: E2eeMessageActions;
-}) {
-  const locale = useBrowserLocale();
-  const iconClass = "tw-size-4 tw-flex-shrink-0";
-  return (
-    <Menu>
-      <MenuButton
-        aria-label={t(locale, "e2ee.message.actions")}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:-tw-mr-2 touch-only:-tw-mt-2 touch-only:tw-size-11 touch-only:tw-bg-transparent touch-only:tw-text-iron-500 touch-only:tw-opacity-100"
-      >
-        <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />
-      </MenuButton>
-      <MenuItems
-        anchor="bottom end"
-        className="tailwind-scope tw-z-[1001] tw-mt-1 tw-w-56 tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none"
-      >
-        <div className="tw-flex tw-justify-between tw-gap-1 tw-px-1 tw-pb-1">
-          {QUICK_REACTIONS.map((reaction) => {
-            const mine =
-              selfProfileId !== null &&
-              (message.reactions[reaction] ?? []).includes(selfProfileId);
-            return (
-              <MenuItem key={reaction}>
-                <button
-                  type="button"
-                  onClick={() => actions.onReact(message, reaction, !mine)}
-                  aria-pressed={mine}
-                  aria-label={t(locale, "e2ee.message.reactWith", { reaction })}
-                  className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-base data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
-                    mine ? "tw-ring-1 tw-ring-iron-700" : ""
-                  }`}
-                >
-                  <span aria-hidden="true">{reaction}</span>
-                </button>
-              </MenuItem>
-            );
-          })}
-        </div>
-        <ActionMenuItem
-          onClick={() => actions.onReply(message)}
-          icon={<ArrowUturnLeftIcon aria-hidden="true" className={iconClass} />}
-        >
-          {t(locale, "e2ee.message.reply")}
-        </ActionMenuItem>
-        {isOwn ? (
-          <>
-            <ActionMenuItem
-              onClick={() => actions.onEdit(message)}
-              icon={
-                <PencilSquareIcon aria-hidden="true" className={iconClass} />
-              }
-            >
-              {t(locale, "e2ee.message.edit")}
-            </ActionMenuItem>
-            <ActionMenuItem
-              tone="danger"
-              onClick={() => actions.onDelete(message)}
-              icon={<TrashIcon aria-hidden="true" className={iconClass} />}
-            >
-              {t(locale, "e2ee.message.delete")}
-            </ActionMenuItem>
-          </>
-        ) : (
-          <SafetyMenuItems
-            message={message}
-            senderName={senderName}
-            actions={actions}
-            iconClass={iconClass}
-          />
-        )}
-      </MenuItems>
-    </Menu>
-  );
-}
-
 function NoticeItem({
   message,
   conversation,
   selfProfileId,
+  inViewportRow,
 }: {
   readonly message: E2eeMessage;
   readonly conversation: E2eeConversation;
   readonly selfProfileId: string | null;
+  readonly inViewportRow: boolean;
 }) {
   const locale = useBrowserLocale();
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <li
-      id={getMessageDomId(message.id)}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
       className="tw-flex tw-justify-center tw-px-4 tw-py-1.5"
     >
       <p className="tw-m-0 tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-center tw-text-xs tw-text-iron-400">
@@ -471,7 +284,7 @@ function NoticeItem({
           {formatE2eeDateTime(locale, message.serverTs)}
         </span>
       </p>
-    </li>
+    </Container>
   );
 }
 
@@ -543,10 +356,12 @@ const hasMarkers = (message: E2eeMessage) =>
 function MessageMeta({
   message,
   name,
+  member,
   compact,
 }: {
   readonly message: E2eeMessage;
   readonly name: string;
+  readonly member: E2eeMember | null;
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -556,10 +371,16 @@ function MessageMeta({
     return <span className="tw-sr-only">{name}</span>;
   }
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-        {name}
-      </span>
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-md tw-leading-5">
+      <E2eeMessageIdentity
+        member={member}
+        fallbackName={name}
+        messageId={message.id}
+      />
+      <span
+        aria-hidden="true"
+        className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"
+      />
       <time
         dateTime={new Date(shownTs).toISOString()}
         title={formatE2eeDateTime(locale, shownTs)}
@@ -634,7 +455,25 @@ function E2eeMessageItemComponent({
   canAct,
   actions,
   appear = false,
+  inViewportRow = false,
 }: E2eeMessageItemProps) {
+  const { data: storedReply, isFetching: replyLoading } = useQuery({
+    queryKey: [
+      "e2ee-reply",
+      engine.getThisDevice()?.deviceKey,
+      message.g,
+      message.reply,
+    ],
+    queryFn: () =>
+      message.reply
+        ? (engine.getMessage?.(message.g, message.reply) ?? null)
+        : null,
+    enabled: Boolean(
+      message.reply && !replyTarget && typeof engine.getMessage === "function"
+    ),
+    gcTime: 0,
+  });
+  const resolvedReply = replyTarget ?? storedReply ?? null;
   const locale = useBrowserLocale();
   if (message.kind === "notice") {
     return (
@@ -642,6 +481,7 @@ function E2eeMessageItemComponent({
         message={message}
         conversation={conversation}
         selfProfileId={selfProfileId}
+        inViewportRow={inViewportRow}
       />
     );
   }
@@ -656,25 +496,31 @@ function E2eeMessageItemComponent({
   const showActions =
     canAct && !message.deleted && !message.undecryptable && !message.pending;
 
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <li
-      id={getMessageDomId(message.id)}
-      tabIndex={-1}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
+      tabIndex={inViewportRow ? undefined : -1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
-      <div className="tw-w-9 tw-flex-shrink-0">
+      <div className="tw-w-10 tw-flex-shrink-0">
         {compact ? null : (
-          <E2eeAvatar pfp={sender?.pfp ?? null} name={shownName} size="sm" />
+          <E2eeMessageAvatar member={sender} fallbackName={shownName} />
         )}
       </div>
       <div
         className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
       >
-        <MessageMeta message={message} name={shownName} compact={compact} />
-        {message.reply ? (
+        <MessageMeta
+          message={message}
+          name={shownName}
+          member={sender}
+          compact={compact}
+        />
+        {message.reply && !(replyLoading && !resolvedReply) ? (
           <ReplyPreview
             replyId={message.reply}
-            target={replyTarget}
+            target={resolvedReply}
             conversation={conversation}
             selfProfileId={selfProfileId}
             onJumpTo={actions.onJumpTo}
@@ -723,7 +569,7 @@ function E2eeMessageItemComponent({
       </div>
       {showActions ? (
         <div className="tw-absolute tw-right-3 tw-top-1">
-          <MessageActionsMenu
+          <E2eeMessageActionsMenu
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}
@@ -732,7 +578,7 @@ function E2eeMessageItemComponent({
           />
         </div>
       ) : null}
-    </li>
+    </Container>
   );
 }
 

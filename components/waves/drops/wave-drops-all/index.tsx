@@ -194,18 +194,29 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ? boostedDrops
       : undefined;
 
-  const { serialTarget, queueSerialTarget, targetDropRef, isScrolling } =
-    useWaveDropsSerialScroll({
-      waveId,
-      dropId,
-      initialDrop,
-      waveMessages,
-      fetchNextPage,
-      waitAndRevealDrop,
-      scrollContainerRef,
-      shouldPinToBottom,
-      scrollToVisualBottom,
-    });
+  const {
+    serialTarget,
+    queueSerialTarget,
+    targetDropRef,
+    isScrolling,
+    cancelSerialScroll,
+  } = useWaveDropsSerialScroll({
+    waveId,
+    dropId,
+    initialDrop,
+    waveMessages,
+    fetchNextPage,
+    waitAndRevealDrop,
+    scrollContainerRef,
+    shouldPinToBottom,
+    scrollToVisualBottom,
+  });
+
+  const scrollToBottom = useCallback(() => {
+    cancelSerialScroll();
+    // Jump before offscreen placeholders hydrate and change the scroll range.
+    forcePinToBottom("auto");
+  }, [cancelSerialScroll, forcePinToBottom]);
 
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
@@ -222,8 +233,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     }
 
     revealDeferredPendingDrops();
-    forcePinToBottom();
-  }, [waveMessages, revealDeferredPendingDrops, forcePinToBottom]);
+    scrollToBottom();
+  }, [waveMessages, revealDeferredPendingDrops, scrollToBottom]);
 
   const canFetchMoreDrops =
     !!waveMessages &&
@@ -297,7 +308,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         targetDropRef={targetDropRef}
         onQuoteClick={handleQuoteClick}
         isAtBottom={isAtBottom}
-        scrollToBottom={forcePinToBottom}
+        scrollToBottom={scrollToBottom}
         typingMessage={typingMessage}
         onDropContentClick={onDropContentClick}
         pendingCount={pendingDropsCount}

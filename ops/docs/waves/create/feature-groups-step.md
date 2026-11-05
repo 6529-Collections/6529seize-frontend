@@ -39,6 +39,18 @@ are configured separately in [competition setup](../competitions/feature-manage-
 - The expanded section shows `Customized` and reopens automatically after
   navigating away and back when Admins was changed, a participation group
   differs from access, chat is disabled, or admin deletion is disabled.
+- Below the access controls, a live summary explains what the selected chat
+  and submission groups mean. For example, chat can be open to people with
+  wave access while submissions remain limited to their own group. The same
+  summary appears in Review or Overview before creation. When chat is disabled,
+  it still explains whether submissions are public or limited to their group.
+- When creating or reviewing a competition inside an existing Wave, the summary
+  uses that parent Wave's current chat group and enabled state. Competition
+  submission groups are separate; competition draft settings do not change chat.
+  A private parent chat remains group-restricted when its group ID or name is
+  withheld. Without the ID, the summary does not claim the groups match or differ.
+- This summary describes group access. Sign-in, profile, submission timing,
+  limits, and other posting requirements still apply. Voting access is separate.
 - `Allow admins to delete posts` is enabled by default.
 - Top-level waves default to `Everyone` for access and chat, and
   `Only me` for administration.

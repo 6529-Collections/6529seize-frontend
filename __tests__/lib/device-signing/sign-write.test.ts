@@ -275,9 +275,13 @@ describe("device-signed drop writes", () => {
     cancelOpenPrompts();
     unmountDecisionHost();
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it("signs a new drop over exactly the body it sends", async () => {
+    const now = Date.now();
+    // Keep WebCrypto and lock waits real while fixing only the wall clock.
+    jest.spyOn(Date, "now").mockReturnValue(now);
     await setUpGrant();
     const body = createBody();
     await postDrop(body, { errorMode: "structured" });
@@ -292,7 +296,8 @@ describe("device-signed drop writes", () => {
     const signature = sentSignature(postMock)!;
     expect(signature.grant_id).toBe(VECTORS.authRef);
     expect(signature.signature).toMatch(/^0x[0-9a-f]{128}$/);
-    expect(signature.seq).toBeGreaterThanOrEqual(signature.claimed_time - 5);
+    expect(signature.seq).toBe(now);
+    expect(signature.claimed_time).toBe(now);
     const { device_signature: _ignored, ...unsigned } = sent.body;
     expect(unsigned).toEqual(body);
     await expectVerifies({

@@ -11,6 +11,11 @@ export const TEST_RELEASE_ENTRY = {
   files: [
     { name: "6529-Validator-0.1.0.dmg", size: 55_073_145, sha256: hash("1") },
     {
+      name: "6529-Validator-Setup-0.1.0-x64.exe",
+      size: 18_900_000,
+      sha256: hash("c"),
+    },
+    {
       name: "6529-Validator-0.1.0-x64.msi",
       size: 18_116_608,
       sha256: hash("2"),
@@ -60,5 +65,31 @@ export const TEST_FEED = {
       files: { "6529-Validator-0.1.0.dmg": { bytes: 10, sha256: hash("b") } },
     },
     TEST_RELEASE_ENTRY,
+  ],
+};
+
+/**
+ * A release in the shape the validator signs (a day, no time), with
+ * TEST_RELEASE_ENTRY's file names. Every candidate of 0.1.0 is built as
+ * 0.1.0, so a release and its candidates share file names.
+ */
+export function feedEntry(version: string, channel: string, date: string) {
+  return {
+    version,
+    channel,
+    date,
+    commit: "e".repeat(40),
+    software_id: `0x${hash("e")}`,
+    notes: `Made-up notes for ${version}.`,
+    files: TEST_RELEASE_ENTRY.files,
+  };
+}
+
+/** 0.1.0 and its last candidate, out on the same day, newest first. */
+export const SAME_DAY_FEED = {
+  format: 1,
+  releases: [
+    feedEntry("0.1.0", "stable", "2026-11-20"),
+    feedEntry("0.1.0-rc.7", "test", "2026-11-20"),
   ],
 };

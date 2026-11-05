@@ -552,7 +552,7 @@ const PACKS = [
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
-      "Profile Following and REP editing dialogs, permissions and recovery.",
+      "Profile Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
       [
         "tests/social/profile-following-sandbox.spec.ts",
         "tests/social/profile-rep-edit-sandbox.spec.ts",
@@ -592,6 +592,13 @@ const PACKS = [
     ),
     timeoutMinutes: 30,
   },
+  sandboxPack(
+    "test:e2e:e2ee-picker-sandbox",
+    "Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.",
+    ["tests/e2ee/encrypted-people-picker-sandbox.spec.ts"],
+    E2EE_SANDBOX_ENV,
+    [DESKTOP, "capacitor-ios-sim"]
+  ),
 
   localPack(
     "test:e2e:smoke:surface-matrix",

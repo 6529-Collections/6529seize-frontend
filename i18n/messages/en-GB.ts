@@ -21,6 +21,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
+  "waves.historyGap.loading": "Loading missed messages…",
+  "waves.historyGap.retry": "Could not load missed messages. Try again",
+
+  "waves.myVotes.sort": "Sort by",
+  "waves.myVotes.sort.voteAmount": "Your vote amount",
+  "waves.myVotes.sort.leaderboard": "Leaderboard position",
+  "waves.myVotes.sort.lastVoted": "Last voted",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
@@ -237,6 +246,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   "waves.drop.actions.menuLabel": "Drop actions",
   "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
+  "waves.drop.actions.showMore": "Show more",
+  "waves.drop.actions.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
@@ -601,6 +612,8 @@ export const EN_GB_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":
@@ -778,6 +791,8 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "waves.create.groups.editAccess.loading": "Loading current criteria…",
   "waves.create.groups.editAccess.loadErrorTitle":
     "Couldn't load the current criteria.",

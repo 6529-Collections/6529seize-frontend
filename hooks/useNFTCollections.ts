@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { NextGenCollection } from "@/entities/INextgen";
@@ -53,20 +53,18 @@ export function useNFTCollections(initialCollections?: {
       const [memes, memeLab, gradients] = await Promise.all([
         fetchCollection("The Memes", async () => {
           const response = await fetchUrl<DBResponse<NFT>>(
-            `${publicEnv.API_ENDPOINT}/api/memes_lite`
+            apiUrl("/api/memes_lite")
           );
           return response.data;
         }),
         fetchCollection("MemeLab", async () => {
           const response = await fetchUrl<DBResponse<NFT>>(
-            `${publicEnv.API_ENDPOINT}/api/memelab_lite`
+            apiUrl("/api/memelab_lite")
           );
           return response.data;
         }),
         fetchCollection("6529 Gradient", () =>
-          fetchAllPages<NFT>(
-            `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-          )
+          fetchAllPages<NFT>(apiUrl("/api/nfts/gradients?&page_size=101"))
         ),
       ]);
 
