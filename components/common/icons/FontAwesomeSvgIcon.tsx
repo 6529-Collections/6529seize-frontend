@@ -11,10 +11,11 @@ type FontAwesomeSvgIconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
  * global `@fortawesome/fontawesome-svg-core/styles.css`), without the
  * react-fontawesome and svg-core runtime.
  *
- * Components in the root layout graph use it with per-icon imports
- * (`@fortawesome/free-solid-svg-icons/faPlus`) so the icon library stays out
- * of every page's startup bundle. It supports only the plain-icon case; use
- * `FontAwesomeIcon` for transforms, masks, layers or animation props.
+ * Components in the root layout graph use it so react-fontawesome stays out
+ * of every page's startup bundle; `modularizeImports` in config/nextConfig.ts
+ * already compiles their `free-solid-svg-icons` imports to single-icon
+ * modules. It supports only the plain-icon case; use `FontAwesomeIcon` for
+ * transforms, masks, layers or animation props.
  */
 export default function FontAwesomeSvgIcon({
   icon,
@@ -39,8 +40,10 @@ export default function FontAwesomeSvgIcon({
       {...svgProps}
       className={classes}
     >
-      {paths.map((d) => (
-        <path key={d} fill="currentColor" d={d} />
+      {paths.map((d, index) => (
+        // An icon's paths are a fixed, ordered list, so the position is a
+        // stable key; path data can repeat and is too long to key on.
+        <path key={index} fill="currentColor" d={d} />
       ))}
     </svg>
   );
