@@ -361,8 +361,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    # The complete native pack needs room for its dev-server bootstrap and tests.
-    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
+    # Allow full native and profile coverage to finish after dev-server bootstrap.
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell') && 30 || 20 }}
     permissions:
       contents: read
       issues: read
