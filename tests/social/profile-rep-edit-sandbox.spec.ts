@@ -522,7 +522,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(list.getByRole("link").first()).toHaveText(TARGET);
       await expect(list.getByRole("link").nth(1)).toHaveText("older-recipient");
       await expect(
-        list.locator(".mobile-wrapper-dialog").locator("..")
+        page
+          .getByRole("dialog", { name: `${matter} Given`, exact: true })
+          .locator(".mobile-wrapper-dialog")
+          .locator("..")
       ).not.toHaveAttribute("data-enter");
       const givenScreenshot = testInfo.outputPath(`${matter}-given.png`);
       await page.screenshot({ path: givenScreenshot });
