@@ -1,3 +1,4 @@
+import competitionRuleDefaults from "../support/competitionRuleDefaults.json";
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -300,31 +301,10 @@ const competition = (id: string, title: string) => ({
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
+  ...structuredClone(competitionRuleDefaults),
   participation: {
-    group_id: null,
-    signature_required: false,
-    max_entries_per_participant: null,
-    required_metadata: [],
-    required_media: [],
-    submission_type: null,
-    identity_submission_strategy: null,
-    identity_submission_duplicates: null,
-    starts_at: null,
+    ...structuredClone(competitionRuleDefaults.participation),
     ends_at: null as number | null,
-    terms: null,
-  },
-  voting: {
-    group_id: null,
-    credit_type: "TDH",
-    credit_scope: "WAVE",
-    credit_category: null,
-    credit_creditor: null,
-    credit_nfts: [],
-    signature_required: false,
-    starts_at: null,
-    ends_at: null,
-    max_votes_per_identity_to_entry: null,
-    forbid_negative_votes: false,
   },
   decisions: {
     strategy: null,
@@ -8927,7 +8907,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             await chat.click();
             await expect(messages).toBeVisible({ timeout: 500 });
           }
-          expect(initialReads).toHaveLength(beforeReads);
+          // Cached activation now refreshes the newest page without a serial
+          // cursor. While it is held, tab churn must reuse that single request.
+          expect(initialReads).toHaveLength(beforeReads + 1);
           await expectNoHorizontalOverflow(page);
           await page.screenshot({
             path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),

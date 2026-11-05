@@ -3,6 +3,7 @@
 import {
   PaperAirplaneIcon,
   PaperClipIcon,
+  FaceSmileIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -29,6 +30,7 @@ import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { getMemberName, tCount } from "../e2eeFormat";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eeEmojiPicker } from "./E2eeEmojiPicker";
 import { collectMentionIds } from "./e2eeMentions";
 import {
   addComposerFiles,
@@ -451,6 +453,8 @@ export function E2eeComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const emojiSelection = useRef({ start: 0, end: 0 });
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
@@ -506,6 +510,23 @@ export function E2eeComposer({
     if (next) {
       placeText(next);
     }
+  };
+
+  const pickEmoji = (emoji: string) => {
+    const { start, end } = emojiSelection.current;
+    const next = {
+      text: text.slice(0, start) + emoji + text.slice(end),
+      caret: start + emoji.length,
+    };
+    setText(next.text);
+    mentions.update(next.text, next.caret);
+    // Let the dialog release its focus trap and restore its trigger first.
+    globalThis.requestAnimationFrame(() => {
+      globalThis.requestAnimationFrame(() => {
+        textareaRef.current?.focus({ preventScroll: true });
+        textareaRef.current?.setSelectionRange(next.caret, next.caret);
+      });
+    });
   };
 
   const submitEdit = async (message: E2eeMessage, trimmed: string) => {
@@ -682,6 +703,23 @@ export function E2eeComposer({
             </button>
           </>
         ) : null}
+        <button
+          type="button"
+          className={ICON_BUTTON}
+          aria-label={t(locale, "e2ee.emoji.insert")}
+          aria-haspopup="dialog"
+          onClick={() => {
+            const input = textareaRef.current;
+            emojiSelection.current = {
+              start: input?.selectionStart ?? text.length,
+              end: input?.selectionEnd ?? text.length,
+            };
+            mentions.close();
+            setEmojiOpen(true);
+          }}
+        >
+          <FaceSmileIcon aria-hidden="true" className="tw-size-5" />
+        </button>
         <label className="tw-sr-only" htmlFor={textareaId}>
           {t(locale, "e2ee.composer.label")}
         </label>
@@ -725,6 +763,11 @@ export function E2eeComposer({
       </div>
       <PastedImagesStatus locale={locale} notice={paste.notice} />
       <ComposerFooter locale={locale} hintId={hintId} error={error} />
+      <E2eeEmojiPicker
+        open={emojiOpen}
+        onClose={() => setEmojiOpen(false)}
+        onSelect={pickEmoji}
+      />
     </div>
   );
 }

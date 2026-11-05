@@ -1,8 +1,13 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import {
+  type ReadonlyURLSearchParams,
+  usePathname,
+  useSearchParams,
+} from "next/navigation";
 import React, {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -19,20 +24,29 @@ import { t } from "@/i18n/messages";
 import { isTitleUpdateCurrent, STREAM_INDEX_ROUTES } from "./title.helpers";
 import { useMyStreamOptional } from "./wave/MyStreamContext";
 
-type TitleContextType = {
-  title: string;
-  // True when a page explicitly claimed the title (setTitle/wave data), as
-  // opposed to the provider's route-default placeholder. Only owned titles
-  // may overwrite the route's server metadata <title>.
-  isTitleOwned: boolean;
+// The provider's own state. The title text and ownership also depend on the
+// URL query (`?wave=`, `/?view=waves`), so readers derive them with
+// useTitleText, which reads the query in the same render as a navigation.
+type TitleState = {
+  readonly title: string;
   // Pathname the current title text was computed for. During a navigation
   // there is a render window where the text still belongs to the previous
   // route; consumers must not act on it for the new route until they match.
-  titlePathname: string | null;
-  setTitle: (title: string) => void;
-  notificationCount: number;
-  setNotificationCount: (count: number) => void;
-  setWaveData: (data: WaveTitleData | null) => void;
+  readonly titlePathname: string | null;
+  // Pathname the explicit title was claimed for.
+  readonly explicitTitlePathname: string | null;
+  readonly notificationCount: number;
+  readonly waveData: WaveTitleData | null;
+  readonly locale: SupportedLocale;
+};
+
+type TitleText = {
+  readonly title: string;
+  // True when a page explicitly claimed the title (setTitle/wave data), as
+  // opposed to the provider's route-default placeholder. Only owned titles
+  // may overwrite the route's server metadata <title>.
+  readonly isTitleOwned: boolean;
+  readonly titlePathname: string | null;
 };
 
 type WaveTitleData = {
@@ -41,12 +55,15 @@ type WaveTitleData = {
   newItemsCount: number;
 };
 
-const TitleContext = createContext<TitleContextType | undefined>(undefined);
+type TitleActionsContextType = {
+  readonly setTitle: (title: string) => void;
+  readonly setNotificationCount: (count: number) => void;
+  readonly setWaveData: (data: WaveTitleData | null) => void;
+};
 
-type TitleActionsContextType = Pick<
-  TitleContextType,
-  "setTitle" | "setNotificationCount" | "setWaveData"
->;
+type TitleContextType = TitleState & TitleActionsContextType;
+
+const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
 // Pages and nav items only set the title. Keeping the setters in their own
 // context stops them re-rendering whenever the title text changes, which
@@ -113,12 +130,27 @@ const getDefaultTitleForRoute = (
   return DEFAULT_TITLE;
 };
 
+// usePathname() and useSearchParams() return null outside an App Router
+// context (for example in component tests), as main's provider allowed for.
+const isWaveRouteFor = (
+  pathname: string | null,
+  searchParams: Pick<URLSearchParams, "get"> | null
+): boolean =>
+  STREAM_INDEX_ROUTES.some((route) => pathname?.startsWith(route)) ||
+  (pathname === "/" && searchParams?.get("view") === "waves");
+
+type RouteObservation = {
+  readonly pathname: string;
+  readonly locale: SupportedLocale;
+  readonly previousSearchParams: ReadonlyURLSearchParams | null;
+  readonly isWaveRoute: boolean;
+  readonly waveInUrl: string | null;
+};
+
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const myStream = useMyStreamOptional();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const locale = useBrowserLocale();
   const [title, setTitle] = useState<string>(() =>
     getDefaultTitleForRoute(pathname, locale)
@@ -133,77 +165,70 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [waveData, setWaveData] = useState<WaveTitleData | null>(null);
   const routeRef = useRef(pathname);
-  const queryRef = useRef(searchParams);
   const localeRef = useRef(locale);
-  const isWaveRoute =
-    STREAM_INDEX_ROUTES.some((route) => pathname?.startsWith(route)) ||
-    (pathname === "/" && searchParams?.get("view") === "waves");
-  const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const fallbackActiveWaveId =
-    pathname === "/" ? (myStream?.activeWave.id ?? null) : null;
-  const waveParam = isWaveRoute ? (waveInUrl ?? fallbackActiveWaveId) : null;
 
-  useEffect(() => {
-    const previousPathname = routeRef.current;
-    const previousSearchParams = queryRef.current;
-    const previousLocale = localeRef.current;
-    const pathnameChanged = previousPathname !== pathname;
-    const localeChanged = previousLocale !== locale;
-    const currentWaveInUrl = waveInUrl;
-    const previousWaveInUrl = getActiveWaveIdFromUrl({
-      pathname: previousPathname,
-      searchParams: previousSearchParams,
-    });
+  // Called from TitleQuerySync's effect. That leaf is rendered after this
+  // provider's children, so it runs after page effects and before any
+  // ancestor's, in the same commit: where this provider's effect used to run.
+  const observeRoute = useCallback(
+    ({
+      pathname: currentPathname,
+      locale: currentLocale,
+      previousSearchParams,
+      isWaveRoute,
+      waveInUrl: currentWaveInUrl,
+    }: RouteObservation) => {
+      const previousPathname = routeRef.current;
+      const previousLocale = localeRef.current;
+      const pathnameChanged = previousPathname !== currentPathname;
+      const localeChanged = previousLocale !== currentLocale;
+      const previousWaveInUrl = getActiveWaveIdFromUrl({
+        pathname: previousPathname,
+        searchParams: previousSearchParams,
+      });
 
-    routeRef.current = pathname;
-    queryRef.current = searchParams;
-    localeRef.current = locale;
+      routeRef.current = currentPathname;
+      localeRef.current = currentLocale;
 
-    if (pathnameChanged) {
-      setTitle(getDefaultTitleForRoute(pathname, locale));
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(null);
-      setWaveData((current) =>
-        current?.id === currentWaveInUrl ? current : null
-      );
-      return;
-    }
+      if (pathnameChanged) {
+        setTitle(getDefaultTitleForRoute(currentPathname, currentLocale));
+        setTitlePathname(currentPathname);
+        setExplicitTitlePathname(null);
+        setWaveData((current) =>
+          current?.id === currentWaveInUrl ? current : null
+        );
+        return;
+      }
 
-    if (
-      localeChanged &&
-      titlePathname === pathname &&
-      explicitTitlePathname !== pathname
-    ) {
-      setTitle(getDefaultTitleForRoute(pathname, locale));
-    }
+      if (
+        localeChanged &&
+        titlePathname === currentPathname &&
+        explicitTitlePathname !== currentPathname
+      ) {
+        setTitle(getDefaultTitleForRoute(currentPathname, currentLocale));
+      }
 
-    if (!isWaveRoute) {
-      setWaveData((current) =>
-        current?.id === currentWaveInUrl ? current : null
-      );
-      return;
-    }
+      if (!isWaveRoute) {
+        setWaveData((current) =>
+          current?.id === currentWaveInUrl ? current : null
+        );
+        return;
+      }
 
-    if (
-      previousWaveInUrl &&
-      (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
-    ) {
-      setTitle(getDefaultTitleForRoute(pathname, locale));
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(null);
-      setWaveData((current) =>
-        current?.id === currentWaveInUrl ? current : null
-      );
-    }
-  }, [
-    explicitTitlePathname,
-    isWaveRoute,
-    locale,
-    pathname,
-    searchParams,
-    titlePathname,
-    waveInUrl,
-  ]);
+      if (
+        previousWaveInUrl &&
+        (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
+      ) {
+        setTitle(getDefaultTitleForRoute(currentPathname, currentLocale));
+        setTitlePathname(currentPathname);
+        setExplicitTitlePathname(null);
+        setWaveData((current) =>
+          current?.id === currentWaveInUrl ? current : null
+        );
+      }
+    },
+    [explicitTitlePathname, titlePathname]
+  );
 
   const updateTitle = useCallback(
     (newTitle: string) => {
@@ -215,6 +240,122 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     [pathname, titlePathname]
   );
+
+  const actionsValue = useMemo<TitleActionsContextType>(
+    () => ({
+      setTitle: updateTitle,
+      setNotificationCount,
+      setWaveData,
+    }),
+    [updateTitle]
+  );
+
+  const contextValue = useMemo<TitleContextType>(
+    () => ({
+      title,
+      titlePathname,
+      explicitTitlePathname,
+      notificationCount,
+      waveData,
+      locale,
+      ...actionsValue,
+    }),
+    [
+      actionsValue,
+      explicitTitlePathname,
+      locale,
+      notificationCount,
+      title,
+      titlePathname,
+      waveData,
+    ]
+  );
+
+  return (
+    <TitleActionsContext.Provider value={actionsValue}>
+      <TitleContext.Provider value={contextValue}>
+        {children}
+        {/* Reads the query, so it owns a Suspense boundary: a prerendered page
+            renders this provider and its children without the query. */}
+        <Suspense fallback={null}>
+          <TitleQuerySync
+            pathname={pathname}
+            locale={locale}
+            observeRoute={observeRoute}
+          />
+        </Suspense>
+      </TitleContext.Provider>
+    </TitleActionsContext.Provider>
+  );
+};
+
+function TitleQuerySync({
+  pathname,
+  locale,
+  observeRoute,
+}: {
+  readonly pathname: string;
+  readonly locale: SupportedLocale;
+  readonly observeRoute: (observation: RouteObservation) => void;
+}) {
+  const searchParams: ReadonlyURLSearchParams | null = useSearchParams();
+  const queryRef = useRef(searchParams);
+  const isWaveRoute = isWaveRouteFor(pathname, searchParams);
+  const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+
+  useEffect(() => {
+    const previousSearchParams = queryRef.current;
+    queryRef.current = searchParams;
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-ref-to-parent -- This leaf only moves TitleProvider's own route effect inside a Suspense boundary; it must run here, after page effects in the same commit, as the provider's effect did (shellQueryParity.test.tsx).
+    observeRoute({
+      pathname,
+      locale,
+      previousSearchParams,
+      isWaveRoute,
+      waveInUrl,
+    });
+  }, [isWaveRoute, locale, observeRoute, pathname, searchParams, waveInUrl]);
+
+  return null;
+}
+
+const useTitleContext = (hookName: string): TitleContextType => {
+  const context = useContext(TitleContext);
+  if (!context) {
+    throw new Error(`${hookName} must be used within a TitleProvider`);
+  }
+  return context;
+};
+
+/** Title setters and the notification count. Does not read the URL query. */
+export const useTitle = () => {
+  const { setTitle, setNotificationCount, setWaveData, notificationCount } =
+    useTitleContext("useTitle");
+  return { setTitle, setNotificationCount, setWaveData, notificationCount };
+};
+
+/**
+ * The document title text, whether a page owns it, and the route it belongs
+ * to. Reads the URL query in the same render as a navigation, so render it
+ * under a Suspense boundary, as DynamicHeadTitle does.
+ */
+export const useTitleText = (): TitleText => {
+  const {
+    title,
+    titlePathname,
+    explicitTitlePathname,
+    notificationCount,
+    waveData,
+    locale,
+  } = useTitleContext("useTitleText");
+  const myStream = useMyStreamOptional();
+  const pathname = usePathname();
+  const searchParams: ReadonlyURLSearchParams | null = useSearchParams();
+  const isWaveRoute = isWaveRouteFor(pathname, searchParams);
+  const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const fallbackActiveWaveId =
+    pathname === "/" ? (myStream?.activeWave.id ?? null) : null;
+  const waveParam = isWaveRoute ? (waveInUrl ?? fallbackActiveWaveId) : null;
 
   // Compute the title based on current state
   const computedTitle = useMemo(() => {
@@ -249,8 +390,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     (explicitTitlePathname !== null && explicitTitlePathname === pathname) ||
     Boolean(isWaveRoute && waveParam && waveData?.id === waveParam);
 
-  // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => {
+  return useMemo(() => {
     const notificationPluralCategory = new Intl.PluralRules(locale).select(
       notificationCount
     );
@@ -265,48 +405,8 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
             title: computedTitle,
           })
         : computedTitle;
-    return {
-      title: finalTitle,
-      isTitleOwned,
-      titlePathname,
-      setTitle: updateTitle,
-      notificationCount,
-      setNotificationCount,
-      setWaveData,
-    };
-  }, [
-    computedTitle,
-    isTitleOwned,
-    locale,
-    notificationCount,
-    titlePathname,
-    updateTitle,
-  ]);
-
-  const actionsValue = useMemo<TitleActionsContextType>(
-    () => ({
-      setTitle: updateTitle,
-      setNotificationCount,
-      setWaveData,
-    }),
-    [updateTitle]
-  );
-
-  return (
-    <TitleActionsContext.Provider value={actionsValue}>
-      <TitleContext.Provider value={contextValue}>
-        {children}
-      </TitleContext.Provider>
-    </TitleActionsContext.Provider>
-  );
-};
-
-export const useTitle = () => {
-  const context = useContext(TitleContext);
-  if (!context) {
-    throw new Error("useTitle must be used within a TitleProvider");
-  }
-  return context;
+    return { title: finalTitle, isTitleOwned, titlePathname };
+  }, [computedTitle, isTitleOwned, locale, notificationCount, titlePathname]);
 };
 
 /** Title setters without subscribing to title text changes. */

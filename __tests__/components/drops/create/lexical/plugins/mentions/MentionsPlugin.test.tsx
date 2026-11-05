@@ -112,12 +112,15 @@ describe("MentionsPlugin", () => {
 
   it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
-      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+      identities: [
+        { id: "1", handle: "alice", display: "Alice", pfp: null, level: 42 },
+      ],
     });
     const ref = createRef<any>();
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
     expect(capturedProps.options).toHaveLength(1);
     expect(capturedProps.options[0]).toBeInstanceOf(MentionTypeaheadOption);
+    expect(capturedProps.options[0].level).toBe(42);
     expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[1020]");
 
     act(() => {
@@ -128,6 +131,16 @@ describe("MentionsPlugin", () => {
       capturedProps.onClose();
     });
     expect(ref.current.isMentionsOpen()).toBe(false);
+  });
+
+  it("accepts cached identity results without a level", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+    });
+    render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} />);
+
+    expect(capturedProps.options[0].handle).toBe("alice");
+    expect(capturedProps.options[0].level).toBeNull();
   });
 
   it.each([

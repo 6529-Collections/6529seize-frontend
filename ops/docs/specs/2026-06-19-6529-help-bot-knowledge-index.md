@@ -7,6 +7,10 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The encrypted-messages record covers the composer emoji board, native and 6529
+custom emojis, insertion during edits, the full reaction picker, readable
+shortcode fallbacks, collection-load recovery, and the separate emoji history.
+
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
 keeps original video downloads deferred until Play; Promo Video retains metadata
@@ -95,6 +99,8 @@ The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
 cards omit Your allowance until a wallet address is available. Connected wallets
 retain allocation pills and distinct loading, unpublished, empty, and unavailable
 states; an allocation does not guarantee that it remains mintable.
+
+The `notifications.artist-artwork-alerts` record describes Artwork alerts in the Profile actions menu, its signed-in-only artist-badge visibility rule with an exception for already-enabled alerts, loading the saved state when the menu opens, independent opt-in, Main Stage-only scope, no-backfill boundary, anonymous-entry exclusion, delivery preferences, and recovery states. It links to the canonical artist artwork alerts guide and the Notifications route.
 
 The `waves.artist-submissions-popup` record explains the artist activity icon,
 Active Submissions promise badges, and the distinction between reading a badge,

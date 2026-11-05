@@ -393,11 +393,32 @@ describe("instrumentation-client", () => {
     return config;
   };
 
+  // beforeSend and beforeSendTransaction load the event pipeline lazily and
+  // return a Promise; these tests exercise the pipeline's synchronous
+  // functions, loaded in the same module registry as instrumentation-client.
+  const loadSentryClientEventPipeline = () => {
+    let pipeline:
+      | typeof import("@/utils/monitoring/sentryClientEventPipeline")
+      | undefined;
+    jest.isolateModules(() => {
+      require("@/instrumentation-client");
+      pipeline = require("@/utils/monitoring/sentryClientEventPipeline");
+    });
+
+    const config = mockInit.mock.calls[0]?.[0];
+    expect(config).toBeDefined();
+    if (!pipeline) {
+      throw new Error("The Sentry client event pipeline did not load");
+    }
+
+    return { config, pipeline };
+  };
+
   const loadBeforeSend = () => {
-    const config = loadSentryConfig();
+    const { config, pipeline } = loadSentryClientEventPipeline();
     expect(typeof config.beforeSend).toBe("function");
 
-    return config.beforeSend as (
+    return pipeline.processSentryClientEvent as unknown as (
       event: Record<string, unknown>,
       hint?: Record<string, unknown>
     ) => BeforeSendResult;
@@ -424,10 +445,12 @@ describe("instrumentation-client", () => {
   };
 
   const loadBeforeSendTransaction = () => {
-    const config = loadSentryConfig();
+    const { config, pipeline } = loadSentryClientEventPipeline();
     expect(typeof config.beforeSendTransaction).toBe("function");
 
-    return config.beforeSendTransaction as (event: Record<string, unknown>) => {
+    return pipeline.processSentryClientTransaction as unknown as (
+      event: Record<string, unknown>
+    ) => {
       spans?: Array<{
         description?: string | undefined;
         data?: Record<string, unknown> | undefined;

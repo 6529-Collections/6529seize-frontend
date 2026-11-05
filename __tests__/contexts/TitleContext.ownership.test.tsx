@@ -32,12 +32,12 @@ import {
   TitleProvider,
   useSetTitle,
   useSetWaveData,
-  useTitle,
+  useTitleText,
 } from "@/contexts/TitleContext";
 import { isTitleUpdateCurrent } from "@/contexts/title.helpers";
 
 function TitleReporter() {
-  const { title, isTitleOwned, titlePathname } = useTitle();
+  const { title, isTitleOwned, titlePathname } = useTitleText();
   return (
     <div>
       <span data-testid="title">{title}</span>

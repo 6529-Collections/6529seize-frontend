@@ -912,6 +912,18 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     });
   });
   return {
+    missMessages(count: number) {
+      for (let index = 0; index < count; index++) {
+        const serial = (drops[0]?.serial_no ?? 151) + 1;
+        drops.unshift({
+          ...template,
+          id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+          serial_no: serial,
+          created_at: 1714000000000 + serial * 60000,
+          content: `Shared link fixture post ${serial}`,
+        });
+      }
+    },
     post: (serial: number) =>
       page
         .getByRole("region", {
@@ -943,6 +955,119 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     },
   };
 }
+
+test("resume shows the latest page before missed history and preserves the composer", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  let olderRequests = 0;
+  let failHistory = true;
+  const history = gate();
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_OLDER"
+    ) {
+      olderRequests++;
+      await history.ready;
+      if (failHistory) {
+        failHistory = false;
+        return route.fulfill({
+          status: 400,
+          json: { message: "History unavailable" },
+        });
+      }
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  await composer.fill("Keep this unsent draft");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  try {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+    await expect(composer).toHaveText("Keep this unsent draft");
+    // A blocked history request must not keep the current conversation stale.
+    await expect(fixture.post(1151)).toBeInViewport();
+    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    await gap.scrollIntoViewIfNeeded();
+    await expect.poll(() => olderRequests).toBeGreaterThan(0);
+    await expect(gap).toBeDisabled();
+    await page.screenshot({
+      path: testInfo.outputPath("resume-missed-history.png"),
+    });
+    history.release();
+    await expect(gap).toContainText(
+      "Could not load missed messages. Try again"
+    );
+    await gap.click();
+    await expect(fixture.post(1101)).toBeAttached();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+    ).toBeAttached();
+    await expect(composer).toHaveText("Keep this unsent draft");
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    history.release();
+  }
+});
+
+test("resume preserves an older reading position while loading the latest page", async ({
+  page,
+  baseURL,
+}) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // Offscreen placeholders hydrate as they enter view and replace the text
+  // node, so reacquire the locator until the reader's position has settled.
+  await expect(async () => {
+    await fixture.post(120).scrollIntoViewIfNeeded({ timeout: 1000 });
+    await expect(fixture.post(120)).toBeInViewport({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByRole("button", { name: "Scroll to bottom", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  await expect(fixture.post(120)).toBeInViewport();
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(1151)).toBeInViewport();
+});
 
 test("shared post stays in view after URL cleanup and delayed loading", async ({
   page,
@@ -1219,3 +1344,165 @@ async function emitKeyboardEvent(
   );
   expect(delivered, `Native callback received ${eventName}`).toBe(true);
 }
+
+test("announcement replies preserve the unread badge and top-level timestamp", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const origin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${origin}/api/v2/waves/${WAVE}/drops?limit=1`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as ApiWaveDropsFeedV2;
+  const template = feed.drops[0];
+  if (!template) throw new Error("Missing announcement fixture");
+  const now = Date.now();
+  const announcement = {
+    ...feed.wave,
+    id: ANNOUNCEMENTS,
+    name: "Announcements",
+    has_competition: false,
+    replies_collapsed: true,
+    last_drop_time: now,
+    has_subwaves: false,
+    context_profile_context: {
+      ...feed.wave.context_profile_context,
+      unread_drops: 0,
+      subscribed: true,
+      muted: false,
+      pinned: false,
+    },
+  };
+  let latest: ApiWaveDropsFeedV2["drops"][number] = {
+    ...template,
+    id: "announcement-root",
+    created_at: now - 2 * 3600000,
+    serial_no: 500,
+  };
+  delete latest.reply_to_drop;
+  let incoming: ApiWaveDropsFeedV2["drops"][number] = {
+    ...latest,
+    id: "announcement-reply",
+    author: {
+      ...template.author,
+      id: "another-reader",
+      handle: "someone-else",
+    },
+    created_at: now,
+    serial_no: 501,
+    reply_to_drop: { id: latest.id },
+  };
+  await page.route("**/api/settings", (route) =>
+    route.fulfill({ json: { announcements_wave_id: ANNOUNCEMENTS } })
+  );
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [announcement], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: [announcement],
+        next_cursor: null,
+        snapshot_expires_at: now + 900000,
+      },
+    })
+  );
+  await page.route(`**/api/v2/waves/${ANNOUNCEMENTS}/drops?**`, (route) =>
+    route.fulfill({ json: { wave: announcement, drops: [latest] } })
+  );
+  await page.route("**/api/v2/drops?**", (route) =>
+    route.fulfill({
+      json: { data: [{ ...incoming, wave: announcement }], next: false },
+    })
+  );
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket(
+    (url) => url.port === new URL(origin).port,
+    (socket) => {
+      sockets.push(socket);
+      socket.onMessage((message) => {
+        if (JSON.parse(String(message)).type === "AUTHENTICATE")
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+      });
+    }
+  );
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  const row = page
+    .getByRole("region", { name: "Announcement waves", exact: true })
+    .filter({ visible: true });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  const avatar = row.getByTestId("sidebar-wave-avatar");
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  const send = () => {
+    for (const socket of sockets)
+      socket.send(
+        JSON.stringify({
+          type: "DROP_UPDATE_REF",
+          data: {
+            update_type: "DROP_UPDATE",
+            wave_id: ANNOUNCEMENTS,
+            drop_id: incoming.id,
+            serial_no: incoming.serial_no,
+            author_id: "another-reader",
+          },
+        })
+      );
+  };
+  const replyResolved = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/v2/drops?") &&
+      res.request().url().includes(incoming.id)
+  );
+  send();
+  await replyResolved;
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  // A reload must not restore the reply-inclusive overview time.
+  sockets.length = 0;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  incoming = {
+    ...incoming,
+    id: "announcement-new-root",
+    created_at: now - 60000,
+    serial_no: 502,
+  };
+  delete incoming.reply_to_drop;
+  latest = incoming;
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  send();
+  await expect(row.getByText("1m", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toBeVisible();
+  // Full updates must refresh the time immediately too, without a reload or poll.
+  latest = {
+    ...latest,
+    id: "announcement-full-root",
+    created_at: Date.now(),
+    serial_no: 503,
+  };
+  for (const socket of sockets)
+    socket.send(
+      JSON.stringify({
+        type: "DROP_UPDATE",
+        data: {
+          id: latest.id,
+          wave: { id: ANNOUNCEMENTS },
+          serial_no: 503,
+          author: { id: "another-reader", handle: "someone-else" },
+          created_at: latest.created_at,
+          drop_type: "CHAT",
+          parts: [],
+          parts_count: 1,
+        },
+      })
+    );
+  await expect(row.getByText("Just now", { exact: true })).toBeVisible({
+    timeout: 5000,
+  });
+  await expect(avatar.getByText("2", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("announcement-sidebar.png"),
+  });
+});

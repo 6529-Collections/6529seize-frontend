@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 
 import { NextConfig } from "next";
 import { PRODUCTION_ASSET_PREFIX } from "@/config/assetPrefix";
+import { withoutBuildStamp } from "@/config/buildStamp";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
 import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
 import { SENTRY_BUILD_RELEASE_OPTIONS } from "@/config/sentryBuildRelease";
@@ -110,6 +111,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
         : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
+        // The browser's copy leaves out the per-build stamp so its chunk keeps
+        // its name across deploys; see config/env.browser.ts.
+        PUBLIC_RUNTIME_BROWSER: JSON.stringify(withoutBuildStamp(publicEnv)),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,

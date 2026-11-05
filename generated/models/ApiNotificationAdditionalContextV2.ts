@@ -23,6 +23,12 @@ import { HttpFile } from '../http/http';
 * Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection. VOTING_CREDITS_RETURNED includes event_id, reason, wave_id, competition_id, competition_title, entry_id, drop_id, submission_title, credit_type, amount and released_at. Amount is the positive released allocation, independent of time-weighted winning scores. Related drops are not required.
 */
 export class ApiNotificationAdditionalContextV2 {
+    'artist_id'?: string;
+    /**
+    * Title for an ARTIST_ARTWORK_SUBMITTED notification.
+    */
+    'artwork_title'?: string | null;
+    'submitted_at'?: number;
     'reason'?: ApiVotingCreditReleaseReason;
     /**
     * Submission title saved before winning or deletion.
@@ -88,6 +94,24 @@ export class ApiNotificationAdditionalContextV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "artist_id",
+            "baseName": "artist_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "artwork_title",
+            "baseName": "artwork_title",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "submitted_at",
+            "baseName": "submitted_at",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "reason",
             "baseName": "reason",

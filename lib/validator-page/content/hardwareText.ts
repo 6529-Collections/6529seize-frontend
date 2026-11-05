@@ -1,7 +1,25 @@
 // The hardware page at /validator/hardware. Every fact here holds for
 // 0.1.0-rc.5 (commit 29a8caf): systems from its install guide and package
-// checks, memory and disk measured on rc.5 on 2026-11-03, the first start
-// from 6529's mainnet join test that day. Prices were read on 2026-10-31.
+// checks, memory and disk measured on rc.5 on 2026-11-03. The first start
+// is from 6529's mainnet join tests of 0.1.0-rc.7 (commit 214e228) on
+// 2026-11-05, as the tester guide gives it. Prices were read on 2026-10-31.
+
+/**
+ * How long a home validator must stay on from 00:15 UTC to calculate, sign
+ * and send the day's vote. Since D161 it sends the vote right after it
+ * signs, with no random wait. From the validator's docs at 6ba7861f
+ * (docs/install/windows.md): the day's data is ready 13 to 20 minutes
+ * after 00:00 UTC, the validator signs within a minute or two of that, and
+ * it sends the signature right after it signs, so a computer that can't
+ * stay on all day needs to be awake from about 00:15 to 00:30 UTC.
+ */
+export const KEEP_ON_MINUTES = 15;
+
+/** "00:30": the time, in UTC, until which the computer should stay on. */
+export function keepOnUntilUtc(): string {
+  const minutes = 15 + KEEP_ON_MINUTES;
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+}
 
 /** The day the rc.5 measurements on this page were made. */
 export const MEASURED_ON = "3 November 2026";
@@ -31,7 +49,7 @@ export const MINIMUM: readonly {
   },
   {
     label: "Time on",
-    value: "3 hours a day",
+    value: `${KEEP_ON_MINUTES} minutes a day`,
     detail: "From 00:15 UTC, with sleep turned off.",
   },
 ];
@@ -120,21 +138,21 @@ export const PARTS: readonly {
   {
     key: "power",
     part: "Power",
-    answer: "On and awake for about three hours a day.",
+    answer: `On and awake for about ${KEEP_ON_MINUTES} minutes a day, from 00:15 UTC.`,
     why: "A mini PC left on all day uses about $1.60 of power a month at the US average price.",
   },
   {
     key: "first-start",
     part: "First start",
-    answer: "Leave it on for about an hour.",
-    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests on 3 November this took 50 to 63 minutes.",
+    answer: "Leave it on until the app says it is ready, about half an hour.",
+    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.7 on 5 November this took about 25 minutes through Tor, and 10 with Tor off.",
   },
 ];
 
 /** The day, in UTC, for the timeline figure. Hours from midnight. */
 export const DAY = {
   signs: 0.25,
-  keepOnUntil: 3.25,
+  keepOnUntil: 0.25 + KEEP_ON_MINUTES / 60,
   windowCloses: 19,
 } as const;
 
@@ -274,13 +292,11 @@ export const QUESTIONS: readonly {
 }[] = [
   {
     question: "Can I use a laptop?",
-    answer:
-      "Yes. Keep it plugged in, with the lid open and sleep turned off for at least three hours from 00:15 UTC.",
+    answer: `Yes. Keep it plugged in, with the lid open and sleep turned off, for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC.`,
   },
   {
     question: "Can I turn it off at night?",
-    answer:
-      "Yes, if it was on for about three hours from 00:15 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.",
+    answer: `Yes, once it has signed, by about ${keepOnUntilUtc()} UTC. If it's off then, it signs when it next starts, until 19:00 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.`,
   },
   {
     question: "Do I need my own Ethereum node?",
@@ -296,7 +312,8 @@ export const QUESTIONS: readonly {
 
 /** Where the page's numbers come from. */
 export const SOURCES: readonly string[] = [
-  `Memory, disk and the first start: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
+  `Memory and disk: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
+  "The first start: 6529's join tests of the test release (0.1.0-rc.7, commit 214e228) on 5 November 2026, fresh installs with the default settings, through Tor and with Tor off.",
   "Internet: 6529's estimate of a month of Ethereum data, in the validator's specification.",
   `Prices: store and provider pages, read on ${PRICES_READ_ON}. Power at 18.16 cents a kWh, the US average for August 2026 (EIA).`,
 ];

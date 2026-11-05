@@ -106,6 +106,7 @@ interface UseWaveDropsSerialScrollParams {
 }
 
 interface UseWaveDropsSerialScrollResult {
+  readonly cancelSerialScroll: () => void;
   readonly serialTarget: number | null;
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly targetDropRef: RefObject<HTMLDivElement | null>;
@@ -178,6 +179,16 @@ export const useWaveDropsSerialScroll = ({
   const lastScrolledToSerialRef = useRef<number | null>(null);
   const lastAutoPinnedNewestDropKeyRef = useRef<string | null>(null);
   const [init, setInit] = useState(false);
+
+  const cancelSerialScroll = useCallback(() => {
+    scrollAnchorRef.current?.release();
+    scrollOperationAbortController.current?.abort();
+    scrollOperationLockRef.current = false;
+    activeScrollTargetRef.current = null;
+    lastScrolledToSerialRef.current = null;
+    setSerialTarget(null);
+    setIsScrolling(false);
+  }, []);
 
   const queueSerialTarget = useCallback((serialNo: number) => {
     setSerialTarget(serialNo);
@@ -531,6 +542,7 @@ export const useWaveDropsSerialScroll = ({
   }, [init, serialTarget, fetchAndScrollToDrop, scrollToSerialNo, isScrolling]);
 
   return {
+    cancelSerialScroll,
     serialTarget,
     queueSerialTarget,
     targetDropRef,

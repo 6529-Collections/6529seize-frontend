@@ -5,20 +5,7 @@ import {
   parseDecentralizedMediaRef,
   to6529ResolverUrl,
 } from "@/lib/media/decentralized-media";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import IpfsService from "./IPFSService";
-
-interface IpfsContextType {
-  ipfsService: IpfsService | null;
-}
-
-const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
+import type IpfsService from "./IPFSService";
 
 const readIpfsConfig = () => {
   const apiEndpoint = publicEnv.IPFS_API_ENDPOINT;
@@ -35,41 +22,41 @@ const readIpfsConfig = () => {
   } as const;
 };
 
-const getEnv = async () => readIpfsConfig();
+let ipfsServicePromise: Promise<IpfsService> | null = null;
 
-export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [ipfsService, setIpfsService] = useState<IpfsService | null>(null);
-
-  useEffect(() => {
-    if (ipfsService) return;
-
-    getEnv()
-      .then((info) => {
-        const service = new IpfsService({
-          apiEndpoint: info.apiEndpoint,
-          mfsPath: info.mfsPath,
-        });
-        service.init();
-        setIpfsService(service);
-      })
-      .catch((error: unknown) => {
-        console.error("Error initializing IPFS service", error);
-      });
-  }, [ipfsService]);
-
-  const value = useMemo(() => ({ ipfsService }), [ipfsService]);
-
-  return <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>;
+const createIpfsService = async (): Promise<IpfsService> => {
+  const config = readIpfsConfig();
+  const { default: IpfsServiceClass } = await import("./IPFSService");
+  const service = new IpfsServiceClass(config);
+  try {
+    // Prepare the MFS folder before the first copy into it. A failure is
+    // logged and uploads still go to IPFS, as when this ran at app start.
+    await service.init();
+  } catch (error: unknown) {
+    console.error("Error initializing IPFS service", error);
+  }
+  return service;
 };
 
-export const useIpfsService = (): IpfsService => {
-  const context = useContext(IpfsContext);
-  if (!context?.ipfsService) {
-    throw new Error("useIpfsService must be used within an IpfsProvider");
+// Uploads are rare (profile pictures), so the IPFS client loads and prepares
+// on the first upload instead of for every visitor at app start.
+const getIpfsService = async (): Promise<IpfsService> => {
+  ipfsServicePromise ??= createIpfsService();
+  const pending = ipfsServicePromise;
+  try {
+    return await pending;
+  } catch (error: unknown) {
+    // Forget a failed attempt so the next upload tries again.
+    if (ipfsServicePromise === pending) {
+      ipfsServicePromise = null;
+    }
+    throw error;
   }
-  return context.ipfsService;
+};
+
+export const addFileToIpfs = async (file: File): Promise<string> => {
+  const service = await getIpfsService();
+  return service.addFile(file);
 };
 
 export const resolveIpfsUrlSync = (url: string) => {

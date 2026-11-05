@@ -50,6 +50,14 @@ validating `config/env.ts`. Browser bundles resolve `@/config/env` to
 `config/nextConfig.ts`), which reads the baked value without zod, so the
 validator stays out of the client bundle.
 
+The browser's copy, `PUBLIC_RUNTIME_BROWSER`, leaves out the per-build stamp
+(`VERSION` and `VERSION_BUILD_TIMESTAMP`, see `config/buildStamp.ts`). Chunk
+names are content hashes, so a baked commit gave that chunk a new name on
+every deploy and every returning visitor downloaded it again. The root layout
+renders `VERSION` as `<html data-version>`, and `config/env.browser.ts` reads
+it from there, so the update checker and monitoring read the same value as
+before.
+
 Server-only values are read at request time through `config/serverEnv.ts`:
 
 - `STAGING_API_KEY`: the `x-6529-auth` value server-side requests send to a
