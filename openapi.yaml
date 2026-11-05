@@ -17175,7 +17175,9 @@ paths:
         - name: page_size
           in: query
           required: false
-          description: Page size. NIC accepts 1 through 500; legacy defaults are unchanged.
+          description: >-
+            Page size. NIC defaults to 50 and accepts 1 through 500; legacy
+            defaults are unchanged.
           schema:
             type: integer
       responses:
