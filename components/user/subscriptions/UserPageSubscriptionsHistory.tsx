@@ -58,6 +58,7 @@ export default function UserPageSubscriptionsHistory(
   const tabs = [
     {
       id: "redeemed",
+      label: t(locale, "subscriptions.history.redeemed"),
       heading: t(locale, "subscriptions.history.redeemedTitle"),
       loading: props.redeemedLoading,
       empty: t(locale, "subscriptions.history.emptyRedeemed"),
@@ -142,7 +143,7 @@ export default function UserPageSubscriptionsHistory(
               })
             }
           >
-            {tab.heading}
+            {tab.label ?? tab.heading}
           </Tab>
         ))}
       </TabList>

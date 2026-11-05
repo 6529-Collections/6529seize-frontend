@@ -19,6 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   type ReactElement,
@@ -31,7 +32,7 @@ import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 import { useSubscriptionAllocationStatus } from "./useSubscriptionAllocationStatus";
 
 const SUBSCRIPTION_COUNT_SELECT_CLASS =
-  "tw-h-10 tw-w-12 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
+  "tw-h-10 tw-w-12 tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
 
 function MintingTodayLabel({
   tokenId,
@@ -50,14 +51,14 @@ function MintingTodayLabel({
     <>
       <button
         type="button"
-        className={`tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${className}`}
+        className={`tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${className}`}
         data-tooltip-id={tooltipId}
         aria-describedby={tooltipId}
       >
         {showIndicator && (
           <span
             aria-hidden="true"
-            className="tw-relative tw-mr-1 tw-inline-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center"
+            className="tw-relative tw-mr-1 tw-inline-flex tw-size-2 tw-shrink-0 tw-items-center tw-justify-center"
           >
             <span className="tw-absolute tw-size-3.5 tw-animate-ping tw-rounded-full tw-bg-primary-300 tw-opacity-30 motion-reduce:tw-animate-none" />
             <span className="tw-relative tw-size-2 tw-rounded-full tw-bg-primary-300" />
@@ -66,13 +67,16 @@ function MintingTodayLabel({
         {t(locale, "profile.subscriptions.mintingToday.label")}
         <FontAwesomeIcon
           icon={faInfoCircle}
-          className="tw-size-4"
+          className={
+            showIndicator ? "tw-size-[13px] tw-opacity-75" : "tw-size-4"
+          }
           aria-hidden="true"
         />
       </button>
       <Tooltip
         id={tooltipId}
         openEvents={{ mouseover: true, focus: true, click: true }}
+        globalCloseEvents={{ escape: true, clickOutsideAnchor: true }}
         place="top"
         positionStrategy="fixed"
         offset={8}
@@ -80,7 +84,11 @@ function MintingTodayLabel({
         opacity={1}
         style={TOOLTIP_STYLES}
       >
-        {t(locale, "profile.subscriptions.mintingToday.tooltip")}
+        <span
+          className={showIndicator ? "tw-text-meta tw-font-normal" : undefined}
+        >
+          {t(locale, "profile.subscriptions.mintingToday.tooltip")}
+        </span>
       </Tooltip>
     </>
   );
@@ -92,7 +100,7 @@ function ReadOnlySubscriptionStatus({
   const locale = useBrowserLocale();
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-5 sm:tw-text-sm ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
+      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
     >
       {t(
         locale,
@@ -126,6 +134,8 @@ export default function MemeSubscriptionRow(
   const id = `subscription-${props.subscription.token_id}`;
   const isCompact = props.variant === "compact";
   const locale = useBrowserLocale();
+  const allocationDetailsId = useId();
+  const [showAllocationDetails, setShowAllocationDetails] = useState(false);
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -329,9 +339,9 @@ export default function MemeSubscriptionRow(
             title: props.title,
             token: formatInteger(locale, props.subscription.token_id),
           })}
-          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-tabular-nums tw-leading-5"
+          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5"
         >
-          <span className="tw-font-medium tw-text-iron-100">
+          <span className="tw-font-normal tw-text-iron-100">
             {formatInteger(
               locale,
               Math.max(0, Math.min(selectedCount, props.eligibilityCount))
@@ -353,14 +363,14 @@ export default function MemeSubscriptionRow(
 
     return (
       <span
-        className={`tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCompact ? "tw-h-11 tw-bg-iron-900 tw-ring-white/[0.03]" : "tw-h-11 tw-bg-transparent tw-ring-white/[0.12] md:tw-h-[30px]"}`}
+        className={`tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCountSelectDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"} ${isCompact ? "tw-h-11 tw-bg-iron-900 tw-ring-white/[0.03]" : "tw-h-11 tw-bg-transparent tw-ring-white/[0.12] md:tw-h-9"}`}
       >
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={
               isCompact
                 ? SUBSCRIPTION_COUNT_SELECT_CLASS
-                : "tw-h-11 tw-w-12 tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-[13px] tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-[30px]"
+                : "tw-h-11 tw-w-12 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-meta tw-font-medium tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-9"
             }
             value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
@@ -369,9 +379,17 @@ export default function MemeSubscriptionRow(
             }}
             aria-label={`Select subscription quantity for ${props.title}`}
           >
-            {props.eligibilityCount < 1 && <option value={0}>0</option>}
+            {props.eligibilityCount < 1 && (
+              <option value={0} className="tw-bg-iron-900 tw-text-iron-100">
+                0
+              </option>
+            )}
             {countOptions.map((num) => (
-              <option key={num} value={num}>
+              <option
+                key={num}
+                value={num}
+                className="tw-bg-iron-900 tw-text-iron-100"
+              >
                 {formatInteger(locale, num)}
               </option>
             ))}
@@ -383,7 +401,9 @@ export default function MemeSubscriptionRow(
             aria-hidden="true"
           />
         </span>
-        <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
+        <span
+          className={`tw-pl-1 tw-pr-3 tw-leading-none tw-text-iron-500 ${isCompact ? "tw-text-sm" : "tw-text-meta tw-font-medium"}`}
+        >
           / {formatInteger(locale, props.eligibilityCount)}
         </span>
       </span>
@@ -449,92 +469,174 @@ export default function MemeSubscriptionRow(
     );
   }
 
+  const allocationDetails = finalWithMetadata && (
+    <span
+      className={`tw-flex tw-flex-wrap tw-gap-x-5 tw-text-meta tw-font-normal tw-tabular-nums ${props.minting_today ? "tw-flex-col tw-gap-y-1.5 tw-leading-[19px] md:tw-flex-row md:tw-gap-y-0.5" : "tw-gap-y-1"}`}
+    >
+      <span>Phase: {finalWithMetadata.phase}</span>
+      <span>
+        Subscription Position:{" "}
+        {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
+        {formatInteger(locale, finalWithMetadata.phaseSubscriptions)}
+      </span>
+      <span>
+        Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)}
+      </span>
+      <span>Subscription Count: x{finalWithMetadata.subscribedCount}</span>
+    </span>
+  );
+  const textColumn = props.artwork ? "tw-col-start-2" : "tw-col-start-1";
+  const controlColumn = props.artwork ? "tw-col-start-3" : "tw-col-start-2";
+  const ownerColumns = props.artwork
+    ? "sm:tw-grid-cols-[auto_minmax(0,1fr)_auto_auto]"
+    : "sm:tw-grid-cols-[minmax(0,1fr)_auto_auto]";
+  const countColumn = props.artwork ? "sm:tw-col-start-3" : "sm:tw-col-start-2";
+  const ownerCountPlacement = `tw-col-start-1 ${props.artwork ? "tw-col-span-full tw-row-start-4 sm:tw-col-span-1" : "tw-row-start-3"} sm:tw-row-start-2 ${countColumn}`;
+  const countPlacement = props.readonly
+    ? `tw-row-start-3 ${textColumn}`
+    : ownerCountPlacement;
+  const allocationDetailsRow =
+    props.artwork && !props.readonly
+      ? "tw-row-start-5 sm:tw-row-start-4"
+      : "tw-row-start-4";
+  const toggleColumn = props.artwork
+    ? "sm:tw-col-start-4"
+    : "sm:tw-col-start-3";
+  const visitorPlacement = props.artwork
+    ? "tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-justify-end tw-self-end md:tw-self-center"
+    : "tw-col-span-full tw-col-start-1 tw-row-start-3 tw-justify-between @[18rem]/subscription-row:tw-col-span-1 @[18rem]/subscription-row:tw-col-start-2 @[18rem]/subscription-row:tw-row-start-2 @[18rem]/subscription-row:tw-justify-end";
+  const visitorTitleSpan = props.artwork
+    ? "tw-col-span-2"
+    : "tw-col-span-full @[18rem]/subscription-row:tw-col-span-1";
+
   return (
     <div
-      className={`tw-min-h-[60px] tw-pl-4 tw-pr-4 sm:tw-pl-5 sm:tw-pr-6 ${props.minting_today ? "tw-py-6" : "tw-py-5"}`}
+      className={
+        props.minting_today
+          ? "tw-px-4 tw-py-4 tw-@container/subscription-row sm:tw-px-5 sm:tw-py-[18px]"
+          : "tw-px-4 tw-py-4 tw-@container/subscription-row md:tw-px-5 md:tw-py-5"
+      }
     >
       <div
-        className={`tw-grid tw-min-w-0 tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex sm:tw-justify-between sm:tw-gap-5 ${props.artwork ? "tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-grid-cols-[minmax(0,1fr)_auto]"}`}
+        className={`tw-grid tw-min-w-0 tw-items-center md:tw-flex md:tw-justify-between md:tw-gap-5 ${props.minting_today ? "tw-gap-x-4 tw-gap-y-0.5 sm:tw-gap-x-5" : "tw-gap-x-2 tw-gap-y-1"} ${props.artwork ? "tw-grid-cols-[auto_minmax(0,1fr)_auto]" : "tw-grid-cols-[minmax(0,1fr)_auto]"} ${props.readonly ? "" : ownerColumns}`}
       >
         {props.artwork && (
-          <div className="tw-row-span-2 tw-shrink-0">{props.artwork}</div>
-        )}
-        <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-1 sm:tw-flex-col sm:tw-gap-2">
-          <div
-            className={`tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-flex-col ${props.minting_today ? "sm:tw-gap-2" : "sm:tw-gap-0.5"}`}
-          >
-            {props.date && (
-              <div
-                className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 ${props.artwork ? "tw-col-start-2 tw-row-start-1" : "tw-col-span-full"}`}
-              >
-                {props.minting_today ? (
-                  <MintingTodayLabel
-                    tokenId={props.subscription.token_id}
-                    locale={locale}
-                    showIndicator
-                    className="tw-text-sm tw-font-medium tw-text-primary-300"
-                  />
-                ) : (
-                  <time
-                    dateTime={props.date.utcDay.toISOString()}
-                    className="tw-min-w-0 tw-break-words"
-                  >
-                    {formatUtcDate(locale, props.date.utcDay, {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </time>
-                )}
-                <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-text-iron-400">
-                  <span className="tw-text-iron-600" aria-hidden="true">
-                    /
-                  </span>
-                  <span>
-                    SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-                  </span>
-                </span>
-              </div>
-            )}
-            <span
-              className={`tw-row-start-2 tw-min-w-0 tw-break-words tw-tabular-nums ${props.minting_today ? "tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50" : "tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"} ${props.artwork ? "tw-col-start-2" : "tw-col-start-1"}`}
-            >
-              {props.title} #{props.subscription.token_id}
-            </span>
+          <div className="tw-col-start-1 tw-row-span-3 tw-row-start-1 tw-shrink-0">
+            {props.artwork}
           </div>
+        )}
+        <div
+          className={`tw-contents md:tw-flex md:tw-min-w-0 md:tw-flex-1 md:tw-flex-col ${props.minting_today ? "md:tw-gap-0.5" : "md:tw-gap-2"}`}
+        >
+          {props.date && (
+            <div
+              className={`tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[17px] tw-font-semibold tw-tabular-nums md:tw-text-base ${props.artwork ? "tw-col-span-2" : "tw-col-span-full"} ${textColumn} ${subscribed ? "tw-text-iron-100" : "tw-text-iron-400"}`}
+            >
+              {props.minting_today ? (
+                <MintingTodayLabel
+                  tokenId={props.subscription.token_id}
+                  locale={locale}
+                  showIndicator
+                  className="tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-primary-300 md:tw-text-base"
+                />
+              ) : (
+                <time
+                  dateTime={props.date.utcDay.toISOString()}
+                  className="tw-min-w-0 tw-break-words"
+                >
+                  {formatUtcDate(locale, props.date.utcDay, {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              )}
+              <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-text-iron-400">
+                <span className="tw-text-iron-600" aria-hidden="true">
+                  /
+                </span>
+                <span>
+                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                </span>
+              </span>
+            </div>
+          )}
+          <span
+            className={`tw-row-start-2 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-400 md:tw-text-sm ${props.minting_today ? "tw-leading-5" : ""} ${textColumn} ${props.readonly ? visitorTitleSpan : ""}`}
+          >
+            {props.title} #{props.subscription.token_id}
+          </span>
           {hasNoAllocation && (
             <output className="tw-col-span-full tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "profile.subscriptions.noAllocation")}
             </output>
           )}
-          {finalWithMetadata && (
-            <span className="tw-col-span-full tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
-              Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-              {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
-              {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
-              Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)}{" "}
-              - Subscription Count: x{finalWithMetadata.subscribedCount}
-            </span>
+          {allocationDetails && (
+            <div
+              className={
+                props.minting_today
+                  ? `tw-col-span-full tw-text-iron-500 md:tw-mt-1.5 ${allocationDetailsRow}`
+                  : "tw-col-span-full tw-text-iron-500"
+              }
+            >
+              {props.minting_today && (
+                <button
+                  type="button"
+                  aria-expanded={showAllocationDetails}
+                  aria-controls={allocationDetailsId}
+                  onClick={() => setShowAllocationDetails((open) => !open)}
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
+                >
+                  {t(locale, "subscriptions.upcoming.more")}
+                  <ChevronDownIcon
+                    aria-hidden="true"
+                    className={`tw-size-4 ${showAllocationDetails ? "tw-rotate-180" : ""}`}
+                  />
+                </button>
+              )}
+              <div
+                id={allocationDetailsId}
+                className={
+                  props.minting_today && !showAllocationDetails
+                    ? "tw-hidden md:tw-block"
+                    : undefined
+                }
+              >
+                {allocationDetails}
+              </div>
+            </div>
           )}
         </div>
         <div
-          className={`tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 ${props.artwork ? "tw-col-span-full tw-row-start-3" : "tw-col-start-2 tw-row-start-2"} ${props.readonly ? "max-sm:tw-flex-col max-sm:tw-items-end max-sm:tw-gap-0.5" : "max-sm:tw-gap-2"}`}
+          className={
+            props.readonly
+              ? `tw-flex tw-shrink-0 tw-items-center tw-gap-2 md:tw-justify-end md:tw-gap-3 ${visitorPlacement}`
+              : "tw-contents md:tw-flex md:tw-shrink-0 md:tw-items-center md:tw-gap-3"
+          }
         >
-          {isSubmitting && <Spinner />}
-          {renderCountSelector({
-            disableWhenSingleOption: true,
-          })}
+          {subscribed && (
+            <span
+              className={`tw-inline-flex tw-items-center tw-gap-2 ${countPlacement}`}
+            >
+              {renderCountSelector({ disableWhenSingleOption: true })}
+            </span>
+          )}
           {props.readonly ? (
             <ReadOnlySubscriptionStatus subscribed={subscribed} />
           ) : (
-            <UserPageSubscriptionsToggle
-              disabled={isToggleDisabled}
-              id={id}
-              checked={subscribed}
-              onChange={submit}
-              ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-            />
+            <span
+              className={`tw-row-start-2 tw-flex tw-items-center tw-justify-end tw-gap-2 ${controlColumn} ${toggleColumn}`}
+            >
+              {isSubmitting && <Spinner />}
+              <UserPageSubscriptionsToggle
+                disabled={isToggleDisabled}
+                id={id}
+                checked={subscribed}
+                onChange={submit}
+                ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+              />
+            </span>
           )}
         </div>
       </div>

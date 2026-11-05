@@ -7,26 +7,27 @@ Subscription balance and Forecast use without an expander. Balance, the availabl
 mint count, Forecast use and the owner-only Top up action share the bottom of the
 coverage panel and wrap when needed. The information button beside Forecast use
 opens the shared tooltip with the projection note and, for Covered profiles, the
-status explanation. Learn more aligns at the far right of the Subscription minting
-heading row. Owners have Choose drops below the status description. For Not set up
-or No upcoming drops selected, Choose drops sits beside the metrics instead, and
-the same Top up form is immediately visible below the overview in a compact
-responsive grid. The coverage card keeps its existing gradient.
+status explanation. Learn more sits on the right of the Subscription minting heading
+at every screen size. Covered owners see Top up without extra Choose drops or
+Review settings shortcuts. All states use the main Top up button without a duplicate
+Top up subscriptions link. Other navigation actions remain unchanged. Only owners in No upcoming drops selected see Choose drops. When available, it sits beside Top up below the metrics,
+right-aligned on desktop and in an equal-width pair on phones. Top up opens the same dialog used by other owner states. The coverage card keeps
+its existing gradient.
 
-Below 640px, a divider separates the summary from the metrics. Balance and Forecast use each have a left-aligned label and right-aligned value, with a divider between rows. Available mints sit below the balance on the right, and the owner refresh button stays beside the ETH amount. The primary owner action spans the panel width below the metrics, keeping its existing Top up or Choose drops wording and behavior.
+Below 640px, Subscription balance and Forecast use sit side by side, with each value below its label. Available mints sit below the balance on the left, and the owner refresh button stays beside the balance label. Below 384px, the two groups stack to retain readable labels and values. Wider screens keep the inline statistics and refresh beside the amount. When Choose drops is available, it shares an equal-width mobile button row with Top up: Top up on the left and Choose drops on the right. Covered owners keep the single full-width Top up button.
 
-From 1024px, Subscription minting occupies the left two-thirds and Minting settings
+From 1024px, Subscription minting occupies the wider left column and Minting settings
 sits in the right column, with its three settings stacked. In that sidebar,
 setting labels are brighter, values and supporting details sit beneath them on
 the left, and owner switches sit on the right. Both original owner choice labels
-remain visible. The full Airdrop Address stays readable and can wrap. Below 1024px,
+remain visible. Airdrop Address uses the original short address format, with the full address available on hover, focus or tap. Below 1024px,
 Minting settings and Subscription History become two compact rows together after
 Upcoming Drops. The settings row summarizes the saved mode and edition preference.
-Each row opens its full content in the shared mobile bottom sheet. Inside settings,
+Settings and history open their full content in the shared mobile bottom sheet; settings uses the full-height sheet. Learn more opens the existing subscriptions guide. Inside settings,
 visitor settings use three columns from 768px and owner settings use two; phones
 stack the groups with dividers. Owner labels remain above their controls.
 History retains its compact pill tabs and original entries. Redeemed rows
-use the original shortened address format. Other owner states open Top up when needed.
+use the original shortened address format. Owners in every coverage state open Top up when needed.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
 are documented in
@@ -36,8 +37,8 @@ are documented in
 
 - Route: `/{user}/subscriptions`
 - Sections: coverage answer and `Subscription balance`, `Minting settings`,
-  `Upcoming Drops`, `Subscription History`, and owner-only `Top up` (inline for
-  Not set up or No upcoming drops selected, otherwise a dialog)
+  `Upcoming Drops`, `Subscription History`, and owner-only `Top up` (a desktop
+  dialog or mobile bottom sheet)
 
 ## Entry Points
 
@@ -65,20 +66,23 @@ first render.
   settings, upcoming-drops, or top-up section.
 - Open a subscription top-up notification. It links to `Top up`
   (`/{user}/subscriptions#profile-subscriptions-top-up`); once loaded, the
-  inline form scrolls into view and receives heading focus for Not set up or
-  No upcoming drops selected. In other states, the dialog opens and focuses its
-  heading without scrolling the page behind it.
+  dialog opens and focuses its heading in every owner coverage state, including
+  Not set up and No upcoming drops selected, without scrolling the page behind it.
   Where Subscriptions are hidden (the iOS app outside the US) the tab
   redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
-- Use `Learn more` at the right of the `Subscription minting` title above the
-  coverage card to open `/about/subscriptions`.
+- Use `Learn more` on the right of the `Subscription minting` heading at any
+  screen size to open `/about/subscriptions`.
 - Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
   `#profile-subscriptions-upcoming`, and `#profile-subscriptions-history`
   scroll to and focus their section heading on desktop. Below 1024px, settings
   and history links open the matching sheet and focus its heading instead.
-  `#profile-subscriptions-top-up` focuses the inline form or opens and focuses the
-  Top up dialog automatically.
+  Resizing from desktop to a smaller screen does not open a sheet, even when
+  its section is already in the URL. Closing a sheet clears its matching URL hash,
+  and reconnecting effects does not reopen a dismissed sheet. Explicit deep links
+  continue to open their section. Resizing to desktop closes an open sheet;
+  tap the compact row to reopen it after returning to a smaller screen.
+  `#profile-subscriptions-top-up` opens and focuses the Top up dialog automatically.
 
 ## Common Scenarios
 
@@ -101,8 +105,7 @@ first render.
    original funded-drop count with its colored status badge above it, including zero.
    When supplied, Funded through shows the Meme link and full date including
    the year. The headline has no decorative status icon. This date is a projection.
-   Without a funded-through point, the status explanation stays in the summary.
-   An owner with Action required still sees the supplied top-up deadline here.
+   Owners in states without a funded-drop count keep their explanation in the summary. Visitors see the status, headline, funded-through date and factual numbers, without setup or action instructions. Funding warning states use their label, count and dates instead of a repeated general explanation.
    The balance refresh icon shows its label on hover or keyboard focus.
 2. Read Subscription balance and Forecast use together near the bottom of the
    coverage panel. The available mint count appears once with the ETH balance,
@@ -110,32 +113,29 @@ first render.
    individual mints, distinct from the funded-drop count and edition preference.
    Hover, focus or tap the information button beside Forecast use for the
    `Subscription coverage` tooltip. It preserves the projection note and, for
-   Covered profiles, the status explanation. Escape or tapping elsewhere dismisses
+   Covered owners, the status explanation. Escape or tapping elsewhere dismisses
    it. These supporting details no longer need an expandable report.
    Status, the funded-drop count and Funded through stay above the metrics.
    The first upcoming drop stays in Upcoming Drops. Mode, its update date,
    eligibility and edition preference stay in Minting settings. Individual drop
    quantities remain in Upcoming Drops.
-   Warning explanations, Next unfunded, recommendations and authoritative
-   deadlines remain visible when supplied, without empty None rows or repeating
-   a deadline already displayed above. The owner balance refresh also reloads
-   coverage. A separate Refresh coverage control appears beside the coverage
-   message only when coverage is unavailable after loading or a refresh failed.
-   Owners retain the status-specific Set up, Top up subscriptions or Review
-   settings action.
-3. For owners with Not set up or No upcoming drops selected, `Choose drops`
-   sits beside the balance and forecast metrics, and the Top up form appears
-   immediately below the overview. Its cards use one column on phones, two
-   from 640px and three from 1024px. Visitors never see this form.
-   Other owner states have `Top up` beside the balance and forecast metrics. This row wraps
-   within the coverage panel on narrower screens.
-   In those other states, `Choose drops` sits on the left below the status description and scrolls to
-   and focuses Upcoming Drops.
-   In those states, Top up opens a centered
-   dialog on desktop or a bottom sheet on phones. Options retain the original
-   blue radio styling in separate compact rounded cards arranged in one column.
-   Each preset has a small radio at the top right, its label above the count,
-   and the ETH amount beneath the count, matching the original card hierarchy.
+   For owners, Recommended is the first option in Top up, preserving the exact ETH amount and funding projection. The summary and dialog omit the extra Top up by paragraph; the Recommended option explains the funding outcome without an additional guidance block. Visitors do not see top-up deadlines, recommendations or action guidance in any coverage state. US iOS owners can read the recommendation in Top up before continuing on the web. The general warning explanations are omitted because the status, funded count and dates already express them. Next unfunded is shown on its Upcoming Drops row instead of repeating it in the summary. If that token is outside the loaded upcoming list or the list is unavailable, its link and full date remain in the summary as a fallback. Each supplied fact appears once, with no empty None rows. Each state retains its own backend data and existing status thresholds. The owner balance refresh also reloads
+   coverage, including when coverage is unavailable or stale. If a coverage refresh
+   fails while prior data remains, the original stale-data warning appears directly
+   above the cards. Owners have a Refresh coverage button beside it, wrapping below
+   on narrow screens. The coverage card itself has no separate refresh control.
+   The summary has no Review settings shortcut; settings remain in the adjacent desktop panel or the dedicated mobile settings row. Not set up keeps its original state and Top up; Automatic mode remains on the existing Mode switch, without a redundant Set up shortcut.
+   Warning states use the main Top up button without a second Top up subscriptions link.
+3. Owners in every coverage state use `Top up` near the balance and forecast
+   metrics to open a centered desktop dialog or mobile bottom sheet. New collectors
+   do not see the amount form until they open it. Visitors never see Top up.
+   Only No upcoming drops selected offers owners `Choose drops`, beside Top up below the metrics on all
+   screen sizes, with natural button widths on desktop and equal widths on phones.
+   Choose drops scrolls to and focuses Upcoming Drops.
+   Top-up options are compact horizontal cards in one column at every screen size.
+   A radio sits on the left, the original label and card count in the middle,
+   and the ETH amount on the right. Other keeps its input on the right and the
+   calculated ETH preview beneath its label.
    Selection adds a blue background, outline and amount; the radio dot animates
    smoothly. Cards have subtle blue hover feedback without moving. All styling
    uses Tailwind and respects reduced motion. The original submit button includes its lightning
@@ -150,17 +150,27 @@ first render.
    Close, Escape, or the backdrop dismisses the dialog and returns focus to
    the opener. Reopening retains the draft selection and Other count.
 4. Use `Upcoming Drops` to review the first three drops and change individual
-   selections or quantities. The `Show More` footer inside the drops panel reveals the
-   remaining rows. Minting
-   Today rows are locked; focus, tap, or hover the label for the explanation.
+   selections or quantities. From 640px, `Show More` reveals the remaining rows
+   inline. On phones it opens the full list in the shared bottom sheet; Close,
+   Escape or Show Less returns to the three-row preview and restores focus.
+   On narrow visitor rows without artwork, the Meme title uses the full width,
+   with quantity on the left and saved subscription status on the right of a
+   separate line below it. Wider rows retain the inline layout. Owner quantity
+   dropdowns sit below the title under 640px and beside it from 640px upward.
+   Every row shows its own season beside the date or Minting Today, including
+   rows revealed by Show More. The expanded list marks the last funded
+   drop using the supplied Funded through token. Minting Today rows stay locked;
+   focus, tap, or hover the label for the explanation. Below 768px, a More button expands the supplied Phase, Subscription Position,
+   Airdrop Address and Subscription Count below the row. Desktop keeps those
+   details visible below the title; the tooltip only explains the mint-day lock.
 5. Use `Minting settings` beside the coverage panel from 1024px. On narrower
    screens, tap its compact row after Upcoming Drops to open the settings sheet. Mode,
    Edition Preference and Airdrop Address stack in one column below 768px,
-   with subtle dividers between rows, labels on the left and values on the right. The
-   mode date and eligibility align right beneath their values in visitor view. From 768px, visitor
+   with subtle dividers between rows and labels above their selected values. The
+   mode date and eligibility follow their values on the same line when space permits. From 768px, visitor
    settings sit side by side with supporting text wrapping within each setting. From 1024px, the three settings stack in the right column, with brighter labels above left-aligned values and supporting details. Owners have the original
-   Manual / Automatic switch and One edition / All eligible switch. Both labels
-   remain visible for owners, with the saved choice emphasized. Owner labels sit
+   Manual / Automatic switch and One edition / All eligible switch. Only the selected
+   value is shown, changing when the saved switch state changes. Owner labels sit
    above their controls: Mode and Edition Preference share two columns from 768px,
    with Airdrop Address below; the settings stack in the right column from 1024px.
    Phones stack the groups with dividers. Learn more stays a small link with a
@@ -169,12 +179,12 @@ first render.
    Owner controls are disabled while settings load or an update is pending.
    Visitors see the saved Mode and Edition Preference as plain static values,
    without switches or inactive choices. Automatic has a small green indicator.
-   The plain UTC Mode date and Eligibility follow the saved values beneath the labels in the desktop sidebar, and remain right-aligned below the values on phones. Loading settings
-   shows a loading label rather than a guessed saved value. The original edition explanation is owner-only; the mode explanation
+   The plain UTC Mode date and Eligibility follow the saved values beneath the labels in the desktop sidebar, with the same arrangement on phones and natural wrapping when space is limited. Loading settings
+   shows a loading label rather than a guessed saved value. The original edition explanation is owner-only, in the info icon beside the selected edition value (hover, focus or tap); the mode explanation
    remains below Upcoming Drops. Eligibility remains beside Edition Preference.
-   The full wallet address is always displayed, including when an ENS name is
-   available, and wraps within its setting when needed. The address tooltip on
-   hover, focus or tap and the owner edit link remain available.
+   The wallet address is shortened beside the ENS name when available; its full
+   value remains the accessible name and is shown in the tooltip on hover, focus
+   or tap. The owner edit link remains available.
    The mode's UTC last-update timestamp keeps its original wording. Visitors can read saved values
    but cannot change them. Direct settings links focus the section or sheet heading.
    Close, Escape or the backdrop dismisses the sheet and returns focus to its row.
@@ -190,32 +200,35 @@ first render.
 ## Current Behavior
 
 - Settings use compact inline controls on the same subtle dark surface as
-  Upcoming Drops and wrap without truncating addresses.
+  Upcoming Drops, with the full address available in its tooltip.
   Upcoming Drops uses date-first rows with the original mode explanation
-  below its heading for the owner only. Minting Today has a subtle primary-blue
-  highlight and a dot beside its label that pings unless reduced motion is enabled.
+  below its heading for the owner only. Minting Today has a primary-blue label
+  and a dot that pings unless reduced motion is enabled. All rows share one panel
+  with no nested row boxes.
   Later rows have no decorative dots. Today's artwork appears beside the label
   when the existing latest-Meme data matches its token and contract; missing,
   mismatched or failed artwork leaves the row usable without an image.
   The panel has vertical padding around the rows and
   footer, with subtle horizontal dividers between rows. Dates are emphasized above
-  quieter Meme titles. On phones the date and Meme title sit beside today's
-  thumbnail, with controls below; other rows keep the date above the title and
-  controls. Allocation details remain below. Show More stays centered
-  in the panel footer at every screen size.
+  quieter Meme titles, including Minting Today. Its blue label takes the date's
+  place, with uncropped 80 × 113 artwork at every screen size. On phones the owner
+  switch stays beside the title and the quantity
+  selector sits below it; visitors see quantity and subscription status together
+  on the right. Below 768px, More expands the original mint-day allocation details as text
+  below the row; desktop keeps them visible. Show More stays centered in the panel footer at every screen size.
   Visitors see non-interactive `Subscribed` or `Not subscribed` text
   instead of disabled drop switches, and plain selected / eligible quantities
   without chip backgrounds or dropdown arrows. Owners keep the existing editable switches, quantity
   pickers and mint-day locks.
 
 - Top up uses fully clickable compact cards, with small radio selectors at
-  the top right, original labels above the count, and ETH amounts below. Blue radio and selected-row colors transition smoothly while rows
+  left, original labels and counts in the middle, and ETH amounts on the right. Blue radio and selected-row colors transition smoothly while rows
   stay in place; reduced motion disables the transitions. Other has a distinct
   bordered count input and ETH preview.
   Both presentations retain any supplied funding projections. A full-width confirmation
   button and recipient address follow all amount choices.
-  During a transaction, the existing transaction-status dialog covers the inline
-  form or replaces the amount-picker dialog. Dismissing success or error returns
+  During a transaction, the existing transaction-status dialog replaces the
+  amount-picker dialog. Dismissing success or error returns
   to the amount picker.
 - Coverage status ramps with urgency and pairs its color with text:
   - `Covered`: at least 7 consecutive intended drops are fully funded
@@ -239,14 +252,14 @@ first render.
   eligibility, all-editions settings, manual choices, and opt-outs can change
   consumption per drop.
 - `Mode` is editable in Minting settings. Its original
-  UTC last-update timestamp appears below the saved value, without "since".
-- Owners use the original shared `Mode` and `Edition Preference` switches, with both
-  choices visible and a native keyboard-focus indicator. The original accessible
+  UTC last-update timestamp follows the saved value, without "since".
+- Owners use the original shared `Mode` and `Edition Preference` switches, with the
+  selected value below each label and a native keyboard-focus indicator. The original accessible
   names are Automatic subscription mode and All eligible editions. The
   authentication, save payloads, success/error feedback and refresh behavior
   remain unchanged. A failed or rejected update retains the saved value.
   `Edition Preference` also shows `Eligibility xN` and its original owner-only
-  explanation. These choices wrap within the settings row when needed.
+  explanation in the info icon beside the selected edition (hover, focus or tap). The selected edition and Eligibility share a line when space permits. Automatic is emerald with a dot; Manual and both edition values are neutral. The date and Eligibility wrap naturally when space is limited.
 - `Top up`:
   - sends ETH to the configured subscriptions address on the configured chain
   - uses exact backend-provided ETH for recommended and minimum options,
@@ -293,7 +306,7 @@ first render.
   - final quantities are capped by eligibility and available balance; refreshing
     upcoming quantities does not change historical finalized allocations
 - `Subscription History`:
-  - `Redeemed Subscriptions`
+  - `Redeemed` (the list keeps its full `Redeemed Subscriptions` heading)
   - `Log History`
   - `Top Up History`
   - Redeemed rows keep the original entry text, quantity, shortened airdrop

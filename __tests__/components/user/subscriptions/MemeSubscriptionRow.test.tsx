@@ -159,6 +159,50 @@ describe("MemeSubscriptionRow", () => {
     expect(screen.getByText("0.5")).toBeInTheDocument();
   });
 
+  it.each([true, false])(
+    "toggles all mint-day More details without saving (visitor: %s)",
+    (readonly) => {
+      renderWithAuth(
+        <MemeSubscriptionRow
+          profileKey="test-key"
+          title="The Memes"
+          subscription={{
+            token_id: 478,
+            contract: "0x123",
+            consolidation_key: "test-key",
+            subscribed: true,
+            subscribed_count: 2,
+          }}
+          eligibilityCount={3}
+          readonly={readonly}
+          refresh={jest.fn()}
+          minting_today
+          first
+          date={null}
+        />
+      );
+      const more = screen.getByRole("button", { name: "More", exact: true });
+      const details = document.getElementById(
+        more.getAttribute("aria-controls")!
+      );
+      expect(more).toHaveAttribute("aria-expanded", "false");
+      fireEvent.click(more);
+      expect(more).toHaveAttribute("aria-expanded", "true");
+      for (const field of [
+        "Phase: Phase 1",
+        "Subscription Position: 4 / 12",
+        "Airdrop Address: 0xabc123",
+        "Subscription Count: x2",
+      ]) {
+        expect(details).toHaveTextContent(field);
+      }
+      fireEvent.click(more);
+      expect(more).toHaveAttribute("aria-expanded", "false");
+      if (!readonly) expect(screen.getByRole("switch")).toBeDisabled();
+      expect(commonApiPost).not.toHaveBeenCalled();
+    }
+  );
+
   it("disables retries for final subscription lookups", () => {
     renderWithAuth(
       <MemeSubscriptionRow

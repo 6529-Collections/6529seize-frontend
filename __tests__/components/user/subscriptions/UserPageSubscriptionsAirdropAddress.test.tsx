@@ -33,7 +33,7 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
     ).toBeNull();
   });
 
-  it("shows the full visitor address beside its ENS name and in the tooltip", async () => {
+  it("shortens the visitor address while keeping the full address accessible and in its tooltip", async () => {
     const address = "0x7d88f221e9ecef9eef118e0d0e8a47f81b37e0b6";
     render(
       <UserPageSubscriptionsAirdropAddress
@@ -43,7 +43,7 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
       />
     );
     const addressButton = screen.getByRole("button", { name: address });
-    expect(addressButton).toHaveTextContent(address);
+    expect(addressButton).toHaveTextContent("0x7d88...e0b6");
     fireEvent.focus(addressButton);
     expect(await screen.findByRole("tooltip")).toHaveTextContent(address);
   });

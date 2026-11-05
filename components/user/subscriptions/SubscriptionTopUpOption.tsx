@@ -53,7 +53,7 @@ export default function SubscriptionTopUpOption({
       htmlFor={id}
       className={`${getTopUpOptionClass(selected)} tw-cursor-pointer`}
     >
-      <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
+      <span className="tw-col-start-1 tw-row-span-2 tw-row-start-1 tw-flex">
         <input
           id={id}
           type="radio"
@@ -71,24 +71,26 @@ export default function SubscriptionTopUpOption({
           className={TOP_UP_RADIO_CLASS}
         />
       </span>
-      <span className="tw-flex tw-min-h-20 tw-min-w-0 tw-flex-col tw-justify-between tw-gap-2 tw-pr-7">
+      <span className="tw-contents">
         {displayLabel && (
           <span
-            className={`tw-text-xs tw-font-medium tw-leading-4 ${selected ? "tw-text-primary-300" : "tw-text-iron-500"}`}
+            className={`tw-col-start-2 tw-row-start-1 tw-self-end tw-text-[15px] tw-font-medium ${selected ? "tw-text-primary-300" : "tw-text-iron-100"}`}
           >
             {displayLabel}
           </span>
         )}
-        <span className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+        <span className="tw-contents">
+          <span
+            className={`tw-col-start-2 ${displayLabel ? "tw-row-start-2 tw-self-start tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-400" : "tw-row-span-2 tw-row-start-1 tw-text-[15px] tw-font-medium tw-text-iron-100"}`}
+          >
             {cardCountLabel}
           </span>
           <span
             id={`${id}-amount`}
-            className={`tw-whitespace-nowrap tw-text-sm tw-tabular-nums tw-leading-5 ${selected ? "tw-text-primary-300" : "tw-text-iron-400"}`}
+            className={`tw-col-start-3 tw-row-span-2 tw-row-start-1 tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5 ${selected ? "tw-text-primary-300" : "tw-text-iron-400"}`}
           >
             {formatSubscriptionEth(locale, amountEth)}{" "}
-            <span className="tw-text-xs tw-text-iron-500">
+            <span className="tw-text-sm tw-text-iron-500">
               {t(locale, "subscriptions.balance.ethUnit")}
             </span>
           </span>
@@ -96,7 +98,7 @@ export default function SubscriptionTopUpOption({
         {description && (
           <span
             id={`${id}-description`}
-            className="tw-text-xs tw-leading-5 tw-text-iron-400"
+            className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-mt-1 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-400"
           >
             {description}
           </span>

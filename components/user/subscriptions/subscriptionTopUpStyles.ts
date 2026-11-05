@@ -4,7 +4,7 @@ export const TOP_UP_RADIO_CLASS =
 export function getTopUpOptionClass(selected: boolean): string {
   const stateClass = selected
     ? "tw-bg-primary-500/15 tw-ring-primary-400/60 desktop-hover:hover:tw-bg-primary-500/20"
-    : "tw-bg-iron-950 tw-ring-white/[0.03] desktop-hover:hover:tw-bg-primary-500/[0.06] desktop-hover:hover:tw-ring-primary-400/30";
+    : "tw-bg-iron-950 tw-ring-white/[0.06] desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-ring-primary-400/30";
 
-  return `tw-relative tw-block tw-min-h-[104px] tw-rounded-xl tw-px-4 tw-py-3 tw-text-left tw-shadow-lg tw-ring-1 tw-ring-inset tw-transition-[background-color,box-shadow] tw-duration-500 tw-ease-out motion-reduce:tw-transition-none desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50 ${stateClass}`;
+  return `tw-relative tw-grid tw-min-h-16 tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-rounded-xl tw-px-3 tw-py-2 tw-text-left tw-ring-1 tw-ring-inset tw-transition-[background-color,box-shadow] tw-duration-300 tw-ease-out sm:tw-gap-x-3 sm:tw-px-4 motion-reduce:tw-transition-none ${stateClass}`;
 }

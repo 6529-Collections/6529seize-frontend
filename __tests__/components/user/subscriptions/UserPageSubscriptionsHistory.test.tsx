@@ -95,15 +95,15 @@ describe("UserPageSubscriptionsHistory", () => {
     const { rerender } = render(<HistoryTestView {...props} />);
     mockHistoryScroll();
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
-      "Redeemed Subscriptions",
+      "Redeemed",
       "Log History",
       "Top Up History",
     ]);
     expect(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tab", { name: "Redeemed" })
     ).toHaveAttribute("aria-selected", "true");
     expect(
-      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tabpanel", { name: "Redeemed" })
     ).toBeVisible();
     expect(screen.getByRole("tabpanel")).toHaveTextContent(
       "Redeemed Subscription for Meme #568 x2"
@@ -143,7 +143,7 @@ describe("UserPageSubscriptionsHistory", () => {
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setTopUpPage).toHaveBeenCalledWith(2);
     await user.click(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tab", { name: "Redeemed" })
     );
     expect(
       within(screen.getByRole("tabpanel")).getByRole("textbox", {
@@ -192,7 +192,7 @@ describe("UserPageSubscriptionsHistory", () => {
       behavior: "instant",
     });
     expect(
-      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tabpanel", { name: "Redeemed" })
     ).toHaveFocus();
 
     rerender(
@@ -217,7 +217,7 @@ describe("UserPageSubscriptionsHistory", () => {
     );
     expect(scroll).toHaveBeenCalledTimes(1);
     expect(
-      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tabpanel", { name: "Redeemed" })
     ).toHaveFocus();
   });
 
@@ -237,7 +237,7 @@ describe("UserPageSubscriptionsHistory", () => {
       "true"
     );
     await user.click(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tab", { name: "Redeemed" })
     );
     expect(scroll).not.toHaveBeenCalled();
   });
@@ -273,7 +273,7 @@ describe("UserPageSubscriptionsHistory", () => {
     render(<HistoryTestView {...makeProps()} />);
     const user = userEvent.setup();
     await user.click(
-      screen.getByRole("tab", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tab", { name: "Redeemed" })
     );
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: "Log History" })).toHaveFocus();

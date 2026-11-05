@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
 
+const SHEET_MEDIA_QUERY = "(max-width: 1023px)";
+
 /** Keep secondary sections inline on desktop and in the shared sheet below lg. */
 export default function UserPageSubscriptionsResponsivePanel({
   id,
@@ -15,6 +17,7 @@ export default function UserPageSubscriptionsResponsivePanel({
   summary,
   className,
   headerClassName,
+  fullHeight = false,
   children,
 }: Readonly<{
   id: string;
@@ -22,11 +25,17 @@ export default function UserPageSubscriptionsResponsivePanel({
   summary?: ReactNode;
   className?: string;
   headerClassName?: string;
+  fullHeight?: boolean;
   children: ReactNode;
 }>) {
-  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const isMobile = useMediaQuery(SHEET_MEDIA_QUERY);
   const hasSummary = Boolean(summary);
-  const { expanded, setExpanded } = useSubscriptionDisclosure(id, isMobile);
+  const { expanded, setExpanded } = useSubscriptionDisclosure(
+    id,
+    true,
+    `${id}-title`,
+    SHEET_MEDIA_QUERY
+  );
   useScrollToHashOnMount(id, {
     enabled: !isMobile,
     focusId: `${id}-title`,
@@ -60,14 +69,14 @@ export default function UserPageSubscriptionsResponsivePanel({
         <span className="tw-min-w-0">
           <span
             id={`${id}-title`}
-            className="tw-block tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100"
+            className="tw-block tw-text-[17px] tw-font-medium tw-text-iron-100"
           >
             {title}
           </span>
           {hasSummary && (
             <span
               id={`${id}-summary`}
-              className="tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5 tw-text-iron-400"
+              className="tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[15px] tw-font-normal tw-leading-5 tw-text-iron-400"
             >
               {summary}
             </span>
@@ -81,9 +90,11 @@ export default function UserPageSubscriptionsResponsivePanel({
       <MobileWrapperDialog
         id={`${id}-sheet`}
         title={title}
+        titleClassName="!tw-text-lg !tw-font-semibold"
         isOpen={expanded}
         onClose={() => setExpanded(false)}
         tall
+        fixedHeight={fullHeight}
         fitVisualViewport
         focusTitleOnOpen
         keepMounted

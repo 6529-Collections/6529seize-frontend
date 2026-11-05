@@ -25,10 +25,10 @@ export default function MintingTodaySubscriptionRow(
           <Image
             src={source}
             alt=""
-            width={96}
-            height={96}
+            width={80}
+            height={113}
             unoptimized
-            className="tw-size-14 tw-rounded-lg tw-object-contain sm:tw-size-24"
+            className="tw-h-[113px] tw-w-20 tw-rounded-[3px] tw-object-contain tw-shadow-sm"
             onError={() => setFailedSource(source)}
           />
         ) : undefined

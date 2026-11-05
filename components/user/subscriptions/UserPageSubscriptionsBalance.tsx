@@ -9,6 +9,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
 export default function UserPageSubscriptionsBalance(
@@ -44,26 +45,11 @@ export default function UserPageSubscriptionsBalance(
 
   return (
     <div
-      className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-1 tw-py-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 sm:tw-col-start-1 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-2 sm:tw-py-0 sm:tw-text-[15px] sm:tw-leading-[22px]"
+      className="tw-row-span-3 tw-grid tw-min-w-0 tw-grid-rows-subgrid tw-items-start tw-gap-y-0.5 tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-col-start-1 sm:tw-row-span-1 sm:tw-flex sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-2 sm:tw-gap-y-0 md:tw-text-[15px]"
       aria-busy={props.fetching}
     >
-      <span>{t(locale, "subscriptions.balance.title")}</span>
-      <div className="tw-inline-flex tw-shrink-0 tw-items-center tw-whitespace-nowrap">
-        {props.fetching ? (
-          <>
-            <output className="tw-sr-only">
-              {t(locale, "subscriptions.balance.loading")}
-            </output>
-            <span className="tw-inline-flex tw-min-h-11 tw-items-center md:tw-min-h-7">
-              <DotLoader />
-            </span>
-          </>
-        ) : (
-          <span className="tw-inline-flex tw-min-h-11 tw-items-center tw-font-medium tw-tabular-nums tw-text-iron-100 md:tw-min-h-7">
-            {formatSubscriptionEth(locale, balance)}{" "}
-            {t(locale, "subscriptions.balance.ethUnit")}
-          </span>
-        )}
+      <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-1 sm:tw-contents">
+        <span>{t(locale, "subscriptions.balance.title")}</span>
         {props.show_refresh && (
           <>
             <button
@@ -72,7 +58,7 @@ export default function UserPageSubscriptionsBalance(
               disabled={props.fetching}
               aria-label={t(locale, "subscriptions.balance.refresh")}
               data-tooltip-id={refreshTooltipId}
-              className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 md:tw-size-7"
+              className="-tw-mx-3 -tw-my-2.5 tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 sm:tw-order-3 sm:tw-m-0 md:tw-size-7"
             >
               <ArrowPathIcon
                 className={`tw-size-4 ${props.fetching ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
@@ -89,13 +75,35 @@ export default function UserPageSubscriptionsBalance(
               opacity={1}
               style={TOOLTIP_STYLES}
             >
-              {t(locale, "subscriptions.balance.refresh")}
+              <span className="tw-text-meta tw-font-normal">
+                {t(locale, "subscriptions.balance.refresh")}
+              </span>
             </Tooltip>
           </>
         )}
       </div>
+      <div className="tw-inline-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-100 sm:tw-order-2 sm:tw-min-h-11 sm:tw-text-sm sm:tw-font-medium md:tw-min-h-7 md:tw-text-[15px]">
+        {props.fetching ? (
+          <>
+            <output className="tw-sr-only">
+              {t(locale, "subscriptions.balance.loading")}
+            </output>
+            <DotLoader />
+          </>
+        ) : (
+          <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
+            {formatSubscriptionEth(locale, balance)}{" "}
+            <span className="tw-h-4 tw-w-2.5 tw-shrink-0 tw-text-iron-400">
+              <EthereumIcon />
+            </span>
+            <span className="tw-sr-only">
+              {t(locale, "subscriptions.balance.ethUnit")}
+            </span>
+          </span>
+        )}
+      </div>
       {!props.fetching && (
-        <span className="tw-col-span-full tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-400 sm:tw-text-left sm:tw-text-[15px]">
+        <span className="tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-500 sm:tw-order-4 md:tw-text-[15px]">
           ({capacityLabel})
         </span>
       )}

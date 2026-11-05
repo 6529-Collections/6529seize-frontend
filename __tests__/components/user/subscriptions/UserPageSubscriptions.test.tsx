@@ -26,6 +26,7 @@ function renderWithAuth(
 
 const mockCoverageRefetch = jest.fn();
 let mockCoverageStatus: Status | undefined;
+let mockCoverageIsError = false;
 
 // Mock child components
 jest.mock(
@@ -56,17 +57,11 @@ jest.mock("@/components/user/subscriptions/UserPageSubscriptionsTopUp", () => ({
   default: ({
     onTransactionConfirmed,
     expanded,
-    presentation,
   }: {
     onTransactionConfirmed: () => void;
     expanded: boolean;
-    presentation: "inline" | "dialog";
   }) => (
-    <div
-      data-testid="subscriptions-topup"
-      data-expanded={expanded}
-      data-presentation={presentation}
-    >
+    <div data-testid="subscriptions-topup" data-expanded={expanded}>
       TopUp Component
       <button onClick={onTransactionConfirmed}>Confirm transaction</button>
     </div>
@@ -92,7 +87,7 @@ jest.mock(
   () => ({
     useSubscriptionCoverage: () => ({
       data: mockCoverageStatus ? { status: mockCoverageStatus } : undefined,
-      isError: false,
+      isError: mockCoverageIsError,
       isLoading: false,
       refetch: mockCoverageRefetch,
     }),
@@ -176,10 +171,39 @@ describe("UserPageSubscriptions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoverageStatus = undefined;
-    mockCommonApiFetch.mockResolvedValue({});
+    mockCoverageIsError = false;
+    mockCommonApiFetch.mockResolvedValue([]);
     mockGetCardsRemainingUntilEndOf.mockReturnValue(5);
     mockIsMintingToday.mockReturnValue(false);
   });
+
+  it.each([true, false])(
+    "shows stale coverage above the cards with owner-only retry (owner: %s)",
+    async (owner) => {
+      mockCoverageStatus = Status.Covered;
+      mockCoverageIsError = true;
+      renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
+        connectedProfile: owner ? mockProfile : null,
+      });
+      const notice = screen.getByRole("status");
+      expect(notice).toHaveTextContent(
+        "Last known coverage is shown and may be out of date."
+      );
+      expect(
+        notice.compareDocumentPosition(
+          screen.getByTestId("subscription-coverage-summary")
+        ) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      const retry = screen.queryByRole("button", { name: "Refresh coverage" });
+      if (owner) {
+        expect(retry).toBeVisible();
+        await userEvent.setup().click(retry!);
+        expect(mockCoverageRefetch).toHaveBeenCalledTimes(1);
+      } else {
+        expect(retry).not.toBeInTheDocument();
+      }
+    }
+  );
 
   describe("Profile Key Generation", () => {
     it("should generate profile key from consolidation_key when available", () => {
@@ -221,19 +245,23 @@ describe("UserPageSubscriptions", () => {
 
   describe("Connected Account Detection", () => {
     it.each([Status.NotSetUp, Status.NoUpcomingSelections])(
-      "shows top up inline for an owner in %s, without a modal opener",
-      (status) => {
+      "opens top up from its button for an owner in %s",
+      async (status) => {
         mockCoverageStatus = status;
         renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
           connectedProfile: mockProfile,
         });
         expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
-          "data-presentation",
-          "inline"
+          "data-expanded",
+          "false"
         );
-        expect(
-          screen.queryByRole("button", { name: "Top up", exact: true })
-        ).not.toBeInTheDocument();
+        await userEvent.click(
+          screen.getByRole("button", { name: "Top up", exact: true })
+        );
+        expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
+          "data-expanded",
+          "true"
+        );
       }
     );
 
@@ -256,8 +284,8 @@ describe("UserPageSubscriptions", () => {
         connectedProfile: mockProfile,
       });
       expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
-        "data-presentation",
-        "dialog"
+        "data-expanded",
+        "false"
       );
       expect(
         screen.getByRole("button", { name: "Top up", exact: true })
@@ -421,7 +449,7 @@ describe("UserPageSubscriptions", () => {
       expect(screen.getByTestId("subscriptions-balance")).toHaveTextContent(
         "Fetching: false"
       );
-      mockCommonApiFetch.mockResolvedValue({});
+      mockCommonApiFetch.mockResolvedValue([]);
       await userEvent
         .setup()
         .click(screen.getByRole("button", { name: "Retry" }));
@@ -606,12 +634,10 @@ describe("UserPageSubscriptions", () => {
         connectedProfile: null,
       });
 
-      const learnMoreLink = screen.getByText("Learn more");
-      expect(learnMoreLink).toBeInTheDocument();
-      expect(learnMoreLink.closest("a")).toHaveAttribute(
-        "href",
-        "/about/subscriptions"
-      );
+      const learnMoreLink = screen.getByRole("link", {
+        name: "Learn more",
+      });
+      expect(learnMoreLink).toHaveAttribute("href", "/about/subscriptions");
     });
   });
 

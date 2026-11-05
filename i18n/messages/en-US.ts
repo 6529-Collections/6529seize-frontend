@@ -3713,6 +3713,7 @@ export const EN_US_MESSAGES = {
   "subscriptions.topUp.hideDeepTime": "Hide Deep Time Subscriptions",
   "subscriptions.topUp.cancel": "Cancel",
   "subscriptions.upcoming.title": "Upcoming Drops",
+  "subscriptions.upcoming.more": "More",
   "subscriptions.upcoming.showMore": "Show More",
   "subscriptions.upcoming.showLess": "Show Less",
   "subscriptions.upcoming.loading": "Loading upcoming drops",

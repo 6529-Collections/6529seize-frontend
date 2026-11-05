@@ -63,10 +63,12 @@ describe("UserPageSubscriptionsMode", () => {
     expect(screen.queryByText(/since/)).not.toBeInTheDocument();
   });
 
-  it("shows both original labels and a valid Manual value when last_update is zero", () => {
+  it("shows the selected Manual value when last_update is zero", () => {
     const { requestAuth } = setup();
     expect(screen.getByText("Manual", { exact: true })).toBeVisible();
-    expect(screen.getByText("Automatic", { exact: true })).toBeVisible();
+    expect(
+      screen.queryByText("Automatic", { exact: true })
+    ).not.toBeInTheDocument();
     expect(getMode()).not.toBeChecked();
     expect(getMode()).toBeEnabled();
     expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
@@ -82,6 +84,12 @@ describe("UserPageSubscriptionsMode", () => {
     await user.keyboard(" ");
     await waitFor(() => expect(getMode()).toBeEnabled());
     expect(getMode()).toBeChecked();
+    expect(screen.getByText("Automatic", { exact: true })).toHaveClass(
+      "tw-text-emerald-400"
+    );
+    expect(
+      screen.queryByText("Manual", { exact: true })
+    ).not.toBeInTheDocument();
     expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledWith({
       endpoint: "subscriptions/p1/subscription-mode",
@@ -118,6 +126,12 @@ describe("UserPageSubscriptionsMode", () => {
     await user.click(getMode());
     await waitFor(() => expect(getMode()).toBeEnabled());
     expect(getMode()).not.toBeChecked();
+    expect(screen.getByText("Manual", { exact: true })).toHaveClass(
+      "tw-text-iron-300"
+    );
+    expect(
+      screen.queryByText("Automatic", { exact: true })
+    ).not.toBeInTheDocument();
     expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledWith({

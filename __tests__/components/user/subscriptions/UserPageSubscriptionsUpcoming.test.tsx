@@ -9,9 +9,19 @@ import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedDa
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import * as localeFormat from "@/i18n/format";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import userEvent from "@testing-library/user-event";
 import { useNowMinting } from "@/hooks/useNowMinting";
 import { useQuery } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+
+jest.mock("@/hooks/useMediaQuery");
 
 jest.mock("@/hooks/useNowMinting", () => ({ useNowMinting: jest.fn() }));
 
@@ -121,6 +131,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
   const mockSetToast = jest.fn();
 
   beforeEach(() => {
+    jest.mocked(useMediaQuery).mockReturnValue(false);
     jest.mocked(isMintingToday).mockReturnValue(false);
     jest
       .mocked(getUpcomingMintsAcrossSeasons)
@@ -170,7 +181,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText("Upcoming Drops")).toBeInTheDocument();
   });
 
-  it("shows the season on every drop row instead of beside the heading", () => {
+  it("shows the season on every row, including rows revealed by Show More", () => {
     renderComponent();
     expect(screen.getAllByText("SZN2")).toHaveLength(3);
     expect(
@@ -197,6 +208,58 @@ describe("UserPageSubscriptionsUpcoming", () => {
     fireEvent.click(screen.getByRole("button", { name: "Show Less" }));
     expect(screen.queryByText("SZN3")).not.toBeInTheDocument();
   });
+
+  it("opens the full phone list in a sheet and restores focus on close", async () => {
+    jest.mocked(useMediaQuery).mockReturnValue(true);
+    const user = userEvent.setup();
+    renderComponent();
+    const opener = screen.getByRole("button", { name: "Show More" });
+    await user.click(opener);
+    const sheet = screen.getByRole("dialog", { name: "Upcoming Drops" });
+    await waitFor(() =>
+      expect(within(sheet).getByRole("heading")).toHaveFocus()
+    );
+    expect(within(sheet).getByText("The Memes #4")).toBeVisible();
+    expect(within(sheet).getAllByRole("switch")).toHaveLength(4);
+    await user.click(within(sheet).getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    await waitFor(() => expect(opener).toHaveFocus());
+    expect(screen.queryByText("The Memes #4")).not.toBeInTheDocument();
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
+  it("places the funded boundary after its drop only in the expanded list", () => {
+    renderComponent({ coverage: { funded_through: { token_id: 3 } } });
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    const marker = screen.getByText("Funded through");
+    expect(
+      within(marker).getByRole("link", { name: "The Memes #3" })
+    ).toHaveAttribute("href", "/the-memes/3");
+    expect(
+      screen
+        .getByText("The Memes #3", { selector: "span" })
+        .compareDocumentPosition(marker) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it.each([false, true])(
+    "keeps the next-unfunded marker and its owner-only Top up link (readonly: %s)",
+    (readonly) => {
+      renderComponent({
+        readonly,
+        coverage: { next_unfunded: { token_id: 2 } },
+      });
+      expect(screen.getByText("Next unfunded The Memes #2")).toBeVisible();
+      const topUp = screen.queryByRole("link", { name: "Top up", exact: true });
+      if (readonly) expect(topUp).not.toBeInTheDocument();
+      else
+        expect(topUp).toHaveAttribute("href", "#profile-subscriptions-top-up");
+    }
+  );
 
   it("does not request current artwork on days without a Minting Today row", () => {
     renderComponent();

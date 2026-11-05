@@ -28,7 +28,7 @@ export default function UserPageSubscriptionsSection({
       className={`tw-min-w-0 tw-scroll-mt-24 ${className ?? ""}`}
     >
       <div
-        className={`tw-mb-3.5 tw-flex tw-items-center tw-justify-between tw-gap-3 md:tw-gap-4 ${headerClassName ?? ""}`}
+        className={`tw-flex tw-items-center tw-justify-between tw-gap-3 md:tw-gap-4 ${description === undefined ? "tw-mb-4" : "tw-mb-1"} ${headerClassName ?? ""}`}
       >
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1">
           <h2
@@ -47,7 +47,7 @@ export default function UserPageSubscriptionsSection({
         )}
       </div>
       {description !== undefined && (
-        <div className="-tw-mt-1 tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <div className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-400">
           {description}
         </div>
       )}

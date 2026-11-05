@@ -119,37 +119,31 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
-  it.each(["dialog", "inline"] as const)(
-    "sends the same transaction from the %s presentation",
-    async (presentation) => {
-      const user = userEvent.setup();
-      render(<UserPageSubscriptionsTopUp presentation={presentation} />);
-
-      const oneCardOption = screen.getByRole("radio", {
-        name: "1 Card",
-      });
-      await user.click(oneCardOption);
-
-      const sendButton = screen.getByRole("button", {
-        name: "Top up 0.06529 ETH",
-      });
-      expect(sendButton).not.toBeDisabled();
-      await user.click(sendButton);
-
-      expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
-        chainId: SUBSCRIPTIONS_CHAIN.id,
-        to: SUBSCRIPTIONS_ADDRESS,
-        value: parseEther(MEMES_MINT_PRICE.toString()),
-      });
-    }
-  );
-
-  it("preserves the draft amount when switching between inline and dialog", async () => {
+  it("sends the selected amount from the top-up dialog", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(
-      <UserPageSubscriptionsTopUp presentation="inline" />
-    );
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    render(<UserPageSubscriptionsTopUp />);
+
+    const oneCardOption = screen.getByRole("radio", {
+      name: "1 Card",
+    });
+    await user.click(oneCardOption);
+
+    const sendButton = screen.getByRole("button", {
+      name: "Top up 0.06529 ETH",
+    });
+    expect(sendButton).not.toBeDisabled();
+    await user.click(sendButton);
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther(MEMES_MINT_PRICE.toString()),
+    });
+  });
+
+  it("preserves the draft amount when closing and reopening the dialog", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<UserPageSubscriptionsTopUp expanded />);
     await user.type(
       screen.getByRole("spinbutton", { name: "Other card count" }),
       "2"
@@ -157,7 +151,11 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(
       screen.getByRole("button", { name: "Top up 0.13058 ETH" })
     ).toBeEnabled();
-    rerender(<UserPageSubscriptionsTopUp presentation="dialog" />);
+    rerender(<UserPageSubscriptionsTopUp expanded={false} />);
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    rerender(<UserPageSubscriptionsTopUp expanded />);
     expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
     expect(
       screen.getByRole("spinbutton", { name: "Other card count" })
@@ -291,6 +289,21 @@ describe("UserPageSubscriptionsTopUp", () => {
       value: parseEther(MEMES_MINT_PRICE.toString()),
     });
   });
+
+  it.each([new Date("2026-11-19T17:00:00Z"), null])(
+    "omits the extra deadline paragraph in Top up (deadline: %s)",
+    (deadline) => {
+      const coverage = {
+        next_unfunded: { token_id: 577, top_up_deadline: deadline },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("No authoritative top-up deadline is available yet.")
+      ).not.toBeInTheDocument();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
 
   it("uses the exact backend recommendation for the primary top-up", async () => {
     const user = userEvent.setup();
@@ -682,6 +695,44 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
+
+  it.each(["US", "FR", ""])(
+    "preserves the recommendation without exposing iOS amount controls (country: %s)",
+    async (country) => {
+      setEnvironment({ isIos: true, country });
+      const coverage = {
+        recommended_top_up: {
+          amount_eth: "0.78348",
+          additional_mints: 12,
+          target_fully_funded_drops: 7,
+          projected_through: {
+            token_id: 577,
+            mint_at: new Date("2026-11-20T17:00:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(
+        <NftPurchasingGate>
+          <UserPageSubscriptionsTopUp expanded coverage={coverage} />
+        </NftPurchasingGate>
+      );
+      if (country === "US") {
+        expect(
+          await screen.findByText(
+            "Recommended: add 0.78348 ETH for 7 funded drops through The Memes #577."
+          )
+        ).toBeVisible();
+        expect(
+          screen.getByRole("link", { name: "Top-up on 6529.io" })
+        ).toBeVisible();
+      } else {
+        expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      }
+      expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
 
   it("opens the dialog for a late-mounting section on Android and web", async () => {
     setHash(`#${TOP_UP_ID}`);

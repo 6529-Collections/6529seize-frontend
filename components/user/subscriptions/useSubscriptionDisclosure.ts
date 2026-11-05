@@ -1,23 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Open a subscription dialog for existing hash links without moving the page. */
 export function useSubscriptionDisclosure(
   id: string,
   enabled = true,
-  focusId = `${id}-title`
+  focusId = `${id}-title`,
+  mediaQuery?: string
 ) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpandedState] = useState(false);
+  const initialHashId = useRef<string | undefined>(undefined);
+  const setExpanded = useCallback(
+    (open: boolean) => {
+      setExpandedState(open);
+      if (!open && window.location.hash === `#${id}`) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + window.location.search
+        );
+      }
+    },
+    [id]
+  );
 
   useEffect(() => {
     if (!enabled) return;
+    const sheetViewport = mediaQuery
+      ? window.matchMedia(mediaQuery)
+      : undefined;
     let frame: number | undefined;
     const revealHash = () => {
-      if (window.location.hash === `#${id}`) setExpanded(true);
+      if (
+        sheetViewport?.matches !== false &&
+        window.location.hash === `#${id}`
+      ) {
+        setExpanded(true);
+      }
     };
     const revealLink = (event: MouseEvent) => {
       if (
+        sheetViewport?.matches === false ||
         event.button !== 0 ||
         event.metaKey ||
         event.ctrlKey ||
@@ -48,15 +72,27 @@ export function useSubscriptionDisclosure(
         document.getElementById(focusId)?.focus({ preventScroll: true })
       );
     };
-    const initialFrame = requestAnimationFrame(revealHash);
+    // Resizing can close a sheet, but only navigation or a click may open one.
+    const closeOutsideSheetViewport = () => {
+      if (sheetViewport?.matches === false) setExpanded(false);
+    };
+    let initialFrame: number | undefined;
+    if (initialHashId.current !== id) {
+      initialFrame = requestAnimationFrame(() => {
+        initialHashId.current = id;
+        revealHash();
+      });
+    }
+    sheetViewport?.addEventListener("change", closeOutsideSheetViewport);
     window.addEventListener("hashchange", revealHash);
     document.addEventListener("click", revealLink, true);
     return () => {
-      cancelAnimationFrame(initialFrame);
+      if (initialFrame !== undefined) cancelAnimationFrame(initialFrame);
+      sheetViewport?.removeEventListener("change", closeOutsideSheetViewport);
       window.removeEventListener("hashchange", revealHash);
       document.removeEventListener("click", revealLink, true);
       if (frame !== undefined) cancelAnimationFrame(frame);
     };
-  }, [id, enabled, focusId]);
+  }, [id, enabled, focusId, mediaQuery, setExpanded]);
   return { expanded, setExpanded };
 }

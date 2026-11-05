@@ -52,12 +52,20 @@ describe("Edition Preference", () => {
   });
 
   it.each([false, true])(
-    "exposes both labels, eligibility and the original owner explanation for saved allEditions=%s",
+    "exposes the selected value, eligibility and the original owner explanation for saved allEditions=%s",
     (allEditions) => {
       const { requestAuth } = setup({ allEditions });
       expect(screen.getByText("Eligibility x2")).toBeVisible();
-      expect(screen.getByText("One edition", { exact: true })).toBeVisible();
-      expect(screen.getByText("All eligible", { exact: true })).toBeVisible();
+      expect(
+        screen.getByText(allEditions ? "All eligible" : "One edition", {
+          exact: true,
+        })
+      ).toHaveClass("tw-text-iron-300");
+      expect(
+        screen.queryByText(allEditions ? "One edition" : "All eligible", {
+          exact: true,
+        })
+      ).not.toBeInTheDocument();
       if (allEditions) expect(getEditions()).toBeChecked();
       else expect(getEditions()).not.toBeChecked();
       expect(getEditions()).toHaveAccessibleDescription(
@@ -68,13 +76,45 @@ describe("Edition Preference", () => {
     }
   );
 
+  it.each([false, true])(
+    "opens the original explanation without changing the saved preference (allEditions=%s)",
+    async (allEditions) => {
+      const { user, requestAuth } = setup({ allEditions });
+      const explanation = allEditions
+        ? "You will receive all editions you are eligible for"
+        : "You will receive only one edition";
+      const info = screen.getByRole("button", { name: "Edition Preference" });
+      expect(info).toHaveAccessibleDescription(explanation);
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+      await user.click(info);
+      expect(await screen.findByRole("tooltip")).toHaveTextContent(explanation);
+      expect(getEditions()).toHaveProperty("checked", allEditions);
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+      await user.keyboard("{Escape}");
+      await waitFor(() =>
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+      );
+    }
+  );
+
   it("uses native keyboard toggling and the existing authenticated API", async () => {
     const { refresh, user, requestAuth } = setup();
+    await user.tab();
+    expect(
+      screen.getByRole("button", { name: "Edition Preference" })
+    ).toHaveFocus();
     await user.tab();
     expect(getEditions()).toHaveFocus();
     await user.keyboard(" ");
     await waitFor(() => expect(getEditions()).toBeEnabled());
     expect(getEditions()).toBeChecked();
+    expect(screen.getByText("All eligible", { exact: true })).toHaveClass(
+      "tw-text-iron-300"
+    );
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
     expect(requestAuth).toHaveBeenCalledTimes(1);
     expect(post).toHaveBeenCalledWith({
       endpoint: "subscriptions/test-key/subscribe-all-editions",

@@ -578,6 +578,57 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectNoHorizontalOverflow(page);
   });
 
+  for (const [section, title] of [
+    ["settings", "Minting settings"],
+    ["history", "Subscription History"],
+  ] as const) {
+    test(`opens subscription ${section} from links and taps, not resizing`, async ({
+      page,
+    }) => {
+      await installSubscriptionFixtures(page);
+      await page.setViewportSize({ width: 1024, height: 900 });
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-${section}`
+      );
+      await expect(
+        page.getByRole("heading", { name: title, exact: true })
+      ).toBeVisible();
+      const sheet = page.getByRole("dialog", { name: title, exact: true });
+      await expect(sheet).toHaveCount(0);
+
+      await page.setViewportSize({ width: 1023, height: 900 });
+      const opener = page.getByRole("button", { name: title, exact: true });
+      await expect(opener).toBeVisible();
+      await expect(sheet).toHaveCount(0);
+      await opener.click();
+      await expect(sheet).toBeVisible();
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(sheet).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      await expect(page).toHaveURL((url) => url.hash === "");
+
+      // Refreshing a dismissed sheet stays closed. Explicit deep links still work.
+      await page.setViewportSize({ width: 390, height: 900 });
+      await page.reload();
+      await expect(opener).toBeVisible();
+      await expect(sheet).toHaveCount(0);
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-${section}`
+      );
+      await expect(sheet).toBeVisible();
+      await expect(
+        sheet.getByRole("heading", { name: title, exact: true })
+      ).toBeFocused();
+      await page.setViewportSize({ width: 1024, height: 900 });
+      await expect(sheet).toHaveCount(0);
+      await page.setViewportSize({ width: 1023, height: 900 });
+      await expect(opener).toBeVisible();
+      await expect(sheet).toHaveCount(0);
+    });
+  }
+
   test("keeps desktop history inline and preserves its selected pill in mobile sheets", async ({
     page,
   }, testInfo) => {
@@ -672,6 +723,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(mintingSettings).toBeVisible();
     await expect(details).toHaveCount(0);
     const statusHeading = coverage.getByRole("heading", { level: 2 });
+    await expect(coverage.getByText(/Top up by|Recommended:/)).toHaveCount(0);
+    await expect(
+      coverage.getByText(
+        /Choose a drop|Set up subscriptions|Review settings or refresh/
+      )
+    ).toHaveCount(0);
     await expect(statusHeading.locator("svg")).toHaveCount(0);
     const statusText = statusHeading.locator(":scope > span");
     if ((await statusText.count()) === 2) {
@@ -718,6 +775,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         "Projected from current eligibility, settings, balance, and the published Meme schedule.",
     });
     await expect(forecastTooltip).toBeVisible();
+    await expect(
+      forecastTooltip.getByText("Your next selected drops are fully funded.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(forecastTooltip).toBeHidden();
     await expect(mintingSettings.getByRole("switch")).toHaveCount(0);
@@ -794,6 +856,28 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       history.replaceState(history.state, "", location.pathname)
     );
     await page.setViewportSize({ width: 390, height: initialViewport.height });
+    const narrowTitle = await upcoming
+      .getByText("The Memes #569", { exact: true })
+      .boundingBox();
+    const narrowQuantity = upcoming.getByRole("group", {
+      name: "Subscription quantity for The Memes #569",
+      exact: true,
+    });
+    const narrowQuantityBox = await narrowQuantity.boundingBox();
+    const narrowStatusBox = await narrowQuantity
+      .locator("..")
+      .locator("..")
+      .getByText("Subscribed", { exact: true })
+      .boundingBox();
+    expect(narrowTitle).not.toBeNull();
+    expect(narrowQuantityBox).not.toBeNull();
+    expect(narrowStatusBox).not.toBeNull();
+    expect(narrowQuantityBox!.y).toBeGreaterThanOrEqual(
+      narrowTitle!.y + narrowTitle!.height
+    );
+    expect(
+      Math.abs(narrowQuantityBox!.y - narrowStatusBox!.y)
+    ).toBeLessThanOrEqual(1);
     const settingsOpener = page.getByRole("button", {
       name: "Minting settings",
       exact: true,
@@ -851,12 +935,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const modeValueBox = await modeValue.boundingBox();
     await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
       "text-align",
-      "right"
+      "start"
     );
     expect(modeLabelBox).not.toBeNull();
     expect(modeValueBox).not.toBeNull();
-    expect(modeValueBox!.x).toBeGreaterThan(
-      modeLabelBox!.x + modeLabelBox!.width
+    expect(Math.abs(modeValueBox!.x - modeLabelBox!.x)).toBeLessThanOrEqual(1);
+    expect(modeValueBox!.y).toBeGreaterThanOrEqual(
+      modeLabelBox!.y + modeLabelBox!.height
     );
     const eligibilityBox = await mintingSettings
       .getByText(/^Eligibility x/)
@@ -867,7 +952,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(eligibilityBox).not.toBeNull();
     await expect(visitorEditions.getByText(/^Eligibility x/)).toHaveCSS(
       "text-align",
-      "right"
+      "start"
     );
     expect(editionLabelBox).not.toBeNull();
     expect(eligibilityBox!.y).toBeGreaterThanOrEqual(
@@ -878,7 +963,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .boundingBox();
     await expect(
       mintingSettings.getByRole("button", { name: /^0x[0-9a-fA-F]{40}$/ })
-    ).toHaveText(/^0x[0-9a-fA-F]{40}$/);
+    ).toHaveText(/^·?\s*0x[0-9a-fA-F]{4}\.\.\.[0-9a-fA-F]{4}$/);
     expect(addressBox).not.toBeNull();
     expect(addressBox!.y).toBeGreaterThanOrEqual(
       settingBoxes[2]!.y + settingBoxes[2]!.height
@@ -928,14 +1013,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeLessThanOrEqual(4);
     await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
       "text-align",
-      "left"
+      "start"
     );
     await page.setViewportSize(initialViewport);
     await expect(details).toHaveCount(0);
     const tabs = history.getByRole("tablist");
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole("tab")).toHaveText([
-      "Redeemed Subscriptions",
+      "Redeemed",
       "Log History",
       "Top Up History",
     ]);
