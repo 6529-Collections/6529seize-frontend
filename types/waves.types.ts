@@ -226,6 +226,8 @@ export interface SidebarWaveDescriptionDrop {
 }
 
 export interface SidebarWave {
+  readonly repliesCollapsed?: boolean;
+  readonly latestTopLevelDropTimestamp?: number | null;
   readonly id: string;
   readonly name: string;
   readonly type: ApiWaveType;
