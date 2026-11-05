@@ -122,7 +122,7 @@ const WINDOWS_MSI: FileFacts & { readonly title: string } = {
 // From rc.8 the validator carries Tor's bridge program, lyrebird, which is
 // under the GPL; each release offers its complete source beside the
 // downloads.
-const LYREBIRD_SOURCE_PATTERN = /^lyrebird-[\d.]+-source\.tar\.gz$/;
+const LYREBIRD_SOURCE_PATTERN = /^lyrebird-\d+(?:\.\d+)*-source\.tar\.gz$/;
 const LYREBIRD_SOURCE: FileFacts & { readonly title: string } = {
   title: "lyrebird source code",
   system: "Any",

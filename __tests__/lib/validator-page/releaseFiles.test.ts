@@ -126,6 +126,24 @@ describe("groupReleaseFiles", () => {
     ).toEqual([source.name, "release.json"]);
   });
 
+  it("names only a well-formed lyrebird source file", () => {
+    const [odd] = parseReleaseFeed({
+      releases: [
+        {
+          ...TEST_RELEASE_ENTRY,
+          files: [
+            { name: "lyrebird-.-source.tar.gz", sha256: "d".repeat(64) },
+            { name: "lyrebird-1..2-source.tar.gz", sha256: "e".repeat(64) },
+          ],
+        },
+      ],
+    });
+    expect(groupReleaseFiles(odd!).archives.map((item) => item.what)).toEqual([
+      "Other file",
+      "Other file",
+    ]);
+  });
+
   it("names both .deb files for the Linux command, or none", () => {
     expect(getDebNames(release)).toEqual({
       x64: "6529-validator_0.1.0_amd64.deb",
