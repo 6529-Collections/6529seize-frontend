@@ -1,6 +1,9 @@
 /** @jest-environment node */
 import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
-import { KEEP_ON_MINUTES } from "@/lib/validator-page/content/hardwareText";
+import {
+  KEEP_ON_MINUTES,
+  PARTS,
+} from "@/lib/validator-page/content/hardwareText";
 import { VALIDATOR_KNOWN_ISSUES_MARKDOWN } from "@/lib/validator-page/content/knownIssuesMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
@@ -145,10 +148,21 @@ describe("validator page text", () => {
     }
   });
 
-  it("carries the mainnet join test's timing and the test phase's machines", () => {
+  it("carries rc.7's join tests' timing and the test phase's machines", () => {
     const ready = fold("how-long-it-takes-to-be-ready");
-    expect(ready).toContain("was ready in about 50 minutes");
-    expect(ready).toContain("In 6529's test of rc.6 on 4 November");
+    expect(ready).toContain("In 6529's tests of rc.7 on 5 November");
+    expect(ready).toContain(
+      "Through Tor it was ready in about 25 minutes: 1 to find the agreed day, 6 to download the history and 17 to rebuild and match it. With Tor off it was ready in about 10 minutes."
+    );
+    expect(ready).not.toMatch(/50 minutes|rc\.6/);
+    // Known issue 2 gives the same step's time, and the hardware page the
+    // same first start.
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
+      "In 6529's tests of rc.7 on 5 November the step took 17 minutes through Tor, and 9 with Tor off."
+    );
+    expect(PARTS.find((part) => part.key === "first-start")?.why).toContain(
+      "In 6529's tests of rc.7 on 5 November this took about 25 minutes through Tor, and 10 with Tor off."
+    );
     expect(ready).toContain(
       "the checkpoint built into this release, from 4 November."
     );

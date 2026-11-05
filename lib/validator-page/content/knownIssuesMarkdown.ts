@@ -3,12 +3,12 @@
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
 export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
-  "These are the issues a tester might meet in 0.1.0-rc.7 of the 6529 validator (commit `214e228`), each with its workaround. Checked on 2026-11-04.",
+  "These are the issues a tester might meet in 0.1.0-rc.7 of the 6529 validator (commit `214e228`), each with its workaround. Checked on 2026-11-05.",
   "",
   "## Joining the network",
   "",
-  "1. Through Tor, finding the agreed day can wait several minutes on a peer that stops answering. In 6529's test of rc.6 on 4 November it took 8 minutes. Workaround: if Ready to sign stays at finding the agreed day for more than 15 minutes, restart the validator service once and tell us.",
-  "2. Rebuild and match can take 30 minutes or more through Tor. The validator reads every Ethereum block since the checkpoint of 4 November before its result can match, so the step takes a little longer each day. The app counts the blocks and the time left, but the count stays at 0 for the first 10 to 15 minutes while the validator fetches the blocks' headers, and the first time left it gives is too long. In 6529's test of rc.6 on 4 November the step took 33 minutes through Tor, and 11 with Tor off. Workaround: leave the validator running.",
+  "1. Through Tor, finding the agreed day can wait a long time on one peer that stops answering. In 6529's tests it took 8 minutes on rc.6, and 19 on rc.7 while one of 6529's sentries restarted. Workaround: if Ready to sign still says it is finding the agreed day after 15 minutes, restart the validator service once: in 6529's logo menu, choose **Stop the validator service**, then **Start the validator service**. Then tell us.",
+  "2. Rebuild and match can take 15 to 20 minutes through Tor. The validator reads every Ethereum block since the checkpoint of 4 November before its result can match, so the step takes a little longer each day. The app counts the blocks and the time left, but the count stays at 0 for the first 5 to 10 minutes while the validator fetches the blocks' headers, and the first time left it gives is too long. In 6529's tests of rc.7 on 5 November the step took 17 minutes through Tor, and 9 with Tor off. Workaround: leave the validator running.",
   "3. On a network that blocks Tor, the page opens, says Tor is blocked, and keeps trying. Bridges come in rc.8. Workaround: use another network, or add bridge lines by hand in Settings › Privacy. rc.7 carries no bridge programs, so only plain bridges work: an address and a fingerprint. As a last resort, turn Tor off there. Peers and Ethereum servers then see this network's IP address.",
   "",
   "## Install and download",

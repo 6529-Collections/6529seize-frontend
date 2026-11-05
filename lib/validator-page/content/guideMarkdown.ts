@@ -33,7 +33,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     markdown: joinMarkdown([
       "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 4 November.",
       "",
-      "In 6529's test of rc.6 on 4 November, through Tor, a new install showed the network's newest agreed day in under a minute, and was ready in about 50 minutes: 8 to find the agreed day, 9 to download the history and 33 to rebuild and match it. The last step reads every Ethereum block since the release's checkpoint, so it takes a little longer each day. Leave the validator running until the app says it is ready.",
+      "In 6529's tests of rc.7 on 5 November, a new install showed the network's newest agreed day in under a minute. Through Tor it was ready in about 25 minutes: 1 to find the agreed day, 6 to download the history and 17 to rebuild and match it. With Tor off it was ready in about 10 minutes. The last step reads every Ethereum block since the release's checkpoint, so it takes a little longer each day. Leave the validator running until the app says it is ready.",
       "",
       "In the test phase, 6529 runs validators and sentries on AWS in the United States, Germany and Singapore. The goal is a network that many holders run, at home and in offices.",
     ]),
