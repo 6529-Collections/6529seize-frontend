@@ -35,8 +35,7 @@ export function E2eeDmHistory({
   const thread = groupConversationThreads(conversations, selfProfileId).find(
     (item) => item.sessions.some((session) => session.g === conversation.g)
   );
-  if (conversation.kind !== "dm" || !thread?.key.startsWith("dm:"))
-    return null;
+  if (conversation.kind !== "dm" || !thread?.key.startsWith("dm:")) return null;
   const usable = isUsableDm(conversation, selfProfileId);
   const current = isUsableDm(thread.current, selfProfileId)
     ? thread.current
