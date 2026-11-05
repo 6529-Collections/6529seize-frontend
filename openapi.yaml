@@ -17091,6 +17091,9 @@ paths:
         response shape. Historical deletion or visibility changes are not a
         frozen snapshot.
       operationId: getProfileActivityLogs
+      security:
+        - {}
+        - bearerAuth: []
       parameters:
         - name: activity_scope
           in: query
