@@ -159,6 +159,8 @@ Statement ownership in this tab:
 
 ## Activity Log Behavior
 
+- The NIC log shows NIC rating edits and identity changes. REP and wave REP
+  rating edits are excluded. The log-type and direction filters still apply.
 - Desktop combined log includes:
   - matter tabs: `All`, `REP`, `NIC`
   - direction tabs: `All`, `Incoming`, `Outgoing`

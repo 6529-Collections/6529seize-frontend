@@ -17078,6 +17078,113 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributorsPage"
+  /profile-logs:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile activity logs
+      description: >-
+        Existing activity history, optionally restricted to the profile NIC
+        view. NIC mode preserves identity changes and read-access restrictions,
+        removes only REP and wave REP rating edits, and uses cursor paging in
+        descending created_at and id order. Other callers retain the legacy
+        response shape. Historical deletion or visibility changes are not a
+        frozen snapshot.
+      operationId: getProfileActivityLogs
+      parameters:
+        - name: activity_scope
+          in: query
+          required: false
+          description: >-
+            Optional NIC-only profile history; excludes REP and wave REP rating
+            edits while preserving all other matching entries.
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          required: false
+          description: >-
+            Opaque NIC continuation cursor returned as next_cursor; required
+            after page 1 and bound to the same filters and viewer.
+          schema:
+            type: string
+        - name: profile
+          in: query
+          required: false
+          description: >-
+            Profile handle, wallet or identity key. NIC requires exactly one
+            profile or target.
+          schema:
+            type: string
+        - name: target
+          in: query
+          required: false
+          description: Incoming profile handle, wallet or identity key.
+          schema:
+            type: string
+        - name: include_incoming
+          in: query
+          required: false
+          description: >-
+            Include target matches alongside actor and proxy matches for profile
+            queries.
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          required: false
+          description: Comma-separated activity types; empty means all types.
+          schema:
+            type: string
+        - name: rating_matter
+          in: query
+          required: false
+          description: >-
+            Legacy rating matter filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: >-
+            Legacy rating category filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          required: false
+          description: Legacy group filter; cannot be combined with activity_scope=NIC.
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          description: Sort direction; NIC supports descending order only.
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: Page number, starting at 1.
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          required: false
+          description: Page size. NIC accepts 1 through 500; legacy defaults are unchanged.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matching activity page; next_cursor is present only in NIC mode.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileActivityLogPage"
+        "400":
+          description: Invalid NIC scope, page size, cursor or filter combination.
   /profile-preferences:
     get:
       tags:
@@ -38984,6 +39091,73 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiProfileActivityLog:
+      type: object
+      required:
+        - id
+        - profile_id
+        - target_id
+        - proxy_id
+        - type
+        - additional_data_1
+        - additional_data_2
+        - created_at
+        - contents
+        - is_target_of_type_drop
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+        target_id:
+          type: string
+          nullable: true
+        proxy_id:
+          type: string
+          nullable: true
+        type:
+          type: string
+        additional_data_1:
+          type: string
+          nullable: true
+        additional_data_2:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        contents:
+          type: object
+          additionalProperties: true
+        profile_handle:
+          type: string
+        target_profile_handle:
+          type: string
+          nullable: true
+        proxy_handle:
+          type: string
+          nullable: true
+        is_target_of_type_drop:
+          type: boolean
+    ApiProfileActivityLogPage:
+      type: object
+      required:
+        - page
+        - next
+        - data
+      properties:
+        page:
+          type: integer
+        next:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileActivityLog"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Present only for NIC mode; null when no further page exists.
     ApiProfileBlockState:
       type: object
       required:

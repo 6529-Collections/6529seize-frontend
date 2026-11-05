@@ -6366,6 +6366,7 @@
         "filters"
       ],
       "facts": [
+        "The NIC activity log includes NIC rating edits and identity changes, and excludes REP and wave REP rating edits. Its direction and log-type filters still apply.",
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
         "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
