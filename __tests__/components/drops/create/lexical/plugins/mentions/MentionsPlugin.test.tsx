@@ -114,14 +114,18 @@ describe("MentionsPlugin", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [
         { id: "1", handle: "alice", display: "Alice", pfp: null, level: 42 },
+        { id: "2", handle: "alison", display: null, pfp: null },
       ],
     });
     const ref = createRef<any>();
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
-    expect(capturedProps.options).toHaveLength(1);
+    expect(capturedProps.options).toHaveLength(2);
     expect(capturedProps.options[0]).toBeInstanceOf(MentionTypeaheadOption);
     expect(capturedProps.options[0].level).toBe(42);
-    expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[1020]");
+    expect(capturedProps.options[1].level).toBeNull();
+    expect(capturedProps.anchorClassName).toBe(
+      "tailwind-scope tw-pointer-events-auto tw-z-[1020]"
+    );
 
     act(() => {
       capturedProps.onOpen();

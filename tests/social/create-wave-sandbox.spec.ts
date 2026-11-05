@@ -44,6 +44,189 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     "Create-wave sandbox requires the local mock API runner."
   );
 
+  test("shows profile levels in chat and visibility-group draft mentions", async ({
+    page,
+    hasTouch,
+  }) => {
+    const suggestions = [
+      {
+        id: "high",
+        handle: "qa_123456789012",
+        display: "A long display name that should truncate within the row",
+        pfp: null,
+        level: 100,
+      },
+      {
+        id: "middle",
+        handle: "qa_member",
+        display: "Member",
+        pfp: null,
+        level: 42,
+      },
+      { id: "zero", handle: "qa_zero", display: null, pfp: null, level: 0 },
+      {
+        id: "unknown",
+        handle: "qa_unknown",
+        display: null,
+        pfp: null,
+        level: null,
+      },
+      {
+        id: "exact",
+        handle: "qa_",
+        display: "Exact handle",
+        pfp: null,
+        level: 1,
+      },
+    ];
+    let releaseFirstSearch: () => void = () => {};
+    const firstSearch = new Promise<void>((resolve) => {
+      releaseFirstSearch = resolve;
+    });
+    let firstSearchRequested = false;
+    await page.route("**/mention-search?**", async (route) => {
+      const query = new URL(route.request().url()).searchParams;
+      expect(query.get("limit")).toBe("5");
+      const handle = query.get("handle") ?? "";
+      if (handle === "qa_" && !firstSearchRequested) {
+        firstSearchRequested = true;
+        await firstSearch;
+      }
+      if (handle === "err") {
+        await route.fulfill({
+          status: 503,
+          json: { error: "Search unavailable" },
+        });
+        return;
+      }
+      await route.fulfill({
+        json: suggestions.filter((profile) =>
+          profile.handle.startsWith(handle)
+        ),
+      });
+    });
+    await installExternalDataFixtures(page);
+    const previewUrl = "https://example.com/6529-composer-preview";
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({
+        json: {
+          errors: {},
+          results: {
+            [previewUrl]: { url: previewUrl, title: "Sandbox preview" },
+          },
+        },
+      })
+    );
+    await page.goto("/waves/00000000-0000-4000-8000-000000000529", {
+      waitUntil: "domcontentloaded",
+    });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await expect(composer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await composer.fill("@qa_");
+    const menu = page
+      .getByRole("listbox", { name: "Typeahead menu" })
+      .getByRole("listitem");
+    await expect.poll(() => firstSearchRequested).toBe(true);
+    await expect(menu).toHaveCount(0);
+    releaseFirstSearch();
+    await expect(menu).toHaveCount(5);
+    await expect(menu.first()).toHaveText(/qa_.*Exact handle/s);
+    await expect(
+      menu.nth(1).getByRole("img", { name: "Level 100" })
+    ).toBeVisible();
+    await expect(
+      menu.nth(3).getByRole("img", { name: "Level 0" })
+    ).toBeVisible();
+    await expect(menu.nth(4).getByRole("img")).toHaveCount(0);
+    const heights = await menu.evaluateAll((rows) =>
+      rows.map((row) => row.getBoundingClientRect().height)
+    );
+    expect(new Set(heights).size).toBe(1);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: test.info().outputPath("mention-levels.png"),
+    });
+
+    await composer.press("ArrowDown");
+    await composer.press("Enter");
+    await expect(composer).toContainText("@qa_123456789012");
+    await expect(menu).toHaveCount(0);
+    await expect(composer).toBeFocused();
+
+    await composer.fill("@qa_");
+    const badge = page.getByRole("img", { name: "Level 42", exact: true });
+    if (hasTouch) await badge.tap();
+    else await badge.click();
+    await expect(composer).toContainText("@qa_member");
+    await expect(menu).toHaveCount(0);
+    const emptySearch = page.waitForResponse((response) =>
+      response.url().includes("mention-search?handle=zzz")
+    );
+    await composer.fill("@zzz");
+    await emptySearch;
+    await expect(menu).toHaveCount(0);
+    const failedSearch = page.waitForResponse((response) =>
+      response.url().includes("mention-search?handle=err")
+    );
+    await composer.fill("@err");
+    expect((await failedSearch).status()).toBe(503);
+    await expect(menu).toHaveCount(0);
+    await composer.fill("@qa_");
+    await expect(menu).toHaveCount(5);
+    await composer.press("Escape");
+    await expect(menu).toHaveCount(0);
+    await expect(composer).toBeFocused();
+
+    await page.goto("/waves?create=wave");
+    const draft = page.getByRole("dialog", {
+      name: "Create Wave",
+      exact: true,
+    });
+    await draft.getByLabel("Wave Name").fill("Mention level draft");
+    await draft.getByRole("button", { name: /^Optional settings/ }).click();
+    const access = draft.getByRole("group", {
+      name: "Who can access this wave",
+    });
+    await access.getByRole("button", { name: "Edit", exact: true }).click();
+    await access.getByRole("button", { name: "Level", exact: true }).click();
+    await access.getByLabel("Level at least").fill("3");
+    await access
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    await expect(access).toContainText("Level at least 3");
+    const draftSearch = page.waitForRequest((request) =>
+      request.url().includes("/v2/waves/mention-search?")
+    );
+    const firstPost = draft.getByRole("textbox", {
+      name: "First post",
+      exact: true,
+    });
+    await firstPost.fill("@qa_");
+    expect(
+      new URL((await draftSearch).url()).searchParams.get("visibility_group_id")
+    ).toBeTruthy();
+    await expect(menu).toHaveCount(5);
+    const draftBadge = page.getByRole("img", { name: "Level 42", exact: true });
+    await page.screenshot({
+      path: test.info().outputPath("mention-levels-draft.png"),
+    });
+    if (hasTouch) await draftBadge.tap();
+    else await draftBadge.click();
+    await expect(firstPost).toContainText("@qa_member");
+    await expect(firstPost).toBeFocused();
+    await expect(
+      draft.getByRole("heading", { name: "Create Wave", exact: true })
+    ).toBeVisible();
+    await expect(menu).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("announces empty fields and recovers first-post text after reload", async ({
     page,
     baseURL,
@@ -1131,12 +1314,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         .filter({ hasText: "only the submission group can submit" })
     ).toBeVisible();
     await expect(
-      page
-        .getByRole("status")
-        .filter({
-          hasText:
-            "People with wave access can chat, but only the submission group can submit.",
-        })
+      page.getByRole("status").filter({
+        hasText:
+          "People with wave access can chat, but only the submission group can submit.",
+      })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await nextStepButton(page).click();

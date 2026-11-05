@@ -1,6 +1,7 @@
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { Portal } from "@headlessui/react";
 import type { MenuTextMatch } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import {
   LexicalTypeaheadMenuPlugin,
@@ -63,7 +64,8 @@ const mayContainPlainMentionAlias = (text: string): boolean =>
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 // Keep mentions above single-drop mobile chat menus/dialogs while below global modal layers.
-const TYPEAHEAD_ANCHOR_CLASS_NAME = "tailwind-scope tw-z-[1020]";
+const TYPEAHEAD_ANCHOR_CLASS_NAME =
+  "tailwind-scope tw-pointer-events-auto tw-z-[1020]";
 const TYPEAHEAD_MENU_WRAPPER_CLASS_NAME =
   "tw-absolute -tw-top-12 tw-left-0 tw-z-[1020]";
 
@@ -337,6 +339,8 @@ const NewMentionsPlugin = forwardRef<
   const { aliases, enabled, isFetched, isError, refetch } = useMentionAliases();
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isDialogMenu, setIsDialogMenu] = useState(false);
+  const [menuParent, setMenuParent] = useState<HTMLElement | null>(null);
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
@@ -575,13 +579,29 @@ const NewMentionsPlugin = forwardRef<
 
   return (
     <div ref={modalRef}>
+      {/* Register with the dialog so its overlay and outside-click handling
+          preserve the menu. The fixed host keeps Lexical's document coordinates. */}
+      {isOpen && isDialogMenu && (
+        <Portal
+          as="div"
+          ref={setMenuParent}
+          className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1020]"
+          style={{ top: -globalThis.scrollY, left: -globalThis.scrollX }}
+        />
+      )}
       <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
         onQueryChange={setQueryString}
         onSelectOption={onSelectOption}
         triggerFn={checkForMentionMatch}
         options={options}
-        onOpen={() => setIsOpen(true)}
+        onOpen={() => {
+          setIsDialogMenu(
+            !!modalRef.current?.closest('[role="dialog"], [role="alertdialog"]')
+          );
+          setIsOpen(true);
+        }}
         onClose={() => setIsOpen(false)}
+        {...(menuParent ? { parent: menuParent } : {})}
         anchorClassName={TYPEAHEAD_ANCHOR_CLASS_NAME}
         menuRenderFn={(
           anchorElementRef,
