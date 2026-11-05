@@ -552,10 +552,11 @@ const PACKS = [
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
-      "Profile Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
+      "Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
       [
         "tests/social/profile-following-sandbox.spec.ts",
         "tests/social/profile-rep-edit-sandbox.spec.ts",
+        "tests/social/profile-about-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
