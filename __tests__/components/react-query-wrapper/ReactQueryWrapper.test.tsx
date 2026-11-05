@@ -77,6 +77,12 @@ describe("ReactQueryWrapper context", () => {
       })
     );
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.PROFILE_RATING_LIST],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
+    });
   });
 
   it("sets profile data in query cache", () => {

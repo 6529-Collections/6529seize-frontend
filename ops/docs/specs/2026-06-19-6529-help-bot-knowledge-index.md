@@ -27,6 +27,10 @@ notification filters remain effective.
 
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its permission rules, stable allowance loading, retry action, and dismissal.
+It also covers desktop/mobile NIC Received/Given, recent-first owner Given
+management, REP category selection, total replacement, staged zero removal and
+returning to the refreshed recipient list. Visitor inspection and existing
+proxy allocation permissions remain distinct.
 
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains

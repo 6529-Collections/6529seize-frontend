@@ -274,3 +274,47 @@ it("does not overwrite an edited amount when the allowance refreshes", async () 
   rerender(<Modal profile={profile} category="Artist" onClose={onClose} />);
   expect(input).toHaveValue("30");
 });
+
+it("stages removal as zero and only submits after Save", async () => {
+  renderModal();
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Remove rating" })
+  );
+  expect(screen.getByRole("textbox")).toHaveValue("0");
+  expect(post).not.toHaveBeenCalled();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Save to remove this rating."
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith({
+      endpoint: "profiles/alice/rep/rating",
+      body: { amount: 0, category: "Artist" },
+    })
+  );
+});
+
+it("does not interpret an incomplete minus sign as removal", async () => {
+  renderModal();
+  const input = await screen.findByRole("textbox");
+  fireEvent.change(input, { target: { value: "-" } });
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  expect(post).not.toHaveBeenCalled();
+});
+
+it("does not submit after the editor leaves during authentication", async () => {
+  let finishAuth: (value: { success: boolean }) => void = () => undefined;
+  requestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  const { unmount } = renderModal();
+  const input = await screen.findByRole("textbox");
+  fireEvent.change(input, { target: { value: "30" } });
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() => expect(requestAuth).toHaveBeenCalledTimes(1));
+  unmount();
+  finishAuth({ success: true });
+  await waitFor(() => expect(post).not.toHaveBeenCalled());
+});
