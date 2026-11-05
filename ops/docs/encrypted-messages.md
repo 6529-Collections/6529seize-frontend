@@ -112,6 +112,9 @@ never ask for a signature per message.
 
 ## Starting a chat
 
+In the 6529 app, the back arrow to the left of the chat avatar returns to the
+encrypted messages list. It stays visible on iPad in portrait and landscape.
+
 1. Open `/messages/encrypted` and select **New encrypted chat**.
 2. Search for people and tap or click a result to add them. The search clears
    and the person appears in the selected list. Each person shows whether they
