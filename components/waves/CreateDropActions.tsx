@@ -6,6 +6,7 @@ import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  PaperClipIcon,
   ArrowUpTrayIcon,
   ChartBarIcon,
   CodeBracketIcon,
@@ -115,7 +116,7 @@ const getPollActionStyles = ({
   if (isStormMode) {
     return "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-bg-iron-900";
   }
-  return "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300";
+  return "tw-cursor-pointer tw-bg-transparent tw-text-iron-300";
 };
 
 const CompactActionButton: React.FC<CompactActionButtonProps> = ({
@@ -332,7 +333,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             aria-label={addPollLabel}
             onClick={onTogglePoll}
             disabled={isStormMode}
-            className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
+            className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
               { isStormMode }
             )}`}
             data-tooltip-id={pollTooltipId}
@@ -526,18 +527,13 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                               isRequiredMediaMissing
                                 ? "tw-text-[#FEDF89]"
                                 : "tw-text-iron-300"
-                            } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
+                            } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
                             data-tooltip-id={uploadTooltipId}
                             data-tooltip-content={uploadLabel}
                           >
-                            <FontAwesomeIcon
-                              icon={faPlus}
+                            <PaperClipIcon
                               aria-hidden="true"
-                              className={`tw-size-4 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out ${
-                                isUploadPickerOpen
-                                  ? "tw-rotate-45"
-                                  : "tw-rotate-0"
-                              }`}
+                              className="tw-size-5"
                             />
                           </button>
                           {!isMobile && (
@@ -552,7 +548,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           onPointerEnter={preloadGifPicker}
                           onFocus={preloadGifPicker}
                           aria-label={addGifLabel}
-                          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
+                          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
                           data-tooltip-id={gifTooltipId}
                           data-tooltip-content={addGifLabel}
                         >
@@ -615,7 +611,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         isPollActive
                           ? "tw-text-[#FEDF89]"
                           : "tw-text-iron-400"
-                      } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
+                      } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

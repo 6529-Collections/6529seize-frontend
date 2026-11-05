@@ -356,7 +356,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await (await openMessageActions(alice.page, typoRow))
       .getByRole("menuitem", { name: "Edit" })
       .click();
-    await expect(composer(alice.page)).toHaveValue(typo);
+    await expect(composer(alice.page)).toHaveText(typo);
     await composer(alice.page).fill(fixed);
     await alice.page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(messageRow(alice.page, fixed)).toBeVisible();

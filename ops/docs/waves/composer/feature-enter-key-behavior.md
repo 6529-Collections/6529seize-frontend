@@ -24,6 +24,10 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
   in the action tray but is unavailable until the Storm is finished or
   discarded.
 
+Expanded browser actions use flat icon buttons with a rounded-square hover
+background and tooltips. Upload uses a paperclip. The narrow-row plus toggle
+and labeled action tray retain their existing icons.
+
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`

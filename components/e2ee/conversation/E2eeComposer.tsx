@@ -7,24 +7,17 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
-  type KeyboardEvent,
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import useCapacitor from "@/hooks/useCapacitor";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
-import {
-  COMPOSER_INPUT_CLASS_NAME,
-  COMPOSER_MAX_HEIGHT_PX,
-  getNativeComposerStyle,
-} from "@/components/waves/composerPresentation";
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -40,17 +33,17 @@ import { getMemberName, tCount } from "../e2eeFormat";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
-import { E2eeComposerEmojiPicker } from "./E2eeEmojiPicker";
+import {
+  E2eeComposerEditor,
+  type E2eeComposerEditorHandle,
+} from "./E2eeComposerEditor";
 import { collectMentionIds } from "./e2eeMentions";
 import {
   addComposerFiles,
   type ComposerError,
-  type ComposerText,
   E2EE_MAX_TEXT_LENGTH,
   handleMentionKey,
-  isSendKey,
   isComposerEmpty,
-  isEditLastMessageKey,
   type PasteNotice,
   useMentionPicker,
   useLoadedComposerText,
@@ -248,10 +241,10 @@ function MentionList({
           id={`${id}-${index}`}
           role="option"
           aria-selected={index === activeIndex}
-          // Keep focus in the textarea while choosing with the pointer.
+          // Keep focus in the editor while choosing with the pointer.
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onPick(member)}
-          // Arrow keys and Enter are handled by the textarea (active
+          // Arrow keys and Enter are handled by the editor (active
           // descendant); this covers assistive tech that sends keys here.
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -396,7 +389,7 @@ interface E2eeComposerProps {
   /** Server switch: without it there is no attach control at all. */
   readonly attachmentsEnabled: boolean;
   readonly onRequestEditLastMessage?: (() => boolean) | undefined;
-  /** Id for the textarea, so a skip link can move focus to it. */
+  /** Id for the editor, so a skip link can move focus to it. */
   readonly inputId?: string | undefined;
   /** A refused message whose text goes back into the box once. */
   readonly restoredDraft?:
@@ -431,16 +424,14 @@ export function E2eeComposer({
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
-  const isMobile = useIsMobileDevice();
   const dismissMobileComposer = useDismissMobileComposer();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const blurInput = useCallback(() => textareaRef.current?.blur(), []);
+  const editorRef = useRef<E2eeComposerEditorHandle>(null);
+  const blurInput = useCallback(() => editorRef.current?.blur(), []);
   useBlurOnNativeKeyboardDismiss(blurInput, isCapacitor);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
-  const emojiSelection = useRef({ start: 0, end: 0 });
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
@@ -464,18 +455,9 @@ export function E2eeComposer({
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- The reply or edit is chosen in the message list; focus moves here once the composer has rendered it.
     if (focusKey !== null) {
-      textareaRef.current?.focus();
+      editorRef.current?.focus();
     }
   }, [focusKey]);
-
-  useLayoutEffect(() => {
-    const element = textareaRef.current;
-    if (!element) {
-      return;
-    }
-    element.style.height = "auto";
-    element.style.height = `${Math.min(element.scrollHeight, COMPOSER_MAX_HEIGHT_PX)}px`;
-  }, [text]);
 
   const isEmpty = isComposerEmpty(text, files);
   const containerClassName = getComposerContainerClassName(isCapacitor);
@@ -484,36 +466,9 @@ export function E2eeComposer({
   // Editing changes only the text, and the server can switch attachments off.
   const canAttach = editing === null && attachmentsEnabled;
 
-  /** Puts `next.text` in the box with the caret at `next.caret`. */
-  const placeText = (next: ComposerText) => {
-    setText(next.text);
-    globalThis.requestAnimationFrame(() => {
-      textareaRef.current?.setSelectionRange(next.caret, next.caret);
-    });
-  };
-
   const pickMention = (member: E2eeMember) => {
-    const next = mentions.apply(text, member);
-    if (next) {
-      placeText(next);
-    }
-  };
-
-  const pickEmoji = (emoji: string) => {
-    const { start, end } = emojiSelection.current;
-    const next = {
-      text: text.slice(0, start) + emoji + text.slice(end),
-      caret: start + emoji.length,
-    };
-    setText(next.text);
-    mentions.update(next.text, next.caret);
-    // Let the dialog release its focus trap and restore its trigger first.
-    globalThis.requestAnimationFrame(() => {
-      globalThis.requestAnimationFrame(() => {
-        textareaRef.current?.focus({ preventScroll: true });
-        textareaRef.current?.setSelectionRange(next.caret, next.caret);
-      });
-    });
+    if (member.handle) editorRef.current?.replaceMention(member.handle);
+    mentions.close();
   };
 
   const submitEdit = async (message: E2eeMessage, trimmed: string) => {
@@ -533,7 +488,7 @@ export function E2eeComposer({
   };
 
   const submitNew = async (trimmed: string) => {
-    const input = textareaRef.current;
+    const input = editorRef.current;
     const pendingFiles = [...files];
     const reply = replyTo?.id ?? null;
     const mentioned = collectMentionIds(trimmed, conversation.members).filter(
@@ -552,7 +507,7 @@ export function E2eeComposer({
       });
       // Let the cleared text render, and leave a new draft or another chat alone.
       globalThis.requestAnimationFrame(() => {
-        if (input && input === textareaRef.current && input.value === "") {
+        if (input && input === editorRef.current && input.getText() === "") {
           dismissMobileComposer(input);
         }
       });
@@ -587,37 +542,14 @@ export function E2eeComposer({
   const canEditLastMessage =
     !text.trim() && files.length === 0 && !editing && !replyTo && !isUploading;
 
-  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (handleMentionKey(event, mentions, pickMention)) {
-      return;
-    }
-    if (event.nativeEvent.isComposing) {
-      return;
-    }
-    if (
-      canEditLastMessage &&
-      isEditLastMessageKey(event) &&
-      onRequestEditLastMessage?.()
-    ) {
-      event.preventDefault();
-      return;
-    }
-    if (!isMobile && !isCapacitor && isSendKey(event)) {
-      event.preventDefault();
-      void submit();
-    } else if (event.key === "Escape") {
-      if (editing) {
-        onCancelEdit();
-      } else if (replyTo) {
-        onCancelReply();
-      }
-    }
-  };
-
-  const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setText(event.target.value);
-    setError(null);
-    mentions.update(event.target.value, event.target.selectionStart);
+  const onKeyDown = (event: KeyboardEvent): boolean => {
+    if (handleMentionKey(event, mentions, pickMention)) return true;
+    if (event.key !== "Escape") return false;
+    if (editing) onCancelEdit();
+    else if (replyTo) onCancelReply();
+    else return false;
+    event.preventDefault();
+    return true;
   };
 
   const addFiles = (incoming: readonly File[]) => {
@@ -632,15 +564,7 @@ export function E2eeComposer({
     event.target.value = "";
   };
 
-  const paste = usePastedImages({
-    canAttach,
-    files,
-    addFiles,
-    onText: (next) => {
-      placeText(next);
-      mentions.update(next.text, next.caret);
-    },
-  });
+  const paste = usePastedImages({ files, addFiles });
 
   if (disabledReasonKey) {
     return (
@@ -706,54 +630,50 @@ export function E2eeComposer({
               className="tw-hidden"
               onChange={onFilesChosen}
             />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              aria-label={t(locale, "e2ee.composer.attach")}
-              className={ICON_BUTTON}
-            >
-              <PaperClipIcon aria-hidden="true" className="tw-size-5" />
-            </button>
+            <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label={t(locale, "e2ee.composer.attach")}
+                className={ICON_BUTTON}
+              >
+                <PaperClipIcon aria-hidden="true" className="tw-size-5" />
+              </button>
+            </DropActionTooltip>
           </>
         ) : null}
         <div className="tw-relative tw-min-w-0 tw-flex-1">
           <label className="tw-sr-only" htmlFor={textareaId}>
             {t(locale, "e2ee.composer.label")}
           </label>
-          <textarea
-            id={textareaId}
-            ref={textareaRef}
-            rows={1}
+          <E2eeComposerEditor
+            ref={editorRef}
             value={text}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-            onPaste={paste.onPaste}
-            onSelect={(event) =>
-              mentions.update(
-                event.currentTarget.value,
-                event.currentTarget.selectionStart
-              )
-            }
-            onBlur={mentions.close}
-            placeholder={t(locale, "e2ee.composer.placeholder")}
-            aria-invalid={tooLong ? true : undefined}
-            aria-autocomplete="list"
-            aria-controls={mentions.open ? listboxId : undefined}
-            aria-activedescendant={
-              mentions.open ? `${listboxId}-${mentions.activeIndex}` : undefined
-            }
-            className={COMPOSER_INPUT_CLASS_NAME}
-          />
-          <E2eeComposerEmojiPicker
-            onOpen={() => {
-              const input = textareaRef.current;
-              emojiSelection.current = {
-                start: input?.selectionStart ?? text.length,
-                end: input?.selectionEnd ?? text.length,
-              };
-              mentions.close();
+            onChange={(value) => {
+              setText(value);
+              setError(null);
             }}
-            onSelect={pickEmoji}
+            onSelection={mentions.update}
+            onKeyDown={onKeyDown}
+            onSubmit={() => void submit()}
+            canAttach={canAttach}
+            onPasteImages={paste.attachImages}
+            canEditLastMessage={canEditLastMessage}
+            onEditLastMessage={onRequestEditLastMessage}
+            canUseShortcuts={() => !mentions.open}
+            placeholder={t(locale, "e2ee.composer.placeholder")}
+            inputProps={{
+              id: textareaId,
+              ariaLabel: t(locale, "e2ee.composer.label"),
+              "aria-placeholder": t(locale, "e2ee.composer.placeholder"),
+              "aria-invalid": tooLong || undefined,
+              ariaAutoComplete: "list",
+              ariaControls: mentions.open ? listboxId : undefined,
+              ariaActiveDescendant: mentions.open
+                ? `${listboxId}-${mentions.activeIndex}`
+                : undefined,
+              onBlur: mentions.close,
+            }}
           />
         </div>
         <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
