@@ -112,12 +112,16 @@ jest.mock(
     __esModule: true,
     default: ({
       onSelectionChange,
+      topups,
+      redeemed,
+      logs,
       setRedeemedPage,
       setTopUpPage,
       setLogsPage,
     }: any) => (
       <div data-testid="subscriptions-history">
-        History Component
+        History Component - TopUps: {topups.data?.length ?? 0}, Redeemed:{" "}
+        {redeemed.data?.length ?? 0}, Logs: {logs.data?.length ?? 0}
         <button onClick={() => onSelectionChange(0)}>Select Redeemed</button>
         <button onClick={() => onSelectionChange(1)}>Select Logs</button>
         <button onClick={() => onSelectionChange(2)}>Select TopUp</button>
@@ -408,6 +412,7 @@ describe("UserPageSubscriptions", () => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint:
             "subscriptions/consolidation/upcoming-memes/test-key?card_count=5",
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint:
@@ -434,6 +439,7 @@ describe("UserPageSubscriptions", () => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint:
             "subscriptions/consolidation/upcoming-memes/test-key?card_count=6",
+          signal: expect.any(AbortSignal),
         });
       });
     });

@@ -608,7 +608,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     // The address comes from the subscriptions API after the shell renders.
     await expect(address).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    const fullAddress = (await address.textContent())!.trim();
+    const fullAddress = (await address.getAttribute("aria-label"))!;
     if (isMobile) {
       await address.tap();
     } else {
@@ -655,7 +655,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(opener).toBeVisible();
       await expect(sheet).toHaveCount(0);
       await opener.click();
-      await expect(sheet).toBeVisible();
+      await expect(
+        sheet.getByRole("heading", { name: title, exact: true })
+      ).toBeVisible();
       await sheet.getByRole("button", { name: "Close", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await expect(opener).toBeFocused();
@@ -670,7 +672,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         page,
         `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-${section}`
       );
-      await expect(sheet).toBeVisible();
+      await expect(
+        sheet.getByRole("heading", { name: title, exact: true })
+      ).toBeVisible();
       await expect(
         sheet.getByRole("heading", { name: title, exact: true })
       ).toBeFocused();
@@ -718,26 +722,26 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         .getByRole("link", { name: "Learn more", exact: true })
     ).toHaveCount(1);
     await expect(learnMore).toHaveAttribute("href", "/about/subscriptions");
-    const titleBox = await overview
-      .getByRole("heading", { name: "Subscription minting", exact: true })
-      .boundingBox();
-    const linkBox = await learnMore.boundingBox();
-    expect(titleBox).not.toBeNull();
-    expect(linkBox).not.toBeNull();
-    const overviewHeaderBox = await overview.boundingBox();
-    expect(overviewHeaderBox).not.toBeNull();
+    // Read related geometry together so profile hydration/scroll restoration
+    // cannot move the viewport between the measurements.
+    const header = await learnMore.evaluate((link) => {
+      const section = link.closest("section")!;
+      const title = section.querySelector("h2")!;
+      return {
+        title: title.getBoundingClientRect().toJSON(),
+        link: link.getBoundingClientRect().toJSON(),
+        section: section.getBoundingClientRect().toJSON(),
+      };
+    });
     expect(
-      Math.abs(
-        linkBox!.x +
-          linkBox!.width -
-          overviewHeaderBox!.x -
-          overviewHeaderBox!.width
-      )
+      Math.abs(header.link.right - header.section.right)
     ).toBeLessThanOrEqual(1);
-    expect(linkBox!.x).toBeGreaterThan(titleBox!.x + titleBox!.width);
+    expect(header.link.left).toBeGreaterThan(header.title.right);
     expect(
       Math.abs(
-        linkBox!.y + linkBox!.height / 2 - (titleBox!.y + titleBox!.height / 2)
+        header.link.y +
+          header.link.height / 2 -
+          (header.title.y + header.title.height / 2)
       )
     ).toBeLessThanOrEqual(1);
     const history = page
@@ -925,9 +929,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(narrowTitle).not.toBeNull();
     expect(narrowQuantityBox).not.toBeNull();
     expect(narrowStatusBox).not.toBeNull();
-    expect(narrowQuantityBox!.y).toBeGreaterThanOrEqual(
-      narrowTitle!.y + narrowTitle!.height
-    );
+    // Visitor values may share the title line when space permits; neither
+    // layout may overlap or split quantity from its status.
+    if (narrowQuantityBox!.y < narrowTitle!.y + narrowTitle!.height) {
+      expect(narrowQuantityBox!.x).toBeGreaterThanOrEqual(
+        narrowTitle!.x + narrowTitle!.width
+      );
+    } else {
+      expect(narrowQuantityBox!.y).toBeGreaterThanOrEqual(
+        narrowTitle!.y + narrowTitle!.height
+      );
+    }
     expect(
       Math.abs(narrowQuantityBox!.y - narrowStatusBox!.y)
     ).toBeLessThanOrEqual(1);
@@ -1030,10 +1042,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       );
       for (const [index, label] of inlineLabels.entries()) {
         expect(label).not.toBeNull();
-        expect(Math.abs(label!.y - inlineLabels[0]!.y)).toBeLessThanOrEqual(1);
+        expect(Math.abs(label!.x - inlineLabels[0]!.x)).toBeLessThanOrEqual(1);
         if (index > 0) {
           const previous = inlineLabels[index - 1]!;
-          expect(label!.x).toBeGreaterThan(previous.x + previous.width);
+          expect(label!.y).toBeGreaterThan(previous.y + previous.height);
         }
       }
     }
@@ -1131,6 +1143,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .all()) {
       await expect(status).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     }
+    // The shorter Redeemed label fits at 390px; exercise scrolling at 320px.
+    await page.setViewportSize({ width: 320, height: viewport.height });
     await historyOpener.click();
     const pillLayout = await tabs.evaluate((element) => ({
       width: element.clientWidth,

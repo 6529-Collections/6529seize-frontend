@@ -24,9 +24,21 @@ function Panel() {
   );
 }
 
+afterEach(() => jest.restoreAllMocks());
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseMediaQuery.mockReturnValue(true);
+  jest.spyOn(window, "matchMedia").mockImplementation((query) => ({
+    matches: query === "(max-width: 1023px)",
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  }));
   window.history.replaceState({}, "", "/");
 });
 

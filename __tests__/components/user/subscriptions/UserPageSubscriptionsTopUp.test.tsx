@@ -144,6 +144,11 @@ describe("UserPageSubscriptionsTopUp", () => {
   it("preserves the draft amount when closing and reopening the dialog", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<UserPageSubscriptionsTopUp expanded />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Top up", exact: true })
+      ).toHaveFocus()
+    );
     await user.type(
       screen.getByRole("spinbutton", { name: "Other card count" }),
       "2"
