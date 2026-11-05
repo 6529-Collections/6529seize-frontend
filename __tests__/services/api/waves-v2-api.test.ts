@@ -1,8 +1,12 @@
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import {
+  mapApiWaveOverviewToSidebarWave,
+  mapApiWaveToSidebarWave,
   createWaveMetadata,
   deleteWaveMetadata,
   fetchWaveMetadata,
@@ -34,6 +38,42 @@ describe("waves-v2-api", () => {
     jest.resetAllMocks();
   });
 
+  it.each([undefined, false, true])(
+    "maps overview collapsed replies setting %s",
+    (collapsed) => {
+      const wave = Object.assign(new ApiWaveOverview(), {
+        id: "announcement",
+        description_drop: { media: [] },
+        ...(collapsed === undefined ? {} : { replies_collapsed: collapsed }),
+      });
+      expect(mapApiWaveOverviewToSidebarWave(wave).repliesCollapsed).toBe(
+        collapsed ?? false
+      );
+    }
+  );
+
+  it.each([undefined, false, true])(
+    "maps detail collapsed replies setting %s",
+    (collapsed) => {
+      const wave = Object.assign(new ApiWave(), {
+        id: "announcement",
+        wave: { type: "CHAT" },
+        chat: {
+          scope: { group: null },
+          ...(collapsed === undefined ? {} : { replies: { collapsed } }),
+        },
+        visibility: { scope: { group: null } },
+        metrics: {},
+        description_drop: { parts: [] },
+        contributors_overview: [],
+        subscribed_actions: [],
+      });
+      expect(mapApiWaveToSidebarWave(wave).repliesCollapsed).toBe(
+        collapsed ?? false
+      );
+    }
+  );
+
   it("fetches subwaves with created-time sort and maps parent metadata", async () => {
     commonApiFetchMock.mockResolvedValue({
       page: 2,
@@ -56,6 +96,7 @@ describe("waves-v2-api", () => {
           total_drops_count: 3,
           is_private: false,
           last_drop_time: 456,
+          replies_collapsed: true,
           context_profile_context: {
             first_unread_drop_serial_no: 7,
             unread_drops: 2,
@@ -94,6 +135,7 @@ describe("waves-v2-api", () => {
         {
           id: "child-wave",
           createdAt: 123,
+          repliesCollapsed: true,
           parentWaveId: "parent-wave",
           hasSubwaves: false,
           unreadDropsCount: 2,

@@ -33,7 +33,7 @@ jest.mock("@tanstack/react-query", () => ({
   useQuery: () => ({ data: [] }),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
-  useIpfsService: () => ({ addFile: jest.fn() }),
+  addFileToIpfs: jest.fn(),
 }));
 
 const authCtx = {

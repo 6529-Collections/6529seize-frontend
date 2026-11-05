@@ -613,7 +613,7 @@ it("Arrow Up edits the latest eligible own message, skipping pending, deleted an
   fireEvent.keyDown(input, { key: "ArrowUp" });
   expect(input).toHaveValue("fixed typo");
   fireEvent.change(input, { target: { value: "fixed again" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
   await waitFor(() =>
     expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")
   );

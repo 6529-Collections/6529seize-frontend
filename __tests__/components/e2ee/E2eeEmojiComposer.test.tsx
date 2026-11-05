@@ -151,7 +151,7 @@ it.each(["mobile browser", "native app"])(
     expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
     expect(engine.send).not.toHaveBeenCalled();
     expect(input).toHaveValue("Still writing");
-    fireEvent.click(screen.getByRole("button", { name: "Send", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
     await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
   }
 );
@@ -159,7 +159,7 @@ it.each(["mobile browser", "native app"])(
 it("does not steal focus back after sending", async () => {
   const { engine, input } = setup();
   fireEvent.change(input, { target: { value: "Sent without refocusing" } });
-  const send = screen.getByRole("button", { name: "Send", exact: true });
+  const send = screen.getByRole("button", { name: /^Send$/ });
   send.focus();
   fireEvent.click(send);
   await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
