@@ -8,6 +8,7 @@ import {
 import {
   type ChangeEvent,
   type KeyboardEvent,
+  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -15,6 +16,14 @@ import {
   useState,
 } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "@/hooks/useCapacitor";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
+import {
+  COMPOSER_INPUT_CLASS_NAME,
+  COMPOSER_MAX_HEIGHT_PX,
+  getNativeComposerStyle,
+} from "@/components/waves/composerPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -39,13 +48,13 @@ import {
   E2EE_MAX_TEXT_LENGTH,
   handleMentionKey,
   isSendKey,
+  isEditLastMessageKey,
   type PasteNotice,
   useMentionPicker,
   usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 
-const TEXTAREA_MAX_HEIGHT_PX = 200;
 const ICON_BUTTON =
   "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
@@ -383,9 +392,10 @@ interface E2eeComposerProps {
   readonly disabledReasonKey: MessageKey | null;
   /** Server switch: without it there is no attach control at all. */
   readonly attachmentsEnabled: boolean;
-  /** A refused message whose text goes back into the box once. */
+  readonly onRequestEditLastMessage?: (() => boolean) | undefined;
   /** Id for the textarea, so a skip link can move focus to it. */
   readonly inputId?: string | undefined;
+  /** A refused message whose text goes back into the box once. */
   readonly restoredDraft?:
     | { readonly id: string; readonly text: string }
     | null
@@ -436,12 +446,17 @@ export function E2eeComposer({
   disabledReasonKey,
   attachmentsEnabled,
   restoredDraft = null,
+  onRequestEditLastMessage,
   inputId,
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
+  const isMobile = useIsMobileDevice();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const blurInput = useCallback(() => textareaRef.current?.blur(), []);
+  useBlurOnNativeKeyboardDismiss(blurInput, isCapacitor);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
   const emojiSelection = useRef({ start: 0, end: 0 });
@@ -478,7 +493,7 @@ export function E2eeComposer({
       return;
     }
     element.style.height = "auto";
-    element.style.height = `${Math.min(element.scrollHeight, TEXTAREA_MAX_HEIGHT_PX)}px`;
+    element.style.height = `${Math.min(element.scrollHeight, COMPOSER_MAX_HEIGHT_PX)}px`;
   }, [text]);
 
   const isEmpty = text.trim().length === 0 && files.length === 0;
@@ -580,11 +595,25 @@ export function E2eeComposer({
     }
   };
 
+  const canEditLastMessage =
+    !text.trim() && files.length === 0 && !editing && !replyTo && !isUploading;
+
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (handleMentionKey(event, mentions, pickMention)) {
       return;
     }
-    if (isSendKey(event)) {
+    if (event.nativeEvent.isComposing) {
+      return;
+    }
+    if (
+      canEditLastMessage &&
+      isEditLastMessageKey(event) &&
+      onRequestEditLastMessage?.()
+    ) {
+      event.preventDefault();
+      return;
+    }
+    if (!isMobile && !isCapacitor && isSendKey(event)) {
       event.preventDefault();
       void submit();
     } else if (event.key === "Escape") {
@@ -626,7 +655,10 @@ export function E2eeComposer({
 
   if (disabledReasonKey) {
     return (
-      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]">
+      <div
+        className={`tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${isCapacitor ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]"}`}
+        style={getNativeComposerStyle(isCapacitor)}
+      >
         <p className="tw-m-0 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
           {t(locale, disabledReasonKey)}
         </p>
@@ -644,7 +676,10 @@ export function E2eeComposer({
     : "";
 
   return (
-    <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]">
+    <div
+      className={`tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${isCapacitor ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]"}`}
+      style={getNativeComposerStyle(isCapacitor)}
+    >
       <ComposerTopBars
         locale={locale}
         showRenewal={isEmpty && !editing && !isUploading}
@@ -718,7 +753,7 @@ export function E2eeComposer({
             aria-activedescendant={
               mentions.open ? `${listboxId}-${mentions.activeIndex}` : undefined
             }
-            className="tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-resize-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-leading-6 tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+            className={COMPOSER_INPUT_CLASS_NAME}
           />
           <E2eeComposerEmojiPicker
             onOpen={() => {

@@ -585,3 +585,36 @@ describe("E2eeConversationView", () => {
     expect(engine.sync).toHaveBeenCalled();
   });
 });
+
+it("Arrow Up edits the latest eligible own message, skipping pending, deleted and unreadable messages", async () => {
+  const engine = renderView(conversation(), [
+    ...timeline,
+    message({
+      id: "deleted-own",
+      seq: 7,
+      senderProfileId: SELF_ID,
+      deleted: true,
+    }),
+    message({
+      id: "unreadable-own",
+      seq: 8,
+      senderProfileId: SELF_ID,
+      undecryptable: true,
+    }),
+    message({ id: "other", seq: 9, senderProfileId: BOB_ID }),
+  ]);
+  const input = screen.getByLabelText("Encrypted message");
+  fireEvent.keyDown(input, { key: "ArrowUp", shiftKey: true });
+  expect(input).toHaveValue("");
+  fireEvent.change(input, { target: { value: "draft" } });
+  fireEvent.keyDown(input, { key: "ArrowUp" });
+  expect(input).toHaveValue("draft");
+  fireEvent.change(input, { target: { value: "" } });
+  fireEvent.keyDown(input, { key: "ArrowUp" });
+  expect(input).toHaveValue("fixed typo");
+  fireEvent.change(input, { target: { value: "fixed again" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save", exact: true }));
+  await waitFor(() =>
+    expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")
+  );
+});

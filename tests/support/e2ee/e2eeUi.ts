@@ -159,11 +159,11 @@ export function notice(page: Page, text: string | RegExp): Locator {
   return timeline(page).getByText(text);
 }
 
-/** Types into the composer, sends with Enter, waits until sequenced. */
+/** Types into the composer, selects Send, waits until sequenced. */
 export async function sendMessage(page: Page, text: string) {
   const input = composer(page);
   await input.fill(text);
-  await input.press("Enter");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
   const row = messageRow(page, text);
   await expect(row).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
   await expect(row.getByText("Sending…")).toHaveCount(0, {

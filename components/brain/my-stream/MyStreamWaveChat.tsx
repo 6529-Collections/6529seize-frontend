@@ -1,5 +1,7 @@
 "use client";
 
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
@@ -136,8 +138,6 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly initialUrl?: string | null | undefined;
 }
 
-const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
-  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
@@ -388,14 +388,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     ? "tw-mt-auto tw-bg-iron-950"
     : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
   const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
-    () =>
-      isApp
-        ? {
-            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
-            transition:
-              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
-          }
-        : undefined,
+    () => getNativeComposerStyle(isApp),
     [isApp]
   );
 

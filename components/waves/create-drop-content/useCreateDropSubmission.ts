@@ -197,23 +197,20 @@ const hideAndroidKeyboard = async () => {
 
 const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
-  shouldKeepChatFocused,
+  isChatSubmit,
   isApp,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
   readonly getMarkdown: string | null;
-  readonly shouldKeepChatFocused: boolean;
+  readonly isChatSubmit: boolean;
   readonly isApp: boolean;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   if (getMarkdown?.length) {
     createDropInputRef.current?.clearEditorState();
   }
 
-  if (shouldKeepChatFocused) {
-    shouldRefocusAfterChatSubmitRef.current = true;
+  if (isChatSubmit) {
     return;
   }
 
@@ -303,7 +300,6 @@ export const useCreateDropSubmission = ({
   setIsStormMode,
   setMetadataOpenState,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
@@ -360,7 +356,6 @@ export const useCreateDropSubmission = ({
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   const {
     locale,
@@ -648,8 +643,7 @@ export const useCreateDropSubmission = ({
         return;
       }
 
-      const shouldKeepChatFocused =
-        updatedDropRequest.drop_type === ApiDropType.Chat;
+      const isChatSubmit = updatedDropRequest.drop_type === ApiDropType.Chat;
 
       addOptimisticDropWithAttachments({
         optimisticDrop,
@@ -659,10 +653,9 @@ export const useCreateDropSubmission = ({
       });
       updateFocusAfterAcceptedSubmit({
         getMarkdown,
-        shouldKeepChatFocused,
+        isChatSubmit,
         isApp,
         createDropInputRef,
-        shouldRefocusAfterChatSubmitRef,
       });
       setFiles([]);
       if (isIdentityPickerAllowed) {

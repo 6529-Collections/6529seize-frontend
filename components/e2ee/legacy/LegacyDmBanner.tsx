@@ -129,9 +129,9 @@ function LegacyDmBanner({
           isProxy ? null : (
             <>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size={null}
-                className={`${ACTION_CLASS} !tw-text-amber-100`}
+                className={ACTION_CLASS}
                 onClick={() => setDialog("export")}
               >
                 {t(locale, "e2ee.legacy.action.export")}

@@ -358,7 +358,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       .click();
     await expect(composer(alice.page)).toHaveValue(typo);
     await composer(alice.page).fill(fixed);
-    await composer(alice.page).press("Enter");
+    await alice.page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(messageRow(alice.page, fixed)).toBeVisible();
     const bobFixed = messageRow(bob.page, fixed);
     await expect(bobFixed).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });

@@ -89,7 +89,7 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expect(composer).toBeFocused();
+    await expect(composer).not.toBeFocused();
     await expect(composer).toHaveText("");
 
     // Escape cancels edit mode without any mutation reaching the API.

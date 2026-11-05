@@ -9,6 +9,21 @@ import {
   SELF_ID,
 } from "./fakeE2eeEngine";
 
+let mockIsMobile = false;
+let mockIsApp = false;
+jest.mock("@/hooks/isMobileDevice", () => ({
+  __esModule: true,
+  default: () => mockIsMobile,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: mockIsApp }),
+}));
+beforeEach(() => {
+  mockIsMobile = false;
+  mockIsApp = false;
+});
+
 jest.mock("@/components/e2ee/conversation/E2eeEmojiPicker", () => ({
   E2eeComposerEmojiPicker: ({
     onSelect,
@@ -124,4 +139,29 @@ it("inserts a custom shortcode into an edit and preserves the existing edit flow
       "Hello:gm: Bob"
     )
   );
+});
+
+it.each(["mobile browser", "native app"])(
+  "does not submit Return on %s",
+  async (platform) => {
+    mockIsMobile = platform === "mobile browser";
+    mockIsApp = platform === "native app";
+    const { engine, input } = setup();
+    fireEvent.change(input, { target: { value: "Still writing" } });
+    expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
+    expect(engine.send).not.toHaveBeenCalled();
+    expect(input).toHaveValue("Still writing");
+    fireEvent.click(screen.getByRole("button", { name: "Send", exact: true }));
+    await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
+  }
+);
+
+it("does not steal focus back after sending", async () => {
+  const { engine, input } = setup();
+  fireEvent.change(input, { target: { value: "Sent without refocusing" } });
+  const send = screen.getByRole("button", { name: "Send", exact: true });
+  send.focus();
+  fireEvent.click(send);
+  await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
+  expect(input).not.toHaveFocus();
 });
