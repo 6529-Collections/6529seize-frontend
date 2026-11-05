@@ -4689,6 +4689,8 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_IDENTITY_STATEMENT_MESSAGES,
   ...USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  "waves.composer.mentions.level": "Level {level}",
+  "waves.composer.mentions.profileAlt": "Profile for {handle}",
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,

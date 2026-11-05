@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useIpfsService } from "@/components/ipfs/IPFSContext";
+import { addFileToIpfs } from "@/components/ipfs/IPFSContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import {
   QueryKey,
@@ -40,8 +40,6 @@ export default function UserPageHeaderEditPfp({
   readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
-  const ipfsService = useIpfsService();
-
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
@@ -103,7 +101,7 @@ export default function UserPageHeaderEditPfp({
         if (!profile.classification) {
           return;
         }
-        const cid = await ipfsService.addFile(pfp as File);
+        const cid = await addFileToIpfs(pfp as File);
         const ipfs = `ipfs://${cid}`;
         const ipfsBody: ApiCreateOrUpdateProfileRequest = {
           handle: profile.handle,
