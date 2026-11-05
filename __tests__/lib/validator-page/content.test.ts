@@ -7,6 +7,11 @@ import {
   VALIDATOR_FEEDBACK_WAVE_HREF,
 } from "@/lib/validator-page/content/pageText";
 
+// The release the pages describe: its version and short commit, as
+// `validator --version` prints them and the signed release list names them.
+const RELEASE = "0.1.0-rc.7";
+const COMMIT = "214e228";
+
 const GUIDE = VALIDATOR_GUIDE_FOLDS.map((fold) => fold.markdown).join("\n\n");
 const fold = (id: string) =>
   VALIDATOR_GUIDE_FOLDS.find((entry) => entry.id === id)?.markdown ?? "";
@@ -58,25 +63,77 @@ describe("validator page text", () => {
       '`"/Applications/6529 Validator.app/Contents/Resources/validator" update check`'
     );
     expect(fold("where-it-lives")).toContain(
-      "`validator 0.1.0-rc.6 (6a26503, TDH v1.4)`"
+      `\`validator ${RELEASE} (${COMMIT}, TDH v1.4)\``
     );
   });
 
-  it("shows rc.6's 18 known issues in order, the blank window among them", () => {
+  it("shows rc.7's 20 known issues in order, with no blank window", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
-    // B99: the app's window can go blank until rc.7.
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toMatch(
-      /^8\. The app's window can go blank, white or black\./m
+    expect(numbers).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
+      `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
+    // B99 is fixed in rc.7: a page that stops comes back by itself.
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/go blank/);
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain("commit `6a26503`");
+  });
+
+  it("says what rc.7 does where Tor is blocked, and nothing it lacks", () => {
+    const tor =
+      VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
+        line.startsWith("3. ")
+      ) ?? "";
+    expect(tor).toMatch(
+      /^3\. On a network that blocks Tor, the page opens, says Tor is blocked, and keeps trying\. Bridges come in rc\.8\. /
+    );
+    // Bridge lines by hand come before Tor off, which says what it gives away.
+    const bridges = tor.indexOf(
+      "add bridge lines by hand in Settings › Privacy"
+    );
+    const torOff = tor.indexOf("As a last resort, turn Tor off there.");
+    expect(bridges).toBeGreaterThan(-1);
+    expect(torOff).toBeGreaterThan(bridges);
+    expect(tor).toMatch(
+      /turn Tor off there\. Peers and Ethereum servers then see this network's IP address\.$/
+    );
+    // rc.7 carries no bridge programs and has no Connect without Tor.
+    for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
+      expect(page).not.toMatch(/connect without tor/i);
+      expect(page).not.toMatch(/snowflake|obfs4|webtunnel|lyrebird/i);
+    }
+  });
+
+  it("names the validator service as rc.7's app and Windows do", () => {
+    const stop = fold("stop-pause-or-uninstall");
+    expect(stop).toContain("**Stop the validator service**");
+    expect(stop).toContain("**Start the validator service**");
+    expect(stop).toContain(
+      "On Windows, Services and Task Manager list the part that signs as 6529 Validator service."
+    );
+    for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
+      expect(page).not.toMatch(/\*\*(?:Stop|Start) the validator\*\*/);
+    }
+    expect(fold("updates")).toContain(
+      "On Windows, from rc.7 the installer replaces any earlier test release"
+    );
+  });
+
+  it("gives one last day for a fresh install, from rc.7's light-client checkpoint", () => {
+    expect(fold("known-issues")).toContain(
+      "a new install must start before about 2026-11-20 14:00 UTC"
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
+      "19. A new install must start before about 2026-11-20 14:00 UTC."
+    );
+    expect(`${GUIDE}\n${VALIDATOR_KNOWN_ISSUES_MARKDOWN}`).not.toContain(
+      "2026-11-19"
+    );
   });
 
   it("keeps the computer on for the hardware page's time, with no random wait (D161)", () => {
@@ -91,7 +148,10 @@ describe("validator page text", () => {
   it("carries the mainnet join test's timing and the test phase's machines", () => {
     const ready = fold("how-long-it-takes-to-be-ready");
     expect(ready).toContain("was ready in about 50 minutes");
-    expect(ready).toContain("In 6529's test on 4 November");
+    expect(ready).toContain("In 6529's test of rc.6 on 4 November");
+    expect(ready).toContain(
+      "the checkpoint built into this release, from 4 November."
+    );
     expect(ready).toContain(
       "In the test phase, 6529 runs validators and sentries on AWS in the United States, Germany and Singapore. The goal is a network that many holders run, at home and in offices."
     );
