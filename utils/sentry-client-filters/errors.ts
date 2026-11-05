@@ -1,4 +1,4 @@
-import { consumeConfirmedMetaMaskBridgeError } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import { isConfirmedMetaMaskBridgeError } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
 import {
   browserGlobalHandlerOnErrorMechanism,
   browserUnhandledRejectionMechanism,
@@ -631,7 +631,7 @@ export function shouldFilterSentryRouteParameterizationError(
   hint?: SentryEventHint
 ): boolean {
   // Legacy name: browser/route/Sentry frames alone cannot attribute a throw.
-  // Only consume proof captured around the exact sampled bridge callback.
+  // Only recognize proof captured around the exact sampled bridge callback.
   const value = event.exception?.values?.[0];
   if (
     event.exception?.values?.length !== 1 ||
@@ -649,7 +649,7 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
-  return consumeConfirmedMetaMaskBridgeError(hint?.originalException);
+  return isConfirmedMetaMaskBridgeError(hint?.originalException);
 }
 
 export function shouldFilterAppleWebKitSortedTrackListTypeError(

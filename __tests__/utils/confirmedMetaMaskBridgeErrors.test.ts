@@ -1,6 +1,7 @@
 import type { ErrorEvent } from "@sentry/nextjs";
 import { installCyclicJsonTimerDiagnostics } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
 import { processSentryClientEvent } from "@/utils/monitoring/sentryClientEventPipeline";
+import { shouldFilterSentryRouteParameterizationError } from "@/utils/sentry-client-filters";
 
 const MESSAGE = "JSON.stringify cannot serialize cyclic structures.";
 const USER_AGENT =
@@ -87,9 +88,15 @@ describe("confirmed MetaMask bridge filtering", () => {
 
   it("filters only the original sampled error and consumes its proof once", () => {
     const error = captureError();
-    expect(
-      processSentryClientEvent(createEvent(), { originalException: error })
-    ).toBeNull();
+    const event = createEvent();
+    const hint = { originalException: error };
+    expect(shouldFilterSentryRouteParameterizationError(event, hint)).toBe(
+      true
+    );
+    expect(shouldFilterSentryRouteParameterizationError(event, hint)).toBe(
+      true
+    );
+    expect(processSentryClientEvent(event, hint)).toBeNull();
     expect(
       processSentryClientEvent(createEvent(), { originalException: error })
     ).not.toBeNull();

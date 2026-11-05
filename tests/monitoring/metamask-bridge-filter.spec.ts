@@ -3,30 +3,34 @@ import { buildSync } from "esbuild";
 
 const userAgent =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 MetaMaskMobile/8.12.0";
-const bundle = buildSync({
-  stdin: {
-    contents: `export { installCyclicJsonTimerDiagnostics } from './utils/monitoring/cyclicJsonTimerDiagnostics';
+let bundle: string;
+
+test.beforeAll(() => {
+  bundle = buildSync({
+    stdin: {
+      contents: `export { installCyclicJsonTimerDiagnostics } from './utils/monitoring/cyclicJsonTimerDiagnostics';
       export { processSentryClientEvent } from './utils/monitoring/sentryClientEventPipeline';`,
-    resolveDir: process.cwd(),
-  },
-  bundle: true,
-  write: false,
-  platform: "browser",
-  format: "iife",
-  globalName: "BridgeFilterFixture",
-  banner: { js: "var process = { env: {} };" },
-  define: {
-    "process.env.PUBLIC_RUNTIME": JSON.stringify(
-      JSON.stringify({
-        BASE_ENDPOINT: "https://6529.io",
-        API_ENDPOINT: "https://api.6529.io",
-        ALLOWLIST_API_ENDPOINT: "https://fixture.invalid",
-        IPFS_API_ENDPOINT: "https://fixture.invalid",
-        IPFS_GATEWAY_ENDPOINT: "https://fixture.invalid",
-      })
-    ),
-  },
-}).outputFiles[0]!.text;
+      resolveDir: process.cwd(),
+    },
+    bundle: true,
+    write: false,
+    platform: "browser",
+    format: "iife",
+    globalName: "BridgeFilterFixture",
+    banner: { js: "var process = { env: {} };" },
+    define: {
+      "process.env.PUBLIC_RUNTIME": JSON.stringify(
+        JSON.stringify({
+          BASE_ENDPOINT: "https://6529.io",
+          API_ENDPOINT: "https://api.6529.io",
+          ALLOWLIST_API_ENDPOINT: "https://fixture.invalid",
+          IPFS_API_ENDPOINT: "https://fixture.invalid",
+          IPFS_GATEWAY_ENDPOINT: "https://fixture.invalid",
+        })
+      ),
+    },
+  }).outputFiles[0]!.text;
+});
 
 // The anonymous timer body and metadata serialization reproduce MetaMask's
 // SPA_urlChangeListener; no wallet, real website, or Sentry ingestion is used.

@@ -127,6 +127,13 @@ function markConfirmedMetaMaskBridgeError(
   }
 }
 
+export function isConfirmedMetaMaskBridgeError(error: unknown): boolean {
+  return (
+    isExactCyclicJsonTypeError(error) &&
+    confirmedMetaMaskBridgeErrors.has(error)
+  );
+}
+
 export function consumeConfirmedMetaMaskBridgeError(error: unknown): boolean {
   return (
     isExactCyclicJsonTypeError(error) &&
