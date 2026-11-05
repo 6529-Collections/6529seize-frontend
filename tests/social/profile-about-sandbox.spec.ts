@@ -7,6 +7,7 @@ import {
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 
@@ -54,7 +55,11 @@ async function seedSession(page: Page, role: string | null = null) {
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
   // Match the existing profile fixture: enter from the hydrated shell to avoid
   // the unrelated cold-load profile navigation hydration defect.
+  const profileLoaded = page.waitForResponse((response) =>
+    new URL(response.url()).pathname.endsWith(`/identities/${WALLET}`)
+  );
   await page.goto("/about");
+  await profileLoaded;
   if ((page.viewportSize()?.width ?? 0) < 1024) {
     await page.getByRole("button", { name: "Open menu", exact: true }).click();
   }
@@ -71,6 +76,9 @@ async function openOwnProfile(page: Page, expectOwnerAction = true) {
     await accountMenu.press("Enter");
     await page.getByRole("link", { name: "Profile", exact: true }).click();
   }
+  await page.waitForURL(/\/playwright$/, {
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
   await expect(
     page.getByRole("navigation", { name: "Profile sections" })
   ).toBeVisible();
