@@ -10,35 +10,48 @@ import {
 } from "./fakeE2eeEngine";
 
 jest.mock("@/components/e2ee/conversation/E2eeEmojiPicker", () => ({
-  E2eeEmojiPicker: ({
-    open,
+  E2eeComposerEmojiPicker: ({
     onSelect,
-    onClose,
+    onOpen,
   }: {
-    open: boolean;
     onSelect: (text: string) => void;
-    onClose: () => void;
-  }) =>
-    open ? (
-      <div>
+    onOpen: () => void;
+  }) => {
+    const React = jest.requireActual<typeof import("react")>("react");
+    const [open, setOpen] = React.useState(false);
+    return (
+      <>
         <button
           onClick={() => {
-            onSelect("😀");
-            onClose();
+            onOpen();
+            setOpen(true);
           }}
         >
-          Choose smile
+          Add emoji
         </button>
-        <button
-          onClick={() => {
-            onSelect(":gm:");
-            onClose();
-          }}
-        >
-          Choose gm
-        </button>
-      </div>
-    ) : null,
+        {open && (
+          <>
+            <button
+              onClick={() => {
+                onSelect("😀");
+                setOpen(false);
+              }}
+            >
+              Choose smile
+            </button>
+            <button
+              onClick={() => {
+                onSelect(":gm:");
+                setOpen(false);
+              }}
+            >
+              Choose gm
+            </button>
+          </>
+        )}
+      </>
+    );
+  },
 }));
 
 function setup(editing = false) {

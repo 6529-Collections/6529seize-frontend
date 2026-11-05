@@ -1,12 +1,14 @@
 "use client";
 
-import type { FC } from "react";
+import type { ComponentProps, FC, ReactNode } from "react";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useCreateDropEmojiPickerLayer } from "./CreateDropEmojiPickerLayerContext";
 import LazyEmojiPicker, { type EmojiPickerSelection } from "./LazyEmojiPicker";
 
@@ -16,25 +18,36 @@ interface CreateDropEmojiPickerProps {
   verticalAlignment?: "top" | "center" | undefined;
 }
 
-interface CreateDropEmojiPickerContentProps {
-  disabled: boolean;
-  top: string;
-  verticalAlignment: "top" | "center";
+interface EmojiPickerControlProps extends CreateDropEmojiPickerProps {
+  readonly onEmojiSelect: (emoji: EmojiPickerSelection) => void;
+  readonly onOpen?: (() => void) | undefined;
+  readonly label?: string | undefined;
+  readonly pickerProps?:
+    | Omit<ComponentProps<typeof LazyEmojiPicker>, "onEmojiSelect">
+    | undefined;
+  readonly pickerNotice?: ReactNode;
 }
 
-const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
-  disabled,
-  top,
-  verticalAlignment,
+/** Shared composer control: anchored on desktop and a slide panel on mobile. */
+export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
+  disabled = false,
+  top = "tw-top-2",
+  verticalAlignment = "top",
+  onEmojiSelect,
+  onOpen,
+  label,
+  pickerProps,
+  pickerNotice,
 }) => {
   const isMobile = useIsMobileScreen();
+  const locale = useBrowserLocale();
+  const pickerLabel = label ?? t(locale, "emoji.picker.label");
   const { desktopZIndex, mobileZIndexClassName } =
     useCreateDropEmojiPickerLayer();
 
-  const [editor] = useLexicalComposerContext();
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const pickerRef = useRef<HTMLDivElement | null>(null);
+  const pickerRef = useRef<HTMLDialogElement | null>(null);
   const [pickerPosition, setPickerPosition] = useState<{
     top: number;
     left: number;
@@ -73,34 +86,12 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
       setPickerPosition(nextPickerPosition);
     }
 
+    onOpen?.();
     setShowPicker(true);
   };
 
   const addEmoji = (emoji: EmojiPickerSelection) => {
-    if (disabled) {
-      setShowPicker(false);
-      return;
-    }
-
-    let emojiText = emoji.native;
-    if (!emojiText && emoji.id) {
-      emojiText = `:${emoji.id}:`;
-    }
-    if (emojiText) {
-      editor.update(() => {
-        const emojiNode = $createTextNode(emojiText);
-        $insertNodes([emojiNode]);
-      });
-
-      // Ensure editor is focused and state is updated
-      requestAnimationFrame(() => {
-        editor.focus();
-        // Force OnChangePlugin to fire with empty update
-        editor.update(() => {
-          // Empty update to trigger onChange
-        });
-      });
-    }
+    if (!disabled) onEmojiSelect(emoji);
     setShowPicker(false);
   };
 
@@ -116,13 +107,23 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowPicker(false);
+        buttonRef.current?.focus();
+      }
+    };
     if (isPickerOpen) {
+      document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isPickerOpen]);
 
   return (
@@ -140,7 +141,9 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
           onClick={handleTogglePicker}
           disabled={disabled}
           type="button"
-          aria-label={isPickerOpen ? "Close emoji picker" : "Open emoji picker"}
+          aria-label={
+            label ?? (isPickerOpen ? "Close emoji picker" : "Open emoji picker")
+          }
           aria-expanded={isPickerOpen}
         >
           <svg
@@ -161,18 +164,26 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
         {!isMobile &&
           isPickerOpen &&
           createPortal(
-            <div
+            <dialog
+              open
               ref={pickerRef}
+              aria-label={pickerLabel}
               style={{
                 position: "absolute",
                 top: pickerPosition.top,
                 left: pickerPosition.left,
+                right: "auto",
                 zIndex: desktopZIndex,
               }}
-              className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg"
+              className="tw-m-0 tw-max-w-none tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-text-inherit tw-shadow-lg"
             >
-              <LazyEmojiPicker onEmojiSelect={addEmoji} autoFocus />
-            </div>,
+              {pickerNotice}
+              <LazyEmojiPicker
+                {...pickerProps}
+                onEmojiSelect={addEmoji}
+                autoFocus
+              />
+            </dialog>,
             document.body
           )}
       </div>
@@ -180,16 +191,22 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
       {isMobile && (
         <MobileWrapperDialog
           isOpen={isPickerOpen}
+          ariaLabel={pickerLabel}
           onClose={() => setShowPicker(false)}
           zIndexClassName={mobileZIndexClassName}
           showHeaderCloseButton={false}
           enableDragToClose
         >
           <div
-            className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+            className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center"
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <LazyEmojiPicker onEmojiSelect={addEmoji} autoFocus />
+            {pickerNotice}
+            <LazyEmojiPicker
+              {...pickerProps}
+              onEmojiSelect={addEmoji}
+              autoFocus
+            />
           </div>
         </MobileWrapperDialog>
       )}
@@ -197,17 +214,24 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   );
 };
 
-const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
-  disabled = false,
-  top = "tw-top-2",
-  verticalAlignment = "top",
-}) => (
-  <CreateDropEmojiPickerContent
-    key={disabled ? "disabled" : "enabled"}
-    disabled={disabled}
-    top={top}
-    verticalAlignment={verticalAlignment}
-  />
-);
+const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = (props) => {
+  const [editor] = useLexicalComposerContext();
+  const addEmoji = (emoji: EmojiPickerSelection) => {
+    const text = emoji.native ?? (emoji.id ? `:${emoji.id}:` : null);
+    if (!text) return;
+    editor.update(() => $insertNodes([$createTextNode(text)]));
+    requestAnimationFrame(() => {
+      editor.focus();
+      editor.update(() => {});
+    });
+  };
+  return (
+    <EmojiPickerControl
+      key={props.disabled ? "disabled" : "enabled"}
+      {...props}
+      onEmojiSelect={addEmoji}
+    />
+  );
+};
 
 export default CreateDropEmojiPicker;

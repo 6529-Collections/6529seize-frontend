@@ -45,6 +45,15 @@ can export them or move them into an encrypted chat.
   them to that tab and pauses the first one. Closing the tab that has them
   lets a waiting tab take over.
 
+## Writing messages
+
+The emoji button sits inside the right edge of the message input, with attachments
+on the left and Send on the right. It uses the regular composer’s desktop emoji
+popover and mobile slide panel. Encrypted emoji choices remain private and do not
+update ordinary reaction history. Selecting an emoji preserves the draft and
+inserts it at the caret. On desktop, the Send tooltip explains Enter to send and
+Shift+Enter for a new line.
+
 ## Signing out
 
 When this browser holds encrypted messages, **Sign out** and **Sign Out All

@@ -152,20 +152,7 @@ function DeviceGrantRow({
         </p>
         {linkedDevice && (
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-300">
-            {t(locale, "e2ee.devices.combinedPermissions")} ·{" "}
-            {t(
-              locale,
-              linkedDevice.revoked_at === null
-                ? "signedMessages.devices.expires"
-                : "signedMessages.devices.revokedOn",
-              {
-                date: formatDate(
-                  locale,
-                  linkedDevice.revoked_at ??
-                    linkedDevice.grant.expires_at * 1000
-                ),
-              }
-            )}
+            {t(locale, "e2ee.devices.combinedPermissions")}
           </p>
         )}
         <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">

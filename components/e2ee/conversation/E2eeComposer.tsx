@@ -3,7 +3,6 @@
 import {
   PaperAirplaneIcon,
   PaperClipIcon,
-  FaceSmileIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -30,7 +29,8 @@ import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { getMemberName, tCount } from "../e2eeFormat";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
-import { E2eeEmojiPicker } from "./E2eeEmojiPicker";
+import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
+import { E2eeComposerEmojiPicker } from "./E2eeEmojiPicker";
 import { collectMentionIds } from "./e2eeMentions";
 import {
   addComposerFiles,
@@ -355,21 +355,13 @@ function PastedImagesStatus({
 
 function ComposerFooter({
   locale,
-  hintId,
   error,
 }: {
   readonly locale: SupportedLocale;
-  readonly hintId: string;
   readonly error: ComposerError | null;
 }) {
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-pb-2">
-      <p
-        id={hintId}
-        className="tw-m-0 tw-hidden tw-text-[11px] tw-text-iron-500 sm:tw-block"
-      >
-        {t(locale, "e2ee.composer.hint")}
-      </p>
       {error ? (
         <p role="alert" className="tw-m-0 tw-text-xs tw-text-rose-300">
           {t(locale, error.key, error.params)}
@@ -449,11 +441,9 @@ export function E2eeComposer({
   const locale = useBrowserLocale();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
-  const hintId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
-  const [emojiOpen, setEmojiOpen] = useState(false);
   const emojiSelection = useRef({ start: 0, end: 0 });
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
@@ -671,7 +661,7 @@ export function E2eeComposer({
       {isUploading ? (
         <UploadingFiles locale={locale} files={uploading} />
       ) : null}
-      <div className="tw-relative tw-flex tw-items-end tw-gap-2 tw-px-3 tw-py-2">
+      <div className="tw-relative tw-flex tw-items-end tw-gap-1 tw-px-2 tw-py-2 sm:tw-gap-2 sm:tw-px-3">
         {mentions.open ? (
           <MentionList
             id={listboxId}
@@ -696,78 +686,69 @@ export function E2eeComposer({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               aria-label={t(locale, "e2ee.composer.attach")}
-              title={t(locale, "e2ee.composer.attach")}
               className={ICON_BUTTON}
             >
               <PaperClipIcon aria-hidden="true" className="tw-size-5" />
             </button>
           </>
         ) : null}
-        <button
-          type="button"
-          className={ICON_BUTTON}
-          aria-label={t(locale, "e2ee.emoji.insert")}
-          aria-haspopup="dialog"
-          onClick={() => {
-            const input = textareaRef.current;
-            emojiSelection.current = {
-              start: input?.selectionStart ?? text.length,
-              end: input?.selectionEnd ?? text.length,
-            };
-            mentions.close();
-            setEmojiOpen(true);
-          }}
-        >
-          <FaceSmileIcon aria-hidden="true" className="tw-size-5" />
-        </button>
-        <label className="tw-sr-only" htmlFor={textareaId}>
-          {t(locale, "e2ee.composer.label")}
-        </label>
-        <textarea
-          id={textareaId}
-          ref={textareaRef}
-          rows={1}
-          value={text}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          onPaste={paste.onPaste}
-          onSelect={(event) =>
-            mentions.update(
-              event.currentTarget.value,
-              event.currentTarget.selectionStart
-            )
-          }
-          onBlur={mentions.close}
-          placeholder={t(locale, "e2ee.composer.placeholder")}
-          aria-describedby={hintId}
-          aria-invalid={tooLong ? true : undefined}
-          aria-autocomplete="list"
-          aria-controls={mentions.open ? listboxId : undefined}
-          aria-activedescendant={
-            mentions.open ? `${listboxId}-${mentions.activeIndex}` : undefined
-          }
-          className="tw-min-h-10 tw-flex-1 tw-resize-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-leading-6 tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-        />
-        <button
-          type="button"
-          onClick={() => void submit()}
-          disabled={isEmpty || tooLong || isUploading}
-          aria-label={t(
-            locale,
-            editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
-          )}
-          className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500"
-        >
-          <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
-        </button>
+        <div className="tw-relative tw-min-w-0 tw-flex-1">
+          <label className="tw-sr-only" htmlFor={textareaId}>
+            {t(locale, "e2ee.composer.label")}
+          </label>
+          <textarea
+            id={textareaId}
+            ref={textareaRef}
+            rows={1}
+            value={text}
+            onChange={onChange}
+            onKeyDown={onKeyDown}
+            onPaste={paste.onPaste}
+            onSelect={(event) =>
+              mentions.update(
+                event.currentTarget.value,
+                event.currentTarget.selectionStart
+              )
+            }
+            onBlur={mentions.close}
+            placeholder={t(locale, "e2ee.composer.placeholder")}
+            aria-invalid={tooLong ? true : undefined}
+            aria-autocomplete="list"
+            aria-controls={mentions.open ? listboxId : undefined}
+            aria-activedescendant={
+              mentions.open ? `${listboxId}-${mentions.activeIndex}` : undefined
+            }
+            className="tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-resize-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-leading-6 tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+          />
+          <E2eeComposerEmojiPicker
+            onOpen={() => {
+              const input = textareaRef.current;
+              emojiSelection.current = {
+                start: input?.selectionStart ?? text.length,
+                end: input?.selectionEnd ?? text.length,
+              };
+              mentions.close();
+            }}
+            onSelect={pickEmoji}
+          />
+        </div>
+        <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
+          <button
+            type="button"
+            onClick={() => void submit()}
+            disabled={isEmpty || tooLong || isUploading}
+            aria-label={t(
+              locale,
+              editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
+            )}
+            className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500"
+          >
+            <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
+          </button>
+        </DropActionTooltip>
       </div>
       <PastedImagesStatus locale={locale} notice={paste.notice} />
-      <ComposerFooter locale={locale} hintId={hintId} error={error} />
-      <E2eeEmojiPicker
-        open={emojiOpen}
-        onClose={() => setEmojiOpen(false)}
-        onSelect={pickEmoji}
-      />
+      {error ? <ComposerFooter locale={locale} error={error} /> : null}
     </div>
   );
 }
