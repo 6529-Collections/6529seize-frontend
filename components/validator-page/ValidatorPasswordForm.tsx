@@ -3,8 +3,11 @@ import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import { VALIDATOR_UNLOCK_PATH } from "@/lib/validator-page/accessGate";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
+import ValidatorUnlockSection from "./ValidatorUnlockSection";
 
 type ValidatorGateNotice = "wrong" | "wait" | null;
+
+const FORM_ID = "validator-unlock";
 
 const NOTICES: Record<Exclude<ValidatorGateNotice, null>, string> = {
   wrong: "That password is not right. Check it and try again.",
@@ -32,10 +35,15 @@ export default function ValidatorPasswordForm({
           </p>
         </ValidatorPageHeader>
         <form
+          id={FORM_ID}
           method="post"
           action={VALIDATOR_UNLOCK_PATH}
           className={`${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
         >
+          <ValidatorUnlockSection
+            formId={FORM_ID}
+            action={VALIDATOR_UNLOCK_PATH}
+          />
           <input type="hidden" name="next" value={nextPath} />
           <label
             htmlFor="validator-password"

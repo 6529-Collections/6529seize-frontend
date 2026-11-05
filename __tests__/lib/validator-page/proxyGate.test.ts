@@ -52,16 +52,13 @@ describe("handleValidatorPageGate", () => {
     "/validator/guide",
     "/validator/hardware",
     "/validator/download/x/y",
-  ])(
-    "shows the password form at %s without a cookie",
-    (path) => {
-      const response = handleValidatorPageGate(request(path), path);
-      expect(rewriteTarget(response)).toBe("https://6529.io/validator/locked");
-      expect(
-        response?.headers.get("x-middleware-request-x-6529-validator-next")
-      ).toBe(path);
-    }
-  );
+  ])("shows the password form at %s without a cookie", (path) => {
+    const response = handleValidatorPageGate(request(path), path);
+    expect(rewriteTarget(response)).toBe("https://6529.io/validator/locked");
+    expect(
+      response?.headers.get("x-middleware-request-x-6529-validator-next")
+    ).toBe(path);
+  });
 
   it("lets a valid cookie through and refuses a forged one", () => {
     const valid = createAccessCookieValue(PASSWORD);
@@ -114,7 +111,11 @@ describe("handleValidatorPageGate", () => {
     );
     expect(response?.status).toBe(200);
     expect(response?.headers.get("cache-control")).toBe("private, no-store");
-    expect(await response?.text()).toContain('http-equiv="refresh"');
+    const html = (await response?.text()) ?? "";
+    expect(html).toContain('http-equiv="refresh"');
+    // A refresh to the same address with a fragment only scrolls, so a
+    // link to /validator#send-feedback would stay here: the page reloads.
+    expect(html).toContain("<script>location.reload()</script>");
 
     const sameSite = handleValidatorPageGate(
       request("/validator", {

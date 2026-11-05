@@ -13,11 +13,15 @@ import {
 } from "./accessGate";
 
 // SameSite=Strict cookies are left off a navigation that starts on another
-// site, such as a link in a chat app. This page reloads itself once from
-// 6529.io, which sends the cookie. Without a cookie the reload shows the
-// password form, so it cannot loop.
+// site, such as a link in a chat app or on the validator's own page in a
+// browser. This page reloads itself once from 6529.io, which sends the
+// cookie. Without a cookie the reload shows the password form, so it cannot
+// loop. location.reload() keeps a link's section (/validator#send-feedback):
+// a refresh to the same address with a fragment only scrolls, and never
+// reaches the server. The refresh stays for a browser without scripts.
 const SAME_SITE_RELOAD_HTML =
   '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+  "<script>location.reload()</script>" +
   '<meta http-equiv="refresh" content="0"><meta name="robots" content="noindex, nofollow">' +
   "<title>6529 Validator</title></head><body>" +
   '<p><a href="">Continue to 6529 Validator</a></p></body></html>';
