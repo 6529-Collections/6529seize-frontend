@@ -38,6 +38,7 @@ const WIN8_CHROME_UA =
 const bodyHasFinePointer = (page: Page) =>
   page.evaluate(() => document.body.hasAttribute("data-fine-pointer"));
 
+/** Find one anonymously readable wave with a hydrated long-pressable message. */
 async function openWaveWithRows(page: Page) {
   await page.goto("/waves", { waitUntil: "domcontentloaded" });
   const waveLinks = page.locator('a[href^="/waves/"]');
@@ -216,6 +217,41 @@ test.describe("Touch target harness", () => {
     for (let round = 0; round < 3; round++) await tapTouchMessage(correctedRow);
     await expect(page).toHaveURL("about:blank");
     await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("tap refuses a replacement inserted after safe-position selection", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      const hitTest = document.elementFromPoint.bind(document);
+      document.elementFromPoint = (x, y) => {
+        const hit = hitTest(x, y);
+        if (hit && element.contains(hit) && !hit.closest("a")) {
+          document.elementFromPoint = hitTest;
+          // Run after the helper returns its safe offset, but before its
+          // separate trusted input call can start. The same serial now has
+          // entirely different interactive geometry.
+          queueMicrotask(() => {
+            const replacement = element.cloneNode(true) as HTMLElement;
+            replacement
+              .querySelector("a")
+              ?.setAttribute(
+                "style",
+                "position:absolute;inset:0;width:100%;height:100%"
+              );
+            element.replaceWith(replacement);
+            const status = document.querySelector("output");
+            if (status) status.textContent = "replaced";
+          });
+        }
+        return hit;
+      };
+    });
+    await expect(tapTouchMessage(row)).rejects.toThrow(/not attached/u);
+    await expect(page.getByRole("status")).toHaveText("replaced");
+    await expect(page).toHaveURL("about:blank");
   });
 
   test("long press ends on its original node when a newer row arrives", async ({

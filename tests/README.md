@@ -600,7 +600,8 @@ Large-pack ownership:
   self-contained browser harness also covers row replacement during scrolling,
   delayed replacement insertion, messages arriving during a touch gesture,
   and avoiding author links when tapping the row wrapper. Trusted taps must
-  stay on the wave route; a row without safe padding fails explicitly.
+  stay on the wave route; a row without safe padding fails explicitly. A tap is
+  bound to the hit-tested node, so a later replacement cannot reuse its offset.
   The harness needs no application server; run it with
   `PLAYWRIGHT_SKIP_WEB_SERVER=1 6529 exec playwright test tests/input/win8-touch-latch-readonly.spec.ts --project=web-desktop-chromium --grep 'Touch target harness'`.
 - `test:e2e`, `test:e2e:smoke`, and targeted single-route specs are ordinary
