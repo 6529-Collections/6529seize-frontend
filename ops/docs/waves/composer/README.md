@@ -39,7 +39,7 @@ Use this area when you need behavior for:
 ### Mentions and Markdown
 
 Type `@` followed by at least three handle characters to find profiles to tag.
-Individual profile suggestions show a level badge beside the handle, including
+Individual profile suggestions show a small round level badge beside the handle, including
 level 0. Global mentions and Quick Tags have no level badge.
 
 Type `~hi~` or `~~hi~~` for strikethrough. Completing the closing tilde or pair

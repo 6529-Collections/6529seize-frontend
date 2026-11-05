@@ -1,6 +1,8 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
-import UserLevel from "@/components/user/utils/level/UserLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -68,19 +70,20 @@ export default function MentionsTypeaheadMenuItem({
               <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-white">
                 <span className="tw-truncate">{handle}</span>
                 {typeof level === "number" && (
-                  <span className="tw-shrink-0">
+                  <div className="tw-shrink-0">
                     <span className="tw-sr-only">
                       {t(locale, "waves.composer.mentions.level", { level })}
                     </span>
-                    <span aria-hidden="true">
-                      <UserLevel
+                    <div
+                      aria-hidden="true"
+                      className="tw-flex [&_.tw-rounded-full]:tw-border-transparent [&_.tw-rounded-full]:tw-bg-iron-900 [&_.tw-rounded-full]:tw-ring-1 [&_.tw-rounded-full]:tw-ring-inset [&_.tw-rounded-full]:tw-ring-white/10"
+                    >
+                      <UserCICAndLevel
                         level={level}
-                        size="xxs"
-                        asSpan
-                        showLabel={false}
+                        size={UserCICAndLevelSize.SMALL}
                       />
-                    </span>
-                  </span>
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
