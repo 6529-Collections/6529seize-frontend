@@ -607,6 +607,7 @@ export const createEslintConfig = ({
         "config/alchemyEnv.ts",
         "config/assets.ts",
         "config/env.ts",
+        "config/env.browser.ts",
         "config/ethereumRpcEnv.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
