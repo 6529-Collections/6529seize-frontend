@@ -11,7 +11,7 @@ import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
-import { RateNicButton } from "../identity/header/RateNicCta";
+import { FingerprintIcon, RateNicButton } from "../identity/header/RateNicCta";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconWrapper from "../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
@@ -153,7 +153,10 @@ export default function NicRatingsOverview({
         <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <RateNicButton onRateClick={onRateClick} />
           {(cicOverview?.authenticated_user_contribution ?? 0) !== 0 && (
-            <span className="tw-text-xs tw-text-iron-400">
+            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+              {compact && (
+                <FingerprintIcon className="tw-h-4 tw-w-4 tw-shrink-0 tw-text-emerald-400" />
+              )}
               {t(locale, "user.profile.rep.nic.yourRating", {
                 value: formatInteger(
                   locale,
