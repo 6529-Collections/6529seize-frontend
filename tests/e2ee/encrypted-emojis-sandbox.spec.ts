@@ -28,7 +28,7 @@ async function installPack(context: BrowserContext, ready = Promise.resolve()) {
   });
 }
 async function chooseEmoji(page: Page, search: string, label: string) {
-  const picker = page.locator("em-emoji-picker");
+  const picker = page.getByRole("dialog").locator("em-emoji-picker");
   await expect(picker).toBeVisible();
   await picker.getByPlaceholder("Search", { exact: true }).fill(search);
   await picker.getByRole("button", { name: label, exact: true }).click();
@@ -98,7 +98,9 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     await input.fill("Secret hello ");
     await emojiTrigger.focus();
     await emojiTrigger.press("Enter");
-    await expect(alice.page.locator("em-emoji-picker")).toBeVisible();
+    await expect(
+      alice.page.getByRole("dialog").locator("em-emoji-picker")
+    ).toBeVisible();
     await expect(
       alice.page.getByRole("dialog", { name: "Choose an emoji" })
     ).toHaveCount(0);
@@ -111,7 +113,7 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     // Native selection worked while the catalog request was still pending.
     releaseCatalog();
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
-    const picker = alice.page.locator("em-emoji-picker");
+    const picker = alice.page.getByRole("dialog").locator("em-emoji-picker");
     await expect(
       picker.getByRole("button", { name: "Frequently used", exact: true })
     ).toHaveCount(0);

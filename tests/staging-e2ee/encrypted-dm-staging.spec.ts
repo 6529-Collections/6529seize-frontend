@@ -349,7 +349,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       query: string,
       name: string
     ) => {
-      const picker = session.page.locator("em-emoji-picker");
+      const picker = session.page
+        .getByRole("dialog")
+        .locator("em-emoji-picker");
       await picker.getByPlaceholder("Search", { exact: true }).fill(query);
       await picker
         .getByRole("button", { name, exact: true })

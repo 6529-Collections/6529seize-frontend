@@ -7,6 +7,8 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useCreateDropEmojiPickerLayer } from "./CreateDropEmojiPickerLayerContext";
 import LazyEmojiPicker, { type EmojiPickerSelection } from "./LazyEmojiPicker";
 
@@ -38,6 +40,8 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   pickerNotice,
 }) => {
   const isMobile = useIsMobileScreen();
+  const locale = useBrowserLocale();
+  const pickerLabel = label ?? t(locale, "emoji.picker.label");
   const { desktopZIndex, mobileZIndexClassName } =
     useCreateDropEmojiPickerLayer();
 
@@ -162,6 +166,8 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
           createPortal(
             <div
               ref={pickerRef}
+              role="dialog"
+              aria-label={pickerLabel}
               style={{
                 position: "absolute",
                 top: pickerPosition.top,
@@ -184,6 +190,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
       {isMobile && (
         <MobileWrapperDialog
           isOpen={isPickerOpen}
+          ariaLabel={pickerLabel}
           onClose={() => setShowPicker(false)}
           zIndexClassName={mobileZIndexClassName}
           showHeaderCloseButton={false}

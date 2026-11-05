@@ -105,6 +105,11 @@ it.each([false, true])(
     expect(onOpen).toHaveBeenCalledTimes(1);
     const choice = screen.getByRole("button", { name: "Choose test emoji" });
     expect(choice).toHaveAttribute("data-private-mode", "true");
+    expect(
+      screen.getByRole("dialog", {
+        name: mobile ? "Emoji slide panel" : "Add emoji",
+      })
+    ).toContainElement(choice);
     expect(screen.queryByText("Choose an emoji")).toBeNull();
     expect(
       screen.queryByRole("dialog", { name: "Emoji slide panel" }) !== null
