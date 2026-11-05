@@ -4,8 +4,11 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useState } from "react";
-import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+import { useContext, useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
+import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
 
 export default function UserPageSubscriptionsEditionPreference(
   props: Readonly<{
@@ -13,15 +16,16 @@ export default function UserPageSubscriptionsEditionPreference(
     details: SubscriptionDetails | undefined;
     readonly: boolean;
     refresh: () => void;
+    layout?: "row" | "inline";
   }>
 ) {
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [isAllEditions, setIsAllEditions] = useState<boolean>(false);
   const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
     useState<boolean>(false);
-  const descriptionId = useId();
-  const isDisabled = props.readonly || isUpdatingAllEditions;
+  const isDisabled = props.readonly || isUpdatingAllEditions || !props.details;
 
   const subscriptionEligibilityCount =
     props.details?.subscription_eligibility_count ?? 1;
@@ -30,8 +34,8 @@ export default function UserPageSubscriptionsEditionPreference(
     setIsAllEditions(props.details?.subscribe_all_editions ?? false);
   }, [props.details?.subscribe_all_editions]);
 
-  const toggleAllEditions = async (): Promise<void> => {
-    if (isUpdatingAllEditions) {
+  const setEditionPreference = async (allEditions: boolean): Promise<void> => {
+    if (isDisabled || allEditions === isAllEditions) {
       return;
     }
     setIsUpdatingAllEditions(true);
@@ -40,7 +44,6 @@ export default function UserPageSubscriptionsEditionPreference(
       if (!success) {
         return;
       }
-      const allEditions = !isAllEditions;
       interface SubscribeAllEditionsBody {
         subscribe_all_editions: boolean;
       }
@@ -75,54 +78,40 @@ export default function UserPageSubscriptionsEditionPreference(
     }
   };
 
+  const description = t(
+    locale,
+    isAllEditions
+      ? "subscriptions.settings.allDescription"
+      : "subscriptions.settings.oneDescription"
+  );
+
   return (
-    <div className="tw-min-w-0 tw-p-1">
-      <div className="tw-min-w-0">
-        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-          <h3 className="tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Edition Preference
-          </h3>
-          <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-[9px] tw-font-medium tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-400">
-            Eligibility x{subscriptionEligibilityCount}
-          </span>
-        </div>
-        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
-          <label
-            htmlFor="subscription-all-editions-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAllEditions ? "tw-text-iron-500" : "tw-text-iron-100"}`}
-          >
-            One edition
-          </label>
-          <UserPageSubscriptionsToggle
-            disabled={isDisabled}
-            id="subscription-all-editions-mode"
-            checked={isAllEditions}
-            onChange={toggleAllEditions}
-            ariaLabel="All eligible editions"
-            describedBy={props.readonly ? undefined : descriptionId}
-          />
-          <label
-            htmlFor="subscription-all-editions-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAllEditions ? "tw-text-iron-100" : "tw-text-iron-500"}`}
-          >
-            All eligible
-          </label>
-        </div>
-      </div>
-      {!props.readonly && (
-        <p
-          id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500"
-        >
-          {isAllEditions
-            ? "You will receive all editions you are eligible for"
-            : "You will receive only one edition"}
-        </p>
-      )}
-    </div>
+    <SubscriptionSettingToggle
+      layout={props.layout ?? "row"}
+      label={t(locale, "subscriptions.settings.editions")}
+      labelNote={
+        props.details
+          ? t(locale, "subscriptions.settings.eligibilityBadge", {
+              count: formatInteger(locale, subscriptionEligibilityCount),
+            })
+          : t(locale, "subscriptions.settings.loading")
+      }
+      checked={
+        props.readonly
+          ? (props.details?.subscribe_all_editions ?? false)
+          : isAllEditions
+      }
+      readOnly={props.readonly}
+      loading={!props.details}
+      disabled={isDisabled}
+      busy={isUpdatingAllEditions}
+      onChange={() => {
+        void setEditionPreference(!isAllEditions);
+      }}
+      offLabel={t(locale, "subscriptions.coverage.editions.one")}
+      onLabel={t(locale, "subscriptions.settings.all")}
+      ariaLabel={t(locale, "subscriptions.coverage.editions.all")}
+      description={!props.readonly && props.details ? description : undefined}
+    />
   );
 }

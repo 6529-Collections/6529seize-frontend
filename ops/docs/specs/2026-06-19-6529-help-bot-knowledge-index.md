@@ -173,9 +173,112 @@ retention after a split. The subscription record covers balance and setting
 merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
 reconciliation. The subscriptions overview also explains that profile history
-sections start closed on phones and preserve user toggles during resizing or
-data refreshes. The profile subscription record also explains how tapping,
+is a separate, always-visible section with three pills, preserving the selected
+view during resizing. Redeemed loads first; the other histories load when selected,
+with cached pages and refreshes after confirmed transactions. The profile
+subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
+Profile subscription facts describe a funded-drop count with a status badge,
+then Funded through with the Meme link and full date when supplied. Covered
+shows its badge above the larger funded-drop headline without a decorative check icon. Without a funded-through point, the original status
+explanation stays in the summary. Balance and Forecast use remain visible together near the bottom of the coverage
+panel, with no Details expander. Below 640px, a divider separates the summary from the metrics. Balance and Forecast use each have a left-aligned label and right-aligned value, with a divider between rows. Available mints sit below the balance on the right, and the owner refresh button stays beside the ETH amount. The primary owner action spans the panel width below the metrics, keeping its existing Top up or Choose drops wording and behavior. The owner balance refresh also reloads coverage; a separate Refresh coverage control
+appears beside the coverage message only when coverage is unavailable after
+loading or a refresh failed. The Forecast use information button opens the
+shared tooltip on hover, focus or tap; it preserves the Subscription coverage
+title, Covered status explanation and projection note. Escape or tapping elsewhere
+dismisses it. The original (N mints available) wording appears once with the ETH
+balance, so balance capacity is visible with the funded-drop count. The saved edition
+choice and Eligibility remain emphasized in Minting settings. These counts are
+not combined into a formula; per-drop quantities and backend forecasts remain
+authoritative. Status explanations use concise, professional wording while
+preserving Manual mode, forecast purpose, eligibility and schedule-dependent
+refresh guidance. Status labels and action text are unchanged. Action required
+copy distinguishes zero from one remaining fully funded drop.
+Mode, eligibility, edition preference, the mode explanation and the first
+upcoming drop stay in their existing sections. Warning states retain visible
+Next unfunded, recommendations, deadlines and owner recovery controls; a deadline already in
+the summary appears only there. The original mode update date is under the
+value in Minting settings, without the added since wording. Owner controls keep
+both switch labels together beneath their setting labels. The sections sit side by side from 1024px, with Subscription minting on the left and settings stacked in the right column. Below that width, owner settings use two columns from 768px until the sidebar starts at 1024px; visitor settings use three columns from 768px.
+Learn more remains a small link with a 44px tap target.
+For owners with Not set up or No upcoming drops selected, Choose drops sits
+beside the balance and forecast. The same Top up form appears directly below
+the overview in a compact responsive grid, and notification links scroll to and
+focus its heading. The existing coverage gradient and all wording stay unchanged.
+Visitors never see this form. Other owner states open Top up in a desktop dialog
+or mobile bottom sheet. Its compact option rows
+show both supplied projections before selection and include Year/Epoch directly.
+Show/Hide Deep Time Subscriptions retains Period/Era/Eon. Other retains the ETH
+preview, and the full-width submit action and recipient follow the choices.
+Closing restores focus and preserves the draft selection. Existing notification
+links open the dialog without scrolling the background, and the original
+transaction-status dialog covers the inline form or replaces the picker dialog
+while a transaction is in progress.
+The picker uses separate compact rounded cards in one column, with the original
+label above the card count and ETH amount and a small blue radio at the top right, a blue selected background, outline and amount, and subtle blue hover
+feedback. Tailwind transitions animate the radio dot and colors without moving
+the cards, respecting reduced motion. The original submit
+button retains its lightning icon and original wording.
+Upcoming Drops leads each row with its existing date or Minting Today wording
+and the Meme number smaller below. Every row shows its season beside the date
+or Minting Today, including rows revealed by Show More; the section heading has
+no season label. Minting Today has a primary-blue outline, tint and pinging dot beside its
+label, with a static dot for reduced motion. Other rows have no decorative dots.
+Today's thumbnail reuses the existing latest-Meme request and appears only for
+a matching token and contract. Missing or failed artwork leaves the row usable
+without an image. The original mode explanation appears
+below the section heading for the owner only. Visitors see saved Subscribed or
+Not subscribed text instead of disabled drop switches, with plain selected /
+eligible quantities and no dropdown arrows; owners retain editable switches,
+quantity pickers and mint-day locks. The dark panel has vertical padding around
+the rows and footer, with subtle horizontal dividers and Show More centered at every screen size. Dates are emphasized above quieter Meme titles. On phones today's thumbnail sits beside its date and Meme title with controls below; other rows keep the date above the title and controls. All allocation details remain below. Visitor quantities and subscription statuses have no chip backgrounds.
+Redeemed history retains all original entry text, quantity, address,
+balance, date and transaction links, using a blue quantity badge, row dividers,
+and circular Etherscan links with the shared portal tooltip and tooltip styles.
+Below 768px, Balance after redemption starts on its own row after the address,
+and the date and transaction link share a divided footer. Top Up History uses the
+same footer, with the original amount and ETH icon above the full sender address.
+Log History retains its original event and additional-info strings with neutral
+decorative dots, readable wrapping and dates. All histories use the same flat
+rows and subtle dividers without changing page sizes, independent page numbers,
+data loading or links. Pagination returns to the history heading and focuses
+the active list after the requested page is ready, including cached pages.
+The selected history remains active. Background refreshes do not scroll, and
+switching history tabs or profiles cancels a pending pagination scroll.
+Minting settings
+is an always-visible group beside coverage from 1024px, and between coverage and Upcoming Drops at narrower widths, using
+the same subtle dark surface. Mode, Edition Preference and the full Airdrop
+Address stack in one column on phones below 768px, with subtle row dividers,
+left-aligned labels and right-aligned values and supporting text.
+From 768px, settings sit side by side in three columns, with supporting text
+wrapping within each setting. From 1024px the three settings stack in the right column. Owners use the original Manual / Automatic
+and One edition / All eligible switches, with both labels visible. Tab focuses a switch and Space changes its value through the existing
+authentication and save flow; owner loading and pending-update controls stay
+disabled. Visitors instead see plain non-interactive saved values, with a small
+green indicator for Automatic. The unchanged UTC Mode date and Eligibility detail
+remain right-aligned on phones. In the desktop sidebar, brighter labels sit above left-aligned values and supporting details; owner switches sit on the right with both original choice labels retained. Full addresses can wrap without truncation.
+The full wallet address remains visible with or without an ENS name, wrapping
+within its setting when needed, with the original hover, focus and tap tooltip. Loading does not display guessed values. Eligibility, the original owner-only edition explanation, Mode date,
+ENS, tooltip and edit link are preserved.
+Subscription balance, Forecast use and the owner-only Top up action share the
+bottom of the status panel and wrap on smaller screens. Learn more remains at
+the far right of the section title. Choose drops stays below the status description
+and scrolls to Upcoming Drops. There is no Details expander: the Forecast use
+information button preserves the projection note and Covered explanation in the
+shared tooltip, while warning details and owner controls remain visible.
+History retains compact
+label-only pills, a light active pill, transparent outlined inactive pills with
+a faint hover fill, and its original entry tables. Redeemed addresses use the
+original shortened format. The pills stay on one
+horizontally scrollable row on narrow screens. Redeemed
+is selected initially, and arrow keys move between tabs. Cached pages,
+independent pagination and transaction refreshes are unchanged. Funded counts
+keep the original coverage-state conditions; absent dates do not create empty
+rows, and an identical explanation is displayed only once. The facts retain all five
+section anchors, exact supplied top-up amounts, full history records, pagination,
+and the existing owner, visitor, proxy, and regional iOS rules.
+
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
