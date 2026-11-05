@@ -21,7 +21,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
-  useIpfsService: () => ({ addFile: mockAddFile }),
+  addFileToIpfs: (file: File) => mockAddFile(file),
 }));
 jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(),
@@ -183,6 +183,24 @@ it("retries remaining profile changes without writing an already saved About aga
   ]);
   expect(mockReplace).toHaveBeenCalledWith("/renamed/identity", {
     scroll: false,
+  });
+  expect(result.current.dirty).toBe(false);
+});
+
+it("uploads a changed picture through the shared lazy upload helper", async () => {
+  const { result } = setup();
+  const file = new File(["test image"], "profile.png", { type: "image/png" });
+  mockAddFile.mockResolvedValue("uploaded-picture");
+  post.mockResolvedValue({ ...profile, pfp: "ipfs://uploaded-picture" });
+  expect(mockAddFile).not.toHaveBeenCalled();
+  act(() => result.current.updateDraft({ pictureFile: file }));
+  await act(async () => {
+    expect(await result.current.save()).toBe(true);
+  });
+  expect(mockAddFile).toHaveBeenCalledWith(file);
+  expect(post).toHaveBeenCalledWith({
+    endpoint: "profiles",
+    body: expect.objectContaining({ pfp_url: "ipfs://uploaded-picture" }),
   });
   expect(result.current.dirty).toBe(false);
 });

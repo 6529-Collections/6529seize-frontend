@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useIpfsService } from "@/components/ipfs/IPFSContext";
+import { addFileToIpfs } from "@/components/ipfs/IPFSContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
@@ -69,8 +69,7 @@ function initialDraft({
 async function prepareProfileUpdate(
   draft: ProfileDraft,
   profile: ApiIdentity,
-  coverChanged: boolean,
-  ipfs: ReturnType<typeof useIpfsService>
+  coverChanged: boolean
 ): Promise<ApiCreateOrUpdateProfileRequest> {
   if (draft.name.toLowerCase() !== profile.handle?.toLowerCase()) {
     const availability = await commonApiFetch<{
@@ -104,7 +103,7 @@ async function prepareProfileUpdate(
     body.banner_2 = undefined;
   }
   if (draft.pictureFile)
-    body.pfp_url = `ipfs://${await ipfs.addFile(draft.pictureFile)}`;
+    body.pfp_url = `ipfs://${await addFileToIpfs(draft.pictureFile)}`;
   return body;
 }
 
@@ -151,7 +150,6 @@ export function useProfileEditor(props: ProfileEditorProps) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileEdit, onProfileStatementAdd, onProfileStatementRemove } =
     useContext(ReactQueryWrapperContext);
-  const ipfs = useIpfsService();
   const router = useRouter();
   const pathname = usePathname();
   const savingRef = useRef(false);
@@ -227,7 +225,7 @@ export function useProfileEditor(props: ProfileEditorProps) {
       const { success } = await requestAuth();
       if (!success) throw new Error(message("user.profileHeader.edit.signIn"));
       const body = profileChanged
-        ? await prepareProfileUpdate(draft, savedProfile, coverChanged, ipfs)
+        ? await prepareProfileUpdate(draft, savedProfile, coverChanged)
         : null;
       // Each endpoint saves separately. Keep confirmed results as the retry
       // baseline, while retaining every draft field that has not been saved.
