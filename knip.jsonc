@@ -182,7 +182,11 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor"
+      "react-doctor",
+      // Transitive dependency of @sentry/nextjs; ops/scripts/resolve-sentry-cli.cjs
+      // resolves the sentry-cli it installed through it, instead of listing a
+      // second copy of the CLI.
+      "@sentry/bundler-plugin-core"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported
