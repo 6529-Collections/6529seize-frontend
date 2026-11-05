@@ -18,6 +18,7 @@ export class ApiWaveMentionSearchResult {
     'handle': string;
     'display': string | null;
     'pfp': string | null;
+    'level': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -47,6 +48,12 @@ export class ApiWaveMentionSearchResult {
             "baseName": "pfp",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "level",
+            "baseName": "level",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
