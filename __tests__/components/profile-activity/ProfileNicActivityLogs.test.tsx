@@ -187,7 +187,11 @@ describe("NIC cursor pagination", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     await screen.findByText("identity-page-1");
   });
-  it.each([{ page: 7 }, { data: [] }])(
+  it.each([
+    { page: 7 },
+    { data: [] },
+    { data: [], next: false, next_cursor: null },
+  ])(
     "keeps the current page when a continuation violates the page contract: %j",
     async (invalid) => {
       fetchMock.mockResolvedValueOnce(response(1));

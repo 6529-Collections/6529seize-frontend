@@ -67,6 +67,7 @@ function NicActivityPages({
       if (
         !("next_cursor" in result) ||
         result.page !== pageParam.page ||
+        (pageParam.page > 1 && result.data.length === 0) ||
         (result.next &&
           (!result.next_cursor ||
             result.data.length !== Number(params.page_size)))
