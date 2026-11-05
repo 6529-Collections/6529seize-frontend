@@ -34,6 +34,7 @@
     "e2e-manifest:sync": "node scripts/require-6529-command.cjs && node scripts/sync-e2e-manifest.cjs",
     "e2e-manifest:check": "node scripts/require-6529-command.cjs && node scripts/sync-e2e-manifest.cjs --check",
     "e2e:packs": "node scripts/require-6529-command.cjs && node scripts/e2e-packs.cjs",
+    "test:e2e:metamask-bridge": "node scripts/require-6529-command.cjs && cross-env PLAYWRIGHT_SKIP_WEB_SERVER=1 playwright test tests/monitoring/metamask-bridge-filter.spec.ts --project=web-desktop-webkit --workers=1 --trace=off",
     "test:e2e": "node scripts/require-6529-command.cjs && playwright test --project=web-desktop-chromium",
     "test:e2e:all-projects": "node scripts/require-6529-command.cjs && playwright test",
     "test:e2e:smoke": "node scripts/require-6529-command.cjs && playwright test tests/home/home.spec.ts tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --grep @smoke --project=web-desktop-chromium --workers=1",
