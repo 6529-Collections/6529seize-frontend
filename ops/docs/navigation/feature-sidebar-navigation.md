@@ -63,7 +63,13 @@ On web layouts, route switching is sidebar-first.
   125ms, including gated Drop Forge and WatchTower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.
 - Local and staging environment badges are present in the initial page render;
-  production shows no environment badge.
+  production shows no environment badge. Desktop badges are centered over the
+  6529 logo without moving it or the navigation. Staging shows `STG`; local
+  shows `LCL` above the current browser port, or just `LCL` when no port is
+  present. Other non-production hosts keep their environment labels. The logo
+  remains a single Home link with environment and host information available to
+  assistive technology. Phone and tablet headers keep their inline badge beside
+  the logo, including the single-line `LCL:port` label locally.
 - The account control has the same footprint while loading, signed out, or
   showing a profile. Only the account placeholder shimmers; Search and Share
   do not wait for wallet initialization.
