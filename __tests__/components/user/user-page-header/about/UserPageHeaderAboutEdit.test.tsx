@@ -4,12 +4,14 @@ import UserPageHeaderAboutEdit from "@/components/user/user-page-header/about/Us
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useState } from "react";
 
 jest.mock("react-use", () => ({ useKeyPressEvent: jest.fn() }));
 
 jest.mock("@tanstack/react-query", () => ({ useMutation: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiDelete: jest.fn().mockResolvedValue({}),
   commonApiPost: jest.fn().mockResolvedValue({}),
 }));
 jest.mock("framer-motion", () => ({
@@ -31,7 +33,7 @@ let mutationError: Error | null = null;
         throw mutationError;
       }
       await opts.mutationFn(val);
-      opts.onSuccess?.();
+      opts.onSuccess?.(undefined, val);
       opts.onSettled?.();
     },
   };
@@ -44,7 +46,7 @@ function AboutEditHarness({ onClose = jest.fn() }: { onClose?: () => void }) {
   return (
     <UserPageHeaderAboutEdit
       profile={{ query: "alice" } as any}
-      statement={{ statement_value: "old" } as any}
+      statement={{ id: "about", statement_value: "old" } as any}
       onClose={onClose}
       value={value}
       onValueChange={setValue}
@@ -59,9 +61,13 @@ describe("UserPageHeaderAboutEdit", () => {
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
   } as any;
-  const ctx = { onProfileStatementAdd: jest.fn() } as any;
+  const ctx = {
+    onProfileStatementAdd: jest.fn(),
+    onProfileStatementRemove: jest.fn(),
+  } as any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mutationError = null;
   });
 
@@ -83,9 +89,31 @@ describe("UserPageHeaderAboutEdit", () => {
     await userEvent.click(btn);
     expect(auth.requestAuth).toHaveBeenCalled();
     expect(auth.setToast).toHaveBeenCalledWith({
-      message: "About statement added.",
+      message: "About statement saved.",
       type: "success",
     });
+  });
+
+  it("removes an existing statement when its text is cleared", async () => {
+    const onClose = jest.fn();
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <AboutEditHarness onClose={onClose} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    await userEvent.clear(
+      screen.getByRole("textbox", { name: "About statement" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(auth.requestAuth).toHaveBeenCalled();
+    expect(commonApiDelete).toHaveBeenCalledWith({
+      endpoint: "profiles/alice/cic/statements/about",
+    });
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(ctx.onProfileStatementRemove).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("associates the inline save error with the textarea", async () => {

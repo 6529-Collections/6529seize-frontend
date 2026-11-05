@@ -91,6 +91,14 @@ describe("effective App PR CI plan", () => {
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "hooks/useRepAllocation.ts",
     "tests/social/profile-rep-edit-sandbox.spec.ts",
+    "tests/social/profile-about-sandbox.spec.ts",
+    "components/user/user-page-header/about/UserPageHeaderAbout.tsx",
+    "components/user/user-page-header/UserPageHeaderClient.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfile.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfileDesktop.tsx",
+    "components/user/user-page-header/UserPageHeaderProfileEditor.tsx",
+    "components/user/user-page-header/useProfileEditor.ts",
+    "components/user/settings/UserSettingsBackground.tsx",
   ])("selects the profile dialog browser pack for %s", (file) => {
     const input = plan([file]);
     input.checks.playwright_critical_shell = {

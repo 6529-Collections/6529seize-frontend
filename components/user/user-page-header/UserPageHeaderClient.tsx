@@ -4,7 +4,7 @@ import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/Ap
 
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -42,6 +42,7 @@ import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
 import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
+import UserPageHeaderEditProfileDesktop from "./UserPageHeaderEditProfileDesktop";
 import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
 import ProfileHeaderRelationshipActions, {
   type ProfileAction,
@@ -104,43 +105,26 @@ function ProfilePreferencesButton() {
   );
 }
 
-type MobileHeaderControlsProps = Readonly<{
-  aboutStatement: CicStatement | null;
-  banner1Color: string;
-  banner2Color: string;
-  canEdit: boolean;
+type ProfileHeaderControlsProps = Readonly<{
+  editProfileButton: ReactNode;
   canManageProfilePreferences: boolean;
   hasTouchScreen: boolean;
-  profile: ApiIdentity;
 }>;
 
-function MobileHeaderControls({
-  aboutStatement,
-  banner1Color,
-  banner2Color,
-  canEdit,
+function ProfileHeaderControls({
+  editProfileButton,
   canManageProfilePreferences,
   hasTouchScreen,
-  profile,
-}: MobileHeaderControlsProps) {
-  if (!canEdit && !canManageProfilePreferences) {
+}: ProfileHeaderControlsProps) {
+  if (editProfileButton === null && !canManageProfilePreferences) {
     return null;
   }
 
   return (
     <div
-      className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
-        hasTouchScreen ? "" : "sm:tw-hidden"
-      }`}
+      className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${hasTouchScreen ? "min-[840px]:tw-hidden" : "sm:tw-hidden"}`}
     >
-      {canEdit ? (
-        <UserPageHeaderEditProfile
-          profile={profile}
-          statement={aboutStatement}
-          defaultBanner1={banner1Color}
-          defaultBanner2={banner2Color}
-        />
-      ) : null}
+      {editProfileButton}
       {canManageProfilePreferences ? (
         <ButtonLink
           variant="tertiary"
@@ -159,19 +143,24 @@ function MobileHeaderControls({
   );
 }
 
-function SmallScreenPreferencesButton({ show }: Readonly<{ show: boolean }>) {
+function SmallScreenPreferencesButton({
+  show,
+  editProfileButton,
+}: Readonly<{ show: boolean; editProfileButton: ReactNode }>) {
   if (!show) {
     return null;
   }
 
   return (
-    <div className="tw-hidden tw-flex-none sm:tw-absolute sm:tw-right-0 sm:tw-top-6 sm:tw-block min-[840px]:tw-hidden">
+    <div className="tw-hidden tw-flex-none sm:tw-absolute sm:tw-right-0 sm:tw-top-6 sm:tw-flex sm:tw-items-center sm:tw-gap-2 min-[840px]:tw-hidden">
+      {editProfileButton}
       <ProfilePreferencesButton />
     </div>
   );
 }
 
 type ProfileHeaderActionColumnProps = Readonly<{
+  editProfileButton: ReactNode;
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
@@ -183,6 +172,7 @@ type ProfileHeaderActionColumnProps = Readonly<{
 }>;
 
 function ProfileHeaderActionColumn({
+  editProfileButton,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
@@ -207,7 +197,8 @@ function ProfileHeaderActionColumn({
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-end tw-gap-2 md:tw-w-auto md:tw-justify-end">
         {canManageProfilePreferences ? (
-          <div className="tw-hidden min-[840px]:tw-block">
+          <div className="tw-hidden tw-items-center tw-gap-2 min-[840px]:tw-flex">
+            {editProfileButton}
             <ProfilePreferencesButton />
           </div>
         ) : null}
@@ -242,10 +233,10 @@ function ProfileHeaderActionColumn({
 }
 
 type ProfileHeaderContentProps = Readonly<{
+  editProfileButton: ReactNode;
   aboutStatement: CicStatement | null;
   banner1Color: string;
   banner2Color: string;
-  canInlineEdit: boolean;
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
@@ -264,10 +255,10 @@ type ProfileHeaderContentProps = Readonly<{
 }>;
 
 function ProfileHeaderContent({
+  editProfileButton,
   aboutStatement,
   banner1Color,
   banner2Color,
-  canInlineEdit,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
@@ -286,7 +277,7 @@ function ProfileHeaderContent({
 }: ProfileHeaderContentProps) {
   const identityPaddingClass =
     canManageProfilePreferences && !hasTouchScreen
-      ? "sm:tw-pr-36 min-[840px]:tw-pr-0"
+      ? "sm:tw-pr-60 min-[840px]:tw-pr-0"
       : "";
 
   return (
@@ -299,7 +290,7 @@ function ProfileHeaderContent({
             <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0">
               <UserPageHeaderPfpWrapper
                 profile={profile}
-                canEdit={canInlineEdit}
+                canEdit={false}
                 profileLabel={profileLabel}
               >
                 <UserPageHeaderPfp
@@ -314,7 +305,7 @@ function ProfileHeaderContent({
             <div className="tw-min-w-0 tw-flex-1 tw-pb-1 sm:tw-pb-2 sm:tw-pt-2 lg:tw-pt-1">
               <UserPageHeaderName
                 profile={profile}
-                canEdit={canInlineEdit}
+                canEdit={false}
                 mainAddress={mainAddress}
                 level={profile.level}
                 profileEnabledAt={profileEnabledAt}
@@ -337,10 +328,12 @@ function ProfileHeaderContent({
           </div>
 
           <SmallScreenPreferencesButton
+            editProfileButton={editProfileButton}
             show={canManageProfilePreferences && !hasTouchScreen}
           />
 
           <ProfileHeaderActionColumn
+            editProfileButton={editProfileButton}
             canManageProfilePreferences={canManageProfilePreferences}
             directMessageLoading={directMessageLoading}
             followHandle={followHandle}
@@ -363,11 +356,7 @@ function ProfileHeaderContent({
 
         {showAbout ? (
           <div className="lg:tw-col-start-1 lg:tw-row-start-2 lg:tw-self-start lg:tw-pt-4">
-            <UserPageHeaderAbout
-              profile={profile}
-              statement={aboutStatement}
-              canEdit={canInlineEdit}
-            />
+            <UserPageHeaderAbout statement={aboutStatement} />
           </div>
         ) : null}
 
@@ -482,8 +471,13 @@ export default function UserPageHeaderClient({
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, setToast } =
-    useContext(AuthContext);
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    isDirectProfileSession,
+    setToast,
+  } = useContext(AuthContext);
+  const hasHydrated = useHasHydrated();
 
   const { profile: hydratedProfile } = useIdentity({
     handleOrWallet: normalizedHandleOrWallet,
@@ -525,11 +519,13 @@ export default function UserPageHeaderClient({
     [profile, address, connectedProfile?.handle]
   );
 
-  const canEdit = useMemo(
-    () => !!(profile.handle && isMyProfile && !activeProfileProxy),
-    [profile.handle, isMyProfile, activeProfileProxy]
+  const canEdit = Boolean(
+    hasHydrated &&
+    isDirectProfileSession === true &&
+    profile.handle &&
+    isMyProfile &&
+    !activeProfileProxy
   );
-  const canInlineEdit = canEdit && !hasTouchScreen;
 
   const { statements, profileEnabledAt, cmsWebsiteHref, followersCount } =
     useProfileHeaderData({
@@ -546,10 +542,7 @@ export default function UserPageHeaderClient({
     [statements]
   );
 
-  const showAbout = useMemo(
-    () => aboutStatement !== null || canEdit,
-    [aboutStatement, canEdit]
-  );
+  const showAbout = aboutStatement !== null;
 
   const websiteAction =
     cmsWebsiteHref && profile.handle
@@ -716,6 +709,19 @@ export default function UserPageHeaderClient({
     },
   };
 
+  const editProfileProps = {
+    profile,
+    statement: aboutStatement,
+    defaultBanner1: banner1Color,
+    defaultBanner2: banner2Color,
+  };
+  const editProfileButton = canEdit ? (
+    <UserPageHeaderEditProfileDesktop {...editProfileProps} />
+  ) : null;
+  const mobileEditProfileButton = canEdit ? (
+    <UserPageHeaderEditProfile {...editProfileProps} />
+  ) : null;
+
   return (
     <div className="tailwind-scope">
       <section
@@ -727,25 +733,21 @@ export default function UserPageHeaderClient({
             profile={profile}
             defaultBanner1={banner1Color}
             defaultBanner2={banner2Color}
-            canEdit={canInlineEdit}
+            canEdit={false}
             profileLabel={profileLabel}
           />
-          <MobileHeaderControls
-            aboutStatement={aboutStatement}
-            banner1Color={banner1Color}
-            banner2Color={banner2Color}
-            canEdit={canEdit}
+          <ProfileHeaderControls
+            editProfileButton={mobileEditProfileButton}
             canManageProfilePreferences={canManageProfilePreferences}
             hasTouchScreen={hasTouchScreen}
-            profile={profile}
           />
         </div>
 
         <ProfileHeaderContent
+          editProfileButton={editProfileButton}
           aboutStatement={aboutStatement}
           banner1Color={banner1Color}
           banner2Color={banner2Color}
-          canInlineEdit={canInlineEdit}
           canManageProfilePreferences={canManageProfilePreferences}
           directMessageLoading={directMessageLoading}
           followHandle={followHandle}

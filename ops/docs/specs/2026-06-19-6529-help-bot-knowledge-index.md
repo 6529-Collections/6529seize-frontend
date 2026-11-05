@@ -199,6 +199,10 @@ scrollable sort controls, side-by-side Year and Season filters, bottom sheets,
 and square card previews. Existing sorting, query, and detail-page guidance
 continues to apply.
 
+The profile-header record describes the single desktop `Edit` action, the
+combined five-field editor, the existing smaller-screen field menu, and saving
+or clearing About statements. Keep those instructions aligned with the header.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the

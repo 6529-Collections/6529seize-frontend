@@ -17,7 +17,9 @@ export default function UserSettingsUsername({
   setUserName,
   setIsAvailable,
   setIsLoading,
+  label = "Username",
 }: {
+  readonly label?: string;
   readonly userName: string;
   readonly originalUsername: string;
   readonly setUserName: (userName: string) => void;
@@ -80,7 +82,7 @@ export default function UserSettingsUsername({
         htmlFor="name"
         className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
       >
-        Username
+        {label}
       </label>
       <div className="tw-relative tw-mt-2">
         <input

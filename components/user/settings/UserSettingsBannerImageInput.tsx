@@ -8,7 +8,9 @@ import { useImageUpload } from "./useImageUpload";
 export default function UserSettingsBannerImageInput({
   imageToShow,
   setFile,
+  compact = false,
 }: {
+  readonly compact?: boolean;
   readonly imageToShow: string | null;
   readonly setFile: (file: File) => void;
 }) {
@@ -30,13 +32,15 @@ export default function UserSettingsBannerImageInput({
           dragging
             ? "tw-border-iron-600 tw-bg-iron-800"
             : "tw-border-iron-700 tw-bg-iron-900"
-        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
+        } tw-relative tw-flex ${compact ? "tw-h-36" : "tw-h-64"} tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
           shake ? "tw-animate-shake motion-reduce:tw-animate-none" : ""
         } `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
           {imageToShow ? (
-            <div className="tw-relative tw-h-40 tw-w-40">
+            <div
+              className={`tw-relative ${compact ? "tw-h-28 tw-w-56" : "tw-size-40"}`}
+            >
               <FallbackImage
                 primarySrc={imageToShow}
                 fallbackSrc={getLegacyGifPreviewUri(imageToShow)}

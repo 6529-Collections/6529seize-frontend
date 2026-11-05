@@ -10,15 +10,14 @@ import type {
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useKeyPressEvent } from "react-use";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 import UserPageHeaderAboutEditError from "./UserPageHeaderAboutEditError";
+import UserPageHeaderAboutInput from "./UserPageHeaderAboutInput";
 export default function UserPageHeaderAboutEdit({
   profile,
   statement,
@@ -38,9 +37,9 @@ export default function UserPageHeaderAboutEdit({
   readonly onErrorMsgChange?: ((errorMsg: string | null) => void) | undefined;
   readonly autoFocus?: boolean | undefined;
 }) {
-  const MAX_STATEMENT_LENGTH = 500;
-
-  const { onProfileStatementAdd } = useContext(ReactQueryWrapperContext);
+  const { onProfileStatementAdd, onProfileStatementRemove } = useContext(
+    ReactQueryWrapperContext
+  );
   const { requestAuth, setToast } = useContext(AuthContext);
   useKeyPressEvent("Escape", onClose);
 
@@ -69,27 +68,23 @@ export default function UserPageHeaderAboutEdit({
     inputRef.current.setSelectionRange(inputValue.length, inputValue.length);
   }, [autoFocus]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onErrorMsgChange(null);
-    const newValue = event.target.value;
-    if (newValue.length > MAX_STATEMENT_LENGTH) {
-      onValueChange(newValue.substring(0, MAX_STATEMENT_LENGTH));
-      return;
-    }
-    onValueChange(newValue);
-  };
-
   const [loading, setLoading] = useState<boolean>(false);
   const isDisabled =
     profileStatementTarget.length === 0 ||
-    value.trim().length === 0 ||
+    (!statement && value.trim().length === 0) ||
     statement?.statement_value === value ||
     loading;
 
-  const addStatementMutation = useMutation({
+  const saveStatementMutation = useMutation({
     mutationFn: async (statementValue: string) => {
       setLoading(true);
       onErrorMsgChange(null);
+      if (statement && statementValue.trim().length === 0) {
+        await commonApiDelete({
+          endpoint: `profiles/${profileStatementTarget}/cic/statements/${statement.id}`,
+        });
+        return;
+      }
       return await commonApiPost<
         ApiCreateOrUpdateProfileCicStatement,
         CicStatement
@@ -103,7 +98,7 @@ export default function UserPageHeaderAboutEdit({
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, statementValue) => {
       onErrorMsgChange(null);
       setToast({
         message: getUserProfileHeaderMessage(
@@ -111,9 +106,11 @@ export default function UserPageHeaderAboutEdit({
         ),
         type: "success",
       });
-      onProfileStatementAdd({
-        profile,
-      });
+      if (statementValue.trim().length === 0) {
+        onProfileStatementRemove({ profile });
+      } else {
+        onProfileStatementAdd({ profile });
+      }
       onClose();
     },
     onError: (error) => {
@@ -130,13 +127,13 @@ export default function UserPageHeaderAboutEdit({
   });
 
   const submitStatement = async () => {
-    if (profileStatementTarget.length === 0 || value.trim().length === 0) {
+    if (isDisabled) {
       return;
     }
     const { success } = await requestAuth();
     if (!success) return;
     try {
-      await addStatementMutation.mutateAsync(value);
+      await saveStatementMutation.mutateAsync(value);
     } catch {
       // The mutation's onError callback owns the inline error presentation.
     }
@@ -146,48 +143,19 @@ export default function UserPageHeaderAboutEdit({
     event.preventDefault();
     await submitStatement();
   };
-  const characterCount = getUserProfileHeaderMessage(
-    "user.profileHeader.aboutEdit.characterCount",
-    {
-      count: formatInteger(DEFAULT_LOCALE, value.length),
-      max: formatInteger(DEFAULT_LOCALE, MAX_STATEMENT_LENGTH),
-    }
-  );
-
   return (
     <div className="tw-w-full tw-max-w-2xl">
       <form onSubmit={onSubmit}>
-        <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 hover:tw-ring-white/15">
-          <textarea
-            className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-border-0 tw-bg-transparent tw-px-4 tw-pb-2 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 placeholder:tw-text-iron-600 focus:tw-outline-none"
-            name="profile-about"
-            id="profile-about-input"
-            aria-label={getUserProfileHeaderMessage(
-              "user.profileHeader.aboutEdit.textareaLabel"
-            )}
-            aria-describedby={
-              errorMsg
-                ? "profile-about-character-count profile-about-error"
-                : "profile-about-character-count"
-            }
-            placeholder={getUserProfileHeaderMessage(
-              "user.profileHeader.aboutEdit.placeholder"
-            )}
-            maxLength={MAX_STATEMENT_LENGTH}
-            required
-            value={value}
-            onChange={handleInputChange}
-            ref={inputRef}
-          ></textarea>
-          <div className="tw-flex tw-justify-end tw-px-3 tw-pb-2">
-            <div
-              id="profile-about-character-count"
-              className="tw-pointer-events-none tw-rounded-full tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-white/10"
-            >
-              {characterCount}
-            </div>
-          </div>
-        </div>
+        <UserPageHeaderAboutInput
+          value={value}
+          onChange={(nextValue) => {
+            onErrorMsgChange(null);
+            onValueChange(nextValue);
+          }}
+          errorMsg={errorMsg}
+          required={!statement}
+          inputRef={inputRef}
+        />
         <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
           <Button
             variant="secondary"

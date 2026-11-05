@@ -94,8 +94,19 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 
 - Display name fallback order: `handle` -> `display` -> primary wallet -> route
   value.
-- Long About text (`>240` chars) is clamped on mobile with `See more` /
-  `See less`; desktop stays expanded.
+- Owners use one `Edit` action beside `Preferences` on desktop. It opens a
+  dialog with Profile cover, Profile picture, Profile name, Classification,
+  and About statement together. Individual fields no longer have edit pencils.
+- Smaller layouts keep the circular `Edit profile` button in the banner.
+  Choose a field in its menu to open that editor; use `Back` to return.
+- About text stays read-only in the header. An empty About has no placeholder;
+  add one through the profile editor. Clear the About editor and save to remove it.
+- Long About text is clamped to six lines on mobile with `See more` /
+  `See less` when it overflows; desktop stays expanded.
+- Profile editing is hidden from visitors, signed-out users, and active proxies.
+- The desktop editor keeps unsaved changes after a save error. If one field
+  saves before another fails, retry saves only the remaining changes. Closing
+  with unsaved desktop changes asks whether to discard them.
 - Mobile profile banners retain their existing full-strength artwork and
   top-right owner controls. Desktop banners fade into the content surface at
   the bottom; only the profile picture crosses that boundary.
