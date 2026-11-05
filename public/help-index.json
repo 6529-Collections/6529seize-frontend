@@ -1935,7 +1935,8 @@
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
-        "On their own profile, owners use direct field-level edit controls on fine-pointer desktop layouts; smaller and touch-first layouts provide an Edit profile hub for the profile cover, profile picture, name, classification, and About.",
+        "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
+        "To add or change an About statement, use the profile editor (Edit profile > About on smaller layouts). Clear the About editor and save to remove it. The header displays only saved About text, with See more and See less for long text on mobile. Visitors, signed-out users, and active proxies never see profile edit controls.",
         "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
         "Editable profile surfaces require the connected profile owner.",
         "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
@@ -6940,8 +6941,8 @@
       ],
       "keywords": ["profile", "banner", "picture", "avatar", "edit", "owner"],
       "facts": [
-        "Profile banner and picture editing are documented profile navigation features.",
-        "Editing controls require the owner or authorized profile permissions.",
+        "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
+        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop offers Choose a Meme with loading and retry states, or a file upload. Cover editing supports Gradient and Image modes.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",
