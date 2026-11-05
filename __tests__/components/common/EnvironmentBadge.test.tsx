@@ -96,11 +96,16 @@ describe("EnvironmentBadge", () => {
           );
         });
 
-        expect(
-          within(container).getByLabelText(
-            "Environment: LCL:3005 (localhost:3005)"
-          )
-        ).toHaveTextContent(logoOverlay ? "LCL3005" : "LCL:3005");
+        const hydratedBadge = within(container).getByLabelText(
+          "Environment: LCL:3005 (localhost:3005)"
+        );
+        if (logoOverlay) {
+          expect(
+            Array.from(hydratedBadge.children, (line) => line.textContent)
+          ).toEqual(["LCL", "3005"]);
+        } else {
+          expect(hydratedBadge).toHaveTextContent("LCL:3005");
+        }
         expect(errors).toEqual([]);
       } finally {
         act(() => root?.unmount());

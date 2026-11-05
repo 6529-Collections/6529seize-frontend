@@ -44,7 +44,7 @@ export default function EnvironmentBadge({
 
   if (logoOverlay) {
     const localPort = isLocalAppEnvironment(browserOrigin)
-      ? badge.split(":")[1]
+      ? new URL(browserOrigin).port
       : undefined;
 
     return (
