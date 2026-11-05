@@ -61,6 +61,7 @@ describe("MentionsTypeaheadMenu", () => {
     const row = screen.getByRole("button", { name: /alice.*Level 42/i });
     expect(within(row).getByRole("img", { name: "Level 42" })).toBeVisible();
     expect(within(row).queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByText("alice display")).toBeVisible();
     fireEvent.click(screen.getByRole("img", { name: "Level 42" }));
     expect(select).toHaveBeenCalledWith(option);
   });
@@ -114,6 +115,7 @@ describe("MentionsTypeaheadMenu", () => {
         />
       );
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.getByText("@all display")).toBeVisible();
     }
   );
 

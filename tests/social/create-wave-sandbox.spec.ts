@@ -136,7 +136,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(menu).toHaveCount(0);
     releaseFirstSearch();
     await expect(menu).toHaveCount(5);
-    await expect(menu.first()).toHaveText(/qa_.*Exact handle/s);
+    await expect(menu.first().getByRole("button")).toHaveAccessibleName(
+      "qa_ Level 1 Exact handle"
+    );
     await expect(
       menu.nth(1).getByRole("img", { name: "Level 100" })
     ).toBeVisible();
@@ -147,7 +149,18 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     const heights = await menu.evaluateAll((rows) =>
       rows.map((row) => row.getBoundingClientRect().height)
     );
-    expect(new Set(heights).size).toBe(1);
+    expect(heights).toEqual([40, 40, 40, 40, 40]);
+    const alignment = await menu
+      .first()
+      .getByRole("button")
+      .evaluate((row) => {
+        const handle = row.querySelector("span")!.getBoundingClientRect();
+        const check = row.querySelector("svg")!.getBoundingClientRect();
+        return Math.abs(
+          handle.top + handle.height / 2 - check.top - check.height / 2
+        );
+      });
+    expect(alignment).toBeLessThan(1);
     const circles = await menu.getByRole("img").evaluateAll((badges) =>
       badges.map((badge) => {
         const circle = badge.querySelector(".tw-rounded-full")!;

@@ -29,11 +29,11 @@ export default function MentionsTypeaheadMenu({
 
   return (
     <div
-      className={`tailwind-scope tw-absolute tw-z-50 tw-w-[20rem] tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
+      className={`tailwind-scope tw-absolute tw-z-50 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
         position === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1"
       }`}
     >
-      <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-px-2">
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0">
         {options.map((option, i: number) => (
           <MentionsTypeaheadMenuItem
             index={i}
