@@ -66,7 +66,13 @@ function NicActivityPages({
       });
       // An older backend ignores unknown filters. Never display its mixed feed
       // as NIC while the dependent API is unavailable.
-      if (!("next_cursor" in result) || (result.next && !result.next_cursor)) {
+      if (
+        !("next_cursor" in result) ||
+        result.page !== pageParam.page ||
+        (result.next &&
+          (!result.next_cursor ||
+            result.data.length !== Number(params.page_size)))
+      ) {
         throw new Error("NIC activity cursor response is unavailable");
       }
       return result;

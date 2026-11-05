@@ -64,7 +64,7 @@ jest.mock(
 const fetchMock = jest.mocked(commonApiFetch);
 const params = {
   page: "1",
-  page_size: "10",
+  page_size: "1",
   log_type: "RATING_EDIT,HANDLE_EDIT",
   profile: "shelby",
   activity_scope: "NIC" as const,
@@ -168,6 +168,22 @@ describe("NIC cursor pagination", () => {
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("identity-page-2");
   });
+  it.each([{ page: 7 }, { data: [] }])(
+    "keeps the current page when a continuation violates the page contract: %j",
+    async (invalid) => {
+      fetchMock.mockResolvedValueOnce(response(1));
+      fetchMock.mockResolvedValueOnce({ ...response(2), ...invalid });
+      setup();
+      await screen.findByText("identity-page-1");
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
+      );
+      expect(screen.getByText("Page 1")).toBeInTheDocument();
+      expect(screen.getByText("identity-page-1")).toBeInTheDocument();
+    }
+  );
   it("does not display a mixed legacy response when the cursor API is unavailable", async () => {
     fetchMock.mockResolvedValue({
       page: 1,

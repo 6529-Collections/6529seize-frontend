@@ -17100,6 +17100,8 @@ paths:
             edits while preserving all other matching entries.
           schema:
             type: string
+            enum:
+              - NIC
         - name: cursor
           in: query
           required: false
