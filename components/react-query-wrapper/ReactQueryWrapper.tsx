@@ -21,6 +21,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
@@ -42,7 +43,6 @@ import {
 export { ReactQueryWrapperContext } from "./ReactQueryWrapperContext";
 import { createGeneralQueryHandlers } from "./ReactQueryWrapper.generalHandlers";
 import { createWaveQueryHandlers } from "./ReactQueryWrapper.waveHandlers";
-import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
 import { getHandlesFromProfile } from "./profileQueryHandles";
 
 const createReactQueryContextValue = (
