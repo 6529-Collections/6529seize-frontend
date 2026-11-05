@@ -14,7 +14,13 @@ import {
 import type { Page } from "@/helpers/Types";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
@@ -129,21 +135,21 @@ export default function UserPageSubscriptionsHistory(
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
-            onFocus={(event) =>
-              event.currentTarget.scrollIntoView({
-                block: "nearest",
-                inline: "nearest",
-              })
-            }
+            onFocus={(event) => revealHistoryTab(event.currentTarget)}
             className={({ selected }) =>
               getButtonClasses({
                 variant: selected ? "filterSelected" : "filter",
                 size: null,
-                className: `tw-h-8 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none ${selected ? "" : "!tw-border-iron-800 !tw-bg-transparent !tw-font-normal desktop-hover:hover:!tw-bg-white/[0.04]"}`,
+                className: `tw-h-8 tw-scroll-mx-1 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none ${selected ? "" : "!tw-border-iron-800 !tw-bg-transparent !tw-font-normal desktop-hover:hover:!tw-bg-white/[0.04]"}`,
               })
             }
           >
-            {tab.label ?? tab.heading}
+            {({ selected }) => (
+              <HistoryTabLabel
+                label={tab.label ?? tab.heading}
+                selected={selected}
+              />
+            )}
           </Tab>
         ))}
       </TabList>
@@ -183,6 +189,32 @@ export default function UserPageSubscriptionsHistory(
       </TabPanels>
     </TabGroup>
   );
+}
+
+// Reveal pills without animation, so reduced motion is respected. Pills use
+// tw-scroll-mx-1 to keep their focus ring inside the strip padding.
+function revealHistoryTab(tab: HTMLElement) {
+  tab.scrollIntoView({
+    behavior: "instant",
+    block: "nearest",
+    inline: "nearest",
+  });
+}
+
+function HistoryTabLabel({
+  label,
+  selected,
+}: Readonly<{ label: string; selected: boolean }>) {
+  const labelRef = useRef<HTMLSpanElement>(null);
+  // Focus moves before selection, and the selected pill is bolder and wider.
+  // Reveal the focused pill again once its selected width is committed.
+  useLayoutEffect(() => {
+    const tab = labelRef.current?.closest<HTMLElement>('[role="tab"]');
+    if (selected && tab && tab === document.activeElement) {
+      revealHistoryTab(tab);
+    }
+  }, [selected]);
+  return <span ref={labelRef}>{label}</span>;
 }
 
 function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
