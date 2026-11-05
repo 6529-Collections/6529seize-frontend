@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Menu, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
@@ -12,6 +13,7 @@ export function CompactMenu({
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   className,
   triggerClassName,
   triggerAsChild,
@@ -34,13 +36,22 @@ export function CompactMenu({
   "aria-label": ariaLabel,
   unstyledItems,
 }: Readonly<CompactMenuProps>) {
+  const [keyboardNavigation, setKeyboardNavigation] = useState(false);
   return (
-    <Menu as="div" className={clsx("tw-relative", className)}>
+    <Menu
+      as="div"
+      className={clsx("tw-relative", className)}
+      onKeyDownCapture={() => setKeyboardNavigation(true)}
+      onPointerDownCapture={() => setKeyboardNavigation(false)}
+      onPointerMoveCapture={() => setKeyboardNavigation(false)}
+    >
       {({ open, close }) => (
         <CompactMenuContent
+          keyboardNavigation={keyboardNavigation}
           trigger={trigger}
           items={items}
           onItemSelect={onItemSelect}
+          onOpenChange={onOpenChange}
           triggerClassName={triggerClassName}
           triggerAsChild={triggerAsChild}
           unstyledTrigger={unstyledTrigger}
@@ -76,14 +87,17 @@ interface CompactMenuContentProps extends Omit<
   readonly anchor: CompactMenuProps["anchor"];
   readonly menuWidthClassName: CompactMenuProps["menuWidthClassName"];
   readonly ariaLabel: CompactMenuProps["aria-label"];
+  readonly keyboardNavigation: boolean;
   readonly isOpen: boolean;
   readonly close: () => void;
 }
 
 function CompactMenuContent({
+  keyboardNavigation,
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   triggerClassName,
   triggerAsChild = false,
   unstyledTrigger = false,
@@ -107,7 +121,12 @@ function CompactMenuContent({
   isOpen,
   close,
 }: Readonly<CompactMenuContentProps>) {
-  const { menuItemsRef } = useCompactMenuFocus(autoFocusItem);
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+  const { menuItemsRef } = useCompactMenuFocus(
+    autoFocusItem || keyboardNavigation
+  );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
@@ -124,6 +143,7 @@ function CompactMenuContent({
       />
       <MenuItems
         ref={menuItemsRef}
+        data-keyboard-navigation={keyboardNavigation}
         anchor={menuAnchor}
         className={clsx(
           "tw-group/compact-menu",

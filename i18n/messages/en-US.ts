@@ -3185,6 +3185,21 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "artworkAlerts.label": "Artwork alerts",
+  "artworkAlerts.on": "On",
+  "artworkAlerts.off": "Off",
+  "artworkAlerts.saving": "Please wait…",
+  "artworkAlerts.mainStage":
+    "Get notified when this artist submits to The Memes Main Stage.",
+  "artworkAlerts.enabled": "Artwork alerts are on.",
+  "artworkAlerts.disabled": "Artwork alerts are off.",
+  "artworkAlerts.retry": "Try again",
+  "artworkAlerts.saveFailed": "Couldn’t save artwork alerts.",
+  "artworkAlerts.tryAgain": "Please try again.",
+  "artworkAlerts.sessionChanged": "Your session changed. Please try again.",
+  "artworkAlerts.notification":
+    "{artist} submitted {artwork} to {competition}.",
+  "artworkAlerts.untitled": "untitled artwork",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",

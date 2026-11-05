@@ -75,6 +75,11 @@ const NOTIFICATION_FILTERS: readonly NotificationFilterOption[] = [
     labelKey: "notifications.filter.option.invites",
   },
   {
+    id: "artwork",
+    cause: [ApiNotificationCause.ArtistArtworkSubmitted],
+    labelKey: "artworkAlerts.label",
+  },
+  {
     id: "subscriptions",
     cause: [ApiNotificationCause.SubscriptionCoverage],
     labelKey: "notifications.filter.option.subscriptions",
