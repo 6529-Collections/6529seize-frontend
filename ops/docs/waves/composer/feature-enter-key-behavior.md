@@ -36,6 +36,11 @@ Expanded browser actions use flat icon buttons with a rounded-square hover
 background and tooltips. Upload uses a paperclip. The narrow-row plus toggle
 and labeled action tray retain their existing icons.
 
+Wave chat and unencrypted DM composers use the same outlined paper-airplane send
+icon as encrypted chat, on desktop and mobile. The chat send control stays square
+instead of expanding to show a `Post` label on desktop. Storm actions keep their
+specific Add part, Save changes and Post storm labels.
+
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
