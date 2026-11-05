@@ -12,6 +12,7 @@ import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { FR_FR_MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -27,6 +28,19 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.historyGap.load": "Charger les messages manqués",
+  "waves.historyGap.loaded": "Messages manqués chargés",
+  "waves.historyGap.loading": "Chargement des messages manqués…",
+  "waves.historyGap.retry":
+    "Impossible de charger les messages manqués. Réessayer",
+
+  "waves.myVotes.sort": "Trier par",
+  "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
+  "waves.myVotes.sort.leaderboard": "Position au classement",
+  "waves.myVotes.sort.lastVoted": "Dernier vote",
+  "e2ee.profile.view": "Voir le profil de {name}",
+  "e2ee.profile.viewUnknown": "Voir le profil",
+  "e2ee.profile.level": "Niveau {level}",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
@@ -241,6 +255,8 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
+  "waves.drop.actions.showMore": "Afficher plus",
+  "waves.drop.actions.showLess": "Afficher moins",
   "media.video.captions": "Sous-titres",
   "media.video.download": "Telecharger le media",
   "media.video.downloading": "Telechargement du media",
@@ -619,6 +635,8 @@ export const FR_FR_MESSAGES = {
   "drop.media.saveDialogTitle": "Enregistrer l'image",
   "drop.media.processingFailed": "Le traitement de l'image a echoue.",
   "drop.media.processingTimedOut": "Le traitement de l'image a expire.",
+  "media.interactive.frameTitle": "Média HTML interactif",
+  "media.interactive.loading": "Chargement du média interactif",
   "quickDm.regionAriaLabel": "Messages directs rapides",
   "quickDm.openButtonAriaLabel": "Ouvrir les messages directs rapides",
   "quickDm.openButtonUnreadAriaLabel":
@@ -643,6 +661,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_CAPACITOR_CONNECT_MESSAGES,
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   ...FR_FR_GLOBAL_ERROR_MESSAGES,
+  ...FR_FR_MAPPING_TOOL_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
   "waves.chat.guidelinesDialog.title": "Directives de la wave",

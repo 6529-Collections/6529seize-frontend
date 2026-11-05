@@ -7,6 +7,15 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The encrypted-messages record covers the composer emoji board, native and 6529
+custom emojis, insertion during edits, the full reaction picker, readable
+shortcode fallbacks, collection-load recovery, and the separate emoji history.
+
+The `media.video-player` record covers preview frames and the video-icon fallback
+for Additional Media and Promo Video in submission details. Additional Media
+keeps original video downloads deferred until Play; Promo Video retains metadata
+preloading.
+
 The `waves.native-competitions` record covers optional anonymous submissions,
 their default-off creation setting, publication lock, per-entry winner reveal,
 continued anonymity across later draws, own-entry access, and submitters'
@@ -49,9 +58,9 @@ from deletion and manual review status.
 
 The `home.overview` record also describes the shared hero artwork and copy, with
 Connect wallet followed by Start here for logged-out visitors. The hero uses a
-fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
-What is 6529? section explains art, Waves, and participation, linking to
-`/the-memes`, `/waves`, and The Memes - Main Stage Wave respectively.
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The
+latest-drop slot follows the hero directly; the home page has no What is 6529?
+section.
 
 The `home.overview` record describes the shared discovery cards on the homepage:
 covers beside the content on mobile and filling the card behind a dark, image-tinted text
@@ -68,9 +77,7 @@ two inline links within its existing sentence: “Hold Meme Cards” opens
 `/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
 eligibility and nominations for new artists. Restricted iOS visitors keep the
 browsing/community description without those links. The record includes the
-“Four steps into 6529.” introduction, the “Read the full guide” link, and
-“Explore Main Stage” as the A real say card's link to
-`/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
+“Four steps into 6529.” introduction and the “Read the full guide” link.
 
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
@@ -92,6 +99,8 @@ The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
 cards omit Your allowance until a wallet address is available. Connected wallets
 retain allocation pills and distinct loading, unpublished, empty, and unavailable
 states; an allocation does not guarantee that it remains mintable.
+
+The `notifications.artist-artwork-alerts` record describes Artwork alerts in the Profile actions menu, its signed-in-only artist-badge visibility rule with an exception for already-enabled alerts, loading the saved state when the menu opens, independent opt-in, Main Stage-only scope, no-backfill boundary, anonymous-entry exclusion, delivery preferences, and recovery states. It links to the canonical artist artwork alerts guide and the Notifications route.
 
 The `waves.artist-submissions-popup` record explains the artist activity icon,
 Active Submissions promise badges, and the distinction between reading a badge,
@@ -121,6 +130,18 @@ The `waves.content-tabs` record describes steady tab rows with screen-reader
 loading announcements, section-specific loading, and destination-bound competition
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
+
+The `messages.encrypted-chats` record covers profile links in DM headers and
+introductions, sender names and avatars, desktop profile cards, level and public
+author badges, profile-wave navigation, and linked member mentions. Those
+details come from public profile data; chat contents stay encrypted. Missing
+profile details do not prevent reading messages stored on the device.
+
+The `waves.leaderboard.sort-group-filters` record covers Main Stage's one-tap
+Additional Action checkbox, independent sorting and view selection, complete-result
+filtering including promises without plans, reset behavior, and empty/error recovery.
+It directs readers to artwork details for the optional plan and distinguishes the
+artist's promise from verification of approval or fulfillment.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
 sidebar sections, their explanations and view-all destinations. It describes
@@ -992,6 +1013,6 @@ include... and Search identities to exclude..., respectively.
 Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
 
-Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.
+Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Its help record explains Sort by: Your vote amount, Leaderboard position and Last voted, complete-list ordering, ties and missing data, browser persistence by competition and profile, reset-selection clearing and order refresh after successful votes. Winners paginate by win time newest first.
 
 Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.

@@ -18,7 +18,8 @@ const ACCESS_INPUT_SELECTOR =
   'input[aria-label="Team access code"], input[placeholder="Team Login"]';
 type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
-async function installStagingAccessUnlock(page: Page) {
+/** Unlocks the staging access gate on navigation; for extra pages too. */
+export async function installStagingAccessUnlock(page: Page) {
   const originalGoto = page.goto.bind(page) as PageGoto;
   const gotoWithAccessUnlock: PageGoto = async (...args) => {
     const response = await originalGoto(...args);
@@ -37,7 +38,8 @@ async function installStagingAccessUnlock(page: Page) {
   page.goto = gotoWithAccessUnlock as Page["goto"];
 }
 
-async function seedStagingAccessCookie(
+/** Seeds the staging access cookie; for contexts a spec creates itself. */
+export async function seedStagingAccessCookie(
   context: BrowserContext,
   baseURL?: string
 ) {

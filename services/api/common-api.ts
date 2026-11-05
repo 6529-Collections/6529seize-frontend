@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -33,9 +34,10 @@ export const getStructuredApiErrorStatus = (
   return typeof status === "number" ? status : undefined;
 };
 
-export const getStructuredApiErrorCode = (
+/** The parsed JSON body of a structured API error, when it is an object. */
+export const getStructuredApiErrorBody = (
   error: unknown
-): string | undefined => {
+): Readonly<Record<string, unknown>> | undefined => {
   if (typeof error !== "object" || error === null || !("response" in error)) {
     return undefined;
   }
@@ -56,10 +58,15 @@ export const getStructuredApiErrorCode = (
       return undefined;
     }
   }
-  if (typeof body !== "object" || body === null || !("code" in body)) {
-    return undefined;
-  }
-  const code = (body as { readonly code?: unknown }).code;
+  return typeof body === "object" && body !== null && !Array.isArray(body)
+    ? (body as Readonly<Record<string, unknown>>)
+    : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  const code = getStructuredApiErrorBody(error)?.["code"];
   return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
 
@@ -86,7 +93,7 @@ const buildUrl = (
 ): string => {
   let path = `/api/${endpoint}`;
   const apiEndpoint =
-    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : getApiBase();
   let url = `${apiEndpoint}${path}`;
 
   if (params) {
@@ -632,6 +639,8 @@ export const commonApiDelete = async (param: {
   headers?: Record<string, string> | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  /** Optional JSON body, for example a device signature. */
+  body?: object | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -639,6 +648,7 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    body: param.body === undefined ? undefined : JSON.stringify(param.body),
     signal: param.signal,
     parseJson: false,
     errorMode: param.errorMode ?? "legacy-string",

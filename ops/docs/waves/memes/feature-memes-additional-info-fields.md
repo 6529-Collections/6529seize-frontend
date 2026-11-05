@@ -33,6 +33,9 @@ If the connected profile has a primary wallet, the form pre-fills:
 
 ## User Journey
 
+Review the `Additional Action` summary first. Use `Back` to edit the checkbox
+or plan in `Artwork`; see [Additional Action](feature-memes-submission.md#additional-action).
+
 1. Review/edit `Airdrop Distribution`.
 2. Review/edit `Payment`, optionally enabling `Designated Payee`.
 3. Add optional `Allowlist Configuration` batches.
@@ -115,7 +118,16 @@ If the connected profile has a primary wallet, the form pre-fills:
   addresses.
 - `Preview Image`, `Promo Video`, `Additional Media`, `About the Artist`, and
   `Artwork Commentary` each render only when data exists.
+- A marked additional action displays its saved plan in a separate
+  `Additional Action` section. If no plan was provided, the section says so.
+  This does not infer a plan from artist bio or commentary.
+- While the saved plan loads, the section shows a loading message. If loading
+  fails, use `Retry loading plan`. A failed request does not mean no plan exists.
 - `Additional Media` shows at most `4` items.
+- Supporting and promo videos show an available preview frame before playback.
+  If a preview is not available yet, a video icon marks the playable area.
+  `Additional Media` loads only the small preview image until you press Play;
+  viewing the section does not download the original video.
 - Click or tap `Preview Image` or an image in `Additional Media` to open the
   [image viewer](../drop-actions/feature-image-viewer-and-scaling.md), with zoom,
   download, open-original, and fullscreen controls where supported. Desktop

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WebSidebar from "@/components/layout/sidebar/WebSidebar";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -104,9 +105,10 @@ it("puts the collapsed update rocket above Search with no desktop toast", () => 
   ).not.toBeNull();
   expect(update).toHaveAttribute("data-tooltip-content", "Update");
   expect(update).toHaveAttribute("data-tooltip-hidden", "false");
+  // The small hash-named WebP shared with the reload cover, not the 1.1 MB PNG.
   expect(update.querySelector("img")).toHaveAttribute(
     "src",
-    "/rocket-refresh-small.png"
+    VERSION_RELOAD_IMAGE_SRC
   );
   expect(screen.getByText("Update")).toHaveClass("tw-w-0", "tw-opacity-0");
   expect(
@@ -185,7 +187,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   const utilities = update.closest('[data-sidebar-section="utilities"]');
   expect(utilities?.firstElementChild).toBe(utilityRow);
   expect(
-    screen.queryByRole("link", { name: "Notifications" })
+    screen.queryByRole("button", { name: "Notifications" })
   ).not.toBeInTheDocument();
 
   jest.mocked(useSeizeConnectContext).mockReturnValue({
@@ -193,7 +195,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
     hasValidWalletAuth: true,
   } as unknown as ReturnType<typeof useSeizeConnectContext>);
   rerender(<WebSidebar {...sidebarProps} />);
-  const notifications = screen.getByRole("link", { name: "Notifications" });
+  const notifications = screen.getByRole("button", { name: "Notifications" });
   expect(
     notifications.closest('[data-sidebar-section="account"]')
   ).not.toBeNull();
@@ -207,7 +209,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   } as unknown as ReturnType<typeof useSeizeConnectContext>);
   rerender(<WebSidebar {...sidebarProps} />);
   expect(
-    screen.queryByRole("link", { name: "Notifications" })
+    screen.queryByRole("button", { name: "Notifications" })
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Update" })).toBe(update);
   expect(utilities?.firstElementChild).toBe(utilityRow);

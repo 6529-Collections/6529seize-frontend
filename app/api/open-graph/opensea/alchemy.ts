@@ -1,4 +1,5 @@
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
+import { getStagingApiKey } from "@/config/serverEnv";
 
 import { extractAlchemyMetadata } from "./shared";
 import type { AlchemyNftMetadata, OpenSeaMetadataFetchResult } from "./shared";
@@ -89,20 +90,23 @@ const fetchAlchemyMetadataCandidate = (
  * have no Alchemy key (the desktop app). The proxy serves Ethereum mainnet
  * and answers `{ tokens: [...] }`.
  */
+const getProxyAuthHeaders = (): Record<string, string> => {
+  const stagingApiKey = getStagingApiKey();
+  return stagingApiKey ? { "x-6529-auth": stagingApiKey } : {};
+};
+
 const fetchProxyMetadataCandidate = (
   contractAddress: string,
   tokenIdCandidate: string
 ): Promise<AlchemyMetadataCandidateResult> =>
   requestMetadataCandidate(
-    `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+    apiUrl("/alchemy-proxy/token-metadata"),
     {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        ...(publicEnv.STAGING_API_KEY
-          ? { "x-6529-auth": publicEnv.STAGING_API_KEY }
-          : {}),
+        ...getProxyAuthHeaders(),
       },
       body: JSON.stringify({
         address: contractAddress,

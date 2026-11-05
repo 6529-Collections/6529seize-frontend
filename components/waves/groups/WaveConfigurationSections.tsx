@@ -1,3 +1,6 @@
+"use client";
+
+import { useWaveConfiguration } from "@/hooks/waves/useWaveConfiguration";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveChatReplies from "@/components/waves/specs/WaveChatReplies";
@@ -17,9 +20,10 @@ interface WaveConfigurationSectionsProps {
 }
 
 export default function WaveConfigurationSections({
-  wave,
+  wave: source,
 }: WaveConfigurationSectionsProps) {
-  const showChatStatus = wave.wave.type !== ApiWaveType.Chat;
+  const wave = useWaveConfiguration(source);
+  const showChatStatus = source.wave.type !== ApiWaveType.Chat;
   const showChatSettings = wave.chat.enabled;
   const showChatSection = showChatStatus || showChatSettings;
 

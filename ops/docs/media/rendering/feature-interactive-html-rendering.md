@@ -5,15 +5,17 @@
 - Interactive `text/html` media uses two renderer families:
   - Sandboxed renderer on shared drop/card surfaces and in Memes submission
     preview.
-  - NFT animation renderer on home `Latest Drop` artwork.
+  - NFT animation renderer on home `Latest Drop` artwork and on NFT pages
+    whose animation is HTML (for example Memes cards).
 - Shared card surfaces that already have preview artwork can show that static
   preview image instead of mounting the live HTML iframe immediately.
-- Some touch-device home surfaces require `Tap to load` before HTML starts.
+- Some touch-device home and Memes quick-vote surfaces require `Tap to load`
+  before HTML starts.
 
 ## Location in the Site
 
 - Shared drop/card media surfaces that use common media renderers (including
-  home card panels and wave/drop card views).
+  home card panels, wave/drop card views, and the Memes quick-vote dialog).
 - `Submit Work to The Memes` modal (`/waves/{waveId}`), Artwork step,
   `Interactive HTML` tab preview.
 - Home `Latest Drop` artwork (`/`) when the NFT animation format is HTML.
@@ -42,8 +44,11 @@
    - iframe with `sandbox="allow-scripts"`, empty `allow`,
      `referrerPolicy="no-referrer"`, and `credentialless`.
 5. Shared renderer iframes mount only after the surface enters the viewport.
-6. Touch-gated home contexts require `Tap to load`; when preview artwork
-   exists, that image stays visible behind the gate until activation.
+   Until the frame finishes loading, a `Loading interactive media` status
+   appears over it.
+6. Touch-gated home and Memes quick-vote contexts require `Tap to load`; when
+   preview artwork exists, that image stays visible behind the gate until
+   activation.
 7. Submission preview:
    - accepts only root CID/transaction IDs (no subpaths, query strings, or
      fragments)
@@ -52,8 +57,12 @@
    - validates gateway responses with `HEAD`, then `GET` fallback on `405`,
      `403`, or `501`
    - keeps `Continue` blocked until status is `valid`.
-8. Home `Latest Drop` HTML uses the NFT animation iframe path (no sandbox
-   banner/canonicalization gate). If an approved Arweave HTML URL errors or
+8. Home `Latest Drop` HTML and other NFT animation HTML use the NFT animation
+   iframe path (no host banner/canonicalization gate). That iframe is
+   sandboxed: the artwork runs and can start downloads and open links in a new
+   tab (each needs a click or tap), but it has no same-origin access to
+   6529.io and cannot navigate the page. NextGen `Live` mode uses a stricter
+   scripts-only sandbox. If an approved Arweave HTML URL errors or
    does not finish loading, the renderer retries the same asset across the
    remaining approved gateways before giving up. Touch devices can still
    require `Tap to load`.
@@ -112,6 +121,9 @@
   state with an inline reason.
 - If gateway requests fail, users see an `Unable to reach/verify` style error;
   editing the hash and retrying re-runs validation.
+- Each visitor can run up to 30 submission validations a minute. Past that,
+  the preview shows `Unable to verify media URL. Try again later.` until the
+  minute is over.
 - If `Latest Drop` HTML animation fails on an approved Arweave gateway, the
   renderer automatically tries the remaining approved gateways; after those
   retries are exhausted, reload `/` to retry rendering.
@@ -121,8 +133,15 @@
 - Interactive iframe handling applies only to `text/html` media.
 - Some shared card surfaces intentionally prefer a static preview image over
   live HTML when preview artwork is available.
-- The sandbox allows scripts but intentionally does not grant same-origin,
-  popup, or broader permission-policy capabilities.
+- The shared sandboxed renderer allows scripts but intentionally does not grant
+  same-origin, popup, or broader permission-policy capabilities.
+- NFT animation iframes (Memes cards and other NFT HTML) allow scripts,
+  downloads, and new-tab links (the new tab opens as a normal page, outside the
+  sandbox). They do not allow same-origin access, top-level navigation, forms,
+  or modals. NextGen `Live` frames allow scripts only. Per-artwork exceptions
+  are documented in code: The Memes #445 compatibility viewer allows scripts
+  and downloads, and The Memes #507 additionally allows same-origin access
+  because it cannot start without `localStorage`.
 - Submission interactive mode currently keeps media type fixed to
   `text/html`.
 - Home `Latest Drop` HTML uses a different renderer path and does not show

@@ -19,6 +19,7 @@ type WaveConfigController = ReturnType<typeof useWaveConfig>;
 export default function CreateWaveStepContent({
   controller,
   isCompetition = false,
+  chatRestricted,
   lockSubmissionStrategy = false,
   lockOutcomeDefinitions = false,
   lockVotingCredits = false,
@@ -34,6 +35,7 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly stepOverride?: CreateWaveStep;
   readonly isCompetition?: boolean;
+  readonly chatRestricted?: boolean | undefined;
   readonly lockSubmissionStrategy?: boolean;
   readonly lockOutcomeDefinitions?: boolean;
   readonly lockVotingCredits?: boolean;
@@ -212,6 +214,7 @@ export default function CreateWaveStepContent({
       return (
         <CreateWaveReview
           isCompetition={isCompetition}
+          chatRestricted={chatRestricted}
           config={config}
           groupsCache={groupsCache}
           description={descriptionSnapshot}

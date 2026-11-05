@@ -122,4 +122,28 @@ describe("useWaveCurationDrops", () => {
 
     expect(refetch).not.toHaveBeenCalled();
   });
+
+  it("leaves ATTACHMENT_STATUS_UPDATE to the app-wide realtime updater", () => {
+    const {
+      useWebSocketMessage,
+    } = require("@/services/websocket/useWebSocketMessage");
+    const subscribedTypes: WsMessageType[] = [];
+    (useWebSocketMessage as jest.Mock).mockImplementation((type) => {
+      subscribedTypes.push(type);
+    });
+
+    renderHook(() =>
+      useWaveCurationDrops({
+        wave: { id: "wave-1" } as unknown as Parameters<
+          typeof useWaveCurationDrops
+        >[0]["wave"],
+        curationId: "curation-1",
+      })
+    );
+
+    expect(subscribedTypes).toContain(WsMessageType.DROP_UPDATE);
+    expect(subscribedTypes).not.toContain(
+      WsMessageType.ATTACHMENT_STATUS_UPDATE
+    );
+  });
 });

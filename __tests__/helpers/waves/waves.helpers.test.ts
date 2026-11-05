@@ -393,6 +393,7 @@ describe("waves.helpers", () => {
       expect(commonApiPost).toHaveBeenCalledWith({
         endpoint: "waves/direct-message/new",
         body: { identity_addresses: ["a", "b"] },
+        errorMode: "structured",
       });
       expect(result).toBe("wave");
     });

@@ -2,6 +2,7 @@
 
 import { useUnreadNotifications } from "./useUnreadNotifications";
 import { useDmUnreadSummary } from "@/services/dm-unread/DmUnreadStateProvider";
+import { useE2eeUnreadSummary } from "@/hooks/e2ee/useE2ee";
 
 type UnreadIndicatorType = "notifications" | "messages";
 
@@ -24,6 +25,9 @@ export function useUnreadIndicator({
   );
 
   const { hasUnread: haveUnreadDmDrops } = useDmUnreadSummary();
+  // Encrypted chats count toward the Messages badge; always false when the
+  // encrypted-messages flag is off or the engine is not loaded.
+  const { hasUnread: haveUnreadEncrypted } = useE2eeUnreadSummary();
 
   // Only show indicators if user is authenticated
   if (!handle) {
@@ -34,5 +38,5 @@ export function useUnreadIndicator({
     return { hasUnread: haveUnreadNotifications };
   }
 
-  return { hasUnread: haveUnreadDmDrops };
+  return { hasUnread: haveUnreadDmDrops || haveUnreadEncrypted };
 }

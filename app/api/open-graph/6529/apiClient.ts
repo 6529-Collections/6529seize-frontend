@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
 
-import { publicEnv } from "@/config/env";
-
-const PUBLIC_API_BASE = "https://api.6529.io";
+import { getStagingApiKey } from "@/config/serverEnv";
+import {
+  getApiBase,
+  PUBLIC_PRODUCTION_API_BASE,
+} from "@/services/api/api-endpoints";
 
 export type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -32,8 +34,8 @@ function trimLeadingSlashes(value: string): string {
   return value.slice(start);
 }
 
-function getApiBase(): string {
-  const base = publicEnv.API_ENDPOINT?.trim();
+function getPrimaryApiBase(): string {
+  const base = getApiBase().trim();
   if (!base) {
     throw new Error("API endpoint is not configured.");
   }
@@ -68,12 +70,15 @@ function normalizeApiOrigin(base: string): string {
 }
 
 function getApiBases(): readonly string[] {
-  const primary = getApiBase();
-  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
+  const primary = getPrimaryApiBase();
+  if (
+    normalizeApiOrigin(primary) ===
+    normalizeApiOrigin(PUBLIC_PRODUCTION_API_BASE)
+  ) {
     return [primary];
   }
 
-  return [primary, PUBLIC_API_BASE];
+  return [primary, PUBLIC_PRODUCTION_API_BASE];
 }
 
 function getCallerApiAuth(context?: ApiContext): string | undefined {
@@ -82,9 +87,7 @@ function getCallerApiAuth(context?: ApiContext): string | undefined {
 }
 
 function getApiAuth(context?: ApiContext): string | undefined {
-  return (
-    getCallerApiAuth(context) ?? publicEnv.STAGING_API_KEY?.trim() ?? undefined
-  );
+  return getCallerApiAuth(context) ?? getStagingApiKey();
 }
 
 function hashCacheToken(token: string): string {
@@ -97,7 +100,7 @@ export function getCacheAuthScope(context?: ApiContext): string {
     return `auth:${hashCacheToken(callerAuth)}`;
   }
 
-  return publicEnv.STAGING_API_KEY?.trim() ? "staging" : "public";
+  return getStagingApiKey() ? "staging" : "public";
 }
 
 function createApiHeaders(context?: ApiContext): HeadersInit {

@@ -1,6 +1,14 @@
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getCompetitionDropRoute,
+  getCompetitionRoute,
+} from "@/helpers/competition.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import {
+  getEncryptedMessagesRoute,
+  getMessagesBaseRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import type { DevicePushData } from "./device-push.types";
 
 const redirectConfig = {
@@ -19,13 +27,21 @@ const redirectConfig = {
     drop_id,
     competition_id,
     competition_entry_id,
+    competition_drop_id,
   }: {
     wave_id: string;
     drop_id: string;
     competition_id?: string;
     competition_entry_id?: string;
+    competition_drop_id?: string;
   }) => {
     if (competition_id) {
+      if (competition_drop_id)
+        return getCompetitionDropRoute(
+          wave_id,
+          competition_id,
+          competition_drop_id
+        );
       const entryQuery = competition_entry_id
         ? `?entry=${encodeURIComponent(competition_entry_id)}`
         : "";
@@ -38,6 +54,11 @@ const redirectConfig = {
       isApp: false,
     });
   },
+  // Content-free encrypted-chat wake: open the encrypted list; the engine
+  // syncs and shows which chat changed. Builds without encrypted chats fall
+  // back to the plaintext messages list.
+  e2ee: () =>
+    isE2eeEnabled() ? getEncryptedMessagesRoute() : getMessagesBaseRoute(true),
 };
 
 export const resolvePushRedirectUrl = (notificationData: DevicePushData) => {

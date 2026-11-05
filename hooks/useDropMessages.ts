@@ -12,11 +12,7 @@ import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
-import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
@@ -33,7 +29,21 @@ import {
   fetchDropRepliesV2,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
+import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
+import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+
+type DropMessagesPage = ApiWaveDropsFeed | ApiWaveDropsV2PageFeed;
+
+const dropMessagesPageAdapter: InfinitePageAdapter<
+  DropMessagesPage,
+  ApiDropWithoutWave
+> = {
+  getItems: (page) => page.drops,
+  withItems: (page, drops) => ({ ...page, drops }),
+  getKey: (drop) => drop.id,
+};
 
 export function useDropMessages(
   waveId: string,
@@ -119,8 +129,14 @@ export function useDropMessages(
     setInit(true);
   }, [data]);
 
-  const requestRefetch = useDebouncedQueryRefetch({
+  const refetchHead = useInfiniteHeadRefetch({
+    queryKey,
     refetch,
+    strategy: "aligned",
+    adapter: dropMessagesPageAdapter,
+  });
+  const requestRefetch = useDebouncedQueryRefetch({
+    refetch: refetchHead,
     isFetching,
     isFetchingNextPage,
   });
@@ -151,16 +167,6 @@ export function useDropMessages(
         requestRefetch();
       },
       [dropId, queryClient, requestRefetch, waveId]
-    )
-  );
-
-  useWebSocketMessage<ApiAttachment>(
-    WsMessageType.ATTACHMENT_STATUS_UPDATE,
-    useCallback(
-      (attachment) => {
-        updateAttachmentInCachedDrops(queryClient, attachment);
-      },
-      [queryClient]
     )
   );
 

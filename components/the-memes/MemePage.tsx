@@ -16,7 +16,7 @@ import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilter
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -359,11 +359,11 @@ export default function MemePage({
       async function loadTransactions() {
         try {
           const response = await fetchUrl<DBResponse<Transaction>>(
-            `${
-              publicEnv.API_ENDPOINT
-            }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
-              ","
-            )}&id=${nftId}`,
+            apiUrl(
+              `/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
+                ","
+              )}&id=${nftId}`
+            ),
             { signal: controller.signal }
           );
           if (controller.signal.aborted) {
@@ -626,6 +626,7 @@ export default function MemePage({
 
   return (
     <div
+      lang={locale}
       data-meme-card-page
       className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-[calc(84px+env(safe-area-inset-bottom))] tw-text-white lg:tw-pb-5"
     >

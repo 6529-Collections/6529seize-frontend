@@ -9,6 +9,9 @@ import {
 } from "@/contexts/EmojiContext";
 
 import { notifyReactionHistoryChange } from "@/helpers/reactions/reactionHistory";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { prepareEmojiMartData } from "./prepareEmojiMartData";
 
 export interface EmojiPickerSelection {
   native?: string | undefined;
@@ -23,11 +26,19 @@ interface EmojiMartPickerProps {
   readonly categories: string[];
   readonly categoryIcons: Record<string, { src: string }>;
   readonly autoFocus?: boolean | undefined;
+  readonly maxFrequentRows?: number | undefined;
+  readonly perLine?: number | undefined;
 }
 
 interface LazyEmojiPickerProps {
   readonly onEmojiSelect: (emoji: EmojiPickerSelection) => void;
   readonly autoFocus?: boolean | undefined;
+  /** Encrypted chats supply only inline assets and do not save reaction history. */
+  readonly customEmojis?: EmojiCategory[] | undefined;
+  readonly privateMode?: boolean | undefined;
+  readonly perLine?: number | undefined;
+  readonly loadingLabel?: string | undefined;
+  readonly errorLabel?: string | undefined;
 }
 
 type EmojiMartPickerComponent = ComponentType<EmojiMartPickerProps>;
@@ -56,7 +67,13 @@ const loadEmojiMartPicker = async (): Promise<EmojiMartPickerComponent> => {
 export default function LazyEmojiPicker({
   onEmojiSelect,
   autoFocus,
+  customEmojis,
+  privateMode = false,
+  perLine,
+  loadingLabel,
+  errorLabel,
 }: LazyEmojiPickerProps) {
+  const locale = useBrowserLocale();
   const {
     categories,
     categoryIcons,
@@ -75,10 +92,16 @@ export default function LazyEmojiPicker({
 
     void (async () => {
       try {
-        const [nativeEmojiData, PickerComponent] = await Promise.all([
+        const [nativeEmojiData, custom] = await Promise.all([
           loadNativeEmojis(),
-          loadCustomEmojis().then(() => loadEmojiMartPicker()),
+          customEmojis === undefined
+            ? loadCustomEmojis()
+            : Promise.resolve(customEmojis),
         ]);
+        const PickerComponent = await loadEmojiMartPicker();
+        if (loadState.cancelled) return;
+        if (nativeEmojiData)
+          await prepareEmojiMartData(nativeEmojiData, custom);
         if (!loadState.cancelled) {
           setPickerLoadState(
             nativeEmojiData
@@ -97,7 +120,7 @@ export default function LazyEmojiPicker({
     return () => {
       loadState.cancelled = true;
     };
-  }, [loadCustomEmojis, loadNativeEmojis]);
+  }, [loadCustomEmojis, loadNativeEmojis, customEmojis]);
 
   const Picker = pickerLoadState.Picker;
 
@@ -109,8 +132,8 @@ export default function LazyEmojiPicker({
         className="tw-p-3 tw-text-sm tw-text-iron-300"
       >
         {pickerLoadState.status === "error"
-          ? "Emoji picker is unavailable."
-          : "Loading emoji picker..."}
+          ? (errorLabel ?? t(locale, "emoji.picker.unavailable"))
+          : (loadingLabel ?? t(locale, "emoji.picker.loading"))}
       </div>
     );
   }
@@ -122,13 +145,19 @@ export default function LazyEmojiPicker({
       onEmojiSelect={(emoji) => {
         // Emoji Mart has already recorded this selection. Notify same-tab
         // quick reactions, including when the selection came from a composer.
-        notifyReactionHistoryChange();
+        if (!privateMode) notifyReactionHistoryChange();
         onEmojiSelect(emoji);
       }}
-      custom={emojiMap}
-      categories={categories}
-      categoryIcons={categoryIcons}
+      custom={customEmojis ?? emojiMap}
+      categories={
+        privateMode
+          ? categories.filter((category) => category !== "frequent")
+          : categories
+      }
+      categoryIcons={privateMode ? {} : categoryIcons}
       autoFocus={autoFocus}
+      maxFrequentRows={privateMode ? 0 : undefined}
+      perLine={perLine}
     />
   );
 }

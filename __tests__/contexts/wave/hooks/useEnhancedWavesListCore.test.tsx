@@ -87,6 +87,36 @@ describe("useEnhancedWavesListCore", () => {
     });
   });
 
+  it.each([50, null])(
+    "uses the main feed timestamp %s over reply-inclusive activity",
+    (timestamp) => {
+      mockedUseNewDropCounter.mockReturnValue({
+        newDropsCounts: { "wave-1": { count: 0, latestDropTimestamp: 999 } },
+        resetAllWavesNewDropsCount: jest.fn(),
+        resetWaveNewDropsCount: jest.fn(),
+      });
+      const { result } = renderHook(() =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                latestDropTimestamp: 500,
+                latestTopLevelDropTimestamp: timestamp,
+              }),
+            ],
+          }),
+          { supportsPinning: true }
+        )
+      );
+      expect(result.current.waves[0]?.newDropsCount.latestDropTimestamp).toBe(
+        timestamp
+      );
+    }
+  );
+
   it("uses the full waves refetch for live unknown-wave recovery", () => {
     const mainWavesRefetch = jest.fn();
     const refetchAllWaves = jest.fn();

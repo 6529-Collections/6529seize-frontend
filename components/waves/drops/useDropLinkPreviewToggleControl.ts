@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { LinkPreviewToggleControl } from "@/components/waves/LinkPreviewContext";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiToggleHideLinkPreviewRequest } from "@/generated/models/ApiToggleHideLinkPreviewRequest";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -29,7 +29,7 @@ export function useDropLinkPreviewToggleControl(
   drop?: ApiDrop
 ): LinkPreviewToggleControl | undefined {
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
-  const myStream = useMyStreamOptional();
+  const myStream = useMyStreamActionsOptional();
   const applyOptimisticDropUpdate = myStream?.applyOptimisticDropUpdate;
   const [isLoading, setIsLoading] = useState(false);
   const mountedRef = useRef(true);

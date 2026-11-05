@@ -506,6 +506,12 @@ const useProcessIncomingDrop = ({
   return { processIncomingDrop, processDropUpdateRef };
 };
 
+/**
+ * The single app-wide handler for ATTACHMENT_STATUS_UPDATE. It refreshes every
+ * cached drop query and the active wave's in-memory message store. Drop list
+ * hooks must not subscribe to this event again; they would repeat the same
+ * cache update once per mounted list.
+ */
 const useAttachmentStatusUpdate = ({
   activeWaveId,
   getData,

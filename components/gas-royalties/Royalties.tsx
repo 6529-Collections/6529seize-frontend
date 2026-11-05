@@ -5,6 +5,7 @@ import type { Royalty } from "@/entities/IRoyalty";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useLatestRequestSignal } from "@/hooks/useLatestRequestSignal";
 import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
@@ -102,6 +103,7 @@ export default function RoyaltiesComponent() {
   const [sumProceeds, setSumProceeds] = useState(0);
   const [sumArtistTake, setSumArtistTake] = useState(0);
   const [fetchError, setFetchError] = useState(false);
+  const startRequest = useLatestRequestSignal();
 
   const {
     dateSelection,
@@ -128,10 +130,14 @@ export default function RoyaltiesComponent() {
   }
 
   async function fetchRoyalties() {
+    const signal = startRequest();
     setFetching(true);
     setFetchError(false);
     try {
-      const res = await fetchUrl<Royalty[]>(getUrlWithParams());
+      const res = await fetchUrl<Royalty[]>(getUrlWithParams(), { signal });
+      if (signal.aborted) {
+        return;
+      }
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
@@ -145,6 +151,9 @@ export default function RoyaltiesComponent() {
         res.reduce((prev, current) => prev + current.artist_take, 0)
       );
     } catch (error) {
+      if (signal.aborted) {
+        return;
+      }
       console.error("Failed to fetch royalties data", error);
       setRoyalties([]);
       setSumVolume(0);
@@ -152,7 +161,9 @@ export default function RoyaltiesComponent() {
       setSumArtistTake(0);
       setFetchError(true);
     } finally {
-      setFetching(false);
+      if (!signal.aborted) {
+        setFetching(false);
+      }
     }
   }
 

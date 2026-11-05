@@ -1,3 +1,4 @@
+import { isConfirmedMetaMaskBridgeError } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
 import {
   browserGlobalHandlerOnErrorMechanism,
   browserUnhandledRejectionMechanism,
@@ -50,10 +51,6 @@ import {
   hasAppOwnedFrame,
   hasGifPickerTenorManagerFrame,
   hasInjectedWasmCspFrameSignature,
-  hasLikelyAppOwnedFrame,
-  hasNativeJsonStringifyFrame,
-  hasSentryRouteParameterizationFrame,
-  isSentryBrowserHelperFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
@@ -633,10 +630,11 @@ export function shouldFilterSentryRouteParameterizationError(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  // Sentry SDK cyclic JSON timer noise observed in MetaMask Mobile on iOS
-  // WKWebView; keep app-owned and generic WebView cyclic JSON errors.
+  // Legacy name: browser/route/Sentry frames alone cannot attribute a throw.
+  // Only recognize proof captured around the exact sampled bridge callback.
   const value = event.exception?.values?.[0];
   if (
+    event.exception?.values?.length !== 1 ||
     value?.type !== "TypeError" ||
     value.value !== sentryRouteParameterizationMessage
   ) {
@@ -651,28 +649,7 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
-  const frames = value.stacktrace?.frames;
-  const hasSentryInfrastructureFrame =
-    hasSentryRouteParameterizationFrame(frames) ||
-    (Array.isArray(frames) && frames.some(isSentryBrowserHelperFrame));
-  const framesWithoutSentryInfrastructure = frames?.filter(
-    (frame) =>
-      !isSentryRouteParameterizationFrame(frame) &&
-      !isSentryBrowserHelperFrame(frame)
-  );
-  if (
-    hasAppOwnedSourceEvidence(event, value, hint) ||
-    hasLikelyAppOwnedFrame(framesWithoutSentryInfrastructure) ||
-    !hasNativeJsonStringifyFrame(frames)
-  ) {
-    return false;
-  }
-
-  return (
-    (hasSentryInfrastructureFrame ||
-      hasRouteParameterizationRouteEvidence(event)) &&
-    hasMetaMaskMobileWebViewContext(event)
-  );
+  return isConfirmedMetaMaskBridgeError(hint?.originalException);
 }
 
 export function shouldFilterAppleWebKitSortedTrackListTypeError(

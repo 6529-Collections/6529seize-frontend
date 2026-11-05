@@ -23,7 +23,7 @@ import {
   trackWaveFeedLoadSuccess,
   trackWaveFeedLoadTerminalFromError,
 } from "@/contexts/wave/hooks/waveFeedTelemetry";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ServerWaveFeedSeedResult } from "@/contexts/wave/server-wave-feed-seed";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -89,7 +89,7 @@ export function WaveServerFeedSeedGate({
   const {
     registerWave,
     serverFeedSeed: { expire, registerPending },
-  } = useMyStream();
+  } = useMyStreamActions();
   const markTerminal = useCallback(() => {
     terminalRef.current = true;
   }, []);
@@ -216,7 +216,7 @@ function ResolvedServerFeedSeed({
   const {
     registerWave,
     serverFeedSeed: { apply, clearPending, replacePending },
-  } = useMyStream();
+  } = useMyStreamActions();
   const didApplyRef = useRef(false);
   const terminalRef = useRef(false);
 

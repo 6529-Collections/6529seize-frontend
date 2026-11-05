@@ -9,6 +9,8 @@ export interface CompactMenuActionItem {
   readonly iconClassName?: string | undefined;
   readonly href?: string | undefined;
   readonly onSelect?: (() => void) | undefined;
+  /** Mobile sheets defer dialog-opening actions until the sheet has closed. */
+  readonly deferUntilClosed?: boolean | undefined;
   readonly disabled?: boolean | undefined;
   readonly className?: string | undefined;
   readonly active?: boolean | undefined;
@@ -33,6 +35,7 @@ export interface CompactMenuProps {
     | ((context: { isOpen: boolean; close: () => void }) => ReactNode);
   readonly items: readonly CompactMenuItem[];
   readonly onItemSelect?: ((id: string) => void) | undefined;
+  readonly onOpenChange?: ((isOpen: boolean) => void) | undefined;
   readonly className?: string | undefined;
   readonly triggerClassName?: string | undefined;
   readonly triggerAsChild?: boolean | undefined;

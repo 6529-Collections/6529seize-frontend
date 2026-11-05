@@ -13,10 +13,17 @@ import {
   plainServiceUnavailableResponse,
 } from "@/lib/proxy/plainResponses";
 import {
+  isRetiredReviewDataPath,
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
+import {
+  hasMalformedWaveId,
+  MALFORMED_WAVE_ROUTE,
+} from "@/lib/proxy/waveRoutes";
+import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 import { publicEnv } from "./config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
 const redirectMappings = [
@@ -84,8 +91,6 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
-
 // The access gate runs only on staging deployments, decided from the baked
 // BASE_ENDPOINT so request headers such as Host cannot switch it off.
 // Production and local development never call the API from proxy.
@@ -101,10 +106,12 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image).*)"],
 };
 
-function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
-  const rawPathname = new URL(req.url).pathname;
+// `/review-data` held the removed Stream review's generated files. Old links
+// get a plain 404 here instead of falling through to the profile catch-all.
+function isRetiredReviewDataRequest(req: NextRequest): boolean {
   return (
-    rawPathname === pathname && pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+    isRetiredReviewDataPath(req.nextUrl.pathname) ||
+    isRetiredReviewDataPath(new URL(req.url).pathname)
   );
 }
 
@@ -300,10 +307,11 @@ async function enforceAccessControl(
     return NextResponse.next();
   }
 
-  const authValue =
-    req.cookies.get(API_AUTH_COOKIE)?.value ?? publicEnv.STAGING_API_KEY ?? "";
+  // Only the visitor's own access cookie decides the gate; no server-held
+  // credential stands in for it.
+  const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
   const verdict = await getAccessVerdict({
-    apiEndpoint: publicEnv.API_ENDPOINT,
+    apiEndpoint: getApiBase(),
     authValue,
   });
 
@@ -329,7 +337,10 @@ async function enforceAccessControl(
 
 export default async function proxy(req: NextRequest) {
   try {
-    if (isUnservableDotPath(req.nextUrl.pathname)) {
+    if (
+      isUnservableDotPath(req.nextUrl.pathname) ||
+      isRetiredReviewDataRequest(req)
+    ) {
       return plainNotFoundResponse();
     }
 
@@ -344,6 +355,18 @@ export default async function proxy(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
+    // Wave routes stream their shell with a 200 before a page can call
+    // notFound(), so an id that cannot be a wave id is answered here: a
+    // rewrite to a route outside those boundaries renders the branded
+    // not-found page with a real 404 and keeps the visitor's URL. The query
+    // stays on the rewritten URL so Next's `_rsc` cache-busting check still
+    // matches on client navigations.
+    if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
+      const notFoundUrl = req.nextUrl.clone();
+      notFoundUrl.pathname = MALFORMED_WAVE_ROUTE;
+      return NextResponse.rewrite(notFoundUrl);
+    }
+
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
       : undefined;
@@ -356,11 +379,16 @@ export default async function proxy(req: NextRequest) {
       return NextResponse.redirect(clone, 301);
     }
 
-    if (
-      isStaticAssetPath(normalizedPathname) ||
-      isPublicStreamReviewDataPath(req, pathname)
-    ) {
+    if (isStaticAssetPath(normalizedPathname)) {
       return NextResponse.next();
+    }
+
+    const validatorGateResponse = handleValidatorPageGate(
+      req,
+      normalizedPathname
+    );
+    if (validatorGateResponse) {
+      return validatorGateResponse;
     }
 
     return await enforceAccessControl(req, normalizedPathname);

@@ -8,6 +8,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
@@ -127,7 +128,9 @@ export const WaveLeaderboardDropAuthor: React.FC<
         />
         {authorStatusBadge}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
-        <WaveDropTime timestamp={drop.created_at} />
+        <WithDropAuthorSignedMarker drop={drop}>
+          <WaveDropTime timestamp={drop.created_at} />
+        </WithDropAuthorSignedMarker>
       </div>
     </div>
   );

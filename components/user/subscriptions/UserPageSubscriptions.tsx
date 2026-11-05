@@ -11,6 +11,7 @@ import {
   getCardsRemainingUntilEndOf,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import { useLatestRequestSignal } from "@/hooks/useLatestRequestSignal";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -148,23 +149,32 @@ export default function UserPageSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
+  const startDetailsRequest = useLatestRequestSignal();
+  const startAirdropRequest = useLatestRequestSignal();
+  const startUpcomingRequest = useLatestRequestSignal();
+
   function fetchDetails() {
     if (!profileKey) {
       return;
     }
+    const signal = startDetailsRequest();
     setFetchingDetails(true);
     setFetchError("details", false);
     commonApiFetch<SubscriptionDetails>({
       endpoint: `subscriptions/consolidation/details/${profileKey}`,
+      signal,
     })
       .then((data) => {
+        if (signal.aborted) return;
         setDetails(data);
       })
       .catch(() => {
+        if (signal.aborted) return;
         setFetchError("details", true);
         setDetails(undefined);
       })
       .finally(() => {
+        if (signal.aborted) return;
         setFetchingDetails(false);
       });
   }
@@ -173,19 +183,24 @@ export default function UserPageSubscriptions(
     if (!profileKey) {
       return;
     }
+    const signal = startAirdropRequest();
     setFetchingAirdropAddress(true);
     setFetchError("airdrop", false);
     commonApiFetch<AirdropAddressResult>({
       endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
+      signal,
     })
       .then((data) => {
+        if (signal.aborted) return;
         setAirdropResult(data);
       })
       .catch(() => {
+        if (signal.aborted) return;
         setFetchError("airdrop", true);
         setAirdropResult(undefined);
       })
       .finally(() => {
+        if (signal.aborted) return;
         setFetchingAirdropAddress(false);
       });
   }
@@ -194,6 +209,7 @@ export default function UserPageSubscriptions(
     if (!profileKey) {
       return;
     }
+    const signal = startUpcomingRequest();
     setFetchingMemeSubscriptions(true);
     setFetchError("upcoming", false);
     let upcomingLimit: number = remainingMintsForSeason;
@@ -202,14 +218,19 @@ export default function UserPageSubscriptions(
     }
     commonApiFetch<NFTSubscription[]>({
       endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
+      signal,
     })
       .then((data) => {
+        if (signal.aborted) return;
         setMemeSubscriptions(data);
       })
       .catch(() => {
+        if (signal.aborted) return;
         setFetchError("upcoming", true);
+        setMemeSubscriptions([]);
       })
       .finally(() => {
+        if (signal.aborted) return;
         setFetchingMemeSubscriptions(false);
       });
   }

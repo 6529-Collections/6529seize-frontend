@@ -1,9 +1,11 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
 import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import { fetchWaveDiscoveryPage } from "./waveDiscoveryPagination";
 import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -116,6 +118,56 @@ async function getFirstWaveId(page: Page) {
     `Expected first wave href to use /waves/{id}; got ${href}`
   ).not.toBeNull();
   return match?.[1] ?? "";
+}
+
+async function getPublicChatMessageTarget(page: Page) {
+  const response = await gotoReadyWithApiResponse(
+    page,
+    "/waves",
+    (url) =>
+      url.pathname === "/api/v2/waves" &&
+      !url.searchParams.has("name") &&
+      !url.searchParams.has("pinned") &&
+      (!url.searchParams.has("page") || url.searchParams.get("page") === "1")
+  );
+  const isEligibleChat = (candidate: ApiWaveOverviewPage["data"][number]) =>
+    !candidate.has_competition &&
+    !candidate.is_private &&
+    !candidate.is_dm_wave &&
+    candidate.total_drops_count > 1;
+  let overview = (await response.json()) as ApiWaveOverviewPage;
+  let wave = overview.data.find(isEligibleChat);
+  const stagingAccess = await response.request().headerValue("x-6529-auth");
+  while (!wave && overview.next) {
+    const nextPage = overview.page + 1;
+    const nextPageUrl = new URL(response.url());
+    nextPageUrl.searchParams.set("page", String(nextPage));
+    overview = await fetchWaveDiscoveryPage(
+      page.context(),
+      nextPageUrl,
+      stagingAccess
+    );
+    expect(overview.page).toBe(nextPage);
+    wave = overview.data.find(isEligibleChat);
+  }
+  expect(
+    wave,
+    "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
+  ).toBeDefined();
+  const waveId = wave!.id;
+  expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
+  await gotoReady(page, `/waves/${waveId}`);
+  const message = page
+    .getByRole("region", {
+      name: "Wave chat file upload area",
+      exact: true,
+    })
+    .locator("[data-serial-no]")
+    .first();
+  await expect(message).toBeVisible({ timeout: 15000 });
+  const serialNo = await message.getAttribute("data-serial-no");
+  expect(serialNo).toMatch(/^[1-9]\d*$/);
+  return { waveId, serialNo: serialNo! };
 }
 
 function getProfileFeed(page: Page): Locator {
@@ -554,7 +606,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const address = page.getByRole("button", {
       name: /^0x[0-9a-fA-F]{40}$/,
     });
-    await expect(address).toBeVisible();
+    // The address comes from the subscriptions API after the shell renders.
+    await expect(address).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const fullAddress = (await address.textContent())!.trim();
     if (isMobile) {
       await address.tap();
@@ -1498,7 +1551,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .click();
     await expect(
       page.getByRole("button", { name: "Toggle decision timeline" })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
     await expect(
       page.getByRole("main").locator("[data-competition-detail]")
@@ -1656,29 +1709,74 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     expect(feedScrollOffset).toBeGreaterThan(0);
 
-    const visibleFeedPostIndex = await feedPostButtons.evaluateAll(
-      (buttons) => {
-        const feed = buttons[0]?.closest("section");
-        if (!feed) {
-          return -1;
-        }
+    // The virtualized masonry re-renders its cells after the scroll, so a
+    // matched cell can detach before it is measured. Measure against the feed
+    // itself and retry until a connected post intersects it.
+    let visibleFeedPostIndex = -1;
+    await expect
+      .poll(async () => {
+        const profileFeedElement = await profileFeed.elementHandle();
+        try {
+          visibleFeedPostIndex = await feedPostButtons.evaluateAll(
+            (buttons, feed) => {
+              if (!feed?.isConnected) {
+                return -1;
+              }
 
-        const feedRect = feed.getBoundingClientRect();
-        return buttons.findIndex((button) => {
-          const rect = button.getBoundingClientRect();
-          return rect.bottom > feedRect.top && rect.top < feedRect.bottom;
-        });
-      }
-    );
-    expect(visibleFeedPostIndex).toBeGreaterThanOrEqual(0);
+              const feedRect = feed.getBoundingClientRect();
+              return buttons.findIndex((button) => {
+                const rect = button.getBoundingClientRect();
+                return (
+                  button.isConnected &&
+                  rect.height > 0 &&
+                  rect.bottom > feedRect.top &&
+                  rect.top < feedRect.bottom
+                );
+              });
+            },
+            profileFeedElement
+          );
+        } finally {
+          await profileFeedElement?.dispose();
+        }
+        return visibleFeedPostIndex;
+      })
+      .toBeGreaterThanOrEqual(0);
     const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
     await visibleFeedPost.focus();
-    await visibleFeedPost.press("Enter");
+    // Chat treats serialNo as a one-time jump target and removes it from the
+    // URL once mounted, sometimes within 100 ms of the navigation. Sampling
+    // the address bar can miss that, so observe the committed navigation,
+    // armed before Enter is pressed.
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
+          Boolean(url.searchParams.get("serialNo")),
+        { waitUntil: "commit", timeout: 20_000 }
+      ),
+      visibleFeedPost.press("Enter"),
+    ]);
+    // The cleanup keeps the pathname, so the current URL names the same wave.
+    const openedWavePath = new URL(page.url()).pathname;
+    expect(openedWavePath).toMatch(/^\/waves\/[0-9a-f-]{36}$/i);
+    // Next syncs that removal into its router in a transition. A Back press
+    // before the transition commits lets the router write the wave URL over
+    // the feed entry, so let the wave consume the target and go idle first.
     await expectUrlState(
       page,
       (url) =>
-        /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
-        Boolean(url.searchParams.get("serialNo"))
+        url.pathname === openedWavePath && !url.searchParams.has("serialNo")
+    );
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          if (typeof globalThis.requestIdleCallback === "function") {
+            globalThis.requestIdleCallback(() => resolve(), { timeout: 5_000 });
+          } else {
+            globalThis.setTimeout(resolve, 250);
+          }
+        })
     );
 
     await page.goBack();
@@ -1905,24 +2003,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {
-    const waveId = await getFirstWaveId(page);
-
-    await gotoDocumentWithTransientRetry(
-      page,
-      `/waves?wave=${waveId}&serialNo=1`
-    );
-    // Next can emit the redirect in the streamed document. The initial shell
-    // is visible before that navigation destroys its execution context.
-    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
+    const { waveId, serialNo } = await getPublicChatMessageTarget(page);
+    const wavePath = `/waves/${waveId}`;
+    await test.info().attach("legacy-wave-message-target", {
+      body: JSON.stringify({ waveId, serialNo }),
+      contentType: "application/json",
     });
-    await waitForRouteReady(page);
+    // Observe both the redirect and the chat's target lookup before navigating.
+    // Chat intentionally consumes serialNo; an address-bar check after hydration
+    // races that cleanup and cannot prove which message was actually opened.
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === wavePath &&
+          !url.searchParams.has("wave") &&
+          url.searchParams.get("serialNo") === serialNo,
+        { waitUntil: "commit", timeout: 45_000 }
+      ),
+      page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.ok() &&
+            url.pathname.endsWith(`/v2/waves/${waveId}/drops`) &&
+            url.searchParams.get("serial_no_limit") === serialNo &&
+            url.searchParams.get("search_strategy") === "FIND_BOTH"
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      ),
+      gotoDocumentWithTransientRetry(
+        page,
+        `/waves?wave=${waveId}&serialNo=${serialNo}`
+      ),
+    ]);
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === wavePath &&
+        !url.searchParams.has("wave") &&
+        !url.searchParams.has("serialNo")
+    );
+    const target = page
+      .getByRole("region", { name: "Wave chat file upload area", exact: true })
+      .locator(`[data-serial-no="${serialNo}"]`);
+    await expect(target).toBeVisible();
+    await expect(target).toBeInViewport();
     await expectNoHorizontalOverflow(page);
-
-    const url = new URL(page.url());
-    expect(url.searchParams.get("wave")).toBeNull();
-    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("keeps profile statistics natural and activity loading compact", async ({

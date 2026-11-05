@@ -1,6 +1,7 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
 import { getMediaResolverSource } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
 
 function isLocalhostHostname(hostname: string): boolean {
   return (
@@ -57,6 +58,41 @@ function getConfiguredIpfsGatewaySource(
   return getConfiguredConnectSource(ipfsGatewayEndpoint);
 }
 
+// The DSN key, hostname and project id are validated so a malformed DSN can
+// never inject extra directives or headers into the generated values. Only
+// Sentry's hosted ingest hosts are accepted; the read-only E2E guard ignores
+// CSP report POSTs to exactly those hosts (see config/sentryIngest.ts).
+const SENTRY_PUBLIC_KEY_PATTERN = /^[A-Za-z0-9]{16,64}$/;
+const SENTRY_PROJECT_PATH_PATTERN = /^\/(\d+)$/;
+const CSP_REPORT_GROUP = "csp-endpoint";
+
+// Browsers post CSP violation reports straight to Sentry's security endpoint,
+// derived from the public DSN, so reporting does not depend on this app being
+// reachable. Returns an empty string when the DSN is missing or unusable.
+function getSentrySecurityReportEndpoint(dsn: string | undefined): string {
+  if (!dsn) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(dsn);
+    const projectId = SENTRY_PROJECT_PATH_PATTERN.exec(parsedUrl.pathname)?.[1];
+    if (
+      parsedUrl.protocol !== "https:" ||
+      parsedUrl.port !== "" ||
+      !projectId ||
+      !SENTRY_PUBLIC_KEY_PATTERN.test(parsedUrl.username) ||
+      !SENTRY_INGEST_HOSTNAME_PATTERN.test(parsedUrl.hostname)
+    ) {
+      return "";
+    }
+
+    return `https://${parsedUrl.hostname}/api/${projectId}/security/?sentry_key=${parsedUrl.username}`;
+  } catch {
+    return "";
+  }
+}
+
 function joinSources(sources: Array<string | false | undefined>): string {
   return sources.filter(Boolean).join(" ");
 }
@@ -71,7 +107,14 @@ function cspDirective(
 interface SecurityHeaderOptions {
   readonly allowInsecureLocalhostConnectSrc?: boolean | undefined;
   readonly allowUnsafeEval?: boolean | undefined;
+  /**
+   * Allow WebAssembly compilation (`'wasm-unsafe-eval'`) without allowing
+   * JavaScript eval. Only the end-to-end encrypted messages build (D109)
+   * needs it, for the MLS WebAssembly module.
+   */
+  readonly allowWasmUnsafeEval?: boolean | undefined;
   readonly webSocketEndpoint?: string | undefined;
+  readonly sentryDsn?: string | undefined;
 }
 
 export function createSecurityHeaders(
@@ -89,6 +132,7 @@ export function createSecurityHeaders(
     options.webSocketEndpoint,
     options.allowInsecureLocalhostConnectSrc
   );
+  const cspReportEndpoint = getSentrySecurityReportEndpoint(options.sentryDsn);
   const ipfsGatewaySources = IPFS_GATEWAY_CSP_SOURCES.join(" ");
   const mediaResolverSource = getMediaResolverSource(mediaResolverEndpoint);
   const configuredIpfsGatewaySource =
@@ -136,6 +180,8 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
     "https://videos.files.wordpress.com",
+    // OpenSea NFT previews use the original video while processing is pending.
+    "https://i2c.seadn.io",
     mediaResolverSource,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
@@ -163,14 +209,14 @@ export function createSecurityHeaders(
     "https://verify.walletconnect.org",
     "https://secure.walletconnect.com",
     "https://d3lqz0a4bldqgf.cloudfront.net",
-    "https://www.youtube.com",
+    // Link-preview video embeds use youtube-nocookie.com; www.youtube.com is the
+    // only other host the client-side embed allowlist accepts.
     "https://www.youtube-nocookie.com",
-    "https://*.youtube.com",
+    "https://www.youtube.com",
     "https://artblocks.io",
     "https://*.artblocks.io",
+    // Google Workspace link previews only embed docs.google.com preview pages.
     "https://docs.google.com",
-    "https://drive.google.com",
-    "https://*.google.com",
   ];
   const contentSecurityPolicy = [
     cspDirective("default-src", ["'none'"]),
@@ -186,6 +232,9 @@ export function createSecurityHeaders(
       // Keep eval available for local/dev tooling only; production dependencies
       // in this app do not require eval-like script execution.
       options.allowUnsafeEval && "'unsafe-eval'",
+      // Encrypted messages compile an MLS WebAssembly module; this keyword
+      // permits WebAssembly compilation only, not JavaScript eval.
+      options.allowWasmUnsafeEval && "'wasm-unsafe-eval'",
     ]),
     cspDirective("connect-src", connectSrc),
     cspDirective("font-src", [
@@ -198,6 +247,8 @@ export function createSecurityHeaders(
     ]),
     cspDirective("img-src", imgSrc),
     cspDirective("media-src", mediaSrc),
+    // default-src is 'none', which would otherwise block the web app manifest.
+    cspDirective("manifest-src", ["'self'"]),
     cspDirective("frame-src", frameSrc),
     cspDirective("style-src", [
       "'self'",
@@ -210,6 +261,17 @@ export function createSecurityHeaders(
       "https://cdn.jsdelivr.net",
     ]),
     cspDirective("object-src", ["'none'"]),
+    // No <base> tags and no cross-origin native form posts exist in the app, and
+    // framing is already same-origin only (see X-Frame-Options below).
+    cspDirective("base-uri", ["'self'"]),
+    cspDirective("form-action", ["'self'"]),
+    cspDirective("frame-ancestors", ["'self'"]),
+    ...(cspReportEndpoint
+      ? [
+          cspDirective("report-uri", [cspReportEndpoint]),
+          cspDirective("report-to", [CSP_REPORT_GROUP]),
+        ]
+      : []),
   ].join(" ");
 
   return [
@@ -221,6 +283,15 @@ export function createSecurityHeaders(
       key: "Content-Security-Policy",
       value: contentSecurityPolicy,
     },
+    ...(cspReportEndpoint
+      ? [
+          {
+            key: "Reporting-Endpoints",
+            value: `${CSP_REPORT_GROUP}="${cspReportEndpoint}"`,
+          },
+        ]
+      : []),
+    // Legacy equivalent of frame-ancestors 'self' for browsers without CSP2.
     { key: "X-Frame-Options", value: "SAMEORIGIN" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "same-origin" },

@@ -305,6 +305,24 @@ const getPreservedReplyPermissions = (
   };
 };
 
+/**
+ * A signed create or edit is broadcast before its author signature is stored,
+ * so that update reads as unsigned and can arrive after the signed response.
+ * For one content version the state only moves from unsigned to signed, so a
+ * known signature stays while the version and its visibility are unchanged.
+ */
+const getPreservedAuthorSignature = (
+  drop: ApiDrop,
+  existingDrop: ExtendedDrop | null
+): { readonly is_author_signed?: boolean } =>
+  existingDrop?.is_author_signed === true &&
+  drop.is_author_signed !== true &&
+  existingDrop.id === drop.id &&
+  existingDrop.updated_at === drop.updated_at &&
+  drop.moderation?.can_view !== false
+    ? { is_author_signed: true }
+    : {};
+
 const buildOptimisticDrop = ({
   drop,
   existingDrop,
@@ -372,6 +390,7 @@ const buildOptimisticDrop = ({
         ? (reconciledDrop.context_profile_context ?? null)
         : existingDrop.context_profile_context,
     ...getPreservedRepliesCount(reconciledDrop, existingDrop),
+    ...getPreservedAuthorSignature(reconciledDrop, existingDrop),
   };
 };
 

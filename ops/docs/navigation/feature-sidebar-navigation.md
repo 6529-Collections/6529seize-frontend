@@ -63,7 +63,13 @@ On web layouts, route switching is sidebar-first.
   125ms, including gated Drop Forge and WatchTower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.
 - Local and staging environment badges are present in the initial page render;
-  production shows no environment badge.
+  production shows no environment badge. Desktop badges are centered over the
+  6529 logo without moving it or the navigation. Staging shows `STG`; local
+  shows `LCL` above the current browser port, or just `LCL` when no port is
+  present. Other non-production hosts keep their environment labels. The logo
+  remains a single Home link with environment and host information available to
+  assistive technology. Phone and tablet headers keep their inline badge beside
+  the logo, including the single-line `LCL:port` label locally.
 - The account control has the same footprint while loading, signed out, or
   showing a profile. Only the account placeholder shimmers; Search and Share
   do not wait for wallet initialization.
@@ -111,11 +117,10 @@ On web layouts, route switching is sidebar-first.
 
 - Open `NFTs` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
-  `/nft-activity`, `/meme-calendar`.
-- On local development and shared staging, open the pre-deployment Stream
-  review from `NFTs > 6529 Stream — Review`. It appears after `ReMemes` and
-  before `NFT Activity` and opens `/reviews/6529-stream`. It is absent on
-  production.
+  `/stream`, `/nft-activity`, `/meme-calendar`.
+- `NFTs > 6529 Stream` appears after `ReMemes` and before `NFT Activity` on
+  every host. It opens `/stream`, a short notice that 6529 Stream is being
+  rebuilt, with a link to the 6529-works repository.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
@@ -230,9 +235,6 @@ On web layouts, route switching is sidebar-first.
 - Desktop-web sidebar search supports both `⌘K` and `Ctrl+K`.
 - Sidebar rows change with auth, device context, country gate, and runtime
   feature gates.
-- The Stream review item is controlled by the public-review environment gate,
-  not wallet state. Only loopback development and the exact shared staging
-  hostname enable it initially.
 - Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 

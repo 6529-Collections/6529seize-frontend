@@ -15,7 +15,7 @@ import {
 import { classifyPageView } from "@/services/analytics/pageClassification";
 import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 const ANALYTICS_RETRY_DELAYS = [1000, 5000] as const;
 
@@ -23,7 +23,7 @@ const getProfileRouteTarget = (pathname: string): string | null => {
   return pathname.split("/").find((segment) => segment.length > 0) ?? null;
 };
 
-export default function MixpanelSetup() {
+function MixpanelPageTracking() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { connectedProfile, fetchingProfile } = useAuth();
@@ -146,4 +146,15 @@ export default function MixpanelSetup() {
   ]);
 
   return null;
+}
+
+// It reads search params (UTM and page classification) and renders nothing,
+// so its own Suspense boundary lets a prerendered page render without it;
+// analytics start in the browser either way.
+export default function MixpanelSetup() {
+  return (
+    <Suspense fallback={null}>
+      <MixpanelPageTracking />
+    </Suspense>
+  );
 }

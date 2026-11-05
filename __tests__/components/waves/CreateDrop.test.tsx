@@ -99,7 +99,7 @@ jest.mock("@/services/api/waves-v2-api", () => ({
   fetchWaveMetadata: jest.fn(),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
     processDropRemoved: mockProcessDropRemoved,
     processIncomingDrop: mockProcessIncomingDrop,

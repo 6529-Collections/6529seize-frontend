@@ -50,7 +50,11 @@ beforeEach(() => {
   callIndex = 0;
   jest
     .mocked(useNftPurchasingVisibility)
-    .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
+    .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      });
 });
 
 function setupBurnAndPrice(burnData: any, priceData: any) {
@@ -64,7 +68,11 @@ describe("NextGenCollectionMint", () => {
   it("redirects restricted iOS without calling contract hooks or mounting mint UI", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(
       <NextGenCollectionMint collection={collection} />
     );
@@ -82,11 +90,51 @@ describe("NextGenCollectionMint", () => {
     );
     await waitFor(() => {
       expect(MockNextGenMint).toHaveBeenLastCalledWith(
-        expect.objectContaining({ burn_amount: 10, mint_price: 5, collection })
+        expect.objectContaining({ burn_amount: 10, mint_price: 5n, collection })
       );
     });
     expect(screen.getByTestId("mint-props").textContent).toBe("5:10");
   });
+
+  it("passes the on-chain mint price as an exact bigint", async () => {
+    const price = 12345678901234567891n;
+    setupBurnAndPrice(
+      { data: BigInt(2), isSuccess: true },
+      { data: price, isSuccess: true }
+    );
+    await waitFor(() => {
+      expect(MockNextGenMint).toHaveBeenLastCalledWith(
+        expect.objectContaining({ burn_amount: 2, mint_price: price })
+      );
+    });
+    // A Number round trip would have rounded this to 12345678901234567000n.
+    expect(MockNextGenMint.mock.lastCall?.[0].mint_price).toBe(price);
+  });
+
+  it("keeps a decimal string price exact and rejects negative or fractional values", async () => {
+    setupBurnAndPrice(
+      { data: "1", isSuccess: true },
+      { data: "10000000000000001", isSuccess: true }
+    );
+    await waitFor(() => {
+      expect(MockNextGenMint.mock.lastCall?.[0].mint_price).toBe(
+        10000000000000001n
+      );
+    });
+  });
+
+  it.each([-5n, "-5", "1.5", Number.NaN, 1.5, null])(
+    "treats %p as a zero mint price",
+    async (data) => {
+      setupBurnAndPrice(
+        { data: "1", isSuccess: true },
+        { data, isSuccess: true }
+      );
+      await waitFor(() => {
+        expect(MockNextGenMint.mock.lastCall?.[0].mint_price).toBe(0n);
+      });
+    }
+  );
 
   it("skips rendering when data not loaded", () => {
     setupBurnAndPrice(
@@ -103,7 +151,7 @@ describe("NextGenCollectionMint", () => {
     );
     await waitFor(() => {
       expect(MockNextGenMint).toHaveBeenLastCalledWith(
-        expect.objectContaining({ burn_amount: 3, mint_price: 0 })
+        expect.objectContaining({ burn_amount: 3, mint_price: 0n })
       );
     });
     expect(screen.getByTestId("mint-props").textContent).toBe("0:3");

@@ -205,6 +205,124 @@ beforeEach(() => {
 });
 
 describe("DropPartMarkdown", () => {
+  it.each(["\n", "\n\n"])(
+    "counts list items rather than generated HTML whitespace (%j)",
+    (separator) => {
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={Array.from(
+            { length: 20 },
+            (_, index) => `- List item ${index + 1}`
+          ).join(separator)}
+          onQuoteClick={jest.fn()}
+          collapsedPreview
+        />
+      );
+      expect(screen.getAllByRole("listitem")).toHaveLength(10);
+      expect(screen.queryByText("List item 11")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps lists, links and emphasis in the preview and restores the complete body", () => {
+    const partContent = [
+      "## Status update",
+      "",
+      "Original paragraph.",
+      "",
+      "3) **Finished** [Task 1](https://example.com/task-1) with *care* and `code`.",
+      ...Array.from(
+        { length: 20 },
+        (_, index) => `${index + 4}) Another formatted item ${index}.`
+      ),
+      "",
+      "[Final link](https://example.com/final)",
+    ].join("\n");
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      partContent,
+      onQuoteClick: jest.fn(),
+      hideLinkPreviews: true,
+    };
+    const { container, rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const expectPreview = () => {
+      expect(
+        screen.getByRole("heading", { name: "Status update" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(screen.getByRole("list")).toHaveClass(
+        PARENTHESIZED_ORDERED_LIST_CLASS_NAME
+      );
+      expect(screen.getByRole("link", { name: "Task 1" })).toHaveAttribute(
+        "href",
+        "https://example.com/task-1"
+      );
+      expect(container.querySelector("strong")).toHaveTextContent("Finished");
+      expect(container.querySelector("em")).toHaveTextContent("care");
+      expect(container.querySelector("code")).toHaveTextContent("code");
+      expect(
+        screen.queryByRole("link", { name: "Final link" })
+      ).not.toBeInTheDocument();
+    };
+    expectPreview();
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(21);
+    expect(screen.getByRole("link", { name: "Final link" })).toHaveAttribute(
+      "href",
+      "https://example.com/final"
+    );
+    rerender(<DropPartMarkdown {...props} collapsedPreview />);
+    expectPreview();
+  });
+
+  it("keeps existing media mounted and preserves bare-URL preview behavior on expansion", () => {
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      onQuoteClick: jest.fn(),
+      partContent: `![Image](/one.png)\n\nhttps://example.com/article\n\n${"Long readable text. ".repeat(90)}`,
+    };
+    const { rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const image = screen.getByRole("img", { name: "Drop media" });
+    expect(screen.getByTestId("link-preview")).toHaveAttribute(
+      "data-href",
+      "https://example.com/article"
+    );
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getByRole("img", { name: "Drop media" })).toBe(image);
+  });
+
+  it("shortens authored lines inside a formatted block without flattening it", () => {
+    const partContent = Array.from(
+      { length: 20 },
+      (_, i) => `> Line ${i + 1}`
+    ).join("\n");
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={partContent}
+        onQuoteClick={jest.fn()}
+        collapsedPreview
+      />
+    );
+    expect(container.querySelector("blockquote")).toHaveTextContent("Line 1");
+    expect(container.querySelector("blockquote")).not.toHaveTextContent(
+      "Line 20"
+    );
+    expect(container.querySelector("blockquote")?.textContent).toContain("\n");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
@@ -1454,6 +1572,119 @@ describe("DropPartMarkdown", () => {
     expect(
       screen.queryByRole("button", { name: "Show link previews" })
     ).toBeNull();
+  });
+
+  // Characterizes the sanitize schema that existing drops render with, so a
+  // narrower schema shows up as a deliberate test change.
+  describe("sanitize schema", () => {
+    const renderPart = (partContent: string) =>
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      ).container;
+
+    it("keeps GFM tables with cell alignment", () => {
+      renderPart("| Left | Right |\n|:--|--:|\n| one | two |");
+
+      expect(screen.getByRole("table")).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("columnheader").map((cell) => cell.textContent)
+      ).toEqual(["Left", "Right"]);
+      expect(screen.getByRole("cell", { name: "one" }).style.textAlign).toBe(
+        "left"
+      );
+      expect(screen.getByRole("cell", { name: "two" }).style.textAlign).toBe(
+        "right"
+      );
+    });
+
+    it("keeps strikethrough, rules, list start numbers and code languages", () => {
+      const container = renderPart(
+        "~~gone~~ text\n\n---\n\n3. three\n4. four\n\n```js\nconst a = 1;\n```"
+      );
+
+      expect(container.querySelector("del")).toHaveTextContent("gone");
+      expect(container.querySelector("hr")).not.toBeNull();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(container.querySelector("pre code")).toHaveClass("language-js");
+    });
+
+    it("keeps GFM task list checkboxes read-only", () => {
+      renderPart("- [x] done\n- [ ] todo");
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes).toHaveLength(2);
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[0]).toBeDisabled();
+      expect(checkboxes[1]).not.toBeChecked();
+      expect(checkboxes[1]).toBeDisabled();
+    });
+
+    it("keeps footnotes and prefixes their ids", () => {
+      const container = renderPart("Note[^1]\n\n[^1]: The footnote.");
+
+      expect(container.querySelector("section[data-footnotes]")).not.toBeNull();
+      const ids = Array.from(container.querySelectorAll("[id]"), (el) => el.id);
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids.every((id) => id.startsWith("user-content-"))).toBe(true);
+    });
+
+    it("drops raw HTML while keeping the surrounding markdown", () => {
+      const container = renderPart(
+        [
+          "<script>alert(1)</script>",
+          "<img src=x onerror=alert(1)>",
+          '<iframe src="https://example.com"></iframe>',
+          "<details><summary>Sum</summary>\n\nBody\n\n</details>",
+          '<h2 id="custom">Raw heading</h2>',
+          '<span style="color:red">styled</span> inline',
+          "# Heading {#custom-id}",
+        ].join("\n\n")
+      );
+
+      for (const selector of [
+        "script",
+        "img",
+        "iframe",
+        "details",
+        "summary",
+        "h2",
+        "[onerror]",
+        "[style*='color']",
+        "[id]",
+      ]) {
+        expect(container.querySelector(selector)).toBeNull();
+      }
+      expect(screen.queryByText(/alert/)).toBeNull();
+      expect(screen.getByText("Body")).toBeInTheDocument();
+      expect(screen.getByText("styled")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 1, name: "Heading {#custom-id}" })
+      ).toBeInTheDocument();
+    });
+
+    it("renders links only for allowed protocols", () => {
+      renderPart(
+        "[web](https://example.com) [mail](mailto:a@b.co) [js](javascript:alert(1)) [data](data:text/html;base64,PHA+) [vb](vbscript:x) [tel](tel:+123)"
+      );
+
+      expect(screen.getByRole("link", { name: "web" })).toHaveAttribute(
+        "href",
+        "https://example.com"
+      );
+      expect(screen.getByRole("link", { name: "mail" })).toHaveAttribute(
+        "href",
+        "mailto:a@b.co"
+      );
+      for (const name of ["js", "data", "vb", "tel"]) {
+        expect(screen.queryByRole("link", { name })).toBeNull();
+      }
+    });
   });
 });
 

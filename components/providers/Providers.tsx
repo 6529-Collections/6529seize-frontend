@@ -10,10 +10,10 @@ import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
-import { IpfsProvider } from "@/components/ipfs/IPFSContext";
+import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -30,15 +30,18 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
+import EULAConsentStartup from "./EULAConsentStartup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
+import DocumentLanguage from "./DocumentLanguage";
 
 export default function Providers({
   children,
@@ -47,8 +50,6 @@ export default function Providers({
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
-  initialIsIos = false,
-  initialEulaConsentVersion,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -56,8 +57,6 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
-  readonly initialIsIos?: boolean;
-  readonly initialEulaConsentVersion?: string | undefined;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -85,28 +84,33 @@ export default function Providers({
               <RefreshProvider>
                 <SeizeSettingsProvider mode={settingsMode}>
                   <EmojiProvider>
-                    <IpfsProvider>
-                      <SeizeConnectProvider>
-                        <Auth
+                    <SeizeConnectProvider>
+                      <Auth
+                        enableWalletAuthentication={
+                          enableWalletAuthentication
+                        }
+                      >
+                        <AuthLaunchTimingReporter
                           enableWalletAuthentication={
                             enableWalletAuthentication
                           }
-                        >
-                          <AuthLaunchTimingReporter
-                            enableWalletAuthentication={
-                              enableWalletAuthentication
-                            }
-                          />
-                          {enableWalletAuthentication && (
-                            <MarketActivityTracker />
+                        />
+                        {enableWalletAuthentication && (
+                          <MarketActivityTracker />
+                        )}
+                        {enableWalletAuthentication &&
+                          isSignedMessagesEnabled() && (
+                            <SignedWriteDecisionHost />
                           )}
-                          <WaveEligibilityProvider>
-                            <NotificationsProvider>
-                              <CookieConsentProvider
-                                disabled={!enableCookieConsent}
-                              >
-                                <MixpanelSetup />
-                                <AppWebSocketProvider>
+                        <WaveEligibilityProvider>
+                          <NotificationsProvider>
+                            <CookieConsentProvider
+                              disabled={!enableCookieConsent}
+                            >
+                              <MixpanelSetup />
+                              <AppWebSocketProvider>
+                                {/* Encrypted chats (D109): inert unless the flag is on. */}
+                                <E2eeProvider>
                                   <LayoutProvider>
                                     {enableMyStream ? (
                                       <MyStreamProvider>
@@ -117,14 +121,14 @@ export default function Providers({
                                       sharedProviders
                                     )}
                                   </LayoutProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </CookieConsentProvider>
-                            </NotificationsProvider>
-                          </WaveEligibilityProvider>
-                        </Auth>
-                      </SeizeConnectProvider>
-                    </IpfsProvider>
+                                </E2eeProvider>
+                                {enableVersionCheck && <NewVersionToast />}
+                              </AppWebSocketProvider>
+                            </CookieConsentProvider>
+                          </NotificationsProvider>
+                        </WaveEligibilityProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
                   </EmojiProvider>
                 </SeizeSettingsProvider>
               </RefreshProvider>
@@ -137,15 +141,13 @@ export default function Providers({
 
   return (
     <>
+      <DocumentLanguage />
       <CapacitorSetup />
-      <EULAConsentProvider
-        initialIsIos={initialIsIos}
-        initialConsentVersion={initialEulaConsentVersion}
-      >
+      <EULAConsentStartup>
         <EditingDropProvider>
           <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
         </EditingDropProvider>
-      </EULAConsentProvider>
+      </EULAConsentStartup>
     </>
   );
 }

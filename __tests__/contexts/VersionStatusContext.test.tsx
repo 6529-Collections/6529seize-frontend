@@ -3,6 +3,7 @@ import {
   useVersionStatus,
 } from "@/contexts/VersionStatusContext";
 import { act, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { prepareVersionReloadImage } from "@/components/version-update/versionReload";
 
 jest.mock("@/components/version-update/versionReload", () => ({
@@ -57,6 +58,49 @@ describe("shared version status", () => {
       jest.advanceTimersByTime(120_000);
     });
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("offers the forced preview without polling first", async () => {
+    globalThis.history.replaceState(null, "", "/?showNewVersionToast=true");
+    render(
+      <VersionStatusProvider>
+        <Consumer name="pull" />
+      </VersionStatusProvider>
+    );
+    await act(async () => {});
+    expect(screen.getByTestId("pull")).toHaveTextContent("update");
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it("follows the preview flag when a client-side query change adds it", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({ stale: false }),
+    });
+    // A fresh element each time, as a navigation re-renders the tree.
+    const ui = () => (
+      <VersionStatusProvider>
+        <Consumer name="pull" />
+      </VersionStatusProvider>
+    );
+    const view = render(ui());
+    await act(async () => {});
+    expect(screen.getByTestId("pull")).toHaveTextContent("current");
+
+    globalThis.history.pushState(null, "", "/?showNewVersionToast=true");
+    view.rerender(ui());
+    await act(async () => {});
+    expect(screen.getByTestId("pull")).toHaveTextContent("update");
+  });
+
+  it("server-renders its children while the preview flag is still unknown", () => {
+    globalThis.history.replaceState(null, "", "/?showNewVersionToast=true");
+    const html = renderToString(
+      <VersionStatusProvider>
+        <Consumer name="pull" />
+      </VersionStatusProvider>
+    );
+    expect(html).toContain("current");
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
   it("does not check or offer updates when the provider is disabled", async () => {

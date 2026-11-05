@@ -1,0 +1,20 @@
+{
+  "Name": "frontend-next-static",
+  "Comment": "6529 frontend /_next/static: content-hashed files, origin Cache-Control decides, up to 1 year",
+  "DefaultTTL": 0,
+  "MinTTL": 0,
+  "MaxTTL": 31536000,
+  "ParametersInCacheKeyAndForwardedToOrigin": {
+    "EnableAcceptEncodingGzip": true,
+    "EnableAcceptEncodingBrotli": true,
+    "HeadersConfig": {
+      "HeaderBehavior": "none"
+    },
+    "CookiesConfig": {
+      "CookieBehavior": "none"
+    },
+    "QueryStringsConfig": {
+      "QueryStringBehavior": "none"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
@@ -55,7 +55,7 @@ export default function DropListItemRateGiveSubmit({
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { voteState } = useDropInteractionRules(drop);
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const optimisticRollbackRef = useRef<(() => void) | null>(null);
 
   const rateChangeMutation = useMutation({

@@ -3,6 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/components/messages/quick-dms/QuickDirectMessagesGate": [
+        "./components/NoQuickDirectMessagesGate.tsx"
+      ],
       "@/*": ["../../../*"]
     }
   },

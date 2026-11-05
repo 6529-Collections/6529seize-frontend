@@ -103,6 +103,9 @@ const config = defineConfig({
           command: webServerCommand,
           env: {
             PORT: webServerPort,
+            // Log the cause when the dev server worker dies mid-run instead of
+            // leaving only refused connections (see scripts/dev-with-fallback.cjs).
+            DEV_SERVER_PORT_WATCHDOG: "1",
           },
           url: webServerUrl,
           reuseExistingServer: !process.env["CI"] && !forceWebServer,

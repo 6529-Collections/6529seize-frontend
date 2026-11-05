@@ -30,7 +30,7 @@ client graph, or the standalone server bundle:
 - the NextGen chain identifier;
 - the asset source switch (`ASSETS_FROM_S3`);
 - the announced-version endpoint;
-- AWS RUM, Mixpanel, and Sentry configuration, including the public-review profile;
+- AWS RUM, Mixpanel, and Sentry configuration;
 - any additional endpoint, feature flag, or profile value that changes the runtime
   graph or generated asset URLs by environment.
 
@@ -50,7 +50,7 @@ copied into the client bundle or the portability inventory.
    transformed, and indirectly generated configuration before activation.
 3. Start the identical package with two signed runtime configurations and prove that
    endpoint selection, chain selection, asset selection, announcement, telemetry,
-   Sentry, and public-review behavior are all runtime-controlled.
+   and Sentry behavior are all runtime-controlled.
 4. Bind one package digest to two distinct runtime-configuration digests in a new
    manifest contract. Keep exact source, content, toolchain, package, and runtime
    digests in the release evidence.

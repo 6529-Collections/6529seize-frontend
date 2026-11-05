@@ -41,6 +41,14 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
   },
 }));
 
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
+jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 describe("DropMinimalIdentityRow", () => {
   it("does not instantiate badge or tooltip components for anonymous authors", () => {
     const drop = {
@@ -134,4 +142,23 @@ describe("DropMinimalIdentityRow", () => {
       "0x1111111111111111111111111111111111111111"
     );
   });
+  it.each(["inline", "stacked"] as const)(
+    "keeps the author signed seal with the %s timestamp",
+    (timestampLayout) => {
+      render(
+        <DropMinimalIdentityRow
+          drop={{
+            ...createDrop("alice", "0xabc", ApiProfileClassification.Pseudonym),
+            is_author_signed: true,
+          }}
+          timestampLayout={timestampLayout}
+        />
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Signed by its author" })
+          .parentElement
+      ).toContainElement(screen.getByTestId("wave-drop-time"));
+    }
+  );
 });

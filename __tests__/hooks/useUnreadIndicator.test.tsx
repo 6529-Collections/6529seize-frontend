@@ -12,6 +12,15 @@ jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   useDmUnreadSummary: () => mockUseDmUnreadSummary(),
 }));
 
+const mockUseE2eeUnreadSummary = jest.fn(() => ({
+  unread: 0,
+  mentions: 0,
+  hasUnread: false,
+}));
+jest.mock("@/hooks/e2ee/useE2ee", () => ({
+  useE2eeUnreadSummary: () => mockUseE2eeUnreadSummary(),
+}));
+
 const mockUseMyStream = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => mockUseMyStream(),
@@ -85,5 +94,20 @@ describe("useUnreadIndicator", () => {
 
     expect(result.current.hasUnread).toBe(false);
     expect(mockUseMyStream).not.toHaveBeenCalled();
+  });
+
+  it("includes encrypted chats in the Messages badge", () => {
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+    mockUseE2eeUnreadSummary.mockReturnValueOnce({
+      unread: 1,
+      mentions: 0,
+      hasUnread: true,
+    });
+    const { result } = renderHook(() =>
+      useUnreadIndicator({ type: "messages", handle: "me" })
+    );
+    expect(result.current.hasUnread).toBe(true);
   });
 });

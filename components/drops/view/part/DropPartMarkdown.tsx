@@ -17,7 +17,10 @@ import Markdown, {
   type ExtraProps,
 } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, {
+  defaultSchema,
+  type Options as RehypeSanitizeSchema,
+} from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { useQueryClient } from "@tanstack/react-query";
 import type { PluggableList } from "unified";
@@ -45,7 +48,31 @@ import {
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
+import { rehypeDropPreview } from "./dropPartMarkdown/preview";
 import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
+
+/**
+ * Complete sanitize policy for drop markdown.
+ *
+ * rehype-sanitize shallow-merges its options over hast-util-sanitize's
+ * GitHub-style `defaultSchema`, so drops use that schema's tag, attribute,
+ * ancestor, `script` strip and `user-content-` clobber rules. The only
+ * override is `protocols`, which also allows `data:` image sources;
+ * `isSafeMarkdownImageSrc` in `urlTransform` narrows those to base64 raster
+ * images. Raw HTML in drop text is dropped here (there is no rehype-raw), so
+ * only markdown and GFM constructs render. Narrowing this schema changes how
+ * existing drops render (for example GFM tables, strikethrough, task lists
+ * and footnotes).
+ */
+const DROP_MARKDOWN_SANITIZE_SCHEMA: RehypeSanitizeSchema = {
+  ...defaultSchema,
+  protocols: {
+    cite: ["http", "https"],
+    href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
+    longDesc: ["http", "https"],
+    src: ["http", "https", "data"],
+  },
+};
 
 const BreakComponent = () => <br />;
 
@@ -238,6 +265,7 @@ export interface DropPartMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly nftLinks?: readonly ApiDropNftLink[] | undefined;
   readonly partContent: string | null;
+  readonly collapsedPreview?: boolean | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
@@ -261,6 +289,7 @@ function DropPartMarkdown({
   referencedNfts,
   nftLinks,
   partContent,
+  collapsedPreview = false,
   onQuoteClick,
   textSize,
   currentDropId,
@@ -389,47 +418,12 @@ function DropPartMarkdown({
           protocols: ["http", "https"],
         },
       ],
-      [
-        rehypeSanitize,
-        {
-          allowedTags: [
-            "p",
-            "br",
-            "strong",
-            "em",
-            "a",
-            "code",
-            "pre",
-            "blockquote",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
-            "h5",
-            "h6",
-            "ul",
-            "ol",
-            "li",
-            "img",
-          ],
-          allowedAttributes: {
-            a: ["href", "title"],
-            img: ["src", "alt", "title"],
-            code: ["className"],
-            pre: ["className"],
-          },
-          protocols: {
-            cite: ["http", "https"],
-            href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
-            longDesc: ["http", "https"],
-            src: ["http", "https", "data"],
-          },
-        },
-      ],
+      [rehypeSanitize, DROP_MARKDOWN_SANITIZE_SCHEMA],
       // This trusted plugin only adds one static renderer-owned class.
       rehypePreserveOrderedListDelimiter,
+      ...(collapsedPreview ? [rehypeDropPreview] : []),
     ],
-    []
+    [collapsedPreview]
   );
 
   const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);

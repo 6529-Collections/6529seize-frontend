@@ -82,6 +82,10 @@ export class ApiCurationDrop {
     'context_profile_context': ApiDropContextProfileContext;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
+    /**
+    * True when the drop\'s current content is the body of an author\'s device signed create or edit event, the same state as a non-null current_event_id from GET /drops/{dropId}/signed-events. False otherwise, including when the viewer cannot see the drop\'s content or its author is anonymous. Treat a missing value as false.
+    */
+    'is_author_signed'?: boolean;
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
     'is_additional_action_promised': boolean | null;
@@ -277,6 +281,12 @@ export class ApiCurationDrop {
         {
             "name": "is_signed",
             "baseName": "is_signed",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_author_signed",
+            "baseName": "is_author_signed",
             "type": "boolean",
             "format": ""
         },

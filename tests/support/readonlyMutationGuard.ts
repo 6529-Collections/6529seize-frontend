@@ -1,6 +1,7 @@
 import type { BrowserContext, Route } from "@playwright/test";
 
 import mutationRegistry from "../../ops/testing-strategy/mutation-endpoint-registry.json";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "../../config/sentryIngest";
 
 type MutationEndpoint = {
   id: string;
@@ -169,15 +170,17 @@ export function shouldUseReadonlyGuard(baseURL?: string) {
   return environment === "staging" || environment === "production";
 }
 
-function isSentryEnvelopePost(method: string, url: URL) {
+// Sentry SDK envelopes and browser-issued CSP violation reports (the
+// /security/ endpoint named by the CSP report-uri) are telemetry, not mutations.
+function isSentryIngestPost(method: string, url: URL) {
   return (
     method === "POST" &&
     url.protocol === "https:" &&
     url.port === "" &&
     url.username === "" &&
     url.password === "" &&
-    /^o[0-9]+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
-    /^\/api\/[0-9]+\/envelope\/$/.test(url.pathname)
+    SENTRY_INGEST_HOSTNAME_PATTERN.test(url.hostname) &&
+    /^\/api\/\d+\/(?:envelope|security)\/$/.test(url.pathname)
   );
 }
 
@@ -441,7 +444,7 @@ export function decideReadonlyRequest({
   }
 
   if (
-    isSentryEnvelopePost(upperMethod, parsed) ||
+    isSentryIngestPost(upperMethod, parsed) ||
     isIgnoredExternalMutation(parsed)
   ) {
     return { action: "abort", reason: "ignored-external-sdk-endpoint" };

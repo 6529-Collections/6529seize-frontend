@@ -16,6 +16,11 @@ export const BLOCK_ACTIVITY_QUERY_KEY = [
   "block-activity",
 ] as const;
 
+export const ENCRYPTED_REPORTS_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "encrypted-reports",
+] as const;
+
 export const PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_REPORTS,
   "public-profile-status",

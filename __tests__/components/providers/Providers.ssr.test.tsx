@@ -17,6 +17,8 @@ const {
 const {
   useSecureSign,
 }: typeof import("@/hooks/useSecureSign") = require("@/hooks/useSecureSign");
+const NftPurchasingGate: typeof import("@/components/common/NftPurchasingGate").default =
+  require("@/components/common/NftPurchasingGate").default;
 
 afterAll(() => {
   jest.clearAllTimers();
@@ -60,4 +62,15 @@ it("renders the complete provider boundary while AppKit is uninitialized", () =>
   expect(html).toContain('href="/education"');
   expect(html).toContain('type="application/ld+json"');
   expect(html).toContain("false:0:false");
+});
+
+it("keeps gated purchasing content out of the server HTML for every request", () => {
+  const html = renderToString(
+    <Providers>
+      <NftPurchasingGate>
+        <p>Minting guide</p>
+      </NftPurchasingGate>
+    </Providers>
+  );
+  expect(html).not.toContain("<p>Minting guide</p>");
 });

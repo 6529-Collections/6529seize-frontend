@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
@@ -393,9 +393,11 @@ describe("UserPageSubscriptions", () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: "subscriptions/consolidation/details/test-key",
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: "subscriptions/consolidation/test-key/airdrop-address",
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).not.toHaveBeenCalledWith(
           expect.objectContaining({
@@ -660,8 +662,98 @@ describe("UserPageSubscriptions", () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: "subscriptions/consolidation/details/new-key",
+          signal: expect.any(AbortSignal),
         });
       });
+    });
+
+    it("should clear history and upcoming memes when their requests fail after a profile change", async () => {
+      const page = { count: 1, page: 1, next: false, data: [{ id: 1 }] };
+      mockCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+        if (endpoint.includes("new-key")) {
+          throw new Error("API Error");
+        }
+        if (endpoint.includes("upcoming-memes")) {
+          return [{ id: 1 }];
+        }
+        return page;
+      });
+
+      const { rerender } = renderWithAuth(
+        <UserPageSubscriptions profile={mockProfile} />,
+        { connectedProfile: null }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("subscriptions-history")).toHaveTextContent(
+          "TopUps: 0, Redeemed: 1, Logs: 0"
+        );
+        expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+          "Memes: 1"
+        );
+      });
+
+      rerender(
+        <UserPageSubscriptions
+          profile={
+            { ...mockProfile, consolidation_key: "new-key" } as ApiIdentity
+          }
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("subscriptions-history")).toHaveTextContent(
+          "TopUps: 0, Redeemed: 0, Logs: 0"
+        );
+        expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+          "Memes: 0"
+        );
+      });
+    });
+
+    it("should ignore a superseded profile request that settles after the current one", async () => {
+      const oldUpcoming: { reject?: (error: Error) => void } = {};
+      const page = { count: 1, page: 1, next: false, data: [{ id: 1 }] };
+      mockCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+        if (endpoint.includes("upcoming-memes/test-key")) {
+          // Settles only after the newer profile's request and ignores the
+          // abort, so the stale failure still reaches the component.
+          return new Promise((_resolve, reject) => {
+            oldUpcoming.reject = reject;
+          });
+        }
+        if (endpoint.includes("upcoming-memes/new-key")) {
+          return [{ id: 1 }, { id: 2 }];
+        }
+        return page;
+      });
+
+      const { rerender } = renderWithAuth(
+        <UserPageSubscriptions profile={mockProfile} />,
+        { connectedProfile: null }
+      );
+      await waitFor(() => expect(oldUpcoming.reject).toBeDefined());
+
+      rerender(
+        <UserPageSubscriptions
+          profile={
+            { ...mockProfile, consolidation_key: "new-key" } as ApiIdentity
+          }
+        />
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+          "Memes: 2"
+        );
+      });
+
+      await act(async () => {
+        oldUpcoming.reject?.(new Error("Old profile request failed"));
+      });
+
+      expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+        "Memes: 2"
+      );
     });
 
     it("should not fetch when profile key is undefined", () => {

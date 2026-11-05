@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { getWebSocketUrl } from "@/services/api/api-endpoints";
 import { useMobileAppActivity } from "./useMobileAppActivity";
 import { WsMessageType } from "@/helpers/Types";
 import {
@@ -100,10 +100,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     let reconnectAttempts = 0;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let authenticationTimeout: ReturnType<typeof setTimeout> | null = null;
-    const url =
-      publicEnv.WS_ENDPOINT ??
-      publicEnv.API_ENDPOINT?.replace("https://api", "wss://ws") ??
-      "wss://default-fallback-url";
+    const url = getWebSocketUrl();
 
     const clearAuthenticationTimeout = () => {
       if (authenticationTimeout !== null) {

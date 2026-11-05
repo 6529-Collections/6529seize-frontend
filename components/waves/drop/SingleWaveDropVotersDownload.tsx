@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDownloader from "@/hooks/useDownloader";
 import { t } from "@/i18n/messages";
@@ -28,9 +28,9 @@ export function SingleWaveDropVotersDownload({
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { download, error: downloadError, isInProgress } = useDownloader();
-  const downloadUrl = `${publicEnv.API_ENDPOINT}/api/v2/drops/${encodeURIComponent(
-    dropId
-  )}/votes/download`;
+  const downloadUrl = apiUrl(
+    `/api/v2/drops/${encodeURIComponent(dropId)}/votes/download`
+  );
 
   const buildDownloadHeaders = useCallback((): Record<string, string> => {
     const headers: Record<string, string> = {
@@ -92,7 +92,9 @@ export function SingleWaveDropVotersDownload({
             : "waves.voteInsights.downloadAll"
         )}
       </span>
-      {!isInProgress && <ArrowDownTrayIcon className="tw-size-4 sm:tw-hidden" />}
+      {!isInProgress && (
+        <ArrowDownTrayIcon className="tw-size-4 sm:tw-hidden" />
+      )}
     </Button>
   );
 }

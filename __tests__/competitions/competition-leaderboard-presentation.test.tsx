@@ -3,7 +3,15 @@ import CompetitionLeaderboard from "@/components/competitions/CompetitionLeaderb
 let mockType = "RANK";
 let mockCapabilities: string[] = [];
 const mockResource = jest.fn();
+const latestLeaderboardParams = () =>
+  mockResource.mock.calls.filter((call) => call[1] === "leaderboard").at(-1)[2];
 let mockDropError: { status: number } | null = null;
+let mockPages = [[{ entry_id: "entry", drop_id: "drop" }]];
+const mockDrop: {
+  id: string;
+  rank: number;
+  winning_context: { place: number; decision_time: number } | null;
+} = { id: "drop", rank: 30, winning_context: null };
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     wave: { id: "wave" },
@@ -40,14 +48,9 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
     mockResource(identity, resource, params);
     return {
       data: {
-        pages: [
-          {
-            data:
-              resource === "leaderboard"
-                ? [{ entry_id: "entry", drop_id: "drop" }]
-                : [],
-          },
-        ],
+        pages: mockPages.map((data) => ({
+          data: resource === "leaderboard" ? data : [],
+        })),
       },
       isPending: false,
       hasNextPage: false,
@@ -58,7 +61,7 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
   useCompetitionEntryDrops: () => [
     {
-      data: { drop: { id: "drop" } },
+      data: { drop: mockDrop },
       isError: mockDropError !== null,
       error: mockDropError,
     },
@@ -83,8 +86,12 @@ jest.mock(
     WaveLeaderboardHeader: ({
       onSortChange,
       onPriceRangeChange,
+      additionalActionOnly,
+      onAdditionalActionChange,
     }: {
       onSortChange: (sort: string) => void;
+      additionalActionOnly: boolean;
+      onAdditionalActionChange?: (checked: boolean) => void;
       onPriceRangeChange?: (range: {
         minPrice: number;
         maxPrice: number;
@@ -92,7 +99,19 @@ jest.mock(
     }) => (
       <div>
         Existing toolbar
+        {onAdditionalActionChange && (
+          <input
+            type="checkbox"
+            aria-label="Additional Action"
+            checked={additionalActionOnly}
+            onChange={(event) => onAdditionalActionChange(event.target.checked)}
+          />
+        )}
         <button onClick={() => onSortChange("PRICE")}>Price</button>
+        <button onClick={() => onSortChange("RATING_PREDICTION")}>
+          Projected Vote
+        </button>
+        <button onClick={() => onSortChange("REALTIME_VOTE")}>Raw votes</button>
         {onPriceRangeChange && (
           <button
             onClick={() => onPriceRangeChange({ minPrice: 0.1, maxPrice: 2 })}
@@ -117,14 +136,17 @@ jest.mock(
   "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop",
   () => ({
     DefaultWaveLeaderboardDrop: ({
+      drop,
       winningThreshold,
       winningThresholdMinDurationMs,
     }: {
+      drop: { rank: number };
       winningThreshold: number | null;
       winningThresholdMinDurationMs: number;
     }) => (
       <div>
         Rich card {winningThreshold ?? "rank"} {winningThresholdMinDurationMs}
+        <span>Displayed rank {drop.rank}</span>
       </div>
     ),
   })
@@ -145,6 +167,9 @@ beforeEach(() => {
   mockResource.mockClear();
   localStorage.clear();
   mockDropError = null;
+  mockPages = [[{ entry_id: "entry", drop_id: "drop" }]];
+  mockDrop.rank = 30;
+  mockDrop.winning_context = null;
 });
 it("uses the existing Rank schedule, controls and cards", () => {
   mockType = "RANK";
@@ -152,6 +177,38 @@ it("uses the existing Rank schedule, controls and cards", () => {
   expect(screen.getByText("Rank schedule")).toBeVisible();
   expect(screen.getByText("Existing toolbar")).toBeVisible();
   expect(screen.getByText("Rich card rank 5000")).toBeVisible();
+  expect(
+    screen.queryByRole("checkbox", { name: "Additional Action" })
+  ).toBeNull();
+});
+it("scopes Additional Action filtering to Main Stage without changing sorting", () => {
+  mockCapabilities = ["MAIN_STAGE"];
+  render(<CompetitionLeaderboard />);
+  const toggle = screen.getByRole("checkbox", { name: "Additional Action" });
+  expect(toggle).not.toBeChecked();
+  fireEvent.click(toggle);
+  expect(mockResource).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "comp" },
+    "leaderboard",
+    expect.objectContaining({
+      is_additional_action_promised: "true",
+      sort: "rating",
+    })
+  );
+  fireEvent.click(screen.getByRole("button", { name: /^Price$/ }));
+  expect(mockResource).toHaveBeenCalledWith(
+    expect.anything(),
+    "leaderboard",
+    expect.objectContaining({
+      is_additional_action_promised: "true",
+      sort: "price",
+    })
+  );
+  fireEvent.click(toggle);
+  expect(latestLeaderboardParams()).not.toHaveProperty(
+    "is_additional_action_promised"
+  );
+  expect(latestLeaderboardParams().sort).toBe("price");
 });
 it("retains loaded artwork during a temporary refresh failure but hides it when access is revoked", () => {
   const { rerender } = render(<CompetitionLeaderboard />);
@@ -180,7 +237,11 @@ jest.mock("@/components/waves/leaderboard/leaderboardRendererRegistry", () => ({
 }));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem",
-  () => ({ WaveLeaderboardGalleryItem: () => null })
+  () => ({
+    WaveLeaderboardGalleryItem: ({ drop }: { drop: { rank: number } }) => (
+      <div>Displayed rank {drop.rank}</div>
+    ),
+  })
 );
 
 jest.mock(
@@ -219,4 +280,58 @@ it("keeps curation price filtering and sorting scoped to the selected competitio
       max_price: "2",
     }
   );
+});
+
+it("requests checkpoint projection ordering independently of raw votes and filters", () => {
+  mockCapabilities = ["MAIN_STAGE"];
+  render(<CompetitionLeaderboard />);
+  fireEvent.click(screen.getByRole("button", { name: "Projected Vote" }));
+  expect(latestLeaderboardParams().sort).toBe("decision_rating");
+  expect(latestLeaderboardParams()).not.toHaveProperty("direction");
+  fireEvent.click(screen.getByRole("checkbox", { name: "Additional Action" }));
+  expect(latestLeaderboardParams()).toMatchObject({
+    sort: "decision_rating",
+    is_additional_action_promised: "true",
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Raw votes" }));
+  expect(latestLeaderboardParams().sort).toBe("real_time_rating");
+});
+
+it.each(["list", "grid", "grid_content_only"])(
+  "displays projected positions across pages in %s without changing current ranks",
+  (viewMode) => {
+    mockCapabilities = ["MAIN_STAGE"];
+    mockPages = [
+      [{ entry_id: "first", drop_id: "first-drop" }],
+      [
+        { entry_id: "second", drop_id: "second-drop" },
+        { entry_id: "third", drop_id: "third-drop" },
+      ],
+    ];
+    localStorage.setItem(
+      "competitionViewMode_wave_comp",
+      JSON.stringify(viewMode)
+    );
+    render(<CompetitionLeaderboard />);
+    expect(screen.getAllByText("Displayed rank 30")).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "Projected Vote" }));
+    for (const rank of [1, 2, 3]) {
+      expect(screen.getByText(`Displayed rank ${rank}`)).toBeVisible();
+    }
+    expect(mockDrop.rank).toBe(30);
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Additional Action" })
+    );
+    expect(screen.getByText("Displayed rank 1")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Raw votes" }));
+    expect(screen.getAllByText("Displayed rank 30")).toHaveLength(3);
+  }
+);
+
+it("preserves a recorded winner rank in projected view", () => {
+  mockCapabilities = ["MAIN_STAGE"];
+  mockDrop.winning_context = { place: 30, decision_time: 1 };
+  render(<CompetitionLeaderboard />);
+  fireEvent.click(screen.getByRole("button", { name: "Projected Vote" }));
+  expect(screen.getByText("Displayed rank 30")).toBeVisible();
 });

@@ -54,6 +54,49 @@ describe("sentry-sanitizer", () => {
     expect(JSON.stringify(event)).not.toContain(SYNTHETIC_WAVE_ID);
   });
 
+  it("drops click and input breadcrumbs on encrypted-chat pages", () => {
+    const click = {
+      category: "ui.click",
+      message: 'button[aria-label="Download passport-scan.pdf"]',
+    };
+    const input = { category: "ui.input", message: "textarea.composer" };
+    const chat = `/messages/encrypted/0x${"a".repeat(64)}`;
+
+    expect(sanitizeSentryBreadcrumb(click, chat)).toBeNull();
+    expect(sanitizeSentryBreadcrumb(input, chat)).toBeNull();
+    expect(sanitizeSentryBreadcrumb(click, "/messages/encrypted")).toBeNull();
+    expect(
+      sanitizeSentryBreadcrumb(click, "/messages/encrypted/devices")
+    ).toBeNull();
+    expect(
+      sanitizeSentryBreadcrumb({ category: "navigation" }, chat)
+    ).not.toBeNull();
+    expect(sanitizeSentryBreadcrumb(click, "/messages")).toEqual(
+      expect.objectContaining({ category: "ui.click" })
+    );
+    expect(
+      sanitizeSentryBreadcrumb(click, "/messages/encrypted-notes")
+    ).not.toBeNull();
+  });
+
+  it("reads the current page when no path is given", () => {
+    window.history.replaceState(
+      null,
+      "",
+      `/messages/encrypted/0x${"b".repeat(64)}`
+    );
+    try {
+      expect(
+        sanitizeSentryBreadcrumb({ category: "ui.click", message: "img" })
+      ).toBeNull();
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
+    expect(
+      sanitizeSentryBreadcrumb({ category: "ui.click", message: "img" })
+    ).not.toBeNull();
+  });
+
   it("redacts secrets from breadcrumb text fields", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       message: "request failed Bearer abc123",
@@ -820,4 +863,45 @@ it("filters saved moderation evidence from telemetry context", () => {
   });
   expect(JSON.stringify(event)).not.toContain("synthetic private material");
   expect(event.extra?.["error_code"]).toBe("MODERATION_STORAGE_UNAVAILABLE");
+});
+
+it("redacts connection-link credentials from messages and stack frames", () => {
+  const pageUrl =
+    "https://6529.io/accept-connection-sharing?token=synthetic-link-secret&address=0x1";
+  const event = sanitizeSentryEvent({
+    message: `Unhandled error on ${pageUrl}`,
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: `Failed at ${pageUrl}`,
+          stacktrace: {
+            frames: [
+              { filename: pageUrl, abs_path: pageUrl, lineno: 1, colno: 2 },
+              {
+                filename: "https://6529.io/_next/static/chunks/app.js?dpl=1",
+                function: "render",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    extra: { detail: `navigated from ${pageUrl}` },
+  });
+
+  expect(JSON.stringify(event)).not.toContain("synthetic-link-secret");
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  expect(frames?.[0]).toEqual({
+    filename:
+      "https://6529.io/accept-connection-sharing?token=[Filtered]&address=0x1",
+    abs_path:
+      "https://6529.io/accept-connection-sharing?token=[Filtered]&address=0x1",
+    lineno: 1,
+    colno: 2,
+  });
+  expect(frames?.[1]).toEqual({
+    filename: "https://6529.io/_next/static/chunks/app.js?dpl=1",
+    function: "render",
+  });
 });

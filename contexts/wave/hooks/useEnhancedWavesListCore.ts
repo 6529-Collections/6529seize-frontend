@@ -192,10 +192,13 @@ function useEnhancedWavesListCore(
       const wsData = newDropsCounts[wave.id];
       const wsDropCount = wsData?.count ?? 0;
       const hasNewWsDrops = wsDropCount > 0;
-      const directLatestDropTimestamp = getNewestTimestamp(
-        wsData?.latestDropTimestamp,
-        wave.latestDropTimestamp ?? null
-      );
+      const directLatestDropTimestamp =
+        wave.latestTopLevelDropTimestamp !== undefined
+          ? wave.latestTopLevelDropTimestamp
+          : getNewestTimestamp(
+              wsData?.latestDropTimestamp,
+              wave.latestDropTimestamp ?? null
+            );
       const sidebarActivityTimestamp = getNewestTimestamp(
         directLatestDropTimestamp,
         wave.latestFollowedSubwaveDropTimestamp ?? null

@@ -470,6 +470,8 @@ export const baseGlobalIgnores = Object.freeze([
   "**/public",
   "**/coverage",
   "**/generated",
+  // Rust crate for the MLS WebAssembly module (cargo target dir, bench tool).
+  "native/**",
   // Bundled from config/env.schema.ts by scripts/build-env-schema.cjs.
   "config/env.schema.runtime.cjs",
   // Expand test lint coverage one subtree at a time; keep directory traversal
@@ -606,11 +608,9 @@ export const createEslintConfig = ({
         "config/assets.ts",
         "config/env.ts",
         "config/ethereumRpcEnv.ts",
-        "config/frontendRoot.server.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
         "config/nextPhase.ts",
-        "config/publicReviewDestinationEnv.server.ts",
         "config/reviewbotUsageEnv.ts",
         "config/runtimeConfig.ts",
         "config/serverEnv.ts",

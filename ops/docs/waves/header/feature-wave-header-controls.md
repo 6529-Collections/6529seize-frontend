@@ -91,6 +91,9 @@ helper keeps its desktop label and opens nomination guidance.
 - Subwaves have their own `Join`; joining a subwave does not join its parent.
 - The header and `About` buttons use the same join request and update the
   wave list immediately, including the `Joined` collection.
+- Leaving removes the open wave from `Joined` while keeping its content open.
+  A parent remains if you still belong to one of its subwaves. Failed requests
+  keep the joined row; joining again restores a wave you left.
 
 ## Permission Rules
 
@@ -120,7 +123,8 @@ helper keeps its desktop label and opens nomination guidance.
 8. Use `Back` in followers to return to `About`.
 9. Use pin to keep the wave in pinned lists (up to 20 total).
 10. Open the wave name to go to `/waves/{waveId}`.
-11. If edit-eligible on a non-DM wave, use pencil actions to rename or update
+11. Renaming the wave leaves competition titles and rules unchanged.
+    If edit-eligible on a non-DM wave, use pencil actions to rename or update
     picture.
 12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
     sheet or tablet overlay, `Wave options` opens inside the same panel. The

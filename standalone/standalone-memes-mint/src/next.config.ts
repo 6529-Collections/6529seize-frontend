@@ -30,6 +30,7 @@ const standalonePublicEnv = {
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io",
   BASE_ENDPOINT: normalizedStandaloneBaseEndpoint,
   STANDALONE_MAIN_SITE_BASE: standaloneMainSiteBase,
+  STANDALONE_TEST_BUILD: process.env["STANDALONE_TEST_BUILD"] === "true",
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io",
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",
   NEXTGEN_CHAIN_ID: 1,

@@ -15,7 +15,22 @@ import { ApiProfileNotificationCategories } from '../models/ApiProfileNotificati
 import { HttpFile } from '../http/http';
 
 export class ApiProfilePreferences {
+    /**
+    * Who may start a new direct message with this profile. Blocked profiles can never start one. GROUP_MEMBERS admits members of direct_message_group_id. 
+    */
     'direct_message_policy': ApiProfilePreferencesDirectMessagePolicyEnum;
+    /**
+    * Group whose members may start a new direct message when direct_message_policy is GROUP_MEMBERS. Kept when another policy is selected so the choice can be restored. 
+    */
+    'direct_message_group_id': string | null;
+    /**
+    * When direct_message_policy is GROUP_MEMBERS, people this profile follows may always start a new direct message. Defaults to true. 
+    */
+    'direct_message_allow_people_i_follow': boolean;
+    /**
+    * True when direct_message_policy is GROUP_MEMBERS but the chosen group is missing or hidden. Admission then falls back to people this profile follows until another group is chosen. 
+    */
+    'direct_message_group_unavailable': boolean;
     'notification_level': ApiProfilePreferencesNotificationLevelEnum;
     'notifications': ApiProfileNotificationCategories;
 
@@ -28,6 +43,24 @@ export class ApiProfilePreferences {
             "name": "direct_message_policy",
             "baseName": "direct_message_policy",
             "type": "ApiProfilePreferencesDirectMessagePolicyEnum",
+            "format": ""
+        },
+        {
+            "name": "direct_message_group_id",
+            "baseName": "direct_message_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "direct_message_allow_people_i_follow",
+            "baseName": "direct_message_allow_people_i_follow",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "direct_message_group_unavailable",
+            "baseName": "direct_message_group_unavailable",
+            "type": "boolean",
             "format": ""
         },
         {
@@ -54,7 +87,8 @@ export class ApiProfilePreferences {
 export enum ApiProfilePreferencesDirectMessagePolicyEnum {
     Everyone = 'EVERYONE',
     PeopleIFollow = 'PEOPLE_I_FOLLOW',
-    Nobody = 'NOBODY'
+    Nobody = 'NOBODY',
+    GroupMembers = 'GROUP_MEMBERS'
 }
 export enum ApiProfilePreferencesNotificationLevelEnum {
     All = 'ALL',

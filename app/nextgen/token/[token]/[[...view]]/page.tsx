@@ -8,7 +8,6 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { canonicalUrl } from "@/lib/structured-data/utils";
 import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
@@ -19,15 +18,7 @@ import { getNextgenTitle } from "../../../title-utils";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
 import { getNextgenTokenViewSegment } from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
-
-const isUsableImageSource = (
-  source: string | null | undefined
-): source is string =>
-  source !== null && source !== undefined && source.trim().length > 0;
-
-const getFirstUsableImage = (
-  ...sources: readonly (string | null | undefined)[]
-): string | undefined => sources.find(isUsableImageSource);
+import { getNextgenRequestHeaders } from "@/app/nextgen/request-headers";
 
 const getTokenPath = (tokenId: number, view: NextgenCollectionView): string => {
   const viewSegment = getNextgenTokenViewSegment(view);
@@ -41,7 +32,7 @@ export async function generateMetadata({
   readonly params: Promise<{ token: string; view?: string[] | undefined }>;
 }): Promise<Metadata> {
   const { token, view } = await params;
-  const headers = await getAppCommonHeaders();
+  const headers = await getNextgenRequestHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
     return getAppMetadata(
@@ -49,12 +40,8 @@ export async function generateMetadata({
         title: "NextGen Token",
         description: "NextGen",
         ogImage: getNftSocialCardImagePath({
-          badge: "NextGen",
-          collection: "NextGen",
           contract: NEXTGEN_CONTRACT,
           id: token,
-          subtitle: "NextGen",
-          title: `NextGen #${token}`,
         }),
         ogImageAlt: "NextGen Token social card",
       })
@@ -63,7 +50,6 @@ export async function generateMetadata({
   const resolvedView = getContentView(view?.[0] ?? "");
   const viewDisplay =
     resolvedView !== NextgenCollectionView.ABOUT ? resolvedView : "";
-  const displayId = data.token?.normalised_id;
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
   const title = getNextgenTitle(viewDisplay, baseTitle);
@@ -78,19 +64,8 @@ export async function generateMetadata({
       title,
       description,
       ogImage: getNftSocialCardImagePath({
-        artist: data.collection.artist,
-        badge: "NextGen",
-        collection: data.collection.name,
         contract: NEXTGEN_CONTRACT,
-        displayId,
         id: data.token?.id ?? data.tokenId,
-        image: getFirstUsableImage(
-          data.token?.image_url,
-          data.token?.thumbnail_url,
-          data.collection.banner,
-          data.collection.image
-        ),
-        title,
       }),
       ogImageAlt: `${title} social card`,
     })
@@ -117,7 +92,7 @@ export default async function NextGenTokenPage({
     : rawReturnTo;
   const returnTo =
     getProfileCollectedReturnContext(returnToValue)?.href ?? null;
-  const headers = await getAppCommonHeaders();
+  const headers = await getNextgenRequestHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
     notFound();

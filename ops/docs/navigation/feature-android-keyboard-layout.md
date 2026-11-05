@@ -56,7 +56,13 @@ blank space.
 
 ## Edge Cases
 
-- Android keyboard show/hide updates are debounced to reduce rapid flicker.
+- On Android, the composer stays directly above the keyboard whether the app
+  window resizes or pans to keep the focused input visible. Space already made
+  available by the app window is counted once, even when keyboard events arrive
+  later, keeping recent messages visible without an extra blank gap. This also
+  applies to DMs, single-drop chat, and mobile dialogs. Layout follows Android's
+  viewport updates immediately, without an extra app animation that could make
+  the composer bounce as the keyboard opens.
 - On iOS, closed-state spacing returns as keyboard dismissal starts, while the
   native animation remains authoritative until the keyboard is fully closed.
   This prevents the composer from briefly touching the physical bottom before

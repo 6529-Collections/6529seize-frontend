@@ -148,9 +148,11 @@ push to open the matching app route.
   native push token. Other tokens and phones remain registered. Conflicting old
   records may still need support review, but cannot indefinitely prevent new-phone
   registration. A device ID alone never authorizes deleting all old profiles.
-- Signing out before the phone first registers for push requires a valid saved
-  native session. If that proof is missing or expires before the phone reconnects,
-  cleanup remains pending for that installation.
+- If sign-out happened before the phone first registered for push and its saved
+  session proof is missing or expired, connecting a fresh account session lets the
+  app retry the pending cleanup. The fresh login stays connected. Registration
+  resumes only after cleanup succeeds; unavailable or rejected proof keeps the
+  original cleanup pending.
 - An unreadable installation credential or unavailable native device identity
   stops setup without replacing credentials or discarding pending cleanup.
 - If secure-storage read/write fails with an unrecoverable error, that setup

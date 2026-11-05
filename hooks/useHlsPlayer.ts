@@ -44,6 +44,8 @@ const HLS_NETWORK_MAX_RECOVERIES = 2;
 const HLS_MANIFEST_RETRY_DELAY_MS = 2000;
 const VIDEO_SOURCE_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
 
+type ApplyFallback = (videoEl: HTMLVideoElement, fallback: string) => void;
+
 function getSafeVideoSource(source: string): string | null {
   try {
     const baseUrl =
@@ -247,22 +249,28 @@ export function useHlsPlayer({
     }
   );
 
-  function stopHlsAndFallback(videoEl: HTMLVideoElement) {
+  function stopHlsAndFallback(
+    videoEl: HTMLVideoElement,
+    applyFallback: ApplyFallback
+  ) {
     cleanupHls(true);
     setIsLoading(false);
     if (fallbackSrc !== undefined) {
-      fallbackToSrc(videoEl, fallbackSrc);
+      applyFallback(videoEl, fallbackSrc);
     }
   }
 
   /**
-   * Sets up HLS error handlers (network/media errors).
+   * Sets up HLS error handlers (network/media errors). The Effect Event that
+   * applies the fallback is passed in by initHls so it is only ever invoked
+   * from a callback created inside that Effect Event.
    */
   function setupHlsErrorHandlers(
     hls: HlsType,
     HlsConstructor: typeof HlsType,
     videoEl: HTMLVideoElement,
-    hlsSrc: string
+    hlsSrc: string,
+    applyFallback: ApplyFallback
   ) {
     hls.on(HlsConstructor.Events.ERROR, (_event: unknown, data: ErrorData) => {
       if (
@@ -285,7 +293,7 @@ export function useHlsPlayer({
             data.details === HlsConstructor.ErrorDetails.MANIFEST_LOAD_TIMEOUT
           ) {
             if (manifestRetryCountRef.current >= HLS_MANIFEST_MAX_RETRIES) {
-              stopHlsAndFallback(videoEl);
+              stopHlsAndFallback(videoEl, applyFallback);
               return;
             }
             manifestRetryCountRef.current += 1;
@@ -302,7 +310,7 @@ export function useHlsPlayer({
             }, HLS_MANIFEST_RETRY_DELAY_MS);
           } else {
             if (networkRecoveryCountRef.current >= HLS_NETWORK_MAX_RECOVERIES) {
-              stopHlsAndFallback(videoEl);
+              stopHlsAndFallback(videoEl, applyFallback);
               return;
             }
             networkRecoveryCountRef.current += 1;
@@ -321,7 +329,7 @@ export function useHlsPlayer({
           // e.g. mux/demux error
           cleanupHls(true);
           if (fallbackSrc !== undefined) {
-            fallbackToSrc(videoEl, fallbackSrc);
+            applyFallback(videoEl, fallbackSrc);
           }
           break;
       }
@@ -396,7 +404,13 @@ export function useHlsPlayer({
         hlsRef.current = hls;
 
         // Configure error handlers
-        setupHlsErrorHandlers(hls, HlsConstructor, videoEl, safeHlsSrc);
+        setupHlsErrorHandlers(
+          hls,
+          HlsConstructor,
+          videoEl,
+          safeHlsSrc,
+          (el, fallback) => fallbackToSrc(el, fallback)
+        );
 
         // Once the manifest is parsed, we can attempt autoplay
         hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {

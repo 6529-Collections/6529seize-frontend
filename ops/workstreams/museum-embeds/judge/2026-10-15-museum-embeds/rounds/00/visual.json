@@ -1,0 +1,195 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "5a826f65056ae64cb5f6c789699d8533c98baaa4",
+  "coverage": [
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-820x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-02.png",
+        "evidence/candidate/gazers-390x844-02.png"
+      ],
+      "findings": ["V-001"],
+      "note": "Sequence (intro, three works, essay) is sound and identical to main; caption-to-work association is ambiguous but pre-existing, so it does not lower the score."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-01.png",
+        "evidence/candidate/gazers-1440x1000-frame-1.png"
+      ],
+      "findings": ["V-003"],
+      "note": "The live works are the largest, brightest objects on the page and chrome recedes; the sandbox attribute changes nothing about hierarchy relative to main."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-frame-2.png",
+        "evidence/candidate/gazers-820x1000-frame-3.png"
+      ],
+      "findings": [],
+      "note": "Dark, restrained museum page led by the artwork with no decorative chrome; the three frames render the same animated Art Blocks output as main and sit natively beside neighbouring Museum routes."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-820x1000-02.png",
+        "evidence/candidate/contact-sheet-820x1000.png"
+      ],
+      "findings": ["V-003"],
+      "note": "Even vertical rhythm of work, caption, work; page heights are identical to main at all three widths (3734, 4440, 4863 px). Fixed 544 px works leave the right half of the column empty on desktop and tablet (pre-existing)."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-03.png",
+        "evidence/candidate/gazers-390x844-06.png"
+      ],
+      "findings": ["V-002", "V-005"],
+      "note": "Type roles are consistent and no text is clipped; essay measure at 1440 is about 128 characters per line and the mobile footer wraps its separators awkwardly, both pre-existing and identical on main."
+    },
+    "J08": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-frame-1.png",
+        "evidence/candidate/gazers-1440x1000-frame-2.png",
+        "evidence/candidate/gazers-1440x1000-frame-3.png"
+      ],
+      "findings": [],
+      "note": "Exercised the live candidate against main: all three sandboxed frames animate (frame probes change 2.5 s apart), mouse-wheel and touch swipes that start on a frame still scroll the page exactly as on main, and no control was lost (the generator documents contain no buttons, links or inputs). Headless Tab entered the first frame and stayed there on both builds; not verified in a headed browser, so no finding is filed."
+    },
+    "J09": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-02.png",
+        "evidence/candidate/contact-sheet-1440x1000.png"
+      ],
+      "findings": ["V-004"],
+      "note": "Live frames paint a canvas 1.4 to 3.5 s after scrolling in, same as main; the sandboxed frames run with an opaque origin (self.origin null, localStorage blocked) and still render. Before paint or on failure the frame is a plain black box with no fallback (pre-existing)."
+    },
+    "J10": {
+      "score": 9,
+      "evidence": [
+        "evidence/candidate/gazers-820x1000-02.png",
+        "evidence/candidate/gazers-390x844-02.png",
+        "evidence/candidate/gazers-390x844-frame-1.png"
+      ],
+      "findings": [],
+      "note": "Works stay square and undistorted at every width (544 px at 1440 and 820, 358 px filling the column at 390) with no horizontal overflow; placement and size are identical to main, and touch swipes over the frames scroll the page."
+    },
+    "J11": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/automated-checks.json",
+        "evidence/diff-candidate-vs-main.json"
+      ],
+      "findings": [],
+      "note": "Fixed-size lazy frames reserve their space (layout shift 0 at 1440; 0.07 at 390 on both builds, from the app banner, not the frames); first canvas at about 1.4 to 1.6 s on the candidate versus 1.4 to 2.5 s on main over three alternating runs, so the sandbox adds no measurable delay."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J02"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-02.png",
+      "observation": "Pre-existing on main: the \"GAZERS #788\" and \"GAZERS #566\" headings sit after the work they name but closer to the next work (about 41 px below the frame above and 30 px above the frame below), so \"GAZERS #788\" reads as the title of the second work. The first work is titled above it (Gazers / Matt Kane), and the third label \"GAZERS #403\" is a plain paragraph, not a heading.",
+      "consequence": "A visitor can attach each work number to the wrong piece, and the labelling pattern changes between the first, middle and last work.",
+      "change": "In a later Museum content pass, put each work number and a consistent caption directly under its own frame with more space above the next frame than below the label, and give the third label the same heading treatment.",
+      "acceptance_check": "At each pinned viewport the gap between a work and its label is smaller than the gap between the label and the next work, and all three labels share one style.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-03.png",
+      "observation": "Pre-existing on main: the essay paragraphs run the full content column, about 128 characters per line at 1440 (for example the first Description line is 129 characters).",
+      "consequence": "Long lines make the essay harder to follow from one line to the next on desktop.",
+      "change": "Cap the migrated-page prose measure at roughly 70 to 85 characters (a max-width on the prose column) for Museum pages.",
+      "acceptance_check": "At 1440 no essay line exceeds about 90 characters, with no change at 820 and 390.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J03", "J05"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-01.png",
+      "observation": "Pre-existing on main: each live work is a fixed 544 px square pinned to the left of a column about 1135 px wide at 1440 (about 716 px at 820), leaving roughly 590 px empty beside every work, and the three works are stacked so all three are only visible after about 2,300 px of scrolling.",
+      "consequence": "The works, which are the point of the page, are shown at a modest size on desktop while the right half of the page is unused.",
+      "change": "In a later Museum layout pass, let the frames scale with the column (up to a sensible maximum) or place the works in a grid, keeping them square.",
+      "acceptance_check": "At 1440 each work is wider than 544 px or the three are visible together, with no change to the frame aspect ratio.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": ["J09"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/contact-sheet-1440x1000.png",
+      "observation": "Pre-existing on main: the lazy-loaded frames show as empty black rounded boxes until the generator paints (1.4 to 3.5 s after scrolling in), and the full-page captures and contact sheets show the second and third works as black boxes on both builds because lazy frames are never scrolled into view; there is no placeholder, label or fallback if generator.artblocks.io is slow or unreachable.",
+      "consequence": "A fast scroller or a visitor with a blocked or failing generator sees an unexplained empty box where a principal work should be.",
+      "change": "Give each frame a neutral placeholder with the work name and a text link to the generator page, and have the capture script scroll every frame into view before the full-page screenshot so the evidence shows the works.",
+      "acceptance_check": "With the generator blocked, each frame area shows the work name and a link; full-page captures show all three works painted.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-390x844-06.png",
+      "observation": "Pre-existing on main (shared site footer): at 390 the \"|\" separators wrap to the start or end of lines (\"@6529Collections |\" ends a line; \"| Cookie Policy\" and \"| Contact Us | Status\" begin lines).",
+      "consequence": "Dangling dividers make the footer look unfinished and are harder to scan.",
+      "change": "Hide the separators on narrow widths or keep each separator attached to the link before it so lines break between items.",
+      "acceptance_check": "At 390 no footer line begins with a \"|\" separator.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "All three Gazers works render and animate in their original 544 px (358 px on mobile) square frames with unchanged placement; page heights and main text are identical to main at all three viewports.",
+    "The opaque-origin sandbox takes effect (frame self.origin is null, localStorage blocked) without breaking rendering, interaction passthrough or load time.",
+    "Dark, restrained page with the artwork as the brightest element and the intro, works and essay sequence.",
+    "No horizontal overflow at any pinned viewport and no clipped text; frames stay square and undistorted.",
+    "Wheel and touch scrolling that starts over a frame still scrolls the page."
+  ]
+}

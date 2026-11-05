@@ -6,6 +6,12 @@ import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 export const DROP_DETAIL_STALE_TIME_MS = 60 * 1000;
 export const DROP_BATCH_STALE_TIME_MS = 5 * 60 * 1000;
 const DROP_IDS_BATCH_SIZE = 100;
+/**
+ * Lookups made within this window share one multi-id request. A realtime event
+ * burst resolves many quoted or updated drops at once; a zero delay only merged
+ * calls made in the same tick, so each event still issued its own request.
+ */
+export const DROP_BATCH_WINDOW_MS = 150;
 
 export const getDropQueryKey = (dropId: string | null | undefined) =>
   [
@@ -189,7 +195,7 @@ const scheduleDropBatchFlush = () => {
   isDropBatchScheduled = true;
   setTimeout(() => {
     void flushPendingDropRequests();
-  }, 0);
+  }, DROP_BATCH_WINDOW_MS);
 };
 
 export const fetchDropByIdBatched = (dropId: string): Promise<ApiDrop> =>

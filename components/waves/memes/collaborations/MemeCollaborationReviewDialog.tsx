@@ -15,6 +15,7 @@ import type { ApiMemeCollaborationState } from "@/generated/models/ApiMemeCollab
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { observeFocusedField } from "@/helpers/focused-field-visibility";
 import clsx from "clsx";
 import styles from "./MemeCollaborationReviewDialog.module.css";
 
@@ -59,18 +60,7 @@ export function MemeCollaborationReviewDialog({
   const viewportRef = useCallback((element: HTMLDivElement | null) => {
     const viewport = globalThis.visualViewport;
     if (!element || !viewport) return;
-    let focusFrame: number | undefined;
-    const revealFocusedField = () => {
-      if (focusFrame !== undefined) globalThis.cancelAnimationFrame(focusFrame);
-      // Focus can move between keyboard layouts without a delivered size change.
-      focusFrame = globalThis.requestAnimationFrame(() => {
-        focusFrame = undefined;
-        const focused = document.activeElement;
-        if (focused instanceof HTMLInputElement && element.contains(focused)) {
-          focused.scrollIntoView({ block: "nearest", inline: "nearest" });
-        }
-      });
-    };
+    const focusedField = observeFocusedField(element);
     const fitViewport = () => {
       // Preserve browser zoom; native shells also retain their own inset.
       if (viewport.scale > 1) {
@@ -86,18 +76,13 @@ export function MemeCollaborationReviewDialog({
         "--review-viewport-top",
         `${viewport.offsetTop}px`
       );
-      revealFocusedField();
+      focusedField.reveal();
     };
     fitViewport();
-    const observer = new ResizeObserver(revealFocusedField);
-    observer.observe(element);
-    element.addEventListener("focusin", revealFocusedField);
     viewport.addEventListener("resize", fitViewport);
     viewport.addEventListener("scroll", fitViewport, { passive: true });
     return () => {
-      observer.disconnect();
-      if (focusFrame !== undefined) globalThis.cancelAnimationFrame(focusFrame);
-      element.removeEventListener("focusin", revealFocusedField);
+      focusedField.disconnect();
       viewport.removeEventListener("resize", fitViewport);
       viewport.removeEventListener("scroll", fitViewport);
     };

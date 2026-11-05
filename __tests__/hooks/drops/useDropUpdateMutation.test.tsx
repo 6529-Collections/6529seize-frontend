@@ -8,7 +8,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 
 // Mock the API module
 jest.mock("@/services/api/common-api", () => ({
@@ -18,14 +18,14 @@ jest.mock("@/services/api/common-api", () => ({
 
 // Mock the MyStreamContext
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(),
+  useMyStreamActions: jest.fn(),
 }));
 
 const mockedCommonApiPost = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
-const mockedUseMyStream = useMyStream as jest.MockedFunction<
-  typeof useMyStream
+const mockedUseMyStream = useMyStreamActions as jest.MockedFunction<
+  typeof useMyStreamActions
 >;
 
 type DropUpdateMutationParams = {

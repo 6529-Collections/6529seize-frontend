@@ -11,26 +11,87 @@ jest.mock(
       children,
       isOpen,
       title,
+      onAfterLeave,
     }: {
       readonly children: ReactNode;
       readonly isOpen: boolean;
       readonly title: string;
-    }) =>
-      isOpen ? (
-        <div role="dialog" aria-label={title}>
-          {children}
-        </div>
-      ) : null
+      readonly onAfterLeave?: () => void;
+    }) => (
+      <>
+        {isOpen && (
+          <div role="dialog" aria-label={title}>
+            {children}
+          </div>
+        )}
+        <button type="button" onClick={onAfterLeave}>
+          Finish closing
+        </button>
+      </>
+    )
 );
 
 describe("CompactMenuMobileBottomSheet", () => {
+  it("runs a deferred action once after the sheet finishes closing", async () => {
+    const user = userEvent.setup();
+    const openDialog = jest.fn();
+    render(
+      <CompactMenuMobileBottomSheet
+        title="Actions"
+        ariaLabel="Actions"
+        trigger="Open"
+        items={[{ id: "dialog", label: "Open dialog", onSelect: openDialog }]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    await user.click(screen.getByRole("button", { name: "Open dialog" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(openDialog).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs immediate saves even if a quick close skips the exit animation callback", async () => {
+    const save = jest.fn();
+    const openDialog = jest.fn();
+    render(
+      <CompactMenuMobileBottomSheet
+        title="Actions"
+        ariaLabel="Actions"
+        trigger="Open"
+        items={[
+          {
+            id: "save",
+            label: "Save",
+            onSelect: save,
+            deferUntilClosed: false,
+          },
+          { id: "dialog", label: "Open dialog", onSelect: openDialog },
+        ]}
+      />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Actions" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Actions" }));
+    await userEvent.click(screen.getByRole("button", { name: "Open dialog" }));
+    expect(openDialog).not.toHaveBeenCalled();
+    expect(save).toHaveBeenCalledTimes(1);
+  });
   it("renders action icons supplied by the shared compact-menu model", async () => {
     const user = userEvent.setup();
+    const onOpenChange = jest.fn();
     render(
       <CompactMenuMobileBottomSheet
         title="Profile actions"
         ariaLabel="Profile actions"
         trigger={<span>Open</span>}
+        onOpenChange={onOpenChange}
         items={[
           {
             id: "mute",
@@ -53,5 +114,10 @@ describe("CompactMenuMobileBottomSheet", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("mute-icon")).toBeInTheDocument();
     expect(screen.getByTestId("block-icon")).toBeInTheDocument();
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    await user.click(
+      screen.getByRole("button", { name: "Mute notifications" })
+    );
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 });

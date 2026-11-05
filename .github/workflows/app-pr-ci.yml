@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      base_sha: ${{ github.event.pull_request.base.sha }}
+      base_sha: ${{ steps.merge_tree.outputs.base_sha }}
       risk_floor: ${{ steps.plan_outputs.outputs.risk_floor }}
       install_required: ${{ steps.plan_outputs.outputs.install_required }}
       lint_changed_required: ${{ steps.plan_outputs.outputs.lint_changed_required }}
@@ -52,14 +52,31 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch exact base commit
+      # GitHub can build the run's merge commit (github.sha) on a newer base
+      # tip than the event payload's base snapshot. Take the base from the
+      # merge commit under test so every diff, the protected Museum policy and
+      # the exact merge-tree evidence describe the tree that CI checks.
+      - name: Resolve exact merge-tree base
+        id: merge_tree
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: ${{ github.base_ref }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git fetch --no-tags origin "$BASE_SHA"
-          test "$(git rev-parse "${BASE_SHA}^{commit}")" = "$BASE_SHA"
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Run merge commit is not an exact 40-hex SHA: '${EXPECTED_MERGE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::PR head is not an exact 40-hex SHA: '${EXPECTED_HEAD_SHA}'."; exit 1; }
+          [[ -n "$BASE_REF" ]] || { echo "::error::PR base branch is empty."; exit 1; }
+          read -r merge_sha base_sha head_sha extra_parents <<< "$(git rev-list --parents --max-count=1 HEAD)"
+          test "$merge_sha" = "$EXPECTED_MERGE_SHA" || { echo "::error::Checked-out HEAD '${merge_sha}' is not the run's merge commit ${EXPECTED_MERGE_SHA}."; exit 1; }
+          [[ -n "${head_sha:-}" && -z "${extra_parents:-}" ]] || { echo "::error::Merge commit ${merge_sha} does not have exactly two parents."; exit 1; }
+          test "$head_sha" = "$EXPECTED_HEAD_SHA" || { echo "::error::Merge commit second parent ${head_sha} is not the PR head ${EXPECTED_HEAD_SHA}."; exit 1; }
+          [[ "$base_sha" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Merge commit first parent is not an exact 40-hex SHA: '${base_sha}'."; exit 1; }
+          test "$(git rev-parse --verify "${base_sha}^{commit}")" = "$base_sha" || { echo "::error::Merge commit first parent ${base_sha} is not a local commit."; exit 1; }
+          # The base supplies protected policy, so it must be base-branch history.
+          git merge-base --is-ancestor "$base_sha" "refs/remotes/origin/${BASE_REF}" || { echo "::error::Merge commit first parent ${base_sha} is not on origin/${BASE_REF}."; exit 1; }
+          echo "Merge commit ${merge_sha} = base ${base_sha} (origin/${BASE_REF}) + PR head ${head_sha}"
+          echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -76,7 +93,7 @@ jobs:
       # It uses Node built-ins and synthetic responses; no provider token is needed.
       - name: Verify Sentry workflow offline contracts
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
         run: |
           set -euo pipefail
           changed_audit_inputs="$(git diff --name-only --no-renames "${BASE_SHA}...HEAD" -- \
@@ -91,7 +108,7 @@ jobs:
 
       - name: Create CI plan and security reports
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
           UNTRUSTED_PR: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -euo pipefail
@@ -111,7 +128,7 @@ jobs:
 
       - name: Apply protected Museum browser-lane floor
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
         run: |
           set -euo pipefail
           control_sha="$(git rev-parse "${BASE_SHA}^{commit}")"
@@ -232,6 +249,12 @@ jobs:
           );
           if (bookmarksBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });
+          }
+          const notificationsInboxRequired = plan.changed_files.some((file) =>
+            /^(?:components\/notifications\/inbox\/|components\/layout\/sidebar\/WebSidebar\.tsx$|tests\/auth\/notifications-inbox-sandbox|i18n\/messages\/notifications-inbox)/.test(file)
+          );
+          if (notificationsInboxRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
           }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
@@ -465,6 +488,10 @@ jobs:
       - name: Run private bookmarks browser pack
         if: matrix.lane == 'playwright-bookmarks'
         run: ./bin/6529 run test:e2e:bookmarks-sandbox
+
+      - name: Run notifications inbox browser pack
+        if: matrix.lane == 'playwright-notifications-inbox'
+        run: ./bin/6529 run test:e2e:notifications-inbox-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
@@ -725,12 +752,12 @@ jobs:
             __tests__/scripts/frontend-deployment-workflows.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/museum-surface-registry.test.ts \
-            __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/package-web-artifact.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-artifact-metadata.test.ts \
             __tests__/scripts/production-artifact-verifier.test.ts \
             __tests__/scripts/deployment-e2e-workflows.test.ts \
-            __tests__/scripts/public-review-artifact-workflows.test.ts \
+            __tests__/scripts/web-artifact-workflows.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts
 
       - name: Lint changed source
@@ -1061,6 +1088,14 @@ jobs:
           set -euo pipefail
           ./bin/6529 run build:ci
 
+      # Turbopack builds no longer print First Load JS. Compare the shared and
+      # per-route first-load JavaScript with scripts/perf-budget.json.
+      - name: Check first-load JavaScript budget
+        if: matrix.lane == 'build'
+        run: |
+          set -euo pipefail
+          ./bin/6529 run perf:budget --report test-results/app-pr-ci/perf-budget.json
+
       - name: Create exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         env:
@@ -1073,15 +1108,15 @@ jobs:
           MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
         run: |
           set -euo pipefail
-          [[ "$EXPECTED_BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
-          test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"
+          [[ "$EXPECTED_BASE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Plan base_sha is not an exact 40-hex SHA: '${EXPECTED_BASE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Run merge commit is not an exact 40-hex SHA: '${EXPECTED_MERGE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::PR head is not an exact 40-hex SHA: '${EXPECTED_HEAD_SHA}'."; exit 1; }
+          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan build_required is not a boolean: '${BUILD_REQUIRED}'."; exit 1; }
+          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan deployment_contract_required is not a boolean: '${DEPLOYMENT_CONTRACT_REQUIRED}'."; exit 1; }
+          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan test_typecheck_required is not a boolean: '${TEST_TYPECHECK_REQUIRED}'."; exit 1; }
+          [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan playwright_museum_required is not a boolean: '${MUSEUM_BROWSER_REQUIRED}'."; exit 1; }
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA" || { echo "::error::Checked-out HEAD $(git rev-parse HEAD) is not the run's merge commit ${EXPECTED_MERGE_SHA}."; exit 1; }
+          test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA" || { echo "::error::Merge commit first parent $(git rev-parse HEAD^1) is not the plan base ${EXPECTED_BASE_SHA}."; exit 1; }
           rm -rf exact-pr-ci-evidence
           mkdir -p exact-pr-ci-evidence
           jq -e --arg base_sha "$EXPECTED_BASE_SHA" --arg head_sha "$EXPECTED_MERGE_SHA" '
@@ -1094,7 +1129,7 @@ jobs:
             (.selected_packs | type == "array") and
             (.source_commit | test("^[a-f0-9]{40}$")) and
             (.selection_digest | test("^[a-f0-9]{64}$"))
-          ' test-results/app-pr-ci/museum-release-selection.json >/dev/null
+          ' test-results/app-pr-ci/museum-release-selection.json >/dev/null || { echo "::error::Museum PR selection report is malformed or not bound to base ${EXPECTED_BASE_SHA} and merge ${EXPECTED_MERGE_SHA}."; exit 1; }
           selection_verifier="$MUSEUM_RELEASE_SELECTION_TOOL"
           if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" != true ]; then
             selection_verifier="$GITHUB_WORKSPACE/scripts/museum-release-selection.cjs"

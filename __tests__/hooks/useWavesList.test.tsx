@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -9,6 +9,12 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
+
+jest.mock("@/hooks/useAnnouncementWaveActivity", () => ({
+  useAnnouncementWaveActivity: jest.fn((wave) => wave),
+}));
 
 jest.mock("@/hooks/useWavesV2", () => {
   const actual = jest.requireActual("@/hooks/useWavesV2");
@@ -615,7 +621,7 @@ test("falls back to all waves when joined preference is persisted without a conn
   );
 });
 
-test("keeps top sections while the joined bottom list shows followed waves", () => {
+test("keeps discovery while the joined list uses only loaded followed waves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const followedOld = createSidebarWave({
@@ -700,7 +706,6 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
     "highly-rated-two",
     "highly-rated-three",
     "highly-rated-four",
-    "3",
     "followed-new",
     "followed-old",
   ]);
@@ -846,6 +851,93 @@ test("paginates only followed activity in joined mode", () => {
   expect(fetchNextAllActivityPage).not.toHaveBeenCalled();
 });
 
+test("keeps older pins behind the joined pagination boundary and retains a searched wave once loaded", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const firstPage = Array.from({ length: 20 }, (_, index) =>
+    createSidebarWave({
+      id: `joined-${index}`,
+      latestDropTimestamp: 100 - index,
+      subscribed: true,
+    })
+  );
+  const searchedWave = createSidebarWave({
+    id: "searched-wave",
+    latestDropTimestamp: 50,
+    subscribed: true,
+  });
+  const olderPin = createSidebarWave({
+    id: "older-pin",
+    latestDropTimestamp: 10,
+    subscribed: true,
+    pinned: true,
+  });
+  let loadedJoinedWaves = firstPage;
+  const fetchNextJoinedPage = jest.fn(() => {
+    loadedJoinedWaves = [...firstPage, searchedWave, olderPin];
+  });
+  useWavesV2Mock.mockImplementation(
+    ({ joinedSnapshot }: { readonly joinedSnapshot?: boolean }) => ({
+      waves: joinedSnapshot ? loadedJoinedWaves : [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: loadedJoinedWaves.length === firstPage.length,
+      fetchNextPage: fetchNextJoinedPage,
+      status: "success",
+      refetch: jest.fn(),
+    })
+  );
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [firstPage[0]!.id, olderPin.id],
+    pinnedWaves: [firstPage[0], olderPin],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result, rerender } = renderHook(
+    ({ activeWave }) => useWavesList({ activeWave }),
+    { wrapper, initialProps: { activeWave: null as ApiWave | null } }
+  );
+  expect(result.current.waves.map((wave) => wave.id)).toEqual(
+    firstPage.map((wave) => wave.id)
+  );
+  expect(result.current.waves[0]).toEqual(
+    expect.objectContaining({ isPinned: true })
+  );
+  expect(result.current.pinnedWaves.map((wave) => wave.id)).toContain(
+    olderPin.id
+  );
+  expect(result.current.hasNextPage).toBe(true);
+
+  rerender({ activeWave: createLegacyApiWave(searchedWave.id, 50) });
+  expect(result.current.waves.map((wave) => wave.id)).toContain(
+    searchedWave.id
+  );
+  expect(result.current.waves.map((wave) => wave.id)).not.toContain(
+    olderPin.id
+  );
+
+  act(() => result.current.fetchNextPage());
+  rerender({ activeWave: null });
+  expect(fetchNextJoinedPage).toHaveBeenCalledTimes(1);
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    firstPage[0]!.id,
+    olderPin.id,
+    ...firstPage.slice(1).map((wave) => wave.id),
+    searchedWave.id,
+  ]);
+  expect(result.current.hasNextPage).toBe(false);
+
+  useShowFollowingWavesMock.mockReturnValue([false]);
+  rerender({ activeWave: null });
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    firstPage[0]!.id,
+    olderPin.id,
+  ]);
+});
+
 test("preserves top sections while joined mode filters bottom list roots and subwaves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
@@ -889,7 +981,7 @@ test("preserves top sections while joined mode filters bottom list roots and sub
   useWavesV2Mock.mockImplementation(({ overviewType }) => ({
     waves:
       overviewType === ApiWavesOverviewType.RecentlyDroppedTo
-        ? [joinedParentWave, announcementWave]
+        ? [joinedPinnedWave, joinedParentWave, announcementWave]
         : [],
     isFetching: false,
     isFetchingNextPage: false,
@@ -940,7 +1032,6 @@ test("preserves top sections while joined mode filters bottom list roots and sub
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "4",
-    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
   ]);
@@ -951,7 +1042,6 @@ test("preserves top sections while joined mode filters bottom list roots and sub
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "4",
-    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
     "joined-subwave",
@@ -1385,6 +1475,69 @@ test("surfaces and loads a direct-linked subwave under its parent in Joined", ()
     "direct-parent",
     "direct-child",
   ]);
+});
+
+test("does not reinsert an explicitly left active root into Joined, while All keeps its route context", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  useWavesV2Mock.mockReturnValue({ waves: [], status: "success" });
+  const activeWave = createLegacyApiWave("left-root", 500);
+  const { result, rerender } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "left-root",
+      following: false,
+    })
+  );
+  await waitFor(() => expect(result.current.waves).toEqual([]));
+  useShowFollowingWavesMock.mockReturnValue([false]);
+  rerender();
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+});
+
+test("hides a left active subwave even under a joined pinned parent", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const parent = createSidebarWave({
+    id: "parent",
+    latestDropTimestamp: 500,
+    subscribed: true,
+    pinned: true,
+  });
+  const child = {
+    ...createSidebarWave({ id: "child", latestDropTimestamp: 400 }),
+    parentWaveId: "parent",
+  };
+  useWavesV2Mock.mockReturnValue({ waves: [parent], status: "success" });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [child],
+    subwavesByParentId: new Map(),
+  });
+  const activeWave = {
+    ...createLegacyApiWave("child", 400),
+    parent_wave: createApiWaveOverview("parent", 500),
+  };
+  const { result } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    "parent",
+    "child",
+  ]);
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "child",
+      following: false,
+    })
+  );
+  await waitFor(() =>
+    expect(result.current.waves.map((wave) => wave.id)).toEqual(["parent"])
+  );
 });
 
 test("exposes loading parent ids while requested subwaves are fetching", () => {

@@ -10,6 +10,7 @@ import { useCallback } from "react";
 import type { DropTimestampLayout } from "./drop.types";
 import { DropAuthorBadges } from "./DropAuthorBadges";
 import WaveDropTime from "./time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "./signature/DropAuthorSignedMarker";
 import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
@@ -81,7 +82,9 @@ export default function DropMinimalIdentityRow({
       {!isStackedTimestamp && (
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
       )}
-      <WaveDropTime timestamp={drop.created_at} />
+      <WithDropAuthorSignedMarker drop={drop}>
+        <WaveDropTime timestamp={drop.created_at} />
+      </WithDropAuthorSignedMarker>
     </div>
   );
 }

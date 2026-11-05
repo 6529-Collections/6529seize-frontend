@@ -21,6 +21,7 @@ import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarUser from "./WebSidebarUser";
 import WebSidebarVersionUpdate from "./WebSidebarVersionUpdate";
+import DesktopNotifications from "@/components/notifications/inbox/DesktopNotifications";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;
@@ -45,7 +46,7 @@ function WebSidebar({
   const pathname = usePathname();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const hasHydrated = useHasHydrated();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
     {
@@ -221,14 +222,22 @@ function WebSidebar({
                 >
                   {hasHydrated && address && (
                     <div className="tw-px-3">
-                      <WebSidebarNavItem
-                        href="/notifications"
-                        icon={BellIcon}
-                        active={pathname.startsWith("/notifications")}
-                        collapsed={shouldShowCollapsed}
-                        label="Notifications"
-                        hasIndicator={haveUnreadNotifications}
-                      />
+                      {isMobile ? (
+                        <WebSidebarNavItem
+                          href="/notifications"
+                          icon={BellIcon}
+                          active={pathname.startsWith("/notifications")}
+                          collapsed={shouldShowCollapsed}
+                          label="Notifications"
+                          hasIndicator={haveUnreadNotifications}
+                        />
+                      ) : (
+                        <DesktopNotifications
+                          key={`${connectedProfile?.id ?? address}:${activeProfileProxy?.id ?? ""}:${hasValidWalletAuth}:${pathname}`}
+                          collapsed={shouldShowCollapsed}
+                          unread={haveUnreadNotifications}
+                        />
+                      )}
                     </div>
                   )}
                   <WebSidebarUser

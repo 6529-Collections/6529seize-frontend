@@ -6,6 +6,8 @@ import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { newsIntroducingOmMigratedWordPressArticle as article } from "./content";
 
+export const dynamic = "force-static";
+
 export default function NewsIntroducingOmPage() {
   return (
     <>

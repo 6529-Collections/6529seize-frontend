@@ -16,7 +16,7 @@ let mockWaveMessagesStore: {
 };
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => mockUseMyStream(),
+  useMyStreamActions: () => mockUseMyStream(),
 }));
 
 const connectedProfile = {

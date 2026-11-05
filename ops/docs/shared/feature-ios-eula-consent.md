@@ -5,9 +5,10 @@ Parent: [Shared Index](README.md)
 ## Overview
 
 The native iOS app requires acceptance of the current End User License
-Agreement before any application providers or page content can start. The
-current agreement version is `2026-08-24`, and an acceptance is valid for 365
-days.
+Agreement before page content is shown. The check starts in the app itself on
+every page, so the page HTML is the same for every visitor; see Failure and
+Recovery. The current agreement version is `2026-08-24`, and an acceptance is
+valid for 365 days.
 
 Android and ordinary web sessions do not use this gate.
 
@@ -42,9 +43,33 @@ record provides the durable acceptance copy used to restore the receipt after
 reinstall. When no valid local receipt exists, missing, stale, expired, or
 differently versioned backend acceptance cannot unlock the app.
 
+## Server Rendering and the Native Boundary
+
+The server does not decide whether a visitor is the iOS app. Removing that
+decision was deliberate. Server gating once read a `native-ios` cookie, which
+an inline script set by reloading the first launch, and the user agent. Both
+signals could only ever withhold content. Every page now has one HTML for all
+visitors: the ungated tree, without NFT purchasing UI.
+
+The trust boundary is the app's own runtime:
+
+- Capacitor injects its native bridge at document start.
+- A synchronous script in `<head>` marks the document as native before the body
+  is parsed. Inline startup styles then hide the page behind the native loading
+  screen.
+- The page is revealed only in the same commit that starts this consent check.
+  Purchasing UI is never in the HTML; in the app it mounts only after the
+  country check allows it.
+
+Removing the cookie also removed the reload on first launch.
+
 ## Failure and Recovery
 
 - While the consent check is running, application content is not mounted.
+- Pages are rendered without the consent cookies. When the app opens on a
+  native iOS device without a current acceptance, the first page loads once
+  behind the native loading screen, including its application providers. The
+  consent check then replaces it before any content is shown.
 - If the device check fails without a valid current cookie, the app remains
   blocked and offers `Retry`.
 - If saving acceptance fails, the EULA remains visible and explains that the

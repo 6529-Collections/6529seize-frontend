@@ -10,7 +10,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevAuthEnabled } from "@/config/devAuth";
 
 interface ImmediateValidationParams {
   currentAddress: string;
@@ -191,10 +191,7 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  if (publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv) {
+  if (isDevAuthEnabled()) {
     return createValidationResult(
       true,
       false,

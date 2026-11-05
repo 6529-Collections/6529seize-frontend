@@ -1,12 +1,19 @@
-import type { Page } from "@playwright/test";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
+import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
+  waitForRouteReady,
   expectAxeClean,
   expectNoHorizontalOverflow,
   test,
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  installLocalSandboxBrowserMutationGuard,
+  dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -229,6 +236,7 @@ test("wave list reveals a direct link after loading without following its later 
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const ANNOUNCEMENTS = "00000000-0000-4000-8000-000000000599";
+const SHARED_POST_GUEST = process.env["USE_DEV_AUTH"] === "false";
 
 useLocalSandboxMutationGuard(
   test,
@@ -237,6 +245,120 @@ useLocalSandboxMutationGuard(
 );
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("removes a successfully left open wave from Joined and restores it on rejoin", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.skip(
+    !!testInfo.project.use.isMobile,
+    "The desktop keeps the collection visible beside the open wave."
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const origin = getSandboxApiOrigin(baseURL);
+  const detailResponse = await page.request.get(`${origin}/api/waves/${WAVE}`);
+  const overviewResponse = await page.request.get(`${origin}/api/v2/waves`);
+  expect(detailResponse.ok()).toBe(true);
+  expect(overviewResponse.ok()).toBe(true);
+  const detail = (await detailResponse.json()) as ApiWave;
+  const overview = ((await overviewResponse.json()) as ApiWaveOverviewPage)
+    .data[0];
+  expect(overview).toBeDefined();
+  if (!overview) throw new Error("Missing sandbox wave overview");
+  let joined = true;
+  let failLeave = true;
+  const actions = () => (joined ? ["DROP_CREATED"] : []);
+  const row = () => ({
+    ...overview,
+    id: WAVE,
+    name: detail.name,
+    context_profile_context: {
+      ...overview.context_profile_context,
+      subscribed: joined,
+      pinned: false,
+    },
+  });
+  await page.route(`**/api/waves/${WAVE}`, (route) =>
+    route.fulfill({
+      json: { ...detail, subscribed_actions: actions(), pinned: false },
+    })
+  );
+  await page.route(`**/api/waves/${WAVE}/subscriptions`, (route) => {
+    if (route.request().method() === "DELETE" && failLeave)
+      return route.fulfill({ status: 500, json: { message: "Leave failed" } });
+    joined = route.request().method() !== "DELETE";
+    return route.fulfill({ json: { actions: actions() } });
+  });
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [row()], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: joined ? [row()] : [],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
+    })
+  );
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  const filters = page.getByRole("group", { name: "Wave list filter" });
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  const list = page.getByRole("region", {
+    name: "Following waves list",
+    exact: true,
+  });
+  const waveRow = list.getByRole("link", { name: detail.name, exact: true });
+  await expect(waveRow).toBeVisible();
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  const about = page.getByRole("complementary", { name: "Wave details" });
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    page.getByText("Couldn't leave this wave.", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  failLeave = false;
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(
+    about.getByRole("button", { name: "Join", exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  await filters.getByRole("button", { name: "All", exact: true }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "All recent waves list", exact: true })
+      .getByRole("link", { name: detail.name, exact: true })
+  ).toBeVisible();
+  await filters.getByRole("button", { name: "Joined", exact: true }).click();
+  await expect(waveRow).toHaveCount(0);
+  await page
+    .getByRole("button", { name: `About ${detail.name}`, exact: true })
+    .first()
+    .click();
+  await about.getByRole("button", { name: "Join", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Expand waves panel", exact: true })
+    .click();
+  await expect(waveRow).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
 });
 
 function gate() {
@@ -518,7 +640,11 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       boosts: 0,
       moderation: { status: "VISIBLE", can_view: true },
     };
-    let first = true;
+    // Single-candidate requests belong to the footer until it shows its
+    // trigger. A footer that remounts while the page settles aborts and
+    // repeats its request, so do not count requests. Later single requests
+    // are quick-vote refreshes.
+    let footerPending = true;
     let fail = false;
     let candidate = drop;
     await page.route("**/*meme-lab*", (route) =>
@@ -529,8 +655,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       const isBatch = new URL(route.request().url()).pathname.endsWith(
         "/undiscovered-drops"
       );
-      const footer = !isBatch && first;
-      if (footer) first = false;
+      const footer = !isBatch && footerPending;
       if (!footer) await content.ready;
       await route.fulfill(
         fail && !footer
@@ -550,6 +675,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         .getByRole("button", { name: /^Uncast Power,/ })
         .filter({ visible: true });
       await expect(trigger).toBeVisible();
+      footerPending = false;
       // Sample every rendered frame, including the first frame before effects settle.
       await page.evaluate(() => {
         const positions: number[] = [];
@@ -647,8 +773,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
       fail = true;
-      first = true;
+      footerPending = true;
       await page.reload({ waitUntil: "domcontentloaded" });
+      await trigger.waitFor();
+      footerPending = false;
       await trigger.click();
       // A failed background window cannot replace the cached artwork with an error.
       await expect(
@@ -701,3 +829,680 @@ for (const width of [375, 390, 768, 1024, 1440]) {
     }
   });
 }
+
+async function sharedPostFixture(page: Page, baseURL: string | undefined) {
+  // Keep the copied tab as isolated from telemetry as the original fixture.
+  await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
+    route.fulfill({ contentType: "application/javascript", body: "" })
+  );
+  await page.route("**/api/drops/*/curations", (route) =>
+    route.fulfill({ json: [] })
+  );
+  await page.route("**/api/open-graph", (route) => route.fulfill({ json: {} }));
+  const response = await page.request.get(
+    `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${WAVE}/drops?limit=50`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as ApiWaveDropsFeedV2;
+  const template = feed.drops[0];
+  if (!template) throw new Error("Missing sandbox drop fixture");
+  const drops = Array.from({ length: 150 }, (_, index) => {
+    const serial = index + 2;
+    return {
+      ...template,
+      id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+      serial_no: serial,
+      created_at: 1714000000000 + serial * 60000,
+      content: `Shared link fixture post ${serial}`,
+    };
+  }).reverse();
+  await page.route("**/api/v2/drops?**", (route) => {
+    const ids =
+      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
+    return route.fulfill({
+      json: {
+        data: drops
+          .filter((drop) => ids.includes(drop.id))
+          .map((drop) => ({ ...drop, wave: feed.wave })),
+        next: false,
+      },
+    });
+  });
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket(
+    (url) => url.port === new URL(getSandboxApiOrigin(baseURL)).port,
+    (socket) => {
+      sockets.push(socket);
+      socket.onMessage((message) => {
+        if (JSON.parse(String(message)).type === "AUTHENTICATE") {
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+        }
+      });
+    }
+  );
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    const serial = Number(params.get("serial_no_limit"));
+    const strategy = params.get("search_strategy");
+    let selected = drops;
+    if (strategy === "FIND_BOTH") {
+      selected = drops.filter((drop) => Math.abs(drop.serial_no - serial) < 20);
+    } else if (strategy === "FIND_OLDER") {
+      selected = drops.filter((drop) => drop.serial_no < serial);
+    } else if (strategy === "FIND_NEWER") {
+      selected = drops.filter((drop) => drop.serial_no > serial);
+    }
+    return route.fulfill({
+      json: {
+        ...feed,
+        drops: selected.slice(0, Number(params.get("limit")) || 50),
+      },
+    });
+  });
+  await page.route("**/api/drop-ids?**", (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    const minimum = Number(params.get("min_serial_no"));
+    return route.fulfill({
+      json: drops
+        .filter((drop) => drop.serial_no >= minimum)
+        .map((drop) => ({
+          id: drop.id,
+          serial_no: drop.serial_no,
+        })),
+    });
+  });
+  return {
+    missMessages(count: number) {
+      for (let index = 0; index < count; index++) {
+        const serial = (drops[0]?.serial_no ?? 151) + 1;
+        drops.unshift({
+          ...template,
+          id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+          serial_no: serial,
+          created_at: 1714000000000 + serial * 60000,
+          content: `Shared link fixture post ${serial}`,
+        });
+      }
+    },
+    post: (serial: number) =>
+      page
+        .getByRole("region", {
+          name: "Wave chat file upload area",
+        })
+        .getByText(`Shared link fixture post ${serial}`, { exact: true }),
+    async incoming() {
+      const drop = {
+        ...drops[0]!,
+        id: "00000000-0000-4000-8000-000000009152",
+        serial_no: 152,
+        content: "Shared link fixture post 152",
+      };
+      drops.unshift(drop);
+      await expect.poll(() => sockets.length).toBeGreaterThan(0);
+      for (const socket of sockets)
+        socket.send(
+          JSON.stringify({
+            type: "DROP_UPDATE_REF",
+            data: {
+              update_type: "DROP_UPDATE",
+              wave_id: WAVE,
+              drop_id: drop.id,
+              serial_no: drop.serial_no,
+              author_id: "another-reader",
+            },
+          })
+        );
+    },
+  };
+}
+
+test("resume shows the latest page before missed history and preserves the composer", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  let olderRequests = 0;
+  let failHistory = true;
+  const history = gate();
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_OLDER"
+    ) {
+      olderRequests++;
+      await history.ready;
+      if (failHistory) {
+        failHistory = false;
+        return route.fulfill({
+          status: 400,
+          json: { message: "History unavailable" },
+        });
+      }
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  await composer.fill("Keep this unsent draft");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  try {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+    await expect(composer).toHaveText("Keep this unsent draft");
+    // A blocked history request must not keep the current conversation stale.
+    await expect(fixture.post(1151)).toBeInViewport();
+    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    await gap.scrollIntoViewIfNeeded();
+    await expect.poll(() => olderRequests).toBeGreaterThan(0);
+    await expect(gap).toBeDisabled();
+    await page.screenshot({
+      path: testInfo.outputPath("resume-missed-history.png"),
+    });
+    history.release();
+    await expect(gap).toContainText(
+      "Could not load missed messages. Try again"
+    );
+    await gap.click();
+    await expect(fixture.post(1101)).toBeAttached();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+    ).toBeAttached();
+    await expect(composer).toHaveText("Keep this unsent draft");
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    history.release();
+  }
+});
+
+test("resume preserves an older reading position while loading the latest page", async ({
+  page,
+  baseURL,
+}) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // Offscreen placeholders hydrate as they enter view and replace the text
+  // node, so reacquire the locator until the reader's position has settled.
+  await expect(async () => {
+    await fixture.post(120).scrollIntoViewIfNeeded({ timeout: 1000 });
+    await expect(fixture.post(120)).toBeInViewport({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByRole("button", { name: "Scroll to bottom", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  fixture.missMessages(1000);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  await expect(fixture.post(120)).toBeInViewport();
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(1151)).toBeInViewport();
+});
+
+test("shared post stays in view after URL cleanup and delayed loading", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const { post, incoming } = await sharedPostFixture(page, baseURL);
+  const target = gate();
+  let held = 0;
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_BOTH"
+    ) {
+      held += 1;
+      await target.ready;
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  try {
+    await expect.poll(() => held).toBeGreaterThan(0);
+    await expect(post(20)).not.toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+    // Keep data unavailable beyond the old three-second reveal deadline.
+    // The jump must survive a slow response, not only a delayed render.
+    await page.waitForTimeout(4500);
+  } finally {
+    target.release();
+  }
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  const chat = page.getByRole("region", {
+    name: "Wave chat file upload area",
+    exact: true,
+  });
+  let afterHeight = 0;
+  // Observe beyond the scroll retry timers. Simulate neighboring media growing,
+  // then redistribute that height across the target without resizing the list.
+  // A list ResizeObserver alone misses the second movement.
+  for (let second = 0; second < 8; second += 1) {
+    if (second === 2) {
+      afterHeight = await page
+        .getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+        .locator("#drop-21")
+        .evaluate((element) => {
+          const height = element.getBoundingClientRect().height;
+          (element as HTMLElement).style.minHeight = `${height + 1000}px`;
+          return height;
+        });
+    } else if (second === 4) {
+      await chat.evaluate((element, height) => {
+        const before = element.querySelector<HTMLElement>("#drop-19");
+        const after = element.querySelector<HTMLElement>("#drop-21");
+        if (!before || !after)
+          throw new Error("Missing neighboring fixture rows");
+        before.style.minHeight = `${before.getBoundingClientRect().height + 1000}px`;
+        after.style.minHeight = `${height}px`;
+      }, afterHeight);
+    }
+    await page.waitForTimeout(1000);
+    await expect(post(20)).toBeInViewport();
+  }
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  if (SHARED_POST_GUEST) {
+    await expect(composer).toBeHidden();
+  } else {
+    await expect(composer).toBeVisible();
+    await incoming();
+    // Live updates require the authenticated subscription. Check delivery before
+    // asserting position, so a missing event cannot make this test pass.
+    await expect(post(152)).toBeAttached();
+  }
+  await expect(post(20)).toBeInViewport();
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("shared-post-settled.png"),
+  });
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(post(SHARED_POST_GUEST ? 151 : 152)).toBeInViewport();
+  await expect(post(20)).not.toBeInViewport();
+});
+
+test("copied shared post links settle in a separate tab and when reopened", async ({
+  page,
+  context,
+  baseURL,
+  browserName,
+}, testInfo) => {
+  test.skip(
+    browserName !== "chromium",
+    "Clipboard permissions are supported by Chromium."
+  );
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const { post } = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  const row = page
+    .getByRole("region", { name: "Wave chat file upload area", exact: true })
+    .locator("#drop-20");
+  if (testInfo.project.use.hasTouch) {
+    await post(20).tap({ trial: true });
+    const box = await post(20).boundingBox();
+    if (!box) throw new Error("Shared post is not visible");
+    const touch = await context.newCDPSession(page);
+    try {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: box.x + 15, y: box.y + 10 }],
+      });
+      await expect(
+        page.getByRole("dialog", { name: "Drop actions", exact: true })
+      ).toBeAttached();
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchCancel",
+        touchPoints: [],
+      });
+    } finally {
+      await touch.detach();
+    }
+    await page
+      .getByRole("dialog", { name: "Drop actions", exact: true })
+      .getByRole("button", { name: /copy link/i })
+      .tap();
+  } else {
+    await row.hover();
+    if (!SHARED_POST_GUEST) {
+      await row
+        .getByRole("button", { name: "More actions", exact: true })
+        .click();
+    }
+    await (SHARED_POST_GUEST ? row : page)
+      .getByRole("button", { name: "Copy link", exact: true })
+      .click();
+  }
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toBe(`${baseURL}/waves/${WAVE}?serialNo=20`);
+  const opened = await context.newPage();
+  const guard = await installLocalSandboxBrowserMutationGuard(opened, baseURL);
+  const fixture = await sharedPostFixture(opened, baseURL);
+  try {
+    for (let visit = 0; visit < 2; visit += 1) {
+      await opened.goto(copied, { waitUntil: "domcontentloaded" });
+      await expect(fixture.post(20)).toBeInViewport({ timeout: 30000 });
+      await expect(opened).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+      await opened.waitForTimeout(3000);
+      await expect(fixture.post(20)).toBeInViewport();
+    }
+    await opened.screenshot({
+      path: testInfo.outputPath("copied-post-reopened.png"),
+    });
+    guard.assertNoBlockedMutations();
+  } finally {
+    await opened.close();
+  }
+});
+for (const surface of [
+  { name: "wave", path: `/waves/${WAVE}` },
+  { name: "DM", path: "/messages/00000000-0000-4000-8000-000000000532" },
+]) {
+  test(`docks the Android ${surface.name} composer after resize-first keyboard events`, async ({
+    baseURL,
+    context,
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Uses the Android bridge in the mobile Chromium sandbox"
+    );
+    await installSurfaceSimulation(context, "capacitor-android-sim", baseURL);
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    await page.setViewportSize({ width: 412, height: 840 });
+    await page.goto(surface.path, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await expect(composer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await composer.fill("Keyboard check.");
+    const readBottom = () =>
+      composer.evaluate((element) => element.getBoundingClientRect().bottom);
+    const initialBottom = await readBottom();
+    for (const keyboardHeight of [320, 280]) {
+      const viewportHeight = 840 - keyboardHeight;
+      await page.setViewportSize({ width: 412, height: viewportHeight });
+      // Run the real resize fallback before native bridge delivery. No CSS
+      // keyboard values are injected: this exercises the hook and its consumers.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          })
+      );
+      await emitKeyboardEvent(page, "keyboardWillShow", keyboardHeight);
+      await emitKeyboardEvent(page, "keyboardDidShow", keyboardHeight);
+      await expect(page.locator("html")).toHaveCSS(
+        "--native-keyboard-inset-bottom",
+        "0px"
+      );
+      await expect.poll(readBottom).toBeGreaterThan(viewportHeight - 24);
+      await expect.poll(readBottom).toBeLessThanOrEqual(viewportHeight);
+      await expect(composer).toBeInViewport();
+      const latestMessage =
+        surface.name === "DM"
+          ? page
+              .getByText(
+                "Synthetic local-only direct message body for Playwright.",
+                { exact: true }
+              )
+              .first()
+          : page
+              .getByRole("link", {
+                name: "https://example.com/6529-composer-preview",
+                exact: true,
+              })
+              .first();
+      await expect(latestMessage).toBeInViewport();
+      await expectNoHorizontalOverflow(page);
+      await dismissNextDevTools(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `android-keyboard-open-${keyboardHeight}.png`
+        ),
+      });
+      await emitKeyboardEvent(page, "keyboardWillHide");
+      await emitKeyboardEvent(page, "keyboardDidHide");
+      await page.setViewportSize({ width: 412, height: 840 });
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-native-keyboard-visible"
+      );
+      await expect.poll(readBottom).toBeCloseTo(initialBottom, 0);
+      await expect(composer).toContainText("Keyboard check.");
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("android-keyboard-closed.png"),
+    });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+}
+
+async function emitKeyboardEvent(
+  page: Page,
+  eventName: string,
+  keyboardHeight = 0
+) {
+  await page.waitForFunction((eventName) => {
+    const runtime = globalThis as typeof globalThis & {
+      __playwrightKeyboardListeners?: string[];
+    };
+    return runtime.__playwrightKeyboardListeners?.includes(eventName);
+  }, eventName);
+  const delivered = await page.evaluate(
+    ({ eventName, keyboardHeight }) => {
+      return !globalThis.dispatchEvent(
+        new CustomEvent(`playwright:${eventName}`, {
+          detail: { keyboardHeight },
+          cancelable: true,
+        })
+      );
+    },
+    { eventName, keyboardHeight }
+  );
+  expect(delivered, `Native callback received ${eventName}`).toBe(true);
+}
+
+test("announcement replies preserve the unread badge and top-level timestamp", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const origin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${origin}/api/v2/waves/${WAVE}/drops?limit=1`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as ApiWaveDropsFeedV2;
+  const template = feed.drops[0];
+  if (!template) throw new Error("Missing announcement fixture");
+  const now = Date.now();
+  const announcement = {
+    ...feed.wave,
+    id: ANNOUNCEMENTS,
+    name: "Announcements",
+    has_competition: false,
+    replies_collapsed: true,
+    last_drop_time: now,
+    has_subwaves: false,
+    context_profile_context: {
+      ...feed.wave.context_profile_context,
+      unread_drops: 0,
+      subscribed: true,
+      muted: false,
+      pinned: false,
+    },
+  };
+  let latest: ApiWaveDropsFeedV2["drops"][number] = {
+    ...template,
+    id: "announcement-root",
+    created_at: now - 2 * 3600000,
+    serial_no: 500,
+  };
+  delete latest.reply_to_drop;
+  let incoming: ApiWaveDropsFeedV2["drops"][number] = {
+    ...latest,
+    id: "announcement-reply",
+    author: {
+      ...template.author,
+      id: "another-reader",
+      handle: "someone-else",
+    },
+    created_at: now,
+    serial_no: 501,
+    reply_to_drop: { id: latest.id },
+  };
+  await page.route("**/api/settings", (route) =>
+    route.fulfill({ json: { announcements_wave_id: ANNOUNCEMENTS } })
+  );
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [announcement], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: [announcement],
+        next_cursor: null,
+        snapshot_expires_at: now + 900000,
+      },
+    })
+  );
+  await page.route(`**/api/v2/waves/${ANNOUNCEMENTS}/drops?**`, (route) =>
+    route.fulfill({ json: { wave: announcement, drops: [latest] } })
+  );
+  await page.route("**/api/v2/drops?**", (route) =>
+    route.fulfill({
+      json: { data: [{ ...incoming, wave: announcement }], next: false },
+    })
+  );
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket(
+    (url) => url.port === new URL(origin).port,
+    (socket) => {
+      sockets.push(socket);
+      socket.onMessage((message) => {
+        if (JSON.parse(String(message)).type === "AUTHENTICATE")
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+      });
+    }
+  );
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  const row = page
+    .getByRole("region", { name: "Announcement waves", exact: true })
+    .filter({ visible: true });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  const avatar = row.getByTestId("sidebar-wave-avatar");
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  const send = () => {
+    for (const socket of sockets)
+      socket.send(
+        JSON.stringify({
+          type: "DROP_UPDATE_REF",
+          data: {
+            update_type: "DROP_UPDATE",
+            wave_id: ANNOUNCEMENTS,
+            drop_id: incoming.id,
+            serial_no: incoming.serial_no,
+            author_id: "another-reader",
+          },
+        })
+      );
+  };
+  const replyResolved = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/v2/drops?") &&
+      res.request().url().includes(incoming.id)
+  );
+  send();
+  await replyResolved;
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  // A reload must not restore the reply-inclusive overview time.
+  sockets.length = 0;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  incoming = {
+    ...incoming,
+    id: "announcement-new-root",
+    created_at: now - 60000,
+    serial_no: 502,
+  };
+  delete incoming.reply_to_drop;
+  latest = incoming;
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  send();
+  await expect(row.getByText("1m", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toBeVisible();
+  // Full updates must refresh the time immediately too, without a reload or poll.
+  latest = {
+    ...latest,
+    id: "announcement-full-root",
+    created_at: Date.now(),
+    serial_no: 503,
+  };
+  for (const socket of sockets)
+    socket.send(
+      JSON.stringify({
+        type: "DROP_UPDATE",
+        data: {
+          id: latest.id,
+          wave: { id: ANNOUNCEMENTS },
+          serial_no: 503,
+          author: { id: "another-reader", handle: "someone-else" },
+          created_at: latest.created_at,
+          drop_type: "CHAT",
+          parts: [],
+          parts_count: 1,
+        },
+      })
+    );
+  await expect(row.getByText("Just now", { exact: true })).toBeVisible({
+    timeout: 5000,
+  });
+  await expect(avatar.getByText("2", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("announcement-sidebar.png"),
+  });
+});
