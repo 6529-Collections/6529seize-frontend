@@ -600,6 +600,14 @@ const PACKS = [
     [DESKTOP, "capacitor-ios-sim"]
   ),
 
+  sandboxPack(
+    "test:e2e:metamask-bridge",
+    "Isolated WebKit MetaMask bridge attribution and application-error boundaries.",
+    ["tests/monitoring/metamask-bridge-filter.spec.ts"],
+    { PLAYWRIGHT_SKIP_WEB_SERVER: "1" },
+    ["web-desktop-webkit"]
+  ),
+
   localPack(
     "test:e2e:smoke:surface-matrix",
     "@smoke subset on desktop and mobile web shells.",

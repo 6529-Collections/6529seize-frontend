@@ -5,7 +5,10 @@
 
 import type * as Sentry from "@sentry/nextjs";
 import { isIndexedDBError } from "@/utils/error-sanitizer";
-import { enrichCyclicJsonTimerEvent } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import {
+  consumeConfirmedMetaMaskBridgeError,
+  enrichCyclicJsonTimerEvent,
+} from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
 import {
   sanitizeSentryEvent,
   sanitizeUrlString,
@@ -431,6 +434,8 @@ export function processSentryClientEvent(
   hint?: Sentry.EventHint
 ): Sentry.ErrorEvent | null {
   if (shouldFilterEvent(event, hint)) {
+    // Predicates remain repeatable; only the final drop consumes throw proof.
+    consumeConfirmedMetaMaskBridgeError(hint?.originalException);
     return null;
   }
 
