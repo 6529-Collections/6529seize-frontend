@@ -11232,6 +11232,39 @@
         "components/brain/notifications/NotificationArtistArtwork.tsx",
         "ops/docs/notifications/feature-artist-artwork-alerts.md"
       ]
+    },
+    {
+      "id": "apps.mobile-compatibility",
+      "kind": "business_rule",
+      "title": "6529 Mobile iOS compatibility and update notice",
+      "aliases": [
+        "ios minimum",
+        "ios 16.4",
+        "iphone update required",
+        "6529 mobile needs ios",
+        "6529 staging needs ios",
+        "signed posts ios 17"
+      ],
+      "keywords": [
+        "mobile",
+        "ios",
+        "compatibility",
+        "update",
+        "browser",
+        "signed posts",
+        "encrypted dms"
+      ],
+      "facts": [
+        "6529 Mobile needs iOS 16.4 or later to load the current website. Signed Posts additionally need iOS 17; supported iOS 16 versions can use Encrypted DMs without signing. Android signing depends on sufficiently recent WebView support. Signed iOS builds are needed for persistent cryptographic keys.",
+        "On an old iOS engine that cannot run the site, the notice says 6529 Mobile needs iOS 16.4 or later in production or 6529 Staging needs iOS 16.4 or later on staging. It directs users to Settings > General > Software Update and to reopen the named app. Other unsupported engines see 6529 needs a newer browser. Modern browsers keep these notices hidden."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "tags": ["mobile", "compatibility"],
+      "source_refs": [
+        "ops/docs/navigation/feature-6529-apps-page.md",
+        "components/legacy-browser/LegacyBrowserNotice.tsx",
+        "components/legacy-browser/legacyBrowserGate.ts"
+      ]
     }
   ]
 }
