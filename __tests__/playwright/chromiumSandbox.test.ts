@@ -10,12 +10,28 @@ type LaunchSite = { readonly line: number; readonly sandboxed: boolean };
 function listSourceFiles(dir: string): string[] {
   return fs
     .readdirSync(dir, { recursive: true, encoding: "utf8" })
-    .filter((file) => /\.[cm]?[jt]s$/.test(file))
+    .filter((file) => /\.[cm]?[jt]sx?$/.test(file))
     .map((file) => path.join(dir, file));
 }
 
+function scriptKind(fileName: string): ts.ScriptKind {
+  if (fileName.endsWith(".tsx")) return ts.ScriptKind.TSX;
+  if (fileName.endsWith(".jsx")) return ts.ScriptKind.JSX;
+  return /\.[cm]?js$/.test(fileName) ? ts.ScriptKind.JS : ts.ScriptKind.TS;
+}
+
+// Quoted and computed string keys name the same option as identifiers.
 function propertyName(node: ts.ObjectLiteralElementLike): string | undefined {
-  return node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
+  const name = node.name;
+  if (!name) return undefined;
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name)) return name.text;
+  if (
+    ts.isComputedPropertyName(name) &&
+    ts.isStringLiteralLike(name.expression)
+  ) {
+    return name.expression.text;
+  }
+  return undefined;
 }
 
 // Literal values such as `chromiumSandbox: false`, or the option in a comment
@@ -50,7 +66,7 @@ function launchSites(source: string, fileName = "spec.ts"): LaunchSite[] {
     source,
     ts.ScriptTarget.Latest,
     true,
-    /\.[cm]?js$/.test(fileName) ? ts.ScriptKind.JS : ts.ScriptKind.TS
+    scriptKind(fileName)
   );
   const sites: LaunchSite[] = [];
   const record = (node: ts.Node, sandboxed: boolean) =>
@@ -116,12 +132,26 @@ describe("Playwright Chromium sandbox", () => {
       "test.use({ launchOptions: { /* chromiumSandbox: CHROMIUM_SANDBOX */ slowMo: 1 } });",
       'test.use({ launchOptions: { note: "chromiumSandbox: CHROMIUM_SANDBOX" } });',
       "test.use({ launchOptions });",
+      'test.use({ "launchOptions": { slowMo: 1 } });',
+      'test.use({ ["launchOptions"]: { slowMo: 1 } });',
+      'test.use({ "launchOptions": { "chromiumSandbox": CHROMIUM_SANDBOX } });',
     ].join("\n");
 
     expect(
       launchSites(source)
         .filter((site) => !site.sandboxed)
         .map((site) => site.line)
-    ).toEqual([2, 3, 5, 6, 7, 8, 9]);
+    ).toEqual([2, 3, 5, 6, 7, 8, 9, 10, 11]);
+  });
+
+  it("parses TSX helpers", () => {
+    const source = [
+      "const fixture = <div data-testid='fixture' />;",
+      "test.use({ launchOptions: { slowMo: 1 } });",
+    ].join("\n");
+
+    expect(launchSites(source, "fixture.tsx")).toEqual([
+      { line: 2, sandboxed: false },
+    ]);
   });
 });

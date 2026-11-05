@@ -88,7 +88,7 @@ const CONTRACTS = [
   },
   {
     test: "__tests__/playwright/chromiumSandbox.test.ts",
-    inputs: [/^tests\/.*\.[cm]?[jt]s$/u, /^playwright\.config\.ts$/u],
+    inputs: [/^tests\/.*\.[cm]?[jt]sx?$/u, /^playwright\.config\.ts$/u],
   },
 ];
 
