@@ -28,14 +28,8 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
             width={40}
             height={40}
           />
+          <EnvironmentBadge logoOverlay />
         </Link>
-      </div>
-      <div
-        className={`tw-flex tw-px-2 tw-pb-2 empty:tw-hidden ${
-          collapsed ? "tw-justify-center" : "tw-ml-3 tw-justify-start"
-        }`}
-      >
-        <EnvironmentBadge compact />
       </div>
       {/* Position against the full-height WebSidebar, not the logo header. */}
       <button
