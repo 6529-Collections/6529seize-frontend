@@ -322,7 +322,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
   test("opens all fields on wide touch and hybrid screens", async ({
     page,
     isMobile,
-  }) => {
+  }, testInfo) => {
     if (!isMobile)
       await page.addInitScript(() => {
         Object.defineProperty(navigator, "maxTouchPoints", {
@@ -380,17 +380,42 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(
       page.getByRole("textbox", { name: "About statement", exact: true })
     ).toBeVisible();
-    if (isMobile) {
-      await page
-        .getByRole("textbox", { name: "About statement", exact: true })
-        .fill("Unsaved touch QA draft");
-    }
+    await page
+      .getByRole("textbox", { name: "About statement", exact: true })
+      .fill("Unsaved touch QA draft");
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
-    if (isMobile) {
-      const discard = page.getByRole("button", {
-        name: "Discard changes",
-        exact: true,
+    const discardDialog = page.getByRole("dialog", {
+      name: "Discard your changes?",
+      exact: true,
+    });
+    const background = await discardDialog
+      .getByTestId("mobile-dialog-header")
+      .evaluate((header) => {
+        const surface = header.parentElement?.parentElement;
+        return surface ? getComputedStyle(surface).backgroundColor : null;
       });
+    expect(background).toMatch(/^rgb\(/);
+    await expect
+      .poll(() =>
+        discardDialog.getByTestId("mobile-dialog-header").evaluate((header) => {
+          let opacity = 1;
+          let node: Element | null = header;
+          while (node) {
+            opacity *= Number(getComputedStyle(node).opacity);
+            node = node.parentElement;
+          }
+          return opacity;
+        })
+      )
+      .toBe(1);
+    await page.screenshot({
+      path: testInfo.outputPath("discard-profile-changes.png"),
+    });
+    const discard = page.getByRole("button", {
+      name: "Discard changes",
+      exact: true,
+    });
+    if (isMobile) {
       const keepEditing = page.getByRole("button", {
         name: "Keep editing",
         exact: true,
@@ -399,8 +424,8 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect((await keepEditing.boundingBox())?.height).toBeGreaterThanOrEqual(
         44
       );
-      await discard.click();
     }
+    await discard.click();
     await expectNoHorizontalOverflow(page);
   });
 

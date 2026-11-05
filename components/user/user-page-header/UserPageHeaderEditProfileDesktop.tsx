@@ -102,7 +102,7 @@ function ProfileEditorDialog({
         cancelText={message("user.profileHeader.edit.keepEditing")}
         confirmVariant="destructive"
         zIndexClassName="tw-z-[1020]"
-        surfaceClassName={PROFILE_EDITOR_TOUCH_TARGETS_CLASS}
+        surfaceClassName={`tw-bg-iron-950 ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
       />
     </>
   );
