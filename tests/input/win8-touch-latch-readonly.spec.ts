@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import { expect, test } from "../testHelpers";
+import { findTouchMessage, longPressTouchMessage } from "./waveTouchTarget";
 
 /**
  * Win 8-sequence regression pack for the behavioral fine-pointer latch
@@ -56,10 +57,7 @@ async function openWaveWithRows(page: Page) {
     // of long-press — it only renders while the app classifies the device
     // as touch-first, so its presence participates in the assertion.
     try {
-      await expect(page.locator(".touch-select-none").last()).toBeAttached({
-        timeout: 20000,
-      });
-      return;
+      return await findTouchMessage(page);
     } catch {
       // next candidate
     }
@@ -67,54 +65,6 @@ async function openWaveWithRows(page: Page) {
   throw new Error(
     `none of the first ${candidates.length} anonymously-listed waves rendered long-pressable rows`
   );
-}
-
-async function longPressViaTouchEvents(page: Page) {
-  // The long-press hook (useLongPressInteraction) reads React touch events;
-  // dispatching TouchEvents at the row is engine-accurate enough here — the
-  // classification state under test is what decides whether the hook is
-  // armed at all.
-  await page.evaluate(() => {
-    const rows = document.querySelectorAll(".touch-select-none");
-    const el = rows[rows.length - 1] as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const touch = new Touch({
-      identifier: 1,
-      target: el,
-      clientX: rect.x + rect.width / 2,
-      clientY: rect.y + rect.height / 2,
-    });
-    el.dispatchEvent(
-      new TouchEvent("touchstart", {
-        bubbles: true,
-        cancelable: true,
-        touches: [touch],
-        targetTouches: [touch],
-        changedTouches: [touch],
-      })
-    );
-  });
-  // Hold past the app's real threshold with margin for remote-target latency.
-  await page.waitForTimeout(DEFAULT_LONG_PRESS_DURATION_MS + 600);
-  await page.evaluate(() => {
-    const rows = document.querySelectorAll(".touch-select-none");
-    const el = rows[rows.length - 1] as HTMLElement;
-    const touch = new Touch({
-      identifier: 1,
-      target: el,
-      clientX: 0,
-      clientY: 0,
-    });
-    el.dispatchEvent(
-      new TouchEvent("touchend", {
-        bubbles: true,
-        cancelable: true,
-        touches: [],
-        targetTouches: [],
-        changedTouches: [touch],
-      })
-    );
-  });
 }
 
 test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
@@ -135,7 +85,7 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // timeout — raise it so the helper's descriptive error surfaces instead
     // of a generic timeout.
     test.setTimeout(180_000);
-    await openWaveWithRows(page);
+    const row = await openWaveWithRows(page);
 
     // The Win 8 sequence, three times over: a real (trusted) touch tap, then
     // trusted mouse moves milliseconds later. Chromium's own touch pipeline
@@ -145,8 +95,6 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // rounds; the near-corner position lands in row padding, clear of links
     // and media that a centered tap could activate.
     for (let round = 0; round < 3; round++) {
-      const row = page.locator(".touch-select-none").last();
-      await row.scrollIntoViewIfNeeded();
       await row.tap({ position: { x: 10, y: 8 } });
       await page.mouse.move(200 + round * 50, 300, { steps: 3 });
     }
@@ -157,7 +105,7 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // Assert on the action button itself — the HeadlessUI dialog wrapper is
     // a zero-size positioning shell that Playwright's visibility heuristic
     // reports as hidden even while its content is on screen.
-    await longPressViaTouchEvents(page);
+    await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
     const copyTextAction = page
       .getByRole("button", { name: /copy text/i })
       .first();
@@ -166,6 +114,102 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // Read-only hygiene: verify the sheet actually closed again.
     await page.keyboard.press("Escape");
     await expect(copyTextAction).toBeHidden({ timeout: 10000 });
+  });
+});
+
+test.describe("Touch target harness", () => {
+  test.use({ hasTouch: true });
+
+  async function installRows(page: Page) {
+    await page.setContent(`
+      <main>
+        <article data-serial-no="1" class="touch-select-none"
+          style="width:300px;height:100px">Message one</article>
+      </main>
+      <output role="status"></output>
+      <script>
+        document.addEventListener('touchstart', (event) => {
+          if (event.isTrusted) {
+            document.querySelector('output').textContent =
+              event.target.closest('[data-serial-no]').dataset.serialNo;
+          }
+        });
+      </script>
+    `);
+  }
+
+  test("tap follows a message replaced between removal and insertion", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      const replacement = element.cloneNode(true);
+      const parent = element.parentElement;
+      element.remove();
+      setTimeout(() => parent?.appendChild(replacement), 50);
+    });
+    await row.tap({ position: { x: 10, y: 8 } });
+    await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("tap stays on the selected message when a newer row arrives", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      const newer = element.cloneNode(true) as HTMLElement;
+      newer.dataset["serialNo"] = "2";
+      element.after(newer);
+    });
+    await row.tap({ position: { x: 10, y: 8 } });
+    await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("tap reacquires the message when scrolling replaces its row", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      element.setAttribute(
+        "style",
+        "margin-top:1500px;width:300px;height:100px"
+      );
+      document.addEventListener(
+        "scroll",
+        () => {
+          const replacement = element.cloneNode(true);
+          replacement.textContent = "Replacement message";
+          element.replaceWith(replacement);
+        },
+        { once: true, capture: true }
+      );
+    });
+    await row.tap({ position: { x: 10, y: 8 } });
+    await expect(row).toHaveText("Replacement message");
+    await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("long press ends on its original node when a newer row arrives", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      const status = document.querySelector("output");
+      element.addEventListener("touchstart", () => {
+        const newer = element.cloneNode(true) as HTMLElement;
+        newer.dataset["serialNo"] = "2";
+        element.after(newer);
+      });
+      element.addEventListener("touchend", (event) => {
+        if (status) status.textContent = String(event.target === element);
+      });
+    });
+    await longPressTouchMessage(row, 30);
+    await expect(page.getByRole("status")).toHaveText("true");
   });
 });
 
