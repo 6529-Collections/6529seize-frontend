@@ -55,6 +55,41 @@ describe("walletChunkRecovery", () => {
     now.mockRestore();
   });
 
+  it("does not reload when the sessionStorage getter is blocked", () => {
+    const getter = jest.spyOn(globalThis, "sessionStorage", "get");
+    getter.mockImplementation(() => {
+      throw new DOMException("Access denied", "SecurityError");
+    });
+    try {
+      expect(reloadToRetryWalletChunks(reload)).toBe(false);
+      expect(reload).not.toHaveBeenCalled();
+    } finally {
+      getter.mockRestore();
+    }
+  });
+
+  it("does not reload when its reload marker cannot be written", () => {
+    const storage = sessionStorage;
+    const originalSetItem = Storage.prototype.setItem;
+    const write = jest.spyOn(Storage.prototype, "setItem");
+    write.mockImplementation(function (this: Storage, key, value) {
+      if (this === storage) {
+        throw new DOMException("Storage full", "QuotaExceededError");
+      }
+      originalSetItem.call(this, key, value);
+    });
+    try {
+      localStorage.setItem("walletRecoveryControl", "available");
+      expect(reloadToRetryWalletChunks(reload)).toBe(false);
+      expect(reloadToRetryWalletChunks(reload)).toBe(false);
+      expect(reload).not.toHaveBeenCalled();
+      expect(localStorage.getItem("walletRecoveryControl")).toBe("available");
+    } finally {
+      write.mockRestore();
+      localStorage.removeItem("walletRecoveryControl");
+    }
+  });
+
   it("disconnects through the wallet stack's Wagmi config and forgets the stored connection", async () => {
     const config = { id: "wallet-stack" } as never;
     setWalletStackWagmiConfig(config);
