@@ -231,7 +231,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       ["personal insults", "Personal insult warning"],
       ["inappropriate language", "Language warning"],
       ["doxxing of another person", "Privacy warning"],
-    ];
+    ] as const;
     for (const [error, title] of failures) {
       await page.route(
         `${getSandboxApiOrigin(baseURL)}/api/profiles/*/cic/statements`,
@@ -247,6 +247,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         page.getByRole("heading", { name: title, exact: true })
       ).toBeVisible();
       await expect(input).toHaveValue(draft);
+      await expect(input).toHaveAttribute(
+        "aria-invalid",
+        error === "Unavailable" ? "false" : "true"
+      );
       await expect(input).toHaveAttribute(
         "aria-describedby",
         /profile-about-error/

@@ -1,22 +1,10 @@
 import UserPageErrorWrapper from "@/components/user/utils/UserPageErrorWrapper";
+import {
+  AboutEditError,
+  getAboutErrorType,
+  type OmitUnknown,
+} from "./about-statement-errors";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
-
-enum AboutEditError {
-  HATE_SPEECH = "HATE_SPEECH",
-  PERSONAL_INSULTS = "PERSONAL_INSULTS",
-  INAPPROPRIATE_LANGUAGE = "INAPPROPRIATE_LANGUAGE",
-  DOXXING = "DOXXING",
-  UNKNOWN = "UNKNOWN",
-}
-
-type OmitUnknown = Exclude<AboutEditError, AboutEditError.UNKNOWN>;
-
-const ERROR_REGEX: { [k in OmitUnknown]: RegExp } = {
-  [AboutEditError.HATE_SPEECH]: /hate\s+speech/i,
-  [AboutEditError.PERSONAL_INSULTS]: /personal\s+insults/i,
-  [AboutEditError.INAPPROPRIATE_LANGUAGE]: /inappropriate\s+language/i,
-  [AboutEditError.DOXXING]: /doxxing\s+of\s+another\s+person/i,
-};
 
 const getErrorText = (): {
   [k in OmitUnknown]: {
@@ -67,15 +55,6 @@ export default function UserPageHeaderAboutEditError({
   readonly msg: string;
   readonly closeError: () => void;
 }) {
-  const getAboutErrorType = (msg: string): AboutEditError => {
-    for (const errorType in ERROR_REGEX) {
-      if (ERROR_REGEX[errorType as OmitUnknown].test(msg)) {
-        return errorType as AboutEditError;
-      }
-    }
-    return AboutEditError.UNKNOWN;
-  };
-
   const errorType = getAboutErrorType(msg);
 
   const errorText =

@@ -1,3 +1,4 @@
+import { AboutEditError, getAboutErrorType } from "./about-statement-errors";
 import type { Ref } from "react";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -35,6 +36,10 @@ export default function UserPageHeaderAboutInput({
         aria-label={getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.textareaLabel"
         )}
+        aria-invalid={
+          errorMsg !== null &&
+          getAboutErrorType(errorMsg) !== AboutEditError.UNKNOWN
+        }
         aria-describedby={
           errorMsg
             ? `${id}-character-count ${id}-profile-about-error`
