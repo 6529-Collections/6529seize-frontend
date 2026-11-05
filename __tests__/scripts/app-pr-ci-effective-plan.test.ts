@@ -90,6 +90,10 @@ it.each([
   "components/profile-activity/ProfileNicActivityLogs.tsx",
   "components/user/rep/MobileNicTabContent.tsx",
   "tests/social/profile-nic-activity-sandbox.spec.ts",
+  "tests/packs.manifest.cjs",
+  "tests/support/composerSandboxServer.cjs",
+  "scripts/app-pr-ci-effective-plan.cjs",
+  ".github/workflows/app-pr-ci.yml",
 ])("selects the profile NIC browser contract for %s", (file) => {
   expect(executePlan([file]).checks.playwright_profile_nic.required).toBe(true);
 });

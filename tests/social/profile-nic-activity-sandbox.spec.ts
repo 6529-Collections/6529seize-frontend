@@ -13,7 +13,7 @@ async function seedViewer(page: Page, api: string, viewer: string) {
   const id = viewer === "owner" ? ownerId : "nic-visitor";
   const viewerWallet =
     viewer === "owner" ? wallet : "0x0000000000000000000000000000000000000530";
-  if (viewer === "visitor") {
+  if (viewer === "visitor" || viewer === "unsigned") {
     await page.route(
       `${api}/api/identities/${viewerWallet}**`,
       async (route) => {
@@ -55,7 +55,7 @@ async function seedViewer(page: Page, api: string, viewer: string) {
             jwt,
             role: null,
             refreshToken: null,
-            authSessionVersion: "v2",
+            authSessionVersion: jwt === null ? null : "v2",
             profileId,
             profileHandle: handle,
           },
@@ -64,7 +64,7 @@ async function seedViewer(page: Page, api: string, viewer: string) {
     },
     {
       address: viewerWallet,
-      jwt: token,
+      jwt: viewer === "unsigned" ? null : token,
       profileId: id,
       handle: viewer === "owner" ? "playwright" : "nic-visitor",
     }
@@ -182,7 +182,7 @@ test.describe("Profile NIC activity @local-only", () => {
     );
   });
   for (const width of [1440, 820, 390]) {
-    for (const viewer of ["owner", "visitor", "logged-out"]) {
+    for (const viewer of ["owner", "visitor", "logged-out", "unsigned"]) {
       test(`${width}px ${viewer}: preserves identity, filters and cursor navigation`, async ({
         page,
         baseURL,
@@ -207,6 +207,13 @@ test.describe("Profile NIC activity @local-only", () => {
           await expect(
             page.getByRole("button", { name: "Follow", exact: true })
           ).toBeVisible();
+        }
+        if (viewer === "unsigned") {
+          expect(
+            await page.evaluate(() =>
+              localStorage.getItem("6529-wallet-active-address")
+            )
+          ).toBe("0x0000000000000000000000000000000000000530");
         }
         await selectNic(page, width);
         const entries = page

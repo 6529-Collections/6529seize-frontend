@@ -29,9 +29,7 @@ export default function ProfileNicActivityLogs(props: Props) {
     isAuthenticated,
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
-  const pendingViewer = Boolean(
-    address && (hasValidWalletAuth === false || fetchingProfile)
-  );
+  const pendingViewer = Boolean(address && fetchingProfile);
   const viewer = JSON.stringify([
     address ?? null,
     isAuthenticated && hasValidWalletAuth !== false

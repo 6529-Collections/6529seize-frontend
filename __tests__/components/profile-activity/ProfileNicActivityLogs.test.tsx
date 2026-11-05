@@ -5,18 +5,20 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
 
 let viewer = "owner";
+let walletAuth = true;
+let fetchingProfile = false;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: { id: viewer },
     activeProfileProxy: null,
-    fetchingProfile: false,
-    isAuthenticated: Boolean(viewer),
+    fetchingProfile,
+    isAuthenticated: Boolean(viewer) && walletAuth,
   }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: viewer || undefined,
-    hasValidWalletAuth: Boolean(viewer),
+    hasValidWalletAuth: Boolean(viewer) && walletAuth,
   }),
 }));
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
@@ -79,6 +81,8 @@ const response = (page: number) => ({
 describe("NIC cursor pagination", () => {
   beforeEach(() => {
     viewer = "owner";
+    walletAuth = true;
+    fetchingProfile = false;
     fetchMock.mockReset();
     fetchMock.mockImplementation(async ({ params: request }) =>
       response(Number((request as typeof params).page))
@@ -167,6 +171,21 @@ describe("NIC cursor pagination", () => {
     expect(screen.getByText("Page 1")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("identity-page-2");
+  });
+  it("shows public activity for a connected unsigned wallet and waits only while its profile is loading", async () => {
+    walletAuth = false;
+    const { rerender, tree } = setup();
+    await screen.findByText("identity-page-1");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    walletAuth = true;
+    fetchingProfile = true;
+    rerender(tree());
+    expect(screen.getByText("Loading")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchingProfile = false;
+    rerender(tree());
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await screen.findByText("identity-page-1");
   });
   it.each([{ page: 7 }, { data: [] }])(
     "keeps the current page when a continuation violates the page contract: %j",

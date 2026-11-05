@@ -285,10 +285,17 @@ function applyEffectiveAppPrCiPlan(plan) {
         )
       : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(
-      files.some((file) =>
-        /^(?:components\/profile-activity\/|__tests__\/components\/profile-activity\/|helpers\/profile-logs\.helpers\.ts$|components\/user\/rep\/|tests\/social\/profile-nic-activity-sandbox\.spec\.ts$)/u.test(
-          file
-        )
+      files.some(
+        (file) =>
+          /^(?:components\/profile-activity\/|__tests__\/components\/profile-activity\/|helpers\/profile-logs\.helpers\.ts$|components\/user\/rep\/|tests\/social\/profile-nic-activity-sandbox\.spec\.ts$)/u.test(
+            file
+          ) ||
+          [
+            "tests/packs.manifest.cjs",
+            "tests/support/composerSandboxServer.cjs",
+            "scripts/app-pr-ci-effective-plan.cjs",
+            ".github/workflows/app-pr-ci.yml",
+          ].includes(file)
       ),
       "Profile activity changes need the NIC cursor and unchanged-view browser contracts."
     ),
