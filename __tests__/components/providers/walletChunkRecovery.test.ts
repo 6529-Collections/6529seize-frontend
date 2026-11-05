@@ -69,15 +69,24 @@ describe("walletChunkRecovery", () => {
   });
 
   it("does not reload when its reload marker cannot be written", () => {
+    const storage = sessionStorage;
+    const originalSetItem = Storage.prototype.setItem;
     const write = jest.spyOn(Storage.prototype, "setItem");
-    write.mockImplementation(() => {
-      throw new DOMException("Storage full", "QuotaExceededError");
+    write.mockImplementation(function (this: Storage, key, value) {
+      if (this === storage) {
+        throw new DOMException("Storage full", "QuotaExceededError");
+      }
+      originalSetItem.call(this, key, value);
     });
     try {
+      localStorage.setItem("walletRecoveryControl", "available");
+      expect(reloadToRetryWalletChunks(reload)).toBe(false);
       expect(reloadToRetryWalletChunks(reload)).toBe(false);
       expect(reload).not.toHaveBeenCalled();
+      expect(localStorage.getItem("walletRecoveryControl")).toBe("available");
     } finally {
       write.mockRestore();
+      localStorage.removeItem("walletRecoveryControl");
     }
   });
 

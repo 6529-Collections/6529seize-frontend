@@ -64,3 +64,23 @@ it("tolerates storage operation failures and recovers on the next call", () => {
   expect(safeSessionStorage.setItem("sidebarCollapsed", "false")).toBe(true);
   expect(safeSessionStorage.getItem("sidebarCollapsed")).toBe("false");
 });
+
+it("retries persistence after repeated write failures when storage recovers", () => {
+  const storage = sessionStorage;
+  let isBlocked = true;
+  Object.defineProperty(globalThis, "sessionStorage", {
+    value: {
+      setItem(key: string, value: string) {
+        if (isBlocked) throw new DOMException("Access denied", "SecurityError");
+        storage.setItem(key, value);
+      },
+    },
+  });
+
+  expect(safeSessionStorage.setItem("sidebarCollapsed", "false")).toBe(false);
+  expect(safeSessionStorage.setItem("sidebarCollapsed", "false")).toBe(false);
+  expect(storage.getItem("sidebarCollapsed")).toBeNull();
+  isBlocked = false;
+  expect(safeSessionStorage.setItem("sidebarCollapsed", "false")).toBe(true);
+  expect(storage.getItem("sidebarCollapsed")).toBe("false");
+});

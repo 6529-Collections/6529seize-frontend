@@ -1,6 +1,8 @@
 import { expect, test } from "../testHelpers";
 import { installLocalCountryCheck } from "../support/localCountryCheck";
 
+test.use({ locale: "en-US" });
+
 for (const restriction of ["getter", "operations"] as const) {
   test(`hydrates notifications with blocked sessionStorage ${restriction} @critical-shell @readonly`, async ({
     page,
@@ -15,10 +17,18 @@ for (const restriction of ["getter", "operations"] as const) {
         );
       };
       if (mode === "getter") {
-        Object.defineProperty(window, "sessionStorage", { get: blocked });
+        Object.defineProperty(window, "sessionStorage", {
+          configurable: true,
+          get: blocked,
+        });
       } else {
         Object.defineProperty(window, "sessionStorage", {
+          configurable: true,
           value: {
+            get length() {
+              return blocked();
+            },
+            key: blocked,
             getItem: blocked,
             setItem: blocked,
             removeItem: blocked,
