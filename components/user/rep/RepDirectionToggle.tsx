@@ -24,8 +24,24 @@ export default function RepDirectionToggle({
       label: t(locale, "user.rate.received"),
       value: "received",
       key: "received",
+      icon: (
+        <ArrowDownLeftIcon
+          className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+          aria-hidden="true"
+        />
+      ),
     },
-    { label: t(locale, "user.rate.given"), value: "given", key: "given" },
+    {
+      label: t(locale, "user.rate.given"),
+      value: "given",
+      key: "given",
+      icon: (
+        <ArrowUpRightIcon
+          className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+          aria-hidden="true"
+        />
+      ),
+    },
   ];
   if (variant === "text") {
     return (
