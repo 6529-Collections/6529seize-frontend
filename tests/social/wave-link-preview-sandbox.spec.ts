@@ -108,18 +108,13 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     await installPreview(page, baseURL);
     await page.goto(`/waves/${WAVE_ID}`, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    const chat = page.getByRole("region", {
-      name: "Wave chat file upload area",
-    });
-    const card = chat
-      .locator("div.tw-group")
-      .filter({
-        has: page.getByRole("link", {
-          name: `View wave ${WAVE_NAME}`,
-          exact: true,
-        }),
+    const card = page
+      .getByRole("region", { name: "Wave chat file upload area" })
+      .getByRole("link", {
+        name: `View wave ${WAVE_NAME}`,
+        exact: true,
       })
-      .last();
+      .locator("..");
     await expectReadablePreview(card);
 
     if (testInfo.project.name === "web-desktop-chromium") {
@@ -130,15 +125,13 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
           .getByRole("button", { name: "Show right sidebar", exact: true })
           .click();
       }
-      const sidebarCard = details
-        .locator("div.tw-group")
-        .filter({
-          has: page.getByRole("link", {
-            name: `View wave ${WAVE_NAME}`,
-            exact: true,
-          }),
+      const sidebarCard = page
+        .getByRole("complementary", { name: "Wave details" })
+        .getByRole("link", {
+          name: `View wave ${WAVE_NAME}`,
+          exact: true,
         })
-        .last();
+        .locator("..");
       await expectReadablePreview(sidebarCard);
       const titleBox = await sidebarCard
         .getByText(WAVE_NAME, { exact: true })
