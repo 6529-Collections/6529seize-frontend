@@ -51,7 +51,7 @@ export default function EnvironmentBadge({
       <span
         role="img"
         aria-label={`Environment: ${badge} (${host})`}
-        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-max-w-[4.75rem] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-select-none tw-flex-col tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded tw-border tw-border-solid tw-border-[#a17c27] tw-bg-[#191405] tw-px-1 tw-py-0.5 tw-font-mono tw-text-[11px] tw-font-semibold tw-leading-[14px] tw-text-amber-200"
+        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-flex tw-max-w-[4.75rem] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-select-none tw-flex-col tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded tw-border tw-border-solid tw-border-[#a17c27] tw-bg-[#191405] tw-px-0.5 tw-py-px tw-font-mono tw-text-[10px] tw-font-semibold tw-leading-[10px] tw-text-amber-200"
       >
         <span className="tw-max-w-full tw-truncate">
           {localPort ? "LCL" : badge}
