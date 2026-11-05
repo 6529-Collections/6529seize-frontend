@@ -43526,6 +43526,7 @@ components:
         - handle
         - display
         - pfp
+        - level
       properties:
         id:
           type: string
@@ -43537,6 +43538,9 @@ components:
         pfp:
           type: string
           nullable: true
+        level:
+          type: integer
+          format: int64
     ApiWaveMetadata:
       type: object
       required:

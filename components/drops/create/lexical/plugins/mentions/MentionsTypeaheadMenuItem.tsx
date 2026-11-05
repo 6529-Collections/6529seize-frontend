@@ -1,5 +1,8 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
+import UserLevel from "@/components/user/utils/level/UserLevel";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function MentionsTypeaheadMenuItem({
   index,
@@ -9,6 +12,7 @@ export default function MentionsTypeaheadMenuItem({
   handle,
   display,
   picture,
+  level = null,
   setRefElement,
 }: {
   readonly index: number;
@@ -18,8 +22,10 @@ export default function MentionsTypeaheadMenuItem({
   readonly handle: string;
   readonly display: string | null;
   readonly picture: string | null;
+  readonly level?: number | null | undefined;
   readonly setRefElement: (element: HTMLElement | null) => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <li
       className="tw-h-full"
@@ -38,15 +44,17 @@ export default function MentionsTypeaheadMenuItem({
         } tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-px-2 tw-py-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
       >
         <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-          <div className="tw-inline-flex tw-items-center tw-space-x-2">
+          <div className="tw-inline-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
             {picture && (
-              <div className="tw-h-6 tw-w-6 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+              <div className="tw-h-6 tw-w-6 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
                 <div className="tw-h-full tw-w-full tw-max-w-full">
                   <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                     {/* Typeahead avatar URLs can use hosts outside next/image remotePatterns, so this stays unoptimized. */}
                     <Image
                       src={getScaledImageUri(picture, ImageScale.W_AUTO_H_50)}
-                      alt={`Profile for ${handle}`}
+                      alt={t(locale, "waves.composer.mentions.profileAlt", {
+                        handle,
+                      })}
                       width={24}
                       height={24}
                       unoptimized
@@ -56,18 +64,33 @@ export default function MentionsTypeaheadMenuItem({
                 </div>
               </div>
             )}
-            <div>
-              <div className="tw-w-[12rem] tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
-                {handle}
+            <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-white">
+                <span className="tw-truncate">{handle}</span>
+                {typeof level === "number" && (
+                  <span className="tw-shrink-0">
+                    <span className="tw-sr-only">
+                      {t(locale, "waves.composer.mentions.level", { level })}
+                    </span>
+                    <span aria-hidden="true">
+                      <UserLevel
+                        level={level}
+                        size="xxs"
+                        asSpan
+                        showLabel={false}
+                      />
+                    </span>
+                  </span>
+                )}
               </div>
-              <div className="tw-w-[12rem] tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+              <div className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
                 {display}
               </div>
             </div>
           </div>
           {isSelected && (
             <svg
-              className="tw-ml-2 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-ml-2 tw-h-5 tw-w-5 tw-shrink-0 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

@@ -57,6 +57,60 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   defineWaveImageLayoutTests();
   defineWaveImagePreviewTests();
 
+  test("shows mention levels and keeps keyboard selection usable", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.route(
+      `**/v2/waves/${SANDBOX_WAVE_ID}/mention-search?**`,
+      async (route) => {
+        await route.fulfill({
+          json: [
+            {
+              id: "profile-alice",
+              handle: "alicelonghandle",
+              display: "A long display name for the mention suggestion",
+              pfp: null,
+              level: 42,
+            },
+            {
+              id: "profile-new",
+              handle: "alicenew",
+              display: null,
+              pfp: null,
+              level: 0,
+            },
+          ],
+        });
+      }
+    );
+    await gotoSandboxWave(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await composer.fill("@ali");
+    const experienced = page.getByRole("button", {
+      name: /alicelonghandle Level 42/,
+    });
+    const newcomer = page.getByRole("button", { name: /alicenew Level 0/ });
+    await expect(experienced).toBeVisible();
+    await expect(newcomer).toBeVisible();
+    await expect(experienced.getByText("42", { exact: true })).toBeVisible();
+    await expect(newcomer.getByText("0", { exact: true })).toBeVisible();
+    await expect(experienced.getByRole("button")).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({ path: testInfo.outputPath("mention-levels.png") });
+    await composer.press("ArrowDown");
+    await composer.press("ArrowUp");
+    await composer.press("Enter");
+    await expect(composer).toContainText("@alicelonghandle");
+    await expect(experienced).toBeHidden();
+    expect(pageErrors).toEqual([]);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("authenticates the wave listener before receiving and sending typing", async ({
     baseURL,
     page,

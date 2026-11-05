@@ -3974,6 +3974,7 @@
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
+        "Type @ followed by at least three handle characters to find profiles to tag. Individual profile suggestions show the user's level beside the handle, including level 0. Global mentions and Quick Tags have no level badge.",
         "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
         "Poll posts require a question, at least two unique options, and a future closing time. The composer explains whether voters can select one option or multiple options and keeps Post unavailable until the poll is valid.",
         "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control and separate Poll action are hidden and the poll header close control removes the poll; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
