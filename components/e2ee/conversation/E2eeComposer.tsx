@@ -19,6 +19,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import useCapacitor from "@/hooks/useCapacitor";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
+import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
 import {
   COMPOSER_INPUT_CLASS_NAME,
   COMPOSER_MAX_HEIGHT_PX,
@@ -52,6 +53,7 @@ import {
   isEditLastMessageKey,
   type PasteNotice,
   useMentionPicker,
+  useLoadedComposerText,
   usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
@@ -403,34 +405,6 @@ interface E2eeComposerProps {
     | undefined;
 }
 
-/**
- * Loads text into the box once per source: the message being edited (which
- * also clears picked files) or a refused message coming back to resend.
- */
-function useLoadedComposerText(
-  editing: E2eeMessage | null,
-  restoredDraft: { readonly id: string; readonly text: string } | null,
-  setText: (text: string) => void,
-  clearFiles: () => void
-): { readonly editId: string | null; readonly draftId: string | null } {
-  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
-  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
-  const editId = editing?.id ?? null;
-  if (editId !== loadedEditId) {
-    setLoadedEditId(editId);
-    setText(editing ? editing.text : "");
-    clearFiles();
-  }
-  const draftId = restoredDraft?.id ?? null;
-  if (draftId !== loadedDraftId) {
-    setLoadedDraftId(draftId);
-    if (restoredDraft) {
-      setText(restoredDraft.text);
-    }
-  }
-  return { editId, draftId };
-}
-
 function getComposerContainerClassName(isApp: boolean): string {
   const bottomPadding = isApp ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]";
   return `tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${bottomPadding}`;
@@ -458,6 +432,7 @@ export function E2eeComposer({
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isMobile = useIsMobileDevice();
+  const dismissMobileComposer = useDismissMobileComposer();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -558,6 +533,7 @@ export function E2eeComposer({
   };
 
   const submitNew = async (trimmed: string) => {
+    const input = textareaRef.current;
     const pendingFiles = [...files];
     const reply = replyTo?.id ?? null;
     const mentioned = collectMentionIds(trimmed, conversation.members).filter(
@@ -573,6 +549,12 @@ export function E2eeComposer({
         mentions: mentioned,
         reply,
         files: pendingFiles,
+      });
+      // Let the cleared text render, and leave a new draft or another chat alone.
+      globalThis.requestAnimationFrame(() => {
+        if (input && input === textareaRef.current && input.value === "") {
+          dismissMobileComposer(input);
+        }
       });
     } catch (caught) {
       setText(trimmed);

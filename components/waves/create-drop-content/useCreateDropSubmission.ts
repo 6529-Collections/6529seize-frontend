@@ -17,6 +17,10 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
+import {
+  hideAndroidComposerKeyboard,
+  useDismissMobileComposer,
+} from "@/hooks/useDismissMobileComposer";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef } from "react";
@@ -185,32 +189,25 @@ const addOptimisticDropWithAttachments = ({
   );
 };
 
-const hideAndroidKeyboard = async () => {
-  const { Capacitor } = await import("@capacitor/core");
-  if (Capacitor.getPlatform() !== "android") {
-    return;
-  }
-
-  const { Keyboard } = await import("@capacitor/keyboard");
-  await Keyboard.hide().catch(() => {});
-};
-
 const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
   isChatSubmit,
   isApp,
   createDropInputRef,
+  dismissMobileComposer,
 }: {
   readonly getMarkdown: string | null;
   readonly isChatSubmit: boolean;
   readonly isApp: boolean;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
+  readonly dismissMobileComposer: ReturnType<typeof useDismissMobileComposer>;
 }) => {
   if (getMarkdown?.length) {
     createDropInputRef.current?.clearEditorState();
   }
 
   if (isChatSubmit) {
+    dismissMobileComposer(createDropInputRef.current);
     return;
   }
 
@@ -219,7 +216,7 @@ const updateFocusAfterAcceptedSubmit = ({
   }
 
   if (isApp) {
-    hideAndroidKeyboard().catch(() => {});
+    hideAndroidComposerKeyboard().catch(() => {});
   }
 };
 
@@ -357,6 +354,7 @@ export const useCreateDropSubmission = ({
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
 }) => {
+  const dismissMobileComposer = useDismissMobileComposer();
   const {
     locale,
     pollDraft,
@@ -656,6 +654,7 @@ export const useCreateDropSubmission = ({
         isChatSubmit,
         isApp,
         createDropInputRef,
+        dismissMobileComposer,
       });
       setFiles([]);
       if (isIdentityPickerAllowed) {

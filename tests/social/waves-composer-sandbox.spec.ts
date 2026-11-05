@@ -879,6 +879,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
     await expect(composer).toHaveText("");
+    if (testInfo.project.use.isMobile) {
+      await expect(composer).not.toBeFocused();
+    }
     // Explicitly focus to test undo; sending must not reopen the keyboard.
     await composer.focus();
     // Sending ends this draft's undo history; Undo must not revive a sent post.
