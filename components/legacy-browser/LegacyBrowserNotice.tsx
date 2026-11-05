@@ -1,3 +1,7 @@
+import {
+  getAppEnvironment,
+  PRODUCTION_APP_ORIGIN,
+} from "@/config/appEnvironment";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -24,7 +28,14 @@ const COPY: Readonly<
  * browsers that cannot run the site; hidden by inline CSS everywhere else.
  * Rendered in the server locale, like the root layout's `lang`.
  */
-export default function LegacyBrowserNotice() {
+export default function LegacyBrowserNotice({
+  baseEndpoint = PRODUCTION_APP_ORIGIN,
+}: {
+  readonly baseEndpoint?: string;
+}) {
+  const appName = getAppEnvironment(baseEndpoint).isProduction
+    ? "6529 Mobile"
+    : "6529 Staging";
   return (
     <div id={LEGACY_BROWSER_NOTICE_ID}>
       {LEGACY_BROWSER_VARIANTS.map((variant) => (
@@ -34,9 +45,9 @@ export default function LegacyBrowserNotice() {
           aria-labelledby={`${LEGACY_BROWSER_NOTICE_ID}-${variant}`}
         >
           <h1 id={`${LEGACY_BROWSER_NOTICE_ID}-${variant}`}>
-            {t(DEFAULT_LOCALE, COPY[variant].title)}
+            {t(DEFAULT_LOCALE, COPY[variant].title, { appName })}
           </h1>
-          <p>{t(DEFAULT_LOCALE, COPY[variant].body)}</p>
+          <p>{t(DEFAULT_LOCALE, COPY[variant].body, { appName })}</p>
         </section>
       ))}
     </div>

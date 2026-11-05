@@ -178,7 +178,7 @@ export default async function RootLayout({
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
-        <LegacyBrowserNotice />
+        <LegacyBrowserNotice baseEndpoint={publicEnv.BASE_ENDPOINT} />
         <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />

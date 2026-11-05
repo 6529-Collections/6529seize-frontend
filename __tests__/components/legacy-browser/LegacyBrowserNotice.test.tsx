@@ -3,22 +3,39 @@ import LegacyBrowserNotice from "@/components/legacy-browser/LegacyBrowserNotice
 import { LEGACY_BROWSER_NOTICE_ID } from "@/components/legacy-browser/legacyBrowserGate";
 
 describe("LegacyBrowserNotice", () => {
+  it.each([
+    ["https://6529.io", "6529 Mobile"],
+    ["https://staging.6529.io", "6529 Staging"],
+  ])(
+    "uses the app name for %s in both iOS instructions",
+    (baseEndpoint, appName) => {
+      render(<LegacyBrowserNotice baseEndpoint={baseEndpoint} />);
+      const ios = screen.getByRole("region", {
+        name: `${appName} needs iOS 16.4 or later`,
+      });
+      expect(ios).toHaveTextContent(
+        `Update in Settings > General > Software Update, then open ${appName} again.`
+      );
+    }
+  );
   it("renders the iOS and the browser notice, each a labelled section with a heading", () => {
     const { container } = render(<LegacyBrowserNotice />);
     const notice = container.querySelector(`#${LEGACY_BROWSER_NOTICE_ID}`);
     expect(notice).not.toBeNull();
 
     const ios = container.querySelector('[data-legacy-variant="ios"]')!;
-    expect(ios).toHaveTextContent("6529 needs iOS 16.4 or later");
+    expect(ios).toHaveTextContent("6529 Mobile needs iOS 16.4 or later");
     expect(ios).toHaveTextContent(
-      "Update in Settings > General > Software Update, then open 6529 again."
+      "Update in Settings > General > Software Update, then open 6529 Mobile again."
     );
 
     const other = container.querySelector('[data-legacy-variant="other"]')!;
     expect(other).toHaveTextContent("6529 needs a newer browser");
 
     expect(
-      screen.getByRole("region", { name: "6529 needs iOS 16.4 or later" })
+      screen.getByRole("region", {
+        name: "6529 Mobile needs iOS 16.4 or later",
+      })
     ).toBe(ios);
     expect(
       screen.getByRole("heading", {
