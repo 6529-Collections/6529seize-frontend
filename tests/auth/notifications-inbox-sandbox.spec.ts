@@ -325,6 +325,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       page,
       baseURL,
     }, testInfo) => {
+      // The floating inbox is desktop-only; mobile's full-page flow is covered below.
       test.skip(
         testInfo.project.name !== "web-desktop-chromium",
         "Desktop sidebar inbox"

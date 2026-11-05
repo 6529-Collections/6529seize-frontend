@@ -18,6 +18,7 @@ import {
 
 const WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const PREVIEW_ID = "00000000-0000-4000-8000-000000000533";
+const CHAT_DROP_ID = "00000000-0000-4000-8000-000000000530";
 const WAVE_NAME = "Follow The Repo";
 
 async function installPreview(
@@ -65,10 +66,9 @@ async function installPreview(
   await page.route(`**/api/v2/waves/${WAVE_ID}/drops?*`, async (route) => {
     const upstream = await route.fetch();
     const data = await upstream.json();
-    data.drops = data.drops.map((drop: { content: string }) => ({
-      ...drop,
-      content: href,
-    }));
+    data.drops = data.drops.map((drop: { id: string }) =>
+      drop.id === CHAT_DROP_ID ? { ...drop, content: href } : drop
+    );
     await route.fulfill({ response: upstream, json: data });
   });
 }
@@ -78,20 +78,32 @@ async function expectReadablePreview(card: Locator) {
   await expect(title).toBeVisible({
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   });
-  const titleBox = await title.boundingBox();
   const following = card.getByRole("button", {
     name: "Following",
     exact: true,
   });
-  const followBox = await following.boundingBox();
-  expect(titleBox).not.toBeNull();
-  expect(followBox).not.toBeNull();
-  // This name fits in the sidebar when it can use the available card width.
-  expect(titleBox!.width).toBeGreaterThan(125);
-  expect(titleBox!.height).toBeLessThanOrEqual(28);
-  expect(followBox!.width).toBeGreaterThanOrEqual(80);
-  expect(followBox!.height).toBeGreaterThanOrEqual(24);
+  await expect(following).toBeVisible();
+  const titleBox = await title.evaluate((el) => {
+    const { y, height } = el.getBoundingClientRect();
+    return {
+      y,
+      height,
+      width: el.clientWidth,
+      contentWidth: el.scrollWidth,
+      lineHeight: Number.parseFloat(getComputedStyle(el).lineHeight),
+    };
+  });
+  const followBox = await following.evaluate((el) => {
+    const { y, width, height } = el.getBoundingClientRect();
+    return { y, width, height };
+  });
+  // The short name should fit in full on one line, regardless of font metrics.
+  expect(titleBox.contentWidth).toBeLessThanOrEqual(titleBox.width);
+  expect(titleBox.height).toBeLessThanOrEqual(titleBox.lineHeight);
+  expect(followBox.width).toBeGreaterThanOrEqual(80);
+  expect(followBox.height).toBeGreaterThanOrEqual(24);
   await expect(title).toHaveCSS("white-space", "nowrap");
+  return { titleBox, followBox };
 }
 
 test.describe("Embedded wave preview sandbox @auth @local-only", () => {
@@ -132,14 +144,8 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
           exact: true,
         })
         .locator("..");
-      await expectReadablePreview(sidebarCard);
-      const titleBox = await sidebarCard
-        .getByText(WAVE_NAME, { exact: true })
-        .boundingBox();
-      const followBox = await sidebarCard
-        .getByRole("button", { name: "Following", exact: true })
-        .boundingBox();
-      expect(followBox!.y).toBeGreaterThan(titleBox!.y + titleBox!.height);
+      const { titleBox, followBox } = await expectReadablePreview(sidebarCard);
+      expect(followBox.y).toBeGreaterThan(titleBox.y + titleBox.height);
       await captureSafeScreenshot(
         page,
         testInfo,
