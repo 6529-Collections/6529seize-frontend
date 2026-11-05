@@ -269,3 +269,17 @@ export function handleMentionKey(
 /** Enter sends; Shift+Enter and IME composition insert a newline. */
 export const isSendKey = (event: KeyboardEvent<HTMLTextAreaElement>) =>
   event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing;
+
+export const isEditLastMessageKey = (
+  event: KeyboardEvent<HTMLTextAreaElement>
+) =>
+  event.key === "ArrowUp" &&
+  !event.altKey &&
+  !event.ctrlKey &&
+  !event.metaKey &&
+  !event.shiftKey;
+
+export const isComposerEmpty = (
+  text: string,
+  files: readonly File[]
+): boolean => text.trim().length === 0 && files.length === 0;

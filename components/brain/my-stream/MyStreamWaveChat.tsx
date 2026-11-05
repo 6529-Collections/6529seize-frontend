@@ -1,5 +1,7 @@
 "use client";
 
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
@@ -11,10 +13,7 @@ import {
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
-import {
-  DropMode,
-  type DropComposerDensity,
-} from "@/components/waves/dropComposer.types";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -76,7 +75,6 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
-  readonly composerDensity?: DropComposerDensity | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -136,8 +134,6 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly initialUrl?: string | null | undefined;
 }
 
-const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
-  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
@@ -207,7 +203,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
-  composerDensity = "default",
 }) => {
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
@@ -388,14 +383,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     ? "tw-mt-auto tw-bg-iron-950"
     : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
   const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
-    () =>
-      isApp
-        ? {
-            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
-            transition:
-              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
-          }
-        : undefined,
+    () => getNativeComposerStyle(isApp),
     [isApp]
   );
 
@@ -696,7 +684,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             style={composerContainerStyle}
           >
             <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
-              <CreateDropWaveWrapper composerDensity={composerDensity}>
+              <CreateDropWaveWrapper>
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}
                   onCancelReplyQuote={onCancelReplyQuote}

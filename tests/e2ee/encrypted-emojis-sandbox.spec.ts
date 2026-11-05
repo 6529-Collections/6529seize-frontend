@@ -143,7 +143,15 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     });
     await chooseEmoji(alice.page, "gm", ":gm:");
     await expect(input).toHaveValue("Secret hello 😀:gm:");
-    await input.press("Enter");
+    if (testInfo.project.use.isMobile) {
+      await input.press("Enter");
+      await expect(input).toHaveValue(/\n$/u);
+      await alice.page
+        .getByRole("button", { name: "Send", exact: true })
+        .click();
+    } else {
+      await input.press("Enter");
+    }
     const sent = messageRow(alice.page, "Secret hello 😀");
     await expect(
       sent.getByRole("img", { name: ":gm:", exact: true })
@@ -174,11 +182,21 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     await openMessageActions(alice.page, sent);
     await alice.page.getByRole("menuitem", { name: "Edit" }).click();
     await expect(input).toHaveValue("Secret hello 😀:gm:");
+    await input.press("Escape");
+    await expect(input).toHaveValue("");
+    await input.press("ArrowUp");
+    await expect(input).toHaveValue("Secret hello 😀:gm:");
     await input.fill("Edited secret :gm: ");
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
     await chooseEmoji(alice.page, "grinning", "😀");
     await expect(input).toHaveValue("Edited secret :gm: 😀");
-    await input.press("Enter");
+    if (testInfo.project.use.isMobile) {
+      await alice.page
+        .getByRole("button", { name: "Save", exact: true })
+        .click();
+    } else {
+      await input.press("Enter");
+    }
     await expect(
       bob.page
         .getByRole("list", { name: "Messages", exact: true })

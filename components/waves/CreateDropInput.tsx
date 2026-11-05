@@ -76,7 +76,7 @@ import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/Root
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useDropComposerDensity } from "./CreateDropWaveWrapper";
+import { COMPOSER_INPUT_CLASS_NAME } from "./composerPresentation";
 import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
@@ -255,8 +255,6 @@ const CreateDropInput = forwardRef<
     const validationHelperTextId = useId();
     const showValidationError =
       hasValidationError && validationHelperText !== null;
-    const composerDensity = useDropComposerDensity();
-    const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -447,26 +445,16 @@ const CreateDropInput = forwardRef<
                         aria-invalid={hasValidationError || undefined}
                         style={{ touchAction: "manipulation" }}
                         onBlur={onEditorBlur}
-                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[min(40vh,var(--composer-viewport-height,40vh))] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
-                          isCompact
-                            ? "tw-py-3 tw-text-sm tw-leading-5"
-                            : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
-                        } ${
+                        className={`editor-input-one-liner tw-form-input ${COMPOSER_INPUT_CLASS_NAME} tw-font-normal tw-caret-primary-400 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 ${
                           submitting ? "tw-cursor-default tw-opacity-50" : ""
-                        } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
+                        }`}
                       />
-                      <CreateDropEmojiPicker
-                        verticalAlignment={isCompact ? "center" : "top"}
-                      />
+                      <CreateDropEmojiPicker verticalAlignment="center" />
                     </div>
                   }
                   placeholder={
                     <span
-                      className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-translate-y-0 tw-truncate sm:tw-translate-y-0.5 ${
-                        isCompact
-                          ? "tw-text-sm tw-leading-5"
-                          : "tw-text-base tw-leading-6 sm:tw-text-sm"
-                      } ${submitting ? "tw-opacity-50" : ""}`}
+                      className={`tw-pointer-events-none tw-absolute tw-left-[13px] tw-top-[9px] tw-block tw-max-w-[calc(100%-3.5rem)] tw-truncate tw-text-sm tw-leading-6 tw-text-iron-500 ${submitting ? "tw-opacity-50" : ""}`}
                     >
                       {placeholderText}
                     </span>

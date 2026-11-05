@@ -351,6 +351,20 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         conversation={conversation}
         engine={engine}
         selfProfileId={profileId}
+        onRequestEditLastMessage={() => {
+          if (!canAct || !profileId) return false;
+          const last = messages.findLast(
+            (message) =>
+              message.kind === "message" &&
+              message.senderProfileId === profileId &&
+              !message.deleted &&
+              !message.undecryptable &&
+              !message.pending
+          );
+          if (!last) return false;
+          actions.onEdit(last);
+          return true;
+        }}
         replyTo={replyTo}
         onCancelReply={() => setReplyToId(null)}
         editing={editing}

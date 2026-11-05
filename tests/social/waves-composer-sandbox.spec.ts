@@ -824,30 +824,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       });
     }
     const postButton = page.getByRole("button", { name: "Post" }).last();
-    await postButton.evaluate((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          button.setAttribute(
-            "data-composer-focused-at-submit",
-            String(
-              document.activeElement?.getAttribute("contenteditable") === "true"
-            )
-          );
-        },
-        { capture: true, once: true }
-      );
-    });
     if (testInfo.project.use.isMobile) {
       await postButton.tap();
     } else {
       await postButton.click();
     }
-    // A tap must not dismiss the native input before submission starts.
-    await expect(postButton).toHaveAttribute(
-      "data-composer-focused-at-submit",
-      "true"
-    );
 
     await expect
       .poll(
@@ -897,8 +878,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expect(composer).toBeFocused();
     await expect(composer).toHaveText("");
+    // Explicitly focus to test undo; sending must not reopen the keyboard.
+    await composer.focus();
     // Sending ends this draft's undo history; Undo must not revive a sent post.
     await composer.press("ControlOrMeta+z");
     await expect(composer).toHaveText("");

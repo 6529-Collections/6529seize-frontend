@@ -446,7 +446,6 @@ export function useCreateDropContentController({
 
   const {
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
     dropEditorRefreshKey,
     onReferencedNft,
     onMentionedUser,
@@ -477,7 +476,6 @@ export function useCreateDropContentController({
     currentPartMentionedUsers,
     currentPartMentionedWaves,
     currentPartReferencedNfts,
-    submitting,
     setDrop,
     setFiles,
     setEditorState,
@@ -616,7 +614,6 @@ export function useCreateDropContentController({
     setIsStormMode,
     setMetadataOpenState,
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
   });
 
   const onSwitchToDropMode = useCallback(() => {
