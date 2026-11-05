@@ -180,6 +180,8 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
     "https://videos.files.wordpress.com",
+    // OpenSea NFT previews use the original video while processing is pending.
+    "https://i2c.seadn.io",
     mediaResolverSource,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
