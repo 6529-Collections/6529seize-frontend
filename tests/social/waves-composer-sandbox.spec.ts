@@ -153,9 +153,17 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     else await badge.click();
     await expect(composer).toContainText("@qa_member");
     await expect(menu).toHaveCount(0);
+    const emptySearch = page.waitForResponse((response) =>
+      response.url().includes("mention-search?handle=zzz")
+    );
     await composer.fill("@zzz");
+    await emptySearch;
     await expect(menu).toHaveCount(0);
+    const failedSearch = page.waitForResponse((response) =>
+      response.url().includes("mention-search?handle=err")
+    );
     await composer.fill("@err");
+    expect((await failedSearch).status()).toBe(503);
     await expect(menu).toHaveCount(0);
     await composer.fill("@qa_");
     await expect(menu).toHaveCount(5);

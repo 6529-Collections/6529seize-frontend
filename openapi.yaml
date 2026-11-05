@@ -43287,7 +43287,6 @@ components:
         - handle
         - display
         - pfp
-        - level
       properties:
         id:
           type: string

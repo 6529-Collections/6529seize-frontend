@@ -21,7 +21,7 @@ export class ApiWaveMentionSearchResult {
     /**
     * Profile level, or null when unavailable.
     */
-    'level': number | null;
+    'level'?: number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
