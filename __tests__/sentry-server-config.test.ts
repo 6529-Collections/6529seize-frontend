@@ -4,7 +4,10 @@ const mockInit = jest.fn();
 
 jest.mock("@sentry/nextjs", () => ({ init: mockInit }));
 jest.mock("@/config/env", () => ({
-  publicEnv: { SENTRY_DSN: "https://synthetic@example.com/1" },
+  publicEnv: {
+    SENTRY_DSN: "https://synthetic@example.com/1",
+    VERSION: "synthetic-build-commit",
+  },
 }));
 
 describe.each(["server", "edge"] as const)(
@@ -18,6 +21,10 @@ describe.each(["server", "edge"] as const)(
       if (runtime === "server") await import("../sentry.server.config");
       else await import("../sentry.edge.config");
       options = mockInit.mock.calls[0][0];
+    });
+
+    it("reports the runtime VERSION as the release", () => {
+      expect(options.release).toBe("synthetic-build-commit");
     });
 
     it("enables sanitized errors without activating tracing, logs, or default PII", () => {
