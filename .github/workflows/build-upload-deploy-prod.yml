@@ -438,6 +438,37 @@ jobs:
             --distribution-id "$ANNOUNCED_VERSION_DISTRIBUTION_ID" \
             --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"
 
+      # Record the live commit as a Sentry release (create, associate commits,
+      # finalize), as the build plugin did before config/sentryBuildRelease.ts
+      # kept the release out of the bundle. It runs only once Elastic Beanstalk
+      # serves this commit, so only live versions are finalized. The release
+      # name is the commit, the VERSION the runtime reports. Best effort:
+      # Sentry problems log a warning and never fail the deploy.
+      - name: Download sentry-cli for the Sentry release
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: production-sentry-cli-${{ github.run_id }}
+          path: sentry-cli-handoff
+
+      - name: Record the Sentry release
+        continue-on-error: true
+        timeout-minutes: 8
+        env:
+          # The org and project withSentryConfig uses in next.config.ts.
+          SENTRY_ORG: seize-ff
+          SENTRY_PROJECT: 6529-frontend
+          SENTRY_VCS_REMOTE: origin
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          set -uo pipefail
+          cli=sentry-cli-handoff/sentry-cli
+          if [ -f "$cli" ] && ! (cd sentry-cli-handoff && sha256sum -c --quiet SHA256SUMS); then
+            echo "::warning::The sentry-cli hand-off does not match its checksum; skipping the Sentry release."
+            exit 0
+          fi
+          bash ops/scripts/sentry-release.sh "$cli" "$COMMIT_SHA"
+
       - name: Upload exact production version evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

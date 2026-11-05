@@ -23,6 +23,8 @@ const dsn = publicEnv.SENTRY_DSN;
 Sentry.init({
   ...(dsn && { dsn }),
   enabled: Boolean(dsn),
+  // The build no longer injects a release (next.config.ts); use VERSION.
+  release: publicEnv.VERSION,
 
   // Error capture only; browser performance remains in client Sentry and RUM.
   enableLogs: false,

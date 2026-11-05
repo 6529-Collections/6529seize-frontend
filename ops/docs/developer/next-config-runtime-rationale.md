@@ -28,6 +28,15 @@ build. The Sentry config also deletes uploaded source maps from the build output
 so stack traces stay readable in Sentry without making browser-served maps part
 of the deployed static asset surface.
 
+The build does not bake a Sentry release into the bundle
+(`config/sentryBuildRelease.ts`, `release.create: false`). A baked commit gave
+the client Sentry chunk a new name on every deploy, so returning visitors
+downloaded it again. The client, server and edge `Sentry.init` calls set
+`release` from `VERSION` instead. The production deploy creates, associates
+commits with and finalizes the release once the commit is live (see "Sentry
+releases" in `deployment.md`). Source maps resolve through debug IDs, which are
+derived from file contents, so they need no release.
+
 ## Public Runtime Config And Server-Only Values
 
 Everything in `publicEnvSchema` (`config/env.schema.ts`) is serialized into
