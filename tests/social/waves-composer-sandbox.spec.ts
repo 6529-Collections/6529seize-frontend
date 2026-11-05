@@ -753,8 +753,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await showDropActionsIfCollapsed(page);
     const actions = [
       {
-        button: page.getByRole("button", { name: "Upload a file" }),
-        label: "Upload",
+        button: page.getByRole("button", { name: "Attach files" }),
+        label: "Attach files",
       },
       {
         button: page.getByRole("button", { name: "Add GIF" }),
@@ -772,10 +772,22 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     for (const { button, label } of actions) {
       await page.mouse.move(0, 0);
       await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-      const shape = await button.evaluate((element) => ({
-        radius: Number.parseFloat(getComputedStyle(element).borderRadius),
-        width: element.getBoundingClientRect().width,
-      }));
+      const shape = await button.evaluate((element) => {
+        const iconBounds = element
+          .querySelector("svg")
+          ?.getBoundingClientRect();
+        return {
+          radius: Number.parseFloat(getComputedStyle(element).borderRadius),
+          width: element.getBoundingClientRect().width,
+          height: element.getBoundingClientRect().height,
+          iconWidth: iconBounds?.width,
+          iconHeight: iconBounds?.height,
+        };
+      });
+      expect(shape.width).toBe(40);
+      expect(shape.height).toBe(40);
+      expect(shape.iconWidth).toBe(20);
+      expect(shape.iconHeight).toBe(20);
       expect(shape.radius).toBeGreaterThan(0);
       expect(shape.radius).toBeLessThan(shape.width / 2);
       await button.hover();
@@ -1602,7 +1614,7 @@ async function showDropActionsIfCollapsed(page: Page) {
     .poll(
       async () =>
         (await page
-          .getByRole("button", { name: "Upload a file" })
+          .getByRole("button", { name: "Attach files" })
           .isVisible()
           .catch(() => false)) ||
         (await page

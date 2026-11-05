@@ -1,4 +1,9 @@
 import React from "react";
+import {
+  COMPOSER_ACTION_BUTTON_CLASS_NAME,
+  COMPOSER_ACTION_IDLE_CLASS_NAME,
+  COMPOSER_ACTION_ICON_CLASS_NAME,
+} from "./composerPresentation";
 import { Tooltip } from "react-tooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -35,20 +40,20 @@ const StormButton: React.FC<StormButtonProps> = ({
         disabled={disabled}
         type="button"
         aria-label={label}
-        className={`tw-flex tw-h-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
-          isMobile
-            ? "tw-w-auto tw-gap-1.5 tw-px-2.5"
-            : "tw-size-8 tw-px-0 lg:tw-size-7"
+        className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${
+          isMobile ? "tw-w-auto tw-gap-1.5 tw-px-2.5" : "tw-px-0"
         } ${
-          !disabled
-            ? "tw-cursor-pointer tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-primary-300/20 desktop-hover:hover:tw-text-primary-400"
-            : "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-text-iron-600"
+          disabled
+            ? "tw-cursor-default tw-text-iron-600"
+            : `tw-cursor-pointer ${COMPOSER_ACTION_IDLE_CLASS_NAME}`
         }`}
         data-tooltip-id="storm-button-tooltip"
       >
         <svg
           className={`tw-flex-shrink-0 ${
-            isMobile ? "tw-h-[1.1rem] tw-w-[1.1rem]" : "tw-size-4"
+            isMobile
+              ? "tw-h-[1.1rem] tw-w-[1.1rem]"
+              : COMPOSER_ACTION_ICON_CLASS_NAME
           } ${disabled ? "tw-opacity-50" : ""}`}
           viewBox="0 0 24 24"
           fill="none"

@@ -2,7 +2,9 @@
 
 ## Overview
 
-The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
+On desktop, the thread composer uses `Enter` for submit and `Shift+Enter` for
+line breaks. Mobile web and the app use Return for a line break and the visible
+Send button for submission.
 
 - Desktop web: `Enter` submits when submit is allowed.
 - Desktop web: `Shift+Enter` inserts a new paragraph.
@@ -24,6 +26,12 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
   in the action tray but is unavailable until the Storm is finished or
   discarded.
 
+Ordinary and encrypted chat share the rich-text editor, focus treatment, input
+sizing and keyboard/safe-area handling. Custom emoji render inline while composing.
+Encrypted chat keeps its own encrypted sending and attachments and omits GIF,
+Poll and Storm. Placeholders are **Write a message** for ordinary messages and
+**Write an encrypted message** for encrypted messages on every device.
+
 Expanded browser actions use flat icon buttons with a rounded-square hover
 background and tooltips. Upload uses a paperclip. The narrow-row plus toggle
 and labeled action tray retain their existing icons.
@@ -44,8 +52,8 @@ and labeled action tray retain their existing icons.
 
 1. Open a wave or DM thread composer.
 2. Type content.
-3. Use `Shift+Enter` for extra lines.
-4. Press `Enter` to submit when the draft is submittable.
+3. On desktop, use `Shift+Enter` for extra lines; on mobile use Return.
+4. On desktop, press `Enter` when the draft is submittable; on mobile use Send.
 5. In storm mode with existing parts, check the primary action and press
    `Enter` to add or save current content, or to post from an empty editor.
 6. On narrow rows, use the plus button to show labeled actions, then choose an
@@ -87,6 +95,10 @@ and labeled action tray retain their existing icons.
 - Enter-key submission is desktop-focused and still depends on submit-ready
   state.
 - Open typeahead menus take precedence over submit shortcuts.
+- With an empty chat input and no reply, edit or attachment in progress, Arrow Up
+  opens the latest eligible own message for editing.
+- Dismissing the native keyboard removes input focus. Bottom safe-area clearance
+  is used while the keyboard is closed and removed while it is open.
 - `Shift+Enter` inserts paragraphs.
 - Wide rows keep composer actions visible without the expandable tray.
 - Wave creation `Description` uses a different editor flow in

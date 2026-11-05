@@ -7,6 +7,21 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockSeizeConnect = jest.fn();
 let mockSeizeConnectOpen = false;
+let mockIsWideContainer = false;
+let mockIsMobile = false;
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => mockIsMobile,
+}));
+jest.mock(
+  "@/components/waves/create-drop-content/useCreateDropContainerWidth",
+  () => ({
+    useCreateDropContainerWidth: () => ({
+      isWideContainer: mockIsWideContainer,
+      setActionsContainerRef: jest.fn(),
+    }),
+  })
+);
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     seizeConnect: mockSeizeConnect,
@@ -18,6 +33,8 @@ describe("DropPlaceholder", () => {
   beforeEach(() => {
     mockSeizeConnect.mockClear();
     mockSeizeConnectOpen = false;
+    mockIsWideContainer = false;
+    mockIsMobile = false;
   });
 
   it("opens the existing wallet chooser without starting a signature itself", () => {
@@ -107,7 +124,7 @@ describe("DropPlaceholder", () => {
     expect(status).toHaveTextContent("Checking posting access…");
     expect(status).toHaveAttribute("aria-busy", "true");
     expect(status).toHaveClass(
-      "tw-min-h-11",
+      "tw-min-h-10",
       "tw-grid-cols-[auto_minmax(0,1fr)_auto]"
     );
     expect(screen.getByTestId("posting-access-skeleton")).toBe(status);
@@ -138,6 +155,22 @@ describe("DropPlaceholder", () => {
       "tw-text-iron-400"
     );
   });
+
+  it.each([
+    { wide: true, mobile: false, count: 4 },
+    { wide: false, mobile: false, count: 1 },
+    { wide: true, mobile: true, count: 1 },
+  ])(
+    "reserves $count actions for wide=$wide mobile=$mobile",
+    ({ wide, mobile, count }) => {
+      mockIsWideContainer = wide;
+      mockIsMobile = mobile;
+      render(<DropPlaceholder type="profile-check" />);
+      expect(
+        screen.getByTestId("composer-actions-skeleton").children
+      ).toHaveLength(count);
+    }
+  );
 
   describe("chat restrictions", () => {
     it("renders not logged in message for chat", () => {

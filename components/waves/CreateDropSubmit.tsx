@@ -31,7 +31,7 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       title={title}
       variant="primary"
       size={null}
-      className={`tw-min-h-11 tw-py-2.5 tw-text-sm ${
+      className={`tw-h-10 tw-py-2 tw-text-sm ${
         showLabelOnMobile
           ? "tw-min-w-20 tw-px-3 lg:tw-px-3.5"
           : "tw-w-10 tw-px-0 lg:tw-w-[3.875rem] lg:tw-px-3.5"
