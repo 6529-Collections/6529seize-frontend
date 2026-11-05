@@ -740,6 +740,56 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("uses flat browser action buttons with rounded-square hover backgrounds and tooltips", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    // Mobile keeps the collapsed plus-button tray; hover assertions apply only to desktop.
+    test.skip(
+      Boolean(testInfo.project.use.isMobile),
+      "Expanded browser actions only"
+    );
+    await gotoSandboxWave(page);
+    await showDropActionsIfCollapsed(page);
+    const actions = [
+      {
+        button: page.getByRole("button", { name: "Upload a file" }),
+        label: "Upload",
+      },
+      {
+        button: page.getByRole("button", { name: "Add GIF" }),
+        label: "Add GIF",
+      },
+      {
+        button: page.getByRole("button", { name: "Add poll", exact: true }),
+        label: "Add poll",
+      },
+      {
+        button: page.getByRole("button", { name: "Break into storm" }),
+        label: "Break into storm",
+      },
+    ];
+    for (const { button, label } of actions) {
+      await page.mouse.move(0, 0);
+      await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      const shape = await button.evaluate((element) => ({
+        radius: Number.parseFloat(getComputedStyle(element).borderRadius),
+        width: element.getBoundingClientRect().width,
+      }));
+      expect(shape.radius).toBeGreaterThan(0);
+      expect(shape.radius).toBeLessThan(shape.width / 2);
+      await button.hover();
+      await expect(button).not.toHaveCSS(
+        "background-color",
+        "rgba(0, 0, 0, 0)"
+      );
+      await expect(
+        page.getByRole("tooltip", { name: label, exact: true })
+      ).toBeVisible();
+    }
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("moves the app chat composer down without an upward jump when closing the keyboard", async ({
     baseURL,
     page,

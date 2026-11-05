@@ -1,3 +1,5 @@
+jest.unmock("lexical");
+import { setComposerText, composerText } from "./composerTestUtils";
 import {
   act,
   fireEvent,
@@ -280,8 +282,8 @@ describe("E2eeConversationView", () => {
     const engine = renderView();
     const input = screen.getByLabelText("Encrypted message");
     // A trailing space closes the mention picker, so Enter sends.
-    fireEvent.change(input, { target: { value: "hi @alice " } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    setComposerText(input, "hi @alice ");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     await waitFor(() =>
       expect(engine.send).toHaveBeenCalledWith(GROUP_G, {
         text: "hi @alice",
@@ -290,14 +292,14 @@ describe("E2eeConversationView", () => {
         files: [],
       })
     );
-    expect(input).toHaveValue("");
+    expect(composerText(input)).toBe("");
   });
 
   it("keeps Shift+Enter as a new line", () => {
     const engine = renderView();
     const input = screen.getByLabelText("Encrypted message");
-    fireEvent.change(input, { target: { value: "line one" } });
-    fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
+    setComposerText(input, "line one");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13, shiftKey: true });
     expect(engine.send).not.toHaveBeenCalled();
   });
 
@@ -337,13 +339,11 @@ describe("E2eeConversationView", () => {
 
   it("offers member suggestions for @ mentions", () => {
     renderView();
-    const input = screen.getByLabelText(
-      "Encrypted message"
-    ) as HTMLTextAreaElement;
-    fireEvent.change(input, { target: { value: "@al", selectionStart: 3 } });
+    const input = screen.getByLabelText("Encrypted message") as HTMLDivElement;
+    setComposerText(input, "@al");
     const listbox = screen.getByRole("listbox", { name: "Mention someone" });
     fireEvent.click(within(listbox).getByRole("option", { name: /alice/ }));
-    expect(input.value).toBe("@alice ");
+    expect(composerText(input)).toBe("@alice ");
   });
 
   it("reacts and reports from the message actions", async () => {
@@ -690,15 +690,15 @@ it("Arrow Up edits the latest eligible own message, skipping pending, deleted an
     message({ id: "other", seq: 9, senderProfileId: BOB_ID }),
   ]);
   const input = screen.getByLabelText("Encrypted message");
-  fireEvent.keyDown(input, { key: "ArrowUp", shiftKey: true });
-  expect(input).toHaveValue("");
-  fireEvent.change(input, { target: { value: "draft" } });
-  fireEvent.keyDown(input, { key: "ArrowUp" });
-  expect(input).toHaveValue("draft");
-  fireEvent.change(input, { target: { value: "" } });
-  fireEvent.keyDown(input, { key: "ArrowUp" });
-  expect(input).toHaveValue("fixed typo");
-  fireEvent.change(input, { target: { value: "fixed again" } });
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38, shiftKey: true });
+  expect(composerText(input)).toBe("");
+  setComposerText(input, "draft");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("draft");
+  setComposerText(input, "");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("fixed typo");
+  setComposerText(input, "fixed again");
   fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
   await waitFor(() =>
     expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")

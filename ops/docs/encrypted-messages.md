@@ -47,6 +47,11 @@ can export them or move them into an encrypted chat.
 
 ## Writing messages
 
+Encrypted and ordinary messages use the same rich-text editor. Custom emoji
+shortcodes render as inline images while composing and editing; encrypted drafts
+keep their shortcode representation for encryption and sending. Encrypted chat
+does not offer GIF, Poll or Storm actions.
+
 The emoji button sits inside the right edge of the message input, with attachments
 on the left and Send on the right. It uses the regular composer’s desktop emoji
 popover and mobile slide panel. Encrypted emoji choices remain private and do not

@@ -366,8 +366,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await choose(a, "grinning", "😀");
     await a.page.getByRole("button", { name: "Add emoji" }).click();
     await choose(a, "gm", ":gm:");
-    const draft = `${prefix} 😀:gm:`;
-    await expect(input).toHaveValue(draft);
+    await expect(input).toContainText(`${prefix} 😀`);
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     await input.press("Enter");
     const row = (session: StagingE2eeSession) =>
       session.page
@@ -406,7 +408,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         )
       ).toBeNull();
     }
-    expectPrivateAndClean([a, b], needles({ draft, custom: ":gm:" }));
+    expectPrivateAndClean([a, b], needles({ prefix, custom: ":gm:" }));
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
@@ -621,7 +623,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "Typing stays responsive while a large saved photo history is open."
     );
     const typingMs = performance.now() - typing;
-    await expect(input).toHaveValue(
+    await expect(input).toHaveText(
       "Typing stays responsive while a large saved photo history is open."
     );
     await input.fill("");

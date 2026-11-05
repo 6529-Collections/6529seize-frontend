@@ -1,6 +1,6 @@
 "use client";
 
-import { type ClipboardEvent, type KeyboardEvent, useState } from "react";
+import { useState } from "react";
 import type { MessageKey } from "@/i18n/messages";
 import type { E2eeMember, E2eeMessage } from "@/lib/e2ee/types";
 import {
@@ -110,35 +110,13 @@ function getClipboardFiles(data: DataTransfer): File[] {
 }
 
 /** Pasted images, which are attached like files picked with the attach control. */
-function getPastedImages(data: DataTransfer | null): File[] {
+export function getPastedImages(data: DataTransfer | null): File[] {
   if (!data) {
     return [];
   }
   return getClipboardFiles(data).filter((file) =>
     file.type.toLowerCase().startsWith("image/")
   );
-}
-
-/** Composer text with the caret position to restore. */
-export interface ComposerText {
-  readonly text: string;
-  readonly caret: number;
-}
-
-/** `text` with `start`..`end` replaced by `inserted`, caret after the insert. */
-function insertComposerText(
-  text: string,
-  start: number,
-  end: number,
-  inserted: string
-): ComposerText {
-  // A textarea stores line breaks as "\n", as a native paste would.
-  const normalized = inserted.replaceAll(/\r\n?/g, "\n");
-  const before = text.slice(0, start);
-  return {
-    text: `${before}${normalized}${text.slice(end)}`,
-    caret: before.length + normalized.length,
-  };
 }
 
 export interface PasteNotice {
@@ -157,42 +135,16 @@ export interface PasteNotice {
  * change again (send, remove, pick, clear).
  */
 export function usePastedImages({
-  canAttach,
   files,
   addFiles,
-  onText,
 }: {
-  readonly canAttach: boolean;
-  /** The composer's attachments now. */
   readonly files: readonly File[];
-  /** Adds files within the attach limits; returns the new attachments. */
   readonly addFiles: (files: readonly File[]) => readonly File[];
-  readonly onText: (next: ComposerText) => void;
-}): {
-  readonly notice: PasteNotice | null;
-  readonly onPaste: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
-} {
+}) {
   const [notice, setNotice] = useState<PasteNotice | null>(null);
-  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-    const images = canAttach ? getPastedImages(event.clipboardData) : [];
-    if (images.length === 0) {
-      return;
-    }
-    event.preventDefault();
-    const pasted = event.clipboardData.getData("text/plain");
-    if (pasted) {
-      const element = event.currentTarget;
-      onText(
-        insertComposerText(
-          element.value,
-          element.selectionStart,
-          element.selectionEnd,
-          pasted
-        )
-      );
-    }
+  const attachImages = (images: readonly File[]) => {
+    if (images.length === 0) return;
     const next = addFiles(images);
-    // addComposerFiles only appends, so the growth is the images accepted.
     const added = next.length - files.length;
     setNotice((current) =>
       added > 0
@@ -200,7 +152,7 @@ export function usePastedImages({
         : null
     );
   };
-  return { notice: notice?.files === files ? notice : null, onPaste };
+  return { notice: notice?.files === files ? notice : null, attachImages };
 }
 
 interface MentionPicker {
@@ -263,7 +215,7 @@ export function useMentionPicker(
 
 /** Handles arrow/enter/tab/escape while suggestions are open. */
 export function handleMentionKey(
-  event: KeyboardEvent<HTMLTextAreaElement>,
+  event: Pick<globalThis.KeyboardEvent, "key" | "preventDefault">,
   picker: MentionPicker,
   onPick: (member: E2eeMember) => void
 ): boolean {
@@ -293,19 +245,6 @@ export function handleMentionKey(
       return false;
   }
 }
-
-/** Enter sends; Shift+Enter and IME composition insert a newline. */
-export const isSendKey = (event: KeyboardEvent<HTMLTextAreaElement>) =>
-  event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing;
-
-export const isEditLastMessageKey = (
-  event: KeyboardEvent<HTMLTextAreaElement>
-) =>
-  event.key === "ArrowUp" &&
-  !event.altKey &&
-  !event.ctrlKey &&
-  !event.metaKey &&
-  !event.shiftKey;
 
 export const isComposerEmpty = (
   text: string,

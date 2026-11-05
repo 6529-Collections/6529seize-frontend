@@ -82,8 +82,14 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     });
     const input = composer(alice.page);
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
+    if (!testInfo.project.use.isMobile) {
+      await alice.page.getByRole("button", { name: "Attach files" }).hover();
+      await expect(alice.page.getByRole("tooltip")).toHaveText("Attach files");
+      await emojiTrigger.hover();
+      await expect(alice.page.getByRole("tooltip")).toHaveText("Add emoji");
+    }
     await expect(input).toHaveAttribute(
-      "placeholder",
+      "aria-placeholder",
       "Write an encrypted message"
     );
     const inputBounds = await input.boundingBox();
@@ -111,7 +117,7 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     await expect(emojiTrigger).toBeFocused();
     await emojiTrigger.press("Enter");
     await chooseEmoji(alice.page, "grinning", "😀");
-    await expect(input).toHaveValue("Secret hello 😀");
+    await expect(input).toHaveText("Secret hello 😀");
     await expect(input).toBeFocused();
     // Native selection worked while the catalog request was still pending.
     releaseCatalog();
@@ -142,10 +148,13 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       animations: "disabled",
     });
     await chooseEmoji(alice.page, "gm", ":gm:");
-    await expect(input).toHaveValue("Secret hello 😀:gm:");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     if (testInfo.project.use.isMobile) {
       await input.press("Enter");
-      await expect(input).toHaveValue(/\n$/u);
+      await expect(input.getByRole("paragraph")).toHaveCount(2);
       await alice.page
         .getByRole("button", { name: "Send", exact: true })
         .click();
@@ -184,15 +193,25 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     ).toHaveCount(0);
     await openMessageActions(alice.page, sent);
     await alice.page.getByRole("menuitem", { name: "Edit" }).click();
-    await expect(input).toHaveValue("Secret hello 😀:gm:");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     await input.press("Escape");
-    await expect(input).toHaveValue("");
+    await expect(input).toHaveText("");
     await input.press("ArrowUp");
-    await expect(input).toHaveValue("Secret hello 😀:gm:");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     await input.fill("Edited secret :gm: ");
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
     await chooseEmoji(alice.page, "grinning", "😀");
-    await expect(input).toHaveValue("Edited secret :gm: 😀");
+    await expect(input).toContainText("Edited secret");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
+    await expect(input).toContainText("😀");
     if (testInfo.project.use.isMobile) {
       await alice.page
         .getByRole("button", { name: "Save", exact: true })

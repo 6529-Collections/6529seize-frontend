@@ -1,3 +1,10 @@
+jest.unmock("lexical");
+import {
+  setComposerText,
+  composerText,
+  selectComposerText,
+  typeAtComposerSelection,
+} from "./composerTestUtils";
 import {
   act,
   fireEvent,
@@ -31,6 +38,17 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
     isApp: mockIsApp,
     isMobileDevice: mockIsMobile,
     hasTouchScreen: mockIsMobile,
+  }),
+}));
+jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
+  useE2eeEmojis: () => ({
+    sources: new Map([
+      ["gm", "data:image/png;base64,aGVsbG8="],
+      ["gm-wave", "data:image/png;base64,aGVsbG8="],
+    ]),
+    categories: [],
+    failed: false,
+    retry: jest.fn(),
   }),
 }));
 beforeEach(() => {
@@ -111,7 +129,7 @@ function setup(editing = false) {
   );
   return {
     engine,
-    input: screen.getByRole<HTMLTextAreaElement>("textbox", {
+    input: screen.getByRole<HTMLDivElement>("textbox", {
       name: "Encrypted message",
     }),
     original,
@@ -120,18 +138,19 @@ function setup(editing = false) {
 
 it("replaces the selected text with a native emoji, restores the caret and sends the encrypted draft", async () => {
   const { engine, input } = setup();
-  fireEvent.change(input, { target: { value: "Hello Bob" } });
-  input.setSelectionRange(6, 9);
+  setComposerText(input, "Hello Bob");
+  selectComposerText(input, 6, 9);
   fireEvent.click(screen.getByRole("button", { name: "Add emoji" }));
   fireEvent.click(screen.getByRole("button", { name: "Choose smile" }));
   await waitFor(() => expect(input).toHaveFocus());
-  expect(input).toHaveValue("Hello 😀");
-  expect(input.selectionStart).toBe(8);
-  fireEvent.keyDown(input, { key: "Enter" });
+  expect(composerText(input)).toBe("Hello 😀");
+  typeAtComposerSelection(input, "!");
+  expect(composerText(input)).toBe("Hello 😀!");
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
   await waitFor(() =>
     expect(engine.send).toHaveBeenCalledWith(
       convoGroup(engine),
-      expect.objectContaining({ text: "Hello 😀" })
+      expect.objectContaining({ text: "Hello 😀!" })
     )
   );
 });
@@ -139,13 +158,46 @@ it("replaces the selected text with a native emoji, restores the caret and sends
 const convoGroup = (engine: ReturnType<typeof createFakeE2eeEngine>) =>
   engine.state.conversations[0]!.g;
 
+it.each(["gm", "gm-wave"])(
+  "renders known custom emojis inline and keeps unknown tokens in the encrypted payload: %s",
+  async (id) => {
+    const { engine, input } = setup();
+    const text = `Hello :unknown: :${id}:!`;
+    setComposerText(input, text);
+    expect(screen.getByRole("img", { name: `:${id}:` })).toHaveAttribute(
+      "src",
+      "data:image/png;base64,aGVsbG8="
+    );
+    expect(input).toHaveTextContent(":unknown:");
+    expect(
+      screen.queryByRole("button", { name: /GIF|Poll|Storm/i })
+    ).not.toBeInTheDocument();
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
+    await waitFor(() =>
+      expect(engine.send).toHaveBeenCalledWith(
+        convoGroup(engine),
+        expect.objectContaining({ text })
+      )
+    );
+  }
+);
+
+it("does not submit Enter while an IME composition is active", () => {
+  const { engine, input } = setup();
+  setComposerText(input, "Still composing");
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 13, isComposing: true });
+  expect(engine.send).not.toHaveBeenCalled();
+  expect(composerText(input)).toBe("Still composing");
+});
+
 it("inserts a custom shortcode into an edit and preserves the existing edit flow", async () => {
   const { engine, input, original } = setup(true);
-  input.setSelectionRange(5, 5);
+  selectComposerText(input, 5, 5);
   fireEvent.click(screen.getByRole("button", { name: "Add emoji" }));
   fireEvent.click(screen.getByRole("button", { name: "Choose gm" }));
-  expect(input).toHaveValue("Hello:gm: Bob");
-  fireEvent.keyDown(input, { key: "Enter" });
+  expect(composerText(input)).toBe("Hello:gm: Bob");
+  expect(input.querySelector('img[alt=":gm:"]')).toBeInTheDocument();
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
   await waitFor(() =>
     expect(engine.edit).toHaveBeenCalledWith(
       convoGroup(engine),
@@ -161,10 +213,10 @@ it.each(["mobile browser", "native app"])(
     mockIsMobile = platform === "mobile browser";
     mockIsApp = platform === "native app";
     const { engine, input } = setup();
-    fireEvent.change(input, { target: { value: "Still writing" } });
-    expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
+    setComposerText(input, "Still writing");
+    expect(fireEvent.keyDown(input, { key: "Enter", keyCode: 13 })).toBe(true);
     expect(engine.send).not.toHaveBeenCalled();
-    expect(input).toHaveValue("Still writing");
+    expect(composerText(input)).toBe("Still writing");
     fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
     await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
   }
@@ -172,7 +224,7 @@ it.each(["mobile browser", "native app"])(
 
 it("does not steal focus back after sending", async () => {
   const { engine, input } = setup();
-  fireEvent.change(input, { target: { value: "Sent without refocusing" } });
+  setComposerText(input, "Sent without refocusing");
   const send = screen.getByRole("button", { name: /^Send$/ });
   act(() => send.focus());
   fireEvent.click(send);
@@ -186,7 +238,7 @@ it.each(["desktop", "mobile browser", "native app"])(
     mockIsMobile = platform === "mobile browser";
     mockIsApp = platform === "native app";
     const { engine, input } = setup();
-    fireEvent.change(input, { target: { value: "Ready to send" } });
+    setComposerText(input, "Ready to send");
     input.focus();
     const blur = jest.spyOn(input, "blur");
     fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
@@ -204,7 +256,7 @@ it.each(["desktop", "mobile browser", "native app"])(
       await waitFor(() => expect(input).not.toHaveFocus());
       expect(blur).toHaveBeenCalledTimes(1);
     }
-    expect(input).toHaveValue("");
+    expect(composerText(input)).toBe("");
   }
 );
 
@@ -215,36 +267,49 @@ it.each(["mobile browser", "native app"])(
     mockIsApp = platform === "native app";
     const { engine, input } = setup();
     jest.mocked(engine.send).mockRejectedValueOnce(new Error("Send failed"));
-    fireEvent.change(input, { target: { value: "Keep this draft" } });
+    setComposerText(input, "Keep this draft");
     input.focus();
     fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
-    await waitFor(() => expect(input).toHaveValue("Keep this draft"));
+    await waitFor(() => expect(composerText(input)).toBe("Keep this draft"));
     expect(engine.send).toHaveBeenCalledTimes(1);
     expect(input).toHaveFocus();
   }
 );
 
-it("does not blur a new mobile draft when an earlier send finishes", async () => {
-  mockIsMobile = true;
-  const { engine, input } = setup();
-  let finishSend: (() => void) | undefined;
-  jest.mocked(engine.send).mockImplementationOnce(
-    () =>
-      new Promise<void>((resolve) => {
-        finishSend = resolve;
-      })
-  );
-  fireEvent.change(input, { target: { value: "First message" } });
-  input.focus();
-  fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
-  expect(input).toHaveValue("");
-  fireEvent.change(input, { target: { value: "Next draft" } });
-  await act(async () => finishSend?.());
-  await act(async () => {
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => resolve())
+it.each(["Next draft", ":gm:"])(
+  "does not blur a new mobile draft when an earlier send finishes: %s",
+  async (nextDraft) => {
+    mockIsMobile = true;
+    const { engine, input } = setup();
+    let finishSend: (() => void) | undefined;
+    jest.mocked(engine.send).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishSend = resolve;
+        })
     );
-  });
-  expect(input).toHaveValue("Next draft");
-  expect(input).toHaveFocus();
+    setComposerText(input, "First message");
+    input.focus();
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+    expect(composerText(input)).toBe("");
+    setComposerText(input, nextDraft);
+    await act(async () => finishSend?.());
+    await act(async () => {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve())
+      );
+    });
+    expect(composerText(input)).toBe(nextDraft);
+    expect(input).toHaveFocus();
+  }
+);
+
+it("inserts safely when the draft was replaced while the emoji picker was open", async () => {
+  const { input } = setup();
+  setComposerText(input, "Old draft");
+  fireEvent.click(screen.getByRole("button", { name: "Add emoji" }));
+  setComposerText(input, "Replacement draft");
+  fireEvent.click(screen.getByRole("button", { name: "Choose smile" }));
+  await waitFor(() => expect(input).toHaveFocus());
+  expect(composerText(input)).toBe("Replacement draft😀");
 });
