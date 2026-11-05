@@ -42,6 +42,16 @@ records.
 
 ## Flows
 
+- When the active Museum edition includes Salgado's accession, open
+  `/museum/network/acquisitions/forest-water-and-community` for the six-work
+  gift. Its photographs have individual pages at
+  `/museum/network/works/6529NM-W-0030` through
+  `/museum/network/works/6529NM-W-0035`, with metadata, short labels, credits,
+  sources, and links to the
+  `/museum/network/artists/sebastiao-salgado` artist page and
+  `/museum/network/projects/amazonia` project page. The acquisition records the
+  unrestricted gift from punk6529 as `6529NM.2026.004`; its supporting accession,
+  rights, condition, and source records appear in the record sections.
 - The [public Museum guide](feature-public-museum-proposition.md#user-journey)
   follows the route from the homepage proposition and featured artwork to the
   complete institutional page and public record.

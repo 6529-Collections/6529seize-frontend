@@ -1,4 +1,9 @@
 import { buildImmutableMuseumBlobUrl, isExactGitCommit } from "./security";
+import {
+  salgadoDocumentKind,
+  salgadoDocumentMarkdown,
+  salgadoDocumentPaths,
+} from "./salgadoDocuments";
 import type {
   MuseumPublicDocument,
   MuseumPublicEntityGraph,
@@ -167,6 +172,10 @@ function candidatePaths(
   graph: MuseumPublicEntityGraph,
   sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
 ): readonly string[] {
+  const salgadoPaths = salgadoDocumentPaths(entity);
+  if (salgadoPaths !== undefined) {
+    return salgadoPaths.filter((path) => sourceDocuments.has(path));
+  }
   const veraPaths = veraMolnarCandidatePaths(entity, graph);
   if (entity.entityType === "WORK") {
     return uniquePaths([
@@ -463,6 +472,8 @@ function documentKind(
   path: string,
   entityType: MuseumPublicEntityType
 ): MuseumPublicDocument["kind"] {
+  const salgadoKind = salgadoDocumentKind(path);
+  if (salgadoKind !== undefined) return salgadoKind;
   if (path.endsWith(".json")) return "source_record";
   if (path === VERA_MOLNAR_PUBLIC_PATHS.artistPractice) {
     return "artist_practice";
@@ -525,7 +536,7 @@ function generatedDocument(
     id: `typed-source:${path}`,
     kind: documentKind(path, entity.entityType),
     title: titleFromDocument(path, source.text),
-    markdown: source.text,
+    markdown: salgadoDocumentMarkdown(path, source.text),
     sha256: source.sha256,
     sourcePath: path,
     artistIds: entity.entityType === "ARTIST" ? [entity.id] : [],

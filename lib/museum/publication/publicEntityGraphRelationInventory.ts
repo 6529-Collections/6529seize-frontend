@@ -15,6 +15,10 @@ import type {
 } from "./types";
 
 const RELATION_ID_PATTERN = /^6529NM-REL-[0-9]{4}$/u;
+const SUPPORTED_INVENTORY_VERSIONS = new Set<string>([
+  PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION,
+  "1.6.0",
+]);
 const RETIRED_RELATION_IDS_V1_3_0 = [
   "6529NM-REL-0159",
   "6529NM-REL-0160",
@@ -59,8 +63,8 @@ export function parseMuseumRelationIdentityInventory(
   );
   if (
     inventory["$schema"] !== PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA ||
-    inventory["inventory_version"] !==
-      PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION ||
+    typeof inventory["inventory_version"] !== "string" ||
+    !SUPPORTED_INVENTORY_VERSIONS.has(inventory["inventory_version"]) ||
     inventory["relation_key_format"] !==
       "relation_type|source_entity_id|target_entity_id"
   ) {
@@ -80,7 +84,7 @@ export function parseMuseumRelationIdentityInventory(
   return {
     sourcePath: MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
     schemaPath: MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
-    inventoryVersion: PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION,
+    inventoryVersion: inventory["inventory_version"],
     activeRelationIds: activeBindings.map((binding) => binding.relationId),
     retiredRelationIds: retiredBindings.map((binding) => binding.relationId),
   };

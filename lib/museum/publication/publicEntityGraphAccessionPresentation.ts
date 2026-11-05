@@ -1,6 +1,10 @@
 import type { MuseumExternalProposalPresentationVariant } from "./entities";
-import type { MuseumSourceDocument } from "./types";
-import { isRecord } from "./publicEntityGraphPrimitives";
+import type { MuseumSourceDocument, MuseumPublicEntityRecord } from "./types";
+import {
+  isRecord,
+  requiredObject,
+  requiredString,
+} from "./publicEntityGraphPrimitives";
 
 const CDN_BASE = "https://d3lqz0a4bldqgf.cloudfront.net";
 const TRANSFORM_PATH = "webp-v2-q82-m6-fixed-icc";
@@ -8,6 +12,107 @@ const WIDTHS = [640, 1280, 2400] as const;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const LEGACY_MAGNUM_PRESENTATION_PATH =
   "records/accessions/6529NM.2026.002/public/presentation-manifest.json";
+
+interface PublicDerivativeInput {
+  readonly workId: string;
+  readonly mediaId: string;
+  readonly sourceUrl: string;
+  readonly sourceSha256: string;
+  readonly repositoryPath: string;
+  readonly sha256: string;
+  readonly byteSize: number;
+  readonly width: number;
+  readonly height: number;
+  readonly altText: string;
+  readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
+  readonly catalogMediaAssetPaths: ReadonlySet<string>;
+}
+
+/** Join a public derivative to its source and reviewed responsive siblings. */
+export function accessionPublicDerivativeVariants(
+  input: PublicDerivativeInput
+): readonly MuseumExternalProposalPresentationVariant[] {
+  const matches = [...input.sourceDocuments.values()].flatMap((document) => {
+    if (
+      !/^records\/accessions\/6529NM\.[0-9]{4}\.[0-9]{3}\/public\/presentation-manifest\.json$/u.test(
+        document.path
+      )
+    )
+      return [];
+    let root: unknown;
+    try {
+      root = JSON.parse(document.text) as unknown;
+    } catch {
+      throw new Error("public_entity_graph_accession_presentation_manifest");
+    }
+    if (!isRecord(root) || !Array.isArray(root["items"])) {
+      throw new Error("public_entity_graph_accession_presentation_manifest");
+    }
+    return root["items"].flatMap((item: unknown) => {
+      if (
+        !isRecord(item) ||
+        item["work_entity_id"] !== input.workId ||
+        item["media_reference_entity_id"] !== input.mediaId
+      )
+        return [];
+      return [{ document, root, item }];
+    });
+  });
+  if (matches.length === 0) return [];
+  if (matches.length !== 1)
+    throw new Error("public_entity_graph_accession_presentation_join");
+  const { document, root, item } = matches[0]!;
+  const source = item["source"];
+  const presentation = item["presentation"];
+  if (
+    root["schema_profile"] !== "6529NM_ACCESSION_MEDIA_PRESENTATION_V2" ||
+    !isRecord(source) ||
+    source["url"] !== input.sourceUrl ||
+    source["sha256"] !== input.sourceSha256 ||
+    !positiveInteger(source["byte_size"]) ||
+    !positiveInteger(source["pixel_width"]) ||
+    !positiveInteger(source["pixel_height"]) ||
+    !isRecord(presentation) ||
+    !Array.isArray(presentation["derivatives"])
+  ) {
+    throw new Error("public_entity_graph_accession_presentation_source");
+  }
+  const primary = presentation["derivatives"].filter(
+    (value: unknown) =>
+      isRecord(value) && value["repository_path"] === input.repositoryPath
+  );
+  const primaryDerivative: unknown = primary[0];
+  if (
+    primary.length !== 1 ||
+    !isRecord(primaryDerivative) ||
+    primaryDerivative["sha256"] !== input.sha256 ||
+    primaryDerivative["byte_size"] !== input.byteSize ||
+    primaryDerivative["width"] !== input.width ||
+    primaryDerivative["height"] !== input.height
+  ) {
+    throw new Error(
+      "public_entity_graph_accession_presentation_primary_derivative"
+    );
+  }
+  return (
+    variantsFromManifest(document, {
+      workId: input.workId,
+      mediaId: input.mediaId,
+      sourceUrl: input.sourceUrl,
+      sourceSha256: input.sourceSha256,
+      sourceByteSize: source["byte_size"],
+      sourceWidth: source["pixel_width"],
+      sourceHeight: source["pixel_height"],
+      sourceAltText: input.altText,
+      sourceDocuments: input.sourceDocuments,
+      catalogMediaAssetPaths: input.catalogMediaAssetPaths,
+    }) ?? []
+  );
+}
+
+function positiveInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
 
 export function accessionPresentationVariants(input: {
   readonly workId: string;
@@ -142,5 +247,80 @@ function variantsFromManifest(
       byteSize,
       sha256: sha256 as `sha256:${string}`,
     };
+  });
+}
+
+export function generatedAccessionVariants(
+  mediaEntity: MuseumPublicEntityRecord,
+  subjectEntityId: string,
+  input: {
+    readonly tokenSourceUri: string | null;
+    readonly repositoryPath: string | null;
+    readonly sourceByteSize: number | null;
+    readonly altText: string | null;
+    readonly width: unknown;
+    readonly height: unknown;
+  },
+  context: {
+    readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
+    readonly catalogMediaAssetPaths: ReadonlySet<string>;
+  }
+) {
+  const media = requiredObject(
+    mediaEntity.profile,
+    "media",
+    "public_entity_graph_media"
+  );
+  if (
+    media["media_role"] !== "museum_generated_public_derivative" ||
+    input.tokenSourceUri === null
+  )
+    return [];
+  const tokenFixity = requiredObject(
+    media,
+    "token_source_fixity",
+    "public_entity_graph_media_token_fixity"
+  );
+  const fixity = requiredObject(
+    media,
+    "fixity",
+    "public_entity_graph_media_fixity"
+  );
+  const sourceSha256 = requiredString(
+    tokenFixity,
+    "digest",
+    "public_entity_graph_media_token_fixity"
+  );
+  const sha256 = requiredString(
+    fixity,
+    "digest",
+    "public_entity_graph_media_fixity"
+  );
+  if (
+    tokenFixity["status"] !== "verified" ||
+    fixity["status"] !== "verified" ||
+    !/^sha256:[a-f0-9]{64}$/u.test(sourceSha256) ||
+    !/^sha256:[a-f0-9]{64}$/u.test(sha256) ||
+    input.repositoryPath === null ||
+    input.sourceByteSize === null ||
+    input.altText === null ||
+    typeof input.width !== "number" ||
+    typeof input.height !== "number"
+  ) {
+    throw new Error("public_entity_graph_media_derivative_fixity");
+  }
+  return accessionPublicDerivativeVariants({
+    workId: subjectEntityId,
+    mediaId: mediaEntity.id,
+    sourceUrl: input.tokenSourceUri,
+    sourceSha256,
+    repositoryPath: input.repositoryPath,
+    sha256,
+    byteSize: input.sourceByteSize,
+    width: input.width,
+    height: input.height,
+    altText: input.altText,
+    sourceDocuments: context.sourceDocuments,
+    catalogMediaAssetPaths: context.catalogMediaAssetPaths,
   });
 }

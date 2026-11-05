@@ -27,7 +27,11 @@ import {
 
 const PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA =
   "https://6529networkmuseum.org/schemas/public-entity-identity-inventory-v1.json";
-const PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSIONS = new Set(["1.6.0", "1.7.0"]);
+const PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSIONS = new Set([
+  "1.6.0",
+  "1.7.0",
+  "1.8.1",
+]);
 const PUBLIC_TYPED_REFERENCE_REGISTRY_ID =
   "PUBLIC_TYPED_REFERENCE_REGISTRY_V1" as const;
 const PUBLIC_TYPED_REFERENCE_AUTHORITY_TYPES = new Set([

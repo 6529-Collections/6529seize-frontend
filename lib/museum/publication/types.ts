@@ -628,7 +628,7 @@ export interface MuseumPublicTypedReferenceRegistryEntry {
 
 export interface MuseumPublicIdentityInventory {
   readonly sourcePath: string;
-  readonly inventoryVersion: "1.6.0" | "1.7.0";
+  readonly inventoryVersion: "1.6.0" | "1.7.0" | "1.8.1";
   /** Canonical curated acquisitions explicitly declared by the identity inventory. */
   readonly curatedAcquisitionIds: readonly string[];
   readonly workAliases: readonly MuseumWorkAlias[];

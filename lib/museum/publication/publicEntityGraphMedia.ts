@@ -36,7 +36,10 @@ import {
   proposalMetadata,
 } from "./publicEntityGraphMediaMetadata";
 import { accessionMediaFacts } from "./publicEntityGraphAccessionMedia";
-import { accessionPresentationVariants } from "./publicEntityGraphAccessionPresentation";
+import {
+  accessionPresentationVariants,
+  generatedAccessionVariants,
+} from "./publicEntityGraphAccessionPresentation";
 export { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
 
 export function mapWorkStatus(
@@ -542,7 +545,7 @@ function projectRetainedMedia(
     };
   }
   if (
-    input.uri === null ||
+    (input.uri === null && input.repositoryPath === null) ||
     typeof input.width !== "number" ||
     typeof input.height !== "number"
   ) {
@@ -567,6 +570,7 @@ function projectRetainedMedia(
     );
   }
   if (media["media_role"] === "token_linked_source_media") {
+    if (input.uri === null) throw new Error("public_entity_graph_media_uri");
     const approved = assertApprovedArtBlocksMediaUrl(input.uri);
     const fixity = requiredObject(
       media,
@@ -669,6 +673,12 @@ function projectRetainedMedia(
       input.repositoryPath,
       context.catalogMediaAssetPaths
     );
+    const variants = generatedAccessionVariants(
+      mediaEntity,
+      subjectEntityId,
+      input,
+      context
+    );
     return {
       retained: {
         id: mediaEntity.id,
@@ -682,10 +692,12 @@ function projectRetainedMedia(
         credit,
         sourcePath: mediaEntity.sourcePath,
         custody: "upstream",
-        url,
+        url:
+          variants.find((variant) => variant.width === input.width)?.url ?? url,
         preservationStatus: "not_retained",
         sha256: null,
         upstreamProvider: "museum_public_derivative",
+        ...(variants.length === 0 ? {} : { variants }),
       },
       presentation: null,
       metadata: null,

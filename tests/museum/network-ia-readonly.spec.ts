@@ -283,7 +283,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(collectionWorkHrefs).toHaveLength(13);
+    expect(collectionWorkHrefs).toHaveLength(19);
     expect(
       collectionWorkHrefs.every(
         (href): href is string =>
@@ -357,17 +357,17 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(artistHrefs).toHaveLength(23);
+    expect(artistHrefs).toHaveLength(24);
     const artistMediaStages = page.getByTestId("museum-directory-media-stage");
-    await expect(artistMediaStages).toHaveCount(23);
+    await expect(artistMediaStages).toHaveCount(24);
     await expectUniformMediaStageRatio(artistMediaStages, [4 / 3], 0.005);
 
     await openRoute(page, "/museum/network/acquisitions");
-    await expect(page.locator("article")).toHaveCount(4);
+    await expect(page.locator("article")).toHaveCount(5);
     const acquisitionMediaStages = page.getByTestId(
       "museum-acquisition-media-stage"
     );
-    await expect(acquisitionMediaStages).toHaveCount(4);
+    await expect(acquisitionMediaStages).toHaveCount(5);
     await expectUniformMediaStageRatio(
       acquisitionMediaStages,
       [4 / 5, 4 / 3],

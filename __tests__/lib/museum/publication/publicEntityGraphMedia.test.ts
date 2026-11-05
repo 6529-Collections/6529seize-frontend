@@ -1220,3 +1220,126 @@ describe("Wave publication receipt joins", () => {
     ).toThrow("public_entity_graph_media_wave_source_join");
   });
 });
+
+function publicDerivativeFixture() {
+  const sourceUrl = "https://gateway.arweave.net/" + "a".repeat(43);
+  const sourceDigest = `sha256:${"b".repeat(64)}`;
+  const primaryDigest = `sha256:${String(1280).padStart(64, "0")}`;
+  const generated = buildAccessionPresentationDocument({
+    workId: "6529NM-W-0001",
+    mediaId: "6529NM-MED-0001",
+    sourceUrl,
+    sourceDigest,
+    sourceByteSize: 8_000_000,
+    sourceWidth: 5964,
+    sourceHeight: 4768,
+    altText: "A governed photograph.",
+  });
+  const root = JSON.parse(generated.document.text) as Record<string, unknown>;
+  root.schema_profile = "6529NM_ACCESSION_MEDIA_PRESENTATION_V2";
+  root.record_control = {
+    record_status: "reviewed",
+    review: {
+      role: "reviewer",
+      outcome: "approved",
+      reviewed_commit: "a".repeat(40),
+    },
+  };
+  const document: MuseumSourceDocument = {
+    ...generated.document,
+    path: generated.document.path.replace("2026.002", "2026.004"),
+    text: JSON.stringify(root).replaceAll("2026.002", "2026.004"),
+  };
+  const paths = generated.paths.map((path) =>
+    path.replace("2026.002", "2026.004")
+  );
+  const graph = buildRetainedMediaGraph({
+    role: "museum_generated_public_derivative",
+    uri: null,
+    repositoryPath: paths[1]!,
+  });
+  const media = graph.entities[1]!.profile.media as Record<string, unknown>;
+  Object.assign(media, {
+    media_type: "image/webp",
+    width: 1280,
+    height: 1023,
+    source_byte_size: 128_000,
+    accessibility_text: "A governed photograph.",
+    token_source_locator: { uri: sourceUrl, repository_path: null },
+    token_source_fixity: { status: "verified", digest: sourceDigest },
+    fixity: { status: "verified", digest: primaryDigest },
+  });
+  return { graph, media, document, paths };
+}
+
+function projectPublicDerivative(
+  fixture: ReturnType<typeof publicDerivativeFixture>
+) {
+  return projectMediaRelations(
+    fixture.graph.entities,
+    fixture.graph,
+    new Map([[fixture.document.path, fixture.document]]),
+    fixture.paths
+  ).get("6529NM-W-0001");
+}
+
+describe("reviewed accession public derivatives", () => {
+  it("renders a repository-only locator with all three approved responsive siblings", () => {
+    const fixture = publicDerivativeFixture();
+    const projection = projectPublicDerivative(fixture);
+    expect(projection?.metadata).toHaveLength(0);
+    expect(projection?.retained[0]).toMatchObject({
+      upstreamProvider: "museum_public_derivative",
+      width: 1280,
+      height: 1023,
+      url: `https://d3lqz0a4bldqgf.cloudfront.net/${fixture.paths[1]?.replace(/^media\//u, "museum/")}`,
+    });
+    expect(
+      projection?.retained[0]?.variants?.map(({ width }) => width)
+    ).toEqual([640, 1280, 2400]);
+  });
+
+  it("rejects a responsive sibling outside the accepted catalogue", () => {
+    const fixture = publicDerivativeFixture();
+    fixture.paths.pop();
+    expect(() => projectPublicDerivative(fixture)).toThrow(
+      "public_entity_graph_accession_presentation_variant"
+    );
+  });
+
+  it("rejects a manifest for a different source photograph", () => {
+    const fixture = publicDerivativeFixture();
+    fixture.media.token_source_fixity = {
+      status: "verified",
+      digest: `sha256:${"c".repeat(64)}`,
+    };
+    expect(() => projectPublicDerivative(fixture)).toThrow(
+      "public_entity_graph_accession_presentation_source"
+    );
+  });
+
+  it("rejects a primary derivative whose hash differs from the media record", () => {
+    const fixture = publicDerivativeFixture();
+    fixture.media.fixity = {
+      status: "verified",
+      digest: `sha256:${"c".repeat(64)}`,
+    };
+    expect(() => projectPublicDerivative(fixture)).toThrow(
+      "public_entity_graph_accession_presentation_primary_derivative"
+    );
+  });
+
+  it("does not activate a presentation still awaiting review", () => {
+    const fixture = publicDerivativeFixture();
+    fixture.document = {
+      ...fixture.document,
+      text: fixture.document.text.replace(
+        "approved_for_contextual_museum_display",
+        "prepared_for_contextual_museum_display_pending_review"
+      ),
+    };
+    expect(() => projectPublicDerivative(fixture)).toThrow(
+      "public_entity_graph_accession_presentation_manifest"
+    );
+  });
+});
