@@ -784,10 +784,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
           iconHeight: iconBounds?.height,
         };
       });
-      expect(shape.width).toBe(40);
-      expect(shape.height).toBe(40);
-      expect(shape.iconWidth).toBe(20);
-      expect(shape.iconHeight).toBe(20);
+      expect(shape.width).toBe(36);
+      expect(shape.height).toBe(36);
+      expect(shape.iconWidth).toBe(18);
+      expect(shape.iconHeight).toBe(18);
       expect(shape.radius).toBeGreaterThan(0);
       expect(shape.radius).toBeLessThan(shape.width / 2);
       await button.hover();
@@ -798,6 +798,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("tooltip", { name: label, exact: true })
       ).toBeVisible();
+    }
+    for (let index = 1; index < actions.length; index++) {
+      const previous = await actions[index - 1]!.button.boundingBox();
+      const current = await actions[index]!.button.boundingBox();
+      expect(previous).not.toBeNull();
+      expect(current).not.toBeNull();
+      expect(current!.x - (previous!.x + previous!.width)).toBeCloseTo(0, 1);
     }
     await expectNoUnsafeSandboxMutations(baseURL);
   });

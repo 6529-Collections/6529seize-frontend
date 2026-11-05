@@ -162,7 +162,6 @@ export function HeaderShareModalView({
     );
   };
 
-
   const getNavigateContent = () => {
     if (pageShareTarget === PageShareTarget.APP) {
       return {

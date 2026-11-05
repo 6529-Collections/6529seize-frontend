@@ -483,7 +483,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       key="default-buttons"
                       data-testid="drop-actions-expanded-motion"
                       {...actionGroupMotionProps}
-                      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-overflow-hidden"
+                      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-0 tw-overflow-hidden"
                     >
                       {isDropMode && (
                         <>
@@ -519,7 +519,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           )}
                         </>
                       )}
-                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
+                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-0">
                         <>
                           <button
                             type="button"
