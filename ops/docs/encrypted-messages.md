@@ -151,6 +151,19 @@ the same people already chosen. Earlier messages are not copied.
   remain readable on this device.
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
+- Select **Add emoji** beside the message box to open the emoji board. Search
+  or browse standard emojis, skin tones, and the **6529** custom collection.
+  The selection replaces highlighted text or goes at the cursor. You can also
+  use the board while editing. Custom emojis appear as `:name:` in the message
+  box and as images in sent and received messages.
+- In a message's menu, choose a quick reaction or **More reactions** to open
+  the full emoji board, including custom emojis. Select an existing reaction
+  to add or remove yours. Emoji choices in encrypted chats do not enter the
+  ordinary chats' frequently-used emoji history.
+- Custom emojis load together as one public collection, independently of the
+  messages in a chat. If the collection cannot load, the board keeps standard
+  emojis available and offers **Try again**. Custom emojis in messages remain
+  readable as `:name:` until available; older apps may also show this text.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
   device like messages. Images show inline and other files are downloads.
   An image larger than about 50 megapixels shows as a file to download

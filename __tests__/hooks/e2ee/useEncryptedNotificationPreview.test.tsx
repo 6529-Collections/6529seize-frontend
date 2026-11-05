@@ -71,7 +71,8 @@ it.each(["needs-enrollment", "loading", "error"])(
   (status) => {
     mockEncrypted.status = status;
     expect(
-      renderHook(() => useEncryptedNotificationPreview("group", 1)).result.current
+      renderHook(() => useEncryptedNotificationPreview("group", 1)).result
+        .current
     ).toEqual({ preview: null, needsSetup: status === "needs-enrollment" });
     expect(mockConversation).toHaveBeenLastCalledWith(null);
   }

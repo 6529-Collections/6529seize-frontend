@@ -31,6 +31,12 @@ export class ApiNotificationAdditionalContextV2 {
     * Sequence of the message to preview from local decrypted history.
     */
     'encrypted_message_seq'?: number;
+    'artist_id'?: string;
+    /**
+    * Title for an ARTIST_ARTWORK_SUBMITTED notification.
+    */
+    'artwork_title'?: string | null;
+    'submitted_at'?: number;
     'reason'?: ApiVotingCreditReleaseReason;
     /**
     * Submission title saved before winning or deletion.
@@ -107,6 +113,24 @@ export class ApiNotificationAdditionalContextV2 {
             "baseName": "encrypted_message_seq",
             "type": "number",
             "format": ""
+        },
+        {
+            "name": "artist_id",
+            "baseName": "artist_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "artwork_title",
+            "baseName": "artwork_title",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "submitted_at",
+            "baseName": "submitted_at",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "reason",

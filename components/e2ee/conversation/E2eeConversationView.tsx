@@ -28,6 +28,7 @@ import {
 } from "../ui/E2eePageShell";
 import { E2eeBlockDialog } from "./E2eeBlockDialog";
 import { E2eeComposer } from "./E2eeComposer";
+import { E2eeEmojiProvider } from "./E2eeEmojiProvider";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
@@ -427,7 +428,11 @@ export function E2eeConversationView({ g }: { readonly g: string }) {
             <E2eeLoadingState label={t(locale, "e2ee.conversation.loading")} />
           );
         }
-        return <ConversationScreen key={g} g={g} e2ee={{ ...e2ee, engine }} />;
+        return (
+          <E2eeEmojiProvider>
+            <ConversationScreen key={g} g={g} e2ee={{ ...e2ee, engine }} />
+          </E2eeEmojiProvider>
+        );
       }}
     </E2eeRouteGate>
   );
