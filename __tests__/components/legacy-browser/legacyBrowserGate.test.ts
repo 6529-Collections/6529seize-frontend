@@ -1,4 +1,9 @@
+/** @jest-environment node */
+
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import LegacyBrowserNotice from "@/components/legacy-browser/LegacyBrowserNotice";
 import { join } from "node:path";
 import { runInNewContext, Script } from "node:vm";
 import {
@@ -150,6 +155,7 @@ describe("legacy browser gate", () => {
       syntaxScript: LEGACY_BROWSER_SYNTAX_SCRIPT,
       noticeScript: LEGACY_BROWSER_NOTICE_SCRIPT,
       attribute: LEGACY_BROWSER_ATTRIBUTE,
+      noticeHtml: renderToStaticMarkup(createElement(LegacyBrowserNotice)),
     });
   });
 });
