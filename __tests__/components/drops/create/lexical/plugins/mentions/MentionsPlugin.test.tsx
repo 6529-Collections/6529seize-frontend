@@ -133,6 +133,16 @@ describe("MentionsPlugin", () => {
     expect(ref.current.isMentionsOpen()).toBe(false);
   });
 
+  it("accepts cached identity results without a level", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+    });
+    render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} />);
+
+    expect(capturedProps.options[0].handle).toBe("alice");
+    expect(capturedProps.options[0].level).toBeNull();
+  });
+
   it.each([
     ["@alice", 0, "alice", "@alice"],
     ["hello @alice", 6, "alice", "@alice"],

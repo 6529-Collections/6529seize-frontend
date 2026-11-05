@@ -99,7 +99,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(newcomer).toBeVisible();
     await expect(experienced.getByText("42", { exact: true })).toBeVisible();
     await expect(newcomer.getByText("0", { exact: true })).toBeVisible();
-    await expect(experienced.locator("button")).toHaveCount(0);
+    await expect(experienced.getByRole("button")).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("mention-levels.png") });
     await composer.press("ArrowDown");

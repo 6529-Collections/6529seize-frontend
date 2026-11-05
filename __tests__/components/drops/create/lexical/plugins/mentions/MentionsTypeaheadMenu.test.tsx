@@ -60,6 +60,23 @@ describe("MentionsTypeaheadMenu", () => {
     }
   );
 
+  it("omits the badge for a cached identity without a level", () => {
+    render(
+      <MentionsTypeaheadMenu
+        selectedIndex={0}
+        options={[{ ...createOption(), level: null }] as any}
+        setHighlightedIndex={jest.fn()}
+        selectOptionAndCleanUp={jest.fn()}
+        anchorElement={null}
+      />
+    );
+
+    expect(screen.queryByText("42")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /alice/ })
+    ).not.toHaveAccessibleName(/Level/);
+  });
+
   it.each(["group", "alias"])("omits levels from %s suggestions", (type) => {
     render(
       <MentionsTypeaheadMenu
