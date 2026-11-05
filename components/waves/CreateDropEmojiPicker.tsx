@@ -47,7 +47,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
 
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const pickerRef = useRef<HTMLDivElement | null>(null);
+  const pickerRef = useRef<HTMLDialogElement | null>(null);
   const [pickerPosition, setPickerPosition] = useState<{
     top: number;
     left: number;
@@ -164,17 +164,18 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
         {!isMobile &&
           isPickerOpen &&
           createPortal(
-            <div
+            <dialog
+              open
               ref={pickerRef}
-              role="dialog"
               aria-label={pickerLabel}
               style={{
                 position: "absolute",
                 top: pickerPosition.top,
                 left: pickerPosition.left,
+                right: "auto",
                 zIndex: desktopZIndex,
               }}
-              className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg"
+              className="tw-m-0 tw-max-w-none tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-text-inherit tw-shadow-lg"
             >
               {pickerNotice}
               <LazyEmojiPicker
@@ -182,7 +183,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
                 onEmojiSelect={addEmoji}
                 autoFocus
               />
-            </div>,
+            </dialog>,
             document.body
           )}
       </div>
