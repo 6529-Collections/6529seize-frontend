@@ -10,6 +10,7 @@ const { resolveSentryCliPath } = require("../../ops/scripts/resolve-sentry-cli.c
 
 const SCRIPT = path.join(process.cwd(), "ops", "scripts", "sentry-release.sh");
 const RELEASE = "0123456789abcdef0123456789abcdef01234567";
+const TOKEN_VARIABLE = "SENTRY_AUTH_TOKEN";
 
 type Run = {
   readonly status: number | null;
@@ -53,14 +54,15 @@ describe("ops/scripts/sentry-release.sh", () => {
   ): Run {
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      SENTRY_AUTH_TOKEN: undefined,
       FAKE_LOG: callLog,
       FAKE_FAIL: options.fail ?? "",
       SENTRY_ORG: "seize-ff",
       SENTRY_PROJECT: "6529-frontend",
     };
+    // Never inherit a real token; set the fake one only when the case wants it.
+    delete env[TOKEN_VARIABLE];
     if (options.token !== null) {
-      env["SENTRY_AUTH_TOKEN"] = options.token ?? "test-token-value";
+      env[TOKEN_VARIABLE] = options.token ?? "fake-value-for-tests";
     }
     const result = spawnSync(
       "bash",
@@ -87,7 +89,7 @@ describe("ops/scripts/sentry-release.sh", () => {
       `releases finalize ${RELEASE}`,
     ]);
     expect(output).toContain(`Recorded Sentry release ${RELEASE}.`);
-    expect(output).not.toContain("test-token-value");
+    expect(output).not.toContain("fake-value-for-tests");
   });
 
   it("still finalizes when commit association fails", () => {

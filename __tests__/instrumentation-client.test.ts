@@ -1125,8 +1125,22 @@ describe("instrumentation-client", () => {
   });
 
   it("reports the runtime VERSION as the release", () => {
-    // jest.setup.js bakes VERSION "test-version" into PUBLIC_RUNTIME.
-    expect(loadSentryConfig().release).toBe("test-version");
+    const previousRuntime = process.env["PUBLIC_RUNTIME"];
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+      ...JSON.parse(previousRuntime ?? "{}"),
+      VERSION: "0123456789abcdef0123456789abcdef01234567",
+    });
+    try {
+      expect(loadSentryConfig().release).toBe(
+        "0123456789abcdef0123456789abcdef01234567"
+      );
+    } finally {
+      if (previousRuntime === undefined) {
+        delete process.env["PUBLIC_RUNTIME"];
+      } else {
+        process.env["PUBLIC_RUNTIME"] = previousRuntime;
+      }
+    }
   });
 
   it("configures filtering for exclusively third-party frames", () => {

@@ -31,11 +31,11 @@ if ! [[ "$release" =~ ^[a-f0-9]{40}$ ]]; then
   warn "the release is not a commit SHA; skipped."
   exit 0
 fi
-if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
+if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
   warn "SENTRY_AUTH_TOKEN is not available; skipped."
   exit 0
 fi
-if [ -z "$cli" ] || [ ! -f "$cli" ]; then
+if [[ -z "$cli" || ! -f "$cli" ]]; then
   warn "the sentry-cli binary from the build is missing; skipped."
   exit 0
 fi
