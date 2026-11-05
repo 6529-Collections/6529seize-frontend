@@ -159,6 +159,10 @@ export function useProfileEditor(props: ProfileEditorProps) {
   const router = useRouter();
   const pathname = usePathname();
   const savingRef = useRef(false);
+  const [fallbackCover] = useState(() => ({
+    color1: props.defaultBanner1,
+    color2: props.defaultBanner2,
+  }));
   const [saving, setSaving] = useState(false);
   const [savedProfile, setSavedProfile] = useState(props.profile);
   const [savedStatement, setSavedStatement] = useState(props.statement);
@@ -173,9 +177,9 @@ export function useProfileEditor(props: ProfileEditorProps) {
       ? Boolean(draft.coverFile) || !savedCover
       : Boolean(savedCover) ||
         draft.color1 !==
-          (getBannerColorValue(savedProfile.banner1) ?? props.defaultBanner1) ||
+          (getBannerColorValue(savedProfile.banner1) ?? fallbackCover.color1) ||
         draft.color2 !==
-          (getBannerColorValue(savedProfile.banner2) ?? props.defaultBanner2);
+          (getBannerColorValue(savedProfile.banner2) ?? fallbackCover.color2);
   const profileChanged =
     draft.name !== savedProfile.handle ||
     draft.classification !== savedProfile.classification ||
@@ -195,13 +199,22 @@ export function useProfileEditor(props: ProfileEditorProps) {
   const navigateAfterRename = (updated: ApiIdentity) => {
     if (
       updated.handle &&
-      updated.handle.toLowerCase() !== props.profile.handle?.toLowerCase()
+      updated.handle.toLowerCase() !== savedProfile.handle?.toLowerCase()
     ) {
       const parts = pathname.split("/");
       parts[1] = encodeURIComponent(updated.handle.toLowerCase());
       router.replace(`${parts.join("/")}${globalThis.location.search}`, {
         scroll: false,
       });
+    }
+  };
+
+  const updateSavedStatement = (statement: CicStatement | null) => {
+    setSavedStatement(statement);
+    if (statement) onProfileStatementAdd({ profile: savedProfile });
+    else {
+      updateDraft({ about: "" });
+      onProfileStatementRemove({ profile: savedProfile });
     }
   };
 
@@ -215,12 +228,9 @@ export function useProfileEditor(props: ProfileEditorProps) {
     try {
       const { success } = await requestAuth();
       if (!success) throw new Error(message("user.profileHeader.edit.signIn"));
-      const body = await prepareProfileUpdate(
-        draft,
-        savedProfile,
-        coverChanged,
-        ipfs
-      );
+      const body = profileChanged
+        ? await prepareProfileUpdate(draft, savedProfile, coverChanged, ipfs)
+        : null;
       // Each endpoint saves separately. Keep confirmed results as the retry
       // baseline, while retaining every draft field that has not been saved.
       if (aboutChanged) {
@@ -229,18 +239,14 @@ export function useProfileEditor(props: ProfileEditorProps) {
           draft.about,
           savedStatement
         );
-        setSavedStatement(updatedStatement);
-        if (updatedStatement) onProfileStatementAdd({ profile: savedProfile });
-        else {
-          updateDraft({ about: "" });
-          onProfileStatementRemove({ profile: savedProfile });
-        }
+        updateSavedStatement(updatedStatement);
         savedAny = true;
       }
       let currentProfile = savedProfile;
       if (draft.meme) {
-        body.pfp_url = await savePictureMeme(target, draft.meme);
-        currentProfile = { ...savedProfile, pfp: body.pfp_url };
+        const pfp = await savePictureMeme(target, draft.meme);
+        if (body) body.pfp_url = pfp;
+        currentProfile = { ...savedProfile, pfp };
         setSavedProfile(currentProfile);
         updateDraft({ meme: null });
         onProfileEdit({
@@ -249,7 +255,7 @@ export function useProfileEditor(props: ProfileEditorProps) {
         });
         savedAny = true;
       }
-      if (profileChanged) {
+      if (body) {
         const updated = await commonApiPost<
           ApiCreateOrUpdateProfileRequest,
           ApiIdentity

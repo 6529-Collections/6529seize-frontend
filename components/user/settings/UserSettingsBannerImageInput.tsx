@@ -1,5 +1,7 @@
 "use client";
 
+import { getUserProfileHeaderMessage as message } from "../user-page-header/user-page-header.messages";
+
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { getLegacyGifPreviewUri } from "@/helpers/gif-preview.helpers";
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
@@ -44,7 +46,7 @@ export default function UserSettingsBannerImageInput({
               <FallbackImage
                 primarySrc={imageToShow}
                 fallbackSrc={getLegacyGifPreviewUri(imageToShow)}
-                alt="Banner preview"
+                alt={message("user.profileHeader.edit.coverPreview")}
                 fill
                 sizes="10rem"
                 className="tw-rounded-sm tw-object-contain"
@@ -73,12 +75,12 @@ export default function UserSettingsBannerImageInput({
               <div className="tw-flex tw-flex-col tw-items-center tw-justify-center">
                 <p className="tw-mb-1 tw-text-sm tw-font-normal tw-text-iron-400">
                   <span className="tw-font-medium tw-text-white">
-                    Click to upload
+                    {message("user.profileHeader.edit.upload")}
                   </span>{" "}
-                  or drag and drop
+                  {message("user.profileHeader.edit.dragDrop")}
                 </p>
                 <p className="tw-text-xs tw-font-normal tw-text-iron-400">
-                  JPEG, JPG, PNG, GIF — max 2MB
+                  {message("user.profileHeader.edit.coverFormats")}
                 </p>
               </div>
             </>
@@ -96,7 +98,7 @@ export default function UserSettingsBannerImageInput({
         <input
           id="banner-upload-input"
           type="file"
-          aria-label="Upload profile cover"
+          aria-label={message("user.profileHeader.edit.uploadCover")}
           className="tw-sr-only"
           aria-describedby={error ? "banner-upload-error" : undefined}
           accept={ACCEPTED_FORMATS_DISPLAY}

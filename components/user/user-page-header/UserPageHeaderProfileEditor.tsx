@@ -16,7 +16,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import UserPageHeaderAboutEditError from "./about/UserPageHeaderAboutEditError";
 import UserPageHeaderAboutInput from "./about/UserPageHeaderAboutInput";
 import type { useProfileEditor } from "./useProfileEditor";
@@ -34,6 +34,7 @@ export default function UserPageHeaderProfileEditor({
   const [nameAvailable, setNameAvailable] = useState(false);
   const [checkingName, setCheckingName] = useState(false);
   const [showMemes, setShowMemes] = useState(false);
+  const aboutInputId = useId();
   const errorRef = useRef<HTMLDivElement>(null);
   const coverObjectUrl = useObjectUrl(editor.coverFile);
   const pictureObjectUrl = useObjectUrl(editor.pictureFile);
@@ -200,12 +201,13 @@ export default function UserPageHeaderProfileEditor({
         />
         <div className="tw-space-y-2">
           <label
-            htmlFor="profile-about-input"
+            htmlFor={aboutInputId}
             className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
           >
             {message("user.profileHeader.aboutEdit.textareaLabel")}
           </label>
           <UserPageHeaderAboutInput
+            id={aboutInputId}
             value={editor.about}
             onChange={(value) => {
               editor.updateDraft({ about: value });
@@ -224,6 +226,7 @@ export default function UserPageHeaderProfileEditor({
         >
           {editor.aboutError ? (
             <UserPageHeaderAboutEditError
+              id={`${aboutInputId}-profile-about-error`}
               msg={editor.aboutError}
               closeError={() => editor.setAboutError(null)}
             />

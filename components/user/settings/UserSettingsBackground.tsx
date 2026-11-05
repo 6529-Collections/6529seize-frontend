@@ -1,5 +1,7 @@
 "use client";
 
+import { getUserProfileHeaderMessage as message } from "../user-page-header/user-page-header.messages";
+
 import { useRef } from "react";
 
 export default function UserSettingsBackground({
@@ -43,7 +45,7 @@ export default function UserSettingsBackground({
           htmlFor="bgColor1"
           className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300"
         >
-          Background Color 1
+          {message("user.profileHeader.edit.color1")}
         </label>
         <div className="tw-relative tw-mt-2">
           <input
@@ -82,7 +84,7 @@ export default function UserSettingsBackground({
           htmlFor="bgColor2"
           className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300"
         >
-          Background Color 2
+          {message("user.profileHeader.edit.color2")}
         </label>
         <div className="tw-relative tw-mt-2">
           <input

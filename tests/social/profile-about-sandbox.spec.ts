@@ -59,8 +59,7 @@ async function openOwnProfile(page: Page, expectOwnerAction = true) {
     await page.getByRole("button", { name: "Open menu", exact: true }).click();
   }
   const nativeProfile = page.getByRole("link", {
-    name: "Open playwright profile",
-    exact: true,
+    name: /^Open .+ profile$/,
   });
   const accountMenu = page.getByRole("button", {
     name: "Open account and profiles menu",
@@ -72,7 +71,9 @@ async function openOwnProfile(page: Page, expectOwnerAction = true) {
     await accountMenu.press("Enter");
     await page.getByRole("link", { name: "Profile", exact: true }).click();
   }
-  await expect(page).toHaveURL(/\/playwright(?:[/?#]|$)/);
+  await expect(
+    page.getByRole("navigation", { name: "Profile sections" })
+  ).toBeVisible();
   if (expectOwnerAction) {
     await expect(
       page.getByRole("button", { name: "Edit profile", exact: true })

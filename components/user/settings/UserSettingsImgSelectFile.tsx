@@ -1,5 +1,7 @@
 "use client";
 
+import { getUserProfileHeaderMessage as message } from "../user-page-header/user-page-header.messages";
+
 import Image from "next/image";
 import { useImageUpload } from "./useImageUpload";
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
@@ -41,7 +43,7 @@ export default function UserSettingsImgSelectFile({
           >
             <Image
               src={imageToShow}
-              alt="Profile image"
+              alt={message("user.profileHeader.edit.picturePreview")}
               fill
               sizes="10rem"
               className="tw-object-contain"
@@ -72,12 +74,12 @@ export default function UserSettingsImgSelectFile({
             <div>
               <p className="tw-mb-2 tw-mt-0 tw-text-sm tw-font-normal tw-text-iron-400">
                 <span className="tw-font-medium tw-text-white">
-                  Click to upload
+                  {message("user.profileHeader.edit.upload")}
                 </span>{" "}
-                or drag and drop
+                {message("user.profileHeader.edit.dragDrop")}
               </p>
               <p className="tw-text-xs tw-font-normal tw-text-iron-400">
-                JPEG, JPG, PNG, GIF, WEBP
+                {message("user.profileHeader.edit.pictureFormats")}
               </p>
             </div>
           </>
@@ -95,7 +97,7 @@ export default function UserSettingsImgSelectFile({
       <input
         id="pfp-upload-input"
         type="file"
-        aria-label="Upload profile picture"
+        aria-label={message("user.profileHeader.edit.uploadPicture")}
         aria-describedby={error ? "pfp-upload-error" : undefined}
         className="tw-sr-only"
         accept={ACCEPTED_FORMATS_DISPLAY}

@@ -4,12 +4,14 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderAboutInput({
+  id,
   value,
   onChange,
   errorMsg,
   required = false,
   inputRef,
 }: {
+  readonly id: string;
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly errorMsg: string | null;
@@ -29,14 +31,14 @@ export default function UserPageHeaderAboutInput({
       <textarea
         className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-border-0 tw-bg-transparent tw-px-4 tw-pb-2 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 placeholder:tw-text-iron-600 focus:tw-outline-none"
         name="profile-about"
-        id="profile-about-input"
+        id={id}
         aria-label={getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.textareaLabel"
         )}
         aria-describedby={
           errorMsg
-            ? "profile-about-character-count profile-about-error"
-            : "profile-about-character-count"
+            ? `${id}-character-count ${id}-profile-about-error`
+            : `${id}-character-count`
         }
         placeholder={getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.placeholder"
@@ -49,7 +51,7 @@ export default function UserPageHeaderAboutInput({
       ></textarea>
       <div className="tw-flex tw-justify-end tw-px-3 tw-pb-2">
         <div
-          id="profile-about-character-count"
+          id={`${id}-character-count`}
           className="tw-pointer-events-none tw-rounded-full tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-white/10"
         >
           {characterCount}

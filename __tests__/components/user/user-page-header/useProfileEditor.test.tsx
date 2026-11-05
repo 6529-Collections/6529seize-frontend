@@ -54,7 +54,10 @@ const statement = {
   statement_value: "Original About",
 } as CicStatement;
 
-function setup(savedStatement: CicStatement | null = null) {
+function setup(
+  savedStatement: CicStatement | null = null,
+  targetProfile = profile
+) {
   function Wrapper({ children }: { readonly children: ReactNode }) {
     const auth = useContext(AuthContext);
     const cache = useContext(ReactQueryWrapperContext);
@@ -74,14 +77,16 @@ function setup(savedStatement: CicStatement | null = null) {
     );
   }
   return renderHook(
-    () =>
+    (defaults) =>
       useProfileEditor({
-        profile,
+        profile: targetProfile,
         statement: savedStatement,
-        defaultBanner1: "#000000",
-        defaultBanner2: "#111111",
+        ...defaults,
       }),
-    { wrapper: Wrapper }
+    {
+      wrapper: Wrapper,
+      initialProps: { defaultBanner1: "#000000", defaultBanner2: "#111111" },
+    }
   );
 }
 
@@ -118,6 +123,7 @@ it("saves only the changed About and updates the cache", async () => {
   });
   expect(onProfileStatementAdd).toHaveBeenCalledWith({ profile });
   expect(result.current.dirty).toBe(false);
+  expect(fetchApi).not.toHaveBeenCalled();
 });
 
 it("clears an existing About with DELETE", async () => {
@@ -186,7 +192,17 @@ it("preserves a confirmed meme selection when another profile change needs a ret
   act(() =>
     result.current.updateDraft({
       name: "renamed",
-      meme: { id: 42, name: "Meme", image: "meme.jpg", scaled: "meme.jpg" },
+      meme: {
+        id: 1,
+        animation: null,
+        contract: "0x0000000000000000000000000000000000000001",
+        icon: null,
+        thumbnail: null,
+        artist: null,
+        name: "Meme",
+        image: "meme.jpg",
+        scaled: "meme.jpg",
+      },
     })
   );
   await act(async () => {
@@ -245,4 +261,33 @@ it("prevents duplicate saves while a request is pending", async () => {
     await pending;
   });
   expect(result.current.saving).toBe(false);
+});
+
+it("requires an image only when the cover is changed to image mode", async () => {
+  const { result } = setup();
+  act(() =>
+    result.current.updateDraft({ coverMode: "image", about: "Safe About" })
+  );
+  await act(async () => {
+    expect(await result.current.save()).toBe(false);
+  });
+  expect(result.current.error).toContain("Select an image");
+  expect(post).not.toHaveBeenCalled();
+  act(() => result.current.updateDraft({ coverMode: "gradient" }));
+  post.mockResolvedValueOnce({ ...statement, statement_value: "Safe About" });
+  await act(async () => {
+    expect(await result.current.save()).toBe(true);
+  });
+  expect(fetchApi).not.toHaveBeenCalled();
+});
+
+it("keeps an untouched fallback cover clean when parent defaults refresh", () => {
+  const { result, rerender } = setup(null, {
+    ...profile,
+    banner1: null,
+    banner2: null,
+  });
+  expect(result.current.dirty).toBe(false);
+  rerender({ defaultBanner1: "#222222", defaultBanner2: "#333333" });
+  expect(result.current.dirty).toBe(false);
 });

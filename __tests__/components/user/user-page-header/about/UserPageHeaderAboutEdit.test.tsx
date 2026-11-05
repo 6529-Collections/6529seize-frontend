@@ -19,7 +19,7 @@ jest.mock("framer-motion", () => ({
 }));
 jest.mock(
   "@/components/user/user-page-header/about/UserPageHeaderAboutEditError",
-  () => (props: any) => <div id="profile-about-error">{props.msg}</div>
+  () => (props: any) => <div id={props.id}>{props.msg}</div>
 );
 
 let mutationError: Error | null = null;
@@ -135,7 +135,7 @@ describe("UserPageHeaderAboutEdit", () => {
     expect(await screen.findByText("backend unavailable.")).toBeInTheDocument();
     expect(input).toHaveAttribute(
       "aria-describedby",
-      "profile-about-character-count profile-about-error"
+      expect.stringMatching(/-character-count .*?-profile-about-error/)
     );
   });
 });

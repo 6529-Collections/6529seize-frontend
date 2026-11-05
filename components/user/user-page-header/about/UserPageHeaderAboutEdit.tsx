@@ -13,7 +13,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import { useKeyPressEvent } from "react-use";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 import UserPageHeaderAboutEditError from "./UserPageHeaderAboutEditError";
@@ -43,6 +43,7 @@ export default function UserPageHeaderAboutEdit({
   const { requestAuth, setToast } = useContext(AuthContext);
   useKeyPressEvent("Escape", onClose);
 
+  const aboutInputId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [internalValue, setInternalValue] = useState(
     statement?.statement_value ?? ""
@@ -147,6 +148,7 @@ export default function UserPageHeaderAboutEdit({
     <div className="tw-w-full tw-max-w-2xl">
       <form onSubmit={onSubmit}>
         <UserPageHeaderAboutInput
+          id={aboutInputId}
           value={value}
           onChange={(nextValue) => {
             onErrorMsgChange(null);
@@ -184,6 +186,7 @@ export default function UserPageHeaderAboutEdit({
       <AnimatePresence mode="wait" initial={false}>
         {errorMsg && (
           <UserPageHeaderAboutEditError
+            id={`${aboutInputId}-profile-about-error`}
             msg={errorMsg}
             closeError={() => onErrorMsgChange(null)}
           />

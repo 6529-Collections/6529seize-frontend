@@ -59,9 +59,11 @@ const getErrorText = (): {
 });
 
 export default function UserPageHeaderAboutEditError({
+  id = "profile-about-error",
   msg,
   closeError,
 }: {
+  readonly id?: string;
   readonly msg: string;
   readonly closeError: () => void;
 }) {
@@ -87,7 +89,7 @@ export default function UserPageHeaderAboutEditError({
       : getErrorText()[errorType];
 
   return (
-    <div id="profile-about-error" className="tw-mt-3">
+    <div id={id} className="tw-mt-3">
       <UserPageErrorWrapper
         closeError={closeError}
         closeLabel={getUserProfileHeaderMessage(
