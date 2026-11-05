@@ -37,6 +37,10 @@ wrapper expects that location.
 - `publish-shared-static-assets.cjs`: publishes a verified build's
   `_next/static` files to the shared production asset prefix, create-only, and
   fails if an existing name holds different bytes.
+- `resolve-sentry-cli.cjs`: prints the path of the `sentry-cli` binary
+  installed with `@sentry/nextjs`; the production build hands it to the deploy.
+- `sentry-release.sh`: records a deployed commit as a Sentry release
+  (create, set commits, finalize), best effort.
 - `run-docs-area-remediator-loop.sh`: iterative docs remediation loop.
 - `process-docs-commit-queue.sh`: docs update queue helper for commit-based
   remediation workflows.

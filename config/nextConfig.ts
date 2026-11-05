@@ -258,6 +258,14 @@ export function sharedConfig(
         },
       },
     },
+    compiler: {
+      // Compiles out the Sentry SDK's debug logger. `disableLogger` in
+      // next.config.ts only applies to webpack builds; Turbopack builds need
+      // the flag defined directly.
+      define: {
+        __SENTRY_DEBUG__: false,
+      },
+    },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
     experimental: {
       // Next 16.3 defaults `next build` to the project-local `tsc` CLI, which

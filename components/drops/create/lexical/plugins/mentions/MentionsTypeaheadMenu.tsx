@@ -49,6 +49,7 @@ export default function MentionsTypeaheadMenu({
             handle={option.handle}
             display={option.display}
             picture={option.picture}
+            level={option.type === "identity" ? option.level : null}
             setRefElement={option.setRefElement}
           />
         ))}
