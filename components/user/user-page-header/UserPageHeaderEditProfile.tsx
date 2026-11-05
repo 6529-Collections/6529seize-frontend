@@ -19,6 +19,10 @@ import UserPageHeaderEditName from "./name/UserPageHeaderEditName";
 import UserPageHeaderEditClassification from "./name/classification/UserPageHeaderEditClassification";
 import UserPageHeaderEditPfp from "./pfp/UserPageHeaderEditPfp";
 import { getUserProfileHeaderMessage } from "./user-page-header.messages";
+import {
+  PROFILE_EDITOR_TOUCH_TARGETS_CLASS,
+  USER_PAGE_HEADER_TOUCH_TARGET_CLASS,
+} from "./user-page-header-surface";
 
 type EditTarget = "banner" | "pfp" | "name" | "classification" | "about";
 
@@ -142,7 +146,7 @@ export default function UserPageHeaderEditProfile({
         onClick={openMenu}
         aria-label={getUserProfileHeaderMessage("user.profileHeader.edit.open")}
         title={getUserProfileHeaderMessage("user.profileHeader.edit.open")}
-        className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5"
+        className={`tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
       >
         <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-scale-95 group-active:tw-bg-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
           <PencilIcon className="tw-size-[1.125rem]" aria-hidden="true" />
@@ -162,7 +166,7 @@ export default function UserPageHeaderEditProfile({
         showScrollbar={showScrollbar}
         maxWidthClass={maxWidthClass}
         focusTitleOnOpen
-        surfaceClassName="tw-bg-iron-950 md:tw-shadow-2xl"
+        surfaceClassName={`tw-bg-iron-950 md:tw-shadow-2xl ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
         headerActions={
           activeTarget === "banner" ? (
             <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
