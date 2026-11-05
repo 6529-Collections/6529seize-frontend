@@ -19,6 +19,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import useCapacitor from "@/hooks/useCapacitor";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
+import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
 import {
   COMPOSER_INPUT_CLASS_NAME,
   COMPOSER_MAX_HEIGHT_PX,
@@ -458,6 +459,7 @@ export function E2eeComposer({
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isMobile = useIsMobileDevice();
+  const dismissMobileComposer = useDismissMobileComposer();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -558,6 +560,7 @@ export function E2eeComposer({
   };
 
   const submitNew = async (trimmed: string) => {
+    const input = textareaRef.current;
     const pendingFiles = [...files];
     const reply = replyTo?.id ?? null;
     const mentioned = collectMentionIds(trimmed, conversation.members).filter(
@@ -573,6 +576,12 @@ export function E2eeComposer({
         mentions: mentioned,
         reply,
         files: pendingFiles,
+      });
+      // Let the cleared text render, and leave a new draft or another chat alone.
+      globalThis.requestAnimationFrame(() => {
+        if (input && input === textareaRef.current && input.value === "") {
+          dismissMobileComposer(input);
+        }
       });
     } catch (caught) {
       setText(trimmed);

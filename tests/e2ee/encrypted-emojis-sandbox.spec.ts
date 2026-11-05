@@ -153,6 +153,9 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       await input.press("Enter");
     }
     const sent = messageRow(alice.page, "Secret hello 😀");
+    if (testInfo.project.use.isMobile) {
+      await expect(input).not.toBeFocused();
+    }
     await expect(
       sent.getByRole("img", { name: ":gm:", exact: true })
     ).toBeVisible();

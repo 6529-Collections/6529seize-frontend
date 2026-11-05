@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { E2eeComposer } from "@/components/e2ee/conversation/E2eeComposer";
 import {
   conversation,
@@ -18,6 +24,14 @@ jest.mock("@/hooks/isMobileDevice", () => ({
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: mockIsApp }),
+}));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isApp: mockIsApp,
+    isMobileDevice: mockIsMobile,
+    hasTouchScreen: mockIsMobile,
+  }),
 }));
 beforeEach(() => {
   mockIsMobile = false;
@@ -160,8 +174,77 @@ it("does not steal focus back after sending", async () => {
   const { engine, input } = setup();
   fireEvent.change(input, { target: { value: "Sent without refocusing" } });
   const send = screen.getByRole("button", { name: /^Send$/ });
-  send.focus();
+  act(() => send.focus());
   fireEvent.click(send);
   await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
   expect(input).not.toHaveFocus();
+});
+
+it.each(["desktop", "mobile browser", "native app"])(
+  "dismisses a focused composer after an accepted send only on mobile: %s",
+  async (platform) => {
+    mockIsMobile = platform === "mobile browser";
+    mockIsApp = platform === "native app";
+    const { engine, input } = setup();
+    fireEvent.change(input, { target: { value: "Ready to send" } });
+    input.focus();
+    const blur = jest.spyOn(input, "blur");
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+    await waitFor(() => expect(engine.send).toHaveBeenCalledTimes(1));
+    if (platform === "desktop") {
+      // Drain the scheduled cleanup before checking the desktop invariant.
+      await act(async () => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+      });
+      expect(blur).not.toHaveBeenCalled();
+      expect(input).toHaveFocus();
+    } else {
+      await waitFor(() => expect(input).not.toHaveFocus());
+      expect(blur).toHaveBeenCalledTimes(1);
+    }
+    expect(input).toHaveValue("");
+  }
+);
+
+it.each(["mobile browser", "native app"])(
+  "keeps the draft and focus after a failed encrypted send on %s",
+  async (platform) => {
+    mockIsMobile = platform === "mobile browser";
+    mockIsApp = platform === "native app";
+    const { engine, input } = setup();
+    jest.mocked(engine.send).mockRejectedValueOnce(new Error("Send failed"));
+    fireEvent.change(input, { target: { value: "Keep this draft" } });
+    input.focus();
+    fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+    await waitFor(() => expect(input).toHaveValue("Keep this draft"));
+    expect(engine.send).toHaveBeenCalledTimes(1);
+    expect(input).toHaveFocus();
+  }
+);
+
+it("does not blur a new mobile draft when an earlier send finishes", async () => {
+  mockIsMobile = true;
+  const { engine, input } = setup();
+  let finishSend: (() => void) | undefined;
+  jest.mocked(engine.send).mockImplementationOnce(
+    () =>
+      new Promise<void>((resolve) => {
+        finishSend = resolve;
+      })
+  );
+  fireEvent.change(input, { target: { value: "First message" } });
+  input.focus();
+  fireEvent.click(screen.getByRole("button", { name: /^Send$/ }));
+  expect(input).toHaveValue("");
+  fireEvent.change(input, { target: { value: "Next draft" } });
+  await act(async () => finishSend?.());
+  await act(async () => {
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve())
+    );
+  });
+  expect(input).toHaveValue("Next draft");
+  expect(input).toHaveFocus();
 });

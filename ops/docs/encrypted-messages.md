@@ -54,9 +54,11 @@ update ordinary reaction history. Selecting an emoji preserves the draft and
 inserts it at the caret. On desktop, the Send tooltip explains Enter to send and
 Shift+Enter for a new line. Mobile web and the app use the Send button; Return
 does not submit. With an empty input and no reply, edit or attachment in progress,
-Arrow Up edits your latest eligible message. Sending does not explicitly restore
-input focus. Closing the native keyboard removes focus and restores the normal
-bottom safe-area clearance.
+Arrow Up edits your latest eligible message. On mobile web and in the app,
+an accepted send removes input focus and dismisses the keyboard. A failed send
+restores the draft without deliberately dismissing the keyboard. A delayed send
+does not remove focus from a new draft you have already started. Closing the
+native keyboard removes focus and restores the normal bottom safe-area clearance.
 
 ## Signing out
 
