@@ -1171,7 +1171,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
           const strip = tab
             .closest('[role="tablist"]')!
             .getBoundingClientRect();
-          return pill.left >= strip.left && pill.right <= strip.right;
+          // Fractional device pixels can leave the final edge <1 CSS px out.
+          return pill.left >= strip.left - 1 && pill.right <= strip.right + 1;
         })
       )
       .toBe(true);
