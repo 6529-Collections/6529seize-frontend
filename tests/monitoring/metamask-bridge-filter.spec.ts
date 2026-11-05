@@ -111,7 +111,11 @@ for (const scenario of cases) {
           message: JSON.stringify(browserErrors),
         })
         .toBe(1);
-      const result = await page.evaluate("globalThis.bridgeResults[0]");
+      const result = await page.evaluate<{
+        kept: boolean;
+        message: string;
+        stack: string;
+      }>("globalThis.bridgeResults[0]");
       expect(result.message).toBe(
         "JSON.stringify cannot serialize cyclic structures."
       );
