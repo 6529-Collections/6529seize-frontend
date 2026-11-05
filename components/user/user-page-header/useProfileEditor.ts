@@ -38,7 +38,8 @@ export interface ProfileEditorProps {
 interface ProfileDraft {
   name: string;
   classification: ApiIdentity["classification"];
-  about: string;
+  // null follows the saved statement until the owner edits About.
+  about: string | null;
   coverMode: "gradient" | "image";
   color1: string;
   color2: string;
@@ -49,14 +50,13 @@ interface ProfileDraft {
 
 function initialDraft({
   profile,
-  statement,
   defaultBanner1,
   defaultBanner2,
 }: ProfileEditorProps): ProfileDraft {
   return {
     name: profile.handle ?? "",
     classification: profile.classification,
-    about: statement?.statement_value ?? "",
+    about: null,
     coverMode: getBannerImageUrl(profile.banner1) ? "image" : "gradient",
     color1: getBannerColorValue(profile.banner1) ?? defaultBanner1,
     color2: getBannerColorValue(profile.banner2) ?? defaultBanner2,
@@ -159,8 +159,16 @@ export function useProfileEditor(props: ProfileEditorProps) {
   }));
   const [saving, setSaving] = useState(false);
   const [savedProfile, setSavedProfile] = useState(props.profile);
-  const [savedStatement, setSavedStatement] = useState(props.statement);
+  // Follow query data until a confirmed local save becomes the retry baseline.
+  const [savedStatementOverride, setSavedStatementOverride] = useState<
+    CicStatement | null | undefined
+  >(undefined);
+  const savedStatement =
+    savedStatementOverride === undefined
+      ? props.statement
+      : savedStatementOverride;
   const [draft, setDraft] = useState(() => initialDraft(props));
+  const about = draft.about ?? savedStatement?.statement_value ?? "";
   const [error, setError] = useState<string | null>(null);
   const [aboutError, setAboutError] = useState<AboutStatementSaveError | null>(
     null
@@ -182,8 +190,8 @@ export function useProfileEditor(props: ProfileEditorProps) {
     coverChanged ||
     Boolean(draft.pictureFile);
   const aboutChanged =
-    draft.about !== (savedStatement?.statement_value ?? "") &&
-    Boolean(savedStatement ?? draft.about.trim());
+    about !== (savedStatement?.statement_value ?? "") &&
+    Boolean(savedStatement ?? about.trim());
   const dirty = profileChanged || aboutChanged || Boolean(draft.meme);
 
   const target = encodeURIComponent(
@@ -206,12 +214,10 @@ export function useProfileEditor(props: ProfileEditorProps) {
   };
 
   const updateSavedStatement = (statement: CicStatement | null) => {
-    setSavedStatement(statement);
+    setSavedStatementOverride(statement);
+    updateDraft({ about: statement?.statement_value ?? "" });
     if (statement) onProfileStatementAdd({ profile: savedProfile });
-    else {
-      updateDraft({ about: "" });
-      onProfileStatementRemove({ profile: savedProfile });
-    }
+    else onProfileStatementRemove({ profile: savedProfile });
   };
 
   const save = async (): Promise<boolean> => {
@@ -230,11 +236,7 @@ export function useProfileEditor(props: ProfileEditorProps) {
       // Each endpoint saves separately. Keep confirmed results as the retry
       // baseline, while retaining every draft field that has not been saved.
       if (aboutChanged) {
-        const updatedStatement = await saveAbout(
-          target,
-          draft.about,
-          savedStatement
-        );
+        const updatedStatement = await saveAbout(target, about, savedStatement);
         updateSavedStatement(updatedStatement);
         savedAny = true;
       }
@@ -285,6 +287,7 @@ export function useProfileEditor(props: ProfileEditorProps) {
   };
   return {
     ...draft,
+    about,
     updateDraft,
     savedProfile,
     savedCover,

@@ -81,12 +81,15 @@ function setup(
     (defaults) =>
       useProfileEditor({
         profile: targetProfile,
-        statement: savedStatement,
         ...defaults,
       }),
     {
       wrapper: Wrapper,
-      initialProps: { defaultBanner1: "#000000", defaultBanner2: "#111111" },
+      initialProps: {
+        defaultBanner1: "#000000",
+        defaultBanner2: "#111111",
+        statement: savedStatement,
+      },
     }
   );
 }
@@ -185,6 +188,58 @@ it("retries remaining profile changes without writing an already saved About aga
     scroll: false,
   });
   expect(result.current.dirty).toBe(false);
+});
+
+it("shows a statement that arrives after opening an untouched editor", async () => {
+  const { result, rerender } = setup();
+  rerender({ defaultBanner1: "#000000", defaultBanner2: "#111111", statement });
+  expect(result.current.about).toBe(statement.statement_value);
+  expect(result.current.dirty).toBe(false);
+  await act(async () => {
+    expect(await result.current.save()).toBe(false);
+  });
+  expect(requestAuth).not.toHaveBeenCalled();
+});
+
+it("preserves an edited About when the statement arrives", () => {
+  const { result, rerender } = setup();
+  act(() => result.current.updateDraft({ about: "My draft" }));
+  rerender({ defaultBanner1: "#000000", defaultBanner2: "#111111", statement });
+  expect(result.current.about).toBe("My draft");
+  expect(result.current.dirty).toBe(true);
+});
+
+it("preserves an intentional clear when the statement arrives", async () => {
+  const { result, rerender } = setup();
+  act(() => result.current.updateDraft({ about: "My draft" }));
+  act(() => result.current.updateDraft({ about: "" }));
+  rerender({ defaultBanner1: "#000000", defaultBanner2: "#111111", statement });
+  expect(result.current.about).toBe("");
+  expect(result.current.dirty).toBe(true);
+  await act(async () => {
+    expect(await result.current.save()).toBe(true);
+  });
+  expect(deleteApi).toHaveBeenCalledWith({
+    endpoint: `profiles/0xowner/cic/statements/${statement.id}`,
+  });
+  expect(post).not.toHaveBeenCalled();
+  rerender({ defaultBanner1: "#000000", defaultBanner2: "#111111", statement });
+  expect(result.current.about).toBe("");
+  expect(result.current.dirty).toBe(false);
+});
+
+it("keeps a confirmed About save when stale statement data arrives", async () => {
+  const { result, rerender } = setup();
+  const saved = { ...statement, statement_value: "Saved About" };
+  post.mockResolvedValue(saved);
+  act(() => result.current.updateDraft({ about: saved.statement_value }));
+  await act(async () => {
+    expect(await result.current.save()).toBe(true);
+  });
+  rerender({ defaultBanner1: "#000000", defaultBanner2: "#111111", statement });
+  expect(result.current.about).toBe(saved.statement_value);
+  expect(result.current.dirty).toBe(false);
+  expect(post).toHaveBeenCalledTimes(1);
 });
 
 it("uploads a changed picture through the shared lazy upload helper", async () => {
@@ -308,6 +363,10 @@ it("keeps an untouched fallback cover clean when parent defaults refresh", () =>
     banner2: null,
   });
   expect(result.current.dirty).toBe(false);
-  rerender({ defaultBanner1: "#222222", defaultBanner2: "#333333" });
+  rerender({
+    defaultBanner1: "#222222",
+    defaultBanner2: "#333333",
+    statement: null,
+  });
   expect(result.current.dirty).toBe(false);
 });
