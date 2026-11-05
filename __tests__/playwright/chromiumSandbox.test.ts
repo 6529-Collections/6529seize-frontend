@@ -35,18 +35,23 @@ function propertyName(node: ts.ObjectLiteralElementLike): string | undefined {
 }
 
 // Literal values such as `chromiumSandbox: false`, or the option in a comment
-// or string, must not satisfy the guard: only the shared constant counts.
+// or string, must not satisfy the guard: only the shared constant counts. A
+// later spread or chromiumSandbox key could override it, so it must come last.
 function hasSharedSandboxOption(node: ts.Node | undefined): boolean {
-  return (
-    !!node &&
-    ts.isObjectLiteralExpression(node) &&
-    node.properties.some(
+  if (!node || !ts.isObjectLiteralExpression(node)) return false;
+  const lastOverride = [...node.properties]
+    .reverse()
+    .find(
       (property) =>
-        ts.isPropertyAssignment(property) &&
-        propertyName(property) === "chromiumSandbox" &&
-        ts.isIdentifier(property.initializer) &&
-        property.initializer.text === "CHROMIUM_SANDBOX"
-    )
+        ts.isSpreadAssignment(property) ||
+        propertyName(property) === "chromiumSandbox"
+    );
+  return (
+    !!lastOverride &&
+    ts.isPropertyAssignment(lastOverride) &&
+    propertyName(lastOverride) === "chromiumSandbox" &&
+    ts.isIdentifier(lastOverride.initializer) &&
+    lastOverride.initializer.text === "CHROMIUM_SANDBOX"
   );
 }
 
@@ -135,13 +140,16 @@ describe("Playwright Chromium sandbox", () => {
       'test.use({ "launchOptions": { slowMo: 1 } });',
       'test.use({ ["launchOptions"]: { slowMo: 1 } });',
       'test.use({ "launchOptions": { "chromiumSandbox": CHROMIUM_SANDBOX } });',
+      "test.use({ launchOptions: { chromiumSandbox: CHROMIUM_SANDBOX, ...overrides } });",
+      "test.use({ launchOptions: { chromiumSandbox: CHROMIUM_SANDBOX, chromiumSandbox: false } });",
+      "test.use({ launchOptions: { ...defaults, chromiumSandbox: CHROMIUM_SANDBOX } });",
     ].join("\n");
 
     expect(
       launchSites(source)
         .filter((site) => !site.sandboxed)
         .map((site) => site.line)
-    ).toEqual([2, 3, 5, 6, 7, 8, 9, 10, 11]);
+    ).toEqual([2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14]);
   });
 
   it("parses TSX helpers", () => {
