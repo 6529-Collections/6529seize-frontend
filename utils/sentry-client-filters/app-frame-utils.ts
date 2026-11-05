@@ -454,12 +454,6 @@ export function hasAppOwnedNonExtensionSignature(
   return stack ? hasAppOwnedFramePathSignature(stack) : false;
 }
 
-export function hasNativeJsonStringifyFrame(
-  frames: SentryStackFrame[] | undefined
-): boolean {
-  return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
-}
-
 export function isSentryBrowserHelperFrame(frame: SentryStackFrame): boolean {
   const framePaths = getFramePaths(frame);
   return (
@@ -483,14 +477,6 @@ export function isSentryRouteParameterizationFrame(
   frame: SentryStackFrame
 ): boolean {
   return getFramePaths(frame).some(isSentryRouteParameterizationPath);
-}
-
-export function hasSentryRouteParameterizationFrame(
-  frames: SentryStackFrame[] | undefined
-): boolean {
-  return (
-    Array.isArray(frames) && frames.some(isSentryRouteParameterizationFrame)
-  );
 }
 
 function isGifPickerTenorManagerPath(path: string | undefined): boolean {
