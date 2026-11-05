@@ -1,18 +1,38 @@
-const globalScope = globalThis as typeof globalThis & {
+const globalScope = globalThis as {
   sessionStorage?: Storage | undefined;
 };
 
-const storage = globalScope.sessionStorage;
-
 export const safeSessionStorage = {
-  getItem: (key: string) => (storage ? storage.getItem(key) : null),
-  setItem: (key: string, value: string) => {
-    storage?.setItem(key, value);
+  getItem: (key: string): string | null => {
+    try {
+      return globalScope.sessionStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  // Report persistence failure so reload guards can fail closed.
+  setItem: (key: string, value: string): boolean => {
+    try {
+      const storage = globalScope.sessionStorage;
+      if (storage === undefined) return false;
+      storage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
   },
   removeItem: (key: string) => {
-    storage?.removeItem(key);
+    try {
+      globalScope.sessionStorage?.removeItem(key);
+    } catch {
+      // Optional session state may be unavailable in restricted documents.
+    }
   },
   clear: () => {
-    storage?.clear();
+    try {
+      globalScope.sessionStorage?.clear();
+    } catch {
+      // Optional session state may be unavailable in restricted documents.
+    }
   },
 };
