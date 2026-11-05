@@ -170,6 +170,9 @@ Statement ownership in this tab:
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Loading uses three compact row placeholders before the activity entries appear.
 - Empty results show `No Activity Log`.
+- If the first NIC activity page cannot load, `Unable to load activity log.`
+  replaces the placeholders. Use `Retry` to try again. A failed later page
+  keeps the current entries and paging controls available.
 
 ## Permissions and Visibility Rules
 
@@ -218,6 +221,9 @@ Statement ownership in this tab:
 
 ## Limitations / Notes
 
+- The NIC activity loading-error message and `Retry` use `en-US` fallback copy
+  where translations are unavailable; frontend localization maintainers can
+  translate those message keys without changing this flow.
 - This page documents the combined default profile tab only; other profile tabs
   have separate route and behavior rules.
 - Action availability still depends on wallet, profile-handle, and proxy

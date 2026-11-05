@@ -214,7 +214,20 @@ describe("NIC cursor pagination", () => {
       data: [{ id: "rep-must-not-appear" }],
     });
     setup();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to load activity log."
+    );
+    expect(screen.queryByText("Loading")).not.toBeInTheDocument();
     expect(screen.queryByText("rep-must-not-appear")).not.toBeInTheDocument();
+  });
+  it("replaces a failed first-page skeleton with a retry that can recover", async () => {
+    fetchMock.mockRejectedValueOnce(new Error("temporary network failure"));
+    setup();
+    await screen.findByRole("alert");
+    expect(screen.queryByText("Loading")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await screen.findByText("identity-page-1");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

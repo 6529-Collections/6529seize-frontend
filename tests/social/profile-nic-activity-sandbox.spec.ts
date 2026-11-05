@@ -321,4 +321,55 @@ test.describe("Profile NIC activity @local-only", () => {
         .filter({ visible: true })
     ).toHaveCount(0);
   });
+  for (const width of [1440, 390]) {
+    test(`${width}px unsupported NIC response shows an error and Retry can recover`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 1000 });
+      const api = getSandboxApiOrigin(baseURL);
+      await installLogs(page, api);
+      let unsupported = true;
+      await page.route(`${api}/api/profile-logs?*`, async (route) => {
+        const query = new URL(route.request().url()).searchParams;
+        if (unsupported && query.get("activity_scope") === "NIC") {
+          await route.fulfill({
+            json: {
+              page: 1,
+              next: false,
+              data: fixtureRows(true).slice(0, 10),
+            },
+          });
+        } else {
+          await route.fallback();
+        }
+      });
+      await page.goto("/playwright");
+      await selectNic(page, width);
+      const alert = page.getByRole("alert").filter({
+        hasText: "Unable to load activity log.",
+      });
+      // The query keeps its normal automatic retries before settling as failed.
+      await expect(alert).toBeVisible({ timeout: 15000 });
+      await expect(
+        page.getByRole("status", { name: "Loading activity log" })
+      ).toHaveCount(0);
+      await expect(
+        page
+          .getByText("rep-leak-marker", { exact: true })
+          .filter({ visible: true })
+      ).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("nic-error.png"),
+        fullPage: true,
+      });
+      unsupported = false;
+      await alert.getByRole("button", { name: "Retry", exact: true }).click();
+      await expect(
+        page.getByText(/^nic-entry-\d+$/).filter({ visible: true })
+      ).toHaveCount(10);
+      await expect(alert).toHaveCount(0);
+    });
+  }
 });

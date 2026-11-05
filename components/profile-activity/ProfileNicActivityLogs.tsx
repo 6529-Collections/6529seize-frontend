@@ -12,6 +12,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ActivityLogParamsConverted } from "./ProfileActivityLogs";
 import ProfileActivityLogsResults from "./ProfileActivityLogsResults";
 import ProfileActivityLogsSkeleton from "./ProfileActivityLogsSkeleton";
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface Props {
   readonly params: ActivityLogParamsConverted;
@@ -48,6 +51,7 @@ function NicActivityPages({
   user,
   scope,
 }: Props & { readonly scope: string }) {
+  const locale = useBrowserLocale();
   const [currentPage, setCurrentPage] = useState(1);
   const query = useInfiniteQuery({
     queryKey: [QueryKey.PROFILE_LOGS, { nic: scope }],
@@ -94,6 +98,24 @@ function NicActivityPages({
       }
     }
   };
+  if (query.isError && !pages) {
+    return (
+      <div
+        role="alert"
+        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-4 tw-text-sm tw-text-iron-300 ${user ? "tw-px-2 sm:tw-px-3" : ""}`}
+      >
+        <span>{t(locale, "profileActivity.loadError")}</span>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={query.isFetching}
+          onClick={() => void query.refetch()}
+        >
+          {t(locale, "profileActivity.retry")}
+        </Button>
+      </div>
+    );
+  }
   return (
     <ProfileActivityLogsResults
       logs={pages?.[pageNumber - 1]}
