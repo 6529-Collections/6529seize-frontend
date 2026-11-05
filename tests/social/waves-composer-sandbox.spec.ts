@@ -772,15 +772,22 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     for (const { button, label } of actions) {
       await page.mouse.move(0, 0);
       await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-      const shape = await button.evaluate((element) => ({
-        radius: Number.parseFloat(getComputedStyle(element).borderRadius),
-        width: element.getBoundingClientRect().width,
-        height: element.getBoundingClientRect().height,
-      }));
+      const shape = await button.evaluate((element) => {
+        const iconBounds = element
+          .querySelector("svg")
+          ?.getBoundingClientRect();
+        return {
+          radius: Number.parseFloat(getComputedStyle(element).borderRadius),
+          width: element.getBoundingClientRect().width,
+          height: element.getBoundingClientRect().height,
+          iconWidth: iconBounds?.width,
+          iconHeight: iconBounds?.height,
+        };
+      });
       expect(shape.width).toBe(40);
       expect(shape.height).toBe(40);
-      await expect(button.locator("svg")).toHaveCSS("width", "20px");
-      await expect(button.locator("svg")).toHaveCSS("height", "20px");
+      expect(shape.iconWidth).toBe(20);
+      expect(shape.iconHeight).toBe(20);
       expect(shape.radius).toBeGreaterThan(0);
       expect(shape.radius).toBeLessThan(shape.width / 2);
       await button.hover();
