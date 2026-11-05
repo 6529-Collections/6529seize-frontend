@@ -6,6 +6,9 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
 - Desktop web: `Enter` submits when submit is allowed.
 - Desktop web: `Shift+Enter` inserts a new paragraph.
+- Mobile web and the app: an accepted chat send removes input focus and dismisses
+  the keyboard. Canceled authentication and refused or failed submissions keep
+  the draft without deliberately dismissing the keyboard.
 - Storm mode: when prior parts exist, `Enter` follows the visible primary
   action. It selects `Add part` or `Save changes` with current content and
   selects `Post storm` on an empty current editor.

@@ -87,9 +87,7 @@ export default function Providers({
                   <EmojiProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={
-                          enableWalletAuthentication
-                        }
+                        enableWalletAuthentication={enableWalletAuthentication}
                       >
                         <AuthLaunchTimingReporter
                           enableWalletAuthentication={
