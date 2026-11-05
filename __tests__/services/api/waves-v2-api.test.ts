@@ -1,5 +1,5 @@
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
+import { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
@@ -41,11 +41,11 @@ describe("waves-v2-api", () => {
   it.each([undefined, false, true])(
     "maps overview collapsed replies setting %s",
     (collapsed) => {
-      const wave = {
+      const wave = Object.assign(new ApiWaveOverview(), {
         id: "announcement",
         description_drop: { media: [] },
-        replies_collapsed: collapsed,
-      } as ApiWaveOverview;
+        ...(collapsed === undefined ? {} : { replies_collapsed: collapsed }),
+      });
       expect(mapApiWaveOverviewToSidebarWave(wave).repliesCollapsed).toBe(
         collapsed ?? false
       );
@@ -55,7 +55,7 @@ describe("waves-v2-api", () => {
   it.each([undefined, false, true])(
     "maps detail collapsed replies setting %s",
     (collapsed) => {
-      const wave = {
+      const wave = Object.assign(new ApiWave(), {
         id: "announcement",
         wave: { type: "CHAT" },
         chat: {
@@ -67,7 +67,7 @@ describe("waves-v2-api", () => {
         description_drop: { parts: [] },
         contributors_overview: [],
         subscribed_actions: [],
-      } as ApiWave;
+      });
       expect(mapApiWaveToSidebarWave(wave).repliesCollapsed).toBe(
         collapsed ?? false
       );

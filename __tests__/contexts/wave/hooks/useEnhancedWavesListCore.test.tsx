@@ -111,7 +111,7 @@ describe("useEnhancedWavesListCore", () => {
           { supportsPinning: true }
         )
       );
-      expect(result.current.waves[0].newDropsCount.latestDropTimestamp).toBe(
+      expect(result.current.waves[0]?.newDropsCount.latestDropTimestamp).toBe(
         timestamp
       );
     }

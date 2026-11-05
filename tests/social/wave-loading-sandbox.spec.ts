@@ -1379,8 +1379,8 @@ test("announcement replies preserve the unread badge and top-level timestamp", a
     id: "announcement-root",
     created_at: now - 2 * 3600000,
     serial_no: 500,
-    reply_to_drop: undefined,
   };
+  delete latest.reply_to_drop;
   let incoming: ApiWaveDropsFeedV2["drops"][number] = {
     ...latest,
     id: "announcement-reply",
@@ -1466,10 +1466,10 @@ test("announcement replies preserve the unread badge and top-level timestamp", a
   incoming = {
     ...incoming,
     id: "announcement-new-root",
-    reply_to_drop: undefined,
     created_at: now - 60000,
     serial_no: 502,
   };
+  delete incoming.reply_to_drop;
   latest = incoming;
   await expect.poll(() => sockets.length).toBeGreaterThan(0);
   send();
