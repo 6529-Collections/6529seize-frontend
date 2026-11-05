@@ -47,6 +47,21 @@ choose a platform before asking.
 - Find all official app options from one route without opening the Share modal.
 - Search with a broad term such as `apps`, `desktop`, or `mobile`.
 
+## Mobile Compatibility
+
+6529 Mobile requires iOS 16.4 or later to load the current website. Signed Posts
+additionally need iOS 17 or later; iOS 16.4–16.x can use Encrypted DMs without
+post signing. Android signing depends on sufficiently recent WebView support.
+Use a signed iOS build so cryptographic keys can persist across app restarts.
+
+An existing installation on an older iOS engine sees **6529 Mobile needs iOS
+16.4 or later** in production, or **6529 Staging needs iOS 16.4 or later** on
+staging. It directs the user to **Settings > General > Software Update**, then
+to reopen the named app. Other engines unable to run the site get **6529 needs
+a newer browser**. These are compatibility notices in place of the app, not
+claims that every device without Signed Posts is unsupported. Modern browsers
+keep both notice variants hidden.
+
 ## Edge Cases
 
 - The shared About contents button stays disabled until the page is interactive.
