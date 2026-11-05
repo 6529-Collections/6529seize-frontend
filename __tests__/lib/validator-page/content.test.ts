@@ -1,8 +1,13 @@
 /** @jest-environment node */
-import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
 import {
+  VALIDATOR_GUIDE_FOLDS,
+  VALIDATOR_UPGRADE,
+} from "@/lib/validator-page/content/guideMarkdown";
+import {
+  DATA_CENTER,
   KEEP_ON_MINUTES,
   PARTS,
+  SOURCES,
 } from "@/lib/validator-page/content/hardwareText";
 import { VALIDATOR_KNOWN_ISSUES_MARKDOWN } from "@/lib/validator-page/content/knownIssuesMarkdown";
 import {
@@ -12,35 +17,57 @@ import {
 
 // The release the pages describe: its version and short commit, as
 // `validator --version` prints them and the signed release list names them.
-const RELEASE = "0.1.0-rc.7";
-const COMMIT = "214e228";
+const RELEASE = "0.1.0-rc.8";
+const COMMIT = "{{RC8_COMMIT}}";
+// From rc.8's light-client checkpoint: a new install must start before it.
+const FRESH_INSTALL_UNTIL = "{{RC8_FRESH_INSTALL_UNTIL}}";
+// rc.8's join tests: the day, and the minutes to ready through Tor and with
+// Tor off.
+const JOIN_DATE = "{{RC8_JOIN_DATE}}";
+const JOIN_TOR = "{{RC8_JOIN_TOR_MINUTES}}";
+const JOIN_TOR_OFF = "{{RC8_JOIN_TOR_OFF_MINUTES}}";
 
-const GUIDE = VALIDATOR_GUIDE_FOLDS.map((fold) => fold.markdown).join("\n\n");
+const GUIDE = [VALIDATOR_UPGRADE, ...VALIDATOR_GUIDE_FOLDS]
+  .map((fold) => fold.markdown)
+  .join("\n\n");
+const HARDWARE = [
+  ...PARTS.map((part) => `${part.answer} ${part.why}`),
+  ...DATA_CENTER.map((tier) => tier.note),
+  ...SOURCES,
+].join("\n");
 const fold = (id: string) =>
   VALIDATOR_GUIDE_FOLDS.find((entry) => entry.id === id)?.markdown ?? "";
+const knownIssue = (number: number) =>
+  VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
+    line.startsWith(`${number}. `)
+  ) ?? "";
 
 describe("validator page text", () => {
+  // A release fact still to fill reads {{RC8_...}}, as the tester package's
+  // drafts read <UPPER_CASE>. Fill them all before merging.
   it.each([
     ["guide", GUIDE],
     ["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN],
-  ])(
-    "the %s hold no addresses, placeholders or retired steps",
-    (_name, text) => {
-      // This repository is public: peer addresses stay off the page.
-      expect(text).not.toMatch(/\/ip4\/|\/onion3\/|12D3Koo/);
-      expect(text).not.toMatch(
-        /\{\{|<SHORT_COMMIT>|<CHECK_DATE>|<HISTORY_MINUTES>/
-      );
-      expect(text).not.toMatch(/replace_bootstrap|peers add/);
-      expect(text).not.toMatch(/\brc\.[1-4]\b/);
-      // The owner took these out: logs go to nobody by DM, and the page
-      // makes no claims about ETH, staking, pay or who signs.
-      expect(text).not.toMatch(/6529validators|encrypted DM|status --json/);
-      expect(text).not.toMatch(/\bno ETH\b/);
-      expect(text).not.toMatch(/nothing is staked|nobody is paid|only signer/i);
-      expect(text).not.toContain("Report what you find");
-    }
-  );
+    ["hardware page", HARDWARE],
+  ])("the %s hold no release fact still to fill", (_name, text) => {
+    expect(text).not.toMatch(/\{\{|\}\}|<[A-Z][A-Z0-9_]*>/);
+  });
+
+  it.each([
+    ["guide", GUIDE],
+    ["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN],
+  ])("the %s hold no addresses or retired steps", (_name, text) => {
+    // This repository is public: peer addresses stay off the page.
+    expect(text).not.toMatch(/\/ip4\/|\/onion3\/|12D3Koo/);
+    expect(text).not.toMatch(/replace_bootstrap|peers add/);
+    expect(text).not.toMatch(/\brc\.[1-4]\b/);
+    // The owner took these out: logs go to nobody by DM, and the page
+    // makes no claims about ETH, staking, pay or who signs.
+    expect(text).not.toMatch(/6529validators|encrypted DM|status --json/);
+    expect(text).not.toMatch(/\bno ETH\b/);
+    expect(text).not.toMatch(/nothing is staked|nobody is paid|only signer/i);
+    expect(text).not.toContain("Report what you find");
+  });
 
   it("folds the guide's deeper sections in the order of the package", () => {
     expect(VALIDATOR_GUIDE_FOLDS.map((entry) => entry.title)).toEqual([
@@ -55,6 +82,24 @@ describe("validator page text", () => {
     ]);
   });
 
+  it("tells a tester on rc.7 what to do differently, as the package does", () => {
+    expect(VALIDATOR_UPGRADE.id).toBe("upgrading");
+    expect(VALIDATOR_UPGRADE.title).toBe("Upgrading from rc.7");
+    const upgrade = VALIDATOR_UPGRADE.markdown;
+    expect(upgrade).toContain(
+      "Install rc.8 over rc.7, the same way. There is nothing to uninstall first, and your key, your authorization and your records stay."
+    );
+    // On a Mac, quit first: dragging over a running app keeps the old one.
+    expect(upgrade).toContain(
+      "On a Mac, quit the app first: choose **Quit 6529 Validator** in the app menu at the top of the screen if it is there, or else Force Quit it (Apple menu › Force Quit). Then drag the new one to Applications and open it from there."
+    );
+    expect(upgrade).toContain("A validator you stopped stays stopped.");
+    // The page's port is drawn once (B130), so an old bookmark breaks.
+    expect(upgrade).toContain(
+      "The validator's page has a new address on this computer. Open it from the app, or with `validator open` on Linux."
+    );
+  });
+
   it("keeps every validator command per system, since the Mac app is not on the PATH", () => {
     const outsideTables = GUIDE.split("\n").filter(
       (line) => !line.startsWith("|")
@@ -62,15 +107,15 @@ describe("validator page text", () => {
     expect(outsideTables.join("\n")).not.toMatch(
       /`validator (?:--version|update|status)/
     );
-    expect(fold("updates")).toContain(
-      '`"/Applications/6529 Validator.app/Contents/Resources/validator" update check`'
+    expect(fold("where-it-lives")).toContain(
+      '`"/Applications/6529 Validator.app/Contents/Resources/validator" --version`'
     );
     expect(fold("where-it-lives")).toContain(
       `\`validator ${RELEASE} (${COMMIT}, TDH v1.4)\``
     );
   });
 
-  it("shows rc.7's 20 known issues in order, with no blank window", () => {
+  it("shows rc.8's 20 known issues in order", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
@@ -79,63 +124,57 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
-    // B99 is fixed in rc.7: a page that stops comes back by itself.
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/go blank/);
+    // rc.8 fixes these: rc.7's slow peer and its block count stuck at 0.
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(
+      /go blank|stays at 0|stops answering|Bridges come in/
+    );
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
+    expect(knownIssue(18)).toMatch(/^18\. The app's Log view reads/);
   });
 
-  it("says what rc.7 does where Tor is blocked, and nothing it lacks", () => {
-    const tor =
-      VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
-        line.startsWith("3. ")
-      ) ?? "";
-    expect(tor).toMatch(
-      /^3\. On a network that blocks Tor, the page opens, says Tor is blocked, and keeps trying\. Bridges come in rc\.8\. /
+  it("says what rc.8 does where Tor is blocked: bridges first, Connect without Tor last and what it gives away", () => {
+    const tor = knownIssue(1);
+    expect(tor).toMatch(/^1\. Tor's built-in bridges are public/);
+    const service = tor.indexOf("the Tor Project's bridge service");
+    const without = tor.indexOf("Connect without Tor on this network");
+    expect(service).toBeGreaterThan(-1);
+    expect(without).toBeGreaterThan(service);
+    expect(tor).toContain(
+      "It asks first: peers and Ethereum servers then see this network's IP address."
     );
-    // Bridge lines by hand come before Tor off, which says what it gives away.
-    const bridges = tor.indexOf(
-      "add bridge lines by hand in Settings › Privacy"
+    // A bridge line of your own, or another network, before going without Tor.
+    expect(tor).toContain(
+      "Workaround: add a bridge line of your own in Settings › Privacy, or use another network."
     );
-    const torOff = tor.indexOf("As a last resort, turn Tor off there.");
-    expect(bridges).toBeGreaterThan(-1);
-    expect(torOff).toBeGreaterThan(bridges);
-    expect(tor).toMatch(
-      /turn Tor off there\. Peers and Ethereum servers then see this network's IP address\.$/
+    expect(tor).toContain(
+      "On macOS 11 there are no bridges (lyrebird needs macOS 12)"
     );
-    // rc.7 carries no bridge programs and has no Connect without Tor.
-    for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
-      expect(page).not.toMatch(/connect without tor/i);
-      expect(page).not.toMatch(/snowflake|obfs4|webtunnel|lyrebird/i);
-    }
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/turn Tor off there/);
   });
 
-  it("names the validator service as rc.7's app and Windows do", () => {
+  it("names the validator service as rc.8's app does", () => {
     const stop = fold("stop-pause-or-uninstall");
     expect(stop).toContain("**Stop the validator service**");
     expect(stop).toContain("**Start the validator service**");
-    expect(stop).toContain(
-      "On Windows, Services and Task Manager list the part that signs as 6529 Validator service."
-    );
+    expect(stop).toContain("through restarts and updates too");
     for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
       expect(page).not.toMatch(/\*\*(?:Stop|Start) the validator\*\*/);
     }
-    expect(fold("updates")).toContain(
-      "On Windows, from rc.7 the installer replaces any earlier test release"
-    );
   });
 
-  it("gives one last day for a fresh install, from rc.7's light-client checkpoint", () => {
+  it("gives one last day for a fresh install, from rc.8's light-client checkpoint", () => {
     expect(fold("known-issues")).toContain(
-      "a new install must start before about 2026-11-20 14:00 UTC"
+      `A new install must start before about ${FRESH_INSTALL_UNTIL}, and 0.1.0 stops signing on 1 December.`
     );
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
-      "19. A new install must start before about 2026-11-20 14:00 UTC."
+    expect(knownIssue(19)).toContain(
+      `19. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
     );
-    expect(`${GUIDE}\n${VALIDATOR_KNOWN_ISSUES_MARKDOWN}`).not.toContain(
-      "2026-11-19"
+    // rc.7's dates.
+    expect(`${GUIDE}\n${VALIDATOR_KNOWN_ISSUES_MARKDOWN}`).not.toMatch(
+      /2026-11-20 14:00|2026-11-04 21:42/
     );
   });
 
@@ -148,27 +187,29 @@ describe("validator page text", () => {
     }
   });
 
-  it("carries rc.7's join tests' timing and the test phase's machines", () => {
+  it("carries rc.8's join tests on the guide and the hardware page alike", () => {
     const ready = fold("how-long-it-takes-to-be-ready");
-    expect(ready).toContain("In 6529's tests of rc.7 on 5 November");
     expect(ready).toContain(
-      "Through Tor it was ready in about 25 minutes: 1 to find the agreed day, 6 to download the history and 17 to rebuild and match it. With Tor off it was ready in about 10 minutes."
+      `In 6529's tests of rc.8 on ${JOIN_DATE}, a new install was ready in about ${JOIN_TOR} minutes through Tor, and in about ${JOIN_TOR_OFF} with Tor off.`
     );
-    expect(ready).not.toMatch(/50 minutes|rc\.6/);
-    // Known issue 2 gives the same step's time, and the hardware page the
-    // same first start.
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
-      "In 6529's tests of rc.7 on 5 November the step took 17 minutes through Tor, and 9 with Tor off."
+    expect(ready).toContain(
+      "the checkpoint built into this release, from 5 November."
     );
+    expect(ready).not.toMatch(/rc\.[67]|50 minutes|25 minutes/);
     expect(PARTS.find((part) => part.key === "first-start")?.why).toContain(
-      "In 6529's tests of rc.7 on 5 November this took about 25 minutes through Tor, and 10 with Tor off."
+      `In 6529's tests of rc.8 on ${JOIN_DATE} this took about ${JOIN_TOR} minutes through Tor, and ${JOIN_TOR_OFF} with Tor off.`
     );
-    expect(ready).toContain(
-      "the checkpoint built into this release, from 4 November."
+    expect(SOURCES.join("\n")).toContain(
+      `The first start: 6529's join tests of the test release (${RELEASE}, commit ${COMMIT}) on ${JOIN_DATE} 2026`
     );
-    expect(ready).toContain(
-      "In the test phase, 6529 runs validators and sentries on AWS in the United States, Germany and Singapore. The goal is a network that many holders run, at home and in offices."
+  });
+
+  it("says a data center with Tor off needs no peer added (rc.8's install guide)", () => {
+    const rack = DATA_CENTER.find((tier) => tier.key === "rack")?.note ?? "";
+    expect(rack).toContain(
+      "With Tor off, it reaches 6529's Bootstraps by their IP addresses, so you add no peer."
     );
+    expect(HARDWARE).not.toContain("a peer's address from 6529");
   });
 
   it("gives the Linux steps with both .deb files and the glibc floor", () => {

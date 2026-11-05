@@ -119,6 +119,19 @@ const WINDOWS_MSI: FileFacts & { readonly title: string } = {
   signedNote: null,
 };
 
+// From rc.8 the validator carries Tor's bridge program, lyrebird, which is
+// under the GPL; each release offers its complete source beside the
+// downloads.
+const LYREBIRD_SOURCE_PATTERN = /^lyrebird-[\d.]+-source\.tar\.gz$/;
+const LYREBIRD_SOURCE: FileFacts & { readonly title: string } = {
+  title: "lyrebird source code",
+  system: "Any",
+  cpu: "",
+  what: "Source of lyrebird, Tor's bridge program in the validator (GPL 3.0 or later)",
+  signedBy: null,
+  signedNote: null,
+};
+
 const ARCHIVE_TARGETS: readonly (FileFacts & {
   readonly target: string;
   readonly title: string;
@@ -173,6 +186,9 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
 function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
   if (WINDOWS_MSI_PATTERN.test(file.name)) {
     return { ...WINDOWS_MSI, file };
+  }
+  if (LYREBIRD_SOURCE_PATTERN.test(file.name)) {
+    return { ...LYREBIRD_SOURCE, file };
   }
   const known = ARCHIVE_TARGETS.find(
     (entry) =>
@@ -264,6 +280,7 @@ export function groupReleaseFiles(
   const archiveOrder = [
     WINDOWS_MSI.title,
     ...ARCHIVE_TARGETS.map((entry) => entry.title),
+    LYREBIRD_SOURCE.title,
   ];
   archives.sort((a, b) => {
     const indexA = archiveOrder.indexOf(a.title);

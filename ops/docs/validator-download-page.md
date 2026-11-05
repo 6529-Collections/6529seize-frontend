@@ -38,10 +38,10 @@ cookie again.
   password signs every tester out.
 - A link from another site arrives without the `SameSite=Strict` cookie,
   so the gate reloads the page once from 6529.io, which sends it. The
-  reload keeps the link's section: rc.7's Tor screens link
-  `/validator#send-feedback`, and the password form carries the section to
-  `/validator/unlock` and back. Keep the `send-feedback` id on the download
-  page.
+  reload keeps the link's section: the validator's Tor screens and its
+  Report a problem (from rc.8) link `/validator#send-feedback`, and the
+  password form carries the section to `/validator/unlock` and back. Keep
+  the `send-feedback` id on the download page.
 
 The password is never in the repository. Production reads it from the
 `VALIDATOR_PAGE_PASSWORD` environment variable, which the
@@ -111,7 +111,10 @@ system, from the User-Agent (and, in Chromium, the CPU from its client
 hints); "Other systems" lists all five. The Windows `-x64.msi` and the
 `validator-<version>-<target>` archives are under "Linux and the
 terminal" and "All files and checksums"; in a release without a
-`Setup.exe`, the `.msi` takes the Windows button.
+`Setup.exe`, the `.msi` takes the Windows button. From rc.8 a release also
+carries `lyrebird-<version>-source.tar.gz`, the source of Tor's bridge
+program, which the validator includes under the GPL; it is listed under
+"All files and checksums" and on the history page.
 
 ### The feed fields the site reads
 
@@ -127,7 +130,15 @@ their pictures in `public/validator/`: drawings of the macOS and Windows
 dialogs, and screenshots of the release's app. The guide's closed sections
 and the known issues are Markdown in `lib/validator-page/content/`, built
 from the tester package's TESTERS.md (its "More" sections) and
-KNOWN-ISSUES.md. The hardware page's text and numbers are in
-`hardwareText.ts` there, each checked against the release it names. Testers
+KNOWN-ISSUES.md. The note for testers on the last release ("Upgrading
+from rc.7", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
+download button and at the top of the guide. The hardware page's text and
+numbers are in `hardwareText.ts` there, each checked against the release it
+names.
+
+A release fact that is not known when the text is written, such as the
+commit of a release cut overnight, is written `{{RC8_COMMIT}}` and the like.
+The page tests fail while any is left, so fill each one, everywhere it
+appears (the tests too), before merging. Testers
 post their results in the Ministry of Validation wave with the template in
 `pageText.ts`, and post no logs or status files.
