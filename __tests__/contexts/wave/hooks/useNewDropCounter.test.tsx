@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 import { AuthContext } from "@/components/auth/Auth";
@@ -6,6 +6,11 @@ import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
   WsMessageType,
 } from "@/helpers/Types";
+
+jest.mock("@/services/api/drop-api", () => ({
+  fetchDropByIdBatched: jest.fn(),
+}));
+const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
@@ -35,17 +40,20 @@ const emitDropUpdate = ({
   reason,
   serialNo,
   waveId = "wave2",
+  isReply = false,
 }: {
   readonly authorHandle?: string;
   readonly createdAt?: number;
   readonly reason?: string;
   readonly serialNo?: number;
   readonly waveId?: string;
+  readonly isReply?: boolean;
 } = {}) => {
   const message: Record<string, unknown> = {
     wave: { id: waveId },
     author: { handle: authorHandle },
     created_at: createdAt,
+    ...(isReply ? { reply_to: { drop_id: "announcement" } } : {}),
   };
 
   if (reason !== undefined) {
@@ -79,7 +87,7 @@ describe("useNewDropCounter", () => {
     (useWebSocketMessage as jest.Mock).mockClear();
     (useWebSocketMessage as jest.Mock).mockImplementation(
       (_t: any, cb: any) => {
-        wsCallback = cb;
+        if (_t === WsMessageType.DROP_UPDATE) wsCallback = cb;
         return { isConnected: true };
       }
     );
@@ -88,6 +96,74 @@ describe("useNewDropCounter", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  it("leaves collapsed reply counts and timestamps unchanged but counts new announcements", () => {
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter(
+          null,
+          [{ ...waves[1], repliesCollapsed: true }],
+          jest.fn()
+        ),
+      { wrapper }
+    );
+    emitDropUpdate({ isReply: true });
+    expect(result.current.newDropsCounts["wave2"]).toBeUndefined();
+    emitDropUpdate({ serialNo: 10 });
+    expect(result.current.newDropsCounts["wave2"]).toMatchObject({
+      count: 1,
+      latestDropTimestamp: 30,
+    });
+  });
+
+  it("keeps counting inline replies", () => {
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, jest.fn()),
+      { wrapper }
+    );
+    emitDropUpdate({ isReply: true, serialNo: 11 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+  });
+
+  it.each([true, false])(
+    "resolves compact collapsed-wave updates (reply: %s)",
+    async (isReply) => {
+      fetchDropByIdBatched.mockResolvedValue({
+        wave: { id: "wave2" },
+        author: { handle: "other" },
+        created_at: 40,
+        serial_no: 12,
+        ...(isReply ? { reply_to: { drop_id: "announcement" } } : {}),
+      });
+      const { result } = renderHook(
+        () =>
+          useNewDropCounter(
+            null,
+            [{ ...waves[1], repliesCollapsed: true }],
+            jest.fn()
+          ),
+        { wrapper }
+      );
+      emitDropUpdateRef({
+        drop_id: "compact",
+        wave_id: "wave2",
+        serial_no: 12,
+        update_type: WsMessageType.DROP_UPDATE,
+      });
+      await waitFor(() =>
+        expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact")
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
+        isReply ? 0 : 1
+      );
+      expect(
+        result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
+      ).toBe(isReply ? null : 40);
+    }
+  );
 
   it("increments counts and resets all", () => {
     const refetch = jest.fn();
@@ -157,7 +233,13 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it("counts an unknown-wave compact content ref before refreshing Waves", () => {
+  it("resolves an unknown-wave compact ref before counting it", async () => {
+    fetchDropByIdBatched.mockResolvedValue({
+      wave: { id: "unknown-wave" },
+      author: { handle: "other" },
+      created_at: 2345,
+      serial_no: 23,
+    });
     const refetch = jest.fn();
     jest.spyOn(Date, "now").mockReturnValue(2345);
     const { result } = renderHook(
@@ -175,11 +257,13 @@ describe("useNewDropCounter", () => {
       update_type: WsMessageType.DROP_UPDATE,
     });
 
-    expect(result.current.newDropsCounts["unknown-wave"]).toEqual({
-      count: 1,
-      latestDropTimestamp: 2345,
-      firstUnreadSerialNo: 23,
-    });
+    await waitFor(() =>
+      expect(result.current.newDropsCounts["unknown-wave"]).toEqual({
+        count: 1,
+        latestDropTimestamp: 2345,
+        firstUnreadSerialNo: 23,
+      })
+    );
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 

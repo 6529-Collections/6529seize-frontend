@@ -51,6 +51,11 @@ Timestamp source and precedence:
 2. Live websocket drops for unmuted rows can move the timestamp forward.
 3. When both sources exist, the newer value wins.
 
+For Announcements with collapsed replies, the time shows the latest top-level
+announcement. Replies do not move it forward. It refreshes when a new
+announcement arrives or a post is deleted, and is checked periodically. While
+the initial timestamp is loading, the line stays hidden.
+
 ## Live Refresh, Unread, and Mute Behavior
 
 - The relative-time label refreshes every 60 seconds, and immediately when the
@@ -58,6 +63,8 @@ Timestamp source and precedence:
 - Selecting a row resets its live websocket new-drop counter.
 - Active-row unread display clears after a short delay (about 1 second).
 - Clearing unread/new-drop counters does not clear `Last drop`.
+- Collapsed replies do not increase the wave unread badge. Inline replies keep
+  the wave's normal unread behavior.
 - Your own new drops can update `Last drop` without increasing unread.
 - If a row is active and the tab is visible, `Last drop` updates while unread
   stays stable.

@@ -1344,3 +1344,138 @@ async function emitKeyboardEvent(
   );
   expect(delivered, `Native callback received ${eventName}`).toBe(true);
 }
+
+test("announcement replies preserve the unread badge and top-level timestamp", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const origin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${origin}/api/v2/waves/${WAVE}/drops?limit=1`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as ApiWaveDropsFeedV2;
+  const template = feed.drops[0];
+  if (!template) throw new Error("Missing announcement fixture");
+  const now = Date.now();
+  const announcement = {
+    ...feed.wave,
+    id: ANNOUNCEMENTS,
+    name: "Announcements",
+    has_competition: false,
+    replies_collapsed: true,
+    last_drop_time: now,
+    has_subwaves: false,
+    context_profile_context: {
+      ...feed.wave.context_profile_context,
+      unread_drops: 0,
+      subscribed: true,
+      muted: false,
+      pinned: false,
+    },
+  };
+  let latest: ApiWaveDropsFeedV2["drops"][number] = {
+    ...template,
+    id: "announcement-root",
+    created_at: now - 2 * 3600000,
+    serial_no: 500,
+    reply_to_drop: undefined,
+  };
+  let incoming: ApiWaveDropsFeedV2["drops"][number] = {
+    ...latest,
+    id: "announcement-reply",
+    author: {
+      ...template.author,
+      id: "another-reader",
+      handle: "someone-else",
+    },
+    created_at: now,
+    serial_no: 501,
+    reply_to_drop: { id: latest.id },
+  };
+  await page.route("**/api/settings", (route) =>
+    route.fulfill({ json: { announcements_wave_id: ANNOUNCEMENTS } })
+  );
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: { data: [announcement], page: 1, next: false } })
+  );
+  await page.route("**/api/v2/waves/joined**", (route) =>
+    route.fulfill({
+      json: {
+        data: [announcement],
+        next_cursor: null,
+        snapshot_expires_at: now + 900000,
+      },
+    })
+  );
+  await page.route(`**/api/v2/waves/${ANNOUNCEMENTS}/drops?**`, (route) =>
+    route.fulfill({ json: { wave: announcement, drops: [latest] } })
+  );
+  await page.route("**/api/v2/drops?**", (route) =>
+    route.fulfill({
+      json: { data: [{ ...incoming, wave: announcement }], next: false },
+    })
+  );
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket(
+    (url) => url.port === new URL(origin).port,
+    (socket) => {
+      sockets.push(socket);
+      socket.onMessage((message) => {
+        if (JSON.parse(String(message)).type === "AUTHENTICATE")
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+      });
+    }
+  );
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  const row = page
+    .getByRole("region", { name: "Announcement waves", exact: true })
+    .filter({ visible: true });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  const avatar = row.getByTestId("sidebar-wave-avatar");
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  const send = () => {
+    for (const socket of sockets)
+      socket.send(
+        JSON.stringify({
+          type: "DROP_UPDATE_REF",
+          data: {
+            update_type: "DROP_UPDATE",
+            wave_id: ANNOUNCEMENTS,
+            drop_id: incoming.id,
+            serial_no: incoming.serial_no,
+            author_id: "another-reader",
+          },
+        })
+      );
+  };
+  const replyResolved = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/v2/drops?") &&
+      res.request().url().includes(incoming.id)
+  );
+  send();
+  await replyResolved;
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toHaveCount(0);
+  // A reload must not restore the reply-inclusive overview time.
+  sockets.length = 0;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(row.getByText("2h", { exact: true })).toBeVisible();
+  incoming = {
+    ...incoming,
+    id: "announcement-new-root",
+    reply_to_drop: undefined,
+    created_at: now - 60000,
+    serial_no: 502,
+  };
+  latest = incoming;
+  await expect.poll(() => sockets.length).toBeGreaterThan(0);
+  send();
+  await expect(row.getByText("1m", { exact: true })).toBeVisible();
+  await expect(avatar.getByText("1", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("announcement-sidebar.png"),
+  });
+});

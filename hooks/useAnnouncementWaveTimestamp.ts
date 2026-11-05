@@ -1,0 +1,72 @@
+"use client";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
+import type { WsDropUpdateMessage } from "@/helpers/Types";
+import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+
+// Wave metrics include replies. The main feed excludes collapsed replies and
+// supplies the correct timestamp even after a reload or deletion.
+export function useAnnouncementWaveTimestamp({
+  waveId,
+  enabled,
+  viewerIdentityKey,
+}: {
+  readonly waveId: string | null;
+  readonly enabled: boolean;
+  readonly viewerIdentityKey: string | null;
+}): number | null {
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => [QueryKey.ANNOUNCEMENT_LATEST_DROP, { waveId, viewerIdentityKey }],
+    [waveId, viewerIdentityKey]
+  );
+  const { data } = useQuery({
+    queryKey,
+    queryFn: async ({ signal }) => {
+      if (!waveId)
+        throw new Error("Cannot fetch an announcement without a wave id");
+      const feed = await commonApiFetch<ApiWaveDropsFeedV2>({
+        endpoint: `v2/waves/${encodeURIComponent(waveId)}/drops`,
+        params: { limit: "1" },
+        signal,
+      });
+      return feed.drops[0]?.created_at ?? null;
+    },
+    enabled: enabled && waveId !== null,
+    staleTime: 30000,
+    refetchInterval: 30000,
+  });
+  const refresh = useCallback(() => {
+    if (enabled && waveId) {
+      void queryClient.invalidateQueries({ queryKey });
+    }
+  }, [enabled, waveId, queryClient, queryKey]);
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_UPDATE,
+    (drop) => {
+      if (drop.wave.id === waveId && !drop.reply_to) refresh();
+    }
+  );
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE_REF, (message) => {
+    if (
+      isWsDropUpdateRefData(message) &&
+      message.wave_id === waveId &&
+      message.update_type === WsMessageType.DROP_UPDATE
+    ) {
+      refresh();
+    }
+  });
+  useWebSocketMessage<{ readonly wave_id: string }>(
+    WsMessageType.DROP_DELETE,
+    (message) => {
+      if (message.wave_id === waveId) refresh();
+    }
+  );
+  return data ?? null;
+}

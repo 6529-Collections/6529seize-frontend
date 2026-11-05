@@ -56,6 +56,7 @@ describe("waves-v2-api", () => {
           total_drops_count: 3,
           is_private: false,
           last_drop_time: 456,
+          replies_collapsed: true,
           context_profile_context: {
             first_unread_drop_serial_no: 7,
             unread_drops: 2,
@@ -94,6 +95,7 @@ describe("waves-v2-api", () => {
         {
           id: "child-wave",
           createdAt: 123,
+          repliesCollapsed: true,
           parentWaveId: "parent-wave",
           hasSubwaves: false,
           unreadDropsCount: 2,
