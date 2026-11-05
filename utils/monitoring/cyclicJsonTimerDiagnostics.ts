@@ -65,6 +65,81 @@ type InstallOptions = {
 
 const diagnosticsByError = new WeakMap<object, CyclicJsonTimerDiagnostics>();
 const installedTargets = new WeakSet<object>();
+const confirmedMetaMaskBridgeErrors = new WeakSet<object>();
+
+// MetaMask's SPA_urlChangeListener schedules exactly this anonymous callback.
+// Keep this signature strict: a changed or wrapped callback remains reportable.
+// https://github.com/MetaMask/metamask-mobile/blob/v8.12.0/app/util/browserScripts.ts
+const META_MASK_NAVIGATION_CALLBACK = "function(){__mm__updateUrl();}";
+
+function isInjectedMetaMaskBridgeFrame(stackLine: string): boolean {
+  // JavaScriptCore can omit an injected script's location entirely.
+  if (stackLine === "__mm__updateUrl@") {
+    return true;
+  }
+  if (!stackLine.startsWith("__mm__updateUrl@user-script:")) {
+    return false;
+  }
+  const frame = parseStackLine(stackLine, "");
+  return (
+    frame?.function === "__mm__updateUrl" && frame.file === "non-http-script"
+  );
+}
+
+function markConfirmedMetaMaskBridgeError(
+  error: object,
+  callback: TimerCallback,
+  webViewFamily: string
+): void {
+  try {
+    if (webViewFamily !== "metamask-mobile") {
+      return;
+    }
+    const source = Function.prototype.toString.call(callback);
+    if (
+      source.length > 256 ||
+      source.replace(/\s/g, "") !== META_MASK_NAVIGATION_CALLBACK
+    ) {
+      return;
+    }
+
+    const stack = (error as { stack?: unknown }).stack;
+    if (typeof stack !== "string" || stack.length > 16384) {
+      return;
+    }
+    const frames = stack
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (frames[0] === `TypeError: ${CYCLIC_JSON_ERROR_MESSAGE}`) {
+      frames.shift();
+    }
+    // Inspect the throw stack, not its scheduling ancestors. An application
+    // getter/toJSON or serializer between stringify and the bridge must survive.
+    if (
+      frames[0] === "stringify@[native code]" &&
+      isInjectedMetaMaskBridgeFrame(frames[1] ?? "")
+    ) {
+      confirmedMetaMaskBridgeErrors.add(error);
+    }
+  } catch {
+    // Missing or unreadable evidence must never hide an event or alter a throw.
+  }
+}
+
+export function isConfirmedMetaMaskBridgeError(error: unknown): boolean {
+  return (
+    isExactCyclicJsonTypeError(error) &&
+    confirmedMetaMaskBridgeErrors.has(error)
+  );
+}
+
+export function consumeConfirmedMetaMaskBridgeError(error: unknown): boolean {
+  return (
+    isExactCyclicJsonTypeError(error) &&
+    confirmedMetaMaskBridgeErrors.delete(error)
+  );
+}
 
 function getSafeName(value: string | undefined, fallback: string): string {
   if (!value) {
@@ -408,6 +483,11 @@ export function installCyclicJsonTimerDiagnostics(
           // with the timer Error object here.
           if (isExactCyclicJsonTypeError(error)) {
             diagnosticsByError.set(error, diagnostics);
+            markConfirmedMetaMaskBridgeError(
+              error,
+              handler,
+              diagnostics.webViewFamily
+            );
           }
           throw error;
         }
