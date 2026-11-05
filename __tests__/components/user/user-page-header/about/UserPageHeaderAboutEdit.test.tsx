@@ -5,6 +5,8 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("react-use", () => ({ useKeyPressEvent: jest.fn() }));
 
@@ -106,6 +108,57 @@ describe("UserPageHeaderAboutEdit", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
     expect(ctx.onProfileStatementRemove).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("shows a late-loading statement without enabling an untouched save", () => {
+    const editor = (statement: CicStatement | null) => (
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <UserPageHeaderAboutEdit
+            profile={{ query: "alice" } as ApiIdentity}
+            statement={statement}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(editor(null));
+    const statement = {
+      id: "about",
+      statement_value: "Loaded About",
+    } as CicStatement;
+    rerender(editor(statement));
+    expect(
+      screen.getByRole("textbox", { name: "About statement" })
+    ).toHaveValue("Loaded About");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("preserves a changed draft when the statement loads", async () => {
+    const editor = (statement: CicStatement | null) => (
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <UserPageHeaderAboutEdit
+            profile={{ query: "alice" } as ApiIdentity}
+            statement={statement}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(editor(null));
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "About statement" }),
+      "My draft"
+    );
+    rerender(
+      editor({ id: "about", statement_value: "Loaded About" } as CicStatement)
+    );
+    expect(
+      screen.getByRole("textbox", { name: "About statement" })
+    ).toHaveValue("My draft");
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
   });
 
   it("associates the inline save error with the textarea", async () => {

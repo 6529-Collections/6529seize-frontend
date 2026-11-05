@@ -153,9 +153,9 @@ export default function UserPageHeaderProfileEditor({
           {showMemes && (
             <div id="profile-editor-memes">
               {loadingMemes && (
-                <p role="status" className="tw-text-sm tw-text-iron-400">
+                <output className="tw-block tw-text-sm tw-text-iron-400">
                   {message("user.profileHeader.edit.loadingMemes")}
-                </p>
+                </output>
               )}
               {memesError && (
                 <p role="alert" className="tw-text-sm tw-text-error">

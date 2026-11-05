@@ -40,7 +40,8 @@ export default function UserPageHeaderAboutEdit({
 
   const aboutInputId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [value, setValue] = useState(statement?.statement_value ?? "");
+  const [draft, setDraft] = useState<string | null>(null);
+  const value = draft ?? statement?.statement_value ?? "";
   const [error, setError] = useState<AboutStatementSaveError | null>(null);
   const profileStatementTarget =
     [profile.query, profile.handle, profile.primary_wallet]
@@ -135,7 +136,7 @@ export default function UserPageHeaderAboutEdit({
           value={value}
           onChange={(nextValue) => {
             setError(null);
-            setValue(nextValue);
+            setDraft(nextValue);
           }}
           errorMsg={error?.message ?? null}
           errorType={error?.type ?? AboutEditError.UNKNOWN}
