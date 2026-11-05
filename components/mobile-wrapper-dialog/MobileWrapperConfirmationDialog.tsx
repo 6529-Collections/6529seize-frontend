@@ -20,6 +20,7 @@ interface MobileWrapperConfirmationDialogProps {
   readonly zIndexClassName?: string | undefined;
   readonly children?: ReactNode;
   readonly titleClassName?: string | undefined;
+  readonly surfaceClassName?: string | undefined;
   readonly messageClassName?: string | undefined;
 }
 
@@ -37,12 +38,14 @@ export default function MobileWrapperConfirmationDialog({
   zIndexClassName,
   children,
   titleClassName,
+  surfaceClassName,
   messageClassName = "tw-text-sm tw-leading-6 tw-text-iron-400",
 }: MobileWrapperConfirmationDialogProps) {
   return (
     <MobileWrapperDialog
       title={title}
       titleClassName={titleClassName}
+      surfaceClassName={surfaceClassName}
       isOpen={isOpen}
       onClose={onClose}
       dismissible={!isConfirming}

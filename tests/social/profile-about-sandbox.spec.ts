@@ -332,10 +332,45 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       });
     await seedSession(page);
     await openOwnProfile(page);
+    const edit = page.getByRole("button", {
+      name: "Edit profile",
+      exact: true,
+    });
+    const preferences = page.getByRole("link", {
+      name: "Preferences",
+      exact: true,
+    });
+    if (isMobile) {
+      await page.setViewportSize({ width: 800, height: 900 });
+      expect((await edit.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      expect((await preferences.boundingBox())?.height).toBeGreaterThanOrEqual(
+        44
+      );
+      await edit.click();
+      await page.getByRole("button", { name: "About", exact: true }).click();
+      const back = page.getByRole("button", { name: "Back", exact: true });
+      expect((await back.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      await back.click();
+      const close = page.getByRole("button", { name: "Close", exact: true });
+      expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      await close.click();
+    }
     await page.setViewportSize({ width: 1024, height: 900 });
-    await page
-      .getByRole("button", { name: "Edit profile", exact: true })
-      .click();
+    if (isMobile) {
+      expect((await edit.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      expect((await preferences.boundingBox())?.height).toBeGreaterThanOrEqual(
+        44
+      );
+    }
+    await edit.click();
+    if (isMobile) {
+      const close = page.getByRole("button", { name: "Close", exact: true });
+      expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      for (const name of ["Gradient", "Image"]) {
+        const tab = page.getByRole("tab", { name, exact: true });
+        expect((await tab.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      }
+    }
     await expect(
       page.getByRole("heading", { name: "Edit profile", exact: true })
     ).toBeVisible();
@@ -345,7 +380,27 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(
       page.getByRole("textbox", { name: "About statement", exact: true })
     ).toBeVisible();
+    if (isMobile) {
+      await page
+        .getByRole("textbox", { name: "About statement", exact: true })
+        .fill("Unsaved touch QA draft");
+    }
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    if (isMobile) {
+      const discard = page.getByRole("button", {
+        name: "Discard changes",
+        exact: true,
+      });
+      const keepEditing = page.getByRole("button", {
+        name: "Keep editing",
+        exact: true,
+      });
+      expect((await discard.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      expect((await keepEditing.boundingBox())?.height).toBeGreaterThanOrEqual(
+        44
+      );
+      await discard.click();
+    }
     await expectNoHorizontalOverflow(page);
   });
 

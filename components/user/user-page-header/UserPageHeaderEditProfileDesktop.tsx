@@ -11,6 +11,8 @@ import { getUserProfileHeaderMessage as message } from "./user-page-header.messa
 import {
   USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS,
   USER_PAGE_HEADER_SURFACE_CLASS,
+  USER_PAGE_HEADER_TOUCH_TARGET_CLASS,
+  PROFILE_EDITOR_TOUCH_TARGETS_CLASS,
 } from "./user-page-header-surface";
 
 export default function UserPageHeaderEditProfileDesktop(
@@ -30,7 +32,7 @@ export default function UserPageHeaderEditProfileDesktop(
         }}
         aria-label={message("user.profileHeader.edit.open")}
         title={message("user.profileHeader.edit.open")}
-        className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+        className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS} ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
       >
         <PencilIcon className="tw-size-4" aria-hidden="true" />
         <span>{message("user.profileHeader.edit.label")}</span>
@@ -77,7 +79,7 @@ function ProfileEditorDialog({
         showDragHandle={false}
         focusTitleOnOpen
         maxWidthClass="md:tw-max-w-xl"
-        surfaceClassName="tw-bg-iron-950 md:tw-shadow-2xl"
+        surfaceClassName={`tw-bg-iron-950 md:tw-shadow-2xl ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
         dismissible={!editor.saving}
         preserveFocusOnEscape
       >
@@ -100,6 +102,7 @@ function ProfileEditorDialog({
         cancelText={message("user.profileHeader.edit.keepEditing")}
         confirmVariant="destructive"
         zIndexClassName="tw-z-[1020]"
+        surfaceClassName={PROFILE_EDITOR_TOUCH_TARGETS_CLASS}
       />
     </>
   );
