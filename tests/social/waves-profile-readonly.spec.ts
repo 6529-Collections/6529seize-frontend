@@ -779,15 +779,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await expect(mintingSettings).toBeVisible();
     await expect(details).toHaveCount(0);
-    const statusHeading = coverage.getByRole("heading", { level: 2 });
     await expect(coverage.getByText(/Top up by|Recommended:/)).toHaveCount(0);
     await expect(
       coverage.getByText(
         /Choose a drop|Set up subscriptions|Review settings or refresh/
       )
     ).toHaveCount(0);
-    await expect(statusHeading.locator("svg")).toHaveCount(0);
-    const statusText = statusHeading.locator(":scope > span");
+    await expect(
+      coverage.getByRole("heading", { level: 2 }).locator("svg")
+    ).toHaveCount(0);
+    const statusText = coverage
+      .getByRole("heading", { level: 2 })
+      .locator(":scope > span");
     if ((await statusText.count()) === 2) {
       // Read both positions in one frame, including during hash scrolling.
       const { badgeBottom, countTop } = await statusText.evaluateAll(
@@ -802,14 +805,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const headlineBox = await coverage
       .getByRole("heading", { level: 2 })
       .boundingBox();
-    const balanceBox = await overview
+    const balanceBox = await page
+      .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#subscription-overview-actions")
       .getByText("Subscription balance", { exact: true })
       .boundingBox();
     expect(coverageBox).not.toBeNull();
     expect(headlineBox).not.toBeNull();
     expect(balanceBox).not.toBeNull();
-    const descriptionBox = await coverage
+    const descriptionBox = await page
+      .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#profile-subscriptions-overview-title + p")
       .boundingBox();
     expect(descriptionBox).not.toBeNull();
@@ -848,13 +853,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: "Edition Preference",
       exact: true,
     });
-    await expect(visitorMode.locator("[data-setting-value]")).toHaveText(
-      /^(Manual|Automatic)$/
-    );
+    await expect(
+      mintingSettings
+        .getByRole("group", { name: "Mode", exact: true })
+        .locator("[data-setting-value]")
+    ).toHaveText(/^(Manual|Automatic)$/);
     await expect(visitorMode.getByText(/^(Manual|Automatic)$/)).toHaveCount(1);
-    await expect(visitorEditions.locator("[data-setting-value]")).toHaveText(
-      /^(One edition|All eligible)$/
-    );
+    await expect(
+      mintingSettings
+        .getByRole("group", { name: "Edition Preference", exact: true })
+        .locator("[data-setting-value]")
+    ).toHaveText(/^(One edition|All eligible)$/);
     await expect(
       visitorEditions.getByText(/^(One edition|All eligible)$/)
     ).toHaveCount(1);
@@ -864,7 +873,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(mintingSettings.getByText(/^You will receive/)).toHaveCount(0);
     await expect(
       page
-        .locator("#profile-subscriptions-upcoming")
+        .getByRole("region", { name: "Upcoming Drops", exact: true })
         .getByText(
           /^(You have to opt-in to each specific drop|Automatic airdrops of all eligible drops unless you opt-out)$/
         )
@@ -898,7 +907,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await page.setViewportSize({ width: 1024, height: initialViewport.height });
     await expectNoHorizontalOverflow(page);
     const desktopOverview = await page
-      .locator("#profile-subscriptions")
+      .getByRole("region", { name: "Subscription minting", exact: true })
       .boundingBox();
     const desktopSettings = await mintingSettings.boundingBox();
     expect(desktopOverview).not.toBeNull();
@@ -910,7 +919,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       Math.abs(desktopSettings!.y - desktopOverview!.y)
     ).toBeLessThanOrEqual(1);
     await page.evaluate(() =>
-      history.replaceState(history.state, "", location.pathname)
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.pathname
+      )
     );
     await page.setViewportSize({ width: 390, height: initialViewport.height });
     const narrowTitle = await upcoming
@@ -921,7 +934,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       exact: true,
     });
     const narrowQuantityBox = await narrowQuantity.boundingBox();
-    const narrowStatusBox = await narrowQuantity
+    const narrowStatusBox = await upcoming
+      .getByRole("group", {
+        name: "Subscription quantity for The Memes #569",
+        exact: true,
+      })
       .locator("..")
       .locator("..")
       .getByText("Subscribed", { exact: true })
@@ -998,10 +1015,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByText("Mode", { exact: true })
       .boundingBox();
     const modeValueBox = await modeValue.boundingBox();
-    await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
-      "text-align",
-      "start"
-    );
+    await expect(
+      mintingSettings
+        .getByRole("group", { name: "Mode", exact: true })
+        .locator('[id$="-detail"]')
+    ).toHaveCSS("text-align", "start");
     expect(modeLabelBox).not.toBeNull();
     expect(modeValueBox).not.toBeNull();
     expect(Math.abs(modeValueBox!.x - modeLabelBox!.x)).toBeLessThanOrEqual(1);
@@ -1058,7 +1076,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("dialog", { name: "Minting settings", exact: true })
     ).toHaveCount(0);
     const inlineModeValue = await modeValue.boundingBox();
-    const inlineModeDate = await visitorMode
+    const inlineModeDate = await mintingSettings
+      .getByRole("group", { name: "Mode", exact: true })
       .locator('[id$="-detail"]')
       .boundingBox();
     expect(inlineModeValue).not.toBeNull();
@@ -1076,10 +1095,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(
       Math.abs(inlineModeDate!.y - inlineModeValue!.y)
     ).toBeLessThanOrEqual(4);
-    await expect(visitorMode.locator('[id$="-detail"]')).toHaveCSS(
-      "text-align",
-      "start"
-    );
+    await expect(
+      mintingSettings
+        .getByRole("group", { name: "Mode", exact: true })
+        .locator('[id$="-detail"]')
+    ).toHaveCSS("text-align", "start");
     await page.setViewportSize(initialViewport);
     await expect(details).toHaveCount(0);
     const tabs = history.getByRole("tablist");

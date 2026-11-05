@@ -100,20 +100,16 @@ describe("local coverage preview", () => {
   it("isolates sample payment and refresh actions and provides an exit to the real profile", async () => {
     const user = userEvent.setup();
     renderPreview();
-    await user.click(
-      screen.getByRole("button", { name: "Top up", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Top up" }));
     const sampleModal = await screen.findByRole("dialog", {
       name: "Top up",
-      exact: true,
     });
     await user.click(
-      within(sampleModal).getByRole("radio", { name: "1 Card", exact: true })
+      within(sampleModal).getByRole("radio", { name: "1 Card" })
     );
     await user.click(
       within(sampleModal).getByRole("button", {
         name: "Top up 0.06529 ETH",
-        exact: true,
       })
     );
     expect(
@@ -122,21 +118,16 @@ describe("local coverage preview", () => {
       )
     ).toHaveAttribute("role", "status");
     await user.click(
-      within(sampleModal).getByRole("button", { name: "Close", exact: true })
+      within(sampleModal).getByRole("button", { name: "Close" })
     );
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
     await user.click(screen.getByRole("button", { name: "Refresh balance" }));
-    await user.click(
-      screen.getByRole("button", { name: "Action required", exact: true })
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Top up", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Action required" }));
+    await user.click(screen.getByRole("button", { name: "Top up" }));
     const warningModal = await screen.findByRole("dialog", {
       name: "Top up",
-      exact: true,
     });
     expect(
       within(warningModal).queryByText(/Top up by/)
@@ -145,7 +136,7 @@ describe("local coverage preview", () => {
       within(warningModal).getByRole("radio", { name: /Recommended/ })
     ).toBeVisible();
     await user.click(
-      within(warningModal).getByRole("button", { name: "Close", exact: true })
+      within(warningModal).getByRole("button", { name: "Close" })
     );
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
@@ -162,7 +153,7 @@ describe("local coverage preview", () => {
       screen.getByRole("button", { name: "Toggle preview perspective" })
     );
     expect(
-      screen.queryByRole("button", { name: "Top up", exact: true })
+      screen.queryByRole("button", { name: "Top up" })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Refresh balance" })
@@ -180,9 +171,7 @@ describe("local coverage preview", () => {
   it("keeps stale coverage and its owner retry above the summary", async () => {
     const user = userEvent.setup();
     renderPreview();
-    await user.click(
-      screen.getByRole("button", { name: "Refresh failed", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Refresh failed" }));
     const notice = screen.getByRole("status");
     expect(notice).toHaveTextContent(
       "Last known coverage is shown and may be out of date."
@@ -207,64 +196,49 @@ describe("local coverage preview", () => {
     expect(
       screen.queryByRole("button", { name: "Refresh coverage" })
     ).not.toBeInTheDocument();
-    await user.click(
-      screen.getByRole("button", { name: "Covered", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Covered" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("reopens the sample modal with its draft and never calls payment or account actions", async () => {
     const user = userEvent.setup();
     renderPreview();
-    await user.click(
-      screen.getByRole("button", { name: "Top up", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Top up" }));
     const modal = await screen.findByRole("dialog", {
       name: "Top up",
-      exact: true,
     });
     await user.type(
       within(modal).getByRole("spinbutton", {
         name: "Other card count",
-        exact: true,
       }),
       "2"
     );
     await user.click(
       within(modal).getByRole("button", {
         name: "Show Deep Time Subscriptions",
-        exact: true,
       })
     );
     await user.click(
       within(modal).getByRole("button", {
         name: "Top up 0.13058 ETH",
-        exact: true,
       })
     );
-    await user.click(
-      within(modal).getByRole("button", { name: "Close", exact: true })
-    );
+    await user.click(within(modal).getByRole("button", { name: "Close" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
-    await user.click(
-      screen.getByRole("button", { name: "Top up", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Top up" }));
     const reopened = await screen.findByRole("dialog", {
       name: "Top up",
-      exact: true,
     });
     expect(
       within(reopened).getByRole("spinbutton", {
         name: "Other card count",
-        exact: true,
       })
     ).toHaveValue(2);
     expect(
       within(reopened).getByRole("button", {
         name: "Hide Deep Time Subscriptions",
-        exact: true,
       })
     ).toHaveAttribute("aria-expanded", "true");
     expect(commonApiPost).not.toHaveBeenCalled();
@@ -311,7 +285,6 @@ describe("local coverage preview", () => {
     await user.click(
       screen.getByRole("button", {
         name: "No upcoming drops selected",
-        exact: true,
       })
     );
     expect(screen.getByText("Manual", { exact: true })).toBeVisible();
@@ -325,7 +298,6 @@ describe("local coverage preview", () => {
     for (const status of Object.values(Status)) {
       const tab = screen.getByRole("button", {
         name: getSubscriptionCoveragePresentation("en-US", status).label,
-        exact: true,
       });
       await user.click(tab);
       expect(tab).toHaveAttribute("aria-pressed", "true");

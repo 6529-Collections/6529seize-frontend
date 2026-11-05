@@ -145,9 +145,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     const { rerender } = render(<UserPageSubscriptionsTopUp expanded />);
     await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Top up", exact: true })
-      ).toHaveFocus()
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
     );
     await user.type(
       screen.getByRole("spinbutton", { name: "Other card count" }),
@@ -604,15 +602,13 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
   it("retains the custom amount and restores the opener after Close and Escape", async () => {
     render(renderGated());
     const user = userEvent.setup();
-    const opener = screen.getByRole("button", { name: "Top up", exact: true });
+    const opener = screen.getByRole("button", { name: "Top up" });
     await user.click(opener);
     await user.type(
       screen.getByRole("spinbutton", { name: "Other card count" }),
       "2"
     );
-    await user.click(
-      screen.getByRole("button", { name: "Close", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Close" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
@@ -642,9 +638,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
         await screen.findByRole("dialog", { name: "Top up" })
       ).toBeVisible();
       expect(window.location.hash).toBe(`#${TOP_UP_ID}`);
-      await user.click(
-        screen.getByRole("button", { name: "Close", exact: true })
-      );
+      await user.click(screen.getByRole("button", { name: "Close" }));
       await waitFor(() =>
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
       );

@@ -259,9 +259,7 @@ describe("UserPageSubscriptions", () => {
           "data-expanded",
           "false"
         );
-        await userEvent.click(
-          screen.getByRole("button", { name: "Top up", exact: true })
-        );
+        await userEvent.click(screen.getByRole("button", { name: "Top up" }));
         expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
           "data-expanded",
           "true"
@@ -292,7 +290,7 @@ describe("UserPageSubscriptions", () => {
         "false"
       );
       expect(
-        screen.getByRole("button", { name: "Top up", exact: true })
+        screen.getByRole("button", { name: "Top up" })
       ).toBeInTheDocument();
     });
 
@@ -307,7 +305,7 @@ describe("UserPageSubscriptions", () => {
       );
       await userEvent
         .setup()
-        .click(screen.getByRole("button", { name: "Top up", exact: true }));
+        .click(screen.getByRole("button", { name: "Top up" }));
       expect(screen.getByTestId("subscriptions-topup")).toHaveAttribute(
         "data-expanded",
         "true"

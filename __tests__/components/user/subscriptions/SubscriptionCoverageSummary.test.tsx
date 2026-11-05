@@ -184,7 +184,7 @@ describe("SubscriptionCoverageSummary", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Top up", exact: true })
+      screen.queryByRole("button", { name: "Top up" })
     ).not.toBeInTheDocument();
   });
 
@@ -444,9 +444,7 @@ describe("SubscriptionCoverageSummary", () => {
         document.getElementById("subscription-coverage-details")
       ).toBeNull();
       for (const name of ["Choose drops", "Set up", "Review settings"]) {
-        expect(
-          screen.queryByRole("link", { name, exact: true })
-        ).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
       }
       await userEvent
         .setup()
@@ -497,7 +495,7 @@ describe("SubscriptionCoverageSummary", () => {
     (status) => {
       renderSummary(createCoverage({ status }));
       expect(
-        screen.queryByRole("link", { name: "Review settings", exact: true })
+        screen.queryByRole("link", { name: "Review settings" })
       ).not.toBeInTheDocument();
     }
   );
@@ -511,14 +509,12 @@ describe("SubscriptionCoverageSummary", () => {
         funded_through: null,
       })
     );
+    expect(screen.getByRole("heading", { name: "Not set up" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Not set up", exact: true })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("link", { name: "Set up", exact: true })
+      screen.queryByRole("link", { name: "Set up" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Choose drops", exact: true })
+      screen.queryByRole("link", { name: "Choose drops" })
     ).not.toBeInTheDocument();
   });
 
@@ -532,15 +528,12 @@ describe("SubscriptionCoverageSummary", () => {
       expect(
         screen.queryByRole("link", { name: "Top up subscriptions" })
       ).not.toBeInTheDocument();
-      expect(
-        screen.getAllByRole("button", { name: "Top up", exact: true })
-      ).toHaveLength(1);
+      expect(screen.getAllByRole("button", { name: "Top up" })).toHaveLength(1);
       const footer = within(
         document.getElementById("subscription-overview-actions")!
       );
       const chooseDrops = footer.queryByRole("link", {
         name: "Choose drops",
-        exact: true,
       });
       if (status !== ApiSubscriptionCoverageStatus.NoUpcomingSelections) {
         expect(chooseDrops).not.toBeInTheDocument();
@@ -550,13 +543,12 @@ describe("SubscriptionCoverageSummary", () => {
           "#profile-subscriptions-upcoming"
         );
         expect(chooseDrops?.parentElement).toBe(
-          footer.getByRole("button", { name: "Top up", exact: true })
-            .parentElement
+          footer.getByRole("button", { name: "Top up" }).parentElement
         );
       }
       await userEvent
         .setup()
-        .click(screen.getByRole("button", { name: "Top up", exact: true }));
+        .click(screen.getByRole("button", { name: "Top up" }));
       expect(openTopUp).toHaveBeenCalledTimes(1);
     }
   );

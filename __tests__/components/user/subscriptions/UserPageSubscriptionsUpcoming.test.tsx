@@ -254,7 +254,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
         coverage: { next_unfunded: { token_id: 2 } },
       });
       expect(screen.getByText("Next unfunded The Memes #2")).toBeVisible();
-      const topUp = screen.queryByRole("link", { name: "Top up", exact: true });
+      const topUp = screen.queryByRole("link", { name: "Top up" });
       if (readonly) expect(topUp).not.toBeInTheDocument();
       else
         expect(topUp).toHaveAttribute("href", "#profile-subscriptions-top-up");
@@ -405,7 +405,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("formats upcoming mint days as UTC calendar days", () => {
     const format = jest.spyOn(localeFormat, "formatUtcDate");
     renderComponent();
-    expect(format).toHaveBeenCalledWith("en-US", mockUpcomingRows[0].utcDay, {
+    expect(format).toHaveBeenCalledWith("en-US", mockUpcomingRows[0]!.utcDay, {
       weekday: "short",
       year: "numeric",
       month: "short",

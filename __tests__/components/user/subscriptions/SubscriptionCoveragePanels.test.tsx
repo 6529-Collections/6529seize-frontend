@@ -34,7 +34,7 @@ describe("Separate Minting settings section", () => {
       screen.getByRole("heading", { name: "Airdrop Address" })
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Minting settings", exact: true })
+      screen.queryByRole("button", { name: "Minting settings" })
     ).not.toBeInTheDocument();
   });
   it("focuses its heading for a direct settings hash", async () => {

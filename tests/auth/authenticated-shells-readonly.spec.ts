@@ -415,6 +415,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     await expect(
       page
+        .getByRole("region", { name: "Subscription minting", exact: true })
         .locator("#subscription-overview-actions")
         .getByText("Forecast use", { exact: true })
     ).toBeVisible();
@@ -546,7 +547,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       topUp.getByRole("heading", { name: "Top up", exact: true })
     ).toBeInViewport();
-    const singleCard = topUp.locator('label[for="subscription-top-up-1"]');
+    const singleCard = page
+      .getByRole("dialog", { name: "Top up", exact: true })
+      .locator('label[for="subscription-top-up-1"]');
     const singleCardBox = await singleCard.boundingBox();
     const cardLabelBox = await singleCard
       .getByText("1 Card", { exact: true })
@@ -648,9 +651,13 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("heading", { name: "3 drops funded Running low" })
     ).toBeVisible();
-    const overview = page.locator("#profile-subscriptions-overview");
+    const overview = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
     const statusHeading = overview.getByRole("heading", { level: 2 });
-    await expect(statusHeading.locator("svg")).toHaveCount(0);
+    await expect(
+      overview.getByRole("heading", { level: 2 }).locator("svg")
+    ).toHaveCount(0);
     const statusBadgeBox = await statusHeading
       .getByText("Running low", { exact: true })
       .boundingBox();
@@ -665,10 +672,13 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const headlineBox = await overview
       .getByRole("heading", { level: 2 })
       .boundingBox();
-    const descriptionBox = await overview
+    const descriptionBox = await page
+      .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#profile-subscriptions-overview-title + p")
       .boundingBox();
-    const overviewActions = page.locator("#subscription-overview-actions");
+    const overviewActions = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#subscription-overview-actions");
     const topUpButton = overviewActions.getByRole("button", {
       name: "Top up",
       exact: true,
@@ -813,7 +823,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       })
     ).toBeDisabled();
     await expect(upcoming.getByRole("combobox").first()).toBeDisabled();
-    const mintingArtwork = upcoming.locator("img");
+    const mintingArtwork = page
+      .getByRole("region", { name: "Upcoming Drops", exact: true })
+      .locator("img");
     await expect(mintingArtwork).toHaveCount(1);
     await expect(mintingArtwork).toHaveAttribute("alt", "");
     await expect
@@ -851,9 +863,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       });
       if (width < 768) {
         await expect(moreDetails).toHaveAttribute("aria-expanded", "false");
-        const details = page.locator(
-          `[id="${await moreDetails.getAttribute("aria-controls")}"]`
-        );
+        const details = page
+          .getByRole("region", { name: "Upcoming Drops", exact: true })
+          .locator(`[id="${await moreDetails.getAttribute("aria-controls")}"]`);
         await expect(details).toBeHidden();
         await moreDetails.click();
         for (const label of [
@@ -874,7 +886,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         await expect(upcoming.getByText(/^Phase:/)).toBeVisible();
       }
       await expect(
-        page.locator("#profile-subscriptions-overview-title")
+        page
+          .getByRole("region", { name: "Subscription minting", exact: true })
+          .locator("#profile-subscriptions-overview-title")
       ).toHaveCSS("font-size", width >= 768 ? "30px" : "24px");
       await expect(topUpButton).toHaveCSS(
         "font-size",
@@ -898,7 +912,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await expect(mintingArtwork).toHaveCSS("height", "113px");
       if (width < 640) {
         await expect(overviewActions).toHaveCSS("border-top-width", "0px");
-        const forecastRow = forecast.locator("../..");
+        const forecastRow = overviewActions
+          .getByRole("button", { name: "Forecast use", exact: true })
+          .locator("../..");
         await expect(forecastRow).toHaveCSS("border-top-width", "0px");
         const mobileActionsBox = await overviewActions.boundingBox();
         const mobileTopUpBox = await topUpButton.boundingBox();
@@ -1053,7 +1069,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         mintingLabelBox!.x
       );
       const overviewSectionBox = await page
-        .locator("#profile-subscriptions")
+        .getByRole("region", { name: "Subscription minting", exact: true })
         .boundingBox();
       const settingsOpener = page.getByRole("button", {
         name: "Minting settings",
@@ -1064,8 +1080,26 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           "profile-subscriptions-settings-title",
           "profile-subscriptions-history-title",
         ]) {
-          await expect(page.locator(`#${id}`)).toHaveCSS("font-size", "17px");
-          await expect(page.locator(`#${id}`)).toHaveCSS("font-weight", "500");
+          await expect(
+            page
+              .getByRole("button", {
+                name: id.includes("settings")
+                  ? "Minting settings"
+                  : "Subscription History",
+                exact: true,
+              })
+              .locator(`#${id}`)
+          ).toHaveCSS("font-size", "17px");
+          await expect(
+            page
+              .getByRole("button", {
+                name: id.includes("settings")
+                  ? "Minting settings"
+                  : "Subscription History",
+                exact: true,
+              })
+              .locator(`#${id}`)
+          ).toHaveCSS("font-weight", "500");
         }
         const openerBox = await settingsOpener.boundingBox();
         const dropsBox = await upcoming.boundingBox();
@@ -1099,7 +1133,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         await expect(mode).toBeEnabled();
         await expect(mode).toBeChecked();
       }
-      const controls = settings.locator("[data-setting-controls]");
+      const controls = settings
+        .getByRole("group")
+        .locator("[data-setting-controls]");
       await expect(controls).toHaveCount(2);
       for (const control of await controls.all()) {
         const layout = await control.evaluate((element) => {
@@ -1158,7 +1194,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       .boundingBox();
     expect(footer).not.toBeNull();
     expect(list).not.toBeNull();
-    const firstDrop = await showMore
+    const firstDrop = await upcoming
+      .getByRole("button", { name: "Show More", exact: true })
       .locator("..")
       .locator(":scope > div > div")
       .first()
@@ -1176,7 +1213,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     });
     await topUpLink.click();
     const topUp = page.getByRole("dialog", { name: "Top up", exact: true });
-    const topUpBackdrop = topUp.locator('[class~="tw-bg-gray-700/60"]');
+    const topUpBackdrop = page
+      .getByRole("dialog", { name: "Top up", exact: true })
+      .locator('[class~="tw-bg-gray-700/60"]');
     await expect(topUp.getByText(/Top up by/)).toHaveCount(0);
     await expect(topUpBackdrop).toBeVisible();
     await expect(topUpBackdrop).toHaveCSS(
@@ -1280,7 +1319,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       topUp.getByRole("radio", { name: /^Remaining Period/ })
     ).toBeHidden();
     await deepTime.click();
-    const deepRows = topUp.locator("#subscription-top-up-deep-time label");
+    const deepRows = page
+      .getByRole("dialog", { name: "Top up", exact: true })
+      .locator("#subscription-top-up-deep-time label");
     await expect(deepRows.first()).toHaveCSS("border-top-left-radius", "12px");
     await expect(deepRows.first()).toHaveCSS("border-top-right-radius", "12px");
     await expect(deepRows.last()).toHaveCSS(
@@ -1330,7 +1371,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await topUpButton.click();
     await expect(topUpBackdrop).toBeVisible();
     await expect(topUpBackdrop).toHaveCSS("opacity", "1");
-    const surface = topUp.locator('[id^="headlessui-dialog-panel-"]');
+    const surface = page
+      .getByRole("dialog", { name: "Top up", exact: true })
+      .locator('[id^="headlessui-dialog-panel-"]');
     const viewport = page.viewportSize()!;
     // Wait for the sheet's opening slide before measuring its final position.
     await expect
@@ -1384,7 +1427,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       settings.getByText("Oct 2, 2026, 19:03 UTC", { exact: true })
     ).toBeVisible();
     await expect(overview.getByText(/Top up by|Recommended:/)).toHaveCount(0);
-    await expect(page.locator("#subscription-coverage-details")).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("region", { name: "Subscription minting", exact: true })
+        .locator("#subscription-coverage-details")
+    ).toHaveCount(0);
     await expect(
       overviewActions.getByText("Next unfunded", { exact: true })
     ).toHaveCount(0);
@@ -1422,10 +1469,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await page.keyboard.press("Tab");
     await expect(editions).toBeFocused();
     await expect(editionTooltip).toHaveCount(0);
-    await expect(editions.locator("+ span")).not.toHaveCSS(
-      "box-shadow",
-      "none"
-    );
+    await expect(
+      settings
+        .getByRole("switch", { name: "All eligible editions", exact: true })
+        .locator("+ span")
+    ).not.toHaveCSS("box-shadow", "none");
     await expect(
       settings.getByText("One edition", { exact: true })
     ).toHaveCount(0);
@@ -1462,12 +1510,14 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await expect(panel).toBeVisible();
       if (title === "Redeemed") {
         if (page.viewportSize()!.width < 768) {
-          const addressLine = await panel
+          const addressLine = await page
+            .getByRole("tabpanel", { name: title, exact: true })
             .locator("p")
             .filter({ hasText: /^Airdrop Address:/ })
             .first()
             .boundingBox();
-          const balanceLine = await panel
+          const balanceLine = await page
+            .getByRole("tabpanel", { name: title, exact: true })
             .locator("p")
             .filter({ hasText: /^Balance after redemption:/ })
             .first()
@@ -1482,7 +1532,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           .getByRole("link", { name: "View transaction on Etherscan" })
           .first();
         const transactionTarget = await transaction.boundingBox();
-        const transactionVisual = await transaction
+        const transactionVisual = await panel
+          .getByRole("link", { name: "View transaction on Etherscan" })
+          .first()
           .locator("span[aria-hidden=true]")
           .boundingBox();
         expect(transactionTarget).not.toBeNull();

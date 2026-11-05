@@ -32,6 +32,7 @@ describe("Minting Today local preview", () => {
           <MintingTodayPreview
             profileKey="preview-profile"
             details={{
+              consolidation_key: "preview-profile",
               balance: 71.55784,
               automatic: true,
               subscribe_all_editions: true,

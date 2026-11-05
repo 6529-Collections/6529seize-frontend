@@ -99,12 +99,11 @@ describe("UserPageSubscriptionsHistory", () => {
       "Log History",
       "Top Up History",
     ]);
-    expect(
-      screen.getByRole("tab", { name: "Redeemed" })
-    ).toHaveAttribute("aria-selected", "true");
-    expect(
-      screen.getByRole("tabpanel", { name: "Redeemed" })
-    ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Redeemed" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByRole("tabpanel", { name: "Redeemed" })).toBeVisible();
     expect(screen.getByRole("tabpanel")).toHaveTextContent(
       "Redeemed Subscription for Meme #568 x2"
     );
@@ -142,9 +141,7 @@ describe("UserPageSubscriptionsHistory", () => {
     ).toHaveAttribute("href", expect.stringContaining("0x456"));
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setTopUpPage).toHaveBeenCalledWith(2);
-    await user.click(
-      screen.getByRole("tab", { name: "Redeemed" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
     expect(
       within(screen.getByRole("tabpanel")).getByRole("textbox", {
         name: "Page number",
@@ -191,9 +188,7 @@ describe("UserPageSubscriptionsHistory", () => {
       block: "start",
       behavior: "instant",
     });
-    expect(
-      screen.getByRole("tabpanel", { name: "Redeemed" })
-    ).toHaveFocus();
+    expect(screen.getByRole("tabpanel", { name: "Redeemed" })).toHaveFocus();
 
     rerender(
       <HistoryTestView {...props} redeemed={nextPage} redeemedLoading />
@@ -216,9 +211,7 @@ describe("UserPageSubscriptionsHistory", () => {
       <HistoryTestView {...props} redeemed={{ ...props.redeemed, page: 34 }} />
     );
     expect(scroll).toHaveBeenCalledTimes(1);
-    expect(
-      screen.getByRole("tabpanel", { name: "Redeemed" })
-    ).toHaveFocus();
+    expect(screen.getByRole("tabpanel", { name: "Redeemed" })).toHaveFocus();
   });
 
   it("cancels the pending scroll if the viewer switches history tabs", async () => {
@@ -236,9 +229,7 @@ describe("UserPageSubscriptionsHistory", () => {
       "aria-selected",
       "true"
     );
-    await user.click(
-      screen.getByRole("tab", { name: "Redeemed" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
     expect(scroll).not.toHaveBeenCalled();
   });
 
@@ -272,9 +263,7 @@ describe("UserPageSubscriptionsHistory", () => {
   it("supports arrow-key tab navigation", async () => {
     render(<HistoryTestView {...makeProps()} />);
     const user = userEvent.setup();
-    await user.click(
-      screen.getByRole("tab", { name: "Redeemed" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: "Log History" })).toHaveFocus();
     expect(screen.getByRole("tab", { name: "Log History" })).toHaveAttribute(

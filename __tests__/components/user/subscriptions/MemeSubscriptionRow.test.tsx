@@ -181,7 +181,7 @@ describe("MemeSubscriptionRow", () => {
           date={null}
         />
       );
-      const more = screen.getByRole("button", { name: "More", exact: true });
+      const more = screen.getByRole("button", { name: "More" });
       const details = document.getElementById(
         more.getAttribute("aria-controls")!
       );
