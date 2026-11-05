@@ -85,8 +85,22 @@ describe("validator page text", () => {
   });
 
   it("says what rc.7 does where Tor is blocked, and nothing it lacks", () => {
-    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toMatch(
-      /^3\. On a network that blocks Tor, .* The page opens, says Tor is blocked on this network, and the validator keeps trying by itself\. .* Bridges come in rc\.8\. /m
+    const tor =
+      VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
+        line.startsWith("3. ")
+      ) ?? "";
+    expect(tor).toMatch(
+      /^3\. On a network that blocks Tor, the page opens, says Tor is blocked, and keeps trying\. Bridges come in rc\.8\. /
+    );
+    // Bridge lines by hand come before Tor off, which says what it gives away.
+    const bridges = tor.indexOf(
+      "add bridge lines by hand in Settings › Privacy"
+    );
+    const torOff = tor.indexOf("As a last resort, turn Tor off there.");
+    expect(bridges).toBeGreaterThan(-1);
+    expect(torOff).toBeGreaterThan(bridges);
+    expect(tor).toMatch(
+      /turn Tor off there\. Peers and Ethereum servers then see this network's IP address\.$/
     );
     // rc.7 carries no bridge programs and has no Connect without Tor.
     for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
