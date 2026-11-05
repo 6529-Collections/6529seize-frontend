@@ -55,7 +55,10 @@ export function E2eeDmHistory({
   };
 
   return (
-    <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-gap-2 tw-border-b tw-border-solid tw-border-white/10 tw-px-4 tw-py-3">
+    <section
+      aria-label={t(locale, "e2ee.dm.history.label")}
+      className="tw-flex tw-flex-shrink-0 tw-flex-col tw-gap-2 tw-border-b tw-border-solid tw-border-white/10 tw-px-4 tw-py-3"
+    >
       {thread.sessions.length > 1 ? (
         <>
           <label
@@ -120,6 +123,6 @@ export function E2eeDmHistory({
           {t(locale, errorKey)}
         </p>
       ) : null}
-    </div>
+    </section>
   );
 }

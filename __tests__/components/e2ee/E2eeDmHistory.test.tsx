@@ -61,6 +61,9 @@ it("continues an ended DM and reports a failed restart with a retry", async () =
       engine={engine}
     />
   );
+  expect(screen.getByRole("region", { name: "Chat history" })).toContainElement(
+    screen.getByRole("button", { name: "Continue encrypted chat" })
+  );
   fireEvent.click(
     screen.getByRole("button", { name: "Continue encrypted chat" })
   );
