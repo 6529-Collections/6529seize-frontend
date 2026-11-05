@@ -1,3 +1,4 @@
+import { installArtworkNotificationImage } from "../support/artworkNotification";
 import {
   captureSafeScreenshot,
   expect,
@@ -17,6 +18,9 @@ import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotif
 import { ApiVotingCreditReleaseReason } from "../../generated/models/ApiVotingCreditReleaseReason";
 
 test.describe("Notifications inbox sandbox @auth @local-only", () => {
+  test.beforeEach(async ({ page }) => {
+    await installArtworkNotificationImage(page);
+  });
   useLocalSandboxMutationGuard(
     test,
     "PLAYWRIGHT_AUTH_SANDBOX",
@@ -124,6 +128,21 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     ).toHaveCount(0);
     await expect(inbox.getByText("#[QUORUM]", { exact: false })).toHaveCount(0);
     await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(0);
+    const artwork = inbox.getByRole("link", {
+      name: /^sandbox-alice submitted Sandbox artwork to The Memes – Main Stage\./,
+    });
+    await expect(artwork).toBeVisible();
+    const thumbnail = artwork.getByRole("presentation");
+    await expect(thumbnail).toBeVisible();
+    await expect
+      .poll(() =>
+        thumbnail.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      )
+      .toBeGreaterThan(0);
+    await expect(artwork).toHaveAttribute(
+      "href",
+      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
+    );
     expect(page.url()).toBe(route);
     await expect
       .poll(
@@ -245,6 +264,40 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("desktop artwork alert opens the single submission", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    // The sidebar inbox exists only on desktop; notifications-sandbox covers
+    // single-artwork navigation from the full feed on every platform.
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    await inbox
+      .getByRole("link", { name: /^sandbox-alice submitted Sandbox artwork/ })
+      .click();
+    await expect(inbox).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { name: "Sandbox artwork", exact: true })
+    ).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
     page,
     baseURL,
@@ -280,7 +333,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     });
     const markAll = inbox.getByRole("button", { name: "Mark all as read" });
     await expect(inbox.getByRole("alert")).toBeVisible();
-    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(4);
+    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(5);
     await expect(markAll).toBeEnabled({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });

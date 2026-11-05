@@ -1,3 +1,4 @@
+import type { ApiArtistArtworkNotificationContext } from "@/generated/models/ApiArtistArtworkNotificationContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
@@ -222,7 +223,14 @@ export type INotificationEncryptedMessage = Omit<
   };
 };
 
+export type INotificationArtistArtwork = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.ArtistArtworkSubmitted;
+    readonly additional_context: ApiArtistArtworkNotificationContext;
+  };
+
 export type TypedNotification =
+  | INotificationArtistArtwork
   | INotificationEncryptedMessage
   | INotificationVotingCreditsReturned
   | INotificationMemeCollaboration

@@ -1,5 +1,8 @@
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import {
+  getCompetitionDropRoute,
+  getCompetitionRoute,
+} from "@/helpers/competition.helpers";
 import {
   getEncryptedConversationRoute,
   getEncryptedMessagesRoute,
@@ -71,6 +74,14 @@ export function getInboxDestination(
   notification: TypedNotification,
   handle: string
 ): string {
+  if (notification.cause === ApiNotificationCause.ArtistArtworkSubmitted) {
+    const context = notification.additional_context;
+    return getCompetitionDropRoute(
+      context.wave_id,
+      context.competition_id,
+      context.drop_id
+    );
+  }
   const drop = getInboxDrop(notification);
   if (drop) {
     return getWaveRoute({
@@ -147,6 +158,14 @@ export function getInboxSummary(
   switch (notification.cause) {
     case ApiNotificationCause.E2EeMessage:
       return t(locale, "e2ee.notification.newMessage");
+    case ApiNotificationCause.ArtistArtworkSubmitted: {
+      const title = notification.additional_context.artwork_title?.trim() ?? "";
+      return t(locale, "artworkAlerts.notification", {
+        artist: actor,
+        artwork: title.length > 0 ? title : t(locale, "artworkAlerts.untitled"),
+        competition: notification.additional_context.competition_title,
+      });
+    }
     case ApiNotificationCause.IdentitySubscribed:
       return t(locale, "notifications.inbox.follow", params);
     case ApiNotificationCause.IdentityMentioned:
