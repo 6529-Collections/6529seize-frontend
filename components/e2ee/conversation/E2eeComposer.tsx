@@ -53,6 +53,7 @@ import {
   isEditLastMessageKey,
   type PasteNotice,
   useMentionPicker,
+  useLoadedComposerText,
   usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
@@ -402,34 +403,6 @@ interface E2eeComposerProps {
     | { readonly id: string; readonly text: string }
     | null
     | undefined;
-}
-
-/**
- * Loads text into the box once per source: the message being edited (which
- * also clears picked files) or a refused message coming back to resend.
- */
-function useLoadedComposerText(
-  editing: E2eeMessage | null,
-  restoredDraft: { readonly id: string; readonly text: string } | null,
-  setText: (text: string) => void,
-  clearFiles: () => void
-): { readonly editId: string | null; readonly draftId: string | null } {
-  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
-  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
-  const editId = editing?.id ?? null;
-  if (editId !== loadedEditId) {
-    setLoadedEditId(editId);
-    setText(editing ? editing.text : "");
-    clearFiles();
-  }
-  const draftId = restoredDraft?.id ?? null;
-  if (draftId !== loadedDraftId) {
-    setLoadedDraftId(draftId);
-    if (restoredDraft) {
-      setText(restoredDraft.text);
-    }
-  }
-  return { editId, draftId };
 }
 
 function getComposerContainerClassName(isApp: boolean): string {

@@ -2,7 +2,7 @@
 
 import { type ClipboardEvent, type KeyboardEvent, useState } from "react";
 import type { MessageKey } from "@/i18n/messages";
-import type { E2eeMember } from "@/lib/e2ee/types";
+import type { E2eeMember, E2eeMessage } from "@/lib/e2ee/types";
 import {
   type ActiveMentionQuery,
   filterMentionCandidates,
@@ -18,6 +18,34 @@ const E2EE_MAX_FILE_MB_LABEL = 25;
 export interface ComposerError {
   readonly key: MessageKey;
   readonly params: Readonly<Record<string, string | number>>;
+}
+
+/**
+ * Loads text into the box once per source: the message being edited (which
+ * also clears picked files) or a refused message coming back to resend.
+ */
+export function useLoadedComposerText(
+  editing: E2eeMessage | null,
+  restoredDraft: { readonly id: string; readonly text: string } | null,
+  setText: (text: string) => void,
+  clearFiles: () => void
+): { readonly editId: string | null; readonly draftId: string | null } {
+  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+  const editId = editing?.id ?? null;
+  if (editId !== loadedEditId) {
+    setLoadedEditId(editId);
+    setText(editing ? editing.text : "");
+    clearFiles();
+  }
+  const draftId = restoredDraft?.id ?? null;
+  if (draftId !== loadedDraftId) {
+    setLoadedDraftId(draftId);
+    if (restoredDraft) {
+      setText(restoredDraft.text);
+    }
+  }
+  return { editId, draftId };
 }
 
 /** Adds chosen files within the count and size limits. */
