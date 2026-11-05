@@ -9,7 +9,7 @@ import {
 import { DesktopConnectionLink } from "./DesktopConnectionLink";
 import DeviceConnectionShare from "./DeviceConnectionShare";
 import { faCopy, faRotate } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import {
   ArrowDownTrayIcon,
   ComputerDesktopIcon,
@@ -162,6 +162,7 @@ export function HeaderShareModalView({
     );
   };
 
+
   const getNavigateContent = () => {
     if (pageShareTarget === PageShareTarget.APP) {
       return {
@@ -290,7 +291,7 @@ export function HeaderShareModalView({
             data-tooltip-id="copy-url-tooltip"
             onClick={() => void copyUrl(url)}
           >
-            <FontAwesomeIcon
+            <FontAwesomeSvgIcon
               icon={faCopy}
               aria-hidden="true"
               className={`tw-size-4 ${urlCopied ? "tw-text-green-500" : ""}`}
@@ -315,7 +316,7 @@ export function HeaderShareModalView({
               : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
           }`}
         >
-          <FontAwesomeIcon
+          <FontAwesomeSvgIcon
             icon={faRotate}
             aria-hidden="true"
             className={`tw-size-4 ${loading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
@@ -425,7 +426,7 @@ export function HeaderShareModalView({
               : ""
           }`}
         >
-          <FontAwesomeIcon
+          <FontAwesomeSvgIcon
             icon={faCopy}
             className={`${SHARE_ACTION_ICON_CLASS_NAME} ${
               urlCopied ? "!tw-text-success" : ""
