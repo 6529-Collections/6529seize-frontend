@@ -72,6 +72,20 @@ const confirmedMetaMaskBridgeErrors = new WeakSet<object>();
 // https://github.com/MetaMask/metamask-mobile/blob/v8.12.0/app/util/browserScripts.ts
 const META_MASK_NAVIGATION_CALLBACK = "function(){__mm__updateUrl();}";
 
+function isInjectedMetaMaskBridgeFrame(stackLine: string): boolean {
+  // JavaScriptCore can omit an injected script's location entirely.
+  if (stackLine === "__mm__updateUrl@") {
+    return true;
+  }
+  if (!stackLine.startsWith("__mm__updateUrl@user-script:")) {
+    return false;
+  }
+  const frame = parseStackLine(stackLine, "");
+  return (
+    frame?.function === "__mm__updateUrl" && frame.file === "non-http-script"
+  );
+}
+
 function markConfirmedMetaMaskBridgeError(
   error: object,
   callback: TimerCallback,
@@ -104,8 +118,7 @@ function markConfirmedMetaMaskBridgeError(
     // getter/toJSON or serializer between stringify and the bridge must survive.
     if (
       frames[0] === "stringify@[native code]" &&
-      // JavaScriptCore can omit an injected script's location entirely.
-      /^__mm__updateUrl@(?:user-script:[^\s]*:\d+:\d+)?$/.test(frames[1] ?? "")
+      isInjectedMetaMaskBridgeFrame(frames[1] ?? "")
     ) {
       confirmedMetaMaskBridgeErrors.add(error);
     }

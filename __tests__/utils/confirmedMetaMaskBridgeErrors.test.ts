@@ -15,6 +15,7 @@ const BRIDGE_STACK = [
 
 function createEvent(): ErrorEvent {
   return {
+    type: undefined,
     exception: {
       values: [
         {
