@@ -278,3 +278,8 @@ export const isEditLastMessageKey = (
   !event.ctrlKey &&
   !event.metaKey &&
   !event.shiftKey;
+
+export const isComposerEmpty = (
+  text: string,
+  files: readonly File[]
+): boolean => text.trim().length === 0 && files.length === 0;

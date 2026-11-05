@@ -13,10 +13,7 @@ import {
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
-import {
-  DropMode,
-  type DropComposerDensity,
-} from "@/components/waves/dropComposer.types";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -78,7 +75,6 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
-  readonly composerDensity?: DropComposerDensity | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -207,7 +203,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
-  composerDensity = "default",
 }) => {
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
@@ -689,7 +684,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             style={composerContainerStyle}
           >
             <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
-              <CreateDropWaveWrapper composerDensity={composerDensity}>
+              <CreateDropWaveWrapper>
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}
                   onCancelReplyQuote={onCancelReplyQuote}

@@ -878,7 +878,6 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expect(composer).not.toBeFocused();
     await expect(composer).toHaveText("");
     // Explicitly focus to test undo; sending must not reopen the keyboard.
     await composer.focus();

@@ -48,6 +48,7 @@ import {
   E2EE_MAX_TEXT_LENGTH,
   handleMentionKey,
   isSendKey,
+  isComposerEmpty,
   isEditLastMessageKey,
   type PasteNotice,
   useMentionPicker,
@@ -430,6 +431,11 @@ function useLoadedComposerText(
   return { editId, draftId };
 }
 
+function getComposerContainerClassName(isApp: boolean): string {
+  const bottomPadding = isApp ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]";
+  return `tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${bottomPadding}`;
+}
+
 /**
  * Encrypted composer: text with @mentions, reply and edit modes, image
  * previews for attachments, Enter to send. Sends optimistically: the engine
@@ -496,7 +502,8 @@ export function E2eeComposer({
     element.style.height = `${Math.min(element.scrollHeight, COMPOSER_MAX_HEIGHT_PX)}px`;
   }, [text]);
 
-  const isEmpty = text.trim().length === 0 && files.length === 0;
+  const isEmpty = isComposerEmpty(text, files);
+  const containerClassName = getComposerContainerClassName(isCapacitor);
   const isUploading = uploading.length > 0;
   const tooLong = text.length > E2EE_MAX_TEXT_LENGTH;
   // Editing changes only the text, and the server can switch attachments off.
@@ -656,7 +663,7 @@ export function E2eeComposer({
   if (disabledReasonKey) {
     return (
       <div
-        className={`tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${isCapacitor ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]"}`}
+        className={containerClassName}
         style={getNativeComposerStyle(isCapacitor)}
       >
         <p className="tw-m-0 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
@@ -677,7 +684,7 @@ export function E2eeComposer({
 
   return (
     <div
-      className={`tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${isCapacitor ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]"}`}
+      className={containerClassName}
       style={getNativeComposerStyle(isCapacitor)}
     >
       <ComposerTopBars

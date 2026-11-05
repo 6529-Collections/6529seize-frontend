@@ -1,17 +1,9 @@
 "use client";
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDebouncedCallback } from "use-debounce";
 import { registerWaveComposerDock } from "./WaveComposerDockVisibility";
-import type { DropComposerDensity } from "./dropComposer.types";
 
 export enum CreateDropWaveWrapperContext {
   WAVE_CHAT = "WAVE_CHAT",
@@ -21,14 +13,7 @@ export enum CreateDropWaveWrapperContext {
 interface CreateDropWaveWrapperProps {
   readonly children: React.ReactNode;
   readonly context?: CreateDropWaveWrapperContext | undefined;
-  readonly composerDensity?: DropComposerDensity | undefined;
 }
-
-const DropComposerDensityContext =
-  createContext<DropComposerDensity>("default");
-
-export const useDropComposerDensity = () =>
-  useContext(DropComposerDensityContext);
 
 function useResizeObserver(
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -83,7 +68,6 @@ function useResizeObserver(
 export function CreateDropWaveWrapper({
   children,
   context = CreateDropWaveWrapperContext.WAVE_CHAT,
-  composerDensity = "default",
 }: CreateDropWaveWrapperProps) {
   const capacitor = useCapacitor();
 
@@ -116,14 +100,12 @@ export function CreateDropWaveWrapper({
     return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)] tw-z-30";
   }, [capacitor.isIos]);
   return (
-    <DropComposerDensityContext.Provider value={composerDensity}>
-      <div
-        ref={containerRef}
-        className={`${containerClassName} tw-sticky tw-top-0 tw-flex tw-w-full tw-flex-none tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
-      >
-        {children}
-        <div ref={fixedBottomRef}></div>
-      </div>
-    </DropComposerDensityContext.Provider>
+    <div
+      ref={containerRef}
+      className={`${containerClassName} tw-sticky tw-top-0 tw-flex tw-w-full tw-flex-none tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
+    >
+      {children}
+      <div ref={fixedBottomRef}></div>
+    </div>
   );
 }
