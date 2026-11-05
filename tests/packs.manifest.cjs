@@ -552,10 +552,11 @@ const PACKS = [
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
-      "Profile Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
+      "Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
       [
         "tests/social/profile-following-sandbox.spec.ts",
         "tests/social/profile-rep-edit-sandbox.spec.ts",
+        "tests/social/profile-about-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
@@ -598,6 +599,14 @@ const PACKS = [
     ["tests/e2ee/encrypted-people-picker-sandbox.spec.ts"],
     E2EE_SANDBOX_ENV,
     [DESKTOP, "capacitor-ios-sim"]
+  ),
+
+  sandboxPack(
+    "test:e2e:metamask-bridge",
+    "Isolated WebKit MetaMask bridge attribution and application-error boundaries.",
+    ["tests/monitoring/metamask-bridge-filter.spec.ts"],
+    { PLAYWRIGHT_SKIP_WEB_SERVER: "1" },
+    ["web-desktop-webkit"]
   ),
 
   localPack(
