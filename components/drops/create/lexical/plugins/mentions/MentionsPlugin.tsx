@@ -102,6 +102,7 @@ export class MentionTypeaheadOption extends MenuOption {
   handle: string;
   display: string | null;
   picture: string | null;
+  level: number | null;
   members: MentionAliasMember[];
 
   constructor({
@@ -109,6 +110,7 @@ export class MentionTypeaheadOption extends MenuOption {
     handle,
     display,
     picture,
+    level = null,
     type = "identity",
     members = [],
   }: {
@@ -116,6 +118,7 @@ export class MentionTypeaheadOption extends MenuOption {
     handle: string;
     display: string | null;
     picture: string | null;
+    level?: number | null | undefined;
     type?: "identity" | "group" | "alias" | undefined;
     members?: MentionAliasMember[] | undefined;
   }) {
@@ -125,6 +128,7 @@ export class MentionTypeaheadOption extends MenuOption {
     this.handle = handle;
     this.display = display;
     this.picture = picture;
+    this.level = level;
     this.members = members;
   }
 }
@@ -414,6 +418,7 @@ const NewMentionsPlugin = forwardRef<
             handle: identity.handle,
             display: identity.display,
             picture: identity.pfp,
+            level: identity.level,
           })
       )
       .sort((first, second) => {
