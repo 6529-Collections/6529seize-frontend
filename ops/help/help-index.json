@@ -11205,6 +11205,44 @@
       "canonical_path": "/bookmarks",
       "tags": ["waves", "privacy", "navigation"],
       "source_refs": ["ops/docs/waves/chat/feature-private-bookmarks.md"]
+    },
+    {
+      "id": "notifications.artist-artwork-alerts",
+      "kind": "ui_affordance",
+      "title": "Artist artwork alerts",
+      "aliases": [
+        "artwork alerts",
+        "artist notifications",
+        "notify me when an artist submits",
+        "Main Stage alerts"
+      ],
+      "keywords": [
+        "artist",
+        "artwork",
+        "bell",
+        "Main Stage",
+        "follow",
+        "notifications"
+      ],
+      "facts": [
+        "Open Profile actions and select Artwork alerts on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
+        "Signed-out viewers do not see Artwork alerts. After signing in, it appears for profiles with an artist activity badge: active Main Stage submissions, Main Stage wins, or earlier Meme artist credits. If alerts are already on, the control remains available without the badge so they can be turned off; turning them off then hides it.",
+        "Open Profile actions and wait for the saved On or Off state to load. On includes a check mark. Select Artwork alerts again to turn alerts off. The control stays hidden until your own-profile session is verified, including while sign-in is unresolved or when using a proxy. An unknown preference is never shown as Off. After signing in, reopen Profile actions to load your saved choice.",
+        "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
+        "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",
+        "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
+        "Find alerts under the Artwork alerts filter in /notifications or in the desktop notification panel. Both show an artwork thumbnail, using the artist's preview image for video or other media when available. A missing or failed image falls back to a bell. The artwork title in the full feed, the panel row, and app push alerts open the exact submission directly in the single-artwork viewer. Closing the viewer returns to its competition. Artworks without a title appear as untitled artwork.",
+        "Profile preferences including Essential only and Direct messages and wave activity apply. App push also requires device permission and the Wave Invites setting.",
+        "Artwork alerts shows Try again when the preference could not load; select it to retry. Without an artist badge, the control appears only once an enabled preference is known; close and reopen Profile actions if the initial request fails, or reopen the profile if no actions menu is available. A failed save displays an error and rechecks saved state before another toggle."
+      ],
+      "canonical_path": "/notifications",
+      "related_paths": ["/waves"],
+      "tags": ["notifications", "profiles"],
+      "source_refs": [
+        "hooks/useArtistArtworkAlert.tsx",
+        "components/brain/notifications/NotificationArtistArtwork.tsx",
+        "ops/docs/notifications/feature-artist-artwork-alerts.md"
+      ]
     }
   ]
 }

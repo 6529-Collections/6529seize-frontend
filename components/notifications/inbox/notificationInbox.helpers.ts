@@ -1,5 +1,8 @@
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import {
+  getCompetitionDropRoute,
+  getCompetitionRoute,
+} from "@/helpers/competition.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -67,6 +70,14 @@ export function getInboxDestination(
   notification: TypedNotification,
   handle: string
 ): string {
+  if (notification.cause === ApiNotificationCause.ArtistArtworkSubmitted) {
+    const context = notification.additional_context;
+    return getCompetitionDropRoute(
+      context.wave_id,
+      context.competition_id,
+      context.drop_id
+    );
+  }
   const drop = getInboxDrop(notification);
   if (drop) {
     return getWaveRoute({
@@ -135,6 +146,14 @@ export function getInboxSummary(
     : (identity?.handle ?? t(locale, "notifications.unknownProfile"));
   const params = { actor };
   switch (notification.cause) {
+    case ApiNotificationCause.ArtistArtworkSubmitted: {
+      const title = notification.additional_context.artwork_title?.trim() ?? "";
+      return t(locale, "artworkAlerts.notification", {
+        artist: actor,
+        artwork: title.length > 0 ? title : t(locale, "artworkAlerts.untitled"),
+        competition: notification.additional_context.competition_title,
+      });
+    }
     case ApiNotificationCause.IdentitySubscribed:
       return t(locale, "notifications.inbox.follow", params);
     case ApiNotificationCause.IdentityMentioned:
