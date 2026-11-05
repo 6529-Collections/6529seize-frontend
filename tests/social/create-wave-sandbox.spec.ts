@@ -148,6 +148,18 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       rows.map((row) => row.getBoundingClientRect().height)
     );
     expect(new Set(heights).size).toBe(1);
+    const circles = await menu.getByRole("img").evaluateAll((badges) =>
+      badges.map((badge) => {
+        const circle = badge.querySelector(".tw-rounded-full")!;
+        const { width, height } = circle.getBoundingClientRect();
+        return { width, height };
+      })
+    );
+    expect(circles).toHaveLength(4);
+    for (const circle of circles) {
+      expect(circle.width).toBe(20);
+      expect(circle.height).toBe(circle.width);
+    }
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: test.info().outputPath("mention-levels.png"),
@@ -223,6 +235,31 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       draft.getByRole("heading", { name: "Create Wave", exact: true })
     ).toBeVisible();
+    await expect(menu).toHaveCount(0);
+    await firstPost.fill("@qa_");
+    await expect(menu).toHaveCount(5);
+    const reopenedDraftBadge = page.getByRole("img", {
+      name: "Level 100",
+      exact: true,
+    });
+    if (hasTouch) await reopenedDraftBadge.tap();
+    else await reopenedDraftBadge.click();
+    await expect(firstPost).toContainText("@qa_123456789012");
+    await expect(menu).toHaveCount(0);
+    await page.goto("/waves/00000000-0000-4000-8000-000000000529");
+    await expect(composer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await composer.fill("@qa_");
+    await expect(menu).toHaveCount(5);
+    const reopenedBadge = page.getByRole("img", {
+      name: "Level 100",
+      exact: true,
+    });
+    if (hasTouch) await reopenedBadge.tap();
+    else await reopenedBadge.click();
+    await expect(composer).toContainText("@qa_123456789012");
+    await expect(composer).toBeFocused();
     await expect(menu).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });

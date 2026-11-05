@@ -1,6 +1,8 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
-import UserLevel from "@/components/user/utils/level/UserLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -73,20 +75,18 @@ export default function MentionsTypeaheadMenuItem({
                   {handle}
                 </span>
                 {hasLevel && (
-                  <span
-                    className="tw-shrink-0"
+                  <div
+                    className="tw-inline-flex tw-shrink-0"
                     role="img"
                     aria-label={t(locale, "waves.composer.mentions.level", {
                       level,
                     })}
                   >
-                    <UserLevel
+                    <UserCICAndLevel
                       level={level}
-                      size="xxs"
-                      asSpan
-                      showLabel={false}
+                      size={UserCICAndLevelSize.SMALL}
                     />
-                  </span>
+                  </div>
                 )}
               </div>
               <div className="tw-h-4 tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
