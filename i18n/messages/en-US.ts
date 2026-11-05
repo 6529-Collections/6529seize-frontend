@@ -3200,6 +3200,8 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.notification":
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.loading": "Loading emoji picker...",
+  "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
   "waves.historyGap.loaded": "Missed messages loaded",
   "waves.historyGap.loading": "Loading missed messages…",

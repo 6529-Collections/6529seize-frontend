@@ -79,6 +79,10 @@ const TODAY: Picture = {
 const SIGN_ONCE =
   "It makes this computer's key and asks your wallet to sign once. That sends no transaction and costs nothing.";
 
+// The app's Starting screen (rc.7, crates/app pages.rs).
+const WHILE_IT_STARTS =
+  "While the validator service starts, the app shows each step. If one takes too long, the app says which, with Restart the validator service.";
+
 const LEAVE_IT_RUNNING: Step = {
   title: "Leave it running",
   text: "It signs once a day by itself.",
@@ -222,6 +226,7 @@ function MoreForSystem({ system }: { readonly system: SystemKey }) {
             macOS says Background Items Added. That is the validator, which runs
             whenever you are logged in.
           </li>
+          <li>{WHILE_IT_STARTS}</li>
           <li>
             If macOS says it could not verify the app, or that Apple can&apos;t
             check it, press Move to Trash and tell us. Don&apos;t press Open
@@ -250,7 +255,13 @@ function MoreForSystem({ system }: { readonly system: SystemKey }) {
             When it&apos;s done, press Launch. The app&apos;s window opens, and
             6529&apos;s logo appears by the clock.
           </li>
+          <li>{WHILE_IT_STARTS}</li>
         </ol>
+        <p className={`tw-mb-4 tw-mt-0 ${BODY}`}>
+          If an earlier test release is installed, run the new Setup.exe over
+          it. It replaces the earlier release, removes any extra 6529 Validator
+          entries in Installed apps, and keeps your key and your records.
+        </p>
         <div className="tw-max-w-sm">
           <StepPicture picture={WINDOWS_PERMISSION} />
         </div>
