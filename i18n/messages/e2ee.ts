@@ -29,6 +29,14 @@ export const E2EE_MESSAGES = {
   "e2ee.profile.viewUnknown": "View profile",
   "e2ee.profile.level": "Level {level}",
   "e2ee.someone": "Someone",
+  "e2ee.emoji.title": "Choose an emoji",
+  "e2ee.emoji.insert": "Add emoji",
+  "e2ee.emoji.react": "More reactions",
+  "e2ee.emoji.loading": "Loading emoji picker…",
+  "e2ee.emoji.unavailable":
+    "Emoji picker is unavailable. Close it and try again.",
+  "e2ee.emoji.customUnavailable":
+    "Custom emojis couldn’t load. Standard emojis are still available.",
   "e2ee.unknownMember": "Unknown member",
 
   "e2ee.gate.proxy.title": "Not available while acting as a proxy",
