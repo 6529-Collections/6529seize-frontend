@@ -111,6 +111,14 @@ describe("effective App PR CI plan", () => {
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "hooks/useRepAllocation.ts",
     "tests/social/profile-rep-edit-sandbox.spec.ts",
+    "tests/social/profile-about-sandbox.spec.ts",
+    "components/user/user-page-header/about/UserPageHeaderAbout.tsx",
+    "components/user/user-page-header/UserPageHeaderClient.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfile.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfileDesktop.tsx",
+    "components/user/user-page-header/UserPageHeaderProfileEditor.tsx",
+    "components/user/user-page-header/useProfileEditor.ts",
+    "components/user/settings/UserSettingsBackground.tsx",
   ])("selects the profile dialog browser pack for %s", (file) => {
     const input = plan([file]);
     input.checks.playwright_critical_shell = {
@@ -629,6 +637,20 @@ describe("App PR CI merge-tree base", () => {
       expect(step.env?.["BASE_SHA"]).toBe(mergeTreeBase);
       expect(planSteps.indexOf(step)).toBeGreaterThan(resolveIndex);
     }
+  });
+
+  it("finishes independent app checks while retaining the aggregate failure gate", () => {
+    expect(appChecks.strategy["fail-fast"]).toBe(false);
+    const aggregate = workflow.jobs["installed-checks"];
+    expect(aggregate.needs).toEqual([
+      "plan",
+      "app-checks",
+      "core-playwright-checks",
+    ]);
+    const gate = aggregate.steps.find(
+      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+    );
+    expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });
 
   it("feeds every app-check diff, selection and evidence base from the plan", () => {

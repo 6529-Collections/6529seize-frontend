@@ -103,13 +103,23 @@ function applyEffectiveAppPrCiPlan(plan) {
   // Museum lane itself. The selection tool then runs only the affected packs.
   const playwrightMuseum = files.some(requiresMuseumLane);
 
-  const playwrightProfileRep = files.some(
+  const playwrightProfileDialogs = files.some(
     (file) =>
       file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/user-page-header/about/") ||
+      file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
+      file.startsWith(
+        "components/user/user-page-header/UserPageHeaderEditProfile"
+      ) ||
+      file ===
+        "components/user/user-page-header/UserPageHeaderProfileEditor.tsx" ||
+      file === "components/user/user-page-header/useProfileEditor.ts" ||
+      file.startsWith("components/user/settings/") ||
       file.startsWith("components/user/utils/rate/") ||
       file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
-      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts" ||
+      file === "tests/social/profile-about-sandbox.spec.ts"
   );
 
   const playwrightArtworkDocumentation = files.some((file) =>
@@ -278,10 +288,10 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const checks = {
     ...plan.checks,
-    playwright_critical_shell: playwrightProfileRep
+    playwright_critical_shell: playwrightProfileDialogs
       ? check(
           true,
-          "Profile REP and rating changes require the profile dialog browser pack."
+          "Profile editing changes require the profile dialog browser pack."
         )
       : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(
