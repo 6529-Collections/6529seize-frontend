@@ -144,7 +144,7 @@ export const PARTS: readonly {
   {
     key: "first-start",
     part: "First start",
-    answer: "Leave it on for about half an hour.",
+    answer: "Leave it on until the app says it is ready, about half an hour.",
     why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.7 on 5 November this took about 25 minutes through Tor, and 10 with Tor off.",
   },
 ];
