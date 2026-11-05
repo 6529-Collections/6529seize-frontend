@@ -26,7 +26,10 @@ import {
   startChat,
 } from "../support/e2ee/e2eeUi";
 
-import { isMobileWebProject } from "../support/surfaceSimulation";
+import {
+  installSurfaceSimulation,
+  isMobileWebProject,
+} from "../support/surfaceSimulation";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -160,6 +163,70 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         })
         .toBe(true);
     }
+  });
+
+  test("iPad app keeps the back arrow when rotating into landscape", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions.push(alice);
+    await installSurfaceSimulation(alice.context, "capacitor-ios-sim", baseURL);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions.push(bob);
+    // Wallet balance reads are unrelated to navigation and blocked by the sandbox.
+    for (const session of sessions) {
+      await session.context.route("https://rpc.walletconnect.org/**", (route) =>
+        route.fulfill({
+          status: 400,
+          json: { error: "Fixture RPC unavailable" },
+        })
+      );
+    }
+    await alice.page.setViewportSize({ width: 834, height: 1194 });
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    const chatUrl = alice.page.url();
+    const back = alice.page.getByRole("link", {
+      name: "Back to encrypted messages",
+    });
+
+    for (const viewport of [
+      { width: 834, height: 1194 },
+      { width: 1194, height: 834 },
+      { width: 1366, height: 1024 },
+    ]) {
+      await alice.page.setViewportSize(viewport);
+      await expect(back).toBeVisible();
+      await expect(back).toHaveAttribute("href", ENCRYPTED_ROUTE);
+      expect(
+        await alice.page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth
+        )
+      ).toBe(false);
+      await alice.page.screenshot({
+        path: testInfo.outputPath(`encrypted-ipad-${viewport.width}.png`),
+        fullPage: true,
+      });
+      await back.click();
+      await expect(alice.page).toHaveURL(
+        new RegExp(`${ENCRYPTED_ROUTE}$`, "u")
+      );
+      await openConversationFromList(alice.page, "bob");
+      await expect(alice.page).toHaveURL(chatUrl);
+    }
+
+    await bob.page.setViewportSize({ width: 1366, height: 1024 });
+    await openConversationFromList(bob.page, "alice");
+    const webBack = bob.page.getByRole("link", {
+      name: "Back to encrypted messages",
+      includeHidden: true,
+    });
+    await expect(webBack).toBeHidden();
+    await bob.page.setViewportSize({ width: 834, height: 1194 });
+    await expect(webBack).toBeVisible();
   });
 
   test("ordinary sender identities and profile navigation on desktop and phone", async ({
