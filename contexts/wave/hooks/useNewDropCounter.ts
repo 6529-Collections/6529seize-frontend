@@ -285,34 +285,65 @@ function useNewDropCounter(
     }
   }, [activeWaveId, enabled, resetWaveNewDropsCount]);
 
-  const handleUnknownDrop = useCallback(
-    (message: ApiDrop) => {
-      const waveId = message.wave.id;
-      if (otherListWaveIds.has(waveId)) return;
-      if (!message.reply_to) {
-        const isOwnDrop =
-          connectedProfile?.handle?.toLowerCase() ===
-          message.author.handle?.toLowerCase();
-        const isVisibleActiveWave =
-          waveId === activeWaveId && document.visibilityState === "visible";
-        if (isOwnDrop || isVisibleActiveWave) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              waveId,
-            })
-          );
-          return;
-        }
+  const recordDropActivity = useCallback(
+    (
+      activity: {
+        readonly waveId: string;
+        readonly createdAt: number;
+        readonly serialNo: number;
+        readonly isOwnDrop: boolean;
+      },
+      muted = false
+    ): boolean => {
+      const { waveId, createdAt, serialNo, isOwnDrop } = activity;
+      const isVisibleActiveWave =
+        waveId === activeWaveId && document.visibilityState === "visible";
+      if (muted || isOwnDrop || isVisibleActiveWave) {
         setNewDropsCounts((prev) =>
-          addUnreadDropCount({
-            createdAt: message.created_at,
+          updateLatestDropTimestamp({
+            createdAt,
             newDropsCounts: prev,
-            serialNo: message.serial_no,
             waveId,
+            ...(muted ? { firstUnreadSerialNo: null, unreadCount: 0 } : {}),
           })
         );
+        return false;
+      }
+      setNewDropsCounts((prev) =>
+        addUnreadDropCount({
+          createdAt,
+          newDropsCounts: prev,
+          serialNo,
+          waveId,
+        })
+      );
+      return true;
+    },
+    [activeWaveId]
+  );
+
+  const recordFullDrop = useCallback(
+    (message: ApiDrop, muted = false) =>
+      recordDropActivity(
+        {
+          waveId: message.wave.id,
+          createdAt: message.created_at,
+          serialNo: message.serial_no,
+          isOwnDrop:
+            connectedProfile?.handle?.toLowerCase() ===
+            message.author.handle?.toLowerCase(),
+        },
+        muted
+      ),
+    [connectedProfile?.handle, recordDropActivity]
+  );
+
+  const handleUnknownDrop = useCallback(
+    (message: ApiDrop) => {
+      if (otherListWaveIds.has(message.wave.id)) return;
+      if (!message.reply_to) {
+        const addedUnread = recordFullDrop(message);
+        if (!addedUnread) return;
       }
       const now = Date.now();
       if (
@@ -324,9 +355,8 @@ function useNewDropCounter(
       refetchWaves();
     },
     [
-      activeWaveId,
-      connectedProfile?.handle,
       otherListWaveIds,
+      recordFullDrop,
       refetchWaves,
       unknownWaveRefetchCooldownMs,
     ]
@@ -336,50 +366,15 @@ function useNewDropCounter(
     (message: ApiDrop) => {
       if (!enabled || !message.wave.id || isPollResponseDropUpdate(message))
         return;
-      const waveId = message.wave.id;
-      const wave = waves.find((candidate) => candidate.id === waveId);
+      const wave = waves.find((candidate) => candidate.id === message.wave.id);
       if (!wave) {
         handleUnknownDrop(message);
         return;
       }
       if (wave.repliesCollapsed && message.reply_to) return;
-      if (wave.muted) {
-        setNewDropsCounts((prev) =>
-          updateLatestDropTimestamp({
-            createdAt: message.created_at,
-            firstUnreadSerialNo: null,
-            newDropsCounts: prev,
-            unreadCount: 0,
-            waveId,
-          })
-        );
-        return;
-      }
-      const isOwnDrop =
-        connectedProfile?.handle?.toLowerCase() ===
-        message.author.handle?.toLowerCase();
-      const isVisibleActiveWave =
-        waveId === activeWaveId && document.visibilityState === "visible";
-      if (isOwnDrop || isVisibleActiveWave) {
-        setNewDropsCounts((prev) =>
-          updateLatestDropTimestamp({
-            createdAt: message.created_at,
-            newDropsCounts: prev,
-            waveId,
-          })
-        );
-        return;
-      }
-      setNewDropsCounts((prev) =>
-        addUnreadDropCount({
-          createdAt: message.created_at,
-          newDropsCounts: prev,
-          serialNo: message.serial_no,
-          waveId,
-        })
-      );
+      recordFullDrop(message, wave.muted);
     },
-    [enabled, waves, handleUnknownDrop, connectedProfile?.handle, activeWaveId]
+    [enabled, waves, handleUnknownDrop, recordFullDrop]
   );
 
   const currentProfileId = useRef(connectedProfile?.id);
@@ -426,51 +421,23 @@ function useNewDropCounter(
           if (!otherListWaveIds.has(waveId)) resolveDropUpdateRef(message);
           return;
         }
-        const isOwnDrop = connectedProfile?.id === message.author_id;
-        const shouldOnlyUpdateTimestamp =
-          isOwnDrop ||
-          (waveId === activeWaveId && document.visibilityState === "visible");
-
-        if (wave.muted) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: now,
-              firstUnreadSerialNo: null,
-              newDropsCounts: prev,
-              unreadCount: 0,
-              waveId,
-            })
-          );
-          return;
-        }
-
-        if (shouldOnlyUpdateTimestamp) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: now,
-              newDropsCounts: prev,
-              waveId,
-            })
-          );
-          return;
-        }
-
-        setNewDropsCounts((prev) =>
-          addUnreadDropCount({
-            createdAt: now,
-            newDropsCounts: prev,
-            serialNo,
+        recordDropActivity(
+          {
             waveId,
-          })
+            createdAt: now,
+            serialNo,
+            isOwnDrop: connectedProfile?.id === message.author_id,
+          },
+          wave.muted
         );
       },
       [
-        activeWaveId,
         connectedProfile?.id,
         enabled,
         otherListWaveIds,
         waves,
         resolveDropUpdateRef,
+        recordDropActivity,
       ]
     )
   );

@@ -84,6 +84,7 @@ const emitDropUpdateRef = (message: Record<string, unknown>) => {
 
 describe("useNewDropCounter", () => {
   beforeEach(() => {
+    fetchDropByIdBatched.mockReset();
     (useWebSocketMessage as jest.Mock).mockClear();
     (useWebSocketMessage as jest.Mock).mockImplementation(
       (_t: any, cb: any) => {
@@ -154,7 +155,7 @@ describe("useNewDropCounter", () => {
         expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact")
       );
       await act(async () => {
-        await Promise.resolve();
+        await fetchDropByIdBatched.mock.results[0].value;
       });
       expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
         isReply ? 0 : 1

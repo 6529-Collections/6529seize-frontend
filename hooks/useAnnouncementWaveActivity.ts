@@ -12,7 +12,7 @@ import type { SidebarWave } from "@/types/waves.types";
 
 // Wave metrics include replies. The main feed excludes collapsed replies and
 // supplies the correct timestamp even after a reload or deletion.
-export function useAnnouncementWaveTimestamp({
+function useAnnouncementWaveTimestamp({
   waveId,
   enabled,
   viewerIdentityKey,

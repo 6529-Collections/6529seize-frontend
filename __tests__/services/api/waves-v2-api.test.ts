@@ -1,8 +1,12 @@
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import {
+  mapApiWaveOverviewToSidebarWave,
+  mapApiWaveToSidebarWave,
   createWaveMetadata,
   deleteWaveMetadata,
   fetchWaveMetadata,
@@ -33,6 +37,42 @@ describe("waves-v2-api", () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
+
+  it.each([undefined, false, true])(
+    "maps overview collapsed replies setting %s",
+    (collapsed) => {
+      const wave = {
+        id: "announcement",
+        description_drop: { media: [] },
+        replies_collapsed: collapsed,
+      } as ApiWaveOverview;
+      expect(mapApiWaveOverviewToSidebarWave(wave).repliesCollapsed).toBe(
+        collapsed ?? false
+      );
+    }
+  );
+
+  it.each([undefined, false, true])(
+    "maps detail collapsed replies setting %s",
+    (collapsed) => {
+      const wave = {
+        id: "announcement",
+        wave: { type: "CHAT" },
+        chat: {
+          scope: { group: null },
+          ...(collapsed === undefined ? {} : { replies: { collapsed } }),
+        },
+        visibility: { scope: { group: null } },
+        metrics: {},
+        description_drop: { parts: [] },
+        contributors_overview: [],
+        subscribed_actions: [],
+      } as ApiWave;
+      expect(mapApiWaveToSidebarWave(wave).repliesCollapsed).toBe(
+        collapsed ?? false
+      );
+    }
+  );
 
   it("fetches subwaves with created-time sort and maps parent metadata", async () => {
     commonApiFetchMock.mockResolvedValue({

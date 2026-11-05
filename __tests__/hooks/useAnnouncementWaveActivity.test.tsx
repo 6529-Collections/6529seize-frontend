@@ -1,12 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
-import {
-  useAnnouncementWaveActivity,
-  useAnnouncementWaveTimestamp,
-} from "@/hooks/useAnnouncementWaveActivity";
+import { useAnnouncementWaveActivity } from "@/hooks/useAnnouncementWaveActivity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { WsMessageType } from "@/helpers/Types";
+import type { SidebarWave } from "@/types/waves.types";
 
 const callbacks = new Map<string, (data: unknown) => void>();
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
@@ -21,6 +19,24 @@ const options = {
   enabled: true,
   viewerIdentityKey: "reader",
 };
+
+function useTimestamp({
+  waveId,
+  enabled,
+  viewerIdentityKey,
+}: {
+  readonly waveId: string | null;
+  readonly enabled: boolean;
+  readonly viewerIdentityKey: string;
+}) {
+  const wave = waveId
+    ? ({ id: waveId, repliesCollapsed: enabled } as SidebarWave)
+    : null;
+  return (
+    useAnnouncementWaveActivity(wave, viewerIdentityKey)
+      ?.latestTopLevelDropTimestamp ?? null
+  );
+}
 
 function setup() {
   const client = new QueryClient({
@@ -44,7 +60,7 @@ beforeEach(() => {
 it("loads the latest main-feed post without using a reply-inclusive metric", async () => {
   fetchMock.mockResolvedValue({ drops: [{ created_at: 100 }] });
   const { wrapper } = setup();
-  const { result } = renderHook(() => useAnnouncementWaveTimestamp(options), {
+  const { result } = renderHook(() => useTimestamp(options), {
     wrapper,
   });
   expect(result.current).toBeNull();
@@ -69,7 +85,7 @@ it("loads the latest main-feed post without using a reply-inclusive metric", asy
 it("rechecks compact updates and recovers the previous post after deletion", async () => {
   fetchMock.mockResolvedValue({ drops: [{ created_at: 100 }] });
   const { wrapper } = setup();
-  const { result } = renderHook(() => useAnnouncementWaveTimestamp(options), {
+  const { result } = renderHook(() => useTimestamp(options), {
     wrapper,
   });
   await waitFor(() => expect(result.current).toBe(100));
@@ -94,8 +110,7 @@ it("keeps viewer caches separate and hides the timestamp until the new viewer lo
   fetchMock.mockResolvedValue({ drops: [{ created_at: 100 }] });
   const { wrapper } = setup();
   const { result, rerender } = renderHook(
-    ({ viewerIdentityKey }) =>
-      useAnnouncementWaveTimestamp({ ...options, viewerIdentityKey }),
+    ({ viewerIdentityKey }) => useTimestamp({ ...options, viewerIdentityKey }),
     { wrapper, initialProps: { viewerIdentityKey: "reader" } }
   );
   await waitFor(() => expect(result.current).toBe(100));
@@ -109,7 +124,7 @@ it("does not request an absent or disabled wave", () => {
   const { wrapper } = setup();
   const { result } = renderHook(
     () =>
-      useAnnouncementWaveTimestamp({
+      useTimestamp({
         ...options,
         waveId: null,
         enabled: false,
@@ -130,7 +145,7 @@ it("removes the timestamp override when replies switch back to inline", async ()
         {
           id: "announcements",
           repliesCollapsed,
-        } as import("@/types/waves.types").SidebarWave,
+        } as SidebarWave,
         "reader"
       ),
     { wrapper, initialProps: { repliesCollapsed: true } }
