@@ -2,7 +2,11 @@ import type { Page } from "@playwright/test";
 
 import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import { expect, test } from "../testHelpers";
-import { findTouchMessage, longPressTouchMessage } from "./waveTouchTarget";
+import {
+  findTouchMessage,
+  longPressTouchMessage,
+  tapTouchMessage,
+} from "./waveTouchTarget";
 
 /**
  * Win 8-sequence regression pack for the behavioral fine-pointer latch
@@ -34,6 +38,7 @@ const WIN8_CHROME_UA =
 const bodyHasFinePointer = (page: Page) =>
   page.evaluate(() => document.body.hasAttribute("data-fine-pointer"));
 
+/** Find one anonymously readable wave with a hydrated long-pressable message. */
 async function openWaveWithRows(page: Page) {
   await page.goto("/waves", { waitUntil: "domcontentloaded" });
   const waveLinks = page.locator('a[href^="/waves/"]');
@@ -53,9 +58,8 @@ async function openWaveWithRows(page: Page) {
     .slice(0, 5);
   for (const href of candidates) {
     await page.goto(href, { waitUntil: "domcontentloaded" });
-    // `.touch-select-none` marks rows whose selection is disabled in favor
-    // of long-press — it only renders while the app classifies the device
-    // as touch-first, so its presence participates in the assertion.
+    // Wait for a hydrated row. The class exists on desktop too, so the
+    // classification and visible action sheet must still be asserted below.
     try {
       return await findTouchMessage(page);
     } catch {
@@ -86,16 +90,17 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // of a generic timeout.
     test.setTimeout(180_000);
     const row = await openWaveWithRows(page);
+    const waveUrl = page.url();
 
     // The Win 8 sequence, three times over: a real (trusted) touch tap, then
     // trusted mouse moves milliseconds later. Chromium's own touch pipeline
     // additionally emits compatibility mouse events after each tap — exactly
     // like the legacy OS — and none of it may latch. Element-relative tap()
-    // keeps coordinate resolution atomic against feed re-layout between
-    // rounds; the near-corner position lands in row padding, clear of links
-    // and media that a centered tap could activate.
+    // follows replacements between rounds. Hit-test neutral row padding so
+    // the input sequence cannot activate the author avatar or a message link.
     for (let round = 0; round < 3; round++) {
-      await row.tap({ position: { x: 10, y: 8 } });
+      await tapTouchMessage(row);
+      await expect(page).toHaveURL(waveUrl);
       await page.mouse.move(200 + round * 50, 300, { steps: 3 });
     }
 
@@ -106,6 +111,7 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
     // a zero-size positioning shell that Playwright's visibility heuristic
     // reports as hidden even while its content is on screen.
     await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
+    await expect(page).toHaveURL(waveUrl);
     const copyTextAction = page
       .getByRole("button", { name: /copy text/i })
       .first();
@@ -120,18 +126,23 @@ test.describe("Win 8 touch emulation vs the fine-pointer latch", () => {
 test.describe("Touch target harness", () => {
   test.use({ hasTouch: true });
 
+  /** Match the row/header/content geometry that exposed the live regression. */
   async function installRows(page: Page) {
     await page.setContent(`
       <main>
         <article data-serial-no="1" class="touch-select-none"
-          style="width:300px;height:100px">Message one</article>
+          style="position:relative;width:300px;height:100px">
+          <a href="#author" aria-label="Author profile"
+            style="position:absolute;left:8px;top:4px;width:48px;height:48px">Author</a>
+          <div style="margin-left:64px;padding-top:12px">Message one</div>
+        </article>
       </main>
       <output role="status"></output>
       <script>
         document.addEventListener('touchstart', (event) => {
           if (event.isTrusted) {
-            document.querySelector('output').textContent =
-              event.target.closest('[data-serial-no]').dataset.serialNo;
+            const row = event.target.closest('[data-serial-no]');
+            if (row) document.querySelector('output').textContent = row.dataset.serialNo;
           }
         });
       </script>
@@ -149,7 +160,7 @@ test.describe("Touch target harness", () => {
       element.remove();
       setTimeout(() => parent?.appendChild(replacement), 50);
     });
-    await row.tap({ position: { x: 10, y: 8 } });
+    await tapTouchMessage(row);
     await expect(page.getByRole("status")).toHaveText("1");
   });
 
@@ -163,7 +174,7 @@ test.describe("Touch target harness", () => {
       newer.dataset["serialNo"] = "2";
       element.after(newer);
     });
-    await row.tap({ position: { x: 10, y: 8 } });
+    await tapTouchMessage(row);
     await expect(page.getByRole("status")).toHaveText("1");
   });
 
@@ -187,9 +198,60 @@ test.describe("Touch target harness", () => {
         { once: true, capture: true }
       );
     });
-    await row.tap({ position: { x: 10, y: 8 } });
+    await tapTouchMessage(row);
     await expect(row).toHaveText("Replacement message");
     await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("trusted taps avoid the author link in the message header", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    // Confirm that the previous coordinates really activate the header link.
+    await row.tap({ position: { x: 10, y: 8 } });
+    await expect(page).toHaveURL(/#author$/u);
+    await page.goto("about:blank");
+    await installRows(page);
+    const correctedRow = await findTouchMessage(page);
+    for (let round = 0; round < 3; round++) await tapTouchMessage(correctedRow);
+    await expect(page).toHaveURL("about:blank");
+    await expect(page.getByRole("status")).toHaveText("1");
+  });
+
+  test("tap refuses a replacement inserted after safe-position selection", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await row.evaluate((element) => {
+      const hitTest = document.elementFromPoint.bind(document);
+      document.elementFromPoint = (x, y) => {
+        const hit = hitTest(x, y);
+        if (hit && element.contains(hit) && !hit.closest("a")) {
+          document.elementFromPoint = hitTest;
+          // Run after the helper returns its safe offset, but before its
+          // separate trusted input call can start. The same serial now has
+          // entirely different interactive geometry.
+          queueMicrotask(() => {
+            const replacement = element.cloneNode(true) as HTMLElement;
+            replacement
+              .querySelector("a")
+              ?.setAttribute(
+                "style",
+                "position:absolute;inset:0;width:100%;height:100%"
+              );
+            element.replaceWith(replacement);
+            const status = document.querySelector("output");
+            if (status) status.textContent = "replaced";
+          });
+        }
+        return hit;
+      };
+    });
+    await expect(tapTouchMessage(row)).rejects.toThrow(/not attached/u);
+    await expect(page.getByRole("status")).toHaveText("replaced");
+    await expect(page).toHaveURL("about:blank");
   });
 
   test("long press ends on its original node when a newer row arrives", async ({
@@ -210,6 +272,25 @@ test.describe("Touch target harness", () => {
     });
     await longPressTouchMessage(row, 30);
     await expect(page.getByRole("status")).toHaveText("true");
+  });
+
+  test("tap refuses a message fully covered by an interactive link", async ({
+    page,
+  }) => {
+    await installRows(page);
+    const row = await findTouchMessage(page);
+    await page
+      .getByRole("link", { name: "Author profile" })
+      .evaluate((link) => {
+        link.setAttribute(
+          "style",
+          "position:absolute;inset:0;width:100%;height:100%"
+        );
+      });
+    await expect(tapTouchMessage(row)).rejects.toThrow(
+      "Message has no visible non-interactive padding to tap"
+    );
+    await expect(page).toHaveURL("about:blank");
   });
 });
 

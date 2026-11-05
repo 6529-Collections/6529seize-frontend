@@ -14,6 +14,59 @@ export async function findTouchMessage(page: Page): Promise<Locator> {
     .locator(`[data-serial-no="${serialNo}"].touch-select-none`);
 }
 
+/**
+ * Tap neutral padding on the exact node whose geometry was checked.
+ * A replacement after hit-testing must fail detached, never inherit its offset.
+ */
+export async function tapTouchMessage(row: Locator) {
+  await row.tap({ trial: true, position: { x: 1, y: 1 } });
+  // Locator actions may resolve a new node. Pin just this input operation so
+  // the validated coordinates cannot be transferred onto a replacement row.
+  const target = await row.elementHandle();
+  if (!target) throw new Error("Message disappeared before tap validation");
+  try {
+    const position = await target.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const xs = [rect.width - 2, rect.width / 2, 1];
+      const ys = [rect.height - 2, rect.height / 2, 1];
+      const interactive =
+        'a, button, input, textarea, select, summary, [role="button"], [contenteditable="true"]';
+      const controls = Array.from(
+        element.querySelectorAll("a, button, input, textarea, select, summary")
+      ).map((control) => control.getBoundingClientRect());
+      // Chromium can adjust a finger tap onto a nearby link even when the exact
+      // point hits padding. Keep clearance, not just an elementFromPoint check.
+      const nearControl = (x: number, y: number) =>
+        controls.some(
+          (control) =>
+            x >= control.left - 24 &&
+            x <= control.right + 24 &&
+            y >= control.top - 24 &&
+            y <= control.bottom + 24
+        );
+      for (const x of xs) {
+        for (const y of ys) {
+          const hit = document.elementFromPoint(rect.left + x, rect.top + y);
+          if (
+            hit &&
+            element.contains(hit) &&
+            hit.closest("[data-serial-no]") === element &&
+            !hit.closest(interactive) &&
+            !nearControl(rect.left + x, rect.top + y)
+          ) {
+            return { x, y };
+          }
+        }
+      }
+      throw new Error("Message has no visible non-interactive padding to tap");
+    });
+    await target.tap({ position });
+  } finally {
+    await target.dispose();
+  }
+}
+
+/** Pair synthetic hold events on one node; trusted taps are tested separately. */
 export async function longPressTouchMessage(row: Locator, durationMs: number) {
   // Let Playwright scroll and reacquire a replaced row before starting a gesture.
   await row.tap({ trial: true, position: { x: 10, y: 8 } });
