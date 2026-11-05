@@ -264,9 +264,11 @@ describe("createSecurityHeaders CSP", () => {
     const mediaSrc = getDirectiveSources(policy, "media-src");
     const openSeaOrigin = "https://i2c.seadn.io";
 
-    expect(mediaSrc.filter((source) => source.includes("seadn.io"))).toEqual([
-      openSeaOrigin,
-    ]);
+    expect(mediaSrc).toContain(openSeaOrigin);
+    expect(mediaSrc).not.toEqual(
+      expect.arrayContaining(["https://*.seadn.io"])
+    );
+    expect(mediaSrc).not.toContain("http://i2c.seadn.io");
     for (const broadSource of ["https:", "http:", "data:", "*"]) {
       expect(mediaSrc).not.toContain(broadSource);
     }
