@@ -1,5 +1,8 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -34,8 +37,8 @@ import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditNic } from "./UserPageRep.helpers";
 import UserPageRepHeader from "./header/UserPageRepHeader";
-import ProfileRatingsDialog from "./ProfileRatingsDialog";
-import RepContributorsDialog from "./RepContributorsDialog";
+import ProfileRepContributorsDialog from "./ProfileRepContributorsDialog";
+import type { RepDialogState } from "./repDialogs.types";
 import UserPageRepMobile from "./UserPageRepMobile";
 
 const INITIAL_VISIBLE_CATEGORY_COUNT = 5;
@@ -53,28 +56,6 @@ const getDefaultFetchStates = (): Record<RepDirection, boolean> => ({
   received: false,
   given: false,
 });
-
-type RepContributorsDialogState =
-  | {
-      readonly scope: "overview";
-      readonly direction: RepDirection;
-      readonly contributorCount: number;
-    }
-  | {
-      readonly scope: "category";
-      readonly direction: RepDirection;
-      readonly category: string;
-      readonly contributorCount: number;
-    };
-
-type RepDialogState =
-  | ({
-      readonly type: "contributors";
-    } & RepContributorsDialogState)
-  | {
-      readonly type: "globalCategory";
-      readonly category: string;
-    };
 
 function useRepCategories({
   user,
@@ -116,6 +97,7 @@ export default function UserPageRep({
   readonly profile: ApiIdentity;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
+  const locale = useBrowserLocale();
   const params = useParams();
   const user = (params["user"] as string).toLowerCase();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -336,7 +318,7 @@ export default function UserPageRep({
         />
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           <div className="tw-min-w-0">
-            <section aria-label="REP">
+            <section aria-label={t(locale, "user.rate.repRegion")}>
               <UserPageRepHeader
                 overview={activeOverview}
                 categories={activeCategories}
@@ -384,37 +366,12 @@ export default function UserPageRep({
         </div>
       </div>
 
-      {repDialog?.type === "contributors" && repDialog.direction === "given" ? (
-        <ProfileRatingsDialog
-          profile={profile}
-          matter="REP"
-          direction="given"
-          category={repDialog.scope === "category" ? repDialog.category : null}
-          onClose={() => setRepDialog(null)}
-        />
-      ) : (
-        <RepContributorsDialog
-          identity={user}
-          isOpen={repDialog?.type === "contributors"}
-          scope={
-            repDialog?.type === "contributors" ? repDialog.scope : "overview"
-          }
-          direction={
-            repDialog?.type === "contributors"
-              ? repDialog.direction
-              : repDirection
-          }
-          category={
-            repDialog?.type === "contributors" && repDialog.scope === "category"
-              ? repDialog.category
-              : null
-          }
-          contributorCount={
-            repDialog?.type === "contributors" ? repDialog.contributorCount : 0
-          }
-          onClose={() => setRepDialog(null)}
-        />
-      )}
+      <ProfileRepContributorsDialog
+        profile={profile}
+        identity={user}
+        dialog={repDialog}
+        onClose={() => setRepDialog(null)}
+      />
 
       <GlobalRepCategoryDialog
         category={

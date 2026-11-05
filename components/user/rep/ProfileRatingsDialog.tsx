@@ -1,5 +1,6 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -8,7 +9,6 @@ import Button from "@/components/utils/button/Button";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
-import { formatAddress } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -19,7 +19,11 @@ import Link from "next/link";
 import { useContext, useState } from "react";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
-import { canManageGivenRatings } from "./ratingsManagement";
+import {
+  canManageGivenRatings,
+  getRatingRecipient,
+  withRatingRecipientIdentity,
+} from "./ratingsManagement";
 import type { RepDirection } from "./UserPageRep.helpers";
 
 type RatingPage = {
@@ -28,11 +32,6 @@ type RatingPage = {
   readonly next: boolean;
 };
 type Recipient = { readonly identity: string; readonly display: string };
-
-function getRecipient(row: ApiRatingWithProfileInfoAndLevel): Recipient {
-  const identity = row.handle.trim() || (row.wallets[0] ?? row.profile_id);
-  return { identity, display: row.handle.trim() || formatAddress(identity) };
-}
 
 function RatingLoadState({
   loading,
@@ -55,10 +54,10 @@ function RatingLoadState({
     );
   if (loading)
     return (
-      <div role="status" className="tw-flex tw-justify-center tw-gap-3 tw-py-6">
+      <output className="tw-flex tw-justify-center tw-gap-3 tw-py-6">
         <CircleLoader />
         <span className="tw-sr-only">{t(locale, "user.rate.loading")}</span>
-      </div>
+      </output>
     );
   return null;
 }
@@ -81,6 +80,9 @@ function RecipientRatings({
   const target = useQuery({
     ...getIdentityQueryOptions({ handleOrWallet: recipient.identity }),
   });
+  const recipientProfile = target.data
+    ? withRatingRecipientIdentity(target.data, recipient.identity)
+    : null;
   const categories = useQuery({
     queryKey: [
       QueryKey.PROFILE_RATING_LIST,
@@ -152,8 +154,8 @@ function RecipientRatings({
                     size="sm"
                     className="tw-min-h-11 tw-shrink-0"
                     onClick={() => setEditCategory(row.category)}
-                    aria-label={t(locale, "user.rate.adjustFor", {
-                      matter: `REP (${row.category})`,
+                    aria-label={t(locale, "user.rate.adjustCategoryFor", {
+                      category: row.category,
                       name: recipient.display,
                     })}
                   >
@@ -163,20 +165,23 @@ function RecipientRatings({
               ))}
             </>
           )}
-          {!loading && !error && matter === "NIC" && (
-            <UserPageIdentityHeaderCICRate
-              profile={target.data}
-              isTooltip={false}
-              locale={locale}
-              onSuccess={onBack}
-              onCancel={onBack}
-            />
-          )}
+          {!loading &&
+            !error &&
+            recipientProfile !== null &&
+            matter === "NIC" && (
+              <UserPageIdentityHeaderCICRate
+                profile={recipientProfile}
+                isTooltip={false}
+                locale={locale}
+                onSuccess={onBack}
+                onCancel={onBack}
+              />
+            )}
         </div>
       </MobileWrapperDialog>
-      {target.data && editCategory && !error && (
+      {recipientProfile !== null && editCategory && !error && (
         <UserPageRepModifyModal
-          profile={target.data}
+          profile={recipientProfile}
           category={editCategory}
           onClose={onBack}
         />
@@ -200,7 +205,9 @@ export default function ProfileRatingsDialog({
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { address } = useSeizeConnectContext();
   const canManage =
+    (matter === "REP" || !!address) &&
     direction === "given" &&
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
   const identity = profile.query ?? profile.handle ?? profile.display;
@@ -272,13 +279,13 @@ export default function ProfileRatingsDialog({
             }}
           />
           {query.isSuccess && items.length === 0 && (
-            <p role="status" className="tw-py-4 tw-text-sm tw-text-iron-400">
+            <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
               {t(locale, "user.rate.empty")}
-            </p>
+            </output>
           )}
           <ul className="tw-m-0 tw-list-none tw-p-0">
             {items.map((row) => {
-              const target = getRecipient(row);
+              const target = getRatingRecipient(row);
               return (
                 <li
                   key={row.profile_id}

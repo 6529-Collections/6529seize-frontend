@@ -1,5 +1,8 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -70,6 +73,7 @@ export default function UserPageRepMobile({
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
+  const locale = useBrowserLocale();
   const params = useParams();
   const user = params["user"]?.toString().toLowerCase() ?? null;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -152,7 +156,7 @@ export default function UserPageRepMobile({
         {activeTab === "rep" && (
           <motion.div
             role="region"
-            aria-label="REP"
+            aria-label={t(locale, "user.rate.repRegion")}
             key="rep"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

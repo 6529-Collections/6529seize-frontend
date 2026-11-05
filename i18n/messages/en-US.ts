@@ -2666,6 +2666,10 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 } as const);
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
+  repRegion: "REP",
+  nicRegion: "NIC",
+  nicReceived: "NIC",
+  adjustCategoryFor: "Adjust REP ({category}) for {name}",
   received: "Received",
   given: "Given",
   direction: "{matter} direction",

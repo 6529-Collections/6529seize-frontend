@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
+
 import { AuthContext } from "@/components/auth/Auth";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -36,7 +38,7 @@ export default function NicRatingsOverview({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [direction, setDirection] = useState<RepDirection>("received");
   const [listOpen, setListOpen] = useState(false);
-  const identity = profile.query ?? profile.handle ?? profile.display;
+  const identity = profile.query ?? profile.handle ?? profile.primary_wallet;
   const given = useQuery({
     queryKey: [
       QueryKey.CIC_OVERVIEW,
@@ -76,7 +78,7 @@ export default function NicRatingsOverview({
     direction === "given" ? "user.rate.given" : "user.rate.received"
   );
   return (
-    <section aria-label="NIC" className="tw-mb-6">
+    <section aria-label={t(locale, "user.rate.nicRegion")} className="tw-mb-6">
       <RepDirectionToggle
         repDirection={direction}
         onRepDirectionChange={setDirection}
@@ -90,7 +92,7 @@ export default function NicRatingsOverview({
                 <p className="tw-mb-1 tw-text-xs tw-text-iron-400">
                   {direction === "given"
                     ? t(locale, "user.rate.nicGiven")
-                    : "NIC"}
+                    : t(locale, "user.rate.nicReceived")}
                 </p>
               )}
               <div className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-text-iron-50">
@@ -138,15 +140,15 @@ export default function NicRatingsOverview({
       {direction === "given" && given.isError && (
         <div role="alert" className="tw-text-sm tw-text-iron-300">
           {t(locale, "user.rate.loadError")}{" "}
-          <button
-            type="button"
+          <Button
+            variant="tertiary"
+            size="sm"
             onClick={() => {
               void given.refetch();
             }}
-            className="tw-min-h-11 tw-border-0 tw-bg-transparent tw-px-3 tw-text-iron-100"
           >
             {t(locale, "user.rate.retry")}
-          </button>
+          </Button>
         </div>
       )}
       {direction === "received" && onRateClick && (

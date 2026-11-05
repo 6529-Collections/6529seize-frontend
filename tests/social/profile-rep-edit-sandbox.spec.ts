@@ -488,6 +488,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       if (matter === "NIC" && isMobile)
         await page.getByRole("button", { name: /^NIC / }).click();
+      await expect(
+        page.getByRole("region", { name: matter, exact: true })
+      ).toHaveCount(1);
       const section =
         matter === "NIC"
           ? page

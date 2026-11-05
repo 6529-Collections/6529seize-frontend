@@ -314,7 +314,7 @@ export default function UserPageIdentityHeaderCICRate({
             >
               {tRich(locale, "user.rate.nic.label", {
                 profile: (
-                  <span key="profile" className="tw-whitespace-nowrap">
+                  <span key="profile" className="tw-break-all">
                     {profileIdentity}
                   </span>
                 ),
@@ -340,12 +340,9 @@ export default function UserPageIdentityHeaderCICRate({
                 </Button>
               )}
               {originalRating !== 0 && draftRating === "0" && (
-                <p
-                  role="status"
-                  className="tw-text-center tw-text-xs tw-text-iron-400"
-                >
+                <output className="tw-text-center tw-text-xs tw-text-iron-400">
                   {t(locale, "user.rate.removeHint")}
-                </p>
+                </output>
               )}
               <Button
                 type="submit"

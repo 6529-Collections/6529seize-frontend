@@ -238,12 +238,9 @@ export default function UserPageRepModifyModal({
             {repState?.rater_contribution !== 0 &&
               newRating === 0 &&
               draftRating === "0" && (
-                <p
-                  role="status"
-                  className="tw-text-center tw-text-xs tw-text-iron-400"
-                >
+                <output className="tw-text-center tw-text-xs tw-text-iron-400">
                   {t(locale, "user.rate.removeHint")}
-                </p>
+                </output>
               )}
             <Button
               type="submit"
