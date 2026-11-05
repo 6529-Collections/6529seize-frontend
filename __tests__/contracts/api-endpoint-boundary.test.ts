@@ -1,0 +1,125 @@
+/**
+ * Every 6529 API URL starts from `services/api/api-endpoints.ts`. Code builds
+ * URLs with `apiUrl(path)` or `getApiBase()` instead of reading
+ * `publicEnv.API_ENDPOINT` or hardcoding the production host, so the endpoint
+ * list there stays the single seam for a later gateway, node or failover.
+ *
+ * The env boundary itself (`config/`, `next.config.ts` and the standalone
+ * `next.config.ts`) bakes and validates the value and is not scanned. Each
+ * remaining exemption below names its reason.
+ */
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+
+const projectRoot = path.resolve(__dirname, "../..");
+
+const SCAN_DIRS = [
+  "app",
+  "components",
+  "contexts",
+  "entities",
+  "helpers",
+  "hooks",
+  "lib",
+  "services",
+  "utils",
+  "wagmiConfig",
+  "standalone/standalone-memes-mint/src/app",
+  "standalone/standalone-memes-mint/src/components",
+];
+const SCAN_FILES = [
+  "proxy.ts",
+  "instrumentation.ts",
+  "instrumentation-client.ts",
+];
+const EXCLUDED_DIR_NAMES = new Set(["__tests__", "__mocks__", "generated"]);
+const CODE_FILE = /\.(?:[cm]?[jt]sx?)$/u;
+const TEST_FILE = /\.(?:test|spec)\.[cm]?[jt]sx?$/u;
+
+const HELPER = "services/api/api-endpoints.ts";
+
+type Rule = {
+  readonly name: string;
+  readonly matches: (source: string) => boolean;
+  readonly exemptions: Readonly<Record<string, string>>;
+};
+
+// The host after each "//" in source text (URLs, protocol-relative URLs and
+// preconnect hints), compared exactly so look-alike hosts do not count.
+const URL_AUTHORITY = /\/\/([\w.-]+)/gu;
+const PRODUCTION_API_HOST = "api.6529.io";
+
+const namesHost = (source: string, host: string): boolean =>
+  Array.from(source.matchAll(URL_AUTHORITY), (match) =>
+    match[1]?.toLowerCase()
+  ).includes(host);
+
+const RULES: readonly Rule[] = [
+  {
+    name: "direct API_ENDPOINT read",
+    // Word boundaries keep ALLOWLIST_API_ENDPOINT and IPFS_API_ENDPOINT out.
+    matches: (source) => /\bAPI_ENDPOINT\b/u.test(source),
+    exemptions: {
+      [HELPER]: "The endpoint list reads the configured value here.",
+    },
+  },
+  {
+    name: "hardcoded production API host",
+    matches: (source) => namesHost(source, PRODUCTION_API_HOST),
+    exemptions: {
+      [HELPER]: "PUBLIC_PRODUCTION_API_BASE names the production API once.",
+      "app/tools/api/page.tsx":
+        "Copyable developer code samples document the public production API.",
+      "app/tools/api/authentication/page.tsx":
+        "Copyable developer code samples document the public production API.",
+    },
+  },
+];
+
+const listSourceFiles = (dir: string): string[] => {
+  const absolute = path.join(projectRoot, dir);
+  return readdirSync(absolute, { withFileTypes: true }).flatMap((entry) => {
+    const relative = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      return EXCLUDED_DIR_NAMES.has(entry.name)
+        ? []
+        : listSourceFiles(relative);
+    }
+    return CODE_FILE.test(entry.name) && !TEST_FILE.test(entry.name)
+      ? [relative]
+      : [];
+  });
+};
+
+const sourceFiles = [...SCAN_DIRS.flatMap(listSourceFiles), ...SCAN_FILES];
+const sources = new Map(
+  sourceFiles.map((file) => [
+    file,
+    readFileSync(path.join(projectRoot, file), "utf8"),
+  ])
+);
+
+describe("API endpoint boundary", () => {
+  it("scans the shippable source tree", () => {
+    expect(sources.size).toBeGreaterThan(1000);
+    expect(sources.has(HELPER)).toBe(true);
+  });
+
+  describe.each(RULES)("$name", ({ matches, exemptions }) => {
+    it("appears only in exempted files (use apiUrl() or getApiBase())", () => {
+      const offenders = [...sources]
+        .filter(([file, source]) => !(file in exemptions) && matches(source))
+        .map(([file]) => file);
+
+      expect(offenders).toEqual([]);
+    });
+
+    it("keeps every exemption in use", () => {
+      const stale = Object.keys(exemptions).filter(
+        (file) => !matches(sources.get(file) ?? "")
+      );
+
+      expect(stale).toEqual([]);
+    });
+  });
+});

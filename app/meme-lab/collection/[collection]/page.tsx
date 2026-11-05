@@ -9,6 +9,7 @@ import {
 } from "@/components/memelab/memeLabRouteParams";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData } from "@/entities/INFT";
 import { t } from "@/i18n/messages";
@@ -30,7 +31,9 @@ const resolveMemeLabCollection = cache(
 
     try {
       const response = await fetchUrl<DBResponse<LabExtendedData>>(
-        `${publicEnv.API_ENDPOINT}/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}&page_size=1`,
+        apiUrl(
+          `/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}&page_size=1`
+        ),
         { cache: "no-store" }
       );
       const data: unknown = (response as { data?: unknown } | null)?.data;

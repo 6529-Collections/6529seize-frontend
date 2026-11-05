@@ -23,6 +23,9 @@ export class ApiNotification {
     'read_at': number | null;
     'related_identity': ApiProfileMin | null;
     'related_drops': Array<ApiDrop>;
+    /**
+    * For ARTIST_ARTWORK_SUBMITTED, follows ApiArtistArtworkNotificationContext.
+    */
     'additional_context': any;
 
     static readonly discriminator: string | undefined = undefined;

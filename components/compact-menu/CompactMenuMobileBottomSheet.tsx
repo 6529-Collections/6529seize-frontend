@@ -25,6 +25,7 @@ interface CompactMenuMobileBottomSheetProps {
     | ((props: MobileBottomSheetTriggerProps) => ReactNode)
     | undefined;
   readonly disabled?: boolean | undefined;
+  readonly onOpenChange?: ((isOpen: boolean) => void) | undefined;
   readonly zIndexClassName?: string | undefined;
 }
 
@@ -38,19 +39,28 @@ export default function CompactMenuMobileBottomSheet({
   itemClassName,
   renderTriggerButton,
   disabled = false,
+  onOpenChange,
   zIndexClassName = "tw-z-[1020]",
 }: CompactMenuMobileBottomSheetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
+  const setOpen = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const close = () => {
     pendingActionRef.current = null;
-    setIsOpen(false);
+    setOpen(false);
   };
 
-  const selectAction = (onSelect: (() => void) | undefined) => {
-    pendingActionRef.current = onSelect ?? null;
-    setIsOpen(false);
+  const selectAction = (
+    onSelect: (() => void) | undefined,
+    deferUntilClosed = true
+  ) => {
+    pendingActionRef.current = deferUntilClosed ? (onSelect ?? null) : null;
+    setOpen(false);
+    if (!deferUntilClosed) onSelect?.();
   };
 
   const runPendingAction = () => {
@@ -66,7 +76,7 @@ export default function CompactMenuMobileBottomSheet({
           ariaLabel,
           ariaExpanded: isOpen,
           disabled,
-          onClick: () => setIsOpen(true),
+          onClick: () => setOpen(true),
         })
       ) : (
         <button
@@ -76,7 +86,7 @@ export default function CompactMenuMobileBottomSheet({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           disabled={disabled}
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpen(true)}
         >
           {trigger}
         </button>
@@ -105,7 +115,9 @@ export default function CompactMenuMobileBottomSheet({
                 key={item.id}
                 type="button"
                 disabled={item.disabled}
-                onClick={() => selectAction(item.onSelect)}
+                onClick={() =>
+                  selectAction(item.onSelect, item.deferUntilClosed)
+                }
                 className={clsx(
                   itemClassName ??
                     "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",

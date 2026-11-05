@@ -22,6 +22,7 @@
       "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
       "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
       "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
+      "ops/scripts/sync-cloudfront-origin-facing.mjs", // documented CloudFront range refresh CLI
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
@@ -75,6 +76,11 @@
       // (W6 C4) makes it reachable and removes these exemptions.
       "lib/chain/codec/**": ["files", "exports", "types"],
       "lib/chain/types/**": ["files", "exports", "types"],
+      // W6 C2: gateway client, status ladder and the CI mock gateway, under
+      // the same exemption until W6 C4 imports them.
+      "lib/chain/gateway/**": ["files", "exports", "types"],
+      "lib/chain/mock/**": ["files", "exports", "types"],
+      "lib/chain/status-ladder.ts": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
@@ -92,6 +98,9 @@
       // Browser variant of i18n/localeDictionaries.ts, reached only through
       // the Turbopack `resolveAlias` browser condition in config/nextConfig.ts.
       "i18n/localeDictionaries.browser.ts": ["files"],
+      // Browser variant of config/env.ts, reached only through the Turbopack
+      // `resolveAlias` browser condition in config/nextConfig.ts.
+      "config/env.browser.ts": ["files"],
       // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
       // excludes their focused Jest consumers from its usage graph.
       "scripts/pr-ci-policy-bundle.cjs": ["exports"],
@@ -117,6 +126,7 @@
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
       // Invoked from workflow YAML; pure helpers are exported for focused tests.
       "ops/scripts/elastic-beanstalk-readiness.cjs": ["exports"],
+      "ops/scripts/publish-shared-static-assets.cjs": ["exports"],
       "services/**": ["files"],
       // In-repo idb-keyval clone behind the bundler alias: it keeps the full
       // package API for aliased third-party consumers knip cannot see.

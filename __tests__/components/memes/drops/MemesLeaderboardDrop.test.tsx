@@ -216,7 +216,7 @@ const mockMemesArtSubmissionModal = jest.fn((p: any) =>
   ) : null
 );
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (p: any) => mockMemesArtSubmissionModal(p),
 }));

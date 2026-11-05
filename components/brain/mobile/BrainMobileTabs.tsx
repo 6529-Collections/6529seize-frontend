@@ -41,6 +41,7 @@ import { hasWaveDestination } from "@/hooks/useWaveTabPreference";
 import { useContentTab } from "../ContentTabContext";
 import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
+import { useSubmissionRulesTabRef } from "./useSubmissionRulesTabRef";
 import {
   getApproveWaveTabLabelsFromMetadata,
   getWaveOutcomeVisibilityFromMetadata,
@@ -78,6 +79,9 @@ const getIsWaveNavigationLoading = ({
     (shouldShowCurationTabs && isCurationsPending));
 
 interface BrainMobileTabsProps {
+  readonly onConfigurationButtonRef?:
+    | ((element: HTMLButtonElement | null) => void)
+    | undefined;
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
   readonly wave?: ApiWave | undefined;
@@ -94,6 +98,7 @@ interface BrainMobileTabsProps {
   readonly isApp?: boolean | undefined;
 }
 
+/** Render the app's available Wave sections and focus the committed rules tab. */
 const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   activeView,
   onViewChange,
@@ -109,6 +114,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   showWavesTab,
   showStreamBack,
   isApp,
+  onConfigurationButtonRef,
 }) => {
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
@@ -119,6 +125,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const { activeContentTab } = useContentTab();
+  const waveId = wave?.id;
   const locale = useBrowserLocale();
   const nativePresentation = useMemo(
     () =>
@@ -242,7 +249,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [scrollActiveButtonIntoView]
   );
 
-  const waveId = wave?.id;
+  const setConfigurationButtonRef = useSubmissionRulesTabRef({
+    active: effectiveActiveView === BrainView.CONFIGURATION,
+    isApp,
+    waveId,
+    onButtonRef: onConfigurationButtonRef,
+    scrollIntoView: scrollActiveButtonIntoView,
+  });
 
   const { tabsScrollerRef, restoreTabRowScroll } = useBrainMobileTabScroll(
     waveId,
@@ -620,9 +633,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                     {...getTabStateProps(
                       effectiveActiveView === BrainView.CONFIGURATION
                     )}
-                    ref={getActiveButtonRef(
-                      effectiveActiveView === BrainView.CONFIGURATION
-                    )}
+                    ref={setConfigurationButtonRef}
                     onClick={() =>
                       handleWaveViewChange(BrainView.CONFIGURATION)
                     }

@@ -8,7 +8,7 @@ import {
   AdditionalDetailsSection,
   MetadataCard,
 } from "@/components/the-memes/MemePageAdditionalDetails";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   MEMES_CONTRACT,
   OPENSEA_STORE_FRONT_CONTRACT,
@@ -100,7 +100,7 @@ export default function RememePage(props: Readonly<Props>) {
           id: props.id,
         });
         const response = await fetchUrl<DBResponse<Rememe>>(
-          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`,
+          apiUrl(`/api/rememes?${query}`),
           { signal: abortController.signal }
         );
         if (cancelled) {
@@ -151,11 +151,11 @@ export default function RememePage(props: Readonly<Props>) {
     const abortController = new AbortController();
 
     fetchAllPages<NFT>(
-      `${
-        publicEnv.API_ENDPOINT
-      }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
-        ","
-      )}`,
+      apiUrl(
+        `/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
+          ","
+        )}`
+      ),
       { signal: abortController.signal }
     )
       .then((responseNfts) => {

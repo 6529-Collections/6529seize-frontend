@@ -7,6 +7,11 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useProfileMute from "@/hooks/useProfileMute";
 
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => jest.fn());
+jest.mock("@/hooks/useArtistArtworkAlert", () => () => ({
+  id: "artwork-alerts",
+  label: "Artwork alerts Off",
+  onSelect: jest.fn(),
+}));
 jest.mock("@/hooks/useProfileMute", () => jest.fn());
 jest.mock("@/components/compact-menu", () => ({
   CompactMenu: ({
@@ -87,6 +92,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         onBlock={onBlock}
       />
@@ -119,6 +125,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         onBlock={jest.fn()}
       />
@@ -142,6 +149,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         showPersonalActions={false}
         moderationAction={{

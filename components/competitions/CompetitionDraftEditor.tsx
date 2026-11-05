@@ -20,6 +20,7 @@ import { useCompetitionDraftSave } from "@/hooks/competitions/useCompetitionDraf
 import { readCompetitionEditorDraft } from "@/helpers/competition-editor-draft.helpers";
 import CreateWaveStepContent from "@/components/waves/create-wave/CreateWaveStepContent";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
+import WaveAccessPreview from "@/components/waves/WaveAccessPreview";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import RankScheduleModeSelector from "@/components/waves/create-wave/overview/type/RankScheduleModeSelector";
 import CreateWaveDropdown from "@/components/waves/create-wave/utils/CreateWaveDropdown";
@@ -71,6 +72,7 @@ const STEPS = [
   CreateWaveStep.REVIEW,
 ];
 
+/** Describe whether a competition draft is saving, server-saved, or retained locally. */
 function getSaveStatus(
   locale: ReturnType<typeof useBrowserLocale>,
   persistence: ReturnType<typeof useCompetitionDraftSave>
@@ -85,6 +87,7 @@ function getSaveStatus(
   );
 }
 
+/** Edit competition rules while retaining the parent Wave's shared chat settings. */
 function DraftForm({
   wave,
   competition,
@@ -497,6 +500,15 @@ function DraftForm({
             errorMessage={null}
           />
         ))}
+        <WaveAccessPreview
+          waveType={config.overview.type}
+          groups={{
+            canChat: wave.chat.scope.group?.id ?? null,
+            canDrop: config.groups.canDrop,
+          }}
+          chatEnabled={wave.chat.enabled}
+          chatRestricted={wave.chat.scope.group !== null}
+        />
       </div>
     );
   else
@@ -506,7 +518,20 @@ function DraftForm({
         lockSubmissionStrategy={preservePublishedRules}
         lockOutcomeDefinitions={preservePublishedRules}
         lockVotingCredits={lockVotingCredits}
-        controller={{ ...controller, errors: visibleErrors }}
+        chatRestricted={wave.chat.scope.group !== null}
+        controller={{
+          ...controller,
+          errors: visibleErrors,
+          config: {
+            ...config,
+            // Competitions share the parent chat; draft defaults cannot change it.
+            chat: { enabled: wave.chat.enabled },
+            groups: {
+              ...config.groups,
+              canChat: wave.chat.scope.group?.id ?? null,
+            },
+          },
+        }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
         onGroupResolutionChange={() => undefined}
@@ -665,6 +690,7 @@ function DraftForm({
   );
 }
 
+/** Load an existing competition configuration or open a new viewer-scoped draft. */
 export default function CompetitionDraftEditor({
   wave,
   competition,

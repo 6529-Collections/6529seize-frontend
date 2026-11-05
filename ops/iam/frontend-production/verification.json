@@ -1034,5 +1034,105 @@
       "requested_region": "eu-west-1",
       "via_aws_service": "true"
     }
+  ],
+  "amendments": [
+    {
+      "recorded_at": "2026-11-03T23:14:00Z",
+      "change": "Shared static asset prefix (web_build/shared/_next/static/) statements for PR #4577",
+      "policy_arn": "arn:aws:iam::987989283142:policy/FrontendProductionStorage",
+      "default_version": "v7",
+      "previous_default_version": "v6",
+      "version_change": "v7 is v6 plus exactly the three shared-prefix statements; no statement was removed",
+      "rollback": "aws iam set-default-policy-version --policy-arn arn:aws:iam::987989283142:policy/FrontendProductionStorage --version-id v6",
+      "deleted_versions": ["v2"],
+      "deleted_versions_note": "v2 (the oldest version) was deleted to stay within the five-version limit; its document was backed up before deletion",
+      "policy_sha256": {
+        "FrontendProductionStorage.json": "42141d1d0c562e907143b41316c1c4acbb1355a4042da22e3e1700644fc59b1d"
+      },
+      "policy_sha256_matches_manifest": true,
+      "access_analyzer_findings": [],
+      "simulation": {
+        "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+        "requested_region": "us-east-1",
+        "status": "passed",
+        "cases": [
+          {
+            "action": "s3:PutObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/shared/_next/static/chunks/x.js",
+            "context": {
+              "s3:if-none-match": "*"
+            },
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:GetObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/shared/_next/static/chunks/x.js",
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:ListBucket",
+            "resource": "arn:aws:s3:::seize-web",
+            "context": {
+              "s3:prefix": "web_build/shared/_next/static/"
+            },
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:PutObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/shared/_next/static/chunks/x.js",
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:DeleteObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/shared/_next/static/chunks/x.js",
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:ListBucket",
+            "resource": "arn:aws:s3:::seize-web",
+            "context": {
+              "s3:prefix": "web_build/"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:ListBucket",
+            "resource": "arn:aws:s3:::seize-web",
+            "context": {
+              "s3:prefix": "web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:PutObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/shared/other",
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "s3:PutObject",
+            "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          }
+        ]
+      }
+    }
   ]
 }

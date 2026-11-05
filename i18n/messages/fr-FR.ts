@@ -28,6 +28,16 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.historyGap.load": "Charger les messages manqués",
+  "waves.historyGap.loaded": "Messages manqués chargés",
+  "waves.historyGap.loading": "Chargement des messages manqués…",
+  "waves.historyGap.retry":
+    "Impossible de charger les messages manqués. Réessayer",
+
+  "waves.myVotes.sort": "Trier par",
+  "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
+  "waves.myVotes.sort.leaderboard": "Position au classement",
+  "waves.myVotes.sort.lastVoted": "Dernier vote",
   "e2ee.profile.view": "Voir le profil de {name}",
   "e2ee.profile.viewUnknown": "Voir le profil",
   "e2ee.profile.level": "Niveau {level}",
@@ -245,6 +255,8 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
+  "waves.drop.actions.showMore": "Afficher plus",
+  "waves.drop.actions.showLess": "Afficher moins",
   "media.video.captions": "Sous-titres",
   "media.video.download": "Telecharger le media",
   "media.video.downloading": "Telechargement du media",

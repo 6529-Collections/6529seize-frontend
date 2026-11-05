@@ -39,6 +39,7 @@ push notification controls.
 
 ## Features
 
+- [Artist Artwork Alerts](feature-artist-artwork-alerts.md)
 - [Notifications Feed](feature-notifications-feed.md)
 - [Profile Privacy and Notification Preferences](feature-profile-preferences.md)
 - [Mobile Push Notifications](feature-mobile-push-notifications.md)
