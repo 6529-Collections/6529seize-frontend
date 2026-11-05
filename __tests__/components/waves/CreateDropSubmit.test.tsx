@@ -48,7 +48,7 @@ describe("CreateDropSubmit", () => {
 
     const btn = screen.getByRole("button", { name: "Post" });
     expect(btn).toHaveClass(
-      "tw-min-h-11",
+      "tw-h-10",
       "tw-w-10",
       "tw-px-0",
       "lg:tw-w-[3.875rem]",

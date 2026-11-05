@@ -753,8 +753,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await showDropActionsIfCollapsed(page);
     const actions = [
       {
-        button: page.getByRole("button", { name: "Upload a file" }),
-        label: "Upload",
+        button: page.getByRole("button", { name: "Attach files" }),
+        label: "Attach files",
       },
       {
         button: page.getByRole("button", { name: "Add GIF" }),
@@ -775,7 +775,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       const shape = await button.evaluate((element) => ({
         radius: Number.parseFloat(getComputedStyle(element).borderRadius),
         width: element.getBoundingClientRect().width,
+        height: element.getBoundingClientRect().height,
       }));
+      expect(shape.width).toBe(40);
+      expect(shape.height).toBe(40);
+      await expect(button.locator("svg")).toHaveCSS("width", "20px");
+      await expect(button.locator("svg")).toHaveCSS("height", "20px");
       expect(shape.radius).toBeGreaterThan(0);
       expect(shape.radius).toBeLessThan(shape.width / 2);
       await button.hover();
@@ -1602,7 +1607,7 @@ async function showDropActionsIfCollapsed(page: Page) {
     .poll(
       async () =>
         (await page
-          .getByRole("button", { name: "Upload a file" })
+          .getByRole("button", { name: "Attach files" })
           .isVisible()
           .catch(() => false)) ||
         (await page

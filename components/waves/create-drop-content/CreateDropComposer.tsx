@@ -1,3 +1,4 @@
+import { COMPOSER_ROW_GAP_CLASS_NAME } from "../composerPresentation";
 import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restriction.helpers";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -135,7 +136,7 @@ export default function CreateDropComposer({
       </LazyMotion>
       <div
         ref={setActionsContainerRef}
-        className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+        className={`tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center ${COMPOSER_ROW_GAP_CLASS_NAME}`}
       >
         <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
           <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />

@@ -17,7 +17,14 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
-import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
+import {
+  COMPOSER_ACTION_BUTTON_CLASS_NAME,
+  COMPOSER_ACTION_IDLE_CLASS_NAME,
+  COMPOSER_ACTION_ICON_CLASS_NAME,
+  COMPOSER_ROW_GAP_CLASS_NAME,
+  COMPOSER_ROW_PADDING_CLASS_NAME,
+  getNativeComposerStyle,
+} from "@/components/waves/composerPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -50,9 +57,6 @@ import {
   usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
-
-const ICON_BUTTON =
-  "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 /** Thumbnails are drawn at twice their 48 px box for sharp displays. */
 const THUMBNAIL_PX = 96;
@@ -453,7 +457,6 @@ export function E2eeComposer({
   // Reply, edit and a restored draft move focus to the composer.
   const focusKey = editId ?? replyTo?.id ?? draftId ?? null;
   useEffect(() => {
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- The reply or edit is chosen in the message list; focus moves here once the composer has rendered it.
     if (focusKey !== null) {
       editorRef.current?.focus();
     }
@@ -609,7 +612,9 @@ export function E2eeComposer({
       {isUploading ? (
         <UploadingFiles locale={locale} files={uploading} />
       ) : null}
-      <div className="tw-relative tw-flex tw-items-end tw-gap-1 tw-px-2 tw-py-2 sm:tw-gap-2 sm:tw-px-3">
+      <div
+        className={`tw-relative tw-flex tw-items-end ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
+      >
         {mentions.open ? (
           <MentionList
             id={listboxId}
@@ -619,25 +624,31 @@ export function E2eeComposer({
             label={t(locale, "e2ee.composer.mentions.label")}
           />
         ) : null}
-        {canAttach ? (
+        {editing === null ? (
           <>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              tabIndex={-1}
-              aria-hidden="true"
-              className="tw-hidden"
-              onChange={onFilesChosen}
-            />
+            {canAttach && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                tabIndex={-1}
+                aria-hidden="true"
+                className="tw-hidden"
+                onChange={onFilesChosen}
+              />
+            )}
             <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label={t(locale, "e2ee.composer.attach")}
-                className={ICON_BUTTON}
+                disabled={!attachmentsEnabled}
+                className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
               >
-                <PaperClipIcon aria-hidden="true" className="tw-size-5" />
+                <PaperClipIcon
+                  aria-hidden="true"
+                  className={COMPOSER_ACTION_ICON_CLASS_NAME}
+                />
               </button>
             </DropActionTooltip>
           </>

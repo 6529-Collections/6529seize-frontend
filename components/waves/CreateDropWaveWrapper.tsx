@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDebouncedCallback } from "use-debounce";
 import { registerWaveComposerDock } from "./WaveComposerDockVisibility";
+import { COMPOSER_ROW_PADDING_CLASS_NAME } from "./composerPresentation";
 
 export enum CreateDropWaveWrapperContext {
   WAVE_CHAT = "WAVE_CHAT",
@@ -102,7 +103,7 @@ export function CreateDropWaveWrapper({
   return (
     <div
       ref={containerRef}
-      className={`${containerClassName} tw-sticky tw-top-0 tw-flex tw-w-full tw-flex-none tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
+      className={`${containerClassName} tw-sticky tw-top-0 tw-flex tw-w-full tw-flex-none tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${COMPOSER_ROW_PADDING_CLASS_NAME} tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
     >
       {children}
       <div ref={fixedBottomRef}></div>

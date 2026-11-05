@@ -455,7 +455,7 @@ describe("E2eeConversationView", () => {
     expect(mutedChats()).toEqual([]);
   });
 
-  it("has no attach control while the server has attachments off", () => {
+  it("reserves the disabled attach control while attachments are unavailable", () => {
     const engine = createFakeE2eeEngine({
       conversations: [conversation()],
       messages: { [GROUP_G]: timeline },
@@ -466,9 +466,7 @@ describe("E2eeConversationView", () => {
         <E2eeConversationView g={GROUP_G} />
       </E2eeTestProvider>
     );
-    expect(
-      screen.queryByRole("button", { name: "Attach files" })
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeDisabled();
     expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 
