@@ -34,6 +34,7 @@ import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditNic } from "./UserPageRep.helpers";
 import UserPageRepHeader from "./header/UserPageRepHeader";
+import ProfileRatingsDialog from "./ProfileRatingsDialog";
 import RepContributorsDialog from "./RepContributorsDialog";
 import UserPageRepMobile from "./UserPageRepMobile";
 
@@ -335,23 +336,25 @@ export default function UserPageRep({
         />
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           <div className="tw-min-w-0">
-            <UserPageRepHeader
-              overview={activeOverview}
-              categories={activeCategories}
-              profile={profile}
-              repDirection={repDirection}
-              onOpenOverviewContributors={handleOpenOverviewContributors}
-              onOpenGlobalCategory={(category) =>
-                setRepDialog({ type: "globalCategory", category })
-              }
-              onOpenCategoryContributors={handleOpenCategoryContributors}
-              onRepDirectionChange={setRepDirection}
-              loading={activeLoading}
-              visibleCount={activeVisibleCount}
-              onShowMore={handleShowMore}
-              hasNextPage={activeHasNextPage}
-              isFetchingNextPage={activeIsFetchingNextPage}
-            />
+            <section aria-label="REP">
+              <UserPageRepHeader
+                overview={activeOverview}
+                categories={activeCategories}
+                profile={profile}
+                repDirection={repDirection}
+                onOpenOverviewContributors={handleOpenOverviewContributors}
+                onOpenGlobalCategory={(category) =>
+                  setRepDialog({ type: "globalCategory", category })
+                }
+                onOpenCategoryContributors={handleOpenCategoryContributors}
+                onRepDirectionChange={setRepDirection}
+                loading={activeLoading}
+                visibleCount={activeVisibleCount}
+                onShowMore={handleShowMore}
+                hasNextPage={activeHasNextPage}
+                isFetchingNextPage={activeIsFetchingNextPage}
+              />
+            </section>
             <div className="tw-mt-6 lg:tw-mt-8">
               <UserPageCombinedActivityLog
                 initialActivityLogParams={initialActivityLogParams}
@@ -381,27 +384,37 @@ export default function UserPageRep({
         </div>
       </div>
 
-      <RepContributorsDialog
-        identity={user}
-        isOpen={repDialog?.type === "contributors"}
-        scope={
-          repDialog?.type === "contributors" ? repDialog.scope : "overview"
-        }
-        direction={
-          repDialog?.type === "contributors"
-            ? repDialog.direction
-            : repDirection
-        }
-        category={
-          repDialog?.type === "contributors" && repDialog.scope === "category"
-            ? repDialog.category
-            : null
-        }
-        contributorCount={
-          repDialog?.type === "contributors" ? repDialog.contributorCount : 0
-        }
-        onClose={() => setRepDialog(null)}
-      />
+      {repDialog?.type === "contributors" && repDialog.direction === "given" ? (
+        <ProfileRatingsDialog
+          profile={profile}
+          matter="REP"
+          direction="given"
+          category={repDialog.scope === "category" ? repDialog.category : null}
+          onClose={() => setRepDialog(null)}
+        />
+      ) : (
+        <RepContributorsDialog
+          identity={user}
+          isOpen={repDialog?.type === "contributors"}
+          scope={
+            repDialog?.type === "contributors" ? repDialog.scope : "overview"
+          }
+          direction={
+            repDialog?.type === "contributors"
+              ? repDialog.direction
+              : repDirection
+          }
+          category={
+            repDialog?.type === "contributors" && repDialog.scope === "category"
+              ? repDialog.category
+              : null
+          }
+          contributorCount={
+            repDialog?.type === "contributors" ? repDialog.contributorCount : 0
+          }
+          onClose={() => setRepDialog(null)}
+        />
+      )}
 
       <GlobalRepCategoryDialog
         category={

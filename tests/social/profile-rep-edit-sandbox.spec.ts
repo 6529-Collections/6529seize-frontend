@@ -242,8 +242,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   }) => {
     await openProfile(page);
     await page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true })
       .getByRole("button", { name: "Given", exact: true })
-      .or(page.getByRole("tab", { name: "Given", exact: true }))
+      .or(
+        page
+          .getByRole("region", { name: "REP", exact: true })
+          .filter({ visible: true })
+          .getByRole("tab", { name: "Given", exact: true })
+      )
       .click();
     await expect(
       page.getByRole("button", { name: /Edit REP category/ })
@@ -354,5 +361,301 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await dialog.getByRole("button", { name: "Save", exact: true }).click();
     await expect(dialog).toBeHidden();
     expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
+  });
+});
+
+test.describe("Profile Given rating management @auth @medium @local-only", () => {
+  useLocalSandboxMutationGuard(
+    test,
+    "PLAYWRIGHT_AUTH_SANDBOX",
+    "Given edits require the isolated local API."
+  );
+
+  for (const matter of ["REP", "NIC"] as const) {
+    test(`${matter}: owner adjusts and removes from Given, then returns to the refreshed list`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }, testInfo) => {
+      const api = getSandboxApiOrigin(baseURL);
+      const path = matter === "REP" ? "rep" : "cic";
+      let rating = 20;
+      let failSave = true;
+      const saved: unknown[] = [];
+      await installCategories(page, api);
+      await page.route(`${api}/api/profiles/*/cic/overview*`, (route) =>
+        route.fulfill({
+          json: {
+            total_cic: 20,
+            authenticated_user_contribution: null,
+            contributor_count: 2,
+            contributors: { data: [], page: 1, next: false },
+          },
+        })
+      );
+      await page.route(
+        `${api}/api/profiles/*/${path}/ratings/by-rater?*`,
+        (route) => {
+          const params = new URL(route.request().url()).searchParams;
+          expect(params.get("given")).toBe("true");
+          expect(params.get("order_by")).toBe("last_modified");
+          expect(params.get("order")).toBe("DESC");
+          const data =
+            rating === 0
+              ? []
+              : [
+                  {
+                    profile_id: "following-0",
+                    handle: TARGET,
+                    wallets: [],
+                    rating,
+                    last_modified: 20,
+                  },
+                ];
+          data.push({
+            profile_id: "older",
+            handle: "older-recipient",
+            wallets: [],
+            rating: 900,
+            last_modified: 10,
+          });
+          return route.fulfill({ json: { data, page: 1, next: false } });
+        }
+      );
+      await page.route(
+        `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+        (route) =>
+          route.fulfill({
+            json: {
+              ...allowance,
+              rating_stats: [
+                { ...allowance.rating_stats[0], rater_contribution: rating },
+              ],
+            },
+          })
+      );
+      await page.route(`${api}/api/profiles/${TARGET}/cic/rating/*`, (route) =>
+        route.fulfill({
+          json: {
+            cic_rating_by_rater: rating,
+            cic_ratings_left_to_give_by_rater: 80,
+          },
+        })
+      );
+      await page.route(
+        `${api}/api/profiles/${TARGET}/${path}/rating`,
+        (route) => {
+          saved.push(route.request().postDataJSON());
+          if (failSave) {
+            failSave = false;
+            return route.fulfill({
+              status: 503,
+              json: { message: "Try again" },
+            });
+          }
+          rating = route.request().postDataJSON().amount;
+          return route.fulfill({ json: {} });
+        }
+      );
+      await seedSession(page, null);
+      await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("navigation", { name: "Profile sections" })
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      if ((page.viewportSize()?.width ?? 0) < 1024)
+        await page
+          .getByRole("button", { name: "Open menu", exact: true })
+          .click();
+      const nativeProfileLink = page.getByRole("link", {
+        name: "Open playwright profile",
+        exact: true,
+      });
+      const accountMenu = page.getByRole("button", {
+        name: "Open account and profiles menu",
+        exact: true,
+      });
+      await expect(nativeProfileLink.or(accountMenu)).toBeVisible();
+      if (await nativeProfileLink.isVisible()) await nativeProfileLink.click();
+      else {
+        await accountMenu.press("Enter");
+        await page.getByRole("link", { name: "Profile", exact: true }).click();
+      }
+      await page.waitForURL(/\/playwright$/, {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(
+        page.getByRole("navigation", { name: "Profile sections" })
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      if (matter === "NIC" && isMobile)
+        await page.getByRole("button", { name: /^NIC / }).click();
+      const section =
+        matter === "NIC"
+          ? page
+              .getByRole("region", { name: "NIC", exact: true })
+              .filter({ visible: true })
+          : page
+              .getByRole("region", { name: "REP", exact: true })
+              .filter({ visible: true });
+      await section
+        .getByRole("button", { name: "Given", exact: true })
+        .or(section.getByRole("tab", { name: "Given", exact: true }))
+        .filter({ visible: true })
+        .first()
+        .click();
+      await section
+        .getByRole("button", {
+          name:
+            matter === "NIC"
+              ? "View NIC Given"
+              : /^View (?:all |[0-9,]+ )receivers?$/,
+          exact: true,
+        })
+        .filter({ visible: true })
+        .click();
+      const list = page.getByRole("dialog", {
+        name: `${matter} Given`,
+        exact: true,
+      });
+      await expect(list.getByRole("link").first()).toHaveText(TARGET);
+      await expect(list.getByRole("link").nth(1)).toHaveText("older-recipient");
+      await expect(
+        list.locator(".mobile-wrapper-dialog").locator("..")
+      ).not.toHaveAttribute("data-enter");
+      const givenScreenshot = testInfo.outputPath(`${matter}-given.png`);
+      await page.screenshot({ path: givenScreenshot });
+      await testInfo.attach(`${matter}-given`, {
+        path: givenScreenshot,
+        contentType: "image/png",
+      });
+
+      const openEditor = async () => {
+        await list
+          .getByRole("button", {
+            name: `Adjust ${matter} for ${TARGET}`,
+            exact: true,
+          })
+          .click();
+        if (matter === "REP")
+          await page
+            .getByRole("dialog", {
+              name: `REP given to ${TARGET}`,
+              exact: true,
+            })
+            .getByRole("button", {
+              name: `Adjust REP (${CATEGORY}) for ${TARGET}`,
+              exact: true,
+            })
+            .click();
+        const editor = page.getByRole("dialog", {
+          name:
+            matter === "REP"
+              ? `Add Rep to ${TARGET}`
+              : `Adjust NIC for ${TARGET}`,
+          exact: true,
+        });
+        await expect(editor.getByRole("textbox")).toHaveValue(String(rating));
+        return editor;
+      };
+      let editor = await openEditor();
+      await editor.getByRole("textbox").fill("30");
+      await editor.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(
+        page.getByText("Please try again.", { exact: true }).first()
+      ).toBeVisible();
+      await expect(editor.getByRole("textbox")).toHaveValue("30");
+      await editor.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(editor).toBeHidden();
+      await expect(
+        list.getByRole("link", { name: TARGET }).locator("..")
+      ).toContainText("30");
+      editor = await openEditor();
+      await editor
+        .getByRole("button", { name: "Remove rating", exact: true })
+        .click();
+      await expect(editor.getByRole("textbox")).toHaveValue("0");
+      expect(saved).toHaveLength(2);
+      await expect(
+        editor.getByText("Save to remove this rating.")
+      ).toBeVisible();
+      const removeScreenshot = testInfo.outputPath(`${matter}-remove.png`);
+      await page.screenshot({ path: removeScreenshot });
+      await testInfo.attach(`${matter}-remove`, {
+        path: removeScreenshot,
+        contentType: "image/png",
+      });
+      await editor.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(editor).toBeHidden();
+      await expect(list.getByRole("link", { name: TARGET })).toHaveCount(0);
+      await expect(
+        list.getByRole("link", { name: "older-recipient" })
+      ).toBeVisible();
+      expect(saved).toEqual(
+        matter === "REP"
+          ? [
+              { amount: 30, category: CATEGORY },
+              { amount: 30, category: CATEGORY },
+              { amount: 0, category: CATEGORY },
+            ]
+          : [{ amount: 30 }, { amount: 30 }, { amount: 0 }]
+      );
+      await expectNoHorizontalOverflow(page);
+    });
+  }
+
+  test("visitor can inspect NIC Received and Given without management controls", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    const api = getSandboxApiOrigin(baseURL);
+    await installCategories(page, api);
+    const directions: string[] = [];
+    await page.route(
+      `${api}/api/profiles/*/cic/ratings/by-rater?*`,
+      (route) => {
+        directions.push(
+          new URL(route.request().url()).searchParams.get("given") ?? ""
+        );
+        return route.fulfill({
+          json: {
+            data: [
+              {
+                profile_id: "one",
+                handle: "another-profile",
+                wallets: [],
+                rating: -20,
+              },
+            ],
+            page: 1,
+            next: false,
+          },
+        });
+      }
+    );
+    await openProfile(page);
+    if (isMobile) await page.getByRole("button", { name: /^NIC / }).click();
+    const section = page
+      .getByRole("region", { name: "NIC", exact: true })
+      .filter({ visible: true });
+    for (const direction of ["Received", "Given"]) {
+      await section
+        .getByRole("button", { name: direction, exact: true })
+        .click();
+      await section
+        .getByRole("button", { name: `View NIC ${direction}`, exact: true })
+        .click();
+      const list = page.getByRole("dialog", {
+        name: `NIC ${direction}`,
+        exact: true,
+      });
+      await expect(
+        list.getByRole("link", { name: "another-profile" })
+      ).toBeVisible();
+      await expect(list.getByRole("button", { name: /Adjust/ })).toHaveCount(0);
+      await list.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(list).toBeHidden();
+    }
+    expect(directions).toEqual(["false", "true"]);
+    await expectNoHorizontalOverflow(page);
   });
 });

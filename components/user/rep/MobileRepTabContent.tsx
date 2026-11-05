@@ -9,7 +9,9 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
+import { AuthContext } from "@/components/auth/Auth";
+import { canManageGivenRatings } from "./ratingsManagement";
 import { buildRepAvatarItems } from "./buildRepAvatarItems";
 import type { RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
@@ -49,10 +51,12 @@ function RepContributorControl({
   overview,
   repDirection,
   onOpenOverviewContributors,
+  canManage,
 }: {
   readonly overview: ApiRepOverview | null;
   readonly repDirection: RepDirection;
   readonly onOpenOverviewContributors: () => void;
+  readonly canManage: boolean;
 }) {
   const locale = useBrowserLocale();
   const repAvatarItems = useMemo(
@@ -88,6 +92,7 @@ function RepContributorControl({
         </span>
       )}
       <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-300">
+        {canManage && <>{t(locale, "user.rate.manageGiven")} · </>}
         {t(locale, contributorMessageKey, { count: contributorCount })}
       </span>
     </span>
@@ -184,6 +189,10 @@ export default function MobileRepTabContent({
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const locale = useBrowserLocale();
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const canManage =
+    repDirection === "given" &&
+    canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
   const hiddenLoadedCategoryCount = Math.max(
     categories.length - visibleCount,
     0
@@ -234,6 +243,7 @@ export default function MobileRepTabContent({
                 overview={overview}
                 repDirection={repDirection}
                 onOpenOverviewContributors={onOpenOverviewContributors}
+                canManage={canManage}
               />
             </div>
             {canEditRep && repDirection === "received" && (
@@ -284,7 +294,7 @@ export default function MobileRepTabContent({
               </div>
             )}
           </div>
-          <div className="tw-mt-3 tw-w-fit [&_[role=tablist]>div]:tw-min-w-0 [&_[role=tablist]>div]:tw-gap-4 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0 [&_[role=tablist]>div>div]:tw-flex-none [&_[role=tablist]>div>div]:tw-p-0 [&_[role=tab]]:tw-flex-none [&_[role=tab]]:tw-bg-transparent [&_[role=tab]]:tw-px-0 [&_[role=tab]]:tw-text-[13px] [&_[role=tab][aria-selected=false]]:tw-text-iron-400 [&_[role=tab]:focus-visible]:tw-outline-offset-[-2px] motion-reduce:[&_[role=tab]]:tw-transition-none">
+          <div className="tw-mt-3 tw-w-fit [&_[role=tab]:focus-visible]:tw-outline-offset-[-2px] [&_[role=tab][aria-selected=false]]:tw-text-iron-400 [&_[role=tab]]:tw-flex-none [&_[role=tab]]:tw-bg-transparent [&_[role=tab]]:tw-px-0 [&_[role=tab]]:tw-text-[13px] motion-reduce:[&_[role=tab]]:tw-transition-none [&_[role=tablist]>div>div]:tw-flex-none [&_[role=tablist]>div>div]:tw-p-0 [&_[role=tablist]>div]:tw-min-w-0 [&_[role=tablist]>div]:tw-gap-4 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0">
             <RepDirectionToggle
               repDirection={repDirection}
               onRepDirectionChange={onRepDirectionChange}

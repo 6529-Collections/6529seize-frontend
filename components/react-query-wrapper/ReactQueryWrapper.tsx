@@ -370,6 +370,9 @@ const createReactQueryContextValue = (
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_RATING_LIST],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
@@ -451,11 +454,16 @@ const createReactQueryContextValue = (
     readonly profileProxy: ApiProfileProxy | null;
   }) => {
     const targetHandleOrWallet = (
-      targetProfile.query ?? targetProfile.handle ?? targetProfile.display
+      targetProfile.query ??
+      targetProfile.handle ??
+      targetProfile.display
     ).toLowerCase();
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_RATING_LIST],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_OVERVIEW],
     });

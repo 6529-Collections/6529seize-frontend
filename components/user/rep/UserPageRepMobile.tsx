@@ -151,6 +151,8 @@ export default function UserPageRepMobile({
       <AnimatePresence mode="wait">
         {activeTab === "rep" && (
           <motion.div
+            role="region"
+            aria-label="REP"
             key="rep"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

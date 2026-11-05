@@ -14,8 +14,9 @@ import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { t, tRich } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useId, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
+import { isRatingValue } from "../ratingsManagement";
 
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
@@ -33,6 +34,13 @@ export default function UserPageRepModifyModal({
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -54,8 +62,9 @@ export default function UserPageRepModifyModal({
   const newRating = getStringAsNumberOrZero(adjustedRatingStr);
   const haveChanged = newRating !== repState?.rater_contribution;
   const isValidValue =
-    !!activeProfileProxy ||
-    (newRating >= minMaxValues.min && newRating <= minMaxValues.max);
+    isRatingValue(adjustedRatingStr) &&
+    (!!activeProfileProxy ||
+      (newRating >= minMaxValues.min && newRating <= minMaxValues.max));
   const isUnavailable = !repState || isError;
   const isSaveDisabled = isUnavailable || !haveChanged || !isValidValue;
   const [mutating, setMutating] = useState(false);
@@ -95,6 +104,7 @@ export default function UserPageRepModifyModal({
     setMutating(true);
     try {
       const { success } = await requestAuth();
+      if (!mounted.current) return;
       if (!success) {
         setToast({
           message: t(locale, "rep.categories.edit.loginRequired"),
@@ -121,6 +131,7 @@ export default function UserPageRepModifyModal({
         name: profile.query ?? profile.handle ?? profile.display,
       })}
       isOpen={isOpen}
+      dismissible={!mutating}
       onClose={close}
       onAfterLeave={onClose}
       tabletModal
@@ -184,6 +195,9 @@ export default function UserPageRepModifyModal({
               ),
             })}
           </label>
+          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+            {t(locale, "user.rate.totalHelp")}
+          </p>
           <div className="tw-relative tw-mt-2 tw-flex">
             <UserPageRateInput
               value={repState ? adjustedRatingStr : ""}
@@ -210,6 +224,27 @@ export default function UserPageRepModifyModal({
             />
           </div>
           <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
+            {repState?.rater_contribution !== 0 && (
+              <Button
+                variant="ghost"
+                size="lg"
+                fullWidth
+                disabled={mutating || isUnavailable}
+                onClick={() => setDraftRating("0")}
+              >
+                {t(locale, "user.rate.remove")}
+              </Button>
+            )}
+            {repState?.rater_contribution !== 0 &&
+              newRating === 0 &&
+              draftRating === "0" && (
+                <p
+                  role="status"
+                  className="tw-text-center tw-text-xs tw-text-iron-400"
+                >
+                  {t(locale, "user.rate.removeHint")}
+                </p>
+              )}
             <Button
               type="submit"
               disabled={isSaveDisabled}

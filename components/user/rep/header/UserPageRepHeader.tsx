@@ -8,6 +8,9 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { canManageGivenRatings } from "../ratingsManagement";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import RepCategoryPill from "../RepCategoryPill";
 import RepDirectionToggle from "../RepDirectionToggle";
@@ -50,6 +53,10 @@ export default function UserPageRepHeader({
   readonly isFetchingNextPage: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const locale = useBrowserLocale();
+  const canManage =
+    repDirection === "given" &&
+    canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
 
   const visibleCategories = categories.slice(0, visibleCount);
   const hiddenLoadedCategoryCount = Math.max(
@@ -144,6 +151,9 @@ export default function UserPageRepHeader({
                       )}`}
                       className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/10 tw-underline-offset-4 tw-transition-[text-decoration-color] hover:tw-text-iron-200 hover:tw-decoration-white/50"
                     >
+                      {canManage && (
+                        <>{t(locale, "user.rate.manageGiven")} · </>
+                      )}
                       {formatNumberWithCommas(overview.contributor_count)}{" "}
                       {getContributorLabel(
                         repDirection,
