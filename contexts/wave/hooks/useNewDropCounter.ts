@@ -10,7 +10,15 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -277,6 +285,122 @@ function useNewDropCounter(
     }
   }, [activeWaveId, enabled, resetWaveNewDropsCount]);
 
+  const recordDropActivity = useCallback(
+    (
+      activity: {
+        readonly waveId: string;
+        readonly createdAt: number;
+        readonly serialNo: number;
+        readonly isOwnDrop: boolean;
+      },
+      muted = false
+    ): boolean => {
+      const { waveId, createdAt, serialNo, isOwnDrop } = activity;
+      const isVisibleActiveWave =
+        waveId === activeWaveId && document.visibilityState === "visible";
+      if (muted || isOwnDrop || isVisibleActiveWave) {
+        setNewDropsCounts((prev) =>
+          updateLatestDropTimestamp({
+            createdAt,
+            newDropsCounts: prev,
+            waveId,
+            ...(muted ? { firstUnreadSerialNo: null, unreadCount: 0 } : {}),
+          })
+        );
+        return false;
+      }
+      setNewDropsCounts((prev) =>
+        addUnreadDropCount({
+          createdAt,
+          newDropsCounts: prev,
+          serialNo,
+          waveId,
+        })
+      );
+      return true;
+    },
+    [activeWaveId]
+  );
+
+  const recordFullDrop = useCallback(
+    (message: ApiDrop, muted = false) =>
+      recordDropActivity(
+        {
+          waveId: message.wave.id,
+          createdAt: message.created_at,
+          serialNo: message.serial_no,
+          isOwnDrop:
+            connectedProfile?.handle?.toLowerCase() ===
+            message.author.handle?.toLowerCase(),
+        },
+        muted
+      ),
+    [connectedProfile?.handle, recordDropActivity]
+  );
+
+  const handleUnknownDrop = useCallback(
+    (message: ApiDrop) => {
+      if (otherListWaveIds.has(message.wave.id)) return;
+      if (!message.reply_to) {
+        const addedUnread = recordFullDrop(message);
+        if (!addedUnread) return;
+      }
+      const now = Date.now();
+      if (
+        lastUnknownWaveRefetchAtRef.current !== null &&
+        now - lastUnknownWaveRefetchAtRef.current < unknownWaveRefetchCooldownMs
+      )
+        return;
+      lastUnknownWaveRefetchAtRef.current = now;
+      refetchWaves();
+    },
+    [
+      otherListWaveIds,
+      recordFullDrop,
+      refetchWaves,
+      unknownWaveRefetchCooldownMs,
+    ]
+  );
+
+  const handleDropUpdate = useCallback(
+    (message: ApiDrop) => {
+      if (!enabled || !message.wave.id || isPollResponseDropUpdate(message))
+        return;
+      const wave = waves.find((candidate) => candidate.id === message.wave.id);
+      if (!wave) {
+        handleUnknownDrop(message);
+        return;
+      }
+      if (wave.repliesCollapsed && message.reply_to) return;
+      recordFullDrop(message, wave.muted);
+    },
+    [enabled, waves, handleUnknownDrop, recordFullDrop]
+  );
+
+  const currentProfileId = useRef(connectedProfile?.id);
+  const currentDropHandler = useRef(handleDropUpdate);
+  // Commit the viewer and handler together before async resolutions can run.
+  useLayoutEffect(() => {
+    currentProfileId.current = connectedProfile?.id;
+    currentDropHandler.current = handleDropUpdate;
+  }, [connectedProfile?.id, handleDropUpdate]);
+  const resolveDropUpdateRef = useDropUpdateRefMessages({
+    processIncomingDrop: useCallback(
+      (drop: ApiDrop) => {
+        if (currentProfileId.current === connectedProfile?.id) {
+          currentDropHandler.current(drop);
+        }
+        return Promise.resolve();
+      },
+      [connectedProfile?.id]
+    ),
+  });
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_UPDATE,
+    handleDropUpdate
+  );
+
   useWebSocketMessage<unknown>(
     WsMessageType.DROP_UPDATE_REF,
     useCallback(
@@ -293,220 +417,29 @@ function useNewDropCounter(
         const { serial_no: serialNo, wave_id: waveId } = message;
         const now = Date.now();
         const wave = waves.find((candidate) => candidate.id === waveId);
-        const isOwnDrop = connectedProfile?.id === message.author_id;
-        const shouldOnlyUpdateTimestamp =
-          isOwnDrop ||
-          (waveId === activeWaveId &&
-            document.visibilityState === "visible");
-
-        if (!wave) {
-          if (otherListWaveIds.has(waveId)) {
-            return;
-          }
-
-          if (shouldOnlyUpdateTimestamp) {
-            setNewDropsCounts((prev) =>
-              updateLatestDropTimestamp({
-                createdAt: now,
-                newDropsCounts: prev,
-                waveId,
-              })
-            );
-          } else {
-            setNewDropsCounts((prev) =>
-              addUnreadDropCount({
-                createdAt: now,
-                newDropsCounts: prev,
-                serialNo,
-                waveId,
-              })
-            );
-          }
-
-          if (
-            lastUnknownWaveRefetchAtRef.current !== null &&
-            now - lastUnknownWaveRefetchAtRef.current <
-              unknownWaveRefetchCooldownMs
-          ) {
-            return;
-          }
-          lastUnknownWaveRefetchAtRef.current = now;
-          refetchWaves();
+        if (!wave || wave.repliesCollapsed) {
+          if (!otherListWaveIds.has(waveId)) resolveDropUpdateRef(message);
           return;
         }
-
-        if (wave.muted) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: now,
-              firstUnreadSerialNo: null,
-              newDropsCounts: prev,
-              unreadCount: 0,
-              waveId,
-            })
-          );
-          return;
-        }
-
-        if (shouldOnlyUpdateTimestamp) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: now,
-              newDropsCounts: prev,
-              waveId,
-            })
-          );
-          return;
-        }
-
-        setNewDropsCounts((prev) =>
-          addUnreadDropCount({
-            createdAt: now,
-            newDropsCounts: prev,
-            serialNo,
+        recordDropActivity(
+          {
             waveId,
-          })
+            createdAt: now,
+            serialNo,
+            isOwnDrop: connectedProfile?.id === message.author_id,
+          },
+          wave.muted
         );
       },
       [
-        activeWaveId,
         connectedProfile?.id,
         enabled,
         otherListWaveIds,
-        refetchWaves,
-        unknownWaveRefetchCooldownMs,
         waves,
+        resolveDropUpdateRef,
+        recordDropActivity,
       ]
     )
-  );
-
-  // WebSocket subscription for new drops using callback pattern
-  useWebSocketMessage<WsDropUpdateMessage["data"]>(
-    WsMessageType.DROP_UPDATE,
-    useCallback(
-      (message) => {
-        if (!enabled) return;
-        if (!message.wave.id) return;
-        if (isPollResponseDropUpdate(message)) return;
-
-        const waveId = message.wave.id;
-        const wave = waves.find((w) => w.id === waveId);
-
-        if (!wave) {
-          // If the opposite list already knows this wave, skip refetch for this list.
-          if (otherListWaveIds.has(waveId)) {
-            return;
-          }
-
-          const isOwnDrop =
-            connectedProfile?.handle?.toLowerCase() ===
-            message.author.handle?.toLowerCase();
-          const isVisibleActiveWave =
-            waveId === activeWaveId && document.visibilityState === "visible";
-
-          if (isOwnDrop) {
-            setNewDropsCounts((prev) =>
-              updateLatestDropTimestamp({
-                createdAt: message.created_at,
-                newDropsCounts: prev,
-                waveId,
-              })
-            );
-            return;
-          }
-
-          if (isVisibleActiveWave) {
-            setNewDropsCounts((prev) =>
-              updateLatestDropTimestamp({
-                createdAt: message.created_at,
-                newDropsCounts: prev,
-                waveId,
-              })
-            );
-            return;
-          }
-
-          setNewDropsCounts((prev) => {
-            return addUnreadDropCount({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              serialNo: message.serial_no,
-              waveId,
-            });
-          });
-
-          // Prevent refetch storms on bursts of unknown-wave websocket events.
-          const now = Date.now();
-          if (
-            lastUnknownWaveRefetchAtRef.current !== null &&
-            now - lastUnknownWaveRefetchAtRef.current <
-              unknownWaveRefetchCooldownMs
-          ) {
-            return;
-          }
-          lastUnknownWaveRefetchAtRef.current = now;
-          refetchWaves();
-          return;
-        }
-
-        if (wave.muted) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              firstUnreadSerialNo: null,
-              newDropsCounts: prev,
-              unreadCount: 0,
-              waveId,
-            })
-          );
-          return;
-        }
-
-        if (
-          connectedProfile?.handle?.toLowerCase() ===
-          message.author.handle?.toLowerCase()
-        ) {
-          setNewDropsCounts((prev) => {
-            return updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              waveId,
-            });
-          });
-          return;
-        }
-
-        // Skip incrementing if this is the active wave AND the document is visible
-        if (waveId === activeWaveId && document.visibilityState === "visible") {
-          setNewDropsCounts((prev) => {
-            return updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              waveId,
-            });
-          });
-          return;
-        }
-
-        setNewDropsCounts((prev) => {
-          return addUnreadDropCount({
-            createdAt: message.created_at,
-            newDropsCounts: prev,
-            serialNo: message.serial_no,
-            waveId,
-          });
-        });
-      },
-      [
-        activeWaveId,
-        connectedProfile,
-        enabled,
-        waves,
-        refetchWaves,
-        otherListWaveIds,
-        unknownWaveRefetchCooldownMs,
-      ]
-    ) // Make sure to include activeWaveId as a dependency
   );
 
   return {

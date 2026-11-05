@@ -18,7 +18,7 @@ describe("instrumentation-client Poper Blocker filter", () => {
     mockCaptureRouterTransitionStart.mockReset();
   });
 
-  it("drops the anonymous fetch sentinel before Sentry normalizes it", () => {
+  it("drops the anonymous fetch sentinel before Sentry normalizes it", async () => {
     jest.isolateModules(() => {
       require("@/instrumentation-client");
     });
@@ -68,6 +68,7 @@ describe("instrumentation-client Poper Blocker filter", () => {
       },
     };
 
-    expect(config.beforeSend(event)).toBeNull();
+    // beforeSend loads the event pipeline lazily, so it resolves its result.
+    await expect(config.beforeSend(event)).resolves.toBeNull();
   });
 });
