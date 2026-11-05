@@ -334,3 +334,30 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
+
+      # The deploy job records the Sentry release once production is live
+      # (build-upload-deploy-prod.yml) and installs no dependencies. Hand it
+      # the sentry-cli binary this frozen install verified against the
+      # lockfile, so nothing is downloaded at deploy time. Best effort: the
+      # deploy skips the release record if this hand-off is missing.
+      - name: Stage installed sentry-cli for the Sentry release
+        id: stage-sentry-cli
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          cli_path="$(node ops/scripts/resolve-sentry-cli.cjs)"
+          mkdir -p sentry-cli-handoff
+          cp "$cli_path" sentry-cli-handoff/sentry-cli
+          chmod +x sentry-cli-handoff/sentry-cli
+          sentry-cli-handoff/sentry-cli --version
+          (cd sentry-cli-handoff && sha256sum sentry-cli > SHA256SUMS)
+
+      - name: Upload sentry-cli for the Sentry release
+        if: steps.stage-sentry-cli.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-sentry-cli-${{ github.run_id }}
+          path: sentry-cli-handoff
+          if-no-files-found: error
+          retention-days: 1

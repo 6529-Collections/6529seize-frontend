@@ -266,6 +266,28 @@ publishes to its commit prefix again, and shared objects stay for pages that
 still use them. Staging serves static files from its own server
 (`ASSETS_FROM_S3=false`) and does not use either prefix.
 
+## Sentry releases
+
+The build no longer bakes the Sentry release into the client bundle
+(`config/sentryBuildRelease.ts`), so it no longer creates the release either.
+After Elastic Beanstalk serves the new commit and the version announcement is
+published, `Web Deploy - PROD` records it. `ops/scripts/sentry-release.sh`
+makes the same three `sentry-cli` calls the build plugin used to make:
+`releases new <commit>`, `releases set-commits <commit> --auto --ignore-missing`
+and `releases finalize <commit>`, for org `seize-ff`, project `6529-frontend`.
+The release name is the deployed commit, the `VERSION` that pages report to
+Sentry at runtime, so events attach to it. Only versions that went live are
+finalized. Source maps still upload during the build.
+
+The deploy job installs no dependencies. The build job hands it the
+`sentry-cli` binary its frozen install verified
+(`ops/scripts/resolve-sentry-cli.cjs`, artifact
+`production-sentry-cli-<run ID>`, kept 1 day), with a SHA-256 checksum, so
+nothing is downloaded at deploy time. Every part is best effort: a missing
+hand-off, a Sentry outage or a failed call prints a warning and never fails the
+deploy. Sentry still creates a missing release from the first event that
+carries it.
+
 ## Sitemap generation
 
 The `postbuild` step (`next-sitemap.build.cjs`) builds the sitemap from live
