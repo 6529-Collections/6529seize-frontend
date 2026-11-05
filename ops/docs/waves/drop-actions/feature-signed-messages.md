@@ -386,3 +386,10 @@ version itself is unchanged.
 The composer notice body uses the full space below its title and controls on
 narrow screens. Legacy DM warning actions use equal-width columns below the
 warning, including in the desktop quick-DM panel.
+
+### Edit availability
+
+Ordinary message Edit actions disappear five minutes after the message was
+last updated (or created, if never edited), matching the API deadline. This
+also updates while the action remains mounted. Wave description drops retain
+the API’s exception to that deadline.

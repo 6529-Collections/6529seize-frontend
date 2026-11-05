@@ -28,14 +28,11 @@ async function installPack(context: BrowserContext, ready = Promise.resolve()) {
   });
 }
 async function chooseEmoji(page: Page, search: string, label: string) {
-  const dialog = page.getByRole("dialog", { name: "Choose an emoji" });
-  // The shared Headless UI dialog has a zero-size root and a fixed visible panel.
-  await expect(
-    dialog.getByRole("heading", { name: "Choose an emoji" })
-  ).toBeVisible();
-  await dialog.getByPlaceholder("Search", { exact: true }).fill(search);
-  await dialog.getByRole("button", { name: label, exact: true }).click();
-  await expect(dialog).toHaveCount(0);
+  const picker = page.locator("em-emoji-picker");
+  await expect(picker).toBeVisible();
+  await picker.getByPlaceholder("Search", { exact: true }).fill(search);
+  await picker.getByRole("button", { name: label, exact: true }).click();
+  await expect(picker).toHaveCount(0);
 }
 
 test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
@@ -84,15 +81,27 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       content: "nextjs-portal { display: none !important; }",
     });
     const input = composer(alice.page);
-    await input.fill("Secret hello ");
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
+    await expect(input).toHaveAttribute("placeholder", "Write a message");
+    const inputBounds = await input.boundingBox();
+    const emojiBounds = await emojiTrigger.boundingBox();
+    expect(inputBounds).not.toBeNull();
+    expect(emojiBounds).not.toBeNull();
+    expect(emojiBounds!.x).toBeGreaterThanOrEqual(inputBounds!.x);
+    expect(emojiBounds!.x + emojiBounds!.width).toBeLessThanOrEqual(
+      inputBounds!.x + inputBounds!.width
+    );
+    expect(
+      inputBounds!.height,
+      "The empty composer stays on one line"
+    ).toBeLessThan(60);
+    await input.fill("Secret hello ");
     await emojiTrigger.focus();
     await emojiTrigger.press("Enter");
+    await expect(alice.page.locator("em-emoji-picker")).toBeVisible();
     await expect(
-      alice.page
-        .getByRole("dialog", { name: "Choose an emoji" })
-        .getByRole("heading")
-    ).toBeVisible();
+      alice.page.getByRole("dialog", { name: "Choose an emoji" })
+    ).toHaveCount(0);
     await alice.page.keyboard.press("Escape");
     await expect(emojiTrigger).toBeFocused();
     await emojiTrigger.press("Enter");
@@ -102,28 +111,25 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     // Native selection worked while the catalog request was still pending.
     releaseCatalog();
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
-    const dialog = alice.page.getByRole("dialog", { name: "Choose an emoji" });
+    const picker = alice.page.locator("em-emoji-picker");
     await expect(
-      dialog.getByRole("button", { name: "Frequently used", exact: true })
+      picker.getByRole("button", { name: "Frequently used", exact: true })
     ).toHaveCount(0);
     await expect(
-      dialog.getByRole("button", { name: "Flags", exact: true })
+      picker.getByRole("button", { name: "Flags", exact: true })
     ).toBeInViewport();
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth
       )
     ).toBe(false);
-    const clipped = await alice.page
-      .getByRole("dialog", { name: "Choose an emoji" })
-      .locator("em-emoji-picker")
-      .evaluate((host) => {
-        const scroll = host.shadowRoot!.querySelector(".scroll")!;
-        const bounds = scroll.getBoundingClientRect();
-        return [...scroll.querySelectorAll("button")].some(
-          (button) => button.getBoundingClientRect().right > bounds.right + 1
-        );
-      });
+    const clipped = await picker.evaluate((host) => {
+      const scroll = host.shadowRoot!.querySelector(".scroll")!;
+      const bounds = scroll.getBoundingClientRect();
+      return [...scroll.querySelectorAll("button")].some(
+        (button) => button.getBoundingClientRect().right > bounds.right + 1
+      );
+    });
     expect(clipped, "Every emoji column fits inside the picker").toBe(false);
     await alice.page.screenshot({
       path: testInfo.outputPath("encrypted-emoji-picker.png"),

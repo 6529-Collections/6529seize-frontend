@@ -88,7 +88,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.status.revoked": "Revoked",
   "signedMessages.devices.revoke": "Revoke",
   "signedMessages.devices.revokeLabel": "Revoke {label}",
-  "signedMessages.devices.authorProof": "Signed posts",
+  "signedMessages.devices.authorProof": "Signed Posts",
   "signedMessages.devices.revokeProofTitle": "Revoke signed posts for {label}?",
   "signedMessages.devices.revokeConfirm":
     "This device will no longer sign your messages. Its earlier signatures stay verifiable.",

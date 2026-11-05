@@ -202,7 +202,7 @@ describe("DevicesPreferencesSettings", () => {
     expect(within(rows[0]!).getByText("Active")).toBeVisible();
     expect(
       within(rows[0]!).getByText(
-        "Signed posts · Can post, edit, delete, and react"
+        "Signed Posts · Can post, edit, delete, and react"
       )
     ).toBeVisible();
     expect(within(rows[0]!).getByText(/Last used/)).toBeVisible();

@@ -349,14 +349,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       query: string,
       name: string
     ) => {
-      const dialog = session.page.getByRole("dialog", {
-        name: "Choose an emoji",
-      });
-      await dialog.getByPlaceholder("Search", { exact: true }).fill(query);
-      await dialog
+      const picker = session.page.locator("em-emoji-picker");
+      await picker.getByPlaceholder("Search", { exact: true }).fill(query);
+      await picker
         .getByRole("button", { name, exact: true })
         .click({ timeout: UI_TIMEOUT_MS });
-      await expect(dialog).toHaveCount(0);
+      await expect(picker).toHaveCount(0);
     };
     await a.page.getByRole("button", { name: "Add emoji" }).click();
     await choose(a, "grinning", "😀");
