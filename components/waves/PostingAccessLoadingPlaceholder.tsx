@@ -41,7 +41,7 @@ export default function PostingAccessLoadingPlaceholder({
     >
       {statusLabel && <span className="tw-sr-only">{statusLabel}</span>}
       <div
-        className="tw-flex tw-items-center tw-gap-2"
+        className="tw-flex tw-items-center tw-gap-0"
         data-testid="composer-actions-skeleton"
       >
         {["attach", "gif", "poll", "storm"]
@@ -49,7 +49,7 @@ export default function PostingAccessLoadingPlaceholder({
           .map((action) => (
             <SkeletonPart
               key={action}
-              className={`tw-size-10 ${expanded ? "tw-rounded-lg" : "tw-rounded-full"} tw-ring-1 tw-ring-inset tw-ring-white/5`}
+              className={`${expanded ? "tw-size-9 tw-rounded-lg" : "tw-size-10 tw-rounded-full"} tw-ring-1 tw-ring-inset tw-ring-white/5`}
             />
           ))}
       </div>

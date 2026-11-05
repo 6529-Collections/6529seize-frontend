@@ -82,8 +82,27 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     });
     const input = composer(alice.page);
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
+    const attachmentTrigger = alice.page.getByRole("button", {
+      name: "Attach files",
+    });
+    const attachmentShape = await attachmentTrigger.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const iconBounds = element.querySelector("svg")?.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        iconWidth: iconBounds?.width,
+        iconHeight: iconBounds?.height,
+      };
+    });
+    expect(attachmentShape).toEqual({
+      width: 36,
+      height: 36,
+      iconWidth: 18,
+      iconHeight: 18,
+    });
     if (!testInfo.project.use.isMobile) {
-      await alice.page.getByRole("button", { name: "Attach files" }).hover();
+      await attachmentTrigger.hover();
       await expect(alice.page.getByRole("tooltip")).toHaveText("Attach files");
       await emojiTrigger.hover();
       await expect(alice.page.getByRole("tooltip")).toHaveText("Add emoji");

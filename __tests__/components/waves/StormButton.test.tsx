@@ -61,7 +61,7 @@ describe("StormButton", () => {
       );
 
       const button = screen.getByRole("button", { name: "Break into storm" });
-      expect(button).toHaveClass("tw-size-10", "tw-px-0");
+      expect(button).toHaveClass("tw-size-9", "tw-px-0");
       expect(
         within(button).queryByText("Break into storm")
       ).not.toBeInTheDocument();

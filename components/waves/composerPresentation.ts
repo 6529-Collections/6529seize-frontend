@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react";
 
 export const COMPOSER_ACTION_BUTTON_CLASS_NAME =
-  "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+  "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 export const COMPOSER_ACTION_IDLE_CLASS_NAME =
   "tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100";
 
-export const COMPOSER_ACTION_ICON_CLASS_NAME = "tw-size-5 tw-flex-shrink-0";
+export const COMPOSER_ACTION_ICON_CLASS_NAME =
+  "tw-size-[18px] tw-flex-shrink-0";
 
 export const COMPOSER_ROW_GAP_CLASS_NAME = "tw-gap-x-1 sm:tw-gap-x-2";
 
