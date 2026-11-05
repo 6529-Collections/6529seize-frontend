@@ -210,6 +210,7 @@ const auth = {
 } as any;
 const ownProfileAuth = {
   connectedProfile: { handle: "bob" },
+  isDirectProfileSession: true,
   activeProfileProxy: null,
   setToast: jest.fn(),
 } as any;
@@ -618,6 +619,36 @@ describe("UserPageHeader", () => {
       );
     });
   });
+
+  it.each([true, false, undefined])(
+    "only enables profile editing for a confirmed direct session (%s)",
+    (isDirectProfileSession) => {
+      render(
+        <AuthContext.Provider
+          value={{ ...ownProfileAuth, isDirectProfileSession }}
+        >
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[
+              {
+                statement_type: STATEMENT_TYPE.BIO,
+                statement_group: STATEMENT_GROUP.GENERAL,
+              } as CicStatement,
+            ]}
+            profileEnabledAt={null}
+            followersCount={0}
+          />
+        </AuthContext.Provider>
+      );
+      expect(
+        screen.queryAllByRole("button", { name: "Edit profile" }).length > 0
+      ).toBe(isDirectProfileSession === true);
+    }
+  );
 
   it("links to preferences from your own profile", () => {
     render(
