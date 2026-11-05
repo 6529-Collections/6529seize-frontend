@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, useState } from "react";
+import { useState } from "react";
 import type { MessageKey } from "@/i18n/messages";
 import type { E2eeMember, E2eeMessage } from "@/lib/e2ee/types";
 import {
@@ -245,19 +245,6 @@ export function handleMentionKey(
       return false;
   }
 }
-
-/** Enter sends; Shift+Enter and IME composition insert a newline. */
-export const isSendKey = (event: KeyboardEvent<HTMLTextAreaElement>) =>
-  event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing;
-
-export const isEditLastMessageKey = (
-  event: KeyboardEvent<HTMLTextAreaElement>
-) =>
-  event.key === "ArrowUp" &&
-  !event.altKey &&
-  !event.ctrlKey &&
-  !event.metaKey &&
-  !event.shiftKey;
 
 export const isComposerEmpty = (
   text: string,

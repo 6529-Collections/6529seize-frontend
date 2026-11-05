@@ -154,7 +154,7 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     ).toBeVisible();
     if (testInfo.project.use.isMobile) {
       await input.press("Enter");
-      await expect(input.locator("p")).toHaveCount(2);
+      await expect(input.getByRole("paragraph")).toHaveCount(2);
       await alice.page
         .getByRole("button", { name: "Send", exact: true })
         .click();

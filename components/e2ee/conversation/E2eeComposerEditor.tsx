@@ -47,6 +47,20 @@ const isSelectionAttached = (selection: RangeSelection | null) =>
   $getNodeByKey(selection.anchor.key)?.isAttached() &&
   $getNodeByKey(selection.focus.key)?.isAttached();
 
+function restoreEmojiCaret(
+  editor: LexicalEditor,
+  caret: RangeSelection | null
+) {
+  editor.focus(() =>
+    editor.update(
+      () => {
+        if (isSelectionAttached(caret)) $setSelection(caret);
+      },
+      { discrete: true }
+    )
+  );
+}
+
 export const E2eeComposerEditor = forwardRef<
   E2eeComposerEditorHandle,
   {
@@ -153,14 +167,7 @@ export const E2eeComposerEditor = forwardRef<
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         if (editorRef.current !== editor) return;
-        editor.focus(() =>
-          editor.update(
-            () => {
-              if (isSelectionAttached(caret)) $setSelection(caret);
-            },
-            { discrete: true }
-          )
-        );
+        restoreEmojiCaret(editor, caret);
       })
     );
   };

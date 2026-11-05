@@ -744,6 +744,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }, testInfo) => {
+    // Mobile keeps the collapsed plus-button tray; hover assertions apply only to desktop.
     test.skip(
       Boolean(testInfo.project.use.isMobile),
       "Expanded browser actions only"
@@ -760,7 +761,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         label: "Add GIF",
       },
       {
-        button: page.locator('button[data-tooltip-id^="drop-actions-poll-"]'),
+        button: page.getByRole("button", { name: "Add poll", exact: true }),
         label: "Add poll",
       },
       {
