@@ -598,7 +598,9 @@ Large-pack ownership:
 - `test:e2e:input-detection-readonly` keeps the Windows touch/mouse latch
   assertions on a single hydrated message selected by serial number. Its
   self-contained browser harness also covers row replacement during scrolling,
-  delayed replacement insertion, and messages arriving during a touch gesture.
+  delayed replacement insertion, messages arriving during a touch gesture,
+  and avoiding author links when tapping the row wrapper. Trusted taps must
+  stay on the wave route; a row without safe padding fails explicitly.
   The harness needs no application server; run it with
   `PLAYWRIGHT_SKIP_WEB_SERVER=1 6529 exec playwright test tests/input/win8-touch-latch-readonly.spec.ts --project=web-desktop-chromium --grep 'Touch target harness'`.
 - `test:e2e`, `test:e2e:smoke`, and targeted single-route specs are ordinary
