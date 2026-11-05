@@ -619,6 +619,20 @@ describe("App PR CI merge-tree base", () => {
     }
   });
 
+  it("finishes independent app checks while retaining the aggregate failure gate", () => {
+    expect(appChecks.strategy["fail-fast"]).toBe(false);
+    const aggregate = workflow.jobs["installed-checks"];
+    expect(aggregate.needs).toEqual([
+      "plan",
+      "app-checks",
+      "core-playwright-checks",
+    ]);
+    const gate = aggregate.steps.find(
+      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+    );
+    expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
+  });
+
   it("feeds every app-check diff, selection and evidence base from the plan", () => {
     const planBase = "${{ needs.plan.outputs.base_sha }}";
     expect(appChecks.env.BASE_SHA).toBe(planBase);
