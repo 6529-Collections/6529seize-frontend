@@ -14,7 +14,6 @@ import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDeci
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import E2eeProvider from "@/components/e2ee/E2eeProvider";
-import { IpfsProvider } from "@/components/ipfs/IPFSContext";
 import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -85,53 +84,51 @@ export default function Providers({
               <RefreshProvider>
                 <SeizeSettingsProvider mode={settingsMode}>
                   <EmojiProvider>
-                    <IpfsProvider>
-                      <SeizeConnectProvider>
-                        <Auth
+                    <SeizeConnectProvider>
+                      <Auth
+                        enableWalletAuthentication={
+                          enableWalletAuthentication
+                        }
+                      >
+                        <AuthLaunchTimingReporter
                           enableWalletAuthentication={
                             enableWalletAuthentication
                           }
-                        >
-                          <AuthLaunchTimingReporter
-                            enableWalletAuthentication={
-                              enableWalletAuthentication
-                            }
-                          />
-                          {enableWalletAuthentication && (
-                            <MarketActivityTracker />
+                        />
+                        {enableWalletAuthentication && (
+                          <MarketActivityTracker />
+                        )}
+                        {enableWalletAuthentication &&
+                          isSignedMessagesEnabled() && (
+                            <SignedWriteDecisionHost />
                           )}
-                          {enableWalletAuthentication &&
-                            isSignedMessagesEnabled() && (
-                              <SignedWriteDecisionHost />
-                            )}
-                          <WaveEligibilityProvider>
-                            <NotificationsProvider>
-                              <CookieConsentProvider
-                                disabled={!enableCookieConsent}
-                              >
-                                <MixpanelSetup />
-                                <AppWebSocketProvider>
-                                  {/* Encrypted chats (D109): inert unless the flag is on. */}
-                                  <E2eeProvider>
-                                    <LayoutProvider>
-                                      {enableMyStream ? (
-                                        <MyStreamProvider>
-                                          {sharedProviders}
-                                          <QuickDirectMessagesGate />
-                                        </MyStreamProvider>
-                                      ) : (
-                                        sharedProviders
-                                      )}
-                                    </LayoutProvider>
-                                  </E2eeProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </CookieConsentProvider>
-                            </NotificationsProvider>
-                          </WaveEligibilityProvider>
-                        </Auth>
-                      </SeizeConnectProvider>
-                    </IpfsProvider>
+                        <WaveEligibilityProvider>
+                          <NotificationsProvider>
+                            <CookieConsentProvider
+                              disabled={!enableCookieConsent}
+                            >
+                              <MixpanelSetup />
+                              <AppWebSocketProvider>
+                                {/* Encrypted chats (D109): inert unless the flag is on. */}
+                                <E2eeProvider>
+                                  <LayoutProvider>
+                                    {enableMyStream ? (
+                                      <MyStreamProvider>
+                                        {sharedProviders}
+                                        <QuickDirectMessagesGate />
+                                      </MyStreamProvider>
+                                    ) : (
+                                      sharedProviders
+                                    )}
+                                  </LayoutProvider>
+                                </E2eeProvider>
+                                {enableVersionCheck && <NewVersionToast />}
+                              </AppWebSocketProvider>
+                            </CookieConsentProvider>
+                          </NotificationsProvider>
+                        </WaveEligibilityProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
                   </EmojiProvider>
                 </SeizeSettingsProvider>
               </RefreshProvider>
