@@ -131,6 +131,16 @@ export function sharedConfig(
       maximumResponseBody: IMAGE_MAXIMUM_RESPONSE_BODY_BYTES,
     },
     poweredByHeader: false,
+    // The free-solid barrel defines every icon inline, so bundles keep far
+    // more icons than a page draws. Rewriting each named import to its
+    // single-icon module (`@fortawesome/free-solid-svg-icons/faPlus`) ships
+    // only the icons in use, with no barrel copy beside them.
+    modularizeImports: {
+      "@fortawesome/free-solid-svg-icons": {
+        transform: "@fortawesome/free-solid-svg-icons/{{member}}",
+        skipDefaultConversion: true,
+      },
+    },
     redirects() {
       return Promise.resolve([
         // CC0 in one minute lives on the 6529 Explained hub until The Memes
