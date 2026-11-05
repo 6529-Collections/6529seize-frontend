@@ -17,6 +17,7 @@ import {
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
+import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
   useWaveSubwavesMap,
@@ -328,7 +329,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         : null,
     [fetchedAnnouncementWave]
   );
-  const announcementWave = useMemo(() => {
+  const announcementWaveSource = useMemo(() => {
     const resolvedWave =
       trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
     if (
@@ -340,6 +341,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }
     return resolvedWave;
   }, [trackedAnnouncementWave, fetchedAnnouncementSidebarWave]);
+
+  const announcementWave = useAnnouncementWaveActivity(
+    announcementWaveSource,
+    viewerIdentityKey
+  );
 
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
