@@ -210,9 +210,10 @@ first render.
   footer, with subtle horizontal dividers between rows. Dates are emphasized above
   quieter Meme titles, including Minting Today. Its blue label takes the date's
   place, with uncropped 80 × 113 artwork from 640px and 48 × 68 artwork on phones.
-  Phone artwork aligns with the top of the text. The owner quantity picker and
+  Below 640px, today's artwork sits above the full-width text, so its controls
+  align with the right edge of the later rows. The owner quantity picker and
   switch stay paired beside the Meme name when there is room, or below it on
-  narrower rows. Visitors keep quantity and subscription status together with
+  narrower rows, still aligned right. Visitors keep quantity and subscription status together with
   the same responsive placement. Below 768px, More expands the original mint-day allocation details as text
   below the row; desktop keeps them visible. Show More stays centered in the panel footer at every screen size.
   Visitors see non-interactive `Subscribed` or `Not subscribed` text

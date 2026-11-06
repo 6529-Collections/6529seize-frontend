@@ -587,6 +587,90 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await captureSafeScreenshot(page, test.info(), "grant-token-empty");
   });
 
+  for (const subscribed of [true, false]) {
+    test(`aligns mint-day visitor status with later rows when subscribed=${subscribed}`, async ({
+      page,
+    }, testInfo) => {
+      await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+      await installSubscriptionFixtures(page);
+      await page.route(
+        (url) => url.pathname.endsWith("/memes_latest"),
+        (route) =>
+          route.fulfill({
+            json: {
+              id: 568,
+              contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+              thumbnail: "/profile-cms/templates/memes/1.webp",
+            },
+          })
+      );
+      await page.route(
+        (url) =>
+          url.pathname.includes("/subscriptions/consolidation/upcoming-memes/"),
+        (route) =>
+          route.fulfill({
+            json: [568, 569, 570].map((token_id) => ({
+              token_id,
+              contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+              subscribed,
+              subscribed_count: 2,
+            })),
+          })
+      );
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      const upcoming = page.getByRole("region", {
+        name: "Upcoming Drops",
+        exact: true,
+      });
+      const artwork = page
+        .getByRole("region", { name: "Upcoming Drops", exact: true })
+        .locator("img");
+      const mintingToday = upcoming.getByRole("button", {
+        name: "Minting Today",
+      });
+      const statuses = upcoming.getByText(
+        subscribed ? "Subscribed" : "Not subscribed",
+        { exact: true }
+      );
+      await expect(artwork).toBeVisible();
+      await expect(statuses).toHaveCount(3);
+      await expect(upcoming.getByRole("switch")).toHaveCount(0);
+      await expect(upcoming.getByRole("combobox")).toHaveCount(0);
+      for (const width of [390, 492, 639, 640, 1024]) {
+        await page.setViewportSize({ width, height: 900 });
+        const imageBox = await artwork.boundingBox();
+        const labelBox = await mintingToday.boundingBox();
+        expect(imageBox).not.toBeNull();
+        expect(labelBox).not.toBeNull();
+        if (width < 640) {
+          expect(labelBox!.y).toBeGreaterThanOrEqual(
+            imageBox!.y + imageBox!.height
+          );
+          expect(Math.abs(labelBox!.x - imageBox!.x)).toBeLessThanOrEqual(1);
+        } else {
+          expect(labelBox!.x).toBeGreaterThanOrEqual(
+            imageBox!.x + imageBox!.width
+          );
+        }
+        const rightEdges = await statuses.evaluateAll((elements) =>
+          elements.map((element) => element.getBoundingClientRect().right)
+        );
+        expect(
+          Math.max(...rightEdges) - Math.min(...rightEdges)
+        ).toBeLessThanOrEqual(1);
+        await expectNoHorizontalOverflow(page);
+        if (width === 390) {
+          const path = testInfo.outputPath(`mint-day-status-${subscribed}.png`);
+          await upcoming.screenshot({ path });
+          await testInfo.attach("Minting Today mobile layout", {
+            contentType: "image/png",
+            path,
+          });
+        }
+      }
+    });
+  }
+
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
     isMobile,
