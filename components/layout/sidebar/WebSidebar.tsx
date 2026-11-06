@@ -233,7 +233,8 @@ function WebSidebar({
                         />
                       ) : (
                         <DesktopNotifications
-                          key={`${connectedProfile?.id ?? address}:${activeProfileProxy?.id ?? ""}:${hasValidWalletAuth}:${pathname}`}
+                          key={`${connectedProfile?.id ?? address}:${activeProfileProxy?.id ?? ""}:${hasValidWalletAuth}`}
+                          pathname={pathname}
                           collapsed={shouldShowCollapsed}
                           unread={haveUnreadNotifications}
                         />

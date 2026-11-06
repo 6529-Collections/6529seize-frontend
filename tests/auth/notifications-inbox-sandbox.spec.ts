@@ -389,11 +389,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       try {
         await page.goto("/waves", { waitUntil: "domcontentloaded" });
         await waitForRouteReady(page);
-        const trigger = page.getByRole("button", {
+        const trigger = page.getByRole("link", {
           name: "Notifications",
           exact: true,
         });
-        await trigger.click();
+        await trigger.hover();
         const inbox = page.getByRole("region", {
           name: "Notifications",
           exact: true,
