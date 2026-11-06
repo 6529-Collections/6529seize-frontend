@@ -69,11 +69,28 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
       name: "Unencrypted chat notice",
     });
     await expect(notice).toContainText(
-      "This history will be deleted from 6529’s servers on Dec 1, 2026, unless we’re legally required to keep it."
+      "6529 deletes this history from its servers on Dec 1, 2026 unless legally required to keep it."
     );
     await expect(
       notice.getByRole("button", { name: "Export history" })
     ).toBeVisible();
+    // Full DM views retain the notice and actions at narrow viewport widths.
+    for (const width of [390, 768]) {
+      await alice.page.setViewportSize({ width, height: 900 });
+      const exportBox = await notice
+        .getByRole("button", { name: "Export history" })
+        .boundingBox();
+      const startBox = await notice
+        .getByRole("button", { name: "Start encrypted chat" })
+        .boundingBox();
+      const noticeBox = await notice.boundingBox();
+      expect(exportBox).not.toBeNull();
+      expect(startBox).not.toBeNull();
+      expect(noticeBox).not.toBeNull();
+      expect(Math.abs(exportBox!.width - startBox!.width)).toBeLessThan(2);
+      expect(Math.abs(exportBox!.y - startBox!.y)).toBeLessThan(2);
+      expect(noticeBox!.height).toBeLessThan(320);
+    }
     await notice.getByRole("button", { name: "Start encrypted chat" }).click();
 
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}/new$`), {

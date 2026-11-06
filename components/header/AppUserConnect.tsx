@@ -1,3 +1,5 @@
+import DeviceSetupMenuAction from "@/components/device-signing/DeviceSetupMenuAction";
+import { isDeviceSecurityStatusEnabled } from "@/components/device-signing/DeviceSecurityStatus";
 import HeaderBookmarksLink from "./user/HeaderBookmarksLink";
 import {
   faPlugCircleMinus,
@@ -30,6 +32,7 @@ export default function AppUserConnect({
 }) {
   const {
     address,
+    hasValidWalletAuth,
     isConnected,
     connectedAccounts,
     seizeConnectFresh,
@@ -37,7 +40,7 @@ export default function AppUserConnect({
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
   } = useSeizeConnectContext();
-  const { setToast } = useContext(AuthContext);
+  const { activeProfileProxy, setToast } = useContext(AuthContext);
   const locale = useBrowserLocale();
   const [isPushSettingsOpen, setIsPushSettingsOpen] = useState(false);
   const [isOpeningConnection, setIsOpeningConnection] = useState(false);
@@ -150,6 +153,13 @@ export default function AppUserConnect({
         />
         <span>{t(locale, "profilePreferences.button")}</span>
       </Link>
+      {isDeviceSecurityStatusEnabled() && (
+        <DeviceSetupMenuAction
+          mobile
+          onClose={onNavigate}
+          showStatus={!hasValidWalletAuth || Boolean(activeProfileProxy)}
+        />
+      )}
       <button
         type="button"
         onClick={() => setIsPushSettingsOpen(true)}

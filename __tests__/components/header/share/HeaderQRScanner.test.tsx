@@ -150,6 +150,38 @@ describe("HeaderQRScanner", () => {
     expect(onScan).toHaveBeenCalled();
   });
 
+  it.each(["", `#device_setup_key=${"a".repeat(43)}`])(
+    "opens connection QR codes with their setup fragment intact (%s)",
+    async (fragment) => {
+      mockedCapacitor.mockReturnValue({ isCapacitor: true });
+      const push = jest.fn();
+      mockedRouter.mockReturnValue({ push });
+      const onScan = jest.fn();
+      mockedAuth.mockReturnValue({ setToast: jest.fn() });
+      const address = "0x00000000000000000000000000000000000000AA";
+      const query = `connection_share_code=code&address=${address}`;
+      (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
+        ScanResult: `testmobile6529://share-connection?${query}${fragment}`,
+      });
+
+      render(<HeaderQRScanner onScanSuccess={onScan} />);
+      await userEvent.click(
+        await screen.findByRole("button", { name: getTriggerName() })
+      );
+
+      await waitFor(() =>
+        expect(push).toHaveBeenCalledWith(
+          expect.stringMatching(
+            new RegExp(
+              `^/accept-connection-sharing\\?${query}&_t=\\d+${fragment}$`
+            )
+          )
+        )
+      );
+      expect(onScan).toHaveBeenCalled();
+    }
+  );
+
   it("shows toast on invalid scan result", async () => {
     mockedCapacitor.mockReturnValue({ isCapacitor: true });
     const push = jest.fn();

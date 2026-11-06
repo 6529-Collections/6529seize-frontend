@@ -158,12 +158,15 @@ describe("useNewDropCounter", () => {
       await act(async () => {
         await fetchDropByIdBatched.mock.results[0].value;
       });
-      expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
-        isReply ? 0 : 1
-      );
-      expect(
-        result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
-      ).toBe(isReply ? null : 40);
+      // Fetch completion can precede the hook's committed state update.
+      await waitFor(() => {
+        expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
+          isReply ? 0 : 1
+        );
+        expect(
+          result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
+        ).toBe(isReply ? null : 40);
+      });
     }
   );
 

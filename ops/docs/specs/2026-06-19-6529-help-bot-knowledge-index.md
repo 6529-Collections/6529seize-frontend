@@ -7,9 +7,14 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The encrypted-messages record covers the composer emoji board, native and 6529
-custom emojis, insertion during edits, the full reaction picker, readable
-shortcode fallbacks, collection-load recovery, and the separate emoji history.
+The signing, encrypted-messages and connection-sharing records cover the shared
+permission consent flow, separate or combined grants, shared server device names,
+renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
+local notification previews without an in-app cooldown. Composer help describes
+the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
+clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
+keeps new-device history limitations explicit and names the environment-specific
+Mobile/Staging push body.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media

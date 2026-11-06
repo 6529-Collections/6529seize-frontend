@@ -19,6 +19,13 @@ import {
 Element.prototype.scrollTo = jest.fn();
 Element.prototype.scrollIntoView = jest.fn();
 
+jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
+  E2eeRenewalBanner: () => null,
+}));
+// This suite checks timeline identities; the rich-text composer has its own tests.
+jest.mock("@/components/e2ee/conversation/E2eeComposer", () => ({
+  E2eeComposer: () => null,
+}));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
   useRouter: () => ({

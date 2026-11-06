@@ -9,10 +9,11 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock(
-  "@/components/user/utils/set-up-profile/UserSetUpProfileCta",
-  () => () => <a href="/0x123">Create profile</a>
-);
+jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => {
+  const { default: Link } =
+    jest.requireActual<typeof import("next/link")>("next/link");
+  return () => <Link href="/0x123">Create profile</Link>;
+});
 jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
   <div>Notification settings panel</div>
 ));
@@ -51,12 +52,14 @@ describe("PreferencesPageClient", () => {
 
   it("offers the Devices tab only while signed messages are enabled", () => {
     const { rerender } = render(<PreferencesPageClient activeTab="devices" />);
-    expect(screen.queryByRole("link", { name: "Devices" })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Device Permissions" })
+    ).toBeNull();
     expect(screen.queryByText("Devices settings panel")).toBeNull();
 
     mockSignedMessagesEnabled = true;
     rerender(<PreferencesPageClient activeTab="devices" />);
-    const devicesTab = screen.getByRole("link", { name: "Devices" });
+    const devicesTab = screen.getByRole("link", { name: "Device Permissions" });
     expect(devicesTab).toHaveAttribute("href", "/preferences?tab=devices");
     expect(devicesTab).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Devices settings panel")).toBeVisible();
@@ -70,18 +73,16 @@ describe("PreferencesPageClient", () => {
     expect(screen.getByRole("heading", { name: "Preferences" })).toBeVisible();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     const notificationsTab = screen.getByRole("link", {
-      name: "Notifications & messages",
+      name: "Notifications & Messages",
     });
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
     expect(notificationsTab).toHaveClass(
-      "tw-border-b-2",
-      "tw-border-primary-400",
-      "tw-px-1",
-      "tw-py-4"
+      "tw-bg-primary-500/10",
+      "@[42rem]/preferences:tw-border-primary-400"
     );
     expect(
       screen.getByRole("navigation", { name: "Preference sections" })
-    ).toHaveClass("tw-gap-x-3", "lg:tw-gap-x-4");
+    ).toHaveClass("tw-grid-cols-2", "@[42rem]/preferences:tw-flex");
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass(
       "tw-min-h-dvh",

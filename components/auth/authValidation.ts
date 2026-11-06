@@ -1,5 +1,6 @@
 import {
   getAuthJwt,
+  getWalletAddress,
   hasActiveSessionV2Auth,
   invalidateAuthSessionForAddress,
 } from "@/services/auth/auth.utils";
@@ -89,9 +90,15 @@ const isCurrentValidationOperation = ({
   readonly activeValidationOperationIdRef: RunImmediateAuthValidationParams["activeValidationOperationIdRef"];
   readonly currentAddress: string;
   readonly operationId: string;
-}): boolean =>
-  latestAddressRef.current === currentAddress &&
-  activeValidationOperationIdRef.current === operationId;
+}): boolean => {
+  const selectedAddress = getWalletAddress();
+  return (
+    latestAddressRef.current === currentAddress &&
+    activeValidationOperationIdRef.current === operationId &&
+    (!selectedAddress ||
+      selectedAddress.toLowerCase() === currentAddress.toLowerCase())
+  );
+};
 
 const trackImmediateAuthValidationTelemetry = ({
   result,
@@ -286,6 +293,14 @@ export const runImmediateAuthValidation = async ({
             isConnected: hasActiveWalletAddress,
             operationId,
             abortSignal: abortController.signal,
+            shouldPersistRefreshedSession: () =>
+              !abortController.signal.aborted &&
+              isCurrentValidationOperation({
+                latestAddressRef,
+                activeValidationOperationIdRef,
+                currentAddress,
+                operationId,
+              }),
           },
           callbacks: {
             onShowSignModal: setShowSignModal,

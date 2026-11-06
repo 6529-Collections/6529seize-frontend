@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { WalletIcon } from "@heroicons/react/24/outline";
 import DotLoader from "../dotLoader/DotLoader";
 import { formatSessionUpgradeTimeLeft } from "./authSessionUpgrade";
 import styles from "./Auth.module.css";
@@ -199,17 +199,6 @@ export function AuthSignModal({
           <h2 id={signModalTitleId} className={modalStyles["signModalTitle"]}>
             {signModalTitle}
           </h2>
-          {!isSessionUpgradePrompt && !isSignRequestInProgress && (
-            <Button
-              variant="secondary"
-              size="lg"
-              className="tw-size-11 tw-min-w-11 tw-p-0"
-              aria-label={t(locale, "auth.signModal.cancelSignIn")}
-              onClick={onCancelSignRequest}
-            >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </Button>
-          )}
         </div>
         <div className={modalStyles["signModalBody"]}>
           <p

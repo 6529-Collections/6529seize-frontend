@@ -14,9 +14,9 @@ const e2eeWake = {
 };
 
 describe("resolvePushRedirectUrl for encrypted chat wakes", () => {
-  it("opens the encrypted chats list when encrypted chats are enabled", () => {
+  it("opens the encrypted chats list, marked as a wake, when encrypted chats are enabled", () => {
     isE2eeEnabledMock.mockReturnValue(true);
-    expect(resolvePushRedirectUrl(e2eeWake)).toBe("/messages/encrypted");
+    expect(resolvePushRedirectUrl(e2eeWake)).toBe("/messages/encrypted?wake=1");
   });
 
   it("falls back to the messages list when the build has them off", () => {
@@ -28,7 +28,7 @@ describe("resolvePushRedirectUrl for encrypted chat wakes", () => {
     isE2eeEnabledMock.mockReturnValue(true);
     expect(
       resolvePushRedirectUrl({ ...e2eeWake, wave_id: "w", drop_id: "d" })
-    ).toBe("/messages/encrypted");
+    ).toBe("/messages/encrypted?wake=1");
   });
 
   it("keeps wave redirects unchanged", () => {

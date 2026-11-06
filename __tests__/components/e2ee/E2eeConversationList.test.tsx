@@ -1,4 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
@@ -8,6 +10,7 @@ import {
   contextFor,
   conversation,
   createFakeE2eeEngine,
+  device,
   DM_G,
   E2eeTestProvider,
   GROUP_G,
@@ -16,9 +19,25 @@ import {
   SELF_ID,
 } from "./fakeE2eeEngine";
 
+const mockSecurityState = jest.fn();
+const emojiSource = "data:image/webp;base64,UklGRg==";
+const mockEmojiSources = new Map([["gm", emojiSource]]);
+jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
+  E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
+  useE2eeEmojis: () => ({ sources: mockEmojiSources }),
+}));
+const mockSearch = jest.fn(() => new URLSearchParams());
+jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
+  useDeviceSecurityState: () => mockSecurityState(),
+}));
+jest.mock("@/hooks/device-signing/useEnableSignedMessages", () => ({
+  useEnableSignedMessages: () => ({ canEnable: false, isEnabling: false }),
+}));
+
 const mockPathname = jest.fn(() => "/messages");
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
+  useSearchParams: () => mockSearch(),
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -45,7 +64,66 @@ const conversations = [
 describe("encrypted conversation list", () => {
   beforeEach(() => {
     globalThis.localStorage.clear();
+    mockSecurityState.mockReturnValue({
+      proofGrant: null,
+      proofRenewal: null,
+      encryptionRenewal: null,
+    });
+    mockSearch.mockReturnValue(new URLSearchParams());
     mockPathname.mockReturnValue("/messages/encrypted");
+  });
+
+  it("shares a combined renewal dismissal between Waves and Messages", () => {
+    const expiresAt = Date.UTC(2026, 10, 10);
+    const thisDevice = device({
+      deviceKey: "combined-device",
+      authorProofGrantId: "combined-grant",
+      expiresAt,
+    });
+    mockSecurityState.mockReturnValue({
+      proofGrant: { id: "combined-grant", expires_at: expiresAt },
+      proofRenewal: 1000,
+      encryptionRenewal: 1000,
+    });
+    const context = contextFor(createFakeE2eeEngine({ thisDevice }));
+    const banner = (
+      <E2eeTestProvider value={context}>
+        <E2eeRenewalBanner />
+      </E2eeTestProvider>
+    );
+    const { rerender } = render(banner);
+    expect(
+      screen.getByRole("button", { name: "Renew signed posts" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Renew encrypted DMs" })
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Dismiss renewal reminder" })
+    );
+    mockPathname.mockReturnValue("/waves/example");
+    rerender(
+      <E2eeTestProvider value={context}>
+        <E2eeRenewalBanner />
+      </E2eeTestProvider>
+    );
+    expect(
+      screen.queryByRole("button", { name: "Renew signed posts" })
+    ).toBeNull();
+  });
+
+  it("previews renewal only on Waves and Messages without enabling signing", () => {
+    mockSearch.mockReturnValue(new URLSearchParams("showRenewal=true"));
+    mockPathname.mockReturnValue("/preferences");
+    const { rerender } = render(<E2eeRenewalBanner />);
+    expect(
+      screen.queryByRole("button", { name: "Renew encrypted DMs" })
+    ).toBeNull();
+    mockPathname.mockReturnValue("/messages/example");
+    rerender(<E2eeRenewalBanner />);
+    expect(
+      screen.getByRole("button", { name: "Renew encrypted DMs" })
+    ).toBeDisabled();
   });
 
   it("lists chats with previews, unread counts and status", () => {
@@ -71,6 +149,38 @@ describe("encrypted conversation list", () => {
       screen.getByRole("heading", { name: "Encrypted messages" })
     ).toBeInTheDocument();
     expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
+  });
+
+  it.each([
+    { name: "inbox", Component: E2eeConversationListPage },
+    { name: "sidebar", Component: E2eeMessagesSection },
+  ])("renders compact custom emojis in $name previews", ({ Component }) => {
+    const chats = [
+      conversation({
+        lastMessage: message({
+          id: "custom-emoji-preview",
+          senderProfileId: SELF_ID,
+          text: "gm :gm: 😀 :unknown:",
+        }),
+      }),
+    ];
+    render(
+      <E2eeTestProvider
+        value={contextFor(createFakeE2eeEngine({ conversations: chats }))}
+      >
+        <Component />
+      </E2eeTestProvider>
+    );
+    const row = within(
+      screen.getByRole("list", { name: "Encrypted chats" })
+    ).getByRole("link");
+    const emoji = within(row).getByRole("img", { name: ":gm:" });
+    expect(emoji).toHaveAttribute("src", emojiSource);
+    expect(emoji).toHaveAttribute("width", "16");
+    expect(emoji).toHaveAttribute("height", "16");
+    expect(emoji.parentElement).toHaveClass("tw-truncate");
+    expect(row).toHaveTextContent("You: gm 😀 :unknown:");
+    expect(row).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
   });
 
   it("marks a chat muted on this device and leaves it out of the badge", () => {

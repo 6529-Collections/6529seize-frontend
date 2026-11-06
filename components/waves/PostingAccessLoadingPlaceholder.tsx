@@ -1,3 +1,9 @@
+"use client";
+
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useCreateDropContainerWidth } from "./create-drop-content/useCreateDropContainerWidth";
+import { COMPOSER_ROW_GAP_CLASS_NAME } from "./composerPresentation";
+
 interface PostingAccessLoadingPlaceholderProps {
   readonly statusLabel?: string | undefined;
 }
@@ -16,8 +22,13 @@ const SkeletonPart = ({ className }: { readonly className: string }) => (
 export default function PostingAccessLoadingPlaceholder({
   statusLabel,
 }: PostingAccessLoadingPlaceholderProps) {
+  const isMobile = useIsMobileScreen();
+  const { isWideContainer, setActionsContainerRef } =
+    useCreateDropContainerWidth();
+  const expanded = !isMobile && isWideContainer;
   return (
     <div
+      ref={setActionsContainerRef}
       {...(statusLabel
         ? {
             role: "status",
@@ -26,12 +37,24 @@ export default function PostingAccessLoadingPlaceholder({
           }
         : { "aria-hidden": true })}
       data-testid="posting-access-skeleton"
-      className="tw-grid tw-min-h-11 tw-w-full tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+      className={`tw-grid tw-min-h-10 tw-w-full tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center ${COMPOSER_ROW_GAP_CLASS_NAME}`}
     >
       {statusLabel && <span className="tw-sr-only">{statusLabel}</span>}
-      <SkeletonPart className="tw-size-8 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/5 lg:tw-size-7" />
-      <SkeletonPart className="tw-h-11 tw-min-w-0 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10" />
-      <SkeletonPart className="tw-h-11 tw-w-10 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/5 lg:tw-w-[3.875rem]" />
+      <div
+        className="tw-flex tw-items-center tw-gap-0"
+        data-testid="composer-actions-skeleton"
+      >
+        {["attach", "gif", "poll", "storm"]
+          .slice(0, expanded ? 4 : 1)
+          .map((action) => (
+            <SkeletonPart
+              key={action}
+              className={`${expanded ? "tw-size-9 tw-rounded-lg" : "tw-size-10 tw-rounded-full"} tw-ring-1 tw-ring-inset tw-ring-white/5`}
+            />
+          ))}
+      </div>
+      <SkeletonPart className="tw-h-[42px] tw-min-w-0 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10" />
+      <SkeletonPart className="tw-h-10 tw-w-10 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/5" />
     </div>
   );
 }

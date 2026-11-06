@@ -1,5 +1,7 @@
 import React from "react";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import Button from "../utils/button/Button";
+import { ComposerSendButton } from "./ComposerSendButton";
 
 interface CreateDropSubmitProps {
   readonly submitting: boolean;
@@ -21,52 +23,43 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   onDrop,
 }) => {
   const submitLabel = label ?? (isDropMode ? "Drop" : "Post");
+  const ariaLabel = submitting ? `${submitLabel} in progress` : submitLabel;
+  const iconOnly = !isDropMode && !label && !showLabelOnMobile;
   const title = !canSubmit && disabledTooltip ? disabledTooltip : undefined;
+  const labelClassName = `${
+    showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
+  } ${label ? "tw-text-[10px]" : ""}`;
 
-  const button = (
+  const button = iconOnly ? (
+    <ComposerSendButton
+      onClick={onDrop}
+      loading={submitting}
+      disabled={!canSubmit}
+      title={title}
+      aria-label={ariaLabel}
+    />
+  ) : (
     <Button
-      onMouseDown={(event) => {
-        // iOS synthesizes mousedown after a tap even when pointerdown is cancelled.
-        if (
-          !isDropMode &&
-          event.button === 0 &&
-          document.activeElement instanceof HTMLElement &&
-          document.activeElement.isContentEditable
-        ) {
-          event.preventDefault();
-        }
-      }}
       onClick={onDrop}
       loading={submitting}
       disabled={!canSubmit}
       title={title}
       variant="primary"
       size={null}
-      className={`tw-min-h-11 tw-py-2.5 tw-text-sm ${
+      className={`tw-h-10 tw-py-2 tw-text-sm ${
         showLabelOnMobile
           ? "tw-min-w-20 tw-px-3 lg:tw-px-3.5"
-          : "tw-w-10 tw-px-0 lg:tw-w-[3.875rem] lg:tw-px-3.5"
-      }`}
-      aria-label={submitting ? `${submitLabel} in progress` : submitLabel}
+          : "tw-w-10 tw-px-0"
+      } ${!showLabelOnMobile ? "lg:tw-w-[3.875rem] lg:tw-px-3.5" : ""}`}
+      aria-label={ariaLabel}
       hideChildrenWhenLoading
     >
-      <span
-        className={`${
-          showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
-        } ${label ? "tw-text-[10px]" : ""}`}
-      >
-        {submitLabel}
-      </span>
+      <span className={labelClassName}>{submitLabel}</span>
       {!showLabelOnMobile && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
+        <PaperAirplaneIcon
           aria-hidden="true"
           className="tw-size-5 tw-flex-shrink-0 lg:tw-hidden"
-        >
-          <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-        </svg>
+        />
       )}
     </Button>
   );

@@ -12,6 +12,7 @@ import {
   composer,
   enroll,
   expectMessage,
+  gotoPath,
   messageRow,
   openConversationFromList,
   openMessageActions,
@@ -28,14 +29,11 @@ async function installPack(context: BrowserContext, ready = Promise.resolve()) {
   });
 }
 async function chooseEmoji(page: Page, search: string, label: string) {
-  const dialog = page.getByRole("dialog", { name: "Choose an emoji" });
-  // The shared Headless UI dialog has a zero-size root and a fixed visible panel.
-  await expect(
-    dialog.getByRole("heading", { name: "Choose an emoji" })
-  ).toBeVisible();
-  await dialog.getByPlaceholder("Search", { exact: true }).fill(search);
-  await dialog.getByRole("button", { name: label, exact: true }).click();
-  await expect(dialog).toHaveCount(0);
+  const picker = page.getByRole("dialog").locator("em-emoji-picker");
+  await expect(picker).toBeVisible();
+  await picker.getByPlaceholder("Search", { exact: true }).fill(search);
+  await picker.getByRole("button", { name: label, exact: true }).click();
+  await expect(picker).toHaveCount(0);
 }
 
 test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
@@ -84,46 +82,92 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       content: "nextjs-portal { display: none !important; }",
     });
     const input = composer(alice.page);
-    await input.fill("Secret hello ");
+    const sendButton = alice.page.getByRole("button", {
+      name: "Send",
+      exact: true,
+    });
+    await expect(sendButton).toBeDisabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(sendButton).toHaveCSS("color", "rgb(132, 132, 144)");
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
+    const attachmentTrigger = alice.page.getByRole("button", {
+      name: "Attach files",
+    });
+    const attachmentShape = await attachmentTrigger.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const iconBounds = element.querySelector("svg")?.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        iconWidth: iconBounds?.width,
+        iconHeight: iconBounds?.height,
+      };
+    });
+    expect(attachmentShape).toEqual({
+      width: 36,
+      height: 36,
+      iconWidth: 18,
+      iconHeight: 18,
+    });
+    if (!testInfo.project.use.isMobile) {
+      await attachmentTrigger.hover();
+      await expect(alice.page.getByRole("tooltip")).toHaveText("Attach files");
+      await emojiTrigger.hover();
+      await expect(alice.page.getByRole("tooltip")).toHaveText("Add emoji");
+    }
+    await expect(input).toHaveAttribute(
+      "aria-placeholder",
+      "Write an encrypted message"
+    );
+    const inputBounds = await input.boundingBox();
+    const emojiBounds = await emojiTrigger.boundingBox();
+    expect(inputBounds).not.toBeNull();
+    expect(emojiBounds).not.toBeNull();
+    expect(emojiBounds!.x).toBeGreaterThanOrEqual(inputBounds!.x);
+    expect(emojiBounds!.x + emojiBounds!.width).toBeLessThanOrEqual(
+      inputBounds!.x + inputBounds!.width
+    );
+    expect(
+      inputBounds!.height,
+      "The empty composer stays on one line"
+    ).toBeLessThan(60);
+    await input.fill("Secret hello ");
     await emojiTrigger.focus();
     await emojiTrigger.press("Enter");
     await expect(
-      alice.page
-        .getByRole("dialog", { name: "Choose an emoji" })
-        .getByRole("heading")
+      alice.page.getByRole("dialog").locator("em-emoji-picker")
     ).toBeVisible();
+    await expect(
+      alice.page.getByRole("dialog", { name: "Choose an emoji" })
+    ).toHaveCount(0);
     await alice.page.keyboard.press("Escape");
     await expect(emojiTrigger).toBeFocused();
     await emojiTrigger.press("Enter");
     await chooseEmoji(alice.page, "grinning", "😀");
-    await expect(input).toHaveValue("Secret hello 😀");
+    await expect(input).toHaveText("Secret hello 😀");
     await expect(input).toBeFocused();
     // Native selection worked while the catalog request was still pending.
     releaseCatalog();
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
-    const dialog = alice.page.getByRole("dialog", { name: "Choose an emoji" });
+    const picker = alice.page.getByRole("dialog").locator("em-emoji-picker");
     await expect(
-      dialog.getByRole("button", { name: "Frequently used", exact: true })
+      picker.getByRole("button", { name: "Frequently used", exact: true })
     ).toHaveCount(0);
     await expect(
-      dialog.getByRole("button", { name: "Flags", exact: true })
+      picker.getByRole("button", { name: "Flags", exact: true })
     ).toBeInViewport();
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth
       )
     ).toBe(false);
-    const clipped = await alice.page
-      .getByRole("dialog", { name: "Choose an emoji" })
-      .locator("em-emoji-picker")
-      .evaluate((host) => {
-        const scroll = host.shadowRoot!.querySelector(".scroll")!;
-        const bounds = scroll.getBoundingClientRect();
-        return [...scroll.querySelectorAll("button")].some(
-          (button) => button.getBoundingClientRect().right > bounds.right + 1
-        );
-      });
+    const clipped = await picker.evaluate((host) => {
+      const scroll = host.shadowRoot!.querySelector(".scroll")!;
+      const bounds = scroll.getBoundingClientRect();
+      return [...scroll.querySelectorAll("button")].some(
+        (button) => button.getBoundingClientRect().right > bounds.right + 1
+      );
+    });
     expect(clipped, "Every emoji column fits inside the picker").toBe(false);
     await alice.page.screenshot({
       path: testInfo.outputPath("encrypted-emoji-picker.png"),
@@ -131,9 +175,26 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       animations: "disabled",
     });
     await chooseEmoji(alice.page, "gm", ":gm:");
-    await expect(input).toHaveValue("Secret hello 😀:gm:");
-    await input.press("Enter");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
+    await expect(sendButton).toBeEnabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await expect(sendButton).toHaveCSS("color", "rgb(255, 255, 255)");
+    if (testInfo.project.use.isMobile) {
+      await input.press("Enter");
+      await expect(input.getByRole("paragraph")).toHaveCount(2);
+      await alice.page
+        .getByRole("button", { name: "Send", exact: true })
+        .click();
+    } else {
+      await input.press("Enter");
+    }
     const sent = messageRow(alice.page, "Secret hello 😀");
+    if (testInfo.project.use.isMobile) {
+      await expect(input).not.toBeFocused();
+    }
     await expect(
       sent.getByRole("img", { name: ":gm:", exact: true })
     ).toBeVisible();
@@ -162,12 +223,32 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     ).toHaveCount(0);
     await openMessageActions(alice.page, sent);
     await alice.page.getByRole("menuitem", { name: "Edit" }).click();
-    await expect(input).toHaveValue("Secret hello 😀:gm:");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
+    await input.press("Escape");
+    await expect(input).toHaveText("");
+    await input.press("ArrowUp");
+    await expect(input).toContainText("Secret hello 😀");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     await input.fill("Edited secret :gm: ");
     await alice.page.getByRole("button", { name: "Add emoji" }).click();
     await chooseEmoji(alice.page, "grinning", "😀");
-    await expect(input).toHaveValue("Edited secret :gm: 😀");
-    await input.press("Enter");
+    await expect(input).toContainText("Edited secret");
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
+    await expect(input).toContainText("😀");
+    if (testInfo.project.use.isMobile) {
+      await alice.page
+        .getByRole("button", { name: "Save", exact: true })
+        .click();
+    } else {
+      await input.press("Enter");
+    }
     await expect(
       bob.page
         .getByRole("list", { name: "Messages", exact: true })
@@ -175,6 +256,26 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
         .filter({ hasText: "Edited secret" })
         .getByRole("img", { name: ":gm:", exact: true })
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    await gotoPath(bob.page, "/messages/encrypted");
+    const previewLists = bob.page.getByRole("list", {
+      name: "Encrypted chats",
+    });
+    await expect(
+      previewLists
+        .last()
+        .getByRole("link")
+        .filter({ hasText: "alice" })
+        .getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    for (const list of await previewLists.all()) {
+      const row = list.getByRole("link").filter({ hasText: "alice" });
+      const image = row.getByRole("img", { name: ":gm:", exact: true });
+      await expect(image).toBeVisible();
+      await expect(row).toContainText("Edited secret");
+      await expect(row).toContainText("😀");
+      await expect(image).toHaveCSS("width", "16px");
+      await expect(image).toHaveCSS("height", "16px");
+    }
     expect(assets).toEqual([]);
     for (const session of sessions)
       expect(

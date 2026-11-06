@@ -2339,7 +2339,7 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
   "waves.composer.placeholder",
   {
     createDrop: "Create a drop",
-    writeChatMessage: "Write a chat message",
+    writeChatMessage: "Write a message",
     dropReply: "Drop a reply",
     postReply: "Post a reply",
     quoteDrop: "Quote a drop",
@@ -3238,6 +3238,7 @@ export const EN_US_ROOT_MESSAGES = {
   "artworkAlerts.notification":
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.label": "Emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
@@ -3587,7 +3588,6 @@ export const EN_US_ROOT_MESSAGES = {
   "waves.signIn.newHere":
     "New here? Sign a message with your wallet to get started.",
   "auth.signModal.authenticationRequest": "Sign in to 6529",
-  "auth.signModal.cancelSignIn": "Cancel sign-in",
   "auth.signModal.walletAddress": "Wallet address",
   "auth.signModal.noTransaction": "No transaction or gas fees.",
   "auth.signModal.connectionShareLead":
@@ -3638,13 +3638,16 @@ export const EN_US_ROOT_MESSAGES = {
   "acceptConnection.limit.message":
     "You can keep up to {maxCount} connected profiles. Sign out from one profile, then scan this connection link again.",
   "acceptConnection.incoming.title": "Incoming connection from",
-  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh} - Level: {level}",
+  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh}",
+  "acceptConnection.incoming.permissions":
+    "Accepting also enables these on this device",
   "acceptConnection.currentProfile.prefix": "Your current profile",
   "acceptConnection.currentProfile.willStayAvailable": "will stay available.",
   "acceptConnection.currentProfile.switchAfterAccepting":
     "You can switch between both after accepting.",
   "acceptConnection.action.processing": "Processing",
   "acceptConnection.action.accept": "Accept connection",
+  "acceptConnection.action.acceptWithSetup": "Accept and enable both",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
@@ -3716,6 +3719,17 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.closeAriaLabel": "Close share modal",
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.chooseApp": "Which app are you connecting?",
+  "headerShare.connectModal.only": "Connect only",
+  "headerShare.connectModal.secure":
+    "Connect with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopComingSoon": "Coming soon",
+  "headerShare.connectModal.as": "Connect as {name}",
+  "headerShare.connectModal.asSecure":
+    "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.back": "Back",
+  "headerShare.connectModal.oneTime":
+    "Use only on a device you own. This code works once.",
   "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
   "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
   "headerShare.connectModal.downloadApps": "Download apps",
@@ -3724,8 +3738,8 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "Mobile",
-  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.menu.desktop": "6529 Desktop",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
@@ -3764,6 +3778,9 @@ export const EN_US_ROOT_MESSAGES = {
   "headerUserMenu.profiles": "Profiles",
   "headerUserMenu.addProfile": "Add profile",
   "appSidebar.openingAccountConnection": "Opening account connection",
+  "appSidebar.copyAddress": "Copy wallet address",
+  "appSidebar.addressCopied": "Address copied",
+  "appSidebar.addressCopyFailed": "Couldn’t copy the wallet address.",
   "appSidebar.openProfile": "Open {name} profile",
   "appSidebar.accountSwitchFailed":
     "Failed to switch connected account. Please try again.",

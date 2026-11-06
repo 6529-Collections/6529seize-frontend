@@ -181,7 +181,6 @@
     "__tests__/components/distribution-plan-tool/run-operations/RunOperations.test.tsx": 1,
     "__tests__/components/distribution/Distribution.test.tsx": 1,
     "__tests__/components/DragDropPastePlugin.test.tsx": 4,
-    "__tests__/components/DropListItemContentMediaImage.test.tsx": 1,
     "__tests__/components/drops/create/compact/CreateDropCompact.test.tsx": 2,
     "__tests__/components/drops/create/full/CreateDropFull.test.tsx": 1,
     "__tests__/components/drops/create/full/desktop/CreateDropFullDesktop.test.tsx": 2,
