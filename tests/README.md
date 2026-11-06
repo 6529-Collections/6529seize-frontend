@@ -58,6 +58,12 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The reaction sandbox covers live count and profile-list updates, desktop tooltip
+and dialog overflow, recoverable detail-read failures, and mobile long press.
+It uses synthetic local data and checks that hidden lists do not refetch.
+App PR CI selects it when reaction components, hooks, API helpers, or its browser
+contract change.
+
 The native competition sandbox pack exercises Additional Action through the real
 Main Stage submission modal on desktop and phone. It checks the optional plan,
 length limit, checkbox draft preservation, review/preview and back navigation,

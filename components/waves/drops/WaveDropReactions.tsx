@@ -1,17 +1,16 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
-
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useDropReactionView } from "@/hooks/drops/useDropReactionView";
+import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { getReactionCount } from "./reaction-utils";
-
-import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
+import React, { useCallback, useMemo, useState } from "react";
+import { getReactionCount, toProfileMin } from "./reaction-utils";
 import WaveDropReaction from "./WaveDropReaction";
 
 const WaveDropReactionsDetailDialog = dynamic(
@@ -23,60 +22,82 @@ interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
 }
 
-interface DetailedReactionsState {
-  readonly dropId: string;
-  readonly reactions: ApiDropReaction[];
-}
-
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   useDropReactionView(drop.id);
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
-  const [dialogReaction, setDialogReaction] = useState<string | null>(null);
-  const [detailedReactionsState, setDetailedReactionsState] =
-    useState<DetailedReactionsState | null>(null);
-  const [detailsLoadingDropId, setDetailsLoadingDropId] = useState<
-    string | null
-  >(null);
-  const detailsRequestRef = useRef<{
+  const [dialog, setDialog] = useState<{
     readonly dropId: string;
-    readonly promise: Promise<void>;
+    readonly reaction: string;
   } | null>(null);
+  const [visibleTooltip, setVisibleTooltip] = useState<string | null>(null);
   const isTouchDevice = useIsTouchDevice();
-  const detailedReactions =
-    detailedReactionsState?.dropId === drop.id
-      ? detailedReactionsState.reactions
-      : null;
-  const detailsLoading = detailsLoadingDropId === drop.id;
-  const dropReactions = drop.reactions;
+  const dialogReaction = dialog?.dropId === drop.id ? dialog.reaction : null;
+  const viewerKey = JSON.stringify([
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+  ]);
+  const reactionVersion = useMemo(
+    () => [
+      drop.reactions
+        .map((reaction) => ({
+          reaction: reaction.reaction,
+          count: getReactionCount(reaction),
+          profiles: reaction.profiles.map((profile) => profile.id).sort(),
+        }))
+        .sort((a, b) => a.reaction.localeCompare(b.reaction)),
+      drop.context_profile_context?.reaction,
+    ],
+    [drop.reactions, drop.context_profile_context?.reaction]
+  );
+  const { data: detailedReactions, isFetching: detailsLoading } = useQuery({
+    queryKey: [QueryKey.DROP_REACTIONS, drop.id, viewerKey, reactionVersion],
+    queryFn: ({ signal }) => fetchDropReactionDetailsV2(drop.id, signal),
+    enabled:
+      dialogReaction !== null ||
+      drop.reactions.some(
+        (reaction) => visibleTooltip === `${drop.id}:${reaction.reaction}`
+      ),
+    // Reopening also catches membership changes that leave the counts unchanged.
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    retry: false,
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === drop.id &&
+      previousQuery.queryKey[2] === viewerKey
+        ? previous
+        : undefined,
+  });
 
   const reactionsWithDetails = useMemo(() => {
-    if (!detailedReactions) {
-      return dropReactions;
-    }
-
     const detailsByReaction = new Map(
-      detailedReactions.map((reaction) => [reaction.reaction, reaction])
+      detailedReactions?.map((reaction) => [reaction.reaction, reaction])
     );
+    const viewer = activeProfileProxy ? null : toProfileMin(connectedProfile);
+    const viewerReaction = drop.context_profile_context?.reaction;
 
-    return dropReactions.map((reaction) => {
-      const detailedReaction = detailsByReaction.get(reaction.reaction);
-      if (!detailedReaction) {
-        return reaction;
+    return drop.reactions.map((reaction) => {
+      let profiles = detailedReactions
+        ? (detailsByReaction.get(reaction.reaction)?.profiles ?? [])
+        : reaction.profiles;
+      // Keep the viewer's optimistic choice authoritative while its write settles.
+      if (viewer && viewerReaction !== undefined) {
+        if (viewerReaction !== reaction.reaction) {
+          profiles = profiles.filter((profile) => profile.id !== viewer.id);
+        } else if (!profiles.some((profile) => profile.id === viewer.id)) {
+          profiles = [...profiles, viewer];
+        }
       }
-      const profilesById = new Map(
-        detailedReaction.profiles.map((profile) => [profile.id, profile])
-      );
-      for (const profile of reaction.profiles) {
-        profilesById.set(profile.id, profile);
-      }
-
-      return {
-        ...reaction,
-        profiles: [...profilesById.values()],
-        count: getReactionCount(reaction),
-      };
+      return { ...reaction, profiles, count: getReactionCount(reaction) };
     });
-  }, [detailedReactions, dropReactions]);
+  }, [
+    detailedReactions,
+    drop.reactions,
+    drop.context_profile_context?.reaction,
+    connectedProfile,
+    activeProfileProxy,
+  ]);
 
   useQuery({
     queryKey: ["emoji-data", "wave-reactions"],
@@ -85,46 +106,21 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
     staleTime: Infinity,
   });
 
-  const loadReactionDetails = useCallback(() => {
-    if (detailedReactions) {
-      return null;
-    }
-
-    if (detailsRequestRef.current?.dropId === drop.id) {
-      return detailsRequestRef.current.promise;
-    }
-
-    const requestDropId = drop.id;
-    const request = (async () => {
-      setDetailsLoadingDropId(requestDropId);
-      try {
-        const reactions = await fetchDropReactionDetailsV2(requestDropId);
-        setDetailedReactionsState({ dropId: requestDropId, reactions });
-      } catch {
-        setDetailedReactionsState({ dropId: requestDropId, reactions: [] });
-      } finally {
-        setDetailsLoadingDropId((current) =>
-          current === requestDropId ? null : current
-        );
-        detailsRequestRef.current = null;
-      }
-    })();
-
-    detailsRequestRef.current = { dropId: requestDropId, promise: request };
-    return request;
-  }, [detailedReactions, drop.id]);
-
-  const handleOpenDialog = useCallback(
-    (reactionKey: string) => {
-      setDialogReaction(reactionKey);
-      loadReactionDetails()?.catch(() => undefined);
+  const handleTooltipOpenChange = useCallback(
+    (reactionKey: string, isOpen: boolean) => {
+      const tooltipKey = `${drop.id}:${reactionKey}`;
+      setVisibleTooltip((current) => {
+        if (isOpen) return tooltipKey;
+        return current === tooltipKey ? null : current;
+      });
     },
-    [loadReactionDetails]
+    [drop.id]
   );
-
-  const handleCloseDialog = useCallback(() => {
-    setDialogReaction(null);
-  }, []);
+  const handleOpenDialog = useCallback(
+    (reaction: string) => setDialog({ dropId: drop.id, reaction }),
+    [drop.id]
+  );
+  const handleCloseDialog = useCallback(() => setDialog(null), []);
 
   return (
     <>
@@ -136,7 +132,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           findNativeEmoji={findNativeEmoji}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
-          onLoadDetails={loadReactionDetails}
+          onTooltipOpenChange={handleTooltipOpenChange}
           isDetailsLoading={detailsLoading}
           isTouchDevice={isTouchDevice}
         />

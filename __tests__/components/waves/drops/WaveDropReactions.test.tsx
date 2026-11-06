@@ -59,7 +59,7 @@ jest.mock(
 );
 
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: jest.fn(),
+  useQuery: jest.fn(() => ({ data: undefined, isFetching: false })),
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
