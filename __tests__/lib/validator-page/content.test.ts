@@ -26,9 +26,9 @@ const FRESH_INSTALL_UNTIL = "2026-11-22 03:30 UTC";
 const LIGHT_CLIENT_CHECKPOINT = "2026-11-06 11:09 UTC";
 // rc.9's join tests: the day, and the minutes to ready through Tor and with
 // Tor off. fill-rc9.sh fills them, here and on the pages.
-const JOIN_DATE = "{{RC9_JOIN_DATE}}";
-const JOIN_TOR = "{{RC9_JOIN_TOR_MINUTES}}";
-const JOIN_TOR_OFF = "{{RC9_JOIN_TOR_OFF_MINUTES}}";
+const JOIN_DATE = "6 November";
+const JOIN_TOR = "22";
+const JOIN_TOR_OFF = "14";
 // The facts above that are still placeholders. The pages may hold these and
 // no other placeholder; once they are filled, none at all.
 const STILL_TO_FILL = [JOIN_DATE, JOIN_TOR, JOIN_TOR_OFF].filter((fact) =>
@@ -190,7 +190,26 @@ describe("validator page text", () => {
 
   it("says a new install on Sunday waits for the evening's checkpoint", () => {
     expect(knownIssue(2)).toBe(
-      "2. A new install on Sunday waits until Sunday's day is final and the update feed has its checkpoint, in the evening UTC."
+      "2. A new install on Sunday waits until Sunday's day is final and the update feed has its checkpoint, in the evening UTC. Workaround: install before Sunday, 00:00 UTC."
+    );
+  });
+
+  it("names rc.9's installers, and says rc.8 or older no longer counts from Sunday", () => {
+    expect(knownIssue(7)).toMatch(
+      /^7\. On Windows, running rc\.9's Setup\.exe after rc\.9's `\.msi` shows two/
+    );
+    const back = knownIssue(8);
+    expect(back).toMatch(
+      /^8\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
+    );
+    expect(back).toContain(
+      "Before then, on Windows, going back to rc.6 or earlier needs an uninstall first."
+    );
+    expect(back).toContain(
+      "Going back to rc.7 or earlier also starts a validator you stopped"
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(
+      /rc\.8's Setup\.exe|from rc\.8 to rc\.7/
     );
   });
 
@@ -210,7 +229,7 @@ describe("validator page text", () => {
     );
   });
 
-  it("says what rc.8 does where Tor is blocked: bridges first, Connect without Tor last and what it gives away", () => {
+  it("says what the validator does where Tor is blocked: bridges first, Connect without Tor last and what it gives away", () => {
     const tor = knownIssue(1);
     expect(tor).toMatch(/^1\. Tor's built-in bridges are public/);
     const service = tor.indexOf("the Tor Project's bridge service");

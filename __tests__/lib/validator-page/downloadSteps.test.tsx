@@ -15,7 +15,7 @@ function steps(system: VisitorSystem): string {
   );
 }
 
-describe("the steps for rc.8's app", () => {
+describe("the steps for the app", () => {
   it("tells a Windows tester to run the new Setup.exe over an earlier test release", () => {
     expect(steps("windows")).toContain(
       "If an earlier test release is installed, run the new Setup.exe over it. It replaces the earlier release, removes any extra 6529 Validator entries in Installed apps, and keeps your key and your records."
