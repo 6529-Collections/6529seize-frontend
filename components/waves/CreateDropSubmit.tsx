@@ -46,25 +46,21 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
         showLabelOnMobile
           ? "tw-min-w-20 tw-px-3 lg:tw-px-3.5"
           : "tw-w-10 tw-px-0"
-      } ${
-        !showLabelOnMobile && !iconOnly ? "lg:tw-w-[3.875rem] lg:tw-px-3.5" : ""
-      }`}
+      } ${!showLabelOnMobile ? "lg:tw-w-[3.875rem] lg:tw-px-3.5" : ""}`}
       aria-label={submitting ? `${submitLabel} in progress` : submitLabel}
       hideChildrenWhenLoading
     >
-      {!iconOnly && (
-        <span
-          className={`${
-            showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
-          } ${label ? "tw-text-[10px]" : ""}`}
-        >
-          {submitLabel}
-        </span>
-      )}
+      <span
+        className={`${
+          showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
+        } ${label ? "tw-text-[10px]" : ""}`}
+      >
+        {submitLabel}
+      </span>
       {!showLabelOnMobile && (
         <PaperAirplaneIcon
           aria-hidden="true"
-          className={`tw-size-5 tw-flex-shrink-0 ${iconOnly ? "" : "lg:tw-hidden"}`}
+          className="tw-size-5 tw-flex-shrink-0 lg:tw-hidden"
         />
       )}
     </Button>
