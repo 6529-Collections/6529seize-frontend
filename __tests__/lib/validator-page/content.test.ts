@@ -18,14 +18,14 @@ import {
 // The release the pages describe: its version and short commit, as
 // `validator --version` prints them and the signed release list names them.
 const RELEASE = "0.1.0-rc.8";
-const COMMIT = "{{RC8_COMMIT}}";
+const COMMIT = "e53fcf3";
 // From rc.8's light-client checkpoint: a new install must start before it.
-const FRESH_INSTALL_UNTIL = "{{RC8_FRESH_INSTALL_UNTIL}}";
+const FRESH_INSTALL_UNTIL = "2026-11-21 20:00 UTC";
 // rc.8's join tests: the day, and the minutes to ready through Tor and with
 // Tor off.
-const JOIN_DATE = "{{RC8_JOIN_DATE}}";
-const JOIN_TOR = "{{RC8_JOIN_TOR_MINUTES}}";
-const JOIN_TOR_OFF = "{{RC8_JOIN_TOR_OFF_MINUTES}}";
+const JOIN_DATE = "6 November";
+const JOIN_TOR = "21";
+const JOIN_TOR_OFF = "14";
 
 const GUIDE = [VALIDATOR_UPGRADE, ...VALIDATOR_GUIDE_FOLDS]
   .map((fold) => fold.markdown)

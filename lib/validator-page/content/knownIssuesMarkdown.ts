@@ -5,7 +5,7 @@
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
 export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
-  "These are the issues a tester might meet in 0.1.0-rc.8 of the 6529 validator (commit `{{RC8_COMMIT}}`), each with its workaround. Checked on {{RC8_CHECKED_ON}}.",
+  "These are the issues a tester might meet in 0.1.0-rc.8 of the 6529 validator (commit `e53fcf3`), each with its workaround. Checked on 2026-11-06.",
   "",
   "## Joining the network",
   "",
@@ -36,6 +36,6 @@ export const VALIDATOR_KNOWN_ISSUES_MARKDOWN = joinMarkdown([
   "",
   "## Dates",
   "",
-  "19. A new install must start before about {{RC8_FRESH_INSTALL_UNTIL}}. The light client starts from a checkpoint built into the release ({{RC8_LIGHT_CLIENT_CHECKPOINT}}), good for about 15 days. A validator already running keeps its own state. Workaround: after that date, install the next release.",
+  "19. A new install must start before about 2026-11-21 20:00 UTC. The light client starts from a checkpoint built into the release (2026-11-06 03:34 UTC), good for about 15 days. A validator already running keeps its own state. Workaround: after that date, install the next release.",
   "20. 0.1.0 stops signing on 2026-12-01. It checks no Ethereum block after that date, ahead of Ethereum's next upgrade. That upgrade has no date yet, and 1 December is the earliest on record. Workaround: install the next 0.1.x release before then. The Update page tells you when it is out.",
 ]);

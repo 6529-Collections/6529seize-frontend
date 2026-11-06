@@ -52,7 +52,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     markdown: joinMarkdown([
       "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 5 November.",
       "",
-      "In 6529's tests of rc.8 on {{RC8_JOIN_DATE}}, a new install was ready in about {{RC8_JOIN_TOR_MINUTES}} minutes through Tor, and in about {{RC8_JOIN_TOR_OFF_MINUTES}} with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
+      "In 6529's tests of rc.8 on 6 November, a new install was ready in about 21 minutes through Tor, and in about 14 with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
     ]),
   },
   {
@@ -77,7 +77,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "| `.deb` | `validator --version` |",
       "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
       "",
-      "It prints `validator 0.1.0-rc.8 ({{RC8_COMMIT}}, TDH v1.4)`. If it shows another commit, tell us.",
+      "It prints `validator 0.1.0-rc.8 (e53fcf3, TDH v1.4)`. If it shows another commit, tell us.",
     ]),
   },
   {
@@ -145,7 +145,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "known-issues",
     title: "Known issues",
     markdown: joinMarkdown([
-      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about {{RC8_FRESH_INSTALL_UNTIL}}, and 0.1.0 stops signing on 1 December.",
+      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-21 20:00 UTC, and 0.1.0 stops signing on 1 December.",
     ]),
   },
 ];
