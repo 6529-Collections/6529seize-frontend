@@ -6337,6 +6337,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("textbox", { name: "Reason (required)" })
       .fill("  Replacing this competition  ");
     await expect(confirm).toBeEnabled();
+    await expect(
+      dialog.getByRole("heading", { name: /Archive and stop competition/ })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(confirm).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("archive-confirmation.png"),

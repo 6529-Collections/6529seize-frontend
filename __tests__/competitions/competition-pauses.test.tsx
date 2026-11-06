@@ -16,7 +16,7 @@ const mockCompetition = {
   permissions: {
     administer: true,
     edit_rules_after_activity: false,
-    archive_requires_reason: true,
+    archive_requires_reason: true as boolean | undefined,
   },
 };
 const mockPush = jest.fn();
@@ -211,35 +211,39 @@ it("loads older pauses without losing the visible history", () => {
   expect(screen.getByText("Reviewing eligibility")).toBeInTheDocument();
 });
 
-it("requires an archive reason after activity and explains the permanent stop", async () => {
-  setup();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Archive and stop competition" })
-  );
-  expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
-  const reason = screen.getByRole("textbox", { name: "Reason (required)" });
-  expect(reason).toHaveAccessibleDescription(
-    "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history."
-  );
-  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-  fireEvent.change(reason, {
-    target: { value: "  Replacing the competition  " },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-  await waitFor(() =>
-    expect(performCompetitionAction).toHaveBeenCalledWith(
-      { waveId: "wave", competitionId: "competition" },
-      "archive",
-      {
-        idempotency_key: "request-key",
-        config_version: 4,
-        reason: "Replacing the competition",
-      }
-    )
-  );
-});
+it.each([true, undefined])(
+  "requires an archive reason for activity or unknown requirements (%p)",
+  async (requirement) => {
+    mockCompetition.permissions.archive_requires_reason = requirement;
+    setup();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Archive and stop competition" })
+    );
+    expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
+    const reason = screen.getByRole("textbox", { name: "Reason (required)" });
+    expect(reason).toHaveAccessibleDescription(
+      "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history."
+    );
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    fireEvent.change(reason, {
+      target: { value: "  Replacing the competition  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await waitFor(() =>
+      expect(performCompetitionAction).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        "archive",
+        {
+          idempotency_key: "request-key",
+          config_version: 4,
+          reason: "Replacing the competition",
+        }
+      )
+    );
+  }
+);
 
-it("allows archiving an unused published competition without a reason", () => {
+it("allows archiving an unused published competition without a reason", async () => {
   mockCompetition.permissions.archive_requires_reason = false;
   setup();
   fireEvent.click(
@@ -249,6 +253,14 @@ it("allows archiving an unused published competition without a reason", () => {
     screen.getByRole("textbox", { name: "Reason (optional)" })
   ).not.toBeRequired();
   expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+  await waitFor(() =>
+    expect(performCompetitionAction).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "competition" },
+      "archive",
+      { idempotency_key: "request-key", config_version: 4, reason: "" }
+    )
+  );
 });
 
 it("exposes only Archive beside draft setup and hides it from non-administrators", () => {
