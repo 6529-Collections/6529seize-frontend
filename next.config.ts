@@ -39,6 +39,24 @@ function getAssetPrefix(assetsFromS3: boolean): string {
   return assetsFromS3 ? PRODUCTION_ASSET_PREFIX : "";
 }
 
+// Maps NEXT_DEV_TURBOPACK_MEMORY_EVICTION to
+// `experimental.turbopackMemoryEviction`. Unknown values keep Next's default.
+function parseTurbopackMemoryEviction(
+  value: string | undefined
+): false | "full" | "auto" | undefined {
+  switch (value?.trim().toLowerCase()) {
+    case "full":
+      return "full";
+    case "auto":
+      return "auto";
+    case "off":
+    case "false":
+      return false;
+    default:
+      return undefined;
+  }
+}
+
 const standaloneOutput = { output: "standalone" as const };
 // PR CI treats this config as build-sensitive so v2 can package the exact merge tree.
 const nextConfigFactory = (phase: string): NextConfig => {
@@ -84,6 +102,24 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const disableDevFileSystemCache =
       phase === PHASE_DEVELOPMENT_SERVER &&
       process.env["NEXT_DEV_TURBOPACK_FS_CACHE"]?.trim() === "0";
+    // The review bot's responsiveness runs set this to "full" so Turbopack
+    // drops persisted cache data from memory after every snapshot; `next dev`
+    // otherwise peaks at 12-14 GB on its 16 GB runners. Unset keeps Next's
+    // default ("auto"). Needs the dev filesystem cache, which is on by default.
+    const devMemoryEviction =
+      phase === PHASE_DEVELOPMENT_SERVER
+        ? parseTurbopackMemoryEviction(
+            process.env["NEXT_DEV_TURBOPACK_MEMORY_EVICTION"]
+          )
+        : undefined;
+    const devExperimentalOverrides: NonNullable<NextConfig["experimental"]> = {
+      ...(disableDevFileSystemCache
+        ? { turbopackFileSystemCacheForDev: false }
+        : {}),
+      ...(devMemoryEviction === undefined
+        ? {}
+        : { turbopackMemoryEviction: devMemoryEviction }),
+    };
     const baseConfig = sharedConfig(publicEnv, assetPrefix);
 
     // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
@@ -101,11 +137,11 @@ const nextConfigFactory = (phase: string): NextConfig => {
         ? { allowedDevOrigins }
         : {}),
       ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
-      ...(disableDevFileSystemCache
+      ...(Object.keys(devExperimentalOverrides).length > 0
         ? {
             experimental: {
               ...baseConfig.experimental,
-              turbopackFileSystemCacheForDev: false,
+              ...devExperimentalOverrides,
             },
           }
         : {}),
