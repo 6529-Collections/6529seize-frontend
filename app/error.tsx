@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { publicEnv } from "@/config/env";
 import { countBoundaryError } from "@/services/analytics/telemetry/collector";
+import { recordFlightError } from "@/services/diagnostics/flightRecorder";
 
 type ErrorProps = {
   readonly error: Error & { digest?: string | undefined };
@@ -16,6 +17,7 @@ type ErrorProps = {
 export default function ErrorPage({ error, reset }: ErrorProps) {
   useEffect(() => {
     countBoundaryError();
+    recordFlightError("boundary", error);
     if (!publicEnv.SENTRY_DSN) return;
     Sentry.captureException(error);
   }, [error]);

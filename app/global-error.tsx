@@ -15,6 +15,7 @@ import {
   countBoundaryError,
   flushTelemetry,
 } from "@/services/analytics/telemetry/collector";
+import { recordFlightError } from "@/services/diagnostics/flightRecorder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, tRich } from "@/i18n/messages";
 import { extractErrorDetails } from "@/utils/error-extractor";
@@ -58,6 +59,7 @@ export default function GlobalError({
 
   useEffect(() => {
     countBoundaryError();
+    recordFlightError("boundary", error);
     flushTelemetry(true);
     if (!publicEnv.SENTRY_DSN) return;
     Sentry.captureException(error);

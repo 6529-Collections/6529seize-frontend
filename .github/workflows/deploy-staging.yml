@@ -52,6 +52,8 @@ jobs:
       # First-party collector (R14): staging only until the orchestrator
       # enables production. Needs the staging edge /e behavior.
       NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: "true"
+      # Flight recorder and Send diagnostics (R14): staging only for now.
+      NEXT_PUBLIC_FEATURE_DIAGNOSTICS: "true"
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"

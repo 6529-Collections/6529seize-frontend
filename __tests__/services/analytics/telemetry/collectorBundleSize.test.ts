@@ -21,6 +21,8 @@ const ALREADY_IN_ROOT_BUNDLE = [
   "@/services/websocket/WebSocketContext",
   "@/services/websocket/WebSocketTypes",
   "@/utils/monitoring/mobileLaunchTimingSanitizers",
+  // Budgeted on its own by flightRecorderBundleSize.
+  "@/services/diagnostics/flightRecorder",
 ];
 
 describe("first-party collector bundle size", () => {
