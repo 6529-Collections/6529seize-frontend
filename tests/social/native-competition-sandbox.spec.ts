@@ -339,7 +339,6 @@ const competition = (id: string, title: string) => ({
     administer: true,
     edit_rules_after_activity: false,
     edit_credit_rules: false,
-    archive_requires_reason: true,
   },
   created_at: 1,
   updated_at: 1,
@@ -757,14 +756,6 @@ async function installCompetitionApi(
       selected
     ) {
       const request = route.request().postDataJSON() as Record<string, unknown>;
-      if (
-        selected.lifecycle === "PUBLISHED" &&
-        !String(request["reason"] ?? "").trim()
-      )
-        return route.fulfill({
-          status: 400,
-          json: { message: "A reason is required" },
-        });
       requests.push({ path: url.pathname, body: request });
       Object.assign(selected, {
         lifecycle: "ARCHIVED",
@@ -774,7 +765,6 @@ async function installCompetitionApi(
           ...selected.permissions,
           submit: false,
           vote: false,
-          archive_requires_reason: false,
         },
       });
       body = selected;
@@ -6302,8 +6292,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await page.getByRole("button", { name: "Archive", exact: true }).click();
     const archiveDialog = page.getByRole("dialog").last();
     await expect(
-      archiveDialog.getByRole("textbox", { name: "Reason (optional)" })
+      archiveDialog.getByRole("textbox", {
+        name: "Competition name to confirm archival",
+      })
     ).toBeVisible();
+    await expect(
+      archiveDialog.getByRole("button", { name: "Confirm", exact: true })
+    ).toBeDisabled();
+    await archiveDialog
+      .getByRole("textbox", { name: "Competition name to confirm archival" })
+      .fill("Native draft");
     await archiveDialog
       .getByRole("button", { name: "Confirm", exact: true })
       .click();
@@ -6313,17 +6311,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
   });
 
-  test("archives an active competition with a reason and preserves readable history", async ({
+  test("archives only after exact name confirmation and preserves readable history", async ({
     page,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?tab=rules`);
-    await page
-      .getByRole("button", {
-        name: "Archive and stop competition",
-        exact: true,
-      })
-      .click();
+    const archive = page.getByRole("button", {
+      name: "Archive and stop competition",
+      exact: true,
+    });
+    await expect(archive).toHaveCSS("border-top-color", "rgb(249, 112, 102)");
+    await archive.click();
     const dialog = page.getByRole("dialog").last();
     await expect(
       dialog.getByText(/permanently stops new submissions/)
@@ -6333,9 +6331,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(confirm).toBeDisabled();
-    await dialog
-      .getByRole("textbox", { name: "Reason (required)" })
-      .fill("  Replacing this competition  ");
+    await expect(
+      dialog.getByText(/This action is permanent and cannot be undone/)
+    ).toBeVisible();
+    await expect(dialog.getByRole("textbox", { name: /Reason/ })).toHaveCount(
+      0
+    );
+    const confirmationName = dialog.getByRole("textbox", {
+      name: "Competition name to confirm archival",
+    });
+    for (const mismatch of [
+      "Parallel",
+      "parallel Alpha",
+      "Parallel alpha",
+      " Parallel Alpha",
+      "Parallel Alpha ",
+    ]) {
+      await confirmationName.fill(mismatch);
+      await expect(confirm).toBeDisabled();
+    }
+    await confirmationName.fill("Parallel Alpha");
+    await expect(confirm).toBeEnabled();
+    await dialog.getByRole("button", { name: "Go back", exact: true }).click();
+    await archive.click();
+    await expect(confirmationName).toHaveValue("");
+    await expect(confirm).toBeDisabled();
+    await confirmationName.fill("Parallel Alpha");
     await expect(confirm).toBeEnabled();
     await expect(
       dialog.getByRole("heading", { name: /Archive and stop competition/ })
@@ -6344,13 +6365,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("archive-confirmation.png"),
+      animations: "disabled",
     });
     await confirm.click();
     await expect(dialog).toBeHidden();
     expect(sandbox.requests.at(-1)).toMatchObject({
       path: `/api/v3/waves/${WAVE}/competitions/alpha/actions/archive`,
-      body: { config_version: 1, reason: "Replacing this competition" },
+      body: { config_version: 1 },
     });
+    expect(sandbox.requests.at(-1)?.body).not.toHaveProperty("reason");
     await expect(
       page.getByRole("button", { name: "Clone as a draft" })
     ).toBeVisible();
@@ -6358,6 +6381,48 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole("button", { name: "Archive and stop competition" })
     ).toHaveCount(0);
   });
+
+  for (const [label, lineEnding] of [
+    ["LF", "\n"],
+    ["CRLF", "\r\n"],
+    ["CR", "\r"],
+  ] as const) {
+    test(`matches competition names containing repeated spaces and line breaks exactly (${label})`, async ({
+      page,
+    }) => {
+      const sandbox = await installCompetitionApi(page);
+      const title = `The Memes  - Main Stage${lineEnding}Round 1`;
+      const browserTitle = "The Memes  - Main Stage\nRound 1";
+      sandbox.setCompetition("alpha", { title });
+      await page.goto(`${ROOT}/alpha?tab=rules`);
+      const archive = page.getByRole("button", {
+        name: "Archive and stop competition",
+        exact: true,
+      });
+      await archive.click();
+      const dialog = page.getByRole("dialog").last();
+      const name = dialog.getByRole("textbox", {
+        name: "Competition name to confirm archival",
+      });
+      const exactName = dialog.getByText(title, { exact: true });
+      expect(await exactName.textContent()).toBe(browserTitle);
+      await expect(exactName).toHaveCSS("white-space", "pre-wrap");
+      const confirm = dialog.getByRole("button", {
+        name: "Confirm",
+        exact: true,
+      });
+      await name.fill("The Memes - Main Stage Round 1");
+      await expect(confirm).toBeDisabled();
+      await name.fill(title);
+      await expect(name).toHaveValue(browserTitle);
+      await expect(confirm).toBeEnabled();
+      await expectNoHorizontalOverflow(page);
+      await name.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(archive).toBeFocused();
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
 
   test("fades overflowing wave tabs without covering Create or changing selection", async ({
     page,
