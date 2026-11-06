@@ -1,452 +1,328 @@
 "use client";
 
-import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
-import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
-import { formatInteger } from "@/i18n/format";
-import { t, type MessageKey } from "@/i18n/messages";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import {
-  ArrowPathIcon,
-  ArrowRightIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XCircleIcon,
-} from "@heroicons/react/24/outline";
-import clsx from "clsx";
+import type { ReactNode } from "react";
+import { useId } from "react";
+import ButtonLink from "@/components/utils/button/ButtonLink";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import Link from "next/link";
-import type { ComponentType, SVGProps } from "react";
+import {
+  ArrowRightIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
+import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
-  formatSubscriptionEth,
   getFundedDropsLabel,
-  getSubscriptionCoverageActionLabel,
-  getSubscriptionCoverageAnchor,
   getSubscriptionCoveragePresentation,
-  getSubscriptionModeLabel,
-  type SubscriptionCoverageTone,
 } from "./subscriptionCoverage.helpers";
 
-type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
-
-function NeutralStatusIcon(props: Readonly<SVGProps<SVGSVGElement>>) {
-  return (
-    <svg viewBox="0 0 14 14" fill="none" {...props}>
-      <circle cx="7" cy="7" r="2.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-const TONE_CLASSES: Record<
-  SubscriptionCoverageTone,
-  {
-    readonly icon: StatusIcon;
-    readonly panel: string;
-    readonly pill: string;
-    readonly text: string;
-  }
-> = {
-  neutral: {
-    icon: NeutralStatusIcon,
-    panel: "tw-border-white/[0.04] tw-bg-iron-950",
-    pill: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",
-    text: "tw-text-iron-300",
-  },
-  positive: {
-    icon: CheckCircleIcon,
-    panel: "tw-border-emerald-400/20 tw-bg-iron-950",
-    pill:
-      "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
-    text: "tw-text-emerald-300",
-  },
-  caution: {
-    icon: ClockIcon,
-    panel: "tw-border-amber-300/20 tw-bg-iron-950",
-    pill: "tw-bg-amber-300/10 tw-text-amber-200 tw-ring-amber-300/25",
-    text: "tw-text-amber-200",
-  },
-  danger: {
-    icon: XCircleIcon,
-    panel: "tw-border-red-300/25 tw-bg-iron-950",
-    pill: "tw-bg-red-300/10 tw-text-red-200 tw-ring-red-300/30",
-    text: "tw-text-red-200",
-  },
+const FUNDED_COUNT_STATUSES: readonly Status[] = [
+  Status.Covered,
+  Status.EarlyWarning,
+  Status.RunningLow,
+  Status.ActionRequired,
+];
+const STATUS_TEXT_CLASS = {
+  neutral: "tw-text-iron-300",
+  positive: "tw-text-emerald-400",
+  caution: "tw-text-amber-200",
+  danger: "tw-text-error",
 };
 
-function getDescriptionKey(
-  status: ApiSubscriptionCoverageStatus
-): MessageKey {
+function navigateToUpcomingDrops(event: { preventDefault(): void }) {
+  event.preventDefault();
+  const hash = "#profile-subscriptions-upcoming";
+  if (globalThis.location.hash === hash) {
+    // Reuse the section's scroll/focus handler on repeated clicks too.
+    globalThis.dispatchEvent(new HashChangeEvent("hashchange"));
+    return;
+  }
+  // Keep native hash navigation so the existing section hook restores focus.
+  globalThis.location.hash = hash;
+}
+
+function getDescriptionKey(status: Status, fundedDrops: number): MessageKey {
   switch (status) {
-    case ApiSubscriptionCoverageStatus.Covered:
+    case Status.Covered:
       return "subscriptions.coverage.covered.description";
-    case ApiSubscriptionCoverageStatus.EarlyWarning:
+    case Status.EarlyWarning:
       return "subscriptions.coverage.earlyWarning.description";
-    case ApiSubscriptionCoverageStatus.RunningLow:
+    case Status.RunningLow:
       return "subscriptions.coverage.runningLow.description";
-    case ApiSubscriptionCoverageStatus.ActionRequired:
+    case Status.ActionRequired:
+      if (fundedDrops === 1) {
+        return "subscriptions.coverage.actionRequired.oneFundedDescription";
+      }
       return "subscriptions.coverage.actionRequired.description";
-    case ApiSubscriptionCoverageStatus.NotSetUp:
+    case Status.NotSetUp:
       return "subscriptions.coverage.notSetUp.description";
-    case ApiSubscriptionCoverageStatus.NoCurrentEligibility:
+    case Status.NoCurrentEligibility:
       return "subscriptions.coverage.noEligibility.description";
-    case ApiSubscriptionCoverageStatus.NoUpcomingSelections:
+    case Status.NoUpcomingSelections:
       return "subscriptions.coverage.noSelections.description";
-    case ApiSubscriptionCoverageStatus.Unknown:
+    case Status.Unknown:
       return "subscriptions.coverage.unknown.description";
   }
 }
 
 function CoveragePoint({
-  date,
-  label,
-  tokenId,
+  point,
+  separator = ", ",
 }: Readonly<{
-  date: Date | string;
-  label: string;
-  tokenId: number;
+  point: { token_id: number; mint_at: Date };
+  separator?: string;
 }>) {
   const locale = useBrowserLocale();
-
   return (
-    <div className="tw-min-w-0">
-      <div className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-        {label}
-      </div>
-      <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-0.5">
-        <Link
-          href={`/the-memes/${tokenId}`}
-          className="tw-text-[15px] tw-font-semibold tw-tabular-nums tw-text-iron-100 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300"
-        >
-          {t(locale, "subscriptions.coverage.memeToken", {
-            token: formatInteger(locale, tokenId),
-          })}
-        </Link>
-        <span className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-          · {formatSubscriptionCoverageDate(locale, date)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function CoverageLoading() {
-  const locale = useBrowserLocale();
-
-  return (
-    <div
-      aria-busy="true"
-      className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7"
-    >
-      <output className="tw-sr-only">
-        {t(locale, "subscriptions.coverage.loading")}
-      </output>
-      <div className="tw-animate-pulse tw-space-y-3">
-        <div className="tw-h-5 tw-w-48 tw-max-w-full tw-rounded tw-bg-iron-800" />
-        <div className="tw-h-6 tw-w-64 tw-max-w-full tw-rounded tw-bg-iron-800" />
-        <div className="tw-h-4 tw-w-full tw-max-w-2xl tw-rounded tw-bg-iron-900" />
-        <div className="tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900" />
-      </div>
-    </div>
-  );
-}
-
-function CoverageUnavailable({
-  isOwner,
-  onRefresh,
-}: Readonly<{
-  isOwner: boolean;
-  onRefresh: () => void;
-}>) {
-  const locale = useBrowserLocale();
-
-  return (
-    <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7">
-      <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-3">
-        <InformationCircleIcon
-          className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
-          aria-hidden="true"
-        />
-        <div className="tw-min-w-0 tw-flex-1">
-          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
-            {t(locale, "subscriptions.coverage.status.unknown")}
-          </h3>
-          <p className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
-            {t(locale, "subscriptions.coverage.unavailable")}
-          </p>
-        </div>
-        {isOwner ? (
-          <button
-            type="button"
-            onClick={onRefresh}
-            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07]"
-          >
-            <ArrowPathIcon className="tw-size-4" aria-hidden="true" />
-            {t(locale, "subscriptions.coverage.refresh")}
-          </button>
-        ) : null}
-      </div>
-    </div>
+    <>
+      <Link
+        href={`/the-memes/${point.token_id}`}
+        className="tw-whitespace-nowrap tw-text-iron-300 tw-no-underline tw-decoration-white/20 tw-underline-offset-[3px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline"
+      >
+        {t(locale, "subscriptions.coverage.memeToken", {
+          token: formatInteger(locale, point.token_id),
+        })}
+      </Link>
+      <span>{separator}</span>
+      <span className="tw-whitespace-nowrap">
+        {formatSubscriptionCoverageDate(locale, point.mint_at)}
+      </span>
+    </>
   );
 }
 
 export default function SubscriptionCoverageSummary({
   coverage,
-  isError,
   isLoading,
   isOwner,
-  onRefresh,
+  action,
+  topUpAction,
+  children,
 }: Readonly<{
   coverage: ApiSubscriptionCoverage | undefined;
-  isError: boolean;
   isLoading: boolean;
   isOwner: boolean;
-  onRefresh: () => void;
+  action?: ReactNode;
+  topUpAction?: ReactNode;
+  children?: ReactNode;
 }>) {
   const locale = useBrowserLocale();
-
-  if (isLoading && !coverage) {
-    return <CoverageLoading />;
-  }
-
-  if (!coverage) {
-    return <CoverageUnavailable isOwner={isOwner} onRefresh={onRefresh} />;
-  }
-
-  const presentation = getSubscriptionCoveragePresentation(
+  const status = coverage?.status ?? Status.Unknown;
+  const presentation = getSubscriptionCoveragePresentation(locale, status);
+  const description = t(
     locale,
-    coverage.status
+    getDescriptionKey(status, coverage?.fully_funded_drops ?? 0)
   );
-  const tone = TONE_CLASSES[presentation.tone];
-  const StatusIcon = tone.icon;
-  const runwayStatuses: readonly ApiSubscriptionCoverageStatus[] = [
-    ApiSubscriptionCoverageStatus.Covered,
-    ApiSubscriptionCoverageStatus.EarlyWarning,
-    ApiSubscriptionCoverageStatus.RunningLow,
-    ApiSubscriptionCoverageStatus.ActionRequired,
-  ];
-  const showFundedCount = runwayStatuses.includes(coverage.status);
+  const pending = isLoading && !coverage;
+  const showFundedCount = !!coverage && FUNDED_COUNT_STATUSES.includes(status);
+  const fundedThrough =
+    coverage && coverage.fully_funded_drops > 0
+      ? coverage.funded_through
+      : null;
+  const warningState =
+    status === Status.EarlyWarning ||
+    status === Status.RunningLow ||
+    status === Status.ActionRequired;
+  const deadline =
+    isOwner && warningState ? coverage?.next_unfunded?.top_up_deadline : null;
+  const showNextUnfunded = !!coverage?.next_unfunded && !deadline;
+  const showChooseDrops =
+    isOwner && presentation.action === "choose_drops" && !pending;
+  const showActions = isOwner && !pending && (showChooseDrops || !!topUpAction);
+  const neutralStatus =
+    status === Status.EarlyWarning || (!isOwner && status !== Status.Covered);
+  const statusTone = neutralStatus ? "neutral" : presentation.tone;
   const headline = showFundedCount
     ? getFundedDropsLabel(locale, coverage.fully_funded_drops)
     : presentation.label;
-  const showStatusPill = headline !== presentation.label;
-  const actionLabel = getSubscriptionCoverageActionLabel(
-    locale,
-    presentation.action
-  );
-  const actionHref = getSubscriptionCoverageAnchor(presentation.action);
-  const isUrgentTopUp =
-    coverage.status === ApiSubscriptionCoverageStatus.RunningLow ||
-    coverage.status === ApiSubscriptionCoverageStatus.ActionRequired;
-  const editionsLabel = coverage.subscribe_all_editions
-    ? t(locale, "subscriptions.coverage.editions.all")
-    : t(locale, "subscriptions.coverage.editions.one");
 
   return (
-    <div
-      className={clsx(
-        "tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7",
-        tone.panel
-      )}
-    >
-      <div
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
-      />
-      <div className="tw-relative tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.75fr)_minmax(280px,1fr)] lg:tw-gap-6">
-        <div className="tw-min-w-0">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-            <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-              {t(locale, "subscriptions.coverage.title")}
-            </span>
-            {showStatusPill ? (
-              <span
-                className={clsx(
-                  "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-ring-1 tw-ring-inset",
-                  tone.pill
-                )}
-              >
-                <StatusIcon className="tw-size-3.5" aria-hidden="true" />
-                {presentation.label}
-              </span>
-            ) : null}
-          </div>
-
-          <h3
-            className={clsx(
-              "tw-mb-0 tw-mt-[13px] tw-font-medium tw-tabular-nums tw-leading-6 tw-tracking-tight",
-              showFundedCount
-                ? `tw-text-xl ${tone.text}`
-                : "tw-text-sm tw-text-iron-400"
-            )}
-          >
-            {headline}
-          </h3>
-          <p
-            className={clsx(
-              "tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-pretty tw-font-normal tw-leading-6",
-              showFundedCount
-                ? "tw-text-[15px] tw-text-iron-300"
-                : "tw-text-meta tw-text-iron-500"
-            )}
-          >
-            {t(locale, getDescriptionKey(coverage.status))}
-          </p>
-          {isError ? (
-            <div
-              role="status"
-              className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-amber-200"
+    <>
+      <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-x-5">
+        <div
+          className={`tw-min-w-0 ${showChooseDrops ? "sm:tw-col-span-full" : ""}`}
+        >
+          {showFundedCount && (
+            <span
+              id="profile-subscriptions-overview-status"
+              className={`tw-mb-2 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 ${STATUS_TEXT_CLASS[statusTone]}`}
             >
-              <span className="tw-text-meta tw-font-normal">
-                {t(locale, "subscriptions.coverage.stale")}
-              </span>
-              {isOwner ? (
-                <button
-                  type="button"
-                  onClick={onRefresh}
-                  className="tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-amber-100 tw-underline tw-underline-offset-2 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                >
-                  {t(locale, "subscriptions.coverage.refresh")}
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-tabular-nums">
-            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
-              {getSubscriptionModeLabel(locale, coverage.mode)}
-            </span>
-            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
-              ·
-            </span>
-            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
-              {formatSubscriptionEth(locale, coverage.balance_eth)} ETH
-            </span>
-            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
-              ·
-            </span>
-            <span className="tw-text-iron-400">
-              {coverage.eligibility_count === null
-                ? t(locale, "subscriptions.coverage.eligibilityUnknown")
-                : t(locale, "subscriptions.coverage.eligibility", {
-                    count: formatInteger(locale, coverage.eligibility_count),
-                  })}
-            </span>
-            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
-              ·
-            </span>
-            <span className="tw-text-iron-400 max-sm:tw-hidden">{editionsLabel}</span>
-          </div>
-
-          {coverage.next_unfunded?.top_up_deadline ? (
-            <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-[15px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300 tw-ring-1 tw-ring-white/[0.06]">
-              <ExclamationTriangleIcon
-                className={clsx("tw-mt-0.5 tw-size-4 tw-flex-none", tone.text)}
+              <span
                 aria-hidden="true"
+                className="tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-current"
               />
-              <span>
-                {t(locale, "subscriptions.coverage.topUpBy", {
-                  deadline: formatSubscriptionCoverageDeadline(
-                    locale,
-                    coverage.next_unfunded.top_up_deadline
-                  ),
-                  token: formatInteger(
-                    locale,
-                    coverage.next_unfunded.token_id
-                  ),
-                })}
-              </span>
-            </div>
-          ) : coverage.next_unfunded ? (
-            <p className="tw-mb-0 tw-mt-3 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
-              {t(locale, "subscriptions.coverage.noDeadline")}
+              {presentation.label}
+            </span>
+          )}
+          <h2
+            id="profile-subscriptions-overview-title"
+            tabIndex={-1}
+            aria-describedby={
+              showFundedCount
+                ? "profile-subscriptions-overview-status"
+                : undefined
+            }
+            className={`tw-m-0 tw-font-semibold tw-tracking-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${pending ? "tw-text-sm tw-font-normal tw-text-iron-400" : "tw-text-2xl tw-text-iron-100 sm:tw-text-[28px] sm:tw-leading-9"}`}
+          >
+            {pending ? t(locale, "subscriptions.coverage.loading") : headline}
+          </h2>
+          {fundedThrough && (
+            <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "subscriptions.coverage.fundedThrough")}{" "}
+              <CoveragePoint point={fundedThrough} separator=" · " />
             </p>
-          ) : null}
-
-          {coverage.recommended_top_up ? (
-            <p className="tw-mb-0 tw-mt-2.5 tw-text-[15px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300">
-              {t(locale, "subscriptions.coverage.recommendedThrough", {
-                amount: formatSubscriptionEth(
-                  locale,
-                  coverage.recommended_top_up.amount_eth
+          )}
+          {deadline && coverage?.next_unfunded && (
+            <p className="tw-mb-0 tw-mt-3 tw-text-pretty tw-rounded-lg tw-bg-white/[0.04] tw-px-3 tw-py-2.5 tw-text-sm tw-leading-6 tw-text-iron-200">
+              {tRich(locale, "subscriptions.coverage.topUpBy", {
+                deadline: (
+                  <span
+                    key="deadline"
+                    className="tw-font-medium tw-text-iron-100"
+                  >
+                    {formatSubscriptionCoverageDeadline(locale, deadline)}
+                  </span>
                 ),
-                count: formatInteger(
-                  locale,
-                  coverage.recommended_top_up.target_fully_funded_drops
-                ),
-                token: formatInteger(
-                  locale,
-                  coverage.recommended_top_up.projected_through.token_id
-                ),
+                token: formatInteger(locale, coverage.next_unfunded.token_id),
               })}
             </p>
-          ) : null}
-
-          {isOwner ? (
-            <div className="tw-mt-[21px]">
-              <Link
-                href={actionHref}
-                className={clsx(
-                  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-shadow-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
-                  isUrgentTopUp
-                    ? "tw-border-primary-400/60 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
-                    : "tw-border-iron-100 tw-bg-iron-100 tw-text-iron-950 desktop-hover:hover:tw-border-white desktop-hover:hover:tw-bg-white"
-                )}
+          )}
+          {!showFundedCount && !pending && (
+            <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
+              {coverage
+                ? description
+                : t(locale, "subscriptions.coverage.unavailable")}
+            </p>
+          )}
+        </div>
+        {showActions && (
+          <div
+            className={`tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2"}`}
+          >
+            {showChooseDrops && (
+              <ButtonLink
+                href="#profile-subscriptions-upcoming"
+                onNavigate={navigateToUpcomingDrops}
+                variant="primary"
+                size={null}
+                className="tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-1.5 tw-text-sm sm:tw-min-h-9"
               >
-                {actionLabel}
-                <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-              </Link>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="-tw-mx-4 -tw-mb-4 tw-grid tw-content-start tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-bg-black/35 tw-p-4 sm:-tw-mx-5 sm:-tw-mb-5 sm:tw-p-5 lg:tw-mx-0 lg:-tw-my-7 lg:-tw-mr-6 lg:tw-border-l lg:tw-border-t-0 lg:tw-px-6 lg:tw-py-7">
-          {coverage.funded_through ? (
-            <CoveragePoint
-              label={t(locale, "subscriptions.coverage.fundedThrough")}
-              tokenId={coverage.funded_through.token_id}
-              date={coverage.funded_through.mint_at}
-            />
-          ) : null}
-          {coverage.next_unfunded ? (
-            <CoveragePoint
-              label={t(locale, "subscriptions.coverage.nextUnfunded")}
-              tokenId={coverage.next_unfunded.token_id}
-              date={coverage.next_unfunded.mint_at}
-            />
-          ) : null}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4 lg:tw-grid-cols-1 lg:tw-gap-7">
-            <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
-              <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-                {t(locale, "subscriptions.coverage.capacity")}
-              </div>
-              <div className="tw-break-words tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
-                {coverage.mint_capacity === null
-                  ? "—"
-                  : formatInteger(locale, coverage.mint_capacity)}
-              </div>
-              <div className="tw-self-baseline tw-text-sm tw-font-normal tw-leading-none tw-text-iron-500">
-                {t(locale, "subscriptions.coverage.capacityUnit")}
-              </div>
-            </div>
-            <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
-              <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-                {t(locale, "subscriptions.coverage.allocated")}
-              </div>
-              <div className="tw-break-words tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
-                {formatInteger(locale, coverage.allocated_mints)}
-              </div>
-              <div className="tw-self-baseline tw-text-sm tw-font-normal tw-leading-none tw-text-iron-500">
-                {t(locale, "subscriptions.coverage.allocatedUnit")}
-              </div>
-            </div>
+                {t(locale, "subscriptions.coverage.action.chooseDrops")}
+                <ArrowRightIcon
+                  aria-hidden="true"
+                  className="tw-hidden tw-size-4 sm:tw-block"
+                />
+              </ButtonLink>
+            )}
+            {topUpAction}
           </div>
-          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-pretty tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
-            {t(locale, "subscriptions.coverage.basis")}
-          </p>
-        </div>
+        )}
       </div>
+      <div
+        id="subscription-overview-actions"
+        className="tw-mt-6 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-auto sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-pt-6"
+      >
+        {action}
+        <SubscriptionCoverageForecast
+          coverage={coverage}
+          isLoading={pending}
+          description={
+            isOwner && status === Status.Covered ? description : undefined
+          }
+        />
+        {showNextUnfunded && coverage?.next_unfunded && (
+          <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
+            <dt className="tw-shrink-0 tw-text-iron-500">
+              {t(locale, "subscriptions.coverage.nextUnfunded")}
+            </dt>
+            <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
+              <CoveragePoint point={coverage.next_unfunded} />
+            </dd>
+          </dl>
+        )}
+      </div>
+      {children}
+    </>
+  );
+}
+
+function SubscriptionCoverageForecast({
+  coverage,
+  isLoading,
+  description,
+}: Readonly<{
+  coverage: ApiSubscriptionCoverage | undefined;
+  isLoading: boolean;
+  description: string | undefined;
+}>) {
+  const locale = useBrowserLocale();
+  const tooltipId = useId();
+  return (
+    <div
+      className="tw-col-start-2 tw-row-span-3 tw-row-start-1 tw-grid tw-min-w-0 tw-grid-rows-subgrid tw-items-start tw-gap-y-0.5 tw-text-sm max-[383px]:tw-col-start-1 max-[383px]:tw-row-start-auto sm:tw-row-span-1 sm:tw-flex sm:tw-items-center sm:tw-justify-start sm:tw-gap-2"
+      aria-busy={isLoading}
+    >
+      <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-text-iron-500">
+        <span>{t(locale, "subscriptions.coverage.allocated")}</span>
+        {!isLoading && (
+          <button
+            type="button"
+            aria-label={t(locale, "subscriptions.coverage.allocated")}
+            aria-describedby={tooltipId}
+            data-tooltip-id={tooltipId}
+            className="-tw-mx-3.5 -tw-my-2.5 tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100 sm:-tw-mx-1.5 sm:tw-size-7"
+          >
+            <InformationCircleIcon className="tw-size-3.5" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+      <p className="tw-m-0 tw-flex tw-min-h-7 tw-items-center tw-whitespace-nowrap tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-100 sm:tw-min-h-6 sm:tw-text-sm sm:tw-font-medium">
+        {isLoading && (
+          <span
+            aria-hidden="true"
+            className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none"
+          />
+        )}
+        {!isLoading &&
+          (coverage
+            ? `${formatInteger(locale, coverage.allocated_mints)} ${t(locale, "subscriptions.coverage.allocatedUnit")}`
+            : t(locale, "subscriptions.details.unavailable"))}
+      </p>
+      {!isLoading && (
+        <BodyPortalTooltip
+          id={tooltipId}
+          place="top"
+          offset={8}
+          delayShow={250}
+          opacity={1}
+          openEvents={{ mouseover: true, focus: true, click: true }}
+          globalCloseEvents={{ escape: true, clickOutsideAnchor: true }}
+          style={TOOLTIP_STYLES}
+        >
+          <div className="tw-max-w-[min(18rem,calc(100vw-2rem))] tw-text-pretty tw-text-meta tw-font-normal">
+            <p className="tw-mb-1 tw-mt-0 tw-font-normal">
+              {t(locale, "subscriptions.coverage.title")}
+            </p>
+            {description && <p className="tw-mb-1 tw-mt-0">{description}</p>}
+            {coverage && (
+              <p className="tw-m-0">
+                {t(locale, "subscriptions.coverage.basis")}
+              </p>
+            )}
+            {!coverage && (
+              <p className="tw-m-0">
+                {t(locale, "subscriptions.coverage.unavailable")}
+              </p>
+            )}
+          </div>
+        </BodyPortalTooltip>
+      )}
     </div>
   );
 }

@@ -130,7 +130,7 @@ export function getSubscriptionCoverageAnchor(
   }
 }
 
-export function getSubscriptionModeLabel(
+function getSubscriptionModeLabel(
   locale: SupportedLocale,
   mode: ApiSubscriptionCoverageMode | null
 ): string {
