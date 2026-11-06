@@ -108,9 +108,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
     await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Top up", exact: true })
-      ).toHaveFocus()
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
     );
     const oneCard = screen.getByRole("radio", { name: "1 Card" });
     await user.click(oneCard);
