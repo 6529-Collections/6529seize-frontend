@@ -382,6 +382,7 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
+  "e2ee.composer.dropArea": "Encrypted chat file upload area",
   "e2ee.composer.removeAttachment": "Remove {name}",
   "e2ee.composer.attachments": "Attachments",
   "e2ee.composer.tooManyFiles": "You can attach up to {max} files.",

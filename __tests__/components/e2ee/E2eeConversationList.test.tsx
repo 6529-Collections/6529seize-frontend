@@ -158,6 +158,7 @@ describe("encrypted conversation list", () => {
     const chats = [
       conversation({
         lastMessage: message({
+          id: "custom-emoji-preview",
           senderProfileId: SELF_ID,
           text: "gm :gm: 😀 :unknown:",
         }),

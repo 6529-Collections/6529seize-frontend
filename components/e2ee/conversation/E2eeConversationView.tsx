@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
+import { useChatFileDrop } from "@/hooks/useChatFileDrop";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
@@ -29,7 +31,7 @@ import {
 } from "../ui/E2eePageShell";
 import { E2eeBlockDialog } from "./E2eeBlockDialog";
 import { E2eeDmHistory } from "./E2eeDmHistory";
-import { E2eeComposer } from "./E2eeComposer";
+import { E2eeComposer, type E2eeComposerHandle } from "./E2eeComposer";
 import { E2eeEmojiProvider } from "./E2eeEmojiProvider";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
@@ -158,6 +160,17 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [actionErrorKey, setActionErrorKey] = useState<MessageKey | null>(null);
 
+  const composerRef = useRef<E2eeComposerHandle>(null);
+  const fileDrop = useChatFileDrop({
+    enabled:
+      conversation !== null &&
+      getDisabledReasonKey(conversation, profileId) === null &&
+      e2ee.attachmentsEnabled &&
+      editingId === null,
+    includeEditor: true,
+    onFiles: (files) => composerRef.current?.attachFiles(files),
+  });
+
   const actions = useMemo<E2eeMessageActions>(() => {
     const react = async (
       message: E2eeMessage,
@@ -242,10 +255,16 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
     (conversation.kind !== "dm" || isUsableDm(conversation, profileId));
 
   return (
-    <div
+    <section
       style={style}
-      className="tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
+      className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
+      aria-label={t(locale, "e2ee.composer.dropArea")}
+      onDragEnterCapture={fileDrop.handlers.onDragEnter}
+      onDragOverCapture={fileDrop.handlers.onDragOver}
+      onDragLeaveCapture={fileDrop.handlers.onDragLeave}
+      onDropCapture={fileDrop.handlers.onDrop}
     >
+      {fileDrop.active && <ChatFileDropOverlay />}
       <E2eeConversationHeader
         conversation={conversation}
         selfProfileId={profileId}
@@ -346,6 +365,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         </div>
       ) : null}
       <E2eeComposer
+        ref={composerRef}
         restoredDraft={restoredDraft}
         inputId={composerInputId}
         conversation={conversation}
@@ -430,7 +450,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         }}
         onClose={() => setDeleteTarget(null)}
       />
-    </div>
+    </section>
   );
 }
 

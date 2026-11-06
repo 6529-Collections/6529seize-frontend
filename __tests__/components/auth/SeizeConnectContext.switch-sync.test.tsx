@@ -204,15 +204,13 @@ describe("SeizeConnectContext switch sync guard", () => {
         expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
       );
       selectedAddress = addressB;
-      act(() =>
-        globalThis.dispatchEvent(
-          new StorageEvent("storage", {
-            key: authUtils.AUTH_STORAGE_KEYS.activeAddress,
-            oldValue: addressA,
-            newValue: addressB,
-          })
-        )
-      );
+      const activeAddressChanged = new StorageEvent("storage");
+      Object.defineProperties(activeAddressChanged, {
+        key: { value: authUtils.AUTH_STORAGE_KEYS.activeAddress },
+        oldValue: { value: addressA },
+        newValue: { value: addressB },
+      });
+      act(() => globalThis.dispatchEvent(activeAddressChanged));
       await waitFor(() =>
         expect(screen.getByTestId("active-address")).toHaveTextContent(addressB)
       );
@@ -224,13 +222,11 @@ describe("SeizeConnectContext switch sync guard", () => {
       jest
         .mocked(authUtils.getConnectedWalletAccounts)
         .mockReturnValue([buildStoredAccount(addressA)]);
-      act(() =>
-        globalThis.dispatchEvent(
-          new StorageEvent("storage", {
-            key: authUtils.AUTH_STORAGE_KEYS.accounts,
-          })
-        )
-      );
+      const accountsChanged = new StorageEvent("storage");
+      Object.defineProperty(accountsChanged, "key", {
+        value: authUtils.AUTH_STORAGE_KEYS.accounts,
+      });
+      act(() => globalThis.dispatchEvent(accountsChanged));
       await waitFor(() =>
         expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
       );
@@ -265,11 +261,13 @@ describe("SeizeConnectContext switch sync guard", () => {
       expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
     );
     selectedAddress = addressB;
+    const unrelatedSettingChanged = new StorageEvent("storage");
+    Object.defineProperty(unrelatedSettingChanged, "key", {
+      value: "unrelated-setting",
+    });
     act(() => {
       globalThis.dispatchEvent(new Event("storage"));
-      globalThis.dispatchEvent(
-        new StorageEvent("storage", { key: "unrelated-setting" })
-      );
+      globalThis.dispatchEvent(unrelatedSettingChanged);
     });
     expect(screen.getByTestId("active-address")).toHaveTextContent(addressA);
   });

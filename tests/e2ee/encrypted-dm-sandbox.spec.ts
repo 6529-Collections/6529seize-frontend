@@ -1,3 +1,7 @@
+import {
+  dropEncryptedAttachment,
+  checkEncryptedImageActions,
+} from "../support/e2ee/attachmentMedia";
 import type { BrowserContext } from "@playwright/test";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
@@ -458,18 +462,25 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
 
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
+    const pickedName = "picked-pixel.png";
     const chooser = alice.page.waitForEvent("filechooser");
-    // Keyboard activation: on phones the dev-only Next.js badge overlaps the
-    // composer's bottom-left attach button.
     await alice.page
-      .getByRole("button", { name: "Attach files" })
-      .press("Enter");
-    await (
-      await chooser
-    ).setFiles({
-      name: "pixel.png",
+      .getByRole("button", { name: "Attach files", exact: true })
+      .click();
+    await (await chooser).setFiles({
+      name: pickedName,
       mimeType: "image/png",
       buffer: Buffer.from(PIXEL_PNG_BASE64, "base64"),
+    });
+    await expect(
+      alice.page
+        .getByRole("list", { name: "Attachments" })
+        .getByText(pickedName, { exact: true })
+    ).toBeVisible();
+    await dropEncryptedAttachment(alice.page, {
+      name: "pixel.png",
+      mimeType: "image/png",
+      base64: PIXEL_PNG_BASE64,
     });
     await expect(
       alice.page
@@ -477,11 +488,14 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         .getByText("pixel.png")
     ).toBeVisible();
     await sendMessage(alice.page, caption);
-    await expect(
-      messageRow(alice.page, caption).getByRole("img", {
-        name: "Image: pixel.png",
-      })
-    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    for (const filename of [pickedName, "pixel.png"]) {
+      await expect(
+        messageRow(alice.page, caption).getByRole("img", {
+          name: `Image: ${filename}`,
+          exact: true,
+        })
+      ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    }
 
     // Story 8: bob's list shows the unread message and its preview.
     await expect(bobRow.getByText("1 unread message")).toBeAttached({
@@ -489,15 +503,19 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     });
     await expect(bobRow).toContainText(caption);
     await bobRow.click();
-    const image = messageRow(bob.page, caption).getByRole("img", {
-      name: "Image: pixel.png",
-    });
-    await expect(image).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
-    await expect
-      .poll(() =>
-        image.evaluate((element: HTMLImageElement) => element.naturalWidth)
-      )
-      .toBe(1);
+    for (const filename of [pickedName, "pixel.png"]) {
+      const image = messageRow(bob.page, caption).getByRole("img", {
+        name: `Image: ${filename}`,
+        exact: true,
+      });
+      await expect(image).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+        )
+        .toBe(1);
+      await checkEncryptedImageActions(bob.page, image, filename);
+    }
     await gotoPath(bob.page, ENCRYPTED_ROUTE);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,
