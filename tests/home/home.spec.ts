@@ -2298,6 +2298,11 @@ test("desktop account updates do not move utilities, including in short expanded
     // Hovering a distant menu control reveals the header toggle too.
     await search.hover();
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    await search.focus();
+    await page.mouse.move(1000, 400);
+    await expect(search).toBeFocused();
+    await expect(sidebarToggle).toHaveCSS("opacity", "0");
+    await search.hover();
     const railBox = await sidebar.boundingBox();
     const toggleBox = await sidebarToggle.boundingBox();
     expect(railBox).not.toBeNull();
@@ -2311,6 +2316,36 @@ test("desktop account updates do not move utilities, including in short expanded
       0
     );
     const about = sidebar.getByRole("button", { name: "About", exact: true });
+    for (const name of ["NFTs", "About"]) {
+      const item = sidebar.getByRole("button", { name, exact: true });
+      const indicator = sidebar
+        .getByRole("button", { name, exact: true })
+        .locator("[data-sidebar-submenu-indicator]");
+      await expect(indicator).toBeVisible();
+      const icon = sidebar
+        .getByRole("button", { name, exact: true })
+        .locator("svg")
+        .first();
+      const iconBounds = await icon.boundingBox();
+      const indicatorBounds = await indicator.boundingBox();
+      expect(iconBounds).not.toBeNull();
+      expect(indicatorBounds).not.toBeNull();
+      expect(indicatorBounds!.y + indicatorBounds!.height / 2).toBeCloseTo(
+        iconBounds!.y + iconBounds!.height / 2,
+        0
+      );
+      expect(
+        indicatorBounds!.x - (iconBounds!.x + iconBounds!.width)
+      ).toBeCloseTo(4, 0);
+      await expect(indicator).toHaveCSS(
+        "color",
+        await icon.evaluate((element) => getComputedStyle(element).color)
+      );
+      await item.hover();
+      await expect(indicator).toHaveCSS("color", "rgb(255, 255, 255)");
+      await page.keyboard.press("Escape");
+      await page.mouse.move(1000, 400);
+    }
     await about.hover();
     await expect(
       page.getByRole("navigation", { name: "About sub-navigation" })
