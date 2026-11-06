@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
+import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import {
   versionReloadImageHeaders,
@@ -242,6 +243,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        profileCmsAssetProxyHeaders,
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
