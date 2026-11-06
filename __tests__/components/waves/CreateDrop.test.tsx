@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useKeyPressEvent } from "react-use";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import { ApiCompetition } from "@/generated/models/ApiCompetition";
@@ -293,6 +294,34 @@ describe("CreateDrop", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("preserves reply targets for a dialog-handled Escape and cancels on an ordinary Escape", () => {
+    const onCancelReplyQuote = jest.fn();
+    render(
+      <CreateDrop
+        activeDrop={null}
+        onCancelReplyQuote={onCancelReplyQuote}
+        onDropAddedToQueue={jest.fn()}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+        privileges={{ chatRestriction: null, submissionRestriction: null }}
+      />
+    );
+    const onEscape = jest
+      .mocked(useKeyPressEvent)
+      .mock.calls.find(([key]) => key === "Escape")?.[1];
+    // The hook invokes the callback later with the original, now-handled event.
+    const handledEvent = new KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    });
+    handledEvent.preventDefault();
+    act(() => onEscape?.(handledEvent));
+    expect(onCancelReplyQuote).not.toHaveBeenCalled();
+    act(() => onEscape?.(new KeyboardEvent("keydown", { key: "Escape" })));
+    expect(onCancelReplyQuote).toHaveBeenCalledTimes(1);
   });
 
   it("processes queued drop and calls mutation", async () => {

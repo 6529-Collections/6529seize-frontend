@@ -5,6 +5,18 @@
 Global mentions notify a Wave audience while keeping a short, shared token in
 the posted message. Matching is case-insensitive.
 
+## Confirming an `@all` message
+
+Before sending a new message containing an active `@all` mention, a confirmation
+shows how many people would currently be notified. The count follows broadcast
+preferences, wave and parent access, mutes, blocks, and notification preferences;
+it excludes the sender. Settings and access can change before sending.
+
+Choose **Send with @all** to post, or **Keep editing** to preserve your draft.
+Escape and clicking outside also keep the draft. While the count loads, sending
+is disabled. If it fails, choose **Try again** or return to editing. A count of
+zero still requires confirmation. Edits do not rebroadcast or show this prompt.
+
 ## Location in the Site
 
 Global mentions are available in Wave message, reply, and edit composers.

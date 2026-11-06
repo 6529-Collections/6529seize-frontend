@@ -4,6 +4,7 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 
 interface LevelData {
   readonly level: number;

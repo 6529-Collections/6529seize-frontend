@@ -4,8 +4,7 @@ import Button from "@/components/utils/button/Button";
 import { shortenAddress } from "@/helpers/address.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   isReconnectStatus,
   type SignedMessagesEnableError,

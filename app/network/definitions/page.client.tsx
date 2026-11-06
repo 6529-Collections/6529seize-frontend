@@ -12,6 +12,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import Link from "next/link";
 import type { ReactNode } from "react";
 

@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US.complete";
 import { t } from "@/i18n/messages";
 
 // getAppMetadata appends " | <hostname>" to every description, and search
