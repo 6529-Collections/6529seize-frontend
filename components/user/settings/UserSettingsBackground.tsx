@@ -36,18 +36,22 @@ export default function UserSettingsBackground({
     <div
       className={
         compact
-          ? "tw-grid tw-grid-cols-2 tw-gap-4"
+          ? "tw-grid tw-grid-cols-2 tw-gap-3"
           : "tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-6 md:tw-flex-nowrap"
       }
     >
-      <div className="tw-w-full tw-cursor-pointer md:tw-flex-1">
+      <div
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 focus-within:tw-ring-2 focus-within:tw-ring-primary-400" : "md:tw-flex-1"}`}
+      >
         <label
           htmlFor="bgColor1"
-          className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300"
+          className={`tw-block tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
         >
           {message("user.profileHeader.edit.color1")}
         </label>
-        <div className="tw-relative tw-mt-2">
+        <div
+          className={`tw-relative ${compact ? "tw-size-8 tw-shrink-0" : "tw-mt-2"}`}
+        >
           <input
             ref={bgColor1Ref}
             type="color"
@@ -55,11 +59,15 @@ export default function UserSettingsBackground({
             name="bgColor1"
             value={bgColor1}
             onChange={(e) => setBgColor1(e.target.value)}
-            className="tw-block tw-h-12 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
+            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
           />
           <div
             onClick={onBgColor1Click}
-            className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+            className={
+              compact
+                ? "tw-hidden"
+                : "tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+            }
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-white"
@@ -79,14 +87,18 @@ export default function UserSettingsBackground({
         </div>
       </div>
 
-      <div className="tw-w-full tw-cursor-pointer md:tw-flex-1">
+      <div
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 focus-within:tw-ring-2 focus-within:tw-ring-primary-400" : "md:tw-flex-1"}`}
+      >
         <label
           htmlFor="bgColor2"
-          className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300"
+          className={`tw-block tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
         >
           {message("user.profileHeader.edit.color2")}
         </label>
-        <div className="tw-relative tw-mt-2">
+        <div
+          className={`tw-relative ${compact ? "tw-size-8 tw-shrink-0" : "tw-mt-2"}`}
+        >
           <input
             ref={bgColor2Ref}
             type="color"
@@ -94,11 +106,15 @@ export default function UserSettingsBackground({
             name="bgColor2"
             value={bgColor2}
             onChange={(e) => setBgColor2(e.target.value)}
-            className="tw-block tw-h-12 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
+            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
           />
           <div
             onClick={onBgColor2Click}
-            className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+            className={
+              compact
+                ? "tw-hidden"
+                : "tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3"
+            }
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-white"

@@ -388,6 +388,46 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(
       page.getByRole("textbox", { name: "About statement", exact: true })
     ).toBeVisible();
+    const aboutInput = page.getByRole("textbox", {
+      name: "About statement",
+      exact: true,
+    });
+    const aboutTop = await aboutInput.evaluate(
+      (element: HTMLTextAreaElement) => element.offsetTop
+    );
+    const classification = page.getByRole("button", {
+      name: /^Profile classification /,
+    });
+    await classification.click();
+    await expect(
+      page
+        .getByRole("dialog", { name: "Edit profile", exact: true })
+        .getByRole("list")
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("dialog", { name: "Edit profile", exact: true })
+        .getByRole("list")
+        .locator("../..")
+    ).toHaveCSS("opacity", "1");
+    await expect
+      .poll(() =>
+        aboutInput.evaluate((element: HTMLTextAreaElement) => element.offsetTop)
+      )
+      .toBe(aboutTop);
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    await page.screenshot({
+      path: testInfo.outputPath("profile-classification-overlay.png"),
+    });
+    await classification.click();
+    await expect(
+      page
+        .getByRole("dialog", { name: "Edit profile", exact: true })
+        .getByRole("list")
+    ).toHaveCount(0);
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    await page.screenshot({ path: testInfo.outputPath("profile-editor.png") });
     await page
       .getByRole("textbox", { name: "About statement", exact: true })
       .fill("Unsaved touch QA draft");
