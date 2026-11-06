@@ -96,7 +96,7 @@ export async function monitorRememberedLeaderboard(
         targetHeaderSeen ||= targetMounted;
         if (
           location.pathname === targetPath ||
-          location.pathname.startsWith(`${targetPath}/competitions`) ||
+          location.pathname.startsWith(`${targetPath}/decisions`) ||
           (location.pathname === "/waves" &&
             new URLSearchParams(location.search).get("wave") === targetWaveId)
         ) {

@@ -27,11 +27,11 @@ afterEach(() => {
 });
 
 it.each([
-  ["Europe/Tallinn", "2026-10-26", "Next decision today at 18:00."],
-  ["Asia/Shanghai", "2026-10-26", "Next decision tomorrow at 00:00."],
-  ["America/New_York", "2026-10-26", "Next decision today at 12:00."],
-  ["Europe/Tallinn", "2026-07-15", "Next decision today at 19:00."],
-  ["America/New_York", "2026-11-02", "Next decision today at 11:00."],
+  ["Europe/Tallinn", "2026-10-26", "Next result today at 18:00."],
+  ["Asia/Shanghai", "2026-10-26", "Next result tomorrow at 00:00."],
+  ["America/New_York", "2026-10-26", "Next result today at 12:00."],
+  ["Europe/Tallinn", "2026-07-15", "Next result today at 19:00."],
+  ["America/New_York", "2026-11-02", "Next result today at 11:00."],
 ])("uses the viewer's %s zone on %s", (zone, day, expected) => {
   jest.setSystemTime(Date.parse(`${day}T12:00:00Z`));
   const timestamp = Date.parse(`${day}T16:00:00Z`);
@@ -67,10 +67,10 @@ it("changes the date to today at local midnight", () => {
     />
   );
   expect(
-    screen.getByText("Next decision tomorrow at 16:00.")
+    screen.getByText("Next result tomorrow at 16:00.")
   ).toBeInTheDocument();
   act(() => jest.advanceTimersByTime(60_000));
-  expect(screen.getByText("Next decision today at 16:00.")).toBeInTheDocument();
+  expect(screen.getByText("Next result today at 16:00.")).toBeInTheDocument();
 });
 
 it("expires the label at the decision time without interval polling", () => {
@@ -123,7 +123,7 @@ it("replaces the timer when the schedule changes and clears it on unmount", () =
   rerender(<ComingUpNextDecision timestamp={replacement} locale="en-US" />);
   expect(jest.getTimerCount()).toBe(1);
   act(() => jest.advanceTimersByTime(DECISION - NOW));
-  expect(screen.getByText("Next decision today at 17:00.")).toBeInTheDocument();
+  expect(screen.getByText("Next result today at 17:00.")).toBeInTheDocument();
   unmount();
   expect(jest.getTimerCount()).toBe(0);
 });
@@ -136,7 +136,7 @@ it("hydrates without exposing the server's timezone", async () => {
   try {
     expect(result.serverHtml).toBe("");
     expect(result.container).toHaveTextContent(
-      "Next decision tomorrow at 00:00."
+      "Next result tomorrow at 00:00."
     );
     expect(result.recoverableErrors).toEqual([]);
     expect(result.hydrationConsoleErrors).toEqual([]);
@@ -146,11 +146,11 @@ it("hydrates without exposing the server's timezone", async () => {
 });
 
 it.each([
-  ["2026-10-27T16:00:00Z", "Next decision tomorrow at 16:00."],
-  ["2026-10-28T16:00:00Z", "Next decision Wednesday at 16:00."],
-  ["2026-11-01T16:00:00Z", "Next decision Sunday at 16:00."],
-  ["2026-11-02T16:00:00Z", "Next decision Nov 2 at 16:00."],
-  ["2026-11-06T16:00:00Z", "Next decision Nov 6 at 16:00."],
+  ["2026-10-27T16:00:00Z", "Next result tomorrow at 16:00."],
+  ["2026-10-28T16:00:00Z", "Next result Wednesday at 16:00."],
+  ["2026-11-01T16:00:00Z", "Next result Sunday at 16:00."],
+  ["2026-11-02T16:00:00Z", "Next result Nov 2 at 16:00."],
+  ["2026-11-06T16:00:00Z", "Next result Nov 6 at 16:00."],
 ])("uses a concise calendar label for %s", (date, expected) => {
   render(<ComingUpNextDecision timestamp={Date.parse(date)} locale="en-US" />);
   expect(screen.getByText(expected)).toHaveAttribute(
@@ -164,19 +164,19 @@ it.each([
     "Europe/Tallinn",
     "2026-03-28T21:30:00Z",
     "2026-03-29T21:30:00Z",
-    "Next decision Monday at 00:30.",
+    "Next result Monday at 00:30.",
   ],
   [
     "Europe/Tallinn",
     "2026-10-24T21:30:00Z",
     "2026-10-25T21:30:00Z",
-    "Next decision today at 23:30.",
+    "Next result today at 23:30.",
   ],
   [
     "UTC",
     "2026-12-31T12:00:00Z",
     "2027-01-01T16:00:00Z",
-    "Next decision tomorrow at 16:00.",
+    "Next result tomorrow at 16:00.",
   ],
 ])(
   "uses calendar days across DST and year boundaries in %s",
@@ -210,7 +210,7 @@ it.each([
       />
     );
     expect(
-      screen.getByText(`Next decision ${weekday} at 18:00.`)
+      screen.getByText(`Next result ${weekday} at 18:00.`)
     ).toBeInTheDocument();
   }
 );

@@ -34,7 +34,7 @@ const entryDropId = (id: string) =>
   id === "alpha"
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
-const ROOT = `/waves/${WAVE}/competitions`;
+const ROOT = `/waves/${WAVE}/decisions`;
 
 async function expectSheetTop(sheet: Locator, top: number) {
   await expect
@@ -74,7 +74,7 @@ async function swipeVertically(page: Page, target: Locator, distance: number) {
   }
 }
 async function openNewCompetition(page: Page) {
-  await page.getByRole("link", { name: "Competition", exact: true }).click();
+  await page.getByRole("link", { name: "Decision", exact: true }).click();
 }
 async function selectCompetitionFilter(page: Page, name: string) {
   const more = page.getByRole("button", { name: "More tabs", exact: true });
@@ -1061,7 +1061,7 @@ async function openAppearanceDraft(
   const sandbox = await installCompetitionApi(page);
   await page.setViewportSize(viewport);
   await page.goto(`${ROOT}/new`);
-  const name = page.getByLabel("Competition name", { exact: true });
+  const name = page.getByLabel("Decision name", { exact: true });
   await name.fill("Appearance layout draft");
   await expect.poll(() => sandbox.requests.length).toBe(1);
   const footer = page
@@ -1160,7 +1160,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       timeout: 60000,
     });
     await expect(page).toHaveURL(
-      new RegExp(`/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`),
+      new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
       { timeout: 30000 }
     );
     // The development badge overlaps the mobile footer; runtime errors remain asserted.
@@ -1392,7 +1392,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       route.fulfill({ json: metadata })
     );
     await page.goto(
-      `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard&drop=${artwork.id}`
+      `/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard&drop=${artwork.id}`
     );
     const summary = page.getByRole("region", {
       name: "Additional Action",
@@ -1540,7 +1540,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(choice).not.toBeChecked();
     await choice.check();
     await page
-      .getByLabel("Competition name", { exact: true })
+      .getByLabel("Decision name", { exact: true })
       .fill("Anonymous art competition");
     await expect
       .poll(() =>
@@ -1733,7 +1733,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
         await expect(page).toHaveURL(
           new RegExp(
-            `/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`
+            `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`
           ),
           { timeout: 30000 }
         );
@@ -1924,7 +1924,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(explainVote).toBeFocused();
     await page.getByRole("tab", { name: "Settings", exact: true }).click();
     await page
-      .getByRole("button", { name: "Edit competition details", exact: true })
+      .getByRole("button", { name: "Edit decision details", exact: true })
       .click();
     const description = page.getByLabel("Description", { exact: true });
     await expect(description).toBeEditable();
@@ -1944,10 +1944,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       description: "Original competition description",
     });
     await page
-      .getByRole("button", { name: "Edit competition rules", exact: true })
+      .getByRole("button", { name: "Edit decision rules", exact: true })
       .click();
     await expect(
-      page.getByRole("combobox", { name: "Competition type", exact: true })
+      page.getByRole("combobox", { name: "Decision type", exact: true })
     ).toBeDisabled();
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -1958,7 +1958,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Close editor", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Edit competition rules", exact: true })
+      page.getByRole("button", { name: "Edit decision rules", exact: true })
     ).toBeVisible();
     expect(obsoleteReads).toEqual([]);
     await expectNoHorizontalOverflow(page);
@@ -2264,7 +2264,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           page.getByRole("tab", { name: "Settings", exact: true }).first()
         ).toHaveAttribute("aria-selected", "true");
         await page.goto(
-          `/waves/${ACCESS_WAVE}/competitions/beta?tab=leaderboard`
+          `/waves/${ACCESS_WAVE}/decisions/beta?tab=leaderboard`
         );
         const submissions = page.getByText("Submissions closed", {
           exact: true,
@@ -2401,7 +2401,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     // Loading the copied URL bypasses the normal onNavigate callback.
     await page.goto(href);
     await expect(page).toHaveURL(
-      `/waves/${ACCESS_WAVE}/competitions/beta?tab=rules`,
+      `/waves/${ACCESS_WAVE}/decisions/beta?tab=rules`,
       {
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       }
@@ -2435,7 +2435,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "Keep my chat draft when opening competition submission rules.";
     await openLockedSubmissionRules(page, draft);
     await expect(page).toHaveURL(
-      `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+      `/waves/${ACCESS_WAVE}/decisions/alpha?tab=rules`,
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
     );
     const configuration = page
@@ -2518,7 +2518,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(page).toHaveURL(
         destination === "shared-wave"
           ? `/waves/${ACCESS_WAVE}?tab=configuration`
-          : `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+          : `/waves/${ACCESS_WAVE}/decisions/alpha?tab=rules`,
         { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
       );
       await expect(configuration).toHaveAttribute("aria-current", "true");
@@ -2624,7 +2624,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       try {
         await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
         await expect(voters.getByRole("status")).toHaveText(
-          "Loading competition…"
+          "Loading decision…"
         );
         const selectedTab = page.getByRole("tab", {
           name: "All votes",
@@ -2707,7 +2707,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       try {
         await page.getByRole("tab", { name: "Activity", exact: true }).click();
         await expect(activity.getByRole("status")).toHaveText(
-          "Loading competition…"
+          "Loading decision…"
         );
         const skeletons = activity.getByTestId("competition-activity-skeleton");
         await expect(skeletons).toHaveCount(6);
@@ -2871,7 +2871,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(failure).toContainText("Profile unavailable");
     await expect(failure).toContainText("100,003");
     await expect(panel).not.toContainText(
-      "This competition could not be loaded"
+      "This decision could not be loaded"
     );
     const retry = failure.getByRole("button", {
       name: "Retry profile at rank 4",
@@ -2982,7 +2982,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       );
       await expect(submissionNotice).toHaveCount(0);
       const pauseNotice = page.getByText(
-        "Decisions are paused. Entries and voting continue within their configured periods.",
+        "Results are paused. Entries and voting continue within their configured periods.",
         { exact: true }
       );
       await expect(pauseNotice).toBeVisible();
@@ -4014,7 +4014,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goto(ROOT);
     await dismissNextDevTools(page);
     await expect(
-      page.getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
+      page.getByRole("tab", { name: /^Decisions(?:\s+\d+\+?)?$/ })
     ).toBeVisible({ timeout: 30000 });
     await page.getByRole("link", { name: /Parallel Alpha/ }).click();
     await expect(
@@ -4043,7 +4043,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
     await expect(
       page.getByRole("button", {
-        name: "Cancel competition",
+        name: "Cancel decision",
         exact: true,
         includeHidden: true,
       })
@@ -4069,7 +4069,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       value: 25,
     });
     await page
-      .getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
+      .getByRole("tab", { name: /^Decisions(?:\s+\d+\+?)?$/ })
       .click();
     await page.getByRole("link", { name: /Parallel Beta/ }).click();
     await expect(
@@ -4088,7 +4088,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       })
     ).toBeVisible({ timeout: 30000 });
     const backLink = waveTabStrip(page).getByRole("tab", {
-      name: /^Competitions(?:\s+\d+\+?)?$/,
+      name: /^Decisions(?:\s+\d+\+?)?$/,
     });
     await backLink.scrollIntoViewIfNeeded();
     await expect(
@@ -4167,11 +4167,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
     );
     await expect(
-      page.getByRole("link", { name: "Competition", exact: true })
+      page.getByRole("link", { name: "Decision", exact: true })
     ).toHaveCount(0);
     expect(await readPublicPreviewCount()).toBe(0);
     const competitionsTab = page.getByRole("tab", {
-      name: /^Competitions(?:\s+\d+\+?)?$/,
+      name: /^Decisions(?:\s+\d+\+?)?$/,
     });
     await competitionsTab.click();
     await expect(competitionsTab).toHaveAttribute("aria-selected", "true");
@@ -5008,7 +5008,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .first();
     try {
       const skeleton = row.getByRole("status", {
-        name: "Loading competition…",
+        name: "Loading decision…",
       });
       await expect(skeleton).toBeVisible();
       const loadingHeight = (await row.boundingBox())!.height;
@@ -5362,7 +5362,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name:
           popup === "artist submissions"
             ? "View 1 art submission"
-            : /View this participant’s competition entries/,
+            : /View this participant’s decision entries/,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
@@ -5373,7 +5373,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .last()
             .locator(".is-mini")
             .getByRole("status")
-            .filter({ hasText: "Loading competition…" });
+            .filter({ hasText: "Loading decision…" });
           await expect(loading).toBeAttached();
           const card = page.getByRole("dialog").last().locator(".tw-shadow-sm");
           // Loading vote data must not reserve an empty footer below the artwork.
@@ -5519,7 +5519,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const projectedTooltip = page
           .getByRole("tooltip", { includeHidden: true })
           .filter({
-            hasText: "Projected vote count at decision time: 123,456,999",
+            hasText: "Projected vote count at result time: 123,456,999",
           })
           .filter({ visible: true });
         await expect(projectedTooltip).toBeVisible();
@@ -5950,11 +5950,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.goto(ROOT);
       await openNewCompetition(page);
       await page
-        .getByRole("combobox", { name: "Competition type", exact: true })
+        .getByRole("combobox", { name: "Decision type", exact: true })
         .click();
       await page.getByRole("option", { name: "Approve", exact: true }).click();
       await page
-        .getByLabel("Competition name", { exact: true })
+        .getByLabel("Decision name", { exact: true })
         .fill("Parent chat review");
       await dismissNextDevTools(page);
       // Use normal keyboard activation so the development toolbar cannot cover Next.
@@ -6110,7 +6110,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         dialog.getByText("75", { exact: true }).filter({ visible: true })
       ).toBeVisible();
       await expect(
-        dialog.getByText("Loading competition…", { exact: true })
+        dialog.getByText("Loading decision…", { exact: true })
       ).toHaveCount(0);
       const refreshed = page.waitForResponse(
         (response) =>
@@ -6245,10 +6245,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await page.goto(ROOT);
     await openNewCompetition(page);
     await expect(
-      page.getByLabel("Competition name", { exact: true })
+      page.getByLabel("Decision name", { exact: true })
     ).toBeVisible({ timeout: 30000 });
     await page
-      .getByLabel("Competition name", { exact: true })
+      .getByLabel("Decision name", { exact: true })
       .fill("Native draft");
     await expect(
       page.getByRole("button", { name: "Save changes", exact: true })
@@ -6256,7 +6256,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect.poll(() => sandbox.requests.length).toBe(1);
     await page.reload();
     await expect(
-      page.getByLabel("Competition name", { exact: true })
+      page.getByLabel("Decision name", { exact: true })
     ).toHaveValue("Native draft");
     expect(sandbox.requests[0]?.path).toBe(
       `/api/v3/waves/${WAVE}/competitions`
@@ -6276,7 +6276,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       })
       .click();
     await expect(
-      page.getByLabel("Competition name", { exact: true })
+      page.getByLabel("Decision name", { exact: true })
     ).toHaveValue("Native draft");
     await expect(competitionContent(page)).toBeVisible();
     await expect(
@@ -6293,14 +6293,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const archiveDialog = page.getByRole("dialog").last();
     await expect(
       archiveDialog.getByRole("textbox", {
-        name: "Competition name to confirm archival",
+        name: "Decision name to confirm archival",
       })
     ).toBeVisible();
     await expect(
       archiveDialog.getByRole("button", { name: "Confirm", exact: true })
     ).toBeDisabled();
     await archiveDialog
-      .getByRole("textbox", { name: "Competition name to confirm archival" })
+      .getByRole("textbox", { name: "Decision name to confirm archival" })
       .fill("Native draft");
     await archiveDialog
       .getByRole("button", { name: "Confirm", exact: true })
@@ -6317,7 +6317,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?tab=rules`);
     const archive = page.getByRole("button", {
-      name: "Archive and stop competition",
+      name: "Archive and stop decision",
       exact: true,
     });
     await expect(archive).toHaveCSS("border-top-color", "rgb(249, 112, 102)");
@@ -6338,7 +6338,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       0
     );
     const confirmationName = dialog.getByRole("textbox", {
-      name: "Competition name to confirm archival",
+      name: "Decision name to confirm archival",
     });
     for (const mismatch of [
       "Parallel",
@@ -6359,7 +6359,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await confirmationName.fill("Parallel Alpha");
     await expect(confirm).toBeEnabled();
     await expect(
-      dialog.getByRole("heading", { name: /Archive and stop competition/ })
+      dialog.getByRole("heading", { name: /Archive and stop decision/ })
     ).toBeInViewport({ ratio: 1 });
     await expect(confirm).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
@@ -6378,7 +6378,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole("button", { name: "Clone as a draft" })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Archive and stop competition" })
+      page.getByRole("button", { name: "Archive and stop decision" })
     ).toHaveCount(0);
   });
 
@@ -6396,13 +6396,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       sandbox.setCompetition("alpha", { title });
       await page.goto(`${ROOT}/alpha?tab=rules`);
       const archive = page.getByRole("button", {
-        name: "Archive and stop competition",
+        name: "Archive and stop decision",
         exact: true,
       });
       await archive.click();
       const dialog = page.getByRole("dialog").last();
       const name = dialog.getByRole("textbox", {
-        name: "Competition name to confirm archival",
+        name: "Decision name to confirm archival",
       });
       const exactName = dialog.getByText(title, { exact: true });
       expect(await exactName.textContent()).toBe(browserTitle);
@@ -6545,7 +6545,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
     await page.goto(ROOT);
     const collection = page.getByRole("region", {
-      name: "Competitions",
+      name: "Decisions",
       exact: true,
     });
     const active = collection.getByRole("tab", {
@@ -6578,15 +6578,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const viewport = page.viewportSize();
       await page.setViewportSize({ width: 320, height: 780 });
       const filtersScroller = page
-        .getByRole("region", { name: "Competitions", exact: true })
+        .getByRole("region", { name: "Decisions", exact: true })
         .locator("[data-competition-filters-scroll]");
       const rightFade = page
-        .getByRole("region", { name: "Competitions", exact: true })
+        .getByRole("region", { name: "Decisions", exact: true })
         .locator("[data-competition-filters-scroll]")
         .locator("..")
         .locator('[data-wave-tabs-fade="right"]');
       const leftFade = page
-        .getByRole("region", { name: "Competitions", exact: true })
+        .getByRole("region", { name: "Decisions", exact: true })
         .locator("[data-competition-filters-scroll]")
         .locator("..")
         .locator('[data-wave-tabs-fade="left"]');
@@ -6599,7 +6599,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         style: "nextjs-portal { visibility: hidden; }",
       });
       const competitionAction = collection.getByRole("link", {
-        name: "Competition",
+        name: "Decision",
         exact: true,
       });
       await expect(competitionAction).toBeInViewport({ ratio: 1 });
@@ -6681,7 +6681,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       style: "nextjs-portal { visibility: hidden; }",
     });
     const newCompetition = collection.getByRole("link", {
-      name: "Competition",
+      name: "Decision",
       exact: true,
     });
     await expect(newCompetition).toBeVisible();
@@ -6703,7 +6703,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ? page.getByRole("dialog", { name: "Create", exact: true })
       : page.getByRole("menu");
     await expect(
-      createOptions.getByText("New competition", { exact: true })
+      createOptions.getByText("New decision", { exact: true })
     ).toHaveCount(0);
     await expect(
       createOptions.getByText("New curation", { exact: true })
@@ -6782,7 +6782,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     // Published competitions share the primary row; Votes owns its secondary tabs.
     await page.goto(`${ROOT}/beta?tab=votes`);
     await expect(
-      page.getByRole("link", { name: "Competition", exact: true })
+      page.getByRole("link", { name: "Decision", exact: true })
     ).toHaveCount(0);
     const mine = page.getByRole("tab", {
       name: "My Votes",
@@ -7125,7 +7125,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/new`);
-    const name = page.getByLabel("Competition name", { exact: true });
+    const name = page.getByLabel("Decision name", { exact: true });
     await expect(name).toBeVisible({ timeout: 30000 });
     const footer = page
       .getByRole("button", { name: "Close editor", exact: true })
@@ -7332,7 +7332,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       testInfo.project.use.baseURL
     );
     await page.goto(`${ROOT}/new`);
-    const name = page.getByLabel("Competition name", { exact: true });
+    const name = page.getByLabel("Decision name", { exact: true });
     const footer = page
       .getByRole("button", { name: "Close editor", exact: true })
       .locator("..");
@@ -7349,7 +7349,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
       );
-      for (const label of ["Competition name", "Description"]) {
+      for (const label of ["Decision name", "Description"]) {
         const field = page.getByLabel(label, { exact: true });
         expect(
           await field.evaluate((element) =>
@@ -7451,12 +7451,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
     await page.goto(`${ROOT}/new`);
     const trigger = page.getByRole("combobox", {
-      name: "Competition type",
+      name: "Decision type",
       exact: true,
       includeHidden: true,
     });
     await expect(trigger).toHaveText("Rank");
-    const name = page.getByLabel("Competition name", { exact: true });
+    const name = page.getByLabel("Decision name", { exact: true });
     await name.focus();
     await page.keyboard.press("Tab");
     await expect(trigger).toBeFocused();
@@ -7492,7 +7492,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     if (app) await trigger.tap();
     else await trigger.press("ArrowDown");
     const choices = page.getByRole("listbox", {
-      name: "Competition type",
+      name: "Decision type",
       exact: true,
     });
     await expect(choices).toBeVisible();
@@ -7501,7 +7501,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toHaveAttribute("aria-selected", "true");
     if (app) {
       const sheet = page.getByRole("dialog", {
-        name: "Competition type",
+        name: "Decision type",
         exact: true,
       });
       await expect(sheet).toHaveAttribute("aria-modal", "true");
@@ -7510,7 +7510,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         (await trigger.getAttribute("aria-controls"))!
       );
       const sheetPanel = page
-        .getByRole("dialog", { name: "Competition type", exact: true })
+        .getByRole("dialog", { name: "Decision type", exact: true })
         .locator(".mobile-wrapper-dialog");
       await expect(sheetPanel).toBeVisible();
       await expect
@@ -7526,7 +7526,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         (await trigger.getAttribute("aria-controls"))!
       );
       await expect(
-        page.getByRole("dialog", { name: "Competition type", exact: true })
+        page.getByRole("dialog", { name: "Decision type", exact: true })
       ).toHaveCount(0);
       await expect(
         choices.getByRole("option", { name: "Rank", exact: true })
@@ -7660,11 +7660,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await page.goto(ROOT);
     await openNewCompetition(page);
     await page
-      .getByRole("combobox", { name: "Competition type", exact: true })
+      .getByRole("combobox", { name: "Decision type", exact: true })
       .click();
     await page.getByRole("option", { name: "Approve", exact: true }).click();
     await page
-      .getByLabel("Competition name", { exact: true })
+      .getByLabel("Decision name", { exact: true })
       .fill("Unsaved approve draft");
     const dialogPromise = page.waitForEvent("dialog");
     const reload = page.evaluate(() => {
@@ -7675,7 +7675,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await dialog.dismiss();
     await reload;
     await expect(
-      page.getByLabel("Competition name", { exact: true })
+      page.getByLabel("Decision name", { exact: true })
     ).toHaveValue("Unsaved approve draft");
     expect(sandbox.requests).toHaveLength(0);
   });
@@ -7715,7 +7715,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
     await editor.fill("Entry body in shared chat");
     const terms = composer.getByRole("checkbox", {
-      name: "I agree to this competition’s terms.",
+      name: "I agree to this decision’s terms.",
       exact: true,
     });
     await expect(terms).toHaveAccessibleDescription(
@@ -7988,7 +7988,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           }
         );
         await page.goto(
-          `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+          `/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`
         );
         await page.getByRole("tab", { name: view, exact: true }).click();
         const list = page.getByRole("list", {
@@ -8207,7 +8207,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   }) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto("/waves/create");
-    await expect(page.getByText(/Configure the first competition/)).toHaveCount(
+    await expect(page.getByText(/Configure the first decision/)).toHaveCount(
       0
     );
     await expect(page.getByRole("radio", { name: "Chat only" })).toHaveCount(0);
@@ -8289,7 +8289,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         if (mode.endsWith("single"))
           await expect(
             page.getByRole(mode === "native-app" ? "button" : "tab", {
-              name: /^Competitions(?:\s+\d+\+?)?$/,
+              name: /^Decisions(?:\s+\d+\+?)?$/,
             })
           ).toHaveCount(0);
         const leaderboard = page.getByRole(
@@ -8307,7 +8307,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           page.getByText("Immutable alpha entry content", { exact: true })
         ).toHaveCount(0);
         await leaderboard.click();
-        await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
+        await expect(page).toHaveURL(/decisions\/alpha\?tab=leaderboard$/);
         if (mode === "legacy-single")
           await expectLegacySectionContent(page, "leaderboard");
         else
@@ -8318,7 +8318,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(chatContent).toBeVisible({ timeout: 30000 });
         await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
         await page.goForward();
-        await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
+        await expect(page).toHaveURL(/decisions\/alpha\?tab=leaderboard$/);
       } finally {
         releaseDefault();
       }
@@ -8471,7 +8471,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       await openWaveFromList("The Memes - Main Stage");
       await expect(page).toHaveURL(
-        new RegExp(`/waves/${WAVE}/competitions/alpha\\?tab=leaderboard$`)
+        new RegExp(`/waves/${WAVE}/decisions/alpha\\?tab=leaderboard$`)
       );
       if (mode === "native")
         await expect(
@@ -8508,7 +8508,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
       await expect(
         page.getByRole(mode === "app" ? "button" : "tab", {
-          name: /^Competitions(?:\s+\d+\+?)?$/,
+          name: /^Decisions(?:\s+\d+\+?)?$/,
         })
       ).toHaveCount(0);
       await page.screenshot({
@@ -8793,7 +8793,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       releaseDefault();
       await expect(page).toHaveURL(
-        /competitions\/alpha\?tab=leaderboard&default=1$/,
+        /decisions\/alpha\?tab=leaderboard&default=1$/,
         { timeout: 30000 }
       );
       await expectLegacySectionContent(page, "leaderboard");
@@ -8835,7 +8835,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         releaseNavigation = resolve;
       });
       await page.route(
-        `**/waves/${WAVE}/competitions/alpha?**`,
+        `**/waves/${WAVE}/decisions/alpha?**`,
         async (route) => {
           if (new URL(route.request().url()).searchParams.has("_rsc"))
             await navigation;
@@ -9092,7 +9092,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await waveTabStrip(page)
       .getByRole("tab", { name: "Leaderboard", exact: true })
       .click();
-    await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
+    await expect(page).toHaveURL(/decisions\/alpha\?tab=leaderboard$/);
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
@@ -9162,7 +9162,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       })
     ).toHaveAttribute("aria-selected", "true");
     await waveTabStrip(page)
-      .getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
+      .getByRole("tab", { name: /^Decisions(?:\s+\d+\+?)?$/ })
       .click();
     await expect(page).toHaveURL(ROOT, { timeout: 30000 });
     await expectFamiliarWaveTabs(page);
@@ -10003,7 +10003,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         ).toHaveCount(0);
       }
       await expect(
-        page.getByRole("link", { name: "All competitions", exact: true })
+        page.getByRole("link", { name: "All decisions", exact: true })
       ).toHaveCount(0);
       await waveTabStrip(page)
         .getByRole("tab", { name: "Chat", exact: true })
@@ -10041,7 +10041,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         tabs.getByRole("tab", { name: "Settings", exact: true })
       ).toHaveAttribute("aria-selected", "true", { timeout: 30000 });
       await expect(
-        tabs.getByRole("tab", { name: /^Competitions/ })
+        tabs.getByRole("tab", { name: /^Decisions/ })
       ).toHaveCount(0);
       expect(
         (await tabs.getByRole("tab").allTextContents()).filter(
@@ -10057,10 +10057,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .first()
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: "Edit competition details" })
+        page.getByRole("button", { name: "Edit decision details" })
       ).toHaveCount(0);
       await expect(
-        page.getByRole("button", { name: "Pause decisions", exact: true })
+        page.getByRole("button", { name: "Pause results", exact: true })
       ).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
@@ -10082,7 +10082,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         page.getByRole("link", { name: /Parallel Alpha/ })
       ).toBeVisible();
       await expect(
-        tabs.getByRole("tab", { name: /^Competitions/ })
+        tabs.getByRole("tab", { name: /^Decisions/ })
       ).toHaveCount(0);
     });
   }
@@ -10123,7 +10123,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await page.goto(`${ROOT}/alpha?tab=leaderboard`);
         const unavailable = page
           .getByRole("alert")
-          .filter({ hasText: "This competition could not be loaded" });
+          .filter({ hasText: "This decision could not be loaded" });
         const retry = unavailable.getByRole("button", {
           name: "Try again",
           exact: true,
@@ -10170,7 +10170,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(chat).toHaveCount(0);
         await expect(
           page.getByRole(app ? "button" : "tab", {
-            name: /^Competitions(?:\s+\d+\+?)?$/,
+            name: /^Decisions(?:\s+\d+\+?)?$/,
           })
         ).toHaveCount(0);
         expect(sandbox.requests).toEqual([]);
@@ -10418,7 +10418,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       const collection = tabs.getByRole(app ? "button" : "tab", {
-        name: /^Competitions(?:\s+\d+\+?)?$/,
+        name: /^Decisions(?:\s+\d+\+?)?$/,
       });
       const modes = page.getByRole("tablist", {
         name: "Leaderboard view modes",
@@ -10440,7 +10440,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       try {
         await page.goto(`${ROOT}/alpha?tab=leaderboard`);
         await expect(
-          page.getByRole("status").filter({ hasText: "Loading competition…" })
+          page.getByRole("status").filter({ hasText: "Loading decision…" })
         ).toBeVisible({ timeout: 30000 });
         await expectSelectedSection();
         loading = false;
@@ -10468,12 +10468,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           "A transient refresh failure must retain the mounted Leaderboard"
         ).toBe(true);
         await expect(
-          page.getByText(/This competition could not be loaded/)
+          page.getByText(/This decision could not be loaded/)
         ).toHaveCount(0);
         await refresh(403);
         await expectSelectedSection();
         await expect(
-          page.getByText(/This competition could not be loaded/)
+          page.getByText(/This decision could not be loaded/)
         ).toBeVisible();
         await expect(modes).toHaveCount(0);
         await expect(
@@ -10533,7 +10533,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         const collection = tabs.getByRole(app ? "button" : "tab", {
-          name: /^Competitions/,
+          name: /^Decisions/,
         });
         await expect(settings).toHaveAttribute(
           app ? "aria-current" : "aria-selected",
@@ -10609,10 +10609,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       sandbox.setPhase("beta", phase);
       await page.goto(`${ROOT}/alpha`);
       await expect(
-        waveTabStrip(page).getByRole("tab", { name: /^Competitions/ })
+        waveTabStrip(page).getByRole("tab", { name: /^Decisions/ })
       ).toBeVisible({ timeout: 30000 });
       await waveTabStrip(page)
-        .getByRole("tab", { name: /^Competitions/ })
+        .getByRole("tab", { name: /^Decisions/ })
         .click();
       await expect(page).toHaveURL(ROOT);
       await selectCompetitionFilter(page, "All");
@@ -10651,7 +10651,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       navigation.getByRole("button", { name: "Settings", exact: true })
     ).toHaveAttribute("aria-current", "true");
     await expect(
-      navigation.getByRole("button", { name: /^Competitions/ })
+      navigation.getByRole("button", { name: /^Decisions/ })
     ).toHaveCount(0);
     expect(
       (
@@ -10665,7 +10665,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole("heading", { name: "Participation", exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Edit competition details" })
+      page.getByRole("button", { name: "Edit decision details" })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
@@ -10783,7 +10783,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
     await expect(configuration).toBeVisible();
     await expect(
-      navigation.getByRole("button", { name: /^Competitions/ })
+      navigation.getByRole("button", { name: /^Decisions/ })
     ).toHaveCount(0);
     await configuration.click();
     await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
@@ -10792,7 +10792,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole("heading", { name: "Participation", exact: true }).first()
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Pause decisions", exact: true })
+      page.getByRole("button", { name: "Pause results", exact: true })
     ).toHaveCount(0);
     await page.goBack();
     await expect(page).toHaveURL(`/waves/${WAVE}?tab=chat`);
@@ -10933,7 +10933,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await sandbox.legacyPrimary("alpha");
     // Compile the destination on the local dev server before holding navigation.
     const destination = await page.request.get(
-      `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+      `/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`
     );
     expect(destination.ok()).toBe(true);
     let releaseNavigation!: () => void;
@@ -10945,7 +10945,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       navigationRequested = resolve;
     });
     await page.route(
-      `**/waves/${MEMES_WAVE}/competitions/alpha?**`,
+      `**/waves/${MEMES_WAVE}/decisions/alpha?**`,
       async (route) => {
         navigationRequested();
         await pendingNavigation;
@@ -10979,7 +10979,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseNavigation();
       await expect(page).toHaveURL(
         new RegExp(
-          `/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard$`
+          `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard$`
         ),
         { timeout: 30000 }
       );
@@ -11098,7 +11098,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
       );
       try {
-        await page.goto(`/waves/${waveId}/competitions/alpha?tab=decisions`);
+        await page.goto(`/waves/${waveId}/decisions/alpha?tab=decisions`);
         if (waveId === MEMES_WAVE) {
           await expect(
             page
@@ -11366,7 +11366,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         });
       }
     );
-    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
     await dismissNextDevTools(page);
     await expect.poll(() => personalReads).toBeGreaterThan(0);
     const trigger = page.getByRole("button", {
@@ -11386,7 +11386,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await expect(
       dialog.getByText(
-        "You haven’t submitted an entry to this competition yet."
+        "You haven’t submitted an entry to this decision yet."
       )
     ).toHaveCount(0);
     failRead = false;
@@ -11457,7 +11457,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       () => artwork,
       (url) => reads.push(url)
     );
-    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
     await dismissNextDevTools(page);
     const toggle = page.getByRole("checkbox", {
       name: "Additional Action",
@@ -11529,7 +11529,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("tab", { name: "Leaderboard", exact: true })
         .boundingBox();
       const timeline = await page
-        .getByRole("button", { name: "Toggle decision timeline", exact: true })
+        .getByRole("button", { name: "Toggle results timeline", exact: true })
         .boundingBox();
       expect(navigationTab).not.toBeNull();
       expect(timeline).not.toBeNull();
@@ -11729,7 +11729,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       fixture.wave,
       () => artwork
     );
-    const url = `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`;
+    const url = `/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`;
     const isNativeApp = testInfo.project.name === "web-mobile-chromium";
     if (isNativeApp) {
       await installSurfaceSimulation(
@@ -11873,7 +11873,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       },
       (drop) => (drop.id === entryDropId("alpha") ? 30 : 23)
     );
-    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
     await dismissNextDevTools(page);
     const entries = page
       .getByRole("list", { name: "Leaderboard drops" })
@@ -12005,7 +12005,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           sorts.push(url.searchParams.get("sort") ?? "");
         }
       );
-      const root = `/waves/${MEMES_WAVE}/competitions/alpha`;
+      const root = `/waves/${MEMES_WAVE}/decisions/alpha`;
       await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
       await expect(page).toHaveURL(`${root}?tab=leaderboard&default=1`, {
         timeout: 30000,
@@ -12138,14 +12138,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     sandbox.refreshAtBoundary();
     await page.goto(`/waves/${WAVE}?tab=leaderboard`);
     await expect(page).toHaveURL(
-      /competitions\/alpha\?tab=leaderboard&default=1$/,
+      /decisions\/alpha\?tab=leaderboard&default=1$/,
       {
         timeout: 30000,
       }
     );
     sandbox.setDefault("beta");
     await expect(page).toHaveURL(
-      /competitions\/beta\?tab=leaderboard&default=1$/,
+      /decisions\/beta\?tab=leaderboard&default=1$/,
       {
         timeout: 15000,
       }
@@ -12159,12 +12159,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(form).toBeVisible();
-    await expect(page).toHaveURL(/competitions\/beta\?tab=leaderboard$/);
+    await expect(page).toHaveURL(/decisions\/beta\?tab=leaderboard$/);
     sandbox.setDefault("alpha");
     const reads = sandbox.selectionReads();
     await expect.poll(() => sandbox.selectionReads()).toBeGreaterThan(reads);
     await expect(form).toBeVisible();
-    await expect(page).toHaveURL(/competitions\/beta\?tab=leaderboard$/);
+    await expect(page).toHaveURL(/decisions\/beta\?tab=leaderboard$/);
     await expect(
       page.getByRole("button", { name: "Enter Beta", exact: true })
     ).toBeVisible();
@@ -12181,7 +12181,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeVisible({ timeout: 30000 });
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
     await expect(
-      waveTabStrip(page).getByRole("tab", { name: /^Competitions/ })
+      waveTabStrip(page).getByRole("tab", { name: /^Decisions/ })
     ).toHaveCount(0);
     await expect(
       page.getByRole("heading", {
@@ -12211,7 +12211,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         : `/my-stream?wave=${WAVE}&tab=leaderboard`
     );
     await expect(page).toHaveURL(
-      /competitions\/alpha\?tab=leaderboard&default=1$/,
+      /decisions\/alpha\?tab=leaderboard&default=1$/,
       {
         timeout: 30000,
       }
@@ -12262,7 +12262,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await installCompetitionApi(page);
     await page.goto(`${ROOT}/missing`);
     await expect(
-      page.getByText(/This competition could not be loaded/)
+      page.getByText(/This decision could not be loaded/)
     ).toBeVisible({ timeout: 30000 });
     await expect(
       page.getByRole("tab", { name: "Chat", exact: true })
