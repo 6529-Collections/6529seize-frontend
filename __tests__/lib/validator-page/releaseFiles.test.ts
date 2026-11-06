@@ -92,6 +92,58 @@ describe("groupReleaseFiles", () => {
     ).toContainEqual(["Linux", "ARM64", null]);
   });
 
+  // rc.8 carries lyrebird, which is under the GPL: its source goes beside
+  // the downloads.
+  it("lists lyrebird's source after the archives, as a file for any system", () => {
+    const source = {
+      name: "lyrebird-0.9.0-source.tar.gz",
+      size: 66_587_930,
+      sha256: "d".repeat(64),
+    };
+    const [withSource] = parseReleaseFeed({
+      releases: [
+        {
+          ...TEST_RELEASE_ENTRY,
+          files: [source, ...TEST_RELEASE_ENTRY.files],
+        },
+      ],
+    });
+    const groups = groupReleaseFiles(withSource!);
+    expect(groups.installers.map((item) => item.file.name)).not.toContain(
+      source.name
+    );
+    expect(groups.archives.at(-1)).toMatchObject({
+      title: "lyrebird source code",
+      system: "Any",
+      cpu: "",
+      what: "Source of lyrebird, Tor's bridge program in the validator (GPL 3.0 or later)",
+      signedBy: null,
+    });
+    expect(
+      listReleaseFiles(withSource!)
+        .slice(-2)
+        .map((entry) => entry.file.name)
+    ).toEqual([source.name, "release.json"]);
+  });
+
+  it("names only a well-formed lyrebird source file", () => {
+    const [odd] = parseReleaseFeed({
+      releases: [
+        {
+          ...TEST_RELEASE_ENTRY,
+          files: [
+            { name: "lyrebird-.-source.tar.gz", sha256: "d".repeat(64) },
+            { name: "lyrebird-1..2-source.tar.gz", sha256: "e".repeat(64) },
+          ],
+        },
+      ],
+    });
+    expect(groupReleaseFiles(odd!).archives.map((item) => item.what)).toEqual([
+      "Other file",
+      "Other file",
+    ]);
+  });
+
   it("names both .deb files for the Linux command, or none", () => {
     expect(getDebNames(release)).toEqual({
       x64: "6529-validator_0.1.0_amd64.deb",

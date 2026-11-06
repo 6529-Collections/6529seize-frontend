@@ -25,7 +25,11 @@ import ValidatorFold from "./ValidatorFold";
 import ValidatorFoldOpener from "./ValidatorFoldOpener";
 import ValidatorMarkdown from "./ValidatorMarkdown";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
-import { ValidatorFeedback, ValidatorNeeds } from "./ValidatorSections";
+import {
+  ValidatorFeedback,
+  ValidatorNeeds,
+  ValidatorUpgrade,
+} from "./ValidatorSections";
 import ValidatorSteps from "./ValidatorSteps";
 import { BODY } from "./validatorStyles";
 
@@ -157,6 +161,8 @@ export default function ValidatorDownloadPage({
           <NotOutYet snapshot={snapshot} />
         )}
       </section>
+
+      <ValidatorUpgrade newest={release?.version} />
 
       <section aria-labelledby="steps">
         <h2 id="steps" className="tw-sr-only">
