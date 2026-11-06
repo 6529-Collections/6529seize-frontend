@@ -255,3 +255,16 @@ it("links deleted entries to their surviving competition and formats returned cr
     "1,500 voting credits returned in Art competition"
   );
 });
+
+it("shows an encrypted inbox entry without a sender, plaintext or local key", () => {
+  const notification = {
+    ...base,
+    cause: ApiNotificationCause.E2EeMessage as const,
+    additional_context: { encrypted_group: "0xgroup" },
+  };
+  expect(getInboxSummary(notification, "en-US")).toBe("New encrypted message");
+  expect(getInboxDrop(notification)).toBeUndefined();
+  expect(getInboxDestination(notification, "viewer")).toBe(
+    "/messages/encrypted/0xgroup"
+  );
+});

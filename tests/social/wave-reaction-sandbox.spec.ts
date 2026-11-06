@@ -496,6 +496,59 @@ test.describe("Live reaction details @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps hidden details idle when the last hovered chip disappears and returns", async ({
+    page,
+    baseURL,
+  }) => {
+    const fixture = await installReactionDetailsFixture(page, baseURL);
+    await gotoSandboxWave(page);
+    const drop = page.getByRole("tabpanel").locator('[data-serial-no="1"]');
+    await drop.getByRole("button", { name: "👍 4", exact: true }).hover();
+    await expect(page.getByRole("tooltip")).toContainText("alice");
+    const viewedReads = fixture.detailReads();
+
+    fixture.update([]);
+    await expect(
+      drop.getByRole("button", { name: "👍 4", exact: true })
+    ).toHaveCount(0);
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+    await page
+      .getByRole("heading", { name: "Local Composer Sandbox Wave" })
+      .hover();
+
+    const hiddenRead = page
+      .waitForRequest(
+        (request) =>
+          request.method() === "GET" &&
+          new URL(request.url()).pathname ===
+            `/api/v2/drops/${SANDBOX_DROP_ID}/reactions`,
+        { timeout: 1000 }
+      )
+      .then(
+        () => true,
+        (error: unknown) => {
+          if (error instanceof Error && error.name === "TimeoutError") {
+            return false;
+          }
+          throw error;
+        }
+      );
+    fixture.update(["alice"]);
+    const returnedChip = drop.getByRole("button", {
+      name: "👍 1",
+      exact: true,
+    });
+    await expect(returnedChip).toBeVisible();
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+    expect(await hiddenRead).toBe(false);
+    expect(fixture.detailReads()).toBe(viewedReads);
+
+    await returnedChip.hover();
+    await expect(page.getByRole("tooltip")).toContainText("alice");
+    await expect.poll(() => fixture.detailReads()).toBe(viewedReads + 1);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("retries a failed list on the next hover with the existing count fallback", async ({
     page,
     baseURL,

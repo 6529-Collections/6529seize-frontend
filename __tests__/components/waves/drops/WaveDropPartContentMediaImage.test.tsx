@@ -275,3 +275,10 @@ describe("WaveDropPartContentMediaImage", () => {
     });
   });
 });
+
+it("uses the zoom cursor for the expandable wave image", () => {
+  render(<WaveDropPartContentMediaImage src="https://example.com/photo.png" />);
+  expect(screen.getByRole("button", { name: "Open drop media" })).toHaveClass(
+    "tw-cursor-zoom-in"
+  );
+});

@@ -1,4 +1,11 @@
+jest.unmock("lexical");
 import {
+  setComposerText,
+  composerText,
+  selectComposerText,
+} from "./composerTestUtils";
+import {
+  act,
   fireEvent,
   render,
   screen,
@@ -71,12 +78,14 @@ const renderComposer = (overrides: Partial<ComposerProps> = {}) => {
       />
     </E2eeTestProvider>
   );
-  const input = screen.getByLabelText<HTMLTextAreaElement>("Encrypted message");
+  const input = screen.getByLabelText<HTMLDivElement>("Encrypted message");
   return { engine, input };
 };
 
-const paste = (target: HTMLElement, data: ReturnType<typeof clipboard>) =>
-  fireEvent.paste(target, { clipboardData: data });
+const paste = (target: HTMLElement, data: ReturnType<typeof clipboard>) => {
+  act(() => target.focus());
+  return fireEvent.paste(target, { clipboardData: data });
+};
 
 /** Chooses files through the attach control's file input. */
 const pickFiles = (files: File[]) => {
@@ -103,12 +112,12 @@ describe("E2eeComposer paste", () => {
 
     expect(notPrevented).toBe(false);
     expect(attachmentNames()).toEqual(["image.png"]);
-    expect(input).toHaveValue("");
+    expect(composerText(input)).toBe("");
     expect(screen.getByRole("status")).toHaveTextContent(
       "1 pasted image attached"
     );
 
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     await waitFor(() =>
       expect(engine.send).toHaveBeenCalledWith(GROUP_G, {
         text: "",
@@ -151,22 +160,40 @@ describe("E2eeComposer paste", () => {
     );
   });
 
-  it("leaves a plain-text paste to the browser", () => {
+  it("inserts plain text through the shared editor", () => {
     const { input } = renderComposer();
-    fireEvent.change(input, { target: { value: "draft" } });
+    setComposerText(input, "draft");
 
     const notPrevented = paste(input, clipboard({ text: "pasted words" }));
 
-    expect(notPrevented).toBe(true);
-    expect(input).toHaveValue("draft");
+    expect(notPrevented).toBe(false);
+    expect(composerText(input)).toBe("draftpasted words");
     expect(attachmentNames()).toEqual([]);
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
+  it("pastes plain text without importing remote HTML images", () => {
+    const { input } = renderComposer();
+    const data = {
+      ...clipboard({}),
+      getData: (type: string) => {
+        if (type === "text/plain") return "Private draft";
+        if (type === "text/html")
+          return '<p>Private draft<img src="https://example.com/tracker.png"></p>';
+        return "";
+      },
+    };
+
+    expect(paste(input, data)).toBe(false);
+    expect(composerText(input)).toBe("Private draft");
+    expect(within(input).queryByRole("img")).not.toBeInTheDocument();
+    expect(attachmentNames()).toEqual([]);
+  });
+
   it("keeps the text pasted together with an image, at the selection", () => {
     const { input } = renderComposer();
-    fireEvent.change(input, { target: { value: "hello world" } });
-    input.setSelectionRange(6, 11);
+    setComposerText(input, "hello world");
+    selectComposerText(input, 6, 11);
 
     const notPrevented = paste(
       input,
@@ -174,7 +201,7 @@ describe("E2eeComposer paste", () => {
     );
 
     expect(notPrevented).toBe(false);
-    expect(input).toHaveValue("hello there\nfriend");
+    expect(composerText(input)).toBe("hello there\nfriend");
     expect(attachmentNames()).toEqual(["shot.png"]);
   });
 
@@ -187,10 +214,10 @@ describe("E2eeComposer paste", () => {
 
     paste(input, clipboard({ files: [png("image.png")], text: long }));
 
-    expect(input).toHaveValue(long);
+    expect(composerText(input)).toBe(long);
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Messages can be up to 10,000 characters."
     );
@@ -200,7 +227,7 @@ describe("E2eeComposer paste", () => {
     const { input } = renderComposer();
     const notes = pdf("notes.pdf");
 
-    expect(paste(input, clipboard({ files: [notes] }))).toBe(true);
+    expect(paste(input, clipboard({ files: [notes] }))).toBe(false);
     expect(attachmentNames()).toEqual([]);
 
     paste(input, clipboard({ files: [notes, png("photo.png")] }));
@@ -292,14 +319,14 @@ describe("E2eeComposer paste", () => {
       editing: message({ id: "m1", senderProfileId: SELF_ID, text: "old" }),
     });
 
-    expect(paste(input, clipboard({ files: [png("image.png")] }))).toBe(true);
+    expect(paste(input, clipboard({ files: [png("image.png")] }))).toBe(false);
     expect(attachmentNames()).toEqual([]);
   });
 
   it("leaves pastes alone while attachments are switched off", () => {
     const { input } = renderComposer({ attachmentsEnabled: false });
 
-    expect(paste(input, clipboard({ files: [png("image.png")] }))).toBe(true);
+    expect(paste(input, clipboard({ files: [png("image.png")] }))).toBe(false);
     expect(attachmentNames()).toEqual([]);
   });
 });

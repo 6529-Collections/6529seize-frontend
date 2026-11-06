@@ -28,6 +28,8 @@ jest.mock("@/components/e2ee/conversation/e2eeInlineImage", () => ({
   prepareInlineImage: jest.fn(),
 }));
 
+jest.mock("@/hooks/useInView", () => ({ useInView: () => [jest.fn(), true] }));
+
 const prepareMock = jest.mocked(prepareInlineImage);
 
 const actions: E2eeMessageActions = {
@@ -161,6 +163,8 @@ describe("attachments", () => {
 
   beforeEach(() => {
     prepareMock.mockReset();
+    createObjectURL.mockClear();
+    revokeObjectURL.mockClear();
     Object.assign(URL, { createObjectURL, revokeObjectURL });
   });
 
@@ -230,6 +234,32 @@ describe("attachments", () => {
     expect(screen.getByText("Too large to preview")).toBeInTheDocument();
     expect(engine.getAttachment).not.toHaveBeenCalled();
     expect(prepareMock).not.toHaveBeenCalled();
+  });
+  it("retries a failed encrypted image through the engine and revokes its URL on unmount", async () => {
+    prepareMock.mockResolvedValue(true);
+    const engine = createFakeE2eeEngine();
+    jest
+      .mocked(engine.getAttachment)
+      .mockRejectedValueOnce(new Error("temporary failure"));
+    const view = render(
+      <E2eeAttachmentView
+        engine={engine}
+        g={GROUP_G}
+        messageId="retry-image"
+        attachment={attachment({ mime: "image/png", name: "retry.png" })}
+      />
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /^Retry/ }));
+    await screen.findByRole("img", { name: "Image: retry.png" });
+    expect(engine.getAttachment).toHaveBeenCalledTimes(2);
+    expect(engine.getAttachment).toHaveBeenLastCalledWith(
+      GROUP_G,
+      "retry-image",
+      "blob-1",
+      expect.any(AbortSignal)
+    );
+    view.unmount();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:local");
   });
 });
 

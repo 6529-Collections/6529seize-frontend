@@ -32,7 +32,6 @@ describe("restored NFT reference submission", () => {
             name: "Test NFT",
           },
         ],
-        submitting: false,
         setDrop: jest.fn(),
         setFiles: jest.fn(),
         setEditorState: jest.fn(),

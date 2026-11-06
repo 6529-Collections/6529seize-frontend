@@ -19,6 +19,11 @@ import {
   setAuthJwt,
 } from "@/services/auth/auth.utils";
 
+const mockAcceptDeviceSetup = jest.fn(async (_input: unknown) => undefined);
+jest.mock("@/lib/device-signing/connection-setup", () => ({
+  acceptConnectionDeviceSetup: (input: unknown) => mockAcceptDeviceSetup(input),
+}));
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
@@ -124,6 +129,8 @@ describe("AcceptConnectionSharing page", () => {
   });
 
   beforeEach(() => {
+    mockAcceptDeviceSetup.mockReset();
+    mockAcceptDeviceSetup.mockResolvedValue(undefined);
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
@@ -237,7 +244,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
     expect(persistSessionResponse).toHaveBeenCalledWith(
@@ -382,7 +389,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(commonApiPost).not.toHaveBeenCalled();
     expect(setAuthJwt).not.toHaveBeenCalled();
@@ -442,7 +449,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(push).toHaveBeenCalledWith("/");
   });
@@ -637,10 +644,66 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(persistSessionResponse).toHaveBeenCalled();
     expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
     expect(push).toHaveBeenCalledWith("/");
   });
+  it.each(["native", "desktop"])(
+    "imports shared setup in %s without connecting a wallet and removes the secret before paint",
+    async (target) => {
+      const push = jest.fn();
+      const accept = jest.fn();
+      const connect = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(
+        target === "native"
+      );
+      if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
+      openConnectionLink("connection_share_code=abc12345&address=0x123");
+      window.history.replaceState(
+        null,
+        "",
+        window.location.href + "#device_setup_key=private-unlock-secret"
+      );
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        seizeAcceptConnection: accept,
+        seizeConnect: connect,
+      });
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        address: "0x123",
+        access_token: "access-token",
+        role: null,
+        client_type: target,
+        encrypted_device_setup: "v1.ciphertext",
+      });
+      render(
+        <React.StrictMode>
+          <TestProvider>
+            <AcceptConnectionSharingPage />
+          </TestProvider>
+        </React.StrictMode>
+      );
+      expect(window.location.hash).toBe("");
+      expect(window.location.search).not.toContain("connection_share_code");
+      expect(await screen.findByText("Signed Posts")).toBeInTheDocument();
+      expect(screen.getByText("Encrypted DMs")).toBeInTheDocument();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Accept and enable both" })
+      );
+      await waitFor(() =>
+        expect(mockAcceptDeviceSetup).toHaveBeenCalledWith({
+          envelope: "v1.ciphertext",
+          secret: "private-unlock-secret",
+          wallet: "0x123",
+          accessToken: "access-token",
+          target,
+        })
+      );
+      await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
+      expect(accept).toHaveBeenCalledWith("0x123");
+      expect(connect).not.toHaveBeenCalled();
+    }
+  );
 });

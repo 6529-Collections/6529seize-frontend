@@ -1,3 +1,5 @@
+jest.unmock("lexical");
+import { setComposerText, composerText } from "./composerTestUtils";
 import {
   act,
   fireEvent,
@@ -35,6 +37,9 @@ const mutedChats = (): string[] =>
   ) as string[];
 jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
   useProfileBlockState: () => ({ block: mockBlock }),
+}));
+jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
+  E2eeRenewalBanner: () => null,
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
@@ -277,8 +282,8 @@ describe("E2eeConversationView", () => {
     const engine = renderView();
     const input = screen.getByLabelText("Encrypted message");
     // A trailing space closes the mention picker, so Enter sends.
-    fireEvent.change(input, { target: { value: "hi @alice " } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    setComposerText(input, "hi @alice ");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     await waitFor(() =>
       expect(engine.send).toHaveBeenCalledWith(GROUP_G, {
         text: "hi @alice",
@@ -287,14 +292,14 @@ describe("E2eeConversationView", () => {
         files: [],
       })
     );
-    expect(input).toHaveValue("");
+    expect(composerText(input)).toBe("");
   });
 
   it("keeps Shift+Enter as a new line", () => {
     const engine = renderView();
     const input = screen.getByLabelText("Encrypted message");
-    fireEvent.change(input, { target: { value: "line one" } });
-    fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
+    setComposerText(input, "line one");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13, shiftKey: true });
     expect(engine.send).not.toHaveBeenCalled();
   });
 
@@ -334,13 +339,11 @@ describe("E2eeConversationView", () => {
 
   it("offers member suggestions for @ mentions", () => {
     renderView();
-    const input = screen.getByLabelText(
-      "Encrypted message"
-    ) as HTMLTextAreaElement;
-    fireEvent.change(input, { target: { value: "@al", selectionStart: 3 } });
+    const input = screen.getByLabelText("Encrypted message") as HTMLDivElement;
+    setComposerText(input, "@al");
     const listbox = screen.getByRole("listbox", { name: "Mention someone" });
     fireEvent.click(within(listbox).getByRole("option", { name: /alice/ }));
-    expect(input.value).toBe("@alice ");
+    expect(composerText(input)).toBe("@alice ");
   });
 
   it("reacts and reports from the message actions", async () => {
@@ -538,7 +541,7 @@ describe("E2eeConversationView", () => {
     expect(mutedChats()).toEqual([]);
   });
 
-  it("has no attach control while the server has attachments off", () => {
+  it("reserves the disabled attach control while attachments are unavailable", () => {
     const engine = createFakeE2eeEngine({
       conversations: [conversation()],
       messages: { [GROUP_G]: timeline },
@@ -549,9 +552,7 @@ describe("E2eeConversationView", () => {
         <E2eeConversationView g={GROUP_G} />
       </E2eeTestProvider>
     );
-    expect(
-      screen.queryByRole("button", { name: "Attach files" })
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeDisabled();
     expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 
@@ -667,4 +668,108 @@ describe("E2eeConversationView", () => {
     ).toBeInTheDocument();
     expect(engine.sync).toHaveBeenCalled();
   });
+});
+
+it("Arrow Up edits the latest eligible own message, skipping pending, deleted and unreadable messages", async () => {
+  const engine = renderView(conversation(), [
+    ...timeline,
+    message({
+      id: "deleted-own",
+      seq: 7,
+      senderProfileId: SELF_ID,
+      deleted: true,
+    }),
+    message({
+      id: "unreadable-own",
+      seq: 8,
+      senderProfileId: SELF_ID,
+      undecryptable: true,
+    }),
+    message({ id: "other", seq: 9, senderProfileId: BOB_ID }),
+  ]);
+  const input = screen.getByLabelText("Encrypted message");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38, shiftKey: true });
+  expect(composerText(input)).toBe("");
+  setComposerText(input, "draft");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("draft");
+  setComposerText(input, "");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("fixed typo");
+  setComposerText(input, "fixed again");
+  fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
+  await waitFor(() =>
+    expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")
+  );
+});
+
+describe("encrypted chat file drops", () => {
+  const files = [
+    new File(["%PDF"], "dropped.pdf", { type: "application/pdf" }),
+  ];
+  const dataTransfer = () => ({ types: ["Files"], files, dropEffect: "none" });
+
+  it.each(["timeline", "composer"])(
+    "attaches a file dropped onto the %s exactly once through the encrypted engine",
+    async (target) => {
+      const engine = renderView();
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      const input = screen.getByRole("textbox", { name: "Encrypted message" });
+      const dropTarget = target === "composer" ? input : area;
+      fireEvent.dragEnter(dropTarget, { dataTransfer: dataTransfer() });
+      expect(screen.getByText("Drop files here")).toBeVisible();
+      expect(fireEvent.drop(dropTarget, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Attachments" })).getAllByRole(
+          "listitem"
+        )
+      ).toHaveLength(1);
+      fireEvent.click(screen.getByRole("button", { name: "Send" }));
+      await waitFor(() =>
+        expect(engine.send).toHaveBeenCalledWith(
+          GROUP_G,
+          expect.objectContaining({ files })
+        )
+      );
+    }
+  );
+
+  it.each(["disabled", "editing", "paused"])(
+    "blocks drops when attachments are %s, without navigating away",
+    (mode) => {
+      const engine = renderView(
+        conversation(mode === "paused" ? { delayed: true } : {})
+      );
+      if (mode === "disabled")
+        act(() => engine.update({ attachmentsEnabled: false }));
+      if (mode === "editing") {
+        setComposerText(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          ""
+        );
+        fireEvent.keyDown(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          { key: "ArrowUp", keyCode: 38 }
+        );
+        expect(screen.getByText("Editing message")).toBeVisible();
+      }
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      fireEvent.dragEnter(area, { dataTransfer: dataTransfer() });
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(fireEvent.drop(area, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(
+        screen.queryByRole("list", { name: "Attachments" })
+      ).not.toBeInTheDocument();
+      expect(engine.send).not.toHaveBeenCalled();
+    }
+  );
 });

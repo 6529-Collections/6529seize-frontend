@@ -7,11 +7,18 @@ import type {
 type MutableRef<T> = { current: T };
 
 export interface HeaderShareModalViewProps {
+  readonly open: boolean;
   readonly shouldRender: boolean;
   readonly isVisible: boolean;
   readonly onClose: () => void;
   readonly dialogRef: MutableRef<HTMLDialogElement | null>;
   readonly mode: Mode;
+  readonly account: {
+    readonly address: string;
+    readonly handle?: string | null | undefined;
+    readonly pfp?: string | null | undefined;
+    readonly canSetUp: boolean;
+  };
   readonly activeSubTab: SubMode;
   readonly setActiveSubTab: (subTab: SubMode) => void;
   readonly navigateBrowserSrc: string;
@@ -29,7 +36,7 @@ export interface HeaderShareModalViewProps {
   readonly terminalConnectionShareFailuresRef: MutableRef<
     Map<string, TerminalConnectionShareStatus>
   >;
-  readonly requestSessionUpgrade: (() => Promise<unknown>) | undefined;
+  readonly updateAuthentication: () => void;
   readonly refreshConnectionShare: () => void;
   readonly isConnectionShareLoading: boolean;
   readonly urlCopied: boolean;

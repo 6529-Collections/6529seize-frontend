@@ -104,7 +104,7 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
   const Icon = PLATFORM_ICONS[device.platform];
   const isActive = device.revokedAt === null;
   return (
-    <li className="tw-flex tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
+    <li className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
       <Icon
         aria-hidden="true"
         className="tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
@@ -124,6 +124,14 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
           ) : null}
           <VerifiedIndicator verified={device.verified} />
         </div>
+        <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-300">
+          {t(
+            locale,
+            device.linkedAuthorProof
+              ? "e2ee.devices.combinedPermissions"
+              : "e2ee.devices.permission"
+          )}
+        </p>
         <DeviceDates device={device} />
       </div>
       {isActive && onRevoke ? (
@@ -198,15 +206,16 @@ export function E2eeDeviceList({
       ) : null}
       <E2eeConfirmDialog
         open={target !== null}
-        title={t(locale, "e2ee.devices.revokeConfirmTitle", {
-          label: target?.label ?? "",
-        })}
-        body={t(
+        title={t(
           locale,
-          target?.isThisDevice
-            ? "e2ee.devices.revokeThisConfirmBody"
-            : "e2ee.devices.revokeConfirmBody"
+          target?.linkedAuthorProof
+            ? "e2ee.devices.revokeCombinedTitle"
+            : "e2ee.devices.revokeEncryptionTitle",
+          {
+            label: target?.label ?? "",
+          }
         )}
+        body={t(locale, "e2ee.devices.revokeHistory")}
         confirmLabel={t(locale, "e2ee.devices.revokeConfirm")}
         errorFallbackKey="e2ee.devices.revokeFailed"
         onConfirm={async () => {

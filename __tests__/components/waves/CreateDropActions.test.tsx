@@ -286,19 +286,21 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     // Both versions render all buttons (one hidden via CSS)
-    expect(screen.getAllByLabelText("Upload a file").length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("Attach files").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Add GIF").length).toBeGreaterThan(0);
     expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
   });
 
-  it("centers the desktop action row against the input", () => {
+  it("aligns the full-height desktop actions with the encrypted composer", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const actionSlot = screen.getByTestId(
       "drop-actions-motion-shell"
     ).parentElement;
-    expect(actionSlot).toHaveClass("tw-self-center");
-    expect(actionSlot).not.toHaveClass("tw-self-end", "tw-mb-1");
+    expect(actionSlot).toHaveClass("tw-self-end");
+    expect(screen.getByTestId("drop-actions-motion-shell")).toHaveClass(
+      "tw-h-10"
+    );
   });
 
   it("renders poll action for admins and toggles it", async () => {
@@ -527,7 +529,7 @@ describe("CreateDropActions", () => {
       <CreateDropActions {...defaultProps} isRequiredMediaMissing={true} />
     );
 
-    const uploadLabels = screen.getAllByLabelText("Upload a file");
+    const uploadLabels = screen.getAllByLabelText("Attach files");
     expect(uploadLabels[0]).toHaveClass("tw-text-[#FEDF89]");
   });
 
@@ -539,7 +541,7 @@ describe("CreateDropActions", () => {
       </>
     );
 
-    const uploadButtons = screen.getAllByLabelText("Upload a file");
+    const uploadButtons = screen.getAllByLabelText("Attach files");
     const tooltipIds = uploadButtons.map((button) =>
       button.getAttribute("data-tooltip-id")
     );
@@ -549,7 +551,8 @@ describe("CreateDropActions", () => {
     expect(new Set(tooltipIds)).toHaveProperty("size", 2);
     expect(
       uploadButtons.every(
-        (button) => button.getAttribute("data-tooltip-content") === "Upload"
+        (button) =>
+          button.getAttribute("data-tooltip-content") === "Attach files"
       )
     ).toBe(true);
   });
@@ -641,7 +644,7 @@ describe("CreateDropActions", () => {
     );
 
     // Verify buttons are visible when showOptions is true
-    expect(screen.getAllByLabelText("Upload a file").length).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("Attach files").length).toBeGreaterThan(0);
 
     // Then collapse
     rerender(<CreateDropActions {...defaultProps} showOptions={false} />);

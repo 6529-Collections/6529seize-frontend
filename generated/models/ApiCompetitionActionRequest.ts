@@ -20,7 +20,7 @@ export class ApiCompetitionActionRequest {
     'idempotency_key': string;
     'config_version': number;
     /**
-    * Required and non-blank for pause actions. The trimmed reason is stored in the competition\'s public pause history. Optional for other actions.
+    * Required and non-blank for pause actions and for archiving a published competition with any historical entries or votes. The trimmed reason is recorded in lifecycle audit history; pause reasons also appear in public pause history.
     */
     'reason'?: string | null;
     'starts_at'?: number | null;

@@ -10,6 +10,17 @@ type CombinedTurnOnOutcome = Awaited<
 >;
 
 const mockRequestGrant = jest.fn();
+const mockConnect = jest.fn();
+let mockCanSign = true;
+jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
+  useSignedMessagesWallet: () => ({
+    isRemoteWallet: false,
+    networkName: "Ethereum",
+    isNetworkSupported: () => true,
+    switchNetwork: jest.fn(),
+  }),
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ requestSignedMessagesGrant: mockRequestGrant }),
 }));
@@ -20,27 +31,58 @@ jest.mock("@/components/e2ee/gate/e2eeCombinedTurnOn", () => ({
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
-const BUTTON = { name: "Turn on encrypted messages (one signature)" };
+const BUTTON = { name: "Sign to enable both" };
 
 const renderCard = () => {
   const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
-  render(
+  const view = render(
     <SeizeConnectContext.Provider
-      value={{ address: ADDRESS } as unknown as SeizeConnectContextType}
+      value={
+        {
+          address: ADDRESS,
+          canSignActiveWallet: mockCanSign,
+          connectedAccounts: [],
+          seizeConnectFresh: mockConnect,
+        } as unknown as SeizeConnectContextType
+      }
     >
       <E2eeEnrollmentCard
+        scope="both"
         engine={engine}
         enrolling={false}
         engineError={null}
       />
     </SeizeConnectContext.Provider>
   );
-  return engine;
+  return Object.assign(engine, {
+    rerenderCard: () =>
+      view.rerender(
+        <SeizeConnectContext.Provider
+          value={
+            {
+              address: ADDRESS,
+              canSignActiveWallet: mockCanSign,
+              connectedAccounts: [],
+              seizeConnectFresh: mockConnect,
+            } as unknown as SeizeConnectContextType
+          }
+        >
+          <E2eeEnrollmentCard
+            scope="both"
+            engine={engine}
+            enrolling={false}
+            engineError={null}
+          />
+        </SeizeConnectContext.Provider>
+      ),
+  });
 };
 
 describe("E2eeEnrollmentCard turn-on", () => {
   beforeEach(() => {
     mockTurnOn.mockReset();
+    mockCanSign = true;
+    mockConnect.mockReset();
   });
 
   it("turns on with the combined sign-in and no separate grant prompt", async () => {
@@ -53,12 +95,12 @@ describe("E2eeEnrollmentCard turn-on", () => {
       expect(mockTurnOn).toHaveBeenCalledWith({
         engine,
         address: ADDRESS,
-        requestGrant: mockRequestGrant,
+        requestGrant: expect.any(Function),
       })
     );
     await waitFor(() =>
       expect(
-        screen.queryByText("Waiting for your wallet signature…")
+        screen.queryByText("Check your wallet to sign")
       ).not.toBeInTheDocument()
     );
     expect(engine.enroll).not.toHaveBeenCalled();
@@ -67,18 +109,23 @@ describe("E2eeEnrollmentCard turn-on", () => {
 
   it("announces the wait and marks the button busy during the combined sign-in", async () => {
     let finish: (outcome: CombinedTurnOnOutcome) => void = () => undefined;
-    mockTurnOn.mockReturnValue(
-      new Promise((resolve) => {
+    mockTurnOn.mockImplementation(async (input: unknown) => {
+      (input as { requestGrant?: (options: object) => unknown }).requestGrant?.(
+        {}
+      );
+      return await new Promise((resolve) => {
         finish = resolve;
-      })
-    );
+      });
+    });
+    mockRequestGrant.mockImplementation((options) => {
+      options?.onSignatureRequested?.();
+      return Promise.resolve({ success: true });
+    });
     renderCard();
 
     fireEvent.click(screen.getByRole("button", BUTTON));
 
-    const status = await screen.findByText(
-      "Waiting for your wallet signature…"
-    );
+    const status = await screen.findByText("Check your wallet to sign");
     expect(status.tagName).toBe("OUTPUT");
     const button = screen.getByRole("button", BUTTON);
     expect(button).toHaveAttribute("aria-busy", "true");
@@ -90,12 +137,19 @@ describe("E2eeEnrollmentCard turn-on", () => {
     );
   });
 
-  it("uses the separate grant prompt when the combined sign-in is not possible", async () => {
+  it("requires a separate approval when combined setup is unavailable", async () => {
     mockTurnOn.mockResolvedValue("fallback");
     const engine = renderCard();
 
     fireEvent.click(screen.getByRole("button", BUTTON));
 
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Enable Encrypted DMs" })
+    );
+    expect(engine.enroll).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to enable Encrypted DMs" })
+    );
     await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
   });
 
@@ -105,9 +159,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
 
     fireEvent.click(screen.getByRole("button", BUTTON));
 
-    const declined = await screen.findByText(
-      "You cancelled the signature. Nothing was turned on."
-    );
+    const declined = await screen.findByText("Signature cancelled.");
     expect(declined.tagName).toBe("OUTPUT");
     expect(engine.enroll).not.toHaveBeenCalled();
   });
@@ -131,5 +183,19 @@ describe("E2eeEnrollmentCard turn-on", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Couldn’t turn on encrypted messages. Try again."
     );
+  });
+
+  it("connects a disconnected wallet before attempting encrypted enrollment and resumes automatically", async () => {
+    mockCanSign = false;
+    mockTurnOn.mockResolvedValue("done");
+    const engine = renderCard();
+    fireEvent.click(screen.getByRole("button", BUTTON));
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockTurnOn).not.toHaveBeenCalled();
+    expect(screen.queryByText("Signature cancelled.")).not.toBeInTheDocument();
+    mockCanSign = true;
+    engine.rerenderCard();
+    await waitFor(() => expect(mockTurnOn).toHaveBeenCalledTimes(1));
+    expect(engine.enroll).not.toHaveBeenCalled();
   });
 });

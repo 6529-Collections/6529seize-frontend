@@ -5,7 +5,7 @@ import { writeDeviceGrantHint } from "./grant-hint";
 
 const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
+export const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
 /** Grants this close to expiry are not used, so the server never sees one expire mid-write. */
 const SIGNING_EXPIRY_MARGIN_MS = 60 * 1000;
 
@@ -212,4 +212,20 @@ export async function allocateDeviceSeq(
 export async function listLocalDevicePublicKeys(): Promise<string[]> {
   const records = await deviceKeyStorage.readAll();
   return records.map((record) => record.publicKeyHex.toLowerCase());
+}
+
+/** Imports a freshly granted app key, preserving an existing usable local grant. */
+export async function installSharedDeviceKey(
+  record: StoredDeviceKey
+): Promise<void> {
+  const address = normalizeAddress(record.address);
+  await withDeviceKeyLock(address, async () => {
+    const existing = await deviceKeyStorage.read(address);
+    if (existing && getUsableGrant(existing, Date.now())) return;
+    if (!record.grant || !getUsableGrant(record, Date.now()))
+      throw new Error("Invalid shared signing grant");
+    await deviceKeyStorage.write({ ...record, address });
+    writeDeviceGrantHint(address, record.grant, record.ownProfileId);
+  });
+  notifyDeviceGrantChanged(address);
 }

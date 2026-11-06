@@ -17,6 +17,10 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
+import {
+  hideAndroidComposerKeyboard,
+  useDismissMobileComposer,
+} from "@/hooks/useDismissMobileComposer";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef } from "react";
@@ -185,35 +189,25 @@ const addOptimisticDropWithAttachments = ({
   );
 };
 
-const hideAndroidKeyboard = async () => {
-  const { Capacitor } = await import("@capacitor/core");
-  if (Capacitor.getPlatform() !== "android") {
-    return;
-  }
-
-  const { Keyboard } = await import("@capacitor/keyboard");
-  await Keyboard.hide().catch(() => {});
-};
-
 const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
-  shouldKeepChatFocused,
+  isChatSubmit,
   isApp,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
+  dismissMobileComposer,
 }: {
   readonly getMarkdown: string | null;
-  readonly shouldKeepChatFocused: boolean;
+  readonly isChatSubmit: boolean;
   readonly isApp: boolean;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
+  readonly dismissMobileComposer: ReturnType<typeof useDismissMobileComposer>;
 }) => {
   if (getMarkdown?.length) {
     createDropInputRef.current?.clearEditorState();
   }
 
-  if (shouldKeepChatFocused) {
-    shouldRefocusAfterChatSubmitRef.current = true;
+  if (isChatSubmit) {
+    dismissMobileComposer(createDropInputRef.current);
     return;
   }
 
@@ -222,7 +216,7 @@ const updateFocusAfterAcceptedSubmit = ({
   }
 
   if (isApp) {
-    hideAndroidKeyboard().catch(() => {});
+    hideAndroidComposerKeyboard().catch(() => {});
   }
 };
 
@@ -303,7 +297,6 @@ export const useCreateDropSubmission = ({
   setIsStormMode,
   setMetadataOpenState,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
@@ -360,8 +353,8 @@ export const useCreateDropSubmission = ({
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
+  const dismissMobileComposer = useDismissMobileComposer();
   const {
     locale,
     pollDraft,
@@ -648,8 +641,7 @@ export const useCreateDropSubmission = ({
         return;
       }
 
-      const shouldKeepChatFocused =
-        updatedDropRequest.drop_type === ApiDropType.Chat;
+      const isChatSubmit = updatedDropRequest.drop_type === ApiDropType.Chat;
 
       addOptimisticDropWithAttachments({
         optimisticDrop,
@@ -659,10 +651,10 @@ export const useCreateDropSubmission = ({
       });
       updateFocusAfterAcceptedSubmit({
         getMarkdown,
-        shouldKeepChatFocused,
+        isChatSubmit,
         isApp,
         createDropInputRef,
-        shouldRefocusAfterChatSubmitRef,
+        dismissMobileComposer,
       });
       setFiles([]);
       if (isIdentityPickerAllowed) {
