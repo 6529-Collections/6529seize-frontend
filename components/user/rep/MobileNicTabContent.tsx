@@ -1,5 +1,5 @@
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
+import type { useNicRatingsOverview } from "./useNicRatingsOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
 import NicRatingsOverview from "./NicRatingsOverview";
@@ -7,23 +7,23 @@ import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 
 export default function MobileNicTabContent({
   profile,
-  cicOverview,
+  ratings,
   initialActivityLogParams,
   canEditNic,
   onRateNic,
 }: {
   readonly profile: ApiIdentity;
-  readonly cicOverview: ApiCicOverview | null;
+  readonly ratings: ReturnType<typeof useNicRatingsOverview>;
   readonly initialActivityLogParams: ActivityLogParams;
   readonly canEditNic: boolean;
   readonly onRateNic: () => void;
 }) {
   return (
     <>
-      <div className="tw-mt-4 tw-px-1 tw-py-1">
+      <div className="tw-mt-6 tw-px-1">
         <NicRatingsOverview
           profile={profile}
-          cicOverview={cicOverview}
+          ratings={ratings}
           compact
           {...(canEditNic ? { onRateClick: onRateNic } : {})}
         />

@@ -252,14 +252,12 @@ export default function ProfileRatingsDialog({
         })}
         isOpen
         onClose={onClose}
-        tall
-        fixedHeight
         tabletModal
         noPadding
         maxWidthClass="md:tw-max-w-xl"
         showScrollbar
       >
-        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
+        <div className="tw-min-h-24 tw-px-4 tw-pb-6 sm:tw-px-6">
           {category && (
             <p className="tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100">
               {category}

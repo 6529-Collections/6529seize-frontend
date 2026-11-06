@@ -3,148 +3,122 @@
 import Button from "@/components/utils/button/Button";
 
 import { AuthContext } from "@/components/auth/Auth";
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { FingerprintIcon, RateNicButton } from "../identity/header/RateNicCta";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconWrapper from "../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
-import { buildRepAvatarItems } from "./buildRepAvatarItems";
+import RatingContributorsControl from "./RatingContributorsControl";
+import type { useNicRatingsOverview } from "./useNicRatingsOverview";
 import ProfileRatingsDialog from "./ProfileRatingsDialog";
 import { canManageGivenRatings } from "./ratingsManagement";
 import RepDirectionToggle from "./RepDirectionToggle";
-import type { RepDirection } from "./UserPageRep.helpers";
 
 export default function NicRatingsOverview({
   profile,
-  cicOverview,
+  ratings,
   onRateClick,
   compact = false,
 }: {
   readonly profile: ApiIdentity;
-  readonly cicOverview: ApiCicOverview | null;
+  readonly ratings: ReturnType<typeof useNicRatingsOverview>;
   readonly onRateClick?: (() => void) | undefined;
   readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [direction, setDirection] = useState<RepDirection>("received");
   const [listOpen, setListOpen] = useState(false);
-  const identity = profile.query ?? profile.handle ?? profile.primary_wallet;
-  const given = useQuery({
-    queryKey: [
-      QueryKey.CIC_OVERVIEW,
-      { handleOrWallet: identity.toLowerCase(), direction: "outgoing" },
-    ],
-    queryFn: () =>
-      commonApiFetch<ApiCicOverview>({
-        endpoint: `profiles/${encodeURIComponent(identity)}/cic/overview`,
-        params: { direction: "outgoing" },
-      }),
-    enabled: direction === "given",
-  });
-  const overview = direction === "received" ? cicOverview : given.data;
-  const score =
-    direction === "received"
-      ? (cicOverview?.total_cic ?? profile.cic)
-      : given.data?.total_cic;
-  const count = overview?.contributor_count ?? 0;
-  const countKey = direction === "given" ? "receivers" : "raters";
-  const countLabel = t(
-    locale,
-    `user.profile.rep.contributors.${countKey}.${count === 1 ? "one" : "other"}`,
-    { count: formatInteger(locale, count) }
-  );
+  const { direction, setDirection, overview, score, isError, retry } = ratings;
   const canManage = canManageGivenRatings(
     profile,
     connectedProfile,
     activeProfileProxy
   );
-  const avatars = useMemo(
-    () =>
-      buildRepAvatarItems(overview?.contributors.data ?? [], compact ? 3 : 5),
-    [overview?.contributors.data, compact]
+  const status = direction === "received" && (
+    <div
+      className={`tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase ${compact ? "tw-mt-2" : "tw-col-start-2 tw-row-start-1 tw-justify-self-end"}`}
+    >
+      <span
+        className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center ${compact ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5"}`}
+      >
+        {compact ? (
+          <UserCICTypeIcon cic={score ?? profile.cic} />
+        ) : (
+          <UserCICTypeIconWrapper profile={profile} />
+        )}
+      </span>
+      <UserCICStatus cic={score ?? profile.cic} />
+    </div>
   );
-  const directionLabel = t(
-    locale,
-    direction === "given" ? "user.rate.given" : "user.rate.received"
+  const directionToggle = (
+    <RepDirectionToggle
+      repDirection={direction}
+      onRepDirectionChange={setDirection}
+      matter="NIC"
+    />
+  );
+  const contributors = (
+    <RatingContributorsControl
+      overview={overview}
+      direction={direction}
+      matter="NIC"
+      canManage={direction === "given" && canManage}
+      onClick={() => setListOpen(true)}
+      compact={compact}
+    />
+  );
+  const scoreValue = (
+    <div
+      className={`tw-text-3xl tw-font-semibold tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
+    >
+      {score === undefined ? "—" : formatInteger(locale, score)}
+    </div>
   );
   return (
     <section aria-label={t(locale, "user.rate.nicRegion")} className="tw-mb-6">
-      <RepDirectionToggle
-        repDirection={direction}
-        onRepDirectionChange={setDirection}
-        matter="NIC"
-      />
-      <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <div>
-          {(!compact || direction === "given") && (
-            <>
-              {(direction === "given" || !compact) && (
-                <p className="tw-mb-1 tw-text-xs tw-text-iron-400">
-                  {direction === "given"
-                    ? t(locale, "user.rate.nicGiven")
-                    : t(locale, "user.rate.nicReceived")}
-                </p>
-              )}
-              <div className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-text-iron-50">
-                {score === undefined ? "—" : formatInteger(locale, score)}
-              </div>
-            </>
-          )}
-          {direction === "received" && (
-            <div className="tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase">
-              <span className="tw-h-4 tw-w-4">
-                {compact ? (
-                  <UserCICTypeIcon cic={score ?? profile.cic} />
-                ) : (
-                  <UserCICTypeIconWrapper profile={profile} />
-                )}
-              </span>
-              <UserCICStatus cic={score ?? profile.cic} />
+      {compact ? (
+        <>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1">
+            <h2 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
+              {t(locale, "user.rate.nicRegion")}
+            </h2>
+            {directionToggle}
+          </div>
+          {scoreValue}
+          {status}
+          <div className="tw-mt-2">{contributors}</div>
+        </>
+      ) : (
+        <>
+          {directionToggle}
+          <div className="tw-mt-4 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1">
+            <div className="tw-contents">
+              <p className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-text-xs tw-text-iron-400">
+                {direction === "given"
+                  ? t(locale, "user.rate.nicGiven")
+                  : t(locale, "user.rate.nicReceived")}
+              </p>
+              {scoreValue}
             </div>
-          )}
-        </div>
-        <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
-          {avatars.length > 0 && (
-            <OverlappingAvatars
-              items={avatars}
-              size={compact ? "sm" : "md"}
-              maxCount={compact ? 3 : 5}
-            />
-          )}
-          <button
-            type="button"
-            onClick={() => setListOpen(true)}
-            aria-label={t(locale, "user.rate.viewRatings", {
-              matter: "NIC",
-              direction: directionLabel,
-            })}
-            className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            {direction === "given" && canManage && (
-              <>{t(locale, "user.rate.manageGiven")} · </>
-            )}
-            {countLabel}
-          </button>
-        </div>
-      </div>
-      {direction === "given" && given.isError && (
+            {status}
+            <div className="tw-col-span-2 tw-row-start-3 tw-mt-3">
+              {contributors}
+            </div>
+          </div>
+        </>
+      )}
+      {direction === "given" && isError && (
         <div role="alert" className="tw-text-sm tw-text-iron-300">
           {t(locale, "user.rate.loadError")}{" "}
           <Button
             variant="tertiary"
             size="sm"
             onClick={() => {
-              void given.refetch();
+              void retry();
             }}
           >
             {t(locale, "user.rate.retry")}
@@ -154,7 +128,7 @@ export default function NicRatingsOverview({
       {direction === "received" && onRateClick && (
         <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <RateNicButton onRateClick={onRateClick} />
-          {(cicOverview?.authenticated_user_contribution ?? 0) !== 0 && (
+          {(overview?.authenticated_user_contribution ?? 0) !== 0 && (
             <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
               {compact && (
                 <FingerprintIcon className="tw-h-4 tw-w-4 tw-shrink-0 tw-text-emerald-400" />
@@ -162,7 +136,7 @@ export default function NicRatingsOverview({
               {t(locale, "user.profile.rep.nic.yourRating", {
                 value: formatInteger(
                   locale,
-                  cicOverview?.authenticated_user_contribution ?? 0
+                  overview?.authenticated_user_contribution ?? 0
                 ),
               })}
             </span>

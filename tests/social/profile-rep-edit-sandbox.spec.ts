@@ -385,13 +385,25 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const requestedPages: number[] = [];
       let recipientRepReads = 0;
       await installCategories(page, api);
-      await page.route(`${api}/api/profiles/*/cic/overview*`, (route) =>
+      await page.route(`${api}/api/profiles/*/${path}/overview*`, (route) =>
         route.fulfill({
           json: {
-            total_cic: 20,
+            [matter === "REP" ? "total_rep" : "total_cic"]: 20,
             authenticated_user_contribution: null,
             contributor_count: 2,
-            contributors: { data: [], page: 1, next: false },
+            contributors: {
+              data: [TARGET, "older-recipient"].map((handle, index) => ({
+                contribution: 20 - index,
+                profile: {
+                  id: `summary-${index}`,
+                  handle,
+                  primary_address: `0x${String(index + 1).padStart(40, "0")}`,
+                  pfp: "/icon-512.png",
+                },
+              })),
+              page: 1,
+              next: false,
+            },
           },
         })
       );
@@ -509,7 +521,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         page.getByRole("navigation", { name: "Profile sections" })
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       if (matter === "NIC" && isMobile)
-        await page.getByRole("button", { name: /^NIC / }).click();
+        await page
+          .getByRole("group", { name: "Identity sections", exact: true })
+          .getByRole("button", { name: "NIC", exact: true })
+          .click();
       await expect(
         page.getByRole("region", { name: matter, exact: true })
       ).toHaveCount(1);
@@ -527,12 +542,16 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         .filter({ visible: true })
         .first()
         .click();
+      await expectNoHorizontalOverflow(page);
+      const summaryScreenshot = testInfo.outputPath(`${matter}-summary.png`);
+      await page.screenshot({ path: summaryScreenshot });
+      await testInfo.attach(`${matter}-summary`, {
+        path: summaryScreenshot,
+        contentType: "image/png",
+      });
       await section
         .getByRole("button", {
-          name:
-            matter === "NIC"
-              ? "View NIC Given"
-              : /^View (?:all |[0-9,]+ )receivers?$/,
+          name: new RegExp(`^Manage given ${matter}: [0-9,]+ receivers?$`),
           exact: true,
         })
         .filter({ visible: true })
@@ -661,10 +680,26 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     page,
     baseURL,
     isMobile,
-  }) => {
+  }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     await installCategories(page, api);
     const directions: string[] = [];
+    const overviewDirections: string[] = [];
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await page.route(`${api}/api/profiles/*/cic/overview*`, (route) => {
+      const direction =
+        new URL(route.request().url()).searchParams.get("direction") ??
+        "incoming";
+      overviewDirections.push(direction);
+      return route.fulfill({
+        json: {
+          total_cic: direction === "outgoing" ? 1250 : 4100,
+          authenticated_user_contribution: null,
+          contributor_count: 1,
+          contributors: { data: [], page: 1, next: false },
+        },
+      });
+    });
     await page.route(
       `${api}/api/profiles/*/cic/ratings/by-rater?*`,
       (route) => {
@@ -688,7 +723,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       }
     );
     await openProfile(page);
-    if (isMobile) await page.getByRole("button", { name: /^NIC / }).click();
+    if (isMobile)
+      await page
+        .getByRole("group", { name: "Identity sections", exact: true })
+        .getByRole("button", { name: "NIC", exact: true })
+        .click();
     const section = page
       .getByRole("region", { name: "NIC", exact: true })
       .filter({ visible: true });
@@ -696,9 +735,55 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await section
         .getByRole("button", { name: direction, exact: true })
         .click();
-      await section
-        .getByRole("button", { name: `View NIC ${direction}`, exact: true })
-        .click();
+      if (!isMobile) {
+        await expect(
+          section.getByText(`NIC ${direction.toLowerCase()}`, { exact: true })
+        ).toBeVisible();
+      }
+      await expect(
+        section.getByRole("button", { name: direction, exact: true })
+      ).toHaveAttribute("aria-pressed", "true");
+      const expectedTotal = direction === "Given" ? "1,250" : "4,100";
+      await expect(
+        section.getByText(expectedTotal, { exact: true })
+      ).toBeVisible();
+      if (isMobile) {
+        await expect(
+          page
+            .getByRole("group", { name: "Identity sections", exact: true })
+            .getByRole("button", {
+              name: "NIC",
+              exact: true,
+            })
+        ).toBeVisible();
+      }
+      const contributorsButton = section.getByRole("button", {
+        name: new RegExp(
+          `^View NIC ${direction}: [0-9,]+ (raters?|receivers?)$`
+        ),
+        exact: true,
+      });
+      if (!isMobile) {
+        const scoreBox = await section
+          .getByText(expectedTotal, { exact: true })
+          .boundingBox();
+        const contributorsBox = await contributorsButton.boundingBox();
+        expect(scoreBox).not.toBeNull();
+        expect(contributorsBox).not.toBeNull();
+        expect(contributorsBox!.y).toBeGreaterThanOrEqual(
+          scoreBox!.y + scoreBox!.height
+        );
+        expect(contributorsBox!.x).toBeCloseTo(scoreBox!.x, 0);
+      }
+      const summaryScreenshot = testInfo.outputPath(
+        `NIC-${direction}-summary.png`
+      );
+      await page.screenshot({ path: summaryScreenshot, fullPage: true });
+      await testInfo.attach(`NIC-${direction}-summary`, {
+        path: summaryScreenshot,
+        contentType: "image/png",
+      });
+      await contributorsButton.click();
       const list = page.getByRole("dialog", {
         name: `NIC ${direction}`,
         exact: true,
@@ -707,10 +792,66 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         list.getByRole("link", { name: "another-profile" })
       ).toBeVisible();
       await expect(list.getByRole("button", { name: /Adjust/ })).toHaveCount(0);
+      const panel = await page
+        .getByRole("dialog", { name: `NIC ${direction}`, exact: true })
+        .locator(".mobile-wrapper-dialog")
+        .boundingBox();
+      expect(panel?.height).toBeLessThan(
+        (page.viewportSize()?.height ?? 720) * 0.6
+      );
       await list.getByRole("button", { name: "Close", exact: true }).click();
       await expect(list).toBeHidden();
     }
     expect(directions).toEqual(["false", "true"]);
+    if (isMobile) {
+      const sections = page.getByRole("group", {
+        name: "Identity sections",
+        exact: true,
+      });
+      await expect(sections.getByRole("button")).toHaveText([
+        "REP",
+        "NIC",
+        "ID Statements",
+      ]);
+      await sections.getByRole("button", { name: "REP", exact: true }).click();
+      await expect(
+        page
+          .getByRole("region", { name: "REP", exact: true })
+          .filter({ visible: true })
+          .getByRole("heading", { name: "Total REP", exact: true })
+          .locator("..")
+          .locator("..")
+          .getByText("20", { exact: true })
+      ).toBeVisible();
+      await sections.getByRole("button", { name: "NIC", exact: true }).click();
+      await expect(section.getByText("1,250", { exact: true })).toBeVisible();
+      await expect(
+        section.getByRole("button", { name: "Given", exact: true })
+      ).toHaveAttribute("aria-pressed", "true");
+    }
+    await section
+      .getByRole("button", { name: "Received", exact: true })
+      .click();
+    await expect(section.getByText("4,100", { exact: true })).toBeVisible();
+    if (isMobile) {
+      const sections = page.getByRole("group", {
+        name: "Identity sections",
+        exact: true,
+      });
+      await expect(
+        sections.getByRole("button", { name: "NIC", exact: true })
+      ).toHaveAttribute("aria-pressed", "true");
+      await sections
+        .getByRole("button", { name: "ID Statements", exact: true })
+        .click();
+      const statements = page.getByRole("region", { name: /ID Statements$/ });
+      await expect(statements.getByText(/^[0-9,]+ statements?$/)).toBeVisible();
+      await sections.getByRole("button", { name: "NIC", exact: true }).click();
+      await expect(section.getByText("4,100", { exact: true })).toBeVisible();
+    }
+    expect(
+      overviewDirections.filter((direction) => direction === "outgoing")
+    ).toHaveLength(1);
     await expectNoHorizontalOverflow(page);
   });
 });

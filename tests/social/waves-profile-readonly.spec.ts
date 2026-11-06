@@ -1667,14 +1667,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(statements).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     }
     if (await statements.isVisible()) {
-      // Its numeric count replaces the server placeholder only after this
-      // streamed section hydrates and its statement query resolves.
-      await expect(statements).toHaveAccessibleName(
-        /^ID Statements \d[\d,]*$/,
-        { timeout: RESPONSE_TIMEOUT_MS }
-      );
+      // Mobile section buttons contain labels; the count is in the content.
+      await expect(statements).toHaveAccessibleName("ID Statements");
       await statements.click();
       await expect(statements).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page
+          .getByRole("region", { name: /ID Statements$/ })
+          .getByText(/^[0-9,]+ statements?$/)
+      ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })

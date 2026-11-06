@@ -1113,7 +1113,11 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
   "user.profile.identity.mobileTabs",
   {
+    label: "Identity sections",
+    rep: "REP",
     totalRep: "Total REP",
+    "statementCount.one": "{count} statement",
+    "statementCount.other": "{count} statements",
     nic: "NIC",
     idStatements: "ID Statements",
   } as const
@@ -2668,13 +2672,16 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   repRegion: "REP",
   nicRegion: "NIC",
-  nicReceived: "NIC",
+  nicReceived: "NIC received",
   adjustCategoryFor: "Adjust REP ({category}) for {name}",
   received: "Received",
   given: "Given",
   direction: "{matter} direction",
   listTitle: "{matter} {direction}",
   manageGiven: "Manage given",
+  manageGivenMatter: "Manage given {matter}",
+  manageRatingContributors: "Manage given {matter}: {contributors}",
+  viewRatingContributors: "View {matter} {direction}: {contributors}",
   recentFirst: "Most recently adjusted first",
   adjust: "Adjust",
   adjustFor: "Adjust {matter} for {name}",
