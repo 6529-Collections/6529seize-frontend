@@ -21,8 +21,7 @@ import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { MessageKey } from "@/i18n/messages/en-US";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useId, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";

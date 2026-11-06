@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { getNodeEnv } from "@/config/env";
 import type { SupportedLocale } from "@/i18n/locales";
 import { tRich, type MessageKey } from "@/i18n/messages";
-import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { getSourceMessage } from "@/i18n/messageRegistry";
 import { fill } from "./i18n";
 import { withCc0 } from "./marks/Cc0";
 
@@ -53,5 +53,5 @@ export function plain(
 
 /** Whether a key built from data (a section id, an item id) has copy. */
 export function isMessageKey(key: string): key is MessageKey {
-  return Object.hasOwn(EN_US_MESSAGES, key);
+  return getSourceMessage(key) !== undefined;
 }

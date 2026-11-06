@@ -1,3 +1,4 @@
+import "@/i18n/namespaces/stream";
 import type { MessageKey } from "@/i18n/messages";
 import { STREAM_ROUTES } from "@/lib/stream/workKey";
 

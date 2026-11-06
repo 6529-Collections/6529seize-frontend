@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumDynamicStateVisualization } from "@/lib/museum/generative-studies";
 import {
   nextSeed,

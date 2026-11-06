@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { NETWORK_REFERENCE_SECTION_HEADING_CLASSES } from "./networkPageLayoutClasses";
 
 interface ReferenceDestination {

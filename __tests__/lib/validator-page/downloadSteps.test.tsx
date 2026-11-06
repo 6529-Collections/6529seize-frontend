@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import {
   ValidatorFeedback,
+  ValidatorSwitch,
   ValidatorUpgrade,
 } from "@/components/validator-page/ValidatorSections";
 import ValidatorSteps from "@/components/validator-page/ValidatorSteps";
@@ -14,7 +15,7 @@ function steps(system: VisitorSystem): string {
   );
 }
 
-describe("the steps for rc.8's app", () => {
+describe("the steps for the app", () => {
   it("tells a Windows tester to run the new Setup.exe over an earlier test release", () => {
     expect(steps("windows")).toContain(
       "If an earlier test release is installed, run the new Setup.exe over it. It replaces the earlier release, removes any extra 6529 Validator entries in Installed apps, and keeps your key and your records."
@@ -59,24 +60,44 @@ describe("the steps for rc.8's app", () => {
     );
   });
 
-  it("shows the upgrade from rc.7 in the open, with an id a link can name", () => {
+  it("shows the upgrade from rc.8 in the open, with an id a link can name", () => {
     const upgrade = renderToStaticMarkup(
-      <ValidatorUpgrade newest="0.1.0-rc.8" />
+      <ValidatorUpgrade newest="0.1.0-rc.9" />
     );
     expect(upgrade).toMatch(
       /^<section id="upgrading" aria-labelledby="upgrading-title"/
     );
-    expect(upgrade).toContain(">Upgrading from rc.7</h2>");
+    expect(upgrade).toContain(">Upgrading from rc.8</h2>");
+    // The Mac steps, numbered, with the command to copy.
+    expect(upgrade.match(/<li/g)).toHaveLength(4);
+    expect(upgrade).toContain(
+      "launchctl bootout gui/$(id -u)/io.6529.validator.agent</code>"
+    );
     expect(upgrade).toContain("<strong");
     expect(upgrade).not.toContain("<details");
   });
 
-  // Merged before the signed list offers rc.8, or left after rc.9 is out,
-  // the note would describe a release the page doesn't offer.
-  it.each([["0.1.0-rc.7"], ["0.1.0-rc.9"], [undefined]])(
-    "shows no upgrade note while the newest release is %s",
+  it("shows Sunday's switch in the open, with an id a link can name", () => {
+    const sunday = renderToStaticMarkup(
+      <ValidatorSwitch newest="0.1.0-rc.9" />
+    );
+    expect(sunday).toMatch(
+      /^<section id="update-before-sunday" aria-labelledby="update-before-sunday-title"/
+    );
+    expect(sunday).toContain(
+      ">Update before Sunday 8 November, 00:00 UTC</h2>"
+    );
+  });
+
+  // Merged before the signed list offers rc.9, or left after rc.10 is out,
+  // a note would describe a release the page doesn't offer.
+  it.each([["0.1.0-rc.8"], ["0.1.0-rc.10"], [undefined]])(
+    "shows no rc.9 note while the offered release is %s",
     (newest) => {
       expect(renderToStaticMarkup(<ValidatorUpgrade newest={newest} />)).toBe(
+        ""
+      );
+      expect(renderToStaticMarkup(<ValidatorSwitch newest={newest} />)).toBe(
         ""
       );
     }

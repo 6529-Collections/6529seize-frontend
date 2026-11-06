@@ -12,8 +12,9 @@ export async function dropEncryptedAttachment(
   const dataTransfer = await page.evaluateHandle(
     ({ name, base64, mimeType }) => {
       const transfer = new DataTransfer();
-      const bytes = Uint8Array.from(atob(base64), (character) =>
-        character.codePointAt(0) ?? 0
+      const bytes = Uint8Array.from(
+        atob(base64),
+        (character) => character.codePointAt(0) ?? 0
       );
       transfer.items.add(new File([bytes], name, { type: mimeType }));
       return transfer;
@@ -46,12 +47,43 @@ export async function dropEncryptedAttachment(
 export async function checkEncryptedImageActions(
   page: Page,
   image: Locator,
-  filename: string
+  filename: string,
+  nextFilename?: string
 ) {
-  await image.click();
+  await expect(image).toBeVisible();
+  const trigger = page.getByRole("button", {
+    name: `Open image preview: ${filename}`,
+    exact: true,
+  });
+  await trigger.click();
   const preview = page.getByRole("dialog", { name: "Expanded image preview" });
   await expect(preview.getByRole("img")).toBeVisible();
   await expect(preview.getByRole("img")).toHaveAttribute("src", /^blob:/u);
+  if (nextFilename) {
+    const firstSource = await preview.getByRole("img").getAttribute("src");
+    const next = preview.getByRole("button", {
+      name: "Next image",
+      exact: true,
+    });
+    await expect(next).toBeEnabled();
+    await next.click();
+    await expect(preview.getByRole("img")).not.toHaveAttribute(
+      "src",
+      firstSource ?? ""
+    );
+    const nextDownload = page.waitForEvent("download");
+    await preview
+      .getByRole("button", { name: "Download media", exact: true })
+      .click();
+    expect((await nextDownload).suggestedFilename()).toBe(nextFilename);
+    await preview
+      .getByRole("button", { name: "Previous image", exact: true })
+      .click();
+    await expect(preview.getByRole("img")).toHaveAttribute(
+      "src",
+      firstSource ?? ""
+    );
+  }
   const download = page.waitForEvent("download");
   await preview
     .getByRole("button", { name: "Download media", exact: true })
@@ -61,17 +93,8 @@ export async function checkEncryptedImageActions(
     .getByRole("button", { name: "Close media", exact: true })
     .click();
   await expect(preview).toHaveCount(0);
-  await image.click();
+  await trigger.click();
   await page.keyboard.press("Escape");
   await expect(preview).toHaveCount(0);
-  await expect(
-    page
-      .getByRole("button", { name: "Open image preview", exact: true })
-      .filter({
-        has: page.getByRole("img", {
-          name: `Image: ${filename}`,
-          exact: true,
-        }),
-      })
-  ).toBeFocused();
+  await expect(trigger).toBeFocused();
 }

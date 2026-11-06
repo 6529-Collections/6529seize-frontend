@@ -13,6 +13,8 @@ import { t } from "@/i18n/messages";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
 import { attachmentDisplayName } from "../e2eeFormat";
+import Button from "@/components/utils/button/Button";
+import { ImagePreviewLoading } from "@/components/drops/view/item/content/media/ImagePreviewLoading";
 import { E2eeImageMedia } from "./E2eeImageMedia";
 import {
   fitsInline,
@@ -61,17 +63,16 @@ function InlineImage(props: AttachmentProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const near = useNearViewport(ref, "400px 0px");
   return (
-    <span ref={ref} className="tw-block tw-min-h-24 tw-max-w-full">
+    <span ref={ref} className="tw-block tw-max-w-full">
       {near ? (
         <InlineImageContent
           key={`${props.g}:${props.messageId}:${props.attachment.blob}`}
           {...props}
         />
       ) : (
-        <span
-          aria-hidden="true"
-          className="tw-block tw-h-48 tw-w-48 tw-max-w-full tw-rounded-lg tw-bg-iron-900"
-        />
+        <span className="tw-relative tw-block tw-h-64 tw-w-full">
+          <ImagePreviewLoading />
+        </span>
       )}
     </span>
   );
@@ -83,7 +84,14 @@ function InlineImageContent(props: AttachmentProps) {
   const name = attachmentDisplayName(locale, attachment.name);
   const tooLargeClaim = claimsTooLarge(attachment);
   const [url, setUrl] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<InlineState>("loading");
+
+  const retry = () => {
+    setUrl(null);
+    setState("loading");
+    setAttempt((current) => current + 1);
+  };
 
   useEffect(() => {
     if (tooLargeClaim) {
@@ -137,15 +145,7 @@ function InlineImageContent(props: AttachmentProps) {
       controller.abort();
       release();
     };
-  }, [engine, g, messageId, attachment.blob, tooLargeClaim]);
-
-  const aspectStyle =
-    attachment.width !== undefined &&
-    attachment.height !== undefined &&
-    attachment.width > 0 &&
-    attachment.height > 0
-      ? { aspectRatio: `${attachment.width} / ${attachment.height}` }
-      : undefined;
+  }, [engine, g, messageId, attachment.blob, tooLargeClaim, attempt]);
 
   if (tooLargeClaim || state === "tooLarge") {
     return (
@@ -157,27 +157,34 @@ function InlineImageContent(props: AttachmentProps) {
   }
   if (state === "failed") {
     return (
-      <span className="tw-text-xs tw-text-rose-300">
+      <span className="tw-flex tw-h-64 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-bg-iron-900 tw-text-sm tw-text-iron-400">
         {t(locale, "e2ee.message.attachment.failed", { name })}
+        <Button type="button" variant="tertiary" size="xs" onClick={retry}>
+          {t(locale, "drop.media.retry")}
+        </Button>
       </span>
     );
   }
   if (state === "loading" || !url) {
     return (
-      <span
-        role="status"
-        style={aspectStyle}
-        className="tw-flex tw-min-h-24 tw-w-48 tw-max-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-text-xs tw-text-iron-400"
-      >
-        <CircleLoader />
+      <output className="tw-relative tw-block tw-h-64 tw-w-full">
+        <ImagePreviewLoading />
         <span className="tw-sr-only">
           {t(locale, "e2ee.message.attachment.loading")}
         </span>
-      </span>
+      </output>
     );
   }
   return (
-    <E2eeImageMedia key={url} url={url} name={name} attachment={attachment} />
+    <span className="tw-block tw-h-64 tw-w-full">
+      <E2eeImageMedia
+        key={url}
+        url={url}
+        name={name}
+        attachment={attachment}
+        onRetry={retry}
+      />
+    </span>
   );
 }
 

@@ -271,6 +271,11 @@ export function sharedConfig(
         "@/i18n/localeDictionaries": {
           browser: "./i18n/localeDictionaries.browser.ts",
         },
+        // Browser bundles register only the root en-US dictionary and the
+        // feature namespaces a page imports; server rendering registers all.
+        "@/i18n/sourceMessages": {
+          browser: "./i18n/sourceMessages.browser.ts",
+        },
         // Browser bundles read the build-validated public env without zod;
         // server rendering keeps validating it.
         "@/config/env": {

@@ -151,9 +151,10 @@ describe("useNewDropCounter", () => {
         serial_no: 12,
         update_type: WsMessageType.DROP_UPDATE,
       });
-      await waitFor(() =>
-        expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact")
-      );
+      // The ref requests the canonical drop synchronously. Resolve it inside
+      // act. Yielding first, as waitFor does, applies the state update outside
+      // act on React's scheduler, which can land after the assertions.
+      expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact");
       await act(async () => {
         await fetchDropByIdBatched.mock.results[0].value;
       });

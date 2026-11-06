@@ -238,6 +238,9 @@ the same people already chosen. Earlier messages are not copied.
   and download actions. In the app, use the popup's download action to save or
   share the decrypted image; local image links cannot open in an external browser.
   Decrypted previews stay on your device and do not go through a public image proxy.
+  Expandable images use the same magnifying cursor and focus outline as ordinary
+  chats and Waves. The popup can move between previewable images in the same message
+  as they finish loading. **Retry** fetches and decrypts a failed image again.
   An image larger than about 50 megapixels shows as a file to download
   (**Too large to preview**) instead, and only a few images load at once.
   File names are shown and saved without path separators, control or
