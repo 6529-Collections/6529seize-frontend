@@ -2683,6 +2683,7 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   manageRatingContributors: "Manage given {matter}: {contributors}",
   viewRatingContributors: "View {matter} {direction}: {contributors}",
   recentFirst: "Most recently adjusted first",
+  ratingAmount: "{value} {matter}",
   adjust: "Adjust",
   adjustFor: "Adjust {matter} for {name}",
   categoriesFor: "REP given to {name}",

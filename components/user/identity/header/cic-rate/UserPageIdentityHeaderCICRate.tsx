@@ -32,12 +32,14 @@ export default function UserPageIdentityHeaderCICRate({
   isTooltip,
   onSuccess,
   onCancel,
+  onBusyChange,
   locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
+  readonly onBusyChange?: (busy: boolean) => void;
   readonly locale?: SupportedLocale;
 }) {
   const { address } = useSeizeConnectContext();
@@ -47,8 +49,9 @@ export default function UserPageIdentityHeaderCICRate({
     mounted.current = true;
     return () => {
       mounted.current = false;
+      onBusyChange?.(false);
     };
-  }, []);
+  }, [onBusyChange]);
   const profileIdentity = profile.query ?? profile.handle ?? profile.display;
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -79,10 +82,14 @@ export default function UserPageIdentityHeaderCICRate({
   });
 
   const [mutating, setMutating] = useState<boolean>(false);
+  const setBusy = (busy: boolean) => {
+    setMutating(busy);
+    onBusyChange?.(busy);
+  };
 
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
-      setMutating(true);
+      setBusy(true);
       return await commonApiPost({
         endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating`,
         body: {
@@ -107,7 +114,7 @@ export default function UserPageIdentityHeaderCICRate({
       onSuccess?.();
     },
     onSettled: () => {
-      setMutating(false);
+      setBusy(false);
     },
   });
 
@@ -196,7 +203,7 @@ export default function UserPageIdentityHeaderCICRate({
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (mutating || isSaveDisabled) return;
-    setMutating(true);
+    setBusy(true);
     try {
       const { success } = await requestAuth();
       if (!mounted.current) return;
@@ -216,7 +223,7 @@ export default function UserPageIdentityHeaderCICRate({
         details: getToastErrorDetails(error),
       });
     } finally {
-      setMutating(false);
+      setBusy(false);
     }
   };
 

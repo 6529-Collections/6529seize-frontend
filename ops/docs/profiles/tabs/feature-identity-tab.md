@@ -176,18 +176,26 @@ Mobile (`< lg`):
 ## Manage Given REP and NIC
 
 1. Open your own profile, choose REP or NIC, and select `Given`.
-2. Open `Manage given` in the summary. Recipients are ordered by
+2. Open `Manage given` in the summary. On mobile a dot separates
+   the receiver count from the `Manage given` button; only that button opens
+   management. Recipients are ordered by
    their most recent rating adjustment, with adjustment controls on the right.
    Overview category ordering stays unchanged, by rating magnitude.
-3. Select `Adjust` beside a recipient. For REP, choose the category first:
+3. Select `Adjust` beside a recipient. Mobile rows show the rating amount and
+   REP/NIC below the person's name, with Adjust on the right. For REP, choose
+   the category first:
    a recipient total can combine several separate category ratings. A list
-   opened from a category skips that selection.
+   opened from a category skips that selection. The list, category choice, and
+   editor share one dialog: a sheet on mobile and a centered dialog on desktop.
 4. Enter the new total. To remove an existing rating, select `Remove rating`;
    this prepares a zero total and does not submit yet.
 5. Select `Save`. Successful updates return to the first page of the same
    receiver list, with refreshed values; removed ratings disappear. Use
    `Load more` to view older recipients again. A failed save keeps the draft
-   and loaded pages so you can retry. Cancel and Back return without submitting.
+   and loaded pages so you can retry. Cancel and Back return one step without
+   submitting; returning to the list restores its scroll position and loaded
+   pages. Close exits the entire management flow. Navigation is unavailable
+   while a save is in progress. Standalone profile rating dialogs are unchanged.
 
 The lists include loading, empty and retry states, and `Load more` when more
 recipients exist. Short lists fit their contents; longer lists scroll within the

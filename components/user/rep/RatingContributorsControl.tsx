@@ -49,13 +49,17 @@ export default function RatingContributorsControl({
     `user.profile.rep.contributors.${countKey}.${suffix}`,
     { count }
   );
+  const separateManageAction = compact && canManage;
+  const avatarGroup = avatars.length > 0 && (
+    <OverlappingAvatars items={avatars} size="sm" maxCount={maxCount} />
+  );
   const content = (
     <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-      {avatars.length > 0 && (
-        <OverlappingAvatars items={avatars} size="sm" maxCount={maxCount} />
-      )}
+      {avatarGroup}
       <span className="tw-text-xs tw-font-medium">
-        {canManage && <>{t(locale, "user.rate.manageGiven")} · </>}
+        {canManage && !separateManageAction && (
+          <>{t(locale, "user.rate.manageGiven")} · </>
+        )}
         {countLabel}
       </span>
     </span>
@@ -84,18 +88,49 @@ export default function RatingContributorsControl({
       contributors: countLabel,
     });
   }
+  const buttonClassName =
+    "tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
+  const chevron = (
+    <ChevronRightIcon
+      aria-hidden="true"
+      className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+    />
+  );
+  if (separateManageAction) {
+    return (
+      <div className="tw-flex tw-min-h-11 tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2">
+        {avatarGroup}
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span className="tw-text-xs tw-font-medium tw-text-iron-300">
+            {countLabel}
+          </span>
+          <span aria-hidden="true" className="tw-text-iron-500">
+            ·
+          </span>
+          <button
+            type="button"
+            aria-label={accessibleName}
+            onClick={onClick}
+            className={buttonClassName}
+          >
+            <span className="tw-text-xs tw-font-medium tw-text-iron-100">
+              {t(locale, "user.rate.manageGiven")}
+            </span>
+            {chevron}
+          </button>
+        </span>
+      </div>
+    );
+  }
   return (
     <button
       type="button"
       aria-label={accessibleName}
       onClick={onClick}
-      className="tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+      className={buttonClassName}
     >
       {content}
-      <ChevronRightIcon
-        aria-hidden="true"
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300 motion-reduce:tw-transition-none"
-      />
+      {chevron}
     </button>
   );
 }

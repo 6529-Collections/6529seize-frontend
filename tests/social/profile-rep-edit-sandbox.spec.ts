@@ -379,6 +379,12 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     }, testInfo) => {
       const api = getSandboxApiOrigin(baseURL);
       const path = matter === "REP" ? "rep" : "cic";
+      const managementDialogs = page.getByRole("dialog", {
+        name: /^(?:(?:REP|NIC) Given|REP given to |Add Rep to |Adjust NIC for )/,
+        includeHidden: true,
+      });
+      if (isMobile && matter === "NIC")
+        await page.setViewportSize({ width: 320, height: 844 });
       let rating = 20;
       let failSave = true;
       const saved: unknown[] = [];
@@ -549,19 +555,40 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         path: summaryScreenshot,
         contentType: "image/png",
       });
-      await section
+      const manageGiven = section
         .getByRole("button", {
           name: new RegExp(`^Manage given ${matter}: [0-9,]+ receivers?$`),
           exact: true,
         })
-        .filter({ visible: true })
-        .click();
+        .filter({ visible: true });
+      if (isMobile) {
+        await expect(manageGiven).toHaveText("Manage given");
+        await expect(
+          section
+            .getByRole("button", {
+              name: new RegExp(`^Manage given ${matter}:`),
+            })
+            .locator("..")
+            .getByText("·", { exact: true })
+        ).toBeVisible();
+        await section.getByText("2 receivers", { exact: true }).click();
+        await expect(managementDialogs).toHaveCount(0);
+      }
+      await manageGiven.click();
       const list = page.getByRole("dialog", {
         name: `${matter} Given`,
         exact: true,
       });
       await expect(list.getByRole("link").first()).toHaveText(TARGET);
       await expect(list.getByRole("link").nth(1)).toHaveText("older-recipient");
+      if (isMobile) {
+        await expect(
+          list
+            .getByRole("listitem")
+            .filter({ hasText: TARGET })
+            .getByText(`20 ${matter}`, { exact: true })
+        ).toBeVisible();
+      }
       await list
         .getByRole("button", { name: "Load more", exact: true })
         .click();
@@ -601,6 +628,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
               exact: true,
             });
           await expect(categoryButton).toBeVisible();
+          await expect(managementDialogs).toHaveCount(1);
           readsBeforeCategoryEditor = recipientRepReads;
           await categoryButton.click();
         }
@@ -612,11 +640,59 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           exact: true,
         });
         await expect(editor.getByRole("textbox")).toHaveValue(String(rating));
+
+        await expect(managementDialogs).toHaveCount(1);
         if (matter === "REP")
           expect(recipientRepReads).toBe(readsBeforeCategoryEditor);
         return editor;
       };
       let editor = await openEditor();
+      await editor.getByRole("textbox").fill("25");
+      await editor.getByRole("button", { name: "Back", exact: true }).click();
+      if (matter === "REP") {
+        const categories = page.getByRole("dialog", {
+          name: `REP given to ${TARGET}`,
+          exact: true,
+        });
+        await expect(
+          categories.getByRole("button", {
+            name: `Adjust REP (${CATEGORY}) for ${TARGET}`,
+            exact: true,
+          })
+        ).toBeVisible();
+        await categories
+          .getByRole("button", { name: "Back", exact: true })
+          .click();
+      }
+      await expect(
+        list.getByRole("heading", { name: `${matter} Given`, exact: true })
+      ).toBeVisible();
+      await expect(managementDialogs).toHaveCount(1);
+      await expect(
+        list.getByRole("button", {
+          name: `Adjust ${matter} for ${TARGET}`,
+          exact: true,
+        })
+      ).toBeFocused();
+      await expect(
+        list.getByRole("link", { name: "page-two-recipient", exact: true })
+      ).toBeVisible();
+      expect(requestedPages).toEqual([1, 2]);
+      expect(saved).toHaveLength(0);
+
+      editor = await openEditor();
+      await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+      if (matter === "REP") {
+        await page
+          .getByRole("dialog", { name: `REP given to ${TARGET}`, exact: true })
+          .getByRole("button", { name: "Back", exact: true })
+          .click();
+      }
+      await expect(
+        list.getByRole("heading", { name: `${matter} Given`, exact: true })
+      ).toBeVisible();
+      expect(saved).toHaveLength(0);
+      editor = await openEditor();
       await editor.getByRole("textbox").fill("30");
       await editor.getByRole("button", { name: "Save", exact: true }).click();
       await expect(
@@ -640,6 +716,16 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         list.getByRole("link", { name: "page-two-recipient", exact: true })
       ).toBeVisible();
       expect(requestedPages.slice(pagesBeforeSave)).toEqual([1, 2]);
+      editor = await openEditor();
+      await editor.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(managementDialogs).toHaveCount(0);
+      const manageTrigger = section
+        .getByRole("button", {
+          name: new RegExp(`^Manage given ${matter}:`),
+        })
+        .filter({ visible: true });
+      await expect(manageTrigger).toBeFocused();
+      await manageTrigger.click();
       editor = await openEditor();
       await editor
         .getByRole("button", { name: "Remove rating", exact: true })

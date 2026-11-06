@@ -145,7 +145,11 @@ export default function MobileRepTabContent({
       <div className="tw-mt-4">
         <div className="tw-mb-4">
           <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-3">
-            <div className="tw-flex-shrink-0">
+            <div
+              className={
+                canManage ? "tw-min-w-0 tw-flex-1" : "tw-flex-shrink-0"
+              }
+            >
               <RatingContributorsControl
                 overview={overview}
                 direction={repDirection}
