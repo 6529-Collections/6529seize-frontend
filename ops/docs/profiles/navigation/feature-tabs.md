@@ -54,6 +54,9 @@ Profile tab routes live under `/{user}`.
 
 ## Tab Visibility Rules
 
+- On a fresh profile load, `Brain` and owner-only `Proxy` visibility wait for
+  the signed-in session. Direct links to either tab keep their existing loading
+  behavior while access is being checked.
 - `Brain` is shown only when Waves is enabled.
 - Direct `/{user}/brain` links delay hidden-tab fallback while client
   hydration, wallet reconnection, or connected-profile restoration is still

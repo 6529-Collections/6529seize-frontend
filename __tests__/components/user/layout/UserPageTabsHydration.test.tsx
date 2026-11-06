@@ -11,6 +11,8 @@ let mockNativePlatform: "ios" | "android" | "web" = "web";
 let mockCountry = "US";
 let mockIsCountryPending = false;
 let mockPathname = "/testuser/subscriptions";
+let mockShowWaves = false;
+let mockConnectedProfile: ApiIdentity | null = null;
 const mockReplace = jest.fn();
 
 jest.mock("@capacitor/core", () => {
@@ -44,8 +46,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    showWaves: false,
-    connectedProfile: null,
+    showWaves: mockShowWaves,
+    connectedProfile: mockConnectedProfile,
     fetchingProfile: false,
   }),
 }));
@@ -112,6 +114,8 @@ beforeEach(() => {
   mockCountry = "US";
   mockIsCountryPending = false;
   mockPathname = "/testuser/subscriptions";
+  mockShowWaves = false;
+  mockConnectedProfile = null;
   container = document.createElement("div");
   document.body.appendChild(container);
 });
@@ -123,6 +127,34 @@ afterEach(() => {
 });
 
 describe("profile Subscriptions tab around hydration", () => {
+  it.each(["owner", "visitor"])(
+    "hydrates the tabs when a %s session is ready before the profile",
+    async (viewer) => {
+      mockPathname = "/testuser/collected";
+      container.innerHTML = renderToString(tree());
+      expect(tabIds()).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
+      expect(tabIds()).not.toContain(USER_PAGE_TAB_IDS.PROXY);
+
+      mockShowWaves = true;
+      mockConnectedProfile = Object.assign(new ApiIdentity(), {
+        normalised_handle: viewer === "owner" ? "testuser" : "anotheruser",
+        wallets: [],
+      });
+      const onRecoverableError = jest.fn();
+      await act(async () => {
+        root = hydrateRoot(container, tree(), { onRecoverableError });
+      });
+
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(tabIds()).toContain(USER_PAGE_TAB_IDS.BRAIN);
+      expect(tabIds().includes(USER_PAGE_TAB_IDS.PROXY)).toBe(
+        viewer === "owner"
+      );
+      expect(activeTabIds()).toEqual([USER_PAGE_TAB_IDS.COLLECTED]);
+      expect(mockReplace).not.toHaveBeenCalled();
+    }
+  );
+
   it.each(["web", "android", "ios"] as const)(
     "omits the tab from the server HTML on %s, even on the subscriptions route",
     (platform) => {
