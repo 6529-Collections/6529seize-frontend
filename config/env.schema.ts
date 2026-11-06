@@ -125,6 +125,9 @@ export const publicEnvSchema = z.object({
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: z.string().optional(),
   NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: z.string().optional(),
+  // Gap-only chat sync and batched read markers. On only when exactly
+  // "true"; staging builds set it, production builds leave it unset.
+  NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: z.string().optional(),
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),

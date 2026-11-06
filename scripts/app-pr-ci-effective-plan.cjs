@@ -148,6 +148,11 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
         file
       ) ||
+      // Chat sync, read markers and the realtime updater; this pack runs the
+      // live-update cases in wave-loading-sandbox.spec.ts.
+      /^(?:contexts\/wave\/hooks\/(?:useWaveRealtimeUpdater|useDropUpdateRefMessages)|hooks\/useMarkWaveNotificationsRead|__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater)/u.test(
+        file
+      ) ||
       [
         "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
         "contexts/CompetitionContext.tsx",

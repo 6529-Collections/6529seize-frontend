@@ -70,7 +70,7 @@ const fetchAndApplyCanonicalDrop = async ({
       preferExistingPollVote: true,
       ...(state.updateType !== WsMessageType.DROP_UPDATE
         ? { canonicalDrop }
-        : {}),
+        : { realtimeSource: "compact-ref" }),
     });
     return isActive() ? { status: "succeeded" } : { status: "cancelled" };
   } catch (error) {

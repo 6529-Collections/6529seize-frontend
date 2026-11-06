@@ -292,6 +292,21 @@ describe("effective App PR CI plan", () => {
     }
   );
 
+  it.each([
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.flags.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "hooks/useMarkWaveNotificationsRead.debounce.ts",
+    "__tests__/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.test.ts",
+    "__tests__/useWaveRealtimeUpdater.test.ts",
+  ])("selects the live chat browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
   it("selects the shared surface browser lane in a mixed change set", () => {
     expect(
       executePlan([
@@ -699,7 +714,8 @@ describe("App PR CI merge-tree base", () => {
       "core-playwright-checks",
     ]);
     const gate = aggregate.steps.find(
-      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+      ({ name }: WorkflowStep) =>
+        name === "Require successful parallel app checks"
     );
     expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });
