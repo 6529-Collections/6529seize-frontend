@@ -37,7 +37,9 @@ export const getReactionDetailsVersion = (
       .map((reaction) => ({
         reaction: reaction.reaction,
         count: getReactionCount(reaction),
-        profiles: reaction.profiles.map((profile) => profile.id).sort(),
+        profiles: reaction.profiles
+          .map((profile) => profile.id)
+          .sort((a, b) => a.localeCompare(b)),
       }))
       .sort((a, b) => a.reaction.localeCompare(b.reaction)),
     viewerReaction,
