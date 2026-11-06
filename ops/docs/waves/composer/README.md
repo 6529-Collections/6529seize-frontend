@@ -41,6 +41,8 @@ Use this area when you need behavior for:
 Type `@` followed by at least three handle characters to find profiles to tag.
 Individual profile suggestions show a small round level badge beside the handle, including
 level 0. Global mentions and Quick Tags have no level badge.
+Long handles and display names stay on one line and truncate with an ellipsis
+when they do not fit in the suggestion row.
 
 Type `~hi~` or `~~hi~~` for strikethrough. Completing the closing tilde or pair
 of tildes replaces the markers with visibly struck-through text in the composer,

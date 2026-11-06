@@ -580,6 +580,56 @@ function runWorkflowScript(
   }
 }
 
+describe("Wave link-preview browser lane selection", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([
+    ["components/waves/list/WaveItemWide.tsx", true],
+    ["components/waves/list/WaveItemChat.tsx", true],
+    ["components/waves/list/WaveItemFollow.tsx", true],
+    ["tests/social/wave-link-preview-sandbox.spec.ts", true],
+    ["README.md", false],
+  ] as const)("selects the preview lane for %s: %s", (file, selected) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "wave-preview-plan-"));
+    const planDir = path.join(root, "test-results/app-pr-ci");
+    try {
+      fs.mkdirSync(planDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(planDir, "ci-plan.json"),
+        JSON.stringify({ ...executePlan([file]), risk: { computed_floor: 2 } })
+      );
+      const result = runWorkflowScript(publish.run, root, {
+        DEFAULT_CI_RUNNER: "ubuntu-latest",
+        BUILD_CI_RUNNER: "ubuntu-latest",
+      });
+      expect(result.status).toBe(0);
+      const matrixLine = result.output
+        .split("\n")
+        .find((line) => line.startsWith("core_playwright_matrix="));
+      expect(matrixLine).toBeDefined();
+      const matrix = JSON.parse(
+        matrixLine!.slice("core_playwright_matrix=".length)
+      ) as {
+        include: { lane: string }[];
+      };
+      expect(
+        matrix.include.some(
+          ({ lane }) => lane === "playwright-wave-link-preview"
+        )
+      ).toBe(selected);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("App PR CI merge-tree base", () => {
   const workflowPath = path.join(
     process.cwd(),

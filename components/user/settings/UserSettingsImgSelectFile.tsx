@@ -23,23 +23,27 @@ export default function UserSettingsImgSelectFile({
     }
   );
 
+  const restingSurfaceClass = compact
+    ? "tw-border-white/[0.06] tw-bg-transparent"
+    : "tw-border-white/10 tw-bg-iron-900";
+
   return (
     <label
       {...dragHandlers}
       className={`tw-group ${
         dragging
           ? "tw-border-primary-400/60 tw-bg-primary-500/10"
-          : "tw-border-white/10 tw-bg-iron-900"
-      } tw-relative tw-flex ${compact ? "tw-min-h-28" : "tw-h-64"} tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border-2 tw-border-dashed tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-white/20 hover:tw-bg-iron-800 ${
+          : restingSurfaceClass
+      } tw-relative tw-flex ${compact ? "tw-min-h-24 tw-items-stretch tw-rounded-lg tw-border tw-border-solid desktop-hover:hover:tw-bg-white/[0.025]" : "tw-h-64 tw-items-center tw-rounded-xl tw-border-2 tw-border-dashed hover:tw-bg-iron-800"} tw-w-full tw-cursor-pointer tw-flex-col tw-justify-center tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-white/20 motion-reduce:tw-transition-none ${
         shake ? "tw-animate-shake motion-reduce:tw-animate-none" : ""
       }`}
     >
       <div
-        className={`tw-flex tw-items-center tw-justify-center ${compact ? "tw-gap-4 tw-p-3" : "tw-flex-col tw-pb-6 tw-pt-5"}`}
+        className={`tw-flex tw-items-center ${compact ? "tw-flex-wrap tw-justify-start tw-gap-3 tw-p-3" : "tw-flex-col tw-justify-center tw-pb-6 tw-pt-5"}`}
       >
         {imageToShow && (
           <div
-            className={`tw-relative tw-shrink-0 tw-overflow-hidden tw-rounded-xl tw-bg-black/20 tw-ring-1 tw-ring-inset tw-ring-white/10 ${compact ? "tw-size-16" : "tw-size-40"}`}
+            className={`tw-relative tw-shrink-0 tw-overflow-hidden tw-bg-black/20 ${compact ? "tw-size-14 tw-rounded-lg" : "tw-size-40 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-white/10"}`}
           >
             <Image
               src={imageToShow}
@@ -52,8 +56,10 @@ export default function UserSettingsImgSelectFile({
         )}
         {(compact || !imageToShow) && (
           <>
-            {!compact && (
-              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-text-iron-50 tw-transition tw-duration-200 tw-ease-out group-hover:tw-border-white/15 group-hover:tw-bg-iron-900">
+            {(!compact || !imageToShow) && (
+              <div
+                className={`tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-50 ${compact ? "tw-bg-white/[0.04]" : "tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-transition tw-duration-200 tw-ease-out group-hover:tw-border-white/15 group-hover:tw-bg-iron-900"}`}
+              >
                 <svg
                   className="tw-size-6 tw-flex-shrink-0"
                   viewBox="0 0 24 24"
@@ -72,13 +78,21 @@ export default function UserSettingsImgSelectFile({
               </div>
             )}
             <div>
-              <p className="tw-mb-2 tw-mt-0 tw-text-sm tw-font-normal tw-text-iron-400">
+              <p
+                className={`${compact ? "tw-mb-1" : "tw-mb-2"} tw-mt-0 tw-text-sm tw-font-normal tw-text-iron-400`}
+              >
                 <span className="tw-font-medium tw-text-white">
-                  {message("user.profileHeader.edit.upload")}
+                  {message(
+                    compact
+                      ? "user.profileHeader.edit.uploadPictureFile"
+                      : "user.profileHeader.edit.upload"
+                  )}
                 </span>{" "}
                 {message("user.profileHeader.edit.dragDrop")}
               </p>
-              <p className="tw-text-xs tw-font-normal tw-text-iron-400">
+              <p
+                className={`${compact ? "tw-m-0" : ""} tw-text-xs tw-font-normal tw-text-iron-400`}
+              >
                 {message("user.profileHeader.edit.pictureFormats")}
               </p>
             </div>
@@ -88,7 +102,7 @@ export default function UserSettingsImgSelectFile({
           <p
             id="pfp-upload-error"
             role="alert"
-            className="tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center tw-text-xs tw-font-medium tw-text-error"
+            className={`${compact ? "tw-m-0 tw-basis-full" : "tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center"} tw-text-xs tw-font-medium tw-text-error`}
           >
             {error}
           </p>
@@ -97,7 +111,11 @@ export default function UserSettingsImgSelectFile({
       <input
         id="pfp-upload-input"
         type="file"
-        aria-label={message("user.profileHeader.edit.uploadPicture")}
+        aria-label={message(
+          compact
+            ? "user.profileHeader.edit.uploadPictureFile"
+            : "user.profileHeader.edit.uploadPicture"
+        )}
         aria-describedby={error ? "pfp-upload-error" : undefined}
         className="tw-sr-only"
         accept={ACCEPTED_FORMATS_DISPLAY}

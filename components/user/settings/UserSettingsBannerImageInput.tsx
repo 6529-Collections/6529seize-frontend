@@ -24,6 +24,10 @@ export default function UserSettingsBannerImageInput({
     }
   );
 
+  const restingSurfaceClass = compact
+    ? "tw-border-white/[0.06] tw-bg-transparent"
+    : "tw-border-iron-700 tw-bg-iron-900";
+
   return (
     <div
       {...dragHandlers}
@@ -31,17 +35,15 @@ export default function UserSettingsBannerImageInput({
     >
       <label
         className={` ${
-          dragging
-            ? "tw-border-iron-600 tw-bg-iron-800"
-            : "tw-border-iron-700 tw-bg-iron-900"
-        } tw-relative tw-flex ${compact ? "tw-h-36" : "tw-h-64"} tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
+          dragging ? "tw-border-iron-600 tw-bg-iron-800" : restingSurfaceClass
+        } tw-relative tw-flex ${compact ? "tw-min-h-28 tw-border tw-border-solid tw-py-3 tw-duration-200 desktop-hover:hover:tw-bg-white/[0.025]" : "tw-h-64 tw-border-2 tw-border-dashed tw-duration-300 hover:tw-bg-iron-800"} tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-transition tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-iron-600 motion-reduce:tw-transition-none ${
           shake ? "tw-animate-shake motion-reduce:tw-animate-none" : ""
         } `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
           {imageToShow ? (
             <div
-              className={`tw-relative ${compact ? "tw-h-28 tw-w-56" : "tw-size-40"}`}
+              className={`tw-relative ${compact ? "tw-h-24 tw-w-48" : "tw-size-40"}`}
             >
               <FallbackImage
                 primarySrc={imageToShow}
@@ -54,7 +56,9 @@ export default function UserSettingsBannerImageInput({
             </div>
           ) : (
             <>
-              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
+              <div
+                className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg ${compact ? "tw-bg-white/[0.04]" : "tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800"}`}
+              >
                 <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                   <svg
                     className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50"

@@ -1,4 +1,6 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import type { HighlyRatedWavePreviewItem } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
@@ -183,6 +185,66 @@ it("persists independent collapse preferences across browser sessions", () => {
     screen.getByRole("button", { name: "Collapse Worth Checking Out" })
   ).toHaveAttribute("aria-expanded", "true");
 });
+it.each([
+  ["true", "true"],
+  ["true", "false"],
+  ["false", "true"],
+  ["false", "false"],
+  [null, null],
+])(
+  "keeps server content closed and hydrates saved preferences (%s, %s)",
+  async (recommendations, active) => {
+    if (recommendations !== null) {
+      localStorage.setItem(
+        "wave-discovery-recommendations-collapsed",
+        recommendations
+      );
+    }
+    if (active !== null) {
+      localStorage.setItem("wave-discovery-active-collapsed", active);
+    }
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(
+      <SidebarDiscovery {...discoveryProps} />
+    );
+    const sections = ["Worth Checking Out", "Active Votes"].map((name) =>
+      within(container).getByRole("region", { name })
+    );
+    for (const section of sections) {
+      const toggle = within(within(section).getByRole("heading")).getByRole(
+        "button"
+      );
+      const panel = container.querySelector(
+        `[id="${toggle.getAttribute("aria-controls")}"]`
+      );
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      expect(panel).toHaveAttribute("aria-hidden", "true");
+      expect(panel).toHaveAttribute("inert");
+      expect(panel).toHaveClass("tw-invisible", "tw-grid-rows-[0fr]");
+    }
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(
+          container,
+          <SidebarDiscovery {...discoveryProps} />,
+          { onRecoverableError }
+        );
+      });
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      for (const [index, value] of [recommendations, active].entries()) {
+        const heading = within(sections[index]!).getByRole("heading");
+        expect(within(heading).getByRole("button")).toHaveAttribute(
+          "aria-expanded",
+          String(value !== "true")
+        );
+      }
+    } finally {
+      act(() => root?.unmount());
+    }
+  }
+);
 it("shows compact empty feedback without hiding either section or view-all link", () => {
   mockVotes.data = { pages: [{ count: 0, data: [] }] };
   mockVotes.hasNextPage = false;

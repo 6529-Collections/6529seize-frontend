@@ -81,7 +81,9 @@ Reduced-motion preferences disable these transitions. The feed icon is blue
 when the desktop feed is active or its button is hovered or keyboard-focused.
 
 - `Worth Checking Out` appears first, followed by `Active Votes`, as independently
-  collapsible sections above the wave collections. Both start expanded.
+  collapsible sections above the wave collections. Both default to expanded
+  once browser preferences load; saved closed sections stay closed from the
+  first render when reopening or refreshing the page.
 - Active Votes has a scrollable window three compact rows tall, with named
   TDH votes and their voting end or next decision. Scroll to browse the list;
   more pages load near the bottom, with a `Load more` button as a fallback.

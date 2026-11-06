@@ -536,6 +536,22 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:wave-link-preview-sandbox",
+      "Embedded wave preview readability in the sidebar and responsive chat.",
+      ["tests/social/wave-link-preview-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-link-preview",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3316",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3316",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4316",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:notifications-inbox-sandbox",
     "Desktop notification preview, explicit read actions, and mobile navigation.",
