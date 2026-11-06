@@ -8,10 +8,10 @@ cache misses and personalised responses. Static assets already use their own
 distribution (`dnclu2fna0b2b.cloudfront.net`, see `config/assetPrefix.ts`) and
 are unaffected.
 
-| Environment | Distribution                                       | Origin                                                                              | Status                                     |
-| ----------- | -------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------ |
-| Staging     | `E1DKA1VIRRUKKC` (`d3n2q53uzk0de4.cloudfront.net`) | `origin.staging.6529.io` (nginx → Node on the staging instance)                     | Serving `staging.6529.io` since 2026-11-02 |
-| Production  | not created                                        | `seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com` (ALB → Node:3001) | [Cutover plan](#production-cutover)        |
+| Environment | Distribution                                       | Origin                                                                              | Status                                                                                               |
+| ----------- | -------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Staging     | `E1DKA1VIRRUKKC` (`d3n2q53uzk0de4.cloudfront.net`) | `origin.staging.6529.io` (nginx → Node on the staging instance)                     | Serving `staging.6529.io` since 2026-11-02                                                           |
+| Production  | `E3KTTDJUNHRYW9` (`d3g6odudeykxr2.cloudfront.net`) | `seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com` (ALB → Node:3001) | Serving `6529.io` since 2026-11-04; [origin locked to CloudFront](#origin-lockdown) since 2026-11-06 |
 
 The CloudFront definitions live in `ops/cloudfront/frontend-html/`: four cache
 policies, one origin request policy, one response headers policy, and the
@@ -56,9 +56,8 @@ Why the page key looks like this:
   Prerendered pages are identical either way; this keeps the guarantee even if
   a route later starts varying.
 
-Compression: the edge serves gzip or Brotli for responses the origin sends
-uncompressed. Node already gzips pages, so pages stay gzip until origin
-compression is turned off (a production follow-up below).
+Compression: Node keeps compressing (`compress` stays on in
+`config/nextConfig.ts`); see [Compression](#compression) for why.
 
 Headers: the app's own security headers (CSP, HSTS, frame options and the
 rest, from `config/securityHeaders.ts`) pass through unchanged. The response
@@ -84,8 +83,9 @@ answers and waits until the purge completes:
   `ops/scripts/purge-page-edge-cache.sh` after the exact HTTP version check.
 - **Production:** `Web Deploy - PROD` runs it after the deployed version check
   and before publishing the announced version, so tabs prompted to reload get
-  the new pages. The step is skipped until the `PRODUCTION_PAGE_DISTRIBUTION_ID`
-  variable is set during the cutover.
+  the new pages. The `PRODUCTION_PAGE_DISTRIBUTION_ID` variable in the
+  `production` environment names the distribution (`E3KTTDJUNHRYW9`); the
+  step is skipped when it is empty.
 
 The step runs only when the version check passed. It fails the job when it
 cannot start a purge, or when the distribution does not serve the deployed
@@ -243,61 +243,120 @@ warns once it is deleted.
 
 ## Production cutover
 
-Production is not cut over. Changing the `6529.io` record moves all traffic,
-so each phase below needs explicit approval.
+Done on 2026-11-04: `6529.io` has been served by `E3KTTDJUNHRYW9`
+(`d3g6odudeykxr2.cloudfront.net`) since 01:45 UTC. The steps were:
 
-**Before the cutover**
-
-1. Ship the rate-limit change (`lib/security/clientRateLimit.ts`) to production
-   and keep staging on CloudFront for at least a day of normal use and green
+1. The rate-limit change (`lib/security/clientRateLimit.ts`) shipped to
+   production. Staging had served through CloudFront since 2026-11-02 with green
    staging E2E.
-2. Create the production distribution from `distribution-production.json`
-   without its alias (set `Aliases` to `{"Quantity": 0}` for this call) and
-   wait for `Deployed`. No traffic reaches it.
-3. Move the `6529.io` alternate name. Distribution `E2CMJWTZ3QB8BF` (the
-   `www.6529.io` S3 redirect) still lists `6529.io` although the apex record
-   points at Elastic Beanstalk, and CloudFront allows a name on one
-   distribution only. Remove `6529.io` from `E2CMJWTZ3QB8BF` (keep
-   `www.6529.io`), then add it to the new distribution. Neither change moves
-   traffic.
-4. Verify the matrix above against production with
-   `curl --connect-to 6529.io:443:<new>.cloudfront.net:443`, plus a signed-in
-   session (wallet connect, waves, messages; the WebSocket and API use their own
-   hosts), a server action, `/api/alchemy/*` rate limits and `/validator`.
-5. Add a `ProductionPageCachePurge` statement for the new distribution to
-   `ops/iam/frontend-production/FrontendProductionDeployment.json` (same actions
-   as staging), install and verify it as that runbook describes, and set the
-   `PRODUCTION_PAGE_DISTRIBUTION_ID` variable in the `production` environment.
-
-**Cutover**
-
-6. In hosted zone `Z034375922ON0KJSHH6TF`, `UPSERT` the `6529.io` `A` alias to
-   the new distribution (`HostedZoneId` `Z2FDTNDATAQYW2`) and `CREATE` a
-   matching `AAAA` alias. Leave the MX, TXT and NS records alone.
-7. Watch for an hour: CloudFront `5xxErrorRate` and `4xxErrorRate`, load
-   balancer 5xx and target response time, Sentry, `/api/version`, the home
-   page, a prerendered Museum page and a signed-in flow. The next production
-   deploy runs the purge step; check its log.
+2. `E3KTTDJUNHRYW9` was created from `distribution-production.json` without its
+   alias and reached `Deployed`. No traffic reached it yet.
+3. The `6529.io` alternate name moved from `E2CMJWTZ3QB8BF` (the `www.6529.io`
+   S3 redirect, which keeps `www.6529.io`) to the new distribution. The `www`
+   redirects behaved the same before, during and after the move.
+4. The verification matrix passed against production with
+   `curl --connect-to 6529.io:443:d3g6odudeykxr2.cloudfront.net:443`. The rate
+   limiter behaved as before: 60 requests passed, then 429, and a spoofed
+   `X-Forwarded-For` did not get around it.
+5. Policy version `v16` of `FrontendProductionDeployment` added the
+   `ProductionPageCachePurge` statement (recorded in
+   `ops/iam/frontend-production/verification.json`).
+   `PRODUCTION_PAGE_DISTRIBUTION_ID` was set to `E3KTTDJUNHRYW9`.
+6. In hosted zone `Z034375922ON0KJSHH6TF`, the `6529.io` `A` alias was upserted
+   to the distribution (`HostedZoneId` `Z2FDTNDATAQYW2`) and a matching `AAAA`
+   alias was created. The MX, TXT and NS records were left alone.
+7. A one-hour watch raised no alerts: CloudFront 5xx and 4xx rates, load
+   balancer 5xx and target response time, and page checks. The first
+   production deploy afterwards purged the distribution in about 21 seconds.
 
 **Rollback** (resolvers follow within about a minute)
 
-8. `UPSERT` the `6529.io` `A` alias back to
+1. Reopen the load balancer first, using the
+   [origin lockdown rollback](#origin-lockdown). Otherwise every request fails
+   once DNS points at it.
+2. `UPSERT` the `6529.io` `A` alias back to
    `seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com`
    (`HostedZoneId` `Z117KPS5GTRQ2G`, `EvaluateTargetHealth` true), `DELETE` the
    `AAAA` alias, and clear `PRODUCTION_PAGE_DISTRIBUTION_ID`. The rate-limit
    change is correct with or without CloudFront.
 
-**After a stable week (separate changes)**
+## Origin lockdown
 
-- Set `compress: false` in `config/nextConfig.ts` so CloudFront compresses
-  pages with Brotli. Only do this once every page request goes through the
-  edge; the load balancer does not compress.
-- Restrict the load balancer to CloudFront: allow HTTPS only from the managed
-  prefix list `com.amazonaws.global.cloudfront.origin-facing`
-  (`pl-3b927c52`), or require a secret origin header on the listener, so
-  nobody can bypass the edge.
-- Consider Origin Shield in `us-east-1` to collapse misses from all edges into
-  one regional cache.
+Since 2026-11-06 the production load balancer accepts traffic only from
+CloudFront. Its security group (`sg-0fac1cee3a1095ef4`, the
+`AWSEBLoadBalancerSecurityGroup` that Elastic Beanstalk creates) allows only
+TCP 443 from the AWS-managed prefix list
+`com.amazonaws.global.cloudfront.origin-facing` (`pl-3b927c52`). Direct
+requests to the Elastic Beanstalk or load balancer hostname time out.
+
+- Port 80 is closed. CloudFront connects to the origin over HTTPS only and
+  redirects viewers from HTTP to HTTPS itself. The prefix list counts as 55 of
+  the group's 60 inbound rules, so only one port can use it.
+- Nothing else is affected:
+  - Target group health checks and app traffic go from the load balancer to
+    the instances inside the VPC.
+  - Elastic Beanstalk reads health from its instance agent.
+  - The production deploy workflow uses the Elastic Beanstalk API and
+    `https://6529.io`.
+  - Production E2E uses `https://6529.io`.
+  - Staging has its own instance and distribution.
+- Nothing else used the origin hostnames. No Route 53 record, health check,
+  canary, alarm or other distribution pointed at them, and their certificate
+  is for `6529.io`.
+- The rule persists across deploys. Ordinary deploys update only the Auto
+  Scaling group and Elastic Beanstalk metadata in the environment's
+  CloudFormation stack. `.ebextensions/alb-cloudfront-only.config` also pins the
+  rule in the environment template, so an environment change cannot reopen it.
+- Any CloudFront distribution can still reach the origin, not only ours,
+  because the prefix list covers all of CloudFront. A secret origin header
+  checked at the load balancer would close that gap; none is in place.
+
+To check, run `curl --connect-timeout 10
+https://seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com/api/version`
+from outside AWS: it times out (curl exit code 28), while
+`https://6529.io/api/version` answers 200.
+
+Rollback restores the Elastic Beanstalk default rules. The prefix-list rule can
+stay. Also revert `.ebextensions/alb-cloudfront-only.config`, so that the next
+template change does not remove the rules again.
+
+```bash
+aws ec2 authorize-security-group-ingress --region us-east-1   --group-id sg-0fac1cee3a1095ef4 --ip-permissions   'IpProtocol=tcp,FromPort=443,ToPort=443,IpRanges=[{CidrIp=0.0.0.0/0}]'   'IpProtocol=tcp,FromPort=80,ToPort=80,IpRanges=[{CidrIp=0.0.0.0/0}]'
+```
+
+## Compression
+
+`compress` stays on in `config/nextConfig.ts`, so Node gzips responses.
+Turning it off would not move compression to the edge; most HTML would arrive
+uncompressed instead. This was checked against production on 2026-11-06:
+
+- CloudFront compresses a response only when the origin sends a
+  `Content-Length` between 1,000 bytes and 10 MB
+  ([conditions for compression](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-cloudfront-notes)).
+- Next streams dynamic pages, route handlers and not-found pages with chunked
+  encoding and no `Content-Length`. CloudFront passes those through
+  uncompressed, whether it caches them or not. Only prerendered pages and
+  static files carry a `Content-Length`.
+- Behaviours that use `Managed-CachingDisabled` (`/validator*`, `/my-stream*`)
+  are never compressed at the edge.
+
+Measured through CloudFront. The right-hand column used
+`Accept-Encoding: br`. Node does not send Brotli, so it answered those requests
+uncompressed, as it would with compression off.
+
+| Path                         | Node gzip (today) | Without Node compression |
+| ---------------------------- | ----------------: | -----------------------: |
+| `/waves/{id}` (dynamic)      |           35.1 KB |  262.4 KB (uncompressed) |
+| `/about/the-memes` (dynamic) |           22.0 KB |  160.1 KB (uncompressed) |
+| `/museum` (prerendered)      |           27.0 KB |         18.9 KB (Brotli) |
+| `/` (prerendered)            |           24.3 KB |         18.2 KB (Brotli) |
+
+Turning compression off would save about 30% on prerendered pages and make
+dynamic pages six to eight times larger. Next has no option to compress only
+streamed responses, so revisit this when most routes are static. The edge
+settings are already in place for that: every behaviour except
+`/_next/image*` (images) has `Compress` on, and the page, static and OG cache
+policies keep gzip and Brotli in the cache key.
 
 ## Known limits
 
@@ -306,4 +365,5 @@ so each phase below needs explicit approval.
 - Revoking a staging access key does not evict pages already cached under it
   until the next deploy or the one-day cap.
 - Page TTLs are capped at one day even where the app asks for a year.
-- The origin still answers direct requests; see the restriction step above.
+- Each edge location forwards its own misses to the origin. Origin Shield in
+  `us-east-1` would collapse them into one regional cache; it is not enabled.
