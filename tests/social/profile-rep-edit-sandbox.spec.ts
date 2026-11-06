@@ -382,6 +382,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       let rating = 20;
       let failSave = true;
       const saved: unknown[] = [];
+      const requestedPages: number[] = [];
+      let recipientRepReads = 0;
       await installCategories(page, api);
       await page.route(`${api}/api/profiles/*/cic/overview*`, (route) =>
         route.fulfill({
@@ -400,6 +402,24 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           expect(params.get("given")).toBe("true");
           expect(params.get("order_by")).toBe("last_modified");
           expect(params.get("order")).toBe("DESC");
+          const requestedPage = Number(params.get("page"));
+          requestedPages.push(requestedPage);
+          if (requestedPage === 2)
+            return route.fulfill({
+              json: {
+                data: [
+                  {
+                    profile_id: "page-two",
+                    handle: "page-two-recipient",
+                    wallets: [],
+                    rating: 10,
+                    last_modified: 1,
+                  },
+                ],
+                page: 2,
+                next: false,
+              },
+            });
           const data =
             rating === 0
               ? []
@@ -419,20 +439,22 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             rating: 900,
             last_modified: 10,
           });
-          return route.fulfill({ json: { data, page: 1, next: false } });
+          return route.fulfill({ json: { data, page: 1, next: true } });
         }
       );
       await page.route(
         `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
-        (route) =>
-          route.fulfill({
+        (route) => {
+          recipientRepReads += 1;
+          return route.fulfill({
             json: {
               ...allowance,
               rating_stats: [
                 { ...allowance.rating_stats[0], rater_contribution: rating },
               ],
             },
-          })
+          });
+        }
       );
       await page.route(`${api}/api/profiles/${TARGET}/cic/rating/*`, (route) =>
         route.fulfill({
@@ -521,6 +543,13 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       });
       await expect(list.getByRole("link").first()).toHaveText(TARGET);
       await expect(list.getByRole("link").nth(1)).toHaveText("older-recipient");
+      await list
+        .getByRole("button", { name: "Load more", exact: true })
+        .click();
+      await expect(
+        list.getByRole("link", { name: "page-two-recipient", exact: true })
+      ).toBeVisible();
+      expect(requestedPages).toEqual([1, 2]);
       await expect(
         page
           .getByRole("dialog", { name: `${matter} Given`, exact: true })
@@ -535,14 +564,15 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       });
 
       const openEditor = async () => {
+        let readsBeforeCategoryEditor = recipientRepReads;
         await list
           .getByRole("button", {
             name: `Adjust ${matter} for ${TARGET}`,
             exact: true,
           })
           .click();
-        if (matter === "REP")
-          await page
+        if (matter === "REP") {
+          const categoryButton = page
             .getByRole("dialog", {
               name: `REP given to ${TARGET}`,
               exact: true,
@@ -550,8 +580,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             .getByRole("button", {
               name: `Adjust REP (${CATEGORY}) for ${TARGET}`,
               exact: true,
-            })
-            .click();
+            });
+          await expect(categoryButton).toBeVisible();
+          readsBeforeCategoryEditor = recipientRepReads;
+          await categoryButton.click();
+        }
         const editor = page.getByRole("dialog", {
           name:
             matter === "REP"
@@ -560,6 +593,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           exact: true,
         });
         await expect(editor.getByRole("textbox")).toHaveValue(String(rating));
+        if (matter === "REP")
+          expect(recipientRepReads).toBe(readsBeforeCategoryEditor);
         return editor;
       };
       let editor = await openEditor();
@@ -569,11 +604,23 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         page.getByText("Please try again.", { exact: true }).first()
       ).toBeVisible();
       await expect(editor.getByRole("textbox")).toHaveValue("30");
+      const pagesBeforeSave = requestedPages.length;
       await editor.getByRole("button", { name: "Save", exact: true }).click();
       await expect(editor).toBeHidden();
       await expect(
         list.getByRole("link", { name: TARGET }).locator("..")
       ).toContainText("30");
+      expect(requestedPages.slice(pagesBeforeSave)).toEqual([1]);
+      await expect(
+        list.getByRole("link", { name: "page-two-recipient", exact: true })
+      ).toHaveCount(0);
+      await list
+        .getByRole("button", { name: "Load more", exact: true })
+        .click();
+      await expect(
+        list.getByRole("link", { name: "page-two-recipient", exact: true })
+      ).toBeVisible();
+      expect(requestedPages.slice(pagesBeforeSave)).toEqual([1, 2]);
       editor = await openEditor();
       await editor
         .getByRole("button", { name: "Remove rating", exact: true })
@@ -589,9 +636,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         path: removeScreenshot,
         contentType: "image/png",
       });
+      const pagesBeforeRemoval = requestedPages.length;
       await editor.getByRole("button", { name: "Save", exact: true }).click();
       await expect(editor).toBeHidden();
       await expect(list.getByRole("link", { name: TARGET })).toHaveCount(0);
+      expect(requestedPages.slice(pagesBeforeRemoval)).toEqual([1]);
       await expect(
         list.getByRole("link", { name: "older-recipient" })
       ).toBeVisible();

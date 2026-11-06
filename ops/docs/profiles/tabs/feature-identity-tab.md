@@ -174,9 +174,10 @@ Mobile (`< lg`):
    opened from a category skips that selection.
 4. Enter the new total. To remove an existing rating, select `Remove rating`;
    this prepares a zero total and does not submit yet.
-5. Select `Save`. Successful updates return to the same receiver list, with
-   refreshed values; removed ratings disappear. A failed save keeps the draft
-   so you can retry. Cancel and Back return without submitting.
+5. Select `Save`. Successful updates return to the first page of the same
+   receiver list, with refreshed values; removed ratings disappear. Use
+   `Load more` to view older recipients again. A failed save keeps the draft
+   and loaded pages so you can retry. Cancel and Back return without submitting.
 
 The lists include loading, empty and retry states, and `Load more` when more
 recipients exist. Visitors see the same public ratings without owner controls.
