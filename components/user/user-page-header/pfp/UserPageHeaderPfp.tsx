@@ -32,6 +32,7 @@ export default function UserPageHeaderPfp({
         <Image
           unoptimized={
             !parseDecentralizedMediaRef(profile.pfp) ||
+            new URL(avatarSrc).port !== "" ||
             isGifImageUrl(avatarSrc) ||
             failedAvatarSrc === avatarSrc
           }

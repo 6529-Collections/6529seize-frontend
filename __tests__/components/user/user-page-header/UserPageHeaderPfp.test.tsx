@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { ImageConfigContext } from "next/dist/shared/lib/image-config-context.shared-runtime";
 import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { publicEnv } from "@/config/env";
 import UserPageHeaderPfp from "@/components/user/user-page-header/pfp/UserPageHeaderPfp";
 
 const cid = "QmZ41GvrNSPUpSs4mfQy4jxUNudcLM6CXUTFwqtVd2m2XP";
@@ -12,7 +13,9 @@ function picture(pfp: string | null) {
     <ImageConfigContext.Provider
       value={{
         ...imageConfigDefault,
-        remotePatterns: [{ protocol: "https", hostname: "media.6529.io" }],
+        remotePatterns: [
+          { protocol: "https", hostname: "media.6529.io", port: "" },
+        ],
       }}
     >
       <UserPageHeaderPfp
@@ -26,6 +29,8 @@ function picture(pfp: string | null) {
 }
 
 describe("UserPageHeaderPfp", () => {
+  afterEach(() => jest.restoreAllMocks());
+
   it.each([`ipfs://${cid}`, source])(
     "optimizes supported profile pictures with responsive display sizes: %s",
     (pfp) => {
@@ -64,6 +69,22 @@ describe("UserPageHeaderPfp", () => {
     );
     expect(url.pathname).toBe("/_next/image");
     expect(url.searchParams.get("url")).toBe(updatedSource);
+  });
+
+  it("keeps direct delivery for a resolver port outside the optimizer allowlist", () => {
+    jest.replaceProperty(
+      publicEnv,
+      "MEDIA_RESOLVER_ENDPOINT",
+      "https://media.6529.io:8443"
+    );
+
+    render(picture(source));
+
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      `https://media.6529.io:8443/ipfs/${cid}`
+    );
+    expect(screen.getByRole("img")).not.toHaveAttribute("srcset");
   });
 
   it("renders placeholder when no pfp", () => {
