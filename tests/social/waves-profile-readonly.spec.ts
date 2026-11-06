@@ -27,7 +27,7 @@ import {
 
 import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
 
-import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
+import { EN_US_MESSAGES } from "../../i18n/messages/en-US.complete";
 import {
   captureSafeScreenshot,
   expect,

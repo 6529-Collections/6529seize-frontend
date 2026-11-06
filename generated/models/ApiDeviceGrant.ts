@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 /**
-* A wallet signed grant that lets a browser-held Ed25519 device key sign drop writes. Its id is the EIP-191 hash of the exact SIWE message the wallet signed.
+* A wallet signed grant that lets a browser-held Ed25519 device key sign drop writes. Its id is the EIP-191 hash of the exact SIWE message the wallet signed at sign-in, or the EIP-712 digest of an app device grant.
 */
 export class ApiDeviceGrant {
     'id': string;
@@ -30,11 +30,11 @@ export class ApiDeviceGrant {
     'scopes': Array<string>;
     'device_label': string;
     /**
-    * SIWE domain the grant was signed for, e.g. 6529.io.
+    * SIWE domain the grant was signed for, e.g. 6529.io, or the origin of an app device grant (e.g. 6529.io or \"6529 Desktop\").
     */
     'domain': string;
     /**
-    * SIWE Issued At, epoch milliseconds.
+    * SIWE Issued At (or app grant issuedAt), epoch milliseconds.
     */
     'issued_at': number;
     /**

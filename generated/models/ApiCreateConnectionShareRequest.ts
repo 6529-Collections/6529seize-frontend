@@ -14,6 +14,10 @@
 import { HttpFile } from '../http/http';
 
 export class ApiCreateConnectionShareRequest {
+    /**
+    * Encrypted fresh target-device keys and wallet grant. The unlock secret is never sent to this API. Not supported for proxy sessions.
+    */
+    'encrypted_device_setup'?: string;
     'target_client_type': ApiCreateConnectionShareRequestTargetClientTypeEnum;
     'role'?: string | null;
     /**
@@ -34,6 +38,12 @@ export class ApiCreateConnectionShareRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "encrypted_device_setup",
+            "baseName": "encrypted_device_setup",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "target_client_type",
             "baseName": "target_client_type",
