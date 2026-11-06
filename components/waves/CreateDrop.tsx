@@ -43,6 +43,8 @@ import { t } from "@/i18n/messages";
 import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
 import { PROFILE_SUSPENDED_ERROR_CODE } from "@/services/api/content-moderation-api";
 import { PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import AllMentionConfirmationDialog from "./create-drop-content/AllMentionConfirmationDialog";
+import { useAllMentionConfirmation } from "./create-drop-content/useAllMentionConfirmation";
 import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
 import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
 import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
@@ -660,11 +662,18 @@ export default function CreateDrop({
     ]
   );
 
-  const submitDrop = useWaveGuidelinesSubmission({
+  const submitWithGuidelines = useWaveGuidelinesSubmission({
     enqueueDrop,
     requestGuidelinesAgreement,
     setToast,
   });
+
+  const { submitDrop, confirmation, cancel, confirm, retry } =
+    useAllMentionConfirmation({
+      submitDrop: submitWithGuidelines,
+      waveId: wave.id,
+      profileId: connectedProfile?.id ?? null,
+    });
 
   const createDropContentProps = useMemo(() => {
     const hasExitFixedDropMode = onExitFixedDropMode !== undefined;
@@ -778,6 +787,12 @@ export default function CreateDrop({
   return (
     <>
       {dropComposerContent}
+      <AllMentionConfirmationDialog
+        state={confirmation}
+        onCancel={cancel}
+        onConfirm={confirm}
+        onRetry={retry}
+      />
       <WaveGuidelinesAgreementDialog
         guidelines={dialogGuidelines}
         onAgree={agreeToGuidelines}

@@ -6834,6 +6834,7 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
+        "Before sending a new message with @all, a confirmation shows the current notification audience count. Choose Send with @all to send or Keep editing to preserve the draft. Counting errors require retrying; edits do not rebroadcast or prompt.",
         "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
         "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
         "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
