@@ -69,30 +69,21 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   const { isCapacitor } = useCapacitor();
   const supportsFullScreen = useFullScreenSupported();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const frameRef = useRef<HTMLIFrameElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const setFrameRef = useCallback(
-    (frame: HTMLIFrameElement | null) => {
-      frameRef.current = frame;
-      if (typeof iframeRef === "function") {
-        iframeRef(frame);
-      } else if (iframeRef) {
-        iframeRef.current = frame;
-      }
-    },
-    [iframeRef]
-  );
-
-  const handleFullscreen = useCallback(() => {
-    const frame = frameRef.current;
+  // The frame is the only iframe in this component's container, so the
+  // caller's iframeRef stays untouched and is passed straight through.
+  const expandFrame = useCallback(async () => {
+    const frame = containerRef.current?.querySelector("iframe");
     if (!frame) {
       return;
     }
-    // The helper logs a refused or unsupported request and resolves to false.
-    requestElementFullScreen(frame).catch((error: unknown) => {
+    try {
+      // The helper logs a refused or unsupported request and resolves false.
+      await requestElementFullScreen(frame);
+    } catch (error: unknown) {
       console.error("Could not expand interactive media", error);
-    });
+    }
   }, []);
 
   const canonicalSrc = useMemo(
@@ -225,7 +216,9 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
         {canExpand ? (
           <button
             type="button"
-            onClick={handleFullscreen}
+            onClick={() => {
+              void expandFrame();
+            }}
             className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-6 tw-shrink-0 tw-items-center tw-gap-1 tw-rounded tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-primary-300 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             <ArrowsPointingOutIcon
@@ -255,7 +248,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
         {isVisible ? (
           <iframe
             {...iframeProps}
-            ref={setFrameRef}
+            ref={iframeRef}
             title={iframeTitle}
             onLoad={onLoad}
             onError={onError}
