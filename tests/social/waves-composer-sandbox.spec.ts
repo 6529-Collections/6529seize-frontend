@@ -733,9 +733,20 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect(composerBounds.bottom).toBeLessThanOrEqual(
       composerBounds.viewportHeight
     );
-    await expect(
-      page.getByRole("button", { name: "Post" }).last()
-    ).toBeEnabled();
+    const sendButton = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last();
+    await expect(sendButton).toBeEnabled();
+    await expect(sendButton).toHaveText("");
+    const sendIcon = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last()
+      .locator("svg");
+    await expect(sendIcon).toBeVisible();
+    await expect(sendIcon).toHaveAttribute("fill", "none");
+    const sendBounds = await sendButton.boundingBox();
+    expect(sendBounds?.width).toBe(40);
+    expect(sendBounds?.height).toBe(40);
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });

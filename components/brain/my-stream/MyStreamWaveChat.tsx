@@ -75,6 +75,7 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
+  readonly showLegacyDmBanner?: boolean;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -203,6 +204,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
+  showLegacyDmBanner = true,
 }) => {
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
@@ -683,7 +685,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
+            <LegacyDmComposerGate
+              wave={wave}
+              enabled={isDirectMessage}
+              showBanner={showLegacyDmBanner}
+            >
               <CreateDropWaveWrapper>
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}

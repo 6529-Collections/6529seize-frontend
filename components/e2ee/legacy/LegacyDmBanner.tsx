@@ -35,10 +35,12 @@ const ACTION_CLASS =
 export function LegacyDmComposerGate({
   wave,
   enabled,
+  showBanner = true,
   children,
 }: {
   readonly wave: ApiWave;
   readonly enabled: boolean;
+  readonly showBanner?: boolean;
   readonly children: ReactNode;
 }) {
   const active = enabled && isE2eeEnabled();
@@ -52,11 +54,13 @@ export function LegacyDmComposerGate({
   const readOnly = closed || equivalent !== null;
   return (
     <>
-      <LegacyDmBanner
-        wave={wave}
-        closed={closed}
-        encryptedG={equivalent?.g ?? null}
-      />
+      {showBanner && (
+        <LegacyDmBanner
+          wave={wave}
+          closed={closed}
+          encryptedG={equivalent?.g ?? null}
+        />
+      )}
       {readOnly ? null : children}
     </>
   );

@@ -36,7 +36,7 @@ describe("CreateDropSubmit", () => {
     expect(btn).not.toHaveTextContent("Post");
   });
 
-  it("keeps the mobile submit icon from collapsing inside the fixed-width button", () => {
+  it("uses the encrypted chat send icon at a fixed width on mobile and desktop", () => {
     render(
       <CreateDropSubmit
         submitting={false}
@@ -47,18 +47,32 @@ describe("CreateDropSubmit", () => {
     );
 
     const btn = screen.getByRole("button", { name: "Post" });
-    expect(btn).toHaveClass(
-      "tw-h-10",
-      "tw-w-10",
-      "tw-px-0",
-      "lg:tw-w-[3.875rem]",
-      "lg:tw-px-3.5"
-    );
+    expect(btn).toHaveClass("tw-h-10", "tw-w-10", "tw-px-0");
+    expect(btn).not.toHaveClass("lg:tw-w-[3.875rem]", "lg:tw-px-3.5");
+    expect(btn.textContent).toBe("");
     // The shared `lg` preset adds `tw-px-5`, leaving this fixed-width button
     // with no content width and shrinking the mobile icon to 0px.
     expect(btn).not.toHaveClass("tw-px-5");
 
     const icon = btn.querySelector("svg");
-    expect(icon).toHaveClass("tw-size-5", "tw-flex-shrink-0", "lg:tw-hidden");
+    expect(icon).toHaveClass("tw-size-5", "tw-flex-shrink-0");
+    expect(icon).not.toHaveClass("lg:tw-hidden");
+    expect(icon).toHaveAttribute("fill", "none");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("preserves explicit Storm action labels", () => {
+    render(
+      <CreateDropSubmit
+        submitting={false}
+        canSubmit={true}
+        isDropMode={false}
+        label="Post storm"
+        onDrop={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Post storm" })
+    ).toHaveTextContent("Post storm");
   });
 });

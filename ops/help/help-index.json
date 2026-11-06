@@ -3941,7 +3941,7 @@
       "facts": [
         "Direct messages started before encrypted chats are not end-to-end encrypted. 6529 deletes their content from its servers, backups included, on 1 December 2026, except anything 6529 is legally required to keep; from then they are closed and no new unencrypted DM can be started.",
         "When you start a new direct message on a build with encrypted chats, Start encrypted chat is the main action; Send unencrypted instead is a second choice, under a warning, until 1 December 2026.",
-        "Each unencrypted conversation shows a notice with Export history, which downloads the messages you can see as a readable HTML page or as JSON data. The file is made in your browser; images and files are listed as links that stop working on the deletion date.",
+        "The full view of each unencrypted conversation shows a notice with Export history, which downloads the messages you can see as a readable HTML page or as JSON data. The file is made in your browser; images and files are listed as links that stop working on the deletion date. Quick Chat hides this notice and its actions; use Open conversation to access them. Quick Chat keeps the same read-only and closure rules.",
         "Once an encrypted chat with exactly the same people exists on your device, the old conversation becomes read-only and offers Move history, which copies the messages you can see into the encrypted chat, oldest first, with their images and files where possible.",
         "Moved messages show the original author and time labelled Imported, not verified, and say who moved them, because 6529 held them unencrypted. An author who is not a member of the chat shows as Unknown. Only the people and devices in the encrypted chat at that time see them, and nobody is notified.",
         "Moving can be stopped and continued later without duplicates, even if another member moves the same history. A long history with many images may pause at the daily encrypted upload limit; continue the next day.",
@@ -7263,7 +7263,8 @@
       "facts": [
         "Wave drop composer Enter-key behavior is documented separately from general markdown.",
         "Enter-key behavior controls when the composer submits versus inserts a new line.",
-        "Users should check composer state and platform behavior if keyboard submission feels unexpected."
+        "Users should check composer state and platform behavior if keyboard submission feels unexpected.",
+        "Wave chat and unencrypted DM composers use the same paper-airplane send icon as encrypted chat on desktop and mobile, instead of a visible Post button label. Storm actions retain their specific labels."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

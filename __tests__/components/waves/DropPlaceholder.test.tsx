@@ -132,6 +132,8 @@ describe("DropPlaceholder", () => {
       '[data-wave-composer-skeleton-part="true"]'
     );
     expect(skeletonParts).toHaveLength(3);
+    expect(skeletonParts[2]).toHaveClass("tw-h-10", "tw-w-10");
+    expect(skeletonParts[2]).not.toHaveClass("lg:tw-w-[3.875rem]");
     skeletonParts.forEach((part) => {
       expect(part.className).toContain("shimmer");
       expect(part).toHaveClass("motion-reduce:tw-animate-none");

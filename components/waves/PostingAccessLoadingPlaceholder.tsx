@@ -54,7 +54,7 @@ export default function PostingAccessLoadingPlaceholder({
           ))}
       </div>
       <SkeletonPart className="tw-h-[42px] tw-min-w-0 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10" />
-      <SkeletonPart className="tw-h-10 tw-w-10 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/5 lg:tw-w-[3.875rem]" />
+      <SkeletonPart className="tw-h-10 tw-w-10 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/5" />
     </div>
   );
 }
