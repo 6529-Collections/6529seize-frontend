@@ -637,6 +637,7 @@ export const EN_GB_MESSAGES = {
   "drop.media.processingTimedOut": "Image processing timed out.",
   "media.interactive.frameTitle": "Interactive HTML media",
   "media.interactive.loading": "Loading interactive media",
+  "media.interactive.fullscreen": "Full screen",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":

@@ -662,6 +662,7 @@ export const FR_FR_MESSAGES = {
   "drop.media.processingTimedOut": "Le traitement de l'image a expire.",
   "media.interactive.frameTitle": "Média HTML interactif",
   "media.interactive.loading": "Chargement du média interactif",
+  "media.interactive.fullscreen": "Plein écran",
   "quickDm.regionAriaLabel": "Messages directs rapides",
   "quickDm.openButtonAriaLabel": "Ouvrir les messages directs rapides",
   "quickDm.openButtonUnreadAriaLabel":

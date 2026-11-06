@@ -4870,6 +4870,7 @@ export const EN_US_ROOT_MESSAGES = {
   "media.interactive.untrustedContent": "Untrusted interactive content",
   "media.interactive.frameTitle": "Interactive HTML media",
   "media.interactive.loading": "Loading interactive media",
+  "media.interactive.fullscreen": "Full screen",
   "walletAddress.copy.optionsAriaLabel": "Copy wallet options",
   "walletAddress.copy.ensAriaLabel": "Copy ENS name",
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
