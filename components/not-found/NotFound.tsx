@@ -1,10 +1,15 @@
 "use client";
 
 import { useTitle } from "@/contexts/TitleContext";
+import { markPageNotFound } from "@/services/analytics/telemetry/collector";
 import Image from "next/image";
 import { useEffect } from "react";
 
-export default function NotFound({ label }: { readonly label?: string | undefined }) {
+export default function NotFound({
+  label,
+}: {
+  readonly label?: string | undefined;
+}) {
   let titleLabel;
   if (label) {
     titleLabel = label.toUpperCase();
@@ -20,8 +25,12 @@ export default function NotFound({ label }: { readonly label?: string | undefine
     setTitle(titleLabel);
   }, [titleLabel, setTitle]);
 
+  useEffect(() => {
+    markPageNotFound(globalThis.location.pathname);
+  }, []);
+
   return (
-    <section className="tw-w-full tw-h-full tw-min-h-screen tw-flex tw-justify-center tw-items-center">
+    <section className="tw-flex tw-h-full tw-min-h-screen tw-w-full tw-items-center tw-justify-center">
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
         <Image
           unoptimized
@@ -33,15 +42,15 @@ export default function NotFound({ label }: { readonly label?: string | undefine
           src="/SummerGlasses.svg"
           alt="SummerGlasses"
         />
-        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-items-center tw-justify-center">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
           <h3 className="tw-text-2xl tw-font-semibold">{titleLabel}</h3>
           <img
             src="/emojis/sgt_flushed.webp"
             alt="sgt_flushed"
-            className="tw-w-8 tw-h-8"
+            className="tw-h-8 tw-w-8"
           />
         </div>
-        <p className="tw-text-center tw-font-medium md:tw-text-lg tw-text-gray-200">
+        <p className="tw-text-center tw-font-medium tw-text-gray-200 md:tw-text-lg">
           The {label ? `${label.toLowerCase()} or ` : ""}page you're looking for
           doesn't exist or has been moved.
         </p>

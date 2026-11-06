@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastReviewed": "2026-07-17",
+  "lastReviewed": "2026-11-06",
   "operationalOwner": "frontend-platform",
   "providers": [
     {
@@ -49,6 +49,20 @@
       "sampling": "consented sessions",
       "release": "not attached",
       "notes": "Overlap with Mixpanel is externally unverified; preserve until dashboard ownership is confirmed. gtag.js loads after window load once the browser is idle, on the first interaction, or 10 seconds after consent, whichever is first; the landing page view is sent explicitly so a navigation before gtag.js is ready keeps today's page views"
+    },
+    {
+      "id": "first-party",
+      "owns": [
+        "page-views",
+        "core-web-vitals",
+        "browser-device-cohorts",
+        "browser-http-health",
+        "anonymous-health-counters"
+      ],
+      "automatic": ["page-views", "web-vitals", "health-counters"],
+      "sampling": "every page view while NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY is true (staging now; production when enabled); no sampler",
+      "release": "not attached",
+      "notes": "Same-origin collector at /e (R14 §4.1, C52). Bundled first-party code, about 4 KB brotli, own performance observers. One batch per page view and one when the page hides, by sendBeacon with a fetch keepalive fallback. Route templates, device class, platform, browser family and enum product properties only; no browser storage, identifiers or URLs. The optional daily fp hash is omitted for EU/EEA/UK and unknown countries (C52a). Runs alongside AWS RUM, Mixpanel and Google tag for the two-week overlap, after which they are removed (R14 §4.6)."
     }
   ],
   "signals": [
@@ -527,6 +541,62 @@
       "lifecycle": "temporary",
       "replacement": "Follow-up migration to status/error buckets and profile cohort",
       "reviewBy": "2026-08-13"
+    },
+    {
+      "name": "first-party page view",
+      "kind": "event",
+      "question": "Which route templates are viewed, from which referring domains, on which device classes and platforms?",
+      "owner": "first-party",
+      "externalUsage": "new; internal dashboard and public stats page planned (R14 §3.7)",
+      "reviewBy": "2026-12-06",
+      "producer": "components/providers/FirstPartyTelemetry.tsx",
+      "destinations": ["first-party:owner"],
+      "sampling": "every page view; one per pathname change",
+      "privacy": "App Router route template, page group, previous route template or entry, external referrer hostname on entry only, device class, platform, browser family and signed-in boolean; optional fp is a daily-changing hash of coarse traits, never sent for EU/EEA/UK or unknown countries; never URLs, query strings, titles, handles, addresses or identifiers",
+      "lifecycle": "keep",
+      "replacement": null
+    },
+    {
+      "name": "first-party web vitals",
+      "kind": "event",
+      "question": "What are LCP, INP, CLS, TTFB and FCP per landing route, device class and platform?",
+      "owner": "first-party",
+      "externalUsage": "new; internal dashboard and public stats page planned (R14 §3.7)",
+      "reviewBy": "2026-12-06",
+      "producer": "services/analytics/telemetry/vitals.ts",
+      "destinations": ["first-party:owner"],
+      "sampling": "every page load, sent once when the page first hides",
+      "privacy": "metric values with the landing route template, device class and platform only",
+      "lifecycle": "keep",
+      "replacement": null
+    },
+    {
+      "name": "first-party health counters",
+      "kind": "event",
+      "question": "How often do assets, API requests and the WebSocket fail, and how many long tasks and unhandled errors occur per page view?",
+      "owner": "first-party",
+      "externalUsage": "new; internal dashboard and public stats page planned (R14 §3.7)",
+      "reviewBy": "2026-12-06",
+      "producer": "services/analytics/telemetry/collector.ts",
+      "destinations": ["first-party:owner"],
+      "sampling": "counts aggregated per page view; sent with the next page view or when the page hides",
+      "privacy": "counts by asset kind, error kind and API endpoint template (identifiers replaced) only; no messages, stacks or URLs",
+      "lifecycle": "keep",
+      "replacement": null
+    },
+    {
+      "name": "first-party product events",
+      "kind": "event",
+      "question": "Which registry product events happen, as totals and ratios, for the recreated Homepage, Profile, Product Impact and Wave pilot reports?",
+      "owner": "first-party",
+      "externalUsage": "new; internal dashboard and public stats page planned (R14 §3.7)",
+      "reviewBy": "2026-12-06",
+      "producer": "services/analytics/mixpanel.ts",
+      "destinations": ["first-party:compatibility"],
+      "sampling": "every registry event a Mixpanel call site emits, before Mixpanel delivery checks",
+      "privacy": "registry event name plus at most six allowlisted properties whose values are enum tokens or booleans; unregistered names, numbers and identifier-shaped values are dropped",
+      "lifecycle": "temporary",
+      "replacement": "Becomes the owner of these questions when Mixpanel is removed after the two-week overlap (R14 §4.6)"
     }
   ]
 }
