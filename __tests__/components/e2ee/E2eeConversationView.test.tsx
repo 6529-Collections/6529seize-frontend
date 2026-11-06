@@ -616,3 +616,74 @@ it("Arrow Up edits the latest eligible own message, skipping pending, deleted an
     expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")
   );
 });
+
+describe("encrypted chat file drops", () => {
+  const files = [
+    new File(["%PDF"], "dropped.pdf", { type: "application/pdf" }),
+  ];
+  const dataTransfer = () => ({ types: ["Files"], files, dropEffect: "none" });
+
+  it.each(["timeline", "composer"])(
+    "attaches a file dropped onto the %s exactly once through the encrypted engine",
+    async (target) => {
+      const engine = renderView();
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      const input = screen.getByRole("textbox", { name: "Encrypted message" });
+      const dropTarget = target === "composer" ? input : area;
+      fireEvent.dragEnter(dropTarget, { dataTransfer: dataTransfer() });
+      expect(screen.getByText("Drop files here")).toBeVisible();
+      expect(fireEvent.drop(dropTarget, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Attachments" })).getAllByRole(
+          "listitem"
+        )
+      ).toHaveLength(1);
+      fireEvent.click(screen.getByRole("button", { name: "Send" }));
+      await waitFor(() =>
+        expect(engine.send).toHaveBeenCalledWith(
+          GROUP_G,
+          expect.objectContaining({ files })
+        )
+      );
+    }
+  );
+
+  it.each(["disabled", "editing", "paused"])(
+    "blocks drops when attachments are %s, without navigating away",
+    (mode) => {
+      const engine = renderView(
+        conversation(mode === "paused" ? { delayed: true } : {})
+      );
+      if (mode === "disabled")
+        act(() => engine.update({ attachmentsEnabled: false }));
+      if (mode === "editing") {
+        setComposerText(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          ""
+        );
+        fireEvent.keyDown(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          { key: "ArrowUp", keyCode: 38 }
+        );
+        expect(screen.getByText("Editing message")).toBeVisible();
+      }
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      fireEvent.dragEnter(area, { dataTransfer: dataTransfer() });
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(fireEvent.drop(area, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(
+        screen.queryByRole("list", { name: "Attachments" })
+      ).not.toBeInTheDocument();
+      expect(engine.send).not.toHaveBeenCalled();
+    }
+  );
+});

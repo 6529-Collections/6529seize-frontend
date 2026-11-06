@@ -3,6 +3,8 @@
 import { PaperClipIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
+  type Ref,
+  useImperativeHandle,
   useCallback,
   useEffect,
   useId,
@@ -378,6 +380,7 @@ function ComposerFooter({
 }
 
 interface E2eeComposerProps {
+  readonly ref?: Ref<E2eeComposerHandle>;
   readonly conversation: E2eeConversation;
   readonly engine: E2eeEngine;
   readonly selfProfileId: string | null;
@@ -409,7 +412,12 @@ function getComposerContainerClassName(isApp: boolean): string {
  * previews for attachments, Enter to send. Sends optimistically: the engine
  * shows the message as pending until it is sequenced.
  */
+export interface E2eeComposerHandle {
+  attachFiles: (files: File[]) => void;
+}
+
 export function E2eeComposer({
+  ref,
   conversation,
   engine,
   selfProfileId,
@@ -552,12 +560,25 @@ export function E2eeComposer({
     return true;
   };
 
-  const addFiles = (incoming: readonly File[]) => {
-    const result = addComposerFiles(files, incoming);
-    setFiles(result.files);
-    setError(result.error);
-    return result.files;
-  };
+  const addFiles = useCallback(
+    (incoming: readonly File[]) => {
+      const result = addComposerFiles(files, incoming);
+      setFiles(result.files);
+      setError(result.error);
+      return result.files;
+    },
+    [files]
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      attachFiles: (incoming) => {
+        if (canAttach && !disabledReasonKey) addFiles(incoming);
+      },
+    }),
+    [canAttach, disabledReasonKey, addFiles]
+  );
 
   const onFilesChosen = (event: ChangeEvent<HTMLInputElement>) => {
     addFiles(Array.from(event.target.files ?? []));

@@ -16,9 +16,11 @@ import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { FocusTrap } from "focus-trap-react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
+import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
 import {
   useOriginalImage,
@@ -222,6 +224,7 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const localOriginalQuality = useOriginalImage(src);
   const quality = originalQuality ?? localOriginalQuality;
   const originalRequested = quality.requested;
@@ -236,12 +239,14 @@ export function ImageMediaModal({
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+  const localSource = useLocalImagePreviewSource(src);
   const video = useExpandedGiphyVideo(src, retry, playingOriginal);
   const { showsVideo, videoRef, sources: videoSources } = video;
   const previewUnavailable =
     videoSources === null &&
     (failedSource === src ||
-      getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0);
+      (!localSource &&
+        getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0));
   // Like the inline video, the expanded one goes full screen once it loads.
   const fullscreenReady = showsVideo
     ? video.loaded
@@ -298,201 +303,218 @@ export function ImageMediaModal({
   };
 
   return createPortal(
-    <div
-      className="tailwind-scope tw-relative tw-z-[1100] tw-cursor-default"
-      onTouchStart={(event) => event.stopPropagation()}
-      onTouchEnd={(event) => event.stopPropagation()}
-      onTouchMove={(event) => event.stopPropagation()}
+    <FocusTrap
+      focusTrapOptions={{
+        escapeDeactivates: false,
+        initialFocus: () => dialogRef.current ?? document.body,
+        fallbackFocus: () => dialogRef.current ?? document.body,
+      }}
     >
-      <button
-        type="button"
-        aria-label="Close modal"
-        data-testid="modal-backdrop"
-        onClick={onClose}
-        className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
-      />
-      <TransformWrapper
-        key={src}
-        panning={{ disabled: true }}
-        limitToBounds={!isZoomed}
-        smooth
-        onZoom={(event) =>
-          setZoomState({ src, isZoomed: event.state.scale > 1 })
-        }
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+        className="tailwind-scope tw-relative tw-z-[1100] tw-cursor-default focus:tw-outline-none"
+        onTouchStart={(event) => event.stopPropagation()}
+        onTouchEnd={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
       >
-        {() => (
-          <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
-              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
-                <TransformComponent
-                  wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  wrapperStyle={{ width: "95vw", height: "90dvh" }}
-                  contentStyle={{ width: "95vw", height: "90dvh" }}
-                >
-                  <button
-                    type="button"
-                    aria-label="Close modal"
-                    className="tw-relative tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-p-0"
-                    onClick={handleExpandedImageButtonClick}
+        <button
+          type="button"
+          aria-label="Close modal"
+          data-testid="modal-backdrop"
+          onClick={onClose}
+          className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
+        />
+        <TransformWrapper
+          key={src}
+          panning={{ disabled: true }}
+          limitToBounds={!isZoomed}
+          smooth
+          onZoom={(event) =>
+            setZoomState({ src, isZoomed: event.state.scale > 1 })
+          }
+        >
+          {() => (
+            <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
+              <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
+                <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
+                  <TransformComponent
+                    wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                    contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                    wrapperStyle={{ width: "95vw", height: "90dvh" }}
+                    contentStyle={{ width: "95vw", height: "90dvh" }}
                   >
-                    {/* Drop media can come from arbitrary hosts outside Next image config. */}
-                    {originalRequested && (
-                      <Image
-                        key={`original-${src}`}
-                        ref={playingOriginal ? imageRef : null}
-                        src={resolveIpfsUrlSync(src)}
-                        alt={t(
-                          DEFAULT_LOCALE,
-                          isGif
-                            ? "drop.media.originalGifAlt"
-                            : "drop.media.originalImageAlt"
-                        )}
-                        fill
-                        sizes="95vw"
-                        unoptimized
-                        loading="eager"
-                        hidden={!playingOriginal}
-                        onLoad={quality.onLoad}
-                        onError={quality.onError}
-                        style={EXPANDED_MEDIA_STYLE}
-                      />
-                    )}
-                    {showsVideo && videoSources && (
-                      <ExpandedGiphyVideo
-                        key={`${src}:${retry}`}
-                        sources={videoSources}
-                        videoRef={videoRef}
-                        alt={
-                          videoAlt ??
-                          t(
+                    <button
+                      type="button"
+                      aria-label="Close modal"
+                      className="tw-relative tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-p-0"
+                      onClick={handleExpandedImageButtonClick}
+                    >
+                      {/* Drop media can come from arbitrary hosts outside Next image config. */}
+                      {originalRequested && (
+                        <Image
+                          key={`original-${src}`}
+                          ref={playingOriginal ? imageRef : null}
+                          src={resolveIpfsUrlSync(src)}
+                          alt={t(
                             DEFAULT_LOCALE,
-                            "drop.media.expandedGifAnimationAlt"
-                          )
-                        }
-                        onLoad={video.onLoad}
-                        onError={video.onError}
-                        onPlayingChange={video.setPlaying}
-                      />
-                    )}
-                    {videoSources === null && (
-                      <span
-                        className="tw-absolute tw-inset-0"
-                        hidden={playingOriginal}
-                      >
-                        <DropImagePreview
-                          key={`${src}:${retry}`}
-                          ref={playingOriginal ? null : imageRef}
-                          onError={() => setFailedSource(src)}
-                          onLoad={() => setFailedSource(null)}
-                          originalSrc={src}
-                          imageScale={ImageScale.AUTOx1080}
-                          preferHighQuality={preferHighQualityPreview}
-                          onAnimatedPreviewUnavailable={
-                            onAnimatedPreviewUnavailable
-                          }
-                          alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+                            isGif
+                              ? "drop.media.originalGifAlt"
+                              : "drop.media.originalImageAlt"
+                          )}
                           fill
                           sizes="95vw"
+                          unoptimized
+                          loading="eager"
+                          hidden={!playingOriginal}
+                          onLoad={quality.onLoad}
+                          onError={quality.onError}
                           style={EXPANDED_MEDIA_STYLE}
                         />
-                      </span>
-                    )}
-                  </button>
-                </TransformComponent>
+                      )}
+                      {showsVideo && videoSources && (
+                        <ExpandedGiphyVideo
+                          key={`${src}:${retry}`}
+                          sources={videoSources}
+                          videoRef={videoRef}
+                          alt={
+                            videoAlt ??
+                            t(
+                              DEFAULT_LOCALE,
+                              "drop.media.expandedGifAnimationAlt"
+                            )
+                          }
+                          onLoad={video.onLoad}
+                          onError={video.onError}
+                          onPlayingChange={video.setPlaying}
+                        />
+                      )}
+                      {videoSources === null && (
+                        <span
+                          className="tw-absolute tw-inset-0"
+                          hidden={playingOriginal}
+                        >
+                          <DropImagePreview
+                            key={`${src}:${retry}`}
+                            ref={playingOriginal ? null : imageRef}
+                            onError={() => setFailedSource(src)}
+                            onLoad={() => setFailedSource(null)}
+                            originalSrc={src}
+                            imageScale={ImageScale.AUTOx1080}
+                            preferHighQuality={preferHighQualityPreview}
+                            onAnimatedPreviewUnavailable={
+                              onAnimatedPreviewUnavailable
+                            }
+                            alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+                            fill
+                            sizes="95vw"
+                            style={EXPANDED_MEDIA_STYLE}
+                          />
+                        </span>
+                      )}
+                    </button>
+                  </TransformComponent>
+                </div>
               </div>
             </div>
+          )}
+        </TransformWrapper>
+        {quality.loading && (
+          <output
+            aria-label={loadingOriginalLabel}
+            className="tw-pointer-events-none tw-fixed tw-left-1/2 tw-top-1/2 tw-z-[1101] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-black/60 tw-p-3"
+          >
+            <span className="tw-sr-only">{loadingOriginalLabel}</span>
+            <span
+              aria-hidden="true"
+              className="tw-block tw-size-6 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-100/30 tw-border-t-iron-100 motion-safe:tw-animate-spin"
+            />
+          </output>
+        )}
+        {!playingOriginal && previewUnavailable && (
+          <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
+            <Button
+              type="button"
+              variant="tertiary"
+              size="sm"
+              onClick={retryPreview}
+            >
+              {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
+            </Button>
           </div>
         )}
-      </TransformWrapper>
-      {quality.loading && (
-        <output
-          aria-label={loadingOriginalLabel}
-          className="tw-pointer-events-none tw-fixed tw-left-1/2 tw-top-1/2 tw-z-[1101] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-black/60 tw-p-3"
+        {showGalleryControls && gallery && (
+          <>
+            <button
+              type="button"
+              aria-label="Previous image"
+              title="Previous image"
+              disabled={!gallery.canGoPrevious}
+              onClick={(event) => {
+                event.stopPropagation();
+                goToPrevious();
+              }}
+              className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
+            >
+              <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next image"
+              title="Next image"
+              disabled={!gallery.canGoNext}
+              onClick={(event) => {
+                event.stopPropagation();
+                goToNext();
+              }}
+              className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
+            >
+              <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
+            </button>
+            <div
+              className="tw-fixed tw-left-1/2 tw-z-[1101] -tw-translate-x-1/2 tw-rounded-lg tw-bg-iron-900/95 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur"
+              data-testid="image-gallery-counter"
+              style={{
+                bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+              }}
+            >
+              {gallery.currentIndex + 1} / {gallery.total}
+            </div>
+          </>
+        )}
+        <ExpandedMediaToolbar
+          onOpen={onOpen}
+          openLabel={openLabel}
+          onDownload={onDownload}
+          isDownloading={isDownloading}
+          onFullscreen={handleFullscreen}
+          fullscreenTargetAvailable={
+            fullscreenTargetAvailable && fullscreenReady
+          }
+          onClose={onClose}
         >
-          <span className="tw-sr-only">{loadingOriginalLabel}</span>
-          <span
-            aria-hidden="true"
-            className="tw-block tw-size-6 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-100/30 tw-border-t-iron-100 motion-safe:tw-animate-spin"
-          />
-        </output>
-      )}
-      {!playingOriginal && previewUnavailable && (
-        <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
-          <Button
-            type="button"
-            variant="tertiary"
-            size="sm"
-            onClick={retryPreview}
-          >
-            {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
-          </Button>
-        </div>
-      )}
-      {showGalleryControls && gallery && (
-        <>
-          <button
-            type="button"
-            aria-label="Previous image"
-            title="Previous image"
-            disabled={!gallery.canGoPrevious}
-            onClick={(event) => {
-              event.stopPropagation();
-              goToPrevious();
-            }}
-            className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
-          >
-            <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next image"
-            title="Next image"
-            disabled={!gallery.canGoNext}
-            onClick={(event) => {
-              event.stopPropagation();
-              goToNext();
-            }}
-            className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
-          >
-            <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
-          </button>
-          <div
-            className="tw-fixed tw-left-1/2 tw-z-[1101] -tw-translate-x-1/2 tw-rounded-lg tw-bg-iron-900/95 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur"
-            data-testid="image-gallery-counter"
-            style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
-          >
-            {gallery.currentIndex + 1} / {gallery.total}
-          </div>
-        </>
-      )}
-      <ExpandedMediaToolbar
-        onOpen={onOpen}
-        openLabel={openLabel}
-        onDownload={onDownload}
-        isDownloading={isDownloading}
-        onFullscreen={handleFullscreen}
-        fullscreenTargetAvailable={fullscreenTargetAvailable && fullscreenReady}
-        onClose={onClose}
-      >
-        {showsVideo && (
-          <GiphyPlaybackToggle
-            videoRef={videoRef}
-            playing={video.playing}
-            autoHide={false}
-            placement="toolbar"
-          />
-        )}
-        {quality.canViewOriginal && (
-          <ImageQualityToggle
-            showingOriginal={originalRequested}
-            failed={quality.failed}
-            isGif={isGif}
-            onToggle={quality.toggle}
-          />
-        )}
-      </ExpandedMediaToolbar>
-    </div>,
+          {showsVideo && (
+            <GiphyPlaybackToggle
+              videoRef={videoRef}
+              playing={video.playing}
+              autoHide={false}
+              placement="toolbar"
+            />
+          )}
+          {quality.canViewOriginal && (
+            <ImageQualityToggle
+              showingOriginal={originalRequested}
+              failed={quality.failed}
+              isGif={isGif}
+              onToggle={quality.toggle}
+            />
+          )}
+        </ExpandedMediaToolbar>
+      </div>
+    </FocusTrap>,
     document.body
   );
 }

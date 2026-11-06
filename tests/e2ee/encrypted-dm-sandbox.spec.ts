@@ -1,3 +1,7 @@
+import {
+  dropEncryptedAttachment,
+  checkEncryptedImageActions,
+} from "../support/e2ee/attachmentMedia";
 import type { BrowserContext } from "@playwright/test";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
@@ -458,18 +462,10 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
 
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
-    const chooser = alice.page.waitForEvent("filechooser");
-    // Keyboard activation: on phones the dev-only Next.js badge overlaps the
-    // composer's bottom-left attach button.
-    await alice.page
-      .getByRole("button", { name: "Attach files" })
-      .press("Enter");
-    await (
-      await chooser
-    ).setFiles({
+    await dropEncryptedAttachment(alice.page, {
       name: "pixel.png",
       mimeType: "image/png",
-      buffer: Buffer.from(PIXEL_PNG_BASE64, "base64"),
+      base64: PIXEL_PNG_BASE64,
     });
     await expect(
       alice.page
@@ -498,6 +494,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         image.evaluate((element: HTMLImageElement) => element.naturalWidth)
       )
       .toBe(1);
+    await checkEncryptedImageActions(bob.page, image, "pixel.png");
     await gotoPath(bob.page, ENCRYPTED_ROUTE);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,

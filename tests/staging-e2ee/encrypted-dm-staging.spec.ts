@@ -1,3 +1,7 @@
+import {
+  dropEncryptedAttachment,
+  checkEncryptedImageActions,
+} from "../support/e2ee/attachmentMedia";
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
 import { performance } from "node:perf_hooks";
 import {
@@ -37,7 +41,6 @@ import {
   UI_TIMEOUT_MS,
 } from "../support/staging-e2ee/session";
 import {
-  attachFile,
   composer,
   expectDecrypted,
   expectNothingUndecryptable,
@@ -415,7 +418,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const caption = qaMessage(runId, "image caption");
 
     await openChat(a, dm);
-    await attachFile(a, image);
+    await dropEncryptedAttachment(a.page, {
+      name: image.name,
+      mimeType: "image/png",
+      base64: image.buffer.toString("base64"),
+    });
     await sendEncrypted(a, caption);
     const altText = `Image: ${image.name}`;
     await expect(
@@ -443,6 +450,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         `decrypted pixel byte ${index} differs`
       ).toBeLessThanOrEqual(2);
     });
+    await checkEncryptedImageActions(b.page, received, image.name);
     await expectNothingUndecryptable(b);
 
     expectPrivateAndClean(

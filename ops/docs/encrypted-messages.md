@@ -214,17 +214,26 @@ the same people already chosen. Earlier messages are not copied.
   emojis available and offers **Try again**. Custom emojis in messages remain
   readable as `:name:` until available; older apps may also show this text.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
-  device like messages. Images show inline and other files are downloads.
+  device like messages. Drop files anywhere over the chat or message input to add
+  them to the draft, with the same drop overlay as ordinary chat. Dropping does
+  not send them: use Send when ready. Drops use the same count and size limits
+  and are blocked while editing, while the chat is paused, or when attachments
+  are switched off. Images show inline and other files are downloads.
+  Tap or click an image to open the regular image popup, with zoom and download
+  controls. Desktop hover also reveals the regular full-screen, open-in-new-tab
+  and download actions. In the app, use the popup's download action to save or
+  share the decrypted image; local image links cannot open in an external browser.
+  Decrypted previews stay on your device and do not go through a public image proxy.
   An image larger than about 50 megapixels shows as a file to download
   (**Too large to preview**) instead, and only a few images load at once.
   File names are shown and saved without path separators, control or
   right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
-  there is no attach control and chats are text only.
+  the attach control is disabled and chats are text only.
 - Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
   same limits as the attach control. Text copied together with an image is
   pasted into the message as well. Pasting attaches images only while the
-  attach control is shown, so not while you edit a message.
+  attach control is enabled, so not while you edit a message.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted

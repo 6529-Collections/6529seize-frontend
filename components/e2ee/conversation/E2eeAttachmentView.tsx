@@ -3,6 +3,8 @@
 import { ArrowDownTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "@/hooks/useCapacitor";
+import { downloadMediaUrl } from "@/helpers/media-download.helpers";
 import { useNearViewport } from "@/hooks/useNearViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
@@ -11,13 +13,12 @@ import { t } from "@/i18n/messages";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
 import { attachmentDisplayName } from "../e2eeFormat";
+import { E2eeImageMedia } from "./E2eeImageMedia";
 import {
   fitsInline,
   prepareInlineImage,
   withInlineImageSlot,
 } from "./e2eeInlineImage";
-
-const MAX_IMAGE_HEIGHT_PX = 320;
 
 const isInlineImage = (attachment: E2eeAttachment) =>
   isSafeInlineImageMime(attachment.mime);
@@ -62,7 +63,10 @@ function InlineImage(props: AttachmentProps) {
   return (
     <span ref={ref} className="tw-block tw-min-h-24 tw-max-w-full">
       {near ? (
-        <InlineImageContent {...props} />
+        <InlineImageContent
+          key={`${props.g}:${props.messageId}:${props.attachment.blob}`}
+          {...props}
+        />
       ) : (
         <span
           aria-hidden="true"
@@ -173,15 +177,7 @@ function InlineImageContent(props: AttachmentProps) {
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- decrypted locally into a blob: URL; next/image cannot optimize it.
-    <img
-      src={url}
-      alt={t(locale, "e2ee.message.attachment.imageAlt", { name })}
-      width={attachment.width}
-      height={attachment.height}
-      style={{ ...aspectStyle, maxHeight: MAX_IMAGE_HEIGHT_PX }}
-      className="tw-h-auto tw-w-auto tw-max-w-full tw-rounded-lg tw-bg-iron-900 tw-object-contain"
-    />
+    <E2eeImageMedia key={url} url={url} name={name} attachment={attachment} />
   );
 }
 
@@ -194,6 +190,7 @@ function DownloadableFile({
   note,
 }: AttachmentProps & { readonly note?: string }) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const name = attachmentDisplayName(locale, attachment.name);
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -204,14 +201,11 @@ function DownloadableFile({
     try {
       const blob = await engine.getAttachment(g, messageId, attachment.blob);
       const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = name;
-      anchor.rel = "noopener";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      try {
+        await downloadMediaUrl({ url: objectUrl, fileName: name, isCapacitor });
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
     } catch {
       setFailed(true);
     } finally {
