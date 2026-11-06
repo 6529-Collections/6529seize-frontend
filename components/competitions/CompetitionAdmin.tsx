@@ -13,6 +13,7 @@ import {
 } from "@/services/api/competitions-api";
 import {
   getCompetitionRoute,
+  getCompetitionsRoute,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -29,7 +30,7 @@ function getLifecycleActions(
     case ApiCompetitionLifecycle.Draft:
       return ["publish", "archive"];
     case ApiCompetitionLifecycle.Published:
-      return [];
+      return ["archive"];
     case ApiCompetitionLifecycle.Archived:
       return ["clone"];
     case ApiCompetitionLifecycle.Ended:
@@ -39,11 +40,13 @@ function getLifecycleActions(
 }
 
 export default function CompetitionAdmin({
-  paused,
+  paused = null,
   onEdit,
+  archiveOnly = false,
 }: {
-  readonly paused: boolean | null;
-  readonly onEdit: () => void;
+  readonly paused?: boolean | null;
+  readonly onEdit?: () => void;
+  readonly archiveOnly?: boolean;
 }) {
   const { competition } = useCompetition();
   const { requestAuth } = useAuth();
@@ -51,9 +54,11 @@ export default function CompetitionAdmin({
   const router = useRouter();
   const client = useQueryClient();
   const [action, setAction] = useState<CompetitionAction | null>(null);
-  const [actionVersion, setActionVersion] = useState(
-    competition.config_version
-  );
+  const [actionSnapshot, setActionSnapshot] = useState({
+    version: competition.config_version,
+    lifecycle: competition.lifecycle,
+  });
+  const { version: actionVersion, lifecycle: actionLifecycle } = actionSnapshot;
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -66,16 +71,45 @@ export default function CompetitionAdmin({
   const canAdminister = competition.permissions.administer;
   const canEditRules =
     competition.permissions.edit_rules_after_activity === true;
-  const actions = getLifecycleActions(competition.lifecycle);
+  const actions = getLifecycleActions(competition.lifecycle).filter(
+    (command) => !archiveOnly || command === "archive"
+  );
+  const published = competition.lifecycle === ApiCompetitionLifecycle.Published;
+  const reasonRequired =
+    action === "pause" ||
+    (action === "archive" &&
+      published &&
+      competition.permissions.archive_requires_reason !== false);
+  const reasonHelpId =
+    action === "pause"
+      ? "competition-pause-reason-help"
+      : "competition-archive-reason-help";
+  const actionLabel = (command: CompetitionAction) =>
+    t(
+      locale,
+      command === "archive" && published
+        ? "competitions.archiveAndStop"
+        : `competitions.${command}`
+    );
+  const consequences = () => {
+    if (action === "pause") return "competitions.pauseConsequences";
+    if (action === "archive" && published)
+      return "competitions.archiveStopConsequences";
+    if (action === "archive") return "competitions.archiveConsequences";
+    return "competitions.actionConsequences";
+  };
   const openAction = (command: CompetitionAction) => {
-    setActionVersion(competition.config_version);
+    setActionSnapshot({
+      version: competition.config_version,
+      lifecycle: competition.lifecycle,
+    });
     setReason("");
     setFailed(false);
     setAction(command);
   };
   const execute = async () => {
     const trimmedReason = reason.trim();
-    if (!action || busy || (action === "pause" && !trimmedReason)) return;
+    if (!action || busy || (reasonRequired && !trimmedReason)) return;
     setBusy(true);
     setFailed(false);
     const identity = {
@@ -105,6 +139,11 @@ export default function CompetitionAdmin({
       await invalidateCompetition(client, identity);
       if (action === "clone")
         router.push(getCompetitionRoute(competition.wave_id, result.id));
+      if (
+        action === "archive" &&
+        actionLifecycle === ApiCompetitionLifecycle.Draft
+      )
+        router.push(getCompetitionsRoute(competition.wave_id));
     } catch {
       setFailed(true);
       await invalidateCompetition(client, identity);
@@ -114,43 +153,50 @@ export default function CompetitionAdmin({
   };
   return (
     <>
-      <CompetitionPauseHistory
-        action={
-          canAdminister &&
-          competition.lifecycle === ApiCompetitionLifecycle.Published &&
-          paused !== null ? (
-            <button
-              type="button"
-              className={`${COMPETITION_BUTTON} tw-gap-2`}
-              disabled={busy}
-              onClick={() => openAction(paused ? "resume" : "pause")}
-            >
-              {paused ? (
-                <PlayIcon className="tw-size-4" aria-hidden="true" />
-              ) : (
-                <PauseIcon className="tw-size-4" aria-hidden="true" />
-              )}
-              {t(locale, paused ? "competitions.resume" : "competitions.pause")}
-            </button>
-          ) : null
-        }
-      />
-      <CompetitionAppearance />
+      {!archiveOnly && (
+        <CompetitionPauseHistory
+          action={
+            canAdminister &&
+            competition.lifecycle === ApiCompetitionLifecycle.Published &&
+            paused !== null ? (
+              <button
+                type="button"
+                className={`${COMPETITION_BUTTON} tw-gap-2`}
+                disabled={busy}
+                onClick={() => openAction(paused ? "resume" : "pause")}
+              >
+                {paused ? (
+                  <PlayIcon className="tw-size-4" aria-hidden="true" />
+                ) : (
+                  <PauseIcon className="tw-size-4" aria-hidden="true" />
+                )}
+                {t(
+                  locale,
+                  paused ? "competitions.resume" : "competitions.pause"
+                )}
+              </button>
+            ) : null
+          }
+        />
+      )}
+      {!archiveOnly && <CompetitionAppearance />}
       {canAdminister &&
         (actions.length > 0 ||
           competition.lifecycle === ApiCompetitionLifecycle.Draft ||
           canEditRules) && (
           <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
-              <button
-                type="button"
-                className={COMPETITION_BUTTON}
-                onClick={onEdit}
-              >
-                {t(locale, "competitions.finishSetup")}
-              </button>
-            )}
-            {canEditRules && (
+            {!archiveOnly &&
+              onEdit &&
+              competition.lifecycle === ApiCompetitionLifecycle.Draft && (
+                <button
+                  type="button"
+                  className={COMPETITION_BUTTON}
+                  onClick={onEdit}
+                >
+                  {t(locale, "competitions.finishSetup")}
+                </button>
+              )}
+            {!archiveOnly && onEdit && canEditRules && (
               <button
                 type="button"
                 className={COMPETITION_BUTTON}
@@ -167,7 +213,7 @@ export default function CompetitionAdmin({
                 disabled={busy}
                 onClick={() => openAction(command)}
               >
-                {t(locale, `competitions.${command}`)}
+                {actionLabel(command)}
               </button>
             ))}
           </div>
@@ -175,18 +221,13 @@ export default function CompetitionAdmin({
       {action && (
         <MobileWrapperConfirmationDialog
           isConfirming={busy}
-          confirmDisabled={action === "pause" && !reason.trim()}
+          confirmDisabled={reasonRequired && !reason.trim()}
           isOpen
           title={t(locale, "competitions.confirmAction", {
-            action: t(locale, `competitions.${action}`),
+            action: actionLabel(action),
             title: competition.title,
           })}
-          message={t(
-            locale,
-            action === "pause"
-              ? "competitions.pauseConsequences"
-              : "competitions.actionConsequences"
-          )}
+          message={t(locale, consequences())}
           confirmText={t(locale, "competitions.confirm")}
           cancelText={t(locale, "competitions.dismiss")}
           onClose={() => {
@@ -204,7 +245,7 @@ export default function CompetitionAdmin({
               >
                 {t(
                   locale,
-                  action === "pause"
+                  reasonRequired
                     ? "competitions.reasonRequired"
                     : "competitions.reasonOptional"
                 )}
@@ -213,23 +254,24 @@ export default function CompetitionAdmin({
                 id="competition-action-reason"
                 className={`${COMPETITION_INPUT} tw-min-h-28 tw-resize-y tw-text-sm`}
                 value={reason}
-                required={action === "pause"}
+                required={reasonRequired}
                 maxLength={2000}
                 rows={3}
                 disabled={busy}
-                aria-describedby={
-                  action === "pause"
-                    ? "competition-pause-reason-help"
-                    : undefined
-                }
+                aria-describedby={reasonRequired ? reasonHelpId : undefined}
                 onChange={(event) => setReason(event.target.value)}
               />
-              {action === "pause" && (
+              {reasonRequired && (
                 <p
-                  id="competition-pause-reason-help"
+                  id={reasonHelpId}
                   className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400"
                 >
-                  {t(locale, "competitions.pauseReasonHelp")}
+                  {t(
+                    locale,
+                    action === "pause"
+                      ? "competitions.pauseReasonHelp"
+                      : "competitions.archiveReasonHelp"
+                  )}
                 </p>
               )}
             </div>

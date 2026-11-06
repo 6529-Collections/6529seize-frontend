@@ -18,8 +18,7 @@ import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessag
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { MessageKey } from "@/i18n/messages/en-US";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { useId, useState } from "react";
 
