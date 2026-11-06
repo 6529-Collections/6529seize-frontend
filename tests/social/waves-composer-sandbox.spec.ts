@@ -62,6 +62,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     page,
   }, testInfo) => {
     const pageErrors: string[] = [];
+    const longHandle = "alicewithaverylongprofilehandle";
     page.on("pageerror", (error) => pageErrors.push(error.message));
     await page.route(
       `**/v2/waves/${SANDBOX_WAVE_ID}/mention-search?**`,
@@ -72,7 +73,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
               id: "profile-alice",
               handle: "alicelonghandle",
               display: "A long display name for the mention suggestion",
-              pfp: null,
+              pfp: `${baseURL}/6529bgwhite.svg`,
               level: 42,
             },
             {
@@ -82,11 +83,21 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
               pfp: null,
               level: 0,
             },
+            {
+              id: "profile-long",
+              handle: longHandle,
+              display: "Another long display name that stays within its row",
+              pfp: null,
+              level: 100,
+            },
           ],
         });
       }
     );
     await gotoSandboxWave(page);
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await page.setViewportSize({ width: 375, height: 844 });
+    }
     const composer = page
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
@@ -102,6 +113,69 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       experienced.getByRole("button", { includeHidden: true })
     ).toHaveCount(0);
+    const list = page.getByRole("list").filter({ has: experienced });
+    await expect(list.getByRole("button")).toHaveText([
+      /alicelonghandle/,
+      /alicenew/,
+      new RegExp(longHandle),
+    ]);
+    const layout = await list.evaluate((element) => {
+      const card = element.parentElement!;
+      const style = getComputedStyle(element);
+      return {
+        width: card.getBoundingClientRect().width,
+        padding: getComputedStyle(card).padding,
+        listMargin: style.margin,
+        listPadding: style.padding,
+        gap: style.rowGap,
+        rowHeights: Array.from(
+          element.querySelectorAll("button"),
+          (row) => row.getBoundingClientRect().height
+        ),
+      };
+    });
+    expect(layout).toMatchObject({
+      width: 288,
+      padding: "8px",
+      listMargin: "0px",
+      listPadding: "0px",
+      gap: "2px",
+    });
+    expect(layout.rowHeights.every((height) => height >= 44)).toBe(true);
+    const check = await experienced.evaluate((button) => {
+      const icon = button.querySelector("svg")!.getBoundingClientRect();
+      const handle = button.querySelector("span")!.getBoundingClientRect();
+      return {
+        width: icon.width,
+        height: icon.height,
+        offset: icon.y + icon.height / 2 - handle.y - handle.height / 2,
+      };
+    });
+    expect(check.width).toBe(16);
+    expect(check.height).toBe(16);
+    expect(Math.abs(check.offset)).toBeLessThanOrEqual(0.5);
+    const badge = await experienced
+      .getByText("42", { exact: true })
+      .evaluate((element) => {
+        const circle = element.parentElement!;
+        const { width, height } = circle.getBoundingClientRect();
+        return {
+          width,
+          height,
+          radius: Number.parseFloat(getComputedStyle(circle).borderRadius),
+        };
+      });
+    expect(badge.width).toBe(20);
+    expect(badge.height).toBe(20);
+    expect(badge.radius).toBeGreaterThanOrEqual(10);
+    await expect(experienced.getByRole("img")).toBeVisible();
+    await expect(experienced).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    const longTitle = list.getByText(longHandle, { exact: true });
+    expect(
+      await longTitle.evaluate(
+        (element) => element.scrollWidth > element.clientWidth
+      )
+    ).toBe(true);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("mention-levels.png") });
     await composer.press("ArrowDown");
@@ -109,6 +183,17 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await composer.press("Enter");
     await expect(composer).toContainText("@alicelonghandle");
     await expect(experienced).toBeHidden();
+    await composer.fill("@ali");
+    await expect(newcomer).toBeVisible();
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await newcomer.tap();
+    } else {
+      await newcomer.hover();
+      await expect(newcomer).toHaveCSS("background-color", "rgb(38, 39, 43)");
+      await newcomer.click();
+    }
+    await expect(composer).toContainText("@alicenew");
+    await expect(newcomer).toBeHidden();
     expect(pageErrors).toEqual([]);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
