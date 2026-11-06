@@ -130,8 +130,9 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
-  it("bakes signed messages on into production builds", () => {
+  it("bakes signed messages and app device grants on into production builds", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+    expect(build.env.NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS).toBe("true");
   });
 
   it("turns the encrypted messages flag on in production builds", () => {
