@@ -197,7 +197,7 @@
   "about.cookiePolicy.awsRum.userId.lifespan": "30 days",
   "about.cookiePolicy.awsRum.session.purpose": "A session ID that groups the page speed and error measurements of one visit.",
   "about.cookiePolicy.awsRum.session.lifespan": "30 minutes after last activity",
-  "about.cookiePolicy.awsRum.sampling": "We use Amazon CloudWatch RUM to measure page load speed, browser errors and failed requests on a sample of visits. In those visits it sets the {userIdCookie} and {sessionCookie} performance cookies. These cookies are currently set whether or not you accept performance cookies, and the Performance Cookies setting on this page does not turn them off. The measurements go to our own Amazon Web Services account.",
+  "about.cookiePolicy.awsRum.sampling": "We use Amazon CloudWatch RUM to measure page load speed, browser errors and failed requests on a sample of visits. In those visits it sets the {userIdCookie} and {sessionCookie} performance cookies. These cookies are set only if you accept performance cookies. Turning performance cookies off stops these measurements and deletes the cookies. The measurements go to our own Amazon Web Services account.",
   "about.primaryAddress.title": "On-Chain Primary Address",
   "about.primaryAddress.overview.title": "Overview",
   "about.primaryAddress.single.title": "Single Address",

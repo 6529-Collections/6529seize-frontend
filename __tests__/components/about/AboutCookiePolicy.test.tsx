@@ -71,7 +71,7 @@ describe('AboutCookiePolicy', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /currently set whether or not you accept performance cookies/
+        /set only if you accept performance cookies\. Turning performance cookies off stops these measurements and deletes the cookies\./
       )
     ).toBeInTheDocument();
   });

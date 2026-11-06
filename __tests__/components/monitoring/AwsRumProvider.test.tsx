@@ -9,6 +9,8 @@ const OTHER_WAVE_ID = `${"f".repeat(8)}-${"1".repeat(4)}-4${"2".repeat(3)}-a${"3
 const TEST_AUTHOR_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
 const MEDIA_URL = `https://media.example.cloudfront.net/renditions/drops/author_${TEST_AUTHOR_ID}/file.m3u8`;
 let mockPathname = `/waves/${WAVE_ID}`;
+let mockPerformanceConsent: boolean | undefined = true;
+let mockStoredPerformanceConsent: boolean | undefined = undefined;
 
 type MockPluginContext = {
   record: (eventType: string, eventData: object) => void;
@@ -17,6 +19,13 @@ type MockPluginContext = {
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+}));
+
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useOptionalCookieConsent: () => ({
+    performanceConsent: mockPerformanceConsent,
+  }),
+  getCookieConsentByName: () => mockStoredPerformanceConsent,
 }));
 
 jest.mock("aws-rum-web", () => {
@@ -149,6 +158,8 @@ describe("AwsRumProvider", () => {
       VERSION: "test-version",
     });
     mockPathname = `/waves/${WAVE_ID}`;
+    mockPerformanceConsent = true;
+    mockStoredPerformanceConsent = undefined;
     mockAwsRum.mockClear();
     mockFetchPlugin.mockClear();
     mockXhrPlugin.mockClear();
@@ -553,6 +564,95 @@ describe("AwsRumProvider", () => {
 
     expect(mockAwsRum).not.toHaveBeenCalled();
     expect(window.awsRum).toBeUndefined();
+  });
+
+  describe("performance consent", () => {
+    const setRumCookies = (): void => {
+      document.cookie = "cwr_u=test-user; path=/";
+      setAwsRumSessionCookie(true);
+    };
+    const hasCookie = (name: string): boolean =>
+      document.cookie
+        .split("; ")
+        .some((cookie) => cookie.startsWith(`${name}=`));
+
+    it("starts AWS RUM when performance cookies are accepted", async () => {
+      mockPerformanceConsent = true;
+
+      render(<AwsRumProvider />);
+
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    });
+
+    it("does not start AWS RUM and deletes its cookies when performance cookies are rejected", async () => {
+      mockPerformanceConsent = false;
+      setRumCookies();
+
+      render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+      expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+    });
+
+    it("waits while no performance choice has been made", async () => {
+      mockPerformanceConsent = undefined;
+      mockStoredPerformanceConsent = undefined;
+
+      const { rerender } = render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+
+      // The regional default or the banner then accepts.
+      mockPerformanceConsent = true;
+      rerender(<AwsRumProvider />);
+
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    });
+
+    it("uses a stored acceptance before the consent provider reports it, without starting twice", async () => {
+      mockPerformanceConsent = undefined;
+      mockStoredPerformanceConsent = true;
+
+      const { rerender } = render(<AwsRumProvider />);
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+      mockPerformanceConsent = true;
+      rerender(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).toHaveBeenCalledTimes(1);
+      expect(getMockAwsRumInstance().disable).not.toHaveBeenCalled();
+    });
+
+    it("stops AWS RUM and deletes its cookies after a later rejection", async () => {
+      mockPerformanceConsent = true;
+      const { rerender } = render(<AwsRumProvider />);
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+      const awsRumInstance = getMockAwsRumInstance();
+      setRumCookies();
+
+      mockPerformanceConsent = false;
+      rerender(<AwsRumProvider />);
+
+      expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
+      expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+
+      mockPathname = `/waves/${OTHER_WAVE_ID}`;
+      rerender(<AwsRumProvider />);
+      expect(awsRumInstance.recordPageView).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("disables AWS RUM and clears the global instance on unmount", async () => {

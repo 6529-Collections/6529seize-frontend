@@ -1,6 +1,11 @@
 "use client";
 
+import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { publicEnv } from "@/config/env";
+import {
+  clearAwsRumCookies,
+  hasAwsRumPerformanceConsent,
+} from "@/utils/monitoring/awsRumConsent";
 import { AWS_RUM_DISPATCH_CONFIG } from "@/utils/monitoring/awsRumDispatch";
 import { isAwsRumSessionSampled } from "@/utils/monitoring/awsRumSampling";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
@@ -27,18 +32,29 @@ const AWS_RUM_HTTP_URLS_TO_EXCLUDE: readonly RegExp[] = [
 ];
 
 interface AwsRumProviderProps {
-  readonly children: React.ReactNode;
+  readonly children?: React.ReactNode;
 }
 
 export default function AwsRumProvider({
   children,
 }: Readonly<AwsRumProviderProps>) {
   const pathname = usePathname();
+  // RUM sets the cwr_u/cwr_s performance cookies, so it follows the same
+  // performance consent as Google Analytics and Mixpanel.
+  const performanceConsent = useOptionalCookieConsent()?.performanceConsent;
+  const hasPerformanceConsent = hasAwsRumPerformanceConsent(performanceConsent);
   const latestPathnameRef = useRef(pathname);
   const awsRumRef = useRef<AwsRumInstance | undefined>(undefined);
   const lastRecordedPageIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    // Without performance consent RUM stays off, and a rejection removes the
+    // cookies an earlier accepted session left behind.
+    if (!hasPerformanceConsent) {
+      clearAwsRumCookies();
+      return;
+    }
+
     // Skip initialization in development mode to avoid noise
     if (publicEnv.NODE_ENV === "development") {
       console.warn("AWS RUM: Skipped initialization in development mode");
@@ -153,7 +169,7 @@ export default function AwsRumProvider({
         delete window.awsRum;
       }
     };
-  }, []);
+  }, [hasPerformanceConsent]);
 
   useEffect(() => {
     latestPathnameRef.current = pathname;

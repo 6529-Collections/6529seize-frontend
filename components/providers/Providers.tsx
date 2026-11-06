@@ -43,6 +43,7 @@ import CapacitorSetup from "./CapacitorSetup";
 import EULAConsentStartup from "./EULAConsentStartup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
@@ -117,6 +118,7 @@ export default function Providers({
                               disabled={!enableCookieConsent}
                             >
                               <MixpanelSetup />
+                              <AwsRumProvider />
                               <AppWebSocketProvider>
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
