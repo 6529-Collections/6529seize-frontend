@@ -38,8 +38,11 @@ import {
   type ChainActionEvent,
 } from "./chain";
 import {
+  hasTransitionObservers,
+  notifyTransitionObservers,
   reportIllegalTransition,
   type IllegalTransitionReporter,
+  type TransitionObserver,
 } from "./report";
 import type {
   ActionEvent,
@@ -58,6 +61,8 @@ export interface TransitionOptions {
   readonly policy?: RetryPolicy | undefined;
   /** Receives illegal transitions; null silences them. Default: the module's. */
   readonly reporter?: IllegalTransitionReporter | null | undefined;
+  /** Also observes this call, besides the app-wide transition observers. */
+  readonly observer?: TransitionObserver | null | undefined;
 }
 
 export const DEFAULT_RETRY_POLICY: RetryPolicy = {
@@ -449,6 +454,18 @@ export function transition(
     reportIllegalTransition(
       { from: state.kind, mode: state.mode, event: event.type },
       options.reporter
+    );
+  }
+  if (hasTransitionObservers(options.observer)) {
+    notifyTransitionObservers(
+      Object.freeze({
+        from: state.kind,
+        event: event.type,
+        to: result.state.kind,
+        mode: state.mode,
+        legal: result.legal,
+      }),
+      options.observer
     );
   }
   return result.state;
