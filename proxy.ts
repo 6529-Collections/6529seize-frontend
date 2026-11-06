@@ -279,6 +279,10 @@ function resolveMyStreamRedirect(
     return undefined;
   }
 
+  return resolveLegacyStreamQueryRedirect(req);
+}
+
+function resolveLegacyStreamQueryRedirect(req: NextRequest): string {
   const params = new URLSearchParams(req.nextUrl.searchParams);
   const view = params.get("view") ?? undefined;
   const wave = params.get("wave") ?? undefined;
@@ -307,6 +311,19 @@ function resolveMyStreamRedirect(
     if (value !== null) destination.searchParams.set(key, value);
   }
   return `${destination.pathname}${destination.search}`;
+}
+
+// The old app home opened a wave with `/?wave=<id>`. `/` is prerendered
+// without its query, so the wave route serves these links, on every device.
+function resolveHomeWaveRedirect(
+  req: NextRequest,
+  normalizedPathname: string
+): string | undefined {
+  if (normalizedPathname !== "/" || !req.nextUrl.searchParams.get("wave")) {
+    return undefined;
+  }
+
+  return resolveLegacyStreamQueryRedirect(req);
 }
 
 function handleRedirects(req: NextRequest): NextResponse | undefined {
@@ -455,7 +472,7 @@ export default async function proxy(req: NextRequest) {
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
-      : undefined;
+      : resolveHomeWaveRedirect(req, normalizedPathname);
 
     if (redirectTarget) {
       const clone = req.nextUrl.clone();

@@ -5,6 +5,7 @@
 // RSC payload, and each reference repeats the root layout's full chunk list in
 // the inline flight data of every HTML page.
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
+import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
@@ -114,14 +115,16 @@ export default function Providers({
                                     <DeviceSetupHost />
                                   )}
                                   <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
+                                    <ShellSearchParamsProvider>
+                                      {enableMyStream ? (
+                                        <MyStreamProvider>
+                                          {sharedProviders}
+                                          <QuickDirectMessagesGate />
+                                        </MyStreamProvider>
+                                      ) : (
+                                        sharedProviders
+                                      )}
+                                    </ShellSearchParamsProvider>
                                   </LayoutProvider>
                                 </E2eeProvider>
                                 {enableVersionCheck && <NewVersionToast />}

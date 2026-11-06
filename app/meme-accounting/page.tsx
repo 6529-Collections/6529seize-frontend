@@ -9,6 +9,10 @@ import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import clsx from "clsx";
 import type { Metadata } from "next";
 
+// Renders per request: Royalties reads the query with useSearchParams()
+// outside a Suspense boundary, which a prerender cannot do.
+export const dynamic = "force-dynamic";
+
 export default function MemeAccountingPage() {
   return (
     <main
