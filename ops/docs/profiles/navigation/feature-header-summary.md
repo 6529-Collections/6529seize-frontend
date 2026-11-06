@@ -139,6 +139,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 
 ## Edge Cases
 
+- On a fresh page load, viewer-specific actions wait until the browser restores
+  the signed-in session. The public profile summary remains available while
+  owner actions, relationship actions, and moderation controls are loading.
 - Quick stats links render only when the resolved route segment is route-safe
   (`a-z`, `A-Z`, `0-9`, `.`, `_`, `-`).
 - If no banner image is set, the header uses a gradient banner.

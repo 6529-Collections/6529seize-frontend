@@ -46,6 +46,7 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.MemeCollaboration]: 15,
   [ApiNotificationCause.VotingCreditsReturned]: 16,
   [ApiNotificationCause.ArtistArtworkSubmitted]: 17,
+  [ApiNotificationCause.E2EeMessage]: 18,
 };
 
 const compareNotificationCause = (

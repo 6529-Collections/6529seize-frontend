@@ -1,5 +1,6 @@
 import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
+import "@/i18n/namespaces/artwork-documentation";
 export function confirmationCopyMatches(
   profile: ApiArtworkDocumentationProfile
 ): boolean {

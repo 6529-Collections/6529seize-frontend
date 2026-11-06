@@ -15,6 +15,7 @@ import type { MuseumPublicationIdentity } from "@/lib/museum/publication/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 
 interface MuseumSourceContributionProps {
   readonly identity: MuseumPublicationIdentity | null;

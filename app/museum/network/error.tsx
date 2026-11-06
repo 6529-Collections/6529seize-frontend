@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 
 export default function MuseumNetworkError({
   error,

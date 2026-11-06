@@ -1,6 +1,7 @@
 /** @jest-environment node */
 import {
   VALIDATOR_GUIDE_FOLDS,
+  VALIDATOR_SWITCH,
   VALIDATOR_UPGRADE,
 } from "@/lib/validator-page/content/guideMarkdown";
 import {
@@ -14,20 +15,27 @@ import {
   VALIDATOR_FEEDBACK_TEMPLATE,
   VALIDATOR_FEEDBACK_WAVE_HREF,
 } from "@/lib/validator-page/content/pageText";
+import { RC9_COMMIT_FULL } from "./fixtures";
 
 // The release the pages describe: its version and short commit, as
 // `validator --version` prints them and the signed release list names them.
-const RELEASE = "0.1.0-rc.8";
-const COMMIT = "e53fcf3";
-// From rc.8's light-client checkpoint: a new install must start before it.
-const FRESH_INSTALL_UNTIL = "2026-11-21 20:00 UTC";
-// rc.8's join tests: the day, and the minutes to ready through Tor and with
-// Tor off.
+const RELEASE = "0.1.0-rc.9";
+const COMMIT = RC9_COMMIT_FULL.slice(0, 7);
+// From rc.9's light-client checkpoint: a new install must start before it.
+const FRESH_INSTALL_UNTIL = "2026-11-22 03:30 UTC";
+const LIGHT_CLIENT_CHECKPOINT = "2026-11-06 11:09 UTC";
+// rc.9's join tests: the day, and the minutes to ready through Tor and with
+// Tor off. fill-rc9.sh fills them, here and on the pages.
 const JOIN_DATE = "6 November";
-const JOIN_TOR = "21";
+const JOIN_TOR = "22";
 const JOIN_TOR_OFF = "14";
+// The facts above that are still placeholders. The pages may hold these and
+// no other placeholder; once they are filled, none at all.
+const STILL_TO_FILL = [JOIN_DATE, JOIN_TOR, JOIN_TOR_OFF].filter((fact) =>
+  fact.startsWith("{{")
+);
 
-const GUIDE = [VALIDATOR_UPGRADE, ...VALIDATOR_GUIDE_FOLDS]
+const GUIDE = [VALIDATOR_SWITCH, VALIDATOR_UPGRADE, ...VALIDATOR_GUIDE_FOLDS]
   .map((fold) => fold.markdown)
   .join("\n\n");
 const HARDWARE = [
@@ -43,15 +51,23 @@ const knownIssue = (number: number) =>
   ) ?? "";
 
 describe("validator page text", () => {
-  // A release fact still to fill reads {{RC8_...}}, as the tester package's
-  // drafts read <UPPER_CASE>. Fill them all before merging.
+  // A release fact still to fill reads {{RC9_...}}, as the tester package's
+  // drafts read <UPPER_CASE>. Only the ones STILL_TO_FILL names may be left;
+  // fill them with fill-rc9.sh before merging.
   it.each([
     ["guide", GUIDE],
     ["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN],
     ["hardware page", HARDWARE],
-  ])("the %s hold no release fact still to fill", (_name, text) => {
-    expect(text).not.toMatch(/\{\{|\}\}|<[A-Z][A-Z0-9_]*>/);
-  });
+  ])(
+    "the %s hold no release fact still to fill but rc.9's join tests",
+    (_name, text) => {
+      const rest = STILL_TO_FILL.reduce(
+        (left, fact) => left.split(fact).join(""),
+        text
+      );
+      expect(rest).not.toMatch(/\{\{|\}\}|<[A-Z][A-Z0-9_]*>/);
+    }
+  );
 
   it.each([
     ["guide", GUIDE],
@@ -82,23 +98,57 @@ describe("validator page text", () => {
     ]);
   });
 
-  it("tells a tester on rc.7 what to do differently, as the package does", () => {
+  it("tells a tester on rc.8 what to do differently, with the Mac steps the Mac lane tested", () => {
     expect(VALIDATOR_UPGRADE.id).toBe("upgrading");
     // Shown only while the signed list's newest release is this one.
     expect(VALIDATOR_UPGRADE.forVersion).toBe(RELEASE);
-    expect(VALIDATOR_UPGRADE.title).toBe("Upgrading from rc.7");
+    expect(VALIDATOR_UPGRADE.title).toBe("Upgrading from rc.8");
     const upgrade = VALIDATOR_UPGRADE.markdown;
     expect(upgrade).toContain(
-      "Install rc.8 over rc.7, the same way. There is nothing to uninstall first, and your key, your authorization and your records stay."
+      "On Windows and Linux, install rc.9 over rc.8 the same way. There is nothing to uninstall first, and your key, your authorization and your records stay. A validator you stopped stays stopped."
     );
-    // On a Mac, quit first: dragging over a running app keeps the old one.
+    // rc.8's Mac app can't quit itself, and Finder can't replace a running
+    // app: stop the agent, quit, replace, open.
+    const steps = upgrade
+      .split("\n")
+      .filter((line) => /^\d\. /.test(line))
+      .map((line) => line.slice(0, 40));
+    expect(steps).toEqual([
+      "1. In Terminal, run `launchctl bootout g",
+      "2. Quit 6529 Validator: **Quit app** in ",
+      "3. Open the rc.9 download and drag the a",
+      "4. Open 6529 Validator. It starts the va",
+    ]);
     expect(upgrade).toContain(
-      "On a Mac, quit the app first: choose **Quit 6529 Validator** in the app menu at the top of the screen if it is there, or else Force Quit it (Apple menu › Force Quit). Then drag the new one to Applications and open it from there."
+      "`launchctl bootout gui/$(id -u)/io.6529.validator.agent`"
     );
-    expect(upgrade).toContain("A validator you stopped stays stopped.");
-    // The page's port is drawn once (B130), so an old bookmark breaks.
+    expect(upgrade).toContain("Cmd-Q doesn't work in rc.8.");
     expect(upgrade).toContain(
-      "The validator's page has a new address on this computer. Open it from the app, or with `validator open` on Linux."
+      'If the window says "The validator service is not running.", press **Start the validator service**.'
+    );
+    expect(upgrade).toContain(
+      "From rc.9 on, steps 1 and 2 are one menu item: **Quit for an update**"
+    );
+    // rc.8's own upgrade note.
+    expect(upgrade).not.toMatch(/rc\.7|127\.0\.0\.1|Quit 6529 Validator\*\*/);
+  });
+
+  it("says to update before Sunday's switch, as TESTERS.md does", () => {
+    expect(VALIDATOR_SWITCH.forVersion).toBe(RELEASE);
+    expect(VALIDATOR_SWITCH.id).toBe("update-before-sunday");
+    expect(VALIDATOR_SWITCH.title).toBe(
+      "Update before Sunday 8 November, 00:00 UTC"
+    );
+    const sunday = VALIDATOR_SWITCH.markdown;
+    expect(sunday).toContain(
+      "From then, signed TDH counts only on the new chain that rc.9 runs. rc.9 moves to it by itself at 00:00 UTC; until then it works as rc.8 does."
+    );
+    expect(sunday).toContain(
+      "Sunday counts as agreed once accounts holding more than 2/3 of validating TDH run rc.9 and have signed."
+    );
+    expect(sunday).toContain("Nobody is penalized either way.");
+    expect(sunday).toContain(
+      "If you update on Sunday, do it before 18:00 UTC to sign that day."
     );
   });
 
@@ -117,27 +167,89 @@ describe("validator page text", () => {
     );
   });
 
-  it("shows rc.8's 21 known issues in order", () => {
+  it("shows rc.9's 23 known issues in order", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 21 }, (_, i) => i + 1));
+    expect(numbers).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
-    // rc.8 fixes these: rc.7's slow peer and its block count stuck at 0.
+    // Fixed: rc.7's slow peer and its block count stuck at 0, and rc.8's
+    // day's total TDH, which Sunday's switch fixes.
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(
-      /go blank|stays at 0|stops answering|Bridges come in/
+      /go blank|stays at 0|stops answering|Bridges come in|1\.1 million lower/
     );
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toContain("--mode rack");
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
-    expect(knownIssue(18)).toMatch(/^18\. The app's Log view reads/);
+    expect(knownIssue(21)).toMatch(/^21\. The app's Log view reads/);
   });
 
-  it("says what rc.8 does where Tor is blocked: bridges first, Connect without Tor last and what it gives away", () => {
+  it("says a new install on Sunday waits for the evening's checkpoint", () => {
+    expect(knownIssue(2)).toBe(
+      "2. A new install on Sunday waits until Sunday's day is final and the update feed has its checkpoint, in the evening UTC. Workaround: install before Sunday, 00:00 UTC."
+    );
+  });
+
+  it("names rc.9's installers, and says rc.8 or older no longer counts from Sunday", () => {
+    expect(knownIssue(7)).toMatch(
+      /^7\. On Windows, running rc\.9's Setup\.exe after rc\.9's `\.msi` shows two/
+    );
+    const back = knownIssue(9);
+    expect(back).toMatch(
+      /^9\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
+    );
+    expect(back).toContain(
+      "Before then, on Windows, going back to rc.6 or earlier needs an uninstall first."
+    );
+    expect(back).toContain(
+      "Going back to rc.7 or earlier also starts a validator you stopped"
+    );
+    expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(
+      /rc\.8's Setup\.exe|from rc\.8 to rc\.7/
+    );
+  });
+
+  it("says what to do when Setup.exe finds the validator's files in use", () => {
+    expect(knownIssue(8)).toBe(
+      '8. On Windows, Setup.exe may show "Files in use" with the 6529 Validator service; Retry shows the same window again. Workaround: press Ignore. If Setup stops with "Error writing to file: …\\validator.exe", stop the validator from 6529\'s logo menu, quit the app and press Retry.'
+    );
+    expect(VALIDATOR_UPGRADE.markdown).toContain(
+      'On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.9. If it shows "Files in use" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself.'
+    );
+  });
+
+  it("says the menu-bar logo may not appear on macOS 26, last under Install and download", () => {
+    expect(knownIssue(12)).toBe(
+      "12. On macOS 26 the menu-bar logo may not appear. Workaround: use the app's menu at the top of the screen; Quit and Quit for an update are there too."
+    );
+    const install =
+      VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("## Running")[0]
+        ?.trimEnd()
+        .split("\n") ?? [];
+    expect(install[install.length - 1]).toBe(knownIssue(12));
+  });
+
+  it("gives rc.9's Mac update: Quit for an update, and the way off rc.8", () => {
+    const mac = knownIssue(11);
+    expect(mac).toMatch(
+      /^11\. On a Mac, dragging the new app over one that is running leaves the old release running, and Cmd-Q doesn't quit rc\.8\./
+    );
+    expect(mac).toContain(
+      "Workaround: from rc.9 on, choose **Quit for an update** in the menu-bar logo's menu or the app's menu"
+    );
+    expect(mac).toContain(
+      "first run `launchctl bootout gui/$(id -u)/io.6529.validator.agent` in Terminal"
+    );
+    expect(mac).toContain(
+      "as [Upgrading from rc.8](/validator#upgrading) describes."
+    );
+  });
+
+  it("says what the validator does where Tor is blocked: bridges first, Connect without Tor last and what it gives away", () => {
     const tor = knownIssue(1);
     expect(tor).toMatch(/^1\. Tor's built-in bridges are public/);
     const service = tor.indexOf("the Tor Project's bridge service");
@@ -157,7 +269,7 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(/turn Tor off there/);
   });
 
-  it("names the validator service as rc.8's app does", () => {
+  it("names the validator service as the app does", () => {
     const stop = fold("stop-pause-or-uninstall");
     expect(stop).toContain("**Stop the validator service**");
     expect(stop).toContain("**Start the validator service**");
@@ -167,24 +279,20 @@ describe("validator page text", () => {
     }
   });
 
-  it("gives one last day for a fresh install, from rc.8's light-client checkpoint", () => {
+  it("gives one last day for a fresh install, from rc.9's light-client checkpoint", () => {
     expect(fold("known-issues")).toContain(
       `A new install must start before about ${FRESH_INSTALL_UNTIL}, and 0.1.0 stops signing on 1 December.`
     );
-    expect(knownIssue(20)).toContain(
-      `20. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
+    expect(knownIssue(22)).toContain(
+      `22. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
     );
-    // rc.7's dates.
+    expect(knownIssue(22)).toContain(
+      `a checkpoint built into the release (${LIGHT_CLIENT_CHECKPOINT})`
+    );
+    // rc.7's and rc.8's dates.
     expect(`${GUIDE}\n${VALIDATOR_KNOWN_ISSUES_MARKDOWN}`).not.toMatch(
-      /2026-11-20 14:00|2026-11-04 21:42/
+      /2026-11-20 14:00|2026-11-04 21:42|2026-11-21 20:00|2026-11-06 03:34/
     );
-  });
-
-  it("says the day's total TDH is lower than 6529.io's until rc.9, with no holder's TDH different", () => {
-    expect(knownIssue(19)).toContain(
-      "19. A day's total TDH on the validator's pages is about 1.1 million lower than on 6529.io."
-    );
-    expect(knownIssue(19)).toContain("No holder's own TDH differs, and signing is not affected");
   });
 
   it("keeps the computer on for the hardware page's time, with no random wait (D161)", () => {
@@ -196,17 +304,17 @@ describe("validator page text", () => {
     }
   });
 
-  it("carries rc.8's join tests on the guide and the hardware page alike", () => {
+  it("carries rc.9's join tests on the guide and the hardware page alike", () => {
     const ready = fold("how-long-it-takes-to-be-ready");
     expect(ready).toContain(
-      `In 6529's tests of rc.8 on ${JOIN_DATE}, a new install was ready in about ${JOIN_TOR} minutes through Tor, and in about ${JOIN_TOR_OFF} with Tor off.`
+      `In 6529's tests of rc.9 on ${JOIN_DATE}, a new install was ready in about ${JOIN_TOR} minutes through Tor, and in about ${JOIN_TOR_OFF} with Tor off.`
     );
     expect(ready).toContain(
       "the checkpoint built into this release, from 5 November."
     );
-    expect(ready).not.toMatch(/rc\.[67]|50 minutes|25 minutes/);
+    expect(ready).not.toMatch(/rc\.[678]|50 minutes|25 minutes/);
     expect(PARTS.find((part) => part.key === "first-start")?.why).toContain(
-      `In 6529's tests of rc.8 on ${JOIN_DATE} this took about ${JOIN_TOR} minutes through Tor, and ${JOIN_TOR_OFF} with Tor off.`
+      `In 6529's tests of rc.9 on ${JOIN_DATE} this took about ${JOIN_TOR} minutes through Tor, and ${JOIN_TOR_OFF} with Tor off.`
     );
     expect(SOURCES.join("\n")).toContain(
       `The first start: 6529's join tests of the test release (${RELEASE}, commit ${COMMIT}) on ${JOIN_DATE} 2026`

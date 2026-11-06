@@ -26,6 +26,10 @@ export class ApiCompetitionPermissions {
     * Whether this administrator may edit established voting credit rules. Historical votes permanently lock those rules.
     */
     'edit_credit_rules'?: boolean;
+    /**
+    * Whether archiving requires a non-blank reason because this published competition has historical entries or votes. False for non-administrators. Rechecked under the competition lock on archive.
+    */
+    'archive_requires_reason'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -65,6 +69,12 @@ export class ApiCompetitionPermissions {
         {
             "name": "edit_credit_rules",
             "baseName": "edit_credit_rules",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "archive_requires_reason",
+            "baseName": "archive_requires_reason",
             "type": "boolean",
             "format": ""
         }    ];

@@ -1,4 +1,4 @@
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 
 export const VERSION_RELOAD_MESSAGES = {
   "en-US": "Updating to the latest version",
