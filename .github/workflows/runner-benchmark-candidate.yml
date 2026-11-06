@@ -116,7 +116,7 @@ jobs:
       reason: ${{ steps.authorization.outputs.reason }}
     steps:
       - name: Check out immutable authorization tools
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ github.workflow_sha }}
           sparse-checkout: |
@@ -273,7 +273,7 @@ jobs:
           echo "CHECKOUT_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
 
       - name: Check out trusted benchmark tool before source execution
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ github.workflow_sha }}
           sparse-checkout: |
@@ -324,7 +324,7 @@ jobs:
           done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized")
 
       - name: Check out exact trusted source SHA
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ steps.normalized.outputs.source_sha }}
           fetch-depth: 0
@@ -590,7 +590,7 @@ jobs:
       actions: read
     steps:
       - name: Check out fresh immutable verifier tools
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ github.workflow_sha }}
           sparse-checkout: |
