@@ -48,7 +48,7 @@ export async function retainDesktopWaveSidebar(page: Page) {
 }
 
 // Sample animation frames throughout the return journey, including the first
-// target-wave frame. Endpoint assertions alone miss a painted Chat/Competitions
+// target-wave frame. Endpoint assertions alone miss a painted Chat/Decisions
 // redirect before the remembered Leaderboard becomes visible.
 export async function monitorRememberedLeaderboard(
   page: Page,
@@ -107,7 +107,7 @@ export async function monitorRememberedLeaderboard(
             const label = section.textContent?.trim() ?? "";
             if (
               isVisible(section) &&
-              /^(Chat|Competitions)(?:\s|$)/.test(label)
+              /^(Chat|Decisions)(?:\s|$)/.test(label)
             ) {
               unexpectedViews.add(label);
             }
@@ -165,7 +165,7 @@ export async function monitorRememberedLeaderboard(
     ).toBeGreaterThan(0);
     expect(
       result.unexpectedViews,
-      "The remembered Leaderboard must open without a visible Chat or Competitions detour"
+      "The remembered Leaderboard must open without a visible Chat or Decisions detour"
     ).toEqual([]);
   };
 }

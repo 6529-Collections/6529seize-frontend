@@ -1528,6 +1528,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("redirects a former competition link to its decision with the query intact", async ({
+    page,
+    baseURL,
+  }) => {
+    await installCompetitionApi(page);
+    // Posts, notifications and push payloads still carry the former route.
+    await page.goto(`/waves/${WAVE}/competitions/alpha?tab=leaderboard`);
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === `${ROOT}/alpha` &&
+        url.searchParams.get("tab") === "leaderboard",
+      { timeout: 30000 }
+    );
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
   }) => {
@@ -1855,7 +1874,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     await page.goto(`/waves/${WAVE}?tab=leaderboard`);
     await expect(page).toHaveURL(
-      new RegExp(`/competitions/alpha\\?tab=leaderboard`),
+      new RegExp(`/decisions/alpha\\?tab=leaderboard`),
       { timeout: 30000 }
     );
     await expect(

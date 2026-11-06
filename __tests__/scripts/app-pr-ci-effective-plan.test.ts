@@ -180,6 +180,7 @@ describe("effective App PR CI plan", () => {
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
+    "app/waves/[wave]/decisions/page.tsx",
     "app/waves/[wave]/decisions/[decision]/page.tsx",
     "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
     "generated/models/ApiCompetition.ts",
