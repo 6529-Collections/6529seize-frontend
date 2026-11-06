@@ -594,9 +594,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
     await expectProfileShell(page, "Subscriptions");
     if (page.viewportSize()!.width < 1024) {
-      await page
-        .getByRole("button", { name: "Minting settings", exact: true })
-        .click();
+      const settingsOpener = page.getByRole("button", {
+        name: "Minting settings",
+        exact: true,
+      });
+      // Stay touch-only on touch devices. A mouse click here would park the
+      // emulated cursor, and Chrome's hover update at that cursor closes the
+      // tapped address tooltip as soon as it mounts.
+      if (isMobile) {
+        await settingsOpener.tap();
+      } else {
+        await settingsOpener.click();
+      }
       await expect(
         page
           .getByRole("dialog", { name: "Minting settings", exact: true })
@@ -614,15 +623,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     } else {
       await address.focus();
     }
-    await expect(
-      page.getByRole("tooltip", { name: fullAddress })
-    ).toBeVisible();
-    await page
-      .getByRole("heading", { name: "Airdrop Address", exact: true })
-      .click();
-    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
-      0
-    );
+    const addressTooltip = page.getByRole("tooltip", { name: fullAddress });
+    await expect(addressTooltip).toBeVisible();
+    // react-tooltip mounts the tooltip at opacity 0 and opens it on a later
+    // timer. Wait until it is readable; dismissing during that handoff can
+    // leave the hidden tooltip mounted.
+    await expect(addressTooltip).toHaveCSS("opacity", "1");
+    const addressHeading = page.getByRole("heading", {
+      name: "Airdrop Address",
+      exact: true,
+    });
+    if (isMobile) {
+      await addressHeading.tap();
+    } else {
+      await addressHeading.click();
+    }
+    await expect(addressTooltip).toHaveCount(0);
     const addressWidth = await address.evaluate((element) => ({
       visible: element.clientWidth,
       content: element.scrollWidth,
