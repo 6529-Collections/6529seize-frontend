@@ -888,7 +888,8 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       expect(scrollButtonProps.isAtBottom).toBe(false);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("calls forcePinToBottom when scroll button is clicked", async () => {
@@ -1067,7 +1068,8 @@ describe("WaveDropsAll", () => {
 
       // Verify scroll button receives isAtBottom state
       expect(scrollButtonProps.isAtBottom).toBe(true);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("integrates with useScrollBehavior hook for scroll intent detection", async () => {
@@ -1621,6 +1623,77 @@ describe("WaveDropsAll", () => {
         } finally {
           globalThis.IntersectionObserver = originalObserver;
         }
+      }
+    );
+
+    it.each([false, true])(
+      "keeps the selected serial anchored when hydration replaces its row (separate commits: %s)",
+      async (separateCommits) => {
+        setupMocks({
+          waveMessages: {
+            drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+            hasNextPage: true,
+            isLoading: false,
+            isLoadingNextPage: false,
+          },
+        });
+        mockFetchNextPage.mockResolvedValueOnce([]);
+        mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+        renderComponent({ initialDrop: 10 });
+
+        const container = mockScrollContainerRef.current;
+        document.body.appendChild(container);
+        container.style.flexDirection = "column-reverse";
+        Object.defineProperties(container, {
+          clientHeight: { configurable: true, value: 400 },
+          scrollHeight: { configurable: true, value: 1000 },
+          getBoundingClientRect: {
+            configurable: true,
+            value: () => ({ top: 100, bottom: 500, height: 400 }),
+          },
+        });
+        const target = document.createElement("div");
+        target.id = "drop-10";
+        target.getBoundingClientRect = () =>
+          ({ top: 150, bottom: 210, height: 60 }) as DOMRect;
+        container.appendChild(target);
+        dropsProps.targetDropRef.current = target;
+        const scrollTo = jest.fn();
+        container.scrollTo = scrollTo;
+        await waitFor(() => expect(scrollTo).toHaveBeenCalled());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(600);
+        });
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+        scrollTo.mockClear();
+
+        // FULL drop content has a different React key from its LIGHT placeholder.
+        // The ref is cleared with serialTarget; recovery must use the serial ID.
+        dropsProps.targetDropRef.current = null;
+        const hydratedTarget = document.createElement("div");
+        hydratedTarget.id = "drop-10";
+        hydratedTarget.getBoundingClientRect = () =>
+          ({ top: -500, bottom: -440, height: 60 }) as DOMRect;
+        if (separateCommits) {
+          await act(async () => {
+            target.remove();
+          });
+          expect(scrollTo).not.toHaveBeenCalled();
+        }
+        await act(async () => {
+          if (separateCommits) container.appendChild(hydratedTarget);
+          else target.replaceWith(hydratedTarget);
+        });
+        expect(scrollTo).toHaveBeenCalledWith({ behavior: "auto", top: -600 });
+
+        scrollTo.mockClear();
+        act(() =>
+          container.dispatchEvent(new Event("wheel", { bubbles: true }))
+        );
+        await act(async () => {
+          hydratedTarget.replaceWith(target);
+        });
+        expect(scrollTo).not.toHaveBeenCalled();
       }
     );
 

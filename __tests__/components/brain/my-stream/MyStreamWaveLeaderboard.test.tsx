@@ -136,7 +136,7 @@ jest.mock("@/components/waves/leaderboard/grid/WaveLeaderboardGrid", () => ({
   },
 }));
 jest.mock(
-  "@/components/waves/memes/MemesArtSubmissionModal",
+  "@/components/waves/memes/LazyMemesArtSubmissionModal",
   () => (props: any) => (props.isOpen ? <div data-testid="memes" /> : null)
 );
 jest.mock(

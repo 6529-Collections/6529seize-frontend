@@ -6,11 +6,13 @@ describe("CompactMenu focus", () => {
   it("preserves active-item autofocus by default and supports keyboard selection", async () => {
     const user = userEvent.setup();
     const select = jest.fn();
+    const onOpenChange = jest.fn();
     render(
       <CompactMenu
         trigger="Options"
         activeItemId="second"
         onItemSelect={select}
+        onOpenChange={onOpenChange}
         items={[
           { id: "first", label: "First" },
           { id: "second", label: "Second" },
@@ -19,13 +21,17 @@ describe("CompactMenu focus", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Options" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
     await waitFor(() =>
       expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus()
     );
     await user.keyboard("{ArrowUp}{Enter}");
     expect(select).toHaveBeenCalledWith("first");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(screen.getByRole("button", { name: "Options" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Options" })).toHaveFocus()
+    );
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 
   it("opens neutrally with a pointer and exposes link items to keyboard navigation", async () => {
@@ -51,10 +57,18 @@ describe("CompactMenu focus", () => {
     expect(menu).toHaveAttribute("aria-activedescendant", link.id);
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(screen.getByRole("button", { name: "Create" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create" })).toHaveFocus()
+    );
+    await user.keyboard("{Enter}");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("menuitem", { name: "Linked action" })
+      ).toHaveFocus()
+    );
   });
 
-  it("draws a ring on the active item, not a background tint alone", async () => {
+  it("distinguishes pointer hover from keyboard navigation", async () => {
     const user = userEvent.setup();
     render(
       <CompactMenu
@@ -70,11 +84,15 @@ describe("CompactMenu focus", () => {
     await user.click(screen.getByRole("button", { name: "Options" }));
     const first = screen.getByRole("menuitem", { name: "First" });
     const second = screen.getByRole("menuitem", { name: "Second" });
-    expect(first).not.toHaveClass("tw-ring-primary-400");
+    const menu = screen.getByRole("menu");
+    expect(menu).toHaveAttribute("data-keyboard-navigation", "false");
+    await user.hover(second);
+    expect(menu).toHaveAttribute("data-keyboard-navigation", "false");
 
-    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{Home}");
+    expect(menu).toHaveAttribute("data-keyboard-navigation", "true");
     expect(first).toHaveClass(
-      "tw-ring-2",
+      "group-data-[keyboard-navigation=true]/compact-menu:!tw-ring-2",
       "tw-ring-inset",
       "tw-ring-primary-400",
       "tw-bg-iron-800"
@@ -84,5 +102,7 @@ describe("CompactMenu focus", () => {
     await user.keyboard("{ArrowDown}");
     expect(second).toHaveClass("tw-ring-primary-400");
     expect(first).not.toHaveClass("tw-ring-primary-400");
+    await user.hover(first);
+    expect(menu).toHaveAttribute("data-keyboard-navigation", "false");
   });
 });

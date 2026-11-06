@@ -121,6 +121,9 @@
   state with an inline reason.
 - If gateway requests fail, users see an `Unable to reach/verify` style error;
   editing the hash and retrying re-runs validation.
+- Each visitor can run up to 30 submission validations a minute. Past that,
+  the preview shows `Unable to verify media URL. Try again later.` until the
+  minute is over.
 - If `Latest Drop` HTML animation fails on an approved Arweave gateway, the
   renderer automatically tries the remaining approved gateways; after those
   retries are exhausted, reload `/` to retry rendering.

@@ -1,6 +1,9 @@
 // __tests__/components/waves/CreateDropEmojiPicker.test.tsx
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+jest.mock("@/components/waves/prepareEmojiMartData", () => ({
+  prepareEmojiMartData: jest.fn(),
+}));
 
 // 1. Mock Lexical before the component import to stub node creation
 jest.mock("lexical", () => ({

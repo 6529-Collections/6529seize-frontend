@@ -241,8 +241,8 @@ const getTooltipClasses = ({
   readonly isNegativeVote: boolean;
 }): string => {
   const sizeClasses = isMini
-    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums"
-    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums";
+    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]"
+    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]";
 
   if (isPositiveVote) {
     return `${sizeClasses} tw-border-solid tw-border-emerald-500/60 tw-bg-iron-950 tw-text-emerald-400 tw-shadow-sm`;
@@ -382,17 +382,11 @@ const getMaxLabelPrefix = (maxValue: number): string => {
   return "";
 };
 
-const getTooltipOffset = (currentPercentage: number): number => {
-  if (currentPercentage <= 10) {
-    return 50;
-  }
-
-  if (currentPercentage >= 90) {
-    return -50;
-  }
-
-  return 0;
-};
+// Slides the value bubble with the thumb: left-aligned at the start, centered
+// in the middle, right-aligned at the end. The bubble then never extends past
+// the track, however wide its value and unit make it.
+const getTooltipOffset = (currentPercentage: number): number =>
+  Math.max(-50, Math.min(50, 50 - currentPercentage));
 
 const getShowZeroScaleMarker = ({
   isMini,

@@ -11,6 +11,7 @@ fallback dictionaries.
 | [About contents/navigation](about-contents-navigation.md)           | The About route, contents dropdown, Tech reports, and wallet-auth page still resolve with `DEFAULT_LOCALE`                    |
 | [About The Memes](about-memes.md)                                   | `AboutMemes` still resolves `about.memes.*` through `DEFAULT_LOCALE`                                                          |
 | [About minting](about-minting.md)                                   | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |
+| [Artist artwork alerts](artist-artwork-alerts.md) | Profile menu states, feedback, notification rows and filter copy fall back to `en-US` outside the source locale |
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
 | [Public contract review](public-contract-review.md)                 | The shell, feedback composer, ledger, and immutable editorial snapshots currently use the source-locale fallback              |
 | [Network reference pages](network-reference-pages.md)               | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
@@ -24,6 +25,8 @@ fallback dictionaries.
 | [Wave competition badges](wave-competition-badges.md)               | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
 | [Wave navigation](wave-navigation.md) | About and Configuration use locale dictionaries with source-locale fallback; other desktop section labels retain existing English copy |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
+| [Wave submission access](wave-submission-access.md) | Submission-access details and organizer audience summaries use browser-locale messages with `en-US` fallback |
+| [Wave compact phase status](wave-compact-phase-status.md) | Submission/voting statuses use browser-locale messages with `en-US` fallback and localized dates/countdowns |
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
 | [Direct-message admission](direct-message-admission.md) | The Preferences group option, its controls, and new-DM refusal notices exist only in `en-US` and fall back to it in other locales |

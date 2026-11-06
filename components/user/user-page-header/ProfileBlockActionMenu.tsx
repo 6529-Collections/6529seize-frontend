@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
+import useArtistArtworkAlert from "@/hooks/useArtistArtworkAlert";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useProfileMute from "@/hooks/useProfileMute";
 import { t } from "@/i18n/messages";
-import { faBell, faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowPathIcon,
+  BellIcon,
+  BellSlashIcon,
   EllipsisVerticalIcon,
   MinusCircleIcon,
   NoSymbolIcon,
@@ -18,30 +21,63 @@ import {
 const TRIGGER_CLASS_NAME =
   "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
 
-export default function ProfileBlockActionMenu({
-  handle,
-  disabled,
-  moderationAction,
-  onBlock,
-  showPersonalActions = true,
-}: {
-  readonly handle: string;
-  readonly disabled: boolean;
-  readonly moderationAction?:
+type Props = Readonly<{
+  handle: string;
+  hasArtistActivity: boolean;
+  disabled: boolean;
+  blocked?: boolean;
+  moderationAction?:
     | {
         readonly kind: "suspend" | "reinstate";
         readonly label: string;
         readonly onSelect: () => void;
       }
     | undefined;
-  readonly onBlock: () => void;
-  readonly showPersonalActions?: boolean | undefined;
-}) {
+  onBlock: () => void;
+  showPersonalActions?: boolean | undefined;
+}>;
+
+export default function ProfileBlockActionMenu(props: Props) {
+  const auth = useAuth();
+  const scope = `${auth.connectedProfile?.id ?? "guest"}:${auth.activeProfileProxy?.id ?? "direct"}:${auth.isAuthenticated === true}:${auth.isDirectProfileSession === true}`;
+  return (
+    <ProfileActionsMenu
+      key={`${scope}:${props.handle}`}
+      {...props}
+      scope={scope}
+    />
+  );
+}
+
+function ProfileActionsMenu({
+  handle,
+  hasArtistActivity,
+  disabled,
+  blocked = false,
+  moderationAction,
+  onBlock,
+  showPersonalActions = true,
+  scope,
+}: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const mute = useProfileMute(handle);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const mute = useProfileMute(showPersonalActions ? handle : "");
+  const artworkAlert = useArtistArtworkAlert(
+    handle,
+    scope,
+    blocked,
+    hasArtistActivity,
+    // With no other actions, discover a saved opt-in so its off switch stays
+    // reachable even after the artist loses their badge or is blocked.
+    !disabled &&
+      (menuOpen ||
+        (!hasArtistActivity && !showPersonalActions && !moderationAction))
+  );
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
+  const MuteIcon = mute.isMuted ? BellSlashIcon : BellIcon;
   const items: readonly CompactMenuItem[] = [
+    ...(artworkAlert ? [artworkAlert] : []),
     ...(showPersonalActions
       ? ([
           {
@@ -52,13 +88,7 @@ export default function ProfileBlockActionMenu({
                 ? "profile.mute.action.unmute"
                 : "profile.mute.action.mute"
             ),
-            icon: (
-              <FontAwesomeIcon
-                aria-hidden="true"
-                icon={mute.isMuted ? faBellSlash : faBell}
-                className="tw-size-4"
-              />
-            ),
+            icon: <MuteIcon aria-hidden="true" className="tw-size-4" />,
             onSelect: () => void mute.toggleMute(),
             disabled: mute.isPending,
           },
@@ -91,6 +121,8 @@ export default function ProfileBlockActionMenu({
         ] satisfies CompactMenuItem[])
       : []),
   ];
+  if (items.length === 0) return null;
+
   const trigger = (
     <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
   );
@@ -104,6 +136,7 @@ export default function ProfileBlockActionMenu({
         trigger={trigger}
         triggerClassName={TRIGGER_CLASS_NAME}
         disabled={disabled}
+        onOpenChange={setMenuOpen}
       />
     );
   }
@@ -113,10 +146,12 @@ export default function ProfileBlockActionMenu({
       aria-label={menuLabel}
       items={items}
       disabled={disabled}
+      onOpenChange={setMenuOpen}
       trigger={trigger}
       triggerClassName={TRIGGER_CLASS_NAME}
       unstyledTrigger
-      menuWidthClassName="tw-w-56"
+      autoFocusItem={false}
+      menuWidthClassName="tw-w-72"
     />
   );
 }

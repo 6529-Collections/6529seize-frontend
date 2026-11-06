@@ -24,6 +24,41 @@ interface ActiveSidebarContext {
   readonly subwave: SidebarWave | null;
 }
 
+export const getVisibleSidebarSubwaves = ({
+  subwaves,
+  activeSubwave,
+  isJoinedMode,
+  leftWaveIds,
+  topSectionWaveIds,
+}: {
+  readonly subwaves: readonly SidebarWave[];
+  readonly activeSubwave: SidebarWave | null;
+  readonly isJoinedMode: boolean;
+  readonly leftWaveIds: readonly string[];
+  readonly topSectionWaveIds: ReadonlySet<string>;
+}): SidebarWave[] => {
+  const visible = new Map<string, SidebarWave>();
+  if (
+    activeSubwave !== null &&
+    (!isJoinedMode || !leftWaveIds.includes(activeSubwave.id))
+  ) {
+    visible.set(activeSubwave.id, activeSubwave);
+  }
+  for (const wave of subwaves) {
+    if (
+      !isJoinedMode ||
+      (!leftWaveIds.includes(wave.id) &&
+        (wave.subscribed ||
+          wave.id === activeSubwave?.id ||
+          topSectionWaveIds.has(wave.parentWaveId ?? "")))
+    ) {
+      // The overview is fresher than the temporary full-wave route context.
+      visible.set(wave.id, wave);
+    }
+  }
+  return [...visible.values()];
+};
+
 export const getActiveSidebarContext = (
   activeWave: ApiWave | null
 ): ActiveSidebarContext => {

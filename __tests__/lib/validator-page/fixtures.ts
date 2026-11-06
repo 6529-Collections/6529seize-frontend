@@ -67,3 +67,29 @@ export const TEST_FEED = {
     TEST_RELEASE_ENTRY,
   ],
 };
+
+/**
+ * A release in the shape the validator signs (a day, no time), with
+ * TEST_RELEASE_ENTRY's file names. Every candidate of 0.1.0 is built as
+ * 0.1.0, so a release and its candidates share file names.
+ */
+export function feedEntry(version: string, channel: string, date: string) {
+  return {
+    version,
+    channel,
+    date,
+    commit: "e".repeat(40),
+    software_id: `0x${hash("e")}`,
+    notes: `Made-up notes for ${version}.`,
+    files: TEST_RELEASE_ENTRY.files,
+  };
+}
+
+/** 0.1.0 and its last candidate, out on the same day, newest first. */
+export const SAME_DAY_FEED = {
+  format: 1,
+  releases: [
+    feedEntry("0.1.0", "stable", "2026-11-20"),
+    feedEntry("0.1.0-rc.7", "test", "2026-11-20"),
+  ],
+};

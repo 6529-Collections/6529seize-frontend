@@ -28,9 +28,12 @@ const standaloneSrc = path.join(
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".cjs", ".mjs"];
 const SERVER_ACTION_DIRECTIVE = "use server";
 const REAL_GATE = "components/messages/quick-dms/QuickDirectMessagesGate.tsx";
-const SINGLE_DROP_VIEW = "components/waves/drop/SingleWaveDrop.tsx";
+// The app has no Server Action today, so the walker's negative control uses a
+// fixture pair: an importer that reaches a "use server" module via `@/`.
+const SERVER_ACTION_IMPORTER =
+  "__tests__/fixtures/standalone-mint-export/aliasedServerActionImporter.ts";
 const SERVER_ACTION_MODULE =
-  "components/waves/memes/submission/actions/validateInteractivePreview.ts";
+  "__tests__/fixtures/standalone-mint-export/serverActionProbe.ts";
 
 // Parsing a couple of thousand files takes a while on a cold machine.
 jest.setTimeout(120_000);
@@ -291,10 +294,9 @@ describe("standalone mint static export", () => {
   });
 
   it("detects a Server Action reached through `@/` aliases", () => {
-    // Negative control for the walker. The single drop view reaches the Memes
-    // submission form's action, which the wave chat UI also reached until the
-    // single drop renderers moved out of the list renderer registry.
-    const graph = collectGraph([SINGLE_DROP_VIEW], rootMappings);
+    // Negative control for the walker: the fixture importer reaches a
+    // "use server" module through an `@/` alias.
+    const graph = collectGraph([SERVER_ACTION_IMPORTER], rootMappings);
 
     expect(serverActionModulesIn(graph)).toEqual([SERVER_ACTION_MODULE]);
   });

@@ -1,6 +1,7 @@
 import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 
+import { isCloudFrontOriginFacingAddress } from "@/lib/security/cloudFrontOriginFacing";
 import { isForbiddenAddress, parseIpv6Groups } from "@/lib/security/urlGuard";
 
 const DEFAULT_MAX_BUCKETS = 10_000;
@@ -72,19 +73,30 @@ function parseForwardedAddress(
  * Node) appends its own private peer address. Client-supplied entries are
  * always to the left of the load balancer's, so walk from the right, skip
  * private infrastructure hops, and use the first public address.
+ *
+ * Behind CloudFront that first public address is the edge, and the edge
+ * appended the viewer address just to its left. Skip exactly one edge hop:
+ * a second edge address is a viewer that came through another CloudFront
+ * distribution, and trusting it would let that viewer pick its own key.
  */
 function getClientKey(headers: Headers): string | null {
   const entries = headers.get("x-forwarded-for")?.split(",") ?? [];
+  let edge: ForwardedAddress | null = null;
   for (let index = entries.length - 1; index >= 0; index -= 1) {
     const forwarded = parseForwardedAddress(entries[index]);
     if (!forwarded) {
-      return null;
+      return edge?.key ?? null;
     }
-    if (!isForbiddenAddress(forwarded.address)) {
-      return forwarded.key;
+    if (isForbiddenAddress(forwarded.address)) {
+      continue;
     }
+    if (!edge && isCloudFrontOriginFacingAddress(forwarded.address)) {
+      edge = forwarded;
+      continue;
+    }
+    return forwarded.key;
   }
-  return null;
+  return edge?.key ?? null;
 }
 
 /**

@@ -48,6 +48,7 @@ import {
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
+import { rehypeDropPreview } from "./dropPartMarkdown/preview";
 import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
 
 /**
@@ -264,6 +265,7 @@ export interface DropPartMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly nftLinks?: readonly ApiDropNftLink[] | undefined;
   readonly partContent: string | null;
+  readonly collapsedPreview?: boolean | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
@@ -287,6 +289,7 @@ function DropPartMarkdown({
   referencedNfts,
   nftLinks,
   partContent,
+  collapsedPreview = false,
   onQuoteClick,
   textSize,
   currentDropId,
@@ -418,8 +421,9 @@ function DropPartMarkdown({
       [rehypeSanitize, DROP_MARKDOWN_SANITIZE_SCHEMA],
       // This trusted plugin only adds one static renderer-owned class.
       rehypePreserveOrderedListDelimiter,
+      ...(collapsedPreview ? [rehypeDropPreview] : []),
     ],
-    []
+    [collapsedPreview]
   );
 
   const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);

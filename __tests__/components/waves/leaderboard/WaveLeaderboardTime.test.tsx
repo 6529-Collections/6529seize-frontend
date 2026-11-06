@@ -162,7 +162,7 @@ describe("single-decision winner announcement", () => {
     expect(screen.getByTestId("vote")).toBeInTheDocument();
     expect(screen.getByText("Next winners announced in")).toBeInTheDocument();
     expect(screen.getByText("2d 3h 4m")).toBeInTheDocument();
-    const announcementDate = screen.getByText("Sep 20");
+    const announcementDate = screen.getByText("Sep 20, 2026");
     expect(announcementDate).toHaveAttribute(
       "dateTime",
       new Date(announcement).toISOString()
