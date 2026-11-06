@@ -6,6 +6,7 @@ import {
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -108,8 +109,16 @@ export default function AboutCookiePolicy() {
   const sevenDaysLabel = t(locale, "about.cookiePolicy.lifespan.sevenDays");
   const oneYearLabel = t(locale, "about.cookiePolicy.lifespan.oneYear");
 
-  const [isPerformanceCookiesEnabled, setIsPerformanceCookiesEnabled] =
-    useState(() => getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE));
+  // Server HTML cannot read the consent cookie, so the server render and its
+  // hydration render show "Disabled"; the stored choice applies afterwards.
+  const hasHydrated = useHasHydrated();
+  const [toggledPerformanceCookies, setToggledPerformanceCookies] = useState<
+    boolean | null
+  >(null);
+  const isPerformanceCookiesEnabled =
+    hasHydrated &&
+    (toggledPerformanceCookies ??
+      getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE) === true);
 
   const togglePerformanceCookies = () => {
     if (isPerformanceCookiesEnabled) {
@@ -117,7 +126,7 @@ export default function AboutCookiePolicy() {
     } else {
       consent();
     }
-    setIsPerformanceCookiesEnabled(!isPerformanceCookiesEnabled);
+    setToggledPerformanceCookies(!isPerformanceCookiesEnabled);
   };
 
   return (

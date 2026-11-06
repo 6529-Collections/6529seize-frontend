@@ -9,8 +9,12 @@ performance-tracking behavior tied to that choice.
 
 - Essential cookies stay enabled so the app can keep core session and policy
   state.
-- Performance consent controls whether the site enables non-essential analytics
-  tracking.
+- Performance consent controls the consent-gated analytics: Google Analytics
+  and Mixpanel.
+- Amazon CloudWatch RUM performance monitoring is the exception: it does not
+  read this choice today. A sampled session can set its `cwr_u` and `cwr_s`
+  cookies before a choice is made and after a rejection (see Performance
+  Monitoring Cookies below).
 - The same preference also controls the toggle on `/about/cookie-policy`.
 
 ## Location in the Site
@@ -62,18 +66,20 @@ performance-tracking behavior tied to that choice.
 
 ## Common Scenarios
 
-- First EU visit: the banner is shown and no non-essential analytics start
-  until the user accepts.
+- First EU visit: the banner is shown and Google Analytics and Mixpanel do
+  not start until the user accepts. A RUM-sampled session still sets the RUM
+  cookies.
 - First non-EU visit: the banner is skipped and performance analytics are
   enabled automatically.
 - Returning visitor with `performance-cookies-consent=false`, in or outside
-  the EU: the banner stays hidden, the rejection is kept, and performance
-  analytics stay disabled.
+  the EU: the banner stays hidden, the rejection is kept, and Google Analytics
+  and Mixpanel stay disabled. RUM is not affected by the rejection.
 - Returning non-EU visitor with a stored acceptance: the acceptance is kept
   with its original expiry. The 7-day default is not extended by later visits;
   once it expires, the next non-EU visit applies it again.
 - `/about/cookie-policy` reuses the same accept/reject flows to enable or
-  disable performance cookies after the initial choice.
+  disable the consent-gated analytics after the initial choice. The toggle
+  does not stop RUM or remove its cookies.
 - A connected user who has granted performance consent can be tracked across
   page changes with the current pathname and connected-profile presence.
 - If that same user disconnects without revoking performance consent, later

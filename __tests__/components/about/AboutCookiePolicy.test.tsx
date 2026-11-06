@@ -1,5 +1,7 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { hydrateRoot, type Root } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import AboutCookiePolicy from '@/components/about/AboutCookiePolicy';
 
 jest.mock('react-toggle', () => (props: any) => (
@@ -113,5 +115,35 @@ describe('AboutCookiePolicy', () => {
     await user.click(checkbox);
     expect(reject).toHaveBeenCalled();
     expect(checkbox).not.toBeChecked();
+  });
+
+  it('hydrates server markup without a mismatch when consent is stored', async () => {
+    (getCookieConsentByName as jest.Mock).mockReturnValue(true);
+    const recoverableErrors: unknown[] = [];
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    let root: Root | undefined;
+    try {
+      container.innerHTML = renderToString(<AboutCookiePolicy />);
+      expect(screen.getByRole('checkbox')).not.toBeChecked();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
+
+      await act(async () => {
+        root = hydrateRoot(container, <AboutCookiePolicy />, {
+          onRecoverableError: (error) => {
+            recoverableErrors.push(error);
+          },
+        });
+      });
+
+      expect(screen.getByRole('checkbox')).toBeChecked();
+      expect(screen.getByText('Enabled')).toBeInTheDocument();
+      expect(recoverableErrors).toEqual([]);
+    } finally {
+      await act(async () => {
+        root?.unmount();
+      });
+      container.remove();
+    }
   });
 });
