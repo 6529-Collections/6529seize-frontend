@@ -105,7 +105,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "| `.deb` | `validator --version` |",
       "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
       "",
-      "It prints `validator 0.1.0-rc.9 (a5bd372, TDH v1.4)`. If it shows another commit, tell us.",
+      "It prints `validator 0.1.0-rc.9 (d5457d6, TDH v1.4)`. If it shows another commit, tell us.",
     ]),
   },
   {
@@ -173,7 +173,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "known-issues",
     title: "Known issues",
     markdown: joinMarkdown([
-      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-22 01:30 UTC, and 0.1.0 stops signing on 1 December.",
+      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-22 03:30 UTC, and 0.1.0 stops signing on 1 December.",
     ]),
   },
 ];

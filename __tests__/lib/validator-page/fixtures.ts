@@ -95,7 +95,7 @@ export const SAME_DAY_FEED = {
 };
 
 /** rc.9's commit, as the cut names it; fill-rc9.sh changes it on a recut. */
-export const RC9_COMMIT_FULL = "a5bd372944756d56ee8a697eba9acba5dd65686a";
+export const RC9_COMMIT_FULL = "d5457d60c72d05b520920cd94de90f38ce0325f3";
 
 /** rc.9's reasons, as 6529 means to sign them. */
 export const RC9_URGENT_REASON =

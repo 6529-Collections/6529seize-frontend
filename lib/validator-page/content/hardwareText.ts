@@ -315,7 +315,7 @@ export const QUESTIONS: readonly {
 /** Where the page's numbers come from. */
 export const SOURCES: readonly string[] = [
   `Memory and disk: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
-  "The first start: 6529's join tests of the test release (0.1.0-rc.9, commit a5bd372) on {{RC9_JOIN_DATE}} 2026, fresh installs with the default settings, through Tor and with Tor off.",
+  "The first start: 6529's join tests of the test release (0.1.0-rc.9, commit d5457d6) on {{RC9_JOIN_DATE}} 2026, fresh installs with the default settings, through Tor and with Tor off.",
   "Internet: 6529's estimate of a month of Ethereum data, in the validator's specification.",
   `Prices: store and provider pages, read on ${PRICES_READ_ON}. Power at 18.16 cents a kWh, the US average for August 2026 (EIA).`,
 ];
