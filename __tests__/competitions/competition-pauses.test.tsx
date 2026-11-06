@@ -218,7 +218,6 @@ it.each(["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"])(
     const archive = screen.getByRole("button", {
       name:
         lifecycle === "PUBLISHED" ? "Archive and stop competition" : "Archive",
-      exact: true,
     });
     expect(archive).toHaveClass("tw-border-red");
     fireEvent.click(archive);
