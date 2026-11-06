@@ -931,6 +931,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         width < 640 ? "68px" : "113px"
       );
       if (width < 640) {
+        const artworkBox = await mintingArtwork.boundingBox();
+        const mintingLabelBox = await upcoming
+          .getByRole("button", { name: "Minting Today" })
+          .boundingBox();
+        expect(artworkBox).not.toBeNull();
+        expect(mintingLabelBox).not.toBeNull();
+        expect(mintingLabelBox!.y).toBeGreaterThanOrEqual(
+          artworkBox!.y + artworkBox!.height
+        );
         await expect(overviewActions).toHaveCSS("border-top-width", "0px");
         const forecastRow = overviewActions
           .getByRole("button", { name: "Forecast use", exact: true })
@@ -1013,11 +1022,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
             toggleTargetBox!.x
           );
           if (width < 640 && countBox!.y >= titleBox!.y + titleBox!.height) {
-            // Narrow rows keep the controls together beneath the complete name.
+            // Narrow rows keep the controls together beneath the complete name,
+            // aligned right just like the other rows.
             expect(countBox!.y).toBeGreaterThanOrEqual(
               titleBox!.y + titleBox!.height
             );
-            expect(Math.abs(countBox!.x - titleBox!.x)).toBeLessThanOrEqual(1);
+            expect(countBox!.x).toBeGreaterThanOrEqual(titleBox!.x);
           } else {
             expect(
               Math.abs(
@@ -1033,6 +1043,16 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           expect(toggleTargetBox!.width).toBeGreaterThanOrEqual(44);
           expect(toggleTargetBox!.height).toBeGreaterThanOrEqual(44);
         }
+        const toggleRightEdges = await upcoming
+          .getByRole("switch")
+          .evaluateAll((elements) =>
+            elements.map(
+              (element) => element.parentElement!.getBoundingClientRect().right
+            )
+          );
+        expect(
+          Math.max(...toggleRightEdges) - Math.min(...toggleRightEdges)
+        ).toBeLessThanOrEqual(1);
       }
       if (width < 640) {
         const more = upcoming.getByRole("button", {
