@@ -6641,7 +6641,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         page.getByRole("button", { name: "Open create menu", exact: true })
       ).toBeInViewport({ ratio: 1 });
-      await page.setViewportSize({ width: 430, height: 932 });
+      // A phone width where the filter row still overflows, so selecting a
+      // hidden tab must scroll it into view. The shorter "+ Decision" action
+      // (formerly "+ Competition") lets the whole row fit at 430px.
+      await page.setViewportSize({ width: 360, height: 800 });
       await collectionMore.tap();
       await page.keyboard.press("Escape");
       await expect(collectionMore).toBeFocused();
