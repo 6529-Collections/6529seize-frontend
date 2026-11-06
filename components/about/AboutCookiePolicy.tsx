@@ -5,6 +5,10 @@ import {
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useState } from "react";
 import Toggle from "react-toggle";
 import {
@@ -24,11 +28,58 @@ const COOKIE_POLICY_TABLE_CLASS = [
   "[&_td]:tw-border-0 [&_td]:tw-border-t [&_td]:tw-border-solid [&_td]:tw-border-white/[0.07] [&_td]:tw-p-3 [&_td]:tw-align-top",
 ].join(" ");
 
+const COOKIE_POLICY_LAST_UPDATED = "2026-11-06";
+
+type CookiePolicyMessageKey = Extract<
+  MessageKey,
+  `about.cookiePolicy.${string}`
+>;
+
+interface AwsRumCookie {
+  readonly name: string;
+  readonly purposeKey: CookiePolicyMessageKey;
+  readonly lifespanKey: CookiePolicyMessageKey;
+}
+
+// Set by aws-rum-web (`allowCookies: true`) on the site's domain.
+const AWS_RUM_COOKIES: readonly AwsRumCookie[] = [
+  {
+    name: "cwr_u",
+    purposeKey: "about.cookiePolicy.awsRum.userId.purpose",
+    lifespanKey: "about.cookiePolicy.awsRum.userId.lifespan",
+  },
+  {
+    name: "cwr_s",
+    purposeKey: "about.cookiePolicy.awsRum.session.purpose",
+    lifespanKey: "about.cookiePolicy.awsRum.session.lifespan",
+  },
+];
+
+function AwsRumCookieRows({ locale }: { readonly locale: SupportedLocale }) {
+  return AWS_RUM_COOKIES.map((cookie) => (
+    <tr key={cookie.name}>
+      <td>.6529.io</td>
+      <td>
+        {t(locale, "about.cookiePolicy.cookieWithProvider", {
+          cookie: cookie.name,
+          provider: t(locale, "about.cookiePolicy.awsRum.provider"),
+        })}
+        <span className="tw-block tw-text-iron-400">
+          {t(locale, cookie.purposeKey)}
+        </span>
+      </td>
+      <td>{t(locale, "about.cookiePolicy.firstParty")}</td>
+      <td>{t(locale, cookie.lifespanKey)}</td>
+    </tr>
+  ));
+}
+
 export default function AboutCookiePolicy() {
+  const locale = useBrowserLocale();
   const { showCookieConsent, consent, reject } = useCookieConsent();
 
   const [isPerformanceCookiesEnabled, setIsPerformanceCookiesEnabled] =
-    useState(getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE));
+    useState(() => getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE));
 
   const togglePerformanceCookies = () => {
     if (isPerformanceCookiesEnabled) {
@@ -48,7 +99,13 @@ export default function AboutCookiePolicy() {
       </Row>
       <Row>
         <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
-          Last Updated: June 04, 2024
+          {t(locale, "about.cookiePolicy.lastUpdated", {
+            date: formatDate(locale, COOKIE_POLICY_LAST_UPDATED, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+          })}
         </Col>
       </Row>
       <Row>
@@ -276,9 +333,13 @@ export default function AboutCookiePolicy() {
                       <td>First Party</td>
                       <td>1 year</td>
                     </tr>
+                    <AwsRumCookieRows locale={locale} />
                   </tbody>
                 </Table>
               </Col>
+            </Row>
+            <Row className="tw-pt-3">
+              <Col>{t(locale, "about.cookiePolicy.awsRum.sampling")}</Col>
             </Row>
             <Row className="tw-pt-2">
               <Col>

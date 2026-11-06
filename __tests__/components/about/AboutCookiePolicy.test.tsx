@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AboutCookiePolicy from '@/components/about/AboutCookiePolicy';
 
@@ -32,6 +32,40 @@ describe('AboutCookiePolicy', () => {
   it('renders cookie policy heading', () => {
     render(<AboutCookiePolicy />);
     expect(screen.getByRole('heading', { name: /Cookie Policy/i })).toBeInTheDocument();
+  });
+
+  it('lists the AWS CloudWatch RUM cookies as performance cookies', () => {
+    render(<AboutCookiePolicy />);
+    const performanceTable = screen.getByRole('region', {
+      name: /Performance Cookies/i,
+    });
+
+    const userIdRow = within(performanceTable)
+      .getByText(/^cwr_u \(Amazon CloudWatch RUM, Amazon Web Services\)/)
+      .closest('tr');
+    expect(userIdRow).not.toBeNull();
+    expect(userIdRow).toHaveTextContent('.6529.io');
+    expect(userIdRow).toHaveTextContent(/random visitor ID/i);
+    expect(userIdRow).toHaveTextContent('First Party');
+    expect(userIdRow).toHaveTextContent('30 days');
+
+    const sessionRow = within(performanceTable)
+      .getByText(/^cwr_s \(Amazon CloudWatch RUM, Amazon Web Services\)/)
+      .closest('tr');
+    expect(sessionRow).not.toBeNull();
+    expect(sessionRow).toHaveTextContent(/session ID/i);
+    expect(sessionRow).toHaveTextContent('30 minutes after your last activity');
+
+    expect(
+      screen.getByText(/We use Amazon CloudWatch RUM to measure page load speed/)
+    ).toBeInTheDocument();
+  });
+
+  it('shows the localized last updated date', () => {
+    render(<AboutCookiePolicy />);
+    expect(
+      screen.getByText('Last Updated: November 6, 2026')
+    ).toBeInTheDocument();
   });
 
   it('enables performance cookies when toggled on', async () => {
