@@ -328,7 +328,7 @@ jobs:
 
       - name: Upload exact production artifact
         id: upload
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ steps.validate-inputs.outputs.artifact_name }}
           path: production-artifact
@@ -356,7 +356,7 @@ jobs:
       - name: Upload sentry-cli for the Sentry release
         if: steps.stage-sentry-cli.outcome == 'success'
         continue-on-error: true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: production-sentry-cli-${{ github.run_id }}
           path: sentry-cli-handoff
