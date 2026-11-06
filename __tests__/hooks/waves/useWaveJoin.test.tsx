@@ -5,6 +5,7 @@ import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
@@ -13,6 +14,9 @@ import {
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDeleteWithBody: jest.fn(),
+}));
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({ key: "alice" }),
 }));
 
 const mockedPost = commonApiPost as jest.MockedFunction<typeof commonApiPost>;
@@ -24,8 +28,9 @@ const requestAuth = jest.fn();
 const setToast = jest.fn();
 const onWaveFollowChange = jest.fn();
 
+let queryClient: QueryClient;
 const createWrapper = () => {
-  const queryClient = new QueryClient({
+  queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   });
   const auth = { requestAuth, setToast } as unknown as AuthContextType;
@@ -84,6 +89,9 @@ describe("useWaveJoin", () => {
       following: true,
     });
     expect(result.current.isPending).toBe(false);
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toEqual([]);
   });
 
   it("also subscribes to every drop when requested", async () => {
@@ -152,6 +160,9 @@ describe("useWaveJoin", () => {
       waveId: "wave-1",
       following: false,
     });
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toEqual(["wave-1"]);
   });
 
   it("does nothing when the session check is cancelled", async () => {
@@ -207,6 +218,23 @@ describe("useWaveJoin", () => {
     expect(setToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Couldn't leave this wave." })
     );
+    expect(onWaveFollowChange).not.toHaveBeenCalled();
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toBeUndefined();
+  });
+
+  it("clears a previous successful leave when rejoining", async () => {
+    const { result } = renderHook(() => useWaveJoin(joinedWave), {
+      wrapper: createWrapper(),
+    });
+    await act(async () => {
+      await result.current.leave();
+      await result.current.join();
+    });
+    expect(
+      queryClient.getQueryData([QueryKey.WAVE_SIDEBAR_MEMBERSHIP, "alice"])
+    ).toEqual([]);
   });
 
   it("ignores a second request while one is in flight", async () => {

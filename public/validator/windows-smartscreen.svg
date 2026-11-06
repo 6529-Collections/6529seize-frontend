@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" font-family="'Segoe UI', 'Segoe UI Variable Text', system-ui, -apple-system, Arial, sans-serif">
+  <rect width="400" height="240" rx="14" fill="#0b2448"/>
+  <rect x="18" y="14" width="364" height="212" rx="4" fill="#0f5fae"/>
+  <text x="36" y="48" fill="#ffffff" font-size="19" font-weight="300">Windows protected your PC</text>
+  <g fill="#ffffff" font-size="11.5">
+    <text x="36" y="72">Microsoft Defender SmartScreen prevented an</text>
+    <text x="36" y="87">unrecognized app from starting. Running this</text>
+    <text x="36" y="102">app might put your PC at risk.</text>
+  </g>
+  <g fill="#ffffff" font-size="11.5">
+    <text x="36" y="126">App:</text>
+    <text x="104" y="126">6529-Validator-Setup-0.1.0-x64.exe</text>
+    <text x="36" y="148">Publisher:</text>
+    <text x="104" y="148" font-weight="600">6529 Collection LLC</text>
+  </g>
+  <rect x="28" y="134" width="242" height="21" rx="5" fill="none" stroke="#ffd166" stroke-width="2.25"/>
+  <rect x="174" y="180" width="96" height="28" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <rect x="278" y="180" width="90" height="28" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <g fill="#ffffff" font-size="12" text-anchor="middle">
+    <text x="222" y="198">Run anyway</text>
+    <text x="323" y="198">Don’t run</text>
+  </g>
+  <rect x="169" y="175" width="106" height="38" rx="6" fill="none" stroke="#ffd166" stroke-width="2.25"/>
+</svg>

@@ -6044,7 +6044,7 @@ describe("sentry-client-filters", () => {
     }
   );
 
-  it("filters Sentry route parameterization cyclic JSON errors", () => {
+  it("keeps ambiguous Sentry route parameterization cyclic JSON errors", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent();
 
@@ -6052,10 +6052,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters observed MetaMaskMobile WKWebView wave route parameterization cyclic JSON errors", () => {
+  it("keeps ambiguous observed MetaMaskMobile WKWebView wave route parameterization cyclic JSON errors", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent();
@@ -6064,10 +6064,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters the observed MetaMask Mobile Sentry helper cyclic JSON timer error", () => {
+  it("keeps ambiguous the observed MetaMask Mobile Sentry helper cyclic JSON timer error", () => {
     // Arrange
     const event = createObservedSentryArEvent();
 
@@ -6075,7 +6075,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter the observed Sentry helper cyclic JSON timer error without MetaMask evidence", () => {
@@ -6158,7 +6158,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters MetaMask Mobile noise when native stringify is marked in-app", () => {
+  it("keeps ambiguous MetaMask Mobile noise when native stringify is marked in-app", () => {
     // Arrange
     const frames = observedSentryCpNotificationsFrames.map((frame) =>
       frame.function === "stringify" ? { ...frame, in_app: true } : frame
@@ -6178,10 +6178,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
+  it("keeps ambiguous Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
 
@@ -6189,10 +6189,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters MetaMaskMobile WebView route parameterization errors on the memes mint route", () => {
+  it("keeps ambiguous MetaMaskMobile WebView route parameterization errors on the memes mint route", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       transaction: "/the-memes/mint",
@@ -6211,10 +6211,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("uses the runtime user agent for MetaMaskMobile WebView route parameterization errors", () => {
+  it("keeps ambiguous runtime-user-agent-only MetaMaskMobile WebView route parameterization errors", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       transaction: "/the-memes/mint",
@@ -6232,7 +6232,7 @@ describe("sentry-client-filters", () => {
     );
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter cyclic JSON errors with app-owned frames", () => {
@@ -6415,7 +6415,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters cyclic JSON errors without navigation breadcrumbs when MetaMaskMobile WebView context is present", () => {
+  it("keeps ambiguous cyclic JSON errors without navigation breadcrumbs when MetaMaskMobile WebView context is present", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       breadcrumbs: [],
@@ -6425,7 +6425,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter cyclic JSON route parameterization errors without MetaMaskMobile WKWebView context", () => {
@@ -6536,7 +6536,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
+  it("keeps ambiguous MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent({
       transaction: undefined,
@@ -6551,7 +6551,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("filters injected wallet collisions for tronlinkParams in app URI stacks", () => {

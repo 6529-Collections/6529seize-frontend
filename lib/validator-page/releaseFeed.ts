@@ -31,13 +31,16 @@ export type ReleaseFeedSnapshot = {
   readonly state: "ok" | "missing" | "error";
   readonly feed: FeedObject | null;
   readonly signature: FeedObject | null;
-  /** Newest first. Entries the site cannot use are left out. */
+  /**
+   * Highest version first, in the validator's order. Entries the site
+   * cannot use are left out.
+   */
   readonly releases: readonly ValidatorRelease[];
 };
 
-// A version and a file name each become one S3 key segment, so neither may
-// hold a slash or start with a dot.
-const VERSION_PATTERN = /^[0-9A-Za-z][0-9A-Za-z.+-]{0,63}$/;
+// A file name becomes one S3 key segment, so it may not hold a slash or
+// start with a dot. A version is checked by parseVersion, whose form has
+// neither.
 const FILE_NAME_PATTERN = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const COMMIT_PATTERN = /^[0-9a-f]{7,64}$/;
@@ -51,6 +54,105 @@ const SNAPSHOT_TTL_MS = 60 * 1000;
 // asked again after ERROR_RETRY_MS.
 const STALE_IF_ERROR_MS = 60 * 60 * 1000;
 const ERROR_RETRY_MS = 10 * 1000;
+
+// Release numbers, read and ordered as the validator does
+// (docs/releases-feed.md, "Versions", in the validator repository):
+// MAJOR.MINOR.PATCH and an optional pre-release, in Semantic Versioning
+// 2.0.0 order, 0.1.0-rc.4 < 0.1.0-rc.10 < 0.1.0 < 0.1.1-rc.1 < 0.1.1.
+// Build metadata (+...) is not used.
+const MAX_VERSION_LENGTH = 64;
+const VERSION_NUMBER = /^(?:0|[1-9]\d*)$/;
+const PRE_RELEASE_PART = /^[0-9A-Za-z-]+$/;
+const DIGITS = /^\d+$/;
+// The validator reads each number as a 64-bit unsigned integer.
+const MAX_VERSION_NUMBER = "18446744073709551615";
+
+type Version = {
+  readonly core: readonly string[];
+  readonly preRelease: readonly string[];
+};
+
+function isVersionNumber(part: string): boolean {
+  return (
+    VERSION_NUMBER.test(part) &&
+    (part.length < MAX_VERSION_NUMBER.length ||
+      (part.length === MAX_VERSION_NUMBER.length && part <= MAX_VERSION_NUMBER))
+  );
+}
+
+function isPreReleasePart(part: string): boolean {
+  return (
+    PRE_RELEASE_PART.test(part) && (!DIGITS.test(part) || isVersionNumber(part))
+  );
+}
+
+/** `0.1.0` or `0.1.0-rc.7`; null for anything the validator refuses. */
+function parseVersion(text: string): Version | null {
+  if (text.length > MAX_VERSION_LENGTH || text.includes("+")) {
+    return null;
+  }
+  const dash = text.indexOf("-");
+  const core = (dash === -1 ? text : text.slice(0, dash)).split(".");
+  const preRelease = dash === -1 ? [] : text.slice(dash + 1).split(".");
+  if (
+    core.length !== 3 ||
+    !core.every(isVersionNumber) ||
+    !preRelease.every(isPreReleasePart)
+  ) {
+    return null;
+  }
+  return { core, preRelease };
+}
+
+function compareText(a: string, b: string): number {
+  if (a === b) {
+    return 0;
+  }
+  return a < b ? -1 : 1;
+}
+
+function comparePart(a: string, b: string): number {
+  const aIsNumber = DIGITS.test(a);
+  const bIsNumber = DIGITS.test(b);
+  if (aIsNumber && bIsNumber) {
+    // Neither has leading zeros, so the longer number is the larger.
+    return a.length - b.length || compareText(a, b);
+  }
+  if (aIsNumber !== bIsNumber) {
+    // A number is below a word.
+    return aIsNumber ? -1 : 1;
+  }
+  return compareText(a, b);
+}
+
+function compareParts(a: readonly string[], b: readonly string[]): number {
+  for (const [index, part] of a.entries()) {
+    const other = b[index];
+    if (other === undefined) {
+      return 1;
+    }
+    const order = comparePart(part, other);
+    if (order !== 0) {
+      return order;
+    }
+  }
+  return a.length - b.length;
+}
+
+/** Below zero when `a` is the lower version. */
+function compareVersions(a: Version, b: Version): number {
+  const core = compareParts(a.core, b.core);
+  if (core !== 0) {
+    return core;
+  }
+  if (a.preRelease.length === 0 || b.preRelease.length === 0) {
+    // A release candidate is below the release it leads to.
+    return (
+      Number(a.preRelease.length === 0) - Number(b.preRelease.length === 0)
+    );
+  }
+  return compareParts(a.preRelease, b.preRelease);
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -114,11 +216,17 @@ function parseFiles(value: unknown): ValidatorReleaseFile[] {
   return files;
 }
 
-function parseRelease(value: unknown): ValidatorRelease | null {
+type ParsedRelease = {
+  readonly release: ValidatorRelease;
+  readonly order: Version;
+};
+
+function parseRelease(value: unknown): ParsedRelease | null {
   if (!isRecord(value)) {
     return null;
   }
   const version = firstString(value, ["version"]);
+  const order = version ? parseVersion(version) : null;
   const channel = firstString(value, ["channel"]);
   const publishedAt = firstString(value, [
     "published_at",
@@ -127,7 +235,7 @@ function parseRelease(value: unknown): ValidatorRelease | null {
   ]);
   if (
     !version ||
-    !VERSION_PATTERN.test(version) ||
+    !order ||
     !channel ||
     !publishedAt ||
     !ISO_DATE_START.test(publishedAt) ||
@@ -139,13 +247,16 @@ function parseRelease(value: unknown): ValidatorRelease | null {
   const commit = firstString(value, ["commit"])?.toLowerCase() ?? null;
   const notes = firstString(value, ["notes", "summary"]);
   return {
-    version,
-    channel,
-    publishedAt,
-    commit: commit && COMMIT_PATTERN.test(commit) ? commit : null,
-    softwareId: firstString(value, ["software_id", "softwareId"]),
-    notes: notes ? notes.slice(0, MAX_NOTES_LENGTH) : null,
-    files: parseFiles(value["files"]),
+    release: {
+      version,
+      channel,
+      publishedAt,
+      commit: commit && COMMIT_PATTERN.test(commit) ? commit : null,
+      softwareId: firstString(value, ["software_id", "softwareId"]),
+      notes: notes ? notes.slice(0, MAX_NOTES_LENGTH) : null,
+      files: parseFiles(value["files"]),
+    },
+    order,
   };
 }
 
@@ -153,26 +264,28 @@ function parseRelease(value: unknown): ValidatorRelease | null {
  * Reads the release list out of the feed's JSON. The site only renders it;
  * validators check the feed's signature themselves. Invalid entries are
  * dropped rather than failing the whole page.
+ *
+ * Releases come out highest version first, as validators order them. Dates
+ * play no part: a release and its last candidate can share a day, and the
+ * page offers only the first entry.
  */
 export function parseReleaseFeed(json: unknown): ValidatorRelease[] {
   const list = isRecord(json) ? json["releases"] : json;
   if (!Array.isArray(list)) {
     return [];
   }
-  const releases: ValidatorRelease[] = [];
+  const parsed: ParsedRelease[] = [];
   const seen = new Set<string>();
-  for (const entry of list) {
-    const release = parseRelease(entry);
-    if (release && !seen.has(release.version)) {
-      seen.add(release.version);
-      releases.push(release);
+  for (const value of list) {
+    const entry = parseRelease(value);
+    if (entry && !seen.has(entry.release.version)) {
+      seen.add(entry.release.version);
+      parsed.push(entry);
     }
   }
-  return releases.sort(
-    (a, b) =>
-      Date.parse(b.publishedAt) - Date.parse(a.publishedAt) ||
-      b.version.localeCompare(a.version, "en", { numeric: true })
-  );
+  return parsed
+    .sort((a, b) => compareVersions(b.order, a.order))
+    .map((entry) => entry.release);
 }
 
 function decodeFeed(feed: FeedObject): ValidatorRelease[] {

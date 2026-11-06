@@ -13,6 +13,7 @@ import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRoot
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { getMemesMintingRoots } from "@/services/api/memes-minting-claims-api";
+import { usePageVisible } from "@/hooks/usePageVisibility";
 import { isAddress, type Abi } from "viem";
 
 export enum ManifoldClaimStatus {
@@ -46,6 +47,7 @@ export interface MemePhase {
 
 const ACTIVE_CLAIM_REFETCH_INTERVAL_MS = 5000;
 const INACTIVE_CLAIM_REFETCH_INTERVAL_MS = 10000;
+const MAX_TIMEOUT_MS = 2_147_483_647;
 const UINT_256_MAX = (1n << 256n) - 1n;
 
 function parseUnknownBigInt(value: unknown): bigint | null {
@@ -310,6 +312,8 @@ export function useManifoldClaim({
   const readMethod: ManifoldClaimReadMethod =
     chainId === mainnet.id ? "getClaimForToken" : "getClaim";
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
+  const [phaseBoundary, setPhaseBoundary] = useState(0);
+  const isPageVisible = usePageVisible();
   const [refetchInterval, setRefetchInterval] = useState<number>(
     ACTIVE_CLAIM_REFETCH_INTERVAL_MS
   );
@@ -503,7 +507,27 @@ export function useManifoldClaim({
     getMemePhase,
     getNextMemePhase,
     getStatus,
+    phaseBoundary,
+    isPageVisible,
   ]);
+
+  useEffect(() => {
+    if (!isPageVisible || !claim || claim.isFinalized) {
+      return;
+    }
+
+    // Clock boundaries must advance even when polling returns identical data.
+    const boundarySeconds =
+      claim.status === ManifoldClaimStatus.UPCOMING
+        ? claim.startDate
+        : claim.endDate;
+    const delayMs = Math.max(0, boundarySeconds * 1000 - Date.now());
+    const timer = setTimeout(
+      () => setPhaseBoundary((previous) => previous + 1),
+      Math.min(delayMs, MAX_TIMEOUT_MS)
+    );
+    return () => clearTimeout(timer);
+  }, [claim, isPageVisible]);
 
   useEffect(() => {
     if (readContract.error) {

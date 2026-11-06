@@ -31,7 +31,8 @@ describe("SingleWaveDropVoteInput", () => {
     const input = screen.getByDisplayValue("42");
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute("type", "text");
-    expect(input).toHaveAttribute("pattern", "-?[0-9]*");
+    // Locale digit grouping is shown in the field, so the pattern allows it.
+    expect(input).toHaveAttribute("pattern", String.raw`-?[0-9.,\s]*`);
     expect(input).toHaveAttribute("inputMode", "numeric");
   });
 

@@ -75,8 +75,9 @@ job's full download/deploy window by at least 15 minutes.
 
 Staging permissions cover its artifact prefix in `seize-web` in `us-east-1`
 and commands on its existing SSM-managed server in `eu-west-1`. Production
-permissions cover its versioned artifact prefix, the existing Elastic Beanstalk
-environment and deployment resources, and its announcement distribution.
+permissions cover its versioned artifact prefix, create-only writes to the
+shared static prefix, the existing Elastic Beanstalk environment and deployment
+resources, and its announcement distribution.
 IAM roles are global. Infrastructure or resource replacements require an
 administrative policy review; deployment roles cannot edit their own policies.
 
@@ -123,6 +124,17 @@ staging access cookie, so they do not render without it. The deploy does not
 give the staging server its own access key: `/api` routes bypass the staging
 access gate, so a server-held key would let anyone without staging access render
 pre-release data through `/api/og-metadata/*`.
+
+## Page edge cache
+
+`staging.6529.io` is served through CloudFront, which answers prerendered
+pages from the edge. Each staging deployment purges that cache after the exact
+HTTP version check; a purge that cannot start fails the job, and one still
+running after ten minutes only warns.
+Production is not behind CloudFront yet; its purge step is skipped until the
+cutover sets `PRODUCTION_PAGE_DISTRIBUTION_ID`. See
+[Page edge cache](cloudfront-page-cache.md) for what is cached, manual purges,
+rollback and the production cutover plan.
 
 ## Order and completion
 
@@ -219,6 +231,62 @@ metadata and final signal. Per-deploy frontend and backend notes post to the
 `Deploys · Production` wave; `6529 Releases` receives one AI-written daily
 digest plus individual Desktop and mobile app release notes. CI wave
 notifications are best effort and use deploy run IDs to correlate E2E replies.
+
+## Production static assets
+
+Production pages load `_next/static` from the asset distribution at
+`https://dnclu2fna0b2b.cloudfront.net/web_build/shared/` (`config/assetPrefix.ts`).
+Next names those files by content hash or scopes them by the build ID, so every
+build shares the prefix: a file that did not change keeps its URL, and browsers
+reuse their cached copy after a deploy instead of downloading it again.
+
+`Web Deploy - PROD` publishes the verified artifact's static files with
+`ops/scripts/publish-shared-static-assets.cjs` before Elastic Beanstalk
+changes. It lists the prefix, compares each existing name's stored SHA-256
+checksum with the verified file, and uploads only new names with
+`If-None-Match: *` and a SHA-256 checksum that S3 verifies. If an existing
+name holds different bytes, it fails without writing anything. Each run uploads
+`production-shared-static-publication-<run ID>` evidence with uploaded and
+reused file and byte counts. The Elastic Beanstalk bundle stays at
+`web_build/<commit SHA>/package.zip`.
+
+A collision means a name was not content-addressed, or a shortened content
+hash collided. Never delete or overwrite the stored object: pages already use
+it. Find the cause; Next's `outputHashSalt` setting changes every hashed name
+if the build must ship before the cause is fixed. That deploy uploads every
+file again, returning visitors download everything once, and the old objects
+stay.
+
+Objects in the shared prefix are never replaced or deleted, and the bucket has
+no expiry rule, so pages from any earlier build, including tabs open across
+several deploys, keep finding their files. Builds made before the shared
+prefix load from their own `web_build/<commit SHA>/` prefix, which is also kept.
+A revert of the shared prefix therefore needs no cleanup: the reverted build
+publishes to its commit prefix again, and shared objects stay for pages that
+still use them. Staging serves static files from its own server
+(`ASSETS_FROM_S3=false`) and does not use either prefix.
+
+## Sentry releases
+
+The build no longer bakes the Sentry release into the client bundle
+(`config/sentryBuildRelease.ts`), so it no longer creates the release either.
+After Elastic Beanstalk serves the new commit and the version announcement is
+published, `Web Deploy - PROD` records it. `ops/scripts/sentry-release.sh`
+makes the same three `sentry-cli` calls the build plugin used to make:
+`releases new <commit>`, `releases set-commits <commit> --auto --ignore-missing`
+and `releases finalize <commit>`, for org `seize-ff`, project `6529-frontend`.
+The release name is the deployed commit, the `VERSION` that pages report to
+Sentry at runtime, so events attach to it. Only versions that went live are
+finalized. Source maps still upload during the build.
+
+The deploy job installs no dependencies. The build job hands it the
+`sentry-cli` binary its frozen install verified
+(`ops/scripts/resolve-sentry-cli.cjs`, artifact
+`production-sentry-cli-<run ID>`, kept 1 day), with a SHA-256 checksum, so
+nothing is downloaded at deploy time. Every part is best effort: a missing
+hand-off, a Sentry outage or a failed call prints a warning and never fails the
+deploy. Sentry still creates a missing release from the first event that
+carries it.
 
 ## Sitemap generation
 

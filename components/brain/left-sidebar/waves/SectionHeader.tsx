@@ -1,5 +1,5 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface SectionHeaderProps {
@@ -25,7 +25,10 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         {icon !== undefined && (
-          <FontAwesomeIcon icon={icon} className="tw-size-3 tw-text-iron-400" />
+          <FontAwesomeSvgIcon
+            icon={icon}
+            className="tw-size-3 tw-text-iron-400"
+          />
         )}
         {labelContent ?? (
           <span className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">

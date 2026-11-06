@@ -102,12 +102,20 @@ describe("NextGenCollectionHeader", () => {
   afterEach(() =>
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false })
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      })
   );
   it("retains countdown information without a mint CTA on restricted iOS", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(
       <NextGenCollectionHeader collection={collection} show_links={false} />
     );

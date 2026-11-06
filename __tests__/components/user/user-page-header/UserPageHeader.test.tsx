@@ -210,6 +210,7 @@ const auth = {
 } as any;
 const ownProfileAuth = {
   connectedProfile: { handle: "bob" },
+  isDirectProfileSession: true,
   activeProfileProxy: null,
   setToast: jest.fn(),
 } as any;
@@ -613,6 +614,36 @@ describe("UserPageHeader", () => {
     });
   });
 
+  it.each([true, false, undefined])(
+    "only enables profile editing for a confirmed direct session (%s)",
+    (isDirectProfileSession) => {
+      render(
+        <AuthContext.Provider
+          value={{ ...ownProfileAuth, isDirectProfileSession }}
+        >
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[
+              {
+                statement_type: STATEMENT_TYPE.BIO,
+                statement_group: STATEMENT_GROUP.GENERAL,
+              } as CicStatement,
+            ]}
+            profileEnabledAt={null}
+            followersCount={0}
+          />
+        </AuthContext.Provider>
+      );
+      expect(
+        screen.queryAllByRole("button", { name: "Edit profile" }).length > 0
+      ).toBe(isDirectProfileSession === true);
+    }
+  );
+
   it("links to preferences from your own profile", () => {
     render(
       <AuthContext.Provider value={ownProfileAuth}>
@@ -639,6 +670,33 @@ describe("UserPageHeader", () => {
         );
       });
   });
+
+  it.each([
+    { connectedProfile: null, hasActions: false },
+    { connectedProfile: { id: "viewer", handle: null }, hasActions: true },
+  ])(
+    "keeps profile actions scoped to connected viewers: $hasActions",
+    ({ connectedProfile, hasActions }) => {
+      render(
+        <AuthContext.Provider value={{ ...auth, connectedProfile }}>
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={5}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+      expect(screen.queryByTestId("profile-actions-menu") !== null).toBe(
+        hasActions
+      );
+    }
+  );
 
   it("does not show preferences when viewing another profile", () => {
     render(
@@ -727,6 +785,68 @@ describe("UserPageHeader", () => {
       screen.queryByRole("link", { name: "Open bob website" })
     ).not.toBeInTheDocument();
   });
+
+  it.each([
+    ["owner", ownProfileAuth, true],
+    ["visitor", auth, false],
+    ["proxy", proxiedOwnProfileAuth, false],
+  ] as const)(
+    "hydrates without mismatches when the %s session is ready before the header",
+    async (viewer, clientAuth, showsPreferences) => {
+      const header = (value: typeof auth) => (
+        <AuthContext.Provider value={value}>
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={null}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        address: undefined,
+      });
+      const container = document.createElement("div");
+      container.innerHTML = renderToString(
+        header({ ...auth, connectedProfile: null })
+      );
+      document.body.append(container);
+      expect(
+        within(container).queryByRole("link", { name: "Preferences" })
+      ).not.toBeInTheDocument();
+
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: "0x1" });
+      const onRecoverableError = jest.fn();
+      let root: Root | undefined;
+      try {
+        await act(async () => {
+          root = hydrateRoot(container, header(clientAuth), {
+            onRecoverableError,
+          });
+        });
+
+        expect(onRecoverableError).not.toHaveBeenCalled();
+        expect(
+          within(container).queryAllByRole("link", { name: "Preferences" })
+            .length > 0
+        ).toBe(showsPreferences);
+        expect(within(container).queryAllByTestId("follow").length > 0).toBe(
+          viewer === "visitor"
+        );
+      } finally {
+        act(() => root?.unmount());
+        container.remove();
+        (useSeizeConnectContext as jest.Mock).mockReturnValue({
+          address: "0x1",
+        });
+      }
+    }
+  );
 
   it("hydrates the streamed header from its server snapshot when the shared cache filled first", async () => {
     const bio = [

@@ -48,7 +48,18 @@ export function MemePageLiveRightMenu(props: {
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
         )}
-        <NftPurchasingGate>
+        <NftPurchasingGate
+          // Same box as the row below (CollectMarketButton is tw-min-h-11),
+          // measured at 52.7 px in the production server HTML (PR #4589).
+          placeholder={
+            <div
+              aria-hidden="true"
+              className="tw-border-0 tw-border-b tw-border-solid tw-border-transparent tw-py-1"
+            >
+              <div className="tw-h-11" />
+            </div>
+          }
+        >
           <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-1">
             <CollectMarketButton
               locale={locale}

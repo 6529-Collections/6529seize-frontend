@@ -1,0 +1,17 @@
+{
+  "Name": "frontend-host-only",
+  "Comment": "6529 frontend cookieless paths: forward the viewer Host so the origin selects the right site and certificate",
+  "HeadersConfig": {
+    "HeaderBehavior": "whitelist",
+    "Headers": {
+      "Quantity": 1,
+      "Items": ["Host"]
+    }
+  },
+  "CookiesConfig": {
+    "CookieBehavior": "none"
+  },
+  "QueryStringsConfig": {
+    "QueryStringBehavior": "none"
+  }
+}

@@ -17,6 +17,11 @@ wrapper expects that location.
 - `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
   adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
   status phases for the Deploy Hub pilot.
+- `purge-page-edge-cache.sh`: purges the CloudFront page distribution after a
+  deployment answers and waits for completion. See
+  [Page edge cache](../docs/developer/cloudfront-page-cache.md).
+- `sync-cloudfront-origin-facing.mjs`: refreshes the CloudFront origin-facing
+  address ranges the client rate limiter skips; `--check` reports drift.
 - `mobile-lab/`: phone-emulated load measurements of the live site with the
   mobile plan's stage 0 budgets; run by the `Mobile lab` workflow after web
   deploys. See its README.
@@ -29,6 +34,13 @@ wrapper expects that location.
   checker.
 - `verify-production-artifact.cjs`: validates the closed production artifact
   archive and extracted filesystem shape before deployment.
+- `publish-shared-static-assets.cjs`: publishes a verified build's
+  `_next/static` files to the shared production asset prefix, create-only, and
+  fails if an existing name holds different bytes.
+- `resolve-sentry-cli.cjs`: prints the path of the `sentry-cli` binary
+  installed with `@sentry/nextjs`; the production build hands it to the deploy.
+- `sentry-release.sh`: records a deployed commit as a Sentry release
+  (create, set commits, finalize), best effort.
 - `run-docs-area-remediator-loop.sh`: iterative docs remediation loop.
 - `process-docs-commit-queue.sh`: docs update queue helper for commit-based
   remediation workflows.
