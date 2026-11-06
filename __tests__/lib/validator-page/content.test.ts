@@ -167,12 +167,12 @@ describe("validator page text", () => {
     );
   });
 
-  it("shows rc.9's 21 known issues in order", () => {
+  it("shows rc.9's 23 known issues in order", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 21 }, (_, i) => i + 1));
+    expect(numbers).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
@@ -185,7 +185,7 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
-    expect(knownIssue(19)).toMatch(/^19\. The app's Log view reads/);
+    expect(knownIssue(21)).toMatch(/^21\. The app's Log view reads/);
   });
 
   it("says a new install on Sunday waits for the evening's checkpoint", () => {
@@ -198,9 +198,9 @@ describe("validator page text", () => {
     expect(knownIssue(7)).toMatch(
       /^7\. On Windows, running rc\.9's Setup\.exe after rc\.9's `\.msi` shows two/
     );
-    const back = knownIssue(8);
+    const back = knownIssue(9);
     expect(back).toMatch(
-      /^8\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
+      /^9\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
     );
     expect(back).toContain(
       "Before then, on Windows, going back to rc.6 or earlier needs an uninstall first."
@@ -213,10 +213,30 @@ describe("validator page text", () => {
     );
   });
 
+  it("says what to do when Setup.exe finds the validator's files in use", () => {
+    expect(knownIssue(8)).toBe(
+      '8. On Windows, Setup.exe may show "Files in use" with the 6529 Validator service; Retry shows the same window again. Workaround: press Ignore. If Setup stops with "Error writing to file: …\\validator.exe", stop the validator from 6529\'s logo menu, quit the app and press Retry.'
+    );
+    expect(VALIDATOR_UPGRADE.markdown).toContain(
+      'On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.9. If it shows "Files in use" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself.'
+    );
+  });
+
+  it("says the menu-bar logo may not appear on macOS 26, last under Install and download", () => {
+    expect(knownIssue(12)).toBe(
+      "12. On macOS 26 the menu-bar logo may not appear. Workaround: use the app's menu at the top of the screen; Quit and Quit for an update are there too."
+    );
+    const install =
+      VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("## Running")[0]
+        ?.trimEnd()
+        .split("\n") ?? [];
+    expect(install[install.length - 1]).toBe(knownIssue(12));
+  });
+
   it("gives rc.9's Mac update: Quit for an update, and the way off rc.8", () => {
-    const mac = knownIssue(10);
+    const mac = knownIssue(11);
     expect(mac).toMatch(
-      /^10\. On a Mac, dragging the new app over one that is running leaves the old release running, and Cmd-Q doesn't quit rc\.8\./
+      /^11\. On a Mac, dragging the new app over one that is running leaves the old release running, and Cmd-Q doesn't quit rc\.8\./
     );
     expect(mac).toContain(
       "Workaround: from rc.9 on, choose **Quit for an update** in the menu-bar logo's menu or the app's menu"
@@ -263,10 +283,10 @@ describe("validator page text", () => {
     expect(fold("known-issues")).toContain(
       `A new install must start before about ${FRESH_INSTALL_UNTIL}, and 0.1.0 stops signing on 1 December.`
     );
-    expect(knownIssue(20)).toContain(
-      `20. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
+    expect(knownIssue(22)).toContain(
+      `22. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
     );
-    expect(knownIssue(20)).toContain(
+    expect(knownIssue(22)).toContain(
       `a checkpoint built into the release (${LIGHT_CLIENT_CHECKPOINT})`
     );
     // rc.7's and rc.8's dates.

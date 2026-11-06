@@ -30,6 +30,8 @@ export const VALIDATOR_UPGRADE: ValidatorReleaseNote = {
   markdown: joinMarkdown([
     "On Windows and Linux, install rc.9 over rc.8 the same way. There is nothing to uninstall first, and your key, your authorization and your records stay. A validator you stopped stays stopped.",
     "",
+    "On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.9. If it shows \"Files in use\" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself. Close any `validator` command you left running in a terminal first. When it's done, open the app from the Start menu, or press **Launch** on Setup's last page.",
+    "",
     "On a Mac:",
     "",
     "1. In Terminal, run `launchctl bootout gui/$(id -u)/io.6529.validator.agent`. This stops the validator, so Finder can replace the app.",
