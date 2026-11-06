@@ -1385,6 +1385,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "edit.namePlaceholder": "Please select a username",
   "edit.username": "Username",
   "edit.chooseMeme": "Choose a Meme",
+  "edit.pictureSourceAlternative": "or",
   "edit.loadingMemes": "Loading Memes…",
   "edit.memesError": "Couldn't load Memes.",
   "edit.retry": "Try again",

@@ -101,8 +101,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   each other when space allows. Classification options overlay the content
   without moving the About statement. Image upload controls keep their upload icon.
   Gradient and Image choices align with the left edge of the cover controls.
-  The Profile picture section gives Choose a Meme a full-width action alongside
-  file upload; choosing it reveals Meme search, with loading and retry states.
+  The Profile picture section separates the full-width Choose a Meme action
+  from file upload with `or`; choosing it reveals Meme search, with loading and
+  retry states.
 - Smaller layouts keep the circular `Edit profile` button in the banner.
   Choose a field in its icon menu to open that editor; use `Back` to return.
   These editors use the same compact field styling as desktop. The picture

@@ -6648,7 +6648,7 @@
       "keywords": ["profile", "banner", "picture", "avatar", "edit", "owner"],
       "facts": [
         "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
-        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop gives Choose a Meme a full-width action that reveals search with loading and retry states, alongside file upload. The smaller picture editor shows Meme search and file upload together, separated by or. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
+        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop gives Choose a Meme a full-width action that reveals search with loading and retry states, separated from file upload by or. The smaller picture editor shows Meme search and file upload together, separated by or. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",

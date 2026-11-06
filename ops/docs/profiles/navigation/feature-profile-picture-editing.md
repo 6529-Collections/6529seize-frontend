@@ -36,7 +36,7 @@ keep the individual picture editor.
 2. The modal opens. If you already have a profile picture, the upload panel shows its preview.
 3. Choose one source:
    - Desktop: the full-width `Choose a Meme` action reveals search and selection,
-     alongside the file uploader.
+     separated from the file uploader by `or` to make the alternatives clear.
    - Smaller layout: `Select Meme` search is already visible above the upload
      control, separated by `or`. Both use the same compact styling as desktop.
    - Uploading supports choosing a file or dragging and dropping it.

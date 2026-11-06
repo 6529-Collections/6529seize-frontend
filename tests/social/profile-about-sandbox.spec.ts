@@ -455,6 +455,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     const uploadBox = await uploadChoice.boundingBox();
     expect(memeBox?.height).toBeGreaterThanOrEqual(44);
     expect(memeBox?.width).toBeCloseTo(uploadBox!.width, 0);
+    await expect(
+      page
+        .getByRole("region", { name: "Profile picture", exact: true })
+        .getByText("or", { exact: true })
+    ).toBeVisible();
     await page.getByLabel("Background Color 1", { exact: true }).focus();
     // WebKit uses Option-Tab to include native clickable controls.
     await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");

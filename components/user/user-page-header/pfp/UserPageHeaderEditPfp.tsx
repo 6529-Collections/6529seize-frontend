@@ -202,7 +202,11 @@ export default function UserPageHeaderEditPfp({
 
       <div className="tw-my-4 tw-flex tw-w-full tw-items-center tw-gap-3">
         <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-        <span className="tw-text-xs tw-font-normal tw-text-iron-400">or</span>
+        <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+          {getUserProfileHeaderMessage(
+            "user.profileHeader.edit.pictureSourceAlternative"
+          )}
+        </span>
         <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
       </div>
 

@@ -187,6 +187,19 @@ export default function UserPageHeaderProfileEditor({
               )}
             </div>
           )}
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-3">
+            <span
+              aria-hidden="true"
+              className="tw-h-px tw-flex-1 tw-bg-white/5"
+            />
+            <span className="tw-text-xs tw-text-iron-400">
+              {message("user.profileHeader.edit.pictureSourceAlternative")}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-h-px tw-flex-1 tw-bg-white/5"
+            />
+          </div>
           <UserSettingsImgSelectFile
             compact
             imageToShow={picturePreview}
