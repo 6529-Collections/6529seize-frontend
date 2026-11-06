@@ -271,9 +271,8 @@ Done on 2026-11-04: `6529.io` has been served by `E3KTTDJUNHRYW9`
 
 **Rollback** (resolvers follow within about a minute)
 
-1. Reopen the load balancer first, using the
-   [origin lockdown rollback](#origin-lockdown). Otherwise every request fails
-   once DNS points at it.
+1. Unlock the origin first (see [Origin lockdown](#origin-lockdown)).
+   Otherwise every request fails once DNS points at the load balancer.
 2. `UPSERT` the `6529.io` `A` alias back to
    `seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com`
    (`HostedZoneId` `Z117KPS5GTRQ2G`, `EvaluateTargetHealth` true), `DELETE` the
@@ -283,46 +282,113 @@ Done on 2026-11-04: `6529.io` has been served by `E3KTTDJUNHRYW9`
 ## Origin lockdown
 
 Since 2026-11-06 the production load balancer accepts traffic only from
-CloudFront. Its security group (`sg-0fac1cee3a1095ef4`, the
-`AWSEBLoadBalancerSecurityGroup` that Elastic Beanstalk creates) allows only
-TCP 443 from the AWS-managed prefix list
-`com.amazonaws.global.cloudfront.origin-facing` (`pl-3b927c52`). Direct
-requests to the Elastic Beanstalk or load balancer hostname time out.
+CloudFront, and only from `E3KTTDJUNHRYW9`. Two controls enforce this.
 
-- Port 80 is closed. CloudFront connects to the origin over HTTPS only and
-  redirects viewers from HTTP to HTTPS itself. The prefix list counts as 55 of
-  the group's 60 inbound rules, so only one port can use it.
-- Nothing else is affected:
-  - Target group health checks and app traffic go from the load balancer to
-    the instances inside the VPC.
-  - Elastic Beanstalk reads health from its instance agent.
-  - The production deploy workflow uses the Elastic Beanstalk API and
-    `https://6529.io`.
-  - Production E2E uses `https://6529.io`.
-  - Staging has its own instance and distribution.
+**Security group.** The load balancer uses `sg-06ef22abcfaf6c8df`
+(`seizeapp-env-node22-alb-cloudfront-only`) instead of the group Elastic
+Beanstalk creates. Its only inbound rule is TCP 443 from the AWS-managed
+prefix list `com.amazonaws.global.cloudfront.origin-facing` (`pl-3b927c52`).
+Its only outbound rule is TCP 3001 to the instances.
+
+- It is attached through the environment option settings
+  `aws:elbv2:loadbalancer` `SecurityGroups` and `ManagedSecurityGroup`, set
+  with `update-environment`. With them, Elastic Beanstalk creates no group of
+  its own, adds no inbound rules to this one, and lets the instances accept
+  TCP 3001 from it.
+- #4685 records the settings in `.ebextensions/alb-cloudfront-only.config`.
+- Port 80 is closed. CloudFront connects over HTTPS only and redirects
+  viewers from HTTP to HTTPS itself.
+- The prefix list counts as 55 of the group's 60 inbound rules, so only one
+  port can use it.
+
+**Secret header.** CloudFront sends `X-Origin-Verify` on every request to the
+origin (`production-alb-https`), replacing any value a viewer sends. The HTTPS
+listener has a priority-1 rule that forwards to the target group only when
+that header matches. Its default action answers 403.
+
+- The value is stored only as the SSM SecureString
+  `/6529/frontend/production/origin-verify-header`. Anyone who can read the
+  distribution config or the listener rules can also see it, including the
+  production deploy role.
+- Sentry redacts the header once #4685 ships. Rotate the value after that.
+- #4685 adds `ops/scripts/production-origin-lock.sh`, which applies, rotates,
+  reports (`status`) and unlocks the setup without printing the value.
+- `ops/cloudfront/frontend-html/distribution-production.json` contains neither
+  the header nor the web ACL (`WebACLId`), so never apply that file to
+  production as it is. Start every change from a fresh `get-distribution-config`
+  and pass its ETag with `--if-match`. Keep `Origins.Items[].CustomHeaders` and
+  `WebACLId`: without the header, every request gets a 403.
+
+With both controls, a CloudFront geo restriction on `E3KTTDJUNHRYW9` cannot be
+bypassed, either directly or through another distribution.
+
+What is unaffected:
+
+- Target group health checks go from the load balancer straight to the
+  instances. Listener rules do not apply to them. A throwaway environment kept
+  healthy targets and Ok Elastic Beanstalk health with the 403 default.
+- Elastic Beanstalk health comes from its instance agent.
+- The production deploy workflow uses the Elastic Beanstalk API and
+  `https://6529.io`, and production E2E uses `https://6529.io`.
+- Staging has its own instance and distribution.
 - Nothing else used the origin hostnames. No Route 53 record, health check,
   canary, alarm or other distribution pointed at them, and their certificate
   is for `6529.io`.
-- The rule persists across deploys. Ordinary deploys update only the Auto
-  Scaling group and Elastic Beanstalk metadata in the environment's
-  CloudFormation stack. `.ebextensions/alb-cloudfront-only.config` also pins the
-  rule in the environment template, so an environment change cannot reopen it.
-- Any CloudFront distribution can still reach the origin, not only ours,
-  because the prefix list covers all of CloudFront. A secret origin header
-  checked at the load balancer would close that gap; none is in place.
 
-To check, run `curl --connect-timeout 10
-https://seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com/api/version`
-from outside AWS: it times out (curl exit code 28), while
+Persistence: deploys send only application environment variables, so the
+security group options stay. Deploys also leave the HTTPS listener alone. On
+the throwaway environment, the header rule and the 403 default survived
+deploys and configuration updates. Changing the HTTPS listener's own settings
+through Elastic Beanstalk would reset its default action to forward. The
+security group would still limit the origin to CloudFront; apply the header
+lock again afterwards.
+
+To check from outside AWS, request
+`https://seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com/api/version`
+with `curl --connect-timeout 10`. It times out (curl exit code 28), while
 `https://6529.io/api/version` answers 200.
 
-Rollback restores the Elastic Beanstalk default rules. The prefix-list rule can
-stay. Also revert `.ebextensions/alb-cloudfront-only.config`, so that the next
-template change does not remove the rules again.
+Rotation, with no downtime:
+
+1. The load balancer rule accepts the old and the new value. A rule can match
+   up to five values.
+2. CloudFront switches to the new value. Wait until the distribution is
+   `Deployed`; until then, some edges still send the old value, and both are
+   accepted.
+3. The rule drops the old value.
+
+`production-origin-lock.sh rotate` does these steps in this order and stores
+the new value in SSM first.
+
+Unlock: run this before any DNS rollback to the load balancer, or the origin
+refuses every visitor. It sends unmatched requests to the app again and opens
+the group to direct traffic. The header rule and the CloudFront header can
+stay.
 
 ```bash
-aws ec2 authorize-security-group-ingress --region us-east-1   --group-id sg-0fac1cee3a1095ef4 --ip-permissions   'IpProtocol=tcp,FromPort=443,ToPort=443,IpRanges=[{CidrIp=0.0.0.0/0}]'   'IpProtocol=tcp,FromPort=80,ToPort=80,IpRanges=[{CidrIp=0.0.0.0/0}]'
+export AWS_REGION=us-east-1
+LB=$(aws elasticbeanstalk describe-environment-resources \
+  --environment-name seizeapp-env-node22 \
+  --query 'EnvironmentResources.LoadBalancers[0].Name' --output text)
+LISTENER=$(aws elbv2 describe-listeners --load-balancer-arn "$LB" \
+  --query 'Listeners[?Port==`443`].ListenerArn | [0]' --output text)
+TG=$(aws elbv2 describe-target-groups --load-balancer-arn "$LB" \
+  --query 'TargetGroups[0].TargetGroupArn' --output text)
+aws elbv2 modify-listener --listener-arn "$LISTENER" \
+  --default-actions "Type=forward,TargetGroupArn=$TG"
+aws ec2 authorize-security-group-ingress --group-id sg-06ef22abcfaf6c8df \
+  --ip-permissions 'IpProtocol=tcp,FromPort=443,ToPort=443,IpRanges=[{CidrIp=0.0.0.0/0}]'
+aws ec2 authorize-security-group-ingress --group-id sg-06ef22abcfaf6c8df \
+  --ip-permissions 'IpProtocol=tcp,FromPort=80,ToPort=80,IpRanges=[{CidrIp=0.0.0.0/0}]'
 ```
+
+Once #4685 is merged, `production-origin-lock.sh unlock` runs the same
+steps. To go back to Elastic Beanstalk's own group, do two things:
+
+- Run `update-environment --options-to-remove` for both `aws:elbv2:loadbalancer`
+  options. Elastic Beanstalk then recreates its default group, which allows 80
+  and 443 from anywhere.
+- Revert `.ebextensions/alb-cloudfront-only.config`.
 
 ## Compression
 

@@ -1143,7 +1143,7 @@
       "previous_default_version": "v15",
       "version_change": "v16 is v15 plus exactly the ProductionPageCachePurge statement; no statement was removed or changed",
       "rollback": "aws iam set-default-policy-version --policy-arn arn:aws:iam::987989283142:policy/FrontendProductionDeployment --version-id v15",
-      "rollback_note": "Clear the production environment variable PRODUCTION_PAGE_DISTRIBUTION_ID first, so Web Deploy - PROD skips the purge step instead of failing it",
+      "rollback_note": "Restore v15 only as part of the production CloudFront rollback (6529.io back to the load balancer), after clearing PRODUCTION_PAGE_DISTRIBUTION_ID. While E3KTTDJUNHRYW9 still serves 6529.io, keep v16: without it the purge step in Web Deploy - PROD fails after the release is live, and clearing the variable instead leaves edge pages from the previous release cached for up to a day after each deploy",
       "deleted_versions": ["v2"],
       "deleted_versions_note": "v2 (the oldest version) was deleted to stay within the five-version limit; its document was backed up before deletion",
       "policy_sha256": {
