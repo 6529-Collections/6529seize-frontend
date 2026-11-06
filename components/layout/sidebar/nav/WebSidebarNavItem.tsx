@@ -30,6 +30,7 @@ interface SidebarPrimaryItemProps {
   readonly ariaControls?: string | undefined;
   readonly ariaHasPopup?: React.AriaAttributes["aria-haspopup"] | undefined;
   readonly rightSlot?: React.ReactNode | undefined;
+  readonly compactIndicator?: React.ReactNode | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly indicatorLabel?: string | undefined;
   readonly "data-section"?: string | undefined;
@@ -52,6 +53,7 @@ function WebSidebarNavItem({
   ariaControls,
   ariaHasPopup,
   rightSlot,
+  compactIndicator,
   hasIndicator,
   indicatorLabel,
   "data-section": dataSection,
@@ -74,6 +76,7 @@ function WebSidebarNavItem({
                 iconSizeClass ?? ""
               }`}
             />
+            {collapsed && compactIndicator}
             {hasIndicator && (
               <div
                 aria-hidden="true"
