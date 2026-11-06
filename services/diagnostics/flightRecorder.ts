@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { addTransitionObserver } from "@/lib/action-lifecycle";
 import {
   classifyAsset,
   classifyError,
@@ -31,7 +32,7 @@ export const LOCAL_COPY_KEY = "6529:flight-recorder";
 const LONG_TASK_MS = 200;
 const PERSIST_THROTTLE_MS = 2000;
 
-/** Kinds and types only: the action-lifecycle observer shape (lane C). */
+/** Kinds and types only: the shape `addTransitionObserver` delivers. */
 export type ActionTransition = {
   readonly from: string;
   readonly event: string;
@@ -180,15 +181,14 @@ export function persistLocalCopy(force = false): void {
 
 /** The first frame of a stack, as `file:line:col` without any query string. */
 function topFrame(error: unknown): string | undefined {
-  const stack = error instanceof Error ? error.stack : undefined;
-  const match = stack
-    ? /\(?((?:https?:\/\/[^/\s]+)?\/[^\s?#():]*):(\d+):(\d+)/.exec(stack)
-    : null;
-  if (!match) return undefined;
-  const file = match[1]!.replace(/^https?:\/\/[^/]+/, "");
-  return file.startsWith("/_next/")
-    ? `${file}:${match[2]}:${match[3]}`
-    : undefined;
+  const stack = error instanceof Error ? (error.stack ?? "") : "";
+  const start = stack.indexOf("/_next/");
+  if (start < 0) return undefined;
+  const token = (stack.slice(start).split(/[\s()]/, 1)[0] ?? "").replace(
+    /[?#][^:]*/,
+    ""
+  );
+  return /^\/_next\/[\w./-]+:\d+:\d+$/.test(token) ? token : undefined;
 }
 
 export function recordFlightError(kind: ErrorKind, error: unknown): void {
@@ -243,7 +243,7 @@ export function recordFlightApi(input: {
 export const recordFlightWebSocket = (state: string): void =>
   record({ at: Date.now(), k: "ws", state: scrubDiagnosticText(state, 24) });
 
-/** Adapter for lane C's action-lifecycle observer (kinds and types only). */
+/** Observer for every action-lifecycle transition (kinds and types only). */
 export const recordActionTransition = (transition: ActionTransition): void =>
   record({
     at: Date.now(),
@@ -328,6 +328,7 @@ export function startFlightRecorder(): void {
   addEventListener("visibilitychange", onVisibility);
   stops.push(() => removeEventListener("visibilitychange", onVisibility));
   listen("pagehide", () => persistLocalCopy(true));
+  stops.push(addTransitionObserver(recordActionTransition));
   try {
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries())

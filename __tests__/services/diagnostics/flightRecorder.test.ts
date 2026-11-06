@@ -157,6 +157,70 @@ describe("flight recorder", () => {
       expect(wire).not.toContain(forbidden);
   });
 
+  it("records real action-lifecycle transitions with nothing else attached", () => {
+    const lifecycle = jest.requireActual<
+      typeof import("@/lib/action-lifecycle")
+    >("@/lib/action-lifecycle");
+    const restoreReporter = lifecycle.setIllegalTransitionReporter(null);
+    try {
+      let state = lifecycle.createActionState("server");
+      state = lifecycle.transition(state, {
+        type: "SUBMIT",
+        requiresSignature: false,
+      });
+      state = lifecycle.transition(state, { type: "SEND_OK" });
+      // An illegal attempt is observed with to === from.
+      lifecycle.transition(state, { type: "WALLET_REJECTED" });
+    } finally {
+      restoreReporter();
+    }
+    const actions = recorder
+      .getFlightSnapshot()
+      .entries.filter((entry) => entry.k === "action");
+    expect(actions.length).toBeGreaterThanOrEqual(3);
+    expect(actions[0]).toMatchObject({
+      from: "draft",
+      event: "SUBMIT",
+      mode: "server",
+      legal: true,
+    });
+    expect(actions.at(-1)).toMatchObject({
+      event: "WALLET_REJECTED",
+      legal: false,
+    });
+    const illegal = actions.at(-1) as { from: string; to: string };
+    expect(illegal.to).toBe(illegal.from);
+
+    // Stopping the recorder unsubscribes it.
+    recorder.resetFlightRecorderForTests();
+    recorder.startFlightRecorder();
+    lifecycle.transition(lifecycle.createActionState("server"), {
+      type: "SUBMIT",
+      requiresSignature: false,
+    });
+    expect(
+      recorder.getFlightSnapshot().entries.filter((e) => e.k === "action")
+    ).toHaveLength(1);
+  });
+
+  it("keeps only the first app-chunk stack frame, without its query", () => {
+    const error = new Error("boom");
+    error.stack = [
+      "Error: boom",
+      "    at render (https://6529.io/_next/static/chunks/app-4f2a.js?dpl=abc:1:2345)",
+      "    at https://6529.io/punk6529/collected:10:20",
+    ].join("\n");
+    recorder.recordFlightError("boundary", error);
+    const thirdParty = new Error("x");
+    thirdParty.stack = "Error: x\n    at https://evil.example/punk6529.js:1:1";
+    recorder.recordFlightError("other", thirdParty);
+    const [first, second] = recorder.getFlightSnapshot().entries;
+    expect(first).toMatchObject({
+      frame: "/_next/static/chunks/app-4f2a.js:1:2345",
+    });
+    expect(second).not.toHaveProperty("frame");
+  });
+
   it("keeps only the last five minutes", () => {
     recorder.recordFlightNavigation("/a");
     jest.advanceTimersByTime(4 * 60 * 1000);

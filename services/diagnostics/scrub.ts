@@ -18,7 +18,7 @@ const RULES: ReadonlyArray<readonly [RegExp, string]> = [
     "[text]",
   ],
   [/@[\w.-]+/g, "[handle]"],
-  [/\/[\w.~%-]+(?:\/[\w.~%-]+)+/g, "[path]"],
+  [/\/[\w.~%-]*\/[\w./~%-]*/g, "[path]"],
   [/\b[\w-]{20,}\b/g, "[token]"],
   [/\b\w*\d\w*\b/g, "[x]"],
 ];
