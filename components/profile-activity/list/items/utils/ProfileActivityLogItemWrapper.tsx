@@ -5,9 +5,13 @@ import { PROFILE_ACTIVITY_EMPHASIS } from "@/components/profile-activity/profile
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLog } from "@/entities/IProfile";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { parseDecentralizedMediaRef } from "@/lib/media/decentralized-media";
 import { ProfileActivityLogType } from "@/types/enums";
+import Image from "next/image";
+import { useState } from "react";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 
 export default function ProfileActivityLogItemWrapper({
@@ -41,16 +45,27 @@ export default function ProfileActivityLogItemWrapper({
   });
 
   const pfp = profile?.pfp ?? null;
+  const avatarSrc = pfp ? getScaledImageUri(pfp, ImageScale.W_AUTO_H_50) : null;
+  const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
 
   return (
     <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
           {!isArchived &&
-            (pfp ? (
-              <img
-                src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
+            (avatarSrc ? (
+              <Image
+                src={avatarSrc}
                 alt={handleOrWallet}
+                width={24}
+                height={24}
+                sizes="24px"
+                unoptimized={
+                  !parseDecentralizedMediaRef(pfp) ||
+                  isGifImageUrl(avatarSrc) ||
+                  failedAvatarSrc === avatarSrc
+                }
+                onError={() => setFailedAvatarSrc(avatarSrc)}
                 className="tw-mt-0.5 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover sm:tw-mt-0"
               />
             ) : (

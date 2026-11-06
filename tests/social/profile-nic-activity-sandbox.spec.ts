@@ -104,13 +104,21 @@ function fixtureRows(onlyRep = false) {
   });
 }
 
-async function installLogs(page: Page, api: string, onlyRep = false) {
+async function installLogs(
+  page: Page,
+  api: string,
+  onlyRep = false,
+  actor = "playwright"
+) {
   const requests: URLSearchParams[] = [];
   await page.route(`${api}/api/profile-logs?*`, async (route) => {
     expect(route.request().method()).toBe("GET");
     const params = new URL(route.request().url()).searchParams;
     requests.push(params);
-    let rows = fixtureRows(onlyRep);
+    let rows = fixtureRows(onlyRep).map((row) => ({
+      ...row,
+      profile_handle: actor,
+    }));
     const nic = params.get("activity_scope") === "NIC";
     if (nic)
       rows = rows.filter(
@@ -181,6 +189,70 @@ test.describe("Profile NIC activity @local-only", () => {
       }
     );
   });
+  for (const width of [1440, 390]) {
+    for (const optimizerFails of [false, true]) {
+      test(`${width}px activity avatars ${optimizerFails ? "recover from optimizer failure" : "use small optimized images"}`, async ({
+        page,
+        baseURL,
+      }) => {
+        await page.setViewportSize({ width, height: 1000 });
+        const api = getSandboxApiOrigin(baseURL);
+        await installLogs(page, api, false, "avatar-user");
+        const source =
+          "https://media.6529.io/ipfs/QmZ41GvrNSPUpSs4mfQy4jxUNudcLM6CXUTFwqtVd2m2XP";
+        const png = Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAJUlEQVQ4jWPooBJgGDWIIBgNI8JgNIwIg9EwIgxGw4gwGMZhBAAG8pYuMnppeAAAAABJRU5ErkJggg==",
+          "base64"
+        );
+        const optimizerWidths: number[] = [];
+        await page.route(
+          `${api}/api/identities/avatar-user*`,
+          async (route) => {
+            const response = await route.fetch();
+            const identity = await response.json();
+            await route.fulfill({ json: { ...identity, pfp: source } });
+          }
+        );
+        await page.route(source, (route) =>
+          route.fulfill({ contentType: "image/png", body: png })
+        );
+        await page.route("**/_next/image?**", async (route) => {
+          const params = new URL(route.request().url()).searchParams;
+          if (params.get("url") !== source) {
+            await route.continue();
+            return;
+          }
+          optimizerWidths.push(Number(params.get("w")));
+          await route.fulfill({
+            status: optimizerFails ? 503 : 200,
+            contentType: "image/png",
+            body: optimizerFails ? "" : png,
+          });
+        });
+        await page.goto("/playwright");
+        const avatar = page
+          .getByRole("img", { name: "avatar-user", exact: true })
+          .filter({ visible: true })
+          .first();
+        await avatar.scrollIntoViewIfNeeded();
+        await expect
+          .poll(() =>
+            avatar.evaluate((img: HTMLImageElement) => img.naturalWidth)
+          )
+          .toBeGreaterThan(0);
+        expect(optimizerWidths.length).toBeGreaterThan(0);
+        expect(optimizerWidths.every((value) => value > 0 && value <= 96)).toBe(
+          true
+        );
+        if (optimizerFails) await expect(avatar).toHaveAttribute("src", source);
+        else await expect(avatar).toHaveAttribute("src", /\/_next\/image\?/);
+        const box = await avatar.boundingBox();
+        expect(box?.width).toBe(24);
+        expect(box?.height).toBe(24);
+        await expectNoHorizontalOverflow(page);
+      });
+    }
+  }
   for (const width of [1440, 820, 390]) {
     for (const viewer of ["owner", "visitor", "logged-out", "unsigned"]) {
       test(`${width}px ${viewer}: preserves identity, filters and cursor navigation`, async ({
