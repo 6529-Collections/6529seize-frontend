@@ -16,7 +16,7 @@ export function useE2eeViewStyle(): CSSProperties {
 }
 
 interface E2eePageShellProps {
-  readonly title: string;
+  readonly title: string | undefined;
   readonly subtitle?: ReactNode | undefined;
   readonly backHref?: string | undefined;
   readonly backLabel?: string | undefined;
@@ -42,7 +42,13 @@ export function E2eePageShell({
       style={style}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
     >
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
+      <div
+        className={
+          title === undefined
+            ? "tw-flex tw-shrink-0 tw-px-4 tw-pt-2 lg:tw-hidden"
+            : "tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3"
+        }
+      >
         {backHref !== undefined && backLabel !== undefined ? (
           <Link
             href={backHref}
@@ -52,16 +58,18 @@ export function E2eePageShell({
             <ArrowLeftIcon aria-hidden="true" className="tw-size-5" />
           </Link>
         ) : null}
-        <div className="tw-min-w-0 tw-flex-1">
-          <h1 className="tw-m-0 tw-line-clamp-2 tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-truncate">
-            {title}
-          </h1>
-          {hasContent(subtitle) ? (
-            <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-text-xs tw-text-iron-400">
-              {subtitle}
-            </div>
-          ) : null}
-        </div>
+        {title !== undefined && (
+          <div className="tw-min-w-0 tw-flex-1">
+            <h1 className="tw-m-0 tw-line-clamp-2 tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-truncate">
+              {title}
+            </h1>
+            {hasContent(subtitle) ? (
+              <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-text-xs tw-text-iron-400">
+                {subtitle}
+              </div>
+            ) : null}
+          </div>
+        )}
         {hasContent(actions) ? (
           <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
             {actions}

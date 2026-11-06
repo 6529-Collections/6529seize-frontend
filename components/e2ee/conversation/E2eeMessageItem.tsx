@@ -24,6 +24,7 @@ import {
 } from "../e2eeFormat";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
+import { E2eeImageGallery } from "./E2eeImageGallery";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitLinks } from "./e2eeLinks";
 import {
@@ -494,7 +495,11 @@ function E2eeMessageItemComponent({
   const isOwn =
     selfProfileId !== null && message.senderProfileId === selfProfileId;
   const showActions =
-    canAct && !message.deleted && !message.undecryptable && !message.pending;
+    selfProfileId !== null &&
+    (canAct || !isOwn) &&
+    !message.deleted &&
+    !message.undecryptable &&
+    !message.pending;
 
   const Container = inViewportRow ? "div" : "li";
   return (
@@ -542,17 +547,19 @@ function E2eeMessageItemComponent({
         {!message.deleted &&
         !message.undecryptable &&
         message.attachments.length > 0 ? (
-          <div className="tw-mt-1 tw-flex tw-flex-wrap tw-gap-2">
-            {message.attachments.map((attachment) => (
-              <E2eeAttachmentView
-                key={attachment.blob}
-                engine={engine}
-                g={message.g}
-                messageId={message.id}
-                attachment={attachment}
-              />
-            ))}
-          </div>
+          <E2eeImageGallery attachments={message.attachments}>
+            <div className="tw-mt-1 tw-space-y-2">
+              {message.attachments.map((attachment) => (
+                <E2eeAttachmentView
+                  key={attachment.blob}
+                  engine={engine}
+                  g={message.g}
+                  messageId={message.id}
+                  attachment={attachment}
+                />
+              ))}
+            </div>
+          </E2eeImageGallery>
         ) : null}
         {compact && hasMarkers(message) ? (
           <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
@@ -563,13 +570,14 @@ function E2eeMessageItemComponent({
           message={message}
           conversation={conversation}
           selfProfileId={selfProfileId}
-          canAct={showActions}
+          canAct={canAct && showActions}
           onReact={(reaction, on) => actions.onReact(message, reaction, on)}
         />
       </div>
       {showActions ? (
         <div className="tw-absolute tw-right-3 tw-top-1">
           <E2eeMessageActionsMenu
+            canAct={canAct}
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}

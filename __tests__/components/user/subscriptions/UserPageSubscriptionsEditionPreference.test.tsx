@@ -1,0 +1,265 @@
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderWithAuth } from "@/__tests__/utils/testContexts";
+import EditionPreference from "@/components/user/subscriptions/UserPageSubscriptionsEditionPreference";
+import { commonApiPost } from "@/services/api/common-api";
+
+jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+const post = jest.mocked(commonApiPost);
+const details = {
+  consolidation_key: "test-key",
+  last_update: 0,
+  balance: 1,
+  automatic: true,
+  subscribe_all_editions: false,
+  subscription_eligibility_count: 2,
+};
+function setup({
+  readonly = false,
+  allEditions = false,
+  loading = false,
+  eligibility = 2,
+} = {}) {
+  const requestAuth = jest.fn().mockResolvedValue({ success: true });
+  const refresh = jest.fn();
+  const setToast = jest.fn();
+  renderWithAuth(
+    <EditionPreference
+      profileKey="test-key"
+      details={
+        loading
+          ? undefined
+          : {
+              ...details,
+              subscribe_all_editions: allEditions,
+              subscription_eligibility_count: eligibility,
+            }
+      }
+      readonly={readonly}
+      refresh={refresh}
+    />,
+    { requestAuth, setToast }
+  );
+  return { requestAuth, refresh, setToast, user: userEvent.setup() };
+}
+const getEditions = () =>
+  screen.getByRole("switch", { name: "All eligible editions" });
+
+describe("Edition Preference", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    post.mockResolvedValue({ subscribe_all_editions: true });
+  });
+
+  it.each([false, true])(
+    "exposes the selected value, eligibility and the original owner explanation for saved allEditions=%s",
+    (allEditions) => {
+      const { requestAuth } = setup({ allEditions });
+      expect(screen.getByText("Eligibility x2")).toBeVisible();
+      expect(
+        screen.getByText(allEditions ? "All eligible" : "One edition", {
+          exact: true,
+        })
+      ).toHaveClass("tw-text-iron-300");
+      expect(
+        screen.queryByText(allEditions ? "One edition" : "All eligible", {
+          exact: true,
+        })
+      ).not.toBeInTheDocument();
+      if (allEditions) expect(getEditions()).toBeChecked();
+      else expect(getEditions()).not.toBeChecked();
+      expect(getEditions()).toHaveAccessibleDescription(
+        `Eligibility x2 ${allEditions ? "You will receive all editions you are eligible for" : "You will receive only one edition"}`
+      );
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([false, true])(
+    "opens the original explanation without changing the saved preference (allEditions=%s)",
+    async (allEditions) => {
+      const { user, requestAuth } = setup({ allEditions });
+      const explanation = allEditions
+        ? "You will receive all editions you are eligible for"
+        : "You will receive only one edition";
+      const info = screen.getByRole("button", { name: "Edition Preference" });
+      expect(info).toHaveAccessibleDescription(explanation);
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+      await user.click(info);
+      expect(await screen.findByRole("tooltip")).toHaveTextContent(explanation);
+      expect(getEditions()).toHaveProperty("checked", allEditions);
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+      await user.keyboard("{Escape}");
+      await waitFor(() =>
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+      );
+    }
+  );
+
+  it("uses native keyboard toggling and the existing authenticated API", async () => {
+    const { refresh, user, requestAuth } = setup();
+    await user.tab();
+    expect(
+      screen.getByRole("button", { name: "Edition Preference" })
+    ).toHaveFocus();
+    await user.tab();
+    expect(getEditions()).toHaveFocus();
+    await user.keyboard(" ");
+    await waitFor(() => expect(getEditions()).toBeEnabled());
+    expect(getEditions()).toBeChecked();
+    expect(screen.getByText("All eligible", { exact: true })).toHaveClass(
+      "tw-text-iron-300"
+    );
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+    expect(post).toHaveBeenCalledWith({
+      endpoint: "subscriptions/test-key/subscribe-all-editions",
+      body: { subscribe_all_editions: true },
+    });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("switches All eligible back to One edition with the original false payload", async () => {
+    const { user, requestAuth, refresh } = setup({ allEditions: true });
+    post.mockResolvedValue({ subscribe_all_editions: false });
+    await user.click(getEditions());
+    await waitFor(() => expect(getEditions()).toBeEnabled());
+    expect(getEditions()).not.toBeChecked();
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+    expect(post).toHaveBeenCalledWith({
+      endpoint: "subscriptions/test-key/subscribe-all-editions",
+      body: { subscribe_all_editions: false },
+    });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("prevents duplicate changes while authentication is pending", async () => {
+    const { user, requestAuth, refresh } = setup();
+    let finishAuth!: (result: { success: boolean }) => void;
+    requestAuth.mockReturnValue(
+      new Promise<{ success: boolean }>((resolve) => {
+        finishAuth = resolve;
+      })
+    );
+    await user.click(getEditions());
+    expect(getEditions()).toBeDisabled();
+    expect(getEditions()).not.toBeChecked();
+    await user.click(getEditions());
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+    expect(post).not.toHaveBeenCalled();
+    finishAuth({ success: true });
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the saved preference if authentication is rejected", async () => {
+    const { requestAuth, user, refresh } = setup();
+    requestAuth.mockResolvedValue({ success: false });
+    await user.click(getEditions());
+    await waitFor(() => expect(getEditions()).toBeEnabled());
+    expect(getEditions()).not.toBeChecked();
+    expect(post).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("retains the saved preference and reports a failed update", async () => {
+    const { user, setToast, refresh } = setup();
+    post.mockRejectedValue(new Error("Unavailable"));
+    await user.click(getEditions());
+    await waitFor(() => expect(getEditions()).toBeEnabled());
+    expect(getEditions()).not.toBeChecked();
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error" })
+    );
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("uses the saved preference returned by the API", async () => {
+    const { user, refresh } = setup();
+    post.mockResolvedValue({ subscribe_all_editions: false });
+    await user.click(getEditions());
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
+    expect(getEditions()).not.toBeChecked();
+  });
+
+  it.each([
+    { allEditions: false, eligibility: 2 },
+    { allEditions: true, eligibility: 12 },
+    { allEditions: true, eligibility: 0 },
+  ])(
+    "shows only the saved visitor preference with eligibility %j",
+    async ({ allEditions, eligibility }) => {
+      const { requestAuth, user, refresh } = setup({
+        readonly: true,
+        allEditions,
+        eligibility,
+      });
+      const value = screen.getByText(
+        allEditions ? "All eligible" : "One edition",
+        { exact: true }
+      );
+      expect(value).toBeVisible();
+      expect(screen.getByText(`Eligibility x${eligibility}`)).toBeVisible();
+      expect(
+        screen.queryByText(allEditions ? "One edition" : "All eligible", {
+          exact: true,
+        })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(screen.queryByText(/You will receive/)).not.toBeInTheDocument();
+      await user.click(value);
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+      expect(refresh).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not show a false visitor preference or eligibility while settings load", () => {
+    setup({ readonly: true, loading: true });
+    expect(screen.getAllByText("Loading settings")).toHaveLength(1);
+    expect(
+      screen.getByRole("group", { name: "Edition Preference" })
+    ).toHaveAttribute("aria-busy", "true");
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("All eligible", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Eligibility/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("waits for saved settings before allowing updates", () => {
+    setup({ loading: true });
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.getByText("Loading settings")).toBeVisible();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("shows unavailable after a failed settings request without guessing a preference", () => {
+    renderWithAuth(
+      <EditionPreference
+        profileKey="p1"
+        details={undefined}
+        error
+        readonly={false}
+        refresh={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Eligibility/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
+  });
+});

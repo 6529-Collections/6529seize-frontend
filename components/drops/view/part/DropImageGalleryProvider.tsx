@@ -16,8 +16,15 @@ import {
   requestCenteredImageFullscreen,
 } from "@/components/drops/view/item/content/media/ImageMediaModal";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import type { DropImageGalleryItem } from "./dropImageGallery";
+
+export interface LocalGalleryImage {
+  readonly src: string;
+  readonly name: string;
+  readonly mime: string;
+}
 
 interface DropImageGalleryContextValue {
   readonly openImage: (galleryItemId: string) => boolean;
@@ -32,9 +39,11 @@ export const useDropImageGallery = (): DropImageGalleryContextValue | null =>
 export function DropImageGalleryProvider({
   children,
   items,
+  localImages,
 }: {
   readonly children: ReactNode;
   readonly items: readonly DropImageGalleryItem[];
+  readonly localImages?: ReadonlyMap<string, LocalGalleryImage> | undefined;
 }) {
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
@@ -110,6 +119,7 @@ export function DropImageGalleryProvider({
         <DropImageGalleryModal
           activeIndex={activeIndex}
           activeItem={activeItem}
+          localImage={localImages?.get(activeItem.id)}
           canGoNext={canGoNext}
           canGoPrevious={canGoPrevious}
           onClose={handleClose}
@@ -125,6 +135,7 @@ export function DropImageGalleryProvider({
 function DropImageGalleryModal({
   activeIndex,
   activeItem,
+  localImage,
   canGoNext,
   canGoPrevious,
   onClose,
@@ -134,6 +145,7 @@ function DropImageGalleryModal({
 }: {
   readonly activeIndex: number;
   readonly activeItem: DropImageGalleryItem;
+  readonly localImage?: LocalGalleryImage | undefined;
   readonly canGoNext: boolean;
   readonly canGoPrevious: boolean;
   readonly onClose: () => void;
@@ -146,9 +158,9 @@ function DropImageGalleryModal({
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: activeItem.src,
-      fallbackFileName: "image",
+      fallbackFileName: localImage?.name ?? "image",
       dialogTitle: "Save image",
-      mimeType: "image",
+      mimeType: localImage?.mime ?? "image",
     });
 
   const handleFullScreen = useCallback(() => {
@@ -159,24 +171,26 @@ function DropImageGalleryModal({
   }, []);
 
   return (
-    <ImageMediaModal
-      src={activeItem.src}
-      imageRef={modalImageRef}
-      onClose={onClose}
-      onOpen={openMedia}
-      openLabel={openLabel}
-      onDownload={downloadMedia}
-      isDownloading={isDownloading}
-      onFullscreen={handleFullScreen}
-      fullscreenTargetAvailable={!isCapacitor}
-      gallery={{
-        canGoNext,
-        canGoPrevious,
-        currentIndex: activeIndex,
-        onNext,
-        onPrevious,
-        total,
-      }}
-    />
+    <LocalImagePreviewContext.Provider value={localImage?.src ?? null}>
+      <ImageMediaModal
+        src={activeItem.src}
+        imageRef={modalImageRef}
+        onClose={onClose}
+        onOpen={openMedia}
+        openLabel={openLabel}
+        onDownload={downloadMedia}
+        isDownloading={isDownloading}
+        onFullscreen={handleFullScreen}
+        fullscreenTargetAvailable={!isCapacitor}
+        gallery={{
+          canGoNext,
+          canGoPrevious,
+          currentIndex: activeIndex,
+          onNext,
+          onPrevious,
+          total,
+        }}
+      />
+    </LocalImagePreviewContext.Provider>
   );
 }

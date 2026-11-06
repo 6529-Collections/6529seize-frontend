@@ -3074,6 +3074,8 @@ function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
     return writeJsonResponse(res, submittedPollDrop);
   }
 
+  submittedChatDrop.created_at = Date.now();
+
   const parts = body.parts.map((part, index) => ({
     part_id: index + 1,
     content: part.content,
@@ -3103,7 +3105,7 @@ function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
 
   return writeJsonResponse(res, {
     ...submittedChatDrop,
-    updated_at: CREATED_AT + 3000,
+    updated_at: Date.now(),
     parts: [
       {
         ...submittedChatDrop.parts[0],

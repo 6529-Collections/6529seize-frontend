@@ -123,7 +123,15 @@ export function updateHistorySummary(
   ctx: EngineContext,
   runtime: GroupRuntime
 ): void {
-  const summary = { ...(runtime.record.history ?? emptyHistorySummary()) };
+  const summary = {
+    ...(runtime.record.history ?? emptyHistorySummary()),
+    // Older checkpoints have no incoming cursor. Their existing log is a
+    // silent baseline, including when the next update only imports history.
+    lastIncomingSeq:
+      runtime.record.history?.lastIncomingSeq ??
+      runtime.record.history?.maxSeq ??
+      0,
+  };
   for (const id of new Set([...runtime.dirty, ...runtime.deleted])) {
     const previous = runtime.originals.get(id);
     const current = runtime.deleted.has(id)
@@ -132,7 +140,15 @@ export function updateHistorySummary(
     summary.count += Number(Boolean(current)) - Number(Boolean(previous));
     adjustUnread(summary, previous, ctx.profileId, runtime.record.readSeq, -1);
     adjustUnread(summary, current, ctx.profileId, runtime.record.readSeq, 1);
-    if (current) updateLatest(summary, current);
+    if (current) {
+      updateLatest(summary, current);
+      if (isUnread(current, ctx.profileId, 0) && !current.imported) {
+        summary.lastIncomingSeq = Math.max(
+          summary.lastIncomingSeq,
+          current.seq
+        );
+      }
+    }
   }
   runtime.record.history = summary;
 }

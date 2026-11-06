@@ -27,6 +27,9 @@ import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
+import DeviceSetupMenuAction from "@/components/device-signing/DeviceSetupMenuAction";
+import { isDeviceSecurityStatusEnabled } from "@/components/device-signing/DeviceSecurityStatus";
+
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
 export default function HeaderUserMenuDropdown({
@@ -171,7 +174,7 @@ export default function HeaderUserMenuDropdown({
     <div>
       {isOpen && (
         <div
-          className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
+          className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-80 tw-max-w-[calc(100vw-2rem)] tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
           style={{
             left: "calc(var(--layout-margin, 0px) + 1.5rem)",
           }}
@@ -458,6 +461,9 @@ export default function HeaderUserMenuDropdown({
                       />
                     </Link>
                   </div>
+                  {isDeviceSecurityStatusEnabled() && !activeProfileProxy && (
+                    <DeviceSetupMenuAction onClose={onClose} />
+                  )}
                   <HeaderBookmarksLink onClose={onClose} />
                   <HeaderArtworkDocumentationLink
                     onClose={onClose}

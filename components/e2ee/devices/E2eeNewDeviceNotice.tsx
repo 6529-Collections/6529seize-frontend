@@ -76,10 +76,16 @@ export function E2eeNewDeviceNotice({
       ))}
       <E2eeConfirmDialog
         open={target !== null}
-        title={t(locale, "e2ee.devices.revokeConfirmTitle", {
-          label: target?.label ?? "",
-        })}
-        body={t(locale, "e2ee.devices.revokeConfirmBody")}
+        title={t(
+          locale,
+          target?.linkedAuthorProof
+            ? "e2ee.devices.revokeCombinedTitle"
+            : "e2ee.devices.revokeEncryptionTitle",
+          {
+            label: target?.label ?? "",
+          }
+        )}
+        body={t(locale, "e2ee.devices.revokeHistory")}
         confirmLabel={t(locale, "e2ee.devices.revokeConfirm")}
         errorFallbackKey="e2ee.devices.revokeFailed"
         onConfirm={async () => {

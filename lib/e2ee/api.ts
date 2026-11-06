@@ -41,6 +41,7 @@ export { E2eeApiError, asE2eeApiError, e2eeErrorCode } from "./api-errors";
 
 /** Contract 4.2: every endpoint the engine uses. Tests inject a fake. */
 export interface E2eeApiClient {
+  renameDevice(deviceKey: string, name: string): Promise<ApiE2eeDevice>;
   getMe(): Promise<ApiE2eeMe>;
   registerDevice(body: ApiE2eeRegisterDeviceRequest): Promise<ApiE2eeDevice>;
   registerLoginGrantDevice(

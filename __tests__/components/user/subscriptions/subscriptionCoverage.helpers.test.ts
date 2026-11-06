@@ -76,3 +76,20 @@ describe("subscription coverage helpers", () => {
     ).toBe("Oct 12, 2026, 14:30 UTC");
   });
 });
+
+describe("summary date format", () => {
+  it("keeps the full date and UTC cutoff time in every year", () => {
+    expect(
+      formatSubscriptionCoverageDeadline(
+        "en-US",
+        new Date("2026-11-12T17:00:00Z")
+      )
+    ).toBe("Nov 12, 2026, 17:00 UTC");
+    expect(
+      formatSubscriptionCoverageDeadline(
+        "en-US",
+        new Date("2027-01-02T17:00:00Z")
+      )
+    ).toBe("Jan 2, 2027, 17:00 UTC");
+  });
+});

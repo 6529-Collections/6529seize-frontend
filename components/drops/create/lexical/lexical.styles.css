@@ -52,8 +52,12 @@
 
 .editor-input-one-liner {
   overflow-x: auto;
-  min-height: 45px;
-  max-height: var(--composer-viewport-height, 40vh);
+  min-height: 40px;
+  max-height: 200px;
+}
+
+.editor-input-one-liner > .editor-paragraph {
+  margin: 0;
 }
 
 .editor-input-multi-liner {

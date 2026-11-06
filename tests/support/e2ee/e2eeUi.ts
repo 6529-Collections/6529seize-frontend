@@ -27,12 +27,14 @@ export async function gotoPath(page: Page, path: string) {
 }
 
 export function enrollmentHeading(page: Page): Locator {
-  return page.getByRole("heading", { name: "Turn on encrypted messages" });
+  return page.getByRole("heading", {
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
+  });
 }
 
 export function enrollButton(page: Page): Locator {
   return page.getByRole("button", {
-    name: "Turn on encrypted messages (one signature)",
+    name: /^Sign to enable (both|Encrypted DMs)$/,
   });
 }
 
@@ -43,7 +45,7 @@ export async function expectEnrollmentCard(page: Page) {
     timeout: FIRST_LOAD_TIMEOUT_MS,
   });
   const card = page.getByRole("region", {
-    name: "Turn on encrypted messages",
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
   });
   await expect(card.getByText(NO_BACKUP_WARNING)).toBeVisible();
   await expect(enrollButton(page)).toBeEnabled({
@@ -157,11 +159,11 @@ export function notice(page: Page, text: string | RegExp): Locator {
   return timeline(page).getByText(text);
 }
 
-/** Types into the composer, sends with Enter, waits until sequenced. */
+/** Types into the composer, selects Send, waits until sequenced. */
 export async function sendMessage(page: Page, text: string) {
   const input = composer(page);
   await input.fill(text);
-  await input.press("Enter");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
   const row = messageRow(page, text);
   await expect(row).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
   await expect(row.getByText("Sending…")).toHaveCount(0, {

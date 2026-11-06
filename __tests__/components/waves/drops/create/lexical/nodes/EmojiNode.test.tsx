@@ -1,5 +1,5 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import { ComposerEmojiContext } from "@/components/composer/ComposerEmojiContext";
 
 // Stub out lexical's DecoratorNode to avoid constructor issues
 jest.mock("lexical", () => {
@@ -65,13 +65,17 @@ describe("EmojiNode class", () => {
     expect(node.updateDOM(node, span, {} as any)).toBe(false);
   });
 
-  it("decorate() returns a React element of EmojiComponent", () => {
-    const el = node.decorate({} as any, {} as any);
-    expect(React.isValidElement(el)).toBe(true);
-    // @ts-ignore
-    expect((el.type as any).name).toBe("EmojiComponent");
-    // @ts-ignore
-    expect(el.props.emojiId).toBe(TEST_ID);
+  it("decorates using the current composer's emoji renderer", () => {
+    const renderEmoji = jest.fn((id: string) => <span>{`:${id}:`}</span>);
+    render(
+      <ComposerEmojiContext.Provider
+        value={{ isValid: () => true, render: renderEmoji }}
+      >
+        {node.decorate({} as any, {} as any)}
+      </ComposerEmojiContext.Provider>
+    );
+    expect(screen.getByText(`:${TEST_ID}:`)).toBeInTheDocument();
+    expect(renderEmoji).toHaveBeenCalledWith(TEST_ID);
   });
 
   it("importJSON & exportJSON round-trip", () => {

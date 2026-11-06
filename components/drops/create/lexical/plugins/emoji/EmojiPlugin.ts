@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import {
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import type { LexicalEditor } from "lexical";
 import {
@@ -14,8 +20,11 @@ import {
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { useEmoji } from "@/contexts/EmojiContext";
 
+import { ComposerEmojiContext } from "@/components/composer/ComposerEmojiContext";
+
 const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;
+const PRIVATE_EMOJI_MATCH_REGEX = /:([A-Za-z0-9_+-]{1,62}):/gu;
 /**
  * Same pattern, without `g`, for `@lexical/markdown` text-match transformers:
  * they match with `String.prototype.match` and read `match.index`, which is
@@ -59,8 +68,11 @@ const getSelectionSnapshot = (): SelectionSnapshot => {
   };
 };
 
-const getEmojiMatches = (textContent: string): EmojiMatch[] =>
-  Array.from(textContent.matchAll(EMOJI_MATCH_REGEX), (match) => ({
+const getEmojiMatches = (
+  textContent: string,
+  pattern = EMOJI_MATCH_REGEX
+): EmojiMatch[] =>
+  Array.from(textContent.matchAll(pattern), (match) => ({
     matchText: match[0],
     emojiId: match[1] ?? "",
     startIndex: match.index,
@@ -210,7 +222,7 @@ function transformEmojiTextToNode(
   });
 }
 
-const EmojiPlugin = ({
+const PublicEmojiPlugin = ({
   disabled = false,
 }: {
   readonly disabled?: boolean | undefined;
@@ -258,4 +270,42 @@ const EmojiPlugin = ({
   return null;
 };
 
-export default EmojiPlugin;
+function PrivateEmojiPlugin({
+  isValid,
+  disabled,
+}: {
+  readonly isValid: (id: string) => boolean;
+  readonly disabled: boolean;
+}) {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    if (disabled) return;
+    const unregister = editor.registerNodeTransform(TextNode, (node) => {
+      const match = getEmojiMatches(
+        node.getTextContent(),
+        PRIVATE_EMOJI_MATCH_REGEX
+      ).find(({ emojiId }) => isValid(emojiId));
+      if (!match) return;
+      const parts = node.splitText(match.startIndex, match.endIndex);
+      const token = parts[match.startIndex === 0 ? 0 : 1];
+      token?.replace(new EmojiNode(match.emojiId));
+    });
+    // A private catalog can finish loading after the user has started typing.
+    editor.update(() => {
+      for (const node of $getRoot().getAllTextNodes()) node.markDirty();
+    });
+    return unregister;
+  }, [disabled, editor, isValid]);
+  return null;
+}
+
+export default function EmojiPlugin({
+  disabled = false,
+}: {
+  readonly disabled?: boolean | undefined;
+}) {
+  const custom = useContext(ComposerEmojiContext);
+  return custom
+    ? createElement(PrivateEmojiPlugin, { disabled, isValid: custom.isValid })
+    : createElement(PublicEmojiPlugin, { disabled });
+}

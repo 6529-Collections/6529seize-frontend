@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
-import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
+import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 
@@ -19,9 +19,12 @@ export function useCreateDropFocusBehavior({
   focusOnInitialActiveDrop,
   createDropInputRef,
 }: UseCreateDropFocusBehaviorParams) {
-  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const blurInput = useCallback(
+    () => createDropInputRef.current?.blur(),
+    [createDropInputRef]
+  );
+  useBlurOnNativeKeyboardDismiss(blurInput, isApp && activeDrop !== null);
   const isInitialMountRef = useRef(true);
-  const wasNativeKeyboardVisibleRef = useRef(false);
 
   const scheduleMobileInputFocus = useCallback(
     (delayMs: number) => {
@@ -52,7 +55,6 @@ export function useCreateDropFocusBehavior({
 
     if (!activeDrop) {
       isInitialMountRef.current = false;
-      wasNativeKeyboardVisibleRef.current = false;
       return;
     }
 
@@ -104,23 +106,4 @@ export function useCreateDropFocusBehavior({
     }, 100);
     return () => clearTimeout(timer);
   }, [activeDrop, isApp, scheduleMobileInputFocus, focusOnInitialActiveDrop]);
-
-  useEffect(() => {
-    if (!isApp || !activeDrop) {
-      wasNativeKeyboardVisibleRef.current = false;
-      return;
-    }
-
-    if (isKeyboardVisible) {
-      wasNativeKeyboardVisibleRef.current = true;
-      return;
-    }
-
-    if (!wasNativeKeyboardVisibleRef.current) {
-      return;
-    }
-
-    wasNativeKeyboardVisibleRef.current = false;
-    createDropInputRef.current?.blur();
-  }, [activeDrop, createDropInputRef, isApp, isKeyboardVisible]);
 }
