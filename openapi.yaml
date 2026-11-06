@@ -28623,10 +28623,9 @@ components:
           nullable: true
           maxLength: 2000
           description: >-
-            Required and non-blank for pause actions and for archiving a
-            published competition with any historical entries or votes. The
-            trimmed reason is recorded in lifecycle audit history; pause reasons
-            also appear in public pause history.
+            Required and non-blank for pause actions. The trimmed reason appears
+            in public pause history. Archive actions do not require or retain a
+            reason.
         starts_at:
           type: integer
           format: int64
@@ -29559,12 +29558,6 @@ components:
           description: >-
             Whether this administrator may edit established voting credit rules.
             Historical votes permanently lock those rules.
-        archive_requires_reason:
-          type: boolean
-          description: >-
-            Whether archiving requires a non-blank reason because this published
-            competition has historical entries or votes. False for
-            non-administrators. Rechecked under the competition lock on archive.
     ApiCompetitionRulesInput:
       type: object
       additionalProperties: false

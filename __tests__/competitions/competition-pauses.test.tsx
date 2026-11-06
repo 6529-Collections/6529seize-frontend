@@ -16,7 +16,6 @@ const mockCompetition = {
   permissions: {
     administer: true,
     edit_rules_after_activity: false,
-    archive_requires_reason: true as boolean | undefined,
   },
 };
 const mockPush = jest.fn();
@@ -105,8 +104,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCompetition.permissions.administer = true;
   mockCompetition.permissions.edit_rules_after_activity = false;
-  mockCompetition.permissions.archive_requires_reason = true;
   mockCompetition.lifecycle = "PUBLISHED";
+  mockCompetition.title = "Test competition";
   mockCompetition.config_version = 4;
   mockQuery.hasNextPage = false;
   jest
@@ -178,7 +177,7 @@ it("resumes without requiring a new reason", async () => {
     expect(performCompetitionAction).toHaveBeenCalledWith(
       expect.anything(),
       "resume",
-      expect.objectContaining({ reason: "" })
+      { idempotency_key: "request-key", config_version: 4 }
     )
   );
 });
@@ -211,57 +210,95 @@ it("loads older pauses without losing the visible history", () => {
   expect(screen.getByText("Reviewing eligibility")).toBeInTheDocument();
 });
 
-it.each([true, undefined])(
-  "requires an archive reason for activity or unknown requirements (%p)",
-  async (requirement) => {
-    mockCompetition.permissions.archive_requires_reason = requirement;
+it.each(["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"])(
+  "requires the exact full name to archive a %s competition without a reason",
+  async (lifecycle) => {
+    mockCompetition.lifecycle = lifecycle;
     setup();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Archive and stop competition" })
-    );
-    expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
-    const reason = screen.getByRole("textbox", { name: "Reason (required)" });
-    expect(reason).toHaveAccessibleDescription(
-      "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history."
-    );
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-    fireEvent.change(reason, {
-      target: { value: "  Replacing the competition  " },
+    const archive = screen.getByRole("button", {
+      name:
+        lifecycle === "PUBLISHED" ? "Archive and stop competition" : "Archive",
+      exact: true,
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(archive).toHaveClass("tw-border-red");
+    fireEvent.click(archive);
+    expect(
+      screen.getByText(/This action is permanent and cannot be undone/)
+    ).toBeVisible();
+    expect(screen.queryByLabelText(/Reason/)).not.toBeInTheDocument();
+    const name = screen.getByRole("textbox", {
+      name: "Competition name to confirm archival",
+    });
+    expect(name).toBeRequired();
+    expect(name).toHaveAccessibleDescription(
+      /Type the full competition name below exactly/
+    );
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect(confirm).toBeDisabled();
+    for (const mismatch of [
+      "Test",
+      "test competition",
+      "Test Competition",
+      " Test competition",
+      "Test competition ",
+      "Test competition!",
+    ]) {
+      fireEvent.change(name, { target: { value: mismatch } });
+      expect(confirm).toBeDisabled();
+      fireEvent.click(confirm);
+      expect(performCompetitionAction).not.toHaveBeenCalled();
+    }
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    expect(confirm).toBeEnabled();
+    fireEvent.change(name, { target: { value: "" } });
+    expect(confirm).toBeDisabled();
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    fireEvent.click(confirm);
     await waitFor(() =>
       expect(performCompetitionAction).toHaveBeenCalledWith(
         { waveId: "wave", competitionId: "competition" },
         "archive",
-        {
-          idempotency_key: "request-key",
-          config_version: 4,
-          reason: "Replacing the competition",
-        }
+        { idempotency_key: "request-key", config_version: 4 }
       )
     );
   }
 );
 
-it("allows archiving an unused published competition without a reason", async () => {
-  mockCompetition.permissions.archive_requires_reason = false;
+it("clears the typed name when the archive dialog is reopened", () => {
   setup();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Archive and stop competition" })
-  );
-  expect(
-    screen.getByRole("textbox", { name: "Reason (optional)" })
-  ).not.toBeRequired();
+  const archive = screen.getByRole("button", {
+    name: "Archive and stop competition",
+  });
+  fireEvent.click(archive);
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
   expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
-  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-  await waitFor(() =>
-    expect(performCompetitionAction).toHaveBeenCalledWith(
-      { waveId: "wave", competitionId: "competition" },
-      "archive",
-      { idempotency_key: "request-key", config_version: 4, reason: "" }
-    )
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+  fireEvent.click(archive);
+  expect(screen.getByRole("textbox")).toHaveValue("");
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
 });
+
+it.each(["Art  competition", "Art\ncompetition"])(
+  "preserves exact whitespace in the displayed and typed name (%p)",
+  (title) => {
+    mockCompetition.title = title;
+    setup();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Archive and stop competition" })
+    );
+    const exactName = document.getElementById("competition-archive-exact-name");
+    expect(exactName?.textContent).toBe(title);
+    expect(exactName).toHaveClass("tw-whitespace-pre-wrap");
+    const name = screen.getByRole("textbox");
+    fireEvent.change(name, { target: { value: "Art competition" } });
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    fireEvent.change(name, { target: { value: title } });
+    expect(name).toHaveValue(title);
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  }
+);
 
 it("exposes only Archive beside draft setup and hides it from non-administrators", () => {
   mockCompetition.lifecycle = "DRAFT";
@@ -270,9 +307,7 @@ it("exposes only Archive beside draft setup and hides it from non-administrators
       <CompetitionAdmin archiveOnly />
     </QueryClientProvider>
   );
-  expect(
-    screen.getByRole("button", { name: "Archive" })
-  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Archive" })).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Publish" })
   ).not.toBeInTheDocument();
@@ -299,6 +334,9 @@ it("returns an archived draft to the collection even if invalidation updates its
     </QueryClientProvider>
   );
   fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
   fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
   await waitFor(() =>
     expect(mockPush).toHaveBeenCalledWith("/waves/wave/competitions")
