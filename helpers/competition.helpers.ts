@@ -1,7 +1,20 @@
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 
+/** Users call competitions "decisions"; their routes use that name. */
+const DECISIONS_PATH_SEGMENT = "decisions";
+/**
+ * The former route segment. `next.config` redirects it permanently, but a page
+ * that was already open, or a history entry, can still carry it.
+ */
+const LEGACY_COMPETITIONS_PATH_SEGMENT = "competitions";
+
+/** True for the decisions collection segment, in its current or legacy form. */
+export const isCompetitionCollectionSegment = (segment: string | undefined) =>
+  segment === DECISIONS_PATH_SEGMENT ||
+  segment === LEGACY_COMPETITIONS_PATH_SEGMENT;
+
 export const getCompetitionsRoute = (waveId: string) =>
-  `/waves/${encodeURIComponent(waveId)}/competitions`;
+  `/waves/${encodeURIComponent(waveId)}/${DECISIONS_PATH_SEGMENT}`;
 
 export const getCompetitionRoute = (waveId: string, competitionId: string) =>
   `${getCompetitionsRoute(waveId)}/${encodeURIComponent(competitionId)}`;
@@ -18,7 +31,7 @@ export const isCompetitionPathname = (pathname: string | null) => {
   return (
     (segments.length === 3 || segments.length === 4) &&
     segments[0] === "waves" &&
-    segments[2] === "competitions"
+    isCompetitionCollectionSegment(segments[2])
   );
 };
 
