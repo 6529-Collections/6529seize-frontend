@@ -148,9 +148,15 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
         file
       ) ||
-      // Chat sync, read markers and the realtime updater; this pack runs the
-      // live-update cases in wave-loading-sandbox.spec.ts.
-      /^(?:contexts\/wave\/hooks\/(?:useWaveRealtimeUpdater|useDropUpdateRefMessages)|hooks\/useMarkWaveNotificationsRead|__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater)/u.test(
+      // Tests of chat sync, read markers and the realtime updater; this pack
+      // runs the live-update cases in wave-loading-sandbox.spec.ts.
+      /^(?:__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater|__tests__\/hooks\/useMarkWaveNotificationsRead)/u.test(
+        file
+      ) ||
+      // The chat hot path: this pack's chat render budget
+      // (chat-render-budget-sandbox.spec.ts) measures renders and requests
+      // per received message for each of these.
+      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/chat-render-budget-sandbox\.spec\.ts$)/u.test(
         file
       ) ||
       [
