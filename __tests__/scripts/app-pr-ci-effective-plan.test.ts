@@ -16,6 +16,7 @@ type EffectivePlan = {
     playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
+    playwright_profile_nic: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -81,6 +82,25 @@ it.each([
 it("keeps the Wave tracking browser lane out of unrelated changes", () => {
   expect(
     executePlan(["README.md"]).checks.playwright_wave_feature_usage.required
+  ).toBe(false);
+});
+
+it.each([
+  "helpers/profile-logs.helpers.ts",
+  "components/profile-activity/ProfileNicActivityLogs.tsx",
+  "components/user/rep/MobileNicTabContent.tsx",
+  "tests/social/profile-nic-activity-sandbox.spec.ts",
+  "tests/packs.manifest.cjs",
+  "tests/support/composerSandboxServer.cjs",
+  "scripts/app-pr-ci-effective-plan.cjs",
+  ".github/workflows/app-pr-ci.yml",
+])("selects the profile NIC browser contract for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_profile_nic.required).toBe(true);
+});
+
+it("does not select the NIC pack for unrelated code", () => {
+  expect(
+    executePlan(["helpers/unrelated.ts"]).checks.playwright_profile_nic.required
   ).toBe(false);
 });
 

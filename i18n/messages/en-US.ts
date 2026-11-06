@@ -4783,6 +4783,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.loading": "Loading activity log",
+  "profileActivity.loadError": "Unable to load activity log.",
+  "profileActivity.retry": "Retry",
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
