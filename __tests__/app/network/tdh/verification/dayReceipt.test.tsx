@@ -107,10 +107,10 @@ describe("a day's receipt (TDH-DESIGN.md §4.5)", () => {
     );
     expect(row("differences")).toHaveTextContent("None, of any class");
     expect(row("history")).toHaveTextContent("Not yet checked");
-    // The wallet root's leaves leave out the two burn addresses, which the
-    // wallet count above includes (P28 §4.3).
+    // TDH includes the two burn addresses, so the wallet root covers every
+    // wallet record the count above holds.
     expect(row("walletRoot")).toHaveTextContent(
-      "A hash tree over the day's wallet records except the two burn addresses': 11,124 of 11,126."
+      "A hash tree over the day's 11,126 wallet records, the two burn addresses' included. At first the validators wrongly left those two out."
     );
   });
 

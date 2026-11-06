@@ -267,7 +267,7 @@ describe("the specification", () => {
       /only for editions 8, 40, 56, 200, 280, and 1,400/
     );
     expect(container.querySelector("#evidence-replay")?.textContent).toMatch(
-      /2,061,888,816 \(2,060,802,863 without the burn addresses\)/
+      /the live total, 2,061,888,816, and the second implementation/
     );
   });
 

@@ -84,7 +84,7 @@ export function FailureSentence({
   );
 }
 
-/** Two right numbers for one name (§9): with and without the burn addresses. */
+/** A short definition of one name and its number (§9). */
 export function DefinitionChip({
   title,
   children,

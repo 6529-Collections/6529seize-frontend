@@ -600,12 +600,11 @@ export function KitEvidence({
           closedBy="checked reads against block headers (D118), and validators run by others."
         />
       </Specimen>
-      <Specimen name="DefinitionChip" state="two right totals">
-        <DefinitionChip title="Two right totals">
-          This total counts the two burn addresses, as 6529.io does. Validators
-          will sign the total without them. For the day of Oct 11 the two were{" "}
-          {v("site.proofA.totalWithBurn")} and{" "}
-          {v("site.proofA.totalWithoutBurn")}.
+      <Specimen name="DefinitionChip" state="the total">
+        <DefinitionChip title="The total">
+          This total includes the two burn addresses, as 6529.io counts it and
+          as validators sign it. For the day of Oct 11 it was{" "}
+          {v("site.proofA.totalWithBurn")}.
         </DefinitionChip>
       </Specimen>
       <Specimen

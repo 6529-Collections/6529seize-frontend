@@ -283,7 +283,7 @@
   "explained.tdh.how.totals.ruleTotal": "total = Σ der Finals der Identitäten",
   "explained.tdh.how.totals.ruleIdentity": "Final der Identität = Σ FINAL(base, beta)",
   "explained.tdh.how.totals.ruleWallets": "Finals der Wallets: eigener Boost, nie addiert",
-  "explained.tdh.how.totals.ruleSinks": "auch ohne die Burn-Adressen angegeben",
+  "explained.tdh.how.totals.ruleSinks": "die Burn-Adressen eingeschlossen",
   "explained.tdh.how.totals.ruleSource": "P26 §7.3, §8.5. Die Burn-Adressen sind eigene Identitäten und verknüpfen sich nie.",
   "explained.tdh.how.totals.break": "stattdessen die Wallets addieren",
   "explained.tdh.how.order.label": "Alles zusammen",
