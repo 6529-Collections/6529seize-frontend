@@ -2273,6 +2273,19 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "allMention.title": "Notify people with @all?",
+  "allMention.description":
+    "The @all tag will notify {count} people. Do you want to send this message?",
+  "allMention.descriptionOne":
+    "The @all tag will notify {count} person. Do you want to send this message?",
+  "allMention.snapshot":
+    "This count reflects current notification settings and wave access. It may change before the message is sent.",
+  "allMention.loading": "Counting people who will be notified…",
+  "allMention.error":
+    "Couldn't count the people who will be notified. Try again before sending.",
+  "allMention.cancel": "Keep editing",
+  "allMention.confirm": "Send with @all",
+  "allMention.retry": "Try again",
   "guidelinesDialog.title": "Wave guidelines",
   "guidelinesDialog.description":
     "Review this wave's guidelines before sending your first message.",
