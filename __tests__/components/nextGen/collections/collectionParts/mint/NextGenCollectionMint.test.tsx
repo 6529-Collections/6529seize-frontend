@@ -50,7 +50,11 @@ beforeEach(() => {
   callIndex = 0;
   jest
     .mocked(useNftPurchasingVisibility)
-    .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
+    .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      });
 });
 
 function setupBurnAndPrice(burnData: any, priceData: any) {
@@ -64,7 +68,11 @@ describe("NextGenCollectionMint", () => {
   it("redirects restricted iOS without calling contract hooks or mounting mint UI", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(
       <NextGenCollectionMint collection={collection} />
     );

@@ -14,6 +14,7 @@ and product-impact operations.
 ## Flows
 
 - [Deployment](deployment.md)
+- [Page edge cache (CloudFront)](cloudfront-page-cache.md)
 - [CI wave deploy and WEB E2E notifications](ci-wave-deploy-validation-notifications.md)
 - [Build-runner benchmark and activation](runner-activation-playbook.md)
 - [Device farm QA](device-farm-qa.md)

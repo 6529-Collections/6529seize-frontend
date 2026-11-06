@@ -10,9 +10,11 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { NextConfig } from "next";
-import { getProductionAssetPrefix } from "@/config/assetPrefix";
+import { PRODUCTION_ASSET_PREFIX } from "@/config/assetPrefix";
+import { withoutBuildStamp } from "@/config/buildStamp";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
 import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
+import { SENTRY_BUILD_RELEASE_OPTIONS } from "@/config/sentryBuildRelease";
 import {
   loadAssetsFlagAtRuntime,
   resolveAssetsFlagFromEnv,
@@ -33,11 +35,8 @@ const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
-function getAssetPrefix(assetsFromS3: boolean, version: string): string {
-  if (!assetsFromS3) {
-    return "";
-  }
-  return getProductionAssetPrefix(version);
+function getAssetPrefix(assetsFromS3: boolean): string {
+  return assetsFromS3 ? PRODUCTION_ASSET_PREFIX : "";
 }
 
 const standaloneOutput = { output: "standalone" as const };
@@ -74,7 +73,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
 
     // Compose config
-    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3);
     const developmentDistDir =
       phase === PHASE_DEVELOPMENT_SERVER
         ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
@@ -112,6 +111,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
         : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
+        // The browser's copy leaves out the per-build stamp so its chunk keeps
+        // its name across deploys; see config/env.browser.ts.
+        PUBLIC_RUNTIME_BROWSER: JSON.stringify(withoutBuildStamp(publicEnv)),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
@@ -168,7 +170,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
     logOnceConfig("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
-    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3);
 
     return sharedConfig(publicEnv, assetPrefix);
   }
@@ -179,6 +181,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
 const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   ...SENTRY_BUILD_OWNERSHIP_OPTIONS,
+  // No build-time release, so the client Sentry chunk is the same across
+  // deploys; the Sentry.init calls set it from VERSION instead.
+  ...SENTRY_BUILD_RELEASE_OPTIONS,
 
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options

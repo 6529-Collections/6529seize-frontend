@@ -10,6 +10,8 @@ const mockUseKeyPressEvent = useKeyPressEvent as jest.Mock;
 
 const createOption = (handle = "alice") => ({
   key: `option-${handle}`,
+  type: "identity",
+  level: 42,
   handle,
   display: `${handle} display`,
   picture: null,
@@ -35,6 +37,61 @@ describe("MentionsTypeaheadMenu", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it.each([0, 42, 100])(
+    "shows level %s without nesting a button in the suggestion",
+    (level) => {
+      render(
+        <MentionsTypeaheadMenu
+          selectedIndex={0}
+          options={[{ ...createOption(), level }] as any}
+          setHighlightedIndex={jest.fn()}
+          selectOptionAndCleanUp={jest.fn()}
+          anchorElement={null}
+        />
+      );
+
+      const option = screen.getByRole("button", {
+        name: new RegExp(`alice Level ${level}`),
+      });
+      expect(screen.getByText(String(level))).toBeVisible();
+      expect(option.querySelector("button")).toBeNull();
+    }
+  );
+
+  it("omits the badge for a cached identity without a level", () => {
+    render(
+      <MentionsTypeaheadMenu
+        selectedIndex={0}
+        options={[{ ...createOption(), level: null }] as any}
+        setHighlightedIndex={jest.fn()}
+        selectOptionAndCleanUp={jest.fn()}
+        anchorElement={null}
+      />
+    );
+
+    expect(screen.queryByText("42")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /alice/ })
+    ).not.toHaveAccessibleName(/Level/);
+  });
+
+  it.each(["group", "alias"])("omits levels from %s suggestions", (type) => {
+    render(
+      <MentionsTypeaheadMenu
+        selectedIndex={0}
+        options={[{ ...createOption(), type }] as any}
+        setHighlightedIndex={jest.fn()}
+        selectOptionAndCleanUp={jest.fn()}
+        anchorElement={null}
+      />
+    );
+
+    expect(screen.queryByText("42")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /alice/ })
+    ).not.toHaveAccessibleName(/Level/);
   });
 
   it("selects the highlighted option when space is pressed", () => {

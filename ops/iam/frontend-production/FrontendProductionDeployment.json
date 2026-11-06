@@ -48,6 +48,23 @@
       }
     },
     {
+      "Sid": "ProductionPageCachePurge",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+      ],
+      "Resource": [
+        "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
       "Sid": "BeanstalkStack",
       "Effect": "Allow",
       "Action": [

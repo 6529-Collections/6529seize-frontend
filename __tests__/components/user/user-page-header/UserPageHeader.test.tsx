@@ -210,6 +210,7 @@ const auth = {
 } as any;
 const ownProfileAuth = {
   connectedProfile: { handle: "bob" },
+  isDirectProfileSession: true,
   activeProfileProxy: null,
   setToast: jest.fn(),
 } as any;
@@ -613,6 +614,36 @@ describe("UserPageHeader", () => {
     });
   });
 
+  it.each([true, false, undefined])(
+    "only enables profile editing for a confirmed direct session (%s)",
+    (isDirectProfileSession) => {
+      render(
+        <AuthContext.Provider
+          value={{ ...ownProfileAuth, isDirectProfileSession }}
+        >
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[
+              {
+                statement_type: STATEMENT_TYPE.BIO,
+                statement_group: STATEMENT_GROUP.GENERAL,
+              } as CicStatement,
+            ]}
+            profileEnabledAt={null}
+            followersCount={0}
+          />
+        </AuthContext.Provider>
+      );
+      expect(
+        screen.queryAllByRole("button", { name: "Edit profile" }).length > 0
+      ).toBe(isDirectProfileSession === true);
+    }
+  );
+
   it("links to preferences from your own profile", () => {
     render(
       <AuthContext.Provider value={ownProfileAuth}>
@@ -639,6 +670,33 @@ describe("UserPageHeader", () => {
         );
       });
   });
+
+  it.each([
+    { connectedProfile: null, hasActions: false },
+    { connectedProfile: { id: "viewer", handle: null }, hasActions: true },
+  ])(
+    "keeps profile actions scoped to connected viewers: $hasActions",
+    ({ connectedProfile, hasActions }) => {
+      render(
+        <AuthContext.Provider value={{ ...auth, connectedProfile }}>
+          <UserPageHeaderClient
+            profile={profile}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={5}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+      expect(screen.queryByTestId("profile-actions-menu") !== null).toBe(
+        hasActions
+      );
+    }
+  );
 
   it("does not show preferences when viewing another profile", () => {
     render(

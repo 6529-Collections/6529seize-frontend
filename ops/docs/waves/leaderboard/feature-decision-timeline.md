@@ -51,13 +51,22 @@ into a horizontal decision strip.
 - Expanded state is local UI state and resets when the leaderboard unmounts
   (refresh, tab switch, or wave switch).
 - Single-decision waves do not render this timeline:
-  - non-curation waves show compact dropping and voting phase cards
+  - non-curation waves show matching submission and voting status sections
+  - before each phase starts, its status says `Submissions open in` or
+    `Voting opens in`; during a timed phase it says `Submissions close in` or
+    `Voting closes in`, followed by a countdown
+  - ended phases say `Submissions closed` or `Voting closed`; known dates appear
+    inline beside the status in the viewer's locale, including the year
+  - manually ended competitions show `Submissions closed` even if submissions
+    originally had no end date or a later scheduled deadline
+  - open-ended phases say `Submissions open` or `Voting open`, with `No end date`
   - when a future winner announcement is scheduled, `Next winners announced in`
     shows a live countdown and local calendar date beside those phase cards
   - the announcement countdown follows the decision schedule, excluding pauses,
     and disappears when no future announcement remains; perpetual rankings with
     no scheduled winners do not show it
-  - the timing cards wrap onto additional rows on narrow screens
+  - status, countdown, and date share a compact line; groups wrap onto additional
+    rows only when there is not enough horizontal space
   - curation waves show no timing card in this slot
 
 ## Related Pages

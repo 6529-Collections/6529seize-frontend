@@ -22,6 +22,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -59,7 +60,7 @@ import {
   getWaveHomeRoute,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
-import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
+import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useExitActiveWave } from "@/components/navigation/useExitActiveWave";
 import { useAuth } from "@/components/auth/Auth";
@@ -68,6 +69,7 @@ import { useClosingDropId } from "@/hooks/useClosingDropId";
 import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import { BrainView } from "./mobile/brainMobileViews";
+import { BrainMobileSubmissionRulesContext } from "./mobile/BrainMobileSubmissionRulesContext";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -82,6 +84,8 @@ import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import WaveInformationSheet from "./mobile/WaveInformationSheet";
 import { useLayout } from "./my-stream/layout/LayoutContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useContentTab } from "./ContentTabContext";
+import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -109,6 +113,7 @@ function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
   return Object.values(MyStreamWaveTab).includes(tab) ? tab : undefined;
 }
 
+/** Coordinate app section selection, Wave routes, overlays and shared content. */
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
@@ -117,6 +122,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { setActiveContentTab } = useContentTab();
+  const requestSubmissionRulesFocus =
+    useOptionalHeaderContext()?.requestSubmissionRulesFocus;
   const { rememberTab } = useWaveTabPreference();
   const { currentWaveView, rememberWaveView } = useNavigationHistoryContext();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -232,6 +240,22 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     waveId,
     restoredView: getRestoredWaveView(isApp, waveId, currentWaveView),
   });
+
+  /** Select the shell view and keep explicitly routed Chat content in sync. */
+  const selectViewAndContent = useCallback(
+    (view: BrainView) => {
+      selectView(view);
+      if (
+        waveId &&
+        view === BrainView.DEFAULT &&
+        !isCompetitionPathname(pathname)
+      ) {
+        setActiveContentTab(MyStreamWaveTab.CHAT, { persist: false });
+      }
+    },
+    [pathname, selectView, setActiveContentTab, waveId]
+  );
+
   const onViewChange = useCallback(
     (view: BrainView) => {
       const competitionTab =
@@ -248,7 +272,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         );
         return;
       }
-      selectView(view);
+      selectViewAndContent(view);
       const tab = getWaveTab(view);
       if (waveId && tab !== undefined) {
         rememberTab(waveId, tab);
@@ -271,7 +295,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       }
     },
     [
-      selectView,
+      selectViewAndContent,
       rememberTab,
       isApp,
       waveId,
@@ -283,6 +307,20 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       searchParams,
     ]
   );
+  const configurationButtonRef = useRef<HTMLButtonElement>(null);
+  const setConfigurationButtonRef = useCallback(
+    (element: HTMLButtonElement | null) => {
+      configurationButtonRef.current = element;
+    },
+    []
+  );
+  const viewSubmissionRules = useCallback(() => {
+    // This tab belongs to the persistent shell, so focus survives changes
+    // to the routed content when opening submission rules.
+    if (waveId) requestSubmissionRulesFocus?.(waveId);
+    onViewChange(BrainView.CONFIGURATION);
+    configurationButtonRef.current?.focus();
+  }, [onViewChange, requestSubmissionRulesFocus, waveId]);
   const viewAnimation = useAnimationControls();
   useEffect(() => {
     // Animate the transition without using the view as the subtree's lifetime.
@@ -468,6 +506,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
             showWavesTab={hydrated}
             showStreamBack={hydrated}
             isApp={isApp}
+            onConfigurationButtonRef={setConfigurationButtonRef}
           />
         )}
         {isApp &&
@@ -516,7 +555,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               onPrefetchQuickVote={quickVote.prefetchQuickVote}
               wave={wave}
             >
-              {children}
+              <BrainMobileSubmissionRulesContext.Provider
+                value={viewSubmissionRules}
+              >
+                {children}
+              </BrainMobileSubmissionRulesContext.Provider>
             </BrainMobileViewContent>
           </m.div>
         </LazyMotion>

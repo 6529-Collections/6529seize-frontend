@@ -34,27 +34,20 @@ export function hasWalletChunkLoadFailed(): boolean {
 /**
  * Reloads the page so a failed wallet chunk is fetched again. Returns false,
  * without reloading, when this tab already reloaded for that reason less
- * than a minute ago.
+ * than a minute ago, or when its reload marker cannot be persisted.
  */
 export function reloadToRetryWalletChunks(
   reloadPage: () => void = () => globalThis.location.reload()
 ): boolean {
   const now = Date.now();
-  let lastReloadAt = Number.NaN;
-  try {
-    lastReloadAt = Number(safeSessionStorage.getItem(RELOAD_MARKER_KEY));
-  } catch {
-    // Storage can be unavailable; reloading at most once is still safe.
-  }
+  const lastReloadAt = Number(safeSessionStorage.getItem(RELOAD_MARKER_KEY));
   if (
     Number.isFinite(lastReloadAt) &&
     now - lastReloadAt < MIN_RELOAD_INTERVAL_MS
   ) {
     return false;
   }
-  try {
-    safeSessionStorage.setItem(RELOAD_MARKER_KEY, String(now));
-  } catch {
+  if (!safeSessionStorage.setItem(RELOAD_MARKER_KEY, String(now))) {
     return false;
   }
   reloadPage();

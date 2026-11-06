@@ -5,6 +5,30 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.chat-resume",
+      "kind": "workflow",
+      "aliases": ["background tab catch-up", "load missed messages"],
+      "title": "Returning to an open wave tab",
+      "keywords": [
+        "wave",
+        "chat",
+        "background",
+        "tab",
+        "missed messages",
+        "loading",
+        "resume"
+      ],
+      "summary": "Returning to an open wave refreshes its latest messages together while preserving the conversation and unsent draft.",
+      "facts": [
+        "If you were at the bottom, the conversation follows the latest messages. If you were reading older messages, it keeps your place; use the bottom control to return to latest.",
+        "After a long absence, Load missed messages marks a gap between cached history and the latest page. It loads a page when approached or selected, without delaying current messages.",
+        "If missed history fails to load, select Could not load missed messages. Try again. Already loaded messages remain available."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "chat", "recovery"],
+      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+    },
+    {
       "id": "waves.selected-post-preview",
       "kind": "workflow",
       "title": "Read a selected public Wave post without JavaScript",
@@ -721,13 +745,7 @@
       "id": "home.overview",
       "kind": "route",
       "title": "6529.io home",
-      "aliases": [
-        "home",
-        "homepage",
-        "landing page",
-        "6529 home",
-        "What is 6529?"
-      ],
+      "aliases": ["home", "homepage", "landing page", "6529 home"],
       "keywords": [
         "home",
         "latest",
@@ -744,12 +762,11 @@
         "The home page is the main 6529.io entry point.",
         "Logged-out visitors see Connect wallet as the primary hero action, followed by Start here linking to /join-6529.",
         "Visitors can browse the public home activity without connecting a wallet.",
-        "Logged-out visitors see What is 6529? below the hero: Art with purpose links to /the-memes, Where the network coordinates links to /waves, and A real say links to The Memes - Main Stage Wave at /waves/b6128077-ea78-4dd9-b381-52c4eadb2077 through Explore Main Stage. It uses three columns on tablet/desktop and stacked rows on mobile; authenticated members do not see this introduction.",
         "Coming up and the homepage Waves section each have an underlined View all link: below the subtitle on mobile and on the right from tablet sizes. The Waves View all opens /waves; there is no second button below the cards.",
         "Authenticated and logged-out visitors share the typography-only hero headline and public-goods subtitle. The hero uses a single left-aligned text block with no artwork, illustration, or reserved image space. Authenticated visitors do not see the hero onboarding buttons.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "Logged-out visitors see How to start after the latest-drop slot. The introduction is Four steps into 6529. The first three step headings are clickable actions with arrows: Connect wallet opens the existing wallet flow, Create profile opens /join-6529#join-step-profile, and Join a Wave opens /waves. The fourth heading, Collect or create, is plain text. Its unchanged description contains two inline links: Hold Meme Cards opens /the-memes and submit your own art opens /about/apply. Apply explains submission eligibility and the Seeking Nomination path for new artists. There are no separate buttons below the description. The community link keeps the hover title Browse Waves. Read the full guide opens /join-6529. The four numbered steps form columns on desktop and a vertical timeline on mobile. The same authentication visibility as the hero actions applies.",
-        "How to start omits the collection/submission description and its two inline links during server rendering and for restricted native iOS users outside the US or with unknown country. They see a browsing/community description instead. Browsing collections remains available through the What is 6529? section.",
+        "How to start omits the collection/submission description and its two inline links during server rendering and for restricted native iOS users outside the US or with unknown country. They see a browsing/community description instead.",
         "The mid-page network society statement uses the Bitcoin/Ethereum sentence; the public-goods definition remains under the hero title.",
         "The homepage no longer shows Boosted Drops. Boosting and boosted-drop preferences inside Waves are unchanged. Homepage Waves cards have a wave cover on the left below 768px and filling the card behind a dark, image-tinted text fade on larger screens. Desktop hover gently lifts the card and zooms its cover; reduced motion disables these effects. The existing plain-text wave description shows one line at each breakpoint; labelled Score, Hot, and REP values remain at the bottom. These are descriptions, not latest chat messages, and there is no message-author row. Explore Waves retains its existing card layout. Card data, requests, ranking, and routes are unchanged.",
         "Coming up shows the next mint when available and current vote leaders. Below 768px, cards stack vertically at full width with space between them. Scroll the page to see the remaining cards. Keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH have their own row above uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
@@ -769,7 +786,6 @@
         "/join-6529",
         "/the-memes",
         "/waves",
-        "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
         "/about/apply",
         "/about/subscriptions",
         "/{user}/subscriptions"
@@ -777,7 +793,6 @@
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
-        "components/home/newcomer/HomeWhatIs6529.tsx",
         "components/home/newcomer/HomeHowToStart.tsx",
         "components/home/explore-waves/ExploreWavesSection.tsx",
         "components/home/next-mint-leading/NextMintLeadingSection.tsx",
@@ -1035,7 +1050,7 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "Refreshing restores the saved desktop sidebar width before the page paints, without a closed-to-open animation or page shift; narrow screens keep the overlay closed. The sidebar can be collapsed or expanded using the single-chevron control at the vertical center of the sidebar’s right edge, entirely inside the sidebar. Hover anywhere in the sidebar or focus a control to reveal it; touch layouts keep it visible.",
-        "The web sidebar has independently scrollable primary navigation, a fixed-height middle section containing Search, Share when supported, and optional Update, and bottom account controls. Without Share, Update sits directly below Search with no empty row. Notifications appear directly above the fixed account slot without moving Update, Search, or Share. Local and staging badges appear in the initial page render; production omits them. Extra Drop Forge and WatchTower entries remain reachable in short windows.",
+        "The web sidebar has independently scrollable primary navigation, a fixed-height middle section containing Search, Share when supported, and optional Update, and bottom account controls. Without Share, Update sits directly below Search with no empty row. Notifications appear directly above the fixed account slot without moving Update, Search, or Share. Local and staging badges appear in the initial page render; production omits them. Desktop badges sit centered over the 6529 Home logo without moving navigation: STG for staging, or LCL above the actual browser port locally (LCL alone without a port). Other non-production labels remain visible. Phone and tablet headers keep the inline badge beside the logo, with LCL:port on one line locally. Extra Drop Forge and WatchTower entries remain reachable in short windows.",
         "The account slot shimmers during restoration, then shows a profile picture or the signed-out Connect Wallet icon. Failed pictures use a 24px default user icon inside the same 40px rounded frame as the PFP; a failed profile request offers Profile unavailable. Retry, while an empty successful result offers Create profile. Search and Share remain available during account loading.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
@@ -1921,7 +1936,8 @@
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
-        "On their own profile, owners use direct field-level edit controls on fine-pointer desktop layouts; smaller and touch-first layouts provide an Edit profile hub for the profile cover, profile picture, name, classification, and About.",
+        "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
+        "To add or change an About statement, use the profile editor (Edit profile > About on smaller layouts). Clear the About editor and save to remove it. The header displays only saved About text, with See more and See less for long text on mobile. Visitors, signed-out users, and active proxies never see profile edit controls.",
         "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
         "Editable profile surfaces require the connected profile owner.",
         "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
@@ -2061,7 +2077,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On web and Android the Subscriptions tab and the profile-header subscription status are part of the first page load; in the iOS app and in iPhone or iPad browsers they are added just after the page loads.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -3019,7 +3035,7 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
-        "Announcements uses a compact row with its timestamp, unread state and score shield. A row-sized placeholder reserves its space while it first loads. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Announcements uses a compact row with its timestamp, unread state and score shield. With collapsed replies, its timestamp shows the latest top-level announcement; replies neither advance that timestamp nor increase the wave unread badge. A row-sized placeholder reserves its space while it first loads. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "While Find a wave is open, sidebar scores remain visible but their details cards are temporarily unavailable, including for an empty search field. Closing search restores score hover, focus and selection. Recommendation links remain available while searching.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. In Joined, pinned waves appear when their batch loads; older pins do not appear ahead of unloaded joined waves. Pinned shows saved pins without loading more of Joined. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
@@ -3238,6 +3254,7 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
+        "A live summary below the Access controls explains whether chat and submissions use public, shared, or separate group access. With chat disabled, it still explains whether submissions are public or limited to their group. Review or Overview repeats that summary before creation. Competition reviews use the parent Wave's current chat group and enabled state; competition draft settings do not change chat. A private parent chat remains group-restricted when its group ID or name is withheld; without the ID, the summary does not claim the groups match or differ. It describes group access; authentication, profile, submission timing, limits, and signing requirements still apply. Voting access is separate.",
         "Each Access row offers one Edit action with a pencil icon and no Choose group action. On desktop, Edit opens Identities alongside the rule choices. On smaller screens and touch devices, Edit opens a vertical category list; selecting a category opens its fields, and Back returns to the list without discarding the draft. Explicitly included and excluded identities remain supported, and Next or Review wave stays disabled until the pending replacement is saved or cancelled. Clicking elsewhere in the Create Wave modal keeps the open criteria editor and its draft available; cancelling is not needed to return to the filters. Cancel sits at the far right above the criteria and discards the pending edit. Inside a mobile category, Back and Cancel share one row: Back returns to the categories; Cancel discards the pending edit.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "In xTDH Grant, Clear filters appears only when a collection name or grantor is set. It clears those search fields and keeps the active status tab; changing status tabs alone does not show the action.",
@@ -3543,7 +3560,9 @@
         "encrypted backup",
         "recovery code",
         "restore encrypted messages",
-        "paste image in encrypted chat"
+        "paste image in encrypted chat",
+        "emoji board in encrypted chat",
+        "custom emojis in encrypted messages"
       ],
       "keywords": [
         "encrypted",
@@ -3557,11 +3576,15 @@
         "backup",
         "restore",
         "recovery code",
-        "paste"
+        "paste",
+        "emoji",
+        "custom emojis",
+        "reactions"
       ],
       "facts": [
         "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
         "To start an encrypted chat, search for a person and tap or click their search result. The search clears and the person appears in the selected list with their encrypted-message eligibility. A new chat requires everyone selected to be eligible. If the encrypted direct message already exists, choose Open chat instead.",
+        "In the 6529 app, the back arrow to the left of the encrypted chat avatar returns to the encrypted messages list. It remains visible on iPad in portrait and landscape.",
         "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
         "Where it is offered, the wallet sign-in on a web browser can turn on signed messages and encrypted messages with the same single signature; that browser then becomes an encrypted-messages device without a second prompt. On the website, Turn on encrypted messages (one signature) asks for that same combined sign-in signature when the sign-in did not cover encrypted messages (for example the profile did not exist yet), and replaces the browser's earlier signed-messages grant, so the browser keeps one grant. The 6529 apps use a separate encrypted-messages signature. Revoking that device, from Devices that can post as you or from encrypted devices, turns off both.",
         "Encrypted chats open at their newest saved messages. Load older messages and Load newer messages browse this device's saved history, and New messages returns to the latest. Photos load near the visible part of a chat. Search, replies and encrypted backups still include older saved messages outside the current view. Previous results and Next results browse long search result lists. A device catching up after being offline must still process messages it has not received yet.",
@@ -3570,6 +3593,7 @@
         "Create new recovery code replaces the backup and makes the old code stop working (do this after revoking a device that had backup on). Turn off backup deletes the encrypted backup from 6529.",
         "In encrypted DMs, the person’s name and avatar in the header and introduction open their profile. Message authors have ordinary profile links, desktop profile hover cards, levels, artist badges and profile-wave badges where applicable. Highlighted member mentions also open profiles. Public profile details use ordinary profile data; message contents stay encrypted. Unavailable profile details are omitted without hiding local messages.",
         "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. To attach images you can also paste them (Ctrl+V or Cmd+V) into the encrypted message box; the same limits apply, and text copied with an image is pasted too. If attachments are switched off, the attach control is hidden and pasted images are not attached.",
+        "Add emoji beside the encrypted message box opens a searchable board with standard emojis, skin tones and the 6529 custom collection. A selection goes at the cursor or replaces selected text, including while editing. Custom emojis appear as :name: in the message box and as images after sending. In a message menu choose More reactions for the same full board; select an existing reaction to toggle yours. Encrypted emoji choices are not added to ordinary chats' frequently-used history. Custom assets load as one collection independent of message contents; if they fail, standard emojis remain available, Try again reloads the collection, and custom emojis remain readable as shortcodes.",
         "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Encrypted messages trust each person's wallets the first time your device sees them (trust on first use). A member's later device is added automatically only when one of those wallets signed it. A device signed by a new wallet, or by a contract wallet whose signature could not be checked, is not added: the chat shows a notice naming the wallet with Add device and Ignore. Add it only if you know whose wallet it is. Chat info shows the wallet that signed each member's device.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
@@ -3663,11 +3687,14 @@
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
+        "Type @ followed by at least three handle characters to find profiles to tag. Individual profile suggestions show a small round level badge beside the handle, including level 0. Global mentions and Quick Tags have no level badge.",
         "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
         "Poll posts require a question, at least two unique options, and a future closing time. The composer explains whether voters can select one option or multiple options and keeps Post unavailable until the poll is valid.",
         "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control and separate Poll action are hidden and the poll header close control removes the poll; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
         "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
+        "Available chat has no permission summary or access-details row above the composer, including when submissions are restricted. Chatting or following a wave does not grant submission or voting access. Existing sign-in, profile, proxy, and moderation guards still apply.",
+        "An unavailable Submit drop action in ordinary Rank and Approve Chat headers opens a details card with the restriction reason, submission access group, and View submission rules. Ended submissions retain the lock and say Submission period has ended, with Closed and the closing date when known, followed by a compact submission group row and the rules link. A public group does not reopen submissions; closure is not presented as a failure to meet group requirements. An open card updates when its submission deadline passes and catches up when the page becomes visible again. Enter or Space opens it; Tab reaches its links; Escape closes it and restores focus to the action. Opening rules moves focus to Settings or to the rules content after a route change. A competition selected before entering Chat remains selected in the rules link, including when copied or opened in a new tab. With competition support enabled, group and signing details are loaded on demand from the selected competition or current default; loading or unavailable details keep the rules link usable and never substitute another competition's access settings. Returning to Chat preserves an ordinary text draft in the same browser tab, but does not save attachments or media. Other submission entry surfaces keep their own eligibility displays.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",
@@ -5939,7 +5966,7 @@
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
-        "Opening the desktop sidebar bell previews notifications without leaving the current page and automatically marks notifications read for the active profile after the inbox loads. The newest rows appear first with compact previews and Load more for older items. Reactions to the same drop share one preview row with reactor avatars, including across Load more pages. Preview mentions and wave tags display as @handle and #wave without storage brackets. Clicking a row marks its unread notifications read if needed and opens its destination; Mark all as read clears new unread notifications or retries a failed automatic read request. Close with Escape, the close button, the bell, or a click outside. View all notifications opens /notifications. Mobile and app bells still open the full page directly. Opening the full /notifications page marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
+        "Opening the desktop sidebar bell previews notifications without leaving the current page and automatically marks notifications read for the active profile after the inbox loads. The newest rows appear first with compact previews and Load more for older items. Reactions to the same drop share one preview row with reactor avatars, including across Load more pages. Grouped reactions and returned voting credits show the wave picture as their main image; a single reaction shows the person’s profile picture. A bell is the fallback when the relevant picture is unavailable. Preview mentions and wave tags display as @handle and #wave without storage brackets. Clicking a row marks its unread notifications read if needed and opens its destination; Mark all as read clears new unread notifications or retries a failed automatic read request. Close with Escape, the close button, the bell, or a click outside. View all notifications opens /notifications. Mobile and app bells still open the full page directly. Opening the full /notifications page marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a responsive multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter opens as a bottom sheet in the mobile layout and as an anchored dropdown on wider viewports.",
@@ -6619,8 +6646,8 @@
       ],
       "keywords": ["profile", "banner", "picture", "avatar", "edit", "owner"],
       "facts": [
-        "Profile banner and picture editing are documented profile navigation features.",
-        "Editing controls require the owner or authorized profile permissions.",
+        "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
+        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop offers Choose a Meme with loading and retry states, or a file upload. Cover editing supports Gradient and Image modes.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",
@@ -7154,6 +7181,7 @@
         "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
         "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
         "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Successfully leaving the open wave removes it from the sidebar's Joined collection without closing its content. It stays removed when switching collections during the current page session, and joining again restores it. A parent stays visible if you still belong to one of its subwaves. A failed leave keeps the joined row.",
         "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
         "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
         "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
@@ -7646,6 +7674,7 @@
       "facts": [
         "Wave leaderboard sorting and price filters are documented controls.",
         "These controls affect leaderboard result ordering and curation-wave price filtering.",
+        "For time-locked competitions, Projected Vote displays and sorts by the weighted score at the next selection checkpoint. Recent votes can have less weight at that checkpoint, so the projection can differ from raw vote totals. Rank badges in this view show positions in the projected results across loaded pages, or within filtered results when a filter is active. Current Vote restores current-vote ranks. Recorded winner places and final selection scores stay unchanged.",
         "On The Memes Main Stage, select the Additional Action checkbox or its label beside the sorting control to show only marked submissions. Select it again to restore all results. The checkmark and amber styling indicate the active filter. It includes promises without a separate plan and filters the complete result set across pages; sorting and grid/list view remain independent.",
         "The Additional Action filter resets on page refresh or leaderboard remount and does not affect other waves. If no submissions match, the list says \"No submissions marked Additional Action.\" Turn off the filter to see all submissions. Failed requests offer Retry. Open artwork details to read the optional public plan; the badge is an artist promise, not verification of approval or fulfillment.",
         "Availability depends on leaderboard tab and wave data."
@@ -7671,7 +7700,8 @@
       "facts": [
         "Wave decision timeline behavior is documented under leaderboard features.",
         "It explains decision header states, expand/review behavior, and scrolling/loading.",
-        "Single-decision leaderboard waves show Next winners announced in with a live countdown and local date beside dropping and voting times when a future announcement is scheduled. It excludes paused decisions and disappears when no future announcement remains; perpetual rankings without scheduled winners do not show it.",
+        "Single-decision leaderboard waves show submission and voting status sections: open in before a phase starts, close in while timed submissions are open (closes in for voting), closed after it ends, or open with No end date for an open-ended phase. A manual competition end closes submissions even without a scheduled end date or before a future deadline. Countdown and known local dates, including the year, appear inline beside the status and wrap only when space is limited.",
+        "When a future winner announcement is scheduled, Next winners announced in shows a live countdown and local date alongside the submission and voting statuses, wrapping when needed. It excludes paused decisions and disappears when no future announcement remains; perpetual rankings without scheduled winners do not show it.",
         "Use it when users ask when or how a wave decision is shown."
       ],
       "canonical_path": "/waves",
@@ -11168,6 +11198,44 @@
       "canonical_path": "/bookmarks",
       "tags": ["waves", "privacy", "navigation"],
       "source_refs": ["ops/docs/waves/chat/feature-private-bookmarks.md"]
+    },
+    {
+      "id": "notifications.artist-artwork-alerts",
+      "kind": "ui_affordance",
+      "title": "Artist artwork alerts",
+      "aliases": [
+        "artwork alerts",
+        "artist notifications",
+        "notify me when an artist submits",
+        "Main Stage alerts"
+      ],
+      "keywords": [
+        "artist",
+        "artwork",
+        "bell",
+        "Main Stage",
+        "follow",
+        "notifications"
+      ],
+      "facts": [
+        "Open Profile actions and select Artwork alerts on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
+        "Signed-out viewers do not see Artwork alerts. After signing in, it appears for profiles with an artist activity badge: active Main Stage submissions, Main Stage wins, or earlier Meme artist credits. If alerts are already on, the control remains available without the badge so they can be turned off; turning them off then hides it.",
+        "Open Profile actions and wait for the saved On or Off state to load. On includes a check mark. Select Artwork alerts again to turn alerts off. The control stays hidden until your own-profile session is verified, including while sign-in is unresolved or when using a proxy. An unknown preference is never shown as Off. After signing in, reopen Profile actions to load your saved choice.",
+        "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
+        "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",
+        "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
+        "Find alerts under the Artwork alerts filter in /notifications or in the desktop notification panel. Both show an artwork thumbnail, using the artist's preview image for video or other media when available. A missing or failed image falls back to a bell. The artwork title in the full feed, the panel row, and app push alerts open the exact submission directly in the single-artwork viewer. Closing the viewer returns to its competition. Artworks without a title appear as untitled artwork.",
+        "Profile preferences including Essential only and Direct messages and wave activity apply. App push also requires device permission and the Wave Invites setting.",
+        "Artwork alerts shows Try again when the preference could not load; select it to retry. Without an artist badge, the control appears only once an enabled preference is known; close and reopen Profile actions if the initial request fails, or reopen the profile if no actions menu is available. A failed save displays an error and rechecks saved state before another toggle."
+      ],
+      "canonical_path": "/notifications",
+      "related_paths": ["/waves"],
+      "tags": ["notifications", "profiles"],
+      "source_refs": [
+        "hooks/useArtistArtworkAlert.tsx",
+        "components/brain/notifications/NotificationArtistArtwork.tsx",
+        "ops/docs/notifications/feature-artist-artwork-alerts.md"
+      ]
     }
   ]
 }

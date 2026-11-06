@@ -131,6 +131,16 @@ export function sharedConfig(
       maximumResponseBody: IMAGE_MAXIMUM_RESPONSE_BODY_BYTES,
     },
     poweredByHeader: false,
+    // The free-solid barrel defines every icon inline, so bundles keep far
+    // more icons than a page draws. Rewriting each named import to its
+    // single-icon module (`@fortawesome/free-solid-svg-icons/faPlus`) ships
+    // only the icons in use, with no barrel copy beside them.
+    modularizeImports: {
+      "@fortawesome/free-solid-svg-icons": {
+        transform: "@fortawesome/free-solid-svg-icons/{{member}}",
+        skipDefaultConversion: true,
+      },
+    },
     redirects() {
       return Promise.resolve([
         {
@@ -246,6 +256,14 @@ export function sharedConfig(
         "@/config/env": {
           browser: "./config/env.browser.ts",
         },
+      },
+    },
+    compiler: {
+      // Compiles out the Sentry SDK's debug logger. `disableLogger` in
+      // next.config.ts only applies to webpack builds; Turbopack builds need
+      // the flag defined directly.
+      define: {
+        __SENTRY_DEBUG__: false,
       },
     },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],

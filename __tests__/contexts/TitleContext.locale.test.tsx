@@ -1,4 +1,4 @@
-import { TitleProvider, useSetTitle, useTitle } from "@/contexts/TitleContext";
+import { TitleProvider, useSetTitle, useTitleText } from "@/contexts/TitleContext";
 import type { SupportedLocale } from "@/i18n/locales";
 import { act, render, screen, waitFor } from "@testing-library/react";
 
@@ -35,7 +35,7 @@ jest.mock("@/i18n/messages", () => {
 });
 
 function TitleReporter() {
-  const { title } = useTitle();
+  const { title } = useTitleText();
   return <span data-testid="title">{title}</span>;
 }
 

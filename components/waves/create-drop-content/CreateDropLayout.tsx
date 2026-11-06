@@ -134,6 +134,7 @@ export interface CreateDropLayoutProps {
   readonly suppressInitialHeightAnimation?: boolean | undefined;
 }
 
+/** Render the composer with draft restoration scoped to its posting mode. */
 export default function CreateDropLayout(props: CreateDropLayoutProps) {
   const {
     activeDrop,
@@ -166,6 +167,7 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
   const prewarmSigning = useDeviceSigningPrewarm();
   const { initialDraftJson } = useWaveDraftPersistence({
     waveId: wave.id,
+    isDropMode: props.isDropMode,
     activeDrop,
     editorState: props.editorState,
     dropEditorRefreshKey: props.dropEditorRefreshKey,
