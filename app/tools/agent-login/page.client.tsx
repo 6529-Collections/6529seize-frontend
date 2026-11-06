@@ -213,8 +213,18 @@ function getCookieExpiresAttribute(expiresAt: string | null): string {
 }
 
 // The session cookie name carries the `__Host-` prefix, which browsers accept
-// only with Secure and Path=/ (localhost counts as a secure origin).
+// only with Secure and Path=/, and only from a secure context (https, or
+// localhost over http). On a plain-http `.local` host the cookie cannot exist,
+// so the agent session works client-side only and server rendering stays
+// anonymous.
 const SESSION_COOKIE_ATTRIBUTES = "; path=/; SameSite=Strict; Secure";
+
+function writeSessionCookie(cookie: string): void {
+  if (globalThis.isSecureContext === false) {
+    return;
+  }
+  document.cookie = cookie;
+}
 
 function dispatchAuthEvents(): void {
   globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
@@ -250,11 +260,13 @@ function applyLoginPayload(payload: AgentLoginPayload): void {
     localStorage.removeItem(STORAGE_KEYS.legacyRole);
   }
 
-  document.cookie = `${STORAGE_KEYS.authCookie}=${encodeURIComponent(
-    account.jwt
-  )}${SESSION_COOKIE_ATTRIBUTES}${getCookieExpiresAttribute(
-    payload.session.accessTokenExpiresAt
-  )}`;
+  writeSessionCookie(
+    `${STORAGE_KEYS.authCookie}=${encodeURIComponent(
+      account.jwt
+    )}${SESSION_COOKIE_ATTRIBUTES}${getCookieExpiresAttribute(
+      payload.session.accessTokenExpiresAt
+    )}`
+  );
   dispatchAuthEvents();
 }
 
@@ -266,9 +278,9 @@ function clearAuthState(): void {
   localStorage.removeItem(STORAGE_KEYS.legacyRole);
   localStorage.removeItem(STORAGE_KEYS.agentLoginActiveAddress);
   clearStoredRoleKeys();
-  document.cookie = `${
-    STORAGE_KEYS.authCookie
-  }=; expires=Thu, 01 Jan 1970 00:00:00 GMT${SESSION_COOKIE_ATTRIBUTES}`;
+  writeSessionCookie(
+    `${STORAGE_KEYS.authCookie}=; expires=Thu, 01 Jan 1970 00:00:00 GMT${SESSION_COOKIE_ATTRIBUTES}`
+  );
   dispatchAuthEvents();
 }
 
@@ -393,7 +405,12 @@ export default function AgentLoginClient() {
           <label htmlFor="agent-login-payload" style={styles.label}>
             Login payload
           </label>
+          {/* Test harnesses and browser extensions can add attributes (for
+              example an inline caret-color) to this server-rendered textarea
+              before React hydrates it; that is not a mismatch worth a console
+              error. */}
           <textarea
+            suppressHydrationWarning
             id="agent-login-payload"
             autoCapitalize="off"
             autoComplete="off"

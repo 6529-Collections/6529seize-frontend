@@ -229,9 +229,12 @@ describe("auth.utils", () => {
     publicEnv.USE_DEV_AUTH = "true";
     publicEnv.DEV_MODE_AUTH_JWT = "dev";
     expect(getAuthJwt()).toBe("dev");
+
+    jest.resetAllMocks();
     publicEnv.USE_DEV_AUTH = "false";
     (Cookies.get as jest.Mock).mockReturnValue("cookie");
     expect(getAuthJwt()).toBeNull();
+    expect(Cookies.get).not.toHaveBeenCalled();
   });
 
   it("getAuthJwt falls back to the active account jwt when the cookie is unavailable", () => {
@@ -307,6 +310,26 @@ describe("auth.utils", () => {
       expect(Cookies.get).not.toHaveBeenCalledWith("wallet-auth");
     });
 
+    it("checks a cookie's subject once per token and address", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-memo": { sub: "0xaaa", exp: 86400 * 2 } });
+      setAuthJwt("0xAaA", "jwt-a", null);
+      cookieJar({ "__Host-wallet-auth": "jwt-memo" });
+      (jwtDecode as jest.Mock).mockClear();
+
+      expect(getAuthJwt()).toBe("jwt-memo");
+      expect(getAuthJwt()).toBe("jwt-memo");
+      expect(getAuthJwt()).toBe("jwt-memo");
+      expect(
+        (jwtDecode as jest.Mock).mock.calls.filter(
+          ([jwt]) => jwt === "jwt-memo"
+        )
+      ).toHaveLength(1);
+
+      setAuthJwt("0xBbB", "jwt-b", null);
+      expect(getAuthJwt()).toBe("jwt-b");
+    });
+
     it("returns no token without a stored account, whatever the cookies hold", () => {
       setupStorageMocks();
       decodeAs({ "jwt-cookie": { sub: "0xaaa", exp: 86400 * 2 } });
@@ -341,6 +364,7 @@ describe("auth.utils", () => {
         path: "/",
       });
       expect(listener).not.toHaveBeenCalled();
+      expect(Cookies.get).not.toHaveBeenCalledWith("wallet-auth");
       globalThis.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
     });
 
