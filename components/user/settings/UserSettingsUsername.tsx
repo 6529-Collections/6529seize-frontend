@@ -84,7 +84,7 @@ export default function UserSettingsUsername({
     <div>
       <label
         htmlFor="name"
-        className={`tw-block tw-font-medium tw-leading-5 ${compact ? "tw-text-xs tw-text-iron-400" : "tw-text-sm tw-text-iron-200"}`}
+        className={`tw-block tw-text-sm tw-font-medium tw-leading-5 ${compact ? "tw-text-iron-100" : "tw-text-iron-200"}`}
       >
         {label}
       </label>

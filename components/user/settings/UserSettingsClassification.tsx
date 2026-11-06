@@ -48,7 +48,7 @@ export default function UserSettingsClassification({
     <div className="tw-relative tw-max-w-full" ref={listRef}>
       <div
         id={labelId}
-        className={`tw-block tw-font-medium tw-leading-5 ${compact ? "tw-text-xs tw-text-iron-400" : "tw-text-sm tw-text-iron-200"}`}
+        className={`tw-block tw-text-sm tw-font-medium tw-leading-5 ${compact ? "tw-text-iron-100" : "tw-text-iron-200"}`}
       >
         Profile classification
       </div>

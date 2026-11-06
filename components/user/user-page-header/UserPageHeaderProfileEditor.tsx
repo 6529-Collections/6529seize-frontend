@@ -90,7 +90,7 @@ export default function UserPageHeaderProfileEditor({
           <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
             <h3
               id="profile-editor-cover"
-              className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
+              className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
             >
               {message("user.profileHeader.edit.banner")}
             </h3>
@@ -141,7 +141,7 @@ export default function UserPageHeaderProfileEditor({
           <div className="tw-flex tw-min-h-5 tw-items-center tw-justify-between tw-gap-3">
             <h3
               id="profile-editor-picture"
-              className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
+              className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
             >
               {message("user.profileHeader.edit.pfp")}
             </h3>
@@ -221,7 +221,7 @@ export default function UserPageHeaderProfileEditor({
         <div className="tw-space-y-2">
           <label
             htmlFor={aboutInputId}
-            className="tw-block tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400"
+            className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
           >
             {message("user.profileHeader.aboutEdit.textareaLabel")}
           </label>
