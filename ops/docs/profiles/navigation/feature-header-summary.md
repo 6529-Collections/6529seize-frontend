@@ -102,9 +102,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   without moving the About statement. Empty upload controls show their upload
   icon; saved or selected images show a preview.
   Gradient and Image choices align with the left edge of the cover controls.
-  The Profile picture section separates the full-width Choose a Meme action
-  from file upload with `or`; choosing it reveals Meme search, with loading and
-  retry states.
+  The Profile picture section shows Meme search immediately, separated from
+  file upload with `or`. You can type while Memes load; loading and retry states
+  remain available.
 - Smaller layouts keep the circular `Edit profile` button in the banner.
   Choose a field in its icon menu to open that editor; use `Back` to return.
   These editors use the same compact field styling as desktop. The picture

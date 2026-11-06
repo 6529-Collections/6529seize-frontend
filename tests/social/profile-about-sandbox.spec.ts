@@ -145,6 +145,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Profile edits require the isolated mock API."
   );
+  test.beforeEach(async ({ page, baseURL }) => {
+    await page.route(
+      `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
+      (route) =>
+        route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
+    );
+  });
 
   test("adds, edits and removes About through the profile editor", async ({
     page,
@@ -444,14 +451,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     expect(gradient).not.toBeNull();
     expect(colorRow).not.toBeNull();
     expect(Math.abs(gradient!.x - colorRow!.x)).toBeLessThanOrEqual(2);
-    const memeChoice = page.getByRole("button", {
-      name: "Choose a Meme",
+    const memeSearch = page.getByRole("textbox", {
+      name: "Select Meme",
       exact: true,
     });
+    await expect(memeSearch).toBeVisible();
     const uploadChoice = page
       .getByLabel("Upload profile picture", { exact: true })
       .locator("..");
-    const memeBox = await memeChoice.boundingBox();
+    const memeBox = await memeSearch.boundingBox();
     const uploadBox = await uploadChoice.boundingBox();
     expect(memeBox?.height).toBeGreaterThanOrEqual(44);
     expect(memeBox?.width).toBeCloseTo(uploadBox!.width, 0);
@@ -467,7 +475,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     if (browserName === "webkit") {
       // Native color wells are skipped in WebKit's sequential focus order:
       // https://bugs.webkit.org/show_bug.cgi?id=194756
-      await expect(memeChoice).toBeFocused();
+      await expect(memeSearch).toBeFocused();
       // Keep keyboard modality while checking the native control's outline.
       await secondColor.focus();
     }
@@ -479,6 +487,14 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("profile-color-keyboard-focus.png"),
     });
+    await page
+      .getByRole("heading", { name: "Profile picture", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("dialog", { name: "Edit profile", exact: true })
+        .getByRole("list")
+    ).toHaveCount(0);
     const aboutTop = await aboutInput.evaluate(
       (element: HTMLTextAreaElement) => element.offsetTop
     );
@@ -564,16 +580,95 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps the compact field editors consistent in the mobile menu", async ({
+  test("shows Meme search immediately while options load", async ({
     page,
     baseURL,
   }, testInfo) => {
     await seedSession(page);
+    await openOwnProfile(page);
+    await page.setViewportSize({ width: 1024, height: 900 });
+    let release: (() => void) | undefined;
+    const responseReady = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     await page.route(
       `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
-      (route) =>
-        route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
+      async (route) => {
+        await responseReady;
+        await route.fulfill({
+          json: {
+            data: [
+              {
+                id: 1,
+                name: "Fixture Meme",
+                animation: null,
+                contract: "0x0000000000000000000000000000000000000001",
+                icon: null,
+                image: `${baseURL}/6529bgwhite.svg`,
+                scaled: `${baseURL}/6529bgwhite.svg`,
+                thumbnail: `${baseURL}/6529bgwhite.svg`,
+                artist: null,
+              },
+            ],
+          },
+        });
+      }
     );
+    try {
+      await page
+        .getByRole("button", { name: "Edit profile", exact: true })
+        .click();
+      const search = page.getByRole("textbox", {
+        name: "Select Meme",
+        exact: true,
+      });
+      await expect(search).toBeVisible();
+      await expect(search).toBeEditable();
+      await expect(
+        page.getByText("Loading Memes…", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Choose a Meme", exact: true })
+      ).toHaveCount(0);
+      await page.screenshot({
+        path: testInfo.outputPath("profile-meme-search-loading.png"),
+        scale: "css",
+      });
+      await search.fill("Fixture");
+      release?.();
+      const meme = page.getByRole("button", {
+        name: "#1 Fixture Meme",
+        exact: true,
+      });
+      await expect(meme).toBeVisible();
+      await expect(search).toHaveValue("Fixture");
+      await meme.click();
+      await expect(meme).toHaveCount(0);
+      await expect(
+        page.getByRole("img", { name: "Profile image", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Save", exact: true })
+      ).toBeEnabled();
+      await expectNoHorizontalOverflow(page);
+      await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await page.screenshot({
+        path: testInfo.outputPath("profile-meme-search-selected.png"),
+        scale: "css",
+      });
+      await page.getByRole("button", { name: "Cancel", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+    } finally {
+      release?.();
+    }
+  });
+
+  test("keeps the compact field editors consistent in the mobile menu", async ({
+    page,
+  }, testInfo) => {
+    await seedSession(page);
     await openOwnProfile(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page

@@ -34,7 +34,6 @@ export default function UserPageHeaderProfileEditor({
 }) {
   const [nameAvailable, setNameAvailable] = useState(false);
   const [checkingName, setCheckingName] = useState(false);
-  const [showMemes, setShowMemes] = useState(false);
   const aboutInputId = useId();
   const errorRef = useRef<HTMLDivElement>(null);
   const coverObjectUrl = useObjectUrl(editor.coverFile);
@@ -64,7 +63,6 @@ export default function UserPageHeaderProfileEditor({
     queryFn: async () =>
       (await commonApiFetch<{ data: NFTLite[] }>({ endpoint: "memes_lite" }))
         .data,
-    enabled: showMemes,
   });
 
   useEffect(() => {
@@ -139,54 +137,38 @@ export default function UserPageHeaderProfileEditor({
           aria-labelledby="profile-editor-picture"
           className="tw-space-y-3"
         >
-          <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
+          <div className="tw-flex tw-min-h-5 tw-items-center tw-justify-between tw-gap-3">
             <h3
               id="profile-editor-picture"
               className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
             >
               {message("user.profileHeader.edit.pfp")}
             </h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="tw-min-h-11 tw-w-full !tw-justify-start !tw-rounded-lg !tw-bg-white/[0.025] !tw-px-3 !tw-py-3 !tw-text-sm !tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/[0.08] aria-expanded:!tw-bg-white/[0.045] desktop-hover:hover:!tw-bg-white/[0.045]"
-              onClick={() => setShowMemes(!showMemes)}
-              aria-expanded={showMemes}
-              aria-controls="profile-editor-memes"
-            >
-              {message("user.profileHeader.edit.chooseMeme")}
-            </Button>
+            {loadingMemes && (
+              <output className="tw-text-xs tw-text-iron-400">
+                {message("user.profileHeader.edit.loadingMemes")}
+              </output>
+            )}
           </div>
-          {showMemes && (
-            <div id="profile-editor-memes">
-              {loadingMemes && (
-                <output className="tw-block tw-text-sm tw-text-iron-400">
-                  {message("user.profileHeader.edit.loadingMemes")}
-                </output>
-              )}
-              {memesError && (
-                <p role="alert" className="tw-text-sm tw-text-error">
-                  {message("user.profileHeader.edit.memesError")}{" "}
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={() => void retryMemes()}
-                  >
-                    {message("user.profileHeader.edit.retry")}
-                  </Button>
-                </p>
-              )}
-              {memes && (
-                <UserSettingsImgSelectMeme
-                  compact
-                  memes={memes}
-                  onMeme={(meme) =>
-                    editor.updateDraft({ meme, pictureFile: null })
-                  }
-                />
-              )}
-            </div>
-          )}
+          <div className="tw-space-y-2">
+            <UserSettingsImgSelectMeme
+              compact
+              memes={memes ?? []}
+              onMeme={(meme) => editor.updateDraft({ meme, pictureFile: null })}
+            />
+            {memesError && (
+              <p role="alert" className="tw-text-sm tw-text-error">
+                {message("user.profileHeader.edit.memesError")}{" "}
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => void retryMemes()}
+                >
+                  {message("user.profileHeader.edit.retry")}
+                </Button>
+              </p>
+            )}
+          </div>
           <div className="tw-flex tw-w-full tw-items-center tw-gap-3">
             <span
               aria-hidden="true"
