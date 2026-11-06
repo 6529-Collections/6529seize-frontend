@@ -5,6 +5,7 @@ import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { WebSocketContext } from "@/services/websocket/WebSocketContext";
 import type { WebSocketConfig } from "@/services/websocket/WebSocketTypes";
 import {
+  getWebSocketMessageMetadata,
   getWebSocketMessageReason,
   WebSocketStatus,
 } from "@/services/websocket/WebSocketTypes";
@@ -524,6 +525,134 @@ describe("WebSocketProvider", () => {
 
       expect(callback).toHaveBeenCalledWith({ id: 1 });
       expect(receivedReason).toBe(WS_DROP_UPDATE_REASON_POLL_RESPONSE);
+    });
+
+    const openSubscribedSocket = (types: readonly WsMessageType[]) => {
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      act(() => {
+        result.current.connect("token");
+      });
+      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+      act(() => {
+        ws.triggerOpen();
+      });
+      const received: { type: WsMessageType; data: unknown }[] = [];
+      act(() => {
+        for (const type of types) {
+          result.current.subscribe(type, (data: unknown) => {
+            received.push({ type, data });
+          });
+        }
+      });
+      return { ws, received };
+    };
+
+    it("records frame timings and the gap marker for subscribers", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+      const before = Date.now();
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "with-fields" },
+          server_received_at: 1_700_000_000_000,
+          sent_at: 1_700_000_000_050,
+          prev_serial_no: 41,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "first-in-wave" },
+          prev_serial_no: null,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "old-server" },
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "malformed" },
+          server_received_at: "soon",
+          sent_at: -1,
+          prev_serial_no: 1.5,
+        });
+      });
+
+      const [withFields, firstInWave, oldServer, malformed] = received.map(
+        ({ data }) => getWebSocketMessageMetadata(data)
+      );
+      expect(withFields).toMatchObject({
+        serverReceivedAt: 1_700_000_000_000,
+        sentAt: 1_700_000_000_050,
+        prevSerialNo: 41,
+      });
+      expect(withFields?.receivedAt).toBeGreaterThanOrEqual(before);
+      expect(firstInWave?.prevSerialNo).toBeNull();
+      // Old servers send no gap marker: absent, not null.
+      expect(oldServer).not.toHaveProperty("prevSerialNo");
+      expect(oldServer?.serverReceivedAt).toBeUndefined();
+      expect(malformed?.serverReceivedAt).toBeUndefined();
+      expect(malformed?.sentAt).toBeUndefined();
+      expect(malformed).not.toHaveProperty("prevSerialNo");
+    });
+
+    it("dispatches the frames of a batch in order, each with its own fields", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+        WsMessageType.DROP_DELETE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: [
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "a" },
+                prev_serial_no: 1,
+                sent_at: 1_700_000_000_001,
+              },
+              { type: WsMessageType.DROP_DELETE, data: { drop_id: "b" } },
+              { type: WsMessageType.DROP_UPDATE, data: { id: "c" } },
+              "not a frame",
+              { type: "AUTHENTICATED" },
+              { type: "BATCH", data: { messages: [] } },
+            ],
+          },
+        });
+      });
+
+      expect(received).toEqual([
+        { type: WsMessageType.DROP_UPDATE, data: { id: "a" } },
+        { type: WsMessageType.DROP_DELETE, data: { drop_id: "b" } },
+        { type: WsMessageType.DROP_UPDATE, data: { id: "c" } },
+      ]);
+      expect(getWebSocketMessageMetadata(received[0]!.data)).toMatchObject({
+        prevSerialNo: 1,
+        sentAt: 1_700_000_000_001,
+      });
+      expect(getWebSocketMessageMetadata(received[2]!.data)).not.toHaveProperty(
+        "prevSerialNo"
+      );
+    });
+
+    it("ignores a batch without a message list", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({ type: "BATCH", data: { messages: "nope" } });
+        ws.triggerMessage({ type: "BATCH" });
+      });
+
+      expect(received).toEqual([]);
     });
 
     it("handles wrapped payload messages and routes nested data", () => {

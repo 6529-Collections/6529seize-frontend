@@ -7,8 +7,23 @@ export type WebSocketMessage<T = {}> = {
   type: WsMessageType;
 } & T;
 
-interface WebSocketMessageMetadata {
+/**
+ * Per-frame fields the server sends next to `type` and `data` (all optional;
+ * older servers omit them).
+ */
+export interface WebSocketMessageMetadata {
   readonly reason?: string | undefined;
+  /** Epoch ms when the API received the request behind the frame. */
+  readonly serverReceivedAt?: number | undefined;
+  /** Epoch ms when the server handed the frame to the socket gateway. */
+  readonly sentAt?: number | undefined;
+  /** Epoch ms when this client started handling the frame. */
+  readonly receivedAt?: number | undefined;
+  /**
+   * The wave's previous surviving drop serial (WAVES-PLAN 1.5): null when the
+   * drop is the wave's first, undefined when the server sent no gap marker.
+   */
+  readonly prevSerialNo?: number | null | undefined;
 }
 
 const messageMetadataByPayload = new WeakMap<
@@ -28,6 +43,15 @@ export function setWebSocketMessageMetadata(
   }
 
   messageMetadataByPayload.set(payload, metadata);
+}
+
+/** The metadata the socket recorded for a frame's `data` object, if any. */
+export function getWebSocketMessageMetadata(
+  payload: unknown
+): WebSocketMessageMetadata | undefined {
+  return isObjectPayload(payload)
+    ? messageMetadataByPayload.get(payload)
+    : undefined;
 }
 
 export function getWebSocketMessageReason(payload: unknown): string | null {

@@ -34,11 +34,40 @@ type WebSocketMessagePayload = {
   readonly type?: unknown;
   readonly data?: unknown;
   readonly reason?: unknown;
+  readonly server_received_at?: unknown;
+  readonly sent_at?: unknown;
+  readonly prev_serial_no?: unknown;
   readonly message?: {
     readonly type?: unknown;
     readonly data?: unknown;
     readonly reason?: unknown;
   };
+};
+
+interface NormalizedIncomingMessage {
+  readonly type: string;
+  readonly data: unknown;
+  readonly reason?: string;
+  readonly serverReceivedAt?: number;
+  readonly sentAt?: number;
+  readonly prevSerialNo?: number | null;
+}
+
+const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
+const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
+const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+const WEBSOCKET_BATCH = "BATCH";
+
+const asEpochMs = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : undefined;
+
+const asPrevSerialNo = (value: unknown): number | null | undefined => {
+  if (value === null) return null;
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : undefined;
 };
 
 const asWebSocketMessagePayload = (
@@ -53,9 +82,7 @@ const asWebSocketMessagePayload = (
 
 const normalizeIncomingMessage = (
   value: unknown
-):
-  | { readonly type: string; readonly data: unknown; readonly reason?: string }
-  | undefined => {
+): NormalizedIncomingMessage | undefined => {
   const payload = asWebSocketMessagePayload(value);
   if (!payload) {
     return undefined;
@@ -71,17 +98,39 @@ const normalizeIncomingMessage = (
 
   const reason =
     asNonEmptyString(payload.reason) ?? asNonEmptyString(nestedPayload?.reason);
+  const serverReceivedAt = asEpochMs(payload.server_received_at);
+  const sentAt = asEpochMs(payload.sent_at);
+  const prevSerialNo = asPrevSerialNo(payload.prev_serial_no);
 
   return {
     type,
     data: payload.data ?? nestedPayload?.data,
     ...(reason ? { reason } : {}),
+    ...(serverReceivedAt === undefined ? {} : { serverReceivedAt }),
+    ...(sentAt === undefined ? {} : { sentAt }),
+    ...(prevSerialNo === undefined ? {} : { prevSerialNo }),
   };
 };
 
-const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
-const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
-const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+/**
+ * The inner frames of a `BATCH` frame, in server order. A batch never holds
+ * auth or sync frames, so those inner types are dropped rather than trusted.
+ */
+const getBatchedMessages = (data: unknown): NormalizedIncomingMessage[] => {
+  const messages = asWebSocketMessagePayload(data) as
+    | { readonly messages?: unknown }
+    | undefined;
+  if (!Array.isArray(messages?.messages)) return [];
+  return messages.messages.flatMap((inner: unknown) => {
+    const message = normalizeIncomingMessage(inner);
+    return message &&
+      message.type !== WEBSOCKET_BATCH &&
+      message.type !== WEBSOCKET_AUTHENTICATED &&
+      message.type !== WEBSOCKET_AUTHENTICATION_FAILED
+      ? [message]
+      : [];
+  });
+};
 
 const createCredentialMarker = (credential: string): string => {
   let primary = 0;
@@ -94,6 +143,34 @@ const createCredentialMarker = (credential: string): string => {
   }
 
   return `${credential.length}:${primary}:${secondary}`;
+};
+
+const dispatchMessage = (
+  subscriberMap: SubscriberMap,
+  message: NormalizedIncomingMessage,
+  receivedAt: number
+): void => {
+  const subscribers = subscriberMap.get(message.type);
+  if (!subscribers) {
+    return;
+  }
+
+  setWebSocketMessageMetadata(message.data, {
+    reason: message.reason,
+    serverReceivedAt: message.serverReceivedAt,
+    sentAt: message.sentAt,
+    receivedAt,
+    ...(message.prevSerialNo === undefined
+      ? {}
+      : { prevSerialNo: message.prevSerialNo }),
+  });
+  for (const subscriber of subscribers) {
+    try {
+      subscriber(message.data);
+    } catch {
+      // Keep one subscriber failure from blocking the remaining handlers.
+    }
+  }
 };
 
 /**
@@ -189,22 +266,15 @@ export function WebSocketProvider({
         return;
       }
 
-      // Get subscribers for this message type
-      const subscribers = subscribersRef.current.get(message.type);
-
-      if (!subscribers) {
-        return;
-      }
-
-      setWebSocketMessageMetadata(message.data, {
-        reason: message.reason,
-      });
-      for (const subscriber of subscribers) {
-        try {
-          subscriber(message.data);
-        } catch {
-          // Keep one subscriber failure from blocking the remaining handlers.
-        }
+      const receivedAt = Date.now();
+      // A batch carries whole frames in server order; each is handled as if
+      // it had arrived on its own.
+      const messages =
+        message.type === WEBSOCKET_BATCH
+          ? getBatchedMessages(message.data)
+          : [message];
+      for (const routed of messages) {
+        dispatchMessage(subscribersRef.current, routed, receivedAt);
       }
     },
     [clearAuthenticationTimer]
