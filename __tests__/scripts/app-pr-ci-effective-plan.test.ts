@@ -16,6 +16,7 @@ type EffectivePlan = {
     playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
+    playwright_profile_nic: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -84,6 +85,25 @@ it("keeps the Wave tracking browser lane out of unrelated changes", () => {
   ).toBe(false);
 });
 
+it.each([
+  "helpers/profile-logs.helpers.ts",
+  "components/profile-activity/ProfileNicActivityLogs.tsx",
+  "components/user/rep/MobileNicTabContent.tsx",
+  "tests/social/profile-nic-activity-sandbox.spec.ts",
+  "tests/packs.manifest.cjs",
+  "tests/support/composerSandboxServer.cjs",
+  "scripts/app-pr-ci-effective-plan.cjs",
+  ".github/workflows/app-pr-ci.yml",
+])("selects the profile NIC browser contract for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_profile_nic.required).toBe(true);
+});
+
+it("does not select the NIC pack for unrelated code", () => {
+  expect(
+    executePlan(["helpers/unrelated.ts"]).checks.playwright_profile_nic.required
+  ).toBe(false);
+});
+
 describe("effective App PR CI plan", () => {
   it.each([
     "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
@@ -91,6 +111,14 @@ describe("effective App PR CI plan", () => {
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "hooks/useRepAllocation.ts",
     "tests/social/profile-rep-edit-sandbox.spec.ts",
+    "tests/social/profile-about-sandbox.spec.ts",
+    "components/user/user-page-header/about/UserPageHeaderAbout.tsx",
+    "components/user/user-page-header/UserPageHeaderClient.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfile.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfileDesktop.tsx",
+    "components/user/user-page-header/UserPageHeaderProfileEditor.tsx",
+    "components/user/user-page-header/useProfileEditor.ts",
+    "components/user/settings/UserSettingsBackground.tsx",
   ])("selects the profile dialog browser pack for %s", (file) => {
     const input = plan([file]);
     input.checks.playwright_critical_shell = {
@@ -659,6 +687,20 @@ describe("App PR CI merge-tree base", () => {
       expect(step.env?.["BASE_SHA"]).toBe(mergeTreeBase);
       expect(planSteps.indexOf(step)).toBeGreaterThan(resolveIndex);
     }
+  });
+
+  it("finishes independent app checks while retaining the aggregate failure gate", () => {
+    expect(appChecks.strategy["fail-fast"]).toBe(false);
+    const aggregate = workflow.jobs["installed-checks"];
+    expect(aggregate.needs).toEqual([
+      "plan",
+      "app-checks",
+      "core-playwright-checks",
+    ]);
+    const gate = aggregate.steps.find(
+      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+    );
+    expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });
 
   it("feeds every app-check diff, selection and evidence base from the plan", () => {
