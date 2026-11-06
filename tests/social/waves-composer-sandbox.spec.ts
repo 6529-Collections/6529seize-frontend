@@ -985,6 +985,95 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("confirms the all mention audience before posting and preserves cancelled drafts", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.route(
+      `**/v2/waves/${SANDBOX_WAVE_ID}/mention-search?**`,
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: "[]",
+        });
+      }
+    );
+    let countRequests = 0;
+    await page.route(
+      `**/v2/waves/${SANDBOX_WAVE_ID}/all-mention-count`,
+      async (route) => {
+        countRequests += 1;
+        if (countRequests === 1) {
+          await route.fulfill({
+            status: 503,
+            contentType: "application/json",
+            body: JSON.stringify({ message: "Temporarily unavailable" }),
+          });
+        } else {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ count: 1234 }),
+          });
+        }
+      }
+    );
+    await gotoSandboxWave(page);
+    await resetSandboxRequests(baseURL);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const post = page.getByRole("button", { name: "Post", exact: true }).last();
+    await composer.fill("A wave announcement @all");
+    await post.click();
+    const dialog = page.getByRole("dialog", {
+      name: "Notify people with @all?",
+    });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText("Couldn't count the people");
+    await page.screenshot({
+      path: testInfo.outputPath("all-mention-error.png"),
+    });
+    await dialog.getByRole("button", { name: "Try again" }).click();
+    await expect(dialog).toContainText("will notify 1,234 people");
+    await expect(
+      dialog.getByRole("button", { name: "Send with @all" })
+    ).toBeEnabled();
+    expect(
+      (await fetchSandboxRequests(baseURL)).filter(
+        (r) => r.method === "POST" && r.path === "/api/drops"
+      )
+    ).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("all-mention-confirmation.png"),
+    });
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(composer).toContainText("A wave announcement @all");
+    await post.click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Keep editing" }).click();
+    await expect(composer).toContainText("A wave announcement @all");
+    await post.click();
+    await expect(dialog).toContainText("will notify 1,234 people");
+    await dialog.getByRole("button", { name: "Send with @all" }).click();
+    await expect(dialog).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (r) => r.method === "POST" && r.path === "/api/drops"
+          ).length
+      )
+      .toBe(1);
+    expect(pageErrors).toEqual([]);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("gates a first chat message with scroll-contained guidelines", async ({
     baseURL,
     page,

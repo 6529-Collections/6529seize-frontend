@@ -19,6 +19,7 @@ import {
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -336,7 +337,25 @@ const NewMentionsPlugin = forwardRef<
   const { setToast } = useContext(AuthContext);
   const { aliases, enabled, isFetched, isError, refetch } = useMentionAliases();
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditorFocused, setIsEditorFocused] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Lexical can retain its selection after another control takes focus.
+    const updateFocus = () => {
+      const rootFocused =
+        editor.getRootElement()?.contains(document.activeElement) ?? false;
+      const menuFocused =
+        modalRef.current?.contains(document.activeElement) ?? false;
+      setIsEditorFocused(rootFocused || menuFocused);
+    };
+    document.addEventListener("focusin", updateFocus);
+    document.addEventListener("focusout", updateFocus);
+    return () => {
+      document.removeEventListener("focusin", updateFocus);
+      document.removeEventListener("focusout", updateFocus);
+    };
+  }, [editor]);
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
@@ -440,7 +459,7 @@ const NewMentionsPlugin = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      isMentionsOpen: () => isOpen && options.length > 0,
+      isMentionsOpen: () => isEditorFocused && isOpen && options.length > 0,
       expandMentionAliases: async () => {
         const editorState = editor.getEditorState();
         const mayContainAlias = editorState.read(() =>
@@ -491,6 +510,7 @@ const NewMentionsPlugin = forwardRef<
       isError,
       isFetched,
       isOpen,
+      isEditorFocused,
       locale,
       onSelect,
       options.length,
@@ -574,7 +594,7 @@ const NewMentionsPlugin = forwardRef<
   );
 
   return (
-    <div ref={modalRef}>
+    <div>
       <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
         onQueryChange={setQueryString}
         onSelectOption={onSelectOption}
@@ -587,9 +607,12 @@ const NewMentionsPlugin = forwardRef<
           anchorElementRef,
           { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
         ) => {
-          return anchorElementRef.current && options.length
+          return isEditorFocused && anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
-                <div className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}>
+                <div
+                  ref={modalRef}
+                  className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}
+                >
                   <MentionsTypeaheadMenu
                     selectedIndex={selectedIndex}
                     options={options}
