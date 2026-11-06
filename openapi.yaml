@@ -21845,6 +21845,42 @@ paths:
           description: Authentication required
         "403":
           description: An acting profile is required
+  /v2/waves/{waveId}/all-mention-count:
+    get:
+      tags:
+        - WavesV2
+      summary: Preview the current number of recipients for an all mention
+      description: >-
+        Available to wave creators and admins with posting rights. Counts joined
+        followers with broadcast mentions enabled, excluding the author, muted
+        followers and profiles without wave or parent visibility. This snapshot
+        can change before sending. Does not send notifications.
+      operationId: getWaveAllMentionCount
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/wave-all-mention-count.handler"
+          name: handleGetWaveAllMentionCount
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current all mention audience
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveAllMentionCount"
+        "401":
+          description: Authentication required
+        "403":
+          description: Wave creator or admin posting rights required
+        "404":
+          description: Wave not found or not visible to the caller
   /v2/waves/{waveId}/mention-search:
     get:
       tags:
@@ -43196,6 +43232,15 @@ components:
           $ref: "#/components/schemas/ApiWaveRepSummary"
         wave_score:
           $ref: "#/components/schemas/ApiWaveScore"
+    ApiWaveAllMentionCount:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int64
+          minimum: 0
     ApiWaveChatConfig:
       type: object
       required:

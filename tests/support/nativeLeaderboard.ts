@@ -4,7 +4,7 @@ import type { ApiCompetitionLeaderboardPage } from "../../generated/models/ApiCo
 import type { ApiDropV2PageWithoutCount } from "../../generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropAndWave } from "../../generated/models/ApiDropAndWave";
 import type { ApiWaveV3 } from "../../generated/models/ApiWaveV3";
-import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
+import { EN_US_MESSAGES } from "../../i18n/messages/en-US.complete";
 import { expect } from "../testHelpers";
 import { RESPONSE_TIMEOUT_MS } from "./routeReadiness";
 

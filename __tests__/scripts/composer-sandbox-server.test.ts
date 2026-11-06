@@ -54,6 +54,7 @@ function loadSandbox(apiOnly?: string) {
     require: requireFixture,
     __dirname: path.dirname(serverPath),
     Buffer,
+    structuredClone: (value: unknown) => JSON.parse(JSON.stringify(value)),
     URL,
     console: { log: jest.fn(), error: jest.fn() },
     process: {
