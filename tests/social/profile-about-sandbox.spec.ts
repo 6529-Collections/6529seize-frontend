@@ -132,7 +132,13 @@ async function openAboutEditor(page: Page) {
     name: "About",
     exact: true,
   });
-  if (await aboutMenuItem.isVisible()) await aboutMenuItem.click();
+  if (await aboutMenuItem.isVisible()) {
+    await aboutMenuItem.click();
+    // Wait for the sheet's scheduled heading focus before editing.
+    await expect(
+      page.getByRole("heading", { name: "Edit About", exact: true })
+    ).toBeFocused();
+  }
   await expect(
     page.getByRole("textbox", { name: "About statement", exact: true })
   ).toBeVisible();
@@ -163,7 +169,20 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
-    // Wallet contract reads are outside this isolated profile fixture.
+    // Hosted wallet usage and contract reads are outside this profile fixture.
+    await page.route(
+      "https://api.web3modal.org/appkit/v1/project-limits?*",
+      (route) =>
+        route.fulfill({
+          json: {
+            planLimits: {
+              tier: "starter",
+              isAboveMauLimit: false,
+              isAboveRpcLimit: false,
+            },
+          },
+        })
+    );
     await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
       const payload = route.request().postDataJSON() as
         | { id: number; method: string }
@@ -293,7 +312,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page, { include: ["#profile-about"] });
     await openAboutEditor(page);
+    await expect(input).toHaveValue(
+      "Updated About statement for this isolated test."
+    );
     await input.fill("");
+    await expect(input).toBeEmpty();
+    await expect(save).toBeEnabled();
     await save.click();
     await expect(input).toHaveCount(0);
     await expect(
@@ -531,6 +555,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     }) => {
       if (viewer !== "logged out")
         await seedSession(page, viewer === "proxy" ? "grantor" : null);
+      if (viewer === "visitor") {
+        await page.route(
+          `${getSandboxApiOrigin(baseURL)}/api/**identities/following-artist-0/subscriptions`,
+          (route) => route.fulfill({ json: { actions: [] } })
+        );
+      }
       if (viewer === "proxy") {
         await page.route(
           `${getSandboxApiOrigin(baseURL)}/api/profiles/*/proxies/**`,
@@ -577,6 +607,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(
         page.getByRole("navigation", { name: "Profile sections" })
       ).toBeVisible();
+      if (viewer === "visitor") {
+        await expect(
+          page.getByRole("button", { name: "Follow", exact: true })
+        ).toBeVisible();
+      }
       await expect(
         page.getByRole("button", { name: "Edit profile", exact: true })
       ).toHaveCount(0);
