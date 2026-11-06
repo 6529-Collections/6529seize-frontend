@@ -569,6 +569,24 @@ const PACKS = [
   },
   {
     ...sandboxPack(
+      "test:e2e:profile-nic-sandbox",
+      "Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.",
+      ["tests/social/profile-nic-activity-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXTGEN_CHAIN_ID: "1",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3304",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3304",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4304",
+        NEXT_DEV_DIST_DIR: ".next-playwright-nic",
+      },
+      [DESKTOP]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
       "test:e2e:wave-creation-sandbox",
       "Wave creation, permissions, and draft recovery on desktop and mobile.",
       ["tests/social/create-wave-sandbox.spec.ts"],
