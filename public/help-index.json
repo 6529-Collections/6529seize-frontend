@@ -6966,7 +6966,7 @@
         "Wave drop composer Enter-key behavior is documented separately from general markdown.",
         "Enter-key behavior controls when the composer submits versus inserts a new line.",
         "Users should check composer state and platform behavior if keyboard submission feels unexpected.",
-        "Wave chat and unencrypted DM composers use the same paper-airplane send icon as encrypted chat on desktop and mobile, instead of a visible Post button label. Storm actions retain their specific labels."
+        "Wave chat and unencrypted DM composers use the same paper-airplane send icon as encrypted chat on desktop and mobile, instead of a visible Post button label. Storm actions retain their specific labels. All three chat send buttons are grey with a muted icon while disabled, and blue with a white icon when enabled."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

@@ -122,3 +122,7 @@ specific Add part, Save changes and Post storm labels.
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)
+
+The chat send button uses a grey background and muted icon when disabled, and
+a blue background with a white icon when enabled. This appearance is shared by
+Waves, unencrypted DMs and encrypted DMs on browser and mobile.

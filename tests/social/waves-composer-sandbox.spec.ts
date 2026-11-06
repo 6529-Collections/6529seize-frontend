@@ -684,6 +684,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   }, testInfo) => {
     await gotoSandboxWave(page);
 
+    const sendButton = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last();
+    await expect(sendButton).toBeDisabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(sendButton).toHaveCSS("color", "rgb(132, 132, 144)");
+
     const isIosSurface = testInfo.project.name === "capacitor-ios-sim";
     const composer = page
       .getByRole("textbox", { name: "Write a message" })
@@ -733,10 +740,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect(composerBounds.bottom).toBeLessThanOrEqual(
       composerBounds.viewportHeight
     );
-    const sendButton = page
-      .getByRole("button", { name: "Post", exact: true })
-      .last();
     await expect(sendButton).toBeEnabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await expect(sendButton).toHaveCSS("color", "rgb(255, 255, 255)");
     await expect(sendButton).toHaveText("");
     const sendIcon = page
       .getByRole("button", { name: "Post", exact: true })

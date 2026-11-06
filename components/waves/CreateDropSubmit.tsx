@@ -1,6 +1,7 @@
 import React from "react";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import Button from "../utils/button/Button";
+import { ComposerSendButton } from "./ComposerSendButton";
 
 interface CreateDropSubmitProps {
   readonly submitting: boolean;
@@ -25,7 +26,15 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   const iconOnly = !isDropMode && !label && !showLabelOnMobile;
   const title = !canSubmit && disabledTooltip ? disabledTooltip : undefined;
 
-  const button = (
+  const button = iconOnly ? (
+    <ComposerSendButton
+      onClick={onDrop}
+      loading={submitting}
+      disabled={!canSubmit}
+      title={title}
+      aria-label={submitting ? `${submitLabel} in progress` : submitLabel}
+    />
+  ) : (
     <Button
       onClick={onDrop}
       loading={submitting}

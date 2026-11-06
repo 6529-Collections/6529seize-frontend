@@ -47,7 +47,14 @@ describe("CreateDropSubmit", () => {
     );
 
     const btn = screen.getByRole("button", { name: "Post" });
-    expect(btn).toHaveClass("tw-h-10", "tw-w-10", "tw-px-0");
+    expect(btn).toHaveClass("tw-size-10");
+    expect(btn).toHaveClass(
+      "tw-bg-primary-500",
+      "tw-text-white",
+      "disabled:tw-bg-iron-800",
+      "disabled:tw-text-iron-500"
+    );
+    expect(btn).not.toHaveClass("tw-bg-iron-200", "disabled:tw-opacity-50");
     expect(btn).not.toHaveClass("lg:tw-w-[3.875rem]", "lg:tw-px-3.5");
     expect(btn.textContent).toBe("");
     // The shared `lg` preset adds `tw-px-5`, leaving this fixed-width button
