@@ -4,6 +4,13 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.dm.history.label": "Chat history",
+  "e2ee.dm.history.hint":
+    "Previous chats with this person stay here. Unread counts include all active histories. Messages and search belong to the selected history.",
+  "e2ee.dm.history.current": "Current chat · {date} · {count} unread",
+  "e2ee.dm.history.saved": "Saved chat {number} · {date} · {count} unread",
+  "e2ee.dm.history.openCurrent": "Open current chat",
+  "e2ee.dm.history.continue": "Continue encrypted chat",
   "e2ee.connectionSetup.title": "Set up device",
   "e2ee.connectionSetup.scan":
     "Scan this code with the QR scanner in the 6529 mobile app.",

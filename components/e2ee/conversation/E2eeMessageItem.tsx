@@ -495,7 +495,11 @@ function E2eeMessageItemComponent({
   const isOwn =
     selfProfileId !== null && message.senderProfileId === selfProfileId;
   const showActions =
-    canAct && !message.deleted && !message.undecryptable && !message.pending;
+    selfProfileId !== null &&
+    (canAct || !isOwn) &&
+    !message.deleted &&
+    !message.undecryptable &&
+    !message.pending;
 
   const Container = inViewportRow ? "div" : "li";
   return (
@@ -566,13 +570,14 @@ function E2eeMessageItemComponent({
           message={message}
           conversation={conversation}
           selfProfileId={selfProfileId}
-          canAct={showActions}
+          canAct={canAct && showActions}
           onReact={(reaction, on) => actions.onReact(message, reaction, on)}
         />
       </div>
       {showActions ? (
         <div className="tw-absolute tw-right-3 tw-top-1">
           <E2eeMessageActionsMenu
+            canAct={canAct}
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}

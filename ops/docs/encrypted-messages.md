@@ -181,7 +181,21 @@ encrypted messages list. It stays visible on iPad in portrait and landscape.
 4. Select **Start encrypted chat**.
 
 If you already have an encrypted direct message with that person, the page
-offers **Open chat** instead.
+offers **Open chat** instead. Your list and sidebar show one direct-message
+entry per person, including when you have left an earlier chat or started a
+replacement. Group chats remain separate.
+
+**Chat history** above the timeline lets you open earlier chats with that
+person, including imported messages kept in the earlier chat. Messages and
+search stay within the selected history; histories are not copied together or
+deleted. Old chat links still open their original history. **Open current chat**
+returns to the active conversation. If no usable chat remains, **Continue
+encrypted chat** starts a replacement with that person (subject to their current
+message preferences and device availability).
+
+Two participants or devices can still start chats at the same time. They share
+one list entry once this device knows both chats, and both histories remain
+selectable. This does not impose a global server-side limit on MLS groups.
 
 From a plaintext direct message, **Start encrypted chat** opens this page with
 the same people already chosen. Earlier messages are not copied.
