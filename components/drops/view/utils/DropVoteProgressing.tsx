@@ -95,7 +95,7 @@ export default function DropVoteProgressing({
   projectedLabel,
   subtle = false,
   compact = false,
-  tooltipLabel = "Projected vote count at decision time",
+  tooltipLabel = "Projected vote count at result time",
   tooltipPortal = false,
   tooltipZIndex = 99999,
   numberFont = "mono",

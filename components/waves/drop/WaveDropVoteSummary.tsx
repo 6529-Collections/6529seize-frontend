@@ -42,7 +42,7 @@ export const WaveDropVoteSummary = ({
     : drop.rating_prediction;
   const progressTooltipLabel = isApproveVoteSummary
     ? "Votes given now"
-    : "Projected vote count at decision time";
+    : "Projected vote count at result time";
 
   return (
     <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01] sm:tw-gap-3">

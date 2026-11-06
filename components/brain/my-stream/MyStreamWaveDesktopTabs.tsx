@@ -127,7 +127,7 @@ const TAB_LABELS: Record<
   string
 > = {
   [MyStreamWaveTab.CHAT]: "Chat",
-  [MyStreamWaveTab.COMPETITIONS]: "Competitions",
+  [MyStreamWaveTab.COMPETITIONS]: "Decisions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
   [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
