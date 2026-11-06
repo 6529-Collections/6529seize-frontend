@@ -40,6 +40,8 @@ import {
 } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 
+import { isRatingValue } from "../ratingsManagement";
+
 const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
@@ -134,8 +136,9 @@ export default function UserPageRepNewRepSearch({
 
   const amountNum = getStringAsNumberOrZero(amountStr);
   const isValidValue =
-    !!activeProfileProxy ||
-    (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max);
+    isRatingValue(amountStr) &&
+    (!!activeProfileProxy ||
+      (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const newRating = getStringAsNumberOrZero(amountStr);
   const haveChanged = newRating !== (repState?.rater_contribution ?? 0);

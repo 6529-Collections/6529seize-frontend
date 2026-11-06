@@ -69,14 +69,17 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    await user.clear(screen.getByRole("textbox", { name: "REP amount" }));
-    await user.type(screen.getByRole("textbox", { name: "REP amount" }), "1");
-    expect(screen.getByRole("textbox", { name: "REP amount" })).toHaveValue(
+    await user.clear(
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Your total REP for this category" }),
       "1"
     );
     expect(
-      screen.getByRole("button", { name: "Grant REP" })
-    ).toBeDisabled();
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    ).toHaveValue("1");
+    expect(screen.getByRole("button", { name: "Grant REP" })).toBeDisabled();
   });
 
   it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {
