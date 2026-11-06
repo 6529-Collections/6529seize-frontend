@@ -41,11 +41,11 @@ export default function UserSettingsBackground({
       }
     >
       <div
-        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2" : "md:tw-flex-1"}`}
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-relative tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-white/[0.045] motion-reduce:tw-transition-none" : "md:tw-flex-1"}`}
       >
         <label
           htmlFor="bgColor1"
-          className={`tw-block tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
+          className={`tw-block tw-cursor-pointer tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400 before:tw-absolute before:tw-inset-0 before:tw-cursor-pointer before:tw-content-['']" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
         >
           {message("user.profileHeader.edit.color1")}
         </label>
@@ -88,11 +88,11 @@ export default function UserSettingsBackground({
       </div>
 
       <div
-        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2" : "md:tw-flex-1"}`}
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-relative tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-white/[0.045] motion-reduce:tw-transition-none" : "md:tw-flex-1"}`}
       >
         <label
           htmlFor="bgColor2"
-          className={`tw-block tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
+          className={`tw-block tw-cursor-pointer tw-leading-5 ${compact ? "tw-order-2 tw-min-w-0 tw-flex-1 tw-text-xs tw-font-medium tw-text-iron-400 before:tw-absolute before:tw-inset-0 before:tw-cursor-pointer before:tw-content-['']" : "tw-text-sm tw-font-semibold tw-text-iron-300"}`}
         >
           {message("user.profileHeader.edit.color2")}
         </label>

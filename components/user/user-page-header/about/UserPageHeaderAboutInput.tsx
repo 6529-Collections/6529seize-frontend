@@ -33,7 +33,7 @@ export default function UserPageHeaderAboutInput({
   );
   return (
     <div
-      className={`tw-overflow-hidden tw-rounded-lg tw-ring-1 tw-ring-inset focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 hover:tw-ring-white/15 motion-reduce:tw-transition-none ${compact ? "tw-bg-white/[0.025] tw-ring-white/[0.08] tw-transition-colors tw-duration-150" : "tw-bg-iron-900 tw-shadow-inner tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out"}`}
+      className={`tw-overflow-hidden tw-rounded-lg tw-ring-1 tw-ring-inset focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 hover:tw-ring-white/15 hover:focus-within:tw-ring-primary-400 motion-reduce:tw-transition-none ${compact ? "tw-bg-white/[0.025] tw-ring-white/[0.08] tw-transition-colors tw-duration-150" : "tw-bg-iron-900 tw-shadow-inner tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out"}`}
     >
       <textarea
         className={`tw-block tw-w-full tw-resize-none tw-border-0 tw-bg-transparent tw-pb-2 tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 focus:tw-outline-none ${compact ? "tw-min-h-24 tw-px-3 tw-pt-2.5 tw-text-base placeholder:tw-text-iron-500 sm:tw-text-sm [@media(any-pointer:coarse)]:tw-text-base" : "tw-min-h-32 tw-px-4 tw-pt-3.5 tw-text-sm placeholder:tw-text-iron-600"}`}

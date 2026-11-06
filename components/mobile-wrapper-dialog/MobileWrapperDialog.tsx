@@ -197,7 +197,7 @@ function MobileDialogOverlay({
       {...getBeforeLeaveProps(onBeforeLeave)}
       afterLeave={onAfterLeave}
     >
-      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-gray-700/60" />
+      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-black/60" />
     </TransitionChild>
   );
 }
@@ -246,7 +246,7 @@ function getSurfaceClassNames({
   readonly tabletModal?: boolean | undefined;
 }) {
   return clsx(
-    "tw-flex tw-flex-col tw-rounded-t-2xl",
+    "tw-flex tw-flex-col tw-rounded-t-2xl tw-ring-1 tw-ring-white/10 md:tw-shadow-2xl md:tw-shadow-black/60",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"

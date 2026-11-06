@@ -119,6 +119,7 @@ export default function UserPageHeaderEditName({
       className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
     >
       <UserSettingsUsername
+        compact
         userName={userName}
         originalUsername={profile.handle ?? ""}
         setUserName={setUserName}
@@ -129,7 +130,7 @@ export default function UserPageHeaderEditName({
       <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
         <Button
           type="submit"
-          variant="action"
+          variant="primary"
           size="lg"
           loading={mutating}
           disabled={!haveChanges || !available || checkingUsername}
@@ -139,7 +140,7 @@ export default function UserPageHeaderEditName({
           Save
         </Button>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
           disabled={mutating}
           onClick={onClose}
@@ -165,7 +166,8 @@ export default function UserPageHeaderEditName({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      showHeaderDivider
+      headerVariant="minimal"
+      titleClassName="!tw-text-base !tw-font-medium"
       maxWidthClass="md:tw-max-w-xl"
     >
       {form}

@@ -195,19 +195,19 @@ export default function UserPageHeaderEditPfp({
   const form = (
     <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
       <UserSettingsImgSelectMeme
+        compact
         memes={memes ?? []}
         onMeme={setSelectedMemeAndRemoveFile}
       />
 
-      <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
+      <div className="tw-my-4 tw-flex tw-w-full tw-items-center tw-gap-3">
         <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-        <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
-          or
-        </span>
+        <span className="tw-text-xs tw-font-normal tw-text-iron-400">or</span>
         <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
       </div>
 
       <UserSettingsImgSelectFile
+        compact
         imageToShow={imageToShow}
         setFile={setFileAndRemoveMeme}
       />
@@ -222,7 +222,7 @@ export default function UserPageHeaderEditPfp({
       <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
         <Button
           type="submit"
-          variant="action"
+          variant="primary"
           size="lg"
           loading={saving}
           disabled={!file && !selectedMeme}
@@ -232,7 +232,7 @@ export default function UserPageHeaderEditPfp({
           Save PFP
         </Button>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
           disabled={saving}
           onClick={onClose}
@@ -258,7 +258,8 @@ export default function UserPageHeaderEditPfp({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      showHeaderDivider
+      headerVariant="minimal"
+      titleClassName="!tw-text-base !tw-font-medium"
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
     >

@@ -392,6 +392,68 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "About statement",
       exact: true,
     });
+    const colorLabel = page.getByText("Background Color 1", { exact: true });
+    await expect(colorLabel).toHaveCSS("cursor", "pointer");
+    for (const name of ["Background Color 1", "Background Color 2"]) {
+      const input = page.getByLabel(name, { exact: true });
+      await input.evaluate((element) => {
+        // Capture native label activation without opening the OS color picker.
+        element.addEventListener(
+          "click",
+          (event) => {
+            event.preventDefault();
+            element.dataset["pickerActivated"] = "true";
+          },
+          { once: true }
+        );
+      });
+      await page
+        .getByLabel(name, { exact: true })
+        .locator("../..")
+        .click({ position: { x: 2, y: 2 } });
+      await expect(input).toHaveAttribute("data-picker-activated", "true");
+    }
+    if (!isMobile) {
+      const colorRow = page
+        .getByLabel("Background Color 1", { exact: true })
+        .locator("../..");
+      const restingBackground = await colorRow.evaluate(
+        (element) => getComputedStyle(element).backgroundColor
+      );
+      await colorLabel.hover();
+      await expect(colorRow).not.toHaveCSS(
+        "background-color",
+        restingBackground
+      );
+      await aboutInput.focus();
+      await aboutInput.hover();
+      await expect(
+        page
+          .getByRole("textbox", { name: "About statement", exact: true })
+          .locator("..")
+      ).toHaveCSS("box-shadow", /rgb\(82, 139, 255\)/);
+    }
+    const gradient = await page
+      .getByRole("tab", { name: "Gradient", exact: true })
+      .boundingBox();
+    const colorRow = await page
+      .getByLabel("Background Color 1", { exact: true })
+      .locator("../..")
+      .boundingBox();
+    expect(gradient).not.toBeNull();
+    expect(colorRow).not.toBeNull();
+    expect(Math.abs(gradient!.x - colorRow!.x)).toBeLessThanOrEqual(2);
+    const memeChoice = page.getByRole("button", {
+      name: "Choose a Meme",
+      exact: true,
+    });
+    const uploadChoice = page
+      .getByLabel("Upload profile picture", { exact: true })
+      .locator("..");
+    const memeBox = await memeChoice.boundingBox();
+    const uploadBox = await uploadChoice.boundingBox();
+    expect(memeBox?.height).toBeGreaterThanOrEqual(44);
+    expect(memeBox?.width).toBeCloseTo(uploadBox!.width, 0);
     await page.getByLabel("Background Color 1", { exact: true }).focus();
     await page.keyboard.press("Tab");
     const secondColor = page.getByLabel("Background Color 2", { exact: true });
@@ -486,6 +548,108 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     }
     await discard.click();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps the compact field editors consistent in the mobile menu", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await seedSession(page);
+    await page.route(
+      `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
+      (route) =>
+        route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
+    );
+    await openOwnProfile(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page
+      .getByRole("button", { name: "Edit profile", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect
+      .poll(() =>
+        dialog.getByTestId("mobile-dialog-header").evaluate((header) => {
+          let opacity = 1;
+          let node: Element | null = header;
+          while (node) {
+            opacity *= Number(getComputedStyle(node).opacity);
+            node = node.parentElement;
+          }
+          return opacity;
+        })
+      )
+      .toBe(1);
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    await page.screenshot({
+      path: testInfo.outputPath("profile-mobile-menu.png"),
+    });
+    for (const target of [
+      "Profile cover",
+      "Profile picture",
+      "Profile name",
+      "Classification",
+      "About",
+    ]) {
+      const row = dialog.getByRole("button", { name: target, exact: true });
+      expect((await row.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      await row.click();
+      if (target === "Profile cover") {
+        await expect(
+          page.getByRole("tab", { name: "Gradient", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+        const input = page.getByLabel("Background Color 1", { exact: true });
+        expect((await input.boundingBox())?.width).toBe(32);
+        await page.getByRole("tab", { name: "Image", exact: true }).click();
+        await expect(
+          page.getByLabel("Upload profile cover", { exact: true })
+        ).toBeAttached();
+        await expect(
+          page
+            .getByLabel("Upload profile cover", { exact: true })
+            .locator("..")
+            .locator("svg")
+        ).toBeVisible();
+      } else if (target === "Profile picture") {
+        await expect(
+          page.getByRole("textbox", { name: "Select Meme", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByLabel("Upload profile picture", { exact: true })
+        ).toBeAttached();
+        await expect(
+          dialog.getByRole("button", { name: "Save PFP", exact: true })
+        ).toBeDisabled();
+      } else if (target === "Profile name") {
+        await expect(
+          page.getByRole("textbox", { name: "Username", exact: true })
+        ).toBeVisible();
+      } else if (target === "Classification") {
+        await page
+          .getByRole("button", { name: /^Profile classification / })
+          .click();
+        await expect(dialog.getByRole("list")).toBeVisible();
+        await expect(dialog.getByRole("list").locator("../..")).toHaveCSS(
+          "opacity",
+          "1"
+        );
+      } else {
+        await expect(
+          page.getByRole("textbox", { name: "About statement", exact: true })
+        ).toBeVisible();
+      }
+      await expectNoHorizontalOverflow(page);
+      await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `profile-mobile-${target.toLowerCase().replaceAll(" ", "-")}.png`
+        ),
+      });
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+    }
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    ).toBeFocused();
   });
 
   for (const viewer of ["visitor", "logged out", "proxy"] as const) {

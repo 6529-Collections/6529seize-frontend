@@ -82,7 +82,7 @@ function ProfileEditorDialog({
         showDragHandle={false}
         focusTitleOnOpen
         maxWidthClass="md:tw-max-w-xl"
-        surfaceClassName={`tw-bg-iron-950 tw-ring-1 tw-ring-white/10 md:tw-shadow-2xl md:tw-shadow-black/60 ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
+        surfaceClassName={`tw-bg-iron-950 ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
         dismissible={!editor.saving}
         preserveFocusOnEscape
       >

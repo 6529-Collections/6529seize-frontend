@@ -35,9 +35,10 @@ keep the individual picture editor.
    `Edit profile` -> `Profile picture` on a smaller layout.
 2. The modal opens. If you already have a profile picture, the upload panel shows its preview.
 3. Choose one source:
-   - Desktop: open `Choose a Meme`, then search and select a meme, or use the
-     file uploader.
-   - Smaller layout: use `Select Meme` or `Upload`.
+   - Desktop: the full-width `Choose a Meme` action reveals search and selection,
+     alongside the file uploader.
+   - Smaller layout: `Select Meme` search is already visible above the upload
+     control, separated by `or`. Both use the same compact styling as desktop.
    - Uploading supports choosing a file or dragging and dropping it.
 4. Click `Save` on desktop (which also saves other changed profile fields), or
    `Save PFP` in the individual picture editor.
@@ -75,6 +76,7 @@ keep the individual picture editor.
 - Desktop failures keep unsaved changes in the dialog with an error. If a
   selected Meme already saved before another field failed, retry preserves it
   and saves only the remaining changes.
+
 ### Individual Picture Editor
 
 - Failed authentication shows:

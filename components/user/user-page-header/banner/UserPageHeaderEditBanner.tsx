@@ -222,11 +222,13 @@ export default function UserPageHeaderEditBanner({
         activeItem={editMode}
         setSelected={setEditMode}
         filterLabel="Banner editor mode"
+        variant="sub-view"
         fill={false}
       />
 
       {editMode === "gradient" ? (
         <UserSettingsBackground
+          compact
           bgColor1={bgColor1}
           bgColor2={bgColor2}
           setBgColor1={setBgColor1}
@@ -234,6 +236,7 @@ export default function UserPageHeaderEditBanner({
         />
       ) : (
         <UserSettingsBannerImageInput
+          compact
           imageToShow={bannerPreviewUrl}
           setFile={setBannerFile}
         />
@@ -241,12 +244,13 @@ export default function UserPageHeaderEditBanner({
 
       <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
         <UserSettingsSave
+          compact
           loading={isSaving}
           disabled={!haveChanges}
           responsiveWidthClassName="md:tw-w-auto"
         />
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
           disabled={isSaving}
           onClick={handleClose}
@@ -272,7 +276,8 @@ export default function UserPageHeaderEditBanner({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      showHeaderDivider
+      headerVariant="minimal"
+      titleClassName="!tw-text-base !tw-font-medium"
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
       headerActions={

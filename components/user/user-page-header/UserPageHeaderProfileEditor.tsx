@@ -88,7 +88,7 @@ export default function UserPageHeaderProfileEditor({
           aria-labelledby="profile-editor-cover"
           className="tw-space-y-3"
         >
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
             <h3
               id="profile-editor-cover"
               className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
@@ -139,7 +139,7 @@ export default function UserPageHeaderProfileEditor({
           aria-labelledby="profile-editor-picture"
           className="tw-space-y-3"
         >
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-2">
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
             <h3
               id="profile-editor-picture"
               className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
@@ -149,7 +149,7 @@ export default function UserPageHeaderProfileEditor({
             <Button
               variant="ghost"
               size="sm"
-              className="!tw-px-2 !tw-text-xs"
+              className="tw-min-h-11 tw-w-full !tw-justify-start !tw-rounded-lg !tw-bg-white/[0.025] !tw-px-3 !tw-py-3 !tw-text-sm !tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/[0.08] aria-expanded:!tw-bg-white/[0.045] desktop-hover:hover:!tw-bg-white/[0.045]"
               onClick={() => setShowMemes(!showMemes)}
               aria-expanded={showMemes}
               aria-controls="profile-editor-memes"
@@ -178,6 +178,7 @@ export default function UserPageHeaderProfileEditor({
               )}
               {memes && (
                 <UserSettingsImgSelectMeme
+                  compact
                   memes={memes}
                   onMeme={(meme) =>
                     editor.updateDraft({ meme, pictureFile: null })
@@ -208,7 +209,6 @@ export default function UserPageHeaderProfileEditor({
             compact
             selected={editor.classification}
             onSelect={(value) => editor.updateDraft({ classification: value })}
-            inlineOptions
           />
         </div>
         <div className="tw-space-y-2">

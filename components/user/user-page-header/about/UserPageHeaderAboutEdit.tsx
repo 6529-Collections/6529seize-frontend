@@ -132,6 +132,7 @@ export default function UserPageHeaderAboutEdit({
     <div className="tw-w-full tw-max-w-2xl">
       <form onSubmit={onSubmit}>
         <UserPageHeaderAboutInput
+          compact
           id={aboutInputId}
           value={value}
           onChange={(nextValue) => {
@@ -145,7 +146,7 @@ export default function UserPageHeaderAboutEdit({
         />
         <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="lg"
             disabled={loading}
             onClick={onClose}
@@ -155,7 +156,7 @@ export default function UserPageHeaderAboutEdit({
           </Button>
           <Button
             type="submit"
-            variant="action"
+            variant="primary"
             size="lg"
             disabled={isDisabled}
             loading={loading}
