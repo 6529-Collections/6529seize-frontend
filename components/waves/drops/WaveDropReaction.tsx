@@ -694,6 +694,12 @@ function WaveDropReaction({
     [onTooltipOpenChange, reaction.reaction]
   );
 
+  // The last reactor can leave while its tooltip is open, unmounting the chip.
+  useEffect(
+    () => () => handleTooltipOpenChange(false),
+    [handleTooltipOpenChange]
+  );
+
   const handleMoreClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
