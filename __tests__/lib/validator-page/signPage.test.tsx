@@ -117,31 +117,38 @@ it("rechecks the live wallet immediately before requesting a signature", async (
   expect(mockSign).not.toHaveBeenCalled();
 });
 
-it("discards a response if the wallet changes while the request is pending", async () => {
-  let finish: ((value: Hex) => void) | undefined;
-  mockSign.mockImplementation(
-    () =>
-      new Promise<Hex>((resolve) => {
-        finish = resolve;
-      })
-  );
-  render(<ValidatorSignPage />);
-  await loadGrant();
-  fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "Sign authorization" }));
-  await screen.findByRole("button", { name: "Confirm in your wallet…" });
-  expect(
-    screen.getByRole("button", { name: "Use a different message" })
-  ).toBeDisabled();
-  jest
-    .mocked(getAccount)
-    .mockReturnValue({ ...mockWallet, isConnected: false } as ReturnType<
-      typeof getAccount
-    >);
-  await act(async () => finish?.(signature));
-  expect(screen.getByRole("alert")).toHaveTextContent("connection changed");
-  expect(screen.queryByLabelText("Signature")).not.toBeInTheDocument();
-});
+it.each([
+  ["disconnection", { isConnected: false }],
+  ["address change", { address: "0x0000000000000000000000000000000000000002" }],
+  ["connector change", { connector: { uid: "another-wallet" } }],
+] as const)(
+  "discards a response after %s while the request is pending",
+  async (_name, change) => {
+    let finish: ((value: Hex) => void) | undefined;
+    mockSign.mockImplementation(
+      () =>
+        new Promise<Hex>((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<ValidatorSignPage />);
+    await loadGrant();
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Sign authorization" }));
+    await screen.findByRole("button", { name: "Confirm in your wallet…" });
+    expect(
+      screen.getByRole("button", { name: "Use a different message" })
+    ).toBeDisabled();
+    jest
+      .mocked(getAccount)
+      .mockReturnValue({ ...mockWallet, ...change } as ReturnType<
+        typeof getAccount
+      >);
+    await act(async () => finish?.(signature));
+    expect(screen.getByRole("alert")).toHaveTextContent("connection changed");
+    expect(screen.queryByLabelText("Signature")).not.toBeInTheDocument();
+  }
+);
 
 it.each(["wrong signer", "malformed signature", "rejected"])(
   "does not expose a signature after %s",

@@ -250,6 +250,8 @@ it.each([
   "lib/validator-page/grant.ts",
   "i18n/messages/validatorSign.en-US.json",
   "tests/validator/sign-sandbox.spec.ts",
+  "__tests__/lib/validator-page/grantFixture.ts",
+  "tests/support/localMuseumAppKitConfig.ts",
   "components/providers/Providers.tsx",
 ])("selects the signing safety browser lane for %s", (file) => {
   expect(JSON.parse(select([file])["core_playwright_matrix"]!)).toMatchObject({

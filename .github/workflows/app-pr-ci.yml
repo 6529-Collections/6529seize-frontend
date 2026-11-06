@@ -263,7 +263,7 @@ jobs:
           }
           const validatorSigningRequired = plan.changed_files.some((file) =>
             /^(?:app\/validator\/|components\/validator-page\/|lib\/validator-page\/grant\.|i18n\/(?:messages\/validatorSign|namespaces\/validator-sign)|tests\/validator\/)/.test(file) ||
-            ["components/providers/Providers.tsx", "tests/support/scriptedWallet.ts", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+            ["components/providers/Providers.tsx", "__tests__/lib/validator-page/grantFixture.ts", "tests/support/localMuseumAppKitConfig.ts", "tests/support/scriptedWallet.ts", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           if (validatorSigningRequired) {
             corePlaywrightLanes.push({ lane: "playwright-validator-sign", label: "Validator signing desktop and mobile", runner: defaultRunner });

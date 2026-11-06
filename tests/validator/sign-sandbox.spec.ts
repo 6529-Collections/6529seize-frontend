@@ -32,12 +32,14 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
     { name: CONSENT_EULA_COOKIE, value: CURRENT_EULA_VERSION, url: baseURL },
   ]);
   const writes: string[] = [];
+  const requests: string[] = [];
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", (request) => {
+    requests.push(`${request.url()} ${request.postData() ?? ""}`.toLowerCase());
     if (
       ["POST", "PUT", "PATCH", "DELETE"].includes(request.method()) &&
-      new URL(request.url()).hostname === "127.0.0.1"
+      ["localhost", "127.0.0.1"].includes(new URL(request.url()).hostname)
     )
       writes.push(request.url());
   });
@@ -123,6 +125,16 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
   expect(TypedDataEncoder.hash(grant.domain, types, signedMessage!)).toBe(
     TypedDataEncoder.hash(grant.domain, types, grant.message)
   );
+  const signature = await page
+    .getByLabel("Signature", { exact: true })
+    .inputValue();
+  // Check every host and method, including query strings and request bodies.
+  // Ordinary wallet-connection traffic remains allowed without grant material.
+  for (const request of requests) {
+    expect(request).not.toContain(grant.message.keys[0]!.pubkey.toLowerCase());
+    expect(request).not.toContain(grant.message.refBlockHash.toLowerCase());
+    expect(request).not.toContain(signature.toLowerCase());
+  }
   expect(writes).toEqual([]);
   expect(errors).toEqual([]);
   await page.screenshot({
