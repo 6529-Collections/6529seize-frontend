@@ -4,6 +4,7 @@ import { WalletValidationError } from "@/errors/wallet-validation";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "viem/chains";
+import { baseAccount, coinbaseWallet } from "wagmi/connectors";
 
 const VALID_LEGACY_SECRET =
   "00112233445566778899aabbccddeeff:00112233445566778899aabbccddeeff:abcdef1234567890";
@@ -35,6 +36,21 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
 jest.mock("@/constants/constants", () => ({
   CW_PROJECT_ID: "12345678-1234-1234-1234-123456789abc", // Valid UUID format
 }));
+jest.mock("wagmi/connectors", () => {
+  const actual =
+    jest.requireActual<typeof import("wagmi/connectors")>("wagmi/connectors");
+  return {
+    ...actual,
+    baseAccount: jest.fn(
+      (parameters?: Parameters<typeof actual.baseAccount>[0]) =>
+        actual.baseAccount(parameters)
+    ),
+    coinbaseWallet: jest.fn(
+      (parameters: Parameters<typeof actual.coinbaseWallet>[0]) =>
+        actual.coinbaseWallet(parameters)
+    ),
+  };
+});
 
 describe("AppKitAdapterManager", () => {
   let manager: AppKitAdapterManager;
@@ -751,6 +767,35 @@ describe("AppKitAdapterManager", () => {
       const adapter = manager.createAdapter([mockWallet]);
       expect(manager.getCurrentAdapter()).toBe(adapter);
       expect(manager.getCurrentAdapter()).toBeDefined();
+    });
+  });
+
+  describe("Wallet SDK telemetry", () => {
+    beforeEach(() => {
+      manager = new AppKitAdapterManager(mockRequestPassword);
+    });
+
+    it("registers the web Base Account connector with Coinbase telemetry off", () => {
+      manager.createAdapter([], false);
+
+      expect(baseAccount).toHaveBeenCalledTimes(1);
+      expect(baseAccount).toHaveBeenCalledWith({
+        preference: { telemetry: false },
+      });
+      expect(coinbaseWallet).not.toHaveBeenCalled();
+      const connector = (baseAccount as jest.Mock).mock.results[0]?.value;
+      expect(WagmiAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ connectors: [connector] })
+      );
+    });
+
+    it("keeps the Capacitor Coinbase v3 connector without Base Account", () => {
+      manager.createAdapter([], true);
+
+      expect(baseAccount).not.toHaveBeenCalled();
+      expect(coinbaseWallet).toHaveBeenCalledWith(
+        expect.objectContaining({ version: "3" })
+      );
     });
   });
 

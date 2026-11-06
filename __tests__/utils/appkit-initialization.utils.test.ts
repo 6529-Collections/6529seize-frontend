@@ -98,6 +98,23 @@ describe("AppKit initialization", () => {
     );
   });
 
+  it.each([true, false])(
+    "turns off Reown modal analytics (Capacitor: %s)",
+    (isCapacitor) => {
+      initializeAppKit({
+        adapter,
+        isCapacitor,
+        chains: [mainnet],
+      });
+
+      expect(createAppKit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          features: expect.objectContaining({ analytics: false }),
+        })
+      );
+    }
+  );
+
   it("keeps AppKit above app-owned transaction modals", () => {
     initializeAppKit({
       adapter,
