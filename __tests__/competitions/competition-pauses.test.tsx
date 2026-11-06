@@ -271,7 +271,7 @@ it("exposes only Archive beside draft setup and hides it from non-administrators
     </QueryClientProvider>
   );
   expect(
-    screen.getByRole("button", { name: "Archive", exact: true })
+    screen.getByRole("button", { name: "Archive" })
   ).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Publish" })
@@ -284,7 +284,7 @@ it("exposes only Archive beside draft setup and hides it from non-administrators
     </QueryClientProvider>
   );
   expect(
-    screen.queryByRole("button", { name: "Archive", exact: true })
+    screen.queryByRole("button", { name: "Archive" })
   ).not.toBeInTheDocument();
 });
 
@@ -298,8 +298,8 @@ it("returns an archived draft to the collection even if invalidation updates its
       <CompetitionAdmin archiveOnly />
     </QueryClientProvider>
   );
-  fireEvent.click(screen.getByRole("button", { name: "Archive", exact: true }));
-  fireEvent.click(screen.getByRole("button", { name: "Confirm", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
   await waitFor(() =>
     expect(mockPush).toHaveBeenCalledWith("/waves/wave/competitions")
   );
