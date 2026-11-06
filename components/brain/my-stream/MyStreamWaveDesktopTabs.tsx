@@ -122,12 +122,13 @@ const TRAILING_TABS = [
 const TAB_LABELS: Record<
   Exclude<
     MyStreamWaveTab,
-    MyStreamWaveTab.CONFIGURATION | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.CONFIGURATION
+    | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.COMPETITIONS
   >,
   string
 > = {
   [MyStreamWaveTab.CHAT]: "Chat",
-  [MyStreamWaveTab.COMPETITIONS]: "Decisions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
   [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
@@ -152,6 +153,8 @@ const getTabLabel = ({
   if (tab === MyStreamWaveTab.CONFIGURATION)
     return t(locale, "competitions.settings");
   if (tab === MyStreamWaveTab.ABOUT) return t(locale, "wave.navigation.about");
+  if (tab === MyStreamWaveTab.COMPETITIONS)
+    return t(locale, "competitions.title");
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
     return approveLabels.approvals;
   }

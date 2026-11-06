@@ -9,6 +9,8 @@ import {
 } from "@/helpers/waves/waves.constants";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface WaveDropVoteSummaryProps {
   readonly drop: ExtendedDrop;
@@ -27,6 +29,7 @@ export const WaveDropVoteSummary = ({
   onVoteClick,
   winningThreshold,
 }: WaveDropVoteSummaryProps) => {
+  const locale = useBrowserLocale();
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
     drop.context_profile_context?.rating !== 0;
@@ -41,8 +44,8 @@ export const WaveDropVoteSummary = ({
     ? drop.realtime_rating
     : drop.rating_prediction;
   const progressTooltipLabel = isApproveVoteSummary
-    ? "Votes given now"
-    : "Projected vote count at result time";
+    ? t(locale, "waves.myVotes.votesGivenNow")
+    : t(locale, "waves.myVotes.projectedAtDecision");
 
   return (
     <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01] sm:tw-gap-3">
