@@ -177,7 +177,12 @@ tabs. The collection lets you choose a different competition at any time.
 - Cancelled and archived competitions remain accessible through history. They
   do not accept new entries or votes. Administrators can permanently stop a
   published competition using **Archive and stop competition** in Settings.
-  Its entries, votes, existing winners and awarded outcomes remain readable.
+  The archive button has a red border. The dialog warns that archival is permanent
+  and cannot be undone. Enter the full competition name exactly, including capitals,
+  spaces and punctuation, to enable **Confirm**. No archive reason is requested.
+  This confirmation also applies to drafts and completed competitions. Closing and
+  reopening the dialog clears the typed name. Its entries, votes, existing winners
+  and awarded outcomes remain readable.
 
 ## Failure and Recovery
 
