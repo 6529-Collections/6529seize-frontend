@@ -167,7 +167,7 @@ export function chatPerfProbe(): void {
             count(nameOf(fiber));
           }
         }
-        if (fiber.child && (!previous || fiber.child !== previous.child)) {
+        if (fiber.child && fiber.child !== previous?.child) {
           stack.push(fiber.child);
         }
       }
@@ -252,8 +252,9 @@ export function chatPerfProbe(): void {
   }
 
   const recordRow = (element: Element, now: number, inserted: string[]) => {
-    const serialNo = element.getAttribute("data-serial-no");
-    if (serialNo === null || state.rows[serialNo] !== undefined) return;
+    if (!(element instanceof HTMLElement)) return;
+    const serialNo = element.dataset["serialNo"];
+    if (serialNo === undefined || state.rows[serialNo] !== undefined) return;
     state.rows[serialNo] = now;
     inserted.push(serialNo);
   };
@@ -285,7 +286,7 @@ export function chatPerfProbe(): void {
           node instanceof Element ? node : (node.parentElement ?? null);
         if (!element) return;
         if (node instanceof Element) {
-          if (node.hasAttribute("data-serial-no"))
+          if (node instanceof HTMLElement && node.dataset["serialNo"])
             recordRow(node, now, inserted);
           node.querySelectorAll("[data-serial-no]").forEach((row) => {
             recordRow(row, now, inserted);
@@ -364,7 +365,7 @@ export async function armChatPerf(
   }, options);
 }
 
-export async function readChatPerf(page: Page): Promise<ChatPerfSnapshot> {
+export function readChatPerf(page: Page): Promise<ChatPerfSnapshot> {
   return page.evaluate(() => {
     const state = (window as ProbeWindow).__chatPerf;
     if (!state) throw new Error("Chat performance probe is not installed.");

@@ -176,7 +176,7 @@ describe("chat performance probe", () => {
       "data"
     );
     const probeWindow = window as unknown as { __chatPerf?: ProbeState };
-    const installed = probeWindow.__chatPerf;
+    const installed = probeState();
     delete probeWindow.__chatPerf;
     try {
       chatPerfProbe();

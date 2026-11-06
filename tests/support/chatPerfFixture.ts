@@ -310,7 +310,7 @@ export async function installChatPerfFixture(
 
   // The viewer's own posts to the synthetic waves are answered in the
   // browser, never by the sandbox API, and fan out like any other message.
-  await page.route("**/api/drops", async (route) => {
+  await page.route("**/api/drops", (route) => {
     const request = route.request();
     const body = request.postDataJSON() as {
       readonly wave_id?: string;
