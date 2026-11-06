@@ -550,7 +550,9 @@ export default function UserPageHeaderClient({
       ? { href: cmsWebsiteHref, handle: profile.handle }
       : null;
   const followHandle =
-    !isMyProfile && profile.handle && connectedProfile ? profile.handle : null;
+    hasHydrated && !isMyProfile && profile.handle && connectedProfile
+      ? profile.handle
+      : null;
   const profileBlockState = useProfileBlockState({
     profileId: profile.id,
     profileHandle: profile.handle,
@@ -559,8 +561,12 @@ export default function UserPageHeaderClient({
   const profileModerationStatus = usePublicProfileModerationStatus(profile.id);
   const moderatorAccess = useContentModeratorAccess();
   const canModerateProfile =
-    !isMyProfile && !!profile.id && moderatorAccess.data?.moderator === true;
-  const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
+    hasHydrated &&
+    !isMyProfile &&
+    !!profile.id &&
+    moderatorAccess.data?.moderator === true;
+  const canManageProfilePreferences =
+    hasHydrated && isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
   const handleCreateDirectMessage = async (
