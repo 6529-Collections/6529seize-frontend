@@ -59,6 +59,15 @@ jest.mock("@/components/common/OnchainTransactionModal", () => ({
   ),
 }));
 
+function renderOpen() {
+  const view = render(<DropForgeContractAdmins />);
+  const details = view.container.querySelector("details");
+  if (!details) throw new Error("Contract Admins accordion missing");
+  details.open = true;
+  fireEvent(details, new Event("toggle"));
+  return view;
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockBobState = "resolved";
@@ -82,7 +91,7 @@ function openAddForm() {
 }
 
 it("re-resolves an edited ENS prefix through the real input before reviewing or signing", () => {
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: "alice.eth" } });
   expect(input).toHaveValue(`alice.eth - ${alice}`);
@@ -101,7 +110,7 @@ it("re-resolves an edited ENS prefix through the real input before reviewing or 
 it.each(["pending", "error", "missing"] as const)(
   "does not trust a prior wallet suffix when the new name is %s",
   (state) => {
-    render(<DropForgeContractAdmins />);
+    renderOpen();
     const input = openAddForm();
     fireEvent.change(input, { target: { value: "alice.eth" } });
     mockBobState = state;
@@ -117,7 +126,7 @@ it.each(["pending", "error", "missing"] as const)(
 );
 
 it("verifies pasted labels and ignores a manually edited wallet suffix", () => {
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: `bob.eth - ${alice}` } });
   expect(input).toHaveValue(`bob.eth - ${bob}`);
@@ -128,7 +137,7 @@ it("verifies pasted labels and ignores a manually edited wallet suffix", () => {
 });
 
 it("does not accept an invalid name plus a valid address suffix", () => {
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: `not-a-name - ${alice}` } });
   expect(screen.getByRole("button", { name: "Review Admin" })).toBeDisabled();
@@ -136,7 +145,7 @@ it("does not accept an invalid name plus a valid address suffix", () => {
 
 it("still accepts a plain wallet address after an ENS lookup failure", () => {
   mockBobState = "error";
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: `bob.eth - ${alice}` } });
   expect(screen.getByRole("button", { name: "Review Admin" })).toBeDisabled();
@@ -153,7 +162,7 @@ it("keeps literal wallet input usable without requiring an ENS lookup", () => {
     isLoading: false,
     isError: true,
   });
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: alice } });
   expect(input).toHaveValue(alice);
@@ -163,7 +172,7 @@ it("keeps literal wallet input usable without requiring an ENS lookup", () => {
 });
 
 it("invalidates an unconfirmed operation when input changes", () => {
-  render(<DropForgeContractAdmins />);
+  renderOpen();
   const input = openAddForm();
   fireEvent.change(input, { target: { value: "alice.eth" } });
   fireEvent.click(screen.getByRole("button", { name: "Review Admin" }));

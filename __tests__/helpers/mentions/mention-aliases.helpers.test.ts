@@ -17,6 +17,7 @@ describe("mention alias helpers", () => {
     "team",
     "6529DEVS",
     "DeVs6529",
+    "@DrOpS6529",
   ])("reserves %s case-insensitively", (alias) => {
     expect(isReservedMentionAlias(alias)).toBe(true);
   });

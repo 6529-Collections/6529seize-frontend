@@ -23,6 +23,7 @@ import {
   PAGE_CONTAINER_CLASS,
 } from "@/components/drop-forge/craft/craft-claim-helpers";
 import AnimationSection from "@/components/drop-forge/craft/sections/AnimationSection";
+import CraftLaunchActions from "@/components/drop-forge/craft/CraftLaunchActions";
 import ArweaveSection from "@/components/drop-forge/craft/sections/ArweaveSection";
 import CoreInformationSection from "@/components/drop-forge/craft/sections/CoreInformationSection";
 import DistributionSection from "@/components/drop-forge/craft/sections/DistributionSection";
@@ -245,6 +246,11 @@ export default function DropForgeCraftClaimPageClient({
             hasPendingChanges={hasPendingPageChanges}
           />
         </DropForgeAccordionSection>
+        <CraftLaunchActions
+          claimId={claimId}
+          metadata={claim.metadata_location}
+          dirty={hasPendingPageChanges || !!claim.media_uploading}
+        />
 
         <DropForgeAccordionSection title="Distribution" defaultOpen={false}>
           <DistributionSection

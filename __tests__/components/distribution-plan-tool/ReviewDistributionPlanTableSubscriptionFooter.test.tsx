@@ -12,6 +12,14 @@ const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
 const mockDistributionAdminWallets = ["0x1"];
 
+jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/ProcessAndFinalize",
+  () => ({
+    __esModule: true,
+    default: () => <button>Process and Finalize</button>,
+  })
+);
+
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: (...args: any[]) => mockUseDownloader(...args),
@@ -174,6 +182,11 @@ function TestWrapper({
   const distCtx = useMemo(
     () => ({
       distributionPlan: { id: "1", name: "Plan" },
+      phases: [
+        { id: "p0", name: "Phase 0" },
+        { id: "p1", name: "Phase 1" },
+        { id: "p2", name: "Phase 2" },
+      ],
       confirmedTokenId,
       setConfirmedTokenId,
     }),
@@ -229,7 +242,7 @@ test("renders split admin controls after token id is confirmed", async () => {
     expect(
       screen.getByRole("button", { name: /distribution photos \(0\)/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
+    expect(screen.getByText("Process and Finalize")).toBeInTheDocument();
     expect(screen.getByText("Publish to GitHub")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /download artist airdrops csv/i })
@@ -408,42 +421,16 @@ test("resetSubscriptions posts data and shows toast directly", async () => {
   });
 });
 
-test("finalizeDistribution posts data and shows toast directly", async () => {
+test("uses Process and Finalize instead of the synchronous normalize request", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  const commonApiPost = jest
-    .fn()
-    .mockResolvedValue({ success: true, message: "Normalized" });
-  jest
-    .spyOn(require("@/services/api/common-api"), "commonApiPost")
-    .mockImplementation(commonApiPost);
-
-  jest
-    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue(createOverview());
-
-  render(<TestWrapper />);
-
-  await user.click(screen.getByTestId("confirm-token-id-button"));
-
-  await waitFor(() => {
-    expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
-  });
-
-  await user.click(screen.getByText("Finalize Distribution"));
-
-  await waitFor(() => {
-    expect(commonApiPost).toHaveBeenCalledWith(
-      expect.objectContaining({
-        endpoint: expect.stringContaining("/normalize"),
-      })
-    );
-    expect(authCtx.setToast).toHaveBeenCalledWith({
-      type: "success",
-      title: "Distribution normalized.",
-      description: "Normalized",
-    });
-  });
+  render(<TestWrapper initialTokenId="123" />);
+  await user.click(
+    screen.getByRole("button", { name: "Process and Finalize" })
+  );
+  expect(
+    jest.requireMock("@/services/api/common-api").commonApiPost
+  ).not.toHaveBeenCalled();
 });
 
 test("upload artist airdrops posts csv data and shows success toast", async () => {

@@ -128,6 +128,7 @@ interface LaunchAirdropWriteProps {
     entries: PhaseAirdrop[] | null;
     actionLabel: LaunchAirdropActionLabel | "Airdrop to Research";
     mintingClaimAction?: string | null;
+    manualCategory?: string;
   }) => void;
   subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
 }

@@ -1,8 +1,74 @@
 import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransactionModal";
 import { render, screen } from "@testing-library/react";
 import { sepolia } from "viem/chains";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { SUPPORTED_LOCALES } from "@/i18n/locales";
+import { formatDecimalString, formatInteger } from "@/i18n/format";
+
+jest.mock("@/hooks/useBrowserLocale");
+
+const useBrowserLocaleMock = jest.mocked(useBrowserLocale);
 
 describe("ClaimTransactionModal", () => {
+  beforeEach(() => {
+    useBrowserLocaleMock.mockReturnValue("en-US");
+  });
+
+  it.each([
+    "Airdrop to Research",
+    "Airdrop Artist",
+    "Airdrop Team",
+    "Airdrop Subscriptions",
+  ])("shows the exact quantity for %s through every status", (actionLabel) => {
+    const { rerender } = render(
+      <ClaimTransactionModal state={null} chain={sepolia} onClose={jest.fn()} />
+    );
+
+    for (const status of [
+      "confirm_wallet",
+      "submitted",
+      "success",
+      "error",
+    ] as const) {
+      rerender(
+        <ClaimTransactionModal
+          state={{
+            status,
+            actionLabel,
+            airdrop: { quantity: "27", walletCount: 3 },
+          }}
+          chain={sepolia}
+          onClose={jest.fn()}
+        />
+      );
+      expect(
+        screen.getByRole("dialog", { name: actionLabel })
+      ).toHaveAccessibleDescription("Copies: 27 · Recipient wallets: 3");
+      expect(
+        screen.getByText("Copies: 27 · Recipient wallets: 3")
+      ).toBeVisible();
+    }
+  });
+
+  it.each(SUPPORTED_LOCALES)("formats exact totals in %s", (locale) => {
+    useBrowserLocaleMock.mockReturnValue(locale);
+    const quantity = "9007199254740993";
+    render(
+      <ClaimTransactionModal
+        state={{
+          status: "confirm_wallet",
+          actionLabel: "Airdrop Subscriptions",
+          airdrop: { quantity, walletCount: 1234 },
+        }}
+        chain={sepolia}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByRole("dialog")).toHaveAccessibleDescription(
+      `Copies: ${formatDecimalString(locale, quantity)} · Recipient wallets: ${formatInteger(locale, 1234)}`
+    );
+  });
+
   it("preserves all Drop Forge transaction status transitions", () => {
     const onClose = jest.fn();
     const { rerender } = render(

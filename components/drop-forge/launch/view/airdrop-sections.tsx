@@ -251,6 +251,7 @@ export function DropForgeSubscriptionAirdropSections({
                   entries: section.airdropEntries,
                   actionLabel: "Airdrop Subscriptions",
                   mintingClaimAction: actionName,
+                  manualCategory: section.phaseKey,
                 })
               }
               action={action}

@@ -25,8 +25,11 @@ import {
 import type { LaunchClaimState } from "@/components/drop-forge/launch/useLaunchClaimState";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
-import { Time } from "@/helpers/time";
-import { buildMemesPhases as buildClaimPhases } from "@/hooks/useManifoldClaim";
+import { useQuery } from "@tanstack/react-query";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import { getForgeLaunch } from "@/services/api/drop-forge-api";
+import { launchCalendarPhases } from "./launch-calendar";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 interface UseLaunchClaimViewModelParams {
@@ -208,6 +211,16 @@ export function useLaunchClaimViewModel({
     mintingClaimActionsLoaded,
     mintingClaimActionsLoadFailed,
   ]);
+  const { contract } = useDropForgeMintingConfig();
+  const savedLaunch = useQuery({
+    queryKey: forgeLaunchKey(contract, claimId),
+    queryFn: () => getForgeLaunch(contract, claimId),
+    enabled: claimId > 0,
+    refetchInterval: 5000,
+  });
+  const savedPhases = savedLaunch.isSuccess
+    ? (savedLaunch.data?.phases ?? null)
+    : undefined;
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -216,7 +229,7 @@ export function useLaunchClaimViewModel({
   const phaseData = useMemo(() => {
     const scheduleByPhaseId = new Map(
       (mintTimeline
-        ? buildClaimPhases(Time.millis(mintTimeline.instantUtc.getTime()))
+        ? launchCalendarPhases(mintTimeline.instantUtc, savedPhases)
         : []
       ).map((phase) => [phase.id, phase])
     );
@@ -247,7 +260,7 @@ export function useLaunchClaimViewModel({
         schedule: scheduleByPhaseId.get("public"),
       },
     ];
-  }, [mintTimeline, roots]);
+  }, [mintTimeline, roots, savedPhases]);
   const autoSelectedPhase = useMemo(
     () =>
       getAutoSelectedLaunchPhase({
@@ -307,6 +320,7 @@ export function useLaunchClaimViewModel({
     setPhaseAllowlistWindows((prev) => {
       const next = { ...prev };
       for (const phase of phaseData) {
+        if (!phase.schedule) continue;
         if (!next[phase.key]) {
           next[phase.key] = {
             start: phase.schedule
@@ -388,7 +402,10 @@ export function useLaunchClaimViewModel({
     launchActionPending,
     selectedPhaseConfig,
     isInitialized,
-    missingRequiredInfo,
+    missingRequiredInfo:
+      missingRequiredInfo ||
+      !savedLaunch.isSuccess ||
+      phaseData.some((phase) => !phase.schedule),
     selectedPhaseIsUpdateAction,
     selectedPhaseMatchesOnChainConfig,
   });

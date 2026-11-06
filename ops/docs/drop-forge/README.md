@@ -49,6 +49,8 @@ This area covers:
 
 ## Features
 
+- [Launch Automation and Wallet Funding](feature-launch-automation-settings.md)
+
 - [Drop Forge Hub and Section Navigation](feature-drop-forge-hub-and-navigation.md)
 - [Craft Claims List and Detail](feature-craft-claims-list-and-detail.md)
 - [Launch Claims List and Detail](feature-launch-claims-list-and-detail.md)
@@ -73,3 +75,22 @@ This area covers:
 - [The Memes Mint Flow](../media/memes/feature-mint-flow.md)
 - [Now Minting Countdown](../media/memes/feature-now-minting-countdown.md)
 - [EMMA Distribution Review](../emma/feature-subscriptions-distribution-review.md)
+
+## Internal backend setup
+
+Preparation runs in `memesDistributionHandler`; on-chain execution runs in
+`dropForgeLaunchHandler`. Both consume queued requests, with one-time future phase
+and Research schedules and continuations only while work is outstanding. There
+are no permanent one-minute triggers. Execution roles use backend stage config,
+without feature-specific GitHub environment variables. Deployment order and IAM,
+queue recovery and rollout instructions live in the backend's maintained
+[setup guide](https://github.com/6529-Collections/6529seize-backend/blob/agent-prxt/drop-forge-auto-launch-requirements/docs/drop-forge-auto-launch-setup.md).
+
+These are internal operator procedures. Keep the public help corpus focused on
+Memes, minting phases/windows and user-facing mention behavior, rather than
+launch signing, distribution processing or infrastructure setup.
+
+Post-mint work adds a one-time 17:15 preview and fresh 18:00 execution checks.
+Research and Pay Artist require finalized RPC/database agreement and completed
+indexing; Launch shows the evidence and retry eligibility. All feature reports go
+only to the dedicated operations wave, with no changes to existing mint announcements.
