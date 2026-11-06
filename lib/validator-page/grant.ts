@@ -39,7 +39,7 @@ function record(
   value: unknown,
   fields: readonly string[]
 ): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new GrantParseError("invalid");
   }
   const result = value as Record<string, unknown>;
@@ -69,7 +69,8 @@ function uint(value: unknown, max: bigint): bigint {
 function hex(value: unknown, bytes: number): Hex {
   if (
     typeof value !== "string" ||
-    !new RegExp(`^0x[0-9a-fA-F]{${bytes * 2}}$`).test(value)
+    value.length !== bytes * 2 + 2 ||
+    !/^0x[0-9a-fA-F]+$/.test(value)
   ) {
     throw new GrantParseError("invalid");
   }
@@ -167,3 +168,14 @@ export function parseValidatorGrant(text: string) {
 }
 
 export type ValidatorGrant = ReturnType<typeof parseValidatorGrant>;
+
+// P28 §7.8, as enforced by keys::eip712::recover: r/s in range,
+// low s, and Ethereum recovery byte 27 or 28. Do not rewrite a wallet's result.
+export function isValidatorSignature(value: string): value is Hex {
+  if (!/^0x[0-9a-fA-F]{128}1[bBcC]$/.test(value)) return false;
+  const order =
+    0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+  const r = BigInt(`0x${value.slice(2, 66)}`);
+  const s = BigInt(`0x${value.slice(66, 130)}`);
+  return r > 0n && r < order && s > 0n && s <= order / 2n;
+}

@@ -19,6 +19,10 @@ Validator pages and stays out of search engines.
 
 ## User Journey
 
+The file chooser includes **How do I get grant.json?**, an expandable three-step
+guide. It keeps export and transfer instructions available without interrupting
+the signing flow.
+
 1. On the validator computer, open **Authorize → Another device or a signing
    tool**. Enter the wallet address and select **Save the message**.
 2. Transfer the resulting `grant.json` file to the device where you keep your wallet.

@@ -1,7 +1,7 @@
 "use client";
 
 import "@/i18n/namespaces/validator-sign";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -13,7 +13,7 @@ import {
 import ValidatorGrantReview from "./ValidatorGrantReview";
 import ValidatorGrantSigner from "./ValidatorGrantSigner";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
-import { SECONDARY_BUTTON, TEXT_BUTTON } from "./validatorStyles";
+import { SECONDARY_BUTTON } from "./validatorStyles";
 
 export default function ValidatorSignPage() {
   const locale = useBrowserLocale();
@@ -21,6 +21,9 @@ export default function ValidatorSignPage() {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const readGeneration = useRef(0);
+  const focusReview = useCallback((heading: HTMLHeadingElement | null) => {
+    heading?.focus();
+  }, []);
 
   function load(contents: string) {
     setError(null);
@@ -73,8 +76,42 @@ export default function ValidatorSignPage() {
             {t(locale, "validator.sign.loadTitle")}
           </h2>
           <p className="tw-mb-5 tw-text-sm tw-leading-7">
-            {t(locale, "validator.sign.exportHelp")}
+            {t(locale, "validator.sign.loadHint")}
           </p>
+          <details className="tw-mb-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/50 tw-p-4">
+            <summary className="tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:tw-outline-primary-400">
+              {t(locale, "validator.sign.helpTitle")}
+            </summary>
+            <ol className="tw-mb-0 tw-mt-4 tw-space-y-4 tw-pl-5 marker:tw-font-semibold marker:tw-text-primary-300">
+              <li className="tw-pl-1">
+                <h3 className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {t(locale, "validator.sign.helpOpenTitle")}
+                </h3>
+                <p className="tw-m-0 tw-text-sm tw-leading-6">
+                  {t(locale, "validator.sign.helpOpen")}
+                </p>
+              </li>
+              <li className="tw-pl-1">
+                <h3 className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {t(locale, "validator.sign.helpSaveTitle")}
+                </h3>
+                <p className="tw-m-0 tw-text-sm tw-leading-6">
+                  {t(locale, "validator.sign.helpSave")}
+                </p>
+              </li>
+              <li className="tw-pl-1">
+                <h3 className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {t(locale, "validator.sign.helpTransferTitle")}
+                </h3>
+                <p className="tw-m-0 tw-text-sm tw-leading-6">
+                  {t(locale, "validator.sign.helpTransfer")}
+                </p>
+              </li>
+            </ol>
+            <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "validator.sign.helpNote")}
+            </p>
+          </details>
           <label
             htmlFor="validator-grant-file"
             className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-100"
@@ -83,6 +120,8 @@ export default function ValidatorSignPage() {
           </label>
           <input
             id="validator-grant-file"
+            aria-describedby={error ? "grant-load-error" : undefined}
+            aria-invalid={Boolean(error)}
             type="file"
             accept=".json,application/json"
             onChange={(event) => void readFile(event.target.files?.[0])}
@@ -108,6 +147,8 @@ export default function ValidatorSignPage() {
               </label>
               <textarea
                 id="validator-grant-json"
+                aria-describedby={error ? "grant-load-error" : undefined}
+                aria-invalid={Boolean(error)}
                 rows={8}
                 value={text}
                 maxLength={MAX_GRANT_BYTES}
@@ -128,6 +169,7 @@ export default function ValidatorSignPage() {
           {error && (
             <p
               role="alert"
+              id="grant-load-error"
               className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-error"
             >
               {error}
@@ -144,23 +186,21 @@ export default function ValidatorSignPage() {
         >
           <h2
             id="review-grant"
+            ref={focusReview}
+            tabIndex={-1}
             className="tw-mb-5 tw-text-lg tw-font-semibold tw-text-iron-50"
           >
             {t(locale, "validator.sign.reviewTitle")}
           </h2>
           <ValidatorGrantReview grant={grant} />
-          <ValidatorGrantSigner grant={grant} />
-          <button
-            type="button"
-            className={`${TEXT_BUTTON} tw-mt-5`}
-            onClick={() => {
+          <ValidatorGrantSigner
+            grant={grant}
+            onReset={() => {
               ++readGeneration.current;
               setGrant(null);
               setError(null);
             }}
-          >
-            {t(locale, "validator.sign.reset")}
-          </button>
+          />
         </section>
       )}
     </ValidatorPageFrame>

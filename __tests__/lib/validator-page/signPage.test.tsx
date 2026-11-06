@@ -41,7 +41,7 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
-const signature: Hex = `0x${"12".repeat(65)}`;
+const signature: Hex = `0x${"12".repeat(64)}1b`;
 async function loadGrant(data = grantFixture()) {
   fireEvent.click(screen.getByText("Or paste the file contents"));
   fireEvent.change(screen.getByLabelText("Contents of grant.json"), {
@@ -129,6 +129,9 @@ it("discards a response if the wallet changes while the request is pending", asy
   fireEvent.click(screen.getByRole("checkbox"));
   fireEvent.click(screen.getByRole("button", { name: "Sign authorization" }));
   await screen.findByRole("button", { name: "Confirm in your wallet…" });
+  expect(
+    screen.getByRole("button", { name: "Use a different message" })
+  ).toBeDisabled();
   jest
     .mocked(getAccount)
     .mockReturnValue({ ...mockWallet, isConnected: false } as ReturnType<

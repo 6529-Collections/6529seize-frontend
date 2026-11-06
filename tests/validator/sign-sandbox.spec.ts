@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { TypedDataEncoder } from "ethers";
 import { grantFixture } from "../../__tests__/lib/validator-page/grantFixture";
 import { installLocalMuseumAppKitConfig } from "../support/localMuseumAppKitConfig";
 import {
@@ -44,13 +45,30 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
   await expect(
     page.getByRole("heading", { name: "Sign your validator authorization" })
   ).toBeVisible();
-  await page
-    .getByLabel("Choose grant.json")
-    .setInputFiles({
-      name: "grant.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(grantFixture())),
-    });
+  // The shared shell switches from its SSR layout to the phone layout after
+  // hydration. Wait for that real readiness signal before native details clicks.
+  const shell = page.locator("[data-small][data-sidebar-ready]");
+  await expect(shell).toHaveAttribute("data-sidebar-ready", "true");
+  await expect(shell).toHaveAttribute(
+    "data-small",
+    String(testInfo.project.use.isMobile === true)
+  );
+  await page.getByText("How do I get grant.json?", { exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Save the authorization message" })
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Keep the Validator app on that authorization screen/)
+  ).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("export-guide.png"),
+    fullPage: true,
+  });
+  await page.getByLabel("Choose grant.json").setInputFiles({
+    name: "grant.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(grantFixture())),
+  });
   const review = page.getByRole("region", {
     name: "2. Check the wallet and validator keys",
   });
@@ -69,13 +87,14 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
   await review.getByRole("button", { name: "Use a different message" }).click();
   const grant = grantFixture();
   grant.message.account = key.address;
-  await page
-    .getByLabel("Choose grant.json")
-    .setInputFiles({
-      name: "grant.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(grant)),
-    });
+  await page.getByLabel("Choose grant.json").setInputFiles({
+    name: "grant.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(grant)),
+  });
+  await expect(
+    review.getByText("Connected wallet address matches this authorization.")
+  ).toBeVisible();
   await review.getByRole("checkbox").check();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > innerWidth + 1
@@ -93,9 +112,17 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
   );
   expect(wallet.typedDataSignatures("ValidatorGrant")).toHaveLength(1);
   expect(wallet.count("personal_sign")).toBe(0);
-  expect(
-    wallet.typedDataSignatures("ValidatorGrant")[0]?.message
-  ).toMatchObject(grant.message);
+  // Wallet serialization lowercases addresses and encodes small integers as
+  // numbers. The EIP-712 digest must still equal the original file's digest.
+  const types = Object.fromEntries(
+    Object.entries(grant.types).filter(([name]) => name !== "EIP712Domain")
+  );
+  const signedMessage =
+    wallet.typedDataSignatures("ValidatorGrant")[0]?.message;
+  expect(signedMessage).toBeDefined();
+  expect(TypedDataEncoder.hash(grant.domain, types, signedMessage!)).toBe(
+    TypedDataEncoder.hash(grant.domain, types, grant.message)
+  );
   expect(writes).toEqual([]);
   expect(errors).toEqual([]);
   await page.screenshot({

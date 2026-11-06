@@ -9,8 +9,15 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isE2eeSignatureRejection } from "@/components/e2ee/e2eeErrors";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import type { ValidatorGrant } from "@/lib/validator-page/grant";
-import { PRIMARY_BUTTON, SECONDARY_BUTTON } from "./validatorStyles";
+import {
+  isValidatorSignature,
+  type ValidatorGrant,
+} from "@/lib/validator-page/grant";
+import {
+  PRIMARY_BUTTON,
+  SECONDARY_BUTTON,
+  TEXT_BUTTON,
+} from "./validatorStyles";
 
 const BUTTON = `${PRIMARY_BUTTON} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`;
 const FIELD =
@@ -18,8 +25,10 @@ const FIELD =
 
 export default function ValidatorGrantSigner({
   grant,
+  onReset,
 }: {
   readonly grant: ValidatorGrant;
+  readonly onReset: () => void;
 }) {
   const locale = useBrowserLocale();
   const config = useConfig();
@@ -38,6 +47,12 @@ export default function ValidatorGrantSigner({
     isConnected && address?.toLowerCase() === expected.toLowerCase();
   const revoke = grant.message.keys.length === 0;
 
+  const actionLabel = t(
+    locale,
+    revoke ? "validator.sign.signRevoke" : "validator.sign.sign"
+  );
+  const signLabel = pending ? t(locale, "validator.sign.signing") : actionLabel;
+
   async function sign() {
     if (busy.current || !confirmed || isSafeWallet) return;
     const live = getAccount(config);
@@ -55,7 +70,7 @@ export default function ValidatorGrantSigner({
     try {
       const signed = await signTypedDataAsync({ ...grant, account: expected });
       if (
-        !/^0x[0-9a-fA-F]{130}$/.test(signed) ||
+        !isValidatorSignature(signed) ||
         getAddress(
           await recoverTypedDataAddress({ ...grant, signature: signed })
         ) !== expected
@@ -147,6 +162,14 @@ export default function ValidatorGrantSigner({
             <p className="tw-mb-3 tw-break-all tw-font-mono tw-text-sm tw-text-iron-50">
               {address}
             </p>
+            {matches && (
+              <p
+                role="status"
+                className="tw-text-sm tw-leading-6 tw-text-success"
+              >
+                {t(locale, "validator.sign.walletMatch")}
+              </p>
+            )}
             {!matches && (
               <p role="alert" className="tw-text-sm tw-leading-6 tw-text-error">
                 {t(locale, "validator.sign.mismatch", { address: expected })}
@@ -196,14 +219,7 @@ export default function ValidatorGrantSigner({
           disabled={!confirmed || !matches || isSafeWallet || pending}
           onClick={() => void sign()}
         >
-          {t(
-            locale,
-            pending
-              ? "validator.sign.signing"
-              : revoke
-                ? "validator.sign.signRevoke"
-                : "validator.sign.sign"
-          )}
+          {signLabel}
         </button>
       )}
       {pending && (
@@ -262,6 +278,14 @@ export default function ValidatorGrantSigner({
           )}
         </section>
       )}
+      <button
+        type="button"
+        disabled={pending}
+        className={`${TEXT_BUTTON} disabled:tw-opacity-50`}
+        onClick={onReset}
+      >
+        {t(locale, "validator.sign.reset")}
+      </button>
     </div>
   );
 }

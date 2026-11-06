@@ -3,7 +3,6 @@
   "validator.sign.title": "Sign your validator authorization",
   "validator.sign.intro": "Keep your wallet on this device. Sign here, then take the signature back to the computer running your validator.",
   "validator.sign.loadTitle": "1. Load the message from your validator",
-  "validator.sign.exportHelp": "On the validator computer, open Authorize → Another device or a signing tool. Enter your wallet address and choose Save the message. Transfer grant.json to this device.",
   "validator.sign.file": "Choose grant.json",
   "validator.sign.pasteToggle": "Or paste the file contents",
   "validator.sign.pasteLabel": "Contents of grant.json",
@@ -59,5 +58,15 @@
   "validator.sign.linkTitle": "Wallet on another device?",
   "validator.sign.linkBody": "Export grant.json from the Validator app, then sign it on the device where you keep your wallet.",
   "validator.sign.link": "Sign a validator authorization",
-  "validator.sign.nav": "Sign authorization"
+  "validator.sign.nav": "Sign authorization",
+  "validator.sign.loadHint": "Choose the grant.json file saved by your Validator app.",
+  "validator.sign.helpTitle": "How do I get grant.json?",
+  "validator.sign.helpOpenTitle": "Open the Validator app on the node computer",
+  "validator.sign.helpOpen": "At the Authorize step, expand Another device or a signing tool under Other ways to sign.",
+  "validator.sign.helpSaveTitle": "Save the authorization message",
+  "validator.sign.helpSave": "Enter the address of the wallet you want to authorize the validator with, then choose Save the message. The app saves a file called grant.json.",
+  "validator.sign.helpTransferTitle": "Bring that file to your wallet device",
+  "validator.sign.helpTransfer": "Transfer grant.json to this phone or computer, then choose it below. You can also copy the file’s contents and use Or paste the file contents.",
+  "validator.sign.helpNote": "Keep the Validator app on that authorization screen. After signing here, you’ll paste the signature back there.",
+  "validator.sign.walletMatch": "Connected wallet address matches this authorization."
 }

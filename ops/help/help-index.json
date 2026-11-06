@@ -11327,6 +11327,7 @@
       "summary": "Export grant.json from the Validator app and sign it at /validator/sign on the device holding your wallet, then return the signature to the validator.",
       "facts": [
         "In the Validator app, Authorize → Another device or a signing tool → enter the wallet address → Save the message exports grant.json. Transfer it to the wallet device.",
+        "On the signing page, expand How do I get grant.json? for a three-step guide to exporting and transferring the file. Keep the Validator app on the authorization screen so you can return the signature there.",
         "Open /validator/sign, choose grant.json or paste its contents, review every key and share, confirm, connect the matching wallet, and sign. This uses the existing wallet connection without requiring site login or a profile.",
         "The page checks that the connected wallet and recovered signature match the address in the grant. Wrong-wallet signing is blocked. Safe and other contract wallets are unsupported. Only main-network validator grants are supported.",
         "Copy or download the signature, then paste it in the same draft’s signature field in the Validator app and select Send the signature. The website does not submit grants; the Validator app verifies and publishes them.",

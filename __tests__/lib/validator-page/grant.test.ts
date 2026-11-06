@@ -3,6 +3,7 @@ import { hashTypedData, recoverTypedDataAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
   GrantParseError,
+  isValidatorSignature,
   MAX_GRANT_BYTES,
   parseValidatorGrant,
 } from "@/lib/validator-page/grant";
@@ -25,6 +26,7 @@ describe("validator authorization boundary", () => {
     data.message.account = account.address;
     const grant = parse(data);
     const signature = await account.signTypedData(grant);
+    expect(isValidatorSignature(signature)).toBe(true);
     expect(await recoverTypedDataAddress({ ...grant, signature })).toBe(
       account.address
     );
@@ -100,4 +102,30 @@ describe("validator authorization boundary", () => {
     );
     expect(() => parse(null)).toThrow(GrantParseError);
   });
+});
+
+it("rejects noncanonical signatures before wallet recovery", () => {
+  const scalar = "01".repeat(32);
+  expect(isValidatorSignature(`0x${scalar}${scalar}1b`)).toBe(true);
+  expect(isValidatorSignature(`0x${scalar}${scalar}1c`)).toBe(true);
+  for (const v of ["00", "01", "1d", "25"]) {
+    expect(isValidatorSignature(`0x${scalar}${scalar}${v}`)).toBe(false);
+  }
+  expect(isValidatorSignature(`0x${"00".repeat(32)}${scalar}1b`)).toBe(false);
+  expect(isValidatorSignature(`0x${scalar}${"00".repeat(32)}1b`)).toBe(false);
+  expect(isValidatorSignature(`0x${"ff".repeat(32)}${scalar}1b`)).toBe(false);
+  expect(isValidatorSignature(`0x${scalar}${"ff".repeat(32)}1b`)).toBe(false);
+  const halfOrder =
+    0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0n;
+  expect(
+    isValidatorSignature(
+      `0x${scalar}${halfOrder.toString(16).padStart(64, "0")}1b`
+    )
+  ).toBe(true);
+  expect(
+    isValidatorSignature(
+      `0x${scalar}${(halfOrder + 1n).toString(16).padStart(64, "0")}1b`
+    )
+  ).toBe(false);
+  expect(isValidatorSignature("0x12")).toBe(false);
 });

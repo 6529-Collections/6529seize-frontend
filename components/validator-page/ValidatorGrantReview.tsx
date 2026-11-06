@@ -59,7 +59,7 @@ export default function ValidatorGrantReview({
                   {t(locale, "validator.sign.share", {
                     share: formatNumber(locale, key.share / total, {
                       style: "percent",
-                      maximumFractionDigits: 2,
+                      maximumFractionDigits: 4,
                     }),
                   })}
                 </p>
