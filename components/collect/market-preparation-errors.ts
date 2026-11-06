@@ -1,6 +1,5 @@
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,

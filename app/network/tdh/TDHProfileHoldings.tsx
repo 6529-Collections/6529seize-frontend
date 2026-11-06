@@ -3,6 +3,7 @@ import Button from "@/components/utils/button/Button";
 import { formatInteger, formatList, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { TDH_FOCUS, TDH_TEXT } from "./TDHSection";
 import {
   TDH_COLLECTIONS,

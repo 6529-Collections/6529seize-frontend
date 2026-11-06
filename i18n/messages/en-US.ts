@@ -36,15 +36,7 @@ import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
-import museumMessages from "@/i18n/messages/museum.en-US.json";
-import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
-import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
-import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
-import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
-import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
-import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
-import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -70,7 +62,6 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
-import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
@@ -468,6 +459,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.about": "About",
+  "primary.museum": "Museum",
   "about.overview": "Overview",
   "primary.home": "Home",
   "sidebar.submenuLabel": "{section} sub-navigation",
@@ -2282,6 +2274,19 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "allMention.title": "Notify people with @all?",
+  "allMention.description":
+    "The @all tag will notify {count} people. Do you want to send this message?",
+  "allMention.descriptionOne":
+    "The @all tag will notify {count} person. Do you want to send this message?",
+  "allMention.snapshot":
+    "This count reflects current notification settings and wave access. It may change before the message is sent.",
+  "allMention.loading": "Counting people who will be notified…",
+  "allMention.error":
+    "Couldn't count the people who will be notified. Try again before sending.",
+  "allMention.cancel": "Keep editing",
+  "allMention.confirm": "Send with @all",
+  "allMention.retry": "Try again",
   "guidelinesDialog.title": "Wave guidelines",
   "guidelinesDialog.description":
     "Review this wave's guidelines before sending your first message.",
@@ -3213,7 +3218,12 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
-export const EN_US_MESSAGES = {
+/**
+ * en-US source copy that every page bundles. Feature namespaces that only some
+ * pages need live in `@/i18n/namespaces` instead; `en-US.complete.ts` combines
+ * both into the complete dictionary.
+ */
+export const EN_US_ROOT_MESSAGES = {
   "artworkAlerts.label": "Artwork alerts",
   "artworkAlerts.on": "On",
   "artworkAlerts.off": "Off",
@@ -3251,6 +3261,10 @@ export const EN_US_MESSAGES = {
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
+  // The header and the drop actions menu link to artwork documentation from
+  // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
+  "artworkDocumentation.title": "Artwork documentation",
+  "artworkDocumentation.myWorks": "My artwork documentation",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,
@@ -4789,15 +4803,7 @@ export const EN_US_MESSAGES = {
   ...aboutMessages,
   ...emmaSnapshotsMessages,
   ...emmaMessages,
-  ...museumMessages,
-  ...networkMetricsMessages,
-  ...networkTdhMessages,
-  ...networkTdhExplainerMessages,
-  ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
-  ...networkTdhExampleMessages,
-  ...networkTdhProfileMessages,
-  ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,
@@ -4843,7 +4849,6 @@ export const EN_US_MESSAGES = {
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
-  ...ARTWORK_DOCUMENTATION_MESSAGES,
   ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
@@ -4972,5 +4977,3 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.allWaves": "All Waves",
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
-
-export type MessageKey = keyof typeof EN_US_MESSAGES;

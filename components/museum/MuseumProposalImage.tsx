@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { MuseumManagedImage, MuseumMediaFailure } from "./MuseumManagedImage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumExternalProposalPresentationVariant } from "@/lib/museum/publication/types";
 
 export const MUSEUM_PROPOSAL_INTENT_VIEW_BYTES = 16_000_000;
