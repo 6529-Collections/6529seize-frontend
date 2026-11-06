@@ -17,6 +17,7 @@ export default function UserPageSubscriptionsMode(
     readonly: boolean;
     refresh: () => void;
     layout?: "row" | "inline";
+    error?: boolean | undefined;
   }>
 ) {
   const locale = useBrowserLocale();
@@ -75,9 +76,7 @@ export default function UserPageSubscriptionsMode(
   };
 
   let modeDetail: string | undefined;
-  if (!props.details) {
-    modeDetail = t(locale, "subscriptions.settings.loading");
-  } else if (props.details.last_update > 0) {
+  if (props.details && props.details.last_update > 0) {
     modeDetail = formatSubscriptionCoverageDeadline(
       locale,
       new Date(props.details.last_update)
@@ -100,7 +99,8 @@ export default function UserPageSubscriptionsMode(
       checked={displayedAuto}
       readOnly={props.readonly}
       readOnlyTone={displayedAuto ? "positive" : "neutral"}
-      loading={!props.details}
+      loading={!props.details && !props.error}
+      unavailable={!props.details && props.error}
       disabled={isDisabled}
       busy={isUpdating}
       onChange={() => {

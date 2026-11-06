@@ -32,6 +32,8 @@ export default function UserPageSubscriptionsUpcoming(
     readonly: boolean;
     refresh: () => void;
     loading?: boolean | undefined;
+    error?: boolean | undefined;
+    detailsError?: boolean | undefined;
     referenceDate?: Date | undefined;
   }>
 ) {
@@ -40,9 +42,13 @@ export default function UserPageSubscriptionsUpcoming(
     props.details?.automatic === true
       ? "subscriptions.mode.automaticDescription"
       : "subscriptions.mode.manualDescription";
-  const description = props.details
-    ? t(locale, modeDescription)
-    : t(locale, "subscriptions.settings.loading");
+  const missingDetailsKey = props.detailsError
+    ? "subscriptions.details.unavailable"
+    : "subscriptions.settings.loading";
+  const description = t(
+    locale,
+    props.details ? modeDescription : missingDetailsKey
+  );
   useScrollToHashOnMount("profile-subscriptions-upcoming", {
     focusId: "profile-subscriptions-upcoming-title",
   });
@@ -88,8 +94,29 @@ export default function UserPageSubscriptionsUpcoming(
     content = (
       <div className="tw-flex tw-flex-col">
         {subscriptions.map((subscription, index) => {
-          const isNextUnfunded =
+          const fundedThroughToken = props.coverage?.funded_through?.token_id;
+          const isLastFunded = fundedThroughToken === subscription.token_id;
+          const isFirstUnfunded =
+            fundedThroughToken === undefined &&
             props.coverage?.next_unfunded?.token_id === subscription.token_id;
+          const fundingBoundary = (isLastFunded || isFirstUnfunded) && (
+            <div className="tw-mx-4 tw-py-3 tw-text-meta tw-font-normal tw-text-amber-200 md:tw-mx-5">
+              {t(
+                locale,
+                isLastFunded
+                  ? "subscriptions.coverage.fundedThrough"
+                  : "subscriptions.coverage.nextUnfunded"
+              )}{" "}
+              <Link
+                href={`/the-memes/${subscription.token_id}`}
+                className="tw-text-inherit tw-no-underline desktop-hover:hover:tw-underline"
+              >
+                {t(locale, "subscriptions.coverage.memeToken", {
+                  token: formatInteger(locale, subscription.token_id),
+                })}
+              </Link>
+            </div>
+          );
           const mintingToday =
             index === 0 &&
             (props.referenceDate
@@ -103,28 +130,10 @@ export default function UserPageSubscriptionsUpcoming(
               key={subscription.token_id}
               className="tw-relative before:tw-absolute before:tw-inset-x-4 before:tw-top-0 before:tw-h-px before:tw-bg-white/[0.06] before:tw-content-[''] first:before:tw-hidden md:before:tw-inset-x-5"
             >
-              {isNextUnfunded && (
-                <div className="tw-mx-4 tw-flex tw-min-h-[60px] tw-items-center tw-justify-between tw-gap-3 tw-text-meta tw-font-normal tw-text-iron-400 md:tw-mx-5">
-                  <span>
-                    {t(locale, "subscriptions.coverage.nextUnfunded")}{" "}
-                    {t(locale, "subscriptions.coverage.memeToken", {
-                      token: formatInteger(locale, subscription.token_id),
-                    })}
-                  </span>
-                  {!props.readonly && (
-                    <Link
-                      href="#profile-subscriptions-top-up"
-                      onClick={() => {
-                        if (isPhone) setExpanded(false);
-                      }}
-                      className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-px-1 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                    >
-                      {t(locale, "subscriptions.page.topUpTitle")}
-                    </Link>
-                  )}
-                </div>
-              )}
+              {isFirstUnfunded && fundingBoundary}
               <Row
+                controlsLoading={!props.details && !props.detailsError}
+                controlsUnavailable={!props.details && !!props.detailsError}
                 profileKey={props.profileKey}
                 title="The Memes"
                 subscription={subscription}
@@ -137,21 +146,7 @@ export default function UserPageSubscriptionsUpcoming(
                 first={index === 0}
                 date={rows[index] ?? null}
               />
-              {expanded &&
-                props.coverage?.funded_through?.token_id ===
-                  subscription.token_id && (
-                  <div className="tw-mx-4 tw-py-3 tw-text-meta tw-font-normal tw-text-iron-400 md:tw-mx-5">
-                    {t(locale, "subscriptions.coverage.fundedThrough")}{" "}
-                    <Link
-                      href={`/the-memes/${subscription.token_id}`}
-                      className="tw-text-iron-300 tw-no-underline desktop-hover:hover:tw-underline"
-                    >
-                      {t(locale, "subscriptions.coverage.memeToken", {
-                        token: formatInteger(locale, subscription.token_id),
-                      })}
-                    </Link>
-                  </div>
-                )}
+              {isLastFunded && fundingBoundary}
             </div>
           );
         })}
@@ -165,7 +160,12 @@ export default function UserPageSubscriptionsUpcoming(
           aria-hidden="true"
         />
         <span className="tw-text-meta tw-font-normal tw-text-iron-500">
-          {t(locale, "subscriptions.upcoming.empty")}
+          {t(
+            locale,
+            props.error
+              ? "subscriptions.details.unavailable"
+              : "subscriptions.upcoming.empty"
+          )}
         </span>
       </div>
     );

@@ -762,8 +762,8 @@
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
         "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
         "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
-        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
-        "When available, Funded through identifies the funded-through Meme and date. Next unfunded marks the first uncovered drop in Upcoming Drops, or remains in the summary when that drop is outside the loaded list. Top up shows the recommended amount and its funding projection without repeating deadline guidance in the summary.",
+        "Coverage is Covered at 7 or more consecutive fully funded intended drops, Plan a top up at 4 to 6, Running low at 2 to 3, and Action required at 0 to 1. These existing thresholds are unchanged.",
+        "When available, Funded through identifies the funded-through Meme and full date. Upcoming Drops shows one amber Funded through boundary after the last funded drop, or Next unfunded before the supplied next unfunded drop when there is no funded-through point. Selection switches and visitor subscription statuses keep their existing meaning. Next unfunded stays in the summary facts when no deadline line already names the same drop. Owners see the supplied top-up deadline once in the summary; Top up shows the recommended amount and funding projection without repeating the deadline. Original date formats, including years and UTC cutoff times, are preserved.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],

@@ -4012,7 +4012,7 @@ export const EN_US_MESSAGES = {
   "subscriptions.coverage.runningLow.description":
     "Your balance covers only a few more selected drops.",
   "subscriptions.coverage.actionRequired.description":
-    "Your next selected drop is not fully funded.",
+    "The immediate next intended drop is not fully funded.",
   "subscriptions.coverage.actionRequired.oneFundedDescription":
     "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":

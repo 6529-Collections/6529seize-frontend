@@ -686,6 +686,145 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
   }
 
+  for (const width of [390, 1280]) {
+    test(`distinguishes failed subscription reads from empty data at ${width}px`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await installSubscriptionFixtures(page);
+      let failReads = true;
+      await page.route(
+        (url) => url.pathname.includes("/subscriptions/consolidation/"),
+        async (route) => {
+          if (failReads) {
+            await route.fulfill({
+              status: 503,
+              json: { error: "Unavailable" },
+            });
+          } else {
+            await route.fallback();
+          }
+        }
+      );
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      const overview = page
+        .getByRole("region", { name: "Subscription minting" })
+        .locator("#profile-subscriptions-overview");
+      const upcoming = page.getByRole("region", { name: "Upcoming Drops" });
+      await expect(
+        overview.getByText("Unavailable", { exact: true }).first()
+      ).toBeVisible();
+      await expect(overview.getByText("ETH", { exact: true })).toHaveCount(0);
+      await expect(overview.getByText(/mints available/)).toHaveCount(0);
+      await expect(
+        upcoming.getByText("Unavailable", { exact: true })
+      ).toBeVisible();
+      await expect(upcoming.getByText("No upcoming drops found")).toHaveCount(
+        0
+      );
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        `subscription-read-error-${width}.png`
+      );
+      await overview.screenshot({
+        path: testInfo.outputPath(`subscription-read-error-card-${width}.png`),
+      });
+
+      failReads = false;
+      await page
+        .getByRole("status")
+        .filter({ hasText: "Some subscription data could not be refreshed." })
+        .getByRole("button", { name: "Retry", exact: true })
+        .click();
+      await expect(
+        overview.getByText("0.4 ETH", { exact: true })
+      ).toBeVisible();
+      await expect(
+        upcoming.getByText("The Memes #568", { exact: true })
+      ).toBeVisible();
+      await expect(
+        upcoming.getByText("Unavailable", { exact: true })
+      ).toHaveCount(0);
+    });
+  }
+
+  for (const width of [390, 1342]) {
+    test(`shows one amber funding boundary without changing visitor selections at ${width}px`, async ({
+      page,
+    }, testInfo) => {
+      await page.setViewportSize({ width, height: 900 });
+      await installSubscriptionFixtures(page);
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-upcoming`
+      );
+      const upcoming = page.getByRole("region", {
+        name: "Upcoming Drops",
+        exact: true,
+      });
+      const boundary = upcoming.getByText(/^Funded through The Memes #570$/);
+      await expect(boundary).toHaveCount(1);
+      await expect(boundary).toHaveCSS("color", "rgb(253, 230, 138)");
+      await expect(
+        boundary.getByRole("link", { name: "The Memes #570" })
+      ).toHaveAttribute("href", "/the-memes/570");
+      await expect(upcoming.getByText("Unfunded", { exact: true })).toHaveCount(
+        0
+      );
+      await expect(
+        upcoming.getByText("Subscribed", { exact: true })
+      ).toHaveCount(3);
+      await expect(upcoming.getByRole("switch")).toHaveCount(0);
+      await upcoming
+        .getByRole("button", { name: "Show More", exact: true })
+        .click();
+      const fullList =
+        width < 640
+          ? page.getByRole("dialog", { name: "Upcoming Drops", exact: true })
+          : upcoming;
+      await expect(
+        fullList.getByText(/^Funded through The Memes #/)
+      ).toHaveCount(1);
+      await expect(
+        fullList.getByText(/^Next unfunded The Memes #/)
+      ).toHaveCount(0);
+      await expect(fullList.getByText("Unfunded", { exact: true })).toHaveCount(
+        0
+      );
+      await expect(
+        fullList.getByText("Subscribed", { exact: true })
+      ).toHaveCount(5);
+      await expectNoHorizontalOverflow(page);
+      if (width < 640) {
+        await expect(
+          fullList.getByRole("heading", { name: "Upcoming Drops", exact: true })
+        ).toBeFocused();
+        const panel = fullList
+          .locator('[id^="headlessui-dialog-panel-"]')
+          .locator("..");
+        await expect
+          .poll(() =>
+            panel.evaluate((element) => {
+              const transform = getComputedStyle(element).transform;
+              return transform === "none"
+                ? 0
+                : new DOMMatrixReadOnly(transform).m42;
+            })
+          )
+          .toBe(0);
+        await expect(
+          fullList.getByText(/^Funded through The Memes #570$/)
+        ).toBeInViewport();
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `subscriptions-funding-boundary-${width}.png`
+        ),
+      });
+    });
+  }
+
   test("keeps desktop history inline and preserves its selected pill in mobile sheets", async ({
     page,
   }, testInfo) => {
@@ -788,19 +927,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       coverage.getByRole("heading", { level: 2 }).locator("svg")
     ).toHaveCount(0);
-    const statusText = coverage
-      .getByRole("heading", { level: 2 })
-      .locator(":scope > span");
-    if ((await statusText.count()) === 2) {
-      // Read both positions in one frame, including during hash scrolling.
-      const { badgeBottom, countTop } = await statusText.evaluateAll(
-        ([count, badge]) => ({
-          badgeBottom: badge!.getBoundingClientRect().bottom,
-          countTop: count!.getBoundingClientRect().top,
-        })
-      );
-      expect(badgeBottom).toBeLessThanOrEqual(countTop);
-    }
+    const statusGeometry = await coverage.evaluate((element) => {
+      const badge = element
+        .querySelector("#profile-subscriptions-overview-status")
+        ?.getBoundingClientRect();
+      const headline = element
+        .querySelector("#profile-subscriptions-overview-title")
+        ?.getBoundingClientRect();
+      return badge && headline
+        ? { badgeBottom: badge.bottom, headlineTop: headline.top }
+        : null;
+    });
+    expect(statusGeometry).not.toBeNull();
+    expect(statusGeometry!.badgeBottom).toBeLessThanOrEqual(
+      statusGeometry!.headlineTop
+    );
     const coverageBox = await coverage.boundingBox();
     const headlineBox = await coverage
       .getByRole("heading", { level: 2 })

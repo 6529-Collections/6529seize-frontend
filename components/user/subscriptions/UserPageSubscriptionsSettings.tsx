@@ -17,6 +17,8 @@ export default function UserPageSubscriptionsSettings({
   refresh,
   airdrop,
   fetchingAirdrop,
+  detailsError = false,
+  airdropError = false,
 }: Readonly<{
   profileKey: string;
   details: SubscriptionDetails | undefined;
@@ -24,15 +26,22 @@ export default function UserPageSubscriptionsSettings({
   refresh: () => void;
   airdrop: AirdropAddressResult | undefined;
   fetchingAirdrop: boolean;
+  detailsError?: boolean | undefined;
+  airdropError?: boolean | undefined;
 }>) {
   const locale = useBrowserLocale();
+  const missingDetailsLabel = t(
+    locale,
+    detailsError
+      ? "subscriptions.details.unavailable"
+      : "subscriptions.settings.loading"
+  );
   return (
     <UserPageSubscriptionsResponsivePanel
       id="profile-subscriptions-settings"
       className="lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-flex lg:tw-flex-col"
       headerClassName="lg:tw-min-h-11"
       title={t(locale, "subscriptions.page.settingsTitle")}
-      fullHeight
       summary={
         details ? (
           <>
@@ -63,7 +72,7 @@ export default function UserPageSubscriptionsSettings({
             </span>
           </>
         ) : (
-          t(locale, "subscriptions.settings.loading")
+          missingDetailsLabel
         )
       }
     >
@@ -73,6 +82,7 @@ export default function UserPageSubscriptionsSettings({
             layout="inline"
             profileKey={profileKey}
             details={details}
+            error={detailsError}
             readonly={readonly}
             refresh={refresh}
           />
@@ -82,6 +92,7 @@ export default function UserPageSubscriptionsSettings({
             layout="inline"
             profileKey={profileKey}
             details={details}
+            error={detailsError}
             readonly={readonly}
             refresh={refresh}
           />
@@ -92,6 +103,7 @@ export default function UserPageSubscriptionsSettings({
             show_edit={!readonly}
             airdrop={airdrop}
             fetching={fetchingAirdrop}
+            error={airdropError}
           />
         </div>
       </div>

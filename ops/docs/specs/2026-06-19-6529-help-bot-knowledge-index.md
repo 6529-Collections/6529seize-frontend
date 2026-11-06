@@ -189,12 +189,9 @@ choice and Eligibility remain emphasized in Minting settings. These counts are
 not combined into a formula; per-drop quantities and backend forecasts remain
 authoritative. Status explanations use concise, professional wording while
 preserving Manual mode, forecast purpose, eligibility and schedule-dependent
-refresh guidance. Status labels and action text are unchanged. Action required
-copy distinguishes zero from one remaining fully funded drop.
+refresh guidance. Status labels and action text are unchanged. Action required owners see the original explanation when no drop is fully funded, and the existing one-funded-drop variation when one drop remains covered.
 Mode, eligibility, edition preference, the mode explanation and the first
-upcoming drop stay in their existing sections. Warning states retain visible
-Next unfunded, recommendations, deadlines and owner recovery controls; a deadline already in
-the summary appears only there. The original mode update date is under the
+upcoming drop stay in their existing sections. Upcoming Drops shows one amber Funded through boundary after the supplied last funded drop, or Next unfunded before the supplied next unfunded drop when there is no funded-through point. It does not repeat Unfunded tags on individual rows or change their selection state. Recommended amounts and funding projections remain in Top up. A supplied authoritative top-up deadline appears once in the owner summary, with the full UTC date and time, and is not repeated in the Top up dialog. The original mode update date is under the
 value in Minting settings, without the added since wording. Owner controls keep
 both switch labels together beneath their setting labels. The sections sit side by side from 1024px, with Subscription minting on the left and settings stacked in the right column. Below that width, owner settings use two columns from 768px until the sidebar starts at 1024px; visitor settings use three columns from 768px.
 Learn more remains a small link with a 44px tap target.
@@ -1021,3 +1018,13 @@ preserving limits, errors, warnings, and the bottom criteria summary.
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Its help record explains Sort by: Your vote amount, Leaderboard position and Last voted, complete-list ordering, ties and missing data, browser persistence by competition and profile, reset-selection clearing and order refresh after successful votes. Winners paginate by win time newest first.
 
 Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.
+
+The subscriptions record distinguishes pending and failed reads from successfully
+loaded zero balances and empty lists. Failed balance, settings, airdrop-address
+and upcoming-drop reads show Unavailable and retain the existing Retry action.
+
+The subscriptions record also covers the two-zone summary, state-based action
+emphasis, owner-only deadlines, original full-year date display, quiet facts, loading
+skeletons, original emerald switches, inline Unfunded tags, compact phone history
+and the content-sized settings sheet. Preview date adjustments affect local
+illustrative data only; real deadlines and funding calculations remain API-owned.

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageSubscriptionsBalance from "@/components/user/subscriptions/UserPageSubscriptionsBalance";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 
 jest.mock("@/components/dotLoader/DotLoader", () => ({
   __esModule: true,
@@ -19,9 +20,7 @@ describe("UserPageSubscriptionsBalance", () => {
         refresh={jest.fn()}
       />
     );
-    expect(
-      screen.getByText("Loading...", { selector: "div" })
-    ).toBeInTheDocument();
+    expect(screen.getByText("Loading balance")).toBeInTheDocument();
     expect(screen.queryByText(/mints? available/)).not.toBeInTheDocument();
   });
 
@@ -38,7 +37,20 @@ describe("UserPageSubscriptionsBalance", () => {
     );
     await user.click(screen.getByLabelText("Refresh balance"));
     expect(refresh).toHaveBeenCalled();
-    expect(screen.getByText("(30 mints available)")).toBeVisible();
+    expect(screen.getByText("30 mints available")).toBeVisible();
+  });
+
+  it("shows a genuine zero balance after a successful response", () => {
+    render(
+      <UserPageSubscriptionsBalance
+        details={{ balance: 0 } as SubscriptionDetails}
+        show_refresh={false}
+        fetching={false}
+        refresh={jest.fn()}
+      />
+    );
+    expect(screen.getByText("0")).toHaveTextContent("0 ETH");
+    expect(screen.getByText("0 mints available")).toBeVisible();
   });
 
   it("uses the exact coverage balance in the compact row", () => {
@@ -59,7 +71,7 @@ describe("UserPageSubscriptionsBalance", () => {
 
     expect(screen.getByText("0.18")).toHaveTextContent("0.18 ETH");
     expect(screen.getByText("ETH")).toHaveClass("tw-sr-only");
-    expect(screen.getByText("(2 mints available)")).toBeVisible();
+    expect(screen.getByText("2 mints available")).toBeVisible();
     expect(screen.queryByText("99")).not.toBeInTheDocument();
   });
 
@@ -74,7 +86,7 @@ describe("UserPageSubscriptionsBalance", () => {
     );
 
     expect(screen.getByText("0.2")).toHaveTextContent("0.2 ETH");
-    expect(screen.getByText("(3 mints available)")).toBeVisible();
+    expect(screen.getByText("3 mints available")).toBeVisible();
   });
 
   it("keeps the exact balance visible when capacity is unknown", () => {
@@ -94,14 +106,14 @@ describe("UserPageSubscriptionsBalance", () => {
     );
 
     expect(screen.getByText("0.18")).toHaveTextContent("0.18 ETH");
-    expect(screen.getByText("(mint capacity unavailable)")).toBeVisible();
+    expect(screen.getByText("mint capacity unavailable")).toBeVisible();
     expect(screen.queryByText(/0 mints available/)).not.toBeInTheDocument();
   });
 
   it.each([
-    [0, "(0 mints available)"],
-    [1, "(1 mint available)"],
-    [1108, "(1,108 mints available)"],
+    [0, "0 mints available"],
+    [1, "1 mint available"],
+    [1108, "1,108 mints available"],
   ])("keeps the original capacity wording for %i mints", (capacity, label) => {
     render(
       <UserPageSubscriptionsBalance
@@ -121,7 +133,7 @@ describe("UserPageSubscriptionsBalance", () => {
   });
 
   it.each([undefined, Number.NaN, Number.POSITIVE_INFINITY])(
-    "does not invent capacity from an unavailable legacy balance (%s)",
+    "does not invent a balance or capacity from missing or invalid data (%s)",
     (balance) => {
       render(
         <UserPageSubscriptionsBalance
@@ -131,7 +143,9 @@ describe("UserPageSubscriptionsBalance", () => {
           refresh={jest.fn()}
         />
       );
-      expect(screen.getByText("(mint capacity unavailable)")).toBeVisible();
+      expect(screen.getByText("Unavailable")).toBeVisible();
+      expect(screen.queryByText("ETH")).not.toBeInTheDocument();
+      expect(screen.queryByText(/mints? available/)).not.toBeInTheDocument();
     }
   );
 });
