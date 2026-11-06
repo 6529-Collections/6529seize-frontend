@@ -1,8 +1,31 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { E2eeEmojiPicker } from "@/components/e2ee/conversation/E2eeEmojiPicker";
+import {
+  E2eeComposerEmojiPicker,
+  E2eeEmojiPicker,
+} from "@/components/e2ee/conversation/E2eeEmojiPicker";
 import type { EmojiPickerSelection } from "@/components/waves/LazyEmojiPicker";
 
 let mockFailed = false;
+let mockMobile = false;
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => mockMobile,
+}));
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: ({
+    isOpen,
+    children,
+  }: {
+    isOpen: boolean;
+    children: React.ReactNode;
+  }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Emoji slide panel">
+        {children}
+      </div>
+    ) : null,
+}));
 const mockRetry = jest.fn();
 const mockSelection: { value: EmojiPickerSelection } = {
   value: { native: "😀" },
@@ -18,10 +41,15 @@ jest.mock("@/components/waves/LazyEmojiPicker", () => ({
   __esModule: true,
   default: ({
     onEmojiSelect,
+    privateMode,
   }: {
     onEmojiSelect: (emoji: EmojiPickerSelection) => void;
+    privateMode?: boolean;
   }) => (
-    <button onClick={() => onEmojiSelect(mockSelection.value)}>
+    <button
+      data-private-mode={String(privateMode)}
+      onClick={() => onEmojiSelect(mockSelection.value)}
+    >
       Choose test emoji
     </button>
   ),
@@ -29,6 +57,7 @@ jest.mock("@/components/waves/LazyEmojiPicker", () => ({
 
 beforeEach(() => {
   mockFailed = false;
+  mockMobile = false;
   jest.clearAllMocks();
 });
 
@@ -63,3 +92,32 @@ it("keeps standard emojis available while a failed custom pack can be retried", 
   fireEvent.click(screen.getByRole("button", { name: "Choose test emoji" }));
   expect(onSelect).toHaveBeenCalledWith("😀");
 });
+
+it.each([false, true])(
+  "uses the regular composer presentation with private emoji handling (mobile=%s)",
+  (mobile) => {
+    mockMobile = mobile;
+    mockSelection.value = { native: "😀" };
+    const onSelect = jest.fn();
+    const onOpen = jest.fn();
+    render(<E2eeComposerEmojiPicker onSelect={onSelect} onOpen={onOpen} />);
+    fireEvent.click(screen.getByRole("button", { name: "Add emoji" }));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    const choice = screen.getByRole("button", { name: "Choose test emoji" });
+    expect(choice).toHaveAttribute("data-private-mode", "true");
+    expect(
+      screen.getByRole("dialog", {
+        name: mobile ? "Emoji slide panel" : "Add emoji",
+      })
+    ).toContainElement(choice);
+    expect(screen.queryByText("Choose an emoji")).toBeNull();
+    expect(
+      screen.queryByRole("dialog", { name: "Emoji slide panel" }) !== null
+    ).toBe(mobile);
+    fireEvent.click(choice);
+    expect(onSelect).toHaveBeenCalledWith("😀");
+    expect(
+      screen.queryByRole("button", { name: "Choose test emoji" })
+    ).toBeNull();
+  }
+);

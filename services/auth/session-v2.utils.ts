@@ -1,5 +1,6 @@
 import { queueNativePushLogout } from "@/services/notifications/push-installation";
 import { Capacitor } from "@capacitor/core";
+import type { ApiRedeemConnectionShareResponse } from "@/generated/models/ApiRedeemConnectionShareResponse";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
@@ -72,15 +73,10 @@ interface CreateLegacyDesktopConnectionShareResponse {
   readonly deep_link_path: string;
 }
 
-interface RedeemConnectionShareResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type?: RefreshTokenSessionClientType | undefined;
-  readonly native_refresh_token: string;
-  readonly refresh_token_expires_at: string;
-}
+type RedeemConnectionShareResponse = Omit<
+  ApiRedeemConnectionShareResponse,
+  "client_type"
+> & { readonly client_type?: RefreshTokenSessionClientType | undefined };
 
 interface NativeConnectionShareSourceProof {
   readonly client_type: RefreshTokenSessionClientType;
@@ -678,18 +674,22 @@ async function getNativeConnectionShareSourceProof(): Promise<NativeConnectionSh
 export async function createConnectionShare({
   signal,
   targetClientType = "native",
+  encryptedDeviceSetup,
 }: {
   readonly signal?: AbortSignal | undefined;
   readonly targetClientType?: RefreshTokenSessionClientType | undefined;
+  readonly encryptedDeviceSetup?: string | undefined;
 }): Promise<CreateConnectionShareResponse> {
   const sourceProof = await getNativeConnectionShareSourceProof();
   const body = sourceProof
     ? {
         target_client_type: targetClientType,
+        encrypted_device_setup: encryptedDeviceSetup,
         ...sourceProof,
       }
     : {
         target_client_type: targetClientType,
+        encrypted_device_setup: encryptedDeviceSetup,
       };
 
   return await commonApiPost<
@@ -766,7 +766,10 @@ export async function logoutSessionV2({
 export async function redeemConnectionShare(
   connectionShareCode: string,
   targetClientType: RefreshTokenSessionClientType = "native"
-): Promise<SessionNativeResponse> {
+): Promise<
+  SessionNativeResponse &
+    Pick<RedeemConnectionShareResponse, "encrypted_device_setup">
+> {
   const response = await commonApiPost<
     {
       readonly connection_share_code: string;
@@ -784,6 +787,13 @@ export async function redeemConnectionShare(
 
   return {
     ...response,
+    role: response.role ?? null,
+    access_token_expires_at: new Date(
+      response.access_token_expires_at
+    ).toISOString(),
+    refresh_token_expires_at: new Date(
+      response.refresh_token_expires_at
+    ).toISOString(),
     client_type: response.client_type ?? targetClientType,
   };
 }

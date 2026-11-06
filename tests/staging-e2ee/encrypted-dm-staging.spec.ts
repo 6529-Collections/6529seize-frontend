@@ -1,3 +1,7 @@
+import {
+  dropEncryptedAttachment,
+  checkEncryptedImageActions,
+} from "../support/e2ee/attachmentMedia";
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
 import { performance } from "node:perf_hooks";
 import {
@@ -26,6 +30,7 @@ import {
   e2eeConsoleProblems,
   ENCRYPTED_ROUTE,
   expectEnrollmentCard,
+  gotoStaging,
   hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
@@ -56,9 +61,9 @@ import {
  * Every user is a throwaway wallet generated for this run. It signs in
  * through the real wallet modal (a scripted EIP-1193 wallet answers in the
  * test process), gets a test-only `e2eeqa_*` profile and turns on encrypted
- * messages with its own combined sign-in grant (NC8: one grant per browser
- * for signed and encrypted messages). Each browser context is a separate
- * device. The run writes throwaway data to staging, so it is an
+ * messages through combined sign-in or a separate encryption grant.
+ * Each browser context is a separate device. The run writes throwaway
+ * data to staging, so it is an
  * opt-in pack (`e2ee-staging`) and never part of PR or post-deploy lanes.
  *
  * Engine rules are covered in Jest and the local sandbox packs; this proves
@@ -242,17 +247,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     }
   });
 
-  test("each device signs one grant and loads OpenMLS WebAssembly under the staging CSP", () => {
+  test("combined and encryption-only setup each use one signature for encryption and load OpenMLS under the staging CSP", () => {
     const { a, b } = requireWorld();
+    expect(a.wallet.typedDataSignatures("MlsDeviceGrant")).toHaveLength(0);
+    expect(b.wallet.typedDataSignatures("MlsDeviceGrant")).toHaveLength(1);
     for (const session of [a, b]) {
-      // NC8 on the website: the device's one grant is a combined sign-in
-      // grant, from a combined sign-in or from explicit enrollment (one more
-      // consent signature, checked at enrollment). No device signs an
-      // EIP-712 MlsDeviceGrant.
-      expect(
-        session.wallet.typedDataSignatures("MlsDeviceGrant"),
-        `${session.label}: device grant signatures`
-      ).toHaveLength(0);
       expect(
         session.evidence.wasmResponses.length,
         `${session.label} never fetched the MLS WebAssembly module`
@@ -301,6 +300,16 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await openChatFromList(b, dm, a.user.handle);
     await expectDecrypted(b, hello);
 
+    await gotoStaging(b.page, "/notifications");
+    const notice = b.page.getByRole("article").filter({
+      has: b.page.getByRole("link", { name: hello, exact: true }),
+    });
+    await expect(
+      notice.getByRole("link", { name: a.user.handle, exact: true })
+    ).toHaveAttribute("href", `/${a.user.handle}`, { timeout: UI_TIMEOUT_MS });
+    await notice.getByRole("link", { name: hello, exact: true }).click();
+    await expectDecrypted(b, hello);
+
     await sendEncrypted(b, reply);
     await expectDecrypted(a, reply);
     await expect(messageRow(b.page, hello)).toHaveCount(1);
@@ -344,21 +353,23 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       query: string,
       name: string
     ) => {
-      const dialog = session.page.getByRole("dialog", {
-        name: "Choose an emoji",
-      });
-      await dialog.getByPlaceholder("Search", { exact: true }).fill(query);
-      await dialog
+      const picker = session.page
+        .getByRole("dialog")
+        .locator("em-emoji-picker");
+      await picker.getByPlaceholder("Search", { exact: true }).fill(query);
+      await picker
         .getByRole("button", { name, exact: true })
         .click({ timeout: UI_TIMEOUT_MS });
-      await expect(dialog).toHaveCount(0);
+      await expect(picker).toHaveCount(0);
     };
     await a.page.getByRole("button", { name: "Add emoji" }).click();
     await choose(a, "grinning", "😀");
     await a.page.getByRole("button", { name: "Add emoji" }).click();
     await choose(a, "gm", ":gm:");
-    const draft = `${prefix} 😀:gm:`;
-    await expect(input).toHaveValue(draft);
+    await expect(input).toContainText(`${prefix} 😀`);
+    await expect(
+      input.getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible();
     await input.press("Enter");
     const row = (session: StagingE2eeSession) =>
       session.page
@@ -397,7 +408,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         )
       ).toBeNull();
     }
-    expectPrivateAndClean([a, b], needles({ draft, custom: ":gm:" }));
+    expectPrivateAndClean([a, b], needles({ prefix, custom: ":gm:" }));
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
@@ -405,15 +416,29 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const { a, b, runId } = current;
     const dm = await ensureDm(current);
     const image = createQaImage(runId);
+    const droppedName = `dropped-${image.name}`;
     const caption = qaMessage(runId, "image caption");
 
     await openChat(a, dm);
-    await attachFile(a, image);
+    await attachFile(a, {
+      name: image.name,
+      mimeType: "image/png",
+      buffer: image.buffer,
+    });
+    await dropEncryptedAttachment(a.page, {
+      name: droppedName,
+      mimeType: "image/png",
+      base64: image.buffer.toString("base64"),
+    });
     await sendEncrypted(a, caption);
-    const altText = `Image: ${image.name}`;
-    await expect(
-      messageRow(a.page, caption).getByRole("img", { name: altText })
-    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    for (const filename of [image.name, droppedName]) {
+      await expect(
+        messageRow(a.page, caption).getByRole("img", {
+          name: `Image: ${filename}`,
+          exact: true,
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    }
     expect(
       a.evidence.requestsMatching(
         "PUT",
@@ -424,18 +449,27 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     await openChat(b, dm);
     await expectDecrypted(b, caption);
-    const received = messageRow(b.page, caption).getByRole("img", {
-      name: altText,
-    });
-    await expect(received).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
-    const pixels = await imagePixels(received);
-    expect(pixels).toHaveLength(image.rgba.length);
-    pixels.forEach((value, index) => {
-      expect(
-        Math.abs(value - (image.rgba[index] ?? -1)),
-        `decrypted pixel byte ${index} differs`
-      ).toBeLessThanOrEqual(2);
-    });
+    for (const filename of [image.name, droppedName]) {
+      const received = messageRow(b.page, caption).getByRole("img", {
+        name: `Image: ${filename}`,
+        exact: true,
+      });
+      await expect(received).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      const pixels = await imagePixels(received);
+      expect(pixels).toHaveLength(image.rgba.length);
+      pixels.forEach((value, index) => {
+        expect(
+          Math.abs(value - (image.rgba[index] ?? -1)),
+          `decrypted pixel byte ${index} differs`
+        ).toBeLessThanOrEqual(2);
+      });
+      await checkEncryptedImageActions(
+        b.page,
+        received,
+        filename,
+        filename === image.name ? droppedName : undefined
+      );
+    }
     await expectNothingUndecryptable(b);
 
     expectPrivateAndClean(
@@ -443,6 +477,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({
         caption,
         fileName: image.name,
+        droppedFileName: droppedName,
         imageMarker: image.marker,
         imageBytes: image.buffer,
       })
@@ -605,7 +640,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "Typing stays responsive while a large saved photo history is open."
     );
     const typingMs = performance.now() - typing;
-    await expect(input).toHaveValue(
+    await expect(input).toHaveText(
       "Typing stays responsive while a large saved photo history is open."
     );
     await input.fill("");

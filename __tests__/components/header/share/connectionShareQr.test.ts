@@ -15,6 +15,19 @@ describe("getConnectionShareRoute", () => {
     );
   });
 
+  it("preserves the private device setup key in the fragment", () => {
+    const fragment = `#device_setup_key=${"a".repeat(43)}`;
+    expect(
+      getConnectionShareRoute({
+        content: `mobileStaging6529://share-connection?connection_share_code=code&address=${ADDRESS}${fragment}`,
+        appScheme: "mobileStaging6529",
+        timestamp: 123,
+      })
+    ).toBe(
+      `/accept-connection-sharing?connection_share_code=code&address=${ADDRESS}&_t=123${fragment}`
+    );
+  });
+
   it("normalizes a configured scheme with a URL suffix", () => {
     expect(
       getConnectionShareRoute({

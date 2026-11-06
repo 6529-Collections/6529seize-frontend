@@ -83,6 +83,10 @@ action.
   - `Profile` opens the active handle route, with wallet-address fallback
   - `Connect Device` opens the Mobile/Desktop connection dialog on
     desktop web
+  - `Post Signing & DM Encryption` opens the shared consent dialog when both
+    permissions are missing. If only one is missing, the action is `Enable
+Signed Posts` or `Enable Encrypted DMs`. It is absent when both are on;
+    choosing it does not immediately open a wallet or navigate to another page
   - wallet connection/disconnection and `Connect Device` share one connection
     section, separated by a lighter full-width divider; surrounding account,
     proxy, network, and profile sections use stronger boundaries
@@ -137,7 +141,8 @@ action.
   unchanged.
 - `Scan Connection QR` opens the native scanner in connection-only mode. This
   entry accepts only canonical 6529 connection-share deep links and routes a
-  valid result to `/accept-connection-sharing`.
+  valid result to `/accept-connection-sharing`. After accepting either connection
+  type, the receiving app opens Home; secure setup finishes before navigation.
 - The separate `Scan QR Code` action in the app sidebar remains the
   general-purpose scanner for supported 6529 links.
 
@@ -167,7 +172,10 @@ action.
    - `Sign out all` (multi-profile web sessions only): clear all connected
      profiles in one visible transition without switching through them.
 7. During known-account switch handoff, active account state stays pinned to
-   the stored active wallet until the new selection settles.
+   the stored active wallet until the new selection settles. Other tabs in the
+   same browser profile follow that selection. A stale tab or an older session
+   validation cannot select the previous account again. Switching the active
+   profile does not switch the wallet connected to the browser.
 8. Review unread indicators in account selectors:
    - web/account avatars can show a dot for unread activity on other connected
      accounts,
@@ -251,13 +259,38 @@ action.
   spinner. If loading fails, an error message appears and connecting again
   retries.
 
+## Device Status
+
+Wallet connection and device permissions are different states. The shared desktop
+account tooltip shows a green **Authorized and Connected** or amber **Authorized
+only (wallet not connected)** line, then **Signed Posts** and **Encrypted DMs**
+with bold on/off states and expiry detail when renewal is due. It uses the normal
+tooltip with a short hover delay and right-side placement, without a native title.
+
+Avatar shields show this device's permissions: green when both are ready without
+renewal due, amber for partial setup or an approaching expiry, and neutral for
+off, unavailable or unresolved states. Connected-profile avatars carry smaller
+shields; they do not imply another physical device is set up.
+
+The mobile sidepanel prints the status beneath identity and above TDH: the
+connection dot belongs to the first row and the shield belongs to the permission
+row. The level circle sits beside the handle, and the wallet address remains
+below it in monospace with middle truncation. Opening the panel does not require
+hover. Disconnecting a wallet does not revoke stored device grants.
+
+Setup, renewal, backup and revocation are covered in
+[Encrypted messages](../encrypted-messages.md#turning-it-on) and
+[Signed Posts](../waves/drop-actions/feature-signed-messages.md).
+
 ## Signing In
 
 Connecting an unauthenticated wallet opens `Sign in to 6529`. The dialog shows
 the wallet address and explains: `Sign a message to confirm this address is yours.`
 Choose `Sign message`, then confirm in the wallet when `Check your wallet…` appears.
 The sign-in message does not create a transaction, cost gas, or approve tokens.
-Cancel or Escape before signing returns to browsing. If signing is rejected,
+The sign-in dialog has **Cancel** and supports Escape, with no top-right close
+button or SIWE/auth-version explanation. Backdrop clicks do not dismiss it.
+Cancel or Escape returns to browsing without signing. If signing is rejected,
 reconnect and try again. Once signed in, existing profile and posting permissions
 still apply; a wallet without a profile is offered profile setup.
 
@@ -310,8 +343,9 @@ account-dependent controls load. No additional account cache is used.
 - Unread counts for every connected account update live while the realtime
   connection is up, with a background check every 5 minutes. While it is down,
   they refresh about every 30 seconds and when you return to the tab.
-- A connection-share QR restores an authenticated profile session; it does not
-  provide a live signer for actions that require wallet signatures.
+- A connection-share QR creates an authenticated profile session. A secure link
+  also installs approved device permissions, but does not provide a live wallet
+  signer for unrelated actions that require a new wallet signature.
 
 ## Related Pages
 

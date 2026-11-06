@@ -7,7 +7,7 @@ import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 
 let mockGrantPossible = true;
 jest.mock("@/lib/device-signing/login-grant", () => ({
-  isDeviceGrantPossible: (role: string | null) =>
+  isAnyDeviceGrantPossible: (role: string | null) =>
     role === null && mockGrantPossible,
 }));
 
@@ -135,21 +135,21 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     }
   );
 
-  it("falls back, keeping the new grant as the only one, when the key could not be stored", async () => {
+  it("reports partial setup, keeping the new grant as the only one, when the key could not be stored", async () => {
     const { engine, asEngine } = createEngine();
 
     await expect(
       run(asEngine, async () => combined({ adopted: false }))
-    ).resolves.toBe("fallback");
+    ).resolves.toBe("partial");
 
     expect(engine.enrollWithLoginGrant).not.toHaveBeenCalled();
     expect(mockRevoke).toHaveBeenCalledWith(OLD_GRANT_ID);
   });
 
-  it("falls back when the server refuses the sign-in grant at registration", async () => {
+  it("reports partial setup when the server refuses the sign-in grant at registration", async () => {
     const { asEngine } = createEngine({ settlesOn: "needs-enrollment" });
     await expect(run(asEngine, async () => combined())).resolves.toBe(
-      "fallback"
+      "partial"
     );
   });
 
@@ -182,7 +182,7 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     await expect(run(asEngine, async () => combined())).resolves.toBe("done");
   });
 
-  it("keeps the grant prompt in the apps and other sessions without a web grant", async () => {
+  it("keeps the grant prompt where no combined grant is possible (proxies, apps with app grants off)", async () => {
     mockGrantPossible = false;
     const { asEngine } = createEngine();
     const requestGrant = jest.fn(async () => combined());

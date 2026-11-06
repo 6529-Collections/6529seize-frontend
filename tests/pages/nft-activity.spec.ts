@@ -8,7 +8,7 @@ test.describe("NFT Activity Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("NFT Activity | Network");
 
-    const heading = page.locator("h1");
+    const heading = page.getByRole("main").getByRole("heading", { level: 1 });
     await expect(heading).toContainText("NFT Activity");
     await expect(heading).toBeVisible();
 

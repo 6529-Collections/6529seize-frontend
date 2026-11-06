@@ -29,6 +29,8 @@ export interface HistoryPageOptions {
 export interface HistorySummary {
   tail?: StoredMessage | null;
   last: StoredMessage | null;
+  /** Latest sequenced, non-imported incoming message, independent of the UI window. */
+  lastIncomingSeq?: number;
   unread: number;
   mentions: number;
   count: number;

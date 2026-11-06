@@ -20,8 +20,3 @@ export const VALIDATOR_FEEDBACK_TEMPLATE = [
   "What happened:",
   "Times, in UTC:",
 ].join("\n");
-
-/** "0.1.0-rc.5" is shown as "0.1.0", the version testers talk about. */
-export function getBaseVersion(version: string): string {
-  return /^\d+\.\d+\.\d+/.exec(version)?.[0] ?? version;
-}

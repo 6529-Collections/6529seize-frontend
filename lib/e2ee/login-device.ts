@@ -16,13 +16,18 @@ export interface LoginE2eeAdoption {
   /** The wallet's own profile (a grant sign-in never requests a proxy role). */
   readonly profileId: string;
   readonly wallet: string;
-  /** EIP-191 hash of the signed sign-in message; the stored grant's id. */
+  /**
+   * The stored grant's id: the EIP-191 hash of the signed sign-in message, or
+   * the EIP-712 digest of an app grant.
+   */
   readonly grantId: string;
   readonly walletSignature: string;
-  /** The SIWE domain the wallet signed for (the page host). */
+  /** The SIWE domain the wallet signed for (the page host), or the app grant's origin. */
   readonly origin: string;
   readonly issuedAtSeconds: number;
   readonly expiresAtSeconds: number;
+  /** The app's platform for an app grant (6529 Mobile or Desktop); "web" by default. */
+  readonly platform?: StoredDevice["platform"] | undefined;
 }
 
 export interface PreparedLoginE2eeDevice {
@@ -40,6 +45,7 @@ export interface PreparedLoginE2eeDevice {
 }
 
 interface LoginE2eeDeviceDeps {
+  readonly state?: Uint8Array | undefined;
   readonly loadWasm?: (() => Promise<WasmModule>) | undefined;
   readonly storage?: E2eeStorage | undefined;
   readonly now?: (() => number) | undefined;
@@ -58,7 +64,9 @@ export async function createLoginE2eeDevice(
   deps: LoginE2eeDeviceDeps = {}
 ): Promise<PreparedLoginE2eeDevice> {
   const wasm = await (deps.loadWasm ?? loadDefaultWasm)();
-  const mls = MlsClient.create(wasm);
+  const mls = deps.state
+    ? MlsClient.load(wasm, deps.state)
+    : MlsClient.create(wasm);
   const deviceKeyHex = mls.deviceKey();
   let released = false;
   const release = () => {
@@ -96,7 +104,7 @@ export async function createLoginE2eeDevice(
         registered: false,
         provisioned: false,
         label: "Device",
-        platform: "web",
+        platform: input.platform ?? "web",
         createdAt: (deps.now ?? Date.now)(),
         lastResortAt: null,
         loginGrantId: input.grantId.toLowerCase(),

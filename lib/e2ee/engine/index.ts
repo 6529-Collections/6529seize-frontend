@@ -23,6 +23,7 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
+import { ConversationCreator } from "./conversation-creation";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
@@ -39,7 +40,6 @@ import { E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
-  createConversation,
   findDm,
   leave,
   removeMember,
@@ -71,6 +71,7 @@ const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
+  private readonly conversationCreator: ConversationCreator;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -79,6 +80,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
       onOwnRevoked: () => this.onOwnRejected(),
       afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
     });
+    this.conversationCreator = new ConversationCreator(
+      ctx,
+      () => this.controller.syncAll(),
+      () => this.requireReady(),
+      this.onDelayed
+    );
   }
 
   async init(): Promise<void> {
@@ -429,16 +436,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return checkEligibility(this.ctx, profileIds);
   };
 
-  async createConversation(input: {
-    profileIds: string[];
-    kind: "dm" | "group";
-    name?: string | null;
-  }): Promise<string> {
-    this.requireReady();
-    const g = await createConversation(this.ctx, input, this.onDelayed);
-    await resolveProfiles(this.ctx, input.profileIds);
-    return g;
-  }
+  createConversation = (
+    input: Parameters<E2eeEngineExt["createConversation"]>[0]
+  ) => this.conversationCreator.create(input);
 
   findDm = (profileId: string) => findDm(this.ctx, profileId);
 
@@ -773,20 +773,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!device) {
       throw new E2eeError("E2EE_NOT_READY");
     }
-    device.label = label.trim().slice(0, 48) || "Device";
-    await this.ctx.queue.run(() =>
-      checkpoint(this.ctx, { device, skipWasm: true })
-    );
-    if (this.ctx.store.thisDevice) {
-      this.ctx.store.thisDevice = {
-        ...this.ctx.store.thisDevice,
-        label: device.label,
-      };
-      this.ctx.store.devices = this.ctx.store.devices.map((info) =>
-        info.isThisDevice ? { ...info, label: device.label } : info
-      );
-    }
-    this.ctx.store.touch();
+    await this.ctx.queue.run(async () => {
+      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
+      // A superseded tab must stop before changing the account's device name.
+      await checkpoint(this.ctx, { skipWasm: true });
+      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
+      await this.ctx.api.renameDevice(device.deviceKey, label);
+    });
+    await this.refreshMe();
   }
 }
 

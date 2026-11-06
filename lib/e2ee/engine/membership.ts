@@ -1,3 +1,8 @@
+import {
+  compareDmSessions,
+  getDmPeerId,
+  isUsableDm,
+} from "../dm-conversations";
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eePolicyStatus } from "../api-types";
 import { randomHex } from "../bytes";
@@ -67,19 +72,18 @@ const principalsOf = (runtime: GroupRuntime): Set<string> =>
   );
 
 export function findDm(ctx: EngineContext, profileId: string): string | null {
-  for (const runtime of ctx.store.groups.values()) {
-    const record = runtime.record;
-    if (record.status !== "active" || record.metadata.kind !== "dm") {
-      continue;
-    }
-    const principals = principalsOf(runtime);
-    const peers =
-      principals.size > 1 ? principals : new Set(record.metadata.admins);
-    if (peers.has(profileId) && peers.has(ctx.profileId) && peers.size === 2) {
-      return record.g;
-    }
-  }
-  return null;
+  const matches = [...ctx.store.groups.values()].flatMap(({ record }) => {
+    const identity = { ...record.metadata, ...record };
+    if (
+      getDmPeerId(identity, ctx.profileId) !== profileId ||
+      !isUsableDm(identity, ctx.profileId)
+    )
+      return [];
+    const conversation = ctx.store.getConversation(record.g);
+    return conversation ? [conversation] : [];
+  });
+  matches.sort((a, b) => compareDmSessions(a, b, ctx.profileId));
+  return matches[0]?.g ?? null;
 }
 
 function normalizeName(name: string | null | undefined): string | null {

@@ -85,7 +85,7 @@ export default function PreferencesPageClient({
 
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
-      <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
+      <div className="tw-mx-auto tw-w-full tw-max-w-5xl tw-@container/preferences">
         <div>
           {!isCapacitor && returnToProfile && profileHref && (
             <Link
@@ -109,7 +109,7 @@ export default function PreferencesPageClient({
 
         <nav
           aria-label={t(locale, "preferences.tabs.ariaLabel")}
-          className="tw-mt-8 tw-flex tw-gap-x-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 lg:tw-gap-x-4"
+          className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-2 @[42rem]/preferences:tw-flex @[42rem]/preferences:tw-gap-x-3 @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-border-iron-800 lg:@[42rem]/preferences:tw-gap-x-4"
         >
           {getVisibleTabs().map((tab) => {
             const isActive = tab.id === activeTab;
@@ -121,10 +121,10 @@ export default function PreferencesPageClient({
                   fromProfile: returnToProfile,
                 })}
                 aria-current={isActive ? "page" : undefined}
-                className={`-tw-mb-px tw-flex tw-min-h-10 tw-items-center tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-1 tw-py-4 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${
+                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-break-words tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 @[42rem]/preferences:-tw-mb-px @[42rem]/preferences:tw-min-h-10 @[42rem]/preferences:tw-rounded-none @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b-2 @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-px-1 @[42rem]/preferences:tw-py-4 @[42rem]/preferences:tw-text-left motion-reduce:tw-transition-none ${
                   isActive
-                    ? "tw-border-primary-400 tw-text-iron-50"
-                    : "tw-border-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
+                    ? "tw-bg-primary-500/10 tw-text-primary-300 @[42rem]/preferences:tw-border-primary-400 @[42rem]/preferences:tw-bg-transparent @[42rem]/preferences:tw-text-iron-50"
+                    : "tw-text-iron-300 @[42rem]/preferences:tw-border-transparent @[42rem]/preferences:tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 @[42rem]/preferences:desktop-hover:hover:tw-text-iron-100"
                 }`}
               >
                 {t(locale, tab.labelKey)}

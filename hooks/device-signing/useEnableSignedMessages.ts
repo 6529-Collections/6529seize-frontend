@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   SignedMessagesEnableFlow,
@@ -18,7 +19,12 @@ import { useSignedMessagesWallet } from "./useSignedMessagesWallet";
  * wallet signature. Without a live wallet it opens the wallet connection and
  * continues once connected; `status` says what is happening or what failed.
  */
-export function useEnableSignedMessages() {
+export function useEnableSignedMessages(
+  options: {
+    readonly requestGrant?: RequestSignedMessagesGrant | undefined;
+    readonly onEnabled?: (() => void) | undefined;
+  } = {}
+) {
   const locale = useBrowserLocale();
   const { requestSignedMessagesGrant, setToast } = useAuth();
   const {
@@ -55,16 +61,18 @@ export function useEnableSignedMessages() {
       isConnectOpen: seizeConnectOpen === true,
       hasOtherLiveAccount,
       isRemoteWallet,
-      requestGrant: requestSignedMessagesGrant,
+      requestGrant: options.requestGrant ?? requestSignedMessagesGrant,
       connectWallet: seizeConnectFresh,
       networkName,
       isNetworkSupported,
       switchNetwork,
-      onEnabled: () =>
-        setToast({
-          message: t(locale, "signedMessages.notice.enabled"),
-          type: "success",
-        }),
+      onEnabled:
+        options.onEnabled ??
+        (() =>
+          setToast({
+            message: t(locale, "signedMessages.notice.enabled"),
+            type: "success",
+          })),
     }),
     [
       address,
@@ -75,6 +83,8 @@ export function useEnableSignedMessages() {
       isWalletConnectionPending,
       locale,
       networkName,
+      options.requestGrant,
+      options.onEnabled,
       requestSignedMessagesGrant,
       seizeConnectFresh,
       seizeConnectOpen,
@@ -89,7 +99,8 @@ export function useEnableSignedMessages() {
   useEffect(() => () => flow.dispose(), [flow]);
 
   return {
-    canEnable: requestSignedMessagesGrant !== undefined,
+    canEnable:
+      (options.requestGrant ?? requestSignedMessagesGrant) !== undefined,
     enable: flow.enable,
     reconnect: flow.reconnect,
     isEnabling,

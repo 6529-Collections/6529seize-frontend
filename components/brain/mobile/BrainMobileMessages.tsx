@@ -1,5 +1,6 @@
 "use client";
 
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import React, { useRef } from "react";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import DirectMessagesList from "../direct-messages/DirectMessagesList";
@@ -19,6 +20,7 @@ const BrainMobileMessages: React.FC = () => {
       style={mobileWavesViewStyle}
     >
       {/* Encrypted chats (D109); renders nothing when the flag is off. */}
+      <E2eeRenewalBanner />
       <E2eeMessagesSection variant="app" />
       <DirectMessagesList scrollContainerRef={scrollContainerRef} />
     </div>

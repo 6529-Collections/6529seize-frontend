@@ -9,6 +9,10 @@ import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchNotificationsPageData } from "@/helpers/notifications.server";
 import type { Metadata } from "next";
 
+// Renders per request: the shell's wave providers read the query in their
+// server render here (contexts/ShellSearchParamsContext.tsx), above this page.
+export const dynamic = "force-dynamic";
+
 export default async function NotificationsPage() {
   const queryClient = new QueryClient();
   const headers = await getAppCommonHeaders();
