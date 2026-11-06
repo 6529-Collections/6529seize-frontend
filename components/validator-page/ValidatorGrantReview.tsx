@@ -14,6 +14,8 @@ export default function ValidatorGrantReview({
 }) {
   const locale = useBrowserLocale();
   const { message } = grant;
+  // ResolvedAccount.share_sum is the protocol denominator. The 10,000 cap
+  // applies to each individual share; shares are proportional, not absolute.
   const total = message.keys.reduce((sum, key) => sum + key.share, 0);
   return (
     <div className="tw-space-y-5">

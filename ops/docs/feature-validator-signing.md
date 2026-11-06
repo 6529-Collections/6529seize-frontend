@@ -82,8 +82,17 @@ proofs, account eligibility, or the latest authorization version. Those checks
 remain with the Validator app and network. A signature being ready is not a
 confirmation that the node is authorized or has signed a daily result.
 
-The initial page copy is English, with the site's English fallback for other
-supported locales. The message copy is registered for future translation.
+### Translation follow-up
+
+- Surface: `/validator/sign`, its Validator navigation and download-page entry
+  point, and page metadata.
+- Current behavior: English source copy is used through the site's `en-US`
+  fallback for `en-GB`, `fr-FR`, `es-ES`, and `de-DE`. Validator navigation and
+  server-rendered entry points currently render the source locale.
+- Owner: frontend maintainers (`6529seize-maintainers`).
+- Remediation: translate the `validator-sign` namespace in those locale
+  dictionaries, thread locale selection through server-rendered entry points
+  and metadata, and verify long labels and percentages across the five locales.
 
 ## Related Pages
 

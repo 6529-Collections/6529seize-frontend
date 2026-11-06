@@ -26,7 +26,7 @@ export const VALIDATOR_GRANT_TYPES = {
   ],
 } as const;
 
-export type GrantErrorCode = "invalid" | "tooLarge" | "network" | "keys";
+type GrantErrorCode = "invalid" | "tooLarge" | "network" | "keys";
 
 export class GrantParseError extends Error {
   constructor(readonly code: GrantErrorCode) {

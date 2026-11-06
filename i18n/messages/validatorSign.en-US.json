@@ -68,5 +68,11 @@
   "validator.sign.helpTransferTitle": "Bring that file to your wallet device",
   "validator.sign.helpTransfer": "Transfer grant.json to this phone or computer, then choose it below. You can also copy the file’s contents and use Or paste the file contents.",
   "validator.sign.helpNote": "Keep the Validator app on that authorization screen. After signing here, you’ll paste the signature back there.",
-  "validator.sign.walletMatch": "Connected wallet address matches this authorization."
+  "validator.sign.walletMatch": "Connected wallet address matches this authorization.",
+  "validator.sign.navDownload": "Download",
+  "validator.sign.navGuide": "Tester guide",
+  "validator.sign.navHardware": "Hardware",
+  "validator.sign.navIssues": "Known issues",
+  "validator.sign.navReleases": "Releases",
+  "validator.sign.navLabel": "Validator pages"
 }

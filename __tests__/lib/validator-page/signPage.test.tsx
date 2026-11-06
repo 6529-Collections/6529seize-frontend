@@ -196,3 +196,16 @@ it("blocks unsupported contract wallets", async () => {
   ).toBeDisabled();
   expect(mockSign).not.toHaveBeenCalled();
 });
+
+it("shows protocol-relative shares instead of treating 10000 as a denominator", async () => {
+  render(<ValidatorSignPage />);
+  const data = grantFixture();
+  data.message.keys = [
+    { pubkey: `0x${"ab".repeat(48)}`, share: "1" },
+    { pubkey: `0x${"cd".repeat(48)}`, share: "1" },
+  ];
+  await loadGrant(data);
+  expect(
+    screen.getAllByText("50% of the account’s signing weight")
+  ).toHaveLength(2);
+});
