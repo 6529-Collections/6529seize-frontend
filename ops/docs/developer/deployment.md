@@ -149,7 +149,8 @@ them.
 
 Before pointing `6529.io` back at the load balancer (the DNS rollback), run
 `ops/scripts/production-origin-lock.sh unlock`. Otherwise the origin refuses
-every visitor.
+every visitor. `production-origin-lock.sh apply` locks it again, including
+revoking the rules the unlock opened.
 
 See [Page edge cache](cloudfront-page-cache.md) for what is cached, manual
 purges, the origin lock, rotation and rollback.
@@ -331,8 +332,9 @@ Use a reviewed revert or compatible known-good source through the same ordinary
 workflow for rollback; retain shared history and account for database/API
 compatibility. Do not drop schema as part of a routine application rollback.
 An application rollback never needs the edge changed. Only a rollback of
-CloudFront itself does, and it must unlock the origin first (see
-[Page edge cache](#page-edge-cache)).
+CloudFront itself does. It must unlock the origin, confirm the unlock and check
+direct access before DNS moves; see the
+[origin lockdown runbook](cloudfront-page-cache.md#origin-lockdown).
 Report the run links, affected services, health/E2E outcomes, and remaining
 failures. Preserve useful logs and artifact evidence without exposing secrets.
 
