@@ -10,6 +10,10 @@ import { buildCollectionPageJsonLd } from "@/lib/structured-data/nft";
 import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 
+// Renders per request: GradientsComponent reads the query with useSearchParams()
+// outside a Suspense boundary, which a prerender cannot do.
+export const dynamic = "force-dynamic";
+
 export default function GradientsPage() {
   return (
     <main className={styles["main"]}>
