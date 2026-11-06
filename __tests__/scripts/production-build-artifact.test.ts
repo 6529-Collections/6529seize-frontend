@@ -130,7 +130,7 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
-  it("bakes signed messages and app device grants on into production builds", () => {
+  it("enables signing and app device grants in production", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
     expect(build.env.NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS).toBe("true");
   });
@@ -217,14 +217,12 @@ describe("production exact-artifact deployment contract", () => {
 
     // Build: hand the deploy the binary the frozen install verified.
     const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
-    const stage =
-      buildSteps[
-        indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
-      ]!;
-    const upload =
-      buildSteps[
-        indexIn(buildSteps, "Upload sentry-cli for the Sentry release")
-      ]!;
+    const stage = buildSteps[
+      indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+    ]!;
+    const upload = buildSteps[
+      indexIn(buildSteps, "Upload sentry-cli for the Sentry release")
+    ]!;
     expect(
       indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
     ).toBeGreaterThan(indexIn(buildSteps, "Install frozen dependencies"));
@@ -238,8 +236,9 @@ describe("production exact-artifact deployment contract", () => {
 
     // Deploy: after Elastic Beanstalk serves the commit, never blocking.
     const steps: Step[] = deploy.jobs["build-upload-deploy"].steps;
-    const download =
-      steps[indexIn(steps, "Download sentry-cli for the Sentry release")]!;
+    const download = steps[
+      indexIn(steps, "Download sentry-cli for the Sentry release")
+    ]!;
     const recordIndex = indexIn(steps, "Record the Sentry release");
     const record = steps[recordIndex]!;
     for (const earlier of [
@@ -300,15 +299,12 @@ describe("production exact-artifact deployment contract", () => {
     expect(PRODUCTION_ASSET_PREFIX).toBe(
       `https://${PRODUCTION_ASSET_HOSTNAME}/${PRODUCTION_SHARED_ASSET_PATH}`
     );
-    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(
-      /^web_build\/[a-f0-9]{40}$/
-    );
+    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(/^web_build\/[a-f0-9]{40}$/);
     expect(deploy.env.SHARED_STATIC_PREFIX).toBe(sharedStaticPrefix);
     expect(deploy.env.AWS_BUCKET).toBe("seize-web");
 
     const publish = steps.find(
-      (step) =>
-        step.name === "Publish verified static files to the shared prefix"
+      (step) => step.name === "Publish verified static files to the shared prefix"
     );
     if (!publish?.run) {
       throw new Error("missing shared static publish step");
@@ -323,9 +319,7 @@ describe("production exact-artifact deployment contract", () => {
 
     // Static files are verified, then published, before any server serves
     // pages that reference them.
-    expect(
-      stepIndex("Independently verify selected production bytes")
-    ).toBeLessThan(
+    expect(stepIndex("Independently verify selected production bytes")).toBeLessThan(
       stepIndex("Publish verified static files to the shared prefix")
     );
     expect(stepIndex("Refuse stale main or production downgrade")).toBeLessThan(
@@ -339,9 +333,7 @@ describe("production exact-artifact deployment contract", () => {
     );
 
     // No more full per-commit copies of unchanged static files.
-    expect(deploySource).not.toContain(
-      'aws s3 cp production-artifact/target "'
-    );
+    expect(deploySource).not.toContain('aws s3 cp production-artifact/target "');
     expect(deploySource).not.toMatch(/aws s3 (?:cp|sync)[^\n]*--recursive/);
 
     const storage = JSON.parse(
@@ -394,11 +386,7 @@ describe("production exact-artifact deployment contract", () => {
     );
     // Nothing may delete or replace shared objects.
     for (const entry of storage.Statement) {
-      if (
-        entry.Resource.some((resource) =>
-          resource.includes("/web_build/shared/")
-        )
-      ) {
+      if (entry.Resource.some((resource) => resource.includes("/web_build/shared/"))) {
         expect(entry.Action).not.toContain("s3:DeleteObject");
         expect(entry.Action).not.toContain("s3:PutObjectAcl");
       }
