@@ -126,6 +126,56 @@ with its own server/build output. Shared image and artwork-renderer changes sele
 this pack in addition to existing competition coverage. The artwork scenarios do
 not extend the competition job's test list or timeout budget.
 
+### Chat render budget
+
+`tests/social/chat-render-budget-sandbox.spec.ts` runs in the native
+competition pack. It measures the chat hot path per received message:
+components re-rendered and mounted, React commits, API requests,
+receive-to-row time, long tasks during a 50-message burst and own
+send-to-render time. Each test attaches `chat-perf-<scenario>.json` and logs
+one `chat-perf` line. `tests/support/chatPerf.ts` installs the probe (a React
+DevTools commit hook, socket receive marks, row and submit marks, a long-task
+observer) as an init script; nothing ships to users.
+`tests/support/chatPerfFixture.ts` supplies 30 followed waves and an open
+wave with 40 messages, then sends full `DROP_UPDATE` frames to the sockets
+the backend would use.
+
+PR CI asserts the render and request budgets (`BUDGETS` in the spec) on the
+development sandbox and reports long tasks and latency only. Lower a budget in
+the same PR that lowers the measured number. The scripted planner selects the
+pack for chat hot-path files (`scripts/app-pr-ci-effective-plan.cjs`).
+
+PR before/after numbers come from a production build. Start the loopback API
+alone, build with the fixture origins and dev auth off, serve the build, then
+run the spec against it. The spec signs in through the stored-account path,
+which works in both builds:
+
+    $env:PORT = "3297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT = "4297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_ONLY = "1"
+    $env:USE_DEV_AUTH = "false"
+    seize exec node tests/support/composerSandboxServer.cjs
+
+    $env:API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:ALLOWLIST_API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:WS_ENDPOINT = "ws://127.0.0.1:4297"
+    $env:BASE_ENDPOINT = "http://localhost:3297"
+    $env:USE_DEV_AUTH = "false"
+    $env:ASSETS_FROM_S3 = "false"
+    seize run build:ci
+    seize exec next start --port 3297 --hostname localhost
+
+    $env:PLAYWRIGHT_SKIP_WEB_SERVER = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_PRODUCTION_SANDBOX = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_REPORT_ONLY = "1"
+    seize run test:e2e:native-competition-sandbox --grep "Chat render budget"
+
+As with the artwork documentation pack, the production-sandbox flag bypasses
+CSP in this spec's browser contexts only, so the production bundle can reach
+the plain-HTTP fixture API. It does not validate CSP. Component names are
+minified in production builds; arm the probe with `names: true` on a
+development server to see which components render.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
