@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { ConnectorNotConnectedError } from "@wagmi/core";
 import { useLaunchClaimState } from "@/components/drop-forge/launch/useLaunchClaimState";
 import { useLaunchClaimWrites } from "@/components/drop-forge/launch/useLaunchClaimWrites";
 import { RESEARCH_AIRDROP_ADDRESS } from "@/constants/constants";
@@ -7,7 +8,7 @@ type WriteParams = Parameters<typeof useLaunchClaimWrites>[0];
 interface HarnessOptions {
   researchAirdropCount?: number;
   data?: `0x${string}`;
-  error?: Error;
+  error?: WriteParams["claimWrite"]["error"];
   receiptSuccess?: boolean;
   receiptError?: Error;
   failManual?: boolean;
@@ -19,6 +20,56 @@ const writeContract = jest.fn();
 const setToast = jest.fn();
 const refetchOnChainClaim = jest.fn(async () => undefined);
 const updateMintingClaimAction = jest.fn(async () => undefined);
+
+function testClaimWrite(
+  data: HarnessOptions["data"],
+  error: HarnessOptions["error"]
+): WriteParams["claimWrite"] {
+  const variables = {
+    abi: [],
+    address: WALLET_A,
+    functionName: "airdrop",
+  } as const;
+  const idle = {
+    writeContract,
+    writeContractAsync: jest.fn(),
+    reset: jest.fn(),
+    context: undefined,
+    submittedAt: 0,
+    variables: undefined,
+    data: undefined,
+    error: null,
+    status: "idle",
+    isIdle: true,
+    isError: false,
+    isPending: false,
+    isSuccess: false,
+    isPaused: false,
+    failureCount: 0,
+    failureReason: null,
+  } as const;
+  if (error) {
+    return {
+      ...idle,
+      variables,
+      error,
+      status: "error",
+      isIdle: false,
+      isError: true,
+    };
+  }
+  if (data) {
+    return {
+      ...idle,
+      data,
+      variables,
+      status: "success",
+      isIdle: false,
+      isSuccess: true,
+    };
+  }
+  return idle;
+}
 
 function useTestWrites({
   researchAirdropCount = 18,
@@ -35,7 +86,7 @@ function useTestWrites({
     setToast,
     forgeMintingChain: { id: 11155111 },
     forgeMintingContract: WALLET_A,
-    claimWrite: { writeContract, data, error } as WriteParams["claimWrite"],
+    claimWrite: testClaimWrite(data, error),
     payArtistWrite: { error: null } as WriteParams["payArtistWrite"],
     waitClaimWrite: {
       isSuccess: receiptSuccess,
@@ -100,8 +151,9 @@ describe("airdrop transaction summaries", () => {
   );
 
   it("keeps Research's selected quantity fixed through submission and success", () => {
+    const initialProps: HarnessOptions = {};
     const { result, rerender } = renderHook(useTestWrites, {
-      initialProps: {} as HarnessOptions,
+      initialProps,
     });
     act(() => result.current.actions.runResearchAirdropWrite(null));
     expect(writeContract).toHaveBeenCalledWith(
@@ -126,11 +178,19 @@ describe("airdrop transaction summaries", () => {
   it.each(["wallet", "receipt", "coordination"] as const)(
     "retains the quantity after a %s failure",
     async (failure) => {
+      const initialProps: HarnessOptions = {
+        failManual: failure === "coordination",
+      };
       const { result, rerender } = renderHook(useTestWrites, {
-        initialProps: { failManual: failure === "coordination" },
+        initialProps,
       });
       act(() => result.current.actions.runResearchAirdropWrite(null));
-      if (failure === "wallet") rerender({ error: new Error("Rejected") });
+      if (failure === "wallet") {
+        const error = Object.assign(new ConnectorNotConnectedError(), {
+          name: "ConnectorNotConnectedError" as const,
+        });
+        rerender({ error });
+      }
       if (failure === "receipt") {
         rerender({ data: "0x123", receiptError: new Error("Reverted") });
       }
