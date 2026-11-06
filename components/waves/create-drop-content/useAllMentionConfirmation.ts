@@ -44,6 +44,7 @@ export function useAllMentionConfirmation({
     setDialog(null);
   }, []);
 
+  // Hide the old scope immediately; effect cleanup declines its pending decision.
   if (dialog !== null && dialog.scope !== scope) setDialog(null);
 
   useEffect(

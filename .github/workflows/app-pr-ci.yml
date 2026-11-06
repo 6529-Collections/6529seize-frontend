@@ -221,7 +221,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const allMentionBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/CreateDrop\.tsx$|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+            /^(?:components\/waves\/CreateDrop\.tsx$|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
           );
           write("all_mention_confirmation_required", String(allMentionBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>

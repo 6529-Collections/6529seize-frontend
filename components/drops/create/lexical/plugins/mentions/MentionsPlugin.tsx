@@ -343,9 +343,11 @@ const NewMentionsPlugin = forwardRef<
   useEffect(() => {
     // Lexical can retain its selection after another control takes focus.
     const updateFocus = () => {
-      setIsEditorFocused(
-        editor.getRootElement()?.contains(document.activeElement) ?? false
-      );
+      const rootFocused =
+        editor.getRootElement()?.contains(document.activeElement) ?? false;
+      const menuFocused =
+        modalRef.current?.contains(document.activeElement) ?? false;
+      setIsEditorFocused(rootFocused || menuFocused);
     };
     document.addEventListener("focusin", updateFocus);
     document.addEventListener("focusout", updateFocus);
@@ -592,7 +594,7 @@ const NewMentionsPlugin = forwardRef<
   );
 
   return (
-    <div ref={modalRef}>
+    <div>
       <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
         onQueryChange={setQueryString}
         onSelectOption={onSelectOption}
@@ -607,7 +609,10 @@ const NewMentionsPlugin = forwardRef<
         ) => {
           return isEditorFocused && anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
-                <div className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}>
+                <div
+                  ref={modalRef}
+                  className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}
+                >
                   <MentionsTypeaheadMenu
                     selectedIndex={selectedIndex}
                     options={options}

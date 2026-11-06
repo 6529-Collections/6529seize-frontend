@@ -226,6 +226,7 @@ it.each([
   "components/waves/CreateDrop.tsx",
   "components/drops/create/lexical/plugins/mentions/MentionsPlugin.tsx",
   "components/waves/create-drop-content/AllMentionConfirmationDialog.tsx",
+  "components/waves/create-drop-content/CreateDropSubmissionDialogs.tsx",
   "components/waves/create-drop-content/useAllMentionConfirmation.ts",
   "tests/social/waves-composer-sandbox.spec.ts",
 ])("selects the all mention browser checks for %s", (file) => {
