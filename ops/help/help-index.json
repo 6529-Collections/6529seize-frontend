@@ -6372,6 +6372,8 @@
         "filters"
       ],
       "facts": [
+        "The NIC activity log includes NIC rating edits and identity changes, and excludes REP and wave REP rating edits. Its direction and log-type filters still apply.",
+        "If the first NIC activity page cannot load, the placeholders are replaced by Unable to load activity log. and a Retry button. A failed later page keeps the current entries and paging controls available.",
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
         "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
