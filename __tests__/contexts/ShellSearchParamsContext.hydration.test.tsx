@@ -1,11 +1,14 @@
 import { act } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { useShellSearchParams } from "@/hooks/useShellSearchParams";
+import {
+  ShellSearchParamsProvider,
+  useShellSearchParams,
+} from "@/contexts/ShellSearchParamsContext";
 
 // The jsdom build selects the browser variant. renderToString runs it with the
 // server snapshot, which gives the same HTML as the server variant (covered in
-// useShellSearchParams.server.test.tsx), so this hydrates real server output.
+// ShellSearchParamsContext.server.test.tsx), so this hydrates real server output.
 const mockLocation = { pathname: "/", search: "" };
 const mockParamsCache = new Map<string, URLSearchParams>();
 
@@ -24,11 +27,19 @@ jest.mock("next/navigation", () => ({
 
 const renders: Array<string | null> = [];
 
-function Reader() {
+function ReaderValue() {
   const params = useShellSearchParams(mockLocation.pathname);
   const value = params === null ? null : params.toString();
   renders.push(value);
   return <output>{value ?? "none"}</output>;
+}
+
+function Reader() {
+  return (
+    <ShellSearchParamsProvider>
+      <ReaderValue />
+    </ShellSearchParamsProvider>
+  );
 }
 
 async function hydrateAt(pathname: string, search: string) {

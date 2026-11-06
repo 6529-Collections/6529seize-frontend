@@ -105,7 +105,7 @@ Rules to keep:
   never sets `Cache-Control`, and `assetPrefix` only moves `/_next/static/*`,
   so neither changes this policy.
 
-## Request-Time Root Layout and Static Content Pages
+## Root Layout Prerendering and Static Content Pages
 
 `app/layout.tsx` reads nothing from the request. Every visitor gets the same
 shell HTML, and the browser makes the per-device decisions:
@@ -145,15 +145,17 @@ caches fetches at build time.
   outside a `<Suspense>` boundary: during a static prerender it fails
   `next build` for that route. Query readers sit in small leaves inside their
   own boundaries, or read after hydration. `MyStreamProvider`
-  (`useActiveWaveManager`) and `WaveInformationProvider` use
-  `hooks/useShellSearchParams.ts`: on wave and chat routes
-  (`isWaveChatPathname`) they read the query in render as before. Those
-  segments export `dynamic = "force-dynamic"` so they stay request-time:
-  `connection()` in a nested layout or page runs after the shell providers
-  have already rendered, too late to stop the prerender. On every other route
-  the providers see no query in the server HTML and its hydration render, and
-  the live query from the next render on. `proxy.ts` sends legacy `/?wave=`
-  links to the wave route.
+  (`useActiveWaveManager`) and `WaveInformationProvider` read it through
+  `contexts/ShellSearchParamsContext.tsx`, whose provider sits above them in
+  `Providers.tsx`. On the server, that provider renders a component calling
+  `useSearchParams()` only on wave and chat routes (`isWaveChatPathname`), so
+  those routes read the query in render as before and public routes never call
+  it. Wave and chat segments export `dynamic = "force-dynamic"` so they stay
+  request-time: `connection()` in a nested layout or page runs after the shell
+  providers have already rendered, too late to stop the prerender. In the
+  browser, public routes see no query in the hydration render, matching the
+  server HTML, and the live query from the next render on. `proxy.ts` sends
+  legacy `/?wave=` links to the wave route.
 - A page whose own client components call `useSearchParams()` outside a
   `<Suspense>` boundary also fails the build once it can prerender. Pages that
   still do (`/6529-gradient`, `/meme-accounting`, `/meme-gas`,
@@ -171,7 +173,9 @@ caches fetches at build time.
   server and real ones in the browser, so shell UI that reads search params in
   the hydration render mismatches for URLs that carry them. A desktop load of
   `/?view=messages` failed hydration (React error 418) that way. `/` therefore
-  prerenders in the default mode, where those readers bail out to the client.
+  exports no `dynamic` setting and prerenders in Next's default (`auto`) mode,
+  where a reader inside its own `<Suspense>` bails out to client rendering
+  instead of reading empty params.
 
 ### CSP Nonces
 

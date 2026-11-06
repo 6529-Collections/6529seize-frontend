@@ -19,7 +19,7 @@ import {
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useShellSearchParams } from "@/hooks/useShellSearchParams";
+import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 

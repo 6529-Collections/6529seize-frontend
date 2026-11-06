@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { useShellSearchParams } from "@/hooks/useShellSearchParams";
+import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
 import type { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 interface WaveInformationRequest {
