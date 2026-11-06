@@ -26,8 +26,8 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Switch entry mode with:
   - `Switch to slider`
   - `Switch to numeric`
-  - `Slider` / `Numeric` in competition submission popups
-  - mini-card mode toggle icon for older non-competition votes
+  - `Slider` / `Numeric` in decision submission popups
+  - mini-card mode toggle icon for older votes outside decisions
 
 ## User Journey
 
@@ -39,9 +39,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `%` quick buttons (normal numeric mode)
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
-5. Optional: enable `Explain vote` and edit the rationale. Competition popups
-   and full competition dialogs display the generated rationale as a placeholder;
-   non-competition dialogs prefill it.
+5. Optional: enable `Explain vote` and edit the rationale. Decision popups
+   and full decision dialogs display the generated rationale as a placeholder;
+   other vote dialogs prefill it.
 6. Select `Vote` or `Vote + reply` to submit.
 
 ## Common Scenarios
@@ -65,7 +65,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
   contains only the generated vote total, plus the vote change when it differs
   from the total.
 
-### Competition Submission Popups
+### Decision Submission Popups
 
 Artist submissions place the voting footer inside each artwork card. When the
 wallet is disconnected, the compact footer is hidden, including the connection
@@ -89,7 +89,7 @@ text field does not scroll internally; drag its resize handle to enlarge it and
 reveal longer explanations. Vote amounts, limits, eligibility, and saving work
 the same in both input modes.
 
-The full competition voting modal and mobile sheet use the same compact
+The full decision voting modal and mobile sheet use the same compact
 remaining/spent credit line beneath the input, and the same
 centered `Explain vote` and `Save vote` actions. Their numeric input and
 rationale field are taller than the card controls. Generated rationale appears
@@ -146,8 +146,8 @@ field retains the existing generated reply.
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Docs Home](../../README.md)
 
-Competition vote dialogs include **Explain vote** when the acting profile can
+Decision vote dialogs include **Explain vote** when the acting profile can
 chat in the wave. This also applies to authorized proxy voting. The reply posts
 only after the vote succeeds; a reply failure does not undo the saved vote.
 
-Competition artist submissions and participant entries offer the same **Slider** / **Numeric** control as the voting dialog. Switching modes keeps the entered value; it does not save a vote. **Explain vote** posts a public reply in the wave after the vote saves. It is omitted when the voter cannot chat.
+Decision artist submissions and participant entries offer the same **Slider** / **Numeric** control as the voting dialog. Switching modes keeps the entered value; it does not save a vote. **Explain vote** posts a public reply in the wave after the vote saves. It is omitted when the voter cannot chat.

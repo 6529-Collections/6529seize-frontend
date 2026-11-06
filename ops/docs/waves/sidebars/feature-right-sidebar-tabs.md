@@ -9,7 +9,7 @@ dismissible panel over the current wave view.
 ## Location in the Site
 
 Wave threads on `/waves/{waveId}` and `/messages/{waveId}`, including selected
-competition routes.
+decision routes.
 
 ## Entry Points
 
@@ -22,7 +22,7 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 1. Open a wave and select its name.
 2. Read About or switch to REP or Configuration.
 3. On mobile, swipe down from the handle or header, select Close, tap outside,
-   press Escape, or use Back to return to the original view. The competition,
+   press Escape, or use Back to return to the original view. The decision,
    tab, curation, scroll and unfinished input remain in place.
 
 ## Common Scenarios
@@ -49,7 +49,7 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   Configuration.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.
-- Competition access, rules, appearance and pauses belong to **Settings** in the
+- Decision access, rules, appearance and pauses belong to **Settings** in the
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines
   focus to the open panel and returns focus to its opener when it closes.
@@ -59,13 +59,13 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 ## Edge Cases
 
 - A section that becomes unavailable falls back to About.
-- Opening information does not change the wave route or selected competition.
+- Opening information does not change the wave route or selected decision.
 - Missing wave data prevents the information content from rendering.
 
 ## Failure and Recovery
 
 Close the panel and reopen it after reloading the wave if wave information could
-not load. Competition-resource errors can be retried in their own main view.
+not load. Decision-resource errors can be retried in their own main view.
 
 ## Limitations / Notes
 
@@ -84,5 +84,5 @@ back to en-US. Legacy rule and voting-unit values retain English domain labels.
 - [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
-- [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)

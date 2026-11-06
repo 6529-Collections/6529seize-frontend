@@ -1,8 +1,8 @@
-# Competition Setup Outcomes Step
+# Decision Setup Outcomes Step
 
 ## Overview
 
-Use `Outcomes` to define winner rewards in `Rank` and `Approve` competition setup.
+Use `Outcomes` to define winner rewards in `Rank` and `Approve` decision setup.
 You must save at least one outcome before `Next` can move to `Guidelines`.
 
 Outcome type, reward configuration, and outcome visibility stay visible.
@@ -10,7 +10,7 @@ The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Location in the Site
 
-- Competition setup: `/waves/{waveId}/competitions/new`
+- Decision setup: `/waves/{waveId}/decisions/new`
 - Desktop modal create mode: `?create=wave` on waves/messages shells
 - Step label: `Outcomes`
 - User-reachable in `Rank` and `Approve` creation
@@ -97,11 +97,11 @@ and it never announces winners.
 
 ## Related Pages
 
-- [Competition Setup Index](../../create/README.md)
+- [Decision Setup Index](../../create/README.md)
 - [Wave Create Modal Entry Points](../../create/feature-modal-entry-points.md)
-- [Competition Setup Guidelines Step](../../create/feature-rules-step.md)
-- [Competition Setup Voting Configuration](feature-voting-step.md)
-- [Competition Setup Description Step](../../create/feature-description-step.md)
+- [Decision Setup Guidelines Step](../../create/feature-rules-step.md)
+- [Decision Setup Voting Configuration](feature-voting-step.md)
+- [Decision Setup Description Step](../../create/feature-description-step.md)
 - [Wave Outcome Lists](../../feature-outcome-lists.md)
 - [Waves Index](../../README.md)
 - [Docs Home](../../../README.md)

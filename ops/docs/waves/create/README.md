@@ -2,8 +2,8 @@
 
 ## Overview
 
-For independently managed competitions in a shared wave, see
-[Competitions](../competitions/README.md).
+For independently managed decisions in a shared wave, see
+[Decisions](../competitions/README.md).
 
 Use this area to create:
 
@@ -44,7 +44,7 @@ Use this area to create:
   4. [Wave Creation Description Step](feature-description-step.md)
   5. [Final Overview](feature-final-overview-step.md)
 - Standalone waves use `Start a chat wave -> Review`; access, picture, and guidelines are optional settings on the first screen. Subwaves retain the guided sequence.
-- Add Rank or Approve competitions afterward through [competition setup](../competitions/feature-manage-competitions.md). Each competition owns its schedule, entries, votes, outcomes and appearance.
+- Add Rank or Approve decisions afterward through [decision setup](../competitions/feature-manage-competitions.md). Each decision owns its schedule, entries, votes, outcomes and appearance.
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
@@ -52,7 +52,7 @@ such as `Vote limits and behavior`. An expandable section shows `Customized`
 when saved or restored values differ from the defaults and opens as
 `Needs attention` when a hidden field fails validation.
 
-Competition submission requirements are configured in competition setup.
+Decision submission requirements are configured in decision setup.
 
 ### Direct-Message Journey
 
