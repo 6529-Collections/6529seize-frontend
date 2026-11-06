@@ -53,8 +53,7 @@ async function seedSession(page: Page, role: string | null = null) {
 }
 
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
-  // Match the existing profile fixture: enter from the hydrated shell to avoid
-  // the unrelated cold-load profile navigation hydration defect.
+  // Exercise account-menu navigation; the direct-load test covers cold hydration.
   const profileLoaded = page.waitForResponse((response) =>
     new URL(response.url()).pathname.endsWith(`/identities/${WALLET}`)
   );
@@ -145,6 +144,94 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Profile edits require the isolated mock API."
   );
+
+  test("hydrates a saved owner session on a direct profile load and reload", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const hydrationWarnings: string[] = [];
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|hydrated|server rendered|did not match|didn't match/i.test(
+          message.text()
+        )
+      ) {
+        hydrationWarnings.push(message.text());
+      }
+    });
+    await seedSession(page);
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    // Wallet contract reads are outside this isolated profile fixture.
+    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+      const payload = route.request().postDataJSON() as
+        | { id: number; method: string }
+        | { id: number; method: string }[];
+      const respond = (call: { id: number; method: string }) => {
+        expect(call.method).toBe("eth_call");
+        return {
+          jsonrpc: "2.0",
+          id: call.id,
+          error: {
+            code: -32000,
+            message: "Contract reads are unavailable in this profile fixture",
+          },
+        };
+      };
+      await route.fulfill({
+        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+      });
+    });
+    await page.goto("/playwright");
+    const edit = page.getByRole("button", {
+      name: "Edit profile",
+      exact: true,
+    });
+    const tabs = page.getByRole("navigation", { name: "Profile sections" });
+    for (const load of ["direct", "reload"]) {
+      if (load === "reload") await page.reload();
+      await expect(edit).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(edit).toHaveCount(1);
+      await expect(
+        page.getByRole("link", { name: "Preferences", exact: true })
+      ).toBeVisible();
+      await expect(
+        tabs.getByRole("link", { name: "Brain", exact: true })
+      ).toBeVisible();
+      await expect(
+        tabs.getByRole("link", { name: "Proxy", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Open your following list:/ })
+      ).toBeVisible();
+      const statementsTab = page.getByRole("button", {
+        name: /^ID Statements/,
+      });
+      if (await statementsTab.isVisible()) await statementsTab.click();
+      await expect(
+        page.getByRole("button", { name: "Add", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      expect(hydrationWarnings, `${load} hydration console warnings`).toEqual(
+        []
+      );
+    }
+    await testInfo.attach("cold-owner-profile", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    if (isMobile) await edit.click();
+    else await edit.press("Enter");
+    const about = page.getByRole("button", { name: "About", exact: true });
+    if (await about.isVisible()) await about.click();
+    await expect(
+      page.getByRole("textbox", { name: "About statement", exact: true })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+  });
 
   test("adds, edits and removes About through the profile editor", async ({
     page,
