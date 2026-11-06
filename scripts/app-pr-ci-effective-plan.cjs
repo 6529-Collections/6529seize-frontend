@@ -103,13 +103,23 @@ function applyEffectiveAppPrCiPlan(plan) {
   // Museum lane itself. The selection tool then runs only the affected packs.
   const playwrightMuseum = files.some(requiresMuseumLane);
 
-  const playwrightProfileRep = files.some(
+  const playwrightProfileDialogs = files.some(
     (file) =>
       file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/user-page-header/about/") ||
+      file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
+      file.startsWith(
+        "components/user/user-page-header/UserPageHeaderEditProfile"
+      ) ||
+      file ===
+        "components/user/user-page-header/UserPageHeaderProfileEditor.tsx" ||
+      file === "components/user/user-page-header/useProfileEditor.ts" ||
+      file.startsWith("components/user/settings/") ||
       file.startsWith("components/user/utils/rate/") ||
       file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
-      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts" ||
+      file === "tests/social/profile-about-sandbox.spec.ts"
   );
 
   const playwrightArtworkDocumentation = files.some((file) =>
@@ -156,6 +166,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "hooks/useNativeKeyboard.ts",
         "tests/support/surfaceSimulation.ts",
         "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
+        // The chat render window; this pack runs wave-loading-sandbox.spec.ts.
+        "hooks/useVirtualizedWaveMessages.ts",
         "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
         "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
         "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
@@ -276,12 +288,27 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const checks = {
     ...plan.checks,
-    playwright_critical_shell: playwrightProfileRep
+    playwright_critical_shell: playwrightProfileDialogs
       ? check(
           true,
-          "Profile REP and rating changes require the profile dialog browser pack."
+          "Profile editing changes require the profile dialog browser pack."
         )
       : baseChecks.playwright_critical_shell,
+    playwright_profile_nic: check(
+      files.some(
+        (file) =>
+          /^(?:components\/profile-activity\/|__tests__\/components\/profile-activity\/|helpers\/profile-logs\.helpers\.ts$|components\/user\/rep\/|tests\/social\/profile-nic-activity-sandbox\.spec\.ts$)/u.test(
+            file
+          ) ||
+          [
+            "tests/packs.manifest.cjs",
+            "tests/support/composerSandboxServer.cjs",
+            "scripts/app-pr-ci-effective-plan.cjs",
+            ".github/workflows/app-pr-ci.yml",
+          ].includes(file)
+      ),
+      "Profile activity changes need the NIC cursor and unchanged-view browser contracts."
+    ),
     install: check(
       true,
       playwrightMuseum

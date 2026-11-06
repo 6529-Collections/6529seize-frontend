@@ -7,7 +7,7 @@ import {
   faChevronUp,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
@@ -119,9 +119,9 @@ export default function ErrorComponent({
                   {isStacktraceExpanded ? "Hide Stacktrace" : "Show Stacktrace"}
                 </span>
                 {isStacktraceExpanded ? (
-                  <FontAwesomeIcon icon={faChevronUp} />
+                  <FontAwesomeSvgIcon icon={faChevronUp} />
                 ) : (
-                  <FontAwesomeIcon icon={faChevronDown} />
+                  <FontAwesomeSvgIcon icon={faChevronDown} />
                 )}
               </button>
               {isStacktraceExpanded && (
@@ -133,7 +133,7 @@ export default function ErrorComponent({
                   size="sm"
                 >
                   {isCopied ? "Copied" : "Copy"}{" "}
-                  {!isCopied && <FontAwesomeIcon icon={faCopy} />}
+                  {!isCopied && <FontAwesomeSvgIcon icon={faCopy} />}
                 </Button>
               )}
             </div>

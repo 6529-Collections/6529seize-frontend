@@ -26,6 +26,11 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.historyGap.load": "Cargar mensajes pendientes",
+  "waves.historyGap.loaded": "Mensajes pendientes cargados",
+  "waves.historyGap.loading": "Cargando mensajes pendientes…",
+  "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
+
   "waves.myVotes.sort": "Ordenar por",
   "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",
   "waves.myVotes.sort.leaderboard": "Posición en la clasificación",

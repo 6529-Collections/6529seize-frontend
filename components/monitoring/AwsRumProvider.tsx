@@ -2,8 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { AWS_RUM_DISPATCH_CONFIG } from "@/utils/monitoring/awsRumDispatch";
-import { AwsRumExpectedAbortPlugin } from "@/utils/monitoring/awsRumExpectedAbort";
-import { createAwsRumPrivacyPlugin } from "@/utils/monitoring/awsRumPrivacy";
+import { isAwsRumSessionSampled } from "@/utils/monitoring/awsRumSampling";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import type { AwsRum as AwsRumInstance, AwsRumConfig } from "aws-rum-web";
 import { usePathname } from "next/navigation";
@@ -70,15 +69,29 @@ export default function AwsRumProvider({
           return;
         }
 
-        const {
-          AwsRum,
-          FetchPlugin,
-          JsErrorPlugin,
-          NavigationPlugin,
-          ResourcePlugin,
-          WebVitalsPlugin,
-          XhrPlugin,
-        } = await import("aws-rum-web");
+        // Sample before downloading the SDK so unsampled sessions skip the
+        // chunk entirely. The SDK then records every session it is given.
+        if (!isAwsRumSessionSampled(SAMPLE_RATE)) {
+          return;
+        }
+
+        const [
+          {
+            AwsRum,
+            FetchPlugin,
+            JsErrorPlugin,
+            NavigationPlugin,
+            ResourcePlugin,
+            WebVitalsPlugin,
+            XhrPlugin,
+          },
+          { AwsRumExpectedAbortPlugin },
+          { createAwsRumPrivacyPlugin },
+        ] = await Promise.all([
+          import("aws-rum-web"),
+          import("@/utils/monitoring/awsRumExpectedAbort"),
+          import("@/utils/monitoring/awsRumPrivacy"),
+        ]);
 
         if (cancelled) {
           return;
@@ -89,7 +102,7 @@ export default function AwsRumProvider({
           urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
         };
         const config: AwsRumConfig = {
-          sessionSampleRate: SAMPLE_RATE,
+          sessionSampleRate: 1,
           telemetries: [],
           eventPluginsToLoad: [
             createAwsRumPrivacyPlugin(initialPageId),

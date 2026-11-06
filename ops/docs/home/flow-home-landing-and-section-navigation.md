@@ -12,7 +12,7 @@ next route.
 - Entry route: `/`
 - Authenticated section order on `/`: `Header` -> `Latest Drop` or `Next Drop`
   -> mission block -> `Coming up` -> `Most active waves`
-- Logged-out section order on `/`: `Header` with newcomer actions -> `What is 6529?` ->
+- Logged-out section order on `/`: `Header` with newcomer actions ->
   `Latest Drop` or `Next Drop` -> `How to start` -> mission block -> `Coming up` ->
   Waves
 
@@ -23,10 +23,6 @@ next route.
 - Logged-out newcomer actions:
   - `Start here`: `/join-6529`
   - `Connect wallet`: opens the wallet connection flow
-- Logged-out `What is 6529?`:
-  - `Browse The Memes`: `/the-memes`
-  - `Browse Waves`: `/waves`
-  - `Explore Main Stage`: `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`
 - Logged-out `How to start`:
   - `Connect wallet`: opens the wallet connection flow
   - `Create profile`: `/join-6529#join-step-profile`
@@ -66,7 +62,6 @@ next route.
 2. If logged out, use the compact newcomer actions to either:
    - Select `Start here` to continue through `/join-6529`.
    - Select `Connect wallet` to begin connecting immediately.
-   - Browse The Memes, Waves, or Main Stage through `What is 6529?`.
    - Keep browsing without a wallet and continue into current activity.
 3. Open `/network/health` from the heart shortcut when needed.
 4. Wait for the top slot to resolve:
@@ -85,8 +80,8 @@ next route.
 
 - Top slot shows a loading skeleton first, then resolves to `Latest Drop`,
   `Next Drop`, or hidden when no eligible card exists.
-- The newcomer actions, What is 6529?, and How to start stay hidden while wallet state is initializing or
-  connecting. They appear when that state settles without valid authentication.
+- The newcomer actions and How to start stay hidden while wallet state is
+  initializing or connecting. They appear when that state settles without valid authentication.
   Authenticated visitors keep the dashboard-first order.
 - `Coming up` can show:
   - up to 3 leaderboard cards, or
@@ -117,8 +112,8 @@ next route.
 
 - Home sections use independent data sources, so loading and visibility timing
   is not synchronized.
-- Public home activity has no auth or wallet gate; only the newcomer actions, explanation, and steps
-  wait for wallet-state resolution. Visible cards still depend on available data.
+- Public home activity has no auth or wallet gate; only the newcomer actions
+  and steps wait for wallet-state resolution. Visible cards still depend on available data.
 
 ## Related Pages
 

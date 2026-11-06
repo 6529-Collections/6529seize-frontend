@@ -9,8 +9,14 @@ import {
 
 function SubscriptionsTab({ profile }: { readonly profile: ApiIdentity }) {
   // UserPageTabs already redirects a hidden tab to this profile's Identity.
+  // The tab mounts after hydration; a viewport-tall blank space keeps the
+  // footer out of view until then.
   return (
-    <NftPurchasingGate>
+    <NftPurchasingGate
+      placeholder={
+        <div aria-hidden="true" className="tw-min-h-[calc(100dvh-100px)]" />
+      }
+    >
       <UserPageSubscriptions profile={profile} />
     </NftPurchasingGate>
   );

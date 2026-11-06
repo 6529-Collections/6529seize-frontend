@@ -19,7 +19,7 @@ import {
   MOBILE_ACTION_ITEM_CLASSES,
 } from "@/components/compact-menu/constants";
 import { useAuth } from "@/components/auth/Auth";
-import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
+import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";

@@ -1,3 +1,4 @@
+import NotificationArtistArtwork from "./NotificationArtistArtwork";
 import NotificationVotingCreditsReturned from "./NotificationVotingCreditsReturned";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -44,6 +45,8 @@ function NotificationItemComponent({
         );
       case ApiNotificationCause.MemeCollaboration:
         return <NotificationMemeCollaboration notification={notification} />;
+      case ApiNotificationCause.ArtistArtworkSubmitted:
+        return <NotificationArtistArtwork notification={notification} />;
       case ApiNotificationCause.CompetitionLifecycle:
         return <NotificationCompetitionLifecycle notification={notification} />;
       case ApiNotificationCause.DropQuoted:

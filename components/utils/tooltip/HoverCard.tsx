@@ -22,6 +22,7 @@ import {
   type TooltipPlacement,
 } from "./tooltipPositioning";
 import { useTooltipReposition } from "./useTooltipReposition";
+import { getHoverCardTabExitTarget } from "./hoverCardFocus";
 
 interface HoverCardProps {
   readonly children: React.ReactElement;
@@ -34,11 +35,17 @@ interface HoverCardProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
   readonly openOnClick?: boolean | undefined;
+  readonly focusOnKeyboardActivation?: boolean | undefined;
   readonly closeOnContentClick?: boolean | undefined;
   readonly stopClickPropagation?: boolean | undefined;
   readonly triggerDisplay?: CSSProperties["display"] | undefined;
   readonly contentStyle?: CSSProperties | undefined;
 }
+/**
+ * Show nonmodal details on hover or explicit activation. Disclosure triggers
+ * can opt into Enter/Space card focus without intercepting navigation triggers.
+ * Dismissal returns focus when it was inside the card.
+ */
 export default function HoverCard({
   children,
   content,
@@ -50,6 +57,7 @@ export default function HoverCard({
   offset = 8,
   hoverTransitionDelay = 150,
   openOnClick = false,
+  focusOnKeyboardActivation = false,
   closeOnContentClick = false,
   stopClickPropagation = false,
   triggerDisplay = "contents",
@@ -142,6 +150,9 @@ export default function HoverCard({
       resetCardInteractionState();
       focusCardOnOpenRef.current = focusCard;
       setIsVisible(true);
+      if (focusCard) {
+        cardRef.current?.focus();
+      }
     },
     [disabled, resetCardInteractionState]
   );
@@ -160,9 +171,16 @@ export default function HoverCard({
   }, [cancelHideTimer, cancelShowTimer, delayHide, hoverTransitionDelay]);
 
   const closeCardImmediately = useCallback(() => {
+    const restoreTriggerFocus = cardRef.current?.contains(
+      document.activeElement
+    );
     resetCardInteractionState();
     setIsVisible(false);
-  }, [resetCardInteractionState]);
+    if (restoreTriggerFocus) {
+      triggerRef.current?.focus();
+      cancelShowTimer();
+    }
+  }, [cancelShowTimer, resetCardInteractionState]);
 
   const handleTriggerMouseEnter = useCallback(() => {
     resolveTriggerNode();
@@ -204,13 +222,29 @@ export default function HoverCard({
         return;
       }
 
-      if (event.key === "ArrowDown") {
+      if (
+        event.key === "ArrowDown" ||
+        (event.key === "Tab" &&
+          !event.shiftKey &&
+          isVisible &&
+          focusOnKeyboardActivation) ||
+        (openOnClick &&
+          focusOnKeyboardActivation &&
+          (event.key === "Enter" || event.key === " "))
+      ) {
         event.preventDefault();
         resolveTriggerNode();
         showImmediately({ focusCard: true });
       }
     },
-    [closeCardImmediately, resolveTriggerNode, showImmediately]
+    [
+      closeCardImmediately,
+      focusOnKeyboardActivation,
+      isVisible,
+      openOnClick,
+      resolveTriggerNode,
+      showImmediately,
+    ]
   );
 
   const handleTriggerClick = useCallback(
@@ -256,6 +290,28 @@ export default function HoverCard({
     isFocusWithinCardRef.current = true;
     cancelHideTimer();
   }, [cancelHideTimer]);
+
+  const handleCardKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || event.defaultPrevented) return;
+      const card = cardRef.current;
+      const trigger = triggerRef.current;
+      if (!card || !trigger || !card.contains(event.target as Node | null)) {
+        return;
+      }
+      const target = getHoverCardTabExitTarget({
+        card,
+        trigger,
+        shiftKey: event.shiftKey,
+      });
+      if (!target) return;
+      event.preventDefault();
+      closeCardImmediately();
+      target.focus();
+      cancelShowTimer();
+    },
+    [cancelShowTimer, closeCardImmediately]
+  );
 
   const handleCardBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
@@ -384,7 +440,10 @@ export default function HoverCard({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeCardImmediately();
+        return;
       }
+
+      handleCardKeyDown(event);
     };
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -405,14 +464,16 @@ export default function HoverCard({
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, {
+      passive: true,
+    });
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [closeCardImmediately, isVisible]);
+  }, [closeCardImmediately, handleCardKeyDown, isVisible]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -472,7 +533,9 @@ export default function HoverCard({
               tabIndex={-1}
               className={joinTooltipClassNames(
                 styles["tooltip"],
-                styles["tooltip--" + actualPlacement]
+                styles["hoverCard"],
+                styles["tooltip--" + actualPlacement],
+                "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               )}
               style={{
                 position: "fixed",

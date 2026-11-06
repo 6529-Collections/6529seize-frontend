@@ -1326,7 +1326,6 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "banner.edit": "Edit {name}'s profile banner",
   "about.add": "Add About statement",
   "about.edit": "Edit About statement",
-  "about.empty": "Click to add an About statement",
   "about.expand": "See more",
   "about.collapse": "See less",
   "aboutEdit.textareaLabel": "About statement",
@@ -1334,7 +1333,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.characterCount": "{count}/{max}",
   "aboutEdit.cancel": "Cancel",
   "aboutEdit.save": "Save",
-  "aboutEdit.success": "About statement added.",
+  "aboutEdit.success": "About statement saved.",
   "aboutEdit.errors.saveFailed":
     "Couldn't save this about statement. Please try again.",
   "aboutEdit.errors.close": "Dismiss About statement error",
@@ -1352,6 +1351,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.doxxing.value":
     "Your About statement may reveal another person's private information. Remove it and try again.",
   "edit.open": "Edit profile",
+  "edit.label": "Edit",
   "edit.title": "Edit profile",
   "edit.banner": "Profile cover",
   "edit.bannerDescription":
@@ -1362,6 +1362,34 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "edit.classification": "Classification",
   "edit.about": "About",
   "edit.aboutTitle": "Edit About",
+  "edit.gradient": "Gradient",
+  "edit.image": "Image",
+  "edit.color1": "Background Color 1",
+  "edit.color2": "Background Color 2",
+  "edit.upload": "Click to upload",
+  "edit.dragDrop": "or drag and drop",
+  "edit.coverFormats": "JPEG, JPG, PNG, GIF — max 2MB",
+  "edit.pictureFormats": "JPEG, JPG, PNG, GIF, WEBP",
+  "edit.coverPreview": "Banner preview",
+  "edit.picturePreview": "Profile image",
+  "edit.uploadCover": "Upload profile cover",
+  "edit.uploadPicture": "Upload profile picture",
+  "edit.namePlaceholder": "Please select a username",
+  "edit.username": "Username",
+  "edit.chooseMeme": "Choose a Meme",
+  "edit.loadingMemes": "Loading Memes…",
+  "edit.memesError": "Couldn't load Memes.",
+  "edit.retry": "Try again",
+  "edit.success": "Profile updated.",
+  "edit.saveFailed": "Couldn't save your changes. Please try again.",
+  "edit.partialSave":
+    "Some changes were saved. Your remaining changes are still here; try saving again.",
+  "edit.signIn": "Log in to save your profile.",
+  "edit.nameUnavailable": "This profile name is not available.",
+  "edit.discardTitle": "Discard your changes?",
+  "edit.discardMessage": "Your unsaved profile changes will be lost.",
+  "edit.discard": "Discard changes",
+  "edit.keepEditing": "Keep editing",
 } as const);
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
@@ -1563,6 +1591,7 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   loginRequired: "Please log in to make submissions",
+  ended: "Submission period has ended",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -1610,6 +1639,36 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["retry.ariaLabel", "Retry notification settings"],
   ] as const
 );
+
+const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
+  loading: "Loading submission access…",
+  unavailable: "Submission access details are unavailable.",
+  submissionScope: "Submission group",
+  publicGroup: "Public",
+  closedOn: "Closed {date}",
+  otherRules: "Other submission rules still apply.",
+  independent: "Chat access is separate from submission access.",
+  signature: "Submissions require a wallet signature.",
+  viewRules: "View submission rules",
+  "preview.chatPublic": "People with wave access can chat.",
+  "preview.chatGroup": "Chat is limited to its selected group.",
+  "preview.chatDisabledSubmitPublic":
+    "Chat is disabled. Submission group access is public. Voting access is separate.",
+  "preview.chatDisabledSubmitGroup":
+    "Chat is disabled. Only the submission group can submit. Voting access is separate.",
+  "preview.bothPublic":
+    "People with wave access can chat and submit. Voting access is separate.",
+  "preview.chatPublicSubmitGroup":
+    "People with wave access can chat, but only the submission group can submit. Voting access is separate.",
+  "preview.chatGroupSubmitPublic":
+    "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  "preview.chatGroupSubmitGroup":
+    "Chat is limited to its selected group. Only the submission group can submit. Voting access is separate.",
+  "preview.sameGroup":
+    "Chat and submissions use the same selected group. Voting access is separate.",
+  "preview.differentGroups":
+    "Chat and submissions use different access groups. Permission for one does not grant the other. Voting access is separate.",
+} as const);
 
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
@@ -2173,8 +2232,14 @@ const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
   {
-    votingOngoing: "Voting ongoing",
-    droppingOngoing: "Dropping open",
+    votingOngoing: "Voting open",
+    droppingOngoing: "Submissions open",
+    submissionsClosed: "Submissions closed",
+    submissionsOpenIn: "Submissions open in",
+    submissionsCloseIn: "Submissions close in",
+    votingClosed: "Voting closed",
+    votingOpensIn: "Voting opens in",
+    votingClosesIn: "Voting closes in",
     noEndDate: "No end date",
     nextWinnersIn: "Next winners announced in",
     countdown: "{hours}h {minutes}m",
@@ -3145,6 +3210,28 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
  * both into the complete dictionary.
  */
 export const EN_US_ROOT_MESSAGES = {
+  "artworkAlerts.label": "Artwork alerts",
+  "artworkAlerts.on": "On",
+  "artworkAlerts.off": "Off",
+  "artworkAlerts.saving": "Please wait…",
+  "artworkAlerts.mainStage":
+    "Get notified when this artist submits to The Memes Main Stage.",
+  "artworkAlerts.enabled": "Artwork alerts are on.",
+  "artworkAlerts.disabled": "Artwork alerts are off.",
+  "artworkAlerts.retry": "Try again",
+  "artworkAlerts.saveFailed": "Couldn’t save artwork alerts.",
+  "artworkAlerts.tryAgain": "Please try again.",
+  "artworkAlerts.sessionChanged": "Your session changed. Please try again.",
+  "artworkAlerts.notification":
+    "{artist} submitted {artwork} to {competition}.",
+  "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.loading": "Loading emoji picker...",
+  "emoji.picker.unavailable": "Emoji picker is unavailable.",
+  "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
+  "waves.historyGap.loading": "Loading missed messages…",
+  "waves.historyGap.retry": "Could not load missed messages. Try again",
+
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
@@ -4631,6 +4718,8 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_PROFILE_IDENTITY_STATEMENT_MESSAGES,
   ...USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  "waves.composer.mentions.level": "Level {level}",
+  "waves.composer.mentions.profileAlt": "Profile for {handle}",
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
@@ -4662,6 +4751,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_CREATE_DIALOG_MESSAGES,
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
+  ...WAVE_ACCESS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
   "waves.subwaves.accessWarning.message":
@@ -4692,6 +4782,8 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.loading": "Loading activity log",
+  "profileActivity.loadError": "Unable to load activity log.",
+  "profileActivity.retry": "Retry",
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,

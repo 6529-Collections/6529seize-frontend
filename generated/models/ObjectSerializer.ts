@@ -15,6 +15,8 @@ export * from '../models/ApiAlchemyContractMetadataBatchResponse';
 export * from '../models/ApiAlchemyContractMetadataRequest';
 export * from '../models/ApiAlchemyContractMetadataResult';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
+export * from '../models/ApiArtistArtworkAlert';
+export * from '../models/ApiArtistArtworkNotificationContext';
 export * from '../models/ApiArtistNameItem';
 export * from '../models/ApiArtworkAssetC2paResult';
 export * from '../models/ApiArtworkAssetFormatIdentification';
@@ -659,6 +661,8 @@ export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
 export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiPaymentDetails';
+export * from '../models/ApiProfileActivityLog';
+export * from '../models/ApiProfileActivityLogPage';
 export * from '../models/ApiProfileBlockState';
 export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileCmsAgentCandidateValidation';
@@ -994,6 +998,8 @@ import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyCon
 import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
 import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
+import { ApiArtistArtworkAlert } from '../models/ApiArtistArtworkAlert';
+import { ApiArtistArtworkNotificationContext } from '../models/ApiArtistArtworkNotificationContext';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
 import { ApiArtworkAssetC2paResult, ApiArtworkAssetC2paResultStatusEnum        , ApiArtworkAssetC2paResultTrustEnum      , ApiArtworkAssetC2paResultIntegrityEnum   } from '../models/ApiArtworkAssetC2paResult';
 import { ApiArtworkAssetFormatIdentification, ApiArtworkAssetFormatIdentificationStatusEnum       , ApiArtworkAssetFormatIdentificationIdentificationScopeEnum   } from '../models/ApiArtworkAssetFormatIdentification';
@@ -1615,7 +1621,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                             } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                                } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -1638,6 +1644,8 @@ import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
 import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
+import { ApiProfileActivityLog } from '../models/ApiProfileActivityLog';
+import { ApiProfileActivityLogPage } from '../models/ApiProfileActivityLogPage';
 import { ApiProfileBlockState } from '../models/ApiProfileBlockState';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileCmsAgentCandidateValidation } from '../models/ApiProfileCmsAgentCandidateValidation';
@@ -2277,6 +2285,8 @@ let typeMap: {[index: string]: any} = {
     "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
     "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
+    "ApiArtistArtworkAlert": ApiArtistArtworkAlert,
+    "ApiArtistArtworkNotificationContext": ApiArtistArtworkNotificationContext,
     "ApiArtistNameItem": ApiArtistNameItem,
     "ApiArtworkAssetC2paResult": ApiArtworkAssetC2paResult,
     "ApiArtworkAssetFormatIdentification": ApiArtworkAssetFormatIdentification,
@@ -2869,6 +2879,8 @@ let typeMap: {[index: string]: any} = {
     "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
     "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiPaymentDetails": ApiPaymentDetails,
+    "ApiProfileActivityLog": ApiProfileActivityLog,
+    "ApiProfileActivityLogPage": ApiProfileActivityLogPage,
     "ApiProfileBlockState": ApiProfileBlockState,
     "ApiProfileCmsAgentCandidateValidation": ApiProfileCmsAgentCandidateValidation,
     "ApiProfileCmsAgentConstraints": ApiProfileCmsAgentConstraints,
