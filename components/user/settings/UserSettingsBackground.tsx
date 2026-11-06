@@ -41,7 +41,7 @@ export default function UserSettingsBackground({
       }
     >
       <div
-        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 focus-within:tw-ring-2 focus-within:tw-ring-primary-400" : "md:tw-flex-1"}`}
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2" : "md:tw-flex-1"}`}
       >
         <label
           htmlFor="bgColor1"
@@ -59,7 +59,7 @@ export default function UserSettingsBackground({
             name="bgColor1"
             value={bgColor1}
             onChange={(e) => setBgColor1(e.target.value)}
-            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
+            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
           />
           <div
             onClick={onBgColor1Click}
@@ -88,7 +88,7 @@ export default function UserSettingsBackground({
       </div>
 
       <div
-        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2 focus-within:tw-ring-2 focus-within:tw-ring-primary-400" : "md:tw-flex-1"}`}
+        className={`tw-w-full tw-cursor-pointer ${compact ? "tw-flex tw-min-h-14 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-px-3 tw-py-2" : "md:tw-flex-1"}`}
       >
         <label
           htmlFor="bgColor2"
@@ -106,7 +106,7 @@ export default function UserSettingsBackground({
             name="bgColor2"
             value={bgColor2}
             onChange={(e) => setBgColor2(e.target.value)}
-            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
+            className={`tw-block tw-cursor-pointer tw-border-0 focus:tw-outline-none ${compact ? "tw-size-8 tw-overflow-hidden tw-rounded-full tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-moz-color-swatch]:tw-rounded-full [&::-moz-color-swatch]:tw-border-0 [&::-webkit-color-swatch-wrapper]:tw-p-0 [&::-webkit-color-swatch]:tw-rounded-full [&::-webkit-color-swatch]:tw-border-0" : "tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-3 tw-pr-10 tw-text-base tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"}`}
           />
           <div
             onClick={onBgColor2Click}

@@ -392,6 +392,17 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "About statement",
       exact: true,
     });
+    await page.getByLabel("Background Color 1", { exact: true }).focus();
+    await page.keyboard.press("Tab");
+    const secondColor = page.getByLabel("Background Color 2", { exact: true });
+    await expect(secondColor).toBeFocused();
+    await expect(secondColor).toHaveCSS("outline-style", "solid");
+    await expect(secondColor).toHaveCSS("outline-width", "2px");
+    await expect(secondColor).toHaveCSS("outline-offset", "2px");
+    await expect(secondColor).toHaveCSS("outline-color", "rgb(82, 139, 255)");
+    await page.screenshot({
+      path: testInfo.outputPath("profile-color-keyboard-focus.png"),
+    });
     const aboutTop = await aboutInput.evaluate(
       (element: HTMLTextAreaElement) => element.offsetTop
     );
