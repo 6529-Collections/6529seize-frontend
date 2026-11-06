@@ -17,6 +17,10 @@
 # in memory and in mode-600 temporary files that are removed on exit. Requests
 # that change AWS state print only IDs and statuses.
 #
+# CloudFront changes start from a fresh get-distribution-config and use its
+# ETag with --if-match. Only the origin's X-Origin-Verify custom header is
+# changed; every other field, including WebACLId, is written back as read.
+#
 # Runbook: ops/docs/developer/cloudfront-page-cache.md
 set -euo pipefail
 set +x
