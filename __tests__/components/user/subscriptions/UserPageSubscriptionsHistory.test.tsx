@@ -272,6 +272,66 @@ describe("UserPageSubscriptionsHistory", () => {
     );
   });
 
+  it("reveals a keyboard-selected tab again at its wider selected weight", async () => {
+    render(<HistoryTestView {...makeProps()} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
+    const reveals: { tab: string; selected: string | null }[] = [];
+    const scroll = jest
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(function (this: Element) {
+        reveals.push({
+          tab: this.textContent ?? "",
+          selected: this.getAttribute("aria-selected"),
+        });
+      });
+    try {
+      await user.keyboard("{ArrowRight}");
+      const logs = screen.getByRole("tab", { name: "Log History" });
+      expect(logs).toHaveFocus();
+      expect(logs).toHaveAttribute("aria-selected", "true");
+      // Focus lands first; the selected pill grows, so it is revealed again.
+      expect(reveals).toEqual([
+        { tab: "Log History", selected: "false" },
+        { tab: "Log History", selected: "true" },
+      ]);
+      expect(scroll).toHaveBeenLastCalledWith({
+        behavior: "instant",
+        block: "nearest",
+        inline: "nearest",
+      });
+    } finally {
+      scroll.mockRestore();
+    }
+  });
+
+  it("does not scroll to the selected tab while focus is elsewhere", () => {
+    const scroll = jest.spyOn(Element.prototype, "scrollIntoView");
+    try {
+      const props = makeProps();
+      const { rerender } = render(
+        <UserPageSubscriptionsHistory
+          {...props}
+          selectedIndex={0}
+          onSelectionChange={jest.fn()}
+        />
+      );
+      rerender(
+        <UserPageSubscriptionsHistory
+          {...props}
+          selectedIndex={2}
+          onSelectionChange={jest.fn()}
+        />
+      );
+      expect(
+        screen.getByRole("tab", { name: "Top Up History" })
+      ).toHaveAttribute("aria-selected", "true");
+      expect(scroll).not.toHaveBeenCalled();
+    } finally {
+      scroll.mockRestore();
+    }
+  });
+
   it.each([
     "No additional allocation details",
     "Mode: Manual - Note: keep exact text: 1 - 2",
