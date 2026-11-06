@@ -2,7 +2,11 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
-import { VALIDATOR_UPGRADE } from "@/lib/validator-page/content/guideMarkdown";
+import {
+  VALIDATOR_SWITCH,
+  VALIDATOR_UPGRADE,
+  type ValidatorReleaseNote,
+} from "@/lib/validator-page/content/guideMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
   VALIDATOR_FEEDBACK_WAVE,
@@ -12,25 +16,26 @@ import CopyChecksumButton from "./CopyChecksumButton";
 import ValidatorMarkdown from "./ValidatorMarkdown";
 import { BODY, LINK, SECTION_HEADING } from "./validatorStyles";
 
-/**
- * What a tester who runs the last release does differently, right under the
- * download, where an upgrading tester looks first. Shown only while the
- * signed list offers the release the note is for, so it never describes a
- * release the page doesn't offer.
- */
-export function ValidatorUpgrade({
-  newest,
-}: {
-  /** The signed list's newest version, or undefined while it has none. */
+type NewestProps = {
+  /** The offered release's version, or undefined while there is none. */
   readonly newest: string | undefined;
-}) {
-  if (newest !== VALIDATOR_UPGRADE.forVersion) {
+};
+
+/**
+ * A note for one release, shown only while the signed list offers it, so it
+ * never describes a release the page doesn't offer.
+ */
+function ReleaseNote({
+  note,
+  newest,
+}: NewestProps & { readonly note: ValidatorReleaseNote }) {
+  if (newest !== note.forVersion) {
     return null;
   }
-  const headingId = `${VALIDATOR_UPGRADE.id}-title`;
+  const headingId = `${note.id}-title`;
   return (
     <section
-      id={VALIDATOR_UPGRADE.id}
+      id={note.id}
       aria-labelledby={headingId}
       className={`${ABOUT_INSET_CLASS_NAME} tw-mb-12 tw-scroll-mt-24 tw-p-5 sm:tw-p-6`}
     >
@@ -38,13 +43,26 @@ export function ValidatorUpgrade({
         id={headingId}
         className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
       >
-        {VALIDATOR_UPGRADE.title}
+        {note.title}
       </h2>
-      <div className="tw-mt-3 [&_ul]:tw-mb-0">
-        <ValidatorMarkdown markdown={VALIDATOR_UPGRADE.markdown} />
+      <div className="tw-mt-3 [&>div>*:last-child]:tw-mb-0">
+        <ValidatorMarkdown markdown={note.markdown} />
       </div>
     </section>
   );
+}
+
+/**
+ * What a tester who runs the last release does differently, right under the
+ * download, where an upgrading tester looks first.
+ */
+export function ValidatorUpgrade({ newest }: NewestProps) {
+  return <ReleaseNote note={VALIDATOR_UPGRADE} newest={newest} />;
+}
+
+/** rc.9's switch on Sunday, at the top of the guide. */
+export function ValidatorSwitch({ newest }: NewestProps) {
+  return <ReleaseNote note={VALIDATOR_SWITCH} newest={newest} />;
 }
 
 /** What a tester needs, in two lines, and the full hardware guide. */

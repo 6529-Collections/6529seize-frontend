@@ -9,6 +9,7 @@ import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
 import {
   ValidatorFeedback,
   ValidatorNeeds,
+  ValidatorSwitch,
   ValidatorUpgrade,
 } from "./ValidatorSections";
 import ValidatorSteps, { type ValidatorDebs } from "./ValidatorSteps";
@@ -25,7 +26,7 @@ export default function ValidatorGuidePage({
 }: {
   readonly platform: VisitorPlatform;
   readonly debs: ValidatorDebs;
-  /** The signed list's newest version, for the upgrade note. */
+  /** The offered release's version, for the notes on it. */
   readonly newest: string | undefined;
 }) {
   return (
@@ -44,6 +45,7 @@ export default function ValidatorGuidePage({
         </p>
       </ValidatorPageHeader>
 
+      <ValidatorSwitch newest={newest} />
       <ValidatorUpgrade newest={newest} />
 
       <section aria-labelledby="steps">
