@@ -23,8 +23,12 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   onDrop,
 }) => {
   const submitLabel = label ?? (isDropMode ? "Drop" : "Post");
+  const ariaLabel = submitting ? `${submitLabel} in progress` : submitLabel;
   const iconOnly = !isDropMode && !label && !showLabelOnMobile;
   const title = !canSubmit && disabledTooltip ? disabledTooltip : undefined;
+  const labelClassName = `${
+    showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
+  } ${label ? "tw-text-[10px]" : ""}`;
 
   const button = iconOnly ? (
     <ComposerSendButton
@@ -32,7 +36,7 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       loading={submitting}
       disabled={!canSubmit}
       title={title}
-      aria-label={submitting ? `${submitLabel} in progress` : submitLabel}
+      aria-label={ariaLabel}
     />
   ) : (
     <Button
@@ -47,16 +51,10 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
           ? "tw-min-w-20 tw-px-3 lg:tw-px-3.5"
           : "tw-w-10 tw-px-0"
       } ${!showLabelOnMobile ? "lg:tw-w-[3.875rem] lg:tw-px-3.5" : ""}`}
-      aria-label={submitting ? `${submitLabel} in progress` : submitLabel}
+      aria-label={ariaLabel}
       hideChildrenWhenLoading
     >
-      <span
-        className={`${
-          showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
-        } ${label ? "tw-text-[10px]" : ""}`}
-      >
-        {submitLabel}
-      </span>
+      <span className={labelClassName}>{submitLabel}</span>
       {!showLabelOnMobile && (
         <PaperAirplaneIcon
           aria-hidden="true"
