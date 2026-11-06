@@ -15,11 +15,12 @@ import {
   VALIDATOR_FEEDBACK_TEMPLATE,
   VALIDATOR_FEEDBACK_WAVE_HREF,
 } from "@/lib/validator-page/content/pageText";
+import { RC9_COMMIT_FULL } from "./fixtures";
 
 // The release the pages describe: its version and short commit, as
 // `validator --version` prints them and the signed release list names them.
 const RELEASE = "0.1.0-rc.9";
-const COMMIT = "a5bd372";
+const COMMIT = RC9_COMMIT_FULL.slice(0, 7);
 // From rc.9's light-client checkpoint: a new install must start before it.
 const FRESH_INSTALL_UNTIL = "2026-11-22 01:30 UTC";
 const LIGHT_CLIENT_CHECKPOINT = "2026-11-06 09:13 UTC";

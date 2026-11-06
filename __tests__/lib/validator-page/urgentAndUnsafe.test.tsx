@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { BucketObject } from "@/lib/validator-page/releasesBucket";
 import {
+  RC9_COMMIT_FULL,
   RC9_DEADLINE_REASON,
   RC9_FEED,
   RC9_UNSAFE_REASON,
@@ -113,6 +114,23 @@ describe("rc.9's feed: rc.9 urgent, rc.5 to rc.8 unsafe", () => {
     expect(page).toContain("Upgrading from rc.8");
   });
 
+  it("names the full version in the heading and under the download button", async () => {
+    const html = renderToStaticMarkup(await ValidatorRoute());
+    expect(text(html)).toContain("Test release 0.1.0-rc.9 ");
+    expect(html).toMatch(
+      /Download for Mac<\/a><p[^>]*><span[^>]*>0\.1\.0-rc\.9<\/span> · macOS 11 or newer/
+    );
+    // The file names stay 0.1.0's.
+    expect(html).toContain(`href="/validator/download/0.1.0-rc.9/${DMG}"`);
+  });
+
+  it("the guide's version line names the feed's rc.9 commit", async () => {
+    const html = renderToStaticMarkup(await ValidatorGuideRoute());
+    expect(html).toContain(
+      `validator 0.1.0-rc.9 (${RC9_COMMIT_FULL.slice(0, 7)}, TDH v1.4)`
+    );
+  });
+
   it("the guide opens with Sunday's switch, then the upgrade from rc.8", async () => {
     const html = renderToStaticMarkup(await ValidatorGuideRoute());
     const sunday = html.indexOf('id="update-before-sunday"');
@@ -126,7 +144,12 @@ describe("rc.9's feed: rc.9 urgent, rc.5 to rc.8 unsafe", () => {
     const html = renderToStaticMarkup(await ValidatorReleasesRoute());
     const entries = html.split("<article").slice(1);
     expect(entries).toHaveLength(3);
+    // Each entry is headed by its full version.
+    expect(
+      entries.map((entry) => /<h2[^>]*>([^<]+)<\/h2>/.exec(entry)?.[1])
+    ).toEqual(["0.1.0-rc.9", "0.1.0-rc.8", "0.1.0-rc.7"]);
     const [rc9, rc8, rc7] = entries.map(text);
+    expect(rc9).toContain(RC9_COMMIT_FULL);
     expect(rc9).toContain("Latest");
     expect(rc9).not.toContain("Unsafe");
     for (const entry of [rc8, rc7]) {
@@ -154,6 +177,7 @@ describe("a feed whose newest release is listed as unsafe", () => {
     const html = renderToStaticMarkup(await ValidatorRoute());
     expect(linkedVersions(html)).toEqual([]);
     expect(html).not.toContain('id="urgent"');
+    expect(text(html)).toContain(" Test release 6529 Validator ");
     expect(text(html)).toContain(
       "The newest release, 0.1.0-rc.9, is listed as unsafe to run, so it isn't offered here. Made-up reason for a test."
     );
@@ -183,6 +207,7 @@ describe("a feed with no urgent release", () => {
 
   it("shows no notice and marks nothing unsafe", async () => {
     const download = renderToStaticMarkup(await ValidatorRoute());
+    expect(text(download)).toContain(" Test release 0.1.0 6529 Validator ");
     expect(download).not.toContain('id="urgent"');
     expect(download).not.toContain("urgent update");
     const releases = renderToStaticMarkup(await ValidatorReleasesRoute());

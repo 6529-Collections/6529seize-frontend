@@ -94,6 +94,9 @@ export const SAME_DAY_FEED = {
   ],
 };
 
+/** rc.9's commit, as the cut names it; fill-rc9.sh changes it on a recut. */
+export const RC9_COMMIT_FULL = "a5bd372944756d56ee8a697eba9acba5dd65686a";
+
 /** rc.9's reasons, as 6529 means to sign them. */
 export const RC9_URGENT_REASON =
   "Signed TDH starts again on Sunday 8 November, 00:00 UTC, with the zero and dead addresses in the total. Update before then.";
@@ -119,6 +122,7 @@ export const RC9_FEED = {
   releases: [
     {
       ...feedEntry("0.1.0-rc.9", "test", "2026-11-06"),
+      commit: RC9_COMMIT_FULL,
       severity: "urgent",
       reason: RC9_URGENT_REASON,
     },

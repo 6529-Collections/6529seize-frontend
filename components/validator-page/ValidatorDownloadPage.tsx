@@ -2,7 +2,6 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
 import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
-import { getBaseVersion } from "@/lib/validator-page/content/pageText";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 import {
   getOfferedRelease,
@@ -195,14 +194,13 @@ export default function ValidatorDownloadPage({
   readonly platform: VisitorPlatform;
 }) {
   const release = getOfferedRelease(snapshot.releases);
-  const version = release ? getBaseVersion(release.version) : "0.1.0";
   const installers = release ? groupReleaseFiles(release).installers : [];
   const knownIssues = guideFold("known-issues");
   return (
     <ValidatorPageFrame current="download">
       <ValidatorFoldOpener />
       <ValidatorPageHeader
-        eyebrow={`Test release ${version}`}
+        eyebrow={release ? `Test release ${release.version}` : "Test release"}
         title="6529 Validator"
       >
         <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-lg tw-leading-8 tw-text-iron-300">
@@ -221,6 +219,7 @@ export default function ValidatorDownloadPage({
         )}
         {release ? (
           <ValidatorDownloadChooser
+            version={release.version}
             options={installers.map((item) => toOption(release, item))}
             initial={platform}
           />

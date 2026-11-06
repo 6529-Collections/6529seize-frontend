@@ -108,7 +108,10 @@ The pages show the new release within a minute. The download buttons pick
 each file by its name: `.dmg`, `-Setup-<version>-x64.exe`, `_amd64.deb`,
 `_arm64.deb` and `-x86_64.AppImage`. The big button is the visitor's
 system, from the User-Agent (and, in Chromium, the CPU from its client
-hints); "Other systems" lists all five. The Windows `-x64.msi` and the
+hints); "Other systems" lists all five. The page's heading and the line
+under the big button name the offered release's full version, as the feed
+gives it (`0.1.0-rc.9`), so a tester can tell which candidate it is; the
+file names stay `0.1.0`'s. The Windows `-x64.msi` and the
 `validator-<version>-<target>` archives are under "Linux and the
 terminal" and "All files and checksums"; in a release without a
 `Setup.exe`, the `.msi` takes the Windows button. From rc.8 a release also
