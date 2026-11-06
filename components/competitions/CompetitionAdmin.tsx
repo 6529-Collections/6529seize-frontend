@@ -54,9 +54,11 @@ export default function CompetitionAdmin({
   const router = useRouter();
   const client = useQueryClient();
   const [action, setAction] = useState<CompetitionAction | null>(null);
-  const [actionVersion, setActionVersion] = useState(
-    competition.config_version
-  );
+  const [actionSnapshot, setActionSnapshot] = useState({
+    version: competition.config_version,
+    lifecycle: competition.lifecycle,
+  });
+  const { version: actionVersion, lifecycle: actionLifecycle } = actionSnapshot;
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -78,6 +80,10 @@ export default function CompetitionAdmin({
     (action === "archive" &&
       published &&
       competition.permissions.archive_requires_reason !== false);
+  const reasonHelpId =
+    action === "pause"
+      ? "competition-pause-reason-help"
+      : "competition-archive-reason-help";
   const actionLabel = (command: CompetitionAction) =>
     t(
       locale,
@@ -93,7 +99,10 @@ export default function CompetitionAdmin({
     return "competitions.actionConsequences";
   };
   const openAction = (command: CompetitionAction) => {
-    setActionVersion(competition.config_version);
+    setActionSnapshot({
+      version: competition.config_version,
+      lifecycle: competition.lifecycle,
+    });
     setReason("");
     setFailed(false);
     setAction(command);
@@ -132,7 +141,7 @@ export default function CompetitionAdmin({
         router.push(getCompetitionRoute(competition.wave_id, result.id));
       if (
         action === "archive" &&
-        competition.lifecycle === ApiCompetitionLifecycle.Draft
+        actionLifecycle === ApiCompetitionLifecycle.Draft
       )
         router.push(getCompetitionsRoute(competition.wave_id));
     } catch {
@@ -249,19 +258,20 @@ export default function CompetitionAdmin({
                 maxLength={2000}
                 rows={3}
                 disabled={busy}
-                aria-describedby={
-                  action === "pause"
-                    ? "competition-pause-reason-help"
-                    : undefined
-                }
+                aria-describedby={reasonRequired ? reasonHelpId : undefined}
                 onChange={(event) => setReason(event.target.value)}
               />
-              {action === "pause" && (
+              {reasonRequired && (
                 <p
-                  id="competition-pause-reason-help"
+                  id={reasonHelpId}
                   className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400"
                 >
-                  {t(locale, "competitions.pauseReasonHelp")}
+                  {t(
+                    locale,
+                    action === "pause"
+                      ? "competitions.pauseReasonHelp"
+                      : "competitions.archiveReasonHelp"
+                  )}
                 </p>
               )}
             </div>

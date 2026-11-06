@@ -19,6 +19,7 @@ const mockCompetition = {
     archive_requires_reason: true,
   },
 };
+const mockPush = jest.fn();
 const mockQuery = {
   data: {
     pages: [
@@ -52,7 +53,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ requestAuth: async () => ({ success: true }) }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionResource: () => mockQuery,
@@ -217,6 +218,9 @@ it("requires an archive reason after activity and explains the permanent stop", 
   );
   expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
   const reason = screen.getByRole("textbox", { name: "Reason (required)" });
+  expect(reason).toHaveAccessibleDescription(
+    "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history."
+  );
   expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
   fireEvent.change(reason, {
     target: { value: "  Replacing the competition  " },
@@ -270,4 +274,21 @@ it("exposes only Archive beside draft setup and hides it from non-administrators
   expect(
     screen.queryByRole("button", { name: "Archive", exact: true })
   ).not.toBeInTheDocument();
+});
+
+it("returns an archived draft to the collection even if invalidation updates its lifecycle", async () => {
+  mockCompetition.lifecycle = "DRAFT";
+  jest.mocked(invalidateCompetition).mockImplementation(async () => {
+    mockCompetition.lifecycle = "ARCHIVED";
+  });
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Archive", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Confirm", exact: true }));
+  await waitFor(() =>
+    expect(mockPush).toHaveBeenCalledWith("/waves/wave/competitions")
+  );
 });
