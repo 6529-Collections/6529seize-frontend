@@ -85,29 +85,29 @@ export default function MentionsTypeaheadMenuItem({
                     </div>
                   </div>
                 )}
+                {isSelected && (
+                  <svg
+                    className="tw-ml-auto tw-size-4 tw-shrink-0 tw-text-primary-300"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 6L9 17L4 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </div>
               <div className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
                 {display}
               </div>
             </div>
           </div>
-          {isSelected && (
-            <svg
-              className="tw-ml-2 tw-mt-0.5 tw-size-4 tw-shrink-0 tw-self-start tw-text-primary-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20 6L9 17L4 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
         </div>
       </button>
     </li>

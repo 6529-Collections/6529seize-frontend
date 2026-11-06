@@ -80,7 +80,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
               id: "profile-new",
               handle: "alicenew",
               display: null,
-              pfp: null,
+              pfp: `${baseURL}/6529bgwhite.svg`,
               level: 0,
             },
             {
@@ -142,18 +142,6 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       gap: "2px",
     });
     expect(layout.rowHeights.every((height) => height >= 44)).toBe(true);
-    const check = await experienced.evaluate((button) => {
-      const icon = button.querySelector("svg")!.getBoundingClientRect();
-      const handle = button.querySelector("span")!.getBoundingClientRect();
-      return {
-        width: icon.width,
-        height: icon.height,
-        offset: icon.y + icon.height / 2 - handle.y - handle.height / 2,
-      };
-    });
-    expect(check.width).toBe(16);
-    expect(check.height).toBe(16);
-    expect(Math.abs(check.offset)).toBeLessThanOrEqual(0.5);
     const badge = await experienced
       .getByText("42", { exact: true })
       .evaluate((element) => {
@@ -177,8 +165,27 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       )
     ).toBe(true);
     await expectNoHorizontalOverflow(page);
-    await page.screenshot({ path: testInfo.outputPath("mention-levels.png") });
-    await composer.press("ArrowDown");
+    for (const option of [experienced, newcomer]) {
+      await expect(option).toHaveCSS("background-color", "rgb(38, 39, 43)");
+      const check = await option.evaluate((button) => {
+        const icon = button.querySelector("svg")!.getBoundingClientRect();
+        const handle = button.querySelector("span")!.getBoundingClientRect();
+        return {
+          width: icon.width,
+          height: icon.height,
+          offset: icon.y + icon.height / 2 - handle.y - handle.height / 2,
+        };
+      });
+      expect(check.width).toBe(16);
+      expect(check.height).toBe(16);
+      expect(Math.abs(check.offset)).toBeLessThanOrEqual(0.5);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `mention-${option === experienced ? "display" : "no-display"}.png`
+        ),
+      });
+      if (option === experienced) await composer.press("ArrowDown");
+    }
     await composer.press("ArrowUp");
     await composer.press("Enter");
     await expect(composer).toContainText("@alicelonghandle");
