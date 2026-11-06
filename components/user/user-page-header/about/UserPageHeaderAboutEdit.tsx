@@ -144,7 +144,7 @@ export default function UserPageHeaderAboutEdit({
           required={!statement}
           inputRef={inputRef}
         />
-        <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
+        <div className="tw-mt-5 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
           <Button
             variant="ghost"
             size="lg"

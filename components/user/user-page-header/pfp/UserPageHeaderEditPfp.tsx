@@ -193,7 +193,7 @@ export default function UserPageHeaderEditPfp({
   };
 
   const form = (
-    <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
+    <form onSubmit={onSubmit} className="tw-px-5 sm:tw-px-6">
       <UserSettingsImgSelectMeme
         compact
         memes={memes ?? []}
@@ -263,6 +263,7 @@ export default function UserPageHeaderEditPfp({
       tabletModal
       showHeaderCloseButton
       headerVariant="minimal"
+      headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
       titleClassName="!tw-text-base !tw-font-medium"
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"

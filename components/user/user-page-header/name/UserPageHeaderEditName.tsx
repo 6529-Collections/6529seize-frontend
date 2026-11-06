@@ -116,7 +116,7 @@ export default function UserPageHeaderEditName({
   const form = (
     <form
       onSubmit={onSubmit}
-      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-5 sm:tw-px-6"
     >
       <UserSettingsUsername
         compact
@@ -167,6 +167,7 @@ export default function UserPageHeaderEditName({
       tabletModal
       showHeaderCloseButton
       headerVariant="minimal"
+      headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
       titleClassName="!tw-text-base !tw-font-medium"
       maxWidthClass="md:tw-max-w-xl"
     >

@@ -162,6 +162,7 @@ export default function UserPageHeaderEditProfile({
         tabletModal
         showHeaderCloseButton
         headerVariant="minimal"
+        headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
         titleClassName="!tw-text-base !tw-font-medium"
         showHeaderDivider={false}
         enableDragToClose
@@ -182,7 +183,7 @@ export default function UserPageHeaderEditProfile({
       >
         <div ref={viewRef}>
           {activeTarget === null && (
-            <div className="tw-px-4 sm:tw-px-6">
+            <div className="tw-px-5 sm:tw-px-6">
               <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
                 {options.map(({ target, label, Icon }) => (
                   <li key={target}>
@@ -239,7 +240,7 @@ export default function UserPageHeaderEditProfile({
             />
           )}
           {activeTarget === "about" && (
-            <div className="tw-px-4 sm:tw-px-6">
+            <div className="tw-px-5 sm:tw-px-6">
               <UserPageHeaderAboutEdit
                 profile={profile}
                 statement={statement}

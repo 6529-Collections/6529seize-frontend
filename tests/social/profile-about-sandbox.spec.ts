@@ -596,6 +596,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectAxeClean(page, { include: ['[role="dialog"]'] });
     await page.screenshot({
       path: testInfo.outputPath("profile-mobile-menu.png"),
+      scale: "css",
     });
     for (const target of [
       "Profile cover",
@@ -651,12 +652,40 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           page.getByRole("textbox", { name: "About statement", exact: true })
         ).toBeVisible();
       }
+      const spacing = await page
+        .getByTestId("mobile-dialog-header")
+        .evaluate((header) => {
+          const surface = header.parentElement?.parentElement;
+          const heading = header.lastElementChild?.lastElementChild;
+          const field =
+            header.nextElementSibling?.querySelector("form")?.firstElementChild;
+          if (!surface || !heading || !field)
+            throw new Error("Missing editor layout");
+          const surfaceBox = surface.getBoundingClientRect();
+          const headingBox = heading.getBoundingClientRect();
+          const fieldBox = field.getBoundingClientRect();
+          return {
+            headerGap: fieldBox.top - headingBox.bottom,
+            leftGutter: fieldBox.left - surfaceBox.left,
+            rightGutter: surfaceBox.right - fieldBox.right,
+          };
+        });
+      expect(spacing.headerGap).toBeGreaterThanOrEqual(19);
+      expect(spacing.leftGutter).toBeGreaterThanOrEqual(19);
+      expect(spacing.rightGutter).toBeGreaterThanOrEqual(19);
+      await expect(
+        page.getByRole("button", {
+          name: target === "Profile picture" ? "Save PFP" : "Save",
+          exact: true,
+        })
+      ).toBeInViewport();
       await expectNoHorizontalOverflow(page);
       await expectAxeClean(page, { include: ['[role="dialog"]'] });
       await page.screenshot({
         path: testInfo.outputPath(
           `profile-mobile-${target.toLowerCase().replaceAll(" ", "-")}.png`
         ),
+        scale: "css",
       });
       await page.getByRole("button", { name: "Back", exact: true }).click();
     }

@@ -215,7 +215,7 @@ export default function UserPageHeaderEditBanner({
   const form = (
     <form
       onSubmit={onSubmit}
-      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-5 sm:tw-px-6"
     >
       <CommonTabs<BannerEditMode>
         items={bannerTabs}
@@ -277,6 +277,7 @@ export default function UserPageHeaderEditBanner({
       tabletModal
       showHeaderCloseButton
       headerVariant="minimal"
+      headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
       titleClassName="!tw-text-base !tw-font-medium"
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
