@@ -238,6 +238,9 @@ jobs:
           if (plan.checks.playwright_submission_artwork?.required) {
             corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
           }
+          if (plan.checks.playwright_profile_nic?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-profile-nic", label: "Profile NIC activity", runner: defaultRunner });
+          }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
           }
@@ -563,6 +566,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
         run: ./bin/6529 run test:e2e:profile-following-sandbox
+
+      - name: Run profile NIC activity browser regression pack
+        if: matrix.lane == 'playwright-profile-nic'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-nic"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-nic"
+        run: ./bin/6529 run test:e2e:profile-nic-sandbox
 
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.
