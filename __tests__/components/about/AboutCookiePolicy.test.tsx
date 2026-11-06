@@ -11,9 +11,14 @@ jest.mock('@/components/cookies/CookieConsentContext', () => ({
   getCookieConsentByName: jest.fn(),
 }));
 
+jest.mock('@/hooks/useBrowserLocale', () => ({
+  useBrowserLocale: jest.fn(() => 'en-US'),
+}));
+
 const { useCookieConsent, getCookieConsentByName } = jest.requireMock(
   '../../../components/cookies/CookieConsentContext'
 );
+const { useBrowserLocale } = jest.requireMock('@/hooks/useBrowserLocale');
 
 describe('AboutCookiePolicy', () => {
   const consent = jest.fn();
@@ -27,6 +32,7 @@ describe('AboutCookiePolicy', () => {
       reject,
     });
     (getCookieConsentByName as jest.Mock).mockReturnValue(false);
+    (useBrowserLocale as jest.Mock).mockReturnValue('en-US');
   });
 
   it('renders cookie policy heading', () => {
@@ -54,18 +60,38 @@ describe('AboutCookiePolicy', () => {
       .closest('tr');
     expect(sessionRow).not.toBeNull();
     expect(sessionRow).toHaveTextContent(/session ID/i);
-    expect(sessionRow).toHaveTextContent('30 minutes after your last activity');
+    expect(sessionRow).toHaveTextContent('30 minutes after last activity');
 
     expect(
-      screen.getByText(/We use Amazon CloudWatch RUM to measure page load speed/)
+      screen.getByText(
+        /We use Amazon CloudWatch RUM .* it sets the cwr_u and cwr_s performance cookies\./
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /currently set whether or not you accept performance cookies/
+      )
     ).toBeInTheDocument();
   });
 
-  it('shows the localized last updated date', () => {
+  it('renders the shared table labels from messages', () => {
     render(<AboutCookiePolicy />);
-    expect(
-      screen.getByText('Last Updated: November 6, 2026')
-    ).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader', { name: 'Lifespan' })).toHaveLength(2);
+    const necessaryTable = screen.getByRole('region', {
+      name: /Strictly Necessary Cookies/i,
+    });
+    const albRow = within(necessaryTable).getByText('AWSALBTG').closest('tr');
+    expect(albRow).toHaveTextContent('First Party');
+    expect(albRow).toHaveTextContent('7 days');
+  });
+
+  it.each([
+    ['en-US', 'Last Updated: November 6, 2026'],
+    ['de-DE', 'Last Updated: 6. November 2026'],
+  ])('formats the last updated date for %s', (locale, expected) => {
+    (useBrowserLocale as jest.Mock).mockReturnValue(locale);
+    render(<AboutCookiePolicy />);
+    expect(screen.getByText(expected)).toBeInTheDocument();
   });
 
   it('enables performance cookies when toggled on', async () => {

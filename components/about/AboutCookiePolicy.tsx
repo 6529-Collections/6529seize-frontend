@@ -41,42 +41,72 @@ interface AwsRumCookie {
   readonly lifespanKey: CookiePolicyMessageKey;
 }
 
-// Set by aws-rum-web (`allowCookies: true`) on the site's domain.
+// aws-rum-web (`allowCookies: true`) writes these with `Domain=<hostname>`,
+// so on 6529.io they are `.6529.io` domain cookies.
+const AWS_RUM_USER_ID_COOKIE = "cwr_u";
+const AWS_RUM_SESSION_COOKIE = "cwr_s";
+
 const AWS_RUM_COOKIES: readonly AwsRumCookie[] = [
   {
-    name: "cwr_u",
+    name: AWS_RUM_USER_ID_COOKIE,
     purposeKey: "about.cookiePolicy.awsRum.userId.purpose",
     lifespanKey: "about.cookiePolicy.awsRum.userId.lifespan",
   },
   {
-    name: "cwr_s",
+    name: AWS_RUM_SESSION_COOKIE,
     purposeKey: "about.cookiePolicy.awsRum.session.purpose",
     lifespanKey: "about.cookiePolicy.awsRum.session.lifespan",
   },
 ];
 
-function AwsRumCookieRows({ locale }: { readonly locale: SupportedLocale }) {
-  return AWS_RUM_COOKIES.map((cookie) => (
-    <tr key={cookie.name}>
-      <td>.6529.io</td>
-      <td>
-        {t(locale, "about.cookiePolicy.cookieWithProvider", {
-          cookie: cookie.name,
-          provider: t(locale, "about.cookiePolicy.awsRum.provider"),
-        })}
-        <span className="tw-block tw-text-iron-400">
-          {t(locale, cookie.purposeKey)}
-        </span>
-      </td>
-      <td>{t(locale, "about.cookiePolicy.firstParty")}</td>
-      <td>{t(locale, cookie.lifespanKey)}</td>
-    </tr>
-  ));
+function CookieTableHead({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <thead>
+      <tr>
+        <th>{t(locale, "about.cookiePolicy.table.domain")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.cookies")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.cookiesUsed")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.lifespan")}</th>
+      </tr>
+    </thead>
+  );
+}
+
+function AwsRumCookieRows({
+  locale,
+  firstPartyLabel,
+}: {
+  readonly locale: SupportedLocale;
+  readonly firstPartyLabel: string;
+}) {
+  return (
+    <>
+      {AWS_RUM_COOKIES.map((cookie) => (
+        <tr key={cookie.name}>
+          <td>.6529.io</td>
+          <td>
+            {t(locale, "about.cookiePolicy.cookieWithProvider", {
+              cookie: cookie.name,
+              provider: t(locale, "about.cookiePolicy.awsRum.provider"),
+            })}
+            <span className="tw-block tw-text-iron-400">
+              {t(locale, cookie.purposeKey)}
+            </span>
+          </td>
+          <td>{firstPartyLabel}</td>
+          <td>{t(locale, cookie.lifespanKey)}</td>
+        </tr>
+      ))}
+    </>
+  );
 }
 
 export default function AboutCookiePolicy() {
   const locale = useBrowserLocale();
   const { showCookieConsent, consent, reject } = useCookieConsent();
+  const firstPartyLabel = t(locale, "about.cookiePolicy.firstParty");
+  const sevenDaysLabel = t(locale, "about.cookiePolicy.lifespan.sevenDays");
+  const oneYearLabel = t(locale, "about.cookiePolicy.lifespan.oneYear");
 
   const [isPerformanceCookiesEnabled, setIsPerformanceCookiesEnabled] =
     useState(() => getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE));
@@ -160,14 +190,7 @@ export default function AboutCookiePolicy() {
                 className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
               >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
-                  <thead>
-                    <tr>
-                      <th>Domain</th>
-                      <th>Cookies</th>
-                      <th>Cookies used</th>
-                      <th>Lifespan</th>
-                    </tr>
-                  </thead>
+                  <CookieTableHead locale={locale} />
                   <tbody>
                     <tr>
                       <td>6529.io</td>
@@ -181,8 +204,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Amazon Web Services)
                       </td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
@@ -196,26 +219,26 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Amazon Web Services)
                       </td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>wallet-auth (JWT Authentication)</td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_ESSENTIAL_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_EULA_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                   </tbody>
                 </Table>
@@ -273,20 +296,13 @@ export default function AboutCookiePolicy() {
                 className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
               >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
-                  <thead>
-                    <tr>
-                      <th>Domain</th>
-                      <th>Cookies</th>
-                      <th>Cookies used</th>
-                      <th>Lifespan</th>
-                    </tr>
-                  </thead>
+                  <CookieTableHead locale={locale} />
                   <tbody>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_PERFORMANCE_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -300,8 +316,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -315,8 +331,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -330,16 +346,24 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
-                    <AwsRumCookieRows locale={locale} />
+                    <AwsRumCookieRows
+                      locale={locale}
+                      firstPartyLabel={firstPartyLabel}
+                    />
                   </tbody>
                 </Table>
               </Col>
             </Row>
             <Row className="tw-pt-3">
-              <Col>{t(locale, "about.cookiePolicy.awsRum.sampling")}</Col>
+              <Col>
+                {t(locale, "about.cookiePolicy.awsRum.sampling", {
+                  userIdCookie: AWS_RUM_USER_ID_COOKIE,
+                  sessionCookie: AWS_RUM_SESSION_COOKIE,
+                })}
+              </Col>
             </Row>
             <Row className="tw-pt-2">
               <Col>

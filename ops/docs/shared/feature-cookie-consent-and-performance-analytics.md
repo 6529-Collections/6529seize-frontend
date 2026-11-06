@@ -138,16 +138,23 @@ performance-tracking behavior tied to that choice.
 ## Performance Monitoring Cookies (Amazon CloudWatch RUM)
 
 - Production deployments that have an AWS RUM app monitor configured load
-  Amazon CloudWatch RUM for a sample of browser sessions (20% by default). It
-  measures page load speed, browser errors and failed requests and sends them
-  to the 6529 Amazon Web Services account.
+  Amazon CloudWatch RUM for a sample of browser sessions. It measures page
+  load speed, browser errors and failed requests and sends them to the 6529
+  Amazon Web Services account.
+- The sample rate is the public `AWS_RUM_SAMPLE_RATE` setting
+  (`config/env.schema.ts`), which the production build workflows fill from
+  the `AWS_RUM_SAMPLE_RATE` GitHub Actions secret. When it is unset or invalid,
+  `DEFAULT_SAMPLE_RATE` (0.2, so 20% of sessions) in
+  `components/monitoring/AwsRumProvider.tsx` applies. The decision is made
+  once per browser tab session, before the RUM code downloads.
 - Sampled sessions set two first-party cookies on `.6529.io`:
   - `cwr_u`: a random visitor ID kept for 30 days.
   - `cwr_s`: the current session, kept for 30 minutes after the last
     activity.
 - `/about/cookie-policy` lists both cookies in the Performance Cookies table,
-  with their purpose, provider and lifespan, and explains the sampling below
-  the table.
+  with their purpose, provider and lifespan. The note below the table explains
+  the sampling and states that these cookies are currently set whether or not
+  performance cookies are accepted.
 - Current behavior: RUM does not read the performance consent choice. A
   sampled session sets `cwr_u` and `cwr_s` whether performance consent is
   accepted, rejected or not yet decided, and the Performance Cookies toggle
