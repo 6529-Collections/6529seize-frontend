@@ -405,7 +405,7 @@ export function getOfferedRelease(
   releases: readonly ValidatorRelease[]
 ): ValidatorRelease | undefined {
   const newest = releases[0];
-  return newest && newest.unsafeReason === null ? newest : undefined;
+  return newest?.unsafeReason === null ? newest : undefined;
 }
 
 function decodeFeed(
