@@ -816,7 +816,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         await expect(
           fullList.getByRole("heading", { name: "Upcoming Drops", exact: true })
         ).toBeFocused();
-        const panel = fullList
+        const panel = page
+          .getByRole("dialog", { name: "Upcoming Drops", exact: true })
           .locator('[id^="headlessui-dialog-panel-"]')
           .locator("..");
         await expect
