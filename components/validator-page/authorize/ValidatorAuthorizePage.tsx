@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
@@ -12,7 +13,7 @@ import {
 import type { Draft } from "@/lib/validator-page/authorize/draftLink";
 
 import ValidatorPageFrame, { ValidatorPageHeader } from "../ValidatorPageFrame";
-import { BODY, PRIMARY_BUTTON, TEXT_BUTTON } from "../validatorStyles";
+import { BODY, LINK, PRIMARY_BUTTON, TEXT_BUTTON } from "../validatorStyles";
 import { useAuthorizeSession, type Signing } from "./useAuthorizeSession";
 
 const TEXT = `${BODY} tw-m-0`;
@@ -165,6 +166,10 @@ function DraftIntro({ draft }: { readonly draft: Draft }) {
           ? "Authorize these validator keys"
           : "Authorize this validator key"}
       </h2>
+      <p className={TEXT}>
+        Your wallet signs one message that lets the 6529 Validator on your
+        computer sign for this account. It costs no gas and moves nothing.
+      </p>
       <p className={TEXT}>
         Check that your validator&apos;s screen shows the same key code. If it
         doesn&apos;t, or someone sent you this link, stop here.
@@ -349,6 +354,44 @@ function SignatureCard({ signature }: { readonly signature: string }) {
   );
 }
 
+// Opened without a validator's link: what the page is for, how to get
+// here from the validator, and the one check before signing.
+function NoLink() {
+  return (
+    <section className={CARD}>
+      <h2 className={HEADING}>Sign for your validator on your phone</h2>
+      <p className={TEXT}>
+        This page lets the wallet on your phone authorize a 6529 Validator that
+        runs on your computer. Your wallet signs one message. It costs no gas
+        and moves nothing.
+      </p>
+      <ol className="tw-m-0 tw-flex tw-flex-col tw-gap-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <li>
+          On your computer, open 6529 Validator and go to Authorize, or to
+          Keys, then Add a computer.
+        </li>
+        <li>
+          Choose your phone as the wallet, and paste its address.
+        </li>
+        <li>
+          Scan the code it shows with your phone, or open its link here.
+        </li>
+        <li>Sign here, then paste the signature into your validator.</li>
+      </ol>
+      <p className={TEXT}>
+        Sign only if the key code on this page matches the one on your
+        computer.
+      </p>
+      <p className={SMALL}>
+        <Link href="/validator" className={LINK}>
+          What is the 6529 Validator?
+        </Link>{" "}
+        Read about it and download it there.
+      </p>
+    </section>
+  );
+}
+
 function AuthorizeBody() {
   const session = useAuthorizeSession();
   const { draft, review, signing } = session;
@@ -357,14 +400,7 @@ function AuthorizeBody() {
     return null;
   }
   if (draft === null) {
-    return (
-      <section className={CARD}>
-        <p className={TEXT}>
-          Open this page from the QR code or the link on your validator&apos;s
-          Authorize step.
-        </p>
-      </section>
-    );
+    return <NoLink />;
   }
   if (draft === "bad" || !review) {
     return (
