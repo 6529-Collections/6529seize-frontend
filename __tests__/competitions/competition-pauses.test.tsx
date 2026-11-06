@@ -13,7 +13,11 @@ const mockCompetition = {
   title: "Test competition",
   lifecycle: "PUBLISHED",
   config_version: 4,
-  permissions: { administer: true, edit_rules_after_activity: false },
+  permissions: {
+    administer: true,
+    edit_rules_after_activity: false,
+    archive_requires_reason: true,
+  },
 };
 const mockQuery = {
   data: {
@@ -57,6 +61,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
   newCompetitionRequestKey: () => "request-key",
   getCompetitionRoute: jest.fn(),
+  getCompetitionsRoute: () => "/waves/wave/competitions",
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   performCompetitionAction: jest.fn(),
@@ -68,12 +73,14 @@ jest.mock(
     (props: {
       children: ReactNode;
       title: string;
+      message: string;
       confirmDisabled: boolean;
       isConfirming: boolean;
       onConfirm: () => void;
       onClose: () => void;
     }) => (
       <div role="dialog" aria-label={props.title}>
+        <p>{props.message}</p>
         {props.children}
         <button
           disabled={props.confirmDisabled || props.isConfirming}
@@ -97,6 +104,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCompetition.permissions.administer = true;
   mockCompetition.permissions.edit_rules_after_activity = false;
+  mockCompetition.permissions.archive_requires_reason = true;
+  mockCompetition.lifecycle = "PUBLISHED";
   mockCompetition.config_version = 4;
   mockQuery.hasNextPage = false;
   jest
@@ -199,4 +208,66 @@ it("loads older pauses without losing the visible history", () => {
   fireEvent.click(screen.getByRole("button", { name: "Load more" }));
   expect(mockQuery.fetchNextPage).toHaveBeenCalled();
   expect(screen.getByText("Reviewing eligibility")).toBeInTheDocument();
+});
+
+it("requires an archive reason after activity and explains the permanent stop", async () => {
+  setup();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Archive and stop competition" })
+  );
+  expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
+  const reason = screen.getByRole("textbox", { name: "Reason (required)" });
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+  fireEvent.change(reason, {
+    target: { value: "  Replacing the competition  " },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+  await waitFor(() =>
+    expect(performCompetitionAction).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "competition" },
+      "archive",
+      {
+        idempotency_key: "request-key",
+        config_version: 4,
+        reason: "Replacing the competition",
+      }
+    )
+  );
+});
+
+it("allows archiving an unused published competition without a reason", () => {
+  mockCompetition.permissions.archive_requires_reason = false;
+  setup();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Archive and stop competition" })
+  );
+  expect(
+    screen.getByRole("textbox", { name: "Reason (optional)" })
+  ).not.toBeRequired();
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+});
+
+it("exposes only Archive beside draft setup and hides it from non-administrators", () => {
+  mockCompetition.lifecycle = "DRAFT";
+  const view = render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  expect(
+    screen.getByRole("button", { name: "Archive", exact: true })
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Publish" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Pause history")).not.toBeInTheDocument();
+  mockCompetition.permissions.administer = false;
+  view.rerender(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  expect(
+    screen.queryByRole("button", { name: "Archive", exact: true })
+  ).not.toBeInTheDocument();
 });
