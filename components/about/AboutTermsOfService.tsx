@@ -17,7 +17,7 @@ export default function AboutTermsOfService() {
       </Row>
       <Row>
         <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
-          Last Updated: September 9, 2026
+          Last Updated: November 6, 2026
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
@@ -445,6 +445,21 @@ export default function AboutTermsOfService() {
               <br />
               As we prefer not to go to jail, if you are a Sanctioned Party, we
               cannot engage in any economic activities with you.
+              <br />
+              <br />
+              The United States also prohibits doing business with anyone in
+              certain countries and regions under comprehensive US sanctions
+              (&quot;Embargoed Regions&quot;), currently Cuba, Iran, North
+              Korea, and the Crimea, Donetsk and Luhansk regions of Ukraine. As
+              we prefer not to go to jail, Our Platform is not available in
+              Embargoed Regions.
+              <br />
+              <br />
+              We also check wallet addresses against public sanctions lists
+              published by the United States and other governments. If a wallet
+              linked to your profile appears on one of these lists, your profile
+              cannot sign in or take actions on Our Platform. If you think we
+              made a mistake, contact us and we will review it.
               <br />
               <br />
               If you are a Sanctioned Party, please do not: a&#41; mint a 6529
