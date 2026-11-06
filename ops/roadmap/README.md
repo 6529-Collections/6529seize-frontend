@@ -154,8 +154,8 @@ Already addressed on `origin/main` and not listed below:
 ### P1: Remove Secret-Like Values From Public Runtime Config
 
 `next.config.ts` still serializes the complete `publicEnv` into
-`PUBLIC_RUNTIME` and individual browser-bundled env values, including IPFS RPC
-endpoints and `IPFS_MFS_PATH`. `STAGING_API_KEY` and
+`PUBLIC_RUNTIME` and individual browser-bundled env values. The IPFS RPC
+endpoint and `IPFS_MFS_PATH` are no longer part of it. `STAGING_API_KEY` and
 `FARCASTER_WARPCAST_API_KEY` are now server-only (`config/serverEnv.ts`). Dev
 auth values stay public for local development, but are ignored outside
 development and test runtimes and fail production builds for non-local hosts.
@@ -167,21 +167,18 @@ Remediation:
 - Rotate any credential-like values that were ever deployed through the public
   runtime bundle.
 
-### P1: Stop Exposing Writable IPFS RPC From Browser Code
+### P1: Keep IPFS Writes Behind The API
 
-Profile image upload code still instantiates `IpfsService` in the browser using
-public `IPFS_API_ENDPOINT` and `IPFS_MFS_PATH`, then calls `/api/v0/add`,
-`/api/v0/files/mkdir`, `/api/v0/files/stat`, and `/api/v0/files/cp` directly.
-The development setup points `IPFS_API_ENDPOINT` at `https://api-ipfs.6529.io`.
+Profile image uploads now go through the authenticated API route
+`POST /profiles/pfp/ipfs`, which accepts one PNG, JPEG, GIF or WebP image of at
+most 2 MB (recognized from its bytes) and pins it on IPFS. Browser code no
+longer holds an IPFS RPC endpoint or MFS path.
 
-Remediation:
+Remaining:
 
-- Move IPFS writes behind an authenticated server route or backend service.
-- Enforce server-side file size, content type, malware/image validation, user
-  authorization, and per-user quota before pinning or writing to MFS.
-- Keep writable IPFS RPC endpoints private or protected by short-lived upload
-  tokens that cannot be reused outside the intended upload flow.
-- Remove MFS write paths from public runtime configuration.
+- Keep the IPFS RPC endpoint reachable only from 6529 services and approved
+  publishing jobs.
+- Add per-user upload quotas and media screening before pinning.
 
 ### P2: Sandbox Untrusted NFT And NextGen HTML Media
 
