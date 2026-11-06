@@ -9,7 +9,10 @@ import {
   getLockedView,
   getValidatorMetadata,
 } from "@/lib/validator-page/pageAccess";
-import { getReleaseFeedSnapshot } from "@/lib/validator-page/releaseFeed";
+import {
+  getOfferedRelease,
+  getReleaseFeedSnapshot,
+} from "@/lib/validator-page/releaseFeed";
 import {
   getReleaseDownloadPath,
   groupReleaseFiles,
@@ -34,7 +37,7 @@ const CARD_FILES: Record<
 
 /** The newest release's files for each system card, if the feed has one. */
 async function getHardwareDownloads(): Promise<HardwareDownloads> {
-  const release = (await getReleaseFeedSnapshot()).releases[0];
+  const release = getOfferedRelease((await getReleaseFeedSnapshot()).releases);
   if (!release) {
     return {};
   }

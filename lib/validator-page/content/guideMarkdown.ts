@@ -1,9 +1,10 @@
 // The tester guide's closed sections at /validator/guide, as Markdown. Built
-// from the tester package: the sections under "More" in TESTERS.md, and its
-// note for testers upgrading from the last release.
+// from the tester package: the sections under "More" in TESTERS.md, its
+// note for testers upgrading from the last release, and rc.9's section on
+// Sunday's switch.
 //
-// Release facts still to fill have the form {{RC8_...}}; the page tests
-// fail while any is left.
+// Release facts still to fill have the form {{RC9_...}} (fill-rc9.sh); the
+// page tests allow only the ones they name as still to fill.
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
@@ -13,21 +14,50 @@ type ValidatorGuideFold = {
   readonly markdown: string;
 };
 
-/**
- * For a tester who runs the last release: what to do differently. The pages
- * show it only while the signed list's newest release is `forVersion`.
- */
-export const VALIDATOR_UPGRADE: ValidatorGuideFold & {
+/** A note the pages show only while the signed list offers `forVersion`. */
+export type ValidatorReleaseNote = ValidatorGuideFold & {
   readonly forVersion: string;
-} = {
-  forVersion: "0.1.0-rc.8",
+};
+
+/**
+ * For a tester who runs the last release: what to do differently. The Mac
+ * steps are the ones the Mac lane tested on 6 November.
+ */
+export const VALIDATOR_UPGRADE: ValidatorReleaseNote = {
+  forVersion: "0.1.0-rc.9",
   id: "upgrading",
-  title: "Upgrading from rc.7",
+  title: "Upgrading from rc.8",
   markdown: joinMarkdown([
-    "- Install rc.8 over rc.7, the same way. There is nothing to uninstall first, and your key, your authorization and your records stay.",
-    "- On a Mac, quit the app first: choose **Quit 6529 Validator** in the app menu at the top of the screen if it is there, or else Force Quit it (Apple menu › Force Quit). Then drag the new one to Applications and open it from there. Dragging over a running app leaves the old release running.",
-    "- A validator you stopped stays stopped. Start it from 6529's logo menu when you want it to sign.",
-    "- The validator's page has a new address on this computer. Open it from the app, or with `validator open` on Linux. A bookmark of `127.0.0.1:6529` no longer works.",
+    "On Windows and Linux, install rc.9 over rc.8 the same way. There is nothing to uninstall first, and your key, your authorization and your records stay. A validator you stopped stays stopped.",
+    "",
+    "On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.9. If it shows \"Files in use\" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself. Close any `validator` command you left running in a terminal first. When it's done, open the app from the Start menu, or press **Launch** on Setup's last page.",
+    "",
+    "On a Mac:",
+    "",
+    "1. In Terminal, run `launchctl bootout gui/$(id -u)/io.6529.validator.agent`. This stops the validator, so Finder can replace the app.",
+    "2. Quit 6529 Validator: **Quit app** in the logo's menu, or Force Quit (Option-Command-Esc). Cmd-Q doesn't work in rc.8.",
+    "3. Open the rc.9 download and drag the app to Applications, choosing **Replace**.",
+    '4. Open 6529 Validator. It starts the validator on rc.9 by itself. If the window says "The validator service is not running.", press **Start the validator service**.',
+    "",
+    "From rc.9 on, steps 1 and 2 are one menu item: **Quit for an update**, in the menu-bar logo's menu or the app's menu at the top of the screen.",
+  ]),
+};
+
+/**
+ * rc.9's switch to the new chain on Sunday 8 November, at the top of the
+ * guide: TESTERS.md's section, and the release notes' line for a tester who
+ * updates on Sunday.
+ */
+export const VALIDATOR_SWITCH: ValidatorReleaseNote = {
+  forVersion: "0.1.0-rc.9",
+  id: "update-before-sunday",
+  title: "Update before Sunday 8 November, 00:00 UTC",
+  markdown: joinMarkdown([
+    "From then, signed TDH counts only on the new chain that rc.9 runs. rc.9 moves to it by itself at 00:00 UTC; until then it works as rc.8 does.",
+    "",
+    "Sunday counts as agreed once accounts holding more than 2/3 of validating TDH run rc.9 and have signed. Accounts still on rc.8 keep counting toward that total for seven days after their last vote, so please update on Saturday. If the line isn't reached on Sunday, the day ends final but not agreed, and the first agreed day comes when it is. Nobody is penalized either way.",
+    "",
+    "If you update on Sunday, do it before 18:00 UTC to sign that day. Later than that, your key starts on Monday, and Sunday never shows as missed.",
   ]),
 };
 
@@ -52,7 +82,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     markdown: joinMarkdown([
       "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 5 November.",
       "",
-      "In 6529's tests of rc.8 on 6 November, a new install was ready in about 21 minutes through Tor, and in about 14 with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
+      "In 6529's tests of rc.9 on 6 November, a new install was ready in about 22 minutes through Tor, and in about 14 with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
     ]),
   },
   {
@@ -77,7 +107,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "| `.deb` | `validator --version` |",
       "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
       "",
-      "It prints `validator 0.1.0-rc.8 (e53fcf3, TDH v1.4)`. If it shows another commit, tell us.",
+      "It prints `validator 0.1.0-rc.9 (d5457d6, TDH v1.4)`. If it shows another commit, tell us.",
     ]),
   },
   {
@@ -145,7 +175,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "known-issues",
     title: "Known issues",
     markdown: joinMarkdown([
-      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-21 20:00 UTC, and 0.1.0 stops signing on 1 December.",
+      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-22 03:30 UTC, and 0.1.0 stops signing on 1 December.",
     ]),
   },
 ];
