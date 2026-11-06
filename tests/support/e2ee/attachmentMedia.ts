@@ -13,7 +13,7 @@ export async function dropEncryptedAttachment(
     ({ name, base64, mimeType }) => {
       const transfer = new DataTransfer();
       const bytes = Uint8Array.from(atob(base64), (character) =>
-        character.charCodeAt(0)
+        character.codePointAt(0) ?? 0
       );
       transfer.items.add(new File([bytes], name, { type: mimeType }));
       return transfer;
@@ -64,5 +64,9 @@ export async function checkEncryptedImageActions(
   await image.click();
   await page.keyboard.press("Escape");
   await expect(preview).toHaveCount(0);
-  await expect(image.locator("..")).toBeFocused();
+  await expect(
+    page
+      .getByRole("button", { name: "Open image preview", exact: true })
+      .filter({ has: image })
+  ).toBeFocused();
 }

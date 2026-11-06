@@ -224,7 +224,7 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const localOriginalQuality = useOriginalImage(src);
   const quality = originalQuality ?? localOriginalQuality;
   const originalRequested = quality.requested;
@@ -310,13 +310,13 @@ export function ImageMediaModal({
         fallbackFocus: () => dialogRef.current ?? document.body,
       }}
     >
-      <div
+      <dialog
+        open
         ref={dialogRef}
         tabIndex={-1}
-        role="dialog"
         aria-modal="true"
         aria-label={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
-        className="tailwind-scope tw-relative tw-z-[1100] tw-cursor-default focus:tw-outline-none"
+        className="tailwind-scope tw-relative tw-z-[1100] tw-m-0 tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit focus:tw-outline-none"
         onTouchStart={(event) => event.stopPropagation()}
         onTouchEnd={(event) => event.stopPropagation()}
         onTouchMove={(event) => event.stopPropagation()}
@@ -513,7 +513,7 @@ export function ImageMediaModal({
             />
           )}
         </ExpandedMediaToolbar>
-      </div>
+      </dialog>
     </FocusTrap>,
     document.body
   );

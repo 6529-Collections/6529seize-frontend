@@ -247,10 +247,9 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const canAct = conversation.status === "active";
 
   return (
-    <div
+    <section
       style={style}
       className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
-      role="region"
       aria-label={t(locale, "e2ee.composer.dropArea")}
       onDragEnterCapture={fileDrop.handlers.onDragEnter}
       onDragOverCapture={fileDrop.handlers.onDragOver}
@@ -437,7 +436,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         }}
         onClose={() => setDeleteTarget(null)}
       />
-    </div>
+    </section>
   );
 }
 
