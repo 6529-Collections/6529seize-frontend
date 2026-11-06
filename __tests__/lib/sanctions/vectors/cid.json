@@ -1,0 +1,29 @@
+{
+  "description": "CIDv1 (raw codec, sha2-256) of a file stored as one IPFS block. utf8 is the file content.",
+  "cases": [
+    {
+      "description": "empty file",
+      "utf8": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cid": "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"
+    },
+    {
+      "description": "ASCII text with newline",
+      "utf8": "hello world\n",
+      "sha256": "a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447",
+      "cid": "bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4"
+    },
+    {
+      "description": "canonical JSON object",
+      "utf8": "{\"a\":1}",
+      "sha256": "015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862",
+      "cid": "bafkreiablk6x6xgfpiw5ss3vsdyevwaiijzzaxxdh3c45pvomitwvf7ymi"
+    },
+    {
+      "description": "UTF-8 multi-byte text",
+      "utf8": "ラザルス",
+      "sha256": "724d15f87617be9749f59b6df907ba093cebccfa3e07c57f5e812a1e1224ba9f",
+      "cid": "bafkreidsjuk7q5qxx2lut5m3nx4qpoqjhtv4z6r6a7cx6xubfipbejf2t4"
+    }
+  ]
+}

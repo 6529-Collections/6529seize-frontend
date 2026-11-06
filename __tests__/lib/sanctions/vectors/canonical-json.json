@@ -1,0 +1,18 @@
+{
+  "description": "JCS (RFC 8785) for the artifact value subset. 'output' is the exact UTF-8 text. 'error' cases must be rejected, never coerced.",
+  "cases": [
+    { "input": { "b": 1, "a": [true, false, null], "c": "x" }, "output": "{\"a\":[true,false,null],\"b\":1,\"c\":\"x\"}" },
+    { "input": { "addresses": [], "Z": 0, "_type": "t", "a": { "y": 2, "x": 1 } }, "output": "{\"Z\":0,\"_type\":\"t\",\"a\":{\"x\":1,\"y\":2},\"addresses\":[]}" },
+    { "input": { "\u00e9": 1, "e": 2, "\u20ac": 3 }, "output": "{\"e\":2,\"\u00e9\":1,\"\u20ac\":3}" },
+    { "input": ["quote \" backslash \\ tab \t newline \n nul \u0000 bell \u0007"], "output": "[\"quote \\\" backslash \\\\ tab \\t newline \\n nul \\u0000 bell \\u0007\"]" },
+    { "input": ["\u2028 \u00e9 \u30e9\u30b6\u30eb\u30b9 \ud83d\ude00"], "output": "[\"\u2028 \u00e9 \u30e9\u30b6\u30eb\u30b9 \ud83d\ude00\"]" },
+    { "input": [0, -7, 9007199254740991], "output": "[0,-7,9007199254740991]" },
+    { "input": {}, "output": "{}" },
+    { "input": "plain", "output": "\"plain\"" }
+  ],
+  "errors": [
+    { "description": "float", "input": [1.5] },
+    { "description": "unsafe integer", "input": [9007199254740992] },
+    { "description": "lone surrogate", "input": ["\ud800"] }
+  ]
+}

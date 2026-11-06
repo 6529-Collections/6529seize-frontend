@@ -59,6 +59,7 @@ const RESERVED_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "open-mobile",
   "rememes",
   "restricted",
+  "sanctions",
   "slide-page",
   "the-memes",
   "tools",

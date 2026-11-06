@@ -2071,6 +2071,10 @@
         "production": "/safe-collecting/tap-guide"
       }
     },
+    "/sanctions": {
+      "classification": "crawlable",
+      "family": "info"
+    },
     "/slide-page/6529-initiatives": {
       "classification": "exempt",
       "exemptReason": "Slide fragment embedded by other surfaces; not standalone."
