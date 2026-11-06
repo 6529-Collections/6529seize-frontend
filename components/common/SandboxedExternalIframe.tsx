@@ -1,9 +1,20 @@
 "use client";
 
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
+import { enterArtFullScreen } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useFullScreenSupported } from "@/hooks/useFullScreenSupported";
 import { t } from "@/i18n/messages";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 // Sandbox policy for external interactive media:
 // - allow-scripts: Required for interactive HTML content.
@@ -25,6 +36,11 @@ interface SandboxedExternalIframeProps {
   readonly iframeRef?: React.Ref<HTMLIFrameElement> | undefined;
   /** Fires once when the container scrolls into view and the iframe is about to render. */
   readonly onVisible?: (() => void) | undefined;
+  /**
+   * Show a banner control that expands the sandboxed frame to full screen.
+   * Leave it off when the parent already offers its own full-screen action.
+   */
+  readonly showFullscreenControl?: boolean | undefined;
 }
 
 /**
@@ -35,6 +51,8 @@ interface SandboxedExternalIframeProps {
  * - deny all Permission Policy features via an explicit empty `allow` attribute.
  * - enforce HTTPS and strip referrers; credentialless removes ambient cookies where supported.
  * - the sandbox isolates the frame even if it redirects after the initial load.
+ * - the source is never offered as a top-level link: viewers expand the
+ *   sandboxed frame itself, so the media always keeps the frame's isolation.
  */
 const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   src,
@@ -46,10 +64,18 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   onError,
   iframeRef,
   onVisible,
+  showFullscreenControl = false,
 }) => {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
+  const supportsFullScreen = useFullScreenSupported();
+  const frameId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const handleFullscreen = useCallback(() => {
+    void enterArtFullScreen(frameId);
+  }, [frameId]);
 
   const canonicalSrc = useMemo(
     () => canonicalizeInteractiveMediaUrl(src),
@@ -159,6 +185,9 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     <div className={frameClassName} aria-hidden="true" role="presentation" />
   );
 
+  const canExpand =
+    showFullscreenControl && isVisible && supportsFullScreen && !isCapacitor;
+
   const banner = (
     <div
       className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-t-md tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
@@ -167,18 +196,28 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300">
         {t(locale, "media.interactive.untrustedContent")}
       </span>
-      {parsedCanonicalUrl ? (
-        <a
-          href={canonicalSrc}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tw-text-xs tw-font-medium tw-text-primary-300 tw-transition hover:tw-text-primary-300"
+      <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+        {/* The source is shown, never linked: opening it would leave the sandbox. */}
+        <span
+          className="tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400"
+          translate="no"
         >
-          {parsedCanonicalUrl.hostname}
-        </a>
-      ) : (
-        <span className="tw-text-xs tw-text-iron-400">{canonicalSrc}</span>
-      )}
+          {parsedCanonicalUrl?.hostname ?? canonicalSrc}
+        </span>
+        {canExpand ? (
+          <button
+            type="button"
+            onClick={handleFullscreen}
+            className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-6 tw-shrink-0 tw-items-center tw-gap-1 tw-rounded tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-primary-300 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            <ArrowsPointingOutIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-shrink-0"
+            />
+            {t(locale, "media.interactive.fullscreen")}
+          </button>
+        ) : null}
+      </span>
     </div>
   );
 
@@ -198,6 +237,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
         {isVisible ? (
           <iframe
             {...iframeProps}
+            id={frameId}
             ref={iframeRef}
             title={iframeTitle}
             onLoad={onLoad}

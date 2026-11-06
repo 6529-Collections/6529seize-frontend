@@ -40,7 +40,13 @@
    interaction, it renders that static preview image instead of mounting the
    live iframe.
 4. Otherwise, if accepted, the surface renders:
-   - host banner (`Untrusted interactive content` + host link)
+   - host banner (`Untrusted interactive content` + the source host as plain
+     text; the host is not a link, so the artwork never opens outside its
+     sandboxed frame)
+   - in the Memes submission preview, a banner `Full screen` button that
+     expands the sandboxed frame itself (hidden in the native app and where
+     the browser cannot show an element full screen); drop media keep their
+     own `Full screen` media action instead
    - iframe with `sandbox="allow-scripts"`, empty `allow`,
      `referrerPolicy="no-referrer"`, and `credentialless`.
 5. Shared renderer iframes mount only after the surface enters the viewport.
