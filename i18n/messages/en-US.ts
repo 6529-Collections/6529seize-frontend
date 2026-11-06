@@ -3212,7 +3212,12 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
-export const EN_US_MESSAGES = {
+/**
+ * en-US source copy that every page bundles. Feature namespaces that only some
+ * pages need live in `@/i18n/namespaces` instead; `en-US.complete.ts` combines
+ * both into the complete dictionary.
+ */
+export const EN_US_ROOT_MESSAGES = {
   "artworkAlerts.label": "Artwork alerts",
   "artworkAlerts.on": "On",
   "artworkAlerts.off": "Off",
@@ -4970,5 +4975,3 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.allWaves": "All Waves",
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
-
-export type MessageKey = keyof typeof EN_US_MESSAGES;
