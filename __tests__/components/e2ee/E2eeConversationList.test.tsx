@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
@@ -19,6 +20,12 @@ import {
 } from "./fakeE2eeEngine";
 
 const mockSecurityState = jest.fn();
+const emojiSource = "data:image/webp;base64,UklGRg==";
+const mockEmojiSources = new Map([["gm", emojiSource]]);
+jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
+  E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
+  useE2eeEmojis: () => ({ sources: mockEmojiSources }),
+}));
 const mockSearch = jest.fn(() => new URLSearchParams());
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
   useDeviceSecurityState: () => mockSecurityState(),
@@ -142,6 +149,37 @@ describe("encrypted conversation list", () => {
       screen.getByRole("heading", { name: "Encrypted messages" })
     ).toBeInTheDocument();
     expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
+  });
+
+  it.each([
+    { name: "inbox", Component: E2eeConversationListPage },
+    { name: "sidebar", Component: E2eeMessagesSection },
+  ])("renders compact custom emojis in $name previews", ({ Component }) => {
+    const chats = [
+      conversation({
+        lastMessage: message({
+          senderProfileId: SELF_ID,
+          text: "gm :gm: 😀 :unknown:",
+        }),
+      }),
+    ];
+    render(
+      <E2eeTestProvider
+        value={contextFor(createFakeE2eeEngine({ conversations: chats }))}
+      >
+        <Component />
+      </E2eeTestProvider>
+    );
+    const row = within(
+      screen.getByRole("list", { name: "Encrypted chats" })
+    ).getByRole("link");
+    const emoji = within(row).getByRole("img", { name: ":gm:" });
+    expect(emoji).toHaveAttribute("src", emojiSource);
+    expect(emoji).toHaveAttribute("width", "16");
+    expect(emoji).toHaveAttribute("height", "16");
+    expect(emoji.parentElement).toHaveClass("tw-truncate");
+    expect(row).toHaveTextContent("You: gm 😀 :unknown:");
+    expect(row).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
   });
 
   it("marks a chat muted on this device and leaves it out of the badge", () => {

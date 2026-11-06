@@ -52,6 +52,9 @@ shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
 does not offer GIF, Poll or Storm actions.
 
+Custom emojis also render inline in the encrypted chat list and sidebar message
+previews, at a compact size that keeps each preview on one line.
+
 The emoji button sits inside the right edge of the message input, with attachments
 on the left and Send on the right. It uses the regular composer’s desktop emoji
 popover and mobile slide panel. Encrypted emoji choices remain private and do not
