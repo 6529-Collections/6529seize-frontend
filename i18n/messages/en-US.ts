@@ -1367,6 +1367,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "edit.color1": "Background Color 1",
   "edit.color2": "Background Color 2",
   "edit.upload": "Click to upload",
+  "edit.uploadPictureFile": "Upload image",
   "edit.dragDrop": "or drag and drop",
   "edit.coverFormats": "JPEG, JPG, PNG, GIF — max 2MB",
   "edit.pictureFormats": "JPEG, JPG, PNG, GIF, WEBP",

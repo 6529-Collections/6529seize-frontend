@@ -6650,6 +6650,7 @@
       "facts": [
         "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
         "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Both editors show Select Meme search immediately, separated from file upload by or. Desktop lets you type while Memes load and keeps loading and retry states. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
+        "In profile picture editors, saved or selected images show a separate preview above the source choices. The preview does not open the file picker. Select Meme search and Upload image remain available to choose a different Meme or file; drag and drop still works.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",

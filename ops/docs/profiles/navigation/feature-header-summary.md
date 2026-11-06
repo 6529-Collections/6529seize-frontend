@@ -100,7 +100,8 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   The dialog uses compact dark controls, with name and classification alongside
   each other when space allows. Classification options overlay the content
   without moving the About statement. Empty upload controls show their upload
-  icon; saved or selected images show a preview.
+  icon. Saved or selected profile pictures show a separate preview above the
+  Meme search and `Upload image` choices; the preview does not open the file picker.
   Gradient and Image choices align with the left edge of the cover controls.
   The Profile picture section shows Meme search immediately, separated from
   file upload with `or`. You can type while Memes load; loading and retry states

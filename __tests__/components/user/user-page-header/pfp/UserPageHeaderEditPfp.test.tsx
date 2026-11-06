@@ -5,13 +5,13 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 // Mock URL.createObjectURL
-global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
+global.URL.createObjectURL = jest.fn(() => "blob:mocked-object-url");
 global.URL.revokeObjectURL = jest.fn();
 
 jest.mock("@/components/user/settings/UserSettingsImgSelectMeme", () => ({
   __esModule: true,
   default: ({ onMeme }: any) => (
-    <button data-testid="meme" onClick={() => onMeme({ id: 1, image: "m" })} />
+    <button data-testid="meme" onClick={() => onMeme({ id: 1, image: "/m" })} />
   ),
 }));
 jest.mock("@/components/user/settings/UserSettingsImgSelectFile", () => ({

@@ -568,7 +568,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await expect(memeSearch).toBeVisible();
     const uploadChoice = page
-      .getByLabel("Upload profile picture", { exact: true })
+      .getByLabel("Upload image", { exact: true })
       .locator("..");
     const memeBox = await memeSearch.boundingBox();
     const uploadBox = await uploadChoice.boundingBox();
@@ -691,90 +691,141 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("shows Meme search immediately while options load", async ({
-    page,
-    baseURL,
-  }, testInfo) => {
-    await seedSession(page);
-    await openOwnProfile(page);
-    await page.setViewportSize({ width: 1024, height: 900 });
-    let release: (() => void) | undefined;
-    const responseReady = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    await page.route(
-      `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
-      async (route) => {
-        await responseReady;
-        await route.fulfill({
-          json: {
-            data: [
-              {
-                id: 1,
-                name: "Fixture Meme",
-                animation: null,
-                contract: "0x0000000000000000000000000000000000000001",
-                icon: null,
-                image: `${baseURL}/6529bgwhite.svg`,
-                scaled: `${baseURL}/6529bgwhite.svg`,
-                thumbnail: `${baseURL}/6529bgwhite.svg`,
-                artist: null,
-              },
-            ],
-          },
+  for (const width of [1024, 390]) {
+    test(`shows Meme search immediately while options load at ${width}px`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      await seedSession(page);
+      await openOwnProfile(page);
+      await page.setViewportSize({ width, height: 900 });
+      let release: (() => void) | undefined;
+      const responseReady = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route(
+        `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
+        async (route) => {
+          await responseReady;
+          await route.fulfill({
+            json: {
+              data: [
+                {
+                  id: 1,
+                  name: "Fixture Meme",
+                  animation: null,
+                  contract: "0x0000000000000000000000000000000000000001",
+                  icon: null,
+                  image: `${baseURL}/6529bgwhite.svg`,
+                  scaled: `${baseURL}/6529bgwhite.svg`,
+                  thumbnail: `${baseURL}/6529bgwhite.svg`,
+                  artist: null,
+                },
+              ],
+            },
+          });
+        }
+      );
+      try {
+        await page
+          .getByRole("button", { name: "Edit profile", exact: true })
+          .click();
+        if (width < 1024) {
+          await page
+            .getByRole("button", { name: "Profile picture", exact: true })
+            .click();
+        }
+        const search = page.getByRole("textbox", {
+          name: "Select Meme",
+          exact: true,
         });
+        await expect(search).toBeVisible();
+        await expect(search).toBeEditable();
+        if (width === 1024)
+          await expect(
+            page.getByText("Loading Memes…", { exact: true })
+          ).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: "Choose a Meme", exact: true })
+        ).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("profile-meme-search-loading.png"),
+          scale: "css",
+        });
+        await search.fill("Fixture");
+        release?.();
+        const meme = page.getByRole("button", {
+          name: "#1 Fixture Meme",
+          exact: true,
+        });
+        await expect(meme).toBeVisible();
+        await expect(search).toHaveValue("Fixture");
+        await meme.click();
+        await expect(meme).toHaveCount(0);
+        await expect(
+          page.getByRole("img", { name: "Profile image", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByLabel("Upload image", { exact: true })
+        ).toBeAttached();
+        await expect(search).toBeEditable();
+        expect(
+          await page
+            .getByRole("img", { name: "Profile image", exact: true })
+            .evaluate((image) => image.closest("label"))
+        ).toBeNull();
+        await expect(
+          page
+            .getByLabel("Upload image", { exact: true })
+            .locator("..")
+            .locator("svg")
+        ).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: width === 1024 ? "Save" : "Save PFP",
+            exact: true,
+          })
+        ).toBeEnabled();
+        await expectNoHorizontalOverflow(page);
+        await expectAxeClean(page, { include: ['[role="dialog"]'] });
+        await page.screenshot({
+          path: testInfo.outputPath("profile-meme-search-selected.png"),
+          scale: "css",
+        });
+        await page.getByLabel("Upload image", { exact: true }).setInputFiles({
+          name: "replacement.png",
+          mimeType: "image/png",
+          buffer: Buffer.from(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aDTsAAAAASUVORK5CYII=",
+            "base64"
+          ),
+        });
+        await expect(
+          page.getByRole("img", { name: "Profile image", exact: true })
+        ).toHaveAttribute("src", /^blob:/);
+        await search.click();
+        await expect(meme).toBeVisible();
+        await meme.click();
+        await expect(
+          page.getByRole("img", { name: "Profile image", exact: true })
+        ).not.toHaveAttribute("src", /^blob:/);
+        if (width === 1024) {
+          await page
+            .getByRole("button", { name: "Cancel", exact: true })
+            .click();
+          await page
+            .getByRole("button", { name: "Discard changes", exact: true })
+            .click();
+        } else {
+          await page
+            .getByRole("button", { name: "Close", exact: true })
+            .click();
+        }
+      } finally {
+        release?.();
       }
-    );
-    try {
-      await page
-        .getByRole("button", { name: "Edit profile", exact: true })
-        .click();
-      const search = page.getByRole("textbox", {
-        name: "Select Meme",
-        exact: true,
-      });
-      await expect(search).toBeVisible();
-      await expect(search).toBeEditable();
-      await expect(
-        page.getByText("Loading Memes…", { exact: true })
-      ).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Choose a Meme", exact: true })
-      ).toHaveCount(0);
-      await page.screenshot({
-        path: testInfo.outputPath("profile-meme-search-loading.png"),
-        scale: "css",
-      });
-      await search.fill("Fixture");
-      release?.();
-      const meme = page.getByRole("button", {
-        name: "#1 Fixture Meme",
-        exact: true,
-      });
-      await expect(meme).toBeVisible();
-      await expect(search).toHaveValue("Fixture");
-      await meme.click();
-      await expect(meme).toHaveCount(0);
-      await expect(
-        page.getByRole("img", { name: "Profile image", exact: true })
-      ).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Save", exact: true })
-      ).toBeEnabled();
-      await expectNoHorizontalOverflow(page);
-      await expectAxeClean(page, { include: ['[role="dialog"]'] });
-      await page.screenshot({
-        path: testInfo.outputPath("profile-meme-search-selected.png"),
-        scale: "css",
-      });
-      await page.getByRole("button", { name: "Cancel", exact: true }).click();
-      await page
-        .getByRole("button", { name: "Discard changes", exact: true })
-        .click();
-    } finally {
-      release?.();
-    }
-  });
+    });
+  }
 
   test("keeps the compact field editors consistent in the mobile menu", async ({
     page,
@@ -835,7 +886,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           page.getByRole("textbox", { name: "Select Meme", exact: true })
         ).toBeVisible();
         await expect(
-          page.getByLabel("Upload profile picture", { exact: true })
+          page.getByLabel("Upload image", { exact: true })
         ).toBeAttached();
         await expect(
           dialog.getByRole("button", { name: "Save PFP", exact: true })

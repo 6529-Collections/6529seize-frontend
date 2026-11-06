@@ -16,6 +16,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import UserPageHeaderAboutEditError from "./about/UserPageHeaderAboutEditError";
 import { AboutEditError } from "./about/about-statement-errors";
@@ -150,6 +151,17 @@ export default function UserPageHeaderProfileEditor({
               </output>
             )}
           </div>
+          {picturePreview && (
+            <div className="tw-relative tw-size-16 tw-overflow-hidden tw-rounded-lg tw-bg-black/20">
+              <Image
+                src={picturePreview}
+                alt={message("user.profileHeader.edit.picturePreview")}
+                fill
+                sizes="4rem"
+                className="tw-object-contain"
+              />
+            </div>
+          )}
           <div className="tw-space-y-2">
             <UserSettingsImgSelectMeme
               compact
