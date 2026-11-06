@@ -58,7 +58,9 @@ rolls back if the request fails.
   not sync between devices.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
 - Reactions added or removed by other people appear live while the wave or
-  direct-message thread is open.
+  direct-message thread is open. Names in an open reaction tooltip or
+  **Reactions** dialog refresh with the counts. Reopening details checks the
+  current list without reloading the page.
 - Viewers can react even when a wave's chat group does not permit them to post.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
@@ -98,6 +100,8 @@ rolls back if the request fails.
 - If rating submit fails, optimistic rating state rolls back and users can retry.
 - Failures surface as toast errors; an unconfirmed timeout or network error shows a warning.
   Users stay in the same thread.
+- If reaction names cannot load, the chip keeps its count. Close and reopen
+  the tooltip or **Reactions** dialog to try loading the names again.
 
 ## Limitations / Notes
 
