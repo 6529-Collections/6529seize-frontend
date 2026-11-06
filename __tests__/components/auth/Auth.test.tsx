@@ -591,14 +591,14 @@ describe("Auth component", () => {
     const oldValidation = validate.mock.calls[0]![0].params;
     validate.mockClear();
     storedActiveAddress = chosenAddress;
+    const activeAddressChanged = new StorageEvent("storage");
+    Object.defineProperties(activeAddressChanged, {
+      key: { value: "6529-wallet-active-address" },
+      oldValue: { value: oldAddress },
+      newValue: { value: chosenAddress },
+    });
     act(() => {
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: "6529-wallet-active-address",
-          oldValue: oldAddress,
-          newValue: chosenAddress,
-        })
-      );
+      window.dispatchEvent(activeAddressChanged);
     });
     expect(utils.setActiveWalletAccount).not.toHaveBeenCalled();
     expect(storedActiveAddress).toBe(chosenAddress);
