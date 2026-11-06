@@ -4,12 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWaveWebSocket } from "./useWaveWebSocket";
 import { useMobileAppActivity } from "./useMobileAppActivity";
-import type {
-  WsDropUpdateMessage,
-  WsDropUpdateRefMessage,
-  WsTypingMessage,
-} from "@/helpers/Types";
+import type { WsTypingMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -89,28 +86,16 @@ const isWsTypingMessage = (value: unknown): value is ValidWsTypingMessage => {
   );
 };
 
-const isWsDropUpdateMessage = (
-  value: unknown
-): value is WsDropUpdateMessage => {
-  if (!isRecord(value) || value["type"] !== WsMessageType.DROP_UPDATE) {
-    return false;
-  }
-
-  const data = value["data"];
-  if (!isRecord(data)) {
-    return false;
-  }
-
+/** The author handle of a drop frame for this wave, if it has one. */
+const getDropAuthorHandle = (data: unknown, waveId: string): string | null => {
+  if (!isRecord(data)) return null;
+  const wave = data["wave"];
   const author = data["author"];
-  return isRecord(author) && typeof author["handle"] === "string";
+  if (!isRecord(wave) || wave["id"] !== waveId || !isRecord(author)) {
+    return null;
+  }
+  return typeof author["handle"] === "string" ? author["handle"] : null;
 };
-
-const isWsDropUpdateRefMessage = (
-  value: unknown
-): value is WsDropUpdateRefMessage =>
-  isRecord(value) &&
-  value["type"] === WsMessageType.DROP_UPDATE_REF &&
-  isWsDropUpdateRefData(value["data"]);
 
 /* ------------------------------------------------------------------ */
 /*  Hook                                                              */
@@ -149,6 +134,39 @@ export function useWaveIsTyping(
   }
 
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
+  // Redraws the label after typers change; set while the typing socket is live.
+  const refreshTypingRef = useRef<(() => void) | null>(null);
+
+  // A typer stops typing when their drop arrives. Drops come on the app
+  // socket: the typing socket (purpose=typing) no longer receives them once
+  // the server supports it, and with it each drop is parsed once, not twice.
+  const clearTypers = (shouldClear: () => boolean) => {
+    const refresh = refreshTypingRef.current;
+    if (!shouldSubscribe || refresh === null || !shouldClear()) return;
+    refresh();
+  };
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE, (data) => {
+    clearTypers(() => {
+      const authorHandle = getDropAuthorHandle(data, waveId);
+      return authorHandle !== null && typersRef.current.delete(authorHandle);
+    });
+  });
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE_REF, (data) => {
+    // Compact refs deliberately omit author data. Clear the Wave's typing
+    // state so a completed large post cannot leave a stale indicator behind.
+    clearTypers(() => {
+      if (
+        !isWsDropUpdateRefData(data) ||
+        data.update_type !== WsMessageType.DROP_UPDATE ||
+        data.wave_id !== waveId ||
+        typersRef.current.size === 0
+      ) {
+        return false;
+      }
+      typersRef.current.clear();
+      return true;
+    });
+  });
 
   useEffect(() => {
     typersRef.current.clear();
@@ -196,29 +214,15 @@ export function useWaveIsTyping(
     };
 
     const onMessage = (event: MessageEvent) => {
+      // Servers without typing-purpose sockets still send every drop here;
+      // skip parsing frames that cannot be typing events.
+      const raw = String(event.data);
+      if (!raw.includes(WsMessageType.USER_IS_TYPING)) return;
       let msg: unknown;
       try {
-        msg = JSON.parse(String(event.data)) as unknown;
+        msg = JSON.parse(raw) as unknown;
       } catch {
         return;
-      }
-      if (isWsDropUpdateMessage(msg)) {
-        const authorHandle = msg.data.author.handle;
-        if (authorHandle) {
-          typersRef.current.delete(authorHandle);
-          updateTypingMessage();
-        }
-      }
-      if (
-        isWsDropUpdateRefMessage(msg) &&
-        msg.data.update_type === WsMessageType.DROP_UPDATE &&
-        msg.data.wave_id === waveId
-      ) {
-        // Compact refs deliberately omit author data. Clear the subscribed
-        // Wave's typing state so a completed large post cannot leave a stale
-        // indicator behind.
-        typersRef.current.clear();
-        updateTypingMessage();
       }
       if (!isWsTypingMessage(msg)) return;
       const data = msg.data;
@@ -234,9 +238,13 @@ export function useWaveIsTyping(
 
     const currentSocket = socket;
     updateTypingMessage();
+    refreshTypingRef.current = updateTypingMessage;
     currentSocket.addEventListener("message", onMessage);
     return () => {
       clearTimeout(expiryTimer);
+      if (refreshTypingRef.current === updateTypingMessage) {
+        refreshTypingRef.current = null;
+      }
       currentSocket.removeEventListener("message", onMessage);
     };
   }, [socket, waveId, myHandle, shouldSubscribe, scopeKey]);

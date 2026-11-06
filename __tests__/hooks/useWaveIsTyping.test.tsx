@@ -27,6 +27,28 @@ jest.mock("@/hooks/useWaveWebSocket", () => ({
   useWaveWebSocket: (waveId: string) => mockUseWaveWebSocket(waveId),
 }));
 
+// Drop frames reach the hook through the app socket.
+const mockAppSocketCallbacks = new Map<string, (data: unknown) => void>();
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebSocketMessage: (type: string, callback: (data: unknown) => void) => {
+    mockAppSocketCallbacks.set(type, callback);
+    return { isConnected: true };
+  },
+}));
+
+const appSocketFrame = (type: WsMessageType, data: unknown) => {
+  const callback = mockAppSocketCallbacks.get(type);
+  if (!callback) throw new Error(`No app socket handler for ${type}`);
+  callback(data);
+};
+
+const typingFrom = (handle: string, waveId = "wave") => ({
+  data: JSON.stringify({
+    type: WsMessageType.USER_IS_TYPING,
+    data: { wave_id: waveId, profile: { handle, level: 1 } },
+  }),
+});
+
 beforeEach(() => {
   mockAppActive = true;
   mockConnected = true;
@@ -34,6 +56,7 @@ beforeEach(() => {
   mockAddEventListener.mockClear();
   mockRemoveEventListener.mockClear();
   mockUseWaveWebSocket.mockClear();
+  mockAppSocketCallbacks.clear();
 });
 
 test("has no typing timer while idle and stops after the final typer expires", () => {
@@ -136,21 +159,83 @@ test("clears typing status when a compact content update arrives", () => {
   expect(result.current).toContain("A is typing");
 
   act(() => {
+    appSocketFrame(WsMessageType.DROP_UPDATE_REF, {
+      author_id: "author-1",
+      drop_id: "drop-1",
+      wave_id: "wave",
+      serial_no: 1,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+  });
+
+  expect(result.current).toBe("");
+});
+
+test("clears a typer when their drop arrives on the app socket", () => {
+  jest.useFakeTimers();
+  const { result } = renderHook(() => useWaveIsTyping("wave", null));
+
+  act(() => {
+    listeners[0](typingFrom("A"));
+    listeners[0](typingFrom("B"));
+  });
+  expect(result.current).toBe("A, B are typing");
+
+  // A drop by A in another wave, and a drop without an author, change nothing.
+  act(() => {
+    appSocketFrame(WsMessageType.DROP_UPDATE, {
+      wave: { id: "other-wave" },
+      author: { handle: "A" },
+    });
+    appSocketFrame(WsMessageType.DROP_UPDATE, { wave: { id: "wave" } });
+  });
+  expect(result.current).toBe("A, B are typing");
+
+  act(() => {
+    appSocketFrame(WsMessageType.DROP_UPDATE, {
+      wave: { id: "wave" },
+      author: { handle: "A" },
+    });
+  });
+  expect(result.current).toBe("B is typing");
+});
+
+test("ignores drop frames on the typing socket", () => {
+  jest.useFakeTimers();
+  const { result } = renderHook(() => useWaveIsTyping("wave", null));
+
+  act(() => {
+    listeners[0](typingFrom("A"));
     listeners[0]({
       data: JSON.stringify({
-        type: WsMessageType.DROP_UPDATE_REF,
-        data: {
-          author_id: "author-1",
-          drop_id: "drop-1",
-          wave_id: "wave",
-          serial_no: 1,
-          update_type: WsMessageType.DROP_UPDATE,
-        },
+        type: WsMessageType.DROP_UPDATE,
+        data: { wave: { id: "wave" }, author: { handle: "A" } },
       }),
     });
   });
-  act(() => jest.advanceTimersByTime(1000));
 
+  // Typing-purpose sockets get no drops; the app socket's frame clears A.
+  expect(result.current).toBe("A is typing");
+});
+
+test("ignores app socket drops while paused", () => {
+  jest.useFakeTimers();
+  const { result, rerender } = renderHook(
+    ({ enabled }: { enabled: boolean }) =>
+      useWaveIsTyping("wave", null, false, { enabled }),
+    { initialProps: { enabled: true } }
+  );
+  act(() => listeners[0](typingFrom("A")));
+  rerender({ enabled: false });
+
+  expect(() =>
+    act(() =>
+      appSocketFrame(WsMessageType.DROP_UPDATE, {
+        wave: { id: "wave" },
+        author: { handle: "A" },
+      })
+    )
+  ).not.toThrow();
   expect(result.current).toBe("");
 });
 
