@@ -443,6 +443,13 @@ test.describe("Live reaction details @auth @medium @local-only", () => {
     });
     const dialogBox = await surface.boundingBox();
     expect(dialogBox).not.toBeNull();
+    fixture.update(["alice", "carol", "dave", "erin"]);
+    await expect(
+      dialog.getByRole("link", { name: "bob bob", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      dialog.getByRole("link", { name: "erin erin", exact: true })
+    ).toBeVisible();
     fixture.update(["alice", "carol", "dave"]);
     await expect(
       drop.getByRole("button", {

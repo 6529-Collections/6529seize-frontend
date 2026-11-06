@@ -1,4 +1,6 @@
 import { useAuth } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import WaveDropReaction from "@/components/waves/drops/WaveDropReaction";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
@@ -34,27 +36,29 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
 }));
 jest.mock("@/components/waves/drops/WaveDropReaction", () => ({
   __esModule: true,
-  default: ({
-    reaction,
-    onTooltipOpenChange,
-    onOpenDetailDialog,
-    isDetailsLoading,
-  }: {
-    reaction: ApiDropReaction & { count: number };
-    onTooltipOpenChange: (reaction: string, open: boolean) => void;
-    onOpenDetailDialog: (reaction: string) => void;
-    isDetailsLoading: boolean;
-  }) => (
-    <button
-      onMouseEnter={() => onTooltipOpenChange(reaction.reaction, true)}
-      onMouseLeave={() => onTooltipOpenChange(reaction.reaction, false)}
-      onClick={() => onOpenDetailDialog(reaction.reaction)}
-      aria-label={`Inspect ${reaction.reaction}`}
-      aria-busy={isDetailsLoading}
-    >
-      {reaction.count}:{" "}
-      {reaction.profiles.map((profile) => profile.handle).join(", ")}
-    </button>
+  default: jest.fn(
+    ({
+      reaction,
+      onTooltipOpenChange,
+      onOpenDetailDialog,
+      isDetailsLoading,
+    }: {
+      reaction: ApiDropReaction & { count: number };
+      onTooltipOpenChange: (reaction: string, open: boolean) => void;
+      onOpenDetailDialog: (reaction: string) => void;
+      isDetailsLoading: boolean;
+    }) => (
+      <button
+        onMouseEnter={() => onTooltipOpenChange(reaction.reaction, true)}
+        onMouseLeave={() => onTooltipOpenChange(reaction.reaction, false)}
+        onClick={() => onOpenDetailDialog(reaction.reaction)}
+        aria-label={`Inspect ${reaction.reaction}`}
+        aria-busy={isDetailsLoading}
+      >
+        {reaction.count}:{" "}
+        {reaction.profiles.map((profile) => profile.handle).join(", ")}
+      </button>
+    )
   ),
 }));
 jest.mock("next/dynamic", () => ({
@@ -205,7 +209,7 @@ test("preserves known profiles during a refresh without carrying them across dro
   fetchDetails.mockReturnValue(new Promise(() => {}));
   rerender(<WaveDropReactions drop={drop(2)} />);
   expect(chip()).toHaveTextContent("alice");
-  expect(chip()).toHaveAttribute("aria-busy", "true");
+  expect(chip()).toHaveAttribute("aria-busy", "false");
 
   rerender(<WaveDropReactions drop={drop(2, "drop-2")} />);
   expect(chip()).not.toHaveTextContent("alice");
@@ -276,4 +280,30 @@ test("preserves the server's profile order when the viewer is already included",
   });
   fireEvent.mouseEnter(chip());
   await waitFor(() => expect(chip()).toHaveTextContent("2: alice, bob"));
+});
+
+test("does not rerender reaction chips for an unchanged background response", async () => {
+  fetchDetails.mockImplementation(async () => details("alice"));
+  const { client } = mount(drop(1));
+  fireEvent.mouseEnter(chip());
+  await waitFor(() => expect(chip()).toHaveTextContent("1: alice"));
+  const rendered = jest.mocked(WaveDropReaction).mock.calls.length;
+
+  await act(async () => {
+    await client.invalidateQueries({
+      queryKey: [QueryKey.DROP_REACTIONS, "drop-1"],
+    });
+  });
+
+  expect(fetchDetails).toHaveBeenCalledTimes(2);
+  expect(jest.mocked(WaveDropReaction)).toHaveBeenCalledTimes(rendered);
+});
+
+test("does not refetch for an unrelated drop update with unchanged reactions", async () => {
+  fetchDetails.mockResolvedValue(details("alice"));
+  const { rerender } = mount(drop(1));
+  fireEvent.mouseEnter(chip());
+  await waitFor(() => expect(chip()).toHaveTextContent("1: alice"));
+  rerender(<WaveDropReactions drop={{ ...drop(1), title: "Updated title" }} />);
+  expect(fetchDetails).toHaveBeenCalledTimes(1);
 });

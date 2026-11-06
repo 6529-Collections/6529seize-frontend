@@ -814,6 +814,7 @@ it.each([
   "hooks/drops/useDropReaction.ts",
   "services/api/wave-drop-reactions-v2-api.ts",
   "tests/social/wave-reaction-sandbox.spec.ts",
+  "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
 ])("selects the live reaction browser lane for %s", (file) => {
   expect(executePlan([file]).checks.playwright_drop_reactions.required).toBe(
     true

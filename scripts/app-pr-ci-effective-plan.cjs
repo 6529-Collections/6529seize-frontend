@@ -128,6 +128,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         file
       ) ||
       [
+        "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+        "__tests__/useWaveRealtimeUpdater.test.ts",
         "tests/support/composerSandboxServer.cjs",
         "tests/packs.manifest.cjs",
         ".github/workflows/app-pr-ci.yml",

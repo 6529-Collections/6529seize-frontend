@@ -28,6 +28,21 @@ export const getReactionCount = (
   return reaction.profiles.length;
 };
 
+export const getReactionDetailsVersion = (
+  reactions: readonly ApiDropReaction[] | null | undefined,
+  viewerReaction: string | null | undefined
+): string =>
+  JSON.stringify([
+    (reactions ?? [])
+      .map((reaction) => ({
+        reaction: reaction.reaction,
+        count: getReactionCount(reaction),
+        profiles: reaction.profiles.map((profile) => profile.id).sort(),
+      }))
+      .sort((a, b) => a.reaction.localeCompare(b.reaction)),
+    viewerReaction,
+  ]);
+
 const withReactionCount = (
   entry: ReactionEntry,
   count: number

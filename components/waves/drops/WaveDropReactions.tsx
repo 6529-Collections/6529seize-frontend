@@ -10,7 +10,11 @@ import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React, { useCallback, useMemo, useState } from "react";
-import { getReactionCount, toProfileMin } from "./reaction-utils";
+import {
+  getReactionCount,
+  getReactionDetailsVersion,
+  toProfileMin,
+} from "./reaction-utils";
 import WaveDropReaction from "./WaveDropReaction";
 
 const WaveDropReactionsDetailDialog = dynamic(
@@ -38,19 +42,14 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
     activeProfileProxy?.id,
   ]);
   const reactionVersion = useMemo(
-    () => [
-      drop.reactions
-        .map((reaction) => ({
-          reaction: reaction.reaction,
-          count: getReactionCount(reaction),
-          profiles: reaction.profiles.map((profile) => profile.id).sort(),
-        }))
-        .sort((a, b) => a.reaction.localeCompare(b.reaction)),
-      drop.context_profile_context?.reaction,
-    ],
+    () =>
+      getReactionDetailsVersion(
+        drop.reactions,
+        drop.context_profile_context?.reaction
+      ),
     [drop.reactions, drop.context_profile_context?.reaction]
   );
-  const { data: detailedReactions, isFetching: detailsLoading } = useQuery({
+  const { data: detailedReactions, isLoading: detailsLoading } = useQuery({
     queryKey: [QueryKey.DROP_REACTIONS, drop.id, viewerKey, reactionVersion],
     queryFn: ({ signal }) => fetchDropReactionDetailsV2(drop.id, signal),
     enabled:
