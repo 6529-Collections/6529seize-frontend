@@ -150,6 +150,17 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     baseURL,
     isMobile,
   }, testInfo) => {
+    const hydrationWarnings: string[] = [];
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        /hydration|hydrated|server rendered|did not match|didn't match/i.test(
+          message.text()
+        )
+      ) {
+        hydrationWarnings.push(message.text());
+      }
+    });
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
     // Wallet contract reads are outside this isolated profile fixture.
@@ -204,6 +215,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         page.getByRole("button", { name: "Add", exact: true })
       ).toBeVisible();
       await expectNoHorizontalOverflow(page);
+      expect(hydrationWarnings, `${load} hydration console warnings`).toEqual(
+        []
+      );
     }
     await testInfo.attach("cold-owner-profile", {
       body: await page.screenshot(),
