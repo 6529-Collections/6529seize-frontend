@@ -85,13 +85,33 @@ afterEach(() => {
 });
 
 describe("the authorize page", () => {
-  it("asks for the validator's link when there is none", async () => {
+  it("says what it is and how to get here when there is no link", async () => {
     open(null);
     expect(
-      await screen.findByText(
-        "Open this page from the QR code or the link on your validator's Authorize step."
+      await screen.findByRole("heading", {
+        name: "Sign for your validator on your phone",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This page lets the wallet on your phone authorize a 6529 Validator that runs on your computer. Your wallet signs one message. It costs no gas and moves nothing."
       )
     ).toBeInTheDocument();
+    const steps = screen.getAllByRole("listitem").map((x) => x.textContent);
+    expect(steps).toEqual([
+      "On your computer, open 6529 Validator and go to Authorize, or to Keys, then Add a computer.",
+      "Choose your phone as the wallet, and paste its address.",
+      "Scan the code it shows with your phone, or open its link here.",
+      "Sign here, then paste the signature into your validator.",
+    ]);
+    expect(
+      screen.getByText(
+        "Sign only if the key code on this page matches the one on your computer."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "What is the 6529 Validator?" })
+    ).toHaveAttribute("href", "/validator");
     expect(
       screen.getByRole("heading", { name: "Authorize your validator" })
     ).toBeInTheDocument();
@@ -160,7 +180,9 @@ describe("the authorize page", () => {
 
   it("reads a new link when the fragment changes", async () => {
     open(null);
-    await screen.findByText(/Open this page from the QR code/);
+    await screen.findByRole("heading", {
+      name: "Sign for your validator on your phone",
+    });
     act(() => {
       globalThis.history.replaceState(
         null,
