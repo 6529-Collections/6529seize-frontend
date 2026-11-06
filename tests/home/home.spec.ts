@@ -2135,6 +2135,38 @@ test("mobile web starts with its header and full-width content before hydration 
   }
 });
 
+test("prerendered home hydrates cleanly with shell query links @smoke @medium @large", async ({
+  page,
+}) => {
+  // `/` is prerendered without its query. Shell readers of `?view=`, `?drop=`
+  // and `?serialNo=` render after hydration or inside their own boundaries,
+  // so a URL carrying them must not produce a hydration mismatch.
+  const hydrationErrors: string[] = [];
+  const isHydrationError = (text: string) =>
+    /hydrat|#418|#423|#425|did not match/i.test(text);
+  page.on("console", (message) => {
+    if (message.type() === "error" && isHydrationError(message.text())) {
+      hydrationErrors.push(message.text());
+    }
+  });
+  page.on("pageerror", (error) => {
+    if (isHydrationError(error.message)) hydrationErrors.push(error.message);
+  });
+
+  for (const search of [
+    "?view=messages",
+    "?view=waves",
+    "?drop=00000000-0000-4000-8000-000000000001",
+    "?serialNo=5",
+  ]) {
+    await page.goto(`/${search}`, { waitUntil: "load" });
+    await waitForRouteReady(page);
+    await expect(page.getByRole("main").first()).toBeVisible();
+  }
+
+  expect(hydrationErrors).toEqual([]);
+});
+
 test("homepage tracking follows nested scrolling and loaded sections @smoke @medium @large", async ({
   page,
 }) => {
