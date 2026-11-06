@@ -60,7 +60,9 @@ export const getTypingSocketUrl = (url: string): string => {
     const parsed = new URL(url);
     parsed.searchParams.set("purpose", TYPING_SOCKET_PURPOSE);
     return parsed.toString();
-  } catch {
+  } catch (error) {
+    // Without the purpose the server sends this socket every drop again.
+    console.warn("[useWaveWebSocket] typing socket URL kept as is", error);
     return url;
   }
 };
