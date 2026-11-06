@@ -122,6 +122,20 @@ function applyEffectiveAppPrCiPlan(plan) {
       file === "tests/social/profile-about-sandbox.spec.ts"
   );
 
+  const playwrightDropReactions = files.some(
+    (file) =>
+      /^(?:components\/waves\/drops\/(?:WaveDropReaction|reaction-utils)|hooks\/drops\/(?:useDropReaction|useOptimisticNotificationDropReaction)|services\/api\/wave-drop|tests\/social\/wave-reaction-sandbox\.spec\.ts|__tests__\/components\/waves\/drops\/WaveDropReaction)/u.test(
+        file
+      ) ||
+      [
+        "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+        "__tests__/useWaveRealtimeUpdater.test.ts",
+        "tests/support/composerSandboxServer.cjs",
+        "tests/packs.manifest.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
@@ -294,6 +308,21 @@ function applyEffectiveAppPrCiPlan(plan) {
           "Profile editing changes require the profile dialog browser pack."
         )
       : baseChecks.playwright_critical_shell,
+    playwright_profile_nic: check(
+      files.some(
+        (file) =>
+          /^(?:components\/profile-activity\/|__tests__\/components\/profile-activity\/|helpers\/profile-logs\.helpers\.ts$|components\/user\/rep\/|tests\/social\/profile-nic-activity-sandbox\.spec\.ts$)/u.test(
+            file
+          ) ||
+          [
+            "tests/packs.manifest.cjs",
+            "tests/support/composerSandboxServer.cjs",
+            "scripts/app-pr-ci-effective-plan.cjs",
+            ".github/workflows/app-pr-ci.yml",
+          ].includes(file)
+      ),
+      "Profile activity changes need the NIC cursor and unchanged-view browser contracts."
+    ),
     install: check(
       true,
       playwrightMuseum
@@ -313,6 +342,10 @@ function applyEffectiveAppPrCiPlan(plan) {
       testTypecheck
         ? "Changed test code, test configuration, or dependency policy needs test-helper typechecking."
         : "No test code, test configuration, or dependency policy changed."
+    ),
+    playwright_drop_reactions: check(
+      playwrightDropReactions,
+      "Drop reaction state or its browser contract requires live tooltip and touch-dialog coverage."
     ),
     playwright_artwork_documentation: check(
       playwrightArtworkDocumentation,

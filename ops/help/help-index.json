@@ -1941,7 +1941,7 @@
         "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
         "To add or change an About statement, use the profile editor (Edit profile > About on smaller layouts). Clear the About editor and save to remove it. The header displays only saved About text, with See more and See less for long text on mobile. Visitors, signed-out users, and active proxies never see profile edit controls.",
         "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
-        "Editable profile surfaces require the connected profile owner.",
+        "Editable profile surfaces require the connected profile owner. On a fresh profile load, owner, relationship, and moderation actions wait for the browser to restore the signed-in session while the public profile summary stays available.",
         "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
       ],
       "canonical_path": "/network",
@@ -1981,7 +1981,7 @@
         "Selecting a profile tab immediately highlights it and hides the previous content. The loading placeholder appears only if the switch takes longer than 100 ms; ready content appears immediately. The header and banner remain in place, vertical scroll is preserved within the destination's available height, and the latest tab selection wins. Leaving Collected exits transfer mode and clears transfer selections.",
         "Profile tab links retain address and locale. The xTDH tab opens with tab=granted; other tab-specific filters do not carry between main profile tabs.",
         "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
-        "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
+        "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules. On a fresh profile load, Brain and owner-only Proxy visibility wait for the signed-in session; direct links keep their loading state while access is checked."
       ],
       "canonical_path": "/{user}",
       "related_paths": [
@@ -3806,6 +3806,7 @@
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Desktop and touch quick reactions show up to three available emojis ranked by local usage. Each button names its emoji in its accessible label and desktop tooltip, such as React with Thumbs up. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
         "Quick reactions and the emoji picker Frequently used section share local emoji history, including composer emoji selections. History stays in the current browser or app installation and does not sync between devices.",
+        "Reaction counts and names refresh while a tooltip or Reactions dialog is open. On desktop, hover a chip and use and N others to see the full list; on touch, long-press the chip. Reopening details checks the current names without reloading. If names cannot load, close and reopen details to retry.",
         "Reaction controls are disabled while a proxy profile is active.",
         "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
@@ -6371,6 +6372,8 @@
         "filters"
       ],
       "facts": [
+        "The NIC activity log includes NIC rating edits and identity changes, and excludes REP and wave REP rating edits. Its direction and log-type filters still apply.",
+        "If the first NIC activity page cannot load, the placeholders are replaced by Unable to load activity log. and a Retry button. A failed later page keeps the current entries and paging controls available.",
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
         "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
@@ -6832,6 +6835,7 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
+        "Before sending a new message with @all, a confirmation shows the current notification audience count. Choose Send with @all to send or Keep editing to preserve the draft. Counting errors require retrying; edits do not rebroadcast or prompt.",
         "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
         "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
         "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",

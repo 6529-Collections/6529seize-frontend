@@ -17,7 +17,10 @@ Use this skill for progressive internationalization work in this repository.
    tabs, labels, placeholders, tooltips, empty states, validation messages,
    error text, and `aria-label` values.
 5. Use message keys based on product meaning. Avoid sentence fragments and
-   string concatenation.
+   string concatenation. When the feature already has a namespace in
+   `i18n/namespaces/`, add new `en-US` copy to it and import that namespace
+   from each browser module that uses its keys; see "Dictionary Loading" in
+   the standard.
 6. Route dates, numbers, percentages, relative time, and locale-sensitive
    sorting through repo helpers when available.
 7. Keep untranslated locales functional by falling back to `en-US` and record

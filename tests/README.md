@@ -58,6 +58,12 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The reaction sandbox covers live count and profile-list updates, desktop tooltip
+and dialog overflow, recoverable detail-read failures, and mobile long press.
+It uses synthetic local data and checks that hidden lists do not refetch.
+App PR CI selects it when reaction components, hooks, API helpers, or its browser
+contract change.
+
 The native competition sandbox pack exercises Additional Action through the real
 Main Stage submission modal on desktop and phone. It checks the optional plan,
 length limit, checkbox draft preservation, review/preview and back navigation,
@@ -167,6 +173,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
 | `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
+| `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
 | `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |

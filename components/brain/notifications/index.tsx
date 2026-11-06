@@ -28,8 +28,6 @@ interface NotificationsProps {
 }
 
 const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
-  [ApiNotificationCause.E2EeMessage]: 17,
-  [ApiNotificationCause.ArtistArtworkSubmitted]: 18,
   [ApiNotificationCause.IdentitySubscribed]: 0,
   [ApiNotificationCause.IdentityMentioned]: 1,
   [ApiNotificationCause.IdentityRep]: 2,
@@ -47,6 +45,8 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.CompetitionLifecycle]: 14,
   [ApiNotificationCause.MemeCollaboration]: 15,
   [ApiNotificationCause.VotingCreditsReturned]: 16,
+  [ApiNotificationCause.ArtistArtworkSubmitted]: 17,
+  [ApiNotificationCause.E2EeMessage]: 18,
 };
 
 const compareNotificationCause = (

@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
 import UserPageIdentityAddStatementsHeader from "@/components/user/identity/statements/header/UserPageIdentityAddStatementsHeader";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -37,6 +38,31 @@ async function expectGuidanceDismissed(button: HTMLElement) {
 }
 
 describe("UserPageIdentityAddStatementsHeader", () => {
+  it("hydrates when the owner wallet is restored before the statements", async () => {
+    const header = () => (
+      <UserPageIdentityAddStatementsHeader profile={profile} />
+    );
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(header());
+    document.body.append(container);
+    expect(within(container).queryByTestId("add-button")).toBeNull();
+
+    mockedUseSeize.mockReturnValue({ address: "0x1" });
+    const onRecoverableError = jest.fn();
+    let root: Root | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, header(), { onRecoverableError });
+      });
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(within(container).getByTestId("add-button")).toBeInTheDocument();
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+    }
+  });
+
   it("shows add button when viewing own profile", () => {
     mockedUseSeize.mockReturnValue({ address: "0x1" });
     render(
