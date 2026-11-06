@@ -26,6 +26,7 @@ const NO_RELEASE: ReleaseFeedSnapshot = {
   feed: null,
   signature: null,
   releases: [],
+  support: { minSupported: null, deadline: null, deadlineReason: null },
 };
 let mockSnapshot = NO_RELEASE;
 let accessCookie: string | undefined;

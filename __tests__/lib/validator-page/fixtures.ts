@@ -93,3 +93,36 @@ export const SAME_DAY_FEED = {
     feedEntry("0.1.0-rc.7", "test", "2026-11-20"),
   ],
 };
+
+/** rc.9's reasons, as 6529 means to sign them. */
+export const RC9_URGENT_REASON =
+  "Signed TDH starts again on Sunday 8 November, 00:00 UTC, with the zero and dead addresses in the total. Update before then.";
+export const RC9_DEADLINE_REASON =
+  "From Sunday 8 November, 00:00 UTC, signed TDH counts only on the new chain, which 0.1.0-rc.9 runs.";
+export const RC9_UNSAFE_REASON =
+  "Its daily total leaves out the zero and dead addresses. From 8 November its signatures don't count.";
+
+/**
+ * rc.9's feed as 6529 means to sign it: rc.9 urgent, rc.5 to rc.8 unsafe,
+ * and the support line moved to rc.9 from Sunday. Hashes and IDs made up.
+ */
+export const RC9_FEED = {
+  format: 1,
+  sequence: 9,
+  published: "2026-11-06T12:00:00Z",
+  min_supported: "0.1.0-rc.9",
+  deadline: "2026-11-08T00:00:00Z",
+  deadline_reason: RC9_DEADLINE_REASON,
+  unsafe_versions: ["0.1.0-rc.8", "0.1.0-rc.7", "0.1.0-rc.6", "0.1.0-rc.5"].map(
+    (version) => ({ version, reason: RC9_UNSAFE_REASON })
+  ),
+  releases: [
+    {
+      ...feedEntry("0.1.0-rc.9", "test", "2026-11-06"),
+      severity: "urgent",
+      reason: RC9_URGENT_REASON,
+    },
+    feedEntry("0.1.0-rc.8", "test", "2026-11-06"),
+    feedEntry("0.1.0-rc.7", "test", "2026-11-05"),
+  ],
+};

@@ -2,9 +2,10 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
-import type {
-  ReleaseFeedSnapshot,
-  ValidatorRelease,
+import {
+  getOfferedRelease,
+  type ReleaseFeedSnapshot,
+  type ValidatorRelease,
 } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,
@@ -64,7 +65,20 @@ function ReleaseEntry({
             Latest
           </span>
         )}
+        {release.unsafeReason && (
+          <span className="tw-rounded-full tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-100">
+            Unsafe
+          </span>
+        )}
       </div>
+      {release.unsafeReason && (
+        <p className={`tw-mb-0 tw-mt-3 ${BODY}`}>
+          <strong className="tw-font-semibold tw-text-error">
+            Unsafe to run:
+          </strong>{" "}
+          {release.unsafeReason}
+        </p>
+      )}
       <dl className="tw-mb-0 tw-mt-4 tw-grid tw-gap-2">
         <MetaRow term="Published">{release.publishedAt.slice(0, 10)}</MetaRow>
         <MetaRow term="Channel">{release.channel}</MetaRow>
@@ -143,6 +157,7 @@ export default function ValidatorReleaseHistory({
 }: {
   readonly snapshot: ReleaseFeedSnapshot;
 }) {
+  const offered = getOfferedRelease(snapshot.releases);
   return (
     <ValidatorPageFrame current="releases">
       <ValidatorPageHeader
@@ -171,11 +186,11 @@ export default function ValidatorReleaseHistory({
         </p>
       ) : (
         <div className="tw-grid tw-gap-5">
-          {snapshot.releases.map((release, index) => (
+          {snapshot.releases.map((release) => (
             <ReleaseEntry
               key={release.version}
               release={release}
-              isLatest={index === 0}
+              isLatest={release === offered}
             />
           ))}
         </div>

@@ -22,6 +22,26 @@ export type ValidatorRelease = {
   readonly softwareId: string | null;
   readonly notes: string | null;
   readonly files: readonly ValidatorReleaseFile[];
+  /**
+   * The feed's severity is `urgent`, or a word the site doesn't know: as in
+   * the validator, an unknown word reads as urgent. Absent: normal.
+   */
+  readonly urgent: boolean;
+  /** Why it is urgent, in a sentence; null when the feed gives none. */
+  readonly reason: string | null;
+  /** Why it is unsafe to run (`unsafe_versions`); null when it isn't listed. */
+  readonly unsafeReason: string | null;
+};
+
+/**
+ * The feed's support line: releases below `minSupported` must move to a
+ * newer one before `deadline`, for `deadlineReason`.
+ */
+export type ValidatorFeedSupport = {
+  readonly minSupported: string | null;
+  /** `YYYY-MM-DDTHH:MM:SSZ`; null without a valid `minSupported`. */
+  readonly deadline: string | null;
+  readonly deadlineReason: string | null;
 };
 
 type FeedObject = Extract<BucketObject, { state: "found" }>;
@@ -36,6 +56,13 @@ export type ReleaseFeedSnapshot = {
    * cannot use are left out.
    */
   readonly releases: readonly ValidatorRelease[];
+  readonly support: ValidatorFeedSupport;
+};
+
+const NO_SUPPORT: ValidatorFeedSupport = {
+  minSupported: null,
+  deadline: null,
+  deadlineReason: null,
 };
 
 // A file name becomes one S3 key segment, so it may not hold a slash or
@@ -49,6 +76,12 @@ const COMMIT_PATTERN = /^[0-9a-f]{7,64}$/;
 const ISO_DATE_START = /^\d{4}-\d{2}-\d{2}/;
 const ISO_DATE_CHARACTERS = /^[0-9TZ:.+-]{10,35}$/;
 const MAX_NOTES_LENGTH = 2_000;
+// A reason (urgent, unsafe, deadline) is one line of at most 300
+// characters, as the validator checks it (crates/releases/src/feed.rs).
+const MAX_REASON_LENGTH = 300;
+const CONTROL_CHARACTER = /\p{Cc}/u;
+// The validator's UTC time: 2026-11-08T00:00:00Z.
+const UTC_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const SNAPSHOT_TTL_MS = 60 * 1000;
 // After an S3 error the last good feed stays in use this long, and S3 is
 // asked again after ERROR_RETRY_MS.
@@ -171,6 +204,20 @@ function firstString(
   return null;
 }
 
+/** One line of plain text, at most 300 characters; null otherwise. */
+function parseReason(value: unknown): string | null {
+  if (typeof value !== "string" || CONTROL_CHARACTER.test(value)) {
+    return null;
+  }
+  const reason = Array.from(value.trim()).slice(0, MAX_REASON_LENGTH).join("");
+  return reason || null;
+}
+
+/** Urgent unless the feed says `normal`, or says nothing it can read. */
+function isUrgent(value: unknown): boolean {
+  return typeof value === "string" && value.trim() !== "" && value !== "normal";
+}
+
 function parseSize(record: Record<string, unknown>): number | null {
   const value = record["size"] ?? record["bytes"];
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
@@ -255,9 +302,40 @@ function parseRelease(value: unknown): ParsedRelease | null {
       softwareId: firstString(value, ["software_id", "softwareId"]),
       notes: notes ? notes.slice(0, MAX_NOTES_LENGTH) : null,
       files: parseFiles(value["files"]),
+      urgent: isUrgent(value["severity"]),
+      reason: parseReason(value["reason"]),
+      unsafeReason: null,
     },
     order,
   };
+}
+
+/**
+ * The feed's `unsafe_versions`, by version as a release names it. An entry
+ * without a valid version and a reason is left out.
+ */
+function parseUnsafeVersions(json: unknown): Map<string, string> {
+  const unsafe = new Map<string, string>();
+  const list = isRecord(json) ? json["unsafe_versions"] : null;
+  if (!Array.isArray(list)) {
+    return unsafe;
+  }
+  for (const value of list) {
+    if (!isRecord(value)) {
+      continue;
+    }
+    const version = value["version"];
+    const reason = parseReason(value["reason"]);
+    if (
+      typeof version === "string" &&
+      parseVersion(version) &&
+      reason &&
+      !unsafe.has(version)
+    ) {
+      unsafe.set(version, reason);
+    }
+  }
+  return unsafe;
 }
 
 /**
@@ -274,6 +352,7 @@ export function parseReleaseFeed(json: unknown): ValidatorRelease[] {
   if (!Array.isArray(list)) {
     return [];
   }
+  const unsafe = parseUnsafeVersions(json);
   const parsed: ParsedRelease[] = [];
   const seen = new Set<string>();
   for (const value of list) {
@@ -285,16 +364,63 @@ export function parseReleaseFeed(json: unknown): ValidatorRelease[] {
   }
   return parsed
     .sort((a, b) => compareVersions(b.order, a.order))
-    .map((entry) => entry.release);
+    .map(({ release }) => ({
+      ...release,
+      unsafeReason: unsafe.get(release.version) ?? null,
+    }));
 }
 
-function decodeFeed(feed: FeedObject): ValidatorRelease[] {
+/**
+ * Reads `min_supported`, `deadline` and `deadline_reason`. As in the
+ * validator, a deadline counts only with a valid `min_supported`; anything
+ * malformed is left out.
+ */
+export function parseFeedSupport(json: unknown): ValidatorFeedSupport {
+  if (!isRecord(json)) {
+    return NO_SUPPORT;
+  }
+  const minimum = json["min_supported"];
+  const minSupported =
+    typeof minimum === "string" && parseVersion(minimum) ? minimum : null;
+  const time = json["deadline"];
+  const deadline =
+    minSupported &&
+    typeof time === "string" &&
+    UTC_TIME_PATTERN.test(time) &&
+    !Number.isNaN(Date.parse(time))
+      ? time
+      : null;
+  return {
+    minSupported,
+    deadline,
+    deadlineReason: parseReason(json["deadline_reason"]),
+  };
+}
+
+/**
+ * The release the pages offer: the newest, unless the feed lists it as
+ * unsafe. Then none is offered.
+ */
+export function getOfferedRelease(
+  releases: readonly ValidatorRelease[]
+): ValidatorRelease | undefined {
+  const newest = releases[0];
+  return newest && newest.unsafeReason === null ? newest : undefined;
+}
+
+function decodeFeed(
+  feed: FeedObject
+): Pick<ReleaseFeedSnapshot, "releases" | "support"> {
   try {
-    return parseReleaseFeed(
-      JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(feed.body))
+    const json: unknown = JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(feed.body)
     );
+    return {
+      releases: parseReleaseFeed(json),
+      support: parseFeedSupport(json),
+    };
   } catch {
-    return [];
+    return { releases: [], support: NO_SUPPORT };
   }
 }
 
@@ -320,16 +446,28 @@ async function fetchSnapshot(): Promise<ReleaseFeedSnapshot> {
       reason = signature.reason;
     }
     console.warn("[validator-page] release feed unavailable", reason);
-    return { state: "error", feed: null, signature: null, releases: [] };
+    return {
+      state: "error",
+      feed: null,
+      signature: null,
+      releases: [],
+      support: NO_SUPPORT,
+    };
   }
   if (feed.state === "missing") {
-    return { state: "missing", feed: null, signature: null, releases: [] };
+    return {
+      state: "missing",
+      feed: null,
+      signature: null,
+      releases: [],
+      support: NO_SUPPORT,
+    };
   }
   return {
     state: "ok",
     feed,
     signature: signature.state === "found" ? signature : null,
-    releases: decodeFeed(feed),
+    ...decodeFeed(feed),
   };
 }
 

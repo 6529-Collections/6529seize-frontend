@@ -4,9 +4,11 @@ import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
 import { VALIDATOR_GUIDE_FOLDS } from "@/lib/validator-page/content/guideMarkdown";
 import { getBaseVersion } from "@/lib/validator-page/content/pageText";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
-import type {
-  ReleaseFeedSnapshot,
-  ValidatorRelease,
+import {
+  getOfferedRelease,
+  type ReleaseFeedSnapshot,
+  type ValidatorFeedSupport,
+  type ValidatorRelease,
 } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,
@@ -76,6 +78,16 @@ function guideFold(id: string) {
   return fold;
 }
 
+function notOutYetText(snapshot: ReleaseFeedSnapshot): string {
+  const newest = snapshot.releases[0];
+  if (newest?.unsafeReason) {
+    return `The newest release, ${newest.version}, is listed as unsafe to run, so it isn't offered here. ${newest.unsafeReason}`;
+  }
+  return snapshot.state === "error"
+    ? "The release list could not be loaded. Reload the page in a minute."
+    : "The test release isn't out yet. When it is, its downloads appear here.";
+}
+
 function NotOutYet({ snapshot }: { readonly snapshot: ReleaseFeedSnapshot }) {
   return (
     <div
@@ -85,12 +97,64 @@ function NotOutYet({ snapshot }: { readonly snapshot: ReleaseFeedSnapshot }) {
         aria-hidden="true"
         className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
       />
-      <p className={`tw-m-0 ${BODY}`}>
-        {snapshot.state === "error"
-          ? "The release list could not be loaded. Reload the page in a minute."
-          : "The test release isn't out yet. When it is, its downloads appear here."}
-      </p>
+      <p className={`tw-m-0 ${BODY}`}>{notOutYetText(snapshot)}</p>
     </div>
+  );
+}
+
+/** `2026-11-08T00:00:00Z` as `2026-11-08 00:00 UTC`. */
+function formatUtc(time: string): string {
+  return `${time.slice(0, 10)} ${time.slice(11, 16)} UTC`;
+}
+
+/**
+ * The feed marks the offered release urgent: its reason, and the feed's
+ * deadline, above the download, where every visitor sees it.
+ */
+function UrgentNotice({
+  release,
+  support,
+}: {
+  readonly release: ValidatorRelease;
+  readonly support: ValidatorFeedSupport;
+}) {
+  if (!release.urgent) {
+    return null;
+  }
+  return (
+    <section
+      id="urgent"
+      aria-labelledby="urgent-title"
+      className="tw-mb-6 tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-p-5 sm:tw-p-6"
+    >
+      <ExclamationTriangleIcon
+        aria-hidden="true"
+        className="tw-mt-1 tw-size-5 tw-flex-none tw-text-error"
+      />
+      <div className="tw-min-w-0">
+        <h2
+          id="urgent-title"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
+        >
+          {release.version} is an urgent update
+        </h2>
+        {release.reason && (
+          <p className={`tw-mb-0 tw-mt-2 ${BODY}`}>{release.reason}</p>
+        )}
+        {(support.deadline ?? support.deadlineReason) && (
+          <p className={`tw-mb-0 tw-mt-2 ${BODY}`}>
+            {support.deadline && support.minSupported && (
+              <strong className="tw-font-semibold tw-text-iron-50">
+                If you run a release before {support.minSupported}, update by{" "}
+                {formatUtc(support.deadline)}.
+              </strong>
+            )}
+            {support.deadline && support.deadlineReason && " "}
+            {support.deadlineReason}
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -130,7 +194,7 @@ export default function ValidatorDownloadPage({
   /** The server's guess at the visitor's system, from the User-Agent. */
   readonly platform: VisitorPlatform;
 }) {
-  const release = snapshot.releases[0];
+  const release = getOfferedRelease(snapshot.releases);
   const version = release ? getBaseVersion(release.version) : "0.1.0";
   const installers = release ? groupReleaseFiles(release).installers : [];
   const knownIssues = guideFold("known-issues");
@@ -152,6 +216,9 @@ export default function ValidatorDownloadPage({
         aria-label="Download"
         className="tw-mb-12 tw-scroll-mt-24"
       >
+        {release && (
+          <UrgentNotice release={release} support={snapshot.support} />
+        )}
         {release ? (
           <ValidatorDownloadChooser
             options={installers.map((item) => toOption(release, item))}
