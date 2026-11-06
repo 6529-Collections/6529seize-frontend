@@ -209,6 +209,10 @@ combined five-field editor, the existing smaller-screen field menu, and saving
 or clearing About statements. Profile media records use the same desktop editor
 and smaller-layout field menu. Keep these instructions aligned with the header.
 
+The drop-actions record covers current reactor names in desktop tooltips and
+Reactions dialogs, touch long press, live count updates, and closing and reopening
+details to retry a failed names request without reloading the thread.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
