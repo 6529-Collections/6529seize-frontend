@@ -738,7 +738,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .last();
     await expect(sendButton).toBeEnabled();
     await expect(sendButton).toHaveText("");
-    const sendIcon = sendButton.locator("svg");
+    const sendIcon = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last()
+      .locator("svg");
     await expect(sendIcon).toBeVisible();
     await expect(sendIcon).toHaveAttribute("fill", "none");
     const sendBounds = await sendButton.boundingBox();

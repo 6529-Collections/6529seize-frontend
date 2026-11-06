@@ -74,8 +74,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       notice.getByRole("button", { name: "Export history" })
     ).toBeVisible();
-    // The reported mobile/quick-DM regression squeezed the warning into a
-    // narrow column beside the actions. Both actions belong below it.
+    // Full DM views retain the notice and actions at narrow viewport widths.
     for (const width of [390, 768]) {
       await alice.page.setViewportSize({ width, height: 900 });
       const exportBox = await notice
