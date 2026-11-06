@@ -1133,6 +1133,104 @@
           }
         ]
       }
+    },
+    {
+      "recorded_at": "2026-11-06T20:30:00Z",
+      "installed_at": "2026-11-04T01:44:24Z",
+      "change": "ProductionPageCachePurge statement for the production page distribution E3KTTDJUNHRYW9 (cloudfront:GetDistribution, cloudfront:CreateInvalidation and cloudfront:GetInvalidation, us-east-1 only), used by the purge step in Web Deploy - PROD",
+      "policy_arn": "arn:aws:iam::987989283142:policy/FrontendProductionDeployment",
+      "default_version": "v16",
+      "previous_default_version": "v15",
+      "version_change": "v16 is v15 plus exactly the ProductionPageCachePurge statement; no statement was removed or changed",
+      "rollback": "aws iam set-default-policy-version --policy-arn arn:aws:iam::987989283142:policy/FrontendProductionDeployment --version-id v15",
+      "rollback_note": "Clear the production environment variable PRODUCTION_PAGE_DISTRIBUTION_ID first, so Web Deploy - PROD skips the purge step instead of failing it",
+      "deleted_versions": ["v2"],
+      "deleted_versions_note": "v2 (the oldest version) was deleted to stay within the five-version limit; its document was backed up before deletion",
+      "policy_sha256": {
+        "FrontendProductionDeployment.json": "6c7b609f7a46c661c427a76e2e3446842c4df75a9b3374b84191abb56d6a0ee4"
+      },
+      "policy_sha256_matches_manifest": true,
+      "installed_document_matches_repository": true,
+      "access_analyzer_findings": [],
+      "simulation": {
+        "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+        "requested_region": "us-east-1",
+        "status": "passed",
+        "note": "7 of 7 cases passed at installation; the cases below were re-run read-only on 2026-11-06 with the same result",
+        "cases": [
+          {
+            "action": "cloudfront:CreateInvalidation",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:GetInvalidation",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:GetDistribution",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "allowed",
+            "decision": "allowed",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:UpdateDistribution",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:CreateInvalidation",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E1DKA1VIRRUKKC",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:CreateInvalidation",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E2CMJWTZ3QB8BF",
+            "context": {
+              "aws:RequestedRegion": "us-east-1"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "us-east-1"
+          },
+          {
+            "action": "cloudfront:CreateInvalidation",
+            "resource": "arn:aws:cloudfront::987989283142:distribution/E3KTTDJUNHRYW9",
+            "context": {
+              "aws:RequestedRegion": "eu-west-1"
+            },
+            "expected": "implicitDeny",
+            "decision": "implicitDeny",
+            "requested_region": "eu-west-1"
+          }
+        ]
+      },
+      "first_use": "Web Deploy - PROD run 41837823740 on 2026-11-04 purged E3KTTDJUNHRYW9 in about 21 seconds; later production deploys purge the same way"
     }
   ]
 }
