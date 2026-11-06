@@ -87,8 +87,17 @@ describe("buildSanctionsPageModel", () => {
     expect(model.sourceCount).toBe(3);
   });
 
+  function groupByKey(key: string) {
+    const found = model.groups.find((group) => group.key === key);
+    if (!found) {
+      throw new Error(`missing group ${key}`);
+    }
+    return found;
+  }
+
   it("keeps lapsed listings out of the enforced group", () => {
-    const [, inForce, lapsed] = model.groups;
+    const inForce = groupByKey("il-nbctf");
+    const lapsed = groupByKey("il-nbctf-lapsed");
     expect(inForce.rows.map((row) => row.reference)).toEqual(["FO 01/25"]);
     expect(lapsed.lapsed).toBe(true);
     expect(lapsed.rows.map((row) => `${row.address}:${row.reference}`)).toEqual(
@@ -98,7 +107,7 @@ describe("buildSanctionsPageModel", () => {
   });
 
   it("keeps an authority with no addresses as an empty group", () => {
-    const canada = model.groups[3];
+    const canada = groupByKey("ca-sema");
     expect(canada.rows).toEqual([]);
     expect(canada.addressCount).toBe(0);
   });

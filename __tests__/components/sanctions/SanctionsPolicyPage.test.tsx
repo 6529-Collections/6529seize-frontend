@@ -118,7 +118,8 @@ describe("SanctionsPolicyPage", () => {
   it("filters the list and announces the result", () => {
     renderPage();
     const search = screen.getByRole("searchbox", { name: "Search the list" });
-    const target = loaded.list.addresses[0].address;
+    const target = loaded.list.addresses[0]?.address ?? "";
+    expect(target).toMatch(/^0x/);
     fireEvent.change(search, {
       target: { value: target.slice(2, 12).toUpperCase() },
     });
