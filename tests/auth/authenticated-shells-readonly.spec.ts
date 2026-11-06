@@ -663,21 +663,20 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
     await gotoReady(page, `${PROFILE_BASE_PATH}/subscriptions`);
     await expect(
-      page.getByRole("heading", { name: "3 drops funded Running low" })
+      page.getByRole("heading", { name: "3 drops funded", exact: true })
     ).toBeVisible();
     const overview = page
       .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#profile-subscriptions-overview");
     const statusHeading = overview.getByRole("heading", { level: 2 });
+    await expect(statusHeading).toHaveAccessibleDescription("Running low");
     await expect(
       overview.getByRole("heading", { level: 2 }).locator("svg")
     ).toHaveCount(0);
-    const statusBadgeBox = await statusHeading
+    const statusBadgeBox = await overview
       .getByText("Running low", { exact: true })
       .boundingBox();
-    const fundedCountBox = await statusHeading
-      .getByText("3 drops funded", { exact: true })
-      .boundingBox();
+    const fundedCountBox = await statusHeading.boundingBox();
     expect(statusBadgeBox).not.toBeNull();
     expect(fundedCountBox).not.toBeNull();
     expect(statusBadgeBox!.y + statusBadgeBox!.height).toBeLessThanOrEqual(
@@ -693,7 +692,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const overviewActions = page
       .getByRole("region", { name: "Subscription minting", exact: true })
       .locator("#subscription-overview-actions");
-    const topUpButton = overviewActions.getByRole("button", {
+    const topUpButton = overview.getByRole("button", {
       name: "Top up",
       exact: true,
     });
@@ -903,22 +902,18 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         page
           .getByRole("region", { name: "Subscription minting", exact: true })
           .locator("#profile-subscriptions-overview-title")
-      ).toHaveCSS("font-size", width >= 768 ? "30px" : "24px");
-      await expect(topUpButton).toHaveCSS(
-        "font-size",
-        width >= 768 ? "14px" : "15px"
-      );
-      const inlineAmountSize = width >= 768 ? "15px" : "14px";
+      ).toHaveCSS("font-size", width >= 640 ? "28px" : "24px");
+      await expect(topUpButton).toHaveCSS("font-size", "14px");
       await expect(amount).toHaveCSS(
         "font-size",
-        width < 640 ? "16px" : inlineAmountSize
+        width < 640 ? "16px" : "14px"
       );
       await expect(
         upcoming.getByRole("button", { name: "Minting Today" })
-      ).toHaveCSS("font-size", width >= 768 ? "16px" : "17px");
+      ).toHaveCSS("font-size", "16px");
       await expect(
         upcoming.getByText("The Memes #568", { exact: true })
-      ).toHaveCSS("font-size", width >= 768 ? "14px" : "15px");
+      ).toHaveCSS("font-size", "14px");
       await expect(
         upcoming.getByText("The Memes #568", { exact: true })
       ).toHaveCSS("font-weight", "400");
@@ -931,6 +926,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         width < 640 ? "68px" : "113px"
       );
       if (width < 640) {
+        const artworkBox = await mintingArtwork.boundingBox();
+        const mintingLabelBox = await upcoming
+          .getByRole("button", { name: "Minting Today" })
+          .boundingBox();
+        expect(artworkBox).not.toBeNull();
+        expect(mintingLabelBox).not.toBeNull();
+        expect(mintingLabelBox!.y).toBeGreaterThanOrEqual(
+          artworkBox!.y + artworkBox!.height
+        );
         await expect(overviewActions).toHaveCSS("border-top-width", "0px");
         const forecastRow = overviewActions
           .getByRole("button", { name: "Forecast use", exact: true })
@@ -1013,11 +1017,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
             toggleTargetBox!.x
           );
           if (width < 640 && countBox!.y >= titleBox!.y + titleBox!.height) {
-            // Narrow rows keep the controls together beneath the complete name.
+            // Narrow rows keep the controls together beneath the complete name,
+            // aligned right just like the other rows.
             expect(countBox!.y).toBeGreaterThanOrEqual(
               titleBox!.y + titleBox!.height
             );
-            expect(Math.abs(countBox!.x - titleBox!.x)).toBeLessThanOrEqual(1);
+            expect(countBox!.x).toBeGreaterThanOrEqual(titleBox!.x);
           } else {
             expect(
               Math.abs(
@@ -1033,6 +1038,16 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           expect(toggleTargetBox!.width).toBeGreaterThanOrEqual(44);
           expect(toggleTargetBox!.height).toBeGreaterThanOrEqual(44);
         }
+        const toggleRightEdges = await upcoming
+          .getByRole("switch")
+          .evaluateAll((elements) =>
+            elements.map(
+              (element) => element.parentElement!.getBoundingClientRect().right
+            )
+          );
+        expect(
+          Math.max(...toggleRightEdges) - Math.min(...toggleRightEdges)
+        ).toBeLessThanOrEqual(1);
       }
       if (width < 640) {
         const more = upcoming.getByRole("button", {
@@ -1215,7 +1230,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
     await expect(
       expandedUpcoming.getByText("Unfunded", { exact: true })
-    ).toHaveCount(2);
+    ).toHaveCount(0);
+    await expect(
+      expandedUpcoming.getByText(/^Funded through The Memes #570$/)
+    ).toHaveCount(1);
     await expect(
       expandedUpcoming.getByRole("link", { name: "Top up", exact: true })
     ).toHaveCount(0);

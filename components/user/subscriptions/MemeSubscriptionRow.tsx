@@ -524,9 +524,9 @@ export default function MemeSubscriptionRow(
 
   return (
     <div className="tw-px-4 tw-py-4 md:tw-px-5 md:tw-py-5">
-      <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-3 sm:tw-items-center sm:tw-gap-5">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-gap-5">
         {props.artwork && <div className="tw-shrink-0">{props.artwork}</div>}
-        <div className="tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/drop-row md:tw-gap-x-5">
+        <div className="tw-grid tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/drop-row sm:tw-w-auto md:tw-gap-x-5">
           {props.date && (
             <div
               className={`tw-col-span-full tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums ${props.readonly ? "md:tw-col-span-1" : "sm:tw-col-span-1"} ${subscribed ? "tw-text-iron-100" : "tw-text-iron-400"}`}
@@ -581,7 +581,7 @@ export default function MemeSubscriptionRow(
               </button>
             )}
           </span>
-          <div className="tw-col-span-full tw-col-start-1 tw-row-start-3 tw-flex tw-shrink-0 tw-items-center tw-justify-start tw-gap-2 max-sm:@[18rem]/drop-row:tw-col-span-1 max-sm:@[18rem]/drop-row:tw-col-start-2 max-sm:@[18rem]/drop-row:tw-row-start-2 max-sm:@[18rem]/drop-row:tw-justify-end sm:tw-col-span-1 sm:tw-col-start-2 sm:tw-row-start-2 sm:tw-justify-end md:tw-row-span-2 md:tw-row-start-1 md:tw-gap-3">
+          <div className="tw-col-span-full tw-col-start-1 tw-row-start-3 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 max-sm:@[18rem]/drop-row:tw-col-span-1 max-sm:@[18rem]/drop-row:tw-col-start-2 max-sm:@[18rem]/drop-row:tw-row-start-2 sm:tw-col-span-1 sm:tw-col-start-2 sm:tw-row-start-2 md:tw-row-span-2 md:tw-row-start-1 md:tw-gap-3">
             {!props.readonly &&
               !props.controlsLoading &&
               !props.controlsUnavailable &&
