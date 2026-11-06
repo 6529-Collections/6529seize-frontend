@@ -14,15 +14,16 @@ import snapshotPayload from "@/lib/sanctions/snapshot/sanctions-list.v1.json";
  * It stands in until the daily job publishes signed releases; its hash is
  * pinned here and re-checked from the parsed data on every render.
  */
-export const SANCTIONS_SNAPSHOT_BUILT_ON = "2026-11-06";
+const SANCTIONS_SNAPSHOT_BUILT_ON = "2026-11-06";
 export const SANCTIONS_SNAPSHOT_SHA256 =
   "aa88e6edee3eb57f93953cbb7fc7d90e6e3f3ffd262d3dfbfbedb01ef59d6778";
 export const SANCTIONS_SNAPSHOT_CID =
   "bafkreifkrdto33r6wv7zhfj4xn74pwiony7t77jgfu67x67nwapplhlhpa";
 
-export interface LoadedSanctionsList {
+interface LoadedSanctionsList {
   readonly list: SanctionsListV1;
-  /** The canonical payload bytes, exactly as published. */
+  /** The canonical payload, exactly as published (UTF-8 when encoded). */
+  readonly json: string;
   readonly bytes: Uint8Array;
   readonly sha256: string;
   readonly cid: string;
@@ -42,7 +43,8 @@ export function loadSanctionsSnapshot(): LoadedSanctionsList {
   if (schema !== SANCTIONS_LIST_SCHEMA) {
     throw new Error("Sanctions snapshot has an unexpected schema");
   }
-  const bytes = new TextEncoder().encode(canonicalJson(list));
+  const json = canonicalJson(list);
+  const bytes = new TextEncoder().encode(json);
   const sha256 = sha256Hex(bytes);
   const cid = rawBlockCid(bytes);
   if (sha256 !== SANCTIONS_SNAPSHOT_SHA256 || cid !== SANCTIONS_SNAPSHOT_CID) {
@@ -50,6 +52,7 @@ export function loadSanctionsSnapshot(): LoadedSanctionsList {
   }
   return {
     list,
+    json,
     bytes,
     sha256,
     cid,

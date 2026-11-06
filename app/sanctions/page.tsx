@@ -14,6 +14,8 @@ export const revalidate = 3600;
 
 export default function SanctionsPage() {
   const loaded = loadSanctionsSnapshot();
+  // Order end dates are calendar dates; the page applies them by UTC day,
+  // like the backend check, so every viewer sees the same grouping.
   const asOf = new Date().toISOString().slice(0, 10);
   return (
     <SanctionsPolicyPage

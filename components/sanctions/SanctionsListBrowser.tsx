@@ -1,6 +1,6 @@
 "use client";
 
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { useId, useMemo, useState } from "react";
 
@@ -32,8 +32,9 @@ export interface SanctionsBrowserGroup {
 export interface SanctionsBrowserLabels {
   readonly searchLabel: string;
   readonly searchHint: string;
-  /** Contains `{count}`. */
-  readonly searchResults: string;
+  /** Singular and plural forms; each contains `{count}`. */
+  readonly searchResultsOne: string;
+  readonly searchResultsOther: string;
   readonly searchEmpty: string;
   readonly sourceLink: string;
   readonly lapsedLabel: string;
@@ -64,10 +65,11 @@ function searchStatus(
   if (matchCount === 0) {
     return labels.searchEmpty;
   }
-  return labels.searchResults.replace(
-    "{count}",
-    formatInteger(DEFAULT_LOCALE, matchCount)
-  );
+  const template =
+    selectPluralCategory(DEFAULT_LOCALE, matchCount) === "one"
+      ? labels.searchResultsOne
+      : labels.searchResultsOther;
+  return template.replace("{count}", formatInteger(DEFAULT_LOCALE, matchCount));
 }
 
 function SanctionsEntry({

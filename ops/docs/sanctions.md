@@ -99,6 +99,28 @@ builder.
 - **Canada:** "This list currently includes no wallet addresses."
 - **Missing listing date:** shown as "Not stated".
 
+## Localization
+
+The page is message-backed (`i18n/messages/sanctions.en-US.json`, namespace
+`sanctions`), but only `en-US` copy exists so far. This fallback debt is
+tracked here:
+
+- **Route:** `/sanctions`, including the list browser.
+- **Untranslated surface:** all page copy, including the authority and list
+  names. Official entity names and listing references stay as published,
+  because they are source data.
+- **Current behavior:** copy is rendered in `en-US` on the server, as on the
+  Museum pages. Other supported locales fall back to `en-US`, and dates and
+  numbers use the `en-US` formats.
+- **User impact:** readers in other locales see English. The page is fully
+  usable, and nothing is hidden or broken.
+- **Owner and follow-up:** sanctions lane R13. Add `en-GB`, `fr-FR`, `es-ES`
+  and `de-DE` dictionaries after the copy has been reviewed (the wording is
+  aligned with the country block page).
+- **Remediation path:** translate the namespace, then render with the
+  request's locale once route-level localization lands. The search status
+  already uses plural rules.
+
 ## Related
 
 - [Shared](shared/README.md)

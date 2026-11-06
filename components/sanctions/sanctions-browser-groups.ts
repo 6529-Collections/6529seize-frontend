@@ -107,7 +107,8 @@ export function browserLabels(locale: SupportedLocale): SanctionsBrowserLabels {
   return {
     searchLabel: t(locale, "sanctions.list.searchLabel"),
     searchHint: t(locale, "sanctions.list.searchHint"),
-    searchResults: t(locale, "sanctions.list.searchResults"),
+    searchResultsOne: t(locale, "sanctions.list.searchResultsOne"),
+    searchResultsOther: t(locale, "sanctions.list.searchResultsOther"),
     searchEmpty: t(locale, "sanctions.list.searchEmpty"),
     sourceLink: t(locale, "sanctions.list.sourceLink"),
     lapsedLabel: t(locale, "sanctions.list.lapsedLabel"),

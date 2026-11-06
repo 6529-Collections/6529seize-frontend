@@ -43,7 +43,6 @@
   "sanctions.list.download": "Download the list (JSON)",
   "sanctions.list.searchLabel": "Search the list",
   "sanctions.list.searchHint": "Address, name or listing reference",
-  "sanctions.list.searchResults": "{count} matching entries",
   "sanctions.list.searchEmpty": "No entries match your search.",
   "sanctions.list.addresses": "Addresses: {count}",
   "sanctions.list.sourceUpdated": "Source updated {date}",
@@ -78,5 +77,7 @@
   "sanctions.source.ca-sema.name": "Canada",
   "sanctions.source.ca-sema.list": "Consolidated autonomous sanctions list",
   "sanctions.list.lapsedLabel": "Lapsed, not enforced",
-  "sanctions.list.entries": "Entries: {count}"
+  "sanctions.list.entries": "Entries: {count}",
+  "sanctions.list.searchResultsOne": "{count} matching entry",
+  "sanctions.list.searchResultsOther": "{count} matching entries"
 }

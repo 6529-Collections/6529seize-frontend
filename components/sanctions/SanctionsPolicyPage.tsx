@@ -23,10 +23,10 @@ import styles from "@/styles/Home.module.css";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
-export const SANCTIONS_CONTACT_EMAIL = "support@6529.io";
-export const OFAC_REMOVAL_URL =
+const SANCTIONS_CONTACT_EMAIL = "support@6529.io";
+const OFAC_REMOVAL_URL =
   "https://ofac.treasury.gov/specially-designated-nationals-list-sdn-list/filing-a-petition-for-removal-from-an-ofac-list";
-export const SANCTIONS_LIST_DOWNLOAD_PATH = "/sanctions/sanctions-list.v1.json";
+const SANCTIONS_LIST_DOWNLOAD_PATH = "/sanctions/sanctions-list.v1.json";
 
 const PLACE_KEYS: ReadonlyArray<MessageKey> = [
   "sanctions.places.cuba",
@@ -61,7 +61,7 @@ const LIST_CLASS =
 const SECTION_CLASS =
   "tw-mt-12 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10";
 
-export interface SanctionsPolicyPageProps {
+interface SanctionsPolicyPageProps {
   readonly locale: SupportedLocale;
   readonly model: SanctionsPageModel;
   readonly sha256: string;

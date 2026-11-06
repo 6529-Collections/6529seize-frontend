@@ -1,10 +1,11 @@
 jest.mock("server-only", () => ({}), { virtual: true });
 
-import SanctionsPolicyPage, {
-  OFAC_REMOVAL_URL,
-  SANCTIONS_CONTACT_EMAIL,
-  SANCTIONS_LIST_DOWNLOAD_PATH,
-} from "@/components/sanctions/SanctionsPolicyPage";
+import SanctionsPolicyPage from "@/components/sanctions/SanctionsPolicyPage";
+
+const SANCTIONS_CONTACT_EMAIL = "support@6529.io";
+const OFAC_REMOVAL_URL =
+  "https://ofac.treasury.gov/specially-designated-nationals-list-sdn-list/filing-a-petition-for-removal-from-an-ofac-list";
+const SANCTIONS_LIST_DOWNLOAD_PATH = "/sanctions/sanctions-list.v1.json";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { buildSanctionsPageModel } from "@/lib/sanctions/sanctions-page-model";
 import { loadSanctionsSnapshot } from "@/lib/sanctions/sanctions-snapshot.server";
@@ -121,8 +122,15 @@ describe("SanctionsPolicyPage", () => {
     fireEvent.change(search, {
       target: { value: target.slice(2, 12).toUpperCase() },
     });
-    expect(screen.getByRole("status")).toHaveTextContent(/matching entries/);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /matching entr(y|ies)/
+    );
     expect(screen.getAllByText(target).length).toBeGreaterThan(0);
+
+    fireEvent.change(search, {
+      target: { value: "0x54a71549cc3bb5fbfe851226e1bb920ad4f5415e" },
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("1 matching entry");
 
     fireEvent.change(search, { target: { value: "no-such-entry" } });
     expect(screen.getByRole("status")).toHaveTextContent(
