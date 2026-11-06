@@ -129,11 +129,12 @@ export function useLaunchClaimWrites({
         await executeManual(write, category);
       } catch (error) {
         pendingMintingClaimActionRef.current = null;
-        setClaimTxModal({
+        setClaimTxModal((prev) => ({
           status: "error",
           message: getErrorMessage(error, "Failed to submit transaction"),
           actionLabel,
-        });
+          airdrop: prev?.airdrop,
+        }));
       }
     },
     [executeManual, pendingMintingClaimActionRef, setClaimTxModal]
@@ -339,6 +340,14 @@ export function useLaunchClaimWrites({
         setClaimTxModal({
           status: "confirm_wallet",
           actionLabel,
+          airdrop: {
+            quantity: amounts
+              .reduce((sum, amount) => sum + amount, 0n)
+              .toString(),
+            walletCount: new Set(
+              recipients.map((wallet) => wallet.toLowerCase())
+            ).size,
+          },
         });
         pendingMintingClaimActionRef.current = mintingClaimAction ?? null;
 
@@ -607,6 +616,7 @@ export function useLaunchClaimWrites({
     if (claimWrite.error) {
       pendingMintingClaimActionRef.current = null;
       setClaimTxModal((prev) => ({
+        airdrop: prev?.airdrop,
         status: "error",
         message: getErrorMessage(
           claimWrite.error,
@@ -637,6 +647,7 @@ export function useLaunchClaimWrites({
     const txHash = claimWrite.data;
     if (!txHash) return;
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "submitted",
       message: prev?.message,
       txHash,
@@ -664,6 +675,7 @@ export function useLaunchClaimWrites({
     pendingMintingClaimActionRef.current = null;
     refetchOnChainClaim().catch(() => undefined);
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "success",
       txHash,
       actionLabel: prev?.actionLabel,
@@ -713,6 +725,7 @@ export function useLaunchClaimWrites({
     handledClaimWriteErrorTxHashRef.current = txHash;
     pendingMintingClaimActionRef.current = null;
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "error",
       txHash,
       message: getErrorMessage(waitClaimWrite.error, "Transaction failed"),

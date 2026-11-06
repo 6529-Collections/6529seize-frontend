@@ -1,4 +1,5 @@
 {
+  "dropForge.airdrop.summary": "Copies: {quantity} · Recipient wallets: {wallets}",
   "dropForge.settings.title": "Launch Automation",
   "dropForge.settings.launch": "Automatic launch",
   "dropForge.settings.artist": "Automatic artist payment",

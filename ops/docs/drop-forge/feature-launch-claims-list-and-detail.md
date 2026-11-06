@@ -159,6 +159,10 @@ plan; Launch exposes progress and transaction recovery controls.
     action is cancelled so the updated values can be reviewed before retrying.
   - Wallet confirmation, submitted, success, and error states appear in a
     transaction dialog using the active action name.
+  - Artist, team, subscription and Research airdrop dialogs show the total
+    copies and distinct recipient-wallet count for that transaction. Research
+    reflects the selected target's calculated airdrop quantity. These counts
+    stay fixed while the wallet confirms and the transaction completes.
   - Submitted and terminal states can include a `View Tx` explorer link.
   - In-progress states stay open; success and error states can be dismissed
     with the close control, backdrop, or Escape.
