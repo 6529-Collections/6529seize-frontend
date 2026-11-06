@@ -7,6 +7,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { groupConversationThreads } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
 import { E2eeEmojiText } from "../conversation/E2eeEmojiText";
@@ -295,24 +296,48 @@ export function E2eeConversationList({
   label,
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
-  const visible =
-    limit === undefined ? conversations : conversations.slice(0, limit);
+  const threads = groupConversationThreads(conversations, selfProfileId);
+  const visible = limit === undefined ? threads : threads.slice(0, limit);
   return (
     <E2eeEmojiProvider>
       <ul
         aria-label={label}
         className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
       >
-        {visible.map((conversation) => (
-          <E2eeConversationRow
-            key={conversation.g}
-            conversation={conversation}
-            selfProfileId={selfProfileId}
-            active={conversation.g === activeGroup}
-            collapsed={collapsed}
-            muted={muted.has(conversation.g)}
-          />
-        ))}
+        {visible.map((thread) => {
+          const activeSessions = thread.sessions.filter(
+            (session) => session.status === "active"
+          );
+          const countedSessions =
+            activeSessions.length > 0 ? activeSessions : [thread.current];
+          const unmuted = countedSessions.filter(
+            (session) => !muted.has(session.g)
+          );
+          const incoming = unmuted
+            .filter((session) => session.unread > 0 || session.mentions > 0)
+            .sort((a, b) => b.updatedAt - a.updatedAt)[0];
+          const target = incoming ?? unmuted[0] ?? thread.current;
+          const conversation = {
+            ...target,
+            unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
+            mentions: unmuted.reduce(
+              (sum, session) => sum + session.mentions,
+              0
+            ),
+          };
+          return (
+            <E2eeConversationRow
+              key={thread.key}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              active={thread.sessions.some(
+                (session) => session.g === activeGroup
+              )}
+              collapsed={collapsed}
+              muted={unmuted.length === 0}
+            />
+          );
+        })}
       </ul>
     </E2eeEmojiProvider>
   );

@@ -9,6 +9,7 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { getDmPeerId } from "@/lib/e2ee/dm-conversations";
 import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
 import type {
   E2eeConversation,
@@ -168,6 +169,12 @@ export function getConversationTitle(
   if (conversation.kind === "group" && conversation.name) {
     return conversation.name;
   }
+  if (conversation.kind === "dm") {
+    return (
+      getDmPeer(conversation, selfProfileId)?.handle ??
+      t(locale, "e2ee.unknownMember")
+    );
+  }
   const others = conversation.members.filter(
     (member) => member.profileId !== selfProfileId
   );
@@ -198,7 +205,10 @@ export function getDmPeer(
     return null;
   }
   return (
-    conversation.members.find((member) => member.profileId !== selfProfileId) ??
+    conversation.dmPeer ??
+    conversation.members.find(
+      (member) => member.profileId === getDmPeerId(conversation, selfProfileId)
+    ) ??
     null
   );
 }
