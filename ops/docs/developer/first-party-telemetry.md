@@ -13,6 +13,12 @@ and desktop apps send the same JSON to the same path. Wire format v1 lives in
 `services/analytics/telemetry/wire.ts`, the only module that knows the backend
 schema.
 
+The backend owns the schema. `ops/telemetry/telemetry-collector.v1.schema.json`
+is a vendored copy: `node ops/scripts/sync-telemetry-schema.cjs` reports drift
+from the backend and `--update` refreshes it. The `wireContract` Jest test
+checks that the client's event registry equals the schema's and that emitted
+batches validate against it.
+
 | Record | Fields |
 |---|---|
 | `pv` page view | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp` |
@@ -61,7 +67,7 @@ enum token; anything else is dropped. The backend checks the exact enums.
   builds set it; production builds leave it unset until the overlap starts.
 - The edge `/e` behavior must exist on an environment before the flag is on
   there.
-- Budget: about 4 KB brotli including the vitals observers. The Jest test
+- Budget: 4.9 KB brotli measured, including the vitals observers. The Jest test
   `collectorBundleSize` fails above 5 KB.
 
 ## Testing

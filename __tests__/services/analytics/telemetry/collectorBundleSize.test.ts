@@ -28,8 +28,12 @@ describe("first-party collector bundle size", () => {
     const root = path.resolve(__dirname, "../../../..");
     const result = buildSync({
       stdin: {
-        contents:
+        // Every entry point other modules import, so nothing that ships in
+        // the real bundle is tree-shaken away here.
+        contents: [
           'export { default } from "@/components/providers/FirstPartyTelemetry";',
+          'export { countApiRequest, countBoundaryError, flushTelemetry, markPageNotFound, recordProductEvent } from "@/services/analytics/telemetry/collector";',
+        ].join("\n"),
         resolveDir: root,
         loader: "ts",
       },

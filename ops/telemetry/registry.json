@@ -62,7 +62,7 @@
       "automatic": ["page-views", "web-vitals", "health-counters"],
       "sampling": "every page view while NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY is true (staging now; production when enabled); no sampler",
       "release": "not attached",
-      "notes": "Same-origin collector at /e (R14 §4.1, C52). Bundled first-party code, about 4 KB brotli, own performance observers. One batch per page view and one when the page hides, by sendBeacon with a fetch keepalive fallback. Route templates, device class, platform, browser family and enum product properties only; no browser storage, identifiers or URLs. The optional daily fp hash is omitted for EU/EEA/UK and unknown countries (C52a). Runs alongside AWS RUM, Mixpanel and Google tag for the two-week overlap, after which they are removed (R14 §4.6)."
+      "notes": "Same-origin collector at /e (R14 §4.1, C52). Bundled first-party code, about 5 KB brotli, own performance observers. One batch per page view and one when the page hides, by sendBeacon with a fetch keepalive fallback. Route templates, device class, platform, browser family and enum product properties only; no browser storage, identifiers or URLs. The optional daily fp hash is omitted for EU/EEA/UK and unknown countries (C52a). Runs alongside AWS RUM, Mixpanel and Google tag for the two-week overlap, after which they are removed (R14 §4.6)."
     }
   ],
   "signals": [

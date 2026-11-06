@@ -79,82 +79,78 @@ export type WireEvent =
   | HealthRecord
   | ProductEventRecord;
 
+// Mirrors the per-event `p` lists of the backend schema
+// (ops/telemetry/telemetry-collector.v1.schema.json); a contract test keeps
+// them equal.
 const HOME = [
   "section",
   "signed_in",
   "is_native",
   "screen_size",
   "layout_version",
-  "action",
 ];
-const PROFILE = [
-  "section",
-  "profile_viewer_context",
-  "profile_tab",
-  "client",
-  "action",
-];
+const PROFILE = ["section", "profile_viewer_context", "profile_tab", "client"];
 const AUTH = [
   "client_type",
   "reason",
   "refresh_outcome",
-  "auth_state_before",
   "auth_state_after",
   "product_failure",
   "was_connected_wallet",
+];
+const AUTH_REFRESH = [
+  "client_type",
   "had_local_jwt",
-  "outcome",
-  "status_bucket",
+  "refresh_outcome",
+  "product_failure",
 ];
 const FEED = [
   "load_source",
-  "status_bucket",
-  "error_kind",
-  "product_failure",
   "duration_bucket",
-  "drop_count_bucket",
   "had_cached_drops",
   "is_native",
 ];
+const FEATURE = ["feature", "value", "placement", "viewer"];
 
 /**
- * Product-event registry: Mixpanel event name -> allowed property keys, in
- * priority order (at most MAX_EVENT_PROPS are sent). Unknown names are dropped.
+ * Product-event registry: Mixpanel event name -> allowed property keys (at
+ * most MAX_EVENT_PROPS). Unknown names are dropped.
  */
-const PRODUCT_EVENTS: Readonly<Record<string, readonly string[]>> = {
-  "Homepage section seen": HOME,
-  "Homepage action clicked": HOME,
-  "Profile section seen": PROFILE,
-  "Profile action clicked": PROFILE,
-  "Auth Forced Logout": AUTH,
-  "Auth Reauth Prompt Shown": AUTH,
-  "Auth Session Refresh Recovered": AUTH,
-  "Auth Session Refresh Succeeded": AUTH,
-  "Auth Session Refresh Product Impact": AUTH,
-  "Auth Session Upgrade Prompt Shown": AUTH,
-  "Auth Validation Cancelled": AUTH,
-  "Auth Validation Failed While Connected": AUTH,
-  "Wave Feed Load Started": FEED,
-  "Wave Feed Load Succeeded": FEED,
-  "Wave Feed Load Cancelled": FEED,
-  "Wave Feed Load Failed": FEED,
-  "Wave Feature Seen": [
-    "feature",
-    "value",
-    "placement",
-    "viewer",
-    "selection_source",
-    "exposure_kind",
-  ],
-  "Wave Feature Activated": [
-    "feature",
-    "value",
-    "placement",
-    "viewer",
-    "selected",
-    "action",
-  ],
-};
+export const PRODUCT_EVENT_PROPS: Readonly<Record<string, readonly string[]>> =
+  {
+    "Homepage section seen": HOME,
+    "Homepage action clicked": [...HOME, "action"],
+    "Profile section seen": PROFILE,
+    "Profile action clicked": [...PROFILE, "action"],
+    "Auth Forced Logout": AUTH,
+    "Auth Reauth Prompt Shown": AUTH,
+    "Auth Session Refresh Recovered": AUTH,
+    "Auth Session Upgrade Prompt Shown": AUTH,
+    "Auth Validation Failed While Connected": AUTH,
+    "Auth Session Refresh Succeeded": AUTH_REFRESH,
+    "Auth Validation Cancelled": AUTH_REFRESH,
+    "Auth Session Refresh Product Impact": [
+      "client_type",
+      "had_local_jwt",
+      "outcome",
+      "refresh_outcome",
+      "product_failure",
+      "reauth_required",
+    ],
+    "Wave Feed Load Started": FEED,
+    "Wave Feed Load Succeeded": [...FEED, "drop_count_bucket"],
+    "Wave Feed Load Cancelled": FEED,
+    "Wave Feed Load Failed": [
+      "load_source",
+      "duration_bucket",
+      "status_bucket",
+      "error_kind",
+      "product_failure",
+      "is_native",
+    ],
+    "Wave Feature Seen": [...FEATURE, "selection_source", "exposure_kind"],
+    "Wave Feature Activated": [...FEATURE, "selected", "action"],
+  };
 
 /** Mixpanel property names that the wire renames. */
 const RENAMED_PROPS: Readonly<Record<string, string>> = { platform: "client" };
@@ -183,7 +179,7 @@ export function toProductEvent(
   name: string,
   properties: Readonly<Record<string, unknown>> = {}
 ): { name: string; p: ProductEventProps } | null {
-  const allowed = PRODUCT_EVENTS[name];
+  const allowed = PRODUCT_EVENT_PROPS[name];
   if (!allowed) return null;
   const p: ProductEventProps = {};
   let count = 0;

@@ -175,20 +175,28 @@ export function classifyError(error: unknown, fallback: ErrorKind): ErrorKind {
   return CHUNK_ERROR.test(text) ? "chunk_load" : fallback;
 }
 
+const ASSET_KINDS: Readonly<Record<string, AssetKind>> = {
+  script: "script",
+  modulepreload: "script",
+  stylesheet: "style",
+  style: "style",
+  font: "font",
+  img: "image",
+  image: "image",
+  video: "media",
+  audio: "media",
+  source: "media",
+  track: "media",
+};
+
+/** By tag name, or for a link by its `as` or `rel`. */
 export function classifyAsset(target: Element): AssetKind {
   const tag = target.tagName.toLowerCase();
-  if (tag === "script") return "script";
-  if (tag === "img" || tag === "image") return "image";
-  if (tag === "video" || tag === "audio" || tag === "source" || tag === "track")
-    return "media";
-  if (tag === "link") {
-    const rel = target.getAttribute("rel") ?? "";
-    if (rel.includes("stylesheet")) return "style";
-    if (target.getAttribute("as") === "font") return "font";
-    if (target.getAttribute("as") === "script" || rel === "modulepreload")
-      return "script";
-  }
-  return "other";
+  const key =
+    tag === "link"
+      ? (target.getAttribute("as") ?? target.getAttribute("rel") ?? "")
+      : tag;
+  return ASSET_KINDS[key] ?? "other";
 }
 
 /** Installs the page-lifetime listeners once. Safe to call repeatedly. */
