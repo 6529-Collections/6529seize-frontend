@@ -26,6 +26,9 @@ type ConnectionState = "connecting" | "connected" | "disconnected";
  * Registering the connector ourselves keeps the identical wallet option
  * (AppKit skips its own when a `baseAccount` connector already exists) with
  * the SDK's documented `preference.telemetry` switch turned off.
+ * That reuse was verified on @reown/appkit-adapter-wagmi 1.8.19 (the pinned
+ * version; a test fails when the pin changes): a production build has exactly
+ * one `baseAccount` connector and never loads Coinbase's analytics script.
  */
 function buildBaseAccountWallet(): CreateConnectorFn {
   return baseAccount({ preference: { telemetry: false } });

@@ -120,6 +120,32 @@ performance-tracking behavior tied to that choice.
 - Users can recover by reloading the page and retrying the banner action or the
   `/about/cookie-policy` toggle.
 
+## Wallet SDK Telemetry (Not Consent-Gated)
+
+The wallet libraries load only when a visitor opens the connect dialog or
+returns with a stored wallet session. Their telemetry does not read the
+performance consent choice. Measured on `@reown/appkit` 1.8.19 and
+`@base-org/account` 2.4.0; re-check after either version changes.
+
+- Reown AppKit runs with its optional analytics off
+  (`features.analytics: false`), so modal events such as opening, closing,
+  network switches and disconnects are not reported. AppKit still sends these to
+  `pulse.walletconnect.org`, and no setting in this version turns them off:
+  - `INITIALIZE`, once AppKit starts: the full page URL and the app's AppKit
+    settings.
+  - `WALLET_IMPRESSION_V2`, while the wallet list is shown: wallet names,
+    ranks and list position, with the full page URL.
+  - `CONNECT_SUCCESS`, after a wallet connects: the connected wallet address
+    and the full page URL.
+  - SDK error reports (`/e`): error name, message, stack trace and the full
+    page URL.
+- The Base Account (Coinbase) wallet option is registered with the SDK's
+  telemetry turned off. Our pages make no requests to Coinbase's analytics
+  endpoint (`cca-lite.coinbase.com`), even when that option is chosen. The
+  Base Account window that option opens is Coinbase's own site.
+- Wallet RPC reads (for example the homepage mint status) go to Reown's RPC
+  endpoint, which sees the visitor's IP address.
+
 ## Limitations / Notes
 
 - The banner offers only two performance choices: fully accept or reject

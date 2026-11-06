@@ -36,21 +36,10 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
 jest.mock("@/constants/constants", () => ({
   CW_PROJECT_ID: "12345678-1234-1234-1234-123456789abc", // Valid UUID format
 }));
-jest.mock("wagmi/connectors", () => {
-  const actual =
-    jest.requireActual<typeof import("wagmi/connectors")>("wagmi/connectors");
-  return {
-    ...actual,
-    baseAccount: jest.fn(
-      (parameters?: Parameters<typeof actual.baseAccount>[0]) =>
-        actual.baseAccount(parameters)
-    ),
-    coinbaseWallet: jest.fn(
-      (parameters: Parameters<typeof actual.coinbaseWallet>[0]) =>
-        actual.coinbaseWallet(parameters)
-    ),
-  };
-});
+jest.mock("wagmi/connectors", () => ({
+  baseAccount: jest.fn(() => ({ id: "baseAccount-connector-stub" })),
+  coinbaseWallet: jest.fn(() => ({ id: "coinbase-v3-connector-stub" })),
+}));
 
 describe("AppKitAdapterManager", () => {
   let manager: AppKitAdapterManager;
@@ -775,6 +764,11 @@ describe("AppKitAdapterManager", () => {
       manager = new AppKitAdapterManager(mockRequestPassword);
     });
 
+    const connectorsPassedToAdapter = (call = 0): readonly unknown[] =>
+      (WagmiAdapter as jest.MockedClass<typeof WagmiAdapter>).mock.calls[
+        call
+      ]?.[0]?.connectors ?? [];
+
     it("registers the web Base Account connector with Coinbase telemetry off", () => {
       manager.createAdapter([], false);
 
@@ -783,19 +777,58 @@ describe("AppKitAdapterManager", () => {
         preference: { telemetry: false },
       });
       expect(coinbaseWallet).not.toHaveBeenCalled();
-      const connector = (baseAccount as jest.Mock).mock.results[0]?.value;
-      expect(WagmiAdapter).toHaveBeenCalledWith(
-        expect.objectContaining({ connectors: [connector] })
-      );
+      expect(connectorsPassedToAdapter()).toEqual([
+        { id: "baseAccount-connector-stub" },
+      ]);
+    });
+
+    it("appends Base Account after the app-wallet connectors on web", () => {
+      manager.createAdapter([mockWallet, mockWallet2], false);
+
+      expect(connectorsPassedToAdapter()).toEqual([
+        { id: "mock-connector" },
+        { id: "mock-connector" },
+        { id: "baseAccount-connector-stub" },
+      ]);
+      expect(baseAccount).toHaveBeenCalledTimes(1);
     });
 
     it("keeps the Capacitor Coinbase v3 connector without Base Account", () => {
-      manager.createAdapter([], true);
+      manager.createAdapter([mockWallet], true);
 
       expect(baseAccount).not.toHaveBeenCalled();
       expect(coinbaseWallet).toHaveBeenCalledWith(
         expect.objectContaining({ version: "3" })
       );
+      expect(connectorsPassedToAdapter()).toEqual([
+        { id: "mock-connector" },
+        { id: "coinbase-v3-connector-stub" },
+      ]);
+    });
+
+    it("never serves a cached adapter built for the other platform", () => {
+      const webAdapter = manager.createAdapterWithCache([mockWallet], false);
+      const capacitorAdapter = manager.createAdapterWithCache(
+        [mockWallet],
+        true
+      );
+
+      expect(capacitorAdapter).not.toBe(webAdapter);
+      expect(manager.createAdapterWithCache([mockWallet], false)).toBe(
+        webAdapter
+      );
+      expect(manager.createAdapterWithCache([mockWallet], true)).toBe(
+        capacitorAdapter
+      );
+      expect(connectorsPassedToAdapter(0)).toContainEqual({
+        id: "baseAccount-connector-stub",
+      });
+      expect(connectorsPassedToAdapter(1)).toContainEqual({
+        id: "coinbase-v3-connector-stub",
+      });
+      expect(connectorsPassedToAdapter(1)).not.toContainEqual({
+        id: "baseAccount-connector-stub",
+      });
     });
   });
 

@@ -109,11 +109,34 @@ describe("AppKit initialization", () => {
 
       expect(createAppKit).toHaveBeenCalledWith(
         expect.objectContaining({
-          features: expect.objectContaining({ analytics: false }),
+          enableCoinbase: !isCapacitor,
+          features: {
+            analytics: false,
+            email: false,
+            socials: [],
+            onramp: false,
+            swaps: false,
+            connectMethodsOrder: ["wallet"],
+            walletFeaturesOrder: ["send"],
+          },
         })
       );
     }
   );
+
+  // AppKit 1.8.19 reuses an existing `baseAccount` connector instead of adding
+  // its own telemetry-on copy, and still sends INITIALIZE, CONNECT_SUCCESS and
+  // wallet-list impressions to Reown with analytics off. Both were verified
+  // against this exact version (see the cookie consent feature doc). Re-check
+  // them in a production build before changing this pin.
+  it("pins the AppKit version whose connector reuse and telemetry were verified", () => {
+    const { dependencies } = jest.requireActual<{
+      dependencies: Record<string, string>;
+    }>("../../package.json");
+
+    expect(dependencies["@reown/appkit"]).toBe("1.8.19");
+    expect(dependencies["@reown/appkit-adapter-wagmi"]).toBe("1.8.19");
+  });
 
   it("keeps AppKit above app-owned transaction modals", () => {
     initializeAppKit({
