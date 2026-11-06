@@ -18,11 +18,13 @@ It combines `Rep` and `NIC` on one route.
 - Unsupported legacy route: /{user}/rep (not found)
 
 Desktop (`>= lg`):
+
 - Left: Rep direction toggle, summary, categories, received-only grant/edit
   actions, activity log
 - Right: NIC summary, ID statements, and `Rate NIC` entry point
 
 Mobile (`< lg`):
+
 - Top segmented control: direction-aware `Total Rep`, `NIC`, and
   `ID Statements`
 - `Total Rep` subview: contributor summary, rep direction toggle, categories,
@@ -169,6 +171,9 @@ Statement ownership in this tab:
   - `Total Rep` subview uses REP log with direction tabs
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Loading uses three compact row placeholders before the activity entries appear.
+- Changing the window between mobile and desktop layouts may briefly show the
+  activity loading placeholders. While you stay on the same profile, each
+  layout keeps its selected filters and current page when you return to it.
 - Empty results show `No Activity Log`.
 - If the first NIC activity page cannot load, `Unable to load activity log.`
   replaces the placeholders. Use `Retry` to try again. A failed later page

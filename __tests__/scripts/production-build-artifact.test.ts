@@ -134,6 +134,10 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
   });
 
+  it("enables app device grants in production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS).toBe("true");
+  });
+
   it("turns the encrypted messages flag on in production builds", () => {
     // Encrypted DMs (D109) are on in production by owner decision
     // (2026-10-31); switching them off is a one-line change to "false" here.

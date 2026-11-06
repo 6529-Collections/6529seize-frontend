@@ -19,6 +19,7 @@ import { t } from "@/i18n/messages";
 interface Props {
   readonly params: ActivityLogParamsConverted;
   readonly user: string | null;
+  readonly enabled?: boolean | undefined;
 }
 
 type NicPage = CountlessPage<ProfileActivityLog> &
@@ -50,10 +51,12 @@ function NicActivityPages({
   params,
   user,
   scope,
+  enabled = true,
 }: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const [currentPage, setCurrentPage] = useState(1);
   const query = useInfiniteQuery({
+    enabled,
     queryKey: [QueryKey.PROFILE_LOGS, { nic: scope }],
     initialPageParam: { cursor: null as string | null, page: 1 },
     queryFn: async ({ pageParam, signal }) => {

@@ -189,6 +189,196 @@ test.describe("Profile NIC activity @local-only", () => {
       }
     );
   });
+  for (const width of [1440, 820, 390]) {
+    test(`${width}px fetches only the visible activity log`, async ({
+      page,
+      baseURL,
+    }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      const requests = await installLogs(page, getSandboxApiOrigin(baseURL));
+      await page.goto("/playwright");
+      await expect(
+        page
+          .getByText("rep-leak-marker", { exact: true })
+          .filter({ visible: true })
+          .first()
+      ).toBeVisible();
+      expect(requests).toHaveLength(1);
+      expect(requests[0]?.get("rating_matter")).toBe(
+        width >= 1024 ? null : "REP"
+      );
+    });
+
+    for (const optimizerFails of [false, true]) {
+      test(`${width}px main profile picture ${optimizerFails ? "recovers from optimizer failure" : "uses responsive optimization"}`, async ({
+        page,
+        baseURL,
+      }, testInfo) => {
+        await page.setViewportSize({ width, height: 1000 });
+        await installLogs(page, getSandboxApiOrigin(baseURL));
+        const source =
+          "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8";
+        const png = Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAJUlEQVQ4jWPooBJgGDWIIBgNI8JgNIwIg9EwIgxGw4gwGMZhBAAG8pYuMnppeAAAAABJRU5ErkJggg==",
+          "base64"
+        );
+        const widths: number[] = [];
+        await page.route(source, (route) =>
+          route.fulfill({ contentType: "image/png", body: png })
+        );
+        await page.route("**/_next/image?**", async (route) => {
+          const params = new URL(route.request().url()).searchParams;
+          if (params.get("url") !== source) return route.continue();
+          widths.push(Number(params.get("w")));
+          await route.fulfill({
+            status: optimizerFails ? 503 : 200,
+            contentType: "image/png",
+            body: optimizerFails ? "" : png,
+          });
+        });
+        await page.goto("/profile-picture");
+        const image = page.getByRole("img", {
+          name: "profile-picture's profile picture",
+          exact: true,
+        });
+        await expect
+          .poll(() =>
+            image.evaluate((img: HTMLImageElement) => img.naturalWidth)
+          )
+          .toBeGreaterThan(0);
+        expect(widths.length).toBeGreaterThan(0);
+        expect(widths.every((value) => value > 0 && value <= 256)).toBe(true);
+        if (optimizerFails) await expect(image).toHaveAttribute("src", source);
+        else await expect(image).toHaveAttribute("src", /\/_next\/image\?/);
+        const box = await image.boundingBox();
+        expect(box?.width).toBe(width < 640 ? 80 : 112);
+        expect(box?.height).toBe(width < 640 ? 80 : 112);
+        await expectNoHorizontalOverflow(page);
+        if (!optimizerFails)
+          await page.screenshot({
+            path: testInfo.outputPath("profile-picture.png"),
+            fullPage: true,
+          });
+      });
+    }
+  }
+
+  for (const startWidth of [390, 1440]) {
+    test(`${startWidth}px retains both layouts' filters and pages across resizing`, async ({
+      page,
+      baseURL,
+    }) => {
+      const api = getSandboxApiOrigin(baseURL);
+      const requests = await installLogs(page, api);
+      await page.setViewportSize({ width: startWidth, height: 1000 });
+      await page.goto("/playwright");
+      await expect(
+        page
+          .getByText("rep-leak-marker", { exact: true })
+          .filter({ visible: true })
+          .first()
+      ).toBeVisible();
+      expect(requests).toHaveLength(1);
+
+      await page.setViewportSize({ width: 1023, height: 1000 });
+      const direction = page.getByRole("tablist", { name: "Filter direction" });
+      await direction
+        .getByRole("tab", { name: "Outgoing", exact: true })
+        .click();
+      await expect
+        .poll(() => requests.at(-1)?.get("include_incoming"))
+        .toBeNull();
+      const mobileLog = page
+        .getByRole("main")
+        .locator('[class~="tw-group/profile-activity"]')
+        .filter({ visible: true });
+      await mobileLog
+        .getByRole("button", { name: "Next", exact: true })
+        .click();
+      await expect.poll(() => requests.at(-1)?.get("page")).toBe("2");
+      await expect(
+        mobileLog.getByRole("button", { name: "Previous", exact: true })
+      ).toBeVisible();
+      const mobilePage = await mobileLog.innerText();
+
+      await page.setViewportSize({ width: 1024, height: 1000 });
+      await page
+        .getByRole("tablist", { name: "Filter matter" })
+        .getByRole("tab", { name: "NIC", exact: true })
+        .click();
+      const entries = page
+        .getByText(/^nic-entry-\d+$/)
+        .filter({ visible: true });
+      await expect(entries).toHaveCount(10);
+      await direction
+        .getByRole("tab", { name: "Incoming", exact: true })
+        .click();
+      await expect(entries).toHaveCount(10);
+      await page
+        .getByRole("button", { name: /Filter activity types:/ })
+        .click();
+      await page.getByRole("button", { name: "Handle", exact: true }).click();
+      await page.keyboard.press("Escape");
+      await expect
+        .poll(() => requests.at(-1)?.get("log_type")?.includes("HANDLE_EDIT"))
+        .toBe(false);
+      const desktopLog = page
+        .getByRole("main")
+        .locator('[class~="tw-group/profile-activity"]')
+        .filter({ visible: true });
+      await desktopLog
+        .getByRole("button", { name: "Next", exact: true })
+        .click();
+      await expect.poll(() => requests.at(-1)?.get("cursor")).toBe("after-10");
+      await expect(
+        desktopLog.getByRole("button", { name: "Previous", exact: true })
+      ).toBeVisible();
+      const desktopEntries = await entries.allTextContents();
+      const desktopFilterLabel = await page
+        .getByRole("button", { name: /Filter activity types:/ })
+        .getAttribute("aria-label");
+
+      const pausedAt = requests.length;
+      await page.setViewportSize({ width: 820, height: 1000 });
+      await expect(
+        direction.getByRole("tab", { name: "Outgoing", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        mobileLog.getByRole("button", { name: "Previous", exact: true })
+      ).toBeVisible();
+      await expect(mobileLog).toHaveText(mobilePage, { useInnerText: true });
+      expect(
+        requests
+          .slice(pausedAt)
+          .every((request) => request.get("activity_scope") !== "NIC")
+      ).toBe(true);
+
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await expect(
+        direction.getByRole("tab", { name: "Incoming", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page
+          .getByRole("tablist", { name: "Filter matter" })
+          .getByRole("tab", { name: "NIC", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expect
+        .poll(() => entries.allTextContents())
+        .toEqual(desktopEntries);
+      await expect(
+        desktopLog.getByRole("button", { name: "Previous", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /Filter activity types:/ })
+      ).toHaveAttribute("aria-label", desktopFilterLabel!);
+      await desktopLog
+        .getByRole("button", { name: "Next", exact: true })
+        .click();
+      await expect.poll(() => requests.at(-1)?.get("cursor")).toBe("after-20");
+      await expect(entries).toHaveCount(10);
+      await expectNoHorizontalOverflow(page);
+    });
+  }
   for (const width of [1440, 390]) {
     for (const optimizerFails of [false, true]) {
       test(`${width}px activity avatars ${optimizerFails ? "recover from optimizer failure" : "use small optimized images"}`, async ({
@@ -436,6 +626,9 @@ test.describe("Profile NIC activity @local-only", () => {
         path: testInfo.outputPath("nic-error.png"),
         fullPage: true,
       });
+      // Full-page capture crosses media queries. Let the resumed layout's
+      // normal retries settle before exercising the explicit Retry action.
+      await expect(alert).toBeVisible({ timeout: 15000 });
       unsupported = false;
       await alert.getByRole("button", { name: "Retry", exact: true }).click();
       await expect(

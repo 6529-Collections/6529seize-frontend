@@ -31,14 +31,20 @@ Backend before frontend before testing the updated app builds.
 - The features are technically separate; the web combines their grants into
   one wallet signature. A combined grant and an enrolled encrypted device
   are separate states, so acceptance must check both.
-- Keep the approved current live wallet wording. Before enabling production
-  app grants, align any app-specific statement changes in the frontend
+- Keep the approved current live wallet wording. Any future app-specific
+  statement changes must stay aligned in the frontend
   (`lib/device-signing/app-grant.ts`), backend
   (`src/api-serverless/src/device-signing/app-device-grant.ts`) and shared
-  test vectors. This follow-up does not turn production flags on.
+  test vectors. Production activation retains the existing statement bytes.
 - Production app grants use `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` in
   `.github/workflows/production-build-artifact.yml` and the desktop live
-  build (`scripts/desktop-build-target.cjs` in 6529-core). Staging has it on.
+  build (`scripts/desktop-build-target.cjs` in 6529-core). The website's staging
+  and production artifact workflows enable it; Core remains a separate release.
+- The app-grant flag is baked into the client bundle, not a runtime switch.
+  To disable it, set the production workflow flag to `"false"`, merge that
+  change, then build, verify and deploy a fresh production artifact. Redeploying
+  an artifact built with the flag enabled will not disable it. Disabling the
+  UI flag does not revoke existing grants.
 - This follow-up implements source-browser-approved setup links for Mobile
   and Core, generic encrypted in-app notifications with local previews, and
   a device-status shield. The target app never connects the wallet for this
