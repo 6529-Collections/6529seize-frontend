@@ -131,10 +131,28 @@ pre-release data through `/api/og-metadata/*`.
 pages from the edge. Each staging deployment purges that cache after the exact
 HTTP version check; a purge that cannot start fails the job, and one still
 running after ten minutes only warns.
-Production is not behind CloudFront yet; its purge step is skipped until the
-cutover sets `PRODUCTION_PAGE_DISTRIBUTION_ID`. See
-[Page edge cache](cloudfront-page-cache.md) for what is cached, manual purges,
-rollback and the production cutover plan.
+Production `6529.io` is served through CloudFront `E3KTTDJUNHRYW9`, and
+`Web Deploy - PROD` purges it the same way (`PRODUCTION_PAGE_DISTRIBUTION_ID`).
+
+The production load balancer accepts only CloudFront, and only this
+distribution:
+
+- Its security group allows HTTPS from the CloudFront origin-facing prefix
+  list only (`.ebextensions/alb-cloudfront-only.config`).
+- Its HTTPS listener forwards only requests that carry the secret
+  `X-Origin-Verify` header and answers 403 otherwise. The secret is kept in SSM
+  Parameter Store and managed with `ops/scripts/production-origin-lock.sh`.
+
+Deploys do not change either control. Elastic Beanstalk health and target
+group health checks go straight to the instances, so neither control affects
+them.
+
+Before pointing `6529.io` back at the load balancer (the DNS rollback), run
+`ops/scripts/production-origin-lock.sh unlock`. Otherwise the origin refuses
+every visitor.
+
+See [Page edge cache](cloudfront-page-cache.md) for what is cached, manual
+purges, the origin lock, rotation and rollback.
 
 ## Order and completion
 
@@ -312,6 +330,9 @@ unrelated E2E failures.
 Use a reviewed revert or compatible known-good source through the same ordinary
 workflow for rollback; retain shared history and account for database/API
 compatibility. Do not drop schema as part of a routine application rollback.
+An application rollback never needs the edge changed. Only a rollback of
+CloudFront itself does, and it must unlock the origin first (see
+[Page edge cache](#page-edge-cache)).
 Report the run links, affected services, health/E2E outcomes, and remaining
 failures. Preserve useful logs and artifact evidence without exposing secrets.
 
