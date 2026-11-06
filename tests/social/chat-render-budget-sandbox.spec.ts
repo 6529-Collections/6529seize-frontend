@@ -231,7 +231,9 @@ function latencies(result: Awaited<ReturnType<typeof measure>>) {
 }
 
 test.describe("Chat render budget @auth @local-only", () => {
-  test.describe.configure({ mode: "serial" });
+  // The first case can include the development server's first compile of
+  // /waves, on top of about 15 s of measurement windows.
+  test.describe.configure({ mode: "serial", timeout: 150_000 });
   useLocalSandboxMutationGuard(
     test,
     "PLAYWRIGHT_AUTH_SANDBOX",
