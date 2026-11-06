@@ -699,6 +699,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await seedSession(page);
       await openOwnProfile(page);
       await page.setViewportSize({ width, height: 900 });
+      let requestStarted = false;
       let release: (() => void) | undefined;
       const responseReady = new Promise<void>((resolve) => {
         release = resolve;
@@ -706,6 +707,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await page.route(
         `${getSandboxApiOrigin(baseURL)}/api/memes_lite`,
         async (route) => {
+          requestStarted = true;
           await responseReady;
           await route.fulfill({
             json: {
@@ -735,6 +737,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
             .getByRole("button", { name: "Profile picture", exact: true })
             .click();
         }
+        await expect.poll(() => requestStarted).toBe(true);
         const search = page.getByRole("textbox", {
           name: "Select Meme",
           exact: true,
