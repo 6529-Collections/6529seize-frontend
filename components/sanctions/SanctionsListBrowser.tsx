@@ -123,6 +123,7 @@ function SanctionsGroupSection({
         className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
       >
         <span>{group.title}</span>
+        {group.lapsed ? <span className="tw-sr-only">, </span> : null}
         {group.lapsed ? (
           <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-300">
             {labels.lapsedLabel}
@@ -206,8 +207,12 @@ export default function SanctionsListBrowser({
         <p id={hintId} className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
           {labels.searchHint}
         </p>
+        {/* Test harnesses and browser extensions can add attributes (for
+            example an inline caret-color) to this server-rendered input before
+            React hydrates it; that is not a mismatch worth a console error. */}
         <input
           id={inputId}
+          suppressHydrationWarning
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}

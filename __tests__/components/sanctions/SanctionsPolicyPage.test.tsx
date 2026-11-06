@@ -105,7 +105,7 @@ describe("SanctionsPolicyPage", () => {
       "Japan",
       "South Korea",
       "Israel",
-      "Israel: lapsed ordersLapsed, not enforced",
+      "Israel: lapsed orders, Lapsed, not enforced",
       "Canada",
     ]);
     expect(
