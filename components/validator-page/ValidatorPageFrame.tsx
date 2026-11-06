@@ -1,9 +1,12 @@
+import "@/i18n/namespaces/validator-sign";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 
 export type ValidatorSection =
+  | "sign"
   | "download"
   | "guide"
   | "hardware"
@@ -15,15 +18,36 @@ const SECTIONS: readonly {
   readonly href: string;
   readonly label: string;
 }[] = [
-  { key: "download", href: "/validator", label: "Download" },
-  { key: "guide", href: "/validator/guide", label: "Tester guide" },
-  { key: "hardware", href: "/validator/hardware", label: "Hardware" },
+  {
+    key: "download",
+    href: "/validator",
+    label: t("en-US", "validator.sign.navDownload"),
+  },
+  {
+    key: "sign",
+    href: "/validator/sign",
+    label: t("en-US", "validator.sign.nav"),
+  },
+  {
+    key: "guide",
+    href: "/validator/guide",
+    label: t("en-US", "validator.sign.navGuide"),
+  },
+  {
+    key: "hardware",
+    href: "/validator/hardware",
+    label: t("en-US", "validator.sign.navHardware"),
+  },
   {
     key: "known-issues",
     href: "/validator/known-issues",
-    label: "Known issues",
+    label: t("en-US", "validator.sign.navIssues"),
   },
-  { key: "releases", href: "/validator/releases", label: "Releases" },
+  {
+    key: "releases",
+    href: "/validator/releases",
+    label: t("en-US", "validator.sign.navReleases"),
+  },
 ];
 
 export default function ValidatorPageFrame({
@@ -40,7 +64,10 @@ export default function ValidatorPageFrame({
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-pb-20 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8">
         {current && (
-          <nav aria-label="Validator pages" className="tw-mb-8 sm:tw-mb-10">
+          <nav
+            aria-label={t("en-US", "validator.sign.navLabel")}
+            className="tw-mb-8 sm:tw-mb-10"
+          >
             <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
               {SECTIONS.map((section) => {
                 const isCurrent = section.key === current;

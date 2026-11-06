@@ -24,6 +24,7 @@ describe("validator download pages stay out of search engines", () => {
   it.each([
     "/validator",
     "/validator/guide",
+    "/validator/sign",
     "/validator/hardware",
     "/validator/releases",
     "/validator/releases.json",
@@ -42,12 +43,10 @@ describe("validator download pages stay out of search engines", () => {
   it.each([
     "/validator",
     "/validator/guide",
+    "/validator/sign",
     "/validator/hardware",
     "/validator/releases",
-  ])(
-    "keeps %s out of the sitemap",
-    (path) => {
-      expect(shouldExcludeSitemapPath(path)).toBe(true);
-    }
-  );
+  ])("keeps %s out of the sitemap", (path) => {
+    expect(shouldExcludeSitemapPath(path)).toBe(true);
+  });
 });

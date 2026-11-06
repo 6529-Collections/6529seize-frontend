@@ -2168,6 +2168,10 @@
     "/validator/releases": {
       "classification": "auth"
     },
+    "/validator/sign": {
+      "classification": "exempt",
+      "exemptReason": "Password-gated validator signing utility. File, wallet, and signature flows are covered by the local validator-sign sandbox pack with synthetic grants and a throwaway wallet."
+    },
     "/wave-not-found": {
       "classification": "exempt",
       "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."

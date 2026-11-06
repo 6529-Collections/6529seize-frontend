@@ -31,6 +31,7 @@ import {
   ValidatorNeeds,
   ValidatorUpgrade,
 } from "./ValidatorSections";
+import ValidatorSignLink from "./ValidatorSignLink";
 import ValidatorSteps from "./ValidatorSteps";
 import { BODY } from "./validatorStyles";
 
@@ -237,6 +238,7 @@ export default function ValidatorDownloadPage({
         <ValidatorSteps initial={platform} debs={getDebNames(release)} />
       </section>
 
+      <ValidatorSignLink />
       <ValidatorNeeds />
       <ValidatorFeedback />
 

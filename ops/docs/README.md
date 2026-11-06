@@ -79,6 +79,7 @@ March 19, 2026.
   `/messages/encrypted`, `/messages/encrypted/new`,
   `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - [Realtime](realtime/README.md): `/nft-activity`
+- [Sign a Validator Authorization](feature-validator-signing.md): use a wallet on another device with an exported `grant.json`.
 - [Validator Download Page](validator-download-page.md): password-protected
   `/validator`, `/validator/guide`, `/validator/known-issues`,
   `/validator/releases`; public `/validator/releases.json` and

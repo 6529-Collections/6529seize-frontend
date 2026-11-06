@@ -50,6 +50,7 @@ describe("handleValidatorPageGate", () => {
   it.each([
     "/validator",
     "/validator/guide",
+    "/validator/sign",
     "/validator/hardware",
     "/validator/download/x/y",
   ])("shows the password form at %s without a cookie", (path) => {

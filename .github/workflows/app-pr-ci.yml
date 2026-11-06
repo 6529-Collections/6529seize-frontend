@@ -261,6 +261,13 @@ jobs:
           if (bookmarksBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });
           }
+          const validatorSigningRequired = plan.changed_files.some((file) =>
+            /^(?:app\/validator\/|components\/validator-page\/|lib\/validator-page\/grant\.|i18n\/(?:messages\/validatorSign|namespaces\/validator-sign)|tests\/validator\/)/.test(file) ||
+            ["components/providers/Providers.tsx", "__tests__/lib/validator-page/grantFixture.ts", "tests/support/localMuseumAppKitConfig.ts", "tests/support/scriptedWallet.ts", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          if (validatorSigningRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-validator-sign", label: "Validator signing desktop and mobile", runner: defaultRunner });
+          }
           const notificationsInboxRequired = plan.changed_files.some((file) =>
             /^(?:components\/notifications\/inbox\/|components\/layout\/sidebar\/WebSidebar\.tsx$|tests\/auth\/notifications-inbox-sandbox|i18n\/messages\/notifications-inbox)/.test(file)
           );
@@ -513,6 +520,10 @@ jobs:
       - name: Run private bookmarks browser pack
         if: matrix.lane == 'playwright-bookmarks'
         run: ./bin/6529 run test:e2e:bookmarks-sandbox
+
+      - name: Run validator signing browser pack
+        if: matrix.lane == 'playwright-validator-sign'
+        run: ./bin/6529 run test:e2e:validator-sign-sandbox
 
       - name: Run notifications inbox browser pack
         if: matrix.lane == 'playwright-notifications-inbox'

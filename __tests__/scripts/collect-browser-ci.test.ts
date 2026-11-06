@@ -151,6 +151,11 @@ it("selects every core browser lane when their shared workflow changes", () => {
         runner: "ubuntu-latest",
       },
       {
+        lane: "playwright-validator-sign",
+        label: "Validator signing desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+      {
         lane: "playwright-wave-creation",
         label: "Wave creation desktop and mobile",
         runner: "ubuntu-latest",
@@ -237,4 +242,29 @@ it.each([
       expect.objectContaining({ lane: "playwright-smoke" }),
     ]),
   });
+});
+
+it.each([
+  "app/validator/sign/page.tsx",
+  "components/validator-page/ValidatorGrantSigner.tsx",
+  "lib/validator-page/grant.ts",
+  "i18n/messages/validatorSign.en-US.json",
+  "tests/validator/sign-sandbox.spec.ts",
+  "__tests__/lib/validator-page/grantFixture.ts",
+  "tests/support/localMuseumAppKitConfig.ts",
+  "components/providers/Providers.tsx",
+])("selects the signing safety browser lane for %s", (file) => {
+  expect(JSON.parse(select([file])["core_playwright_matrix"]!)).toMatchObject({
+    include: expect.arrayContaining([
+      expect.objectContaining({ lane: "playwright-validator-sign" }),
+    ]),
+  });
+});
+
+it("runs validator signing in its isolated desktop and mobile sandbox", () => {
+  const step = workflow.jobs["core-playwright-checks"]!.steps.find(
+    (item) => item.name === "Run validator signing browser pack"
+  )!;
+  expect(step.if).toBe("matrix.lane == 'playwright-validator-sign'");
+  expect(step.run).toBe("./bin/6529 run test:e2e:validator-sign-sandbox");
 });
