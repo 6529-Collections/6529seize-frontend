@@ -92,13 +92,35 @@ describe("NIC cursor pagination", () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
-    const tree = (request: ActivityLogParamsConverted = params) => (
+    const tree = (
+      request: ActivityLogParamsConverted = params,
+      enabled = true
+    ) => (
       <QueryClientProvider client={client}>
-        <ProfileNicActivityLogs params={request} user="shelby" />
+        <ProfileNicActivityLogs
+          params={request}
+          user="shelby"
+          enabled={enabled}
+        />
       </QueryClientProvider>
     );
     return { ...render(tree()), tree, client };
   }
+  it("pauses hidden-layout requests without resetting the NIC cursor page", async () => {
+    const { rerender, tree, client } = setup();
+    await screen.findByText("identity-page-1");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("identity-page-2");
+    rerender(tree(params, false));
+    fetchMock.mockClear();
+    await client.invalidateQueries();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText("Page 2")).toBeInTheDocument();
+    rerender(tree());
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(screen.getByText("Page 2")).toBeInTheDocument();
+    expect(screen.getByText("identity-page-2")).toBeInTheDocument();
+  });
   it("uses server cursors forward, cached pages backward, and never offset-requests a missing page", async () => {
     setup();
     await screen.findByText("identity-page-1");

@@ -70,12 +70,14 @@ export default function ProfileActivityLogs({
   withFilters,
   withMatterFilter = false,
   disableActiveGroup = false,
+  enabled = true,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
   readonly withMatterFilter?: boolean | undefined;
   readonly disableActiveGroup?: boolean | undefined;
+  readonly enabled?: boolean | undefined;
   readonly children?: React.ReactNode | undefined;
 }) {
   const { activeGroupId } = useActiveGroup();
@@ -146,7 +148,7 @@ export default function ProfileActivityLogs({
           params: params,
         }),
       placeholderData: keepPreviousData,
-      enabled: !isProfileNic,
+      enabled: enabled && !isProfileNic,
     }
   );
 
@@ -234,6 +236,7 @@ export default function ProfileActivityLogs({
         <ProfileNicActivityLogs
           params={params}
           user={initialParams.handleOrWallet}
+          enabled={enabled}
         />
       ) : (
         <ProfileActivityLogsResults
