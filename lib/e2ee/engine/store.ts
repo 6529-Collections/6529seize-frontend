@@ -330,6 +330,20 @@ export class EngineStore {
     return [...byProfile.values()];
   }
 
+  private lastIncomingSeq(runtime: GroupRuntime): number {
+    const record = runtime.record;
+    let lastIncomingSeq =
+      record.history?.lastIncomingSeq ?? record.history?.maxSeq ?? 0;
+    // New arrivals may be outside the selected history page or behind an
+    // outgoing pending echo. Their notification cursor must survive eviction.
+    for (const message of runtime.messages.values()) {
+      if (isCountable(message, this.ownProfileId) && !message.imported) {
+        lastIncomingSeq = Math.max(lastIncomingSeq, message.seq);
+      }
+    }
+    return lastIncomingSeq;
+  }
+
   private buildDmPeer(
     record: StoredGroup,
     members: E2eeMember[]
@@ -349,20 +363,6 @@ export class EngineStore {
           devices: [],
         })
       : null;
-  }
-
-  private lastIncomingSeq(runtime: GroupRuntime): number {
-    const record = runtime.record;
-    let lastIncomingSeq =
-      record.history?.lastIncomingSeq ?? record.history?.maxSeq ?? 0;
-    // New arrivals may be outside the selected history page or behind an
-    // outgoing pending echo. Their notification cursor must survive eviction.
-    for (const message of runtime.messages.values()) {
-      if (isCountable(message, this.ownProfileId) && !message.imported) {
-        lastIncomingSeq = Math.max(lastIncomingSeq, message.seq);
-      }
-    }
-    return lastIncomingSeq;
   }
 
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
