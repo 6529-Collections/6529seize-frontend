@@ -13,8 +13,14 @@ type ValidatorGuideFold = {
   readonly markdown: string;
 };
 
-/** For a tester who runs the last release: what to do differently. */
-export const VALIDATOR_UPGRADE: ValidatorGuideFold = {
+/**
+ * For a tester who runs the last release: what to do differently. The pages
+ * show it only while the signed list's newest release is `forVersion`.
+ */
+export const VALIDATOR_UPGRADE: ValidatorGuideFold & {
+  readonly forVersion: string;
+} = {
+  forVersion: "0.1.0-rc.8",
   id: "upgrading",
   title: "Upgrading from rc.7",
   markdown: joinMarkdown([

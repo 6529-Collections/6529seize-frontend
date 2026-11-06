@@ -14,9 +14,19 @@ import { BODY, LINK, SECTION_HEADING } from "./validatorStyles";
 
 /**
  * What a tester who runs the last release does differently, right under the
- * download, where an upgrading tester looks first.
+ * download, where an upgrading tester looks first. Shown only while the
+ * signed list offers the release the note is for, so it never describes a
+ * release the page doesn't offer.
  */
-export function ValidatorUpgrade() {
+export function ValidatorUpgrade({
+  newest,
+}: {
+  /** The signed list's newest version, or undefined while it has none. */
+  readonly newest: string | undefined;
+}) {
+  if (newest !== VALIDATOR_UPGRADE.forVersion) {
+    return null;
+  }
   const headingId = `${VALIDATOR_UPGRADE.id}-title`;
   return (
     <section

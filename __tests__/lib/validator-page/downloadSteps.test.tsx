@@ -60,7 +60,9 @@ describe("the steps for rc.8's app", () => {
   });
 
   it("shows the upgrade from rc.7 in the open, with an id a link can name", () => {
-    const upgrade = renderToStaticMarkup(<ValidatorUpgrade />);
+    const upgrade = renderToStaticMarkup(
+      <ValidatorUpgrade newest="0.1.0-rc.8" />
+    );
     expect(upgrade).toMatch(
       /^<section id="upgrading" aria-labelledby="upgrading-title"/
     );
@@ -68,4 +70,15 @@ describe("the steps for rc.8's app", () => {
     expect(upgrade).toContain("<strong");
     expect(upgrade).not.toContain("<details");
   });
+
+  // Merged before the signed list offers rc.8, or left after rc.9 is out,
+  // the note would describe a release the page doesn't offer.
+  it.each([["0.1.0-rc.7"], ["0.1.0-rc.9"], [undefined]])(
+    "shows no upgrade note while the newest release is %s",
+    (newest) => {
+      expect(renderToStaticMarkup(<ValidatorUpgrade newest={newest} />)).toBe(
+        ""
+      );
+    }
+  );
 });

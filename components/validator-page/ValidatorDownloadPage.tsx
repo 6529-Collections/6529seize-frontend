@@ -162,7 +162,7 @@ export default function ValidatorDownloadPage({
         )}
       </section>
 
-      <ValidatorUpgrade />
+      <ValidatorUpgrade newest={release?.version} />
 
       <section aria-labelledby="steps">
         <h2 id="steps" className="tw-sr-only">

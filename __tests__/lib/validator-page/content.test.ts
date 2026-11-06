@@ -84,6 +84,8 @@ describe("validator page text", () => {
 
   it("tells a tester on rc.7 what to do differently, as the package does", () => {
     expect(VALIDATOR_UPGRADE.id).toBe("upgrading");
+    // Shown only while the signed list's newest release is this one.
+    expect(VALIDATOR_UPGRADE.forVersion).toBe(RELEASE);
     expect(VALIDATOR_UPGRADE.title).toBe("Upgrading from rc.7");
     const upgrade = VALIDATOR_UPGRADE.markdown;
     expect(upgrade).toContain(

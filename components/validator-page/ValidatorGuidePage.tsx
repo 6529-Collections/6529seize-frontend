@@ -21,9 +21,12 @@ import { LINK, SECTION_HEADING } from "./validatorStyles";
 export default function ValidatorGuidePage({
   platform,
   debs,
+  newest,
 }: {
   readonly platform: VisitorPlatform;
   readonly debs: ValidatorDebs;
+  /** The signed list's newest version, for the upgrade note. */
+  readonly newest: string | undefined;
 }) {
   return (
     <ValidatorPageFrame current="guide">
@@ -41,7 +44,7 @@ export default function ValidatorGuidePage({
         </p>
       </ValidatorPageHeader>
 
-      <ValidatorUpgrade />
+      <ValidatorUpgrade newest={newest} />
 
       <section aria-labelledby="steps">
         <h2 id="steps" className="tw-sr-only">
