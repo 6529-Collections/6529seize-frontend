@@ -212,9 +212,9 @@ function getCookieExpiresAttribute(expiresAt: string | null): string {
   return `; expires=${new Date(timestamp).toUTCString()}`;
 }
 
-function getSecureCookieAttribute(): string {
-  return globalThis.location.protocol === "https:" ? "; Secure" : "";
-}
+// The session cookie name carries the `__Host-` prefix, which browsers accept
+// only with Secure and Path=/ (localhost counts as a secure origin).
+const SESSION_COOKIE_ATTRIBUTES = "; path=/; SameSite=Strict; Secure";
 
 function dispatchAuthEvents(): void {
   globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
@@ -252,9 +252,9 @@ function applyLoginPayload(payload: AgentLoginPayload): void {
 
   document.cookie = `${STORAGE_KEYS.authCookie}=${encodeURIComponent(
     account.jwt
-  )}; path=/; SameSite=Strict${getCookieExpiresAttribute(
+  )}${SESSION_COOKIE_ATTRIBUTES}${getCookieExpiresAttribute(
     payload.session.accessTokenExpiresAt
-  )}${getSecureCookieAttribute()}`;
+  )}`;
   dispatchAuthEvents();
 }
 
@@ -268,7 +268,7 @@ function clearAuthState(): void {
   clearStoredRoleKeys();
   document.cookie = `${
     STORAGE_KEYS.authCookie
-  }=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict${getSecureCookieAttribute()}`;
+  }=; expires=Thu, 01 Jan 1970 00:00:00 GMT${SESSION_COOKIE_ATTRIBUTES}`;
   dispatchAuthEvents();
 }
 

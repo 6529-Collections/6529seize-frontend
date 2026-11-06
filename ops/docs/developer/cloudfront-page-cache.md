@@ -33,14 +33,14 @@ and honours `stale-while-revalidate`:
   never stored either. Error responses use an error-caching minimum of 0, so a
   transient 5xx or 404 is never held at the edge.
 
-| Path                            | Cache key                                                                                                                      | Notes                                                                                                                    |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| default (`*`)                   | path, every query string, `rsc`, `next-router-*` headers, `next-url`, cookies `x-6529-auth`, `wallet-auth`, `validator_access` | All viewer headers, cookies and query strings reach the origin. Max 1 day.                                               |
-| `/_next/static/*`               | path                                                                                                                           | Content-hashed files, up to one year. Only the Host header is forwarded.                                                 |
-| `/_next/image*`                 | `url`, `w`, `q`, `Accept`                                                                                                      | Moves sharp image resizing off the app servers. No cookies.                                                              |
-| `/api/og-metadata/*`            | path, every query string, cookie `x-6529-auth`                                                                                 | Crawler cards. Max 1 day.                                                                                                |
-| `/validator*`, `/my-stream*`    | not cached                                                                                                                     | The validator password gate and the user-agent based `/my-stream` redirect run in `proxy.ts` and must see every request. |
-| `/.well-known/acme-challenge/*` | not cached (staging only)                                                                                                      | Plain HTTP to nginx port 80 so certbot renewals keep working.                                                            |
+| Path                            | Cache key                                                                                                                                            | Notes                                                                                                                    |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| default (`*`)                   | path, every query string, `rsc`, `next-router-*` headers, `next-url`, cookies `x-6529-auth`, `__Host-wallet-auth`, `wallet-auth`, `validator_access` | All viewer headers, cookies and query strings reach the origin. Max 1 day.                                               |
+| `/_next/static/*`               | path                                                                                                                                                 | Content-hashed files, up to one year. Only the Host header is forwarded.                                                 |
+| `/_next/image*`                 | `url`, `w`, `q`, `Accept`                                                                                                                            | Moves sharp image resizing off the app servers. No cookies.                                                              |
+| `/api/og-metadata/*`            | path, every query string, cookie `x-6529-auth`                                                                                                       | Crawler cards. Max 1 day.                                                                                                |
+| `/validator*`, `/my-stream*`    | not cached                                                                                                                                           | The validator password gate and the user-agent based `/my-stream` redirect run in `proxy.ts` and must see every request. |
+| `/.well-known/acme-challenge/*` | not cached (staging only)                                                                                                                            | Plain HTTP to nginx port 80 so certbot renewals keep working.                                                            |
 
 Why the page key looks like this:
 
@@ -51,10 +51,12 @@ Why the page key looks like this:
 - **`x-6529-auth`** is the staging access cookie. `proxy.ts` decides the
   staging gate from it, so keying on it keeps the gate exact: a visitor without
   the cookie never receives a page cached for one who had it.
-- **`wallet-auth`** (the signed-in JWT) gives every signed-in session its own
-  entries, so signed-in and anonymous visitors never share a cached response.
-  Prerendered pages are identical either way; this keeps the guarantee even if
-  a route later starts varying.
+- **`__Host-wallet-auth`** (the signed-in JWT) gives every signed-in session its
+  own entries, so signed-in and anonymous visitors never share a cached
+  response. Prerendered pages are identical either way; this keeps the
+  guarantee even if a route later starts varying. `wallet-auth` is the name the
+  cookie had before; it stays in the key until browsers have dropped it, and
+  can then be removed from the policy.
 
 Compression: the edge serves gzip or Brotli for responses the origin sends
 uncompressed. Node already gzips pages, so pages stay gzip until origin

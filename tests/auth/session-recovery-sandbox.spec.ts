@@ -83,7 +83,7 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
       ) as { jwt: string }[];
       accounts[0]!.jwt = jwt;
       localStorage.setItem("6529-wallet-accounts", JSON.stringify(accounts));
-      document.cookie = `wallet-auth=${jwt}; path=/`;
+      document.cookie = `__Host-wallet-auth=${jwt}; path=/; Secure`;
       window.dispatchEvent(new Event("focus"));
     }, expiredJwt);
     await expect.poll(() => refreshRequests).toBe(3);

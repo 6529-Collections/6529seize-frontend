@@ -20,7 +20,9 @@ import {
   setActiveWalletAccount,
   setAuthJwt,
   syncConnectedWalletProfile,
+  syncWalletAuthCookie,
   syncWalletRoleWithServer,
+  WALLET_AUTH_COOKIE,
 } from "@/services/auth/auth.utils";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -93,10 +95,16 @@ describe("auth.utils", () => {
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
     setAuthJwt("addr", "jwt", "refresh", "role");
-    expect(Cookies.set).toHaveBeenCalledWith("wallet-auth", "jwt", {
+    expect(Cookies.set).toHaveBeenCalledWith("__Host-wallet-auth", "jwt", {
       secure: true,
       sameSite: "strict",
+      path: "/",
       expires: 2,
+    });
+    expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+      secure: true,
+      sameSite: "strict",
+      path: "/",
     });
     expect(safeLocalStorage.setItem).toHaveBeenCalledWith(
       "6529-wallet-address",
@@ -223,7 +231,7 @@ describe("auth.utils", () => {
     expect(getAuthJwt()).toBe("dev");
     publicEnv.USE_DEV_AUTH = "false";
     (Cookies.get as jest.Mock).mockReturnValue("cookie");
-    expect(getAuthJwt()).toBe("cookie");
+    expect(getAuthJwt()).toBeNull();
   });
 
   it("getAuthJwt falls back to the active account jwt when the cookie is unavailable", () => {
@@ -235,6 +243,135 @@ describe("auth.utils", () => {
     setAuthJwt("0xAaA", "jwt-a", null, "role-a");
 
     expect(getAuthJwt()).toBe("jwt-a");
+  });
+
+  describe("session cookie", () => {
+    const cookieJar = (cookies: Record<string, string>) => {
+      (Cookies.get as jest.Mock).mockImplementation(
+        (name: string) => cookies[name]
+      );
+    };
+    const decodeAs = (claims: Record<string, Record<string, unknown>>) => {
+      (jwtDecode as jest.Mock).mockImplementation(
+        (jwt: string) => claims[jwt] ?? { exp: 86400 * 2 }
+      );
+    };
+
+    beforeEach(() => {
+      jest.spyOn(Date, "now").mockReturnValue(0);
+    });
+
+    it("uses the prefixed host-only cookie name", () => {
+      expect(WALLET_AUTH_COOKIE).toBe("__Host-wallet-auth");
+    });
+
+    it("uses the cookie when it was issued for the active account", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-cookie": { sub: "0xaaa", exp: 86400 * 2 } });
+      setAuthJwt("0xAaA", "jwt-a", null);
+      cookieJar({ "__Host-wallet-auth": "jwt-cookie" });
+
+      expect(getAuthJwt()).toBe("jwt-cookie");
+    });
+
+    it("ignores a cookie issued for another address", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-other": { sub: "0xbbb", exp: 86400 * 2 } });
+      setAuthJwt("0xAaA", "jwt-a", null);
+      cookieJar({ "__Host-wallet-auth": "jwt-other" });
+
+      expect(getAuthJwt()).toBe("jwt-a");
+    });
+
+    it("ignores a cookie without a readable subject", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-no-sub": { exp: 86400 * 2 } });
+      setAuthJwt("0xAaA", "jwt-a", null);
+      cookieJar({ "__Host-wallet-auth": "jwt-no-sub" });
+      expect(getAuthJwt()).toBe("jwt-a");
+
+      (jwtDecode as jest.Mock).mockImplementation(() => {
+        throw new Error("invalid token");
+      });
+      cookieJar({ "__Host-wallet-auth": "not-a-jwt" });
+      expect(getAuthJwt()).toBe("jwt-a");
+    });
+
+    it("never reads the cookie name used before the prefix", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-legacy": { sub: "0xaaa", exp: 86400 * 2 } });
+      setAuthJwt("0xAaA", "jwt-a", null);
+      cookieJar({ "wallet-auth": "jwt-legacy" });
+
+      expect(getAuthJwt()).toBe("jwt-a");
+      expect(Cookies.get).not.toHaveBeenCalledWith("wallet-auth");
+    });
+
+    it("returns no token without a stored account, whatever the cookies hold", () => {
+      setupStorageMocks();
+      decodeAs({ "jwt-cookie": { sub: "0xaaa", exp: 86400 * 2 } });
+      cookieJar({
+        "__Host-wallet-auth": "jwt-cookie",
+        "wallet-auth": "jwt-cookie",
+      });
+
+      expect(getAuthJwt()).toBeNull();
+    });
+
+    it("migrates a stored session to the prefixed cookie without a token change event", () => {
+      setupStorageMocks();
+      decodeAs({});
+      setAuthJwt("0xAaA", "jwt-a", null);
+      jest.clearAllMocks();
+      cookieJar({ "wallet-auth": "jwt-a" });
+      const listener = jest.fn();
+      globalThis.addEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
+
+      syncWalletAuthCookie();
+
+      expect(Cookies.set).toHaveBeenCalledWith("__Host-wallet-auth", "jwt-a", {
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        expires: 2,
+      });
+      expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+      });
+      expect(listener).not.toHaveBeenCalled();
+      globalThis.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
+    });
+
+    it("removes both cookies when no stored session remains", () => {
+      setupStorageMocks();
+      cookieJar({ "__Host-wallet-auth": "stale", "wallet-auth": "stale" });
+
+      syncWalletAuthCookie();
+
+      expect(Cookies.set).not.toHaveBeenCalled();
+      expect(Cookies.remove).toHaveBeenCalledWith("__Host-wallet-auth", {
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+      });
+      expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+      });
+    });
+
+    it("does not touch cookies under development auth", () => {
+      const { publicEnv } = require("@/config/env");
+      publicEnv.USE_DEV_AUTH = "true";
+
+      syncWalletAuthCookie();
+
+      expect(Cookies.set).not.toHaveBeenCalled();
+      expect(Cookies.remove).not.toHaveBeenCalled();
+    });
   });
 
   it("tracks whether the active account was authenticated with session v2", () => {
@@ -347,8 +484,11 @@ describe("auth.utils", () => {
     });
 
     it("ignores the dev auth jwt", () => {
-      (Cookies.get as jest.Mock).mockReturnValue("cookie");
-      expect(getAuthJwt()).toBe("cookie");
+      setupStorageMocks();
+      (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+      jest.spyOn(Date, "now").mockReturnValue(0);
+      setAuthJwt("0xAaA", "jwt-a", null);
+      expect(getAuthJwt()).toBe("jwt-a");
     });
 
     it("ignores the dev auth wallet address", () => {
@@ -427,9 +567,10 @@ describe("auth.utils", () => {
   it("removeAuthJwt clears storage and cookie", async () => {
     (safeLocalStorage.getItem as jest.Mock).mockReturnValue("Addr");
     await removeAuthJwt();
-    expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+    expect(Cookies.remove).toHaveBeenCalledWith("__Host-wallet-auth", {
       secure: true,
       sameSite: "strict",
+      path: "/",
     });
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
       "6529-wallet-address"
@@ -465,11 +606,16 @@ describe("auth.utils", () => {
     expect(storage.get("6529-wallet-active-address")).toBe("0xAaA");
     expect(getWalletAddress()).toBe("0xAaA");
     expect(getRefreshToken()).toBe("refresh-a");
-    expect(Cookies.set).toHaveBeenLastCalledWith("wallet-auth", "jwt-a", {
-      secure: true,
-      sameSite: "strict",
-      expires: 2,
-    });
+    expect(Cookies.set).toHaveBeenLastCalledWith(
+      "__Host-wallet-auth",
+      "jwt-a",
+      {
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        expires: 2,
+      }
+    );
     expect(
       getConnectedWalletAccounts().map((account) => account.address)
     ).toEqual(["0xAaA", "0xBbB"]);
@@ -567,9 +713,10 @@ describe("auth.utils", () => {
     expect(getConnectedWalletAccounts()).toHaveLength(0);
     expect(getWalletAddress()).toBeNull();
     expect(getRefreshToken()).toBeNull();
-    expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+    expect(Cookies.remove).toHaveBeenCalledWith("__Host-wallet-auth", {
       secure: true,
       sameSite: "strict",
+      path: "/",
     });
     expect(storage.get("6529-wallet-accounts")).toBeUndefined();
     expect(storage.get("6529-wallet-active-address")).toBeUndefined();

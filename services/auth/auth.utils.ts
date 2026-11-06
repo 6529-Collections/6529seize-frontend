@@ -7,7 +7,12 @@ import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import { getDevAuthTestOverride } from "./devAuthTestOverride";
 import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 
-export const WALLET_AUTH_COOKIE = "wallet-auth";
+// The `__Host-` prefix makes browsers accept this cookie only when it is
+// Secure, scoped to Path=/ and set without a Domain, so only this exact host
+// can write it.
+export const WALLET_AUTH_COOKIE = "__Host-wallet-auth";
+// The cookie name used before the prefix. It is only ever removed, never read.
+const LEGACY_WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
 export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
 export const AUTH_TOKEN_CHANGED_EVENT = "6529-auth-token-changed";
@@ -43,6 +48,7 @@ export interface ConnectedWalletAccount {
 const COOKIE_OPTIONS = {
   secure: true,
   sameSite: "strict" as const,
+  path: "/",
 };
 
 const getJwtExpiration = (jwt: string): number => {
@@ -50,6 +56,23 @@ const getJwtExpiration = (jwt: string): number => {
     exp: number;
   }>(jwt);
   return decodedJwt.exp;
+};
+
+const isJwtForAddress = (jwt: string, address: string): boolean => {
+  try {
+    const { sub } = jwtDecode<{ sub?: unknown }>(jwt);
+    return (
+      typeof sub === "string" && sub.toLowerCase() === address.toLowerCase()
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** The session cookie's token, only when it was issued for `address`. */
+const getWalletAuthCookieFor = (address: string): string | null => {
+  const jwt = Cookies.get(WALLET_AUTH_COOKIE);
+  return jwt && isJwtForAddress(jwt, address) ? jwt : null;
 };
 
 export const isAuthJwtUsable = (
@@ -154,35 +177,39 @@ const emitAuthTokenChangedIfChanged = (
   }
 };
 
+const getCookieExpiresInDays = (jwt: string): number | null => {
+  try {
+    const expiresInSeconds =
+      getJwtExpiration(jwt) - Math.floor(Date.now() / 1000);
+    return expiresInSeconds > 0 ? expiresInSeconds / 86400 : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Writes the session cookie the server reads, or removes it when the token is
+ * missing, unreadable or expired. Returns the value the cookie now holds.
+ */
+const writeWalletAuthCookie = (jwt: string | null): string | null => {
+  Cookies.remove(LEGACY_WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+
+  const expiresInDays = jwt ? getCookieExpiresInDays(jwt) : null;
+  if (!jwt || expiresInDays === null) {
+    Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+    return null;
+  }
+
+  Cookies.set(WALLET_AUTH_COOKIE, jwt, {
+    ...COOKIE_OPTIONS,
+    expires: expiresInDays,
+  });
+  return jwt;
+};
+
 const setWalletAuthCookie = (jwt: string | null): void => {
   const previousJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
-
-  if (!jwt) {
-    Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChangedIfChanged(previousJwt, null);
-    return;
-  }
-
-  try {
-    const jwtExpiration = getJwtExpiration(jwt);
-    const now = Math.floor(Date.now() / 1000);
-    const expiresInSeconds = jwtExpiration - now;
-    if (expiresInSeconds <= 0) {
-      Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-      emitAuthTokenChangedIfChanged(previousJwt, null);
-      return;
-    }
-    const expiresInDays = expiresInSeconds / 86400;
-
-    Cookies.set(WALLET_AUTH_COOKIE, jwt, {
-      ...COOKIE_OPTIONS,
-      expires: expiresInDays,
-    });
-    emitAuthTokenChangedIfChanged(previousJwt, jwt);
-  } catch {
-    Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChangedIfChanged(previousJwt, null);
-  }
+  emitAuthTokenChangedIfChanged(previousJwt, writeWalletAuthCookie(jwt));
 };
 
 const parseAccountsJson = (raw: string): unknown[] | null => {
@@ -345,13 +372,12 @@ const migrateLegacyStorageIfNeeded = (): void => {
   if (!legacyAddress || !legacyRefreshToken) return;
 
   const legacyRole = safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY);
-  const legacyJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 
   const legacyAccount: ConnectedWalletAccount = {
     address: legacyAddress,
     refreshToken: legacyRefreshToken,
     role: legacyRole,
-    jwt: legacyJwt,
+    jwt: getWalletAuthCookieFor(legacyAddress),
     profileId: null,
     profileHandle: null,
     authSessionVersion: null,
@@ -511,11 +537,27 @@ export const getAuthJwt = () => {
   if (isDevAuthEnabled()) {
     return getDevAuthTestOverride()?.jwt ?? publicEnv.DEV_MODE_AUTH_JWT ?? null;
   }
-  return (
-    Cookies.get(WALLET_AUTH_COOKIE) ??
-    getActiveAccountFromAccounts(getStoredAccounts())?.jwt ??
-    null
-  );
+  // The cookie is only trusted for the account this browser has signed in as.
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  if (!activeAccount) {
+    return null;
+  }
+  return getWalletAuthCookieFor(activeAccount.address) ?? activeAccount.jwt;
+};
+
+/**
+ * Brings the session cookie in line with the active stored account: writes the
+ * cookie the server reads from the stored token and removes the cookie name
+ * used before it. Stored sessions therefore keep working after the cookie
+ * name changes. It does not announce a token change, because the token the
+ * app sends stays the same.
+ */
+export const syncWalletAuthCookie = (): void => {
+  if (isDevAuthEnabled()) {
+    return;
+  }
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  writeWalletAuthCookie(activeAccount?.jwt ?? null);
 };
 
 export const hasActiveSessionV2Auth = ({
