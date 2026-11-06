@@ -16,7 +16,7 @@ type ProbeState = {
   framesReceived: number;
   receives: Record<string, number>;
   rows: Record<string, number>;
-  trackRows: boolean;
+  track: boolean;
   ownText: string | null;
   ownRenderAt: number | null;
   names: Record<string, number> | null;
@@ -125,8 +125,23 @@ describe("chat performance probe", () => {
     });
   });
 
+  it("passes socket data through untouched until armed", () => {
+    const state = probeState();
+    const frame = JSON.stringify({
+      type: "DROP_UPDATE",
+      data: { id: "drop-6", serial_no: 6 },
+    });
+    expect(new MessageEvent("message", { data: frame }).data).toBe(frame);
+    expect(state.receives["6"]).toBeUndefined();
+    expect(state.framesReceived).toBe(0);
+    // Unrelated message data, such as a postMessage payload, is unchanged.
+    const payload = { kind: "other" };
+    expect(new MessageEvent("message", { data: payload }).data).toBe(payload);
+  });
+
   it("marks the first read of each drop frame by serial number", () => {
     const state = probeState();
+    state.track = true;
     const frame = JSON.stringify({
       type: "DROP_UPDATE",
       data: { id: "drop-7", serial_no: 7 },
@@ -146,6 +161,31 @@ describe("chat performance probe", () => {
     expect(state.receives["7"]).toBe(firstMark);
     expect(state.receives["8"]).toBeUndefined();
     expect(state.framesReceived).toBe(1);
+
+    // The same drop on a second socket counts as a frame but keeps the
+    // first receive mark.
+    expect(new MessageEvent("message", { data: frame }).data).toBe(frame);
+    expect(state.framesReceived).toBe(2);
+    expect(state.receives["7"]).toBe(firstMark);
+    state.track = false;
+  });
+
+  it("patches MessageEvent.data once", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      MessageEvent.prototype,
+      "data"
+    );
+    const probeWindow = window as unknown as { __chatPerf?: ProbeState };
+    const installed = probeWindow.__chatPerf;
+    delete probeWindow.__chatPerf;
+    try {
+      chatPerfProbe();
+      expect(
+        Object.getOwnPropertyDescriptor(MessageEvent.prototype, "data")
+      ).toEqual(descriptor);
+    } finally {
+      probeWindow.__chatPerf = installed;
+    }
   });
 
   it("records chat rows only while armed", async () => {
@@ -156,7 +196,7 @@ describe("chat performance probe", () => {
     await Promise.resolve();
     expect(state.rows["41"]).toBeUndefined();
 
-    state.trackRows = true;
+    state.track = true;
     const wrapper = document.createElement("section");
     const nested = document.createElement("div");
     nested.setAttribute("data-serial-no", "42");
@@ -164,7 +204,7 @@ describe("chat performance probe", () => {
     document.body.appendChild(wrapper);
     await Promise.resolve();
     expect(state.rows["42"]).toEqual(expect.any(Number));
-    state.trackRows = false;
+    state.track = false;
     row.remove();
     wrapper.remove();
   });
@@ -173,7 +213,7 @@ describe("chat performance probe", () => {
 describe("chat performance own-render mark", () => {
   it("marks the own row when its content renders after the row", async () => {
     const state = probeState();
-    state.trackRows = true;
+    state.track = true;
     state.ownText = "my own message";
     const row = document.createElement("div");
     row.setAttribute("data-serial-no", "77");
@@ -187,7 +227,7 @@ describe("chat performance own-render mark", () => {
     row.appendChild(content);
     await Promise.resolve();
     expect(state.ownRenderAt).toEqual(expect.any(Number));
-    state.trackRows = false;
+    state.track = false;
     state.ownText = null;
     row.remove();
   });

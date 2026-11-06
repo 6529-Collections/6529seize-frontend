@@ -42,8 +42,11 @@ export type ChatPerfSnapshot = {
 };
 
 export type ChatPerfArmOptions = {
-  /** Record insertion times of chat rows (`[data-serial-no]`). */
-  readonly trackRows?: boolean;
+  /**
+   * Record socket receive marks and insertion times of chat rows
+   * (`[data-serial-no]`). Off until armed.
+   */
+  readonly track?: boolean;
   /** Record a submit mark on the next click on a button with this name. */
   readonly submitLabel?: string;
   /** Record an own-render mark when a row containing this text appears. */
@@ -72,7 +75,7 @@ type ProbeState = {
   receives: Record<string, number>;
   rows: Record<string, number>;
   rowFrames: Record<string, number>;
-  trackRows: boolean;
+  track: boolean;
   submitLabel: string | null;
   submitAt: number | null;
   ownText: string | null;
@@ -104,7 +107,7 @@ export function chatPerfProbe(): void {
     receives: {},
     rows: {},
     rowFrames: {},
-    trackRows: false,
+    track: false,
     submitLabel: null,
     submitAt: null,
     ownText: null,
@@ -178,8 +181,7 @@ export function chatPerfProbe(): void {
       renderers: new Map(),
       inject() {
         state.hookInstalled = true;
-        nextRendererId += 1;
-        return nextRendererId - 1;
+        return nextRendererId++;
       },
       checkDCE() {},
       onScheduleFiberRoot() {},
@@ -198,49 +200,55 @@ export function chatPerfProbe(): void {
 
   // Receive mark: the first read of a socket message's data is when the app
   // starts handling it. Reading MessageEvent.data works for real sockets and
-  // for Playwright's routed (mocked) sockets alike.
+  // for Playwright's routed (mocked) sockets alike. The getter passes values
+  // through unchanged and does nothing extra until a measurement is armed.
+  // State is per document: the init script runs again on every navigation.
+  const PATCHED = "__chatPerfDataPatched";
+  const messagePrototype = MessageEvent.prototype as MessageEvent &
+    Record<string, unknown>;
   const dataDescriptor = Object.getOwnPropertyDescriptor(
     MessageEvent.prototype,
     "data"
   );
   const readData = dataDescriptor?.get;
-  if (readData) {
+  if (readData && messagePrototype[PATCHED] !== true) {
     const seen = new WeakSet<MessageEvent>();
+    const noteReceive = (value: string) => {
+      const at = performance.now();
+      try {
+        const frame = JSON.parse(value) as {
+          type?: string;
+          data?: { serial_no?: number };
+        };
+        const serialNo = frame.data?.serial_no;
+        if (frame.type !== "DROP_UPDATE" || typeof serialNo !== "number") {
+          return;
+        }
+        state.framesReceived += 1;
+        // The first copy wins when several sockets deliver the same drop.
+        state.receives[String(serialNo)] ??= at;
+      } catch {
+        // Not a chat frame.
+      }
+    };
     Object.defineProperty(MessageEvent.prototype, "data", {
       configurable: true,
       enumerable: dataDescriptor.enumerable ?? true,
       get(this: MessageEvent) {
         const value: unknown = readData.call(this);
-        if (!seen.has(this)) {
-          seen.add(this);
-          if (
-            typeof value === "string" &&
-            value.includes('"DROP_UPDATE"') &&
-            value.includes('"serial_no"')
-          ) {
-            const at = performance.now();
-            try {
-              const frame = JSON.parse(value) as {
-                type?: string;
-                data?: { serial_no?: number };
-              };
-              const serialNo = frame.data?.serial_no;
-              if (
-                frame.type === "DROP_UPDATE" &&
-                typeof serialNo === "number"
-              ) {
-                state.framesReceived += 1;
-                const key = String(serialNo);
-                state.receives[key] ??= at;
-              }
-            } catch {
-              // Not a chat frame.
-            }
-          }
+        if (!state.track || seen.has(this)) return value;
+        seen.add(this);
+        if (
+          typeof value === "string" &&
+          value.includes('"DROP_UPDATE"') &&
+          value.includes('"serial_no"')
+        ) {
+          noteReceive(value);
         }
         return value;
       },
     });
+    Object.defineProperty(MessageEvent.prototype, PATCHED, { value: true });
   }
 
   const recordRow = (element: Element, now: number, inserted: string[]) => {
@@ -268,7 +276,7 @@ export function chatPerfProbe(): void {
   };
 
   const observer = new MutationObserver((records) => {
-    if (!state.trackRows) return;
+    if (!state.track) return;
     const now = performance.now();
     const inserted: string[] = [];
     for (const record of records) {
@@ -342,8 +350,7 @@ export async function armChatPerf(
   await page.evaluate((armOptions) => {
     const state = (window as ProbeWindow).__chatPerf;
     if (!state) throw new Error("Chat performance probe is not installed.");
-    if (armOptions.trackRows !== undefined)
-      state.trackRows = armOptions.trackRows;
+    if (armOptions.track !== undefined) state.track = armOptions.track;
     if (armOptions.submitLabel !== undefined) {
       state.submitLabel = armOptions.submitLabel;
       state.submitAt = null;

@@ -324,6 +324,11 @@ describe("effective App PR CI plan", () => {
     "components/waves/drops/WaveDropActions.tsx",
     "components/drops/view/part/DropPartMarkdownImage.tsx",
     "contexts/wave/hooks/useActiveWaveManager.ts",
+    // Sibling paths of the hot-path files stay out.
+    "helpers/waves/drop-signature.helpers.ts",
+    "components/waves/drops/WaveDropTime.tsx",
+    "components/drops/view/DropsListItem.tsx",
+    "tests/support/composerSandboxConstants.json",
   ])("keeps chat-adjacent path %s out of the render budget lane", (file) => {
     expect(
       executePlan([file]).checks.playwright_native_competition.required

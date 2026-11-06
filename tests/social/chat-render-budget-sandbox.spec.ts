@@ -90,6 +90,10 @@ function topNames(
  * Requests: 5.4-7.2, 0.5-2.4, 0.1). Each Phase 0 PR that lowers a number
  * lowers its budget here. Phase 0 target: < 5 renders and 0 requests.
  */
+// Ratchets: lanes B and C lower openWave.renders as their fixes land (0.2
+// unread slice, 0.3 render isolation, 0.4/0.5 chat store and shared drop
+// record, 0.10 row cost); lane A lowers the request budgets (0.7 gap-only
+// refetch, 0.8 read debounce).
 const BUDGETS = {
   openWave: { renders: 7000, requests: 14 },
   otherWave: { renders: 650, requests: 5 },
@@ -140,7 +144,7 @@ async function measure({
   readonly messages: number;
   readonly intervalMs: number;
 }) {
-  await armChatPerf(page, { trackRows: true, names: REPORT_NAMES });
+  await armChatPerf(page, { track: true, names: REPORT_NAMES });
   const idleRate = await idleRendersPerSecond(page);
   tracker.reset();
   const before = await readChatPerf(page);
@@ -207,6 +211,25 @@ async function openPerfWave(page: Page) {
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
 }
 
+/** Opens the surface, then lets its initial requests and renders settle. */
+async function prepare(
+  page: Page,
+  fixture: ChatPerfFixture,
+  open: (page: Page) => Promise<void>
+) {
+  await open(page);
+  await fixture.waitForSockets();
+  await page.waitForTimeout(1500);
+}
+
+function latencies(result: Awaited<ReturnType<typeof measure>>) {
+  return {
+    receiveToRowP50Ms: result.receiveToRowP50Ms,
+    receiveToFrameP50Ms: result.receiveToFrameP50Ms,
+    receiveToFrameP95Ms: result.receiveToFrameP95Ms,
+  };
+}
+
 test.describe("Chat render budget @auth @local-only", () => {
   test.describe.configure({ mode: "serial" });
   useLocalSandboxMutationGuard(
@@ -229,108 +252,68 @@ test.describe("Chat render budget @auth @local-only", () => {
     await page.unrouteAll({ behavior: "wait" });
   });
 
-  test("an incoming message in the open wave", async ({ page }, testInfo) => {
-    await openPerfWave(page);
-    await fixture.waitForSockets();
-    await page.waitForTimeout(1500);
-    const result = await measure({
-      page,
-      fixture,
-      tracker,
+  const scenarios = [
+    {
+      key: "openWave",
+      title: "an incoming message in the open wave",
+      open: openPerfWave,
       waveIndex: PERF_OPEN_WAVE_INDEX,
-      messages: MESSAGES,
-      intervalMs: MESSAGE_INTERVAL_MS,
-    });
-    expectProbeWorking(result.after);
-    // Every injected message reached the app and rendered its row.
-    await expect(
-      page.getByText(perfMessageText(40 + MESSAGES), { exact: true }).last()
-    ).toBeVisible();
-    expect(result.receivedFrames).toBeGreaterThanOrEqual(MESSAGES);
-    await attachNumbers(testInfo, "openWave", {
-      ...result.summary,
-      idleRendersPerSecond: result.idleRendersPerSecond,
-      receivedFrames: result.receivedFrames,
-      perMessageByComponent: result.perMessageByComponent,
-      receiveToRowP50Ms: result.receiveToRowP50Ms,
-      receiveToFrameP50Ms: result.receiveToFrameP50Ms,
-      receiveToFrameP95Ms: result.receiveToFrameP95Ms,
-    });
-    if (REPORT_ONLY) return;
-    expect(result.summary.rendersPerMessage).toBeLessThanOrEqual(
-      BUDGETS.openWave.renders
-    );
-    expect(result.summary.requestsPerMessage).toBeLessThanOrEqual(
-      BUDGETS.openWave.requests
-    );
-  });
-
-  test("an incoming message in another wave while a wave is open", async ({
-    page,
-  }, testInfo) => {
-    await openPerfWave(page);
-    await fixture.waitForSockets();
-    await page.waitForTimeout(1500);
-    const result = await measure({
-      page,
-      fixture,
-      tracker,
+    },
+    {
+      key: "otherWave",
+      title: "an incoming message in another wave while a wave is open",
+      open: openPerfWave,
       waveIndex: PERF_OTHER_WAVE_INDEX,
-      messages: MESSAGES,
-      intervalMs: MESSAGE_INTERVAL_MS,
-    });
-    expectProbeWorking(result.after);
-    expect(result.receivedFrames).toBeGreaterThanOrEqual(MESSAGES);
-    await attachNumbers(testInfo, "otherWave", {
-      ...result.summary,
-      idleRendersPerSecond: result.idleRendersPerSecond,
-      receivedFrames: result.receivedFrames,
-      perMessageByComponent: result.perMessageByComponent,
-    });
-    if (REPORT_ONLY) return;
-    expect(result.summary.rendersPerMessage).toBeLessThanOrEqual(
-      BUDGETS.otherWave.renders
-    );
-    expect(result.summary.requestsPerMessage).toBeLessThanOrEqual(
-      BUDGETS.otherWave.requests
-    );
-  });
-
-  test("an incoming message on the wave list", async ({ page }, testInfo) => {
-    await openWaveList(page);
-    await fixture.waitForSockets();
-    await page.waitForTimeout(1500);
-    const result = await measure({
-      page,
-      fixture,
-      tracker,
+    },
+    {
+      key: "waveList",
+      title: "an incoming message on the wave list",
+      open: openWaveList,
       waveIndex: PERF_OTHER_WAVE_INDEX,
-      messages: MESSAGES,
-      intervalMs: MESSAGE_INTERVAL_MS,
+    },
+  ] as const;
+
+  for (const scenario of scenarios) {
+    test(scenario.title, async ({ page }, testInfo) => {
+      await prepare(page, fixture, scenario.open);
+      const result = await measure({
+        page,
+        fixture,
+        tracker,
+        waveIndex: scenario.waveIndex,
+        messages: MESSAGES,
+        intervalMs: MESSAGE_INTERVAL_MS,
+      });
+      expectProbeWorking(result.after);
+      expect(result.receivedFrames).toBeGreaterThanOrEqual(MESSAGES);
+      if (scenario.waveIndex === PERF_OPEN_WAVE_INDEX) {
+        // Every injected message reached the app and rendered its row.
+        await expect(
+          page.getByText(perfMessageText(40 + MESSAGES), { exact: true }).last()
+        ).toBeVisible();
+      }
+      await attachNumbers(testInfo, scenario.key, {
+        ...result.summary,
+        idleRendersPerSecond: result.idleRendersPerSecond,
+        receivedFrames: result.receivedFrames,
+        perMessageByComponent: result.perMessageByComponent,
+        ...latencies(result),
+      });
+      if (REPORT_ONLY) return;
+      const budget = BUDGETS[scenario.key];
+      expect(result.summary.rendersPerMessage).toBeLessThanOrEqual(
+        budget.renders
+      );
+      expect(result.summary.requestsPerMessage).toBeLessThanOrEqual(
+        budget.requests
+      );
     });
-    expectProbeWorking(result.after);
-    expect(result.receivedFrames).toBeGreaterThanOrEqual(MESSAGES);
-    await attachNumbers(testInfo, "waveList", {
-      ...result.summary,
-      idleRendersPerSecond: result.idleRendersPerSecond,
-      receivedFrames: result.receivedFrames,
-      perMessageByComponent: result.perMessageByComponent,
-    });
-    if (REPORT_ONLY) return;
-    expect(result.summary.rendersPerMessage).toBeLessThanOrEqual(
-      BUDGETS.waveList.renders
-    );
-    expect(result.summary.requestsPerMessage).toBeLessThanOrEqual(
-      BUDGETS.waveList.requests
-    );
-  });
+  }
 
   test("a burst of 50 messages in the open wave", async ({
     page,
   }, testInfo) => {
-    await openPerfWave(page);
-    await fixture.waitForSockets();
-    await page.waitForTimeout(1500);
+    await prepare(page, fixture, openPerfWave);
     const result = await measure({
       page,
       fixture,
@@ -350,16 +333,14 @@ test.describe("Chat render budget @auth @local-only", () => {
       ...result.summary,
       receivedFrames: result.receivedFrames,
       perMessageByComponent: result.perMessageByComponent,
-      receiveToFrameP50Ms: result.receiveToFrameP50Ms,
-      receiveToFrameP95Ms: result.receiveToFrameP95Ms,
+      ...latencies(result),
       longTasks: result.longTasks,
     });
   });
 
   test("own message send to render", async ({ page }, testInfo) => {
     const content = "Own perf message from the composer";
-    await openPerfWave(page);
-    await fixture.waitForSockets();
+    await prepare(page, fixture, openPerfWave);
     const composer = page
       .getByRole("textbox", { name: "Write a message" })
       .last();
@@ -371,7 +352,7 @@ test.describe("Chat render budget @auth @local-only", () => {
     await expect(post).toBeEnabled();
     await page.waitForTimeout(1500);
     await armChatPerf(page, {
-      trackRows: true,
+      track: true,
       submitLabel: "Post",
       ownText: content,
       names: REPORT_NAMES,
@@ -388,15 +369,19 @@ test.describe("Chat render budget @auth @local-only", () => {
     await page.waitForTimeout(SETTLE_MS);
     const after = await readChatPerf(page);
     expectProbeWorking(after);
-    expect(after.submitAt).not.toBeNull();
+    const { submitAt, ownRenderAt, ownFrameAt } = after;
+    if (submitAt === null)
+      throw new Error("submitAt not recorded: no click on the Post button.");
+    if (ownRenderAt === null || ownFrameAt === null)
+      throw new Error(`ownRenderAt not recorded for message "${content}".`);
     const requests = tracker.requests();
     expect(
       requests.filter((request) => request === "POST /api/drops")
     ).toHaveLength(1);
     await expect(page.getByText(content, { exact: true }).last()).toBeVisible();
     await attachNumbers(testInfo, "send", {
-      submitToRowMs: Math.round(after.ownRenderAt! - after.submitAt!),
-      submitToFrameMs: Math.round(after.ownFrameAt! - after.submitAt!),
+      submitToRowMs: Math.round(ownRenderAt - submitAt),
+      submitToFrameMs: Math.round(ownFrameAt - submitAt),
       renders: after.renders - before.renders,
       mounts: after.mounts - before.mounts,
       requestsAfterSend: requests.length,
