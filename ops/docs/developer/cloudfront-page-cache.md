@@ -393,7 +393,17 @@ aws ec2 authorize-security-group-ingress --group-id sg-06ef22abcfaf6c8df \
 ```
 
 Once #4685 is merged, `production-origin-lock.sh unlock` runs the same
-steps. To go back to Elastic Beanstalk's own group, do two things:
+steps. It also checks that a direct request without the header returns 200.
+Unlock opens port 80 as well, because after a DNS rollback the HTTP listener
+redirects `http://` visitors to HTTPS.
+
+To lock again after an unlock, run `production-origin-lock.sh apply`. Without
+the script, set the default action back to the 403 fixed response and revoke
+both `0.0.0.0/0` rules. Elastic Beanstalk never removes rules from a group
+attached as `ManagedSecurityGroup`. `apply` does this: it revokes the rules,
+checks that 443 from `pl-3b927c52` is the only inbound rule left, and verifies
+the listener at the origin (403 without the header, 200 with it) through a
+temporary rule for the machine running it. To go back to Elastic Beanstalk's own group, do two things:
 
 - Run `update-environment --options-to-remove` for both `aws:elbv2:loadbalancer`
   options. Elastic Beanstalk then recreates its default group, which allows 80
