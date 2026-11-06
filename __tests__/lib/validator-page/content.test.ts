@@ -117,12 +117,12 @@ describe("validator page text", () => {
     );
   });
 
-  it("shows rc.8's 20 known issues in order", () => {
+  it("shows rc.8's 21 known issues in order", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
+    expect(numbers).toEqual(Array.from({ length: 21 }, (_, i) => i + 1));
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
@@ -171,13 +171,20 @@ describe("validator page text", () => {
     expect(fold("known-issues")).toContain(
       `A new install must start before about ${FRESH_INSTALL_UNTIL}, and 0.1.0 stops signing on 1 December.`
     );
-    expect(knownIssue(19)).toContain(
-      `19. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
+    expect(knownIssue(20)).toContain(
+      `20. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
     );
     // rc.7's dates.
     expect(`${GUIDE}\n${VALIDATOR_KNOWN_ISSUES_MARKDOWN}`).not.toMatch(
       /2026-11-20 14:00|2026-11-04 21:42/
     );
+  });
+
+  it("says the day's total TDH is lower than 6529.io's until rc.9, with no holder's TDH different", () => {
+    expect(knownIssue(19)).toContain(
+      "19. A day's total TDH on the validator's pages is about 1.1 million lower than on 6529.io."
+    );
+    expect(knownIssue(19)).toContain("No holder's own TDH differs, and signing is not affected");
   });
 
   it("keeps the computer on for the hardware page's time, with no random wait (D161)", () => {
