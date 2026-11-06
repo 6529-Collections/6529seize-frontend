@@ -176,7 +176,7 @@ function DropImageGalleryModal({
         src={activeItem.src}
         imageRef={modalImageRef}
         onClose={onClose}
-        onOpen={localImage && isCapacitor ? undefined : openMedia}
+        onOpen={openMedia}
         openLabel={openLabel}
         onDownload={downloadMedia}
         isDownloading={isDownloading}

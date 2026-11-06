@@ -357,9 +357,6 @@ function DropListItemContentMediaImageContent({
       mimeType,
     });
 
-  // Decrypted blob URLs cannot leave their originating native WebView.
-  const openImage = localSource && isCapacitor ? undefined : openMedia;
-
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
   }, []);
@@ -598,7 +595,7 @@ function DropListItemContentMediaImageContent({
                   {(loaded || unavailable || canToggleOriginal) && (
                     <InlineMediaActions
                       variant="image"
-                      onOpen={openImage}
+                      onOpen={openMedia}
                       openLabel={openLabel}
                       onDownload={downloadMedia}
                       isDownloading={isDownloading}
@@ -636,7 +633,7 @@ function DropListItemContentMediaImageContent({
           src={src}
           imageRef={modalImageRef}
           onClose={() => handleCloseModal()}
-          onOpen={openImage}
+          onOpen={openMedia}
           openLabel={openLabel}
           onDownload={downloadMedia}
           isDownloading={isDownloading}

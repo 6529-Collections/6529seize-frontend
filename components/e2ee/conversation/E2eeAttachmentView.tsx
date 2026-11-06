@@ -167,12 +167,12 @@ function InlineImageContent(props: AttachmentProps) {
   }
   if (state === "loading" || !url) {
     return (
-      <span role="status" className="tw-relative tw-block tw-h-64 tw-w-full">
+      <output className="tw-relative tw-block tw-h-64 tw-w-full">
         <ImagePreviewLoading />
         <span className="tw-sr-only">
           {t(locale, "e2ee.message.attachment.loading")}
         </span>
-      </span>
+      </output>
     );
   }
   return (

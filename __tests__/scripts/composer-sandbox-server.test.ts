@@ -50,7 +50,6 @@ function loadSandbox(apiOnly?: string) {
     readFixture: (_pathname: string): unknown => undefined,
     mutateChat: (_edit: boolean, _res: unknown): unknown => undefined,
     Date,
-    structuredClone,
     require: requireFixture,
     __dirname: path.dirname(serverPath),
     Buffer,
