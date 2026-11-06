@@ -41,8 +41,9 @@ export default function AwsRumProvider({
   const pathname = usePathname();
   // RUM sets the cwr_u/cwr_s performance cookies, so it follows the same
   // performance consent as Google Analytics and Mixpanel.
-  const performanceConsent = useOptionalCookieConsent()?.performanceConsent;
-  const hasPerformanceConsent = hasAwsRumPerformanceConsent(performanceConsent);
+  const hasPerformanceConsent = hasAwsRumPerformanceConsent(
+    useOptionalCookieConsent()
+  );
   const latestPathnameRef = useRef(pathname);
   const awsRumRef = useRef<AwsRumInstance | undefined>(undefined);
   const lastRecordedPageIdRef = useRef<string | undefined>(undefined);

@@ -11,6 +11,7 @@ const MEDIA_URL = `https://media.example.cloudfront.net/renditions/drops/author_
 let mockPathname = `/waves/${WAVE_ID}`;
 let mockPerformanceConsent: boolean | undefined = true;
 let mockStoredPerformanceConsent: boolean | undefined = undefined;
+let mockHasConsentProvider = true;
 
 type MockPluginContext = {
   record: (eventType: string, eventData: object) => void;
@@ -22,9 +23,10 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useOptionalCookieConsent: () => ({
-    performanceConsent: mockPerformanceConsent,
-  }),
+  useOptionalCookieConsent: () =>
+    mockHasConsentProvider
+      ? { performanceConsent: mockPerformanceConsent }
+      : undefined,
   getCookieConsentByName: () => mockStoredPerformanceConsent,
 }));
 
@@ -160,6 +162,7 @@ describe("AwsRumProvider", () => {
     mockPathname = `/waves/${WAVE_ID}`;
     mockPerformanceConsent = true;
     mockStoredPerformanceConsent = undefined;
+    mockHasConsentProvider = true;
     mockAwsRum.mockClear();
     mockFetchPlugin.mockClear();
     mockXhrPlugin.mockClear();
@@ -632,6 +635,21 @@ describe("AwsRumProvider", () => {
       });
       expect(mockAwsRum).toHaveBeenCalledTimes(1);
       expect(getMockAwsRumInstance().disable).not.toHaveBeenCalled();
+    });
+
+    it("fails closed outside a cookie consent provider, even with a stored acceptance", async () => {
+      mockHasConsentProvider = false;
+      mockStoredPerformanceConsent = true;
+      setRumCookies();
+
+      render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
     });
 
     it("stops AWS RUM and deletes its cookies after a later rejection", async () => {
