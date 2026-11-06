@@ -29,6 +29,6 @@ export const fetchDropReactionDetailsV2 = async (
   } catch (error) {
     rethrowAbortFetchError(error);
     console.error("Failed to fetch Wave drop reaction details.", error);
-    return [];
+    throw error;
   }
 };
