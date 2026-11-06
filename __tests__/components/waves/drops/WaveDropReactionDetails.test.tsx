@@ -247,7 +247,9 @@ test("shares one in-flight details request between views of the same drop", asyn
   fireEvent.mouseEnter(chips[1]!);
   await waitFor(() => expect(fetchDetails).toHaveBeenCalledTimes(1));
   await act(async () => resolveDetails(details("alice")));
-  for (const button of chips) expect(button).toHaveTextContent("1: alice");
+  await waitFor(() => {
+    for (const button of chips) expect(button).toHaveTextContent("1: alice");
+  });
 });
 
 test("does not show the previous viewer's cached list after an account switch", async () => {
