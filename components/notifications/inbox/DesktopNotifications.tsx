@@ -36,9 +36,11 @@ const Inbox = dynamic(() => import("./NotificationsInbox"), {
 export default function DesktopNotifications({
   collapsed,
   unread,
+  pathname,
 }: {
   readonly collapsed: boolean;
   readonly unread: boolean;
+  readonly pathname: string | null;
 }) {
   const locale = useBrowserLocale();
   const title = t(locale, "notifications.inbox.title");
@@ -48,7 +50,12 @@ export default function DesktopNotifications({
   const panelRef = useRef<HTMLElement>(null);
   const focusPanelRef = useRef(false);
   const keyboardFocusRef = useRef(false);
-  const [open, setOpen] = useState(false);
+  // Reset route-scoped preview state without replacing the hovered link.
+  const [preview, setPreview] = useState({ pathname, open: false });
+  const open = preview.pathname === pathname && preview.open;
+  if (preview.pathname !== pathname) {
+    setPreview({ pathname, open: false });
+  }
   const [position, setPosition] = useState({ left: 0, bottom: 16 });
   const { schedule: scheduleOpen, cancel: cancelOpen } = useHoverIntent(
     SIDEBAR_HOVER_OPEN_DELAY_MS
@@ -63,7 +70,9 @@ export default function DesktopNotifications({
       cancelClose();
       focusPanelRef.current = false;
       keyboardFocusRef.current = false;
-      setOpen(false);
+      setPreview((current) =>
+        current.open ? { ...current, open: false } : current
+      );
       if (restoreFocus) triggerRef.current?.focus();
     },
     [cancelOpen, cancelClose]
@@ -76,6 +85,13 @@ export default function DesktopNotifications({
         panelRef.current?.contains(target) === true),
     []
   );
+
+  useEffect(() => {
+    cancelOpen();
+    cancelClose();
+    focusPanelRef.current = false;
+    keyboardFocusRef.current = false;
+  }, [cancelOpen, cancelClose, pathname]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -177,7 +193,7 @@ export default function DesktopNotifications({
         onPointerEnter={(event) => {
           if (event.pointerType !== "mouse") return;
           cancelClose();
-          if (!open) scheduleOpen(() => setOpen(true));
+          if (!open) scheduleOpen(() => setPreview({ pathname, open: true }));
         }}
         onPointerLeave={handlePointerLeave}
         onBlur={handleBlur}
@@ -191,7 +207,7 @@ export default function DesktopNotifications({
           if (open) panelRef.current?.focus();
           else {
             focusPanelRef.current = true;
-            setOpen(true);
+            setPreview({ pathname, open: true });
           }
         }}
         className="tw-flex tw-h-[2.875rem] tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
