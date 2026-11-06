@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
+import { createWaveUnreadStore } from "@/contexts/wave/hooks/waveUnreadStore";
 import { AuthContext } from "@/components/auth/Auth";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
@@ -24,6 +25,23 @@ const waves = [
   { id: "wave1", metrics: { latest_drop_timestamp: 10 } },
   { id: "wave2", metrics: { latest_drop_timestamp: 20 } },
 ] as any;
+
+/** The hook with a store of its own; returns the store with the result. */
+function useTestNewDropCounter(
+  activeWaveId: string | null,
+  testWaves: Parameters<typeof useNewDropCounter>[1],
+  refetchWaves: () => void,
+  options: Omit<Parameters<typeof useNewDropCounter>[3], "store"> = {}
+) {
+  const [unreadStore] = React.useState(createWaveUnreadStore);
+  return {
+    ...useNewDropCounter(activeWaveId, testWaves, refetchWaves, {
+      ...options,
+      store: unreadStore,
+    }),
+    unreadStore,
+  };
+}
 
 let wsCallback: any;
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -101,7 +119,7 @@ describe("useNewDropCounter", () => {
   it("leaves collapsed reply counts and timestamps unchanged but counts new announcements", () => {
     const { result } = renderHook(
       () =>
-        useNewDropCounter(
+        useTestNewDropCounter(
           null,
           [{ ...waves[1], repliesCollapsed: true }],
           jest.fn()
@@ -109,9 +127,13 @@ describe("useNewDropCounter", () => {
       { wrapper }
     );
     emitDropUpdate({ isReply: true });
-    expect(result.current.newDropsCounts["wave2"]).toBeUndefined();
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["wave2"]
+    ).toBeUndefined();
     emitDropUpdate({ serialNo: 10 });
-    expect(result.current.newDropsCounts["wave2"]).toMatchObject({
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["wave2"]
+    ).toMatchObject({
       count: 1,
       latestDropTimestamp: 30,
     });
@@ -119,11 +141,13 @@ describe("useNewDropCounter", () => {
 
   it("keeps counting inline replies", () => {
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, jest.fn()),
+      () => useTestNewDropCounter(null, waves, jest.fn()),
       { wrapper }
     );
     emitDropUpdate({ isReply: true, serialNo: 11 });
-    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      1
+    );
   });
 
   it.each([true, false])(
@@ -138,7 +162,7 @@ describe("useNewDropCounter", () => {
       });
       const { result } = renderHook(
         () =>
-          useNewDropCounter(
+          useTestNewDropCounter(
             null,
             [{ ...waves[1], repliesCollapsed: true }],
             jest.fn()
@@ -160,11 +184,12 @@ describe("useNewDropCounter", () => {
       });
       // Fetch completion can precede the hook's committed state update.
       await waitFor(() => {
-        expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
-          isReply ? 0 : 1
-        );
         expect(
-          result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
+          result.current.unreadStore.getNewDropsCounts()["wave2"]?.count ?? 0
+        ).toBe(isReply ? 0 : 1);
+        expect(
+          result.current.unreadStore.getNewDropsCounts()["wave2"]
+            ?.latestDropTimestamp ?? null
         ).toBe(isReply ? null : 40);
       });
     }
@@ -191,7 +216,7 @@ describe("useNewDropCounter", () => {
     );
     const { result, rerender } = renderHook(
       () =>
-        useNewDropCounter(
+        useTestNewDropCounter(
           null,
           [{ ...waves[1], repliesCollapsed: true }],
           jest.fn()
@@ -214,37 +239,48 @@ describe("useNewDropCounter", () => {
         serial_no: 13,
       });
     });
-    expect(result.current.newDropsCounts["wave2"]).toBeUndefined();
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["wave2"]
+    ).toBeUndefined();
   });
 
   it("increments counts and resets all", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, refetch),
+      () => useTestNewDropCounter(null, waves, refetch),
       { wrapper }
     );
     emitDropUpdate();
-    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
-    expect(result.current.newDropsCounts["wave2"]?.latestDropTimestamp).toBe(
-      30
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      1
     );
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["wave2"]
+        ?.latestDropTimestamp
+    ).toBe(30);
     act(() => {
       result.current.resetAllWavesNewDropsCount();
     });
-    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
-    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+    expect(result.current.unreadStore.getNewDropsCounts()["wave1"]?.count).toBe(
+      0
+    );
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      0
+    );
   });
 
   it("does not increment counts for poll response updates", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, refetch),
+      () => useTestNewDropCounter(null, waves, refetch),
       { wrapper }
     );
 
     emitDropUpdate({ reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE });
 
-    expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(0);
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["wave2"]?.count ?? 0
+    ).toBe(0);
     expect(refetch).not.toHaveBeenCalled();
   });
 
@@ -252,7 +288,7 @@ describe("useNewDropCounter", () => {
     const refetch = jest.fn();
     jest.spyOn(Date, "now").mockReturnValue(1234);
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, refetch),
+      () => useTestNewDropCounter(null, waves, refetch),
       { wrapper }
     );
 
@@ -277,7 +313,7 @@ describe("useNewDropCounter", () => {
       reason: "AUTHOR_EDIT",
     });
 
-    expect(result.current.newDropsCounts["wave2"]).toEqual({
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]).toEqual({
       count: 1,
       latestDropTimestamp: 1234,
       firstUnreadSerialNo: 22,
@@ -296,7 +332,7 @@ describe("useNewDropCounter", () => {
     jest.spyOn(Date, "now").mockReturnValue(2345);
     const { result } = renderHook(
       () =>
-        useNewDropCounter(null, waves, refetch, {
+        useTestNewDropCounter(null, waves, refetch, {
           otherListWaveIds: new Set(),
         }),
       { wrapper }
@@ -310,7 +346,9 @@ describe("useNewDropCounter", () => {
     });
 
     await waitFor(() =>
-      expect(result.current.newDropsCounts["unknown-wave"]).toEqual({
+      expect(
+        result.current.unreadStore.getNewDropsCounts()["unknown-wave"]
+      ).toEqual({
         count: 1,
         latestDropTimestamp: 2345,
         firstUnreadSerialNo: 23,
@@ -323,7 +361,7 @@ describe("useNewDropCounter", () => {
     const refetch = jest.fn();
     jest.spyOn(Date, "now").mockReturnValue(3456);
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, refetch),
+      () => useTestNewDropCounter(null, waves, refetch),
       { wrapper }
     );
 
@@ -335,7 +373,7 @@ describe("useNewDropCounter", () => {
       update_type: WsMessageType.DROP_UPDATE,
     });
 
-    expect(result.current.newDropsCounts["wave2"]).toEqual({
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]).toEqual({
       count: 0,
       latestDropTimestamp: 3456,
       firstUnreadSerialNo: null,
@@ -346,7 +384,7 @@ describe("useNewDropCounter", () => {
   it("does not process websocket updates or resets while disabled", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
-      () => useNewDropCounter(null, waves, refetch, { enabled: false }),
+      () => useTestNewDropCounter(null, waves, refetch, { enabled: false }),
       { wrapper }
     );
 
@@ -356,15 +394,33 @@ describe("useNewDropCounter", () => {
       result.current.resetWaveNewDropsCount("wave2");
     });
 
-    expect(result.current.newDropsCounts).toEqual({});
+    expect(result.current.unreadStore.getNewDropsCounts()).toEqual({});
     expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("clears live counts when turned back on", () => {
+    const { result, rerender } = renderHook(
+      ({ enabled }) =>
+        useTestNewDropCounter(null, waves, jest.fn(), { enabled }),
+      { wrapper, initialProps: { enabled: true } }
+    );
+
+    emitDropUpdate();
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      1
+    );
+
+    rerender({ enabled: false });
+    rerender({ enabled: true });
+
+    expect(result.current.unreadStore.getNewDropsCounts()).toEqual({});
   });
 
   it("updates muted wave timestamps without unread counts", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(
       ({ muted }) =>
-        useNewDropCounter(
+        useTestNewDropCounter(
           null,
           [...waves, { id: "muted-wave", muted }],
           refetch
@@ -373,7 +429,9 @@ describe("useNewDropCounter", () => {
     );
 
     emitDropUpdate({ createdAt: 60, serialNo: 5, waveId: "muted-wave" });
-    expect(result.current.newDropsCounts["muted-wave"]).toEqual({
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["muted-wave"]
+    ).toEqual({
       count: 1,
       latestDropTimestamp: 60,
       firstUnreadSerialNo: 5,
@@ -383,7 +441,9 @@ describe("useNewDropCounter", () => {
 
     emitDropUpdate({ createdAt: 70, serialNo: 6, waveId: "muted-wave" });
 
-    expect(result.current.newDropsCounts["muted-wave"]).toEqual({
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["muted-wave"]
+    ).toEqual({
       count: 0,
       latestDropTimestamp: 70,
       firstUnreadSerialNo: null,
@@ -393,21 +453,27 @@ describe("useNewDropCounter", () => {
 
   it("ignores messages from connected profile and resets on active change", () => {
     const { result, rerender } = renderHook(
-      ({ activeId }) => useNewDropCounter(activeId, waves, jest.fn()),
+      ({ activeId }) => useTestNewDropCounter(activeId, waves, jest.fn()),
       { wrapper, initialProps: { activeId: "wave1" } }
     );
-    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
+    expect(result.current.unreadStore.getNewDropsCounts()["wave1"]?.count).toBe(
+      0
+    );
     emitDropUpdate({ authorHandle: "me", createdAt: 50, waveId: "wave1" });
-    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
+    expect(result.current.unreadStore.getNewDropsCounts()["wave1"]?.count).toBe(
+      0
+    );
     rerender({ activeId: "wave2" });
-    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      0
+    );
   });
 
   it("skips unknown-wave refetch when wave exists in opposite list", () => {
     const refetch = jest.fn();
     renderHook(
       () =>
-        useNewDropCounter(null, waves, refetch, {
+        useTestNewDropCounter(null, waves, refetch, {
           otherListWaveIds: new Set(["main-wave"]),
         }),
       { wrapper }
@@ -422,7 +488,7 @@ describe("useNewDropCounter", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
       () =>
-        useNewDropCounter(null, waves, refetch, {
+        useTestNewDropCounter(null, waves, refetch, {
           otherListWaveIds: new Set(),
         }),
       { wrapper }
@@ -434,7 +500,9 @@ describe("useNewDropCounter", () => {
       waveId: "unknown-own-wave",
     });
 
-    expect(result.current.newDropsCounts["unknown-own-wave"]).toEqual({
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["unknown-own-wave"]
+    ).toEqual({
       count: 0,
       latestDropTimestamp: 55,
       firstUnreadSerialNo: null,
@@ -446,7 +514,7 @@ describe("useNewDropCounter", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
       () =>
-        useNewDropCounter("unknown-active-wave", waves, refetch, {
+        useTestNewDropCounter("unknown-active-wave", waves, refetch, {
           otherListWaveIds: new Set(),
         }),
       { wrapper }
@@ -458,7 +526,9 @@ describe("useNewDropCounter", () => {
       waveId: "unknown-active-wave",
     });
 
-    expect(result.current.newDropsCounts["unknown-active-wave"]).toEqual({
+    expect(
+      result.current.unreadStore.getNewDropsCounts()["unknown-active-wave"]
+    ).toEqual({
       count: 0,
       latestDropTimestamp: 56,
       firstUnreadSerialNo: null,
@@ -473,7 +543,7 @@ describe("useNewDropCounter", () => {
 
     renderHook(
       () =>
-        useNewDropCounter(null, waves, refetch, {
+        useTestNewDropCounter(null, waves, refetch, {
           otherListWaveIds: new Set(),
           unknownWaveRefetchCooldownMs: 3000,
         }),

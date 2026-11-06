@@ -51,6 +51,7 @@ import {
   useWaveSubmissionButtonLabelOverride,
 } from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveUnread } from "@/contexts/wave/WaveUnreadContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import {
@@ -199,16 +200,18 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     });
   }, [updateEligibility, wave]);
 
-  // Get enhanced data from the waves list (has correct WS-updated values)
-  const enhancedData = useMemo(() => {
-    const waveFromList =
+  // The list row's live unread values (socket counts on top of the server's).
+  const waveFromList = useMemo(
+    () =>
       waves.list.find((w) => w.id === waveId) ??
-      directMessages.list.find((w) => w.id === waveId);
-    return {
-      newDropsCount: waveFromList?.newDropsCount.count ?? 0,
-      firstUnreadSerialNo: waveFromList?.firstUnreadDropSerialNo ?? null,
-    };
-  }, [waves.list, directMessages.list, waveId]);
+      directMessages.list.find((w) => w.id === waveId),
+    [waves.list, directMessages.list, waveId]
+  );
+  const liveWaveFromList = useWaveUnread(waveFromList);
+  const enhancedData = {
+    newDropsCount: liveWaveFromList?.newDropsCount.count ?? 0,
+    firstUnreadSerialNo: liveWaveFromList?.firstUnreadDropSerialNo ?? null,
+  };
 
   const newDropsCount = enhancedData.newDropsCount;
   const currentWaveId = wave?.id ?? null;
@@ -232,7 +235,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, availableTabs, setActiveContentTab } = useContentTab();
+  const { activeContentTab, availableTabs, setActiveContentTab } =
+    useContentTab();
   const activeCurationId = competitionOnly
     ? null
     : searchParams.get("curation");

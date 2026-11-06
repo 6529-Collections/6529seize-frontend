@@ -151,7 +151,7 @@ function applyEffectiveAppPrCiPlan(plan) {
       // The chat hot path: this pack's chat render budget
       // (chat-render-budget-sandbox.spec.ts) measures renders and requests
       // per received message for each of these.
-      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/chat-render-budget-sandbox\.spec\.ts$)/u.test(
+      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/(?:chat-render-budget|wave-live-unread)-sandbox\.spec\.ts$)/u.test(
         file
       ) ||
       [
