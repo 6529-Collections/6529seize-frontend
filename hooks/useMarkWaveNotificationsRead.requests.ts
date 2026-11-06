@@ -270,6 +270,9 @@ const sendWaveReadRequest = async (
     });
     sendableIntents.forEach((intent) => intent.onReadResponse?.(response));
   }
+  // Only a live read of the open wave opts out of the wave-list refetch; any
+  // other read (undefined: the default) can change list unread counts. A
+  // merged batch refreshes the lists when any of its reads needs it.
   invalidateNotificationsRef.current({
     refreshWaveLists: sendableIntents.some(
       (intent) => intent.refreshWaveLists !== false

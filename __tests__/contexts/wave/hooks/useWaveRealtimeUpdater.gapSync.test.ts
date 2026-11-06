@@ -151,7 +151,15 @@ const makeProps = (store: Store) => ({
   getData: (key: string) => store[key] as never,
   updateData: jest.fn((update: WaveMessagesUpdate) => {
     const current = store[update.key];
-    if (!current || !update.drops) return;
+    if (!current) return;
+    // Like the store, the verified serial only moves forward.
+    if (typeof update.latestFetchedSerialNo === "number") {
+      current.latestFetchedSerialNo = Math.max(
+        current.latestFetchedSerialNo ?? update.latestFetchedSerialNo,
+        update.latestFetchedSerialNo
+      );
+    }
+    if (!update.drops) return;
     const byId = new Map(current.drops.map((drop) => [drop.id, drop]));
     for (const drop of update.drops) byId.set(drop.id, drop as ExtendedDrop);
     current.drops = [...byId.values()].sort(
@@ -297,10 +305,120 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
       );
     });
 
-    it("does not schedule a check for an update to a stored drop", async () => {
+    // One rule: every socket message that changes a stored wave schedules
+    // the check, whichever branch handles it, so a lost frame followed only
+    // by updates is still repaired.
+    it("schedules the check for an update to a stored drop", async () => {
       const { props } = setup();
 
       await emit(WsMessageType.DROP_UPDATE, frameDrop(10, { id: "stored-10" }));
+      expect(props.syncNewestMessages).not.toHaveBeenCalled();
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(1);
+      expect(props.syncNewestMessages).toHaveBeenCalledWith(
+        WAVE,
+        10,
+        expect.any(AbortSignal)
+      );
+    });
+
+    it.each([
+      [WsMessageType.DROP_REACTION_UPDATE, "stored-10"],
+      [WsMessageType.DROP_RATING_UPDATE, "stored-10"],
+      // The store lacks this drop: it may follow a lost frame.
+      [WsMessageType.DROP_REACTION_UPDATE, "frame-12"],
+      [WsMessageType.DROP_RATING_UPDATE, "frame-12"],
+    ])("schedules the check for a %s of %s", async (type, dropId) => {
+      const { props } = setup();
+      fetchDropByIdBatched.mockResolvedValue({
+        ...storedDrop(10),
+        id: dropId,
+      });
+
+      await emit(type, frameDrop(12, { id: dropId }));
+      await advance(0);
+      expect(props.syncNewestMessages).not.toHaveBeenCalled();
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(1);
+      expect(props.syncNewestMessages).toHaveBeenCalledWith(
+        WAVE,
+        10,
+        expect.any(AbortSignal)
+      );
+    });
+
+    it("schedules the check for a full update of a drop known only from a compact ref", async () => {
+      const { props, store } = setup();
+      fetchDropByIdBatched.mockResolvedValue({
+        ...frameDrop(11),
+        wave: viewerWave,
+      });
+      await emit(WsMessageType.DROP_UPDATE_REF, {
+        drop_id: "frame-11",
+        wave_id: WAVE,
+        author_id: "author-b",
+        serial_no: 11,
+        update_type: WsMessageType.DROP_UPDATE,
+      });
+      await advance(0);
+      // The ref itself fetches at once; its drop is now stored.
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(1);
+      expect(store[WAVE]!.drops.map((drop) => drop.id)).toContain("frame-11");
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(2);
+    });
+
+    it("fetches the newest page when no fetch has verified a serial yet", async () => {
+      // Socket drops never stand in for a verified serial.
+      const { props } = setup({
+        [WAVE]: { drops: [storedDrop(10)], latestFetchedSerialNo: null },
+      });
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+
+      expect(props.syncNewestMessages).not.toHaveBeenCalled();
+      expect(props.registerWave).toHaveBeenCalledWith(WAVE, true);
+    });
+
+    it("checks a drop stored while the server-rendered feed was pending", async () => {
+      const store: Store = {};
+      const { props } = setup(store);
+      props.hasServerFeedSeed.mockReturnValue(true);
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      expect(props.updateData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: WAVE,
+          drops: [expect.objectContaining({ id: "frame-11" })],
+        })
+      );
+
+      // Still pending at the first check: it waits and checks again.
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+      expect(props.syncNewestMessages).not.toHaveBeenCalled();
+
+      store[WAVE] = { drops: [storedDrop(10)], latestFetchedSerialNo: 10 };
+      props.hasServerFeedSeed.mockReturnValue(false);
+      await advance(CHAT_GAP_TRAILING_CHECK_MS);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledWith(
+        WAVE,
+        10,
+        expect.any(AbortSignal)
+      );
+    });
+
+    it("stops scheduled checks on unmount", async () => {
+      const { props, unmount } = setup();
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      unmount();
       await advance(CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS);
 
       expect(props.syncNewestMessages).not.toHaveBeenCalled();
@@ -428,6 +546,73 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
 
       expect(props.syncNewestMessages).toHaveBeenCalledTimes(2);
     });
+  });
+
+  describe("convergence under lossy delivery", () => {
+    // Deterministic PRNG (mulberry32), so a failing seed reproduces.
+    const random = (seed: number) => {
+      let state = seed >>> 0;
+      return () => {
+        state = (state + 0x6d2b79f5) >>> 0;
+        let t = state;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    it.each([1, 7, 42, 1234, 99999])(
+      "matches the server after loss, duplication and reordering (seed %i)",
+      async (seed) => {
+        const next = random(seed);
+        const N = 40;
+        const serverDrops = Array.from({ length: N }, (_, index) =>
+          frameDrop(11 + index)
+        );
+        const { props, store } = setup();
+        props.syncNewestMessages.mockImplementation(async (_waveId, since) => {
+          const drops = serverDrops
+            .filter((drop) => drop.serial_no > since)
+            .map((drop) => ({ ...drop, wave: viewerWave }) as ApiDrop);
+          return {
+            drops,
+            highestSerialNo: Math.max(since, ...drops.map((d) => d.serial_no)),
+          };
+        });
+
+        // Lose about 20%, duplicate about 15%, then swap neighbours.
+        const deliveries: ApiDrop[] = [];
+        for (const drop of serverDrops) {
+          if (next() < 0.2) continue;
+          deliveries.push(drop);
+          if (next() < 0.15) deliveries.push(drop);
+        }
+        for (let index = 1; index < deliveries.length; index++) {
+          if (next() < 0.3) {
+            [deliveries[index - 1], deliveries[index]] = [
+              deliveries[index]!,
+              deliveries[index - 1]!,
+            ];
+          }
+        }
+
+        for (const drop of deliveries) {
+          await emit(WsMessageType.DROP_UPDATE, drop);
+          await advance(Math.floor(next() * 400));
+        }
+        await advance(CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS * 2);
+
+        expect(
+          store[WAVE]!.drops.map((drop) => drop.id)
+            .filter((id) => id !== "stored-10")
+            .sort()
+        ).toEqual(serverDrops.map((drop) => drop.id).sort());
+        // Far fewer fetches than delivered frames.
+        expect(props.syncNewestMessages.mock.calls.length).toBeLessThan(
+          deliveries.length / 4
+        );
+      }
+    );
   });
 
   describe("viewer context of socket drops", () => {
