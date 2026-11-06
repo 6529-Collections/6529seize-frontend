@@ -330,6 +330,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
   test("opens all fields on wide touch and hybrid screens", async ({
     page,
     isMobile,
+    browserName,
   }, testInfo) => {
     if (!isMobile)
       await page.addInitScript(() => {
@@ -455,8 +456,16 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     expect(memeBox?.height).toBeGreaterThanOrEqual(44);
     expect(memeBox?.width).toBeCloseTo(uploadBox!.width, 0);
     await page.getByLabel("Background Color 1", { exact: true }).focus();
-    await page.keyboard.press("Tab");
+    // WebKit uses Option-Tab to include native clickable controls.
+    await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
     const secondColor = page.getByLabel("Background Color 2", { exact: true });
+    if (browserName === "webkit") {
+      // Native color wells are skipped in WebKit's sequential focus order:
+      // https://bugs.webkit.org/show_bug.cgi?id=194756
+      await expect(memeChoice).toBeFocused();
+      // Keep keyboard modality while checking the native control's outline.
+      await secondColor.focus();
+    }
     await expect(secondColor).toBeFocused();
     await expect(secondColor).toHaveCSS("outline-style", "solid");
     await expect(secondColor).toHaveCSS("outline-width", "2px");
