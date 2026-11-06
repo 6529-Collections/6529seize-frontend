@@ -71,8 +71,9 @@ function serialize(value: unknown, path: string): string {
     case "symbol":
     case "undefined":
     case "function":
-      throw new TypeError(`Unsupported ${typeof value} at ${path}`);
+      break;
   }
+  throw new TypeError(`Unsupported ${typeof value} at ${path}`);
 }
 
 export function canonicalJson(value: unknown): string {
