@@ -41,6 +41,7 @@ import {
   UI_TIMEOUT_MS,
 } from "../support/staging-e2ee/session";
 import {
+  attachFile,
   composer,
   expectDecrypted,
   expectNothingUndecryptable,
@@ -415,19 +416,29 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const { a, b, runId } = current;
     const dm = await ensureDm(current);
     const image = createQaImage(runId);
+    const droppedName = `dropped-${image.name}`;
     const caption = qaMessage(runId, "image caption");
 
     await openChat(a, dm);
-    await dropEncryptedAttachment(a.page, {
+    await attachFile(a, {
       name: image.name,
+      mimeType: "image/png",
+      buffer: image.buffer,
+    });
+    await dropEncryptedAttachment(a.page, {
+      name: droppedName,
       mimeType: "image/png",
       base64: image.buffer.toString("base64"),
     });
     await sendEncrypted(a, caption);
-    const altText = `Image: ${image.name}`;
-    await expect(
-      messageRow(a.page, caption).getByRole("img", { name: altText })
-    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    for (const filename of [image.name, droppedName]) {
+      await expect(
+        messageRow(a.page, caption).getByRole("img", {
+          name: `Image: ${filename}`,
+          exact: true,
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    }
     expect(
       a.evidence.requestsMatching(
         "PUT",
@@ -438,19 +449,22 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     await openChat(b, dm);
     await expectDecrypted(b, caption);
-    const received = messageRow(b.page, caption).getByRole("img", {
-      name: altText,
-    });
-    await expect(received).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
-    const pixels = await imagePixels(received);
-    expect(pixels).toHaveLength(image.rgba.length);
-    pixels.forEach((value, index) => {
-      expect(
-        Math.abs(value - (image.rgba[index] ?? -1)),
-        `decrypted pixel byte ${index} differs`
-      ).toBeLessThanOrEqual(2);
-    });
-    await checkEncryptedImageActions(b.page, received, image.name);
+    for (const filename of [image.name, droppedName]) {
+      const received = messageRow(b.page, caption).getByRole("img", {
+        name: `Image: ${filename}`,
+        exact: true,
+      });
+      await expect(received).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      const pixels = await imagePixels(received);
+      expect(pixels).toHaveLength(image.rgba.length);
+      pixels.forEach((value, index) => {
+        expect(
+          Math.abs(value - (image.rgba[index] ?? -1)),
+          `decrypted pixel byte ${index} differs`
+        ).toBeLessThanOrEqual(2);
+      });
+      await checkEncryptedImageActions(b.page, received, filename);
+    }
     await expectNothingUndecryptable(b);
 
     expectPrivateAndClean(
@@ -458,6 +472,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({
         caption,
         fileName: image.name,
+        droppedFileName: droppedName,
         imageMarker: image.marker,
         imageBytes: image.buffer,
       })

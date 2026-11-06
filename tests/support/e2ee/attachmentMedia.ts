@@ -67,6 +67,11 @@ export async function checkEncryptedImageActions(
   await expect(
     page
       .getByRole("button", { name: "Open image preview", exact: true })
-      .filter({ has: image })
+      .filter({
+        has: page.getByRole("img", {
+          name: `Image: ${filename}`,
+          exact: true,
+        }),
+      })
   ).toBeFocused();
 }

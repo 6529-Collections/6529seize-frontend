@@ -287,7 +287,8 @@ Opt-in stateful staging packs:
   sign-in grants both permissions (NC8). A new user who already has a
   Signed Posts grant signs one EIP-712 `MlsDeviceGrant` from the enrollment
   card and keeps their existing Signed Posts grant. The spec covers a DM in
-  both directions, an image attachment through the blob store, a group with a
+  both directions, file-picked and dropped images through the blob store,
+  image popup dismissal, downloads and focus return, a group with a
   third user and a revoked second device that can no longer read new messages.
   It also checks sender profile links and levels, plus DM header profile
   links. Its privacy checks ensure no request URL, body or sent WebSocket
