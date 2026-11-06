@@ -1,3 +1,4 @@
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryClient } from "@tanstack/react-query";
 import {
   addDropToDrops,
@@ -179,3 +180,76 @@ test("skips media-only caches when a websocket drop omits parts", () => {
     "partial-websocket-drop"
   );
 });
+
+test("keeps a newer REST snapshot when an older websocket edit arrives", () => {
+  const queryClient = new QueryClient();
+  const key = [QueryKey.DROPS, { waveId: "w", context: "wave-drops" }];
+  const current = { id: "d", wave: { id: "w" }, updated_at: 200, parts: [] };
+  const original = { pages: [{ drops: [current] }] };
+  queryClient.setQueryData(key, original);
+  upsertDropIntoMatchingDropsQueries(queryClient, {
+    drop: Object.assign(new ApiDrop(), current, { updated_at: 100 }),
+  });
+  expect(queryClient.getQueryData(key)).toEqual(original);
+});
+
+test.each([100, 200])(
+  "checks all matching caches before inserting revision %s",
+  (updated_at) => {
+    const queryClient = new QueryClient();
+    const emptyKey = [QueryKey.DROPS, { waveId: "w", limit: 20 }];
+    const newerKey = [QueryKey.DROPS, { waveId: "w", limit: 50 }];
+    const empty = { pages: [{ drops: [] }] };
+    const current = Object.assign(new ApiDrop(), {
+      id: "d",
+      wave: { id: "w" },
+      updated_at: 200,
+      parts: [],
+    });
+    // Register the empty cache first: no mutation may precede the revision check.
+    queryClient.setQueryData(emptyKey, empty);
+    queryClient.setQueryData(newerKey, { pages: [{ drops: [current] }] });
+    const incoming = Object.assign(new ApiDrop(), current, { updated_at });
+    upsertDropIntoMatchingDropsQueries(queryClient, { drop: incoming });
+    expect(queryClient.getQueryData(emptyKey)).toEqual(
+      updated_at < 200 ? empty : { pages: [{ drops: [incoming] }] }
+    );
+    expect(queryClient.getQueryData(newerKey)).toEqual({
+      pages: [{ drops: [current] }],
+    });
+  }
+);
+
+test.each([100, 200, 300])(
+  "checks nonmatching media caches before inserting revision %s",
+  (updated_at) => {
+    const queryClient = new QueryClient();
+    const emptyKey = [QueryKey.DROPS, { waveId: "w" }];
+    const mediaKey = [QueryKey.DROPS, { waveId: "w", containsMedia: true }];
+    const empty = { pages: [{ drops: [] }] };
+    const current = Object.assign(new ApiDrop(), {
+      id: "d",
+      wave: { id: "w" },
+      updated_at: 200,
+      parts: [
+        {
+          media: [
+            { url: "https://example.com/image.png", mime_type: "image/png" },
+          ],
+        },
+      ],
+    });
+    const mediaData = { pages: [{ drops: [current] }] };
+    queryClient.setQueryData(emptyKey, empty);
+    queryClient.setQueryData(mediaKey, mediaData);
+    const incoming = Object.assign(new ApiDrop(), current, {
+      updated_at,
+      parts: [],
+    });
+    upsertDropIntoMatchingDropsQueries(queryClient, { drop: incoming });
+    expect(queryClient.getQueryData(emptyKey)).toEqual(
+      updated_at < 200 ? empty : { pages: [{ drops: [incoming] }] }
+    );
+    expect(queryClient.getQueryData(mediaKey)).toEqual(mediaData);
+  }
+);

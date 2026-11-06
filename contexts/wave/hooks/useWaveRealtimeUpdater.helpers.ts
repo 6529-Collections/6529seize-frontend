@@ -240,6 +240,7 @@ const shouldApplyCanonicalDrop = (
 };
 
 interface CanonicalDropUpdateParams {
+  readonly canApplyDrop?: (drop: ApiDrop) => boolean;
   readonly dropId: string;
   readonly existingDrop: ExtendedDrop;
   readonly waveId: string;
@@ -250,6 +251,7 @@ interface CanonicalDropUpdateParams {
 }
 
 const applyCanonicalDropUpdate = async ({
+  canApplyDrop,
   dropId,
   existingDrop,
   waveId,
@@ -259,6 +261,7 @@ const applyCanonicalDropUpdate = async ({
   updateData,
 }: CanonicalDropUpdateParams): Promise<void> => {
   const apiDrop = options.canonicalDrop ?? (await fetchDropByIdBatched(dropId));
+  if (canApplyDrop && !canApplyDrop(apiDrop)) return;
   const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledApiDrop =
     preferExistingPollVote === undefined

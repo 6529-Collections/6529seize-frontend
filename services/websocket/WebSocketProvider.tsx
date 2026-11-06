@@ -315,15 +315,13 @@ export function WebSocketProvider({
       setStatus(WebSocketStatus.CONNECTING);
 
       try {
-        // Advertise reconnect safety on every connection, including anonymous sessions.
+        // Public capabilities only; authentication remains message-based.
         const url = new URL(config.url);
+        url.searchParams.set("delivery_capability", "durable_updates_v1");
         url.searchParams.set(
           "recovery_capability",
           WEBSOCKET_RECOVERY_CAPABILITY
         );
-        if (token && !useMessageAuth) {
-          url.searchParams.set("token", token);
-        }
         // Create new WebSocket connection
         const ws = new WebSocket(url.toString());
 

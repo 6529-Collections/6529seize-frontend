@@ -119,6 +119,23 @@ describe("patchFromMediaLinkUpdate", () => {
     ...overrides,
   });
 
+  it("does not roll a newer NFT preview back to an older queued snapshot", () => {
+    const current = createCurrentData({
+      title: "Newer",
+      price: "2",
+      lastSuccessfullyUpdatedMs: 1771516352000,
+    });
+    const patched = patchFromMediaLinkUpdate({
+      current,
+      update: createMediaLinkUpdatedPayload({
+        name: "Older",
+        price: "1",
+        last_successfully_updated: "1771516351000",
+      }),
+    });
+    expect(patched).toBe(current);
+  });
+
   it("prefers preview urls from websocket payload over media_uri", () => {
     const patched = patchFromMediaLinkUpdate({
       current: createCurrentData(),
@@ -203,12 +220,29 @@ describe("patchFromMediaLinkUpdate", () => {
         lastSuccessfullyUpdatedMs: 1735689600000,
         failedSinceMs: 1735689700000,
       }),
-      update: createMediaLinkUpdatedPayload(),
+      update: createMediaLinkUpdatedPayload({
+        last_successfully_updated: 1735689600000,
+      }),
     });
 
     expect(patched.lastErrorMessage).toBeNull();
-    expect(patched.lastSuccessfullyUpdatedMs).toBeNull();
+    expect(patched.lastSuccessfullyUpdatedMs).toBe(1735689600000);
     expect(patched.failedSinceMs).toBeNull();
+  });
+
+  it("ignores a delayed unresolved NFT snapshot after a successful refresh", () => {
+    const current = createCurrentData({
+      lastSuccessfullyUpdatedMs: 1735689600000,
+    });
+    expect(
+      patchFromMediaLinkUpdate({
+        current,
+        update: createMediaLinkUpdatedPayload({
+          last_successfully_updated: null,
+          name: "old unresolved name",
+        }),
+      })
+    ).toBe(current);
   });
 });
 

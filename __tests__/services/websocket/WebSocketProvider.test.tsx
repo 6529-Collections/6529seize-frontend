@@ -124,6 +124,35 @@ describe("WebSocketProvider", () => {
     jest.useRealTimers();
   });
 
+  it("announces capability while preserving endpoint query parameters and keeping auth out of the URL", () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WebSocketProvider
+        config={{
+          url: "wss://test/socket?stage=staging&delivery_capability=unknown",
+        }}
+      >
+        {children}
+      </WebSocketProvider>
+    );
+    const { result } = renderHook(() => React.useContext(WebSocketContext), {
+      wrapper,
+    });
+    act(() => result.current!.connect("fresh-token"));
+    const url = new URL(
+      (globalThis.WebSocket as unknown as jest.Mock).mock.calls[0][0]
+    );
+    expect(url.pathname).toBe("/socket");
+    expect(url.searchParams.get("stage")).toBe("staging");
+    expect(url.searchParams.getAll("delivery_capability")).toEqual([
+      "durable_updates_v1",
+    ]);
+    expect(url.searchParams.getAll("recovery_capability")).toEqual([
+      "resync_v1",
+    ]);
+    expect(url.searchParams.has("token")).toBe(false);
+    expect(url.href).not.toContain("fresh-token");
+  });
+
   const createWrapper =
     (config: WebSocketConfig) =>
     ({ children }: { children: React.ReactNode }) => (
@@ -189,7 +218,7 @@ describe("WebSocketProvider", () => {
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
@@ -213,7 +242,7 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
 
@@ -231,7 +260,7 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
@@ -266,7 +295,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const reconnectedWs = (
@@ -393,7 +422,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
 
@@ -713,7 +742,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws2 = (
@@ -1033,7 +1062,7 @@ describe("WebSocketProvider", () => {
       expect(ws1.close).toHaveBeenCalled();
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
@@ -1373,7 +1402,7 @@ describe("WebSocketProvider", () => {
       expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?recovery_capability=resync_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
   });
