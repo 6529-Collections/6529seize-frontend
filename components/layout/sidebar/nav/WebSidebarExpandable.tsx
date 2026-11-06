@@ -105,7 +105,7 @@ function WebSidebarExpandable({
           <ChevronRightIcon
             aria-hidden="true"
             data-sidebar-submenu-indicator="true"
-            className="tw-pointer-events-none tw-absolute tw-left-full tw-top-1/2 tw-ml-1 tw-size-2.5 -tw-translate-y-1/2"
+            className="tw-pointer-events-none tw-absolute tw-left-full tw-top-1/2 tw-ml-1 tw-size-3.5 -tw-translate-y-1/2"
           />
         }
         rightSlot={
