@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import {
+  getDownloadableReleases,
   getOfferedRelease,
   type ReleaseFeedSnapshot,
   type ValidatorRelease,
@@ -41,9 +42,12 @@ function MetaRow({
 function ReleaseEntry({
   release,
   isLatest,
+  downloadable,
 }: {
   readonly release: ValidatorRelease;
   readonly isLatest: boolean;
+  /** The site hands out its files (getDownloadableReleases). */
+  readonly downloadable: boolean;
 }) {
   const headingId = `release-${release.version}`;
   return (
@@ -121,7 +125,7 @@ function ReleaseEntry({
                     </span>
                   )}
                 </span>
-                {isLatest && (
+                {downloadable && (
                   <a
                     href={getReleaseDownloadPath(release, file)}
                     className={SECONDARY_BUTTON}
@@ -158,6 +162,7 @@ export default function ValidatorReleaseHistory({
   readonly snapshot: ReleaseFeedSnapshot;
 }) {
   const offered = getOfferedRelease(snapshot.releases);
+  const downloadable = new Set(getDownloadableReleases(snapshot.releases));
   return (
     <ValidatorPageFrame current="releases">
       <ValidatorPageHeader
@@ -165,8 +170,8 @@ export default function ValidatorReleaseHistory({
         title="All releases and checksums"
       >
         <p className={`tw-mb-0 tw-mt-4 tw-max-w-2xl ${BODY}`}>
-          Every test release of the validator, newest first, with its notes and
-          the SHA-256 of each file. The list comes from the signed release feed,{" "}
+          Every release of the validator, newest first, with its notes and the
+          SHA-256 of each file. The list comes from the signed release feed,{" "}
           <a href="/validator/releases.json" className={LINK}>
             releases.json
           </a>
@@ -174,8 +179,8 @@ export default function ValidatorReleaseHistory({
           <a href="/validator/releases.json.sig" className={LINK}>
             releases.json.sig
           </a>
-          . Only the newest release can be downloaded; older ones stay here for
-          the record.
+          . Only the newest release, and the newest stable release, can be
+          downloaded; older ones stay here for the record.
         </p>
       </ValidatorPageHeader>
       {snapshot.releases.length === 0 ? (
@@ -191,6 +196,7 @@ export default function ValidatorReleaseHistory({
               key={release.version}
               release={release}
               isLatest={release === offered}
+              downloadable={downloadable.has(release)}
             />
           ))}
         </div>

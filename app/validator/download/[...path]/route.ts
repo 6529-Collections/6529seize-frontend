@@ -19,8 +19,14 @@ function plain(status: number, body: string): Response {
 
 /**
  * /validator/download/<version>/<file>, or /validator/download/<file> for the
- * newest release. Answers with a 302 to a presigned S3 URL that works for
- * five minutes. Only files listed in the release feed can be fetched.
+ * release the pages offer. Answers with a 302 to a presigned S3 URL that
+ * works for five minutes. Only files listed in the release feed can be
+ * fetched.
+ *
+ * Never change this shape. From rc.10 the validator's in-app update builds
+ * /validator/download/<version>/<file> from the signed feed's version folder
+ * and file name, and follows the 302 to the https URL; releases already
+ * installed depend on it (__tests__/lib/validator-page/downloadRoute.test.ts).
  */
 export async function GET(
   _request: Request,

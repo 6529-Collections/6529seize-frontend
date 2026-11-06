@@ -397,15 +397,39 @@ export function parseFeedSupport(json: unknown): ValidatorFeedSupport {
   };
 }
 
+// The releases a build on each channel hears of (crates/releases/src/feed.rs):
+// a test build hears of test and stable releases, a stable build only of
+// stable ones, and neither of a channel it doesn't know.
+const CHANNELS_HEARD: Readonly<Record<string, readonly string[]>> = {
+  test: ["test", "stable"],
+  stable: ["stable"],
+};
+
 /**
- * The release the pages offer: the newest, unless the feed lists it as
- * unsafe. Then none is offered.
+ * The releases the site hands out: for each channel, the newest release a
+ * build on it is offered, unless the feed lists that release as unsafe;
+ * then that channel gets none. A stable build offered the newest stable
+ * release can download it while a newer candidate is listed. Highest
+ * version first.
  */
+export function getDownloadableReleases(
+  releases: readonly ValidatorRelease[]
+): ValidatorRelease[] {
+  const downloadable = new Set<ValidatorRelease>();
+  for (const heard of Object.values(CHANNELS_HEARD)) {
+    const newest = releases.find((release) => heard.includes(release.channel));
+    if (newest?.unsafeReason === null) {
+      downloadable.add(newest);
+    }
+  }
+  return releases.filter((release) => downloadable.has(release));
+}
+
+/** The release the pages offer: the highest version the site hands out. */
 export function getOfferedRelease(
   releases: readonly ValidatorRelease[]
 ): ValidatorRelease | undefined {
-  const newest = releases[0];
-  return newest?.unsafeReason === null ? newest : undefined;
+  return getDownloadableReleases(releases)[0];
 }
 
 function decodeFeed(

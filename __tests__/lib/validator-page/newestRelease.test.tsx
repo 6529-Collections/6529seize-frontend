@@ -2,7 +2,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 
 import type { BucketObject } from "@/lib/validator-page/releasesBucket";
-import { SAME_DAY_FEED } from "./fixtures";
+import { SAME_DAY_FEED, TWO_CHANNEL_FEED } from "./fixtures";
 
 const mockRead = jest.fn<Promise<BucketObject>, [string]>();
 const mockPresign = jest.fn(
@@ -100,5 +100,40 @@ describe("a release and its candidate from the same day", () => {
     expect(await resolveReleaseDownload(["0.1.0-rc.7", SETUP])).toEqual({
       state: "not-found",
     });
+  });
+});
+
+describe("a stable release and a newer candidate", () => {
+  beforeAll(() => {
+    process.env["VALIDATOR_PAGE_PUBLIC"] = "true";
+  });
+
+  afterAll(() => {
+    delete process.env["VALIDATOR_PAGE_PUBLIC"];
+  });
+
+  beforeEach(() => {
+    resetReleaseFeedCacheForTests();
+    const body = new TextEncoder().encode(JSON.stringify(TWO_CHANNEL_FEED));
+    mockRead.mockImplementation(async (key) =>
+      key === "feed/releases.json"
+        ? { state: "found", body, etag: '"e"', lastModified: null }
+        : { state: "missing" }
+    );
+  });
+
+  it("the download page offers the candidate, the highest version", async () => {
+    const html = renderToStaticMarkup(await ValidatorRoute());
+    expect(linkedVersions(html)).toEqual(["0.1.1-rc.1"]);
+  });
+
+  it("the releases page offers the candidate and the stable release, and marks the candidate Latest", async () => {
+    const html = renderToStaticMarkup(await ValidatorReleasesRoute());
+    expect(linkedVersions(html)).toEqual(["0.1.1-rc.1", "0.1.0"]);
+    expect(html.split(">Latest<")).toHaveLength(2);
+    expect(html.indexOf(">Latest<")).toBeLessThan(html.indexOf('id="0.1.0"'));
+    expect(html).toContain(
+      "Only the newest release, and the newest stable release, can be downloaded"
+    );
   });
 });
