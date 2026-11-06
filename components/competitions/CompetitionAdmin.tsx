@@ -21,7 +21,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CompetitionAppearance from "./CompetitionAppearance";
 import CompetitionPauseHistory from "./CompetitionPauseHistory";
-import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
+import {
+  COMPETITION_BUTTON,
+  COMPETITION_DESTRUCTIVE_BUTTON,
+  COMPETITION_INPUT,
+} from "./CompetitionState";
 
 function getLifecycleActions(
   lifecycle: ApiCompetitionLifecycle
@@ -37,6 +41,10 @@ function getLifecycleActions(
     case ApiCompetitionLifecycle.Cancelled:
       return ["archive", "clone"];
   }
+}
+
+function confirmationTitle(title: string): string {
+  return title.replace(/\r\n?/g, "\n");
 }
 
 export default function CompetitionAdmin({
@@ -57,9 +65,14 @@ export default function CompetitionAdmin({
   const [actionSnapshot, setActionSnapshot] = useState({
     version: competition.config_version,
     lifecycle: competition.lifecycle,
+    title: confirmationTitle(competition.title),
   });
-  const { version: actionVersion, lifecycle: actionLifecycle } = actionSnapshot;
-  const [reason, setReason] = useState("");
+  const {
+    version: actionVersion,
+    lifecycle: actionLifecycle,
+    title: actionTitle,
+  } = actionSnapshot;
+  const [actionInput, setActionInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const pending = useRef<{
@@ -75,15 +88,10 @@ export default function CompetitionAdmin({
     (command) => !archiveOnly || command === "archive"
   );
   const published = competition.lifecycle === ApiCompetitionLifecycle.Published;
-  const reasonRequired =
-    action === "pause" ||
-    (action === "archive" &&
-      published &&
-      competition.permissions.archive_requires_reason !== false);
-  const reasonHelpId =
-    action === "pause"
-      ? "competition-pause-reason-help"
-      : "competition-archive-reason-help";
+  const reasonRequired = action === "pause";
+  const confirmDisabled =
+    (reasonRequired && !actionInput.trim()) ||
+    (action === "archive" && actionInput !== actionTitle);
   const actionLabel = (command: CompetitionAction) =>
     t(
       locale,
@@ -102,14 +110,15 @@ export default function CompetitionAdmin({
     setActionSnapshot({
       version: competition.config_version,
       lifecycle: competition.lifecycle,
+      title: confirmationTitle(competition.title),
     });
-    setReason("");
+    setActionInput("");
     setFailed(false);
     setAction(command);
   };
   const execute = async () => {
-    const trimmedReason = reason.trim();
-    if (!action || busy || (reasonRequired && !trimmedReason)) return;
+    const trimmedReason = action === "pause" ? actionInput.trim() : "";
+    if (!action || busy || confirmDisabled) return;
     setBusy(true);
     setFailed(false);
     const identity = {
@@ -132,7 +141,7 @@ export default function CompetitionAdmin({
       const result = await performCompetitionAction(identity, action, {
         idempotency_key: pending.current.key,
         config_version: actionVersion,
-        reason: trimmedReason,
+        ...(action === "pause" ? { reason: trimmedReason } : {}),
       });
       pending.current = null;
       setAction(null);
@@ -209,7 +218,11 @@ export default function CompetitionAdmin({
               <button
                 key={command}
                 type="button"
-                className={COMPETITION_BUTTON}
+                className={
+                  command === "archive"
+                    ? COMPETITION_DESTRUCTIVE_BUTTON
+                    : COMPETITION_BUTTON
+                }
                 disabled={busy}
                 onClick={() => openAction(command)}
               >
@@ -221,11 +234,14 @@ export default function CompetitionAdmin({
       {action && (
         <MobileWrapperConfirmationDialog
           isConfirming={busy}
-          confirmDisabled={reasonRequired && !reason.trim()}
+          confirmDisabled={confirmDisabled}
+          confirmVariant={
+            action === "archive" ? "destructiveOutline" : "primary"
+          }
           isOpen
           title={t(locale, "competitions.confirmAction", {
             action: actionLabel(action),
-            title: competition.title,
+            title: actionTitle,
           })}
           message={t(locale, consequences())}
           confirmText={t(locale, "competitions.confirm")}
@@ -237,41 +253,69 @@ export default function CompetitionAdmin({
             void execute();
           }}
         >
-          {action !== "resume" && (
+          {action === "archive" && (
+            <div className="tw-mt-5">
+              <p className="tw-mb-3 tw-font-semibold tw-text-red">
+                {t(locale, "competitions.archiveIrreversible")}
+              </p>
+              <label
+                className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+                htmlFor="competition-archive-name"
+              >
+                {t(locale, "competitions.archiveConfirmationName")}
+              </label>
+              <p
+                id="competition-archive-name-help"
+                className="tw-mb-3 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300"
+              >
+                {t(locale, "competitions.archiveNameHelp")}
+              </p>
+              <p
+                id="competition-archive-exact-name"
+                className="tw-mb-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100"
+              >
+                {actionTitle}
+              </p>
+              <textarea
+                id="competition-archive-name"
+                className={`${COMPETITION_INPUT} tw-min-h-11 tw-resize-y`}
+                rows={1}
+                value={actionInput}
+                required
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                disabled={busy}
+                aria-describedby="competition-archive-name-help competition-archive-exact-name"
+                onChange={(event) => setActionInput(event.target.value)}
+              />
+            </div>
+          )}
+          {action === "pause" && (
             <div className="tw-mt-5">
               <label
                 className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
                 htmlFor="competition-action-reason"
               >
-                {t(
-                  locale,
-                  reasonRequired
-                    ? "competitions.reasonRequired"
-                    : "competitions.reasonOptional"
-                )}
+                {t(locale, "competitions.reasonRequired")}
               </label>
               <textarea
                 id="competition-action-reason"
                 className={`${COMPETITION_INPUT} tw-min-h-28 tw-resize-y tw-text-sm`}
-                value={reason}
+                value={actionInput}
                 required={reasonRequired}
                 maxLength={2000}
                 rows={3}
                 disabled={busy}
-                aria-describedby={reasonRequired ? reasonHelpId : undefined}
-                onChange={(event) => setReason(event.target.value)}
+                aria-describedby="competition-pause-reason-help"
+                onChange={(event) => setActionInput(event.target.value)}
               />
               {reasonRequired && (
                 <p
-                  id={reasonHelpId}
+                  id="competition-pause-reason-help"
                   className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400"
                 >
-                  {t(
-                    locale,
-                    action === "pause"
-                      ? "competitions.pauseReasonHelp"
-                      : "competitions.archiveReasonHelp"
-                  )}
+                  {t(locale, "competitions.pauseReasonHelp")}
                 </p>
               )}
             </div>
