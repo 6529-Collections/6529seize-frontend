@@ -132,7 +132,8 @@ and the known issues are Markdown in `lib/validator-page/content/`, built
 from the tester package's TESTERS.md (its "More" sections) and
 KNOWN-ISSUES.md. The note for testers on the last release ("Upgrading
 from rc.7", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
-download button and at the top of the guide. The hardware page's text and
+download button and at the top of the guide, only while the signed list's
+newest release is the one it names (`forVersion`). The hardware page's text and
 numbers are in `hardwareText.ts` there, each checked against the release it
 names.
 
