@@ -8,7 +8,25 @@
  * an event missing from a row is illegal there. Chain events (gateway
  * answers, inclusion, finality, decisions) follow one rule for every state:
  * they fold into status-ladder evidence and the ladder's derivation picks
- * the state, never moving a chain stage backwards.
+ * the state.
+ *
+ * Invariants (each one is a test in machine.test.ts):
+ * - The mode never changes. Server mode never reaches a chain stage and
+ *   never uses chain words; its `submitted` ("posted") is terminal.
+ * - Chain stages (submitted < committed < finalized < in-decision) never
+ *   move backwards, and an accepted action never returns to a client-side
+ *   state.
+ * - Terminal states are stable: every event leaves them as they are.
+ * - Open outcome: a rejected, failed, expired or replaced outcome that the
+ *   ladder derived from gateway claims alone is not terminal. Every status
+ *   is a claim until verified (P41 GW5), so more evidence can still move
+ *   it. A verified outcome, or one the client decided, is terminal.
+ * - `SEND_OK` is accepted from `queued` and `send-failed` as well as from
+ *   `sending`: a request can reach the server after its response failed.
+ * - Retries (`DEFAULT_RETRY_POLICY`): the first retry after 1 s, doubling
+ *   to at most 30 s; after 5 attempts only a manual retry is offered
+ *   (`nextRetryAt: null`). Retry times come from the event's `at`, so the
+ *   reducer never reads a clock.
  */
 import { initialEvidence, isFinalOverlay } from "@/lib/chain/status-ladder";
 
@@ -19,7 +37,10 @@ import {
   isChainEvent,
   type ChainActionEvent,
 } from "./chain";
-import { reportIllegalTransition } from "./report";
+import {
+  reportIllegalTransition,
+  type IllegalTransitionReporter,
+} from "./report";
 import type {
   ActionEvent,
   ActionEventType,
@@ -32,6 +53,12 @@ import type {
   SendFailedState,
   TransitionResult,
 } from "./types";
+
+export interface TransitionOptions {
+  readonly policy?: RetryPolicy | undefined;
+  /** Receives illegal transitions; null silences them. Default: the module's. */
+  readonly reporter?: IllegalTransitionReporter | null | undefined;
+}
 
 export const DEFAULT_RETRY_POLICY: RetryPolicy = {
   baseDelayMs: 1_000,
@@ -415,15 +442,14 @@ export function step(
 export function transition(
   state: ActionState,
   event: ActionEvent,
-  policy: RetryPolicy = DEFAULT_RETRY_POLICY
+  options: TransitionOptions = {}
 ): ActionState {
-  const result = step(state, event, policy);
+  const result = step(state, event, options.policy ?? DEFAULT_RETRY_POLICY);
   if (!result.legal) {
-    reportIllegalTransition({
-      from: state.kind,
-      mode: state.mode,
-      event: event.type,
-    });
+    reportIllegalTransition(
+      { from: state.kind, mode: state.mode, event: event.type },
+      options.reporter
+    );
   }
   return result.state;
 }

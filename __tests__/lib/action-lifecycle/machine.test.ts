@@ -460,17 +460,17 @@ function stageRank(state: ActionState): number {
 }
 
 let reports: IllegalTransition[] = [];
-let previousReporter: ReturnType<typeof setIllegalTransitionReporter>;
+let restoreReporter: () => void = () => undefined;
 
 beforeEach(() => {
   reports = [];
-  previousReporter = setIllegalTransitionReporter((report) => {
+  restoreReporter = setIllegalTransitionReporter((report) => {
     reports.push(report);
   });
 });
 
 afterEach(() => {
-  setIllegalTransitionReporter(previousReporter);
+  restoreReporter();
 });
 
 describe.each([
@@ -696,28 +696,24 @@ function defaultPolicy() {
 
 /** Every state kind reachable from a draft, one representative each. */
 function reachableStates(mode: ActionMode): ActionState[] {
-  const previous = setIllegalTransitionReporter(null);
-  try {
-    const seen = new Map<ActionStateKind, ActionState>();
-    let frontier: ActionState[] = [createActionState(mode)];
-    seen.set("draft", frontier[0]!);
-    for (let depth = 0; depth < 10 && frontier.length > 0; depth++) {
-      const next: ActionState[] = [];
-      for (const state of frontier) {
-        for (const name of EVENT_NAMES) {
-          const result = step(state, EVENTS[name]).state;
-          if (!seen.has(result.kind)) {
-            seen.set(result.kind, result);
-            next.push(result);
-          }
+  // `step` never reports, so exploring illegal moves is silent.
+  const seen = new Map<ActionStateKind, ActionState>();
+  let frontier: ActionState[] = [createActionState(mode)];
+  seen.set("draft", frontier[0]!);
+  for (let depth = 0; depth < 10 && frontier.length > 0; depth++) {
+    const next: ActionState[] = [];
+    for (const state of frontier) {
+      for (const name of EVENT_NAMES) {
+        const result = step(state, EVENTS[name]).state;
+        if (!seen.has(result.kind)) {
+          seen.set(result.kind, result);
+          next.push(result);
         }
       }
-      frontier = next;
     }
-    return [...seen.values()];
-  } finally {
-    setIllegalTransitionReporter(previous);
+    frontier = next;
   }
+  return [...seen.values()];
 }
 
 describe("properties", () => {
@@ -780,8 +776,8 @@ describe("properties", () => {
   });
 
   it("never moves a chain stage backwards on random walks", () => {
-    const previous = setIllegalTransitionReporter(null);
-    try {
+    {
+      // Seeded: every CI run walks the same 2,000 paths.
       const random = mulberry32(6529);
       const gateways = [GW1, GW2, GW3];
       const pick = <T>(values: readonly T[]): T =>
@@ -825,7 +821,7 @@ describe("properties", () => {
         let rank = 0;
         for (let move = 0; move < 40; move++) {
           const terminal = isTerminalActionState(state);
-          const next = step(state, randomEvent()).state;
+          const next: ActionState = step(state, randomEvent()).state;
           expect(next.mode).toBe(mode);
           if (terminal) {
             expect(next).toBe(state);
@@ -841,9 +837,41 @@ describe("properties", () => {
           state = next;
         }
       }
-    } finally {
-      setIllegalTransitionReporter(previous);
     }
+  });
+});
+
+describe("illegal-transition reporting", () => {
+  it("reports to a per-call reporter instead of the default, and never throws", () => {
+    const own: IllegalTransition[] = [];
+    const draft = createActionState("server");
+    expect(
+      transition(draft, EVENTS.SEND_OK, { reporter: (r) => own.push(r) })
+    ).toBe(draft);
+    expect(own).toEqual([{ from: "draft", mode: "server", event: "SEND_OK" }]);
+    expect(reports).toEqual([]);
+
+    // null silences; a throwing reporter cannot break the caller.
+    expect(transition(draft, EVENTS.SEND_OK, { reporter: null })).toBe(draft);
+    expect(
+      transition(draft, EVENTS.SEND_OK, {
+        reporter: () => {
+          throw new Error("reporter failed");
+        },
+      })
+    ).toBe(draft);
+    expect(reports).toEqual([]);
+  });
+
+  it("restores the previous default reporter", () => {
+    const inner: IllegalTransition[] = [];
+    const restore = setIllegalTransitionReporter((r) => inner.push(r));
+    transition(createActionState("server"), EVENTS.RETRY);
+    restore();
+    transition(createActionState("server"), EVENTS.RETRY);
+    expect(inner).toHaveLength(1);
+    expect(reports).toHaveLength(1);
+    reports = [];
   });
 });
 

@@ -192,6 +192,11 @@ export interface RetryPolicy {
   readonly maxAutoAttempts: number;
 }
 
+/** Exhaustiveness guard for switches over the unions above. */
+export function assertNever(value: never): never {
+  throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
+}
+
 export interface TransitionResult {
   readonly state: ActionState;
   /** False when the event does not apply; `state` is then the input state. */

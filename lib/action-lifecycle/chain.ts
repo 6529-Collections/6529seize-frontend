@@ -11,7 +11,7 @@ import {
   type LadderEvidence,
 } from "@/lib/chain/status-ladder";
 
-import type { ActionEvent, ChainProgress } from "./types";
+import { assertNever, type ActionEvent, type ChainProgress } from "./types";
 
 export type ChainActionEvent = Extract<
   ActionEvent,
@@ -95,6 +95,9 @@ export function toLadderEvent(event: ChainActionEvent): LadderEvent {
       return dropEvent("replaced", event);
     case "REDUCED":
       return { type: "reduced", amount: event.amount };
+    default:
+      // Unreachable: callers check `isChainEvent` first.
+      return assertNever(event);
   }
 }
 

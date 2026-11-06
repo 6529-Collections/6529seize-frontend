@@ -9,6 +9,7 @@ export {
   nextRetryAt,
   step,
   transition,
+  type TransitionOptions,
 } from "./machine";
 export { actionLabel, type ActionLabel, type ActionLabelKey } from "./labels";
 export {

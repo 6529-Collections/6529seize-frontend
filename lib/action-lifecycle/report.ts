@@ -19,23 +19,31 @@ const warnOutsideProduction: IllegalTransitionReporter = (report) => {
   );
 };
 
-let reporter: IllegalTransitionReporter | null = warnOutsideProduction;
+let defaultReporter: IllegalTransitionReporter | null = warnOutsideProduction;
 
 /**
- * Replaces the reporter for illegal transitions (tests collect them). Returns
- * the previous reporter so callers can restore it; `null` silences reports.
+ * Replaces the module-wide default reporter; `null` silences it. Returns a
+ * function that restores the previous one. Prefer passing a reporter to
+ * `transition` (or to the store) over changing the default.
  */
 export function setIllegalTransitionReporter(
   next: IllegalTransitionReporter | null
-): IllegalTransitionReporter | null {
-  const previous = reporter;
-  reporter = next;
-  return previous;
+): () => void {
+  const previous = defaultReporter;
+  defaultReporter = next;
+  return () => {
+    defaultReporter = previous;
+  };
 }
 
-export function reportIllegalTransition(report: IllegalTransition): void {
+/** Reports to `reporter` when given (null silences), else to the default. */
+export function reportIllegalTransition(
+  report: IllegalTransition,
+  reporter?: IllegalTransitionReporter | null
+): void {
+  const target = reporter === undefined ? defaultReporter : reporter;
   try {
-    reporter?.(report);
+    target?.(report);
   } catch {
     // Reporting must never break the caller.
   }

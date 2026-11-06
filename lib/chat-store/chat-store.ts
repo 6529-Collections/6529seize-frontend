@@ -11,13 +11,16 @@
  * - Deleted keys are tombstoned per wave, so responses already in flight
  *   cannot bring them back (#4639).
  * - Pending sends are keyed by their client ID and carry an explicit
- *   lifecycle (`lib/action-lifecycle`).
+ *   lifecycle (`lib/action-lifecycle`). A server copy carrying the send's
+ *   `client_drop_id` (the POST response or its creation frame) settles it
+ *   exactly; without one, today's content match is the fallback.
  */
 import {
   createActionState,
   transition,
   type ActionEvent,
   type ActionState,
+  type IllegalTransitionReporter,
 } from "@/lib/action-lifecycle";
 import {
   DropSize,
@@ -58,6 +61,8 @@ export interface PendingSend {
   readonly clientId: string;
   readonly waveId: string;
   readonly state: ActionState;
+  /** The `client_drop_id` sent with the create request, lowercase. */
+  readonly clientDropId: string | null;
   /** The accepted record's key, once its server copy replaced the pending one. */
   readonly serverKey: string | null;
 }
@@ -65,6 +70,16 @@ export interface PendingSend {
 export interface ChatStoreOptions {
   /** The record key. Phase 0: the drop ID; Phase 2: the root event ID. */
   readonly keyOf?: ((drop: Drop) => string) | undefined;
+  /** Receives illegal pending-send transitions; default: the lifecycle's. */
+  readonly lifecycleReporter?: IllegalTransitionReporter | null | undefined;
+}
+
+/** The create request's client ID, echoed on its response and creation frame. */
+function clientDropIdOf(drop: Drop): string | null {
+  const value = (drop as { readonly client_drop_id?: unknown }).client_drop_id;
+  return typeof value === "string" && value.length > 0
+    ? value.toLowerCase()
+    : null;
 }
 
 /** `getOptimisticDropId` prefixes client IDs of optimistic drops with this. */
@@ -134,6 +149,12 @@ export class ChatStore {
   /** Per-wave deleted keys; Map order is least recently touched first. */
   private readonly tombstones = new Map<string, Set<string>>();
   private readonly pendingSends = new Map<string, PendingSend>();
+  /** `client_drop_id` -> client ID of the pending send that sent it. */
+  private readonly pendingByClientDropId = new Map<string, string>();
+  private readonly lifecycleReporter:
+    | IllegalTransitionReporter
+    | null
+    | undefined;
   /** Settled client IDs, oldest first. */
   private readonly settled = new Set<string>();
   /** Source of wave versions; never repeats, even after a wave is deleted. */
@@ -141,6 +162,7 @@ export class ChatStore {
 
   constructor(options: ChatStoreOptions = {}) {
     this.keyOf = options.keyOf ?? ((drop) => drop.id);
+    this.lifecycleReporter = options.lifecycleReporter;
   }
 
   // Reads -------------------------------------------------------------------
@@ -309,6 +331,7 @@ export class ChatStore {
     this.waves.clear();
     this.tombstones.clear();
     this.pendingSends.clear();
+    this.pendingByClientDropId.clear();
     this.settled.clear();
   }
 
@@ -316,14 +339,24 @@ export class ChatStore {
 
   /**
    * Shows `drop` as a pending send keyed by its client ID, in `sending`.
-   * Merging a drop whose ID starts with `temp-` does the same.
+   * Merging a drop whose ID starts with `temp-` does the same. Pass the
+   * `client_drop_id` sent to the server (or set it on `drop`) so its
+   * server copy settles the send exactly.
    */
-  addPendingSend(waveId: string, drop: ExtendedDrop): PendingSend | null {
+  addPendingSend(
+    waveId: string,
+    drop: ExtendedDrop,
+    options: { readonly clientDropId?: string | undefined } = {}
+  ): PendingSend | null {
     const clientId = this.keyOf(drop);
     if (this.isTombstoned(waveId, clientId)) {
       return null;
     }
-    this.registerPendingSend(waveId, clientId);
+    this.registerPendingSend(
+      waveId,
+      clientId,
+      options.clientDropId?.toLowerCase() ?? clientDropIdOf(drop)
+    );
     this.merge(waveId, [drop]);
     return this.pendingSends.get(clientId) ?? null;
   }
@@ -337,7 +370,7 @@ export class ChatStore {
     if (send === undefined) {
       return undefined;
     }
-    const state = transition(send.state, event);
+    const state = this.transition(send.state, event);
     if (state === send.state) {
       return send;
     }
@@ -394,6 +427,10 @@ export class ChatStore {
     wave.snapshot = null;
   }
 
+  private transition(state: ActionState, event: ActionEvent): ActionState {
+    return transition(state, event, { reporter: this.lifecycleReporter });
+  }
+
   private isPendingKey(key: string): boolean {
     const send = this.pendingSends.get(key);
     return send === undefined
@@ -401,11 +438,15 @@ export class ChatStore {
       : send.serverKey === null;
   }
 
-  private registerPendingSend(waveId: string, clientId: string): void {
+  private registerPendingSend(
+    waveId: string,
+    clientId: string,
+    clientDropId: string | null
+  ): void {
     if (this.pendingSends.has(clientId)) {
       return;
     }
-    const state = transition(createActionState("server"), {
+    const state = this.transition(createActionState("server"), {
       type: "SUBMIT",
       requiresSignature: false,
     });
@@ -413,13 +454,39 @@ export class ChatStore {
       clientId,
       waveId,
       state,
+      clientDropId,
       serverKey: null,
     });
+    if (clientDropId !== null) {
+      this.pendingByClientDropId.set(clientDropId, clientId);
+    }
   }
 
   private releasePendingSend(clientId: string): void {
+    const clientDropId = this.pendingSends.get(clientId)?.clientDropId;
+    if (
+      clientDropId !== undefined &&
+      clientDropId !== null &&
+      this.pendingByClientDropId.get(clientDropId) === clientId
+    ) {
+      this.pendingByClientDropId.delete(clientDropId);
+    }
     this.pendingSends.delete(clientId);
     this.settled.delete(clientId);
+  }
+
+  /** The still-shown pending send in this wave that created `drop`. */
+  private pendingSendFor(waveId: string, drop: Drop): string | null {
+    const clientDropId = clientDropIdOf(drop);
+    const clientId =
+      clientDropId === null
+        ? undefined
+        : this.pendingByClientDropId.get(clientDropId);
+    const send =
+      clientId === undefined ? undefined : this.pendingSends.get(clientId);
+    return send?.waveId === waveId && send.serverKey === null
+      ? send.clientId
+      : null;
   }
 
   /** Records acceptance, removes the pending row and tombstones its client ID. */
@@ -432,7 +499,7 @@ export class ChatStore {
     if (send === undefined) {
       return;
     }
-    const state = transition(send.state, { type: "SEND_OK" });
+    const state = this.transition(send.state, { type: "SEND_OK" });
     this.pendingSends.set(clientId, { ...send, state, serverKey });
     this.settled.add(clientId);
     if (this.settled.size > MAX_SETTLED_PENDING_SENDS) {
@@ -498,6 +565,13 @@ export class ChatStore {
       }
       this.replaceFull(wave, key, existing, drop);
       context.changed = true;
+      // A creation frame can follow a feed copy of the same drop.
+      const creator =
+        wave.pending.size === 0 ? null : this.pendingSendFor(waveId, drop);
+      if (creator !== null) {
+        this.settlePending(waveId, creator, key);
+        context.reconciled++;
+      }
       return;
     }
     if (existing !== undefined) {
@@ -506,7 +580,7 @@ export class ChatStore {
     }
 
     if (this.isPendingKey(key)) {
-      this.registerPendingSend(waveId, key);
+      this.registerPendingSend(waveId, key, clientDropIdOf(drop));
       wave.pending.add(key);
       this.insertFull(
         wave,
@@ -522,7 +596,7 @@ export class ChatStore {
       return;
     }
     const match =
-      wave.pending.size === 0 ? null : this.matchPending(wave, drop);
+      wave.pending.size === 0 ? null : this.matchPending(waveId, wave, drop);
     if (match === null) {
       this.insertFull(
         wave,
@@ -539,10 +613,20 @@ export class ChatStore {
     context.changed = true;
   }
 
+  /**
+   * The pending send `drop` is the server copy of. Its `client_drop_id`
+   * decides when present; otherwise today's content match does.
+   */
   private matchPending(
+    waveId: string,
     wave: WaveRecords,
     drop: ExtendedDrop
   ): ExtendedDrop | null {
+    if (clientDropIdOf(drop) !== null) {
+      const creator = this.pendingSendFor(waveId, drop);
+      const record = creator === null ? undefined : wave.records.get(creator);
+      return record?.type === DropSize.FULL ? record : null;
+    }
     const pending: ExtendedDrop[] = [];
     for (const clientId of wave.pending) {
       const record = wave.records.get(clientId);

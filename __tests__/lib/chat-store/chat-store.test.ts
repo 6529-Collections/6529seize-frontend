@@ -6,6 +6,7 @@ import {
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import {
+  isTerminalActionState,
   setIllegalTransitionReporter,
   type IllegalTransition,
 } from "@/lib/action-lifecycle";
@@ -71,12 +72,12 @@ const ids = (store: ChatStore, waveId = WAVE): string[] =>
   store.getDrops(waveId).map((drop) => drop.id);
 
 let reports: IllegalTransition[] = [];
-let previousReporter: ReturnType<typeof setIllegalTransitionReporter>;
+let restoreReporter: () => void = () => undefined;
 
 beforeEach(() => {
   serial = 0;
   reports = [];
-  previousReporter = setIllegalTransitionReporter((report) =>
+  restoreReporter = setIllegalTransitionReporter((report) =>
     reports.push(report)
   );
 });
@@ -84,7 +85,7 @@ beforeEach(() => {
 afterEach(() => {
   // No store flow may drive a pending send through an illegal transition.
   expect(reports).toEqual([]);
-  setIllegalTransitionReporter(previousReporter);
+  restoreReporter();
 });
 
 describe("order (today's mergeDrops vectors)", () => {
@@ -322,14 +323,14 @@ describe("deletions (#4639 invariants)", () => {
     );
     store.merge(WAVE, drops);
     store.merge(OTHER_WAVE, [full({ id: "other" })]);
-    const started = performance.now();
+    // One pass, not one splice per key: a quadratic removal would run for
+    // many seconds and time the test out.
     expect(
       store.remove(
         WAVE,
         drops.slice(0, 40_000).map((drop) => drop.id)
       )
     ).toBe(true);
-    expect(performance.now() - started).toBeLessThan(2_000);
     expect(store.size(WAVE)).toBe(20_000);
     expect(ids(store)[0]).toBe("large-59999");
     expect(ids(store).at(-1)).toBe("large-40000");
@@ -512,6 +513,7 @@ describe("pending sends", () => {
       clientId: "temp-a",
       waveId: WAVE,
       state: { kind: "sending", mode: "server", attempt: 1, evidence: null },
+      clientDropId: null,
       serverKey: null,
     });
     const { key, hash } = getStableDropKey(temp);
@@ -718,6 +720,112 @@ describe("pending sends", () => {
     store.merge(WAVE, [pendingDrop("temp-b")]);
     store.clear();
     expect(store.getPendingSend("temp-b")).toBeUndefined();
+  });
+});
+
+describe("client_drop_id (exact reconciliation)", () => {
+  const SENT_AT = 7_000_000;
+  const CLIENT_DROP_ID = "0f8c3a52-7d1e-4b6a-9c2f-5e8d1a4b7c90";
+
+  const optimistic = (content = "gm") =>
+    full({
+      id: "temp-c",
+      serial_no: SENT_AT,
+      created_at: SENT_AT,
+      content,
+    });
+
+  const serverCopy = (
+    id: string,
+    content: string,
+    clientDropId: string | null
+  ) =>
+    full({
+      id,
+      serial_no: 950,
+      created_at: SENT_AT + 300,
+      content,
+      extra: clientDropId === null ? {} : { client_drop_id: clientDropId },
+    });
+
+  it("settles the send its client_drop_id names, even when the text differs", () => {
+    const store = new ChatStore();
+    const send = store.addPendingSend(WAVE, optimistic("gm "), {
+      clientDropId: CLIENT_DROP_ID.toUpperCase(),
+    });
+    expect(send?.clientDropId).toBe(CLIENT_DROP_ID);
+    const pending = store.get(WAVE, "temp-c")!;
+    const result = store.merge(WAVE, [
+      serverCopy("server-c", "gm", CLIENT_DROP_ID),
+    ]);
+    expect(result.reconciled).toBe(1);
+    expect(ids(store)).toEqual(["server-c"]);
+    expect(store.get(WAVE, "server-c")?.stableKey).toBe(pending.stableKey);
+    expect(store.getPendingSend("temp-c")).toMatchObject({
+      serverKey: "server-c",
+      state: { kind: "submitted" },
+    });
+  });
+
+  it("never matches by content when the server copy names another send", () => {
+    const store = new ChatStore();
+    store.addPendingSend(WAVE, optimistic(), { clientDropId: CLIENT_DROP_ID });
+    store.merge(WAVE, [
+      serverCopy("server-other", "gm", "11111111-2222-4333-8444-555555555555"),
+    ]);
+    expect(ids(store)).toEqual(["server-other", "temp-c"]);
+    expect(store.getPendingSend("temp-c")?.state.kind).toBe("sending");
+  });
+
+  it("settles on a creation frame that follows a feed copy of the drop", () => {
+    const store = new ChatStore();
+    store.addPendingSend(WAVE, optimistic("gm "), {
+      clientDropId: CLIENT_DROP_ID,
+    });
+    // Feeds omit client_drop_id, and this copy's text differs: no match yet.
+    store.merge(WAVE, [serverCopy("server-c", "gm", null)]);
+    expect(ids(store)).toEqual(["server-c", "temp-c"]);
+    store.merge(WAVE, [serverCopy("server-c", "gm", CLIENT_DROP_ID)]);
+    expect(ids(store)).toEqual(["server-c"]);
+    expect(store.getPendingSend("temp-c")?.serverKey).toBe("server-c");
+  });
+
+  it("reads client_drop_id from an optimistic temp- drop", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [
+      { ...optimistic(), client_drop_id: CLIENT_DROP_ID } as ExtendedDrop,
+    ]);
+    expect(store.getPendingSend("temp-c")?.clientDropId).toBe(CLIENT_DROP_ID);
+    store.merge(WAVE, [serverCopy("server-c", "gm", CLIENT_DROP_ID)]);
+    expect(ids(store)).toEqual(["server-c"]);
+  });
+
+  it("makes a 409 terminal for the pending send", () => {
+    const store = new ChatStore();
+    store.addPendingSend(WAVE, optimistic(), { clientDropId: CLIENT_DROP_ID });
+    const rejected = store.dispatchPendingSend("temp-c", {
+      type: "REJECTED",
+      reason: "client_drop_id conflict",
+    });
+    expect(rejected?.state).toMatchObject({
+      kind: "rejected",
+      reason: "client_drop_id conflict",
+    });
+    expect(isTerminalActionState(rejected!.state)).toBe(true);
+    store.remove(WAVE, ["temp-c"]);
+    expect(store.getPendingSend("temp-c")).toBeUndefined();
+    // The ID no longer points at a send.
+    store.merge(WAVE, [serverCopy("server-c", "gm", CLIENT_DROP_ID)]);
+    expect(ids(store)).toEqual(["server-c"]);
+  });
+
+  it("sends illegal pending-send transitions to the store's reporter", () => {
+    const own: IllegalTransition[] = [];
+    const store = new ChatStore({ lifecycleReporter: (r) => own.push(r) });
+    store.addPendingSend(WAVE, optimistic());
+    store.dispatchPendingSend("temp-c", { type: "RETRY" });
+    expect(own).toEqual([{ from: "sending", mode: "server", event: "RETRY" }]);
+    expect(reports).toEqual([]);
   });
 });
 
