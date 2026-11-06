@@ -175,7 +175,9 @@ tabs. The collection lets you choose a different competition at any time.
   available when their dates and eligibility permit. Approve results can be
   finalized after voting closes if a threshold hold or pause is still pending.
 - Cancelled and archived competitions remain accessible through history. They
-  do not accept new entries or votes.
+  do not accept new entries or votes. Administrators can permanently stop a
+  published competition using **Archive and stop competition** in Settings.
+  Its entries, votes, existing winners and awarded outcomes remain readable.
 
 ## Failure and Recovery
 
