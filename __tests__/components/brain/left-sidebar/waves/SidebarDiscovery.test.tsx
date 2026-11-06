@@ -208,7 +208,7 @@ it.each([
       <SidebarDiscovery {...discoveryProps} />
     );
     const sections = ["Worth Checking Out", "Active Votes"].map((name) =>
-      within(container).getByRole("region", { name, exact: true })
+      within(container).getByRole("region", { name })
     );
     for (const section of sections) {
       const toggle = within(within(section).getByRole("heading")).getByRole(
