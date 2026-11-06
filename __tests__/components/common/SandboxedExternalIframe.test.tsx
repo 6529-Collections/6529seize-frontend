@@ -1,5 +1,16 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { requestElementFullScreen } from "@/helpers/Helpers";
+
+jest.mock("@/helpers/Helpers", () => {
+  const actual = jest.requireActual("@/helpers/Helpers");
+  return {
+    ...actual,
+    requestElementFullScreen: jest.fn(actual.requestElementFullScreen),
+  };
+});
+
+const requestElementFullScreenMock = requestElementFullScreen as jest.Mock;
 
 jest.mock("@/components/waves/memes/submission/constants/security", () => ({
   canonicalizeInteractiveMediaUrl: (src: string) => src,
@@ -38,6 +49,7 @@ describe("SandboxedExternalIframe", () => {
     observerCallback = null;
     mockIsCapacitor = false;
     mockFullScreenSupported = true;
+    requestElementFullScreenMock.mockClear();
     globalThis.IntersectionObserver =
       MockIntersectionObserver as unknown as typeof IntersectionObserver;
   });
@@ -124,11 +136,33 @@ describe("SandboxedExternalIframe", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("expands the sandboxed frame itself when asked", () => {
+  it("offers full screen only after the frame is revealed", () => {
+    render(
+      <SandboxedExternalIframe
+        src="https://media.example.test/ipfs/cid/index.html"
+        title="Artwork"
+        showFullscreenControl
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
+
+    revealFrame();
+
+    expect(
+      screen.getByRole("button", { name: "Full screen" })
+    ).toBeInTheDocument();
+  });
+
+  it("expands this sandboxed frame element itself", async () => {
+    const externalRef = { current: null as HTMLIFrameElement | null };
     const { container } = render(
       <SandboxedExternalIframe
         src="https://media.example.test/ipfs/cid/index.html"
         title="Artwork"
+        iframeRef={externalRef}
         showFullscreenControl
       />
     );
@@ -140,8 +174,14 @@ describe("SandboxedExternalIframe", () => {
       value: requestFullscreen,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    });
 
+    expect(externalRef.current).toBe(frame);
+    expect(requestElementFullScreenMock).toHaveBeenCalledTimes(1);
+    expect(requestElementFullScreenMock).toHaveBeenCalledWith(frame);
+    // The real helper reaches the browser API on that same element.
     expect(requestFullscreen).toHaveBeenCalledTimes(1);
     expect(frame).toHaveAttribute("sandbox", "allow-scripts");
   });

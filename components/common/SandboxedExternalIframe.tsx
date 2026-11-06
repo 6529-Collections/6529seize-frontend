@@ -1,7 +1,7 @@
 "use client";
 
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
-import { enterArtFullScreen } from "@/helpers/Helpers";
+import { requestElementFullScreen } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useFullScreenSupported } from "@/hooks/useFullScreenSupported";
@@ -10,7 +10,6 @@ import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import React, {
   useCallback,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -48,7 +47,7 @@ interface SandboxedExternalIframeProps {
  *
  * Security notes:
  * - keep allow-same-origin disabled to force an opaque origin boundary.
- * - deny all Permission Policy features via an explicit empty `allow` attribute.
+ * - grant only the `fullscreen` Permission Policy feature, so the frame itself can be expanded.
  * - enforce HTTPS and strip referrers; credentialless removes ambient cookies where supported.
  * - the sandbox isolates the frame even if it redirects after the initial load.
  * - the source is never offered as a top-level link: viewers expand the
@@ -69,13 +68,32 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const supportsFullScreen = useFullScreenSupported();
-  const frameId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  const setFrameRef = useCallback(
+    (frame: HTMLIFrameElement | null) => {
+      frameRef.current = frame;
+      if (typeof iframeRef === "function") {
+        iframeRef(frame);
+      } else if (iframeRef) {
+        iframeRef.current = frame;
+      }
+    },
+    [iframeRef]
+  );
+
   const handleFullscreen = useCallback(() => {
-    void enterArtFullScreen(frameId);
-  }, [frameId]);
+    const frame = frameRef.current;
+    if (!frame) {
+      return;
+    }
+    // The helper logs a refused or unsupported request and resolves to false.
+    requestElementFullScreen(frame).catch((error: unknown) => {
+      console.error("Could not expand interactive media", error);
+    });
+  }, []);
 
   const canonicalSrc = useMemo(
     () => canonicalizeInteractiveMediaUrl(src),
@@ -237,8 +255,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
         {isVisible ? (
           <iframe
             {...iframeProps}
-            id={frameId}
-            ref={iframeRef}
+            ref={setFrameRef}
             title={iframeTitle}
             onLoad={onLoad}
             onError={onError}
