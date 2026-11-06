@@ -41,7 +41,6 @@ import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
 import localFont from "next/font/local";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
-import { connection } from "next/server";
 
 // Any route that fetches while rendering stays request-time, so its data is
 // never frozen at build. Routes that fetch nothing are unaffected. Pages move
@@ -71,7 +70,7 @@ export const viewport: Viewport = {
   maximumScale: 10,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
@@ -79,14 +78,10 @@ export default async function RootLayout({
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
   // The shell reads nothing from the request: every visitor gets the same
   // HTML, and the browser decides native iOS, the EULA gate and NFT
-  // purchasing. connection() is the deliberate opt-out that keeps routes
-  // rendering per request by default. It cannot be removed yet: shell
-  // components call useSearchParams() outside a Suspense boundary, which
-  // fails the build for any route Next tries to prerender. A page that
-  // exports `dynamic = "force-static"` skips it and is prerendered. See
-  // "Static Rendering Readiness" in
+  // purchasing. A route that reads no request data and fetches nothing while
+  // it renders is prerendered. Wave and chat routes stay request-time in
+  // their own segments. See "Static Rendering Readiness" in
   // ops/docs/developer/next-config-runtime-rationale.md.
-  await connection();
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when

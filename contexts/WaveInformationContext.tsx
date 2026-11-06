@@ -10,7 +10,8 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
 import type { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 interface WaveInformationRequest {
@@ -55,8 +56,10 @@ export function WaveInformationProvider({
   const requestSequence = useRef(0);
   const traversing = useRef(false);
   const pathname = usePathname();
-  const search = useSearchParams();
-  const route = `${pathname}?${search.toString()}`;
+  // Public routes prerender without a query; it joins the route key after
+  // hydration, before any sheet can open. Wave and chat routes read it now.
+  const search = useShellSearchParams(pathname);
+  const route = `${pathname}?${search?.toString() ?? ""}`;
   useEffect(() => {
     // A route change ends any pending traversal owned by the previous sheet.
     traversing.current = false;
