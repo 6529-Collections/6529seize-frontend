@@ -661,6 +661,8 @@ export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
 export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiPaymentDetails';
+export * from '../models/ApiProfileActivityLog';
+export * from '../models/ApiProfileActivityLogPage';
 export * from '../models/ApiProfileBlockState';
 export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileCmsAgentCandidateValidation';
@@ -1642,6 +1644,8 @@ import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
 import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
+import { ApiProfileActivityLog } from '../models/ApiProfileActivityLog';
+import { ApiProfileActivityLogPage } from '../models/ApiProfileActivityLogPage';
 import { ApiProfileBlockState } from '../models/ApiProfileBlockState';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileCmsAgentCandidateValidation } from '../models/ApiProfileCmsAgentCandidateValidation';
@@ -2875,6 +2879,8 @@ let typeMap: {[index: string]: any} = {
     "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
     "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiPaymentDetails": ApiPaymentDetails,
+    "ApiProfileActivityLog": ApiProfileActivityLog,
+    "ApiProfileActivityLogPage": ApiProfileActivityLogPage,
     "ApiProfileBlockState": ApiProfileBlockState,
     "ApiProfileCmsAgentCandidateValidation": ApiProfileCmsAgentCandidateValidation,
     "ApiProfileCmsAgentConstraints": ApiProfileCmsAgentConstraints,
