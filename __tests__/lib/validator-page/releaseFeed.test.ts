@@ -1,7 +1,15 @@
 /** @jest-environment node */
-import { parseReleaseFeed } from "@/lib/validator-page/releaseFeed";
+import {
+  getOfferedRelease,
+  parseFeedSupport,
+  parseReleaseFeed,
+} from "@/lib/validator-page/releaseFeed";
 import {
   feedEntry,
+  RC9_DEADLINE_REASON,
+  RC9_FEED,
+  RC9_UNSAFE_REASON,
+  RC9_URGENT_REASON,
   SAME_DAY_FEED,
   TEST_FEED,
   TEST_RELEASE_ENTRY,
@@ -154,5 +162,142 @@ describe("parseReleaseFeed", () => {
     expect(parseReleaseFeed(null)).toEqual([]);
     expect(parseReleaseFeed({ releases: "x" })).toEqual([]);
     expect(parseReleaseFeed([TEST_RELEASE_ENTRY])).toHaveLength(1);
+  });
+});
+
+describe("the feed's urgent and unsafe fields", () => {
+  const entry = (version: string, extra: Record<string, unknown>) => ({
+    ...feedEntry(version, "test", "2026-11-06"),
+    ...extra,
+  });
+
+  it("reads rc.9's feed: rc.9 urgent with its reason, older releases unsafe", () => {
+    const [rc9, rc8, rc7] = parseReleaseFeed(RC9_FEED);
+    expect(rc9).toMatchObject({
+      version: "0.1.0-rc.9",
+      urgent: true,
+      reason: RC9_URGENT_REASON,
+      unsafeReason: null,
+    });
+    for (const release of [rc8, rc7]) {
+      expect(release).toMatchObject({
+        urgent: false,
+        reason: null,
+        unsafeReason: RC9_UNSAFE_REASON,
+      });
+    }
+    expect(parseFeedSupport(RC9_FEED)).toEqual({
+      minSupported: "0.1.0-rc.9",
+      deadline: "2026-11-08T00:00:00Z",
+      deadlineReason: RC9_DEADLINE_REASON,
+    });
+  });
+
+  it("reads a severity it doesn't know as urgent, as the validator does", () => {
+    const releases = parseReleaseFeed({
+      releases: [
+        entry("0.1.0-rc.14", { severity: "critical" }),
+        entry("0.1.0-rc.13", { severity: "urgent" }),
+        entry("0.1.0-rc.12", { severity: "normal" }),
+        entry("0.1.0-rc.11", {}),
+        entry("0.1.0-rc.10", { severity: 2 }),
+        entry("0.1.0-rc.9", { severity: " " }),
+      ],
+    });
+    expect(releases.map((release) => release.urgent)).toEqual([
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it("caps a reason at 300 characters and drops one that is not one line of text", () => {
+    const long = `${"é".repeat(299)}xyz`;
+    const releases = parseReleaseFeed({
+      releases: [
+        entry("0.1.0-rc.13", { severity: "urgent", reason: long }),
+        entry("0.1.0-rc.12", { severity: "urgent", reason: "two\nlines" }),
+        entry("0.1.0-rc.11", { severity: "urgent", reason: 7 }),
+        entry("0.1.0-rc.10", { severity: "urgent", reason: "  " }),
+      ],
+    });
+    expect(releases[0]?.reason).toBe(`${"é".repeat(299)}x`);
+    expect(releases.slice(1).map((release) => release.reason)).toEqual([
+      null,
+      null,
+      null,
+    ]);
+    expect(
+      parseFeedSupport({ ...RC9_FEED, deadline_reason: "a\u0007b" })
+        .deadlineReason
+    ).toBeNull();
+  });
+
+  it("marks only well-formed unsafe versions, by the version a release names", () => {
+    const releases = parseReleaseFeed({
+      unsafe_versions: [
+        { version: "0.1.0-rc.8", reason: "First reason." },
+        { version: "0.1.0-rc.8", reason: "Second reason." },
+        { version: "0.1.0-rc.7" },
+        { version: "0.1.0-rc.6", reason: "Two\nlines." },
+        { version: "rc.5", reason: "Not a version." },
+        "0.1.0-rc.5",
+      ],
+      releases: [
+        entry("0.1.0-rc.8", {}),
+        entry("0.1.0-rc.7", {}),
+        entry("0.1.0-rc.6", {}),
+        entry("0.1.0-rc.5", {}),
+      ],
+    });
+    expect(releases.map((release) => release.unsafeReason)).toEqual([
+      "First reason.",
+      null,
+      null,
+      null,
+    ]);
+    expect(
+      parseReleaseFeed({ ...RC9_FEED, unsafe_versions: "all" }).map(
+        (release) => release.unsafeReason
+      )
+    ).toEqual([null, null, null]);
+  });
+
+  it("keeps a deadline only in the validator's form and with a minimum version", () => {
+    for (const deadline of [
+      "2026-11-08",
+      "2026-11-08T00:00:00+00:00",
+      "2026-11-08T00:00Z",
+      "2026-13-40T00:00:00Z",
+      20261108,
+    ]) {
+      expect(parseFeedSupport({ ...RC9_FEED, deadline }).deadline).toBeNull();
+    }
+    expect(parseFeedSupport({ ...RC9_FEED, min_supported: "rc.9" })).toEqual({
+      minSupported: null,
+      deadline: null,
+      deadlineReason: RC9_DEADLINE_REASON,
+    });
+    expect(parseFeedSupport(TEST_FEED)).toEqual({
+      minSupported: null,
+      deadline: null,
+      deadlineReason: null,
+    });
+    expect(parseFeedSupport(null).deadline).toBeNull();
+  });
+
+  it("offers the newest release unless the feed lists it as unsafe", () => {
+    expect(getOfferedRelease(parseReleaseFeed(RC9_FEED))?.version).toBe(
+      "0.1.0-rc.9"
+    );
+    const unsafeNewest = parseReleaseFeed({
+      ...RC9_FEED,
+      unsafe_versions: [{ version: "0.1.0-rc.9", reason: "Made up." }],
+    });
+    expect(getOfferedRelease(unsafeNewest)).toBeUndefined();
+    expect(getOfferedRelease([])).toBeUndefined();
   });
 });

@@ -55,12 +55,16 @@ function buttonLabel(
 /**
  * One big button for this computer, and the other systems one click away.
  * The server picks the first button from the User-Agent header; Chromium's
- * client hints then pick the Linux file for this CPU.
+ * client hints then pick the Linux file for this CPU. Under each button, the
+ * full version, so a tester can tell which candidate it is.
  */
 export default function ValidatorDownloadChooser({
+  version,
   options,
   initial,
 }: {
+  /** The offered release's version, as the feed names it: 0.1.0-rc.9. */
+  readonly version: string;
   readonly options: readonly ValidatorDownloadOption[];
   readonly initial: VisitorPlatform;
 }) {
@@ -96,6 +100,8 @@ export default function ValidatorDownloadChooser({
               {buttonLabel(option, bothLinux)}
             </a>
             <p className="tw-m-0 tw-text-center tw-text-sm tw-leading-6 tw-text-iron-400">
+              <span className="tw-font-mono tw-text-iron-200">{version}</span>
+              {" · "}
               {option.summary}
               {option.size && ` · ${option.size}`}
             </p>
