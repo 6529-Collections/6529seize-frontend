@@ -502,6 +502,12 @@ test.describe("Live reaction details @auth @medium @local-only", () => {
   }) => {
     const fixture = await installReactionDetailsFixture(page, baseURL);
     fixture.failNextRead();
+    const failedRead = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v2/drops/${SANDBOX_DROP_ID}/reactions` &&
+        response.status() === 503
+    );
     await gotoSandboxWave(page);
     const chip = page
       .getByRole("tabpanel")
@@ -509,6 +515,7 @@ test.describe("Live reaction details @auth @medium @local-only", () => {
       .getByRole("button", { name: "👍 4", exact: true });
     await chip.hover();
     const tooltip = page.getByRole("tooltip");
+    await failedRead;
     await expect(tooltip).toContainText("4 reactions");
     expect(fixture.detailReads()).toBe(1);
     await page

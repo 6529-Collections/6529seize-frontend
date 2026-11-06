@@ -307,3 +307,44 @@ test("does not refetch for an unrelated drop update with unchanged reactions", a
   rerender(<WaveDropReactions drop={{ ...drop(1), title: "Updated title" }} />);
   expect(fetchDetails).toHaveBeenCalledTimes(1);
 });
+
+test.each([{ profiles: [] }, { profiles: [profile("alice")] }])(
+  "keeps partial names in the loading/count fallback without losing the viewer's selection (%j)",
+  async ({ profiles }) => {
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: { id: "alice", handle: "alice" },
+      activeProfileProxy: null,
+    } as unknown as ReturnType<typeof useAuth>);
+    let rejectDetails!: (error: Error) => void;
+    fetchDetails.mockReturnValueOnce(
+      new Promise((_resolve, reject) => {
+        rejectDetails = reject;
+      })
+    );
+    const viewerDrop = drop(2);
+    mount({
+      ...viewerDrop,
+      reactions: [{ ...viewerDrop.reactions[0]!, profiles }],
+      context_profile_context: {
+        ...viewerDrop.context_profile_context!,
+        reaction: ":gm:",
+      },
+    });
+    fireEvent.mouseEnter(chip());
+    await waitFor(() => expect(chip()).toHaveAttribute("aria-busy", "true"));
+    expect(chip()).toHaveTextContent("2:");
+    expect(chip()).not.toHaveTextContent("alice");
+    expect(
+      jest.mocked(WaveDropReaction).mock.lastCall?.[0].drop
+        .context_profile_context?.reaction
+    ).toBe(":gm:");
+
+    await act(async () => rejectDetails(new Error("Offline")));
+    await waitFor(() => expect(chip()).toHaveAttribute("aria-busy", "false"));
+    expect(chip()).not.toHaveTextContent("alice");
+    fireEvent.mouseLeave(chip());
+    fetchDetails.mockResolvedValueOnce(details("alice", "bob"));
+    fireEvent.mouseEnter(chip());
+    await waitFor(() => expect(chip()).toHaveTextContent("2: alice, bob"));
+  }
+);

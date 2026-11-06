@@ -77,18 +77,23 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
     const viewerReaction = drop.context_profile_context?.reaction;
 
     return drop.reactions.map((reaction) => {
+      const count = getReactionCount(reaction);
+      const hasDetails =
+        detailedReactions !== undefined || reaction.profiles.length === count;
       let profiles = detailedReactions
         ? (detailsByReaction.get(reaction.reaction)?.profiles ?? [])
         : reaction.profiles;
-      // Keep the viewer's optimistic choice authoritative while its write settles.
-      if (viewer && viewerReaction !== undefined) {
+      if (!hasDetails) profiles = [];
+      // Keep partial feed profiles in the loading/count fallback until details arrive.
+      // The chip's count and selection remain authoritative during an optimistic write.
+      if (hasDetails && viewer && viewerReaction !== undefined) {
         if (viewerReaction !== reaction.reaction) {
           profiles = profiles.filter((profile) => profile.id !== viewer.id);
         } else if (!profiles.some((profile) => profile.id === viewer.id)) {
           profiles = [...profiles, viewer];
         }
       }
-      return { ...reaction, profiles, count: getReactionCount(reaction) };
+      return { ...reaction, profiles, count };
     });
   }, [
     detailedReactions,
