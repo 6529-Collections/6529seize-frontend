@@ -7,7 +7,7 @@ import Spinner from "../utils/Spinner";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import {
   getActiveWaveIdFromUrl,
   getMessagesBaseRoute,
@@ -32,13 +32,13 @@ export default function BackButton({
   const searchParamsString = searchParams.toString();
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const exitActiveWave = useExitActiveWave();
   const { goBack, goBackTo } = useNavigationHistoryContext();
   const information = useWaveInformation();
 
   const waveId =
-    myStream?.activeWave.id ??
+    activeWave?.id ??
     getActiveWaveIdFromUrl({ pathname, searchParams }) ??
     null;
   const dropIdFromUrl = searchParams.get("drop") ?? undefined;
@@ -63,7 +63,7 @@ export default function BackButton({
       : () => {
           const route = getMissingWaveNavigationRoute(waveId);
           if (!route) return;
-          myStream?.activeWave.set(null);
+          activeWave?.set(null);
           const params = route.searchParams;
           params.delete("wave");
           const basePath = getWaveHomeRoute({

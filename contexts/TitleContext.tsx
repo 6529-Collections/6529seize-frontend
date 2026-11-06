@@ -22,7 +22,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isTitleUpdateCurrent, STREAM_INDEX_ROUTES } from "./title.helpers";
-import { useMyStreamOptional } from "./wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 
 // The provider's own state. The title text and ownership also depend on the
 // URL query (`?wave=`, `/?view=waves`), so readers derive them with
@@ -348,13 +348,13 @@ export const useTitleText = (): TitleText => {
     waveData,
     locale,
   } = useTitleContext("useTitleText");
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const pathname = usePathname();
   const searchParams: ReadonlyURLSearchParams | null = useSearchParams();
   const isWaveRoute = isWaveRouteFor(pathname, searchParams);
   const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
   const fallbackActiveWaveId =
-    pathname === "/" ? (myStream?.activeWave.id ?? null) : null;
+    pathname === "/" ? (activeWave?.id ?? null) : null;
   const waveParam = isWaveRoute ? (waveInUrl ?? fallbackActiveWaveId) : null;
 
   // Compute the title based on current state

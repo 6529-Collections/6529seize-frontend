@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import WavePicture from "@/components/waves/WavePicture";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -140,7 +140,7 @@ const getActiveSubwaveFallbackItem = (
 
 function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
   const { registerRef } = useLayout();
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const locale = useBrowserLocale();

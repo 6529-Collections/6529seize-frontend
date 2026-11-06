@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import MailUnreadIcon from "@/components/common/icons/MailUnreadIcon";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiMarkDropUnreadResponse } from "@/generated/models/ApiMarkDropUnreadResponse";
@@ -33,7 +33,8 @@ export default function WaveDropActionsMarkUnread({
   const [loading, setLoading] = useState(false);
   const unreadDividerContext = useUnreadDividerOptional();
   const dmUnreadActions = useOptionalDmUnreadActions();
-  const { waves, directMessages } = useMyStream();
+  // Read on click, not on render: rows must not re-render when lists refresh.
+  const { streamLists } = useMyStreamActions();
 
   const isAuthor =
     !drop.author.is_anonymous &&
@@ -57,11 +58,12 @@ export default function WaveDropActionsMarkUnread({
         dmUnreadActions?.applyServerState(response.dm_unread_state);
       }
 
-      waves.restoreWaveUnreadCount(
+      const lists = streamLists.get();
+      lists?.waves.restoreWaveUnreadCount(
         drop.wave.id,
         response.your_unread_drops_count
       );
-      directMessages.restoreWaveUnreadCount(
+      lists?.directMessages.restoreWaveUnreadCount(
         drop.wave.id,
         response.your_unread_drops_count
       );
@@ -113,8 +115,7 @@ export default function WaveDropActionsMarkUnread({
     queryClient,
     setToast,
     unreadDividerContext,
-    waves,
-    directMessages,
+    streamLists,
     dmUnreadActions,
     onMarkUnread,
   ]);

@@ -69,6 +69,18 @@ let mockActiveWaveId: string | null = null;
 const mockSetActiveWave = jest.fn();
 const mockRequestMainWavesList = jest.fn(() => jest.fn());
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamActions: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamActionsOptional: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamSelector: (selector: (lists: unknown) => unknown) =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamSelector(selector),
   useMyStreamOptional: () => ({
     activeWave: {
       id: mockActiveWaveId,
@@ -77,6 +89,12 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
     requestMainWavesList: mockRequestMainWavesList,
   }),
 }));
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 
 const mockClearLastVisited = jest.fn();
 jest.mock("@/components/navigation/ViewContext", () => ({

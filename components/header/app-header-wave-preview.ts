@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import type { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useCallback, useMemo } from "react";
+import { useMyStreamSelector } from "@/contexts/wave/MyStreamContext";
+import type { StreamListsSnapshot } from "@/contexts/wave/MyStreamContext.types";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -77,27 +78,39 @@ const getIsWaveResolving = ({
   !headerWavePreview &&
   (isLoading || isFetching || wave?.id !== waveId);
 
-export const useHeaderActiveWave = (
-  myStream: ReturnType<typeof useMyStreamOptional>
-) => {
-  const waveId = myStream?.activeWave.id ?? null;
+const isSameHeaderWavePreview = (
+  left: HeaderWavePreview | null,
+  right: HeaderWavePreview | null
+): boolean =>
+  left === right ||
+  (left !== null &&
+    right !== null &&
+    left.id === right.id &&
+    left.name === right.name &&
+    left.picture === right.picture &&
+    left.contributors === right.contributors);
+
+export const useHeaderActiveWave = (waveId: string | null) => {
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const activeWave = getActiveApiWave(waveId, wave);
-  const streamWaves = myStream?.waves.list ?? EMPTY_MINIMAL_WAVES;
-  const streamDirectMessages =
-    myStream?.directMessages.list ?? EMPTY_MINIMAL_WAVES;
   const fullWaveHeaderPreview = useMemo(
     () => (activeWave ? getHeaderWavePreviewFromApiWave(activeWave) : null),
     [activeWave]
   );
-  const listWaveHeaderPreview = useMemo(
-    () =>
+  // The header re-renders only when the previewed wave changes, not on
+  // every wave-list refresh.
+  const selectListPreview = useCallback(
+    (lists: StreamListsSnapshot | null) =>
       getActiveHeaderWavePreviewFromList({
         waveId,
-        waves: streamWaves,
-        directMessages: streamDirectMessages,
+        waves: lists?.waves.list ?? EMPTY_MINIMAL_WAVES,
+        directMessages: lists?.directMessages.list ?? EMPTY_MINIMAL_WAVES,
       }),
-    [streamDirectMessages, streamWaves, waveId]
+    [waveId]
+  );
+  const listWaveHeaderPreview = useMyStreamSelector(
+    selectListPreview,
+    isSameHeaderWavePreview
   );
   const headerWavePreview = fullWaveHeaderPreview ?? listWaveHeaderPreview;
   // A list preview is enough to avoid the title spinner; full-wave-only

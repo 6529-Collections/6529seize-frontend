@@ -4,7 +4,9 @@ import {
   MyStreamProvider,
   useMyStream,
   useMyStreamActions,
+  useMyStreamSelector,
 } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import type { WaveMessagesUpdate } from "@/contexts/wave/hooks/types";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -259,6 +261,72 @@ describe("MyStreamProvider actions context", () => {
     expect(actionRowRender).not.toHaveBeenCalled();
     // The provider rebuilt processIncomingDrop on each of those renders.
     expect(mockProcessIncomingDropImpls.length).toBeGreaterThan(2);
+  });
+
+  it("keeps open-wave readers still while wave lists change", async () => {
+    const activeWaveRender = jest.fn();
+    const ActiveWaveRow = () => {
+      activeWaveRender(useActiveWave().id);
+      return null;
+    };
+    render(
+      <MyStreamProvider>
+        <ActiveWaveRow />
+      </MyStreamProvider>
+    );
+    await flushStoreNotifications();
+    expect(activeWaveRender).toHaveBeenLastCalledWith(mockWaveId);
+    activeWaveRender.mockClear();
+
+    await deliverIncomingDrop(buildDrop("drop-1", 1), 1);
+    await deliverIncomingDrop(buildDrop("drop-2", 2), 2);
+
+    expect(activeWaveRender).not.toHaveBeenCalled();
+  });
+
+  it("gives handlers the latest lists and selectors only their changes", async () => {
+    const actionRowRender = jest.fn<void, [MyStreamActions]>();
+    const selectorRender = jest.fn();
+    const SelectorRow = () => {
+      selectorRender(
+        useMyStreamSelector((lists) => lists?.waves.list.length ?? -1)
+      );
+      return null;
+    };
+    render(
+      <MyStreamProvider>
+        <ActionRow onRender={actionRowRender} />
+        <SelectorRow />
+      </MyStreamProvider>
+    );
+    await flushStoreNotifications();
+    const actions = actionRowRender.mock.calls[0]![0];
+    expect(selectorRender).toHaveBeenLastCalledWith(1);
+    selectorRender.mockClear();
+
+    // A new unread count changes the list but not its length.
+    await deliverIncomingDrop(buildDrop("drop-1", 1), 3);
+    expect(selectorRender).not.toHaveBeenCalled();
+    expect(
+      (
+        actions.streamLists.get()?.waves.list[0] as unknown as {
+          readonly unread: number;
+        }
+      ).unread
+    ).toBe(3);
+
+    act(() => {
+      mockMainWaves.current = [
+        { id: mockWaveId, unread: 3 },
+        { id: "wave-2", unread: 0 },
+      ];
+      mockCapturedStore.updateData?.({
+        key: mockWaveId,
+        drops: [buildDrop("drop-2", 2)],
+      });
+    });
+    await flushStoreNotifications();
+    expect(selectorRender).toHaveBeenLastCalledWith(2);
   });
 
   it("runs mount-time actions against the latest stream state", async () => {

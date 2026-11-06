@@ -33,6 +33,12 @@ jest.mock("@/contexts/wave/MyStreamContext", () => {
     }),
   };
 });
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 
 jest.mock("@/components/community-curations/CommunityCurations", () => ({
   __esModule: true,

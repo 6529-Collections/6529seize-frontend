@@ -5,8 +5,10 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 
 let capturedProps: any;
+let quoteRenders = 0;
 jest.mock("@/components/waves/drops/WaveDropQuote", () => (props: any) => {
   capturedProps = props;
+  quoteRenders += 1;
   return <div data-testid="quote" />;
 });
 
@@ -18,8 +20,26 @@ jest.mock("@tanstack/react-query", () => ({
 
 const useMyStreamOptional = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamActions: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamActionsOptional: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamSelector: (selector: (lists: unknown) => unknown) =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamSelector(selector),
   useMyStreamOptional: () => useMyStreamOptional(),
 }));
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 
 jest.mock("@/services/api/drop-api", () => {
   const { QueryKey: ActualQueryKey } = jest.requireActual(
@@ -201,6 +221,54 @@ describe("WaveDropQuoteWithDropId", () => {
 
     expect(capturedProps.drop).toBe(moderatedDrop);
     expect(capturedProps.isNotFound).toBe(false);
+  });
+
+  it("re-renders only when the quoted drop changes, not for other messages", () => {
+    const listeners = new Set<() => void>();
+    const quoted = { id: "d1", wave: { id: "w1" }, type: "FULL" };
+    let waveMessages: any = { isLoading: false, drops: [quoted] };
+    useMyStreamOptional.mockReturnValue({
+      activeWave: { id: "w1" },
+      waveMessagesStore: {
+        getData: jest.fn(() => waveMessages),
+        subscribe: jest.fn((_waveId: string, listener: () => void) => {
+          listeners.add(listener);
+        }),
+        unsubscribe: jest.fn((_waveId: string, listener: () => void) => {
+          listeners.delete(listener);
+        }),
+      },
+    });
+    useQuery.mockReturnValue({ data: undefined, error: null });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId="d1"
+        partId={1}
+        maybeDrop={null}
+        waveId="w1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+    expect(capturedProps.drop).toBe(quoted);
+    const rendersBefore = quoteRenders;
+
+    // A new message elsewhere in the wave leaves the quoted drop alone.
+    act(() => {
+      waveMessages = {
+        isLoading: false,
+        drops: [quoted, { id: "d2", wave: { id: "w1" }, type: "FULL" }],
+      };
+      listeners.forEach((listener) => listener());
+    });
+    expect(quoteRenders).toBe(rendersBefore);
+
+    const edited = { ...quoted, title: "edited" };
+    act(() => {
+      waveMessages = { isLoading: false, drops: [edited] };
+      listeners.forEach((listener) => listener());
+    });
+    expect(capturedProps.drop).toBe(edited);
   });
 
   it("passes not-found state when the refresh returns the not-found message", () => {
