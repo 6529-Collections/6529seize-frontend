@@ -463,7 +463,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           `decrypted pixel byte ${index} differs`
         ).toBeLessThanOrEqual(2);
       });
-      await checkEncryptedImageActions(b.page, received, filename);
+      await checkEncryptedImageActions(
+        b.page,
+        received,
+        filename,
+        filename === image.name ? droppedName : undefined
+      );
     }
     await expectNothingUndecryptable(b);
 

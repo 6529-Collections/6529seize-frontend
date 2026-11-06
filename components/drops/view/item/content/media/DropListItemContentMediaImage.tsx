@@ -15,12 +15,12 @@ import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import React, { useCallback, useRef, useState } from "react";
 import { useContainedImageBoundsStyle } from "./containedImageBounds";
+import { ImagePreviewLoading } from "./ImagePreviewLoading";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import {
   ImageMediaModal,
@@ -37,16 +37,6 @@ import {
   type OriginalImageQuality,
 } from "./useOriginalImage";
 
-const loadingPlaceholderStyle: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  maxWidth: "100%",
-  maxHeight: "100%",
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-};
 const INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
 const INTRINSIC_IMAGE_MAX_HEIGHT = "16rem";
 
@@ -132,21 +122,6 @@ function getImageLoadingState({
     hidePreview:
       (quality.showingOriginal && canToggleOriginal) || hideUnavailable,
   };
-}
-
-function LoadingPlaceholder({
-  hasTouchScreen,
-}: {
-  readonly hasTouchScreen: boolean;
-}) {
-  return (
-    <div
-      className={`tw-rounded-xl tw-bg-iron-800 ${
-        hasTouchScreen ? "" : "tw-animate-pulse"
-      }`}
-      style={loadingPlaceholderStyle}
-    />
-  );
 }
 
 function DropImageContent({
@@ -258,7 +233,9 @@ function ImageInteractionLayer({
   boundsStyle,
   label,
   onClick,
+  triggerRef,
 }: {
+  readonly triggerRef: React.RefObject<HTMLButtonElement | null>;
   readonly actions: React.ReactNode;
   readonly boundsStyle: React.CSSProperties | null;
   readonly label: string;
@@ -271,7 +248,8 @@ function ImageInteractionLayer({
     >
       <button
         type="button"
-        className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        ref={triggerRef}
+        className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-zoom-in tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
         onClick={onClick}
         aria-label={label}
       />
@@ -282,6 +260,9 @@ function ImageInteractionLayer({
 
 type DropListItemContentMediaImageProps = {
   readonly src: string;
+  readonly downloadFileName?: string | undefined;
+  readonly mimeType?: string | undefined;
+  readonly onRetry?: (() => void) | undefined;
   readonly alt?: string | undefined;
   readonly openPreviewLabel?: string | undefined;
   readonly maxRetries?: number | undefined;
@@ -316,6 +297,9 @@ function DropListItemContentMediaImage({
 function DropListItemContentMediaImageContent({
   src,
   alt: altOverride,
+  downloadFileName = "image",
+  mimeType = "image",
+  onRetry,
   openPreviewLabel = t(DEFAULT_LOCALE, "drop.media.openPreview"),
   maxRetries = 0,
   isCompetitionDrop = false,
@@ -337,7 +321,6 @@ function DropListItemContentMediaImageContent({
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
   const { isCapacitor } = useCapacitor();
-  const { hasTouchScreen } = useDeviceInfo();
   const imageGallery = useDropImageGallery();
   const quality = useOriginalImage(src, showOriginalQualityToggle);
   const canToggleOriginal =
@@ -355,6 +338,7 @@ function DropListItemContentMediaImageContent({
   const videoRef = useRef<HTMLVideoElement>(null);
   const originalImgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const localSource = useLocalImagePreviewSource(src);
@@ -368,10 +352,13 @@ function DropListItemContentMediaImageContent({
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
-      fallbackFileName: "image",
+      fallbackFileName: downloadFileName,
       dialogTitle: t(DEFAULT_LOCALE, "drop.media.saveDialogTitle"),
-      mimeType: "image",
+      mimeType,
     });
+
+  // Decrypted blob URLs cannot leave their originating native WebView.
+  const openImage = localSource && isCapacitor ? undefined : openMedia;
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -396,6 +383,7 @@ function DropListItemContentMediaImageContent({
   };
 
   const manualRetry = () => {
+    onRetry?.();
     setErrorCount(0);
     setLoaded(false);
     setVideoFailed(false);
@@ -439,6 +427,7 @@ function DropListItemContentMediaImageContent({
     ) => {
       event?.stopPropagation();
       setIsModalOpen(false);
+      triggerRef.current?.focus({ preventScroll: true });
     },
     []
   );
@@ -494,7 +483,7 @@ function DropListItemContentMediaImageContent({
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
         {!loaded && !unavailable && !quality.showingOriginal && !isGif && (
-          <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
+          <ImagePreviewLoading />
         )}
 
         <div
@@ -593,6 +582,7 @@ function DropListItemContentMediaImageContent({
             )}
           {!disableModal && (
             <ImageInteractionLayer
+              triggerRef={triggerRef}
               boundsStyle={imageActionBoundsStyle}
               label={openPreviewLabel}
               onClick={handleImageClick}
@@ -608,7 +598,7 @@ function DropListItemContentMediaImageContent({
                   {(loaded || unavailable || canToggleOriginal) && (
                     <InlineMediaActions
                       variant="image"
-                      onOpen={openMedia}
+                      onOpen={openImage}
                       openLabel={openLabel}
                       onDownload={downloadMedia}
                       isDownloading={isDownloading}
@@ -646,7 +636,7 @@ function DropListItemContentMediaImageContent({
           src={src}
           imageRef={modalImageRef}
           onClose={() => handleCloseModal()}
-          onOpen={openMedia}
+          onOpen={openImage}
           openLabel={openLabel}
           onDownload={downloadMedia}
           isDownloading={isDownloading}

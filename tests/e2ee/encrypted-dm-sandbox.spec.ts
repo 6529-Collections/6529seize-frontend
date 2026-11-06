@@ -467,7 +467,9 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await alice.page
       .getByRole("button", { name: "Attach files", exact: true })
       .click();
-    await (await chooser).setFiles({
+    await (
+      await chooser
+    ).setFiles({
       name: pickedName,
       mimeType: "image/png",
       buffer: Buffer.from(PIXEL_PNG_BASE64, "base64"),
@@ -514,7 +516,12 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
           image.evaluate((element: HTMLImageElement) => element.naturalWidth)
         )
         .toBe(1);
-      await checkEncryptedImageActions(bob.page, image, filename);
+      await checkEncryptedImageActions(
+        bob.page,
+        image,
+        filename,
+        filename === pickedName ? "pixel.png" : undefined
+      );
     }
     await gotoPath(bob.page, ENCRYPTED_ROUTE);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible({
