@@ -82,10 +82,10 @@ on every page view. `config/staticAssetCacheHeaders.ts` adds a bounded policy
 through the shared `headers()` config instead of `immutable`, which would pin old
 bytes in browsers after a deploy:
 
-| Files | `Cache-Control` | Why |
-| --- | --- | --- |
-| Root-level images and icons (`png`, `jpg`, `svg`, `webp`, `avif`) | `public, max-age=86400, stale-while-revalidate=604800` | Brand assets change a few times a year at most. A replaced file shows within a day for returning visitors and on the next view after that. |
-| `/help-index.json`, `/llms.txt`, `/glossary.json` | `public, max-age=300, stale-while-revalidate=3600` | Regenerated on every deploy and read by crawlers and the help bot, so they stay short-lived. Next still sends `ETag` and `Last-Modified`, so a stale copy revalidates with a 304. |
+| Files                                                             | `Cache-Control`                                        | Why                                                                                                                                                                               |
+| ----------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root-level images and icons (`png`, `jpg`, `svg`, `webp`, `avif`) | `public, max-age=86400, stale-while-revalidate=604800` | Brand assets change a few times a year at most. A replaced file shows within a day for returning visitors and on the next view after that.                                        |
+| `/help-index.json`, `/llms.txt`, `/glossary.json`                 | `public, max-age=300, stale-while-revalidate=3600`     | Regenerated on every deploy and read by crawlers and the help bot, so they stay short-lived. Next still sends `ETag` and `Last-Modified`, so a stale copy revalidates with a 304. |
 
 Rules to keep:
 
@@ -123,9 +123,12 @@ shell HTML, and the browser makes the per-device decisions:
   Each deployment is built for one host. A browser on another host, such as a
   local server on a different port, gets its own badge right after hydration.
 
-Routes still render per request by default: the layout calls `connection()`,
-and it sets `fetchCache = "force-no-store"`. See Static Rendering Readiness for
-why each remains.
+A route that reads no request data and fetches nothing while it renders is
+prerendered, `/` included. The layout sets `fetchCache = "force-no-store"`, so
+a route that fetches while it renders stays request-time; see Static Rendering
+Readiness for why it remains. Wave and chat routes (`/waves`, `/messages`,
+`/notifications`, `/my-stream`) stay request-time in their own segments, because
+the shell's wave providers read their query during the server render there.
 
 Fixed-content pages opt out with `export const dynamic = "force-static"`.
 Next.js then prerenders them, gives them a cacheable `Cache-Control` header, and
@@ -138,16 +141,24 @@ caches fetches at build time.
 
 ### Static Rendering Readiness
 
-- `connection()` keeps the remaining routes request-time. Without it, any
-  route Next tries to prerender fails `next build`, because shell components
-  call `useSearchParams()` outside a `<Suspense>` boundary. Callers rendered on
-  every route include `VersionStatusProvider` (`useIsVersionStale`),
-  `MixpanelSetup`, `MyStreamProvider` (`useActiveWaveManager`),
-  `TitleProvider`, `WaveInformationProvider`, `NavigationHistoryProvider`,
-  `QuickDirectMessagesGate`, `DynamicHeadTitle`, and the sidebar Share trigger
-  and QR modal. Each must read search params without suspending the page
-  (for example a small reader inside its own `<Suspense>`) before
-  `connection()` can go.
+- Shell components rendered on every route must not call `useSearchParams()`
+  outside a `<Suspense>` boundary: during a static prerender it fails
+  `next build` for that route. Query readers sit in small leaves inside their
+  own boundaries, or read after hydration. `MyStreamProvider`
+  (`useActiveWaveManager`) and `WaveInformationProvider` use
+  `hooks/useShellSearchParams.ts`: on wave and chat routes
+  (`isWaveChatPathname`) they read the query in render as before. Those
+  segments export `dynamic = "force-dynamic"` so they stay request-time:
+  `connection()` in a nested layout or page runs after the shell providers
+  have already rendered, too late to stop the prerender. On every other route
+  the providers see no query in the server HTML and its hydration render, and
+  the live query from the next render on. `proxy.ts` sends legacy `/?wave=`
+  links to the wave route.
+- A page whose own client components call `useSearchParams()` outside a
+  `<Suspense>` boundary also fails the build once it can prerender. Pages that
+  still do (`/6529-gradient`, `/meme-accounting`, `/meme-gas`,
+  `/nextgen/manager`, `/xtdh`) export `dynamic = "force-dynamic"` until that
+  read moves into a boundary.
 - `fetchCache = "force-no-store"` keeps every route that fetches while it
   renders request-time, so its data is never frozen into a build-time page.
   Routes that fetch nothing are unaffected by it. It also blocks a page from
@@ -158,11 +169,9 @@ caches fetches at build time.
   revalidation with "Page changed from static to dynamic at runtime".
 - A `force-static` page renders the shell with empty search params on the
   server and real ones in the browser, so shell UI that reads search params in
-  the hydration render mismatches for URLs that carry them. The home page (`/`)
-  fetches nothing and builds as a static page with `force-static`, but a
-  desktop load of `/?view=messages` then fails hydration (React error 418) and
-  re-renders on the client. Make the shell's search-param readers
-  hydration-safe before opting `/` in.
+  the hydration render mismatches for URLs that carry them. A desktop load of
+  `/?view=messages` failed hydration (React error 418) that way. `/` therefore
+  prerenders in the default mode, where those readers bail out to the client.
 
 ### CSP Nonces
 

@@ -19,7 +19,8 @@ import {
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useShellSearchParams } from "@/hooks/useShellSearchParams";
+import { usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
@@ -59,7 +60,9 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
 
 export function useActiveWaveManager() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // Wave and chat routes read the query in render; on other routes it arrives
+  // after hydration, together with the `?wave=` it qualifies.
+  const searchParams = useShellSearchParams(pathname);
   const { isApp } = useDeviceInfo();
   const { tabsRef } = useWaveTabPreference();
   const queryClient = useQueryClient();
@@ -74,8 +77,8 @@ export function useActiveWaveManager() {
     [pathname, searchParams]
   );
   const hasActiveWaveDropTarget = useMemo(() => {
-    const serialNo = searchParams.get("serialNo")?.trim() ?? "";
-    const drop = searchParams.get("drop")?.trim() ?? "";
+    const serialNo = searchParams?.get("serialNo")?.trim() ?? "";
+    const drop = searchParams?.get("drop")?.trim() ?? "";
     return serialNo.length > 0 || drop.length > 0;
   }, [searchParams]);
 
