@@ -14,12 +14,12 @@ interface MockButtonProps {
   readonly children?: ReactNode;
 }
 
-let capturedActionProps: MockButtonProps;
+let capturedSubmitProps: MockButtonProps;
 let capturedClassificationProps: any;
 
 jest.mock("@/components/utils/button/Button", () => (props: MockButtonProps) => {
-  if (props.variant === "action") {
-    capturedActionProps = props;
+  if (props.type === "submit") {
+    capturedSubmitProps = props;
   }
   return (
     <button type={props.type} disabled={props.disabled}>
@@ -88,12 +88,12 @@ describe("UserPageHeaderEditClassification", () => {
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
-    expect(capturedActionProps.disabled).toBe(true);
+    expect(capturedSubmitProps.disabled).toBe(true);
 
     act(() => {
       capturedClassificationProps.onSelect(ApiProfileClassification.Bot);
     });
-    expect(capturedActionProps.disabled).toBe(false);
+    expect(capturedSubmitProps.disabled).toBe(false);
   });
 
   it("submits when auth succeeds", async () => {

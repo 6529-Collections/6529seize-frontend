@@ -1935,7 +1935,7 @@
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
-        "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
+        "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. The compact dark editor places name and classification alongside each other when space allows; classification options overlay the content without moving About. Image upload controls retain their upload icon. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
         "To add or change an About statement, use the profile editor (Edit profile > About on smaller layouts). Clear the About editor and save to remove it. The header displays only saved About text, with See more and See less for long text on mobile. Visitors, signed-out users, and active proxies never see profile edit controls.",
         "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
         "Editable profile surfaces require the connected profile owner. On a fresh profile load, owner, relationship, and moderation actions wait for the browser to restore the signed-in session while the public profile summary stays available.",
@@ -6665,7 +6665,8 @@
       "keywords": ["profile", "banner", "picture", "avatar", "edit", "owner"],
       "facts": [
         "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
-        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Desktop offers Choose a Meme with loading and retry states, or a file upload. Cover editing supports Gradient and Image modes.",
+        "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Both editors show Select Meme search immediately, separated from file upload by or. Desktop lets you type while Memes load and keeps loading and retry states. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
+        "In profile picture editors, saved or selected images show their preview inside the Upload image area, below Meme search, with no separate preview row. Select Meme search and Upload image remain available to choose a different Meme or file; drag and drop still works.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",
@@ -6702,7 +6703,7 @@
         "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link aligned to the right, with the collapse chevron beside the title, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
         "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves you don’t follow for both signed-in and signed-out visitors. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
         "If there are no active votes, Active Votes shows No active TDH votes right now in a compact area. Its heading, zero count and view-all link remain available. Loading and request errors are distinct from empty results; retrying a failed next page keeps previously loaded votes.",
-        "Both sidebar discovery sections start expanded. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
+        "Both sidebar discovery sections default to expanded once browser preferences load. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. Saved closed sections stay closed from the first render when reopening or refreshing the page. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
         "Discover Waves is a labeled link in the Profile Waves Feed header and a searchable destination that routes to /discover. Worth Checking Out is the first tab and default; Active Votes is second. The sidebar follows the same order, with direct View all links to each tab.",
         "Wave discovery is for finding waves, while the Waves panel is for active navigation and participation.",
         "Search and section availability depend on the route state and access rules."
@@ -7475,6 +7476,7 @@
       "facts": [
         "Wave quote link cards are documented under drop actions.",
         "Supported source links and rendering behavior are covered in the quote-link docs.",
+        "Direct same-origin /waves/{waveId} links without a serial number can show wave preview cards. Names truncate with an ellipsis when space is limited. Narrow cards put Follow or Following below the wave details; wider cards keep it beside the name.",
         "If a quote card fails, the original link can still be opened or copied where available."
       ],
       "canonical_path": "/waves",

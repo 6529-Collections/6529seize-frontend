@@ -12,7 +12,9 @@ export default function UserSettingsClassification({
   selected,
   onSelect,
   inlineOptions,
+  compact = false,
 }: {
+  readonly compact?: boolean;
   readonly selected: ApiProfileClassification;
   readonly onSelect: (selected: ApiProfileClassification) => void;
   readonly inlineOptions?: boolean | undefined;
@@ -46,7 +48,7 @@ export default function UserSettingsClassification({
     <div className="tw-relative tw-max-w-full" ref={listRef}>
       <div
         id={labelId}
-        className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
+        className={`tw-block tw-text-sm tw-font-medium tw-leading-5 ${compact ? "tw-text-iron-100" : "tw-text-iron-200"}`}
       >
         Profile classification
       </div>
@@ -57,7 +59,7 @@ export default function UserSettingsClassification({
         aria-labelledby={`${labelId} ${valueId}`}
         aria-expanded={isOpen}
         aria-controls={isOpen ? optionsId : undefined}
-        className="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60 focus-visible:tw-ring-primary-400"
+        className={`tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border-0 tw-text-left tw-font-normal tw-text-iron-50 tw-ring-1 tw-ring-inset hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${compact ? "tw-min-h-11 tw-bg-white/[0.025] tw-px-3 tw-py-2.5 tw-text-base tw-ring-white/[0.08] tw-transition-colors tw-duration-150 sm:tw-text-sm" : "tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-shadow-inner tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out"}`}
       >
         <span id={valueId}>{title}</span>
         <svg
@@ -85,7 +87,8 @@ export default function UserSettingsClassification({
             <m.div
               className={clsx(
                 "tw-right-0 tw-z-30 tw-mt-2 tw-w-full tw-origin-top-right tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/50",
-                inlineOptions ? "tw-relative" : "tw-absolute"
+                inlineOptions ? "tw-relative" : "tw-absolute",
+                compact && !inlineOptions && "tw-top-full"
               )}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}

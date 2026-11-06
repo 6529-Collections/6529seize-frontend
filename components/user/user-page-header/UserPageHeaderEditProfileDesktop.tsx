@@ -73,13 +73,16 @@ function ProfileEditorDialog({
         tall
         fitVisualViewport
         noPadding
-        headerClassName="tw-pt-3"
+        headerClassName="tw-pb-1 tw-pt-5"
+        headerVariant="minimal"
+        titleClassName="!tw-text-base !tw-font-medium"
+        headerCloseButtonClassName="!tw-mr-0"
         showHeaderCloseButton
         showScrollbar
         showDragHandle={false}
         focusTitleOnOpen
         maxWidthClass="md:tw-max-w-xl"
-        surfaceClassName={`tw-bg-iron-950 md:tw-shadow-2xl ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
+        surfaceClassName={`tw-bg-iron-950 ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
         dismissible={!editor.saving}
         preserveFocusOnEscape
       >

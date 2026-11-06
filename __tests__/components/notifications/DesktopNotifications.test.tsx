@@ -26,7 +26,9 @@ function advance(milliseconds: number) {
   });
 }
 function setup() {
-  const result = render(<DesktopNotifications collapsed unread />);
+  const result = render(
+    <DesktopNotifications collapsed unread pathname="/waves" />
+  );
   return {
     ...result,
     bell: screen.getByRole("link", { name: "Notifications" }),
@@ -130,6 +132,25 @@ test("unmount cancels pending hover work", () => {
   advance(100);
   expect(panel()).not.toBeInTheDocument();
 });
+
+test.each([false, true])(
+  "route changes close the preview and cancel hover intent (already open: %s)",
+  (alreadyOpen) => {
+    const { bell, rerender } = setup();
+    enter(bell);
+    advance(alreadyOpen ? 100 : 50);
+    rerender(
+      <DesktopNotifications collapsed unread pathname="/notifications" />
+    );
+    advance(200);
+    expect(panel()).not.toBeInTheDocument();
+    rerender(<DesktopNotifications collapsed unread pathname="/waves" />);
+    expect(panel()).not.toBeInTheDocument();
+    enter(screen.getByRole("link", { name: "Notifications" }));
+    advance(100);
+    expect(panel()).toBeInTheDocument();
+  }
+);
 
 test("mouse focus on a preview action does not keep it open after leaving", () => {
   const { bell } = setup();
