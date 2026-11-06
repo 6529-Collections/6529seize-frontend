@@ -94,7 +94,9 @@ export default function CreateDrop({
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
-  useKeyPressEvent("Escape", () => onCancelReplyQuote());
+  useKeyPressEvent("Escape", (event) => {
+    if (!event.defaultPrevented) onCancelReplyQuote();
+  });
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
   const [dropModeOverride, setDropModeOverride] = useState<{

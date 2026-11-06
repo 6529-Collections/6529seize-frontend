@@ -17,6 +17,7 @@ const request: DropMutationBody = {
     mentioned_users: [],
     mentioned_waves: [],
     metadata: [],
+    signature: null,
     referenced_nfts: [],
   },
 };
