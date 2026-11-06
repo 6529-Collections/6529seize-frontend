@@ -12,8 +12,7 @@ import {
 import type { Page } from "@playwright/test";
 
 async function openOwnProfile(page: Page) {
-  // Enter through the authenticated shell after hydration. Cold profile loads
-  // have a separate profile-tab hydration mismatch.
+  // Exercise entry through the authenticated account menu before the list flow.
   const profileLoaded = page.waitForResponse((response) =>
     new URL(response.url()).pathname.endsWith(
       "/identities/0x0000000000000000000000000000000000000529"
