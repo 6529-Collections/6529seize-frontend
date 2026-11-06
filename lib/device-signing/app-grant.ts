@@ -87,11 +87,11 @@ interface AppGrantTypedMessage {
 type StatementRenderer = (fields: AppGrantFields) => string;
 
 /**
- * DRAFT wording, NOT owner-approved yet (the backend renders the same): the
- * approved sign-in statements without "Sign in to 6529 and", because the app
- * grant is not a sign-in. Like the sign-in statements it is a signed
- * commitment, not UI copy, so it is never localized. Before release, change
- * this renderer and the backend's together with the shared vectors.
+ * Approved app-grant wording, mirrored by the backend. The historical Draft1
+ * renderer name is retained; the signed statement bytes are unchanged.
+ * This is a signed commitment, not UI copy, so it is never localized.
+ * Any future wording change must update the frontend, backend and shared
+ * vectors together while preserving verification of existing grants.
  */
 const renderAppGrantStatementDraft1: StatementRenderer = (fields) => {
   const keys =
