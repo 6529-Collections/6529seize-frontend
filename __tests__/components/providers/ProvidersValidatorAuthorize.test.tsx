@@ -55,12 +55,9 @@ function walletAuthentication(
 }
 
 describe("the site's wallet sign-in prompt", () => {
-  it.each(["/validator/authorize", "/validator/authorize/next"])(
-    "is off on %s, where a phone only signs a validator's grant",
-    (pathname) => {
-      expect(walletAuthentication(pathname)).toBe("false");
-    }
-  );
+  it("is off on /validator/authorize only, where a phone only signs a validator's grant", () => {
+    expect(walletAuthentication("/validator/authorize")).toBe("false");
+  });
 
   it.each([
     "/",
@@ -68,6 +65,10 @@ describe("the site's wallet sign-in prompt", () => {
     "/validator",
     "/validator/guide",
     "/validator/authorizer",
+    "/validator/authorize/next",
+    "/validator/authorize/",
+    "/x/validator/authorize",
+    "/VALIDATOR/AUTHORIZE",
   ])("stays on at %s", (pathname) => {
     expect(walletAuthentication(pathname)).toBe("true");
   });
