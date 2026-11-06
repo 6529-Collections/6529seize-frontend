@@ -694,10 +694,13 @@ function WaveDropReaction({
     [onTooltipOpenChange, reaction.reaction]
   );
 
-  // The last reactor can leave while its tooltip is open, unmounting the chip.
+  const showTooltip =
+    Boolean(emojiNode) && total !== 0 && !isTouchDevice && hydrated;
+
+  // Hiding or unmounting a chip can remove its tooltip without a close event.
   useEffect(
     () => () => handleTooltipOpenChange(false),
-    [handleTooltipOpenChange]
+    [handleTooltipOpenChange, showTooltip]
   );
 
   const handleMoreClick = useCallback(
@@ -753,8 +756,7 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice &&
-        hydrated &&
+      {showTooltip &&
         createPortal(
           <Tooltip
             id={tooltipId}
