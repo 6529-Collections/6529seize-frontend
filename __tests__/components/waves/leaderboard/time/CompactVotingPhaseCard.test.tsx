@@ -19,17 +19,20 @@ const perpetualWave: any = {
 
 beforeEach(() => jest.clearAllMocks());
 
-test("shows countdown when not completed", () => {
+test.each([
+  [true, "Voting opens in"],
+  [false, "Voting closes in"],
+])("shows the correct countdown for upcoming=%s", (isUpcoming, label) => {
   useWaveTimers.mockReturnValue({
     voting: {
       isCompleted: false,
-      isUpcoming: true,
+      isUpcoming,
       timeLeft: { days: 1, hours: 2, minutes: 3 },
     },
   });
   useWave.mockReturnValue({ voting: { startTime: 0, endTime: 100 } });
   render(<CompactVotingPhaseCard wave={wave} />);
-  expect(screen.getByText("Voting starts in")).toBeInTheDocument();
+  expect(screen.getByText(label)).toBeInTheDocument();
   expect(screen.getByText("1d 2h 3m")).toBeInTheDocument();
 });
 
@@ -43,7 +46,7 @@ test("shows completion message when completed", () => {
   });
   useWave.mockReturnValue({ voting: { startTime: 0, endTime: 1000 } });
   render(<CompactVotingPhaseCard wave={wave} />);
-  expect(screen.getByText("Voting complete")).toBeInTheDocument();
+  expect(screen.getByText("Voting closed")).toBeInTheDocument();
 });
 
 test("shows ongoing state instead of a countdown for open-ended voting", () => {
@@ -58,7 +61,7 @@ test("shows ongoing state instead of a countdown for open-ended voting", () => {
     voting: { startTime: 0, endTime: Number.MAX_SAFE_INTEGER },
   });
   render(<CompactVotingPhaseCard wave={perpetualWave} />);
-  expect(screen.getByText("Voting ongoing")).toBeInTheDocument();
+  expect(screen.getByText("Voting open")).toBeInTheDocument();
   expect(screen.getByText("No end date")).toBeInTheDocument();
-  expect(screen.queryByText(/ends in/)).toBeNull();
+  expect(screen.queryByText(/closes in/)).toBeNull();
 });

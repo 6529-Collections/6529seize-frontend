@@ -43,3 +43,9 @@ it("suppresses a cached coverage item without suppressing social follows", () =>
   expect(isNotificationVisible(coverage, false)).toBe(true);
   expect(isNotificationVisible(follow, true)).toBe(true);
 });
+
+it("preserves grouped reactions when purchasing notifications are hidden", () => {
+  const group = { type: "grouped_reactions" } as NotificationDisplayItem;
+  expect(isNotificationVisible(group, true)).toBe(true);
+  expect(isNotificationVisible(group, false)).toBe(true);
+});

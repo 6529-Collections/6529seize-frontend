@@ -1,12 +1,14 @@
 import {
   getInboxDestination,
   getInboxDrop,
+  getInboxPreview,
   getInboxSummary,
 } from "@/components/notifications/inbox/notificationInbox.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type {
+  INotificationArtistArtwork,
   INotificationDropReplied,
   INotificationIdentitySubscribed,
   INotificationVotingCreditsReturned,
@@ -35,6 +37,47 @@ const replied: INotificationDropReplied = {
     replied_drop_part: "1",
   },
 };
+
+const artwork: INotificationArtistArtwork = {
+  ...base,
+  cause: ApiNotificationCause.ArtistArtworkSubmitted,
+  related_identity: actor,
+  related_drops: [original],
+  additional_context: {
+    artist_id: "artist",
+    drop_id: original.id,
+    wave_id: "public-wave",
+    competition_id: "competition",
+    entry_id: "entry",
+    competition_title: "The Memes Main Stage",
+    artwork_title: "  Open skies  ",
+    submitted_at: 1000,
+  },
+};
+
+it("names artwork alerts and opens their single submission view", () => {
+  expect(getInboxSummary(artwork, "en-US")).toBe(
+    "alice submitted Open skies to The Memes Main Stage."
+  );
+  expect(getInboxDestination(artwork, "viewer")).toBe(
+    "/waves/public-wave/competitions/competition?drop=original"
+  );
+});
+
+it.each([null, "   "])("handles an untitled artwork (%s)", (title) => {
+  expect(
+    getInboxSummary(
+      {
+        ...artwork,
+        additional_context: {
+          ...artwork.additional_context,
+          artwork_title: title,
+        },
+      },
+      "en-US"
+    )
+  ).toBe("alice submitted untitled artwork to The Memes Main Stage.");
+});
 
 it("opens the reply itself in its DM rather than the original drop", () => {
   expect(getInboxDrop(replied)).toBe(reply);
@@ -82,6 +125,31 @@ it("falls back safely when the related reply is unavailable", () => {
   expect(
     getInboxDestination({ ...replied, related_drops: [original] }, "viewer")
   ).toBe("/waves/public-wave?serialNo=42");
+});
+
+it("renders mention and wave tokens as readable text across drop parts", () => {
+  const drop = {
+    ...reply,
+    title: null,
+    parts: [
+      { content: "@[GelatoGenesis] when block screenshot feature?" },
+      { content: "Ideas from #[QUORUM]. Keep [ordinary brackets] and @all." },
+    ],
+  } as ApiDrop;
+  expect(getInboxPreview({ ...replied, related_drops: [drop] })).toBe(
+    "@GelatoGenesis when block screenshot feature? Ideas from #QUORUM. Keep [ordinary brackets] and @all."
+  );
+});
+
+it("normalizes a title before truncating and handles missing drops", () => {
+  const title = `@[GelatoGenesis] #[QUORUM] ${"x".repeat(260)}`;
+  expect(
+    getInboxPreview({
+      ...replied,
+      related_drops: [{ ...reply, title }],
+    })
+  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`.slice(0, 240));
+  expect(getInboxPreview({ ...replied, related_drops: [] })).toBe("");
 });
 
 it("does not expose an anonymous actor's handle in copy or profile links", () => {

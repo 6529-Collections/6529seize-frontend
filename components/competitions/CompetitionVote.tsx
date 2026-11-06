@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 import Button from "@/components/utils/button/Button";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -74,7 +76,8 @@ export function useCompetitionVoteBudget(
     queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
     enabled: enabled && Boolean(connectedProfile),
     retry: false,
-    staleTime: 0,
+    // Reuse fresh limits when sorting remounts rows; votes and events invalidate them.
+    staleTime: 15_000,
   });
 }
 
@@ -86,6 +89,7 @@ export function CompetitionVoteForm({
   voteMode = "numeric",
   size,
   onVoteSuccess,
+  onSubmittingChange,
   onExplainVote,
   controlledDraft,
   reply,
@@ -113,6 +117,7 @@ export function CompetitionVoteForm({
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onSubmittingChange?: ((submitting: boolean) => void) | undefined;
   readonly onExplainVote?:
     | ((voteTotal: number, voteChange: number) => void)
     | undefined;
@@ -121,7 +126,7 @@ export function CompetitionVoteForm({
     waveId: competition.wave_id,
     competitionId: competition.id,
   };
-  const { requestAuth, connectedProfile } = useAuth();
+  const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
   const viewer = useCompetitionViewer();
   const currentViewer = useRef<string | null | undefined>(viewer);
   // Async vote completions must see viewer changes and unmounts at commit.
@@ -188,11 +193,20 @@ export function CompetitionVoteForm({
       !competition.permissions.vote
     )
       return;
+    const address = getWalletAddress();
+    const isCurrentActor = () =>
+      currentViewer.current === viewer &&
+      isAuthSessionForProfile({
+        address,
+        profileId: connectedProfile?.id,
+        proxyProfileId: activeProfileProxy?.created_by.id,
+      });
     setBusy(true);
+    onSubmittingChange?.(true);
     setFailed(false);
     setSaved(false);
     try {
-      if (!(await requestAuth()).success) return;
+      if (!(await requestAuth()).success || !isCurrentActor()) return;
       let body =
         pending.current?.actor === viewer ? pending.current.body : null;
       if (
@@ -213,6 +227,7 @@ export function CompetitionVoteForm({
           );
         pending.current = { actor: viewer, body };
       }
+      if (!isCurrentActor()) return;
       const budget = await setCompetitionVote(identity, entryId, body);
       pending.current = null;
       await updateCompetitionVoteInCache(client, {
@@ -221,9 +236,9 @@ export function CompetitionVoteForm({
         entryId,
         dropId,
         budget,
-        isCurrentViewer: () => currentViewer.current === viewer,
+        isCurrentViewer: isCurrentActor,
       });
-      if (currentViewer.current === viewer) {
+      if (isCurrentActor()) {
         setDraft(null);
         controlledDraft?.onChange(null);
         setSaved(true);
@@ -242,6 +257,7 @@ export function CompetitionVoteForm({
       await credit.refetch();
     } finally {
       setBusy(false);
+      onSubmittingChange?.(false);
     }
   };
   if (!connectedProfile)

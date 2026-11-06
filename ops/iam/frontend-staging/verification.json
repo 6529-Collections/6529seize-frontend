@@ -24,5 +24,32 @@
       "status": "passed"
     }
   ],
-  "temporary_role_deleted": true
+  "temporary_role_deleted": true,
+  "amendments": [
+    {
+      "recorded_at": "2026-11-02T20:20:00+00:00",
+      "change": "Added StagingPageCachePurge for the staging page distribution E1DKA1VIRRUKKC",
+      "policy_version": "v2",
+      "installed_matches_previous_reviewed_document": true,
+      "access_analyzer_findings": 0,
+      "simulation_summary": {
+        "positive_cases": 4,
+        "negative_cases": 5,
+        "status": "passed"
+      },
+      "positive_cases": [
+        "cloudfront:CreateInvalidation on E1DKA1VIRRUKKC in us-east-1",
+        "cloudfront:GetInvalidation on E1DKA1VIRRUKKC in us-east-1",
+        "cloudfront:GetDistribution on E1DKA1VIRRUKKC in us-east-1",
+        "ssm:SendCommand on i-059d5adda6cc33b90 in eu-west-1 (unchanged)"
+      ],
+      "negative_cases": [
+        "cloudfront:CreateInvalidation on EKB17CMB021J6",
+        "cloudfront:CreateInvalidation on E2CMJWTZ3QB8BF",
+        "cloudfront:UpdateDistribution on E1DKA1VIRRUKKC",
+        "cloudfront:DeleteDistribution on E1DKA1VIRRUKKC",
+        "cloudfront:CreateInvalidation on E1DKA1VIRRUKKC outside us-east-1"
+      ]
+    }
+  ]
 }

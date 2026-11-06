@@ -2,6 +2,11 @@ import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import YAML from "yaml";
+import {
+  PRODUCTION_ASSET_HOSTNAME,
+  PRODUCTION_ASSET_PREFIX,
+  PRODUCTION_SHARED_ASSET_PATH,
+} from "@/config/assetPrefix";
 
 const read = (file: string) =>
   fs.readFileSync(
@@ -170,9 +175,11 @@ describe("production exact-artifact deployment contract", () => {
       '.artifact_contract == "production-deployment-v1"'
     );
     expect(deploySource).toContain(".schema_version == 1");
-    expect(deploySource).toContain("aws s3 cp production-artifact/target");
     expect(deploySource).toContain(
-      '--recursive --cache-control "public, max-age=31536000, immutable"'
+      "aws s3 cp production-artifact/target/package.zip"
+    );
+    expect(deploySource).toContain(
+      '"s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/package.zip"'
     );
     expect(deploySource).toContain(
       '--cache-control "no-store, max-age=0, must-revalidate"'
@@ -189,5 +196,199 @@ describe("production exact-artifact deployment contract", () => {
     );
     expect(deploySource).not.toMatch(/release[-_ ]bus/i);
     expect(deploySource).not.toMatch(/operation_id|authority/i);
+  });
+
+  it("records the Sentry release with the installed sentry-cli only once production is live", () => {
+    type Step = {
+      name?: string;
+      run?: string;
+      uses?: string;
+      env?: Record<string, string>;
+      with?: Record<string, unknown>;
+      "continue-on-error"?: boolean;
+      "timeout-minutes"?: number;
+    };
+    const indexIn = (steps: Step[], name: string) => {
+      const index = steps.findIndex((step) => step.name === name);
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+
+    // Build: hand the deploy the binary the frozen install verified.
+    const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
+    const stage = buildSteps[
+      indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+    ]!;
+    const upload = buildSteps[
+      indexIn(buildSteps, "Upload sentry-cli for the Sentry release")
+    ]!;
+    expect(
+      indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+    ).toBeGreaterThan(indexIn(buildSteps, "Install frozen dependencies"));
+    expect(stage.run).toContain("node ops/scripts/resolve-sentry-cli.cjs");
+    expect(stage.env ?? {}).not.toHaveProperty("SENTRY_AUTH_TOKEN");
+    expect(stage["continue-on-error"]).toBe(true);
+    expect(upload["continue-on-error"]).toBe(true);
+    expect(upload.with?.["name"]).toBe(
+      "production-sentry-cli-${{ github.run_id }}"
+    );
+
+    // Deploy: after Elastic Beanstalk serves the commit, never blocking.
+    const steps: Step[] = deploy.jobs["build-upload-deploy"].steps;
+    const download = steps[
+      indexIn(steps, "Download sentry-cli for the Sentry release")
+    ]!;
+    const recordIndex = indexIn(steps, "Record the Sentry release");
+    const record = steps[recordIndex]!;
+    for (const earlier of [
+      "Check Elastic Beanstalk health and readiness",
+      "Verify exact deployed version",
+      "Download sentry-cli for the Sentry release",
+    ]) {
+      expect(recordIndex).toBeGreaterThan(indexIn(steps, earlier));
+    }
+    expect(download["continue-on-error"]).toBe(true);
+    expect(download.with?.["name"]).toBe(upload.with?.["name"]);
+    expect(record["continue-on-error"]).toBe(true);
+    expect(record["timeout-minutes"]).toBeGreaterThan(0);
+    expect(record.run).toContain(
+      'bash ops/scripts/sentry-release.sh "$cli" "$COMMIT_SHA"'
+    );
+    expect(record.env?.["SENTRY_AUTH_TOKEN"]).toBe(
+      "${{ secrets.SENTRY_AUTH_TOKEN }}"
+    );
+    // The same org and project the build plugin used.
+    const nextConfig = fs.readFileSync(
+      path.join(process.cwd(), "next.config.ts"),
+      "utf8"
+    );
+    expect(nextConfig).toContain(`org: "${record.env?.["SENTRY_ORG"]}"`);
+    expect(nextConfig).toContain(
+      `project: "${record.env?.["SENTRY_PROJECT"]}"`
+    );
+    // Release name = github.sha = the VERSION the build bakes and the runtime
+    // reports to Sentry.
+    expect(deploy.env.COMMIT_SHA).toBe("${{ github.sha }}");
+    expect(deploy.jobs["build-production-artifact"].with.target_sha).toBe(
+      "${{ github.sha }}"
+    );
+    expect(buildSource).toContain("VERSION: ${{ inputs.target_sha }}");
+    // set-commits --auto reads the full local history at the deployed commit.
+    const checkout = steps.find(
+      (step) => step.name === "Checkout exact production SHA"
+    );
+    expect(checkout?.with?.["fetch-depth"]).toBe(0);
+    // Nothing is downloaded at deploy time.
+    expect(JSON.stringify([stage, download, record])).not.toMatch(
+      /\bnpx\b|\bcurl\b|\bwget\b|npm (i|install)\b|pnpm (add|dlx)\b/
+    );
+  });
+
+  it("publishes static files create-only to the shared prefix pages load from", () => {
+    const steps: { name?: string; run?: string }[] =
+      deploy.jobs["build-upload-deploy"].steps;
+    const stepIndex = (name: string) => {
+      const index = steps.findIndex((step) => step.name === name);
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+    const sharedStaticPrefix = `${PRODUCTION_SHARED_ASSET_PATH}/_next/static`;
+
+    // Pages, workflow, and IAM must agree on one prefix.
+    expect(PRODUCTION_ASSET_PREFIX).toBe(
+      `https://${PRODUCTION_ASSET_HOSTNAME}/${PRODUCTION_SHARED_ASSET_PATH}`
+    );
+    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(/^web_build\/[a-f0-9]{40}$/);
+    expect(deploy.env.SHARED_STATIC_PREFIX).toBe(sharedStaticPrefix);
+    expect(deploy.env.AWS_BUCKET).toBe("seize-web");
+
+    const publish = steps.find(
+      (step) => step.name === "Publish verified static files to the shared prefix"
+    );
+    if (!publish?.run) {
+      throw new Error("missing shared static publish step");
+    }
+    expect(publish.run).toContain(
+      "node ops/scripts/publish-shared-static-assets.cjs"
+    );
+    expect(publish.run).toContain(
+      "--source production-artifact/target/_next/static"
+    );
+    expect(publish.run).toContain('--prefix "$SHARED_STATIC_PREFIX"');
+
+    // Static files are verified, then published, before any server serves
+    // pages that reference them.
+    expect(stepIndex("Independently verify selected production bytes")).toBeLessThan(
+      stepIndex("Publish verified static files to the shared prefix")
+    );
+    expect(stepIndex("Refuse stale main or production downgrade")).toBeLessThan(
+      stepIndex("Publish verified static files to the shared prefix")
+    );
+    expect(
+      stepIndex("Publish verified static files to the shared prefix")
+    ).toBeLessThan(stepIndex("Deploy new version to Elastic Beanstalk"));
+    expect(stepIndex("Upload verified deployment bundle to S3")).toBeLessThan(
+      stepIndex("Ensure Elastic Beanstalk application version")
+    );
+
+    // No more full per-commit copies of unchanged static files.
+    expect(deploySource).not.toContain('aws s3 cp production-artifact/target "');
+    expect(deploySource).not.toMatch(/aws s3 (?:cp|sync)[^\n]*--recursive/);
+
+    const storage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "ops",
+          "iam",
+          "frontend-production",
+          "FrontendProductionStorage.json"
+        ),
+        "utf8"
+      )
+    ) as {
+      Statement: {
+        Sid: string;
+        Action: string[];
+        Resource: string[];
+        Condition: Record<string, Record<string, unknown>>;
+      }[];
+    };
+    const statement = (sid: string) => {
+      const found = storage.Statement.find((entry) => entry.Sid === sid);
+      if (!found) {
+        throw new Error(`missing IAM statement ${sid}`);
+      }
+      return found;
+    };
+    const objects = `arn:aws:s3:::seize-web/${sharedStaticPrefix}/*`;
+    expect(statement("ProductionSharedStaticCreateOnly")).toEqual(
+      expect.objectContaining({
+        Action: ["s3:PutObject"],
+        Resource: [objects],
+        Condition: expect.objectContaining({
+          Null: { "s3:if-none-match": "false" },
+        }),
+      })
+    );
+    expect(statement("ProductionSharedStaticRead")).toEqual(
+      expect.objectContaining({ Action: ["s3:GetObject"], Resource: [objects] })
+    );
+    expect(statement("ProductionSharedStaticListing")).toEqual(
+      expect.objectContaining({
+        Action: ["s3:ListBucket"],
+        Resource: ["arn:aws:s3:::seize-web"],
+        Condition: expect.objectContaining({
+          StringLike: { "s3:prefix": [`${sharedStaticPrefix}/*`] },
+        }),
+      })
+    );
+    // Nothing may delete or replace shared objects.
+    for (const entry of storage.Statement) {
+      if (entry.Resource.some((resource) => resource.includes("/web_build/shared/"))) {
+        expect(entry.Action).not.toContain("s3:DeleteObject");
+        expect(entry.Action).not.toContain("s3:PutObjectAcl");
+      }
+    }
   });
 });

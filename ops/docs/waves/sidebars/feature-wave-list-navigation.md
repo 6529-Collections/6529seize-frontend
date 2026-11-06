@@ -27,6 +27,10 @@ Wave and DM rows in the left list control which thread is open.
 - A wave opened from a direct link is temporarily added to the sidebar route
   context when it is outside the loaded list, including in `Joined`. This does
   not pin or join the wave.
+- Successfully leaving the open wave removes it from `Joined` without closing
+  its content. It stays removed while switching collections in the current
+  page session; joining again restores it. A parent stays visible if you still
+  belong to one of its subwaves. A failed leave keeps the joined row.
 - When the direct link targets a subwave, its visible root parent is surfaced,
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.

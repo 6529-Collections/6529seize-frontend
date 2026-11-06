@@ -4908,6 +4908,21 @@ paths:
             type: string
             enum:
               - cards
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Sort the complete eligible personal vote set before pagination.
+            vote_amount preserves signed value descending, allocation update
+            time ascending and drop ID ascending. leaderboard uses the
+            competition's authoritative rank ascending, unranked entries last,
+            with the leaderboard's stable identity tie-breaker. last_voted uses
+            the most recent confirmed user vote change (including retained
+            history), newest first, excluding automatic adjustments and
+            unchanged votes; unknown times sort last, ties by drop ID ascending.
+            Cursors are bound to the sort.
+          schema:
+            $ref: "#/components/schemas/ApiCompetitionMyVotesSort"
         - name: limit
           in: query
           required: false
@@ -4928,9 +4943,10 @@ paths:
       responses:
         "200":
           description: >-
-            Paged active nonzero personal votes, ordered by vote value
-            descending and vote time ascending; include=cards adds authorized
-            lightweight entry content and summaries.
+            Paged active nonzero personal votes in the requested order. The
+            default is vote_amount; include=cards adds authorized lightweight
+            entry content and summaries. These are live pages; refresh from the
+            first page after a vote changes.
           content:
             application/json:
               schema:
@@ -6222,11 +6238,15 @@ paths:
         - name: sort
           in: query
           required: false
+          description: >-
+            Sort by current weighted rating, raw vote total, or next-decision
+            weighted projection (decision_rating).
           schema:
             type: string
             enum:
               - rating
               - real_time_rating
+              - decision_rating
               - submitted_at
               - trend
               - price
@@ -12675,6 +12695,115 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/artwork-alerts:
+    get:
+      tags:
+        - Identities
+      summary: Read your independent artwork-alert preference for an artist.
+      operationId: getArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleGetArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
+    post:
+      tags:
+        - Identities
+      summary: Enable future artwork alerts without following the artist.
+      operationId: enableArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleEnableArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
+    delete:
+      tags:
+        - Identities
+      summary: Disable artwork alerts without changing feed subscriptions.
+      operationId: disableArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleDisableArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
   /identities/{id}/mute:
     get:
       tags:
@@ -16949,6 +17078,120 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributorsPage"
+  /profile-logs:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile activity logs
+      description: >-
+        Existing activity history, optionally restricted to the profile NIC
+        view. NIC mode preserves identity changes and read-access restrictions,
+        removes only REP and wave REP rating edits, and uses cursor paging in
+        descending created_at and id order. Other callers retain the legacy
+        response shape. Historical deletion or visibility changes are not a
+        frozen snapshot.
+      operationId: getProfileActivityLogs
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - name: activity_scope
+          in: query
+          required: false
+          description: >-
+            Optional NIC-only profile history; excludes REP and wave REP rating
+            edits while preserving all other matching entries.
+          schema:
+            type: string
+            enum:
+              - NIC
+        - name: cursor
+          in: query
+          required: false
+          description: >-
+            Opaque NIC continuation cursor returned as next_cursor; required
+            after page 1 and bound to the same filters and viewer.
+          schema:
+            type: string
+        - name: profile
+          in: query
+          required: false
+          description: >-
+            Profile handle, wallet or identity key. NIC requires exactly one
+            profile or target.
+          schema:
+            type: string
+        - name: target
+          in: query
+          required: false
+          description: Incoming profile handle, wallet or identity key.
+          schema:
+            type: string
+        - name: include_incoming
+          in: query
+          required: false
+          description: >-
+            Include target matches alongside actor and proxy matches for profile
+            queries.
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          required: false
+          description: Comma-separated activity types; empty means all types.
+          schema:
+            type: string
+        - name: rating_matter
+          in: query
+          required: false
+          description: >-
+            Legacy rating matter filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: >-
+            Legacy rating category filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          required: false
+          description: Legacy group filter; cannot be combined with activity_scope=NIC.
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          description: Sort direction; NIC supports descending order only.
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: Page number, starting at 1.
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          required: false
+          description: >-
+            Page size. NIC defaults to 50 and accepts 1 through 500; legacy
+            defaults are unchanged.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matching activity page; next_cursor is present only in NIC mode.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileActivityLogPage"
+        "400":
+          description: Invalid NIC scope, page size, cursor or filter combination.
   /profile-preferences:
     get:
       tags:
@@ -22601,6 +22844,50 @@ components:
       properties:
         expected_package_hash:
           type: string
+    ApiArtistArtworkAlert:
+      type: object
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: >-
+            Explicit opt-in for new non-anonymous Main Stage artwork
+            submissions, independent of feed following. Defaults to false.
+            Existing submissions are never backfilled.
+    ApiArtistArtworkNotificationContext:
+      type: object
+      description: Additional context for ARTIST_ARTWORK_SUBMITTED notifications.
+      required:
+        - artist_id
+        - drop_id
+        - wave_id
+        - competition_id
+        - entry_id
+        - competition_title
+        - artwork_title
+        - submitted_at
+      properties:
+        artist_id:
+          type: string
+        drop_id:
+          type: string
+        wave_id:
+          type: string
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        competition_title:
+          type: string
+        artwork_title:
+          type: string
+          nullable: true
+        submitted_at:
+          type: integer
+          format: int64
     ApiArtistNameItem:
       type: object
       required:
@@ -28822,6 +29109,13 @@ components:
           nullable: true
         has_more:
           type: boolean
+    ApiCompetitionMyVotesSort:
+      type: string
+      default: vote_amount
+      enum:
+        - vote_amount
+        - leaderboard
+        - last_voted
     ApiCompetitionOutcome:
       type: object
       additionalProperties: false
@@ -38092,9 +38386,21 @@ components:
             $ref: "#/components/schemas/ApiDrop"
         additional_context:
           type: object
+          description: >-
+            For ARTIST_ARTWORK_SUBMITTED, follows
+            ApiArtistArtworkNotificationContext.
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        artist_id:
+          type: string
+        artwork_title:
+          type: string
+          nullable: true
+          description: Title for an ARTIST_ARTWORK_SUBMITTED notification.
+        submitted_at:
+          type: integer
+          format: int64
         reason:
           $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:
@@ -38250,6 +38556,7 @@ components:
         - ALL_DROPS
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
+        - ARTIST_ARTWORK_SUBMITTED
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
         - VOTING_CREDITS_RETURNED
@@ -38791,6 +39098,73 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiProfileActivityLog:
+      type: object
+      required:
+        - id
+        - profile_id
+        - target_id
+        - proxy_id
+        - type
+        - additional_data_1
+        - additional_data_2
+        - created_at
+        - contents
+        - is_target_of_type_drop
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+        target_id:
+          type: string
+          nullable: true
+        proxy_id:
+          type: string
+          nullable: true
+        type:
+          type: string
+        additional_data_1:
+          type: string
+          nullable: true
+        additional_data_2:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        contents:
+          type: object
+          additionalProperties: true
+        profile_handle:
+          type: string
+        target_profile_handle:
+          type: string
+          nullable: true
+        proxy_handle:
+          type: string
+          nullable: true
+        is_target_of_type_drop:
+          type: boolean
+    ApiProfileActivityLogPage:
+      type: object
+      required:
+        - page
+        - next
+        - data
+      properties:
+        page:
+          type: integer
+        next:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileActivityLog"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Present only for NIC mode; null when no further page exists.
     ApiProfileBlockState:
       type: object
       required:
@@ -43092,6 +43466,7 @@ components:
         - handle
         - display
         - pfp
+        - level
       properties:
         id:
           type: string
@@ -43103,6 +43478,9 @@ components:
         pfp:
           type: string
           nullable: true
+        level:
+          type: integer
+          format: int64
     ApiWaveMetadata:
       type: object
       required:

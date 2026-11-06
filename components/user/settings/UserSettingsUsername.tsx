@@ -1,5 +1,7 @@
 "use client";
 
+import { getUserProfileHeaderMessage as message } from "../user-page-header/user-page-header.messages";
+
 import { useEffect, useState } from "react";
 import { useDebounce } from "react-use";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -17,7 +19,9 @@ export default function UserSettingsUsername({
   setUserName,
   setIsAvailable,
   setIsLoading,
+  label = message("user.profileHeader.edit.username"),
 }: {
+  readonly label?: string;
   readonly userName: string;
   readonly originalUsername: string;
   readonly setUserName: (userName: string) => void;
@@ -80,7 +84,7 @@ export default function UserSettingsUsername({
         htmlFor="name"
         className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
       >
-        Username
+        {label}
       </label>
       <div className="tw-relative tw-mt-2">
         <input
@@ -94,7 +98,7 @@ export default function UserSettingsUsername({
           aria-busy={loading}
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
-          placeholder="Please select a username"
+          placeholder={message("user.profileHeader.edit.namePlaceholder")}
           className="tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-pr-11 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400"
         />
         {loading && (

@@ -48,6 +48,7 @@ function areEqual(
     "referencedNfts",
     "nftLinks",
     "partContent",
+    "collapsedPreview",
     "textSize",
     "currentDropId",
     "hideLinkPreviews",

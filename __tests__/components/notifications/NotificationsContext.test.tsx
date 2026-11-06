@@ -1534,6 +1534,29 @@ describe("push notification action handling", () => {
       )
     );
 
+    await act(async () => {
+      if (actionPerformedCallback)
+        await actionPerformedCallback({
+          notification: {
+            data: {
+              redirect: "waves",
+              wave_id: "wave",
+              competition_id: "competition",
+              competition_entry_id: "entry",
+              competition_drop_id: "artwork",
+              notification_id: "3",
+              target_profile_id: "test-profile-id",
+              target_profile_handle: "owner",
+            },
+          },
+        });
+    });
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith(
+        "/waves/wave/competitions/competition?drop=artwork"
+      )
+    );
+
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
 

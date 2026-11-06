@@ -10,6 +10,8 @@ import type * as ContentTabContext from "@/components/brain/ContentTabContext";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import type { ChatSubmitDropAction } from "@/components/brain/my-stream/chatSubmitDrop.types";
 import { useWaveData } from "@/hooks/useWaveData";
 import { CompetitionState } from "@/components/competitions/CompetitionState";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -34,12 +36,22 @@ const mockUseCompetitionSubmissionWave = jest.fn(
     retry: jest.fn(),
   })
 );
-jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
-  useCompetitionSubmissionWave: (
-    wave: ApiWave | null | undefined,
-    enabled?: boolean
-  ) => mockUseCompetitionSubmissionWave(wave, enabled),
-}));
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => {
+  const { useMemo } = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    useCompetitionSubmissionWave(
+      wave: ApiWave | null | undefined,
+      enabled = true
+    ) {
+      // Match the real hook's stable wave identity across header updates.
+      return useMemo(
+        () => mockUseCompetitionSubmissionWave(wave, enabled),
+        [wave, enabled]
+      );
+    },
+  };
+});
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
@@ -69,6 +81,13 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 
 const mockRegisterWave = jest.fn();
 const mockUpdateAvailableTabs = jest.fn();
+const mockSetActiveContentTab = jest.fn();
+let mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.CONFIGURATION];
+const mockWaveTabs = jest.fn(
+  (_props: { readonly chatSubmitDropAction: ChatSubmitDropAction }) => (
+    <div data-testid="tabs" />
+  )
+);
 const mockCompleteInitialRegistration = jest.fn();
 const mockSetQueryData = jest.fn();
 const mockSetWaveData = jest.fn();
@@ -168,6 +187,8 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
   ),
   useContentTab: () => ({
     activeContentTab: mockActiveContentTab,
+    availableTabs: mockAvailableTabs,
+    setActiveContentTab: mockSetActiveContentTab,
     updateAvailableTabs: mockUpdateAvailableTabs,
   }),
 }));
@@ -276,8 +297,13 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
-  MyStreamWaveTabs: (props: { showGalleryToggle: boolean }) =>
-    mockSharedWaveTabs(props),
+  MyStreamWaveTabs: (props: {
+    readonly chatSubmitDropAction: ChatSubmitDropAction;
+    readonly showGalleryToggle: boolean;
+  }) => {
+    mockWaveTabs(props);
+    return mockSharedWaveTabs(props);
+  },
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
@@ -285,7 +311,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   default: () => <div data-testid="competition-tabs" />,
 }));
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (props: any) => mockMemesArtSubmissionModal(props),
 }));
@@ -342,6 +368,7 @@ describe("MyStreamWave registration", () => {
     mockWaveInfo = getDefaultMockWaveInfo();
     mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.CONFIGURATION];
     mockPathname = "/waves/wave-1";
     window.history.replaceState(null, "", mockPathname);
   });
@@ -482,6 +509,29 @@ describe("MyStreamWave registration", () => {
     expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", false);
     expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
   });
+
+  it("keeps native rules navigation when Configuration is not registered", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT];
+    renderWave();
+    const action = mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction;
+    expect(action).toBeDefined();
+    expect(action?.onViewRules).toBeUndefined();
+  });
+
+  it.each([false, true])(
+    "retains existing local rules navigation for available web tabs or app mode: %s",
+    (isApp) => {
+      mockIsApp = isApp;
+      if (isApp) mockAvailableTabs = [MyStreamWaveTab.CHAT];
+      renderWave();
+      const action = mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction;
+      expect(action?.onViewRules).toBeDefined();
+      action?.onViewRules?.();
+      expect(mockSetActiveContentTab).toHaveBeenCalledWith(
+        MyStreamWaveTab.CONFIGURATION
+      );
+    }
+  );
 
   it("marks wave metadata as loaded for launch timing", async () => {
     renderWave();
