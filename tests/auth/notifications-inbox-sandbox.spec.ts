@@ -197,6 +197,9 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await trigger.focus();
     await page.keyboard.press("ArrowDown");
     await expect(inbox).toBeFocused();
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeEnabled();
     await page.keyboard.press("Tab");
     await expect(
       inbox.getByRole("button", { name: "Mark all as read" })
