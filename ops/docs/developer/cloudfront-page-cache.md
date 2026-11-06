@@ -269,11 +269,20 @@ Done on 2026-11-04: `6529.io` has been served by `E3KTTDJUNHRYW9`
    balancer 5xx and target response time, and page checks. The first
    production deploy afterwards purged the distribution in about 21 seconds.
 
-**Rollback** (resolvers follow within about a minute)
+**Rollback** (resolvers follow within about a minute). The load balancer
+refuses everything except `E3KTTDJUNHRYW9`, so unlock it before moving DNS:
 
-1. Unlock the origin first (see [Origin lockdown](#origin-lockdown)).
-   Otherwise every request fails once DNS points at the load balancer.
-2. `UPSERT` the `6529.io` `A` alias back to
+1. Unlock the origin. Use `ops/scripts/production-origin-lock.sh unlock`
+   (added by #4685), or the unlock commands under
+   [Origin lockdown](#origin-lockdown) if the script is not on `main` yet.
+2. Confirm both resets. The HTTPS listener's default action must be `forward`,
+   and the load balancer's security group must allow 443 and 80 from
+   `0.0.0.0/0`. Check with `production-origin-lock.sh status`, or with
+   `aws elbv2 describe-listeners` and `aws ec2 describe-security-group-rules`.
+3. Check direct access. Run
+   `curl -s -o /dev/null -w '%{http_code}\n' --connect-to 6529.io:443:seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com:443 https://6529.io/api/version`
+   with no `X-Origin-Verify` header. It must print 200.
+4. Only then change DNS. `UPSERT` the `6529.io` `A` alias back to
    `seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com`
    (`HostedZoneId` `Z117KPS5GTRQ2G`, `EvaluateTargetHealth` true), `DELETE` the
    `AAAA` alias, and clear `PRODUCTION_PAGE_DISTRIBUTION_ID`. The rate-limit
@@ -360,10 +369,11 @@ Rotation, with no downtime:
 `production-origin-lock.sh rotate` does these steps in this order and stores
 the new value in SSM first.
 
-Unlock: run this before any DNS rollback to the load balancer, or the origin
-refuses every visitor. It sends unmatched requests to the app again and opens
-the group to direct traffic. The header rule and the CloudFront header can
-stay.
+Unlock: run this before any DNS rollback to the load balancer, then follow
+the confirm and check steps in the [cutover rollback](#production-cutover).
+Otherwise the origin refuses every visitor. Unlocking sends unmatched requests
+to the app again and opens the group to direct traffic. The header rule and
+the CloudFront header can stay.
 
 ```bash
 export AWS_REGION=us-east-1
