@@ -339,6 +339,7 @@ export default function MobileRepTabContent({
 
       <div className="tw-mt-6">
         <UserPageCombinedActivityLog
+          layout="mobile"
           initialActivityLogParams={initialActivityLogParams}
           matter={RateMatter.REP}
           withMatterFilter={false}
