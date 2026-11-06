@@ -235,7 +235,7 @@ describe("WaveDropReactions", () => {
 
     fireEvent.click(chip);
     await waitFor(() => expect(chip).not.toBeInTheDocument());
-    expect(drop.reactions[0]?.count).toBe(1);
+    expect(drop.reactions[0]).toMatchObject({ count: 1 });
     await waitFor(() => expect(detailQuery()?.enabled).toBe(false));
   });
   it("keeps a stable chip synchronized with externally updated count and selection", async () => {
