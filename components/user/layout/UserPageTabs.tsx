@@ -5,6 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -12,14 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
@@ -39,9 +33,6 @@ import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
 import { useUserPageNavigation } from "./UserPageNavigation";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
-const subscribeToClientRender = () => () => undefined;
-const getClientRenderSnapshot = () => true;
-const getServerRenderSnapshot = () => false;
 
 const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   const segments = pathname.split("/").filter(Boolean);
@@ -61,6 +52,7 @@ export default function UserPageTabs({
   const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
+  const isClientHydrated = useHasHydrated();
   // Subscriptions is omitted from the server HTML and the first hydration
   // render (the server cannot identify the native shell), and on iOS until the
   // country check allows purchasing.
@@ -75,22 +67,28 @@ export default function UserPageTabs({
   const resolvedViewedProfile = viewedProfile ?? initialProfile;
 
   const isOwnProfile = useMemo(() => {
-    return isOwnProfileRoute({
-      connectedProfile,
-      handleOrWallet,
-    });
-  }, [connectedProfile, handleOrWallet]);
+    return (
+      isClientHydrated &&
+      isOwnProfileRoute({ connectedProfile, handleOrWallet })
+    );
+  }, [connectedProfile, handleOrWallet, isClientHydrated]);
 
   const hasProfileWave = Boolean(resolvedViewedProfile.profile_wave_id);
 
   const visibilityContext = useMemo<UserPageVisibilityContext>(
     () => ({
-      showWaves,
+      showWaves: isClientHydrated && showWaves,
       hasProfileWave,
       hideSubscriptions: hideNftPurchasing,
       isOwnProfile,
     }),
-    [hasProfileWave, hideNftPurchasing, isOwnProfile, showWaves]
+    [
+      hasProfileWave,
+      hideNftPurchasing,
+      isClientHydrated,
+      isOwnProfile,
+      showWaves,
+    ]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -99,11 +97,6 @@ export default function UserPageTabs({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const { activeIndicator, updateActiveIndicator } =
     useUserPageTabIndicator(contentContainerRef);
-  const isClientHydrated = useSyncExternalStore(
-    subscribeToClientRender,
-    getClientRenderSnapshot,
-    getServerRenderSnapshot
-  );
 
   const resolvedTabFromPath = useMemo<UserPageTabKey>(
     () => resolveTabFromPath(pathname),
