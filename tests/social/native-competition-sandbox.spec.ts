@@ -6398,7 +6398,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const name = dialog.getByRole("textbox", {
       name: "Competition name to confirm archival",
     });
-    const exactName = dialog.locator("#competition-archive-exact-name");
+    const exactName = dialog.getByText(title, { exact: true });
     expect(await exactName.textContent()).toBe(title);
     await expect(exactName).toHaveCSS("white-space", "pre-wrap");
     const confirm = dialog.getByRole("button", {
