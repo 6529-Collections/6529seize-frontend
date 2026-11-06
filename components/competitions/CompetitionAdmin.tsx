@@ -43,6 +43,10 @@ function getLifecycleActions(
   }
 }
 
+function confirmationTitle(title: string): string {
+  return title.replace(/\r\n?/g, "\n");
+}
+
 export default function CompetitionAdmin({
   paused = null,
   onEdit,
@@ -61,7 +65,7 @@ export default function CompetitionAdmin({
   const [actionSnapshot, setActionSnapshot] = useState({
     version: competition.config_version,
     lifecycle: competition.lifecycle,
-    title: competition.title,
+    title: confirmationTitle(competition.title),
   });
   const {
     version: actionVersion,
@@ -106,7 +110,7 @@ export default function CompetitionAdmin({
     setActionSnapshot({
       version: competition.config_version,
       lifecycle: competition.lifecycle,
-      title: competition.title,
+      title: confirmationTitle(competition.title),
     });
     setActionInput("");
     setFailed(false);

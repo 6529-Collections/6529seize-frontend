@@ -279,7 +279,12 @@ it("clears the typed name when the archive dialog is reopened", () => {
   expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
 });
 
-it.each(["Art  competition", "Art\ncompetition"])(
+it.each([
+  "Art  competition",
+  "Art\ncompetition",
+  "Art\r\ncompetition",
+  "Art\rcompetition",
+])(
   "preserves exact whitespace in the displayed and typed name (%p)",
   (title) => {
     mockCompetition.title = title;
@@ -288,13 +293,14 @@ it.each(["Art  competition", "Art\ncompetition"])(
       screen.getByRole("button", { name: "Archive and stop competition" })
     );
     const exactName = document.getElementById("competition-archive-exact-name");
-    expect(exactName?.textContent).toBe(title);
+    const browserTitle = title.replace(/\r\n?/g, "\n");
+    expect(exactName?.textContent).toBe(browserTitle);
     expect(exactName).toHaveClass("tw-whitespace-pre-wrap");
     const name = screen.getByRole("textbox");
     fireEvent.change(name, { target: { value: "Art competition" } });
     expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
     fireEvent.change(name, { target: { value: title } });
-    expect(name).toHaveValue(title);
+    expect(name).toHaveValue(browserTitle);
     expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
   }
 );

@@ -6382,40 +6382,47 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toHaveCount(0);
   });
 
-  test("matches competition names containing repeated spaces and line breaks exactly", async ({
-    page,
-  }) => {
-    const sandbox = await installCompetitionApi(page);
-    const title = "The Memes  - Main Stage\nRound 1";
-    sandbox.setCompetition("alpha", { title });
-    await page.goto(`${ROOT}/alpha?tab=rules`);
-    const archive = page.getByRole("button", {
-      name: "Archive and stop competition",
-      exact: true,
+  for (const [label, lineEnding] of [
+    ["LF", "\n"],
+    ["CRLF", "\r\n"],
+    ["CR", "\r"],
+  ] as const) {
+    test(`matches competition names containing repeated spaces and line breaks exactly (${label})`, async ({
+      page,
+    }) => {
+      const sandbox = await installCompetitionApi(page);
+      const title = `The Memes  - Main Stage${lineEnding}Round 1`;
+      const browserTitle = "The Memes  - Main Stage\nRound 1";
+      sandbox.setCompetition("alpha", { title });
+      await page.goto(`${ROOT}/alpha?tab=rules`);
+      const archive = page.getByRole("button", {
+        name: "Archive and stop competition",
+        exact: true,
+      });
+      await archive.click();
+      const dialog = page.getByRole("dialog").last();
+      const name = dialog.getByRole("textbox", {
+        name: "Competition name to confirm archival",
+      });
+      const exactName = dialog.getByText(title, { exact: true });
+      expect(await exactName.textContent()).toBe(browserTitle);
+      await expect(exactName).toHaveCSS("white-space", "pre-wrap");
+      const confirm = dialog.getByRole("button", {
+        name: "Confirm",
+        exact: true,
+      });
+      await name.fill("The Memes - Main Stage Round 1");
+      await expect(confirm).toBeDisabled();
+      await name.fill(title);
+      await expect(name).toHaveValue(browserTitle);
+      await expect(confirm).toBeEnabled();
+      await expectNoHorizontalOverflow(page);
+      await name.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(archive).toBeFocused();
+      expect(sandbox.requests).toHaveLength(0);
     });
-    await archive.click();
-    const dialog = page.getByRole("dialog").last();
-    const name = dialog.getByRole("textbox", {
-      name: "Competition name to confirm archival",
-    });
-    const exactName = dialog.getByText(title, { exact: true });
-    expect(await exactName.textContent()).toBe(title);
-    await expect(exactName).toHaveCSS("white-space", "pre-wrap");
-    const confirm = dialog.getByRole("button", {
-      name: "Confirm",
-      exact: true,
-    });
-    await name.fill("The Memes - Main Stage Round 1");
-    await expect(confirm).toBeDisabled();
-    await name.fill(title);
-    await expect(name).toHaveValue(title);
-    await expect(confirm).toBeEnabled();
-    await expectNoHorizontalOverflow(page);
-    await name.press("Escape");
-    await expect(dialog).toBeHidden();
-    await expect(archive).toBeFocused();
-    expect(sandbox.requests).toHaveLength(0);
-  });
+  }
 
   test("fades overflowing wave tabs without covering Create or changing selection", async ({
     page,
