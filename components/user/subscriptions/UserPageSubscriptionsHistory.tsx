@@ -30,9 +30,7 @@ import EtherscanIcon from "../utils/icons/EtherscanIcon";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
-  "tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-4 tw-transition-colors last:tw-border-b-0 desktop-hover:hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none md:tw-px-5 md:tw-py-5";
-const HISTORY_FOOTER_CLASS =
-  "tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-3 md:tw-shrink-0 md:tw-justify-end md:tw-border-t-0 md:tw-pt-0";
+  "tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 tw-transition-colors last:tw-border-b-0 desktop-hover:hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none md:tw-px-5 md:tw-py-5";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -167,7 +165,7 @@ export default function UserPageSubscriptionsHistory(
             ) : (
               <>
                 {tab.rows.length ? (
-                  <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-white/[0.03]">
+                  <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950">
                     {tab.rows}
                   </div>
                 ) : (
@@ -276,30 +274,28 @@ function TopUpEntry(
   const locale = useBrowserLocale();
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-4">
-        <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-          <span className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-sm tw-text-emerald-300 md:tw-text-[15px]">
-            <b className="tw-font-semibold tw-tabular-nums">
-              + {props.topUp.amount}
-            </b>
-            <span className="tw-flex tw-h-4 tw-w-2.5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500">
-              <EthereumIcon />
-            </span>
+      <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1 md:tw-grid-cols-[minmax(0,1fr)_auto_auto] md:tw-gap-x-4">
+        <span className="tw-col-start-1 tw-row-start-1 tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-sm tw-text-emerald-300 md:tw-text-[15px]">
+          <b className="tw-font-semibold tw-tabular-nums">
+            + {props.topUp.amount}
+          </b>
+          <span className="tw-flex tw-h-4 tw-w-2.5 tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-500">
+            <EthereumIcon />
           </span>
-          <p className="tw-m-0 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere] md:tw-text-sm">
-            {tRich(locale, "subscriptions.history.fromWallet", {
-              address: (
-                <span key="sender" className="tw-font-medium tw-text-iron-200">
-                  {props.topUp.from_wallet}
-                </span>
-              ),
-            })}
-          </p>
-        </div>
-        <div className={HISTORY_FOOTER_CLASS}>
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-text-sm">
-            {getDateDisplay(new Date(props.topUp.transaction_date))}
-          </span>
+        </span>
+        <p className="tw-col-start-1 tw-row-start-2 tw-m-0 tw-min-w-0 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere] md:tw-text-sm">
+          {tRich(locale, "subscriptions.history.fromWallet", {
+            address: (
+              <span key="sender" className="tw-font-medium tw-text-iron-200">
+                {props.topUp.from_wallet}
+              </span>
+            ),
+          })}
+        </p>
+        <span className="tw-col-start-2 tw-row-start-2 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-row-span-2 md:tw-row-start-1 md:tw-text-sm">
+          {getDateDisplay(new Date(props.topUp.transaction_date))}
+        </span>
+        <div className="tw-col-start-2 tw-row-start-1 tw-justify-self-end md:tw-col-start-3 md:tw-row-span-2">
           <HistoryTransactionLink transaction={props.topUp.hash} />
         </div>
       </div>
@@ -377,63 +373,59 @@ function RedeemedEntry(
 
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-4">
-        <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-          <p className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 md:tw-text-[15px]">
-            {tRich(locale, "subscriptions.history.redeemedEntryTitle", {
-              contract: contractName,
-              token: formatInteger(locale, props.redeem.token_id),
-              count: (
-                <span
-                  key="quantity"
-                  className="tw-ml-1 tw-inline-flex tw-whitespace-nowrap tw-rounded-md tw-bg-primary-300/[0.08] tw-px-2 tw-py-0.5 tw-align-middle tw-text-xs tw-font-medium tw-leading-5 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-300/20"
-                >
-                  {t(locale, "subscriptions.history.quantity", {
-                    count: formatInteger(locale, props.redeem.count),
-                  })}
+      <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1 md:tw-grid-cols-[minmax(0,1fr)_auto_auto] md:tw-gap-x-4">
+        <p className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-text-pretty tw-break-words tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-6 tw-text-iron-100 md:tw-text-[15px]">
+          {tRich(locale, "subscriptions.history.redeemedEntryTitle", {
+            contract: contractName,
+            token: formatInteger(locale, props.redeem.token_id),
+            count: (
+              <span
+                key="quantity"
+                className="tw-ml-1 tw-inline-flex tw-whitespace-nowrap tw-rounded-md tw-bg-primary-300/[0.08] tw-px-2 tw-py-0.5 tw-align-middle tw-text-xs tw-font-medium tw-leading-5 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-300/20"
+              >
+                {t(locale, "subscriptions.history.quantity", {
+                  count: formatInteger(locale, props.redeem.count),
+                })}
+              </span>
+            ),
+          })}
+        </p>
+        <div className="tw-contents md:tw-col-start-1 md:tw-row-start-2 md:tw-flex md:tw-min-w-0 md:tw-flex-wrap md:tw-items-baseline md:tw-gap-x-2">
+          <p className="tw-col-start-1 tw-row-start-2 tw-m-0 tw-min-w-0 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 md:tw-text-sm">
+            {tRich(locale, "subscriptions.history.redeemedAddress", {
+              address: (
+                <span key="address" className="tw-font-medium tw-text-iron-200">
+                  {formatAddress(props.redeem.address)}
                 </span>
               ),
             })}
           </p>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-1 tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 md:tw-flex-row md:tw-flex-wrap md:tw-items-baseline md:tw-gap-x-2 md:tw-text-sm">
-            <p className="tw-m-0 tw-min-w-0 [overflow-wrap:anywhere]">
-              {tRich(locale, "subscriptions.history.redeemedAddress", {
-                address: (
-                  <span
-                    key="address"
-                    className="tw-font-medium tw-text-iron-200"
-                  >
-                    {formatAddress(props.redeem.address)}
-                  </span>
-                ),
-              })}
-            </p>
-            <span
-              aria-hidden="true"
-              className="tw-hidden tw-text-iron-600 md:tw-inline"
-            >
-              {" - "}
-            </span>
-            <p className="tw-m-0 tw-min-w-0 tw-text-pretty [overflow-wrap:anywhere]">
-              {tRich(locale, "subscriptions.history.redeemedBalance", {
-                balance: (
-                  <span
-                    key="balance"
-                    className="tw-whitespace-nowrap tw-font-medium tw-text-iron-100"
-                  >
-                    {props.redeem.balance_after} ETH
-                  </span>
-                ),
-              })}
-            </p>
-          </div>
+          <span
+            aria-hidden="true"
+            className="tw-hidden tw-text-iron-600 md:tw-inline"
+          >
+            {" "}
+            -{" "}
+          </span>
+          <p className="tw-col-span-full tw-row-start-3 tw-m-0 tw-min-w-0 tw-text-pretty tw-text-[12.5px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400 md:tw-text-sm">
+            {tRich(locale, "subscriptions.history.redeemedBalance", {
+              balance: (
+                <span
+                  key="balance"
+                  className="tw-whitespace-nowrap tw-font-medium tw-text-iron-100"
+                >
+                  {props.redeem.balance_after} ETH
+                </span>
+              ),
+            })}
+          </p>
         </div>
-        <div className={HISTORY_FOOTER_CLASS}>
-          {transactionDate && (
-            <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-text-sm">
-              {getDateDisplay(new Date(transactionDate))}
-            </span>
-          )}
+        {transactionDate && (
+          <span className="tw-col-start-2 tw-row-start-2 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-row-span-2 md:tw-row-start-1 md:tw-text-sm">
+            {getDateDisplay(new Date(transactionDate))}
+          </span>
+        )}
+        <div className="tw-col-start-2 tw-row-start-1 tw-justify-self-end md:tw-col-start-3 md:tw-row-span-2">
           <HistoryTransactionLink transaction={props.redeem.transaction} />
         </div>
       </div>

@@ -237,11 +237,30 @@ describe("UserPageSubscriptionsMode", () => {
     expect(post).not.toHaveBeenCalled();
   });
 
-  it("keeps the owner switch disabled while settings load", async () => {
-    const { user, requestAuth } = setup({ loading: true });
-    expect(getMode()).toBeDisabled();
-    await user.click(getMode());
+  it("shows a placeholder while settings load", async () => {
+    const { requestAuth } = setup({ loading: true });
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.getByText("Loading settings")).toBeVisible();
     expect(requestAuth).not.toHaveBeenCalled();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("shows unavailable after a failed settings request without guessing Manual", () => {
+    renderWithAuth(
+      <UserPageSubscriptionsMode
+        profileKey="p1"
+        details={undefined}
+        error
+        readonly={false}
+        refresh={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Manual", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     expect(post).not.toHaveBeenCalled();
   });
 });

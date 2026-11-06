@@ -181,6 +181,37 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText("Upcoming Drops")).toBeInTheDocument();
   });
 
+  it("shows loading instead of an empty result while the request is pending", () => {
+    renderComponent({ memes_subscriptions: [], loading: true });
+    expect(screen.getByText("Loading upcoming drops")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No upcoming drops found")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+  });
+
+  it("shows unavailable instead of an empty result after a failed request", () => {
+    renderComponent({ memes_subscriptions: [], error: true });
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(
+      screen.queryByText("No upcoming drops found")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+  });
+
+  it("preserves the empty message for a successful empty response", () => {
+    renderComponent({ memes_subscriptions: [], loading: false, error: false });
+    expect(screen.getByText("No upcoming drops found")).toBeVisible();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+  });
+
+  it("does not keep saying Loading settings after the settings request fails", () => {
+    renderComponent({ details: undefined, detailsError: true });
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Unavailable")).toHaveLength(4);
+    expect(screen.getByText("The Memes #1")).toBeVisible();
+  });
+
   it("shows the season on every row, including rows revealed by Show More", () => {
     renderComponent();
     expect(screen.getAllByText("SZN2")).toHaveLength(3);
@@ -231,11 +262,12 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(mockRefresh).not.toHaveBeenCalled();
   });
 
-  it("places the funded boundary after its drop only in the expanded list", () => {
+  it("places one amber funded boundary after its drop in both list views", () => {
     renderComponent({ coverage: { funded_through: { token_id: 3 } } });
-    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
     const marker = screen.getByText("Funded through");
+    expect(marker).toHaveClass("tw-text-amber-200");
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
     expect(
       within(marker).getByRole("link", { name: "The Memes #3" })
     ).toHaveAttribute("href", "/the-memes/3");
@@ -247,19 +279,74 @@ describe("UserPageSubscriptionsUpcoming", () => {
   });
 
   it.each([false, true])(
-    "keeps the next-unfunded marker and its owner-only Top up link (readonly: %s)",
+    "places one next-unfunded boundary before its drop when none are funded (readonly: %s)",
     (readonly) => {
       renderComponent({
         readonly,
         coverage: { next_unfunded: { token_id: 2 } },
       });
-      expect(screen.getByText("Next unfunded The Memes #2")).toBeVisible();
-      const topUp = screen.queryByRole("link", { name: "Top up" });
-      if (readonly) expect(topUp).not.toBeInTheDocument();
-      else
-        expect(topUp).toHaveAttribute("href", "#profile-subscriptions-top-up");
+      const marker = screen.getByText("Next unfunded");
+      expect(marker).toHaveClass("tw-text-amber-200");
+      expect(
+        within(marker).getByRole("link", { name: "The Memes #2" })
+      ).toHaveAttribute("href", "/the-memes/2");
+      expect(
+        marker.compareDocumentPosition(
+          screen.getByText("The Memes #2", { selector: "span" })
+        ) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Top up" })
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+      expect(screen.getAllByText("Next unfunded")).toHaveLength(1);
+      expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+      if (readonly) {
+        expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+        expect(screen.getAllByText("Subscribed", { exact: true })).toHaveLength(
+          2
+        );
+      } else {
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #1",
+          })
+        ).toBeChecked();
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #2",
+          })
+        ).not.toBeChecked();
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #3",
+          })
+        ).toBeChecked();
+      }
     }
   );
+
+  it("does not duplicate the boundary at the next unfunded drop", () => {
+    renderComponent({
+      coverage: {
+        funded_through: { token_id: 1 },
+        next_unfunded: { token_id: 3 },
+      },
+    });
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
+    expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+  });
+
+  it("reveals a later funding boundary with Show More", () => {
+    renderComponent({ coverage: { funded_through: { token_id: 4 } } });
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Show Less" }));
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+  });
 
   it("does not request current artwork on days without a Minting Today row", () => {
     renderComponent();

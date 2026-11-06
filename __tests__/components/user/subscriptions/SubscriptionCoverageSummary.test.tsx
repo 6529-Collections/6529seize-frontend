@@ -87,18 +87,23 @@ describe("SubscriptionCoverageSummary", () => {
       />
     );
 
-  it("keeps the funding facts without repeating top-up modal guidance", () => {
+  it("shows one action-required deadline without repeated explanations", () => {
     renderSummary(createCoverage());
     expect(
       screen.getByRole("heading", {
-        name: "0 drops funded Action required",
+        name: "0 drops funded",
       })
     ).toBeVisible();
     expect(screen.queryByText("Status")).not.toBeInTheDocument();
-    expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
-    expect(screen.getByText("Next unfunded")).toBeVisible();
+    expect(screen.getAllByText(/Top up by/)).toHaveLength(1);
+    expect(screen.getByText(/Top up by/)).toHaveTextContent(
+      `Top up by Oct 12, 2026, 14:30 UTC to receive The Memes #561.`
+    );
+    expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Your next selected drop is not fully funded.")
+      screen.queryByText(
+        "The immediate next intended drop is not fully funded."
+      )
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText(
@@ -136,42 +141,52 @@ describe("SubscriptionCoverageSummary", () => {
       for (const repeatedExplanation of [
         "You are covered for now. Plan a top up before coverage ends.",
         "Your balance covers only a few more selected drops.",
-        "Your next selected drop is not fully funded.",
-        "One selected drop is fully funded. Add funds to cover more upcoming drops.",
       ]) {
         expect(screen.queryByText(repeatedExplanation)).not.toBeInTheDocument();
       }
       const metrics = document.getElementById("subscription-overview-actions")!;
-      expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
+      const explanation =
+        funded === 1
+          ? "One selected drop is fully funded. Add funds to cover more upcoming drops."
+          : "The immediate next intended drop is not fully funded.";
+      expect(screen.queryByText(explanation)).not.toBeInTheDocument();
       expect(
-        within(metrics).getByRole("link", { name: `The Memes #${nextToken}` })
-      ).toHaveAttribute("href", `/the-memes/${nextToken}`);
-      expect(within(metrics).getByText(/Oct 14, 2026/)).toBeVisible();
-      expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
+        within(metrics).queryByText("Next unfunded")
+      ).not.toBeInTheDocument();
+      expect(screen.getAllByText(/Top up by/)).toHaveLength(1);
+      expect(screen.getByText(/Top up by/)).toHaveTextContent(
+        `Top up by Oct 12, 2026, 14:30 UTC to receive The Memes #${nextToken}.`
+      );
       expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
     }
   );
 
   it.each([true, false])(
-    "omits the next-unfunded row only when that token is in Upcoming Drops (present: %s)",
-    (present) => {
-      renderSummary(createCoverage(), {
-        upcomingTokenIds: present ? [561] : [560],
+    "keeps the Next unfunded fact only when the deadline line does not name it (%s)",
+    (hasDeadline) => {
+      const coverage = createCoverage();
+      renderSummary({
+        ...coverage,
+        next_unfunded: {
+          ...coverage.next_unfunded!,
+          top_up_deadline: hasDeadline
+            ? coverage.next_unfunded!.top_up_deadline
+            : null,
+        },
       });
       const metrics = within(
         document.getElementById("subscription-overview-actions")!
       );
-      if (present) {
-        expect(metrics.queryByText("Next unfunded")).not.toBeInTheDocument();
+      expect(metrics.queryAllByText("Next unfunded")).toHaveLength(
+        hasDeadline ? 0 : 1
+      );
+      if (!hasDeadline)
         expect(
-          metrics.queryByRole("link", { name: "The Memes #561" })
-        ).not.toBeInTheDocument();
-      } else {
-        expect(metrics.getByText("Next unfunded")).toBeVisible();
-        expect(metrics.getByText(/Oct 14, 2026/)).toBeVisible();
-      }
-      expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
-      expect(screen.getByText("Forecast use")).toBeVisible();
+          metrics.getByRole("link", { name: "The Memes #561" })
+        ).toHaveAttribute("href", "/the-memes/561");
+      expect(screen.queryAllByText(/Top up by/)).toHaveLength(
+        hasDeadline ? 1 : 0
+      );
     }
   );
 
@@ -183,6 +198,11 @@ describe("SubscriptionCoverageSummary", () => {
       )
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "The immediate next intended drop is not fully funded."
+      )
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Top up" })
     ).not.toBeInTheDocument();
@@ -203,14 +223,14 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(
-      screen.getByRole("heading", { name: "8 drops funded Covered" })
+      screen.getByRole("heading", { name: "8 drops funded" })
     ).toBeVisible();
     const headline = screen.getByRole("heading", {
-      name: "8 drops funded Covered",
+      name: "8 drops funded",
     });
     const summary = headline.parentElement!;
     expect(within(summary).getByText(/Funded through/)).toHaveTextContent(
-      "Funded through The Memes #560 · Oct 12, 2026"
+      `Funded through The Memes #560 · Oct 12, 2026`
     );
     expect(
       within(summary).getByRole("link", { name: "The Memes #560" })
@@ -299,7 +319,7 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(
-      screen.getByRole("heading", { name: "1 drop funded Action required" })
+      screen.getByRole("heading", { name: "1 drop funded" })
     ).toBeVisible();
     expect(
       screen.queryByRole("heading", {
@@ -312,7 +332,9 @@ describe("SubscriptionCoverageSummary", () => {
       )
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Your next selected drop is not fully funded.")
+      screen.queryByText(
+        "The immediate next intended drop is not fully funded."
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -333,7 +355,7 @@ describe("SubscriptionCoverageSummary", () => {
     [ApiSubscriptionCoverageStatus.Unknown, "Coverage unavailable"],
   ])("preserves the shared status vocabulary for %s", async (status, label) => {
     renderSummary(createCoverage({ status }));
-    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(label);
+    expect(screen.getByText(label, { exact: true })).toBeVisible();
     expect(
       screen.queryByText("Status", { exact: true })
     ).not.toBeInTheDocument();
@@ -413,6 +435,7 @@ describe("SubscriptionCoverageSummary", () => {
     async (status) => {
       const coverage = createCoverage({
         status,
+        fully_funded_drops: 1,
         funded_through: {
           token_id: 560,
           mint_at: new Date("2026-10-12T15:40:00Z"),
@@ -432,10 +455,10 @@ describe("SubscriptionCoverageSummary", () => {
       });
       expect(screen.getByRole("heading", { level: 2 })).toBeVisible();
       expect(screen.getByText(/Funded through/)).toHaveTextContent(
-        "The Memes #560 · Oct 12, 2026"
+        `The Memes #560 · Oct 12, 2026`
       );
       expect(screen.getByText("0.18")).toBeVisible();
-      expect(screen.getByText("(2 mints available)")).toBeVisible();
+      expect(screen.getByText("2 mints available")).toBeVisible();
       expect(screen.getByText("2 allocated")).toBeVisible();
       expect(
         screen.queryByText(/Top up by|Recommended:/)
@@ -452,9 +475,7 @@ describe("SubscriptionCoverageSummary", () => {
       const tooltip = await screen.findByRole("tooltip");
       expect(within(tooltip).getByText("Subscription coverage")).toBeVisible();
       expect(
-        screen.queryByText(
-          /Choose a drop|Set up subscriptions|Review settings or refresh|Your next selected drops/
-        )
+        screen.queryByText("Your next selected drops are fully funded.")
       ).not.toBeInTheDocument();
     }
   );
@@ -476,19 +497,22 @@ describe("SubscriptionCoverageSummary", () => {
     ApiSubscriptionCoverageStatus.NoUpcomingSelections,
     ApiSubscriptionCoverageStatus.NoCurrentEligibility,
     ApiSubscriptionCoverageStatus.Unknown,
-  ])("does not show owner setup guidance for a visitor in %s", (status) => {
-    renderSummary(
-      createCoverage({ status, funded_through: null, next_unfunded: null }),
-      { isOwner: false }
-    );
-    expect(screen.getByRole("heading", { level: 2 })).toBeVisible();
-    expect(screen.getByText("2 allocated")).toBeVisible();
-    expect(
-      screen.queryByText(
-        /Choose a drop|Set up subscriptions|Review settings or refresh|Adding funds does not change eligibility/
-      )
-    ).not.toBeInTheDocument();
-  });
+  ])(
+    "keeps each no-status explanation available to a visitor in %s",
+    (status) => {
+      renderSummary(
+        createCoverage({ status, funded_through: null, next_unfunded: null }),
+        { isOwner: false }
+      );
+      expect(screen.getByRole("heading", { level: 2 })).toBeVisible();
+      expect(screen.getByText("2 allocated")).toBeVisible();
+      expect(
+        screen.getByText(
+          /Choose a drop|Set up subscriptions|Review settings or refresh|Adding funds does not change eligibility/
+        )
+      ).toBeVisible();
+    }
+  );
 
   it.each(Object.values(ApiSubscriptionCoverageStatus))(
     "omits the redundant Review settings shortcut in %s",
@@ -529,10 +553,7 @@ describe("SubscriptionCoverageSummary", () => {
         screen.queryByRole("link", { name: "Top up subscriptions" })
       ).not.toBeInTheDocument();
       expect(screen.getAllByRole("button", { name: "Top up" })).toHaveLength(1);
-      const footer = within(
-        document.getElementById("subscription-overview-actions")!
-      );
-      const chooseDrops = footer.queryByRole("link", {
+      const chooseDrops = screen.queryByRole("link", {
         name: "Choose drops",
       });
       if (status !== ApiSubscriptionCoverageStatus.NoUpcomingSelections) {
@@ -543,7 +564,7 @@ describe("SubscriptionCoverageSummary", () => {
           "#profile-subscriptions-upcoming"
         );
         expect(chooseDrops?.parentElement).toBe(
-          footer.getByRole("button", { name: "Top up" }).parentElement
+          screen.getByRole("button", { name: "Top up" }).parentElement
         );
       }
       await userEvent
@@ -625,11 +646,11 @@ describe("SubscriptionCoverageSummary", () => {
       ),
     });
     expect(
-      screen.getByRole("heading", { name: "24 drops funded Covered" })
+      screen.getByRole("heading", { name: "24 drops funded" })
     ).toBeVisible();
-    expect(screen.getByText("(1,108 mints available)")).toBeVisible();
+    expect(screen.getByText("1,108 mints available")).toBeVisible();
     expect(screen.getByText("288 allocated")).toBeVisible();
-    expect(screen.getAllByText("(1,108 mints available)")).toHaveLength(1);
+    expect(screen.getAllByText("1,108 mints available")).toHaveLength(1);
     expect(document.getElementById("subscription-coverage-details")).toBeNull();
   });
 
@@ -692,7 +713,7 @@ describe("SubscriptionCoverageSummary", () => {
     renderSummary(createCoverage(), { isOwner: false });
     expect(
       screen.getByRole("heading", {
-        name: "0 drops funded Action required",
+        name: "0 drops funded",
       })
     ).toBeVisible();
     expect(
@@ -705,4 +726,20 @@ describe("SubscriptionCoverageSummary", () => {
       screen.queryByRole("button", { name: "Refresh coverage" })
     ).not.toBeInTheDocument();
   });
+});
+
+it("shows no actions or unavailable forecast while the first coverage request is pending", () => {
+  render(
+    <SubscriptionCoverageSummary
+      coverage={undefined}
+      isLoading
+      isOwner
+      topUpAction={<button>Top up</button>}
+    />
+  );
+  expect(
+    screen.getByRole("heading", { name: "Loading subscription coverage" })
+  ).toHaveClass("tw-text-sm");
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
 });
