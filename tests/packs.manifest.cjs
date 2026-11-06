@@ -194,6 +194,25 @@ function museumPack(pack) {
 const PACKS = [
   {
     ...sandboxPack(
+      "test:e2e:validator-sign-sandbox",
+      "Validator grant file loading, matching-wallet signing, and signature return on desktop and mobile.",
+      ["tests/validator/sign-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://localhost:3317",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3317",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+        PLAYWRIGHT_WEB_SERVER_COMMAND: "node tests/support/composerSandboxServer.cjs",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4317",
+        VALIDATOR_PAGE_PUBLIC: "true",
+        USE_DEV_AUTH: "false",
+        NEXT_DEV_DIST_DIR: ".next-playwright-validator-sign",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
       "test:e2e:bookmarks-sandbox",
       "Private bookmark menus, account isolation, and saved-page flow.",
       ["tests/social/bookmarks-sandbox.spec.ts"],

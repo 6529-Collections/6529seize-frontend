@@ -1,9 +1,12 @@
+import "@/i18n/namespaces/validator-sign";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 
 export type ValidatorSection =
+  | "sign"
   | "download"
   | "guide"
   | "hardware"
@@ -16,6 +19,11 @@ const SECTIONS: readonly {
   readonly label: string;
 }[] = [
   { key: "download", href: "/validator", label: "Download" },
+  {
+    key: "sign",
+    href: "/validator/sign",
+    label: t("en-US", "validator.sign.nav"),
+  },
   { key: "guide", href: "/validator/guide", label: "Tester guide" },
   { key: "hardware", href: "/validator/hardware", label: "Hardware" },
   {

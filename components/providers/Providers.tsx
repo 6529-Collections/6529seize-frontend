@@ -8,6 +8,7 @@ import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
 import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
+import { usePathname } from "next/navigation";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
@@ -60,6 +61,10 @@ export default function Providers({
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
 }) {
+  // Connecting here requests only the validator grant, never a site login.
+  const pathname = usePathname();
+  const walletAuthenticationEnabled =
+    enableWalletAuthentication && pathname !== "/validator/sign";
   const sharedProviders = (
     <TitleProvider>
       <HeaderProvider>
@@ -88,17 +93,17 @@ export default function Providers({
                   <EmojiProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={enableWalletAuthentication}
+                        enableWalletAuthentication={walletAuthenticationEnabled}
                       >
                         <AuthLaunchTimingReporter
                           enableWalletAuthentication={
-                            enableWalletAuthentication
+                            walletAuthenticationEnabled
                           }
                         />
-                        {enableWalletAuthentication && (
+                        {walletAuthenticationEnabled && (
                           <MarketActivityTracker />
                         )}
-                        {enableWalletAuthentication &&
+                        {walletAuthenticationEnabled &&
                           isSignedMessagesEnabled() && (
                             <SignedWriteDecisionHost />
                           )}
@@ -111,7 +116,7 @@ export default function Providers({
                               <AppWebSocketProvider>
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
-                                  {enableWalletAuthentication && (
+                                  {walletAuthenticationEnabled && (
                                     <DeviceSetupHost />
                                   )}
                                   <LayoutProvider>

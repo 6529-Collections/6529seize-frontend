@@ -11294,6 +11294,36 @@
         "components/legacy-browser/LegacyBrowserNotice.tsx",
         "components/legacy-browser/legacyBrowserGate.ts"
       ]
+    },
+    {
+      "id": "validator.sign-authorization",
+      "kind": "workflow",
+      "title": "Sign a validator authorization using a wallet on another device",
+      "aliases": [
+        "grant.json",
+        "sign validator on phone",
+        "wallet on another computer"
+      ],
+      "keywords": [
+        "validator",
+        "grant",
+        "authorization",
+        "wallet",
+        "signature",
+        "phone"
+      ],
+      "summary": "Export grant.json from the Validator app and sign it at /validator/sign on the device holding your wallet, then return the signature to the validator.",
+      "facts": [
+        "In the Validator app, Authorize → Another device or a signing tool → enter the wallet address → Save the message exports grant.json. Transfer it to the wallet device.",
+        "Open /validator/sign, choose grant.json or paste its contents, review every key and share, confirm, connect the matching wallet, and sign. This uses the existing wallet connection without requiring site login or a profile.",
+        "The page checks that the connected wallet and recovered signature match the address in the grant. Wrong-wallet signing is blocked. Safe and other contract wallets are unsupported. Only main-network validator grants are supported.",
+        "Copy or download the signature, then paste it in the same draft’s signature field in the Validator app and select Send the signature. The website does not submit grants; the Validator app verifies and publishes them.",
+        "An empty key list is a revocation and requires explicit confirmation. Never sign keys you did not create. No wallet seed phrase or validator private key is needed.",
+        "The signing page is linked from /validator and shares its tester password access. The exported JSON stays on the device rather than being uploaded. Signing readiness does not establish account eligibility or completion of daily signing."
+      ],
+      "canonical_path": "/validator/sign",
+      "tags": ["validator", "wallet", "signing"],
+      "source_refs": ["ops/docs/feature-validator-signing.md"]
     }
   ]
 }

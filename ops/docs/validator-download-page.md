@@ -11,6 +11,7 @@ validators fetch to find updates.
 | Route | What it serves | Access |
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
+| `/validator/sign` | Sign an exported authorization with a wallet on another device; see [the signing guide](feature-validator-signing.md) | Password |
 | `/validator/guide` | The tester guide | Password |
 | `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
