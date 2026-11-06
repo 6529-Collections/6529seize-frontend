@@ -124,7 +124,11 @@ export default function ValidatorSignPage() {
             aria-invalid={Boolean(error)}
             type="file"
             accept=".json,application/json"
-            onChange={(event) => void readFile(event.target.files?.[0])}
+            onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              event.currentTarget.value = "";
+              void readFile(file);
+            }}
             className="tw-block tw-w-full tw-min-w-0 tw-text-sm tw-text-iron-300 file:tw-mr-3 file:tw-cursor-pointer file:tw-rounded-lg file:tw-border-0 file:tw-bg-iron-800 file:tw-px-4 file:tw-py-3 file:tw-font-semibold file:tw-text-white focus-visible:tw-outline-primary-400"
           />
           <details className="tw-mt-5">

@@ -58,7 +58,7 @@ function uint(value: unknown, max: bigint): bigint {
     typeof value === "number" && Number.isSafeInteger(value)
       ? String(value)
       : value;
-  if (typeof decimal !== "string" || !/^(0|[1-9][0-9]{0,19})$/.test(decimal)) {
+  if (typeof decimal !== "string" || !/^(0|[1-9]\d{0,19})$/.test(decimal)) {
     throw new GrantParseError("invalid");
   }
   const parsed = BigInt(decimal);

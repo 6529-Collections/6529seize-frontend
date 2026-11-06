@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { recoverTypedDataAddress, type Hex } from "viem";
 import { getAccount } from "wagmi/actions";
 import ValidatorSignPage from "@/components/validator-page/ValidatorSignPage";
@@ -208,4 +209,26 @@ it("shows protocol-relative shares instead of treating 10000 as a denominator", 
   expect(
     screen.getAllByText("50% of the account’s signing weight")
   ).toHaveLength(2);
+});
+
+it("can retry the same file after a read failure", async () => {
+  const user = userEvent.setup();
+  const file = new File([JSON.stringify(grantFixture())], "grant.json", {
+    type: "application/json",
+  });
+  const read = jest
+    .fn()
+    .mockRejectedValueOnce(new Error("Temporary read failure"))
+    .mockResolvedValueOnce(JSON.stringify(grantFixture()));
+  Object.defineProperty(file, "text", { value: read });
+  render(<ValidatorSignPage />);
+  const input = screen.getByLabelText<HTMLInputElement>("Choose grant.json");
+  await user.upload(input, file);
+  await screen.findByRole("alert");
+  expect(input.value).toBe("");
+  await user.upload(input, file);
+  await screen.findByRole("heading", {
+    name: "2. Check the wallet and validator keys",
+  });
+  expect(read).toHaveBeenCalledTimes(2);
 });

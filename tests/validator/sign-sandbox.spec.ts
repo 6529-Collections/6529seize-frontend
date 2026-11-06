@@ -47,7 +47,7 @@ test("exports no data, blocks the wrong wallet, and signs only the reviewed gran
   ).toBeVisible();
   // The shared shell switches from its SSR layout to the phone layout after
   // hydration. Wait for that real readiness signal before native details clicks.
-  const shell = page.locator("[data-small][data-sidebar-ready]");
+  const shell = page.getByRole("main").first().locator("..");
   await expect(shell).toHaveAttribute("data-sidebar-ready", "true");
   await expect(shell).toHaveAttribute(
     "data-small",

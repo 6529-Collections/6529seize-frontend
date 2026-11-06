@@ -163,12 +163,9 @@ export default function ValidatorGrantSigner({
               {address}
             </p>
             {matches && (
-              <p
-                role="status"
-                className="tw-text-sm tw-leading-6 tw-text-success"
-              >
+              <output className="tw-block tw-text-sm tw-leading-6 tw-text-success">
                 {t(locale, "validator.sign.walletMatch")}
-              </p>
+              </output>
             )}
             {!matches && (
               <p role="alert" className="tw-text-sm tw-leading-6 tw-text-error">
@@ -223,9 +220,9 @@ export default function ValidatorGrantSigner({
         </button>
       )}
       {pending && (
-        <p role="status" className="tw-text-sm">
+        <output className="tw-block tw-text-sm">
           {t(locale, "validator.sign.pending")}
-        </p>
+        </output>
       )}
       {signature && (
         <section
@@ -238,9 +235,9 @@ export default function ValidatorGrantSigner({
           >
             {t(locale, "validator.sign.returnTitle")}
           </h2>
-          <p role="status" className="tw-text-sm tw-leading-6 tw-text-iron-100">
+          <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-100">
             {t(locale, "validator.sign.success")}
-          </p>
+          </output>
           <p className="tw-text-sm tw-leading-6">
             {t(locale, "validator.sign.returnHelp")}
           </p>
@@ -272,9 +269,7 @@ export default function ValidatorGrantSigner({
             </button>
           </div>
           {copyStatus && (
-            <p role="status" className="tw-text-sm">
-              {copyStatus}
-            </p>
+            <output className="tw-block tw-text-sm">{copyStatus}</output>
           )}
         </section>
       )}

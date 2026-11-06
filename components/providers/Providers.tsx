@@ -63,9 +63,10 @@ export default function Providers({
 }) {
   // Connecting here requests only the validator grant, never a site login.
   const pathname = usePathname();
+  const isValidatorSigningPage =
+    pathname === "/validator/sign" || pathname === "/validator/sign/";
   const walletAuthenticationEnabled =
-    enableWalletAuthentication &&
-    pathname.replace(/\/+$/, "") !== "/validator/sign";
+    enableWalletAuthentication && !isValidatorSigningPage;
   const sharedProviders = (
     <TitleProvider>
       <HeaderProvider>
