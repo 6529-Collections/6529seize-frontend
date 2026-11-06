@@ -71,12 +71,33 @@ locales.
 
 ### Dictionary Loading
 
-- `en-US` ships in every client bundle. Browsers load each other locale's
-  dictionary on demand through `@/i18n/localeDictionaries`; server rendering
-  has every locale synchronously.
+- `en-US` copy is split into a root dictionary and feature namespaces.
+  `i18n/messages/en-US.ts` is the root dictionary, which every client bundle
+  includes. A feature namespace, `i18n/namespaces/<name>.ts`, holds copy that
+  only some pages need and ships only with the modules that import it.
+  `i18n/messages/en-US.complete.ts` combines both. Server rendering registers
+  the complete dictionary, so server output never depends on namespace
+  imports.
+- A module that can run in a browser (a `"use client"` module or anything it
+  imports) and uses a namespace's keys imports that namespace for its side
+  effect: `import "@/i18n/namespaces/network-tdh";`. This includes composed
+  keys such as `` `network.tdh.${id}` ``.
+  `__tests__/i18n/messageNamespaces.test.ts` enforces it.
+- Translate namespace copy in a server component and pass the text to client
+  components. Do not pass a namespace key from a server component to a client
+  component: the browser has not registered it.
+- Add copy to the namespace of the feature that renders it. Copy for the root
+  layout, header, sidebar or every page belongs in the root dictionary: a
+  namespace that one of those imports ships to every page again.
+- If a browser still meets an unregistered key, it logs a console error,
+  renders no text for that key and loads the complete dictionary in the
+  background. Treat that console error as a bug.
+- Browsers load each other locale's dictionary on demand through
+  `@/i18n/localeDictionaries`; server rendering has every locale synchronously.
 - Read copy only through `t()` and `tRich()` from `@/i18n/messages`. Do not
-  import a locale dictionary such as `@/i18n/messages/de-DE` from app code:
-  that puts it back in the client baseline.
+  import a locale dictionary such as `@/i18n/messages/de-DE`, or the complete
+  `@/i18n/messages/en-US.complete`, from app code: that puts it back in the
+  client baseline.
 - Until a locale's dictionary loads, `t()` returns `en-US` copy, never a key.
   `useBrowserLocale` switches only after the dictionary arrives, and pages
   opened with `?locale=` wait for it before hydrating.

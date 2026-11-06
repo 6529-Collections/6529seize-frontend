@@ -30,6 +30,7 @@ import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh-consolidation";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 

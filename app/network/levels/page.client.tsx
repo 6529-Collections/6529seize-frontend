@@ -15,6 +15,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 
 type NetworkLevelsMessageKey = Extract<MessageKey, `network.levels.${string}`>;
 

@@ -1,4 +1,6 @@
 import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
+import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
+import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -13,6 +15,8 @@ import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
  */
 export const EN_US_MESSAGES = {
   ...EN_US_ROOT_MESSAGES,
+  ...NETWORK_TDH_MESSAGES,
+  ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

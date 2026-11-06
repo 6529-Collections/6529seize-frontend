@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh-consolidation";
 import { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 import {
   matchesSimulatedScenario,
