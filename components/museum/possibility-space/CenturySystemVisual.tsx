@@ -1,6 +1,7 @@
 "use client";
 
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumHeldPosition } from "@/lib/museum/generative-studies";
 import {
   ComparisonMarker,

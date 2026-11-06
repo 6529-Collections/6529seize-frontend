@@ -305,4 +305,80 @@ describe("mobile app links", () => {
       ).toBe(true);
     });
   });
+
+  describe("on Android WebViews before Chromium 130", () => {
+    // Those parse custom-scheme URLs with an empty host and keep the host in
+    // the path, e.g. mobile6529://navigate/x -> host "", path "//navigate/x".
+    const RealURL = globalThis.URL;
+    class LegacyCustomSchemeURL extends RealURL {
+      constructor(value: string | URL, base?: string | URL) {
+        super(value, base);
+        const text = String(value);
+        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(
+          text
+        );
+        if (!schemePrefix) {
+          return;
+        }
+        const legacy = new RealURL(
+          `https://legacy.invalid//${text.slice(schemePrefix[0].length)}`
+        );
+        Object.defineProperty(this, "hostname", { value: "" });
+        Object.defineProperty(this, "pathname", { value: legacy.pathname });
+      }
+    }
+
+    beforeEach(() => {
+      globalThis.URL = LegacyCustomSchemeURL as typeof URL;
+    });
+
+    afterEach(() => {
+      globalThis.URL = RealURL;
+    });
+
+    it("still opens the linked page", () => {
+      const result = new RealURL(
+        getNativeLinkDestination(
+          "mobile6529://navigate/messages/encrypted?x=1#m",
+          "mobile6529",
+          origin,
+          123
+        )!,
+        origin
+      );
+      expect(result.pathname).toBe("/messages/encrypted");
+      expect(result.searchParams.get("x")).toBe("1");
+      expect(result.hash).toBe("#m");
+    });
+
+    it("still opens connection sharing and nothing else", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://share-connection?code=1",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toMatch(/^\/accept-connection-sharing\?/);
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://evil/messages",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it("preserves the configured staging scheme on an older WebView", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobilestaging6529://navigate/messages/encrypted?x=1#m",
+          "mobileStaging6529",
+          origin,
+          123
+        )
+      ).toBe("/messages/encrypted?x=1&_t=123#m");
+    });
+  });
 });

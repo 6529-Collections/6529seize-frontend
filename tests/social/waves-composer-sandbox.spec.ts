@@ -180,7 +180,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       })
     ).toBeVisible();
     await page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last()
       .fill("Typing without posting");
     await expect.poll(() => deliveredTyping).toBeGreaterThan(0);
@@ -237,7 +237,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.evaluate((element) => {
       const bytes = new Uint8Array([
@@ -339,7 +339,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(page.getByText(PREVIEW_DESCRIPTION).first()).toBeVisible();
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill("Checking the local composer without sending.");
     await expect(
@@ -636,7 +636,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     const draftText = "Draft that must survive the new-version reload.";
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(draftText);
     // The draft autosave is debounced (400ms); wait for it to persist.
@@ -661,7 +661,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await dismissNextDevTools(page);
 
     const restoredComposer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await expect(restoredComposer).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -684,9 +684,16 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   }, testInfo) => {
     await gotoSandboxWave(page);
 
+    const sendButton = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last();
+    await expect(sendButton).toBeDisabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(sendButton).toHaveCSS("color", "rgb(132, 132, 144)");
+
     const isIosSurface = testInfo.project.name === "capacitor-ios-sim";
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const wrapper = composer.locator(
       "xpath=ancestor::div[contains(@class, 'tw-sticky') and contains(@class, 'tw-overflow-y-auto')][1]"
@@ -733,10 +740,89 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect(composerBounds.bottom).toBeLessThanOrEqual(
       composerBounds.viewportHeight
     );
-    await expect(
-      page.getByRole("button", { name: "Post" }).last()
-    ).toBeEnabled();
+    await expect(sendButton).toBeEnabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await expect(sendButton).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(sendButton).toHaveText("");
+    const sendIcon = page
+      .getByRole("button", { name: "Post", exact: true })
+      .last()
+      .locator("svg");
+    await expect(sendIcon).toBeVisible();
+    await expect(sendIcon).toHaveAttribute("fill", "none");
+    const sendBounds = await sendButton.boundingBox();
+    expect(sendBounds?.width).toBe(40);
+    expect(sendBounds?.height).toBe(40);
     await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("uses flat browser action buttons with rounded-square hover backgrounds and tooltips", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    // Mobile keeps the collapsed plus-button tray; hover assertions apply only to desktop.
+    test.skip(
+      Boolean(testInfo.project.use.isMobile),
+      "Expanded browser actions only"
+    );
+    await gotoSandboxWave(page);
+    await showDropActionsIfCollapsed(page);
+    const actions = [
+      {
+        button: page.getByRole("button", { name: "Attach files" }),
+        label: "Attach files",
+      },
+      {
+        button: page.getByRole("button", { name: "Add GIF" }),
+        label: "Add GIF",
+      },
+      {
+        button: page.getByRole("button", { name: "Add poll", exact: true }),
+        label: "Add poll",
+      },
+      {
+        button: page.getByRole("button", { name: "Break into storm" }),
+        label: "Break into storm",
+      },
+    ];
+    for (const { button, label } of actions) {
+      await page.mouse.move(0, 0);
+      await expect(button).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      const shape = await button.evaluate((element) => {
+        const iconBounds = element
+          .querySelector("svg")
+          ?.getBoundingClientRect();
+        return {
+          radius: Number.parseFloat(getComputedStyle(element).borderRadius),
+          width: element.getBoundingClientRect().width,
+          height: element.getBoundingClientRect().height,
+          iconWidth: iconBounds?.width,
+          iconHeight: iconBounds?.height,
+        };
+      });
+      expect(shape.width).toBe(36);
+      expect(shape.height).toBe(36);
+      expect(shape.iconWidth).toBe(18);
+      expect(shape.iconHeight).toBe(18);
+      expect(shape.radius).toBeGreaterThan(0);
+      expect(shape.radius).toBeLessThan(shape.width / 2);
+      await button.hover();
+      await expect(button).not.toHaveCSS(
+        "background-color",
+        "rgba(0, 0, 0, 0)"
+      );
+      await expect(
+        page.getByRole("tooltip", { name: label, exact: true })
+      ).toBeVisible();
+    }
+    for (let index = 1; index < actions.length; index++) {
+      const previous = await actions[index - 1]!.button.boundingBox();
+      const current = await actions[index]!.button.boundingBox();
+      expect(previous).not.toBeNull();
+      expect(current).not.toBeNull();
+      expect(current!.x - (previous!.x + previous!.width)).toBeCloseTo(0, 1);
+    }
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -752,7 +838,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await gotoSandboxWave(page);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const positions = await composer.evaluate(async (element) => {
       const root = document.documentElement;
@@ -802,7 +888,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
     await expect(
@@ -824,30 +910,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       });
     }
     const postButton = page.getByRole("button", { name: "Post" }).last();
-    await postButton.evaluate((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          button.setAttribute(
-            "data-composer-focused-at-submit",
-            String(
-              document.activeElement?.getAttribute("contenteditable") === "true"
-            )
-          );
-        },
-        { capture: true, once: true }
-      );
-    });
     if (testInfo.project.use.isMobile) {
       await postButton.tap();
     } else {
       await postButton.click();
     }
-    // A tap must not dismiss the native input before submission starts.
-    await expect(postButton).toHaveAttribute(
-      "data-composer-focused-at-submit",
-      "true"
-    );
 
     await expect
       .poll(
@@ -897,8 +964,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expect(composer).toBeFocused();
     await expect(composer).toHaveText("");
+    if (testInfo.project.use.isMobile) {
+      await expect(composer).not.toBeFocused();
+    }
+    // Explicitly focus to test undo; sending must not reopen the keyboard.
+    await composer.focus();
     // Sending ends this draft's undo history; Undo must not revive a sent post.
     await composer.press("ControlOrMeta+z");
     await expect(composer).toHaveText("");
@@ -914,6 +985,95 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("confirms the all mention audience before posting and preserves cancelled drafts", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.route(
+      `**/v2/waves/${SANDBOX_WAVE_ID}/mention-search?**`,
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: "[]",
+        });
+      }
+    );
+    let countRequests = 0;
+    await page.route(
+      `**/v2/waves/${SANDBOX_WAVE_ID}/all-mention-count`,
+      async (route) => {
+        countRequests += 1;
+        if (countRequests === 1) {
+          await route.fulfill({
+            status: 503,
+            contentType: "application/json",
+            body: JSON.stringify({ message: "Temporarily unavailable" }),
+          });
+        } else {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ count: 1234 }),
+          });
+        }
+      }
+    );
+    await gotoSandboxWave(page);
+    await resetSandboxRequests(baseURL);
+    const composer = page
+      .getByRole("textbox", { name: /^Write a(?: chat)? message$/ })
+      .last();
+    const post = page.getByRole("button", { name: "Post", exact: true }).last();
+    await composer.fill("A wave announcement @all");
+    await post.click();
+    const dialog = page.getByRole("dialog", {
+      name: "Notify people with @all?",
+    });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText("Couldn't count the people");
+    await page.screenshot({
+      path: testInfo.outputPath("all-mention-error.png"),
+    });
+    await dialog.getByRole("button", { name: "Try again" }).click();
+    await expect(dialog).toContainText("will notify 1,234 people");
+    await expect(
+      dialog.getByRole("button", { name: "Send with @all" })
+    ).toBeEnabled();
+    expect(
+      (await fetchSandboxRequests(baseURL)).filter(
+        (r) => r.method === "POST" && r.path === "/api/drops"
+      )
+    ).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("all-mention-confirmation.png"),
+    });
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(composer).toContainText("A wave announcement @all");
+    await post.click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Keep editing" }).click();
+    await expect(composer).toContainText("A wave announcement @all");
+    await post.click();
+    await expect(dialog).toContainText("will notify 1,234 people");
+    await dialog.getByRole("button", { name: "Send with @all" }).click();
+    await expect(dialog).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (r) => r.method === "POST" && r.path === "/api/drops"
+          ).length
+      )
+      .toBe(1);
+    expect(pageErrors).toEqual([]);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("gates a first chat message with scroll-contained guidelines", async ({
     baseURL,
     page,
@@ -922,7 +1082,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     const postButton = page.getByRole("button", { name: "Post" }).last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
@@ -1128,7 +1288,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
 
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_STORM_INITIAL_PART);
     await showDropActionsIfCollapsed(page);
@@ -1470,7 +1630,7 @@ async function gotoSandboxWave(page: Page) {
       .first()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
-    page.getByRole("textbox", { name: "Write a chat message" }).last()
+    page.getByRole("textbox", { name: "Write a message" }).last()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);
@@ -1567,7 +1727,7 @@ async function showDropActionsIfCollapsed(page: Page) {
     .poll(
       async () =>
         (await page
-          .getByRole("button", { name: "Upload a file" })
+          .getByRole("button", { name: "Attach files" })
           .isVisible()
           .catch(() => false)) ||
         (await page

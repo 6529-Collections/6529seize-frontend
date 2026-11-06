@@ -5,7 +5,7 @@ import {
 } from "@/helpers/competition.helpers";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import {
-  getEncryptedMessagesRoute,
+  getEncryptedMessagesWakeRoute,
   getMessagesBaseRoute,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
@@ -54,11 +54,14 @@ const redirectConfig = {
       isApp: false,
     });
   },
-  // Content-free encrypted-chat wake: open the encrypted list; the engine
-  // syncs and shows which chat changed. Builds without encrypted chats fall
-  // back to the plaintext messages list.
+  // Content-free encrypted-chat wake: open the encrypted list; once the
+  // engine has synced it opens the chat when only one has new messages
+  // (useOpenWakeChat). Builds without encrypted chats fall back to the
+  // plaintext messages list.
   e2ee: () =>
-    isE2eeEnabled() ? getEncryptedMessagesRoute() : getMessagesBaseRoute(true),
+    isE2eeEnabled()
+      ? getEncryptedMessagesWakeRoute()
+      : getMessagesBaseRoute(true),
 };
 
 export const resolvePushRedirectUrl = (notificationData: DevicePushData) => {

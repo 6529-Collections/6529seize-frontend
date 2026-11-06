@@ -1,8 +1,14 @@
+"use client";
+
+import { ConnectionShareNotice } from "./ConnectionShareNotice";
 import {
-  faCopy,
-  faExternalLink,
-  faRotate,
-} from "@fortawesome/free-solid-svg-icons";
+  ConnectDeviceChoices,
+  ConnectDeviceContent,
+  ConnectDeviceFooter,
+} from "./ConnectDeviceContent";
+import { DesktopConnectionLink } from "./DesktopConnectionLink";
+import DeviceConnectionShare from "./DeviceConnectionShare";
+import { faCopy, faRotate } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import {
   ArrowDownTrayIcon,
@@ -12,19 +18,22 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { type CSSProperties, useEffect, useRef } from "react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Tooltip } from "react-tooltip";
 
-import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
   PageShareTarget,
-  squareStyle,
   SubMode,
 } from "./constants";
-import { ModalMenu } from "./HeaderShareMenu";
 import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
 import { buildSocialShareUrls, type ConnectionShareStatus } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
@@ -50,11 +59,13 @@ const TOOLTIP_STYLE = {
 };
 
 export function HeaderShareModalView({
+  open,
   shouldRender,
   isVisible,
   onClose,
   dialogRef,
   mode,
+  account,
   activeSubTab,
   setActiveSubTab,
   navigateBrowserSrc,
@@ -70,7 +81,7 @@ export function HeaderShareModalView({
   mobileConnectionShareStatus,
   desktopConnectionShareStatus,
   terminalConnectionShareFailuresRef,
-  requestSessionUpgrade,
+  updateAuthentication,
   refreshConnectionShare,
   isConnectionShareLoading,
   urlCopied,
@@ -78,6 +89,14 @@ export function HeaderShareModalView({
   isMobile,
   isElectron,
 }: HeaderShareModalViewProps) {
+  const [connectionMode, setConnectionMode] = useState<
+    "only" | "secure" | null
+  >(null);
+  const [previousOpen, setPreviousOpen] = useState(open);
+  if (open !== previousOpen) {
+    setPreviousOpen(open);
+    if (open || connectionMode === "secure") setConnectionMode(null);
+  }
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
@@ -143,34 +162,6 @@ export function HeaderShareModalView({
     );
   };
 
-  const renderCoreLink = (url: string) => {
-    return (
-      <a
-        data-testid="desktop-connection-panel"
-        href={url}
-        className="tw-group tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-6 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
-        style={squareStyle}
-      >
-        <Image
-          unoptimized
-          priority
-          loading="eager"
-          src="/6529Core.png"
-          alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
-          width={150}
-          height={150}
-          className="tw-unselectable"
-        />
-        <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
-          <FontAwesomeSvgIcon icon={faExternalLink} aria-hidden="true" />
-          <span className="tw-whitespace-nowrap">
-            {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
-          </span>
-        </span>
-      </a>
-    );
-  };
-
   const getNavigateContent = () => {
     if (pageShareTarget === PageShareTarget.APP) {
       return {
@@ -205,7 +196,7 @@ export function HeaderShareModalView({
 
     if (activeSubTab === SubMode.DESKTOP) {
       return {
-        content: renderCoreLink(shareConnectionCoreUrl),
+        content: <DesktopConnectionLink url={shareConnectionCoreUrl} />,
         url: shareConnectionCoreUrl,
       };
     }
@@ -230,112 +221,17 @@ export function HeaderShareModalView({
     };
   };
 
-  const requestAuthenticationUpgrade = async () => {
-    try {
-      await requestSessionUpgrade?.();
-    } catch (error) {
-      console.error("Failed to request session upgrade", error);
-    }
-  };
-
-  const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
-    const isLegacyAuth = status === "legacy-auth";
-    const title = (() => {
-      if (isLegacyAuth) {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.legacyTitle"
-        );
-      }
-      if (status === "loading") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.loadingTitle"
-        );
-      }
-      if (status === "error") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.errorTitle"
-        );
-      }
-      return t(
-        HEADER_SHARE_LOCALE,
-        "headerShare.connectionNotice.unauthenticatedTitle"
-      );
-    })();
-    const message = (() => {
-      if (isLegacyAuth) {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.legacyMessage"
-        );
-      }
-      if (status === "loading") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.loadingMessage"
-        );
-      }
-      if (status === "error") {
-        return t(
-          HEADER_SHARE_LOCALE,
-          "headerShare.connectionNotice.errorMessage"
-        );
-      }
-      return t(
-        HEADER_SHARE_LOCALE,
-        "headerShare.connectionNotice.unauthenticatedMessage"
-      );
-    })();
-
-    return (
-      <div
-        data-testid="connection-share-notice"
-        data-status={status}
-        className={`tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-p-8 tw-text-center ${
-          status === "loading"
-            ? ""
-            : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50"
-        }`}
-      >
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
-            {title}
-          </div>
-          <div className="tw-text-sm tw-leading-6 tw-text-iron-300">
-            {message}
-          </div>
-        </div>
-        {isLegacyAuth && (
-          <div className="tw-flex tw-w-full tw-gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              className="tw-flex-1"
-              onClick={onClose}
-            >
-              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.cancel")}
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              className="tw-flex-1"
-              onClick={() => {
-                onClose();
-                terminalConnectionShareFailuresRef.current.clear();
-                void requestAuthenticationUpgrade();
-              }}
-            >
-              {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.update")}
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderConnectionShareNotice = (status: ConnectionShareStatus) => (
+    <ConnectionShareNotice
+      status={status}
+      onClose={onClose}
+      onUpdate={() => {
+        onClose();
+        terminalConnectionShareFailuresRef.current.clear();
+        updateAuthentication();
+      }}
+    />
+  );
 
   const getDisplayContent = () => {
     if (mode === Mode.PAGE_SHARE) {
@@ -361,14 +257,18 @@ export function HeaderShareModalView({
     }
   };
 
-  const renderConnectionUrl = (url: string) => {
+  const renderConnectionUrl = (
+    url: string,
+    refresh = refreshConnectionShare,
+    loading = isConnectionShareLoading
+  ) => {
     const refreshLabel = t(
       HEADER_SHARE_LOCALE,
       "headerShare.connectionRefresh.action"
     );
     const unavailableLabel = t(
       HEADER_SHARE_LOCALE,
-      isConnectionShareLoading
+      loading
         ? "headerShare.connectionRefresh.loading"
         : "headerShare.connectionRefresh.unavailable"
     );
@@ -385,7 +285,7 @@ export function HeaderShareModalView({
           <button
             type="button"
             aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-            disabled={!url || isConnectionShareLoading}
+            disabled={!url || loading}
             className="tw-inline-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-opacity-50"
             data-tooltip-id="copy-url-tooltip"
             onClick={() => void copyUrl(url)}
@@ -401,15 +301,16 @@ export function HeaderShareModalView({
           type="button"
           aria-label={refreshLabel}
           title={refreshLabel}
-          aria-busy={isConnectionShareLoading}
-          aria-disabled={isConnectionShareLoading}
+          aria-busy={loading}
+          aria-disabled={loading}
           onClick={() => {
-            if (!isConnectionShareLoading) {
-              refreshConnectionShare();
+            if (!loading) {
+              setUrlCopied(false);
+              refresh();
             }
           }}
-          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
-            isConnectionShareLoading
+          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+            loading
               ? "tw-cursor-wait tw-opacity-50"
               : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
           }`}
@@ -417,7 +318,7 @@ export function HeaderShareModalView({
           <FontAwesomeSvgIcon
             icon={faRotate}
             aria-hidden="true"
-            className={`tw-size-4 ${isConnectionShareLoading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
+            className={`tw-size-4 ${loading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
           />
         </button>
         <Tooltip
@@ -606,11 +507,11 @@ export function HeaderShareModalView({
     const qrContent = (
       <div
         id="header-share-content"
-        className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
+        className={`tw-relative tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
           isConnectMode
             ? "tw-w-full"
             : "tw-w-48 sm:tw-w-[var(--page-share-qr-size)]"
-        } ${
+        } ${isConnectMode && activeSubTab === SubMode.DESKTOP ? "tw-h-56" : "tw-aspect-square"} ${
           isConnectMode && activeConnectionShareStatus === "ready"
             ? "tw-animate-fadeIn motion-reduce:tw-animate-none"
             : ""
@@ -655,6 +556,70 @@ export function HeaderShareModalView({
       );
     }
 
+    return renderConnectContent(
+      qrContent,
+      activeConnectionShareStatus,
+      content,
+      url
+    );
+  }
+
+  function renderConnectContent(
+    qrContent: ReactNode,
+    activeConnectionShareStatus: ConnectionShareStatus,
+    content: ReactNode,
+    url: string
+  ) {
+    const goBack = () => {
+      setUrlCopied(false);
+      setConnectionMode(null);
+    };
+    const footer = <ConnectDeviceFooter onBack={goBack} />;
+    const name = account.handle ?? account.address;
+    if (connectionMode === "secure") {
+      return (
+        <DeviceConnectionShare
+          key={activeSubTab}
+          target={activeSubTab === SubMode.DESKTOP ? "desktop" : "native"}
+          renderLink={(link, refresh, loading) => (
+            <>
+              <h3 className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
+                {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.asSecure", {
+                  name,
+                })}
+              </h3>
+              {activeSubTab === SubMode.DESKTOP ? (
+                <div className="tw-h-56">
+                  <DesktopConnectionLink url={link.url} />
+                </div>
+              ) : (
+                <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
+                  {renderQRCodeImage(
+                    link.qr,
+                    t(HEADER_SHARE_LOCALE, "e2ee.connectionSetup.qr")
+                  )}
+                </div>
+              )}
+              {renderConnectionUrl(link.url, refresh, loading)}
+            </>
+          )}
+          footer={footer}
+        />
+      );
+    }
+
+    if (!connectionMode) {
+      return (
+        <ConnectDeviceChoices
+          activeSubTab={activeSubTab}
+          isElectron={isElectron}
+          setActiveSubTab={setActiveSubTab}
+          canSetUp={account.canSetUp}
+          setConnectionMode={setConnectionMode}
+        />
+      );
+    }
+
     const connectionStatusKey =
       CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
     const showConnectionControls =
@@ -663,39 +628,51 @@ export function HeaderShareModalView({
       activeConnectionShareStatus === "error";
 
     return (
-      <div
-        data-testid="connection-share-content"
-        className="tw-relative tw-w-full"
-      >
-        <span
-          className="tw-sr-only"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {connectionStatusKey
-            ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
-            : ""}
-        </span>
+      <>
+        <h3 className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
+          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.as", { name })}
+        </h3>
         <div
-          data-testid="connection-share-reserved-space"
-          aria-hidden="true"
-          className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+          data-testid="connection-share-content"
+          className="tw-relative tw-w-full"
         >
-          <div className="tw-aspect-square tw-w-full" />
-          <div className="tw-h-10 tw-w-full" />
+          <span
+            className="tw-sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {connectionStatusKey
+              ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
+              : ""}
+          </span>
+          <div
+            data-testid="connection-share-reserved-space"
+            aria-hidden="true"
+            className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+          >
+            <div
+              className={
+                activeSubTab === SubMode.DESKTOP
+                  ? "tw-h-56 tw-w-full"
+                  : "tw-aspect-square tw-w-full"
+              }
+            />
+            <div className="tw-h-10 tw-w-full" />
+          </div>
+          <div className="tw-absolute tw-inset-0">
+            {showConnectionControls ? (
+              <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2">
+                {qrContent}
+                {renderConnectionUrl(url)}
+              </div>
+            ) : (
+              content
+            )}
+          </div>
         </div>
-        <div className="tw-absolute tw-inset-0">
-          {showConnectionControls ? (
-            <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2">
-              {qrContent}
-              {renderConnectionUrl(url)}
-            </div>
-          ) : (
-            content
-          )}
-        </div>
-      </div>
+        {footer}
+      </>
     );
   }
 
@@ -727,63 +704,62 @@ export function HeaderShareModalView({
         aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
-        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${modalMaxWidthClassName} ${
+        className={`tw-relative tw-flex tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${modalMaxWidthClassName} ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
       >
+        <div className="tw-flex tw-shrink-0 tw-items-start tw-justify-between tw-gap-3 tw-px-5 tw-pt-5">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
+            <h2
+              id="header-share-title"
+              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+            >
+              {modalTitle}
+            </h2>
+            {isConnectMode && (
+              <Link
+                href="/about/6529-apps"
+                onClick={onClose}
+                aria-label={t(
+                  HEADER_SHARE_LOCALE,
+                  "headerShare.connectModal.downloadAppsAriaLabel"
+                )}
+                className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                <ArrowDownTrayIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-shrink-0"
+                />
+                {t(
+                  HEADER_SHARE_LOCALE,
+                  "headerShare.connectModal.downloadApps"
+                )}
+              </Link>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label={closeAriaLabel}
+            title={closeAriaLabel}
+            onClick={onClose}
+            className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            <XMarkIcon className="tw-size-5" aria-hidden="true" />
+          </button>
+        </div>
         <div
           data-testid="header-share-modal-content"
-          className="tw-flex tw-flex-col tw-gap-3 tw-p-5"
+          className="tw-flex tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-y-auto tw-px-5 tw-pb-5 tw-pt-2"
         >
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
-              <h2
-                id="header-share-title"
-                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
-              >
-                {modalTitle}
-              </h2>
-              {isConnectMode && (
-                <Link
-                  href="/about/6529-apps"
-                  onClick={onClose}
-                  aria-label={t(
-                    HEADER_SHARE_LOCALE,
-                    "headerShare.connectModal.downloadAppsAriaLabel"
-                  )}
-                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  <ArrowDownTrayIcon
-                    aria-hidden="true"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  />
-                  {t(
-                    HEADER_SHARE_LOCALE,
-                    "headerShare.connectModal.downloadApps"
-                  )}
-                </Link>
-              )}
-            </div>
-            <button
-              type="button"
-              aria-label={closeAriaLabel}
-              title={closeAriaLabel}
-              onClick={onClose}
-              className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
-          </div>
-          {isConnectMode && (
-            <ModalMenu
-              activeSubTab={activeSubTab}
-              isElectron={isElectron}
-              onSubTabChange={setActiveSubTab}
-            />
+          {isConnectMode ? (
+            <ConnectDeviceContent account={account}>
+              {renderActiveContent()}
+            </ConnectDeviceContent>
+          ) : (
+            renderActiveContent()
           )}
-          {renderActiveContent()}
         </div>
       </dialog>
     </div>

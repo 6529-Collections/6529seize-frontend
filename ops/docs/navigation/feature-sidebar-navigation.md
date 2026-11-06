@@ -19,14 +19,18 @@ On web layouts, route switching is sidebar-first.
   nested route grouping shown in the expanded rail.
 - In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
   intent delay; tap or click remains available for touch and pointer users.
+- Compact submenu icons have a small, vertically centered right chevron, 4px
+  beside the icon. Icon and chevron share the same muted colour and turn white
+  together on hover. Direct links have no submenu chevron.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
 - The 40px 6529 logo links to `/`; there is no labeled `Home` product row.
   Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
 - A single-chevron toggle stays inside the sidebar’s right edge, vertically
   centered in both states (20px wide in both states).
-  Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
-  keep it visible. Expand and collapse use the same footprint.
+  Hover anywhere in the sidebar or give the toggle itself keyboard focus to
+  reveal it; focus on other sidebar controls does not keep it visible after the
+  pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
   `Join 6529`, and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
@@ -154,7 +158,11 @@ On web layouts, route switching is sidebar-first.
   `Data & Developer Tools` instead of flattening every route into one list.
   `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
-- Open connected `Notifications` from the bottom account section.
+- Click the connected `Notifications` bell in the bottom account section to
+  open `/notifications`. On desktop, hover for a preview without navigating;
+  with the bell focused, press Arrow Down to enter the preview. The preview
+  opens after 100ms and closes 200ms after leaving both bell and preview,
+  unless keyboard focus remains inside the preview.
 - Open `Share` for copy, QR, X, Farcaster, and supported system-share actions
   using the exact current URL.
 - Select the connected avatar, then `Profile` (handle route first, wallet

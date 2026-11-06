@@ -1,6 +1,7 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiRegisterDeviceGrantRequest } from "@/generated/models/ApiRegisterDeviceGrantRequest";
 import {
   commonApiFetch,
   commonApiPost,
@@ -17,6 +18,19 @@ export const fetchDeviceGrants = (
   commonApiFetch<ApiDeviceGrant[]>({
     endpoint: "device-grants",
     signal,
+    errorMode: "structured",
+  });
+
+/**
+ * Registers an app device grant (6529 Mobile and Desktop): EIP-712 typed data
+ * the signed-in wallet signed outside a web sign-in.
+ */
+export const registerAppDeviceGrant = (
+  request: ApiRegisterDeviceGrantRequest
+): Promise<ApiDeviceGrant> =>
+  commonApiPost<ApiRegisterDeviceGrantRequest, ApiDeviceGrant>({
+    endpoint: "device-grants",
+    body: request,
     errorMode: "structured",
   });
 

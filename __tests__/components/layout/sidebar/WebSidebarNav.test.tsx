@@ -80,6 +80,26 @@ describe("WebSidebarNav", () => {
     };
   });
 
+  it("shows compact submenu indicators only on expandable items", () => {
+    const { rerender } = render(<WebSidebarNav isCollapsed />);
+    for (const name of ["NFTs", "About"]) {
+      expect(
+        screen
+          .getByRole("button", { name })
+          .querySelector("[data-sidebar-submenu-indicator]")
+      ).toBeInTheDocument();
+    }
+    expect(
+      screen
+        .getByRole("link", { name: "Museum" })
+        .querySelector("[data-sidebar-submenu-indicator]")
+    ).toBeNull();
+    rerender(<WebSidebarNav isCollapsed={false} />);
+    expect(
+      document.querySelector("[data-sidebar-submenu-indicator]")
+    ).toBeNull();
+  });
+
   it("renders Waves as a direct /waves link instead of an expandable trigger", () => {
     render(<WebSidebarNav isCollapsed={false} />);
 

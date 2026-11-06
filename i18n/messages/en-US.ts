@@ -37,15 +37,7 @@ import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
-import museumMessages from "@/i18n/messages/museum.en-US.json";
-import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
-import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
-import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
-import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
-import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
-import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
-import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -55,6 +47,7 @@ import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json"
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
+import { LEGACY_BROWSER_MESSAGES } from "@/i18n/messages/legacy-browser";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
@@ -70,7 +63,6 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
-import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
@@ -468,6 +460,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.about": "About",
+  "primary.museum": "Museum",
   "about.overview": "Overview",
   "primary.home": "Home",
   "sidebar.submenuLabel": "{section} sub-navigation",
@@ -2282,6 +2275,19 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "allMention.title": "Notify people with @all?",
+  "allMention.description":
+    "The @all tag will notify {count} people. Do you want to send this message?",
+  "allMention.descriptionOne":
+    "The @all tag will notify {count} person. Do you want to send this message?",
+  "allMention.snapshot":
+    "This count reflects current notification settings and wave access. It may change before the message is sent.",
+  "allMention.loading": "Counting people who will be notified…",
+  "allMention.error":
+    "Couldn't count the people who will be notified. Try again before sending.",
+  "allMention.cancel": "Keep editing",
+  "allMention.confirm": "Send with @all",
+  "allMention.retry": "Try again",
   "guidelinesDialog.title": "Wave guidelines",
   "guidelinesDialog.description":
     "Review this wave's guidelines before sending your first message.",
@@ -2335,7 +2341,7 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
   "waves.composer.placeholder",
   {
     createDrop: "Create a drop",
-    writeChatMessage: "Write a chat message",
+    writeChatMessage: "Write a message",
     dropReply: "Drop a reply",
     postReply: "Post a reply",
     quoteDrop: "Quote a drop",
@@ -3213,7 +3219,12 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
-export const EN_US_MESSAGES = {
+/**
+ * en-US source copy that every page bundles. Feature namespaces that only some
+ * pages need live in `@/i18n/namespaces` instead; `en-US.complete.ts` combines
+ * both into the complete dictionary.
+ */
+export const EN_US_ROOT_MESSAGES = {
   ...dropForgeSettingsMessages,
   "dropForge.actionDone": "Completed",
   "dropForge.actionFailed": "Failed",
@@ -3327,6 +3338,7 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.notification":
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
+  "emoji.picker.label": "Emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
@@ -3349,6 +3361,10 @@ export const EN_US_MESSAGES = {
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
+  // The header and the drop actions menu link to artwork documentation from
+  // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
+  "artworkDocumentation.title": "Artwork documentation",
+  "artworkDocumentation.myWorks": "My artwork documentation",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,
@@ -3672,7 +3688,6 @@ export const EN_US_MESSAGES = {
   "waves.signIn.newHere":
     "New here? Sign a message with your wallet to get started.",
   "auth.signModal.authenticationRequest": "Sign in to 6529",
-  "auth.signModal.cancelSignIn": "Cancel sign-in",
   "auth.signModal.walletAddress": "Wallet address",
   "auth.signModal.noTransaction": "No transaction or gas fees.",
   "auth.signModal.connectionShareLead":
@@ -3723,13 +3738,16 @@ export const EN_US_MESSAGES = {
   "acceptConnection.limit.message":
     "You can keep up to {maxCount} connected profiles. Sign out from one profile, then scan this connection link again.",
   "acceptConnection.incoming.title": "Incoming connection from",
-  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh} - Level: {level}",
+  "acceptConnection.incoming.profileStatsLabel": "TDH: {tdh}",
+  "acceptConnection.incoming.permissions":
+    "Accepting also enables these on this device",
   "acceptConnection.currentProfile.prefix": "Your current profile",
   "acceptConnection.currentProfile.willStayAvailable": "will stay available.",
   "acceptConnection.currentProfile.switchAfterAccepting":
     "You can switch between both after accepting.",
   "acceptConnection.action.processing": "Processing",
   "acceptConnection.action.accept": "Accept connection",
+  "acceptConnection.action.acceptWithSetup": "Accept and enable both",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
@@ -3801,6 +3819,17 @@ export const EN_US_MESSAGES = {
   "headerShare.shareModal.closeAriaLabel": "Close share modal",
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.chooseApp": "Which app are you connecting?",
+  "headerShare.connectModal.only": "Connect only",
+  "headerShare.connectModal.secure":
+    "Connect with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopComingSoon": "Coming soon",
+  "headerShare.connectModal.as": "Connect as {name}",
+  "headerShare.connectModal.asSecure":
+    "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.back": "Back",
+  "headerShare.connectModal.oneTime":
+    "Use only on a device you own. This code works once.",
   "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
   "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
   "headerShare.connectModal.downloadApps": "Download apps",
@@ -3809,8 +3838,8 @@ export const EN_US_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "Mobile",
-  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.menu.desktop": "6529 Desktop",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
@@ -3849,6 +3878,9 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.profiles": "Profiles",
   "headerUserMenu.addProfile": "Add profile",
   "appSidebar.openingAccountConnection": "Opening account connection",
+  "appSidebar.copyAddress": "Copy wallet address",
+  "appSidebar.addressCopied": "Address copied",
+  "appSidebar.addressCopyFailed": "Couldn’t copy the wallet address.",
   "appSidebar.openProfile": "Open {name} profile",
   "appSidebar.accountSwitchFailed":
     "Failed to switch connected account. Please try again.",
@@ -3960,6 +3992,92 @@ export const EN_US_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "subscriptions.page.refreshError":
+    "Some subscription data could not be refreshed. Previously loaded data may be out of date.",
+  "subscriptions.upcoming.subscribed": "Subscribed",
+  "subscriptions.upcoming.notSubscribed": "Not subscribed",
+  "subscriptions.upcoming.quantity":
+    "Subscription quantity for {title} #{token}",
+  "subscriptions.history.viewTransaction": "View transaction on Etherscan",
+  "subscriptions.history.meme": "Meme",
+  "subscriptions.history.contract": "Contract {address}",
+  "subscriptions.history.quantity": "x{count}",
+  "subscriptions.history.redeemedEntryTitle":
+    "Redeemed Subscription for {contract} #{token} {count}",
+  "subscriptions.history.redeemedAddress": "Airdrop Address: {address}",
+  "subscriptions.history.redeemedBalance":
+    "Balance after redemption: {balance}",
+  "subscriptions.history.fromWallet": "from: {address}",
+  "subscriptions.page.retry": "Retry",
+  "subscriptions.airdrop.title": "Airdrop Address",
+  "subscriptions.airdrop.change": "Change airdrop address",
+  "subscriptions.airdrop.empty": "No airdrop address found",
+  "subscriptions.airdrop.set": "Set airdrop address",
+  "subscriptions.details.title": "Details",
+  "subscriptions.details.status": "Status",
+  "subscriptions.details.drops": "Drops funded",
+  "subscriptions.details.mode": "Mode",
+  "subscriptions.details.eligibility": "Eligibility",
+  "subscriptions.details.none": "None",
+  "subscriptions.details.unavailable": "Unavailable",
+  "subscriptions.answer.covered": "Covered until {date}",
+  "subscriptions.answer.runningLow": "Running low, covered until {date}",
+  "subscriptions.answer.actionRequired": "Your next drop is not fully funded",
+  "subscriptions.answer.actionRequiredVisitor":
+    "The next intended drop is not fully funded",
+  "subscriptions.answer.next.one": "Next: {drop} · {date} · {count} card.",
+  "subscriptions.answer.next.many": "Next: {drop} · {date} · {count} cards.",
+  "subscriptions.answer.today": "Minting today",
+  "subscriptions.answer.keepMinting": "Top up to keep minting.",
+  "subscriptions.answer.plan": "Plan a top up before then.",
+  "subscriptions.answer.choose": "Turn on the drops you want below.",
+  "subscriptions.answer.topUpAndChoose":
+    "Top up, then turn on the drops you want below.",
+  "subscriptions.answer.topUpFor": "Top up to receive The Memes #{token}.",
+  "subscriptions.balance.loading": "Loading balance",
+  "subscriptions.balance.refresh": "Refresh balance",
+  "subscriptions.mode.label": "Automatic subscription mode",
+  "subscriptions.mode.since": "{mode} since {date}",
+  "subscriptions.mode.automaticDescription":
+    "Automatic airdrops of all eligible drops unless you opt-out",
+  "subscriptions.mode.manualDescription":
+    "You have to opt-in to each specific drop",
+  "subscriptions.settings.editions": "Edition Preference",
+  "subscriptions.settings.all": "All eligible",
+  "subscriptions.settings.loading": "Loading settings",
+  "subscriptions.settings.eligibilityBadge": "Eligibility x{count}",
+  "subscriptions.settings.allDescription":
+    "You will receive all editions you are eligible for",
+  "subscriptions.settings.oneDescription": "You will receive only one edition",
+  "subscriptions.topUp.ios": "Top-up on 6529.io",
+  "subscriptions.topUp.remaining": "Remaining {period} {number}",
+  "subscriptions.topUp.other": "Other",
+  "subscriptions.topUp.countPlaceholder": "count",
+  "subscriptions.topUp.customLabel": "Other card count",
+  "subscriptions.topUp.more": "More",
+  "subscriptions.topUp.less": "Less",
+  "subscriptions.topUp.showDeepTime": "Show Deep Time Subscriptions",
+  "subscriptions.topUp.hideDeepTime": "Hide Deep Time Subscriptions",
+  "subscriptions.topUp.cancel": "Cancel",
+  "subscriptions.upcoming.title": "Upcoming Drops",
+  "subscriptions.upcoming.more": "More",
+  "subscriptions.upcoming.showMore": "Show More",
+  "subscriptions.upcoming.showLess": "Show Less",
+  "subscriptions.upcoming.loading": "Loading upcoming drops",
+  "subscriptions.upcoming.empty": "No upcoming drops found",
+  "subscriptions.row.cards.one": "{count} card",
+  "subscriptions.row.cards.many": "{count} cards",
+  "subscriptions.history.title": "Subscription History",
+  "subscriptions.history.redeemed": "Redeemed",
+  "subscriptions.history.logs": "Log",
+  "subscriptions.history.topups": "Top Ups",
+  "subscriptions.history.redeemedTitle": "Redeemed Subscriptions",
+  "subscriptions.history.logsTitle": "Log History",
+  "subscriptions.history.topupsTitle": "Top Up History",
+  "subscriptions.history.emptyRedeemed": "No Redeemed Subscriptions found",
+  "subscriptions.history.emptyLogs": "No logs found",
+  "subscriptions.history.emptyTopups": "No Top Ups found",
+  "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
@@ -4011,21 +4129,23 @@ export const EN_US_MESSAGES = {
   "subscriptions.coverage.recommendedThrough":
     "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
   "subscriptions.coverage.notSetUp.description":
-    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+    "Set up subscriptions to receive eligible Meme drops automatically or select individual drops.",
   "subscriptions.coverage.noEligibility.description":
-    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+    "This profile is not currently eligible for an upcoming Meme mint. Adding funds does not change eligibility.",
   "subscriptions.coverage.noSelections.description":
-    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+    "No drops are selected in Manual mode. Choose a drop to see how long your balance will last.",
   "subscriptions.coverage.unknown.description":
-    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+    "Some forecast information is missing. Review settings or refresh when the schedule is available.",
   "subscriptions.coverage.covered.description":
-    "Your immediate intended drops are fully funded.",
+    "Your next selected drops are fully funded.",
   "subscriptions.coverage.earlyWarning.description":
-    "You are covered for now. Plan a top up before the funded runway ends.",
+    "You are covered for now. Plan a top up before coverage ends.",
   "subscriptions.coverage.runningLow.description":
-    "Only a few intended drops remain fully funded.",
+    "Your balance covers only a few more selected drops.",
   "subscriptions.coverage.actionRequired.description":
     "The immediate next intended drop is not fully funded.",
+  "subscriptions.coverage.actionRequired.oneFundedDescription":
+    "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
@@ -4808,6 +4928,7 @@ export const EN_US_MESSAGES = {
   ...QR_SCANNER_MESSAGES,
   ...CAPACITOR_CONNECT_MESSAGES,
   ...E2EE_MESSAGES,
+  ...LEGACY_BROWSER_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
@@ -4880,19 +5001,13 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.loading": "Loading activity log",
+  "profileActivity.loadError": "Unable to load activity log.",
+  "profileActivity.retry": "Retry",
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
   ...emmaMessages,
-  ...museumMessages,
-  ...networkMetricsMessages,
-  ...networkTdhMessages,
-  ...networkTdhExplainerMessages,
-  ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
-  ...networkTdhExampleMessages,
-  ...networkTdhProfileMessages,
-  ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,
@@ -4938,7 +5053,6 @@ export const EN_US_MESSAGES = {
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
-  ...ARTWORK_DOCUMENTATION_MESSAGES,
   ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
@@ -5067,5 +5181,3 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.allWaves": "All Waves",
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
-
-export type MessageKey = keyof typeof EN_US_MESSAGES;

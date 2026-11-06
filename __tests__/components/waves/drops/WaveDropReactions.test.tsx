@@ -20,6 +20,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
@@ -59,7 +60,7 @@ jest.mock(
 );
 
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: jest.fn(),
+  useQuery: jest.fn(() => ({ data: undefined, isLoading: false })),
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
@@ -207,6 +208,36 @@ const createDeferred = <T,>() => {
 };
 
 describe("WaveDropReactions", () => {
+  it("disables hidden details after a local last-reaction removal with unchanged parent data", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue([], () => ({ skins: [{ native: "👍" }] }))
+    );
+    const drop = createMockDrop({
+      reactions: [
+        {
+          reaction: ":+1:",
+          count: 1,
+          profiles: [{ id: "profile-1", handle: "alice" }],
+        },
+      ],
+      context_profile_context: { reaction: ":+1:" },
+    }) as unknown as ApiDrop;
+    const detailQuery = () =>
+      jest
+        .mocked(useQuery)
+        .mock.calls.findLast(
+          ([options]) => options.queryKey[0] === AppQueryKey.DROP_REACTIONS
+        )?.[0];
+    render(<WaveDropReactions drop={drop} />);
+    const chip = screen.getByRole("button");
+    fireEvent.mouseOver(chip);
+    await waitFor(() => expect(detailQuery()?.enabled).toBe(true));
+
+    fireEvent.click(chip);
+    await waitFor(() => expect(chip).not.toBeInTheDocument());
+    expect(drop.reactions[0]).toMatchObject({ count: 1 });
+    await waitFor(() => expect(detailQuery()?.enabled).toBe(false));
+  });
   it("keeps a stable chip synchronized with externally updated count and selection", async () => {
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue([

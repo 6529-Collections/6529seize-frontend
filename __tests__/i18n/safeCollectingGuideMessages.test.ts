@@ -1,7 +1,6 @@
 import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { getLocaleDictionary } from "@/i18n/localeDictionaries";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import safeCollecting from "@/i18n/messages/safeCollecting.en-US.json";
 import tapGuide from "@/i18n/messages/delegationTapGuide.en-US.json";
 import consolidation from "@/i18n/messages/networkTdhConsolidation.en-US.json";

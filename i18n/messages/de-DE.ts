@@ -22,7 +22,7 @@ import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.json";
 
 const RETRY_LABEL = "Erneut versuchen";
@@ -1180,7 +1180,7 @@ export const DE_DE_MESSAGES = {
   "waves.poll.status.voted": "Abgestimmt",
   "waves.poll.status.updated": "Aktualisiert",
   "waves.composer.placeholder.createDrop": "Drop erstellen",
-  "waves.composer.placeholder.writeChatMessage": "Chatnachricht schreiben",
+  "waves.composer.placeholder.writeChatMessage": "Nachricht schreiben",
   "waves.composer.placeholder.dropReply": "Antwort als Drop verfassen",
   "waves.composer.placeholder.postReply": "Antwort posten",
   "waves.composer.placeholder.quoteDrop": "Drop zitieren",

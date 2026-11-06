@@ -247,4 +247,27 @@ describe("E2eeProvider", () => {
       expect(screen.getByTestId("availability")).toHaveTextContent("failed")
     );
   });
+
+  it("adopts a combined grant arriving after the setup engine has already loaded", async () => {
+    mockPathname.mockReturnValue("/messages/encrypted");
+    const { loadModules, engines } = createLoader();
+    render(
+      <E2eeProvider loadModules={loadModules}>
+        <ContextProbe />
+      </E2eeProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("availability")).toHaveTextContent("loaded")
+    );
+    const engine = engines[0]!;
+    await waitFor(() =>
+      expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(1)
+    );
+    setE2eeEnrollmentMarker(SELF_ID, true);
+    act(() => globalThis.dispatchEvent(new Event("storage")));
+    await waitFor(() =>
+      expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(2)
+    );
+    expect(engine.enroll).not.toHaveBeenCalled();
+  });
 });

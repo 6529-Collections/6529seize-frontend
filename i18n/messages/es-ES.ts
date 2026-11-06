@@ -22,7 +22,7 @@ import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
@@ -1174,7 +1174,7 @@ export const ES_ES_MESSAGES = {
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
   "waves.composer.placeholder.createDrop": "Crear un drop",
-  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje de chat",
+  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje",
   "waves.composer.placeholder.dropReply": "Responder con un drop",
   "waves.composer.placeholder.postReply": "Publicar una respuesta",
   "waves.composer.placeholder.quoteDrop": "Citar un drop",

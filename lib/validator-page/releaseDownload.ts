@@ -1,4 +1,8 @@
-import { getReleaseFeedSnapshot, type ValidatorRelease } from "./releaseFeed";
+import {
+  getOfferedRelease,
+  getReleaseFeedSnapshot,
+  type ValidatorRelease,
+} from "./releaseFeed";
 import { getReleaseObjectKey, presignReleaseObject } from "./releasesBucket";
 
 /** A presigned URL works this long after the redirect. */
@@ -29,13 +33,14 @@ function decodeSegment(segment: string | undefined): string | null {
 /**
  * Only the newest release can be downloaded (the owner, 2026-11-01 and
  * 2026-11-04): an older test release stays in the feed and on the history
- * page, with its SHA-256, but its files are not handed out.
+ * page, with its SHA-256, but its files are not handed out. A newest
+ * release the feed lists as unsafe hands out none.
  */
 function findRelease(
   releases: readonly ValidatorRelease[],
   segments: readonly string[]
 ): { release: ValidatorRelease; fileName: string } | null {
-  const newest = releases[0];
+  const newest = getOfferedRelease(releases);
   if (!newest) {
     return null;
   }

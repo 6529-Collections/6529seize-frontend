@@ -8,10 +8,10 @@ profiles, and submitted report history.
 
 ## Location in the Site
 
-Preferences is a dedicated page at `/preferences`. It contains three tabs:
-**Notifications & messages**, **Blocked Profiles**, and **Reports**. A
-fourth **Devices** tab at `/preferences?tab=devices` lists the browsers that
-can post as you with signed messages.
+Preferences is a dedicated page at `/preferences`. It contains four tabs: **Notifications & Messages**, **Blocked Profiles**,
+**Reports**, and **Device Permissions** (`/preferences?tab=devices`). Desktop
+uses the underlined tab row; narrow layouts use a two-by-two grid without
+horizontal scrolling.
 
 ## Entry Points
 
@@ -31,7 +31,8 @@ The profile-header action is hidden while an active profile proxy is in use.
 ## User Journey
 
 1. Open your own profile and select **Preferences**.
-2. Choose **Notifications & messages**, **Blocked Profiles**, or **Reports**.
+2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**, or
+   **Device Permissions**.
 3. Review or change the available settings for the active profile.
 4. When Preferences was opened from the profile header, return to the active
    profile with **Back to profile** on desktop or the standard back arrow in
@@ -91,15 +92,27 @@ When `Essential only` is selected, the optional category controls collapse out
 of view. Their values are preserved and restored when the profile switches back
 to `All`.
 
+Encrypted DMs use the existing **Direct messages and wave activity** category,
+without an additional setting. In-app encrypted notifications have no 60-second
+cooldown; content-free phone pushes have their own throttle.
+
 Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these
 profile preferences cannot trigger a push.
 
-### Devices
+### Device Permissions
 
-**Devices** lists every browser key granted to sign your posts, edits,
-deletes, and reactions, marks **This device**, and lets you revoke a device.
-See [Signed Messages](../waves/drop-actions/feature-signed-messages.md).
+**Authorized devices** lists signing and encrypted-DM permissions, including
+combined grants, with their status, wallet, added/expiry dates, last use and
+**This device** where applicable. You can rename any unrevoked device you own
+from a browser or app; the server name is shared across your devices.
+**Revoke** explains whether signing, encryption or both will stop before you
+confirm. Revoking this encryption device also clears its local encrypted history.
+
+The setup action names whichever permissions this device is missing and opens
+the shared consent dialog before a wallet request. It is omitted when both are
+on. See [Signed Posts](../waves/drop-actions/feature-signed-messages.md) and
+[Encrypted messages](../encrypted-messages.md#renewal-and-revocation).
 
 ### Blocks and Reports
 

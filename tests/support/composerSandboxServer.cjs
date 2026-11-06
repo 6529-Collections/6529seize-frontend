@@ -58,6 +58,7 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_ALL_MENTION_CONTENT = "A wave announcement @all";
 const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_WAVE_GUIDELINES = Array.from(
   { length: 24 },
@@ -1244,7 +1245,10 @@ function isExpectedChatDropParts(parts, hasPoll) {
   }
 
   if (parts.length === 1) {
-    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+    return (
+      isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT) ||
+      isExpectedChatDropPart(parts[0], SANDBOX_ALL_MENTION_CONTENT)
+    );
   }
 
   return (
@@ -1317,7 +1321,9 @@ function isExpectedChatDropBody(body) {
     Array.isArray(body.mentioned_users) &&
     body.mentioned_users.length === 0 &&
     Array.isArray(body.mentioned_groups) &&
-    body.mentioned_groups.length === 0 &&
+    (body.parts[0]?.content === SANDBOX_ALL_MENTION_CONTENT
+      ? body.mentioned_groups.length === 1 && body.mentioned_groups[0] === "ALL"
+      : body.mentioned_groups.length === 0) &&
     Array.isArray(body.mentioned_waves) &&
     body.mentioned_waves.length === 0 &&
     Array.isArray(body.metadata) &&
@@ -2902,7 +2908,9 @@ function handleNotificationRead(pathname, url, res) {
     const ids = url.searchParams.get("ids").split(",");
     return writeJsonResponse(res, {
       ...emptyPage(),
-      data: ids.includes(artworkNotificationDrop.id) ? [artworkNotificationDrop] : [],
+      data: ids.includes(artworkNotificationDrop.id)
+        ? [artworkNotificationDrop]
+        : [],
     });
   }
   if (pathname !== "/api/v2/notifications") {
@@ -3066,6 +3074,8 @@ function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
     return writeJsonResponse(res, submittedPollDrop);
   }
 
+  submittedChatDrop.created_at = Date.now();
+
   const parts = body.parts.map((part, index) => ({
     part_id: index + 1,
     content: part.content,
@@ -3095,7 +3105,7 @@ function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
 
   return writeJsonResponse(res, {
     ...submittedChatDrop,
-    updated_at: CREATED_AT + 3000,
+    updated_at: Date.now(),
     parts: [
       {
         ...submittedChatDrop.parts[0],

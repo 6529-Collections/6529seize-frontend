@@ -150,6 +150,57 @@ describe("proxy", () => {
     }
   );
 
+  describe("legacy home wave links", () => {
+    const DESKTOP_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)";
+    const IPHONE_UA =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15";
+
+    it.each([
+      [DESKTOP_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=waves&wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=messages&wave=dm", "/messages/dm"],
+      [
+        DESKTOP_UA,
+        "wave=wave&drop=message///&serialNo=42/&tab=leaderboard",
+        "/waves/wave?drop=message&serialNo=42&tab=leaderboard",
+      ],
+    ])(
+      "sends %s /?%s to the wave route",
+      async (userAgent, query, destination) => {
+        const request = createRequest("/");
+        request.nextUrl.search = `?${query}`;
+        jest.mocked(request.headers.get).mockReturnValue(userAgent);
+        await proxy(request);
+        expect(mockRedirect).toHaveBeenCalledWith(
+          new URL(destination, request.url)
+        );
+      }
+    );
+
+    it.each(["", "?wave=", "?view=waves", "?view=messages", "?drop=message"])(
+      "leaves the prerendered home page to serve /%s",
+      async (search) => {
+        mockFetchStatus(200);
+        const request = createRequest("/");
+        request.nextUrl.search = search;
+        jest.mocked(request.headers.get).mockReturnValue(IPHONE_UA);
+        const response = await proxy(request);
+        expect(response).toEqual({ kind: "next" });
+        expect(mockRedirect).not.toHaveBeenCalled();
+      }
+    );
+
+    it("keeps a wave query on other pages for the app to read after hydration", async () => {
+      mockFetchStatus(200);
+      const request = createRequest("/the-memes");
+      request.nextUrl.search = "?wave=wave";
+      const response = await proxy(request);
+      expect(response).toEqual({ kind: "next" });
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     "/pdfjs/5.4.296/pdf.worker.min.mjs",
     "/pdfjs/5.4.296/cmaps/Adobe-Japan1-UCS2.bcmap",

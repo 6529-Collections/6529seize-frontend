@@ -8,6 +8,7 @@ import {
   historyAround,
   loadHistoryPage,
   updateHistorySummary,
+  trimHistory,
 } from "@/lib/e2ee/engine/history";
 import type { StoredGroup, StoredMessage } from "@/lib/e2ee/records";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
@@ -290,6 +291,73 @@ it("retains at most two pages while browsing and preserves offscreen summary cou
   updateHistorySummary(ctx, runtime);
   expect(runtime.record.history).toMatchObject({ count: 1500, unread: 1499 });
 }, 30_000);
+
+it("keeps the incoming notification cursor behind pending sends and outside the history window", async () => {
+  const store = new EngineStore("p", { version: 0 } as DeviceDirectory);
+  const runtime = newRuntime({
+    g: "g",
+    status: "active",
+    readSeq: 0,
+    members: [],
+    leaving: [],
+    epochFp: "0".repeat(16),
+    metadata: { admins: [], kind: "dm", name: null, created_by: "p" },
+    history: emptyHistorySummary(),
+  } as unknown as StoredGroup);
+  store.groups.set("g", runtime);
+  const storage = createIndexedDbE2eeStorage(new IDBFactory());
+  const ctx = { profileId: "p", storage } as EngineContext;
+  const rows = [
+    message(1),
+    message(2, { senderProfileId: "p" }),
+    message(3, {
+      imported: { w: "old", d: "drop", p: 0 } as NonNullable<
+        StoredMessage["imported"]
+      >,
+    }),
+    message(4, { kind: "notice" }),
+    message(5, { deleted: true }),
+    message(0, { pending: true, senderProfileId: "p" }),
+  ];
+  for (const row of rows) {
+    runtime.messages.set(row.id, row);
+    runtime.dirty.add(row.id);
+  }
+  runtime.windowIds = new Set(["m-0"]);
+  const visible = store.getConversation("g");
+  expect(visible?.lastMessage?.pending).toBe(true);
+  expect(visible?.lastIncomingSeq).toBe(1);
+  // The checkpoint persists the cursor before old-window eviction drops the
+  // incoming record. A later snapshot still has it without loading history.
+  updateHistorySummary(ctx, runtime);
+  await storage.writeBatch("p", { groups: [runtime.record] });
+  runtime.dirty.clear();
+  trimHistory(runtime, true);
+  expect(runtime.messages.has("m-1")).toBe(false);
+  store.touch("g");
+  expect(store.getConversation("g")?.lastIncomingSeq).toBe(1);
+  expect((await storage.listGroups("p"))[0]?.history?.lastIncomingSeq).toBe(1);
+});
+
+it("silently baselines old checkpoints before importing history", () => {
+  const runtime = newRuntime({
+    g: "g",
+    readSeq: 0,
+    history: { ...emptyHistorySummary(), maxSeq: 10 },
+  } as StoredGroup);
+  const imported = message(11, {
+    imported: { w: "old", d: "drop", p: 0 } as NonNullable<
+      StoredMessage["imported"]
+    >,
+  });
+  runtime.messages.set(imported.id, imported);
+  runtime.dirty.add(imported.id);
+  updateHistorySummary({ profileId: "p" } as EngineContext, runtime);
+  expect(runtime.record.history).toMatchObject({
+    maxSeq: 11,
+    lastIncomingSeq: 10,
+  });
+});
 
 it("refreshes dirty snapshots while unchanged messages retain their identity", () => {
   const store = new EngineStore("p", {} as DeviceDirectory);

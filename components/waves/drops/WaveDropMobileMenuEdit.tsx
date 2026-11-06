@@ -3,6 +3,7 @@
 import React, { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { useDropEditWindow } from "@/hooks/useDropEditWindow";
 import { AuthContext } from "@/components/auth/Auth";
 
 interface WaveDropMobileMenuEditProps {
@@ -18,13 +19,11 @@ const WaveDropMobileMenuEdit: React.FC<WaveDropMobileMenuEditProps> = ({
 }) => {
   const { connectedProfile } = useContext(AuthContext);
 
-  // Only show edit for drop authors
-  if (
-    drop.author.is_anonymous ||
-    connectedProfile?.handle !== drop.author.handle
-  ) {
-    return null;
-  }
+  const isAuthor =
+    !drop.author.is_anonymous &&
+    connectedProfile?.handle === drop.author.handle;
+  const canEdit = useDropEditWindow(drop, isAuthor);
+  if (!canEdit) return null;
 
   const handleEdit = () => {
     onEdit();

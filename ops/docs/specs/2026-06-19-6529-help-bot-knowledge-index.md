@@ -7,9 +7,14 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The encrypted-messages record covers the composer emoji board, native and 6529
-custom emojis, insertion during edits, the full reaction picker, readable
-shortcode fallbacks, collection-load recovery, and the separate emoji history.
+The signing, encrypted-messages and connection-sharing records cover the shared
+permission consent flow, separate or combined grants, shared server device names,
+renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
+local notification previews without an in-app cooldown. Composer help describes
+the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
+clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
+keeps new-device history limitations explicit and names the environment-specific
+Mobile/Staging push body.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
@@ -168,10 +173,96 @@ selection from the roughly seven-day, 50,400-processed-block rule for profile
 retention after a split. The subscription record covers balance and setting
 merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
-reconciliation. The subscriptions overview also explains that profile history
-sections start closed on phones and preserve user toggles during resizing or
-data refreshes. The profile subscription record also explains how tapping,
-hovering, or focusing the address reveals its full value on compact layouts.
+reconciliation. The subscriptions overview uses two zones: the status and funded-drop headline,
+followed by its existing explanation or funded-through line and owner actions;
+Subscription balance, available mints and Forecast use stay visible below.
+Covered is green, Plan a top up is neutral, Running low is amber and Action
+required is red. Visitors see neutral statuses except Covered and no owner
+controls. States without a status retain their existing explanation. Summary
+dates keep their full year, and supplied owner top-up deadlines retain UTC time.
+A supplied deadline appears once in the summary and is not repeated in Top up.
+Next unfunded remains in the facts only when a deadline has not already named
+that drop. Recommended amounts and projected outcomes stay in Top up.
+
+The original coverage gradient is used in every state. On phones, balance and
+Forecast use sit side by side with labels above their values and available mints
+under the balance; they stack below 384px. The owner refresh sits beside the
+balance label on phones and after the balance on desktop. It also refreshes
+coverage. A separate Refresh coverage control appears with the existing notice
+only after coverage is unavailable or a refresh failed. Forecast use opens the
+shared tooltip on hover, focus or tap, preserving its projection note and the
+Covered-owner explanation. Escape or tapping elsewhere dismisses it. There is
+no Details expander, and quantities and backend forecasts remain authoritative.
+
+Owners open the same Top up desktop dialog or mobile bottom sheet in every
+state, including new collectors. No inline amount form is displayed. Notification
+links open and focus the dialog. Top up is filled white for Action required,
+Running low and Not set up, and secondary otherwise. Only No upcoming drops
+selected shows Choose drops, followed by Top up; Choose drops scrolls to and
+focuses Upcoming Drops. Loading has no actions and visitors have no owner actions.
+The actions use consistent phone and desktop heights and padding.
+
+The Top up picker has compact horizontal cards in one column: a radio on the
+left, the original label and card count in the middle, and the ETH amount on the
+right. Selection adds blue fill, outline and amount, with subtle hover feedback
+and no movement. Transitions respect reduced motion. Recommended and Minimum
+retain supplied amounts and show their projected outcome before selection.
+Remaining Year and Epoch are directly visible; Show/Hide Deep Time Subscriptions
+retains Period, Era and Eon. Other keeps its input on the right and its ETH
+preview beneath the label. The original lightning submit button and recipient
+follow the choices. Closing restores focus and retains the draft. Existing
+transaction-status dialogs replace the picker during a transaction and return
+to it when success or error is dismissed.
+
+Upcoming Drops retains its owner-only mode explanation, initial three rows,
+per-row season, date or Minting Today label, Meme title, quantity and selection.
+Show More is centered; on phones it opens the full-list sheet. One amber Funded
+through boundary follows the supplied last funded drop, or Next unfunded
+precedes the first unfunded drop when no funded-through point exists. There are
+no repeated Unfunded tags or duplicate Top up links. This does not change saved
+selection or funding logic. Owners retain emerald switches, quantity pickers and
+mint-day locks. Visitors see non-interactive Subscribed or Not subscribed and
+plain selected / eligible quantities without dropdown arrows or chip backgrounds.
+
+Minting Today uses the existing matching-token-and-contract artwork, a blue
+label and a pulsing dot; reduced motion keeps the dot static. Missing or failed
+artwork leaves the row usable. Below 640px, the artwork sits above full-width
+text and controls align right with later rows, including when they wrap.
+From 640px artwork remains beside the text. More stays close to the Meme title
+and expands all original allocation details below 768px; desktop shows them
+inline. Other rows have no decorative dots. The panel keeps subtle row dividers
+and breathing room above the first row and around the footer.
+
+Subscription minting and Minting settings sit side by side from 1024px. Below
+that width, compact Minting settings and Subscription History rows appear after
+Upcoming Drops and open shared bottom sheets. Settings stack in a column inside
+the sheet. Desktop settings retain their separate labels, selected values,
+unchanged UTC Mode date, Eligibility and owner-only controls and descriptions.
+Visitors see values without switches or edit actions. The saved address uses
+the original short format with the full value available on hover, focus or tap,
+with or without ENS. Loading and failures do not invent saved values. Direct
+section links still open the matching sheet, but resizing alone does not open it.
+Learn more remains the small link at the right of Subscription minting.
+
+Subscription History stays inline on desktop and uses the same three pills
+inside its phone sheet. Redeemed is selected initially; Log History and Top Up
+History load when selected, with independent cached pages and transaction
+refreshes. Pills stay in one horizontally scrolling row, with a light active
+pill and transparent outlined inactive pills with faint hover fill. Arrow keys
+move between tabs. Entries retain every original title, quantity, address,
+balance, date and transaction link. Phone rows are compact; Balance after
+redemption starts on its own line, and time and the smaller Etherscan action do
+not create a separate tall footer. The Etherscan link uses the shared tooltip
+and its styles. Pagination returns to the active history after the requested
+page is ready; background refreshes do not scroll, and tab or profile changes
+cancel pending pagination scrolling.
+
+All five section anchors, exact top-up amounts, history records, pagination and
+owner, visitor, proxy and regional iOS rules remain represented. Failed reads
+are distinct from genuine zero balances or successful empty lists. Application
+preview controls and sample coverage data are absent; isolated automated test
+fixtures do not ship as page data.
+
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
@@ -203,6 +294,10 @@ The profile-header record describes the single desktop `Edit` action, the
 combined five-field editor, the existing smaller-screen field menu, and saving
 or clearing About statements. Profile media records use the same desktop editor
 and smaller-layout field menu. Keep these instructions aligned with the header.
+
+The drop-actions record covers current reactor names in desktop tooltips and
+Reactions dialogs, touch long press, live count updates, and closing and reopening
+details to retry a failed names request without reloading the thread.
 
 ## Problem Statement
 
@@ -918,3 +1013,13 @@ preserving limits, errors, warnings, and the bottom criteria summary.
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Its help record explains Sort by: Your vote amount, Leaderboard position and Last voted, complete-list ordering, ties and missing data, browser persistence by competition and profile, reset-selection clearing and order refresh after successful votes. Winners paginate by win time newest first.
 
 Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.
+
+The subscriptions record distinguishes pending and failed reads from successfully
+loaded zero balances and empty lists. Failed balance, settings, airdrop-address
+and upcoming-drop reads show Unavailable and retain the existing Retry action.
+
+The subscriptions record also covers the two-zone summary, state-based action
+emphasis, owner-only deadlines, original full-year date display, quiet facts, loading
+skeletons, original emerald switches, one amber funding boundary, compact phone
+history and the content-sized settings sheet. Real deadlines and funding
+calculations remain API-owned; application design-preview data is absent.

@@ -3,7 +3,11 @@ import {
   getCompetitionDropRoute,
   getCompetitionRoute,
 } from "@/helpers/competition.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getEncryptedConversationRoute,
+  getEncryptedMessagesRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -88,6 +92,12 @@ export function getInboxDestination(
     });
   }
   switch (notification.cause) {
+    case ApiNotificationCause.E2EeMessage:
+      return notification.additional_context.encrypted_group
+        ? getEncryptedConversationRoute(
+            notification.additional_context.encrypted_group
+          )
+        : getEncryptedMessagesRoute();
     case ApiNotificationCause.IdentitySubscribed:
       return notification.related_identity.handle &&
         !notification.related_identity.is_anonymous
@@ -146,6 +156,8 @@ export function getInboxSummary(
     : (identity?.handle ?? t(locale, "notifications.unknownProfile"));
   const params = { actor };
   switch (notification.cause) {
+    case ApiNotificationCause.E2EeMessage:
+      return t(locale, "e2ee.notification.newMessage");
     case ApiNotificationCause.ArtistArtworkSubmitted: {
       const title = notification.additional_context.artwork_title?.trim() ?? "";
       return t(locale, "artworkAlerts.notification", {

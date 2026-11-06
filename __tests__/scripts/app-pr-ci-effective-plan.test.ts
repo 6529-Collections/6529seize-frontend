@@ -15,7 +15,9 @@ type EffectivePlan = {
     playwright_native_competition: { required: boolean };
     playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
+    playwright_drop_reactions: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
+    playwright_profile_nic: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -81,6 +83,25 @@ it.each([
 it("keeps the Wave tracking browser lane out of unrelated changes", () => {
   expect(
     executePlan(["README.md"]).checks.playwright_wave_feature_usage.required
+  ).toBe(false);
+});
+
+it.each([
+  "helpers/profile-logs.helpers.ts",
+  "components/profile-activity/ProfileNicActivityLogs.tsx",
+  "components/user/rep/MobileNicTabContent.tsx",
+  "tests/social/profile-nic-activity-sandbox.spec.ts",
+  "tests/packs.manifest.cjs",
+  "tests/support/composerSandboxServer.cjs",
+  "scripts/app-pr-ci-effective-plan.cjs",
+  ".github/workflows/app-pr-ci.yml",
+])("selects the profile NIC browser contract for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_profile_nic.required).toBe(true);
+});
+
+it("does not select the NIC pack for unrelated code", () => {
+  expect(
+    executePlan(["helpers/unrelated.ts"]).checks.playwright_profile_nic.required
   ).toBe(false);
 });
 
@@ -784,4 +805,24 @@ describe("App PR CI merge-tree base", () => {
       }
     });
   });
+});
+
+it.each([
+  "components/waves/drops/WaveDropReactions.tsx",
+  "components/waves/drops/WaveDropReaction.tsx",
+  "components/waves/drops/WaveDropReactionsDetailDialog.tsx",
+  "hooks/drops/useDropReaction.ts",
+  "services/api/wave-drop-reactions-v2-api.ts",
+  "tests/social/wave-reaction-sandbox.spec.ts",
+  "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+])("selects the live reaction browser lane for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_drop_reactions.required).toBe(
+    true
+  );
+});
+
+it("does not select the live reaction browser lane for unrelated changes", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_drop_reactions.required
+  ).toBe(false);
 });

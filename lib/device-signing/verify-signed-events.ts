@@ -8,6 +8,12 @@ import {
   EMPTY_BODY_HASH,
   hashCanonicalString,
 } from "./canonical-json";
+import {
+  computeAppGrantId,
+  isAppGrantMessage,
+  parseAppGrantMessage,
+  recoverAppGrantSigner,
+} from "./app-grant";
 import { verifyEventIdSignature } from "./ed25519";
 import { isAllowedGrantDomain, parseDeviceGrantMessage } from "./grant-message";
 import {
@@ -18,7 +24,7 @@ import {
 } from "./interim-event";
 
 /**
- * How this browser verified the wallet's sign-in signature on a grant:
+ * How this browser verified the wallet's signature on a grant (sign-in or app):
  * "verified": it recovers (ECDSA) to the wallet.
  * "contract-verified": the wallet has contract code on Ethereum and its
  * EIP-1271 check returned the magic value for this signature.
@@ -197,8 +203,33 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
   DeviceEventKind.EDIT,
 ]);
 
+/**
+ * An app grant (6529 Mobile or Desktop, EIP-712) commits to exactly the
+ * stored terms; its id is the typed-data digest. Its origin is what the
+ * wallet was shown, so it is not limited to the site's hosts.
+ */
+const isAppGrantConsistent = (grant: ApiDeviceGrantProof): boolean => {
+  const parsed = parseAppGrantMessage(grant.message);
+  if (parsed === null) {
+    return false;
+  }
+  const { fields } = parsed;
+  return (
+    same(computeAppGrantId(parsed.message), grant.id) &&
+    fields.origin === grant.domain &&
+    grant.chain_id === ETHEREUM_MAINNET_CHAIN_ID &&
+    same(fields.wallet, grant.wallet) &&
+    same(fields.deviceKeyHex, grant.device_key) &&
+    fields.scopes.join(",") === grant.scopes.join(",") &&
+    fields.expiresAtSeconds * 1000 === grant.expires_at
+  );
+};
+
 /** The grant message commits to exactly the key, scopes and expiry stored. */
 const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
+  if (isAppGrantMessage(grant.message)) {
+    return isAppGrantConsistent(grant);
+  }
   if (!same(hashMessage(grant.message), grant.id)) {
     return false;
   }
@@ -216,6 +247,13 @@ const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
 };
 
 async function recoversToWallet(grant: ApiDeviceGrantProof): Promise<boolean> {
+  if (isAppGrantMessage(grant.message)) {
+    const parsed = parseAppGrantMessage(grant.message);
+    const signer = parsed
+      ? await recoverAppGrantSigner(parsed.message, grant.wallet_signature)
+      : null;
+    return signer !== null && same(signer, grant.wallet);
+  }
   try {
     const recovered = await recoverMessageAddress({
       message: grant.message,
@@ -248,7 +286,10 @@ async function checkContractWalletSignature(
     }
     const result = await contractWallets.isValidSignature({
       address,
-      hash: hashMessage(grant.message),
+      // An app grant's id is its EIP-712 digest (checked as consistent).
+      hash: isAppGrantMessage(grant.message)
+        ? (grant.id as Hex)
+        : hashMessage(grant.message),
       signature: grant.wallet_signature as Hex,
     });
     return result !== null && same(result, EIP1271_MAGIC_VALUE)

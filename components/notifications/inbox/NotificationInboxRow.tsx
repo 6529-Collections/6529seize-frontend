@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
@@ -38,6 +39,16 @@ export default function NotificationInboxRow({
         .map((entry) => entry.id)
     ),
   ];
+  if (notification.cause === ApiNotificationCause.E2EeMessage) {
+    return (
+      <li>
+        <NotificationEncryptedMessage
+          notification={notification}
+          onOpen={() => onOpen(unreadIds)}
+        />
+      </li>
+    );
+  }
   const reactors = group
     ? [
         ...new Map(
