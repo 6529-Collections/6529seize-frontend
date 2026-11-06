@@ -36,7 +36,6 @@ import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
-import museumMessages from "@/i18n/messages/museum.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
@@ -459,6 +458,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.about": "About",
+  "primary.museum": "Museum",
   "about.overview": "Overview",
   "primary.home": "Home",
   "sidebar.submenuLabel": "{section} sub-navigation",
@@ -4788,7 +4788,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...aboutMessages,
   ...emmaSnapshotsMessages,
   ...emmaMessages,
-  ...museumMessages,
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
