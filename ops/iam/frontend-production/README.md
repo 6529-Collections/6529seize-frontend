@@ -33,8 +33,9 @@ version>/`, plus the exact `web_build/current-production-version.json` object.
 - Read, invalidate, and read invalidation status only on the production page
   distribution `E3KTTDJUNHRYW9`, so a deployment can purge the edge cache
   once the new release answers. It cannot change or delete the distribution.
-  The purge step stays skipped until `PRODUCTION_PAGE_DISTRIBUTION_ID` is set.
-  See [page edge cache](../../docs/developer/cloudfront-page-cache.md).
+  Installed as policy version `v16` on 2026-11-04 (`v15` is the rollback); the
+  `PRODUCTION_PAGE_DISTRIBUTION_ID` variable has been set since then. See
+  [page edge cache](../../docs/developer/cloudfront-page-cache.md).
 - Get/pass only the existing `ec2-seize-prod` role and read its instance
   profile. Passing is limited to Elastic Beanstalk and EC2. No IAM policy,
   credential, trust, service-linked-role, or identity writes are allowed.
