@@ -983,7 +983,7 @@ test("resume shows the latest page before missed history and preserves the compo
   });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
-  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  const composer = page.getByRole("textbox", { name: "Write a message" });
   await composer.fill("Keep this unsent draft");
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
@@ -1135,7 +1135,7 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     await page.waitForTimeout(1000);
     await expect(post(20)).toBeInViewport();
   }
-  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  const composer = page.getByRole("textbox", { name: "Write a message" });
   if (SHARED_POST_GUEST) {
     await expect(composer).toBeHidden();
   } else {
@@ -1253,7 +1253,7 @@ for (const surface of [
     await page.goto(surface.path, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await expect(composer).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,

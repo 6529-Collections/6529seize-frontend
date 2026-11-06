@@ -8,6 +8,7 @@ import LazyEmojiPicker, {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { CUSTOM_EMOJI_ID } from "@/lib/e2ee/emoji-pack";
+import { EmojiPickerControl } from "@/components/waves/CreateDropEmojiPicker";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import { useE2eeEmojis } from "./E2eeEmojiProvider";
 
@@ -48,7 +49,7 @@ export function E2eeEmojiPicker({
       closeLabel={t(locale, "e2ee.action.close")}
     >
       {failed ? (
-        <p role="status" className="tw-mb-3 tw-text-sm tw-text-iron-400">
+        <output className="tw-mb-3 tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "e2ee.emoji.customUnavailable")}{" "}
           <button
             type="button"
@@ -57,7 +58,7 @@ export function E2eeEmojiPicker({
           >
             {t(locale, "e2ee.action.retry")}
           </button>
-        </p>
+        </output>
       ) : null}
       {open ? (
         <div ref={containerRef} className="tw-flex tw-justify-center">
@@ -77,5 +78,48 @@ export function E2eeEmojiPicker({
         </div>
       ) : null}
     </E2eeDialog>
+  );
+}
+
+/** Keep the normal composer presentation without recording private emoji use. */
+export function E2eeComposerEmojiPicker({
+  onOpen,
+  onSelect,
+}: {
+  readonly onOpen: () => void;
+  readonly onSelect: (text: string) => void;
+}) {
+  const locale = useBrowserLocale();
+  const { categories, failed, retry } = useE2eeEmojis();
+  return (
+    <EmojiPickerControl
+      verticalAlignment="center"
+      label={t(locale, "e2ee.emoji.insert")}
+      onOpen={onOpen}
+      onEmojiSelect={(emoji) => {
+        const text = emojiSelectionText(emoji);
+        if (text) onSelect(text);
+      }}
+      pickerProps={{
+        customEmojis: categories,
+        privateMode: true,
+        loadingLabel: t(locale, "e2ee.emoji.loading"),
+        errorLabel: t(locale, "e2ee.emoji.unavailable"),
+      }}
+      pickerNotice={
+        failed ? (
+          <output className="tw-m-2 tw-block tw-text-sm tw-text-iron-400">
+            {t(locale, "e2ee.emoji.customUnavailable")}{" "}
+            <button
+              type="button"
+              onClick={retry}
+              className="tw-border-0 tw-bg-transparent tw-text-primary-300 tw-underline"
+            >
+              {t(locale, "e2ee.action.retry")}
+            </button>
+          </output>
+        ) : null
+      }
+    />
   );
 }

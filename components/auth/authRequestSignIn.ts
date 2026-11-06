@@ -40,10 +40,10 @@ interface AuthRequestSignInParams {
   readonly signerAddress: string;
   readonly role: string | null;
   readonly authRequestGuard?: AuthRequestGuard | undefined;
-  /** Defaults to "auto"; "required" is the "Turn on signed messages" action. */
+  /** Defaults to "off"; explicit device setup uses "required". */
   readonly deviceGrantMode?: DeviceGrantMode | undefined;
   /**
-   * "Turn on encrypted messages" (NC8, with deviceGrantMode "required"):
+   * Combined device setup (with deviceGrantMode "required"):
    * sign only a challenge that also grants this browser's MLS key, and wait
    * for the key handover before resolving.
    */
@@ -193,9 +193,10 @@ const getDeviceGrantChallenge = async ({
   readonly requireE2eeDevice: boolean;
   readonly signerAddress: string;
 }): Promise<SignInChallenge | null> => {
-  const e2eeDevice = await prepareLoginE2eeDevice({
-    required: requireE2eeDevice,
-  });
+  const e2eeDevice =
+    requireE2eeDevice || deviceGrantMode === "auto"
+      ? await prepareLoginE2eeDevice({ required: requireE2eeDevice })
+      : null;
   const combined = e2eeDevice
     ? await getCombinedGrantChallenge({
         deviceGrant,
@@ -241,9 +242,10 @@ const getSignInChallenge = async ({
   readonly role: string | null;
   readonly signerAddress: string;
 }): Promise<SignInChallenge> => {
-  const deviceGrant = isDeviceGrantPossible(role)
-    ? await prepareLoginDeviceGrant({ signerAddress, mode: deviceGrantMode })
-    : null;
+  const deviceGrant =
+    deviceGrantMode !== "off" && isDeviceGrantPossible(role)
+      ? await prepareLoginDeviceGrant({ signerAddress, mode: deviceGrantMode })
+      : null;
   const grantChallenge = deviceGrant
     ? await getDeviceGrantChallenge({
         deviceGrant,
@@ -285,7 +287,7 @@ const getOrdinaryChallenge = async (
 
 const createSignInSession = async ({
   authRequestGuard,
-  deviceGrantMode = "auto",
+  deviceGrantMode = "off",
   getNonce,
   getSignature,
   handover,
@@ -547,8 +549,9 @@ export const createAuthRequestSignIn =
         return { success: false };
       }
 
+      const e2ee = await settleGrantHandover(handover);
       return requireE2eeDevice === true
-        ? { success: true, e2ee: await settleGrantHandover(handover) }
+        ? { success: true, e2ee }
         : { success: true };
     } catch (error) {
       if (isAuthRequestStale(authRequestGuard)) {

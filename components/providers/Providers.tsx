@@ -5,11 +5,13 @@
 // RSC payload, and each reference repeats the root layout's full chunk list in
 // the inline flight data of every HTML page.
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
+import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
 import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
@@ -86,9 +88,7 @@ export default function Providers({
                   <EmojiProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={
-                          enableWalletAuthentication
-                        }
+                        enableWalletAuthentication={enableWalletAuthentication}
                       >
                         <AuthLaunchTimingReporter
                           enableWalletAuthentication={
@@ -111,15 +111,20 @@ export default function Providers({
                               <AppWebSocketProvider>
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
+                                  {enableWalletAuthentication && (
+                                    <DeviceSetupHost />
+                                  )}
                                   <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
+                                    <ShellSearchParamsProvider>
+                                      {enableMyStream ? (
+                                        <MyStreamProvider>
+                                          {sharedProviders}
+                                          <QuickDirectMessagesGate />
+                                        </MyStreamProvider>
+                                      ) : (
+                                        sharedProviders
+                                      )}
+                                    </ShellSearchParamsProvider>
                                   </LayoutProvider>
                                 </E2eeProvider>
                                 {enableVersionCheck && <NewVersionToast />}

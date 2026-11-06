@@ -175,6 +175,25 @@ Browser realtime notification delivery remains connected while the tab is hidden
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
 
+### Encrypted DMs
+
+Encrypted-DM entries appear in both the desktop inbox and the full **All** feed.
+Known senders use the usual avatar, clickable handle, level and applicable
+badges. Older entries without sender details use a lock and **New encrypted
+message**. A locally readable preview keeps a lock indicator; it is decrypted
+on this device, never supplied as plaintext by the notification API.
+
+Previewing requires the exact referenced message in this device's history.
+Without encryption setup, the action is **Set up Encrypted DMs**. With setup but
+without that local message, it is **Open encrypted chat**. A newly enrolled phone
+cannot preview an earlier browser-only message until it has the required history;
+older notifications without a message reference remain generic. The link can
+show **Chat not found on this device** when the device never joined that chat.
+
+These entries follow **Direct messages and wave activity** preferences and are
+created independently of the phone-push cooldown. Missing historical entries are
+not automatically backfilled. See [Encrypted messages](../encrypted-messages.md).
+
 ## Read, Paging, and Navigation
 
 - Opening `/notifications` marks notifications read for the active authenticated

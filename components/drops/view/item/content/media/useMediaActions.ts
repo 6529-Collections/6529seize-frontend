@@ -32,10 +32,14 @@ function getUrlExtension(url: string): string | null {
 function canOpenMediaInBrowser({
   mimeType,
   url,
+  isCapacitor,
 }: {
   readonly mimeType?: string | undefined;
   readonly url: string;
+  readonly isCapacitor: boolean;
 }): boolean {
+  // A local blob belongs to this WebView; an external native browser cannot read it.
+  if (isCapacitor && url.startsWith("blob:")) return false;
   if (mimeType) {
     const normalizedMimeType = (mimeType.split(";")[0] ?? "")
       .trim()
@@ -65,7 +69,7 @@ export function useMediaActions({
   const { isCapacitor } = useCapacitor();
   const [isDownloading, setIsDownloading] = useState(false);
   const fileName = getDownloadFilenameFromUrl(url, fallbackFileName);
-  const canOpen = canOpenMediaInBrowser({ mimeType, url });
+  const canOpen = canOpenMediaInBrowser({ mimeType, url, isCapacitor });
   let openLabel: string | undefined;
 
   if (canOpen) {

@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { CompactMenu } from "@/components/compact-menu";
+import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStatus";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -555,6 +556,9 @@ export default function AppHeader() {
           />
         )}
       </div>
+      {!menuOpen && hasValidWalletAuth && !activeProfileProxy && (
+        <DeviceSecurityStatus presentation="mobile-badge" />
+      )}
       {hasUnreadOnOtherConnectedProfiles && (
         <div
           className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"

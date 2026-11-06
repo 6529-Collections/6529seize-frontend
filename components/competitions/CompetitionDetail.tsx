@@ -176,20 +176,25 @@ export function NativeCompetitionContent({
         competition.permissions.edit_rules_after_activity === true))
   )
     return (
-      <CompetitionDraftEditor
-        wave={wave}
-        competition={competition}
-        onClose={() => {
-          const params = new URLSearchParams(search.toString());
-          params.delete("edit");
-          params.set("tab", "rules");
-          router.replace(
-            competition.lifecycle === ApiCompetitionLifecycle.Draft
-              ? getCompetitionsRoute(wave.id)
-              : `${pathname}?${params.toString()}`
-          );
-        }}
-      />
+      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-gap-5">
+        {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
+          <CompetitionAdmin archiveOnly />
+        )}
+        <CompetitionDraftEditor
+          wave={wave}
+          competition={competition}
+          onClose={() => {
+            const params = new URLSearchParams(search.toString());
+            params.delete("edit");
+            params.set("tab", "rules");
+            router.replace(
+              competition.lifecycle === ApiCompetitionLifecycle.Draft
+                ? getCompetitionsRoute(wave.id)
+                : `${pathname}?${params.toString()}`
+            );
+          }}
+        />
+      </div>
     );
   return (
     <div

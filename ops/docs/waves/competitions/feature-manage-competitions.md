@@ -60,9 +60,17 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 - **Pause decisions** stops decision execution without closing otherwise open
   entry or vote windows. **Resume decisions** allows evaluation again. A paused
   Rank occurrence is skipped without shifting later scheduled occurrences.
-- Competitions complete through their configured rules. Administrators cannot
-  manually end or cancel a competition.
-- **Archive** moves a draft or terminal competition into history. **Clone as a draft**
+- Competitions complete through their configured rules, or administrators can
+  permanently stop them with **Archive and stop competition** in Settings.
+  This closes submissions and voting and stops future winner selection.
+  Decisions already executing finish before archival; their winners and awards remain.
+  Archiving a published competition with any past entries or votes requires a
+  non-blank reason, recorded in its audit history. Deleted entries and reset
+  votes still count. Review the confirmation before proceeding.
+- **Archive** moves a draft or completed competition into history. Open a saved
+  draft from **Competitions → Drafts**; its Archive button is above the setup
+  editor. Archiving preserves entries, votes, winners and awarded outcomes.
+  **Clone as a draft**
   creates a new draft from a terminal competition; review its dates before
   publishing.
 

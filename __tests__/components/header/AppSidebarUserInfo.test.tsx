@@ -97,7 +97,9 @@ describe("AppSidebarUserInfo", () => {
     expect(stats.tdh).toBe(10);
     expect(stats.rep).toBe(20);
     expect(stats.profileId).toBeNull();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/alice");
+    expect(
+      screen.getByRole("link", { name: "Open alice profile" })
+    ).toHaveAttribute("href", "/alice");
   });
 
   it("falls back to profile when no active proxy", () => {
@@ -122,7 +124,9 @@ describe("AppSidebarUserInfo", () => {
     expect(stats.tdh).toBe(4);
     expect(stats.rep).toBe(5);
     expect(stats.profileId).toBe("p1");
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/bob");
+    expect(
+      screen.getByRole("link", { name: "Open bob profile" })
+    ).toHaveAttribute("href", "/bob");
   });
 
   it("requests the AUTOx50 derivative of a CDN profile picture", () => {
@@ -146,7 +150,9 @@ describe("AppSidebarUserInfo", () => {
     expect(stats.tdh).toBe(0);
     expect(stats.rep).toBe(0);
     expect(stats.profileId).toBeNull();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/0xabcdef1234");
+    expect(
+      screen.getByRole("link", { name: "Open 0xabcd profile" })
+    ).toHaveAttribute("href", "/0xabcdef1234");
   });
 
   it("navigates and calls onNavigate when profile summary is clicked", async () => {

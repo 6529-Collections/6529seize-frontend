@@ -1,3 +1,4 @@
+import { getDmPeerId } from "../dm-conversations";
 import { compareHistory } from "../history-order";
 import { safetyCodeFromFp } from "../digests";
 import { parseCredentialIdentity } from "../grant";
@@ -329,6 +330,41 @@ export class EngineStore {
     return [...byProfile.values()];
   }
 
+  private buildDmPeer(
+    record: StoredGroup,
+    members: E2eeMember[]
+  ): E2eeMember | null {
+    const peerId = getDmPeerId(
+      { ...record.metadata, members },
+      this.ownProfileId
+    );
+    const profile = peerId ? this.profiles.get(peerId) : null;
+    return peerId
+      ? (members.find((member) => member.profileId === peerId) ?? {
+          profileId: peerId,
+          handle: profile?.handle ?? null,
+          pfp: profile?.pfp ?? null,
+          wallets: [...(profile?.wallets ?? [])],
+          isAdmin: true,
+          devices: [],
+        })
+      : null;
+  }
+
+  private lastIncomingSeq(runtime: GroupRuntime): number {
+    const record = runtime.record;
+    let lastIncomingSeq =
+      record.history?.lastIncomingSeq ?? record.history?.maxSeq ?? 0;
+    // New arrivals may be outside the selected history page or behind an
+    // outgoing pending echo. Their notification cursor must survive eviction.
+    for (const message of runtime.messages.values()) {
+      if (isCountable(message, this.ownProfileId) && !message.imported) {
+        lastIncomingSeq = Math.max(lastIncomingSeq, message.seq);
+      }
+    }
+    return lastIncomingSeq;
+  }
+
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
     const record = runtime.record;
     const ordered = record.history
@@ -361,11 +397,14 @@ export class EngineStore {
         .at(-1);
       if (pending) last = pending;
     }
+    const members = this.buildMembers(record);
+    const dmPeer = this.buildDmPeer(record, members);
     return {
+      dmPeer,
       g: record.g,
       kind: record.metadata.kind,
       name: record.metadata.name,
-      members: this.buildMembers(record),
+      members,
       admins: [...record.metadata.admins],
       createdBy: record.metadata.created_by,
       epoch: record.epoch,
@@ -375,6 +414,7 @@ export class EngineStore {
       splitView: record.splitView,
       untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
+      lastIncomingSeq: this.lastIncomingSeq(runtime),
       unread,
       mentions,
       historyError: runtime.historyError === true,

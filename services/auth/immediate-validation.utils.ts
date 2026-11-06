@@ -20,6 +20,7 @@ interface ImmediateValidationParams {
   isConnected: boolean;
   operationId: string;
   abortSignal: AbortSignal;
+  shouldPersistRefreshedSession?: () => boolean;
 }
 
 interface ImmediateValidationCallbacks {
@@ -44,9 +45,14 @@ interface ImmediateValidationResult {
 const isOperationValid = (
   currentAddress: string,
   connectionAddress: string,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
+  shouldPersistRefreshedSession?: () => boolean
 ): boolean => {
-  return !abortSignal.aborted && currentAddress === connectionAddress;
+  return (
+    !abortSignal.aborted &&
+    currentAddress === connectionAddress &&
+    (shouldPersistRefreshedSession?.() ?? true)
+  );
 };
 
 // Helper function to create a cancelled result
@@ -210,11 +216,20 @@ export const validateAuthImmediate = async ({
     isConnected,
     operationId,
     abortSignal,
+    shouldPersistRefreshedSession,
   } = params;
+
+  const isCurrentOperation = () =>
+    isOperationValid(
+      currentAddress,
+      connectionAddress,
+      abortSignal,
+      shouldPersistRefreshedSession
+    );
 
   try {
     // Early validation check
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 
@@ -228,10 +243,13 @@ export const validateAuthImmediate = async ({
         operationId,
         abortSignal,
         activeProfileProxy,
+        ...(shouldPersistRefreshedSession
+          ? { shouldPersistRefreshedSession }
+          : {}),
       });
 
     // Post-validation check
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 
@@ -246,7 +264,7 @@ export const validateAuthImmediate = async ({
     );
   } catch (error) {
     // Only handle errors if operation is still valid
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 

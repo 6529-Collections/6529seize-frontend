@@ -22,17 +22,28 @@ export default function TransferModalPfp({
   src,
   alt,
   level,
+  showLevel = true,
   size = 40,
 }: {
   readonly src?: string | null | undefined;
   readonly alt?: string | undefined;
   readonly level: number;
+  readonly showLevel?: boolean;
   readonly size?: TransferModalPfpSize | undefined;
 }) {
   const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
   const sizeClass = PFP_SIZE_CLASSES[size] ?? DEFAULT_PFP_SIZE_CLASS;
+
+  if (!resolved && !showLevel) {
+    return (
+      <div
+        aria-hidden="true"
+        className={`${sizeClass} tw-rounded-full tw-bg-iron-800`}
+      />
+    );
+  }
 
   if (!resolved) {
     return (
@@ -53,11 +64,13 @@ export default function TransferModalPfp({
         height={size}
         className="tw-rounded-full tw-object-cover"
       />
-      <div
-        className={`tw-absolute -tw-right-[5px] -tw-top-[5px] tw-flex tw-h-[18px] tw-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-text-[8px] tw-font-semibold ${levelColor}`}
-      >
-        {level}
-      </div>
+      {showLevel && (
+        <div
+          className={`tw-absolute -tw-right-[5px] -tw-top-[5px] tw-flex tw-h-[18px] tw-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-text-[8px] tw-font-semibold ${levelColor}`}
+        >
+          {level}
+        </div>
+      )}
     </div>
   );
 }

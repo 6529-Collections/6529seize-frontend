@@ -4,8 +4,11 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useState } from "react";
-import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+import { useContext, useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
+import { formatSubscriptionCoverageDeadline } from "./coverage/subscriptionCoverage.helpers";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
@@ -13,34 +16,32 @@ export default function UserPageSubscriptionsMode(
     details: SubscriptionDetails | undefined;
     readonly: boolean;
     refresh: () => void;
+    layout?: "row" | "inline";
+    error?: boolean | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const descriptionId = useId();
-  const isDisabled = props.readonly || isUpdating;
+  const isDisabled = props.readonly || isUpdating || !props.details;
 
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
   }, [props.details]);
 
-  const toggleMode = async (): Promise<void> => {
-    if (isUpdating) {
+  const setMode = async (auto: boolean): Promise<void> => {
+    if (isDisabled || auto === isAuto) {
       return;
     }
     setIsUpdating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsUpdating(false);
-      return;
-    }
-    const auto = !isAuto;
     interface SubscribeModeBody {
       automatic: boolean;
     }
     try {
+      const { success } = await requestAuth();
+      if (!success) return;
       const response = await commonApiPost<
         SubscribeModeBody,
         SubscribeModeBody
@@ -74,65 +75,40 @@ export default function UserPageSubscriptionsMode(
     }
   };
 
+  let modeDetail: string | undefined;
+  if (props.details && props.details.last_update > 0) {
+    modeDetail = formatSubscriptionCoverageDeadline(
+      locale,
+      new Date(props.details.last_update)
+    );
+  }
+  const displayedAuto = props.readonly
+    ? (props.details?.automatic ?? false)
+    : isAuto;
+
   return (
-    <div className="tw-min-w-0 tw-p-1">
-      <div className="tw-min-w-0">
-        <div className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3">
-          <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Mode
-          </h3>
-          {props.details && props.details.last_update > 0 && (
-            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-              {new Date(props.details.last_update).toLocaleString("en-US", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                timeZone: "UTC",
-              })}{" "}
-              UTC
-            </span>
-          )}
-        </div>
-        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
-          <label
-            htmlFor="subscription-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAuto ? "tw-text-iron-500" : "tw-text-iron-100"}`}
-          >
-            Manual
-          </label>
-          <UserPageSubscriptionsToggle
-            disabled={isDisabled}
-            id="subscription-mode"
-            checked={isAuto}
-            onChange={toggleMode}
-            ariaLabel="Automatic subscription mode"
-            describedBy={props.readonly ? undefined : descriptionId}
-          />
-          <label
-            htmlFor="subscription-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAuto ? "tw-text-iron-100" : "tw-text-iron-500"}`}
-          >
-            Automatic
-          </label>
-        </div>
-      </div>
-      {!props.readonly && (
-        <p
-          id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500"
-        >
-          {isAuto
-            ? "Automatic airdrops of all eligible drops unless you opt-out"
-            : "You have to opt-in to each specific drop"}
-        </p>
-      )}
-    </div>
+    <SubscriptionSettingToggle
+      layout={props.layout ?? "row"}
+      label={t(locale, "subscriptions.details.mode")}
+      detail={modeDetail}
+      describedBy={
+        !props.readonly && props.details
+          ? "profile-subscriptions-upcoming-description"
+          : undefined
+      }
+      checked={displayedAuto}
+      readOnly={props.readonly}
+      readOnlyTone={displayedAuto ? "positive" : "neutral"}
+      loading={!props.details && !props.error}
+      unavailable={!props.details && props.error}
+      disabled={isDisabled}
+      busy={isUpdating}
+      onChange={() => {
+        void setMode(!isAuto);
+      }}
+      offLabel={t(locale, "subscriptions.coverage.mode.manual")}
+      onLabel={t(locale, "subscriptions.coverage.mode.automatic")}
+      ariaLabel={t(locale, "subscriptions.mode.label")}
+    />
   );
 }

@@ -198,7 +198,7 @@ export default function AppSidebar({
               <AppSidebarHeader onClose={handleClose} />
               <nav
                 aria-label={t(DEFAULT_LOCALE, "navigation.primary.ariaLabel")}
-                className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+                className="tw-flex-1 tw-overflow-y-auto tw-pb-6 tw-pt-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
               >
                 <div className="tw-flex tw-h-full tw-flex-col">
                   <div className="tw-flex-1 tw-px-2">

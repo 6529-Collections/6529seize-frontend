@@ -139,7 +139,7 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await composer(bob.page).fill(mention);
-    await composer(bob.page).press("Enter");
+    await bob.page.getByRole("button", { name: "Send", exact: true }).click();
     await expect(
       messageRow(bob.page, mention).getByText("Sending…")
     ).toHaveCount(0, { timeout: E2EE_SYNC_TIMEOUT_MS });
