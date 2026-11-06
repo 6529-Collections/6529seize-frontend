@@ -607,7 +607,21 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("button", { name: "Refresh coverage", exact: true })
     ).toHaveCount(0);
-    await page.getByRole("link", { name: "Choose drops", exact: true }).click();
+    const chooseDrops = page.getByRole("link", {
+      name: "Choose drops",
+      exact: true,
+    });
+    await chooseDrops.hover();
+    await expect(chooseDrops).toHaveAttribute(
+      "href",
+      "#profile-subscriptions-upcoming"
+    );
+    await chooseDrops.click();
+    await expect(
+      page.getByRole("heading", { name: "Upcoming Drops", exact: true })
+    ).toBeFocused();
+    await chooseDrops.scrollIntoViewIfNeeded();
+    await chooseDrops.click();
     await expect(
       page.getByRole("heading", { name: "Upcoming Drops", exact: true })
     ).toBeFocused();
@@ -738,7 +752,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       name: "Refresh balance",
     });
     await expect(amount).toBeVisible();
-    const availableMints = overviewActions.getByText("(6 mints available)", {
+    const availableMints = overviewActions.getByText("6 mints available", {
       exact: true,
     });
     await expect(availableMints).toBeVisible();
@@ -908,8 +922,14 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await expect(
         upcoming.getByText("The Memes #568", { exact: true })
       ).toHaveCSS("font-weight", "400");
-      await expect(mintingArtwork).toHaveCSS("width", "80px");
-      await expect(mintingArtwork).toHaveCSS("height", "113px");
+      await expect(mintingArtwork).toHaveCSS(
+        "width",
+        width < 640 ? "48px" : "80px"
+      );
+      await expect(mintingArtwork).toHaveCSS(
+        "height",
+        width < 640 ? "68px" : "113px"
+      );
       if (width < 640) {
         await expect(overviewActions).toHaveCSS("border-top-width", "0px");
         const forecastRow = overviewActions
@@ -939,16 +959,12 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
         expect(mobileAmountBox!.y).toBeGreaterThanOrEqual(
           mobileBalanceLabelBox!.y + mobileBalanceLabelBox!.height
         );
-        expect(
-          Math.abs(
-            mobileAmountBox!.y +
-              mobileAmountBox!.height / 2 -
-              (mobileForecastValueBox!.y + mobileForecastValueBox!.height / 2)
-          )
-        ).toBeLessThanOrEqual(1);
-        expect(mobileForecastValueBox!.x).toBeGreaterThanOrEqual(
+        expect(mobileForecastValueBox!.x).toBeGreaterThan(
           mobileAmountBox!.x + mobileAmountBox!.width
         );
+        expect(
+          Math.abs(mobileForecastValueBox!.y - mobileAmountBox!.y)
+        ).toBeLessThanOrEqual(1);
         expect(
           Math.abs(
             mobileRefreshBox!.y +
@@ -961,7 +977,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
             overviewActions.getByText("Subscription balance", { exact: true })
           );
         }
-        await expect(availableMints).toHaveCSS("text-align", "start");
+        await expect(availableMints).toHaveCSS("text-align", "left");
         await expectSingleLineLabel(
           overviewActions.getByText("Forecast use", { exact: true })
         );
@@ -981,48 +997,38 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
             .boundingBox();
           expect(titleBox).not.toBeNull();
           expect(toggleTargetBox).not.toBeNull();
-          expect(toggleTargetBox!.x).toBeGreaterThanOrEqual(
-            titleBox!.x + titleBox!.width
-          );
-          expect(
-            Math.abs(
-              titleBox!.y +
-                titleBox!.height / 2 -
-                (toggleTargetBox!.y + toggleTargetBox!.height / 2)
-            )
-          ).toBeLessThanOrEqual(1);
           const countBox = await upcoming
             .getByRole("combobox")
             .nth(token - 568)
             .boundingBox();
           expect(countBox).not.toBeNull();
-          if (width < 640) {
+          expect(
+            Math.abs(
+              countBox!.y +
+                countBox!.height / 2 -
+                (toggleTargetBox!.y + toggleTargetBox!.height / 2)
+            )
+          ).toBeLessThanOrEqual(1);
+          expect(countBox!.x + countBox!.width).toBeLessThanOrEqual(
+            toggleTargetBox!.x
+          );
+          if (width < 640 && countBox!.y >= titleBox!.y + titleBox!.height) {
+            // Narrow rows keep the controls together beneath the complete name.
             expect(countBox!.y).toBeGreaterThanOrEqual(
               titleBox!.y + titleBox!.height
             );
-            const otherCountBox = await upcoming
-              .getByRole("combobox")
-              .nth(1)
-              .boundingBox();
-            expect(otherCountBox).not.toBeNull();
-            expect(
-              Math.abs(countBox!.x - otherCountBox!.x)
-            ).toBeLessThanOrEqual(1);
-            if (token === 568) {
-              const imageBox = await mintingArtwork.boundingBox();
-              expect(imageBox).not.toBeNull();
-              expect(countBox!.y).toBeGreaterThanOrEqual(
-                imageBox!.y + imageBox!.height
-              );
-            }
+            expect(Math.abs(countBox!.x - titleBox!.x)).toBeLessThanOrEqual(1);
           } else {
             expect(
               Math.abs(
-                countBox!.y +
-                  countBox!.height / 2 -
-                  (titleBox!.y + titleBox!.height / 2)
+                titleBox!.y +
+                  titleBox!.height / 2 -
+                  (toggleTargetBox!.y + toggleTargetBox!.height / 2)
               )
             ).toBeLessThanOrEqual(1);
+            expect(countBox!.x).toBeGreaterThanOrEqual(
+              titleBox!.x + titleBox!.width
+            );
           }
           expect(toggleTargetBox!.width).toBeGreaterThanOrEqual(44);
           expect(toggleTargetBox!.height).toBeGreaterThanOrEqual(44);
@@ -1204,14 +1210,24 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     expect(firstDrop!.y).toBeGreaterThan(list!.y);
     expect(Math.abs(footer!.width - list!.width)).toBeLessThanOrEqual(2);
     await showMore.click();
+    const expandedUpcoming = upcoming.or(
+      page.getByRole("dialog", { name: "Upcoming Drops", exact: true })
+    );
     await expect(
-      upcoming.getByText("Next unfunded The Memes #571", { exact: true })
-    ).toHaveCount(1);
-    const topUpLink = upcoming.getByRole("link", {
-      name: "Top up",
+      expandedUpcoming.getByText("Unfunded", { exact: true })
+    ).toHaveCount(2);
+    await expect(
+      expandedUpcoming.getByRole("link", { name: "Top up", exact: true })
+    ).toHaveCount(0);
+    const upcomingSheet = page.getByRole("dialog", {
+      name: "Upcoming Drops",
       exact: true,
     });
-    await topUpLink.click();
+    if (await upcomingSheet.isVisible())
+      await upcomingSheet
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+    await page.getByRole("button", { name: "Top up", exact: true }).click();
     const topUp = page.getByRole("dialog", { name: "Top up", exact: true });
     const topUpBackdrop = page
       .getByRole("dialog", { name: "Top up", exact: true })
@@ -1357,9 +1373,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeVisible();
     await topUp.getByRole("button", { name: "Close", exact: true }).click();
     await expect(topUp).toBeHidden();
-    await expect(topUpLink).toBeFocused();
-    // A repeated current-hash link still opens, retaining the selected amount.
-    await topUpLink.click();
+    await expect(topUpButton).toBeFocused();
+    // Reopening the main action retains the selected amount.
+    await topUpButton.click();
     await expect(
       topUp.getByRole("radio", { name: /^Minimum for next drop/ })
     ).toBeChecked();
@@ -1367,7 +1383,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       .getByRole("heading", { name: "Top up", exact: true })
       .press("Escape");
     await expect(topUp).toBeHidden();
-    await expect(topUpLink).toBeFocused();
+    await expect(topUpButton).toBeFocused();
     await topUpButton.click();
     await expect(topUpBackdrop).toBeVisible();
     await expect(topUpBackdrop).toHaveCSS("opacity", "1");
@@ -1426,7 +1442,11 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       settings.getByText("Oct 2, 2026, 19:03 UTC", { exact: true })
     ).toBeVisible();
-    await expect(overview.getByText(/Top up by|Recommended:/)).toHaveCount(0);
+    await expect(overview.getByText(/Top up by/)).toHaveCount(1);
+    await expect(overview.getByText(/Top up by/)).toHaveText(
+      "Top up by Oct 12, 2026, 14:30 UTC to receive The Memes #571."
+    );
+    await expect(overview.getByText(/Recommended:/)).toHaveCount(0);
     await expect(
       page
         .getByRole("region", { name: "Subscription minting", exact: true })

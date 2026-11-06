@@ -107,6 +107,9 @@ describe("UserPageSubscriptionsTopUp", () => {
   it("keeps the original radio choices keyboard-selectable without sending ETH", async () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
+    );
     const oneCard = screen.getByRole("radio", { name: "1 Card" });
     await user.click(oneCard);
     expect(oneCard).toBeChecked();

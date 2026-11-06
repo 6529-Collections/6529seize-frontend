@@ -28,7 +28,7 @@ export default function MintingTodaySubscriptionRow(
             width={80}
             height={113}
             unoptimized
-            className="tw-h-[113px] tw-w-20 tw-rounded-[3px] tw-object-contain tw-shadow-sm"
+            className="tw-h-[68px] tw-w-12 tw-rounded-[3px] tw-object-contain tw-shadow-sm sm:tw-h-[113px] sm:tw-w-20"
             onError={() => setFailedSource(source)}
           />
         ) : undefined

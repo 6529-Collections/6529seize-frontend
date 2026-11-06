@@ -33,6 +33,12 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
     ).toBeNull();
   });
 
+  it("does not claim the address is empty after a failed request", () => {
+    render(<UserPageSubscriptionsAirdropAddress show_edit error />);
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
   it("shortens the visitor address while keeping the full address accessible and in its tooltip", async () => {
     const address = "0x7d88f221e9ecef9eef118e0d0e8a47f81b37e0b6";
     render(

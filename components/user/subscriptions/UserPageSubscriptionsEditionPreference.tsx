@@ -17,6 +17,7 @@ export default function UserPageSubscriptionsEditionPreference(
     readonly: boolean;
     refresh: () => void;
     layout?: "row" | "inline";
+    error?: boolean | undefined;
   }>
 ) {
   const locale = useBrowserLocale();
@@ -94,7 +95,7 @@ export default function UserPageSubscriptionsEditionPreference(
           ? t(locale, "subscriptions.settings.eligibilityBadge", {
               count: formatInteger(locale, subscriptionEligibilityCount),
             })
-          : t(locale, "subscriptions.settings.loading")
+          : undefined
       }
       checked={
         props.readonly
@@ -102,7 +103,8 @@ export default function UserPageSubscriptionsEditionPreference(
           : isAllEditions
       }
       readOnly={props.readonly}
-      loading={!props.details}
+      loading={!props.details && !props.error}
+      unavailable={!props.details && props.error}
       disabled={isDisabled}
       busy={isUpdatingAllEditions}
       onChange={() => {

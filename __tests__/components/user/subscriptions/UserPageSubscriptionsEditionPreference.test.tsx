@@ -238,8 +238,28 @@ describe("Edition Preference", () => {
 
   it("waits for saved settings before allowing updates", () => {
     setup({ loading: true });
-    expect(getEditions()).toBeDisabled();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     expect(screen.getByText("Loading settings")).toBeVisible();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("shows unavailable after a failed settings request without guessing a preference", () => {
+    renderWithAuth(
+      <EditionPreference
+        profileKey="p1"
+        details={undefined}
+        error
+        readonly={false}
+        refresh={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("One edition", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Eligibility/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     expect(post).not.toHaveBeenCalled();
   });
 });

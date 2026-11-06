@@ -98,9 +98,10 @@ jest.mock(
   "@/components/user/subscriptions/UserPageSubscriptionsUpcoming",
   () => ({
     __esModule: true,
-    default: ({ memes_subscriptions }: any) => (
+    default: ({ memes_subscriptions, loading, error }: any) => (
       <div data-testid="subscriptions-upcoming">
-        Upcoming Component - Memes: {memes_subscriptions?.length || 0}
+        Upcoming Component - Memes: {memes_subscriptions?.length || 0}, Loading:{" "}
+        {loading ? "true" : "false"}, Error: {error ? "true" : "false"}
       </div>
     ),
   })
@@ -455,12 +456,18 @@ describe("UserPageSubscriptions", () => {
       expect(screen.getByTestId("subscriptions-balance")).toHaveTextContent(
         "Fetching: false"
       );
+      expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+        "Loading: false, Error: true"
+      );
       mockCommonApiFetch.mockResolvedValue([]);
       await userEvent
         .setup()
         .click(screen.getByRole("button", { name: "Retry" }));
       await waitFor(() =>
         expect(screen.queryByRole("status")).not.toBeInTheDocument()
+      );
+      expect(screen.getByTestId("subscriptions-upcoming")).toHaveTextContent(
+        "Loading: false, Error: false"
       );
     });
   });

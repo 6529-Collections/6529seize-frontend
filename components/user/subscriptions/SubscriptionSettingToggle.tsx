@@ -10,21 +10,28 @@ import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 function SettingValue({
   loading,
+  unavailable,
   value,
   tone,
 }: Readonly<{
   loading: boolean;
+  unavailable: boolean;
   value: string;
   tone: "positive" | "neutral";
 }>) {
   const locale = useBrowserLocale();
-  if (loading) {
+  if (loading || unavailable) {
     return (
       <span
         data-setting-value
         className="tw-text-meta tw-font-normal tw-text-iron-400"
       >
-        {t(locale, "subscriptions.settings.loading")}
+        {t(
+          locale,
+          loading
+            ? "subscriptions.settings.loading"
+            : "subscriptions.details.unavailable"
+        )}
       </span>
     );
   }
@@ -55,6 +62,7 @@ export default function SubscriptionSettingToggle({
   disabled,
   busy,
   loading,
+  unavailable = false,
   offLabel,
   onLabel,
   ariaLabel,
@@ -64,7 +72,7 @@ export default function SubscriptionSettingToggle({
 }: Readonly<{
   label: string;
   layout?: "row" | "inline";
-  labelNote?: string;
+  labelNote?: string | undefined;
   detail?: string | undefined;
   description?: string | undefined;
   describedBy?: string | undefined;
@@ -72,6 +80,7 @@ export default function SubscriptionSettingToggle({
   disabled: boolean;
   busy: boolean;
   loading: boolean;
+  unavailable?: boolean | undefined;
   offLabel: string;
   onLabel: string;
   ariaLabel: string;
@@ -108,6 +117,7 @@ export default function SubscriptionSettingToggle({
         <span className="tw-inline-flex tw-items-center tw-gap-1">
           <SettingValue
             loading={loading}
+            unavailable={unavailable}
             value={checked ? onLabel : offLabel}
             tone={readOnlyTone}
           />
@@ -169,19 +179,26 @@ export default function SubscriptionSettingToggle({
           </>
         )}
       </div>
-      {!readOnly && (
+      {!readOnly && !unavailable && (
         <div
           data-setting-controls
           className="tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end"
         >
-          <UserPageSubscriptionsToggle
-            id={toggleId}
-            checked={checked}
-            disabled={disabled}
-            onChange={onChange}
-            ariaLabel={ariaLabel}
-            describedBy={descriptionIds}
-          />
+          {loading ? (
+            <span
+              aria-hidden="true"
+              className="tw-h-6 tw-w-11 tw-animate-pulse tw-rounded-full tw-bg-iron-800 motion-reduce:tw-animate-none"
+            />
+          ) : (
+            <UserPageSubscriptionsToggle
+              id={toggleId}
+              checked={checked}
+              disabled={disabled}
+              onChange={onChange}
+              ariaLabel={ariaLabel}
+              describedBy={descriptionIds}
+            />
+          )}
         </div>
       )}
       {description && (

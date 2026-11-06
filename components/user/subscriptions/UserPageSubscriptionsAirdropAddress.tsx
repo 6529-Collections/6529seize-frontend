@@ -25,6 +25,7 @@ export default function UserPageSubscriptionsAirdropAddress(
     layout?: "row" | "inline";
     airdrop?: AirdropAddressResult | undefined;
     fetching?: boolean | undefined;
+    error?: boolean | undefined;
   }>
 ) {
   const locale = useBrowserLocale();
@@ -107,7 +108,10 @@ export default function UserPageSubscriptionsAirdropAddress(
                   className={`tw-group tw-row-start-1 tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-text-iron-400 focus:tw-outline-none ${inline ? "tw-col-start-2 tw-row-span-2" : "md:tw-size-7"}`}
                 >
                   <span className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-transition-colors group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 desktop-hover:group-hover:tw-bg-iron-800 desktop-hover:group-hover:tw-text-iron-100">
-                    <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
+                    <PencilSquareIcon
+                      className="tw-size-4"
+                      aria-hidden="true"
+                    />
                   </span>
                 </Link>
                 <Tooltip
@@ -128,9 +132,14 @@ export default function UserPageSubscriptionsAirdropAddress(
             {!airdropAddress && (
               <div className="tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
                 <span className="tw-text-meta tw-font-normal tw-text-iron-500">
-                  {t(locale, "subscriptions.airdrop.empty")}
+                  {t(
+                    locale,
+                    props.error
+                      ? "subscriptions.details.unavailable"
+                      : "subscriptions.airdrop.empty"
+                  )}
                 </span>
-                {props.show_edit && (
+                {props.show_edit && !props.error && (
                   <Link
                     href={editHref}
                     className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-px-1 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
