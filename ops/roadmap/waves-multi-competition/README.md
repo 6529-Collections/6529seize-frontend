@@ -229,9 +229,11 @@ policy; this permanent guarantee applies to GET APIs.
 - Presentation and participation/voting access groups remain editable with an
   audited config version. Credit, signature, submission, timing and decision
   rules freeze after the first accepted entry.
-- Published competitions finish through configured rules; manual end/cancel
-  and entry withdrawal/disqualification are not exposed. Drafts/terminal
-  competitions can be archived and terminal configurations cloned.
+- Published competitions finish through configured rules or an administrator
+  permanently archives and stops them. Historical entries or votes require an
+  audit reason; history, winners and awards remain. Drafts and terminal
+  competitions can also be archived. Separate manual end/cancel and entry
+  withdrawal/disqualification are not exposed; terminal configurations can be cloned.
 - Subwaves remain separate discussion destinations and are not used as
   permanent competition containers.
 

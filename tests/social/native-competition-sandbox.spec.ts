@@ -341,6 +341,7 @@ const competition = (id: string, title: string) => ({
     administer: true,
     edit_rules_after_activity: false,
     edit_credit_rules: false,
+    archive_requires_reason: true,
   },
   created_at: 1,
   updated_at: 1,
@@ -750,6 +751,33 @@ async function installCompetitionApi(
         description: request.config["description"],
         presentation: request.config["presentation"],
         config_version: selected.config_version + 1,
+      });
+      body = selected;
+    } else if (
+      method === "POST" &&
+      resource === "actions/archive" &&
+      selected
+    ) {
+      const request = route.request().postDataJSON() as Record<string, unknown>;
+      if (
+        selected.lifecycle === "PUBLISHED" &&
+        !String(request["reason"] ?? "").trim()
+      )
+        return route.fulfill({
+          status: 400,
+          json: { message: "A reason is required" },
+        });
+      requests.push({ path: url.pathname, body: request });
+      Object.assign(selected, {
+        lifecycle: "ARCHIVED",
+        computed_phase: "ARCHIVED",
+        config_version: selected.config_version + 1,
+        permissions: {
+          ...selected.permissions,
+          submit: false,
+          vote: false,
+          archive_requires_reason: false,
+        },
       });
       body = selected;
     } else if (method === "POST" && resource === "entries") {
@@ -6277,6 +6305,64 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
+    await page.getByRole("button", { name: "Archive", exact: true }).click();
+    const archiveDialog = page.getByRole("dialog").last();
+    await expect(
+      archiveDialog.getByRole("textbox", { name: "Reason (optional)" })
+    ).toBeVisible();
+    await archiveDialog
+      .getByRole("button", { name: "Confirm", exact: true })
+      .click();
+    await expect(page).toHaveURL(ROOT);
+    expect(sandbox.requests.at(-1)?.path).toBe(
+      `/api/v3/waves/${WAVE}/competitions/draft/actions/archive`
+    );
+  });
+
+  test("archives an active competition with a reason and preserves readable history", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?tab=rules`);
+    await page
+      .getByRole("button", {
+        name: "Archive and stop competition",
+        exact: true,
+      })
+      .click();
+    const dialog = page.getByRole("dialog").last();
+    await expect(
+      dialog.getByText(/permanently stops new submissions/)
+    ).toBeVisible();
+    const confirm = dialog.getByRole("button", {
+      name: "Confirm",
+      exact: true,
+    });
+    await expect(confirm).toBeDisabled();
+    await dialog
+      .getByRole("textbox", { name: "Reason (required)" })
+      .fill("  Replacing this competition  ");
+    await expect(confirm).toBeEnabled();
+    await expect(
+      dialog.getByRole("heading", { name: /Archive and stop competition/ })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(confirm).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("archive-confirmation.png"),
+    });
+    await confirm.click();
+    await expect(dialog).toBeHidden();
+    expect(sandbox.requests.at(-1)).toMatchObject({
+      path: `/api/v3/waves/${WAVE}/competitions/alpha/actions/archive`,
+      body: { config_version: 1, reason: "Replacing this competition" },
+    });
+    await expect(
+      page.getByRole("button", { name: "Clone as a draft" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Archive and stop competition" })
+    ).toHaveCount(0);
   });
 
   test("fades overflowing wave tabs without covering Create or changing selection", async ({
