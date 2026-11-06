@@ -2152,6 +2152,9 @@
     "/validator": {
       "classification": "auth"
     },
+    "/validator/authorize": {
+      "classification": "crawlable"
+    },
     "/validator/guide": {
       "classification": "auth"
     },
