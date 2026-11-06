@@ -83,20 +83,41 @@ async function expectReadablePreview(card: Locator) {
     exact: true,
   });
   await expect(following).toBeVisible();
-  const titleBox = await title.evaluate((el) => {
-    const { y, height } = el.getBoundingClientRect();
-    return {
-      y,
-      height,
-      width: el.clientWidth,
-      contentWidth: el.scrollWidth,
-      lineHeight: Number.parseFloat(getComputedStyle(el).lineHeight),
-    };
-  });
-  const followBox = await following.evaluate((el) => {
-    const { y, width, height } = el.getBoundingClientRect();
-    return { y, width, height };
-  });
+  const readLayout = async () => {
+    const titleBox = await title.evaluate((el) => {
+      const { y, height } = el.getBoundingClientRect();
+      return {
+        y,
+        height,
+        width: el.clientWidth,
+        contentWidth: el.scrollWidth,
+        lineHeight: Number.parseFloat(getComputedStyle(el).lineHeight),
+      };
+    });
+    const followBox = await following.evaluate((el) => {
+      const { y, width, height } = el.getBoundingClientRect();
+      return { y, width, height };
+    });
+    return { titleBox, followBox };
+  };
+  let layout = await readLayout();
+  // Hydration may replace the preview after a visibility check. Measure
+  // laid-out nodes before applying the same title and control constraints.
+  await expect
+    .poll(
+      async () => {
+        layout = await readLayout();
+        return (
+          layout.titleBox.height > 0 &&
+          Number.isFinite(layout.titleBox.lineHeight) &&
+          layout.followBox.width > 0 &&
+          layout.followBox.height > 0
+        );
+      },
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    )
+    .toBe(true);
+  const { titleBox, followBox } = layout;
   // The short name should fit in full on one line, regardless of font metrics.
   expect(titleBox.contentWidth).toBeLessThanOrEqual(titleBox.width);
   expect(titleBox.height).toBeLessThanOrEqual(titleBox.lineHeight);
@@ -182,9 +203,13 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     await expect(title).toBeVisible();
     await expect(title).toHaveCSS("text-overflow", "ellipsis");
     await expect(title).toHaveCSS("white-space", "nowrap");
-    expect(await title.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(
-      true
-    );
+    await expect
+      .poll(() =>
+        title.evaluate(
+          (el) => el.clientWidth > 0 && el.scrollWidth > el.clientWidth
+        )
+      )
+      .toBe(true);
     await expectNoHorizontalOverflow(page);
     const route = page.url();
     const follow = card.getByRole("button", { name: "Follow", exact: true });
