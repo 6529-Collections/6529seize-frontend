@@ -33,8 +33,8 @@ keep the individual picture editor.
 
 1. Open your own profile and choose `Edit` on desktop, or
    `Edit profile` -> `Profile picture` on a smaller layout.
-2. The modal opens. A saved or selected profile picture appears in a separate
-   preview above the source choices. The preview does not open the file picker.
+2. The modal opens. A saved or selected profile picture appears inside the
+   `Upload image` area, below Meme search, without a separate preview row.
 3. Choose one source:
    - `Select Meme` search is visible immediately above the upload control,
      separated by `or`. Desktop and smaller layouts use the same compact field.

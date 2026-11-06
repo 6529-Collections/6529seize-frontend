@@ -23,7 +23,6 @@ import { getUploadErrorMessage } from "@/services/api/upload-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 import { useContext, useState } from "react";
-import Image from "next/image";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditPfp({
@@ -195,19 +194,6 @@ export default function UserPageHeaderEditPfp({
 
   const form = (
     <form onSubmit={onSubmit} className="tw-px-5 sm:tw-px-6">
-      {imageToShow && (
-        <div className="tw-relative tw-mb-4 tw-size-16 tw-overflow-hidden tw-rounded-lg tw-bg-black/20">
-          <Image
-            src={imageToShow}
-            alt={getUserProfileHeaderMessage(
-              "user.profileHeader.edit.picturePreview"
-            )}
-            fill
-            sizes="4rem"
-            className="tw-object-contain"
-          />
-        </div>
-      )}
       <UserSettingsImgSelectMeme
         compact
         memes={memes ?? []}

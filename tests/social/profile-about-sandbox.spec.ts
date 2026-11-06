@@ -748,6 +748,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         await expect(
           page.getByRole("button", { name: "Choose a Meme", exact: true })
         ).toHaveCount(0);
+        await expect(
+          page
+            .getByLabel("Upload image", { exact: true })
+            .locator("..")
+            .locator("svg")
+        ).toBeVisible();
         await page.screenshot({
           path: testInfo.outputPath("profile-meme-search-loading.png"),
           scale: "css",
@@ -769,17 +775,19 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           page.getByLabel("Upload image", { exact: true })
         ).toBeAttached();
         await expect(search).toBeEditable();
-        expect(
-          await page
-            .getByRole("img", { name: "Profile image", exact: true })
-            .evaluate((image) => image.closest("label"))
-        ).toBeNull();
         await expect(
           page
             .getByLabel("Upload image", { exact: true })
             .locator("..")
-            .locator("svg")
+            .getByRole("img", { name: "Profile image", exact: true })
         ).toBeVisible();
+        const searchBox = await search.boundingBox();
+        const previewBox = await page
+          .getByRole("img", { name: "Profile image", exact: true })
+          .boundingBox();
+        expect(previewBox!.y).toBeGreaterThanOrEqual(
+          searchBox!.y + searchBox!.height
+        );
         await expect(
           page.getByRole("button", {
             name: width === 1024 ? "Save" : "Save PFP",
