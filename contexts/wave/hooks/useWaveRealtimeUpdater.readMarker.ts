@@ -16,6 +16,11 @@ interface ActiveWaveReadOptions {
   readonly immediate?: boolean;
 }
 
+interface BatchedReadOptions {
+  readonly shouldSend?: () => boolean;
+  readonly refreshWaveLists?: boolean;
+}
+
 export type MarkActiveWaveAsRead = (
   waveId: string,
   readThroughSerialNo?: number,
@@ -68,13 +73,16 @@ export const useActiveWaveReadMarker = ({
   const markNotificationsRead = useCallback(
     async (
       waveId: string,
-      readThroughSerialNo?: number,
-      shouldSend: () => boolean = () => canSendReadForWave(waveId)
+      readThroughSerialNo: number | undefined,
+      options: BatchedReadOptions = {}
     ) => {
       try {
         const result = await markWaveNotificationsRead(waveId, {
-          shouldSend,
+          shouldSend: options.shouldSend ?? (() => canSendReadForWave(waveId)),
           readThroughSerialNo,
+          ...(options.refreshWaveLists === undefined
+            ? {}
+            : { refreshWaveLists: options.refreshWaveLists }),
         });
         if (result === "sent") await removeDeliveredNotifications(waveId);
       } catch (error) {
@@ -90,10 +98,13 @@ export const useActiveWaveReadMarker = ({
 
   const flushBatchedRead = useCallback<FlushWaveRead>(
     (waveId, readThroughSerialNo, reason) => {
+      // The open wave already shows these drops as read, so the wave lists
+      // need no refetch.
       if (reason === "timer") {
         pendingReadNotificationsRef.current = markNotificationsRead(
           waveId,
-          readThroughSerialNo
+          readThroughSerialNo,
+          { refreshWaveLists: false }
         );
         return;
       }
@@ -106,7 +117,7 @@ export const useActiveWaveReadMarker = ({
       pendingReadNotificationsRef.current = markNotificationsRead(
         waveId,
         readThroughSerialNo,
-        () => isFlushing
+        { shouldSend: () => isFlushing, refreshWaveLists: false }
       );
       isFlushing = false;
     },

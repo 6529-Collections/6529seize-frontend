@@ -15,6 +15,11 @@ export interface MarkWaveNotificationsReadOptions {
   readonly readThroughSerialNo?: number | undefined;
   readonly requestDmUnreadState?: boolean;
   readonly onReadResponse?: (response: ApiMarkWaveReadResponse) => void;
+  /**
+   * False when the read only confirms what the open wave already shows, so
+   * the wave lists need no refetch. Notification queries still refresh.
+   */
+  readonly refreshWaveLists?: boolean;
 }
 
 export interface WaveNotificationsReadMarkerState {
@@ -27,15 +32,21 @@ export interface WaveNotificationsReadMarkerState {
 }
 
 export interface WaveNotificationsReadMarkerConfig extends WaveReadIdentityConfig {
-  readonly invalidateNotifications: () => void;
+  readonly invalidateNotifications: (
+    options?: InvalidateNotificationsOptions
+  ) => void;
 }
 
 export type WaveReadAddressEpoch = object;
 
 export type WaveReadShouldSend = (() => boolean) | undefined;
 
+export interface InvalidateNotificationsOptions {
+  readonly refreshWaveLists: boolean;
+}
+
 export type InvalidateNotificationsRef = Readonly<{
-  current: () => void;
+  current: (options?: InvalidateNotificationsOptions) => void;
 }>;
 
 export interface WaveReadSendRetryContext {
@@ -56,6 +67,7 @@ export interface WaveReadSendIntent {
   readonly onReadResponse:
     | ((response: ApiMarkWaveReadResponse) => void)
     | undefined;
+  readonly refreshWaveLists?: boolean | undefined;
 }
 
 export interface WaveReadRequestState {

@@ -1068,6 +1068,7 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
         hide_link_preview: false,
         nft_links: [],
         viewer_context: { author_blocked: false, drop_hidden: false },
+        ...(drop.moderation ? { moderation: drop.moderation } : {}),
       };
       for (const socket of sockets)
         socket.send(JSON.stringify({ type: "DROP_UPDATE", data: frame }));
