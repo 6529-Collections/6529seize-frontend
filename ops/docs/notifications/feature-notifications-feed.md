@@ -11,22 +11,26 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached through `View all notifications` in the desktop sidebar inbox, or
-  directly from mobile/app notifications navigation.
+- Reached by clicking the desktop sidebar bell, choosing `View all
+  notifications` in its preview, or using mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
-- On desktop, select the sidebar bell to preview notifications, then choose
-  `View all notifications` for the full feed. Mobile/app navigation opens the
-  full feed directly.
+- On desktop, hover over the sidebar bell to preview notifications. Click the
+  bell or choose `View all notifications` for the full feed. Mobile/app
+  navigation opens the full feed directly.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
 
 ## Desktop Inbox
 
-The desktop sidebar bell opens a floating inbox beside the sidebar while the
-current page stays in place. Compact rows show the actor, activity, a short drop
+Hovering the desktop sidebar bell opens a floating inbox after 100ms while
+the current page stays in place. The inbox stays open while moving between
+the bell and panel, and closes 200ms after leaving both unless keyboard focus
+remains inside the panel. With the bell focused, Arrow Down opens and focuses
+the inbox; Tab reaches its actions. Clicking the bell opens `/notifications`
+directly, including while the preview is open. Compact rows show the actor, activity, a short drop
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
 Reactions to the same drop share one row with reactor avatars and one drop
@@ -44,8 +48,9 @@ a row marks its unread notifications read if needed and opens its destination.
 automatic read request. Read failures show an error; loading failures offer
 `Try again`. The empty inbox shows `No notifications yet`.
 
-Close the inbox with its close button, Escape, another bell click, or a click
-outside. Escape returns focus to the bell. Changing accounts or routes closes
+Close the inbox with its close button, Escape, a click outside, or by moving
+away from both bell and panel. Leaving the preview by keyboard also closes it.
+Escape and the close button return focus to the bell. Changing accounts or routes closes
 it. The inbox is also available when the desktop sidebar is collapsed.
 
 The full `/notifications` page retains its automatic mark-read behavior and
