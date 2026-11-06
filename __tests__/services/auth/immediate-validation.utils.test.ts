@@ -96,6 +96,38 @@ describe("validateAuthImmediate", () => {
     });
   });
 
+  it("cancels stale-account validation before refresh or callbacks", async () => {
+    const result = await validateAuthImmediate({
+      params: { ...baseParams, shouldPersistRefreshedSession: () => false },
+      callbacks: mockCallbacks,
+    });
+    expect(result.wasCancelled).toBe(true);
+    expect(mockValidateJwt).not.toHaveBeenCalled();
+    expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
+  });
+
+  it("guards refresh persistence and ignores results after the selected account changes", async () => {
+    let isSelected = true;
+    const shouldPersistRefreshedSession = () => isSelected;
+    mockValidateJwt.mockImplementationOnce(async (params) => {
+      expect(params.shouldPersistRefreshedSession).toBe(
+        shouldPersistRefreshedSession
+      );
+      expect(params.shouldPersistRefreshedSession?.()).toBe(true);
+      isSelected = false;
+      expect(params.shouldPersistRefreshedSession?.()).toBe(false);
+      return { isValid: false, wasCancelled: false };
+    });
+    const result = await validateAuthImmediate({
+      params: { ...baseParams, shouldPersistRefreshedSession },
+      callbacks: mockCallbacks,
+    });
+    expect(result.wasCancelled).toBe(true);
+    expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
+    expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
+    expect(mockCallbacks.onInvalidateCache).not.toHaveBeenCalled();
+  });
+
   describe("Successful JWT Validation", () => {
     it("should return success when JWT is valid", async () => {
       mockValidateJwt.mockResolvedValue({

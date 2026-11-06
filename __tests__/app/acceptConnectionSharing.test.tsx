@@ -701,9 +701,7 @@ describe("AcceptConnectionSharing page", () => {
           target,
         })
       );
-      await waitFor(() =>
-        expect(push).toHaveBeenCalledWith("/messages/encrypted")
-      );
+      await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
       expect(accept).toHaveBeenCalledWith("0x123");
       expect(connect).not.toHaveBeenCalled();
     }

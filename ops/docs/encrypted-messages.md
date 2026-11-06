@@ -570,6 +570,9 @@ One secure link signs in and enrolls the app; a second connection-only scan is
 unnecessary. Generating or viewing a QR does not register an active device.
 Registration happens when the receiving app accepts and completes setup.
 
+After accepting either connection type, the receiving app opens Home. Secure
+setup completes before navigation; Encrypted DMs do not open automatically.
+
 The Mobile QR fills the available width. Below it, the link field has a copy
 icon and separate refresh icon. **Back** returns to the app and connection
 choices. Connect-only refresh creates a new code directly; secure refresh clears
