@@ -4,6 +4,8 @@
 // Component a Server Component renders becomes its own client reference in the
 // RSC payload, and each reference repeats the root layout's full chunk list in
 // the inline flight data of every HTML page.
+import { usePathname } from "next/navigation";
+
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
 import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
@@ -33,6 +35,7 @@ import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+import { isValidatorAuthorizePath } from "@/lib/validator-page/authorize/paths";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
@@ -48,7 +51,7 @@ import DocumentLanguage from "./DocumentLanguage";
 export default function Providers({
   children,
   enableVersionCheck = true,
-  enableWalletAuthentication = true,
+  enableWalletAuthentication: walletAuthenticationProp = true,
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
@@ -60,6 +63,12 @@ export default function Providers({
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
 }) {
+  // A phone authorizing a validator connects a wallet only to sign the
+  // validator's grant; it doesn't sign in to 6529.io.
+  const pathname = usePathname();
+  const enableWalletAuthentication =
+    walletAuthenticationProp && !isValidatorAuthorizePath(pathname);
+
   const sharedProviders = (
     <TitleProvider>
       <HeaderProvider>

@@ -83,8 +83,20 @@ describe("handleValidatorPageGate", () => {
     "/validator/releases.json",
     "/validator/releases.json.sig",
     "/validator/unlock",
+    "/validator/authorize",
   ])("keeps %s open without a cookie", (path) => {
     expect(handleValidatorPageGate(request(path), path)).toBeUndefined();
+  });
+
+  it("locks a path below the authorize page", () => {
+    expect(
+      rewriteTarget(
+        handleValidatorPageGate(
+          request("/validator/authorize/more"),
+          "/validator/authorize/more"
+        )
+      )
+    ).toBe("https://6529.io/validator/locked");
   });
 
   it("opens everything when the page is public or has no password", () => {
