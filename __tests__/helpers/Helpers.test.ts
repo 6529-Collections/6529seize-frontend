@@ -10,6 +10,7 @@ import {
   getRandomColorWithSeed,
   numberWithCommas,
   numberWithCommasFromString,
+  requestElementFullScreen,
   parseEmojis,
   parseIpfsUrl,
   parseIpfsUrlToGateway,
@@ -245,6 +246,17 @@ describe("enterArtFullScreen", () => {
 
     expect(webkitRequestFullscreen).toHaveBeenCalledTimes(1);
     expect(webkitRequestFullscreen.mock.contexts[0]).toBe(element);
+  });
+
+  test("expands a given element without an id lookup", async () => {
+    const element = document.createElement("iframe");
+    document.body.append(element);
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    setFullscreenRequest(element, "requestFullscreen", requestFullscreen);
+
+    await expect(requestElementFullScreen(element)).resolves.toBe(true);
+
+    expect(requestFullscreen.mock.contexts[0]).toBe(element);
   });
 });
 
