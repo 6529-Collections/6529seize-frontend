@@ -81,6 +81,13 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       content: "nextjs-portal { display: none !important; }",
     });
     const input = composer(alice.page);
+    const sendButton = alice.page.getByRole("button", {
+      name: "Send",
+      exact: true,
+    });
+    await expect(sendButton).toBeDisabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(sendButton).toHaveCSS("color", "rgb(132, 132, 144)");
     const emojiTrigger = alice.page.getByRole("button", { name: "Add emoji" });
     const attachmentTrigger = alice.page.getByRole("button", {
       name: "Attach files",
@@ -171,6 +178,9 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     await expect(
       input.getByRole("img", { name: ":gm:", exact: true })
     ).toBeVisible();
+    await expect(sendButton).toBeEnabled();
+    await expect(sendButton).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await expect(sendButton).toHaveCSS("color", "rgb(255, 255, 255)");
     if (testInfo.project.use.isMobile) {
       await input.press("Enter");
       await expect(input.getByRole("paragraph")).toHaveCount(2);

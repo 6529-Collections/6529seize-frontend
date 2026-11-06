@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  PaperAirplaneIcon,
-  PaperClipIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { PaperClipIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
   useCallback,
@@ -14,6 +10,7 @@ import {
   useState,
 } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { ComposerSendButton } from "@/components/waves/ComposerSendButton";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
@@ -688,18 +685,14 @@ export function E2eeComposer({
           />
         </div>
         <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
-          <button
-            type="button"
+          <ComposerSendButton
             onClick={() => void submit()}
             disabled={isEmpty || tooLong || isUploading}
             aria-label={t(
               locale,
               editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
             )}
-            className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500"
-          >
-            <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
-          </button>
+          />
         </DropActionTooltip>
       </div>
       <PastedImagesStatus locale={locale} notice={paste.notice} />
