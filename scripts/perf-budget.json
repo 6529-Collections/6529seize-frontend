@@ -10,48 +10,48 @@
       "label": "Root layout",
       "route": null,
       "chunks": 48,
-      "gzip_bytes": 1219933,
-      "brotli_bytes": 1043465
+      "gzip_bytes": 1225168,
+      "brotli_bytes": 1048174
     },
     {
       "id": "home",
       "label": "Home",
       "route": "(home)",
       "chunks": 66,
-      "gzip_bytes": 1465615,
-      "brotli_bytes": 1251569
+      "gzip_bytes": 1470972,
+      "brotli_bytes": 1256383
     },
     {
       "id": "wave",
       "label": "Wave",
       "route": "waves/[wave]",
       "chunks": 102,
-      "gzip_bytes": 2875715,
-      "brotli_bytes": 2407359
+      "gzip_bytes": 2881072,
+      "brotli_bytes": 2412173
     },
     {
       "id": "meme",
       "label": "Meme card",
       "route": "the-memes/[id]",
       "chunks": 75,
-      "gzip_bytes": 1618921,
-      "brotli_bytes": 1383779
+      "gzip_bytes": 1624337,
+      "brotli_bytes": 1388636
     },
     {
       "id": "profile",
       "label": "Profile",
       "route": "[user]/(profile)",
       "chunks": 65,
-      "gzip_bytes": 1558169,
-      "brotli_bytes": 1322356
+      "gzip_bytes": 1563526,
+      "brotli_bytes": 1327170
     },
     {
       "id": "museum",
       "label": "Museum",
       "route": "museum",
       "chunks": 52,
-      "gzip_bytes": 1224167,
-      "brotli_bytes": 1047019
+      "gzip_bytes": 1229524,
+      "brotli_bytes": 1051833
     }
   ]
 }
