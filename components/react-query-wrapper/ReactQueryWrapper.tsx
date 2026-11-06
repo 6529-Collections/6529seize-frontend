@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
+import { refreshProfileRatingLists } from "./utils/refreshProfileRatingLists";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
@@ -357,9 +358,7 @@ const createReactQueryContextValue = (
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_RATING_LIST],
-    });
+    void refreshProfileRatingLists(queryClient, "NIC");
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
@@ -448,9 +447,7 @@ const createReactQueryContextValue = (
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_RATING_LIST],
-    });
+    void refreshProfileRatingLists(queryClient, "REP");
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_OVERVIEW],
     });

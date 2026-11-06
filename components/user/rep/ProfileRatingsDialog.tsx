@@ -85,14 +85,12 @@ function RecipientRatings({
     : null;
   const categories = useQuery({
     queryKey: [
-      QueryKey.PROFILE_RATING_LIST,
-      "recipientCategories",
-      owner,
-      recipient.identity,
+      QueryKey.PROFILE_REP_RATINGS,
+      { rater: owner, handleOrWallet: recipient.identity.toLowerCase() },
     ],
     queryFn: () =>
       commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${encodeURIComponent(recipient.identity)}/rep/ratings/received`,
+        endpoint: `profiles/${encodeURIComponent(recipient.identity.toLowerCase())}/rep/ratings/received`,
         params: { rater: owner },
       }),
     enabled: matter === "REP" && !category,
@@ -224,7 +222,7 @@ export default function ProfileRatingsDialog({
         proxy: activeProfileProxy?.id,
       },
     ],
-    queryFn: ({ pageParam }) =>
+    queryFn: ({ pageParam, signal }) =>
       commonApiFetch<RatingPage>({
         endpoint: `profiles/${encodeURIComponent(identity)}/${matter === "REP" ? "rep" : "cic"}/ratings/by-rater`,
         params: {
@@ -235,6 +233,7 @@ export default function ProfileRatingsDialog({
           page: String(pageParam),
           page_size: "25",
         },
+        signal,
       }),
     initialPageParam: 1,
     getNextPageParam: (page) => (page.next ? page.page + 1 : undefined),
@@ -346,7 +345,7 @@ export default function ProfileRatingsDialog({
         <RecipientRatings
           key={recipient.identity}
           recipient={recipient}
-          owner={identity}
+          owner={connectedProfile?.handle ?? identity}
           matter={matter}
           category={category}
           onBack={() => setRecipient(null)}
