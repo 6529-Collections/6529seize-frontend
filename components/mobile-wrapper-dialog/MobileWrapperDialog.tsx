@@ -197,7 +197,7 @@ function MobileDialogOverlay({
       {...getBeforeLeaveProps(onBeforeLeave)}
       afterLeave={onAfterLeave}
     >
-      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-black/60" />
+      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-gray-700/60" />
     </TransitionChild>
   );
 }
