@@ -401,12 +401,15 @@ test("saved discovery sections stay closed before hydration on reload", async ({
   // Hold application JavaScript so the first visible server HTML cannot
   // be corrected by hydration before we assert its collapsed layout.
   const hydration = gate();
+  let heldScripts = 0;
   await page.route("**/_next/static/**/*.js", async (route) => {
+    heldScripts += 1;
     await hydration.ready;
     await route.continue();
   });
   try {
     await page.reload({ waitUntil: "commit" });
+    await expect.poll(() => heldScripts).toBeGreaterThan(0);
     for (const name of names) {
       const toggle = discovery.getByRole("button", {
         name: `Expand ${name}`,
@@ -414,9 +417,9 @@ test("saved discovery sections stay closed before hydration on reload", async ({
       });
       await expect(toggle).toBeVisible();
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
-      const panel = page.locator(
-        `[id="${await toggle.getAttribute("aria-controls")}"]`
-      );
+      const panel = page
+        .getByRole("region", { name, exact: true })
+        .locator(`[id="${await toggle.getAttribute("aria-controls")}"]`);
       await expect(panel).toHaveAttribute("inert", "");
       await expect(panel).toHaveAttribute("aria-hidden", "true");
       await expect(panel).toBeHidden();
