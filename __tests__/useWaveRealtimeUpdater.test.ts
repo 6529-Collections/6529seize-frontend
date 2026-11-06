@@ -4,11 +4,14 @@ import {
   ProcessIncomingDropType,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { getReactionDetailsVersion } from "@/components/waves/drops/reaction-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { WsMessageType } from "@/helpers/Types";
 
 const mockSetQueriesData = jest.fn();
 const mockSetQueryData = jest.fn();
+const mockInvalidateQueries = jest.fn().mockResolvedValue(undefined);
 const mockCancelQueries = jest.fn().mockResolvedValue(undefined);
 const mockFindAll = jest.fn(() => []);
 const mockRefreshEligibility = jest.fn().mockResolvedValue(undefined);
@@ -79,6 +82,7 @@ jest.mock("@/contexts/wave/drop-visibility", () => ({
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
     cancelQueries: mockCancelQueries,
+    invalidateQueries: mockInvalidateQueries,
     getQueryCache: () => ({
       findAll: mockFindAll,
     }),
@@ -374,6 +378,86 @@ describe("useWaveRealtimeUpdater", () => {
 
     expect(fetchDropByIdBatched).toHaveBeenNthCalledWith(1, "existing-drop");
     expect(fetchDropByIdBatched).toHaveBeenNthCalledWith(2, "existing-drop");
+  });
+
+  it.each([
+    [WsMessageType.DROP_REACTION_UPDATE, 2, true],
+    [WsMessageType.DROP_REACTION_UPDATE, 3, false],
+    [WsMessageType.DROP_RATING_UPDATE, 2, false],
+  ])(
+    "refreshes unchanged-count details only for reaction events (%s, count %i)",
+    async (updateType, count, shouldRefetch) => {
+      const existingDrop = {
+        ...makeRealtimeDrop("existing-drop", "wave1", 10),
+        type: DropSize.FULL,
+        stableKey: "existing-drop",
+        stableHash: "existing-drop",
+        reactions: [{ reaction: ":gm:", count: 2, profiles: [] }],
+        context_profile_context: null,
+      };
+      const store = {
+        wave1: { drops: [existingDrop], latestFetchedSerialNo: 10 },
+      };
+      const props = baseProps(store);
+      fetchDropByIdBatched.mockResolvedValue({
+        ...existingDrop,
+        reactions: [{ reaction: ":gm:", count, profiles: [] }],
+      });
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+        drop_id: "existing-drop",
+        wave_id: "wave1",
+        serial_no: 10,
+        update_type: updateType,
+      });
+      await flushPromises();
+
+      if (updateType === WsMessageType.DROP_REACTION_UPDATE) {
+        expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+        const invalidation = mockInvalidateQueries.mock.calls[0]![0];
+        expect(invalidation.queryKey).toEqual([
+          QueryKey.DROP_REACTIONS,
+          "existing-drop",
+        ]);
+        expect(
+          invalidation.predicate({
+            queryKey: [
+              QueryKey.DROP_REACTIONS,
+              "existing-drop",
+              "viewer",
+              getReactionDetailsVersion(existingDrop.reactions, null),
+            ],
+          })
+        ).toBe(shouldRefetch);
+      } else {
+        expect(mockInvalidateQueries).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it("refreshes reaction details outside the cached chat stream", async () => {
+    const props = baseProps({});
+    fetchDropByIdBatched.mockResolvedValue({
+      ...makeRealtimeDrop("other-surface-drop", "wave1", 10),
+      reactions: [],
+    });
+    renderHook(() => useWaveRealtimeUpdater(props));
+
+    emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+      drop_id: "other-surface-drop",
+      wave_id: "wave1",
+      serial_no: 10,
+      update_type: WsMessageType.DROP_REACTION_UPDATE,
+    });
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROP_REACTIONS, "other-surface-drop"],
+      predicate: expect.any(Function),
+    });
   });
 
   it("coalesces duplicate compact references into one follow-up sync", async () => {
