@@ -25,6 +25,7 @@ export default async function ValidatorGuideRoute() {
     <ValidatorGuidePage
       platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
       debs={getDebNames(snapshot.releases[0])}
+      newest={snapshot.releases[0]?.version}
     />
   );
 }
