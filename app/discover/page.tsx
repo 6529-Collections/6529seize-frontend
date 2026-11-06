@@ -24,6 +24,12 @@ function DiscoverFallback() {
   );
 }
 
+// Renders per request, as before #4674. Since /discover became a static
+// prerender, production E2E reports keyboard focus not following the selected
+// score filter (search-waves-readonly › discovery filters). The cause is not yet
+// reproduced outside CI, so the page keeps its earlier rendering mode until it is.
+export const dynamic = "force-dynamic";
+
 export default function DiscoverPage() {
   return (
     <main className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black">

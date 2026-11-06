@@ -31,6 +31,7 @@ export default function MobileNicTabContent({
 
       <div className="tw-mt-6">
         <UserPageCombinedActivityLog
+          layout="mobile"
           initialActivityLogParams={initialActivityLogParams}
           matter={RateMatter.NIC}
           withMatterFilter={false}

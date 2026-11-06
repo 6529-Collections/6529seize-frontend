@@ -2832,6 +2832,16 @@ const mockApiPatternReadRoutes = [
   { pattern: /^\/api\/v2\/waves\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/reactions$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/profile-picture$/,
+    response: () => ({
+      ...localProfile,
+      query: "profile-picture",
+      handle: "profile-picture",
+      normalised_handle: "profile-picture",
+      pfp: "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8",
+    }),
+  },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
 ];
