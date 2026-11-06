@@ -1024,7 +1024,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await gotoSandboxWave(page);
     await resetSandboxRequests(baseURL);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: /^Write a(?: chat)? message$/ })
       .last();
     const post = page.getByRole("button", { name: "Post", exact: true }).last();
     await composer.fill("A wave announcement @all");
