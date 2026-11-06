@@ -1,10 +1,10 @@
 // The hardware page at /validator/hardware. Every fact here holds for
 // 0.1.0-rc.5 (commit 29a8caf): systems from its install guide and package
 // checks, memory and disk measured on rc.5 on 2026-11-03. The first start
-// is from 6529's mainnet join tests of 0.1.0-rc.8, as the tester guide gives
+// is from 6529's mainnet join tests of 0.1.0-rc.9, as the tester guide gives
 // it, and a data center's peers from rc.8's install guide
 // (docs/install/operations.md, Peers). Prices were read on 2026-10-31.
-// Release facts still to fill have the form {{RC8_...}}.
+// Release facts still to fill have the form {{RC9_...}} (fill-rc9.sh).
 
 /**
  * How long a home validator must stay on from 00:15 UTC to calculate, sign
@@ -147,7 +147,7 @@ export const PARTS: readonly {
     key: "first-start",
     part: "First start",
     answer: "Leave it on until the app says it is ready, about half an hour.",
-    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.8 on 6 November this took about 21 minutes through Tor, and 14 with Tor off.",
+    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.9 on {{RC9_JOIN_DATE}} this took about {{RC9_JOIN_TOR_MINUTES}} minutes through Tor, and {{RC9_JOIN_TOR_OFF_MINUTES}} with Tor off.",
   },
 ];
 
@@ -315,7 +315,7 @@ export const QUESTIONS: readonly {
 /** Where the page's numbers come from. */
 export const SOURCES: readonly string[] = [
   `Memory and disk: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
-  "The first start: 6529's join tests of the test release (0.1.0-rc.8, commit e53fcf3) on 6 November 2026, fresh installs with the default settings, through Tor and with Tor off.",
+  "The first start: 6529's join tests of the test release (0.1.0-rc.9, commit a5bd372) on {{RC9_JOIN_DATE}} 2026, fresh installs with the default settings, through Tor and with Tor off.",
   "Internet: 6529's estimate of a month of Ethereum data, in the validator's specification.",
   `Prices: store and provider pages, read on ${PRICES_READ_ON}. Power at 18.16 cents a kWh, the US average for August 2026 (EIA).`,
 ];
