@@ -151,6 +151,13 @@ export const COMPETITION_MESSAGES = {
   "competitions.pause": "Pause decisions",
   "competitions.resume": "Resume decisions",
   "competitions.archive": "Archive",
+  "competitions.archiveAndStop": "Archive and stop competition",
+  "competitions.archiveStopConsequences":
+    "This permanently stops new submissions, voting and future winner selection. Entries, votes, existing winners and awarded outcomes remain in history. This competition cannot be reopened.",
+  "competitions.archiveConsequences":
+    "This competition will move into history and cannot be reopened. Existing entries, votes, winners and awarded outcomes are preserved.",
+  "competitions.archiveReasonHelp":
+    "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history.",
   "competitions.clone": "Clone as a draft",
   "competitions.edit": "Edit competition",
   "competitions.editRules": "Edit competition rules",
