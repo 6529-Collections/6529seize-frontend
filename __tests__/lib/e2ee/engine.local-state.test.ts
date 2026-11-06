@@ -53,6 +53,30 @@ describe("E2EE engine: local state", () => {
     expect((await storage.getDevice("alice"))?.label).toBe(labelBefore);
   });
 
+  it("shares the updated server name with another device", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    await settle(world);
+    const original = alice.primary.engine.getThisDevice();
+
+    await alice.primary.engine.renameThisDevice("My phone");
+    const laptop = await startDevice(world, "alice", alice.account);
+    alice.devices.push(laptop);
+    await settle(world);
+
+    expect(alice.primary.engine.getThisDevice()?.label).toBe("My phone");
+    expect(
+      laptop.engine
+        .getDevices()
+        .find((device) => device.deviceKey === original?.deviceKey)
+    ).toMatchObject({
+      label: "My phone",
+    });
+    expect((await alice.primary.storage.getDevice("alice"))?.label).toBe(
+      original?.label
+    );
+  });
+
   it("wiping a revoked device also deletes its encrypted-backup state", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

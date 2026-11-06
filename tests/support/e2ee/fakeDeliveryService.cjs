@@ -435,7 +435,7 @@ function createFakeDeliveryService(options = {}) {
       wallet_signature: lower(input.signature),
       grant_message: input.grantMessage,
       verified_via: "eoa",
-      label,
+      label: existing?.label ?? label,
       platform: ["web", "desktop", "phone"].includes(body.platform)
         ? body.platform
         : "web",
@@ -1309,6 +1309,18 @@ function createFakeDeliveryService(options = {}) {
     ],
     [
       "POST",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/label$/,
+      (c, [key]) => {
+        const device = s.devices.get(key);
+        if (device?.profile_id !== c.profileId || device.revoked_at !== null) {
+          fail(403, "E2EE_NOT_YOUR_DEVICE");
+        }
+        device.label = c.body.label;
+        return device;
+      },
+    ],
+    [
+      "POST",
       /^e2ee\/devices\/(0x[0-9a-f]+)\/revoke$/,
       (c, [key]) => revokeDevice(c.profileId, key, c.body),
     ],
@@ -1594,6 +1606,8 @@ function createFakeApiClient(ds, profileId) {
     getDevice: (key) => call("GET", `e2ee/devices/${enc(key)}`),
     getProfileDevices: (pid) =>
       call("GET", `e2ee/profiles/${enc(pid)}/devices`),
+    renameDevice: (key, name) =>
+      call("POST", `e2ee/devices/${enc(key)}/label`, { label: name }),
     revokeDevice: (key, body) =>
       call("POST", `e2ee/devices/${enc(key)}/revoke`, body),
     uploadKeyPackages: (key, body) =>

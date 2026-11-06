@@ -15,7 +15,7 @@ const AppSidebarHeader: FC<AppSidebarHeaderProps> = ({ onClose }) => {
   const { address } = useSeizeConnectContext();
 
   return (
-    <div className="tw-px-6 tw-pb-4 tw-pt-2">
+    <div className="tw-px-6 tw-pb-5 tw-pt-2">
       <div className="tw-flex tw-items-center">
         <EnvironmentBadge />
         <button

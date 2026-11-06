@@ -773,20 +773,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!device) {
       throw new E2eeError("E2EE_NOT_READY");
     }
-    device.label = label.trim().slice(0, 48) || "Device";
-    await this.ctx.queue.run(() =>
-      checkpoint(this.ctx, { device, skipWasm: true })
-    );
-    if (this.ctx.store.thisDevice) {
-      this.ctx.store.thisDevice = {
-        ...this.ctx.store.thisDevice,
-        label: device.label,
-      };
-      this.ctx.store.devices = this.ctx.store.devices.map((info) =>
-        info.isThisDevice ? { ...info, label: device.label } : info
-      );
-    }
-    this.ctx.store.touch();
+    await this.ctx.queue.run(async () => {
+      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
+      // A superseded tab must stop before changing the account's device name.
+      await checkpoint(this.ctx, { skipWasm: true });
+      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
+      await this.ctx.api.renameDevice(device.deviceKey, label);
+    });
+    await this.refreshMe();
   }
 }
 

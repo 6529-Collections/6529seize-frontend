@@ -7,8 +7,10 @@ import type {
 } from "lexical";
 import { DecoratorNode } from "lexical";
 import Image from "next/image";
-import { createElement, type JSX } from "react";
+import { useContext, createElement, type JSX } from "react";
 import { useEmoji } from "@/contexts/EmojiContext";
+
+import { ComposerEmojiContext } from "@/components/composer/ComposerEmojiContext";
 
 type SerializedEmojiNode = Spread<{ emojiId: string }, SerializedLexicalNode>;
 
@@ -56,7 +58,7 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     _editor: LexicalEditor,
     _config: EditorConfig
   ): JSX.Element {
-    return createElement(EmojiComponent, { emojiId: this.__emojiId });
+    return createElement(ScopedEmojiComponent, { emojiId: this.__emojiId });
   }
 
   static override importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
@@ -103,3 +105,8 @@ const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
     />
   );
 };
+
+function ScopedEmojiComponent({ emojiId }: { readonly emojiId: string }) {
+  const custom = useContext(ComposerEmojiContext);
+  return custom ? custom.render(emojiId) : <EmojiComponent emojiId={emojiId} />;
+}

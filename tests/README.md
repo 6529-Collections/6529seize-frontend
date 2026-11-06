@@ -284,16 +284,16 @@ Opt-in stateful staging packs:
   wallet (announced through EIP-6963 and as `window.ethereum`) that answers in
   the test process, so the private keys never enter the page, logs or
   artifacts. Each user signs in through the real wallet modal, gets a
-  test-only `e2eeqa_*` profile and turns on encrypted messages with one
-  combined sign-in grant (NC8): a returning user's sign-in grants it, and a
-  new user (who signs in before the profile exists) gets it from the
-  enrollment button with one more sign-in signature, which also revokes the
-  earlier signing-only grant. No device signs an EIP-712 `MlsDeviceGrant` on
-  the website. The spec covers a DM in both directions, an image
-  attachment through the blob store, a group with a third user and a revoked
-  second device that can no longer read new messages. It also checks sender
-  profile links and levels, plus DM header profile links. Its privacy checks ensure no
-  request URL, body or sent WebSocket frame contains any plaintext (raw, hex
+  test-only `e2eeqa_*` profile, and enables encryption. A returning user's
+  sign-in grants both permissions (NC8). A new user who already has a
+  Signed Posts grant signs one EIP-712 `MlsDeviceGrant` from the enrollment
+  card and keeps their existing Signed Posts grant. The spec covers a DM in
+  both directions, file-picked and dropped images through the blob store,
+  image popup dismissal, downloads and focus return, a group with a
+  third user and a revoked second device that can no longer read new messages.
+  It also checks sender profile links and levels, plus DM header profile
+  links. Its privacy checks ensure no request URL, body or sent WebSocket
+  frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
   engine logs no errors. A route guard drops writes aimed at production 6529

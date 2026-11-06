@@ -1,5 +1,9 @@
 "use client";
 
+import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
+import { useChatFileDrop } from "@/hooks/useChatFileDrop";
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
@@ -11,10 +15,7 @@ import {
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
-import {
-  DropMode,
-  type DropComposerDensity,
-} from "@/components/waves/dropComposer.types";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -76,7 +77,7 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
-  readonly composerDensity?: DropComposerDensity | undefined;
+  readonly showLegacyDmBanner?: boolean;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -136,8 +137,6 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly initialUrl?: string | null | undefined;
 }
 
-const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
-  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
@@ -207,7 +206,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
-  composerDensity = "default",
+  showLegacyDmBanner = true,
 }) => {
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
@@ -216,13 +215,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const galleryContainerRef = useRef<HTMLDivElement>(null);
-  const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
   const { editingDropId } = useEditingDrop();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const [isDragDropActive, setIsDragDropActive] = useState(false);
   const [externalAttachmentDrop, setExternalAttachmentDrop] = useState<{
     readonly token: number;
     readonly files: File[];
@@ -388,14 +385,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     ? "tw-mt-auto tw-bg-iron-950"
     : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
   const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
-    () =>
-      isApp
-        ? {
-            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
-            transition:
-              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
-          }
-        : undefined,
+    () => getNativeComposerStyle(isApp),
     [isApp]
   );
 
@@ -494,25 +484,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       : null;
   const isChatSubmitFlowOpen = activeChatSubmitDropExperience !== null;
 
-  const shouldHandleContainerFileDrop = (
-    event: React.DragEvent<HTMLElement>
-  ): boolean => {
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return true;
-    }
-
-    return (
-      target.closest(
-        '[contenteditable="true"], input, textarea, [role="textbox"]'
-      ) === null
-    );
-  };
-
-  const isFileDragEvent = (event: React.DragEvent<HTMLElement>): boolean => {
-    return Array.from(event.dataTransfer.types).includes("Files");
-  };
-
   const filterSupportedFiles = (files: File[]) => {
     const supported: File[] = [];
     const unsupported: File[] = [];
@@ -526,69 +497,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     });
 
     return { supported, unsupported };
-  };
-
-  const resetDragDropState = useCallback(() => {
-    dragCounterRef.current = 0;
-    setIsDragDropActive(false);
-  }, []);
-
-  useEffect(() => {
-    globalThis.window.addEventListener("dragend", resetDragDropState);
-    globalThis.window.addEventListener("drop", resetDragDropState);
-
-    return () => {
-      globalThis.window.removeEventListener("dragend", resetDragDropState);
-      globalThis.window.removeEventListener("drop", resetDragDropState);
-    };
-  }, [resetDragDropState]);
-
-  const onContainerDragEnter = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current += 1;
-    setIsDragDropActive(true);
-  };
-
-  const onContainerDragOver = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "copy";
-  };
-
-  const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
-    if (dragCounterRef.current === 0) {
-      setIsDragDropActive(false);
-    }
-  };
-
-  const onContainerDrop = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current = 0;
-    setIsDragDropActive(false);
-
-    const droppedFiles = Array.from(event.dataTransfer.files);
-    if (droppedFiles.length === 0) {
-      return;
-    }
-
-    handleExternalAttachmentFiles(droppedFiles);
   };
 
   const handleExternalAttachmentFiles = (files: File[]) => {
@@ -610,6 +518,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       setToast(getUnsupportedUploadToast(unsupported, locale));
     }
   };
+
+  const fileDrop = useChatFileDrop({ onFiles: handleExternalAttachmentFiles });
 
   if (viewMode === "gallery") {
     return (
@@ -642,22 +552,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         className={`${containerClassName} tw-relative`}
         style={effectiveWaveViewStyle}
         aria-label={t(locale, "waves.chat.fileUploadAreaAriaLabel")}
-        onDragEnter={onContainerDragEnter}
-        onDragOver={onContainerDragOver}
-        onDragLeave={onContainerDragLeave}
-        onDrop={onContainerDrop}
+        {...fileDrop.handlers}
       >
-        {isDragDropActive && (
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/75 tw-p-6">
-            <div className="tw-max-w-3xl tw-p-4 tw-text-center">
-              <p className="tw-text-base tw-font-semibold tw-text-primary-300">
-                {t(locale, "drop.upload.dropHere")}
-              </p>
-              <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
-                {getAcceptedUploadFormats(locale)}
-              </p>
-            </div>
-          </div>
+        {fileDrop.active && (
+          <ChatFileDropOverlay description={getAcceptedUploadFormats(locale)} />
         )}
         <WaveReplyThreadsProvider
           enabled={collapseReplies}
@@ -695,8 +593,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
-              <CreateDropWaveWrapper composerDensity={composerDensity}>
+            <LegacyDmComposerGate
+              wave={wave}
+              enabled={isDirectMessage}
+              showBanner={showLegacyDmBanner}
+            >
+              <CreateDropWaveWrapper>
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}
                   onCancelReplyQuote={onCancelReplyQuote}

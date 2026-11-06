@@ -329,6 +329,20 @@ export class EngineStore {
     return [...byProfile.values()];
   }
 
+  private lastIncomingSeq(runtime: GroupRuntime): number {
+    const record = runtime.record;
+    let lastIncomingSeq =
+      record.history?.lastIncomingSeq ?? record.history?.maxSeq ?? 0;
+    // New arrivals may be outside the selected history page or behind an
+    // outgoing pending echo. Their notification cursor must survive eviction.
+    for (const message of runtime.messages.values()) {
+      if (isCountable(message, this.ownProfileId) && !message.imported) {
+        lastIncomingSeq = Math.max(lastIncomingSeq, message.seq);
+      }
+    }
+    return lastIncomingSeq;
+  }
+
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
     const record = runtime.record;
     const ordered = record.history
@@ -375,6 +389,7 @@ export class EngineStore {
       splitView: record.splitView,
       untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
+      lastIncomingSeq: this.lastIncomingSeq(runtime),
       unread,
       mentions,
       historyError: runtime.historyError === true,

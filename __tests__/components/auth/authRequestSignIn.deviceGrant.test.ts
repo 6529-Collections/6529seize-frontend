@@ -165,7 +165,7 @@ describe("sign-in with a device grant", () => {
     const { getNonce, getSignature, signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     const record = mockRecords.get(SIGNER);
@@ -203,7 +203,7 @@ describe("sign-in with a device grant", () => {
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     const record = mockRecords.get(SIGNER);
@@ -238,7 +238,9 @@ describe("sign-in with a device grant", () => {
     arrange();
     const { getNonce, getSignature, signIn } = createSubject();
 
-    await expect(signIn({ signerAddress: SIGNER, role })).resolves.toEqual({
+    await expect(
+      signIn({ signerAddress: SIGNER, role, deviceGrantMode: "auto" })
+    ).resolves.toEqual({
       success: true,
     });
     expect(getNonce).toHaveBeenCalledWith({ signerAddress: SIGNER });
@@ -252,7 +254,7 @@ describe("sign-in with a device grant", () => {
     const { getNonce, getSignature, signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
     expect(getNonce).toHaveBeenCalledWith({ signerAddress: SIGNER });
     expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
@@ -264,7 +266,7 @@ describe("sign-in with a device grant", () => {
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
     expect(getNonce).toHaveBeenCalledTimes(1);
     expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
@@ -279,7 +281,7 @@ describe("sign-in with a device grant", () => {
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
     expect(getNonce).toHaveBeenCalledTimes(2);
     expect(getNonce).toHaveBeenLastCalledWith({ signerAddress: SIGNER });
@@ -296,7 +298,7 @@ describe("sign-in with a device grant", () => {
     });
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
     expect(getNonce).toHaveBeenCalledTimes(2);
     expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
@@ -312,18 +314,26 @@ describe("sign-in with a device grant", () => {
     ).resolves.toEqual({ success: false });
     expect(getSignature).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith({
-      message: "Couldn't turn on signed messages. Please try again.",
+      message: "Couldn't turn on signed posts. Please try again.",
       type: "error",
     });
   });
 
   it("renews through an ordinary sign-in only when the stored grant is in its last 14 days", async () => {
     const first = createSubject();
-    await first.signIn({ signerAddress: SIGNER, role: null });
+    await first.signIn({
+      signerAddress: SIGNER,
+      role: null,
+      deviceGrantMode: "auto",
+    });
     await flushPromises();
 
     const again = createSubject();
-    await again.signIn({ signerAddress: SIGNER, role: null });
+    await again.signIn({
+      signerAddress: SIGNER,
+      role: null,
+      deviceGrantMode: "auto",
+    });
     expect(again.getNonce).toHaveBeenCalledWith({ signerAddress: SIGNER });
 
     const record = mockRecords.get(SIGNER)!;
@@ -332,7 +342,11 @@ describe("sign-in with a device grant", () => {
       grant: { ...record.grant!, expires_at: Date.now() + 5 * 86_400_000 },
     } as StoredDeviceKey);
     const renewal = createSubject();
-    await renewal.signIn({ signerAddress: SIGNER, role: null });
+    await renewal.signIn({
+      signerAddress: SIGNER,
+      role: null,
+      deviceGrantMode: "auto",
+    });
     expect(renewal.getNonce).toHaveBeenCalledWith(
       expect.objectContaining({ deviceGrant: expect.any(Object) })
     );
@@ -354,7 +368,11 @@ describe("sign-in with a device grant", () => {
       subject.getNonce.mockClear();
       subject.getSignature.mockClear();
       await expect(
-        subject.signIn({ signerAddress: signer, role: null })
+        subject.signIn({
+          signerAddress: signer,
+          role: null,
+          deviceGrantMode: "auto",
+        })
       ).resolves.toEqual({ success: true });
       expect(subject.getNonce).toHaveBeenCalledTimes(1);
       expect(subject.getNonce).toHaveBeenCalledWith({ signerAddress: signer });
@@ -379,7 +397,11 @@ describe("sign-in with a device grant", () => {
         subject.getSignature.mockResolvedValueOnce(failure);
 
         await expect(
-          subject.signIn({ signerAddress: signer, role: null })
+          subject.signIn({
+            signerAddress: signer,
+            role: null,
+            deviceGrantMode: "auto",
+          })
         ).resolves.toEqual({ success: false });
         expect(subject.getSignature).toHaveBeenCalledWith({
           message: grantMessage(mockRecords.get(signer)!.publicKeyHex, signer),
@@ -395,7 +417,11 @@ describe("sign-in with a device grant", () => {
       loginMock.mockRejectedValueOnce(new Error("500 Internal Server Error"));
 
       await expect(
-        subject.signIn({ signerAddress: signer, role: null })
+        subject.signIn({
+          signerAddress: signer,
+          role: null,
+          deviceGrantMode: "auto",
+        })
       ).resolves.toEqual({ success: false });
       expect(loginMock).toHaveBeenCalledWith(
         expect.objectContaining({ deviceLabel: expect.any(String) })
@@ -404,11 +430,15 @@ describe("sign-in with a device grant", () => {
       await expectOrdinaryNextSignIn(subject, signer);
     });
 
-    it("still asks for a grant when signed messages are turned on", async () => {
+    it("still asks for a grant when signed posts are turned on", async () => {
       const signer = walletOf("5");
       const subject = createSubject();
       subject.getSignature.mockResolvedValueOnce(declined);
-      await subject.signIn({ signerAddress: signer, role: null });
+      await subject.signIn({
+        signerAddress: signer,
+        role: null,
+        deviceGrantMode: "auto",
+      });
       subject.getNonce.mockClear();
 
       await expect(

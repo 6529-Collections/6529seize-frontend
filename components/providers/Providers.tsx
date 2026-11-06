@@ -11,6 +11,7 @@ import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
 import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
@@ -87,9 +88,7 @@ export default function Providers({
                   <EmojiProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={
-                          enableWalletAuthentication
-                        }
+                        enableWalletAuthentication={enableWalletAuthentication}
                       >
                         <AuthLaunchTimingReporter
                           enableWalletAuthentication={
@@ -112,6 +111,9 @@ export default function Providers({
                               <AppWebSocketProvider>
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
+                                  {enableWalletAuthentication && (
+                                    <DeviceSetupHost />
+                                  )}
                                   <LayoutProvider>
                                     <ShellSearchParamsProvider>
                                       {enableMyStream ? (

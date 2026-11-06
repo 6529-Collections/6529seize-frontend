@@ -8,6 +8,8 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
+import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
+import { E2eeEmojiText } from "../conversation/E2eeEmojiText";
 import {
   formatE2eeTimestamp,
   getConversationTitle,
@@ -253,7 +255,10 @@ function E2eeConversationRow({
                 hasUnread ? "tw-text-iron-200" : "tw-text-iron-400"
               }`}
             >
-              {getRowPreview(locale, conversation, selfProfileId)}
+              <E2eeEmojiText
+                text={getRowPreview(locale, conversation, selfProfileId)}
+                size="sm"
+              />
             </span>
             {statusKey ? (
               <span className="tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-iron-300">
@@ -293,20 +298,22 @@ export function E2eeConversationList({
   const visible =
     limit === undefined ? conversations : conversations.slice(0, limit);
   return (
-    <ul
-      aria-label={label}
-      className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
-    >
-      {visible.map((conversation) => (
-        <E2eeConversationRow
-          key={conversation.g}
-          conversation={conversation}
-          selfProfileId={selfProfileId}
-          active={conversation.g === activeGroup}
-          collapsed={collapsed}
-          muted={muted.has(conversation.g)}
-        />
-      ))}
-    </ul>
+    <E2eeEmojiProvider>
+      <ul
+        aria-label={label}
+        className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
+      >
+        {visible.map((conversation) => (
+          <E2eeConversationRow
+            key={conversation.g}
+            conversation={conversation}
+            selfProfileId={selfProfileId}
+            active={conversation.g === activeGroup}
+            collapsed={collapsed}
+            muted={muted.has(conversation.g)}
+          />
+        ))}
+      </ul>
+    </E2eeEmojiProvider>
   );
 }

@@ -27,6 +27,9 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "@/components/auth/Auth";
 import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import DeviceSecurityStatus, {
+  isDeviceSecurityStatusEnabled,
+} from "@/components/device-signing/DeviceSecurityStatus";
 import WebSidebarAccountAvatar from "./WebSidebarAccountAvatar";
 import { useSidebarIdentity } from "./useSidebarIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -49,6 +52,7 @@ function WebSidebarUser({
     useState(false);
   const hasHydrated = useHasHydrated();
   const accountDescriptionId = useId();
+  const deviceStatusId = useId();
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
     useIsMobileDeviceStatus();
@@ -334,7 +338,14 @@ function WebSidebarUser({
             : "webSidebar.accountMenu.openAriaLabel"
         )}
         aria-expanded={showUserMenu}
-        aria-describedby={accountDescriptionId}
+        aria-describedby={
+          isDeviceSecurityStatusEnabled()
+            ? `${accountDescriptionId} ${deviceStatusId}`
+            : accountDescriptionId
+        }
+        {...(isDeviceSecurityStatusEnabled() && {
+          "data-tooltip-id": `${deviceStatusId}-tooltip`,
+        })}
         aria-controls="user-menu"
       >
         <span id={accountDescriptionId} className="tw-sr-only">
@@ -352,7 +363,11 @@ function WebSidebarUser({
                   ? "desktop-hover:group-hover/user:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_0_14px_rgba(255,255,255,0.06)] desktop-hover:group-hover/user:tw-brightness-[1.05]"
                   : ""
               }`}
-              title={connectionIndicator.title}
+              title={
+                isDeviceSecurityStatusEnabled()
+                  ? undefined
+                  : connectionIndicator.title
+              }
             >
               <WebSidebarAccountAvatar
                 key={`${address}:${resolvedPfp ?? "default"}`}
@@ -364,6 +379,11 @@ function WebSidebarUser({
                 />
               )}
             </div>
+            <DeviceSecurityStatus
+              descriptionId={deviceStatusId}
+              menuOpen={showUserMenu}
+              connection={connectionIndicator}
+            />
             {hasUnreadOnOtherConnectedProfiles && (
               <div
                 className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"

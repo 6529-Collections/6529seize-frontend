@@ -66,6 +66,13 @@ const ENCRYPTED_MESSAGES_ROUTE = `/messages/${ENCRYPTED_SEGMENT}`;
 
 export const getEncryptedMessagesRoute = (): string => ENCRYPTED_MESSAGES_ROUTE;
 
+/** The query a content-free encrypted-message push opens the list with. */
+export const ENCRYPTED_MESSAGES_WAKE_PARAM = "wake";
+
+/** Where an encrypted-message push opens (the list, marked as a wake). */
+export const getEncryptedMessagesWakeRoute = (): string =>
+  `${ENCRYPTED_MESSAGES_ROUTE}?${ENCRYPTED_MESSAGES_WAKE_PARAM}=1`;
+
 export const getNewEncryptedChatRoute = (): string =>
   `${ENCRYPTED_MESSAGES_ROUTE}/new`;
 

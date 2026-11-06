@@ -562,7 +562,7 @@ function WaveDropPartContentMediaImageContent({
             type="button"
             onClick={handleOpenModal}
             aria-label={t(DEFAULT_LOCALE, "drop.media.openMedia")}
-            className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-zoom-in tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           />
           {usesGiphyVideo && !showError && (
             <GiphyPlaybackToggle

@@ -109,7 +109,7 @@ describe("ProfilePreferencesSettings", () => {
       endpoint: "profile-preferences",
     });
     expect(
-      screen.getByRole("region", { name: "Notifications & messages" })
+      screen.getByRole("region", { name: "Notifications & Messages" })
     ).toBeInTheDocument();
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 });
     expect(

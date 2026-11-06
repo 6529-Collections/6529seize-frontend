@@ -6,6 +6,7 @@ import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  PaperClipIcon,
   ArrowUpTrayIcon,
   ChartBarIcon,
   CodeBracketIcon,
@@ -24,6 +25,11 @@ import { t } from "@/i18n/messages";
 import { createDropGifPickerLoader } from "./CreateDropGifPickerLoader";
 import LazyCreateDropGifPicker from "./LazyCreateDropGifPicker";
 import StormButton from "./StormButton";
+import {
+  COMPOSER_ACTION_BUTTON_CLASS_NAME,
+  COMPOSER_ACTION_IDLE_CLASS_NAME,
+  COMPOSER_ACTION_ICON_CLASS_NAME,
+} from "./composerPresentation";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
@@ -115,7 +121,7 @@ const getPollActionStyles = ({
   if (isStormMode) {
     return "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-bg-iron-900";
   }
-  return "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300";
+  return `tw-cursor-pointer ${COMPOSER_ACTION_IDLE_CLASS_NAME}`;
 };
 
 const CompactActionButton: React.FC<CompactActionButtonProps> = ({
@@ -184,6 +190,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const actionsLabel = t(locale, "waves.composer.actions.label");
     const metadataLabel = t(locale, "waves.composer.actions.metadata");
     const uploadLabel = t(locale, "waves.composer.actions.upload");
+    const attachFilesLabel = t(locale, "e2ee.composer.attach");
     const gifLabel = t(locale, "waves.composer.actions.gif");
     const pollLabel = t(locale, "waves.composer.actions.poll");
     const addPollLabel = t(locale, "waves.poll.composer.add");
@@ -332,14 +339,14 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             aria-label={addPollLabel}
             onClick={onTogglePoll}
             disabled={isStormMode}
-            className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
+            className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${getPollActionStyles(
               { isStormMode }
             )}`}
             data-tooltip-id={pollTooltipId}
             data-tooltip-content={addPollLabel}
           >
             <ChartBarIcon
-              className="tw-size-4 tw-flex-shrink-0"
+              className={COMPOSER_ACTION_ICON_CLASS_NAME}
               aria-hidden="true"
             />
           </button>
@@ -464,11 +471,11 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
               </AnimatePresence>
             </>
           ) : (
-            <div className="tw-relative tw-col-start-1 tw-row-start-2 tw-self-center">
+            <div className="tw-relative tw-col-start-1 tw-row-start-2 tw-self-end">
               <motion.div
                 data-testid="drop-actions-motion-shell"
                 {...shellMotionProps}
-                className="tw-relative tw-flex tw-h-8 tw-items-center tw-overflow-hidden"
+                className="tw-relative tw-flex tw-h-10 tw-items-center tw-overflow-hidden"
               >
                 <AnimatePresence mode="sync" initial={false}>
                   {showOptions ? (
@@ -476,7 +483,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       key="default-buttons"
                       data-testid="drop-actions-expanded-motion"
                       {...actionGroupMotionProps}
-                      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-overflow-hidden"
+                      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-0 tw-overflow-hidden"
                     >
                       {isDropMode && (
                         <>
@@ -512,32 +519,23 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           )}
                         </>
                       )}
-                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
+                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-0">
                         <>
                           <button
                             type="button"
-                            aria-label={
-                              isUploadPickerOpen
-                                ? "Close upload picker"
-                                : "Upload a file"
-                            }
+                            aria-label={attachFilesLabel}
                             onClick={onUploadClick}
-                            className={`tw-flex-shrink-0 ${
+                            className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} tw-cursor-pointer ${
                               isRequiredMediaMissing
-                                ? "tw-text-[#FEDF89]"
-                                : "tw-text-iron-300"
-                            } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
+                                ? "tw-text-[#FEDF89] hover:tw-bg-iron-800"
+                                : COMPOSER_ACTION_IDLE_CLASS_NAME
+                            }`}
                             data-tooltip-id={uploadTooltipId}
-                            data-tooltip-content={uploadLabel}
+                            data-tooltip-content={attachFilesLabel}
                           >
-                            <FontAwesomeIcon
-                              icon={faPlus}
+                            <PaperClipIcon
                               aria-hidden="true"
-                              className={`tw-size-4 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out ${
-                                isUploadPickerOpen
-                                  ? "tw-rotate-45"
-                                  : "tw-rotate-0"
-                              }`}
+                              className={COMPOSER_ACTION_ICON_CLASS_NAME}
                             />
                           </button>
                           {!isMobile && (
@@ -552,12 +550,12 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           onPointerEnter={preloadGifPicker}
                           onFocus={preloadGifPicker}
                           aria-label={addGifLabel}
-                          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
+                          className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} tw-cursor-pointer`}
                           data-tooltip-id={gifTooltipId}
                           data-tooltip-content={addGifLabel}
                         >
                           <svg
-                            className="tw-size-4 tw-flex-shrink-0"
+                            className={COMPOSER_ACTION_ICON_CLASS_NAME}
                             viewBox="0 0 24 24"
                             version="1.1"
                             xmlns="http://www.w3.org/2000/svg"
@@ -615,7 +613,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         isPollActive
                           ? "tw-text-[#FEDF89]"
                           : "tw-text-iron-400"
-                      } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
+                      } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

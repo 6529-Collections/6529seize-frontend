@@ -94,6 +94,8 @@ function createActions(
       userRejected: false,
     })),
     signModalReason: "auth",
+    ownProfileId: null,
+    signAppGrant: jest.fn(),
     ...overrides,
   };
   return { params, ...createAuthRequestActions(params) };
