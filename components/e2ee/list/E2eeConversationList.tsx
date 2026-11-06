@@ -9,6 +9,8 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { groupConversationThreads } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation } from "@/lib/e2ee/types";
+import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
+import { E2eeEmojiText } from "../conversation/E2eeEmojiText";
 import {
   formatE2eeTimestamp,
   getConversationTitle,
@@ -254,7 +256,10 @@ function E2eeConversationRow({
                 hasUnread ? "tw-text-iron-200" : "tw-text-iron-400"
               }`}
             >
-              {getRowPreview(locale, conversation, selfProfileId)}
+              <E2eeEmojiText
+                text={getRowPreview(locale, conversation, selfProfileId)}
+                size="sm"
+              />
             </span>
             {statusKey ? (
               <span className="tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-iron-300">
@@ -294,41 +299,46 @@ export function E2eeConversationList({
   const threads = groupConversationThreads(conversations, selfProfileId);
   const visible = limit === undefined ? threads : threads.slice(0, limit);
   return (
-    <ul
-      aria-label={label}
-      className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
-    >
-      {visible.map((thread) => {
-        const activeSessions = thread.sessions.filter(
-          (session) => session.status === "active"
-        );
-        const countedSessions =
-          activeSessions.length > 0 ? activeSessions : [thread.current];
-        const unmuted = countedSessions.filter(
-          (session) => !muted.has(session.g)
-        );
-        const incoming = unmuted
-          .filter((session) => session.unread > 0 || session.mentions > 0)
-          .sort((a, b) => b.updatedAt - a.updatedAt)[0];
-        const target = incoming ?? unmuted[0] ?? thread.current;
-        const conversation = {
-          ...target,
-          unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
-          mentions: unmuted.reduce((sum, session) => sum + session.mentions, 0),
-        };
-        return (
-          <E2eeConversationRow
-            key={thread.key}
-            conversation={conversation}
-            selfProfileId={selfProfileId}
-            active={thread.sessions.some(
-              (session) => session.g === activeGroup
-            )}
-            collapsed={collapsed}
-            muted={unmuted.length === 0}
-          />
-        );
-      })}
-    </ul>
+    <E2eeEmojiProvider>
+      <ul
+        aria-label={label}
+        className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
+      >
+        {visible.map((thread) => {
+          const activeSessions = thread.sessions.filter(
+            (session) => session.status === "active"
+          );
+          const countedSessions =
+            activeSessions.length > 0 ? activeSessions : [thread.current];
+          const unmuted = countedSessions.filter(
+            (session) => !muted.has(session.g)
+          );
+          const incoming = unmuted
+            .filter((session) => session.unread > 0 || session.mentions > 0)
+            .sort((a, b) => b.updatedAt - a.updatedAt)[0];
+          const target = incoming ?? unmuted[0] ?? thread.current;
+          const conversation = {
+            ...target,
+            unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
+            mentions: unmuted.reduce(
+              (sum, session) => sum + session.mentions,
+              0
+            ),
+          };
+          return (
+            <E2eeConversationRow
+              key={thread.key}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              active={thread.sessions.some(
+                (session) => session.g === activeGroup
+              )}
+              collapsed={collapsed}
+              muted={unmuted.length === 0}
+            />
+          );
+        })}
+      </ul>
+    </E2eeEmojiProvider>
   );
 }

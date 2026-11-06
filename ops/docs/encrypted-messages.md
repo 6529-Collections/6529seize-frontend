@@ -52,6 +52,9 @@ shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
 does not offer GIF, Poll or Storm actions.
 
+Custom emojis also render inline in the encrypted chat list and sidebar message
+previews, at a compact size that keeps each preview on one line.
+
 The emoji button sits inside the right edge of the message input, with attachments
 on the left and Send on the right. It uses the regular composer’s desktop emoji
 popover and mobile slide panel. Encrypted emoji choices remain private and do not
@@ -580,6 +583,9 @@ The receiving screen identifies the account and lists **Signed Posts** and
 One secure link signs in and enrolls the app; a second connection-only scan is
 unnecessary. Generating or viewing a QR does not register an active device.
 Registration happens when the receiving app accepts and completes setup.
+
+After accepting either connection type, the receiving app opens Home. Secure
+setup completes before navigation; Encrypted DMs do not open automatically.
 
 The Mobile QR fills the available width. Below it, the link field has a copy
 icon and separate refresh icon. **Back** returns to the app and connection

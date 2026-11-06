@@ -1,3 +1,7 @@
+// Auth uses the mocked connection context below rather than a live Wagmi provider.
+jest.mock("@testing-library/react", () =>
+  jest.requireActual("@testing-library/react")
+);
 jest.mock("@/components/auth/useSessionRecovery", () => ({
   useSessionRecovery: jest.fn(),
 }));
@@ -18,6 +22,7 @@ import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
+import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { publicEnv } from "@/config/env";
@@ -539,6 +544,77 @@ describe("Auth component", () => {
   afterEach(() => {
     publicEnv.USE_DEV_AUTH = ORIGINAL_USE_DEV_AUTH;
     jest.restoreAllMocks();
+  });
+
+  it("does not overwrite a newer saved profile while this tab still has stale context", async () => {
+    const oldAddress = "0x1111111111111111111111111111111111111111";
+    const chosenAddress = "0x2222222222222222222222222222222222222222";
+    walletAddress = oldAddress;
+    let storedActiveAddress = oldAddress;
+    const utils = require("@/services/auth/auth.utils");
+    utils.getWalletAddress.mockImplementation(() => storedActiveAddress);
+    utils.getAuthJwt.mockReturnValue("saved-access-token");
+    utils.hasActiveSessionV2Auth.mockReturnValue(true);
+    utils.setActiveWalletAccount.mockImplementation((address: string) => {
+      storedActiveAddress = address;
+      return true;
+    });
+    mockUseIdentity.mockReturnValue({
+      profile: {
+        id: "old-profile",
+        handle: "old-profile",
+        query: "old-profile",
+        primary_wallet: oldAddress,
+        wallets: [],
+      },
+      isLoading: false,
+    });
+    const validate = jest.mocked(validateAuthImmediate);
+    const pendingValidation =
+      createDeferredPromise<
+        Awaited<ReturnType<typeof validateAuthImmediate>>
+      >();
+    validate.mockReturnValueOnce(pendingValidation.promise);
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryWrapperContextValue()}
+      >
+        <Auth>
+          <ShowAuthState />
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("true")
+    );
+    expect(utils.setActiveWalletAccount).not.toHaveBeenCalled();
+    const oldValidation = validate.mock.calls[0]![0].params;
+    validate.mockClear();
+    storedActiveAddress = chosenAddress;
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "6529-wallet-active-address",
+          oldValue: oldAddress,
+          newValue: chosenAddress,
+        })
+      );
+    });
+    expect(utils.setActiveWalletAccount).not.toHaveBeenCalled();
+    expect(storedActiveAddress).toBe(chosenAddress);
+    expect(oldValidation.abortSignal.aborted).toBe(true);
+    expect(oldValidation.shouldPersistRefreshedSession?.()).toBe(false);
+    expect(validate).not.toHaveBeenCalled();
+    await act(async () => {
+      pendingValidation.resolve({
+        isValid: true,
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+        authRefreshOutcome: "not_attempted",
+      });
+      await pendingValidation.promise;
+    });
   });
 
   describe("Basic functionality", () => {

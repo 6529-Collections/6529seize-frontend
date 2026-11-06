@@ -12,6 +12,7 @@ import {
   composer,
   enroll,
   expectMessage,
+  gotoPath,
   messageRow,
   openConversationFromList,
   openMessageActions,
@@ -255,6 +256,26 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
         .filter({ hasText: "Edited secret" })
         .getByRole("img", { name: ":gm:", exact: true })
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    await gotoPath(bob.page, "/messages/encrypted");
+    const previewLists = bob.page.getByRole("list", {
+      name: "Encrypted chats",
+    });
+    await expect(
+      previewLists
+        .last()
+        .getByRole("link")
+        .filter({ hasText: "alice" })
+        .getByRole("img", { name: ":gm:", exact: true })
+    ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    for (const list of await previewLists.all()) {
+      const row = list.getByRole("link").filter({ hasText: "alice" });
+      const image = row.getByRole("img", { name: ":gm:", exact: true });
+      await expect(image).toBeVisible();
+      await expect(row).toContainText("Edited secret");
+      await expect(row).toContainText("😀");
+      await expect(image).toHaveCSS("width", "16px");
+      await expect(image).toHaveCSS("height", "16px");
+    }
     expect(assets).toEqual([]);
     for (const session of sessions)
       expect(

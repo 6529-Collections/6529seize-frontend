@@ -141,7 +141,8 @@ Signed Posts` or `Enable Encrypted DMs`. It is absent when both are on;
   unchanged.
 - `Scan Connection QR` opens the native scanner in connection-only mode. This
   entry accepts only canonical 6529 connection-share deep links and routes a
-  valid result to `/accept-connection-sharing`.
+  valid result to `/accept-connection-sharing`. After accepting either connection
+  type, the receiving app opens Home; secure setup finishes before navigation.
 - The separate `Scan QR Code` action in the app sidebar remains the
   general-purpose scanner for supported 6529 links.
 
@@ -171,7 +172,10 @@ Signed Posts` or `Enable Encrypted DMs`. It is absent when both are on;
    - `Sign out all` (multi-profile web sessions only): clear all connected
      profiles in one visible transition without switching through them.
 7. During known-account switch handoff, active account state stays pinned to
-   the stored active wallet until the new selection settles.
+   the stored active wallet until the new selection settles. Other tabs in the
+   same browser profile follow that selection. A stale tab or an older session
+   validation cannot select the previous account again. Switching the active
+   profile does not switch the wallet connected to the browser.
 8. Review unread indicators in account selectors:
    - web/account avatars can show a dot for unread activity on other connected
      accounts,

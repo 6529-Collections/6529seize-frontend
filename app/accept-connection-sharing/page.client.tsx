@@ -475,7 +475,7 @@ async function acceptConnectionShare({
     }
   }
   seizeAcceptConnection(redeemResponse.address);
-  routerPush(hasDeviceSetup ? "/messages/encrypted" : "/");
+  routerPush("/");
   return true;
 }
 
