@@ -45,7 +45,7 @@ export default function DesktopNotifications({
   const unreadDescriptionId = useId();
   const panelId = useId();
   const triggerRef = useRef<HTMLAnchorElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const focusPanelRef = useRef(false);
   const keyboardFocusRef = useRef(false);
   const [open, setOpen] = useState(false);
@@ -119,18 +119,30 @@ export default function DesktopNotifications({
   useEffect(() => {
     if (!open) return;
     const handleOutsidePointer = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        panelRef.current?.contains(event.target)
+      ) {
+        keyboardFocusRef.current = false;
+      }
       if (!containsTarget(event.target)) close();
     };
-    const handleEscape = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof Node &&
+        panelRef.current?.contains(event.target)
+      ) {
+        keyboardFocusRef.current = true;
+      }
       if (event.key !== "Escape") return;
       event.preventDefault();
       close(true);
     };
     document.addEventListener("pointerdown", handleOutsidePointer);
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("pointerdown", handleOutsidePointer);
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, close, containsTarget]);
 
@@ -204,26 +216,19 @@ export default function DesktopNotifications({
       </Link>
       {open &&
         createPortal(
-          <div
+          <section
             id={panelId}
             ref={panelRef}
             tabIndex={-1}
-            role="region"
             aria-label={title}
             onPointerEnter={cancelClose}
             onPointerLeave={handlePointerLeave}
             onBlur={handleBlur}
-            onKeyDown={() => {
-              keyboardFocusRef.current = true;
-            }}
-            onPointerDown={() => {
-              keyboardFocusRef.current = false;
-            }}
             style={position}
             className="tailwind-scope tw-fixed tw-z-[100] tw-flex tw-max-h-[min(36rem,calc(100dvh-2rem))] tw-w-[26rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-shadow-2xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <Inbox onClose={() => close(true)} />
-          </div>,
+          </section>,
           document.body
         )}
     </>

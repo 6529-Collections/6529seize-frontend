@@ -142,3 +142,16 @@ test("mouse focus on a preview action does not keep it open after leaving", () =
   advance(200);
   expect(panel()).not.toBeInTheDocument();
 });
+
+test("keyboard opening cancels a previously scheduled mouse close", () => {
+  const { bell } = setup();
+  enter(bell);
+  advance(100);
+  leave(bell);
+  advance(199);
+  fireEvent.keyDown(bell, { key: "ArrowDown" });
+  expect(panel()).toHaveFocus();
+  advance(200);
+  expect(panel()).toBeInTheDocument();
+  expect(panel()).toHaveFocus();
+});

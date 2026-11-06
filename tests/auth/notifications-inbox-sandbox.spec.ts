@@ -157,7 +157,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(trigger).not.toHaveAccessibleDescription("Unread");
     await expectNoHorizontalOverflow(page);
     const accessibility = await new AxeBuilder({ page })
-      .include('[role="region"][aria-label="Notifications"]')
+      .include('section[aria-label="Notifications"]')
       .analyze();
     expect(accessibility.violations).toEqual([]);
     const box = await inbox.boundingBox();
@@ -278,6 +278,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     page,
     baseURL,
   }, testInfo) => {
+    // The shared pack runs desktop and mobile; the mobile scenario below
+    // preserves direct navigation without a desktop hover preview.
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"
