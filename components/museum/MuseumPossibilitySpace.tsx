@@ -7,6 +7,7 @@ import { replaceBrowserUrl } from "@/components/museum/possibility-space/shared"
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type {
   MuseumGenerativeStudy,
   MuseumMintedProjectIndex,

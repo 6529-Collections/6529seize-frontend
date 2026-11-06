@@ -13,6 +13,7 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { commonApiFetch } from "@/services/api/common-api";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
 import {

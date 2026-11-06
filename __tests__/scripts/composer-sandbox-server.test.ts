@@ -23,6 +23,12 @@ function loadSandbox(apiOnly?: string) {
     path,
     child_process: { spawn, spawnSync },
     dotenv: { config: jest.fn() },
+    "./competitionRuleDefaults.json": JSON.parse(
+      fs.readFileSync(
+        path.join(path.dirname(serverPath), "competitionRuleDefaults.json"),
+        "utf8"
+      )
+    ),
     "./composerSandboxConstants.json": JSON.parse(
       fs.readFileSync(
         path.join(path.dirname(serverPath), "composerSandboxConstants.json"),
@@ -43,6 +49,7 @@ function loadSandbox(apiOnly?: string) {
     require: requireFixture,
     __dirname: path.dirname(serverPath),
     Buffer,
+    structuredClone: (value: unknown) => JSON.parse(JSON.stringify(value)),
     URL,
     console: { log: jest.fn(), error: jest.fn() },
     process: {
