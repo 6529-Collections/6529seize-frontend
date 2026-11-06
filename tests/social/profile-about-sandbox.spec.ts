@@ -152,6 +152,26 @@ test.describe("Profile editing @auth @medium @local-only", () => {
   }, testInfo) => {
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
+    // Wallet contract reads are outside this isolated profile fixture.
+    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+      const payload = route.request().postDataJSON() as
+        | { id: number; method: string }
+        | { id: number; method: string }[];
+      const respond = (call: { id: number; method: string }) => {
+        expect(call.method).toBe("eth_call");
+        return {
+          jsonrpc: "2.0",
+          id: call.id,
+          error: {
+            code: -32000,
+            message: "Contract reads are unavailable in this profile fixture",
+          },
+        };
+      };
+      await route.fulfill({
+        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+      });
+    });
     await page.goto("/playwright");
     const edit = page.getByRole("button", {
       name: "Edit profile",
