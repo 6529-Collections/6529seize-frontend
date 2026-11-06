@@ -9507,12 +9507,27 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await installCompetitionApi(page);
       await page.goto(`/waves/${WAVE}?tab=chat`);
       const originalUrl = page.url();
-      await openWaveInformation(page);
+      const initialSheet = await openWaveInformation(page);
       const options = page.getByRole("button", {
         name: "Open options",
         exact: true,
       });
       await options.click({ trial: true });
+      // Measure the baseline after the sheet's entrance transition settles.
+      await expect
+        .poll(() =>
+          initialSheet.evaluate(
+            (element) =>
+              element
+                .getAnimations({ subtree: true })
+                .filter(
+                  (animation) =>
+                    animation.playState === "running" &&
+                    animation.effect?.getTiming().iterations !== Infinity
+                ).length
+          )
+        )
+        .toBe(0);
       const initialHeader = await page
         .getByTestId("mobile-dialog-header")
         .boundingBox();

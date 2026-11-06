@@ -97,8 +97,19 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 - Owners use one `Edit` action beside `Preferences` on desktop. It opens a
   dialog with Profile cover, Profile picture, Profile name, Classification,
   and About statement together. Individual fields no longer have edit pencils.
+  The dialog uses compact dark controls, with name and classification alongside
+  each other when space allows. Classification options overlay the content
+  without moving the About statement. Empty upload controls show their upload
+  icon; saved or selected profile pictures show their preview inside the
+  `Upload image` area. Meme search stays above it, with no separate preview row.
+  Gradient and Image choices align with the left edge of the cover controls.
+  The Profile picture section shows Meme search immediately, separated from
+  file upload with `or`. You can type while Memes load; loading and retry states
+  remain available.
 - Smaller layouts keep the circular `Edit profile` button in the banner.
-  Choose a field in its menu to open that editor; use `Back` to return.
+  Choose a field in its icon menu to open that editor; use `Back` to return.
+  These editors use the same compact field styling as desktop. The picture
+  editor shows Meme search and file upload together, separated by `or`.
 - About text stays read-only in the header. An empty About has no placeholder;
   add one through the profile editor. Clear the About editor and save to remove it.
 - Long About text is clamped to six lines on mobile with `See more` /

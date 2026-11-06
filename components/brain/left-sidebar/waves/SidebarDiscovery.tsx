@@ -4,6 +4,7 @@ import { useId, type ReactNode } from "react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
@@ -115,6 +116,7 @@ export function SidebarDiscovery({
 }) {
   const locale = useBrowserLocale();
   const votes = useActiveWaveVotes();
+  const hasHydrated = useHasHydrated();
   const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const { canUseCollections } = useWaveDiscoveryViewer();
   const [activePreference, setActivePreference] = useWaveSidebarPreference(
@@ -126,8 +128,10 @@ export function SidebarDiscovery({
       "wave-discovery-recommendations-collapsed",
       "local"
     );
-  const activeCollapsed = activePreference === "true";
-  const recommendationsCollapsed = recommendationsPreference === "true";
+  // Keep server HTML closed until browser preferences are available.
+  const activeCollapsed = !hasHydrated || activePreference === "true";
+  const recommendationsCollapsed =
+    !hasHydrated || recommendationsPreference === "true";
   return (
     <section
       className="tailwind-scope"
