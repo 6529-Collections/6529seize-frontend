@@ -120,6 +120,7 @@ describe("E2E pack manifest", () => {
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
         "tests/social/chat-render-budget-sandbox.spec.ts",
+        "tests/social/wave-live-unread-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {

@@ -89,6 +89,7 @@ function topNames(
  * desktop / 2,700 phone; another wave 269-313 / 8; wave list 114-130 / 126.
  * Requests: 5.4-7.2, 0.5-2.4, 0.1). Each Phase 0 PR that lowers a number
  * lowers its budget here. Phase 0 target: < 5 renders and 0 requests.
+ * 0.2 (unread slice): wave list 21-22 per message, budget 60.
  */
 // Ratchets: lanes B and C lower openWave.renders as their fixes land (0.2
 // unread slice, 0.3 render isolation, 0.4/0.5 chat store and shared drop
@@ -97,7 +98,7 @@ function topNames(
 const BUDGETS = {
   openWave: { renders: 7000, requests: 14 },
   otherWave: { renders: 650, requests: 5 },
-  waveList: { renders: 260, requests: 1 },
+  waveList: { renders: 60, requests: 1 },
 } as const;
 
 type Scenario = keyof typeof BUDGETS | "burst";
