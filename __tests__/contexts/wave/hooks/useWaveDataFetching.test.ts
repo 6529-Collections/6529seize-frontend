@@ -547,6 +547,7 @@ describe("useWaveDataFetching", () => {
     expect(res).toEqual({
       drops: [{ id: "d", serial_no: 11 }],
       highestSerialNo: 11,
+      reachedPageLimit: false,
     });
   });
 
@@ -562,7 +563,11 @@ describe("useWaveDataFetching", () => {
       new AbortController().signal
     );
     expect(updateData).not.toHaveBeenCalled();
-    expect(res).toEqual({ drops: null, highestSerialNo: null });
+    expect(res).toEqual({
+      drops: null,
+      highestSerialNo: null,
+      reachedPageLimit: false,
+    });
   });
 
   it("caps newest sync when every page is full", async () => {
@@ -593,6 +598,8 @@ describe("useWaveDataFetching", () => {
 
     expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(20);
     expect(res.highestSerialNo).toBe(10 + 20 * 50);
+    // Newer drops may remain past the cap.
+    expect(res.reachedPageLimit).toBe(true);
   });
 
   it("uses a tracked controller for existing wave newest sync", async () => {

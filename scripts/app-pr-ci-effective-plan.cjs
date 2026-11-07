@@ -148,6 +148,11 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
         file
       ) ||
+      // Tests of chat sync, read markers and the realtime updater; this pack
+      // runs the live-update cases in wave-loading-sandbox.spec.ts.
+      /^(?:__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater|__tests__\/hooks\/useMarkWaveNotificationsRead)/u.test(
+        file
+      ) ||
       // The chat hot path: this pack's chat render budget
       // (chat-render-budget-sandbox.spec.ts) measures renders and requests
       // per received message for each of these.

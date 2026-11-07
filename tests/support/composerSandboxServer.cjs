@@ -3303,6 +3303,12 @@ function buildPublicRuntime() {
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
     ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
+    // Sandbox packs run the staging chat configuration (gap-only sync and
+    // batched reads); set the variable to "false" to run the production one.
+    NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC:
+      process.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC === "false"
+        ? "false"
+        : "true",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

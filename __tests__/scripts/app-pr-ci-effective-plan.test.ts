@@ -294,6 +294,21 @@ describe("effective App PR CI plan", () => {
   );
 
   it.each([
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.flags.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "hooks/useMarkWaveNotificationsRead.debounce.ts",
+    "__tests__/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.test.ts",
+    "__tests__/useWaveRealtimeUpdater.test.ts",
+  ])("selects the live chat browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
     "contexts/wave/hooks/useNewDropCounter.ts",
     "contexts/wave/hooks/useEnhancedWavesListCore.ts",
     "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
