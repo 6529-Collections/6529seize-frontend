@@ -73,6 +73,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  syncWalletAuthCookie: jest.fn(),
   isAuthAddressAuthorized: jest.fn(
     ({
       address,
@@ -2264,5 +2265,23 @@ describe("Fail-Fast Security Tests", () => {
 
     // Verify disconnect was successful before auth cleanup failure
     expect(mockDisconnect).toHaveBeenCalled();
+  });
+});
+
+describe("SeizeConnectProvider session cookie", () => {
+  it("syncs the session cookie from the stored session once on mount", async () => {
+    jest.clearAllMocks();
+    const { rerender } = renderWithProvider();
+
+    await waitFor(() => {
+      expect(authUtils.syncWalletAuthCookie).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(
+      <SeizeConnectProvider>
+        <TestComponent />
+      </SeizeConnectProvider>
+    );
+    expect(authUtils.syncWalletAuthCookie).toHaveBeenCalledTimes(1);
   });
 });

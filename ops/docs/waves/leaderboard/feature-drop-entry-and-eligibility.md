@@ -58,7 +58,7 @@ Entry behavior differs by wave type:
    - restriction controls that reveal why submission is unavailable
    - empty-state restriction message
 5. After a standard or Quorum submission is saved, a confirmation checks its
-   competition entry directly. A confirmed entry offers **View my entry**.
+   decision entry directly. A confirmed entry offers **View my entry**.
 6. On ordinary wave leaderboards, **My submissions** opens your active and
    winning entries in that wave without changing the leaderboard sort or filters.
    It appears as a text button beside the entry action in the toolbar. On
@@ -96,18 +96,18 @@ Entry behavior differs by wave type:
   `How to Submit` helper keeps its desktop label.
 - In ordinary Rank and Approve Chat headers, that details card also shows the
   submission access group and a `View submission rules` link to Settings.
-  The rules link preserves a competition selected before entering Chat, including
+  The rules link preserves a decision selected before entering Chat, including
   when copied or opened in a new tab.
-  Group and signing details use that competition or the current default.
+  Group and signing details use that decision or the current default.
   Loading and unavailable states keep the rules link usable.
   Hidden and direct-message groups show only `Private group`. These details
   appear on demand; restricted submissions do not add an access panel to chat.
-- When the submission period or competition has ended, the lock remains and
+- When the submission period or decision has ended, the lock remains and
   its card says `Submission period has ended`, with `Closed {date}` when the
   closing date is known. The submission group appears on one compact row above
   `View submission rules`. This explains closure without claiming that the
   viewer fails the group requirements; a public group does not reopen submissions.
-  An early competition end uses the earlier closing date. If no closing date is
+  An early decision end uses the earlier closing date. If no closing date is
   available, the card omits the date. An already-open card updates when the
   submission deadline passes and catches up when the page becomes visible again.
 - Available Memes desktop submit labels are responsive: compact desktop widths
@@ -148,11 +148,11 @@ Entry behavior differs by wave type:
 - If curation `Drop Artwork` modal closes accidentally, reopen from header
   `Drop Art` or empty-state `Drop`.
 - If a create panel/modal opens but submit fails, retry from the same surface.
-- If the artwork was saved but its competition entry cannot be confirmed, use
+- If the artwork was saved but its decision entry cannot be confirmed, use
   **Check again** or **View artwork** before submitting another copy. **Check
   again** reads the saved entry; it does not submit another drop.
 - **My submissions** is available on your own signed-in profile even when you
-  cannot currently submit. Native competitions show it when you have entries,
+  cannot currently submit. Native decisions show it when you have entries,
   hide it after an empty lookup, and keep it available after a failed lookup
   for retry. Proxy mode hides this personal control.
 - If wave timing or eligibility changed while viewing, refresh leaderboard to
@@ -161,7 +161,7 @@ Entry behavior differs by wave type:
 ## Limitations / Notes
 
 - This page owns entry gating, start controls and ordinary-wave submission recovery.
-- The Memes keeps its specialized submission flow. Native competitions have
+- The Memes keeps its specialized submission flow. Native decisions have
   their own [entry confirmation and My submissions](../competitions/feature-competitions.md).
 - Full submit format and validation rules live in curation and memes submission
   pages.

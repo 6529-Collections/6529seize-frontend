@@ -151,7 +151,7 @@ is blocked.
   tab availability changes by wave type and voting state. Chat-type waves hide
   the desktop tab row (`Chat`, `Leaderboard`, `Winners`, and related tabs).
 - `Winners` is missing:
-  it appears only after the first decision has passed.
+  it appears only after the first result has passed.
 - `Leaderboard` is missing:
   it can disappear after voting ends.
 - `Sales` is missing:

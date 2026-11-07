@@ -210,7 +210,7 @@ it("keeps submission terms separate from the checkbox accessible name", () => {
   mockTerms = "The complete competition participation terms.";
   render(<CompetitionEntryForm onClose={jest.fn()} />);
   const checkbox = screen.getByRole("checkbox", {
-    name: "I agree to this competition’s terms.",
+    name: "I agree to this decision’s terms.",
   });
   expect(checkbox).toHaveAccessibleDescription(mockTerms);
   expect(screen.getByText(mockTerms).closest("label")).toBeNull();

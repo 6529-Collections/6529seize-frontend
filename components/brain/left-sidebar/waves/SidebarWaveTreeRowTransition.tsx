@@ -86,6 +86,8 @@ const shallowEqual = (
 // The list rebuilds its row objects, positions and row elements whenever any
 // wave's live unread values change. A row whose fields, position and row
 // element props are all equal renders the same output, so it is skipped.
+// Rows pass one element as children; anything else (arrays, fragments of
+// several children) compares unequal, so the row simply re-renders.
 const sameChildren = (left: ReactNode, right: ReactNode): boolean => {
   if (Object.is(left, right)) return true;
   if (!isValidElement(left) || !isValidElement(right)) return false;

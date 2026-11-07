@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { BucketObject } from "@/lib/validator-page/releasesBucket";
 import {
+  RC10_COMMIT_FULL,
+  RC10_FEED,
   RC9_COMMIT_FULL,
   RC9_DEADLINE_REASON,
   RC9_FEED,
@@ -109,9 +111,6 @@ describe("rc.9's feed: rc.9 urgent, rc.5 to rc.8 unsafe", () => {
     expect(notice).toBeGreaterThan(-1);
     expect(download).toBeGreaterThan(notice);
     expect(linkedVersions(html)).toEqual(["0.1.0-rc.9"]);
-    // rc.9's notes for testers on rc.8.
-    expect(html).toContain('id="upgrading"');
-    expect(page).toContain("Upgrading from rc.8");
   });
 
   it("names the full version in the heading and under the download button", async () => {
@@ -124,20 +123,10 @@ describe("rc.9's feed: rc.9 urgent, rc.5 to rc.8 unsafe", () => {
     expect(html).toContain(`href="/validator/download/0.1.0-rc.9/${DMG}"`);
   });
 
-  it("the guide's version line names the feed's rc.9 commit", async () => {
-    const html = renderToStaticMarkup(await ValidatorGuideRoute());
-    expect(html).toContain(
-      `validator 0.1.0-rc.9 (${RC9_COMMIT_FULL.slice(0, 7)}, TDH v1.4)`
-    );
-  });
-
-  it("the guide opens with Sunday's switch, then the upgrade from rc.8", async () => {
-    const html = renderToStaticMarkup(await ValidatorGuideRoute());
-    const sunday = html.indexOf('id="update-before-sunday"');
-    const upgrade = html.indexOf('id="upgrading"');
-    expect(sunday).toBeGreaterThan(-1);
-    expect(upgrade).toBeGreaterThan(sunday);
-    expect(text(html)).toContain("Update before Sunday 8 November, 00:00 UTC");
+  it("shows no note for rc.10 while rc.9 is offered", async () => {
+    const html = renderToStaticMarkup(await ValidatorRoute());
+    expect(html).not.toContain('id="upgrading"');
+    expect(html).not.toContain('id="sundays-switch"');
   });
 
   it("the releases page marks rc.8 and rc.7 unsafe, with the reason, and offers only rc.9", async () => {
@@ -212,5 +201,49 @@ describe("a feed with no urgent release", () => {
     expect(download).not.toContain("urgent update");
     const releases = renderToStaticMarkup(await ValidatorReleasesRoute());
     expect(releases).not.toContain("Unsafe");
+  });
+});
+
+describe("rc.10's feed: rc.10 of normal severity above an urgent rc.9", () => {
+  beforeEach(() => serveFeed(RC10_FEED));
+
+  it("the download page offers rc.10 with no urgent notice, then Sunday's switch and the upgrade from rc.9", async () => {
+    const html = renderToStaticMarkup(await ValidatorRoute());
+    expect(linkedVersions(html)).toEqual(["0.1.0-rc.10"]);
+    expect(text(html)).toContain("Test release 0.1.0-rc.10 ");
+    expect(html).not.toContain('id="urgent"');
+    const sunday = html.indexOf('id="sundays-switch"');
+    const upgrade = html.indexOf('id="upgrading"');
+    expect(sunday).toBeGreaterThan(-1);
+    expect(upgrade).toBeGreaterThan(sunday);
+    expect(text(html)).toContain(
+      "If you run rc.8 or older, update before Sunday 8 November, 00:00 UTC, to rc.9 or rc.10."
+    );
+    expect(text(html)).toContain("Upgrading from rc.9");
+  });
+
+  it("the guide opens with Sunday's switch, then the upgrade from rc.9", async () => {
+    const html = renderToStaticMarkup(await ValidatorGuideRoute());
+    const sunday = html.indexOf('id="sundays-switch"');
+    const upgrade = html.indexOf('id="upgrading"');
+    expect(sunday).toBeGreaterThan(-1);
+    expect(upgrade).toBeGreaterThan(sunday);
+  });
+
+  it("the guide's version line names the feed's rc.10 commit", async () => {
+    const html = renderToStaticMarkup(await ValidatorGuideRoute());
+    expect(html).toContain(
+      `validator 0.1.0-rc.10 (${RC10_COMMIT_FULL.slice(0, 7)}, TDH v1.4)`
+    );
+  });
+
+  it("the releases page marks rc.10 Latest and offers only rc.10", async () => {
+    const html = renderToStaticMarkup(await ValidatorReleasesRoute());
+    const entries = html.split("<article").slice(1).map(text);
+    expect(entries[0]).toContain("0.1.0-rc.10");
+    expect(entries[0]).toContain("Latest");
+    expect(entries[0]).toContain(RC10_COMMIT_FULL);
+    expect(html).not.toContain("Unsafe");
+    expect(linkedVersions(html)).toEqual(["0.1.0-rc.10"]);
   });
 });

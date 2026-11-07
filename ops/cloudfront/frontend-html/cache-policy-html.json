@@ -23,8 +23,13 @@
     "CookiesConfig": {
       "CookieBehavior": "whitelist",
       "Cookies": {
-        "Quantity": 3,
-        "Items": ["x-6529-auth", "wallet-auth", "validator_access"]
+        "Quantity": 4,
+        "Items": [
+          "x-6529-auth",
+          "__Host-wallet-auth",
+          "wallet-auth",
+          "validator_access"
+        ]
       }
     },
     "QueryStringsConfig": {

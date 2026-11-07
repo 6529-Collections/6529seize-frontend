@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { addFileToIpfs } from "@/components/ipfs/IPFSContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import {
   QueryKey,
@@ -19,6 +18,7 @@ import {
   commonApiPost,
   commonApiPostForm,
 } from "@/services/api/common-api";
+import { uploadProfilePicture } from "@/services/api/profile-picture-upload-api";
 import { getUploadErrorMessage } from "@/services/api/upload-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
@@ -101,8 +101,7 @@ export default function UserPageHeaderEditPfp({
         if (!profile.classification) {
           return;
         }
-        const cid = await addFileToIpfs(pfp as File);
-        const ipfs = `ipfs://${cid}`;
+        const ipfs = await uploadProfilePicture(pfp as File);
         const ipfsBody: ApiCreateOrUpdateProfileRequest = {
           handle: profile.handle,
           classification: profile.classification,

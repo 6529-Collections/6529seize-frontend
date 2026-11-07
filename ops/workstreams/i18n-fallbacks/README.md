@@ -10,6 +10,7 @@ fallback dictionaries.
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | [About contents/navigation](about-contents-navigation.md)           | The About route, contents dropdown, Tech reports, and wallet-auth page still resolve with `DEFAULT_LOCALE`                    |
 | [About The Memes](about-memes.md)                                   | `AboutMemes` still resolves `about.memes.*` through `DEFAULT_LOCALE`                                                          |
+| [About Cookie Policy](about-cookie-policy.md) | Table labels and the RUM rows use `about.cookiePolicy.*` messages with `en-US` fallback; the rest of the page is hard-coded English |
 | [About minting](about-minting.md)                                   | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |
 | [Artist artwork alerts](artist-artwork-alerts.md) | Profile menu states, feedback, notification rows and filter copy fall back to `en-US` outside the source locale |
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
@@ -31,6 +32,7 @@ fallback dictionaries.
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
 | [Direct-message admission](direct-message-admission.md) | The Preferences group option, its controls, and new-DM refusal notices exist only in `en-US` and fall back to it in other locales |
 | [Legacy-browser update notice](legacy-browser-notice.md) | The pre-hydration update notice uses `DEFAULT_LOCALE`, matching the server-rendered document language |
+| [Decisions rename: English-only copy](decisions-rename-english-copy.md) | The `/tools/api` glossary (`AboutApi`), wave-rules result rows and Memes voting FAQ phases still render hard-coded English |
 
 Remove a debt record only in the same change that completes its remediation and
 verifies the supported locale and accessible-name behavior described by the

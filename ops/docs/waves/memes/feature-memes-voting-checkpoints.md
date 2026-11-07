@@ -36,7 +36,7 @@ add the viewer's own time zone.
 - The note follows daylight saving in your zone. It is worked out for the next
   checkpoint of each weekday, so around a clock change it can list a different
   time for each day.
-- The wave FAQ takes the time of day from the wave's own decision schedule. If
+- The wave FAQ takes the time of day from the wave's own result schedule. If
   that is not available yet, it shows 16:00 UTC.
 - In the `Checkpoint Schedule` list on `/about/apply`, the weekday on the left
   is the UTC weekday. The note on each row gives the matching local weekday and
@@ -60,5 +60,5 @@ add the viewer's own time zone.
 ## Related Pages
 
 - [Memes Index](README.md)
-- [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](../leaderboard/feature-decision-timeline.md)
 - [Memes Minting Guide](../../media/memes/feature-minting-guide.md)

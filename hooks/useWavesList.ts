@@ -17,7 +17,7 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveById } from "./useWaveById";
+import { useAnnouncementsWave } from "./useAnnouncementsWave";
 import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
@@ -312,9 +312,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: rawAnnouncementQueryLoading,
     error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
-  } = useWaveById(announcementsWaveId, {
-    enabled: shouldFetchAnnouncementWave,
-  });
+  } = useAnnouncementsWave(announcementsWaveId, shouldFetchAnnouncementWave);
   const announcementQueryLoading =
     shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
   const announcementQueryError = shouldFetchAnnouncementWave
@@ -618,8 +616,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   );
 
   // Refresh all sources (main, pinned, announcements, subwaves): forced, or
-  // stale-only for reconnect and tab-resume resyncs.
-  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
+  // stale-only on resync; or just the activity list for unknown-wave drops.
+  const refresh = useWavesListRefetch({
     shouldLoadMainWaves,
     isJoinedMode,
     highlyRated: {
@@ -644,8 +642,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     announcementWaveId: shouldFetchAnnouncementWave
       ? announcementsWaveId
       : null,
-    refetchAnnouncementWave: announcementRefetch,
   });
+  const { refetchAllWaves, refreshActivityList, refreshStaleWaves } = refresh;
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -723,6 +721,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   );
   const mainWavesRefetchStable = useStableCallback(mainWavesRefetch);
   const refetchAllWavesStable = useStableCallback(refetchAllWaves);
+  const refreshActivityListStable = useStableCallback(refreshActivityList);
   const refreshStaleWavesStable = useStableCallback(refreshStaleWaves);
   const loadSubwavesForParentStable = useStableCallback(loadSubwavesForParent);
   const prefetchSubwavesForParentStable = useStableCallback(
@@ -774,8 +773,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWaves: stableMainWaves,
       missingPinnedIds,
       mainWavesRefetch: mainWavesRefetchStable,
-      // Refetch all waves including main and pinned
+      // Refetch all waves including main and pinned, or just the activity list
       refetchAllWaves: refetchAllWavesStable,
+      refreshActivityList: refreshActivityListStable,
       refreshStaleWaves: refreshStaleWavesStable,
       loadSubwavesForParent: loadSubwavesForParentStable,
       prefetchSubwavesForParent: prefetchSubwavesForParentStable,
@@ -809,6 +809,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetchStable,
       refetchAllWavesStable,
+      refreshActivityListStable,
       refreshStaleWavesStable,
       loadSubwavesForParentStable,
       prefetchSubwavesForParentStable,

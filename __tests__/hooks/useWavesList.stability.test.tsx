@@ -158,6 +158,7 @@ describe("useWavesList identity", () => {
     expect(result.current.addPinnedWave).toBe(first.addPinnedWave);
     expect(result.current.removePinnedWave).toBe(first.removePinnedWave);
     expect(result.current.refetchAllWaves).toBe(first.refetchAllWaves);
+    expect(result.current.refreshActivityList).toBe(first.refreshActivityList);
     expect(result.current.refreshStaleWaves).toBe(first.refreshStaleWaves);
     expect(result.current.mainWavesRefetch).toBe(first.mainWavesRefetch);
     expect(result.current.loadSubwavesForParent).toBe(

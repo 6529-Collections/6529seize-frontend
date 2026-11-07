@@ -130,3 +130,25 @@ export const RC9_FEED = {
     feedEntry("0.1.0-rc.7", "test", "2026-11-05"),
   ],
 };
+
+/** rc.10's commit, as the cut names it; fill-rc10.sh changes it on a recut. */
+export const RC10_COMMIT_FULL = "f0a3440a108e810b6e4323672da61e5116993885";
+
+/**
+ * rc.10's feed as 6529 means to sign it: rc.10 of normal severity above
+ * rc.9, which stays urgent, the support line moved to rc.9 from Sunday, and
+ * nothing unsafe. Hashes and IDs made up.
+ */
+export const RC10_FEED = {
+  ...RC9_FEED,
+  sequence: 10,
+  unsafe_versions: [],
+  releases: [
+    {
+      ...feedEntry("0.1.0-rc.10", "test", "2026-11-07"),
+      commit: RC10_COMMIT_FULL,
+      severity: "normal",
+    },
+    ...RC9_FEED.releases,
+  ],
+};

@@ -21,7 +21,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn(), prefetch: jest.fn() }),
-  usePathname: () => "/waves/wave/competitions/alpha",
+  usePathname: () => "/waves/wave/decisions/alpha",
   useSearchParams: () => new URLSearchParams("tab=leaderboard"),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({

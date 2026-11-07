@@ -21,9 +21,11 @@ import {
   WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS,
   WebSocketStatus,
 } from "@/services/websocket/WebSocketTypes";
+import { QueryClientContext } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -35,8 +37,13 @@ import {
   type DmUnreadContextValue,
 } from "./dm-unread-context";
 import { DmUnreadStore, type DmUnreadReadOperation } from "./dm-unread-store";
+import {
+  DmDropRecoveryPolicy,
+  isIncomingDropUpdate,
+  isIncomingDropUpdateRef,
+  isRecord,
+} from "./dm-unread-drop-recovery";
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
-const DROP_UPDATE_RECOVERY_GRACE_MS = 1_500;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
 const SNAPSHOT_RETRY_BASE_DELAYS_MS = [
   5_000,
@@ -63,22 +70,6 @@ interface PendingDropRecovery {
   readonly minimumSnapshotRequestId: number;
   readonly serialNo: number;
 }
-
-interface IncomingDropUpdate {
-  readonly author: { readonly id: string };
-  readonly serial_no: number;
-  readonly wave: { readonly id: string };
-}
-
-interface IncomingDropUpdateRef {
-  readonly author_id: string;
-  readonly serial_no: number;
-  readonly update_type: string;
-  readonly wave_id: string;
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isDmUnreadConversationState = (
   value: unknown
@@ -109,32 +100,6 @@ const isDmUnreadSnapshot = (value: unknown): value is ApiDmUnreadSnapshot => {
     value["conversations"].every(isDmUnreadConversationState)
   );
 };
-
-const isIncomingDropUpdate = (value: unknown): value is IncomingDropUpdate => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  const author = value["author"];
-  const wave = value["wave"];
-  return (
-    typeof value["serial_no"] === "number" &&
-    Number.isFinite(value["serial_no"]) &&
-    isRecord(author) &&
-    typeof author["id"] === "string" &&
-    isRecord(wave) &&
-    typeof wave["id"] === "string"
-  );
-};
-
-const isIncomingDropUpdateRef = (
-  value: unknown
-): value is IncomingDropUpdateRef =>
-  isRecord(value) &&
-  typeof value["author_id"] === "string" &&
-  typeof value["serial_no"] === "number" &&
-  Number.isFinite(value["serial_no"]) &&
-  value["update_type"] === WsMessageType.DROP_UPDATE &&
-  typeof value["wave_id"] === "string";
 
 interface SnapshotSynchronizationRequest {
   readonly expectedProfileId: string;
@@ -227,6 +192,10 @@ export function DmUnreadStateProvider({
   const dropRecoveryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const dropRecoveryDueAtRef = useRef(0);
+  const [dropRecoveryPolicy] = useState(() => new DmDropRecoveryPolicy());
+  // Optional so the provider also works outside a QueryClientProvider.
+  const queryClient = useContext(QueryClientContext);
   const authJwt = getAuthJwt();
   const authFingerprint = getAuthTokenFingerprint(authJwt);
 
@@ -567,13 +536,27 @@ export function DmUnreadStateProvider({
   );
 
   const scheduleDropRecovery = useCallback(
-    (authorId: string, serialNo: number, waveId: string) => {
+    (
+      authorId: string,
+      serialNo: number,
+      waveId: string,
+      isDirectMessage: unknown
+    ) => {
       const activation = activeActivationRef.current;
       const profileId = activation.profileId;
       if (!profileId || authorId === profileId) {
         return;
       }
       if (!store.needsIncomingDropRecovery(profileId, waveId, serialNo)) {
+        return;
+      }
+      const delayMs = dropRecoveryPolicy.getDelay({
+        waveId,
+        isDirectMessage,
+        hasConversation: store.hasConversation(profileId, waveId),
+        queryClient,
+      });
+      if (delayMs === null) {
         return;
       }
       const previousPending = pendingDropRecoveryByWaveRef.current.get(waveId);
@@ -587,9 +570,13 @@ export function DmUnreadStateProvider({
           Math.floor(serialNo)
         ),
       });
+      // One timer per tab; a direct message can pull a later check earlier.
+      const dueAt = Date.now() + delayMs;
       if (dropRecoveryTimerRef.current !== null) {
-        return;
+        if (dropRecoveryDueAtRef.current <= dueAt) return;
+        clearTimeout(dropRecoveryTimerRef.current);
       }
+      dropRecoveryDueAtRef.current = dueAt;
       const expectedActivationId = activation.id;
       dropRecoveryTimerRef.current = setTimeout(() => {
         dropRecoveryTimerRef.current = null;
@@ -620,15 +607,20 @@ export function DmUnreadStateProvider({
           );
           void requestDropRecoverySnapshot(minimumRequestId);
         }
-      }, DROP_UPDATE_RECOVERY_GRACE_MS);
+      }, delayMs);
     },
-    [requestDropRecoverySnapshot, store]
+    [dropRecoveryPolicy, queryClient, requestDropRecoverySnapshot, store]
   );
 
   const handleDropUpdate = useCallback(
     (value: unknown) => {
       if (isIncomingDropUpdate(value)) {
-        scheduleDropRecovery(value.author.id, value.serial_no, value.wave.id);
+        scheduleDropRecovery(
+          value.author.id,
+          value.serial_no,
+          value.wave.id,
+          value.wave.is_direct_message
+        );
       }
     },
     [scheduleDropRecovery]
@@ -637,7 +629,12 @@ export function DmUnreadStateProvider({
   const handleDropUpdateRef = useCallback(
     (value: unknown) => {
       if (isIncomingDropUpdateRef(value)) {
-        scheduleDropRecovery(value.author_id, value.serial_no, value.wave_id);
+        scheduleDropRecovery(
+          value.author_id,
+          value.serial_no,
+          value.wave_id,
+          undefined
+        );
       }
     },
     [scheduleDropRecovery]

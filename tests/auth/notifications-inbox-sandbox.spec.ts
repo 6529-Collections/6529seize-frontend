@@ -162,7 +162,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       .toBeGreaterThan(0);
     await expect(artwork).toHaveAttribute(
       "href",
-      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
+      "/waves/00000000-0000-4000-8000-000000000533/decisions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
     );
     expect(page.url()).toBe(route);
     await expect
