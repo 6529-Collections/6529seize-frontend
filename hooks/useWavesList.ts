@@ -3,7 +3,8 @@
 /* eslint max-lines-per-function: "off" */
 
 import { useMemo, useCallback, useState } from "react";
-import { useStableCallback, useStableList } from "./useStableIdentity";
+import { useStableList } from "./useStableIdentity";
+import { useStableWavesListActions } from "./useStableWavesListActions";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -697,11 +698,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     ? hasPinnedWavesErrorServer
     : false;
 
-  // Memoize the fetchNextPage function to ensure it doesn't change on every render
-  const fetchNextPageStable = useCallback(() => {
-    fetchNextMainWavesPage();
-  }, [fetchNextMainWavesPage]);
-
   // Query results and the hooks built on them hand back new functions and
   // arrays on every render, even when nothing changed. Consumers (the stream
   // context and everything reading it) only see a new value when the data or
@@ -710,23 +706,23 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   const stableMainWaves = useStableList(mainWaves);
   const stablePinnedWaves = useStableList(allPinnedWaves);
   const stableLoadingSubwaveParentIds = useStableList(loadingSubwaveParentIds);
-  const fetchNextPage = useStableCallback(fetchNextPageStable);
-  const retryLoading = useStableCallback(retryFollowedActivityWaves);
-  const retryRecommendationsStable = useStableCallback(retryRecommendations);
-  const addPinnedWave = useStableCallback((waveId: string) =>
-    shouldLoadMainWaves ? pinWave(waveId) : undefined
-  );
-  const removePinnedWave = useStableCallback((waveId: string) =>
-    shouldLoadMainWaves ? unpinWave(waveId) : undefined
-  );
-  const mainWavesRefetchStable = useStableCallback(mainWavesRefetch);
-  const refetchAllWavesStable = useStableCallback(refetchAllWaves);
-  const refreshActivityListStable = useStableCallback(refreshActivityList);
-  const refreshStaleWavesStable = useStableCallback(refreshStaleWaves);
-  const loadSubwavesForParentStable = useStableCallback(loadSubwavesForParent);
-  const prefetchSubwavesForParentStable = useStableCallback(
-    prefetchSubwavesForParent
-  );
+  const actions = useStableWavesListActions({
+    fetchNextPage: () => {
+      fetchNextMainWavesPage();
+    },
+    retryLoading: retryFollowedActivityWaves,
+    retryRecommendations,
+    addPinnedWave: (waveId) =>
+      shouldLoadMainWaves ? pinWave(waveId) : undefined,
+    removePinnedWave: (waveId) =>
+      shouldLoadMainWaves ? unpinWave(waveId) : undefined,
+    mainWavesRefetch,
+    refetchAllWaves,
+    refreshActivityList,
+    refreshStaleWaves,
+    loadSubwavesForParent,
+    prefetchSubwavesForParent,
+  });
   const isAnnouncementsLoading =
     (!settingsLoaded && !settingsError) ||
     Boolean(
@@ -744,15 +740,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       isFetching: isMainWavesFetching,
       isFetchingNextPage: isMainWavesFetchingNextPage,
       hasNextPage: hasMainWavesNextPage,
-      fetchNextPage,
       status: mainWavesStatus,
       hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
-      retryLoading,
 
       recommendationsStatus: shouldLoadMainWaves
         ? recommendationsStatus
         : ("pending" as const),
-      retryRecommendations: retryRecommendationsStable,
       isAnnouncementsLoading,
 
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
@@ -765,35 +758,24 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       announcementQueryError,
       announcementRefetch,
 
-      // Pinned waves management functions
-      addPinnedWave,
-      removePinnedWave,
-
       // Additional data that might be useful
       mainWaves: stableMainWaves,
       missingPinnedIds,
-      mainWavesRefetch: mainWavesRefetchStable,
-      // Refetch all waves including main and pinned, or just the activity list
-      refetchAllWaves: refetchAllWavesStable,
-      refreshActivityList: refreshActivityListStable,
-      refreshStaleWaves: refreshStaleWavesStable,
-      loadSubwavesForParent: loadSubwavesForParentStable,
-      prefetchSubwavesForParent: prefetchSubwavesForParentStable,
       loadingSubwaveParentIds: stableLoadingSubwaveParentIds,
+      // Pagination, retries, pinning, and refetching all waves (main and
+      // pinned) or just the activity list
+      ...actions,
     }),
     [
       stableWaves,
       isMainWavesFetching,
       isMainWavesFetchingNextPage,
       hasMainWavesNextPage,
-      fetchNextPage,
       mainWavesStatus,
       isJoinedMode,
       hasFollowedActivityWavesError,
-      retryLoading,
       shouldLoadMainWaves,
       recommendationsStatus,
-      retryRecommendationsStable,
       isAnnouncementsLoading,
       stablePinnedWaves,
       isPinnedWavesLoading,
@@ -803,17 +785,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       announcementQueryLoading,
       announcementQueryError,
       announcementRefetch,
-      addPinnedWave,
-      removePinnedWave,
       stableMainWaves,
       missingPinnedIds,
-      mainWavesRefetchStable,
-      refetchAllWavesStable,
-      refreshActivityListStable,
-      refreshStaleWavesStable,
-      loadSubwavesForParentStable,
-      prefetchSubwavesForParentStable,
       stableLoadingSubwaveParentIds,
+      actions,
     ]
   );
 };
