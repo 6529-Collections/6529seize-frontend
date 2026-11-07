@@ -5,6 +5,7 @@ import { getQueryErrorStatus } from "@/components/react-query-wrapper/utils/quer
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot";
 import { applyDelayJitter, scheduleStaggered } from "@/helpers/jitter.helpers";
+import { shouldResyncOnResume } from "@/helpers/resumeSync.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -178,6 +179,8 @@ export function DmUnreadStateProvider({
   );
   const nextSnapshotRequestIdRef = useRef(1);
   const lastRecoverySnapshotAtRef = useRef(0);
+  // When any snapshot last started, for the focus and visibility rule.
+  const lastSnapshotStartedAtRef = useRef(0);
   const terminalSnapshotFailureActivationIdsRef = useRef(new Set<number>());
   const nextSnapshotAllowedAtByActivationRef = useRef(
     new Map<number, number>()
@@ -285,6 +288,7 @@ export function DmUnreadStateProvider({
         }
       }
       const requestId = nextSnapshotRequestIdRef.current++;
+      lastSnapshotStartedAtRef.current = Date.now();
       const startedAtSequence = store.beginSnapshot();
       latestSnapshotRequestByProfileRef.current.set(
         expectedProfileId,
@@ -696,10 +700,25 @@ export function DmUnreadStateProvider({
     if (isCapacitor) {
       return;
     }
-    const synchronizeIfVisible = () => {
-      if (document.visibilityState === "visible") {
-        void requestActiveSnapshot();
+    // Focus and visibility fire often on desktop; a snapshot runs only after
+    // the tab was hidden 30 s or more, or 60 s after the last snapshot.
+    // Coming back online follows a real connectivity gap and always syncs.
+    let hiddenSince: number | null =
+      document.visibilityState === "visible" ? null : Date.now();
+    const synchronizeIfVisible = (event: Event) => {
+      if (document.visibilityState !== "visible") {
+        if (event.type === "visibilitychange") hiddenSince ??= Date.now();
+        return;
       }
+      const shouldSync =
+        event.type === "online" ||
+        shouldResyncOnResume({
+          now: Date.now(),
+          hiddenSince,
+          lastSyncAt: lastSnapshotStartedAtRef.current,
+        });
+      hiddenSince = null;
+      if (shouldSync) void requestActiveSnapshot();
     };
     document.addEventListener("visibilitychange", synchronizeIfVisible);
     window.addEventListener("focus", synchronizeIfVisible);

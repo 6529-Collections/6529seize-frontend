@@ -1,3 +1,4 @@
+jest.mock("server-only", () => ({}), { virtual: true });
 jest.mock("next/server", () => ({
   NextResponse: {
     json: jest.fn(),
@@ -24,6 +25,8 @@ const requestWithClientVersion = (version: string) =>
   }) as Request;
 
 describe("GET version route", () => {
+  let stdoutWrite: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
     __resetAnnouncedVersionCacheForTests();
@@ -33,6 +36,7 @@ describe("GET version route", () => {
     publicEnv.VERSION = "current-version";
     publicEnv.VERSION_BUILD_TIMESTAMP = "2026-07-09T10:00:00.000Z";
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = undefined;
+    stdoutWrite = jest.spyOn(process.stdout, "write").mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -432,6 +436,24 @@ describe("GET version route", () => {
         version: "current-version",
       },
       { headers: NO_STORE_HEADERS }
+    );
+  });
+
+  it("logs a hidden tab's poll with the staleness it returned", async () => {
+    jsonMock.mockReturnValue({ ok: true });
+    const values: Record<string, string> = {
+      [CLIENT_VERSION_HEADER]: "0123456789abcdef0123456789abcdef01234567",
+      "x-6529-client-hidden": "1",
+      "x-6529-client-age-min": "90",
+      "x-6529-client-releases-behind": "2",
+    };
+
+    await GET({
+      headers: { get: (name: string) => values[name] ?? null },
+    } as Request);
+
+    expect(stdoutWrite).toHaveBeenCalledWith(
+      "version_poll v=0123456789ab stale=1 behind=2 age_min=90 hidden=1 rate=1\n"
     );
   });
 });
