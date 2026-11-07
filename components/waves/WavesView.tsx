@@ -7,19 +7,19 @@ import CommunityCurations from "@/components/community-curations/CommunityCurati
 import WaveRouteShell from "./WaveRouteShell";
 import BrainContent from "../brain/content/BrainContent";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const WavesView: React.FC = () => {
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
 
-  const serialisedWaveId = myStream?.activeWave.id ?? null;
+  const serialisedWaveId = activeWave?.id ?? null;
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 

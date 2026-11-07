@@ -4,7 +4,8 @@ import React, { useCallback, useSyncExternalStore } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -13,31 +14,58 @@ import {
 } from "@/services/api/drop-api";
 import WaveDropQuote from "./WaveDropQuote";
 
-type MyStreamContext = ReturnType<typeof useMyStreamOptional>;
+type WaveMessagesStore = NonNullable<
+  ReturnType<typeof useMyStreamActionsOptional>
+>["waveMessagesStore"];
 
-const useOptionalWaveMessages = (
-  myStream: MyStreamContext,
-  waveId: string | null
-) => {
+type QuotedDropSnapshot = {
+  readonly drop: ExtendedDrop | null;
+  readonly isLoading: boolean;
+};
+
+const NO_QUOTED_DROP: QuotedDropSnapshot = { drop: null, isLoading: false };
+const LOADING_QUOTED_DROP: QuotedDropSnapshot = {
+  drop: null,
+  isLoading: true,
+};
+
+// Re-renders only when the quoted drop or the wave's loading state changes,
+// not on every message in the wave.
+const useQuotedWaveMessagesDrop = (
+  store: WaveMessagesStore | undefined,
+  waveId: string | null,
+  dropId: string
+): QuotedDropSnapshot => {
+  const snapshotRef = React.useRef<QuotedDropSnapshot>(NO_QUOTED_DROP);
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
-      if (!myStream || !waveId) {
+      if (!store || !waveId) {
         return () => undefined;
       }
 
       const listener = () => onStoreChange();
-      myStream.waveMessagesStore.subscribe(waveId, listener);
-      return () => myStream.waveMessagesStore.unsubscribe(waveId, listener);
+      store.subscribe(waveId, listener);
+      return () => store.unsubscribe(waveId, listener);
     },
-    [myStream, waveId]
+    [store, waveId]
   );
-  const getSnapshot = useCallback(
-    () =>
-      myStream && waveId
-        ? myStream.waveMessagesStore.getData(waveId)
-        : undefined,
-    [myStream, waveId]
-  );
+  const getSnapshot = useCallback((): QuotedDropSnapshot => {
+    if (!store || !waveId) return NO_QUOTED_DROP;
+    const data = store.getData(waveId);
+    if (data === undefined) return LOADING_QUOTED_DROP;
+    const drop =
+      data.drops.find(
+        (candidate): candidate is ExtendedDrop =>
+          candidate.type === DropSize.FULL && candidate.id === dropId
+      ) ?? null;
+    const previous = snapshotRef.current;
+    if (previous.drop === drop && previous.isLoading === data.isLoading) {
+      return previous;
+    }
+    const next = { drop, isLoading: data.isLoading };
+    snapshotRef.current = next;
+    return next;
+  }, [dropId, store, waveId]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 };
@@ -109,20 +137,19 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   onLinkCardActionsActiveChange,
 }) => {
   const normalizedDropId = dropId.trim();
-  const myStream = useMyStreamOptional();
-  const targetWaveId = waveId ?? myStream?.activeWave.id ?? null;
-  const waveMessages = useOptionalWaveMessages(myStream, targetWaveId);
-  const waveMessagesDrop =
-    (targetWaveId
-      ? waveMessages?.drops.find(
-          (drop): drop is ExtendedDrop =>
-            drop.type === DropSize.FULL && drop.id === normalizedDropId
-        )
-      : null) ?? null;
+  const activeWaveId = useActiveWaveOptional()?.id ?? null;
+  const waveMessagesStore = useMyStreamActionsOptional()?.waveMessagesStore;
+  const targetWaveId = waveId ?? activeWaveId;
+  const quotedDrop = useQuotedWaveMessagesDrop(
+    waveMessagesStore,
+    targetWaveId,
+    normalizedDropId
+  );
+  const waveMessagesDrop = targetWaveId ? quotedDrop.drop : null;
   const isActiveWaveHydrating =
     targetWaveId !== null &&
-    targetWaveId === myStream?.activeWave.id &&
-    (waveMessages === undefined || waveMessages.isLoading);
+    targetWaveId === activeWaveId &&
+    quotedDrop.isLoading;
   const currentPresentationDrop = maybeDrop ?? waveMessagesDrop ?? null;
   let authoritativeModeratedDrop: ApiDrop | null = null;
   if (isModeratedPresentation(maybeDrop)) {

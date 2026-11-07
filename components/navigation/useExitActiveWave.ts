@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback } from "react";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import { useViewContext } from "./ViewContext";
 
 export function useExitActiveWave() {
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const { clearLastVisited } = useViewContext();
-  const setActiveWave = myStream?.activeWave.set;
+  const setActiveWave = activeWave?.set;
 
   return useCallback(
     (isDirectMessage: boolean) => {

@@ -19,7 +19,7 @@ import {
   type HeaderWaveDropAction,
   useHeaderContext,
 } from "@/contexts/HeaderContext";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -395,7 +395,7 @@ const switchToNextConnectedAccount = ({
 export default function AppHeader() {
   const locale = useBrowserLocale();
   const [menuOpen, setMenuOpen] = useState(false);
-  const myStream = useMyStreamOptional();
+  const activeStreamWaveId = useActiveWaveOptional()?.id ?? null;
   const { waveDropAction } = useHeaderContext();
   const { isCapacitor } = useCapacitor();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -443,7 +443,7 @@ export default function AppHeader() {
       .replace(/^./, (c) => c.toUpperCase()) ?? "Home";
 
   const { activeWave, headerWavePreview, isWaveResolving, waveId } =
-    useHeaderActiveWave(myStream);
+    useHeaderActiveWave(activeStreamWaveId);
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");

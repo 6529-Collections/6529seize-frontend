@@ -1,7 +1,7 @@
 "use client";
 
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
@@ -17,8 +17,8 @@ export default function WaveDropMobileMenuCopyLink({
   onCopy,
 }: WaveDropMobileMenuCopyLinkProps) {
   const { isMemesWave, isQuorumWave } = useSeizeSettings();
-  const myStream = useMyStreamOptional();
-  const directMessageWaves = myStream?.directMessages.list ?? [];
+  // Read on copy, not on render: rows must not re-render when lists refresh.
+  const streamLists = useMyStreamActionsOptional()?.streamLists;
 
   const getDropLink = () => {
     const waveDetails = drop.wave as unknown as {
@@ -40,7 +40,7 @@ export default function WaveDropMobileMenuCopyLink({
       isDirectMessage: isWaveDirectMessage(
         drop.wave.id,
         waveDetails,
-        directMessageWaves
+        streamLists?.get()?.directMessages.list ?? []
       ),
       isMemesWave,
       isQuorumWave,

@@ -4,7 +4,7 @@ import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import { ActiveWaveVoteRow } from "@/components/waves/discovery/ActiveWaveVoteRow";
 import { t } from "@/i18n/messages";
 import { SidebarVotesSkeleton } from "./SidebarDiscoverySkeletons";
@@ -22,7 +22,7 @@ export function SidebarActiveVotes({
   readonly scoreDetailsDisabled?: boolean;
 }) {
   const locale = useBrowserLocale();
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const scrollRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);

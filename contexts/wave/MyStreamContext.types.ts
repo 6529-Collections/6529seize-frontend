@@ -48,6 +48,17 @@ export interface ActiveWaveContextData {
   readonly set: (waveId: string | null, options?: ActiveWaveSetOptions) => void;
 }
 
+/** The main and direct-message lists, read on demand or through a selector. */
+export interface StreamListsSnapshot {
+  readonly waves: WavesContextData;
+  readonly directMessages: WavesContextData;
+}
+
+export interface StreamListsStore {
+  readonly get: () => StreamListsSnapshot | null;
+  readonly subscribe: (listener: () => void) => () => void;
+}
+
 // Define the interface for the wave messages store functions
 interface WaveMessagesStoreData {
   readonly getData: (key: string) => WaveMessages | undefined;
@@ -60,6 +71,12 @@ interface WaveMessagesStoreData {
 // do not re-render on every drop. Read them with useMyStreamActions.
 export interface MyStreamActionsContextType {
   readonly waveMessagesStore: WaveMessagesStoreData;
+  /**
+   * The current wave lists without subscribing to them. Read it in event
+   * handlers (copy link, mark unread); use useMyStreamSelector to render from
+   * a narrow part of the lists.
+   */
+  readonly streamLists: StreamListsStore;
   readonly requestMainWavesList: () => () => void;
   readonly requestDirectMessagesList: () => () => void;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;

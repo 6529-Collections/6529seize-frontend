@@ -7,7 +7,7 @@ import { useCallback, useId, useRef } from "react";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WavePicture from "@/components/waves/WavePicture";
 import { formatInteger } from "@/i18n/format";
@@ -169,7 +169,7 @@ export function SidebarWaveSearchResults({
 }) {
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const { queryText, queryEnabled, results, resultWaves } = navigation;
   const loading = !queryEnabled || results.isPending;
   const showResults = queryText.trim().length >= 3 && !loading;
