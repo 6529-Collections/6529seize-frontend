@@ -7,7 +7,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { ChatStore } from "@/lib/chat-store";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
-import type { WaveMessages, WaveMessagesUpdate } from "./types";
+import type { WaveDropsTrim, WaveMessages, WaveMessagesUpdate } from "./types";
+import { addWaveHistoryGap } from "../utils/wave-resume";
 import {
   cloneDrop,
   cloneValue,
@@ -724,6 +725,41 @@ function useWaveMessagesStore() {
     [removeDrops]
   );
 
+  const trimDrops = useCallback(
+    (waveId: string, trim: WaveDropsTrim): boolean => {
+      if (
+        storeGeneration !== storeGenerationRef.current ||
+        trim.dropIds.length === 0
+      )
+        return false;
+      const currentWave = waveMessagesRef.current[waveId];
+      if (!currentWave) return false;
+      const chatStore = getChatStore();
+      if (!chatStore.evict(waveId, trim.dropIds)) return false;
+      const updatedWave: WaveMessages = {
+        ...currentWave,
+        drops: chatStore.getDrops(waveId),
+        ...(trim.releasesOlderHistory ? { hasNextPage: true } : {}),
+        ...(trim.historyGap === null
+          ? {}
+          : {
+              historyGaps: addWaveHistoryGap(
+                currentWave.historyGaps ?? [],
+                trim.historyGap
+              ),
+            }),
+      };
+      waveMessagesRef.current = {
+        ...waveMessagesRef.current,
+        [waveId]: updatedWave,
+      };
+      dirtyWaveIdsRef.current.add(waveId);
+      flushNotifications();
+      return true;
+    },
+    [flushNotifications, getChatStore, storeGeneration]
+  );
+
   const clearWave = useCallback(
     (waveId: string) => {
       if (storeGeneration !== storeGenerationRef.current) return false;
@@ -755,6 +791,7 @@ function useWaveMessagesStore() {
     completeInitialServerFeedRegistration,
     removeDrop,
     removeDrops,
+    trimDrops,
     clearWave,
     optimisticUpdateDrop,
   };

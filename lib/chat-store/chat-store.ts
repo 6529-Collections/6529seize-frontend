@@ -318,6 +318,47 @@ export class ChatStore {
     return changed;
   }
 
+  /**
+   * Releases records the wave no longer keeps resident (the chat's cap on
+   * held drops). Unlike `remove`, nothing is tombstoned: a later page or
+   * frame brings the drops back. Pending sends are never evicted.
+   */
+  evict(waveId: string, keys: readonly string[]): boolean {
+    const wave = this.waves.get(waveId);
+    if (wave === undefined || keys.length === 0) {
+      return false;
+    }
+    const pendingKeys = new Set<string>();
+    for (const send of this.pendingSends.values()) {
+      if (send.waveId === waveId) {
+        pendingKeys.add(send.clientId);
+        if (send.serverKey !== null) {
+          pendingKeys.add(send.serverKey);
+        }
+      }
+    }
+    const evictable = keys.filter(
+      (key) => !pendingKeys.has(key) && !key.startsWith(OPTIMISTIC_KEY_PREFIX)
+    );
+    const batched = evictable.length > BATCH_THRESHOLD;
+    if (batched) {
+      wave.order.beginBatch();
+      wave.placeholders.beginBatch();
+    }
+    let changed = false;
+    for (const key of evictable) {
+      changed = this.removeRecord(wave, key) || changed;
+    }
+    if (batched) {
+      wave.order.commitBatch();
+      wave.placeholders.commitBatch();
+    }
+    if (changed) {
+      this.touch(wave);
+    }
+    return changed;
+  }
+
   /** Drops the wave's records and pending sends; tombstones stay. */
   deleteWave(waveId: string): boolean {
     for (const [clientId, send] of this.pendingSends) {

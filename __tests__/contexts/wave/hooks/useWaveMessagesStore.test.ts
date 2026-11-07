@@ -786,6 +786,54 @@ describe("useWaveMessagesStore empty batches and lookups", () => {
   const ids = (drops: readonly { readonly id: string }[] | undefined) =>
     drops?.map((item) => item.id);
 
+  it("releases trimmed drops so paging and the history gap load them again", () => {
+    const { result } = populated();
+    act(() => {
+      result.current.updateData({
+        key: "wave1",
+        drops: [drop("d4", 4), drop("d5", 5)],
+        hasNextPage: false,
+      });
+    });
+
+    let trimmed = false;
+    act(() => {
+      trimmed = result.current.trimDrops("wave1", {
+        dropIds: ["d1", "d4"],
+        releasesOlderHistory: true,
+        historyGap: { newerThan: 3, olderThan: 5 },
+      });
+    });
+
+    expect(trimmed).toBe(true);
+    const wave = result.current.getData("wave1")!;
+    expect(ids(wave.drops)).toEqual(["d5", "d3", "d2"]);
+    expect(wave.hasNextPage).toBe(true);
+    expect(wave.historyGaps).toEqual([{ newerThan: 3, olderThan: 5 }]);
+
+    // Nothing is tombstoned: a later page brings the drops back.
+    act(() => {
+      result.current.updateData({ key: "wave1", drops: [drop("d1", 1)] });
+    });
+    expect(ids(result.current.getData("wave1")!.drops)).toEqual([
+      "d5",
+      "d3",
+      "d2",
+      "d1",
+    ]);
+  });
+
+  it("does not trim a wave it does not hold", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    expect(
+      result.current.trimDrops("wave1", {
+        dropIds: ["d1"],
+        releasesOlderHistory: true,
+        historyGap: null,
+      })
+    ).toBe(false);
+  });
+
   it("keeps a populated wave on an empty standard batch, as the old merge did", () => {
     const { result } = populated();
     const before = result.current.getData("wave1")!.drops;

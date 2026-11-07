@@ -29,6 +29,19 @@ export interface WaveHistoryGap {
   readonly olderThan: number;
 }
 
+/**
+ * Releases drops a wave no longer keeps resident (the windowed chat's cap on
+ * held drops). Released drops load again like any history: older ones by
+ * paging, newer ones through the history gap that marks them.
+ */
+export interface WaveDropsTrim {
+  readonly dropIds: readonly string[];
+  /** Released drops older than every kept one: paging loads them again. */
+  readonly releasesOlderHistory: boolean;
+  /** Released drops between kept ones, newest side of the reader. */
+  readonly historyGap: WaveHistoryGap | null;
+}
+
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
 };
