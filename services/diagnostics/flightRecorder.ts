@@ -70,7 +70,7 @@ type FlightLog = {
   readonly entries: readonly FlightEntry[];
 };
 
-export type FlightSnapshot = {
+type FlightSnapshot = {
   readonly v: 1;
   readonly captured_at: number;
   readonly app_version: string;
