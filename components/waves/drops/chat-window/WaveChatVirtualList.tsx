@@ -42,6 +42,7 @@ import {
   useFocusedChatItemKey,
   useWindowedChatEnd,
 } from "./useWindowedChat";
+import { useChatResidentCap } from "./useChatResidentCap";
 
 // Rows rendered beyond each edge of the viewport. With typical rows this
 // keeps about 50 rows mounted on a desktop viewport.
@@ -208,6 +209,25 @@ export function WaveChatVirtualList({
   // Keyboard focus pins its row, so tabbing never loses focus to an unmount.
   const focusedKey = useFocusedChatItemKey(scrollElement);
 
+  // Drops that stay loaded whatever the cap: the jump target, the unread
+  // divider's row and the focused row.
+  const pinnedSerials = useMemo(() => {
+    const serials = new Set<number>();
+    if (serialNo !== null) serials.add(serialNo);
+    if (unreadDividerSerialNo !== null && unreadDividerSerialNo !== undefined) {
+      serials.add(unreadDividerSerialNo);
+    }
+    const focused = items.find((item) => item.key === focusedKey);
+    if (focused?.kind === "drop") serials.add(focused.drop.serial_no);
+    return serials;
+  }, [items, focusedKey, serialNo, unreadDividerSerialNo]);
+  const handleResidentCap = useChatResidentCap({
+    waveId,
+    orderedDrops,
+    items,
+    pinnedSerials,
+  });
+
   const pinnedIndices = useMemo(
     () =>
       getPinnedChatItemIndices(items, {
@@ -282,7 +302,10 @@ export function WaveChatVirtualList({
     // Scroll-only updates move rows without a React render.
     directDomUpdates: true,
     directDomUpdatesMode: "position",
-    onChange: handleRangeChange,
+    onChange: (instance) => {
+      handleRangeChange(instance);
+      handleResidentCap(instance);
+    },
   });
 
   useWindowedChatEnd({

@@ -101,6 +101,10 @@ With it on:
   latest drop stays there.
 - Jumps scroll instantly instead of smoothly when the system asks for reduced
   motion.
+- A wave keeps at most about 500 drops loaded. Shortly after you stop
+  scrolling, the drops furthest from you are released: older ones load again
+  when you scroll up, and ones between your place and the latest drops sit
+  behind `Load missed messages`. The latest drops always stay loaded.
 
 ## Limitations / Notes
 

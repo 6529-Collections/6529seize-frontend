@@ -1,7 +1,7 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { Drop } from "@/helpers/waves/drop.helpers";
-import type { WaveMessages } from "./hooks/types";
+import type { WaveDropsTrim, WaveMessages } from "./hooks/types";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
@@ -104,6 +104,8 @@ export interface MyStreamActionsContextType {
     dropIds: readonly string[]
   ) => void;
   readonly refreshWaveMessages: (waveId: string) => void;
+  /** Releases drops the windowed chat no longer keeps resident. */
+  readonly trimWaveDrops: (waveId: string, trim: WaveDropsTrim) => boolean;
   readonly applyOptimisticDropUpdate: ({
     waveId,
     dropId,

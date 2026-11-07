@@ -46,8 +46,12 @@ jest.mock("@/components/waves/drops/WaveHistoryGap", () => ({
 }));
 
 const mockFetchAroundSerialNo = jest.fn();
+const mockTrimWaveDrops = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamActions: () => ({ fetchAroundSerialNo: mockFetchAroundSerialNo }),
+  useMyStreamActions: () => ({
+    fetchAroundSerialNo: mockFetchAroundSerialNo,
+    trimWaveDrops: mockTrimWaveDrops,
+  }),
 }));
 
 jest.mock("@/hooks/useBrowserLocale", () => ({

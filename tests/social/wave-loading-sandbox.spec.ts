@@ -1555,7 +1555,9 @@ test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
   const loadMs = Date.now() - loadStartedAt;
   const rowsAtOldest = await countMountedChatRows(scroller);
 
-  // A scripted fling back down through all 2,000 posts, 300px a frame.
+  // A scripted fling back down through the loaded history, 300px a frame.
+  // With the resident cap, that is the posts kept around the reader, the
+  // gap and the newest posts.
   const fling = await scroller.evaluate(async (element) => {
     const longTasks: number[] = [];
     let observer: PerformanceObserver | null = null;
@@ -1628,6 +1630,47 @@ test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
   } else {
     expect(rowsAtNewest).toBeGreaterThanOrEqual(2000);
   }
+});
+
+test("windowed chat releases far history while reading and loads it again", async ({
+  page,
+  baseURL,
+}) => {
+  test.skip(!CHAT_WINDOWING, "Chat windowing is off in this run.");
+  test.setTimeout(300000);
+  const fixture = await sharedPostFixture(page, baseURL, { count: 2000 });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(2001)).toBeInViewport({ timeout: 30000 });
+  const chat = waveChat(page);
+  const scroller = waveChatScroller(page);
+
+  // Read all the way back to the first post.
+  await expect(async () => {
+    if ((await fixture.post(2).count()) > 0) return;
+    await scroller.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    throw new Error("History is still loading.");
+  }).toPass({ timeout: 240000, intervals: [250] });
+  await fixture.post(2).scrollIntoViewIfNeeded();
+
+  // Once scrolling stops, the wave keeps at most 500 posts: the ones around
+  // the reader and the newest. The posts between go behind a history gap.
+  const gap = chat.getByRole("button", { name: /missed messages/ });
+  await expect(gap).toBeAttached({ timeout: 10000 });
+  await expect(fixture.post(2)).toBeInViewport();
+
+  // The newest posts stayed, so the live end needs no reload.
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(2001)).toBeInViewport();
+
+  // Released posts load again as the reader scrolls back to them.
+  await revealChatRow(scroller, waveChatRow(page, 1900), "older", {
+    timeout: 60000,
+  });
+  await expect(fixture.post(1900)).toBeAttached({ timeout: 15000 });
 });
 
 test("windowed chat follows new posts only at the newest and announces them", async ({

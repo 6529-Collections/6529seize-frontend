@@ -356,6 +356,47 @@ describe("deletions (#4639 invariants)", () => {
   });
 });
 
+describe("evictions (the windowed chat cap)", () => {
+  it("releases records without tombstones, so a later page brings them back", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [
+      full({ id: "e1", serial_no: 1 }),
+      full({ id: "e2", serial_no: 2 }),
+      full({ id: "e3", serial_no: 3 }),
+    ]);
+    const before = store.version(WAVE);
+
+    expect(store.evict(WAVE, ["e1", "e2"])).toBe(true);
+    expect(ids(store)).toEqual(["e3"]);
+    expect(store.version(WAVE)).toBeGreaterThan(before);
+    expect(store.isTombstoned(WAVE, "e1")).toBe(false);
+
+    store.merge(WAVE, [full({ id: "e1", serial_no: 1 })]);
+    expect(ids(store)).toEqual(["e3", "e1"]);
+  });
+
+  it("never evicts a pending send", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [
+      full({ id: "e1", serial_no: 1 }),
+      full({ id: "temp-x", serial_no: 2 }),
+    ]);
+
+    expect(store.evict(WAVE, ["temp-x"])).toBe(false);
+    expect(ids(store)).toContain("temp-x");
+    expect(store.getPendingSend("temp-x")).not.toBeUndefined();
+  });
+
+  it("does nothing for an unknown wave or no keys", () => {
+    const store = new ChatStore();
+    expect(store.evict(WAVE, ["e1"])).toBe(false);
+    store.merge(WAVE, [full({ id: "e1", serial_no: 1 })]);
+    expect(store.evict(WAVE, [])).toBe(false);
+    expect(store.evict(OTHER_WAVE, ["e1"])).toBe(false);
+    expect(ids(store)).toEqual(["e1"]);
+  });
+});
+
 describe("snapshots", () => {
   it("returns the same array until the wave changes", () => {
     const store = new ChatStore();
