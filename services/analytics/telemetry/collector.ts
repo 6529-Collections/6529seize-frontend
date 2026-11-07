@@ -31,7 +31,7 @@ import {
  * in memory for the current page load.
  */
 
-export const COLLECTOR_ENDPOINT = "/e";
+const COLLECTOR_ENDPOINT = "/e";
 const FLUSH_DELAY_MS = 1500;
 const SLOW_API_MS = 3000;
 const LONG_TASK_MS = 200;
@@ -80,7 +80,7 @@ const state = {
   timer: undefined as ReturnType<typeof setTimeout> | undefined,
 };
 
-export const isFirstPartyTelemetryEnabled = (): boolean =>
+const isFirstPartyTelemetryEnabled = (): boolean =>
   publicEnv.NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY === "true" &&
   typeof window !== "undefined";
 
@@ -169,7 +169,7 @@ function bump(key: DimensionKey | ScalarKey, dimension?: string): void {
 const CHUNK_ERROR =
   /ChunkLoadError|Loading (CSS )?chunk|dynamically imported module|Importing a module script failed/i;
 
-export function classifyError(error: unknown, fallback: ErrorKind): ErrorKind {
+function classifyError(error: unknown, fallback: ErrorKind): ErrorKind {
   let text = typeof error === "string" ? error : "";
   if (error instanceof Error) text = `${error.name} ${error.message}`;
   return CHUNK_ERROR.test(text) ? "chunk_load" : fallback;
@@ -190,7 +190,7 @@ const ASSET_KINDS: Readonly<Record<string, AssetKind>> = {
 };
 
 /** By tag name, or for a link by its `as` or `rel`. */
-export function classifyAsset(target: Element): AssetKind {
+function classifyAsset(target: Element): AssetKind {
   const tag = target.tagName.toLowerCase();
   const key =
     tag === "link"

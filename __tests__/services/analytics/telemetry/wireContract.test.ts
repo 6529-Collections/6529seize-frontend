@@ -1,8 +1,12 @@
 import schema from "@/ops/telemetry/telemetry-collector.v1.schema.json";
+import * as collector from "@/services/analytics/telemetry/collector";
 import { PRODUCT_EVENT_PROPS } from "@/services/analytics/telemetry/wire";
 
+jest.mock("@/config/env", () => ({
+  publicEnv: { NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: "true" },
+}));
+
 type Schema = Record<string, unknown>;
-type Collector = typeof import("@/services/analytics/telemetry/collector");
 
 // The subset of JSON Schema 2020-12 the vendored collector schema uses.
 function validate(node: Schema, value: unknown, path = "$"): string[] {
@@ -145,13 +149,6 @@ describe("wire format v1 matches the vendored backend schema", () => {
       configurable: true,
       value: "https://www.google.com/",
     });
-    jest.resetModules();
-    jest.doMock("@/config/env", () => ({
-      publicEnv: { NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: "true" },
-    }));
-    const collector = jest.requireActual<Collector>(
-      "@/services/analytics/telemetry/collector"
-    );
     try {
       collector.setTelemetryCountry("US", false);
       collector.recordPageView({

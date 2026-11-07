@@ -11,11 +11,11 @@
  * booleans.
  */
 
-export const WIRE_VERSION = 1;
-export const MAX_BATCH_EVENTS = 40;
-export const MAX_BATCH_BYTES = 8192;
-export const MAX_EVENT_PROPS = 6;
-export const MAX_DIMENSION_KEYS = 16;
+const WIRE_VERSION = 1;
+const MAX_BATCH_EVENTS = 40;
+const MAX_BATCH_BYTES = 8192;
+const MAX_EVENT_PROPS = 6;
+const MAX_DIMENSION_KEYS = 16;
 
 export type Device = "mobile" | "tablet" | "desktop";
 export type Platform = "web" | "ios" | "android" | "desktop";

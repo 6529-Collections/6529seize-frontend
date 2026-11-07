@@ -1,4 +1,8 @@
-type Collector = typeof import("@/services/analytics/telemetry/collector");
+import { publicEnv } from "@/config/env";
+import * as collector from "@/services/analytics/telemetry/collector";
+
+jest.mock("@/config/env", () => ({ publicEnv: {} }));
+const mockEnv = publicEnv as Record<string, string | undefined>;
 
 const HANDLE = "punk6529";
 const WALLET = "0x1234567890abcdef1234567890abcdef12345678";
@@ -10,16 +14,6 @@ const TITLE = "The Memes - Main Stage | punk6529";
 
 const sendBeacon = jest.fn<boolean, [string, string]>(() => true);
 const fetchMock = jest.fn(() => Promise.resolve(new Response(null)));
-
-const loadCollector = (flag: string | undefined): Collector => {
-  jest.resetModules();
-  jest.doMock("@/config/env", () => ({
-    publicEnv: { NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: flag },
-  }));
-  return jest.requireActual<Collector>(
-    "@/services/analytics/telemetry/collector"
-  );
-};
 
 const sentBodies = (): string[] => [
   ...sendBeacon.mock.calls.map(([, body]) => body),
@@ -39,8 +33,6 @@ const hidePage = () => {
   });
   globalThis.dispatchEvent(new Event("visibilitychange"));
 };
-
-let collector: Collector;
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -62,7 +54,7 @@ beforeEach(() => {
   });
   document.title = TITLE;
   window.history.replaceState(null, "", "/");
-  collector = loadCollector("true");
+  mockEnv["NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY"] = "true";
 });
 
 afterEach(() => {
@@ -77,7 +69,7 @@ const viewPage = (pathname: string, route: string, pageGroup = "waves") => {
 
 describe("first-party collector", () => {
   it("sends nothing when the flag is off", () => {
-    collector = loadCollector(undefined);
+    mockEnv["NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY"] = undefined;
     collector.setTelemetryCountry("US", false);
     viewPage("/waves/x", "/waves/[wave]");
     collector.recordProductEvent("Homepage section seen", {
