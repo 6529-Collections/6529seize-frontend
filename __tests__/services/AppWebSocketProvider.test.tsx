@@ -17,6 +17,9 @@ jest.mock("@/services/websocket/MarketplacePreviewWebSocketSync", () => ({
 jest.mock("@/services/websocket/NotificationWebSocketSync", () => ({
   NotificationWebSocketSync: () => null,
 }));
+jest.mock("@/services/websocket/WavesChangedWebSocketSync", () => ({
+  WavesChangedWebSocketSync: () => null,
+}));
 jest.mock("@/services/websocket/WebSocketRecoverySync", () => ({
   WebSocketRecoverySync: () => null,
 }));

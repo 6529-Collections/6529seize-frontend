@@ -5,7 +5,7 @@
 `Setup` is the first step in wave creation.
 A standalone Chat wave starts with its name and first post on one screen.
 Use Optional settings for access, picture, and guidelines, then Review wave.
-Subwaves use the guided steps. Rank and Approve are configured separately in [competition setup](../competitions/feature-manage-competitions.md).
+Subwaves use the guided steps. Rank and Approve are configured separately in [decision setup](../competitions/feature-manage-competitions.md).
 
 ## Location in the Site
 
@@ -28,7 +28,7 @@ Subwaves use the guided steps. Rank and Approve are configured separately in [co
 - Wave profile picture, access, chat permissions and guidelines in Optional settings.
 - For subwaves, the guided setup retains the parent access and administrator defaults.
 
-Wave creation opens shared chat. To add Rank or Approve rules, open the created wave's **Competitions**, then **+ Competition**. Competition type, schedule, entry requirements, voting, outcomes and appearance are configured there.
+Wave creation opens shared chat. To add Rank or Approve rules, open the created wave's **Decisions**, then **+ Decision**. Decision type, schedule, entry requirements, voting, outcomes and appearance are configured there.
 
 ## Navigation Behavior
 
@@ -48,7 +48,7 @@ Wave creation opens shared chat. To add Rank or Approve rules, open the created 
 - Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
-- Restoring an older saved draft keeps its wave name, permissions and first post. Wave creation always opens shared chat; competition rules are configured separately.
+- Restoring an older saved draft keeps its wave name, permissions and first post. Wave creation always opens shared chat; decision rules are configured separately.
 
 ## Failure and Recovery
 

@@ -51,6 +51,7 @@ import {
   useWaveSubmissionButtonLabelOverride,
 } from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveUnread } from "@/contexts/wave/WaveUnreadContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import {
@@ -199,18 +200,16 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     });
   }, [updateEligibility, wave]);
 
-  // Get enhanced data from the waves list (has correct WS-updated values)
-  const enhancedData = useMemo(() => {
-    const waveFromList =
+  // The list row's live unread values (socket counts on top of the server's).
+  // Direct messages come back unchanged: they use the server's DM unread state.
+  const waveFromList = useMemo(
+    () =>
       waves.list.find((w) => w.id === waveId) ??
-      directMessages.list.find((w) => w.id === waveId);
-    return {
-      newDropsCount: waveFromList?.newDropsCount.count ?? 0,
-      firstUnreadSerialNo: waveFromList?.firstUnreadDropSerialNo ?? null,
-    };
-  }, [waves.list, directMessages.list, waveId]);
-
-  const newDropsCount = enhancedData.newDropsCount;
+      directMessages.list.find((w) => w.id === waveId),
+    [waves.list, directMessages.list, waveId]
+  );
+  const liveWaveFromList = useWaveUnread(waveFromList);
+  const newDropsCount = liveWaveFromList?.newDropsCount.count ?? 0;
   const currentWaveId = wave?.id ?? null;
   const currentWaveName = wave?.name ?? null;
 
@@ -232,7 +231,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, availableTabs, setActiveContentTab } = useContentTab();
+  const { activeContentTab, availableTabs, setActiveContentTab } =
+    useContentTab();
   const activeCurationId = competitionOnly
     ? null
     : searchParams.get("curation");
@@ -668,7 +668,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
         wave={submissionWave ?? wave}
-        firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
+        firstUnreadSerialNo={liveWaveFromList?.firstUnreadDropSerialNo ?? null}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
         chatSubmitDrop={activeChatSubmitDropState}

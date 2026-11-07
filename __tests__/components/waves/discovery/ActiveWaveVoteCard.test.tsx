@@ -35,7 +35,7 @@ function vote(end: number | null, decision: number | null): ApiActiveWaveVote {
 
 it.each([
   [100000, 200000, /^Voting ends /],
-  [200000, 100000, /^Next decision /],
+  [200000, 100000, /^Next result /],
   [null, null, /^Voting open$/],
 ] as const)(
   "shows the appropriate deadline beneath the name",

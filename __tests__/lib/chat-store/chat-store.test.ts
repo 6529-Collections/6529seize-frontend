@@ -1,4 +1,3 @@
-import { mergeDrops } from "@/contexts/wave/utils/wave-messages-utils";
 import {
   DropSize,
   getStableDropKey,
@@ -11,6 +10,8 @@ import {
   type IllegalTransition,
 } from "@/lib/action-lifecycle";
 import { ChatStore } from "@/lib/chat-store";
+
+import { legacyMergeDrops as mergeDrops } from "./legacyMergeDrops";
 
 const WAVE = "wave-1";
 const OTHER_WAVE = "wave-2";
@@ -863,3 +864,30 @@ function mulberry32(seed: number): () => number {
     return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
   };
 }
+
+describe("malformed copies", () => {
+  it("keeps a drop without an author instead of breaking the merge", () => {
+    const store = new ChatStore();
+    const malformed = {
+      id: "no-author",
+      serial_no: 3,
+      created_at: 3_000,
+      wave: { id: WAVE },
+      type: DropSize.FULL,
+      stableKey: "no-author",
+      stableHash: "no-author",
+    } as unknown as ExtendedDrop;
+    store.merge(WAVE, [
+      full({ id: "temp-x", serial_no: 9_000, created_at: 2_900 }),
+    ]);
+    expect(() => store.merge(WAVE, [malformed])).not.toThrow();
+    expect(store.get(WAVE, "no-author")).toMatchObject({
+      stableKey: "no-author",
+      stableHash: "no-author",
+    });
+    expect(() =>
+      store.merge(WAVE, [{ ...malformed, boosts: 1 } as ExtendedDrop])
+    ).not.toThrow();
+    expect(ids(store)).toEqual(["no-author", "temp-x"]);
+  });
+});

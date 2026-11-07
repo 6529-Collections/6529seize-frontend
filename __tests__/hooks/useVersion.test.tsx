@@ -48,10 +48,14 @@ describe("useIsVersionStale", () => {
     await act(async () => {
       jest.runOnlyPendingTimers();
     });
+    // The bundle's version, plus the visible tab's adoption telemetry.
     expect(globalThis.fetch).toHaveBeenCalledWith("/api/version", {
       cache: "no-store",
       headers: {
         [CLIENT_VERSION_HEADER]: "1.0.0",
+        "x-6529-client-hidden": "0",
+        "x-6529-client-age-min": expect.stringMatching(/^\d+$/),
+        "x-6529-client-releases-behind": "0",
       },
     });
     expect(await findByText("fresh")).toBeInTheDocument();

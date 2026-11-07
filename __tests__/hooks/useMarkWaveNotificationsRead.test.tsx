@@ -580,6 +580,52 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("refreshes the wave lists after a read unless the caller opts out", async () => {
+    const invalidateNotifications = jest.fn();
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(result.current("wave-1")).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenLastCalledWith({
+      refreshWaveLists: true,
+    });
+
+    await expect(
+      result.current("wave-1", { refreshWaveLists: false })
+    ).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenLastCalledWith({
+      refreshWaveLists: false,
+    });
+  });
+
+  it("refreshes the wave lists when any merged read asks for it", async () => {
+    const firstRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockResolvedValueOnce(undefined);
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const first = result.current("wave-1", { refreshWaveLists: false });
+    // These two join one trailing read; one of them wants the lists.
+    const second = result.current("wave-1", { refreshWaveLists: false });
+    const third = result.current("wave-1");
+    firstRequest.resolve();
+    await expect(first).resolves.toBe("sent");
+    await expect(second).resolves.toBe("sent");
+    await expect(third).resolves.toBe("sent");
+
+    expect(invalidateNotifications.mock.calls).toEqual([
+      [{ refreshWaveLists: false }],
+      [{ refreshWaveLists: true }],
+    ]);
+  });
+
   it("sends one trailing read after two calls for the same wave", async () => {
     const firstRequest = createDeferred();
     const trailingRequest = createDeferred();

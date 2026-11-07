@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
+import { mockRandomUnit } from "../helpers/mockRandomUnit";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(globalThis.location.search),
@@ -86,15 +87,95 @@ describe("useIsVersionStale visibility", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it("stops polling while the tab is hidden and leaves no timer behind", async () => {
+  it("stops the interval while the tab is hidden, leaving only the rare hidden check", async () => {
     renderHook(() => useIsVersionStale(INTERVAL_MS));
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     setVisibility("hidden");
-    expect(jest.getTimerCount()).toBe(0);
+    expect(jest.getTimerCount()).toBe(1);
 
     await advance(INTERVAL_MS * 10);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("checks a hidden tab every 10-15 minutes and says it is hidden", async () => {
+    const randomUnit = mockRandomUnit(0);
+    try {
+      renderHook(() => useIsVersionStale(INTERVAL_MS));
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      setVisibility("hidden");
+
+      // The lowest jitter sample: 10 minutes.
+      await advance(10 * 60_000 - 1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await advance(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        "/api/version",
+        expect.objectContaining({
+          headers: expect.objectContaining({ "x-6529-client-hidden": "1" }),
+        })
+      );
+      await advance(10 * 60_000);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+
+      // Shown again a little later: the hidden check stops, the tab checks
+      // at once and the interval resumes.
+      await advance(5_000);
+      setVisibility("visible");
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        "/api/version",
+        expect.objectContaining({
+          headers: expect.objectContaining({ "x-6529-client-hidden": "0" }),
+        })
+      );
+      const hiddenChecks = () =>
+        fetchMock.mock.calls.filter(
+          ([, init]) => init?.headers?.["x-6529-client-hidden"] === "1"
+        ).length;
+      expect(hiddenChecks()).toBe(2);
+      await advance(20 * 60_000);
+      expect(hiddenChecks()).toBe(2);
+    } finally {
+      randomUnit.mockRestore();
+    }
+  });
+
+  it("never waits more than 15 minutes for a hidden check", async () => {
+    const randomUnit = mockRandomUnit(0.999_999_9);
+    try {
+      visibilityState = "hidden";
+      renderHook(() => useIsVersionStale(INTERVAL_MS));
+      await advance(14 * 60_000);
+      expect(fetchMock).not.toHaveBeenCalled();
+      await advance(60_000);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      randomUnit.mockRestore();
+    }
+  });
+
+  it("reports how many newer versions it has been told about", async () => {
+    fetchMock.mockResolvedValue({
+      json: async () => ({ stale: true, announced_version: "release-a" }),
+    });
+    renderHook(() => useIsVersionStale(INTERVAL_MS));
+    await advance(INTERVAL_MS);
+    fetchMock.mockResolvedValue({
+      json: async () => ({ stale: true, announced_version: "release-b" }),
+    });
+    await advance(INTERVAL_MS);
+    await advance(INTERVAL_MS);
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/version",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "x-6529-client-releases-behind": "2",
+        }),
+      })
+    );
   });
 
   it("does not check on mount in a hidden tab, then checks once it is shown", async () => {

@@ -22,13 +22,13 @@ and lets users review recent sale links without opening each winner from
 ## User Journey
 
 1. Open a curation wave and switch to `Sales`.
-2. While decision data is loading, the tab shows `Loading sales...`.
+2. While result data is loading, the tab shows `Loading sales...`.
 3. When links are available, the tab shows a compact card grid:
-   - newest decision rounds first
+   - newest result rounds first
    - winners inside each round in place order
    - one card per winner when that drop has at least one non-empty NFT link
 4. Select a card to open the marketplace destination behind that preview.
-5. Scroll to the bottom to load older decision rounds automatically.
+5. Scroll to the bottom to load older result rounds automatically.
 6. Keep browsing loaded cards while older rounds continue loading.
 
 ## Common Scenarios
@@ -54,7 +54,7 @@ and lets users review recent sale links without opening each winner from
 
 ## Failure and Recovery
 
-- If decision loading fails, the tab shows `Failed to load sales` and appends
+- If result loading fails, the tab shows `Failed to load sales` and appends
   the returned error text when available.
 - Refresh the current wave route and reopen `Sales`.
 - If a preview cannot resolve marketplace metadata, the card falls back to a
@@ -62,7 +62,7 @@ and lets users review recent sale links without opening each winner from
 
 ## Limitations / Notes
 
-- `Sales` is populated from winning decision data, not from every submission in
+- `Sales` is populated from winning result data, not from every submission in
   the leaderboard.
 - Only the first non-empty NFT link on each winning drop is used to build a
   sales card.
@@ -73,6 +73,6 @@ and lets users review recent sale links without opening each winner from
 - [Wave Leaderboards Index](README.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Winners Tab](feature-winners-tab.md)
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
 - [Docs Home](../../README.md)

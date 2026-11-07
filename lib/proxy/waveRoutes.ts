@@ -27,10 +27,14 @@ const WAVE_ID_PATTERN =
 /** `/waves/<wave>` and `/messages/<wave>` (`app/{waves,messages}/[wave]`). */
 const THREAD_ROUTE_PATTERN = /^\/(?:waves|messages)\/([^/]+)$/;
 
-/** `/waves/<wave>/competitions` and `/waves/<wave>/competitions/<competition>`. */
+/**
+ * `/waves/<wave>/decisions` and `/waves/<wave>/decisions/<decision>`. The
+ * legacy `competitions` segment is redirected before proxy runs; matching it
+ * too keeps the policy unchanged if that redirect is ever bypassed.
+ */
 const COMPETITION_ROUTE_PATTERNS: readonly RegExp[] = [
-  /^\/waves\/([^/]+)\/competitions$/,
-  /^\/waves\/([^/]+)\/competitions\/[^/]+$/,
+  /^\/waves\/([^/]+)\/(?:decisions|competitions)$/,
+  /^\/waves\/([^/]+)\/(?:decisions|competitions)\/[^/]+$/,
 ];
 
 /**

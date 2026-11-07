@@ -61,6 +61,16 @@ The AWS RUM service will automatically create:
 - Custom-event ownership and compatibility status are catalogued in
   `ops/telemetry/registry.json`.
 
+### Consent
+
+- RUM sets the `cwr_u` (30-day user ID) and `cwr_s` (session) performance
+  cookies, so it starts only when performance consent is accepted, like Google
+  Analytics and Mixpanel. `AwsRumProvider` is mounted inside
+  `CookieConsentProvider` for this reason.
+- Until the consent provider reports a choice, the stored
+  `performance-cookies-consent` cookie decides. No stored choice means no RUM.
+- A later rejection disables the running SDK and deletes `cwr_u` and `cwr_s`.
+
 ### Session Management
 
 - **Sample Rate**: configurable via `AWS_RUM_SAMPLE_RATE` (default 20%)

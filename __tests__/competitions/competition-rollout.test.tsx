@@ -29,7 +29,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
-  usePathname: () => "/waves/wave/competitions/native",
+  usePathname: () => "/waves/wave/decisions/native",
   useSearchParams: () => new URLSearchParams(mockSearch),
 }));
 jest.mock("@/hooks/useWaveData", () => ({
@@ -121,7 +121,7 @@ it.each([
     expect(screen.getByText("Native draft editor")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
     expect(mockReplace).toHaveBeenCalledWith(
-      `/waves/wave/competitions/native?${expectedSearch}`
+      `/waves/wave/decisions/native?${expectedSearch}`
     );
   }
 );
@@ -163,7 +163,7 @@ it.each<[string, string, string, string]>([
     ).toBeVisible();
     fireEvent.click(screen.getByRole("tab", { name: expectedApproved }));
     expect(mockPush).toHaveBeenCalledWith(
-      "/waves/wave/competitions/native?tab=decisions",
+      "/waves/wave/decisions/native?tab=decisions",
       { scroll: false }
     );
     mockSearch = "tab=decisions";
@@ -190,7 +190,7 @@ it("keeps the entry action in the competition view and exposes details and manag
 
   fireEvent.click(screen.getByRole("tab", { name: "Settings" }));
   expect(mockPush).toHaveBeenCalledWith(
-    "/waves/wave/competitions/native?tab=rules",
+    "/waves/wave/decisions/native?tab=rules",
     { scroll: false }
   );
   mockSearch = "tab=rules";
@@ -215,6 +215,6 @@ it.each(["", "tab=rules", "edit=1", "edit=1&competition=native&serialNo=42"])(
     expect(screen.queryByText("Readable native entries")).toBeNull();
     expect(screen.queryByRole("tab", { name: "Leaderboard" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
-    expect(mockReplace).toHaveBeenCalledWith("/waves/wave/competitions");
+    expect(mockReplace).toHaveBeenCalledWith("/waves/wave/decisions");
   }
 );

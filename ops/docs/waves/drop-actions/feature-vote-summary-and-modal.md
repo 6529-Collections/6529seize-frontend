@@ -110,10 +110,10 @@ ranking, and voting rules retain their usual meaning.
 - Desktop modal restores focus to the previously focused element on close.
 - In app mode, modal renders inline and does not mutate `document.body`
   overflow.
-- Competition voting reuses an artwork's known competition and entry when
+- Decision voting reuses an artwork's known decision and entry when
   available. The form still loads current vote credits and may briefly show
-  `Loading competition…`; artworks without that context must first be identified.
-- After a competition vote is confirmed, your vote and credits update and the
+  `Loading decision…`; artworks without that context must first be identified.
+- After a decision vote is confirmed, your vote and credits update and the
   voting modal closes immediately. Scores and rankings refresh in the background
   while existing content stays visible.
 - Current-vote distribution is limited to participatory rank-wave drops. It is
@@ -134,7 +134,7 @@ ranking, and voting rules retain their usual meaning.
   stays open.
 - If vote submit request fails, voting stays open and an error toast is shown.
 - Closing voting only closes the voting surface; single-drop view stays open.
-- A background refresh failure does not turn a confirmed competition vote into
+- A background refresh failure does not turn a confirmed decision vote into
   a failed save. Loaded artwork stays visible during temporary refresh failures;
   access-denied or deleted entries still show an error.
 - If the optional distribution cannot be loaded, the drop and its normal
@@ -165,5 +165,5 @@ ranking, and voting rules retain their usual meaning.
 - [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md)
 - [Wave Drop Vote Slider](feature-vote-slider.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
-- [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)
