@@ -159,6 +159,11 @@ export default function AwsRumProvider({
 
     return () => {
       cancelled = true;
+      // aws-rum-web 1.25.0 keeps web-vitals callbacks registered after
+      // disable(), and their session lookup can rewrite cwr_u/cwr_s. Turning
+      // cookie storage off first (the SDK reads this setting on every write)
+      // keeps cookies deleted after a rejection from coming back.
+      awsRum?.allowCookies(false);
       awsRum?.disable();
 
       if (awsRumRef.current === awsRum) {

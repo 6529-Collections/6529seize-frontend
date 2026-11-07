@@ -87,10 +87,22 @@ jest.mock("aws-rum-web", () => {
         _region: string,
         config: MockPluginConfig
       ) => {
+        let cookiesAllowed = true;
         const instance = {
+          allowCookies: jest.fn((allow: boolean) => {
+            cookiesAllowed = allow;
+          }),
           disable: jest.fn(),
           recordEvent: jest.fn(),
           recordPageView: jest.fn(),
+          // Models a late SDK callback (for example a web-vitals candidate)
+          // whose session lookup rewrites the RUM cookies when allowed.
+          simulateLateSessionWrite: () => {
+            if (cookiesAllowed) {
+              document.cookie = "cwr_u=late-user; path=/";
+              document.cookie = "cwr_s=late-session; path=/";
+            }
+          },
         };
         const pluginContext: MockPluginContext = {
           record: instance.recordEvent,
@@ -123,6 +135,8 @@ type AwsRumHttpPluginConfig = {
 };
 
 type MockAwsRumInstance = {
+  readonly allowCookies: jest.Mock;
+  readonly simulateLateSessionWrite: () => void;
   readonly disable: jest.Mock;
   readonly recordEvent: jest.Mock;
   readonly recordPageView: jest.Mock;
@@ -662,8 +676,18 @@ describe("AwsRumProvider", () => {
       mockPerformanceConsent = false;
       rerender(<AwsRumProvider />);
 
+      expect(awsRumInstance.allowCookies).toHaveBeenCalledWith(false);
       expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
+      expect(
+        awsRumInstance.allowCookies.mock.invocationCallOrder[0]
+      ).toBeLessThan(awsRumInstance.disable.mock.invocationCallOrder[0] ?? 0);
       expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+
+      // A callback the SDK still runs after the rejection cannot bring the
+      // cookies back.
+      awsRumInstance.simulateLateSessionWrite();
       expect(hasCookie("cwr_u")).toBe(false);
       expect(hasCookie("cwr_s")).toBe(false);
 
