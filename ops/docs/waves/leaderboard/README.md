@@ -2,17 +2,17 @@
 
 ## Overview
 
-For independently managed competitions in a shared wave, see
-[Competitions](../competitions/README.md).
+For independently managed decisions in a shared wave, see
+[Decisions](../competitions/README.md).
 
 Use this area for rank-wave leaderboard tasks: submission entry, ranking views,
-decision timing, winners, and vote management.
+result timing, winners, and vote management.
 
 This area covers:
 - Thread routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - `Leaderboard` before voting ends.
 - `Sales` in curation waves.
-- `Winners` after the first decision time passes.
+- `Winners` after the first result time passes.
 - `My Votes` in memes and curation waves.
 - Wave-level `Voters` plus non-chat single-drop `Top voters`.
 - Curation-only ETH price filtering and `Price` sort.
@@ -35,15 +35,15 @@ This area covers:
   configurable cards for standard proposal-bearing Waves and full-proposal
   open behavior.
 
-### Decision and Outcome Views
+### Result and Outcome Views
 
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md): collapsed
-  header, pause messaging, and expandable decision history.
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md): collapsed
+  header, pause messaging, and expandable result history.
 - [Wave Sales Tab](feature-sales-tab.md): curation-wave sale-link cards,
-  loading/empty states, and paging through older decision rounds.
+  loading/empty states, and paging through older result rounds.
 - [Wave Winners Tab](feature-winners-tab.md): when winners appear and how
-  main-thread and right-sidebar winners render in single-decision vs
-  multi-decision waves.
+  main-thread and right-sidebar winners render in single-result vs
+  multi-result waves.
 - [Wave My Votes Tab](feature-my-votes-tab.md): voted-drop list, inline vote
   edits, select-all controls, and bulk reset behavior.
 - [Wave Top Voters Lists](feature-top-voters-lists.md): wave-level and

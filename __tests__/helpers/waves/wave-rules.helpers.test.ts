@@ -227,8 +227,8 @@ describe("wave-rules.helpers", () => {
         expect.objectContaining({ label: "Who can vote", value: "Public" }),
         expect.objectContaining({ label: "Chat access", value: "Public" }),
         expect.objectContaining({
-          label: "Decision cadence",
-          value: "Single decision",
+          label: "Result cadence",
+          value: "Single result",
         }),
       ])
     );
@@ -276,8 +276,8 @@ describe("wave-rules.helpers", () => {
       ])
     );
     const labels = rows.map(([label]) => label);
-    expect(labels).not.toContain("First decision");
-    expect(labels).not.toContain("Decision cadence");
+    expect(labels).not.toContain("First result");
+    expect(labels).not.toContain("Result cadence");
   });
 
   it("labels existing perpetual rank waves in the type row", () => {

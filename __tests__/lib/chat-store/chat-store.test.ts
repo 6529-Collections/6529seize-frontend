@@ -1,4 +1,3 @@
-import { mergeDrops } from "@/contexts/wave/utils/wave-messages-utils";
 import {
   DropSize,
   getStableDropKey,
@@ -11,6 +10,8 @@ import {
   type IllegalTransition,
 } from "@/lib/action-lifecycle";
 import { ChatStore } from "@/lib/chat-store";
+
+import { legacyMergeDrops as mergeDrops } from "./legacyMergeDrops";
 
 const WAVE = "wave-1";
 const OTHER_WAVE = "wave-2";
@@ -863,3 +864,65 @@ function mulberry32(seed: number): () => number {
     return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
   };
 }
+
+describe("malformed copies", () => {
+  it("keeps a drop without an author instead of breaking the merge", () => {
+    const store = new ChatStore();
+    const malformed = {
+      id: "no-author",
+      serial_no: 3,
+      created_at: 3_000,
+      wave: { id: WAVE },
+      type: DropSize.FULL,
+      stableKey: "no-author",
+      stableHash: "no-author",
+    } as unknown as ExtendedDrop;
+    store.merge(WAVE, [
+      full({ id: "temp-x", serial_no: 9_000, created_at: 2_900 }),
+    ]);
+    expect(() => store.merge(WAVE, [malformed])).not.toThrow();
+    expect(store.get(WAVE, "no-author")).toMatchObject({
+      stableKey: "no-author",
+      stableHash: "no-author",
+    });
+    expect(() =>
+      store.merge(WAVE, [{ ...malformed, boosts: 1 } as ExtendedDrop])
+    ).not.toThrow();
+    expect(ids(store)).toEqual(["no-author", "temp-x"]);
+  });
+});
+
+describe("identical copies", () => {
+  it("keeps the stored object and version for a copy with nothing new", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [full({ id: "d1", serial_no: 1 })]);
+    const stored = store.get(WAVE, "d1");
+    const drops = store.getDrops(WAVE);
+    const version = store.version(WAVE);
+    // Feeds hand drops over with `stableKey: id`, and an absent field may
+    // arrive as `undefined`; neither is news.
+    const result = store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { extra_field: undefined } }),
+    ]);
+    expect(result.changed).toBe(false);
+    expect(store.get(WAVE, "d1")).toBe(stored);
+    expect(store.getDrops(WAVE)).toBe(drops);
+    expect(store.version(WAVE)).toBe(version);
+  });
+
+  it("replaces the object when any field changes, however deep", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { reactions: [{ count: 1 }] } }),
+    ]);
+    const stored = store.get(WAVE, "d1");
+    store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { reactions: [{ count: 2 }] } }),
+    ]);
+    expect(store.get(WAVE, "d1")).not.toBe(stored);
+    expect(store.get(WAVE, "d1")).toMatchObject({
+      reactions: [{ count: 2 }],
+      stableKey: stored?.stableKey,
+    });
+  });
+});

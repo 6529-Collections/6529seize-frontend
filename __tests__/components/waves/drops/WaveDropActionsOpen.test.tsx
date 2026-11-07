@@ -47,7 +47,7 @@ test.each([false, true])(
       drop_type: ApiDropType.Participatory,
     } as ExtendedDrop;
     (useRouter as jest.Mock).mockReturnValue({ push });
-    (usePathname as jest.Mock).mockReturnValue("/waves/w/competitions/alpha");
+    (usePathname as jest.Mock).mockReturnValue("/waves/w/decisions/alpha");
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams("tab=leaderboard&default=1")
     );
@@ -67,7 +67,7 @@ test.each([false, true])(
     );
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith(
-      "/waves/w/competitions/alpha?tab=leaderboard&drop=entry-art",
+      "/waves/w/decisions/alpha?tab=leaderboard&drop=entry-art",
       { scroll: false }
     );
     expect(onOpen).toHaveBeenCalledTimes(1);

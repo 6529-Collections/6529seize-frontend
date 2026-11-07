@@ -29,6 +29,7 @@ import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
 import {
   ValidatorFeedback,
   ValidatorNeeds,
+  ValidatorSwitch,
   ValidatorUpgrade,
 } from "./ValidatorSections";
 import ValidatorSteps from "./ValidatorSteps";
@@ -228,6 +229,7 @@ export default function ValidatorDownloadPage({
         )}
       </section>
 
+      <ValidatorSwitch newest={release?.version} />
       <ValidatorUpgrade newest={release?.version} />
 
       <section aria-labelledby="steps">

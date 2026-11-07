@@ -60,6 +60,17 @@ describe("handleValidatorPageGate", () => {
     ).toBe(path);
   });
 
+  it("keeps the pages' screenshots in public/validator behind the password", () => {
+    const path = "/validator/app-today.webp";
+    expect(rewriteTarget(handleValidatorPageGate(request(path), path))).toBe(
+      "https://6529.io/validator/locked"
+    );
+    const valid = createAccessCookieValue(PASSWORD);
+    expect(
+      handleValidatorPageGate(request(path, { cookie: valid }), path)
+    ).toBeUndefined();
+  });
+
   it("lets a valid cookie through and refuses a forged one", () => {
     const valid = createAccessCookieValue(PASSWORD);
     expect(

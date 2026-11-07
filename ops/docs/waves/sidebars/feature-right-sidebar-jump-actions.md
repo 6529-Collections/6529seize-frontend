@@ -3,8 +3,8 @@
 ## Overview
 
 Trending cards in About can jump to a drop in the current wave chat.
-Competition leaderboard, winners and vote activity actions belong to their main
-competition views.
+Decision leaderboard, winners and vote activity actions belong to their main
+decision views.
 
 ## Location in the Site
 
@@ -42,5 +42,5 @@ Serial jumps are in-session actions and do not write a serial to the URL.
 
 - [Wave Information Panel](feature-right-sidebar-tabs.md)
 - [Trending Drops](feature-right-sidebar-trending-drops.md)
-- [Competition views](../competitions/feature-competitions.md)
+- [Decision views](../competitions/feature-competitions.md)
 - [Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
