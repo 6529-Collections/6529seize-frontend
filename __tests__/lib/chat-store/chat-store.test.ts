@@ -891,3 +891,38 @@ describe("malformed copies", () => {
     expect(ids(store)).toEqual(["no-author", "temp-x"]);
   });
 });
+
+describe("identical copies", () => {
+  it("keeps the stored object and version for a copy with nothing new", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [full({ id: "d1", serial_no: 1 })]);
+    const stored = store.get(WAVE, "d1");
+    const drops = store.getDrops(WAVE);
+    const version = store.version(WAVE);
+    // Feeds hand drops over with `stableKey: id`, and an absent field may
+    // arrive as `undefined`; neither is news.
+    const result = store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { extra_field: undefined } }),
+    ]);
+    expect(result.changed).toBe(false);
+    expect(store.get(WAVE, "d1")).toBe(stored);
+    expect(store.getDrops(WAVE)).toBe(drops);
+    expect(store.version(WAVE)).toBe(version);
+  });
+
+  it("replaces the object when any field changes, however deep", () => {
+    const store = new ChatStore();
+    store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { reactions: [{ count: 1 }] } }),
+    ]);
+    const stored = store.get(WAVE, "d1");
+    store.merge(WAVE, [
+      full({ id: "d1", serial_no: 1, extra: { reactions: [{ count: 2 }] } }),
+    ]);
+    expect(store.get(WAVE, "d1")).not.toBe(stored);
+    expect(store.get(WAVE, "d1")).toMatchObject({
+      reactions: [{ count: 2 }],
+      stableKey: stored?.stableKey,
+    });
+  });
+});
