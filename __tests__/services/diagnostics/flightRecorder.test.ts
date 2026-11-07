@@ -287,6 +287,16 @@ describe("flight recorder", () => {
     );
   });
 
+  it("skips aborted API requests", () => {
+    recorder.recordFlightApi({
+      method: "GET",
+      endpoint: "/api/drops",
+      status: "aborted",
+      durationMs: 5,
+    });
+    expect(recorder.getFlightSnapshot().entries).toEqual([]);
+  });
+
   it("never sends anything or uses localStorage", () => {
     recorder.recordFlightNavigation("/waves/[wave]");
     recorder.recordFlightApi({

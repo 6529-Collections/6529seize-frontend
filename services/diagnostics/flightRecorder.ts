@@ -221,7 +221,10 @@ export function recordFlightApi(input: {
   readonly durationMs: number;
   readonly requestId?: string | null | undefined;
 }): void {
-  if (!isFlightRecorderEnabled()) return;
+  // Aborted requests (common on fast navigation) would crowd out the rest.
+  if (input.status === "aborted" || !isFlightRecorderEnabled()) return;
+  // The backend's own or API Gateway request ID (R14 §3.4): an opaque token
+  // that carries no user identifier, kept only when ID-shaped.
   const requestId = input.requestId?.trim();
   record({
     at: Date.now(),
@@ -288,6 +291,9 @@ export function getFlightSnapshot(now = Date.now()): FlightSnapshot {
 export function startFlightRecorder(): void {
   if (started || !isFlightRecorderEnabled()) return;
   started = true;
+  // One level: the next hide or error overwrites the stored copy with this
+  // page's entries, so a second reload keeps only the later page. The
+  // in-memory `previous` stays until its hour is up.
   previous = readLocalCopy(Date.now());
   if (previous) scheduleLocalCopyDeletion(previous.saved_at);
   const listen = <K extends keyof WindowEventMap>(
