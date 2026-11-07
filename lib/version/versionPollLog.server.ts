@@ -1,6 +1,6 @@
 import "server-only";
 import { randomInt } from "node:crypto";
-import { VERSION_POLL_HEADERS } from "./versionPoll";
+import { getClientBuildId, VERSION_POLL_HEADERS } from "./versionPoll";
 
 // Every hidden poll is logged (one per tab per 10-15 min); one visible poll
 // in four (each visible tab polls every 2 min). `rate` scales counts back up.
@@ -19,12 +19,8 @@ const toBoundedInt = (value: string | null, max: number): number => {
 };
 
 // Builds are full or short git SHAs; anything else is reported as "other".
-const toVersionLabel = (value: string | null): string => {
-  const normalized = value?.trim().toLowerCase() ?? "";
-  return /^[0-9a-f]{7,40}$/.test(normalized)
-    ? normalized.slice(0, 12)
-    : "other";
-};
+const toVersionLabel = (value: string | null): string =>
+  getClientBuildId(value ?? undefined)?.slice(0, 12) ?? "other";
 
 /**
  * One space-separated line per sampled poll, on stdout, which Elastic

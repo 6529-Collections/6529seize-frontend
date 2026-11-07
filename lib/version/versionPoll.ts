@@ -10,6 +10,15 @@ export const VERSION_POLL_HEADERS = {
   releasesBehind: "x-6529-client-releases-behind",
 } as const;
 
+/**
+ * The page's build ID (its git SHA) when it is one, for reporting it beside
+ * the poll: the app socket sends it as `client_version`.
+ */
+export function getClientBuildId(version: string | undefined): string | null {
+  const normalized = version?.trim().toLowerCase() ?? "";
+  return /^[0-9a-f]{7,40}$/.test(normalized) ? normalized : null;
+}
+
 // Distinct newer versions this page has been told about since it loaded: a
 // lower bound on how many releases behind it is.
 const announcedSinceLoad = new Set<string>();
