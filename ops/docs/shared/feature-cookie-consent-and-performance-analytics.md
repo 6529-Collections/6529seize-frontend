@@ -164,6 +164,10 @@ performance consent choice. Measured on `@reown/appkit` 1.8.19 and
   fetches it only after performance consent is `true`, so visitors without
   that consent never download it. Page-view and profile identification resume
   as soon as it arrives.
+- The [first-party collector](../developer/first-party-telemetry.md), on in
+  staging only for now, sets no cookies or storage and runs without the
+  performance choice. It reads the consent country only to leave out its daily
+  `fp` hash for EU/EEA, UK and unknown countries.
 - This page covers performance-consent behavior only. Other country-based UI
   rules that reuse the consent country are documented by their owning features.
 

@@ -1,5 +1,6 @@
 import { publicEnv } from "@/config/env";
 import { getApiBase } from "@/services/api/api-endpoints";
+import { countApiRequest } from "@/services/analytics/telemetry/collector";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -399,13 +400,15 @@ const executeApiRequest = async <T>({
     status = getErrorStatus(status, error);
     throw normalizeFetchError(error, url);
   } finally {
+    const durationMs = getRequestTimingNow() - requestStartedAtMs;
     recordMobileLaunchApiRequest({
       endpoint: url,
       method,
       status,
       startedAtMs: requestStartedAtMs,
-      durationMs: getRequestTimingNow() - requestStartedAtMs,
+      durationMs,
     });
+    countApiRequest({ endpoint: url, status, durationMs });
   }
 };
 

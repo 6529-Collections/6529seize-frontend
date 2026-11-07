@@ -14,6 +14,7 @@ import {
   sanitizeMixpanelEnvelope,
   sanitizeMixpanelIdentityEnvelope,
 } from "./mixpanelPrivacy";
+import { recordProductEvent } from "./telemetry/collector";
 
 export type AnalyticsProperties = Record<
   string,
@@ -293,10 +294,21 @@ const track = (
   }
 };
 
+// During the overlap (R14 §4.6) every event also goes to the first-party
+// collector, which keeps only registry events and enum or boolean values.
+const fanOut = (eventName: string, properties?: AnalyticsProperties): void => {
+  try {
+    recordProductEvent(eventName, properties);
+  } catch {
+    // Telemetry must never interrupt a product action.
+  }
+};
+
 export const trackAnalyticsEvent = (
   eventName: string,
   properties?: AnalyticsProperties
 ): boolean => {
+  fanOut(eventName, properties);
   return track(eventName, properties);
 };
 
@@ -389,5 +401,6 @@ export const trackAuthImpactEvent = (
   eventName: AuthImpactEventName,
   properties?: AuthImpactProperties
 ): void => {
+  fanOut(eventName, properties);
   track(eventName, properties);
 };

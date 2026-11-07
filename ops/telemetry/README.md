@@ -23,6 +23,12 @@ with separate own-profile and visitor groups.
   technical timings do not go to Mixpanel.
 - Google tag page analytics is a preserved legacy overlap. Its external usage
   has not been verified, so this change does not remove it.
+- The [first-party collector](../docs/developer/first-party-telemetry.md)
+  (`first-party`, same-origin `/e`) records page views, Core Web Vitals and
+  page health counters, and receives registry product events as a
+  compatibility copy of Mixpanel's. It runs alongside AWS RUM, Mixpanel and
+  Google tag for a two-week overlap, after which it owns their questions and
+  they are removed.
 
 Two providers may observe the same flow only when they answer different
 questions. The registry must say which question each destination owns. A

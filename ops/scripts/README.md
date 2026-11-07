@@ -22,6 +22,11 @@ wrapper expects that location.
   [Page edge cache](../docs/developer/cloudfront-page-cache.md).
 - `sync-cloudfront-origin-facing.mjs`: refreshes the CloudFront origin-facing
   address ranges the client rate limiter skips; `--check` reports drift.
+- `sync-telemetry-schema.cjs`: compares `ops/telemetry/telemetry-collector.v1.schema.json`
+  with the backend's collector schema through the GitHub API (`GH_TOKEN`);
+  `--print` prints the backend copy to redirect over the vendored one, and
+  `--ref` picks a backend branch or commit. See
+  [First-party telemetry](../docs/developer/first-party-telemetry.md).
 - `mobile-lab/`: phone-emulated load measurements of the live site with the
   mobile plan's stage 0 budgets; run by the `Mobile lab` workflow after web
   deploys. See its README.

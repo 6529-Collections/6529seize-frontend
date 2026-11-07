@@ -11,6 +11,10 @@ import {
   type ErrorBoundaryRetryProps,
 } from "@/components/error/errorBoundaryRetry";
 import { publicEnv } from "@/config/env";
+import {
+  countBoundaryError,
+  flushTelemetry,
+} from "@/services/analytics/telemetry/collector";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, tRich } from "@/i18n/messages";
 import { extractErrorDetails } from "@/utils/error-extractor";
@@ -53,6 +57,8 @@ export default function GlobalError({
   const locale = useBrowserLocale();
 
   useEffect(() => {
+    countBoundaryError();
+    flushTelemetry(true);
     if (!publicEnv.SENTRY_DSN) return;
     Sentry.captureException(error);
   }, [error]);

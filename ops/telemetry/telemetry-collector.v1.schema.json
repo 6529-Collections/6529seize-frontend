@@ -1,0 +1,1417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/telemetry-collector.v1.json",
+  "title": "6529 first-party telemetry batch, v1",
+  "description": "POST /e (6529.io) or /api/e (API). Body at most 8192 bytes, text/plain or application/json. Responds 204. Never send URLs, query strings, titles, handles, wallet addresses, ids or free text.",
+  "type": "object",
+  "required": [
+    "v",
+    "events"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": [
+        "v",
+        "t",
+        "route",
+        "device",
+        "platform"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "t": {
+          "enum": [
+            "pv",
+            "vitals",
+            "ev",
+            "health"
+          ]
+        },
+        "route": {
+          "type": "string",
+          "maxLength": 96,
+          "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
+          "description": "Route template such as `/waves/[wave]` or `/[user]/collected`. Static segments are lowercase; ids and names must be placeholders (`[name]`, `[...name]`, `[[...name]]` or `:name`). Unknown first segments and id-looking segments are recorded as `/[other]`."
+        },
+        "device": {
+          "enum": [
+            "mobile",
+            "tablet",
+            "desktop"
+          ]
+        },
+        "platform": {
+          "enum": [
+            "web",
+            "ios",
+            "android",
+            "desktop"
+          ]
+        },
+        "page_group": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,32}$"
+        },
+        "prev_route": {
+          "anyOf": [
+            {
+              "const": "entry"
+            },
+            {
+              "type": "string",
+              "maxLength": 96,
+              "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
+              "description": "Route template such as `/waves/[wave]` or `/[user]/collected`. Static segments are lowercase; ids and names must be placeholders (`[name]`, `[...name]`, `[[...name]]` or `:name`). Unknown first segments and id-looking segments are recorded as `/[other]`."
+            }
+          ]
+        },
+        "referrer_domain": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+          "description": "External hostname only, sent only when prev_route is `entry`."
+        },
+        "browser": {
+          "enum": [
+            "chrome",
+            "safari",
+            "firefox",
+            "edge",
+            "other"
+          ]
+        },
+        "signed_in": {
+          "type": "boolean"
+        },
+        "fp": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{8,32}$",
+          "description": "Optional coarse client hash for daily uniques (C52a). Used in memory only, never stored or logged. Omit for EU/EEA/UK/unknown-country visitors."
+        },
+        "lcp": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300000
+        },
+        "inp": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300000
+        },
+        "ttfb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300000
+        },
+        "fcp": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300000
+        },
+        "cls": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "name": {
+          "enum": [
+            "Homepage section seen",
+            "Homepage action clicked",
+            "Profile section seen",
+            "Profile action clicked",
+            "Auth Forced Logout",
+            "Auth Reauth Prompt Shown",
+            "Auth Session Refresh Recovered",
+            "Auth Session Upgrade Prompt Shown",
+            "Auth Validation Failed While Connected",
+            "Auth Session Refresh Succeeded",
+            "Auth Validation Cancelled",
+            "Auth Session Refresh Product Impact",
+            "Wave Feed Load Started",
+            "Wave Feed Load Succeeded",
+            "Wave Feed Load Cancelled",
+            "Wave Feed Load Failed",
+            "Wave Feature Seen",
+            "Wave Feature Activated"
+          ]
+        },
+        "p": {
+          "type": "object"
+        },
+        "c": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ws_drop": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "ws_reconnect": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "long_task": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "asset_fail": {
+              "type": "object",
+              "maxProperties": 16,
+              "propertyNames": {
+                "enum": [
+                  "script",
+                  "style",
+                  "font",
+                  "image",
+                  "media",
+                  "other"
+                ]
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              }
+            },
+            "error": {
+              "type": "object",
+              "maxProperties": 16,
+              "propertyNames": {
+                "enum": [
+                  "unhandled_error",
+                  "unhandled_rejection",
+                  "chunk_load",
+                  "boundary",
+                  "resource",
+                  "other"
+                ]
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              }
+            },
+            "api_fail": {
+              "type": "object",
+              "maxProperties": 16,
+              "propertyNames": {
+                "type": "string",
+                "maxLength": 96,
+                "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
+                "description": "API endpoint template without `/api`, e.g. `/drops/[id]`."
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              }
+            },
+            "api_slow": {
+              "type": "object",
+              "maxProperties": 16,
+              "propertyNames": {
+                "type": "string",
+                "maxLength": 96,
+                "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
+                "description": "API endpoint template without `/api`, e.g. `/drops/[id]`."
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              }
+            }
+          }
+        },
+        "ws_lag": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300000
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Homepage section seen"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "enum": [
+                      "Introduction",
+                      "Get started",
+                      "How to start",
+                      "Latest drop",
+                      "Next drop",
+                      "About 6529",
+                      "Coming up",
+                      "Boosted drops",
+                      "Explore waves"
+                    ]
+                  },
+                  "signed_in": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  },
+                  "screen_size": {
+                    "type": "string",
+                    "enum": [
+                      "Small",
+                      "Medium",
+                      "Large"
+                    ]
+                  },
+                  "layout_version": {
+                    "type": "string",
+                    "enum": [
+                      "1"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Homepage action clicked"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "enum": [
+                      "Introduction",
+                      "Get started",
+                      "How to start",
+                      "Latest drop",
+                      "Next drop",
+                      "About 6529",
+                      "Coming up",
+                      "Boosted drops",
+                      "Explore waves"
+                    ]
+                  },
+                  "signed_in": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  },
+                  "screen_size": {
+                    "type": "string",
+                    "enum": [
+                      "Small",
+                      "Medium",
+                      "Large"
+                    ]
+                  },
+                  "layout_version": {
+                    "type": "string",
+                    "enum": [
+                      "1"
+                    ]
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "Open network health",
+                      "Get started",
+                      "Connect wallet",
+                      "Browse Waves",
+                      "Create profile",
+                      "View collections",
+                      "Open artwork",
+                      "Open artist profile",
+                      "Toggle edition details",
+                      "View distribution plan",
+                      "Mint",
+                      "Manage subscriptions",
+                      "About subscriptions",
+                      "About submissions",
+                      "View all",
+                      "Open drop",
+                      "Open wave"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Profile section seen"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "enum": [
+                      "Collection summary",
+                      "Collection details",
+                      "Filters",
+                      "Artwork"
+                    ]
+                  },
+                  "profile_viewer_context": {
+                    "type": "string",
+                    "enum": [
+                      "self",
+                      "other",
+                      "anonymous"
+                    ]
+                  },
+                  "profile_tab": {
+                    "type": "string",
+                    "enum": [
+                      "Collected"
+                    ]
+                  },
+                  "client": {
+                    "type": "string",
+                    "enum": [
+                      "native",
+                      "desktop_app",
+                      "mobile_web",
+                      "desktop_web"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Profile action clicked"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "enum": [
+                      "Collection summary",
+                      "Collection details",
+                      "Filters",
+                      "Artwork"
+                    ]
+                  },
+                  "profile_viewer_context": {
+                    "type": "string",
+                    "enum": [
+                      "self",
+                      "other",
+                      "anonymous"
+                    ]
+                  },
+                  "profile_tab": {
+                    "type": "string",
+                    "enum": [
+                      "Collected"
+                    ]
+                  },
+                  "client": {
+                    "type": "string",
+                    "enum": [
+                      "native",
+                      "desktop_app",
+                      "mobile_web",
+                      "desktop_web"
+                    ]
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "Details",
+                      "Hide details",
+                      "Complete my set",
+                      "Manage orders",
+                      "Open artwork",
+                      "Change view",
+                      "Change collection",
+                      "Change season",
+                      "Change sort",
+                      "Change seized filter",
+                      "Clear filters",
+                      "Change address",
+                      "Change page",
+                      "Show more seasons",
+                      "Show fewer seasons"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Forced Logout"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "auth_validation_failed",
+                      "session_refresh",
+                      "session_upgrade_deadline_expired",
+                      "session_upgrade_required",
+                      "stored_auth_invalid",
+                      "wallet_not_authorized"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "auth_state_after": {
+                    "type": "string",
+                    "enum": [
+                      "authenticated",
+                      "auth_validation_failed",
+                      "logged_out",
+                      "reauth_prompt",
+                      "refresh_needed",
+                      "session_upgrade_prompt",
+                      "session_upgrade_required",
+                      "wallet_connected"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "was_connected_wallet": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Reauth Prompt Shown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "auth_validation_failed",
+                      "session_refresh",
+                      "session_upgrade_deadline_expired",
+                      "session_upgrade_required",
+                      "stored_auth_invalid",
+                      "wallet_not_authorized"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "auth_state_after": {
+                    "type": "string",
+                    "enum": [
+                      "authenticated",
+                      "auth_validation_failed",
+                      "logged_out",
+                      "reauth_prompt",
+                      "refresh_needed",
+                      "session_upgrade_prompt",
+                      "session_upgrade_required",
+                      "wallet_connected"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "was_connected_wallet": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Session Refresh Recovered"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "auth_validation_failed",
+                      "session_refresh",
+                      "session_upgrade_deadline_expired",
+                      "session_upgrade_required",
+                      "stored_auth_invalid",
+                      "wallet_not_authorized"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "auth_state_after": {
+                    "type": "string",
+                    "enum": [
+                      "authenticated",
+                      "auth_validation_failed",
+                      "logged_out",
+                      "reauth_prompt",
+                      "refresh_needed",
+                      "session_upgrade_prompt",
+                      "session_upgrade_required",
+                      "wallet_connected"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "was_connected_wallet": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Session Upgrade Prompt Shown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "auth_validation_failed",
+                      "session_refresh",
+                      "session_upgrade_deadline_expired",
+                      "session_upgrade_required",
+                      "stored_auth_invalid",
+                      "wallet_not_authorized"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "auth_state_after": {
+                    "type": "string",
+                    "enum": [
+                      "authenticated",
+                      "auth_validation_failed",
+                      "logged_out",
+                      "reauth_prompt",
+                      "refresh_needed",
+                      "session_upgrade_prompt",
+                      "session_upgrade_required",
+                      "wallet_connected"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "was_connected_wallet": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Validation Failed While Connected"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "auth_validation_failed",
+                      "session_refresh",
+                      "session_upgrade_deadline_expired",
+                      "session_upgrade_required",
+                      "stored_auth_invalid",
+                      "wallet_not_authorized"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "auth_state_after": {
+                    "type": "string",
+                    "enum": [
+                      "authenticated",
+                      "auth_validation_failed",
+                      "logged_out",
+                      "reauth_prompt",
+                      "refresh_needed",
+                      "session_upgrade_prompt",
+                      "session_upgrade_required",
+                      "wallet_connected"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "was_connected_wallet": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Session Refresh Succeeded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "had_local_jwt": {
+                    "type": "boolean"
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Validation Cancelled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "had_local_jwt": {
+                    "type": "boolean"
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Auth Session Refresh Product Impact"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "client_type": {
+                    "type": "string",
+                    "enum": [
+                      "desktop",
+                      "native",
+                      "web"
+                    ]
+                  },
+                  "had_local_jwt": {
+                    "type": "boolean"
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "enum": [
+                      "failed_without_prompt",
+                      "logout_required",
+                      "reauth_required",
+                      "session_upgrade_required"
+                    ]
+                  },
+                  "refresh_outcome": {
+                    "type": "string",
+                    "enum": [
+                      "cancelled",
+                      "empty",
+                      "failed",
+                      "local_valid_after_failure",
+                      "missing_wallet",
+                      "not_attempted",
+                      "success"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "reauth_required": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feed Load Started"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "load_source": {
+                    "type": "string",
+                    "enum": [
+                      "background_sync",
+                      "cache",
+                      "initial_visible",
+                      "native_initial_backfill",
+                      "server_initial"
+                    ]
+                  },
+                  "duration_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "under_1s",
+                      "1s_3s",
+                      "3s_10s",
+                      "over_10s"
+                    ]
+                  },
+                  "had_cached_drops": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feed Load Succeeded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "load_source": {
+                    "type": "string",
+                    "enum": [
+                      "background_sync",
+                      "cache",
+                      "initial_visible",
+                      "native_initial_backfill",
+                      "server_initial"
+                    ]
+                  },
+                  "duration_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "under_1s",
+                      "1s_3s",
+                      "3s_10s",
+                      "over_10s"
+                    ]
+                  },
+                  "had_cached_drops": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  },
+                  "drop_count_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "0",
+                      "1-9",
+                      "10-49",
+                      "50+"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feed Load Cancelled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "load_source": {
+                    "type": "string",
+                    "enum": [
+                      "background_sync",
+                      "cache",
+                      "initial_visible",
+                      "native_initial_backfill",
+                      "server_initial"
+                    ]
+                  },
+                  "duration_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "under_1s",
+                      "1s_3s",
+                      "3s_10s",
+                      "over_10s"
+                    ]
+                  },
+                  "had_cached_drops": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feed Load Failed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "load_source": {
+                    "type": "string",
+                    "enum": [
+                      "background_sync",
+                      "cache",
+                      "initial_visible",
+                      "native_initial_backfill",
+                      "server_initial"
+                    ]
+                  },
+                  "duration_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "under_1s",
+                      "1s_3s",
+                      "3s_10s",
+                      "over_10s"
+                    ]
+                  },
+                  "status_bucket": {
+                    "type": "string",
+                    "enum": [
+                      "aborted",
+                      "1xx",
+                      "2xx",
+                      "3xx",
+                      "4xx",
+                      "5xx",
+                      "network_error",
+                      "unknown"
+                    ]
+                  },
+                  "error_kind": {
+                    "type": "string",
+                    "enum": [
+                      "abort",
+                      "auth",
+                      "client",
+                      "network",
+                      "rate_limit",
+                      "server",
+                      "unknown"
+                    ]
+                  },
+                  "product_failure": {
+                    "type": "boolean"
+                  },
+                  "is_native": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feature Seen"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "feature": {
+                    "type": "string",
+                    "enum": [
+                      "sidebar_section",
+                      "sidebar_entry",
+                      "sidebar_collection",
+                      "wave_tab",
+                      "leaderboard_sort"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "enum": [
+                      "recommendations",
+                      "active_votes",
+                      "recommendations_all",
+                      "recommendations_wave",
+                      "active_votes_all",
+                      "active_votes_wave",
+                      "profile_feed",
+                      "search",
+                      "all",
+                      "pinned",
+                      "joined",
+                      "chat",
+                      "competitions",
+                      "leaderboard",
+                      "submissions",
+                      "sales",
+                      "winners",
+                      "outcome",
+                      "my_votes",
+                      "polls",
+                      "faq",
+                      "configuration",
+                      "about",
+                      "voters",
+                      "rank",
+                      "rating_prediction",
+                      "realtime_vote",
+                      "trend",
+                      "created_at",
+                      "price",
+                      "menu"
+                    ]
+                  },
+                  "placement": {
+                    "type": "string",
+                    "enum": [
+                      "sidebar",
+                      "wave_tabs",
+                      "leaderboard_tabs",
+                      "leaderboard_dropdown"
+                    ]
+                  },
+                  "viewer": {
+                    "type": "string",
+                    "enum": [
+                      "guest",
+                      "profile",
+                      "proxy"
+                    ]
+                  },
+                  "selection_source": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "automatic"
+                    ]
+                  },
+                  "exposure_kind": {
+                    "type": "string",
+                    "enum": [
+                      "foreground_dwell",
+                      "direct_activation"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Wave Feature Activated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "p": {
+                "type": "object",
+                "maxProperties": 6,
+                "additionalProperties": false,
+                "properties": {
+                  "feature": {
+                    "type": "string",
+                    "enum": [
+                      "sidebar_section",
+                      "sidebar_entry",
+                      "sidebar_collection",
+                      "wave_tab",
+                      "leaderboard_sort"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "enum": [
+                      "recommendations",
+                      "active_votes",
+                      "recommendations_all",
+                      "recommendations_wave",
+                      "active_votes_all",
+                      "active_votes_wave",
+                      "profile_feed",
+                      "search",
+                      "all",
+                      "pinned",
+                      "joined",
+                      "chat",
+                      "competitions",
+                      "leaderboard",
+                      "submissions",
+                      "sales",
+                      "winners",
+                      "outcome",
+                      "my_votes",
+                      "polls",
+                      "faq",
+                      "configuration",
+                      "about",
+                      "voters",
+                      "rank",
+                      "rating_prediction",
+                      "realtime_vote",
+                      "trend",
+                      "created_at",
+                      "price",
+                      "menu"
+                    ]
+                  },
+                  "placement": {
+                    "type": "string",
+                    "enum": [
+                      "sidebar",
+                      "wave_tabs",
+                      "leaderboard_tabs",
+                      "leaderboard_dropdown"
+                    ]
+                  },
+                  "viewer": {
+                    "type": "string",
+                    "enum": [
+                      "guest",
+                      "profile",
+                      "proxy"
+                    ]
+                  },
+                  "selected": {
+                    "type": "boolean"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "choose",
+                      "open",
+                      "expand",
+                      "collapse"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
