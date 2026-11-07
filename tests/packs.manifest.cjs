@@ -474,6 +474,7 @@ const PACKS = [
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/chat-render-budget-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

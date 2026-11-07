@@ -13,9 +13,12 @@ export {
 } from "./machine";
 export { actionLabel, type ActionLabel, type ActionLabelKey } from "./labels";
 export {
+  addTransitionObserver,
   setIllegalTransitionReporter,
+  type ActionTransition,
   type IllegalTransition,
   type IllegalTransitionReporter,
+  type TransitionObserver,
 } from "./report";
 export { CHAIN_LABEL_RANK } from "./chain";
 export type {
