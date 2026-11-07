@@ -1,0 +1,295 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ]
+    },
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ]
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Start here and Connect wallet sit above the fold at both viewports, and the mint panel is complete. But the Latest Drop artwork is an empty black player, two of the three Coming up previews say 'Preview unavailable', and the concrete definition of 6529 sits below the whole mint module."
+    },
+    "J02": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png"
+      ],
+      "findings": ["F-002"],
+      "note": "The order is hero, Latest Drop, mission block, Coming up, waves. The mission block splits the two Memes sections and is far from the hero it explains."
+    },
+    "J03": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The H1 and CTAs lead clearly. On desktop, the largest element in the first viewport is an empty black video box of about 650x700 px, so attention lands on nothing."
+    },
+    "J04": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-001", "F-004", "F-007"],
+      "note": "Dark iron surfaces, rounded-xl cards and restrained borders are native, and the wave banners and avatars add real content. Against that: the principal art is missing, a mission sentence is styled as a monospace 'terminal' box, and the waves header uses crypto-marketing hype."
+    },
+    "J05": {
+      "score": 8,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-06.png"
+      ],
+      "findings": [],
+      "note": "Desktop density suits a mixed landing page, and the wave cards scan quickly. At 390, about 650 px go to two 'Preview unavailable' boxes (charged in F-001)."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-004", "F-005", "F-006"],
+      "note": "Type roles are consistent. Detail defects: literal markdown asterisks in a wave preview, the one centered section header, and dangling '|' separators in the mobile footer."
+    },
+    "J07": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-003", "F-004", "F-007"],
+      "note": "Mint labels and the allowance copy are specific. But the vote figures contradict the rank labels without explanation, 'Tired of bot replies? / Join the most interesting chats in crypto' is a superlative hook, and the mission claims have no path to their mechanism."
+    },
+    "J10": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-001", "F-006"],
+      "note": "Sections stack cleanly at 390 with no horizontal overflow. But the video controls overlap in Latest Drop and Next Mint, and the footer wraps with dangling separators and ends after 'Privacy Policy |'."
+    },
+    "J13": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-04.png"
+      ],
+      "findings": ["F-003"],
+      "note": "Before the wallet step the user sees price in ETH, edition 149/331, status, the phase end and an allowance gated on connection. TDH figures are unexplained and contradict the rank labels. The mint lifecycle was not observable."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S1": "unverified",
+    "S2": "unverified",
+    "S3": "unverified",
+    "S4": "unverified",
+    "S5": "unverified",
+    "S6": "unverified"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J01", "J03", "J04", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "The Latest Drop (The Memes #560, a video) renders as an empty black player showing '0:00 / —' with no poster frame. On desktop it is the largest element in the first viewport. In Coming up, the Next Mint video is also black. The Leading and 2nd place cards, both marked with the image icon, show only 'Preview unavailable' in grey boxes about 320 px tall at 390 (page-1440x1000-02, page-390x844-04). At 390 the player has no reserved height: the 64 px play button sits on the scrub bar in Latest Drop, and in Next Mint it overlaps the scrub bar and the '0:00 / —' pill above the icon row (page-390x844-01, page-390x844-03).",
+      "consequence": "Visitors land on an empty rectangle instead of the art the page promotes, and members cannot see what they would mint or vote on. On phones the overlapping controls look broken and invite mis-taps.",
+      "change": "Give video media a poster: the drop thumbnail or a first-frame still. Reserve the player box at the artwork's aspect ratio from token metadata before the file loads, so the controls lay out at the real height. For Coming up entries whose preview fails, fall back to the submission thumbnail. If no thumbnail exists, use a compact fallback that names the work and links to it, not a full-height grey box.",
+      "acceptance_check": "At 1440x1000 and 390x844, the Latest Drop shows the artwork still at its own aspect ratio before playback. Each Coming up card shows its artwork or a compact named fallback. At 390x844, the centered play button, scrub bar, time pill and icon buttons do not overlap in either player.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J02", "J01"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "Above the fold, the only statement of what 6529 is is the H1 'Building a decentralized network state'. The concrete definition ('6529 is a network society: a decentralized, permissionless global network that funds, builds, and coordinates public-goods work…') starts below the whole Latest Drop module: about y=1240 at desktop and mid tile 2 at 390. It also sits between Latest Drop and Coming up, separating the current drop from its queue.",
+      "consequence": "A first-time visitor scrolls past a mint panel of unexplained terms before learning what 6529 is. Members lose the continuity between the live drop and what mints next.",
+      "change": "Choose one: (a) add a one-sentence definition under the H1, e.g. '6529 is a network society that funds and builds public-goods work in art, science, culture, and technology.', and keep the longer block lower; or (b) move the network-society block directly beneath the hero. In both cases, place Coming up immediately after Latest Drop.",
+      "acceptance_check": "At both viewports, a concrete one-sentence definition of 6529 is visible in the first viewport with Start here and Connect wallet, and Coming up directly follows Latest Drop.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J07", "J13"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The Coming up cards read 'LEADING 36,857,274 TDH' and '2ND PLACE 37,033,359 TDH', so the second-place entry shows the larger figure. Neither the card nor the section says which tally the figure is (current or weighted vote) or what TDH means (page-390x844-04 shows the same).",
+      "consequence": "The ranking looks wrong, and a newcomer cannot tell what TDH is or how the vote leaders are chosen.",
+      "change": "Name the figure: either show the metric the rank uses, or label the shown number as a different tally, e.g. 'Current vote 37.0M TDH · ranked by time-weighted vote'. Put a short TDH explanation within reach (a tooltip or a 'What is TDH?' link).",
+      "acceptance_check": "On each Coming up card, the figure is consistent with its rank label or is explicitly named as a different metric, and TDH is explained within one interaction of the card at both viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07", "J04", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The waves section is headed 'Tired of bot replies?' with the subline 'JOIN THE MOST INTERESTING CHATS IN CRYPTO', centered, with 'View all' centered below the grid. Every other section header is left-aligned, and Coming up puts 'View all' at the right. At 390 the subline wraps 'CRYPTO' onto a line of its own (page-390x844-05).",
+      "consequence": "The copy is a marketing hook with an unverifiable superlative, out of register with the hero and mission block. It never says that these are waves or why these six are shown, and the header treatment breaks the page rhythm.",
+      "change": "Name the object and the selection basis, e.g. heading 'Active waves' with subline 'Public discussions ranked by recent activity' (use the actual ranking). Left-align the header and put 'View all' at the right, matching Coming up.",
+      "acceptance_check": "At both viewports, the section heading names waves and how they were selected, uses no superlative, and has the same header alignment and 'View all' placement as Coming up.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J06", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "The '6529 Book Club' card preview reads '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my…' with literal asterisks, at both viewports (page-390x844-06).",
+      "consequence": "Unrendered markup makes a featured preview look broken and spends the two-line clamp on syntax.",
+      "change": "Convert wave descriptions to plain text before clamping, either by stripping markdown or by rendering inline emphasis.",
+      "acceptance_check": "No wave card description shows literal markdown syntax (**, #, _, [](...)) at either viewport.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-006",
+      "targets": ["J10", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-08.png",
+      "observation": "At 390 the footer wraps one item per line but keeps its '|' separators, leaving dangling pipes: '@punk6529 |', '@6529Collections |', 'Terms of Service | Privacy Policy |' (page-390x844-07, page-390x844-08). The page capture ends after 'Privacy Policy |'. Copyright, Cookie Policy, License, 6529 Apps, API, Contact Us and Status, all visible at 1440, are not shown at 390.",
+      "consequence": "The footer looks broken on phones, and the legal and contact links may be unreachable.",
+      "change": "Replace text separators with gap-spaced, wrapping inline items (flex-wrap with gap, or separators that hide at line ends). Make sure the footer's full height counts toward the page so every link can be scrolled to.",
+      "acceptance_check": "At 390x844, every footer link shown at 1440 can be scrolled to, and no footer line begins or ends with a separator.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-007",
+      "targets": ["J04", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The sentence 'We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.' is set in monospace inside a bordered box beside the network-society statement (page-390x844-03 shows the same). The block makes 'decentralized, permissionless' and 'funds, builds, and coordinates' claims but links nowhere.",
+      "consequence": "Monospace makes mission prose read like a terminal readout, used as decoration rather than code. The claims stop at assertion, with no path to the mechanisms (TDH voting, minting, waves) that the page shows elsewhere.",
+      "change": "Set the sentence in the body or quote style used by the rest of the block. Add one link to the explanation of how it works, e.g. 'How 6529 works', pointing to the Start here or About destination.",
+      "acceptance_check": "The mission block has no monospace prose and includes a working link to an explanation of the network's mechanisms, at both viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-008",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The Next Mint time '14 Oct · 02:40 PM' has no timezone, and the Latest Drop shows 'FLOOR N/A'.",
+      "consequence": "Collectors cannot be sure when the mint happens, and 'N/A' reads as missing data rather than 'no listings yet'.",
+      "change": "Add the timezone abbreviation to the mint time. Show 'No listings yet' or '—' for an empty floor.",
+      "acceptance_check": "The Next Mint time includes a timezone, and the floor shows a plain-language empty value.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-009",
+      "targets": ["J07", "J04"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "Every wave card shows 'Score', 'Hot' (flame icon) and 'REP' values, all in the 92–98 range for Score and Hot, with no legend or tooltip.",
+      "consequence": "The numbers barely tell the waves apart, and their meaning is out of reach.",
+      "change": "Add a tooltip or short legend defining Score, Hot and REP, or show only the metric the section is ranked by.",
+      "acceptance_check": "Each wave metric has a definition within one interaction.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-010",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "There is an unlabeled red heart icon button at the top right of the desktop page. Separately, The Memes - Main Stage banner is cropped so the top of 'THE' is cut off (page-1440x1000-03).",
+      "consequence": "The heart's purpose is unclear, and the cropped logo looks accidental.",
+      "change": "Give the heart a visible label or tooltip that names its action. Set the banner's object-position so the logo text stays whole.",
+      "acceptance_check": "The heart control's purpose is stated on hover or focus, and the Main Stage banner text is not clipped at 1440.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Compact hero: '6529' eyebrow, single H1, and side-by-side 'Start here →' / 'Connect wallet' above the fold at both viewports",
+    "Latest Drop info column: 'THE MEMES #560' eyebrow, title, artist avatar and name, Edition 149/331, Status Active, Mint price 0.06529 ETH with unit, and the Edition Details link",
+    "'YOUR ALLOWANCE — Connect your wallet to view details.' as plain gating copy for the disconnected state",
+    "Public phase card: Live badge, countdown tied to the phase end, and one clear Mint CTA",
+    "Coming up card structure: status label, date, title, and artist avatar",
+    "Wave cards: banner art, title, two-line clamp, last-activity time and drop counts (e.g. 'Just now · 94,497 drops')",
+    "The network-society definition sentence and the 'nation-scale positive impact' line, in an elevated but specific register",
+    "Dark-first iron surfaces, rounded-xl cards, rounded-lg buttons, and subtle borders consistent with the app shell",
+    "Desktop footer with social links and the full legal and contact link set"
+  ]
+}

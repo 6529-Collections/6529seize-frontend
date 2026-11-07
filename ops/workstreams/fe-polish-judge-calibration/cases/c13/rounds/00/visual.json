@@ -1,0 +1,138 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-art-first-release-verified",
+  "coverage": [
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/artists/[slug]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/artist-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": ["V-003"],
+      "note": "The Museum section nav, back links, artist link above the title, and intro-then-record-then-works order are clear. 'View project' sits apart from the project name it relates to. Only the first viewport of each page was captured."
+    },
+    "J03": {
+      "score": 7.5,
+      "evidence": ["evidence/object-1440x1000-01.png"],
+      "findings": ["V-001"],
+      "note": "The title block leads cleanly and the art dominates, but on the object page the work fills the full content width and is taller than the 1000 px viewport, so it can never be seen whole."
+    },
+    "J04": {
+      "score": 9,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The pages are dark and restrained, with the art leading and no frame, radius, or overlay. Blue (primary) is used only for links and eyebrow labels. There are no casino, template, or SaaS motifs, and the pages look native inside the app shell."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": ["V-002"],
+      "note": "Record facts are grouped tightly under labels with spacing suited to a museum. On phones, the stacked header, Museum title, and two-row nav use about 30% of the first viewport before any content."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png"
+      ],
+      "findings": ["V-003"],
+      "note": "Heading, eyebrow, and label roles are consistent, and headings wrap cleanly. The accession ID is monospace on the gift page but sans-serif on the object page, and the title-block links use two different weights."
+    },
+    "J10": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": ["V-002"],
+      "note": "At 390 px the layout is a single column, the header collapses to search and menu buttons, text wraps cleanly, and no overflow is visible. The Museum nav wraps onto two rows instead of adapting. The LCL:3204 badge and the fixed 'N' circle at bottom left look like local and Next.js dev-tool overlays, so I did not count them against the product."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J03"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "CENTURY #31 renders as a square at the full content width (about 1,260 px), starting about 400 px down the page. On load only the upper half of the circle is in view. Because the image is taller than the viewport, no scroll position shows the whole work.",
+      "consequence": "On a standard desktop the visitor sees the principal work only as a crop. They cannot take in the whole composition without zooming the browser out, and the title and the full work never appear on screen together.",
+      "change": "Fit the object page's principal image to the viewport. Keep its aspect ratio with object-contain and cap its rendered height at the viewport height minus the app header and a small margin (for example, max-height: calc(100svh - header - spacing)). Center it in the content column, and optionally tighten the space above the title block so more of the work shows on load.",
+      "acceptance_check": "At 1440x1000, 820x1000, and 390x844, the principal image's rendered height is no more than the viewport height minus the header. Scrolling until the image's top meets the header shows the entire work, uncropped and undistorted.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J10", "J05"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId] and /museum/network/artists/[slug] · default · 390x844 · en-US",
+      "evidence": "evidence/gift-390x844-01.png",
+      "observation": "Below the app header, the Museum band stacks the '6529 Network Museum' title and five nav links wrapped onto two rows ('Collection Artists Programs' / 'Stories & Research About'). The chrome takes about 257 of 844 px before the back link. The gift page shows no artwork in its first viewport, and the artist page (artist-390x844-01.png) shows only the top edge of its first work.",
+      "consequence": "Every Museum route on a phone opens with about a third of the screen spent on navigation, which pushes the art and the record down.",
+      "change": "At narrow widths, show the Museum section nav as one row: either horizontally scrollable with an edge fade, or the title plus a compact sections disclosure. Reduce the band's vertical padding.",
+      "acceptance_check": "At 390x844 the Museum band (title plus nav) is no more than about 110 px tall, all five destinations stay reachable by touch, and the page has no horizontal overflow.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J06", "J02"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US; /museum/network/gifts/[accessionId] · default · 390x844 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "The accession ID is set in monospace on the gift page ('6529NM.2026.001') but in the sans-serif metadata line on the object page ('6529NM.2026.001.01'). On the object page, the semibold 'View project' link sits alone at the far right of the title block, about 900 px from the regular-weight artist link and the 'CENTURY' project name it refers to.",
+      "consequence": "The same kind of identifier reads differently on related routes, and the project link is easy to miss and detached from its context.",
+      "change": "Use one type style for accession IDs on every Museum route. Give title-block links one weight, and place 'View project' next to or directly under the project name in the metadata line.",
+      "acceptance_check": "The accession ID uses the same type style on the object and gift pages. The title-block links share one weight and sit within the title block's text column.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The object-page title block: back link to the collection, the artist link above the title, the title, and one compact project / year / accession line",
+    "Artwork shown at its true aspect ratio with no frame, rounded corners, or overlaid chrome",
+    "A restrained dark surface: hairline dividers only, no stray cards or boxes, and blue (primary) used only for links and eyebrow labels",
+    "The mobile gift record: tracked-caps labels with plain values, one divider above the facts, and a cleanly wrapped heading",
+    "Museum header and nav that sit naturally in the app shell (left rail on desktop, search and menu buttons on mobile)",
+    "The artist page order on mobile: bio, then 'Works in the collection' with artwork at full column width"
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-04.png"
+    },
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-08.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 6,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The headline and the 'Start here' action do lead. But the first step sits beside 'Claim your free Meme now' and under a false scarcity banner, so the newcomer's first decision rests on misleading information."
+    },
+    "J02": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The section order makes sense: hero, Latest Drop, network-society explainer, Coming up, waves, footer. The injected banner splits the hero headline from its own actions."
+    },
+    "J03": {
+      "score": 6,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-004"],
+      "note": "The saturated red-orange banner is the loudest element on the page, louder than the headline and the artwork. The Latest Drop frame is an empty black square, so the art does not lead."
+    },
+    "J04": {
+      "score": 4,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "This is textbook crypto-casino styling: a neon gradient strip, a countdown, an 'only 3 left!' line and 'claim your free' hype on the institution's front door. Underneath, the mint card, Coming up cards and wave cards are native and content-led."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-06.png"
+      ],
+      "findings": [],
+      "note": "Density fits the task. The mint data grid, Coming up cards and wave cards keep related metrics together and scan quickly. The 3-column grid becomes 1 column on mobile."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-03.png"
+      ],
+      "findings": ["F-001", "F-004"],
+      "note": "The banner breaks the content column: it runs from the rail edge to the frame edge, about 138 to 1381px against content at 170 to 1349px, and uses a hyphen as a dash. On mobile the video controls overlap. The finish is otherwise consistent."
+    },
+    "J07": {
+      "score": 4,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The banner and the secondary CTA contradict the page's own data: free and 'No fees, ever' against a 0.06529 ETH mint price, 04:59 against 17h:42m:46s, and 'only 3 left' against 149/331. The remaining copy is specific and concrete."
+    },
+    "J10": {
+      "score": 6,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-03.png"
+      ],
+      "findings": ["F-001", "F-003", "F-004"],
+      "note": "At 390px the second hero button is cut on both sides ('im your free Meme no') and runs past the viewport. The video play overlays collide with the scrubber and time controls. The banner wraps to 3 lines above the actions."
+    },
+    "J13": {
+      "score": 3.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Before any wallet action, the entry points misstate cost and fees and blur 'connect' with 'claim'. The real mint card is solid: price, edition, status, phase countdown and 'Connect your wallet to view details'. It does not mention a network fee."
+    }
+  },
+  "checks": {
+    "I1": "fail",
+    "I2": "pass",
+    "I3": "fail",
+    "S1": "fail",
+    "S2": "unverified",
+    "S3": "unverified",
+    "S4": "unverified",
+    "S5": "unverified",
+    "S6": "fail"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": [
+        "I1",
+        "I3",
+        "S6",
+        "J01",
+        "J02",
+        "J03",
+        "J04",
+        "J06",
+        "J07",
+        "J13"
+      ],
+      "severity": "P0",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "A full-width red-to-orange gradient banner sits between the headline and the hero actions. It reads 'Mint closes in 04:59 - only 3 left! Connect your wallet to claim instantly. No fees, ever.' The same page shows the real state of The Memes #560: Edition 149/331, Mint price 0.06529 ETH, Status Active, and 'Public Phase Ends In 17h : 42m : 46s' (page-1440x1000-02.png). On desktop the banner extends past the content column to the rail edge. On mobile it wraps to three lines of white-on-gradient text (page-390x844-01.png).",
+      "consequence": "A newcomer is pushed to connect a wallet by an invented five-minute countdown and a three-left scarcity claim. They are told the mint is fee-free and instant when it costs 0.06529 ETH plus network fees and runs for about 17 more hours. This is deception about cost and urgency on the institution's front page, and it makes 6529 read as a crypto casino.",
+      "change": "Remove the banner. If the hero needs a mint notice, drive it from the same mint data as the Latest Drop card. State it plainly in iron/primary tokens inside the content column, with no exclamation and no scarcity claim. Example: 'The Memes #560 is minting · 0.06529 ETH plus network fee · public phase ends in 17h 42m', linking to the drop. Add it through i18n message keys.",
+      "acceptance_check": "At 1440x1000 and 390x844 in en-US, no copy on / gives a countdown, remaining quantity, price or fee that differs from the Latest Drop mint card. No 'free', 'No fees', 'instantly' or exclamation hype appears. Any hero mint notice uses iron/primary tokens, sits inside the content column, and is visually subordinate to the headline.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["I3", "S1", "J01", "J07", "J13"],
+      "severity": "P0",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "The secondary hero button reads 'Claim your free Meme now' and sits beside 'Start here'. The only Meme on offer on the page, The Memes #560, has a mint price of 0.06529 ETH. Nothing near the button states the price, that a network fee applies, which wallet acts, or that a mint cannot be undone.",
+      "consequence": "The visitor's first wallet action would start on the belief that it is free. They would learn the real cost only at the wallet prompt, or not at all, which defeats informed consent. The button also competes with the honest primary action.",
+      "change": "Remove the button so 'Start here' leads, or replace it with an honest action that names the object, such as 'Mint The Memes #560'. That action should take the user to the Latest Drop card, which already shows price, edition and phase. Add 'plus network fee' and the acting wallet before any wallet prompt. If the intent is to connect a wallet, label it 'Connect wallet', and connecting must not start a mint or a signature.",
+      "acceptance_check": "No hero control says 'free' or 'claim' for a paid mint. Any secondary hero action names the real object and action. Before a wallet prompt, the price (0.06529 ETH), the fact that a network fee applies, and the acting wallet are visible.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-01.png",
+      "observation": "At 390px the hero action row does not wrap. 'Start here' fits, but the second button is cropped on both sides and reads 'im your free Meme no'. Its box runs past the right edge of the viewport.",
+      "consequence": "The second hero action is unreadable on phones, and the row overflows the pinned mobile viewport.",
+      "change": "Let the hero actions wrap or stack at narrow widths, for example flex-wrap with a gap or full-width stacked buttons. Whatever label survives F-002 must fit within the content column at 390px.",
+      "acceptance_check": "At 390x844, every hero action label is fully visible inside the content column, no button extends past the viewport, and the page has no horizontal scroll.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J03", "J06", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 390x844, 1440x1000 · en-US",
+      "evidence": "evidence/page-390x844-01.png",
+      "observation": "At 390px the Latest Drop video and the Next Mint card video (page-390x844-03.png) collapse to short strips. The large centered play button sits on the scrubber and collides with the '0:00 / —' time pill, with the control row crowded beneath. At 1440px the Latest Drop frame is a large black square with only a play button and no poster (page-1440x1000-01.png).",
+      "consequence": "The first artwork a visitor meets is a black frame on desktop and a pile of overlapping controls on phones, so the art does not lead the page.",
+      "change": "Reserve the media aspect ratio and show a poster or thumbnail frame before metadata loads. Keep the overlay play button inside the media area, clear of the scrubber, time display and control buttons.",
+      "acceptance_check": "At 390x844 and 1440x1000, the Latest Drop and Next Mint players show a poster or a reserved-aspect frame. The overlay play button does not overlap the scrubber, time display or control buttons.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In Coming up, 'LEADING' shows 36,857,274 TDH while '2ND PLACE' shows 37,033,359 TDH. The page does not say what the ranking is based on.",
+      "consequence": "A reader may think the leaderboard is wrong, because the leader shows the smaller number.",
+      "change": "Label the metric the ranking uses, or show that metric next to the place label, for example the vote rating used to rank.",
+      "acceptance_check": "Each Coming up card's figure is labeled so that the place order is explained by the numbers shown.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-006",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "The 6529 Book Club wave card excerpt shows raw markdown: '**Punk6529's SciFi/NearFi Book List** **Background**'.",
+      "consequence": "Markup syntax leaks into a front-page preview and looks unfinished.",
+      "change": "Strip or render markdown in wave card excerpts.",
+      "acceptance_check": "No wave card excerpt on / shows literal markdown markers.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-007",
+      "targets": ["J04", "J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The quote 'We're extending what Bitcoin and Ethereum proved...' is set in monospace inside a bordered box. Separately, at 390px the footer separators dangle at the ends of lines ('@punk6529 |', 'Privacy Policy |') (page-390x844-08.png).",
+      "consequence": "Mono type used for prose reads as decorative code styling, and the dangling separators look unfinished on mobile.",
+      "change": "Set the quote in the body or display face. At narrow widths, hide the separators or switch the footer to gap-separated items.",
+      "acceptance_check": "The network-society quote uses the body or display face, and no footer line at 390px ends in a bare '|'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Latest Drop mint card data block: 'The Memes #560' eyebrow, title, artist avatar and name, Edition 149/331, Status Active in the success color, Mint price 0.06529 ETH, Floor N/A, and the Edition Details link",
+    "'YOUR ALLOWANCE — Connect your wallet to view details.' as plain, accurate pre-connection copy",
+    "'Public Phase Ends In' panel with the Live chip, the real countdown and the Mint button",
+    "'Start here' as the light primary hero action with an arrow",
+    "Hero headline 'Building a decentralized network state' with the '6529' eyebrow in restrained white type",
+    "'6529 is a network society' explainer, which names concrete scope (art, science, culture, technology)",
+    "Coming up cards: Next Mint date and time, Leading and 2nd Place labels, TDH figures with grouped tabular numerals, creator avatars, and the View all link",
+    "Wave cards with real artwork, Score/Hot/REP metrics, recency and drop counts, rounded-xl cards with subtle borders, and a 3-column to 1-column responsive grid",
+    "Persistent left rail navigation at both viewports",
+    "Footer social and legal links"
+  ]
+}

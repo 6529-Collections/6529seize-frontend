@@ -1,0 +1,194 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ]
+    },
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "unverified",
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "reason": "Evidence gap, not a product finding. The 390 tiles show the desktop icon rail still on screen at 390 px, which suggests a narrow desktop window without mobile device emulation rather than the touch layout. The capture also stops in the middle of the footer: tile 08 is 257 px tall and ends at 'Terms of Service | Privacy Policy |', and the other footer links never appear. Needed: a full-page 390x844 capture with mobile device emulation (touch input and a mobile user agent) that reaches the end of the page. The 390 tiles still back up the copy and integrity findings, which are also visible at 1440."
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 6.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "'Start here' leads correctly. But a false mint alarm comes right after the headline, and the connect-wallet step is replaced by 'Claim your free Meme now', so a first-time visitor learns something untrue before learning what 6529 is."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "The order follows a visitor's path: hero, then the Latest Drop, what 6529 is, Coming up (queue and vote leaders), waves and footer. Related content stays together in each section."
+    },
+    "J03": {
+      "score": 6.0,
+      "evidence": ["evidence/page-1440x1000-01.png"],
+      "findings": ["F-001"],
+      "note": "A full-width red-to-orange gradient banner is the brightest and widest element above the fold. It outranks the headline, both CTAs and the Latest Drop artwork."
+    },
+    "J04": {
+      "score": 5.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-001", "F-002", "F-004"],
+      "note": "The hero has crypto-casino styling: a saturated gradient urgency strip with countdown, scarcity and a 'free' claim. A prose statement is also set in monospace like a terminal readout. The rest of the page is native: iron surfaces, rounded-xl cards and art-led wave covers. The Latest Drop video was black in the capture and two Coming up cards read 'Preview unavailable'. I treated those as unverified media and did not score them."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "The drop stats sit in a compact two-column grid. Wave cards scan quickly, with fixed Score/Hot/REP and recency/drop-count rows. Gaps between sections are generous but acceptable."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-07.png"
+      ],
+      "findings": ["F-003", "F-004"],
+      "note": "Type roles are mostly consistent. The 6529 Book Club card shows literal markdown asterisks in its preview, and the prose quote card uses a monospace face meant for data."
+    },
+    "J07": {
+      "score": 4.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002", "F-003"],
+      "note": "The two most prominent lines after the headline are false: the banner's 04:59 countdown, 'only 3 left' and 'No fees, ever', and the 'Claim your free Meme now' CTA. The same page contradicts them with a 17h:21m:27s phase timer, 149/331 and 0.06529 ETH. The rest of the copy names real objects."
+    },
+    "J10": {
+      "status": "unverified",
+      "note": "The 390 capture looks like a narrow desktop window: the desktop icon rail stays at 390 px and there is no touch layout. It also stops mid-footer. Needed: a full-page 390x844 capture with mobile device emulation. In this capture the secondary hero CTA is clipped ('im your free Meme no'). That clipping is covered by F-002's label repair, so it is not filed separately here."
+    },
+    "J13": {
+      "score": 4.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Before any wallet prompt, the hero tells a newcomer the mint is free, has no fees, closes in five minutes and has 3 left. The drop card shows a 0.06529 ETH price and a 17h phase. The honest drop card (price, edition, phase timer, Live chip, 'Connect your wallet to view details') is the good base. The mint lifecycle itself was not observed."
+    }
+  },
+  "checks": {
+    "I1": "fail",
+    "I2": "pass",
+    "I3": "fail",
+    "S1": "fail",
+    "S2": "unverified",
+    "S3": "unverified",
+    "S4": "unverified",
+    "S5": "unverified",
+    "S6": "fail"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["S6", "I1", "I3", "S1", "J03", "J04", "J07", "J13", "J01"],
+      "severity": "P0",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "A full-width red-to-orange gradient banner sits between the headline and the CTAs: 'Mint closes in 04:59 - only 3 left! Connect your wallet to claim instantly. No fees, ever.' The same page contradicts every claim. The Latest Drop card shows 'Public Phase Ends In 17h : 21m : 27s', Edition 149/331, and Mint price 0.06529 ETH (page-1440x1000-02.png). At 390 the banner wraps to three lines directly under the headline (page-390x844-01.png).",
+      "consequence": "This is deception at the point of entry. The countdown is false, the scarcity is invented, and the claims of no cost and instant claiming hide a paid mint plus network fee. Together they push newcomers to connect a wallet in a hurry and on false terms, which puts funds and trust at risk. The banner is also the loudest element on the page and pulls attention away from the headline and the artwork.",
+      "change": "Remove the banner entirely. If the hero needs a mint status, derive it from the live phase data and style it neutrally (an iron-* surface or plain text, no gradient). Back it with a message key, for example: 'The Memes #560 is minting · public phase ends in 17h 21m · 0.06529 ETH plus network fee', linking to the Latest Drop card.",
+      "acceptance_check": "At 1440 and at 390 with mobile emulation, the hero has no gradient urgency banner. No countdown, remaining-quantity, 'free', 'no fees' or 'instantly' text appears in the hero. Any hero mint status shows the same phase end, edition count and price as the Latest Drop card.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["I3", "S1", "S6", "J01", "J07", "J13"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "The secondary hero CTA next to 'Start here' reads 'Claim your free Meme now'. The current drop is priced at 0.06529 ETH on the same screen. The run record says this slot is the visitor's connect-wallet step. In the 390 capture the label overflows the button row and is clipped to 'im your free Meme no' (page-390x844-01.png).",
+      "consequence": "The visitor cannot tell what the button does. It promises a free item that does not exist and hides that this is a wallet or mint action, so the primary task's 'connect a wallet' step is mislabeled. That makes it a confusable control: someone expecting a free claim may face a wallet prompt for a paid transaction.",
+      "change": "If the control opens the wallet connection flow, relabel it 'Connect wallet' through a message key. If it links to the mint, use 'Mint The Memes #560' with no 'free' or 'claim' wording. Let the two-button hero row wrap or stack at narrow widths so neither label clips.",
+      "acceptance_check": "The secondary hero action names the action it performs, with no 'free' or 'claim' wording. Activating it opens the wallet connection modal (or the mint card) without requesting a signature or transaction. At 390x844 with mobile emulation, both hero buttons are fully visible and unclipped.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J06", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "The 6529 Book Club wave card preview shows literal markdown: '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my basic NearFi (Sci…'. The same text appears at 390 (page-390x844-07.png).",
+      "consequence": "Raw syntax on the front page reads as broken rendering. It also spends the two-line preview on asterisks instead of the description.",
+      "change": "Render wave description previews as plain text before truncating: strip markdown emphasis, heading and list markers, and reduce links to their text.",
+      "acceptance_check": "No wave card description on / shows literal '**', '#' or '[text](url)' tokens at either width. The Book Club preview begins 'Punk6529's SciFi/NearFi Book List Background I consider…'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J04", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The card beside '6529 is a network society' sets a full sentence of prose ('We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.') in a monospace face, framed like a terminal readout. It does the same at 390 (page-390x844-03.png).",
+      "consequence": "Mission prose dressed as code output is the decorative mono and faux-science cue the 6529 style penalizes. It reads more slowly than the sans paragraph beside it and weakens the one section that explains what 6529 is.",
+      "change": "Set the statement in the page's sans body face as a quiet blockquote, keeping the existing iron-bordered rounded-xl frame. Keep mono for data such as TDH counts and timestamps.",
+      "acceptance_check": "The statement renders in the sans body face at both widths. Mono type on / is limited to numeric data such as TDH totals and the next-mint timestamp.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Headline 'Building a decentralized network state' with the 'Start here →' primary action",
+    "Latest Drop card: artwork and player on the left; title, artist with avatar, and the Edition / Status / Mint price / Floor grid on the right",
+    "Real phase timer 'Public Phase Ends In 17h : 21m : 27s' with the Live chip and a single 'Mint' action",
+    "Plain gating copy 'Your allowance: Connect your wallet to view details.' and the Subscription Minting control with its help affordance",
+    "'6529 is a network society' explanation paragraph in the sans body face",
+    "Coming up cards with real next-mint timestamp and TDH vote totals in tabular mono",
+    "Wave cards with art-led covers, Score / Hot / REP stats, recency and drop counts, and a 'View all' link",
+    "Dark iron surfaces, subtle borders, rounded-xl cards and the restrained footer"
+  ]
+}
