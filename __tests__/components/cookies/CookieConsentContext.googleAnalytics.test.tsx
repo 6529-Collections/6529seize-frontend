@@ -7,6 +7,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
+import * as viewerCountry from "@/components/cookies/viewerCountry";
 import * as api from "@/services/api/common-api";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import Cookies from "js-cookie";
@@ -17,9 +18,12 @@ jest.mock("js-cookie", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(),
 }));
 
 jest.mock("@/components/auth/Auth", () => {
@@ -57,9 +61,8 @@ const renderProvider = () =>
   );
 
 const mockCountry = (isEu: boolean, country = isEu ? "DE" : "US") => {
-  (api.commonApiFetch as jest.Mock).mockResolvedValue({
+  (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
     is_eu: isEu,
-    is_consent: false,
     country,
   });
 };
@@ -107,7 +110,9 @@ describe("CookieConsentProvider Google Analytics consent", () => {
   it("schedules a returning consented visitor before the country check returns", () => {
     cookieJar[CONSENT_ESSENTIAL_COOKIE] = "true";
     cookieJar[CONSENT_PERFORMANCE_COOKIE] = "true";
-    (api.commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
+      new Promise(() => {})
+    );
 
     renderProvider();
 
@@ -168,7 +173,9 @@ describe("CookieConsentProvider Google Analytics consent", () => {
   it("cancels a pending load on unmount", () => {
     cookieJar[CONSENT_ESSENTIAL_COOKIE] = "true";
     cookieJar[CONSENT_PERFORMANCE_COOKIE] = "true";
-    (api.commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
+      new Promise(() => {})
+    );
     const { unmount } = renderProvider();
 
     unmount();

@@ -34,7 +34,7 @@ const ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/u,
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/u,
   MUSEUM_SETTINGS_FETCH_ERROR_PATTERN,
-  /^Failed to fetch cookie consent status Error: Network request failed\./u,
+  /^Failed to fetch cookie consent status TypeError: (?:Failed to fetch|NetworkError when attempting to fetch resource\.|Load failed)(?:\n|$)/u,
 ];
 
 if (

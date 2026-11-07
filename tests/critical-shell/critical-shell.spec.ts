@@ -22,7 +22,7 @@ type ConsoleDiagnostics = {
 const CRITICAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Error fetching emoji list: Error: Failed to load emoji list(?:\n|$)/,
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
-  /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
+  /^Failed to fetch cookie consent status TypeError: (?:Failed to fetch|NetworkError when attempting to fetch resource\.|Load failed)(?:\n|$)/,
 ];
 
 function attachConsoleDiagnostics(page: Page): ConsoleDiagnostics {
@@ -259,9 +259,10 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
-    expect(missingNextAssets, "Next.js static assets that returned 404").toEqual(
-      []
-    );
+    expect(
+      missingNextAssets,
+      "Next.js static assets that returned 404"
+    ).toEqual([]);
     await expectRouteShellHealthy(page, diagnostics, {
       // Local feed API health gets separate coverage; keep this allowance
       // route-scoped because Chromium reports the resource 500 without a URL.

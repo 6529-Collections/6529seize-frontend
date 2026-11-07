@@ -119,12 +119,15 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: (url: string) => mockFetchUrl(url),
 }));
 
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(() =>
+    Promise.resolve({ is_eu: false, country: "US" })
+  ),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   __esModule: true,
   commonApiFetch: jest.fn((opts: { endpoint: string }) => {
-    if (opts.endpoint === "policies/country-check") {
-      return Promise.resolve({ is_eu: false, country: "US" });
-    }
     if (opts.endpoint === "meme-cards/5/drop") {
       return Promise.resolve({ meme_card_id: 5, drop_id: "drop-5" });
     }

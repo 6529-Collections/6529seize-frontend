@@ -23,7 +23,7 @@ const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
   MUSEUM_SETTINGS_FETCH_ERROR_PATTERN,
-  /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
+  /^Failed to fetch cookie consent status TypeError: (?:Failed to fetch|NetworkError when attempting to fetch resource\.|Load failed)(?:\n|$)/,
 ];
 
 const PROJECTS = [
@@ -105,13 +105,7 @@ test.describe("Museum Inside the System @surface @readonly", () => {
     const pendingCountryChecks = new Set<Request>();
     const trackCountryCheck = (request: Request) => {
       const url = new URL(request.url());
-      if (
-        request.method() === "GET" &&
-        ["https://api.6529.io", "https://api.staging.6529.io"].includes(
-          url.origin
-        ) &&
-        url.pathname === "/api/policies/country-check"
-      ) {
+      if (request.method() === "GET" && url.pathname === "/e/country") {
         pendingCountryChecks.add(request);
       }
     };

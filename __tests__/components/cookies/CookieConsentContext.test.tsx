@@ -6,6 +6,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
+import * as viewerCountry from "@/components/cookies/viewerCountry";
 import * as api from "@/services/api/common-api";
 import {
   act,
@@ -24,9 +25,12 @@ jest.mock("js-cookie", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(),
 }));
 
 // Mock AuthContext
@@ -70,9 +74,8 @@ describe("CookieConsentProvider", () => {
 
   it("renders and loads cookie consent banner for EU users", async () => {
     (Cookies.get as jest.Mock).mockImplementation((name) => undefined);
-    (api.commonApiFetch as jest.Mock).mockResolvedValue({
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
       is_eu: true,
-      is_consent: false,
       country: "DE",
     });
 
@@ -90,9 +93,8 @@ describe("CookieConsentProvider", () => {
 
   it("auto-consents for non-EU users", async () => {
     (Cookies.get as jest.Mock).mockImplementation(() => undefined);
-    (api.commonApiFetch as jest.Mock).mockResolvedValue({
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
       is_eu: false,
-      is_consent: false,
       country: "US",
     });
 
@@ -196,7 +198,7 @@ describe("CookieConsentProvider country check state", () => {
 
   it("stays pending until the lookup returns a country", async () => {
     const lookup: { resolve?: (value: unknown) => void } = {};
-    (api.commonApiFetch as jest.Mock).mockReturnValue(
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
       new Promise((resolve) => {
         lookup.resolve = resolve;
       })
@@ -212,7 +214,7 @@ describe("CookieConsentProvider country check state", () => {
       screen.getByText("Country: unknown / pending: true")
     ).toBeInTheDocument();
 
-    lookup.resolve?.({ is_eu: true, is_consent: false, country: "US" });
+    lookup.resolve?.({ is_eu: true, country: "US" });
 
     expect(
       await screen.findByText("Country: US / pending: false")
@@ -223,7 +225,9 @@ describe("CookieConsentProvider country check state", () => {
     const consoleError = jest
       .spyOn(console, "error")
       .mockImplementation(() => undefined);
-    (api.commonApiFetch as jest.Mock).mockRejectedValue(new Error("offline"));
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockRejectedValue(
+      new Error("offline")
+    );
 
     render(
       <CookieConsentProvider>
@@ -249,7 +253,9 @@ describe("CookieConsentProvider country check state", () => {
     });
 
     const renderSettled = async (response: unknown) => {
-      (api.commonApiFetch as jest.Mock).mockResolvedValue(response);
+      (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue(
+        response
+      );
       render(
         <CookieConsentProvider>
           <CountryConsumer />
@@ -261,7 +267,7 @@ describe("CookieConsentProvider country check state", () => {
     };
 
     it("remembers US after a completed lookup", async () => {
-      await renderSettled({ is_eu: false, is_consent: false, country: "US" });
+      await renderSettled({ is_eu: false, country: "US" });
 
       expect(window.localStorage.getItem(HINT_KEY)).toBe("US");
     });
@@ -269,7 +275,7 @@ describe("CookieConsentProvider country check state", () => {
     it("clears the hint when a completed lookup returns another country", async () => {
       window.localStorage.setItem(HINT_KEY, "US");
 
-      await renderSettled({ is_eu: true, is_consent: false, country: "FR" });
+      await renderSettled({ is_eu: true, country: "FR" });
 
       expect(window.localStorage.getItem(HINT_KEY)).toBeNull();
     });
@@ -279,7 +285,9 @@ describe("CookieConsentProvider country check state", () => {
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
       window.localStorage.setItem(HINT_KEY, "US");
-      (api.commonApiFetch as jest.Mock).mockRejectedValue(new Error("offline"));
+      (viewerCountry.fetchViewerCountry as jest.Mock).mockRejectedValue(
+        new Error("offline")
+      );
 
       render(
         <CookieConsentProvider>
@@ -301,9 +309,8 @@ describe("CookieConsentProvider country check state", () => {
       jest.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
         throw new Error("storage blocked");
       });
-      (api.commonApiFetch as jest.Mock).mockResolvedValue({
+      (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
         is_eu: false,
-        is_consent: false,
         country: "US",
       });
 
@@ -329,7 +336,7 @@ describe("CookieConsentProvider country check state", () => {
     expect(
       screen.getByText("Country: US / pending: false")
     ).toBeInTheDocument();
-    expect(api.commonApiFetch).not.toHaveBeenCalled();
+    expect(viewerCountry.fetchViewerCountry).not.toHaveBeenCalled();
   });
 });
 
@@ -342,10 +349,9 @@ describe("CookieConsentProvider country check timeout", () => {
     );
 
   const lookupSignal = (): AbortSignal => {
-    const [request] = (api.commonApiFetch as jest.Mock).mock.calls[0] as [
-      { signal: AbortSignal },
-    ];
-    return request.signal;
+    const [signal] = (viewerCountry.fetchViewerCountry as jest.Mock).mock
+      .calls[0] as [AbortSignal];
+    return signal;
   };
 
   let consoleError: jest.SpyInstance;
@@ -381,7 +387,9 @@ describe("CookieConsentProvider country check timeout", () => {
   });
 
   it("settles a stalled lookup as unknown after five seconds", async () => {
-    (api.commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
+      new Promise(() => {})
+    );
     renderProvider();
 
     await act(async () => {
@@ -401,9 +409,8 @@ describe("CookieConsentProvider country check timeout", () => {
   });
 
   it("clears the timeout after a fast response so it cannot override it", async () => {
-    (api.commonApiFetch as jest.Mock).mockResolvedValue({
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
       is_eu: true,
-      is_consent: false,
       country: "US",
     });
     renderProvider();
@@ -425,7 +432,9 @@ describe("CookieConsentProvider country check timeout", () => {
   });
 
   it("cancels the lookup and its timeout on unmount", async () => {
-    (api.commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
+      new Promise(() => {})
+    );
     const { unmount } = renderProvider();
 
     unmount();
