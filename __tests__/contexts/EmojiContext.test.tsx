@@ -99,7 +99,7 @@ describe("EmojiContext", () => {
     expect(screen.getByTestId("categoryIcons").textContent).toContain("6529");
   });
 
-  it("handles fetch failure gracefully and retries later", async () => {
+  it("handles fetch failure gracefully and retries after a backoff", async () => {
     const fakeEmojiList = JSON.stringify(["retry_smile"]);
     (fetch as jest.Mock)
       .mockResolvedValueOnce({
@@ -113,6 +113,10 @@ describe("EmojiContext", () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => undefined);
+    let now = 1_000_000;
+    const dateNowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    const loadButton = () =>
+      screen.getByRole("button", { name: /load emoji/i });
 
     render(
       <EmojiProvider>
@@ -122,18 +126,64 @@ describe("EmojiContext", () => {
 
     expect(fetch).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: /load emoji/i }));
+    fireEvent.click(loadButton());
 
     await waitFor(() => expect(consoleErrorSpy).toHaveBeenCalled());
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("emojiMap").textContent).toBe("0");
 
-    fireEvent.click(screen.getByRole("button", { name: /load emoji/i }));
+    // Inside the backoff window the failed list is not requested again.
+    now += 1_999;
+    await act(async () => {
+      fireEvent.click(loadButton());
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("emojiMap").textContent).toBe("0");
+
+    now += 1;
+    fireEvent.click(loadButton());
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId("emojiMap").textContent).toBe("1");
     });
+    dateNowSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("doubles the wait after each consecutive failure", async () => {
+    (fetch as jest.Mock).mockResolvedValue({ ok: false });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    let now = 1_000_000;
+    const dateNowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    const { result } = renderHook(() => useEmoji(), {
+      wrapper: ({ children }) => <EmojiProvider>{children}</EmojiProvider>,
+    });
+    const load = async () => {
+      await act(async () => {
+        await result.current.loadCustomEmojis();
+      });
+    };
+
+    await load();
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    now += 2_000;
+    await load();
+    expect(fetch).toHaveBeenCalledTimes(2);
+
+    // The second failure waits 4 s, not 2 s.
+    now += 2_000;
+    await load();
+    expect(fetch).toHaveBeenCalledTimes(2);
+    now += 2_000;
+    await load();
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(result.current.emojiMap).toEqual([]);
+
+    dateNowSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
 
