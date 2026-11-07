@@ -336,6 +336,20 @@ describe("effective App PR CI plan", () => {
   });
 
   it.each([
+    "components/waves/drops/chat-window/WaveChatVirtualList.tsx",
+    "components/waves/drops/chat-window/useWindowedChat.ts",
+    "__tests__/components/waves/drops/chat-window/chatItems.test.ts",
+    "components/drops/view/dropsListShared.tsx",
+    "components/waves/drops/wave-drops-all/subcomponents/WaveDropsMessageListSection.tsx",
+    "hooks/useScrollBehavior.ts",
+    "tests/support/chatWindowing.ts",
+  ])("selects the windowed chat browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
     "components/waves/drops/WaveDropActions.tsx",
     "components/drops/view/part/DropPartMarkdownImage.tsx",
     "contexts/wave/hooks/useActiveWaveManager.ts",
