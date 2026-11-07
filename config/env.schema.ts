@@ -57,7 +57,6 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   // REQUIRED
-  IPFS_API_ENDPOINT: z.string().url("IPFS_API_ENDPOINT must be a valid URL"),
   IPFS_GATEWAY_ENDPOINT: z
     .string()
     .url("IPFS_GATEWAY_ENDPOINT must be a valid URL"),
@@ -70,7 +69,6 @@ export const publicEnvSchema = z.object({
     })
     .optional()
     .default("https://media.6529.io"),
-  IPFS_MFS_PATH: z.string().optional(),
 
   /**
    * ────────────────
