@@ -6,7 +6,7 @@ import { getWaveQueryKey } from "@/services/api/wave-query";
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
 /** Wait before checking an incoming direct message's unread state. */
-export const DM_DROP_RECOVERY_GRACE_MS = 1_500;
+const DM_DROP_RECOVERY_GRACE_MS = 1_500;
 // A drop whose wave may or may not be a direct message reaches every online
 // tab at once. DM_UNREAD_STATE_CHANGED is the primary signal, so these
 // recovery checks wait long and spread out (7.5-22.5 s).
