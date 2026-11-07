@@ -6,7 +6,8 @@
 //
 //   GH_TOKEN=$(gh auth token) node ops/scripts/sync-telemetry-schema.cjs
 //       -> check (exit 1 on drift)
-//   ... --update                    -> rewrite the vendored copy
+//   ... --print > ops/telemetry/telemetry-collector.v1.schema.json
+//       -> print the backend copy, to replace the vendored one
 //   ... --ref <branch-or-sha>       -> compare with another backend ref
 //
 // Reads the backend file from the GitHub REST API with GH_TOKEN (or
@@ -28,7 +29,7 @@ const VENDORED = path.join(
 
 async function main() {
   const args = process.argv.slice(2);
-  const update = args.includes("--update");
+  const print = args.includes("--print");
   const refIndex = args.indexOf("--ref");
   const ref = refIndex >= 0 ? args[refIndex + 1] : "main";
   if (!ref || !/^[\w./-]+$/.test(ref)) {
@@ -57,10 +58,9 @@ async function main() {
   const upstream = JSON.parse(await response.text());
   const formatted = `${JSON.stringify(upstream, null, 2)}\n`;
 
-  if (update) {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed repo path built from __dirname.
-    fs.writeFileSync(VENDORED, formatted);
-    process.stdout.write(`Updated the vendored schema from ${REPO}@${ref}.\n`);
+  // Printed, never written here: the operator redirects it into the repo.
+  if (print) {
+    process.stdout.write(formatted);
     return 0;
   }
 
@@ -69,7 +69,7 @@ async function main() {
   if (JSON.stringify(vendored) !== JSON.stringify(upstream)) {
     console.error(
       `The vendored collector schema differs from ${REPO}@${ref}. ` +
-        "Run with --update, then fix services/analytics/telemetry/wire.ts until the contract test passes."
+        "Run with --print to refresh it, then fix services/analytics/telemetry/wire.ts until the contract test passes."
     );
     return 1;
   }
