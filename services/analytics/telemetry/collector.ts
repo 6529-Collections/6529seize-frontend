@@ -177,7 +177,7 @@ function bump(key: DimensionKey | ScalarKey, dimension?: string): void {
 const CHUNK_ERROR =
   /ChunkLoadError|Loading (CSS )?chunk|dynamically imported module|Importing a module script failed/i;
 
-function classifyError(error: unknown, fallback: ErrorKind): ErrorKind {
+export function classifyError(error: unknown, fallback: ErrorKind): ErrorKind {
   let text = typeof error === "string" ? error : "";
   if (error instanceof Error) text = `${error.name} ${error.message}`;
   return CHUNK_ERROR.test(text) ? "chunk_load" : fallback;
@@ -198,7 +198,7 @@ const ASSET_KINDS: Readonly<Record<string, AssetKind>> = {
 };
 
 /** By tag name, or for a link by its `as` or `rel`. */
-function classifyAsset(target: Element): AssetKind {
+export function classifyAsset(target: Element): AssetKind {
   const tag = target.tagName.toLowerCase();
   const key =
     tag === "link"

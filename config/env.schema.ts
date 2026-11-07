@@ -128,6 +128,9 @@ export const publicEnvSchema = z.object({
   // First-party collector at same-origin /e (R14). On only when exactly
   // "true"; staging builds set it, production builds leave it unset for now.
   NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: z.string().optional(),
+  // Flight recorder, Send diagnostics and the crash prompt (R14 §4.2-4.4).
+  // On only when exactly "true"; staging builds set it.
+  NEXT_PUBLIC_FEATURE_DIAGNOSTICS: z.string().optional(),
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),

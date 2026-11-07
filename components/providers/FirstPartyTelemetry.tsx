@@ -14,13 +14,20 @@ import {
   setTelemetryCountry,
   startFirstPartyTelemetry,
 } from "@/services/analytics/telemetry/collector";
+import {
+  recordFlightNavigation,
+  recordFlightWebSocket,
+  startFlightRecorder,
+} from "@/services/diagnostics/flightRecorder";
 import { WebSocketContext } from "@/services/websocket/WebSocketContext";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useParams, usePathname } from "next/navigation";
 import { useContext, useEffect, useRef } from "react";
 
-// Listen from the moment this chunk runs, before hydration finishes.
+// Listen from the moment this chunk runs, before hydration finishes. Each
+// starts only when its own flag is on.
 startFirstPartyTelemetry();
+startFlightRecorder();
 
 function FirstPartyTelemetryClient({
   consentEnabled,
@@ -47,9 +54,11 @@ function FirstPartyTelemetryClient({
   useEffect(() => {
     if (lastPathRef.current === pathname) return;
     lastPathRef.current = pathname;
+    const route = toRouteTemplate(pathname, params);
+    recordFlightNavigation(route);
     recordPageView({
       pathname,
-      route: toRouteTemplate(pathname, params),
+      route,
       pageGroup: classifyPageView({ pathname }).pageGroup,
       signedIn,
     });
@@ -59,6 +68,7 @@ function FirstPartyTelemetryClient({
   useEffect(() => {
     const previous = wsRef.current;
     if (status === previous.status) return;
+    if (status !== undefined) recordFlightWebSocket(status);
     if (
       previous.status === WebSocketStatus.CONNECTED &&
       status === WebSocketStatus.DISCONNECTED
@@ -79,15 +89,19 @@ function FirstPartyTelemetryClient({
 }
 
 /**
- * First-party collector (R14 §4.1) behind
- * NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY. Renders nothing.
+ * Feeds the first-party collector (R14 §4.1, NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY)
+ * and the flight recorder (R14 §4.2, NEXT_PUBLIC_FEATURE_DIAGNOSTICS). Renders
+ * nothing.
  */
 export default function FirstPartyTelemetry({
   consentEnabled = true,
 }: {
   readonly consentEnabled?: boolean;
 }) {
-  if (publicEnv.NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY !== "true")
+  if (
+    publicEnv.NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY !== "true" &&
+    publicEnv.NEXT_PUBLIC_FEATURE_DIAGNOSTICS !== "true"
+  )
     return null;
   return <FirstPartyTelemetryClient consentEnabled={consentEnabled} />;
 }

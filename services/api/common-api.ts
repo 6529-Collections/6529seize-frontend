@@ -1,6 +1,7 @@
 import { publicEnv } from "@/config/env";
 import { getApiBase } from "@/services/api/api-endpoints";
 import { countApiRequest } from "@/services/analytics/telemetry/collector";
+import { recordFlightApi } from "@/services/diagnostics/flightRecorder";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -378,6 +379,7 @@ const executeApiRequest = async <T>({
 }: ExecuteApiRequestParams): Promise<T> => {
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
+  let requestId: string | null = null;
   const requestInit = createRequestInit({
     method,
     headers,
@@ -390,6 +392,7 @@ const executeApiRequest = async <T>({
   try {
     const res = await sessionAwareFetch(url, requestInit, manageWalletAuth);
     status = res.status;
+    requestId = readRequestId(res);
 
     if (!res.ok) {
       return handleApiError(res, errorMode);
@@ -409,8 +412,19 @@ const executeApiRequest = async <T>({
       durationMs,
     });
     countApiRequest({ endpoint: url, status, durationMs });
+    recordFlightApi({ method, endpoint: url, status, durationMs, requestId });
   }
 };
+
+// The backend's request ID (R14 §3.4) lets a diagnostics bundle be matched
+// to server logs.
+function readRequestId(res: Response): string | null {
+  try {
+    return res.headers.get("x-request-id");
+  } catch {
+    return null;
+  }
+}
 
 function getRequestTimingNow(): number {
   if (globalThis.performance?.now) {

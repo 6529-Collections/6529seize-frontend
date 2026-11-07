@@ -20,12 +20,12 @@ redirect over it. The `wireContract` Jest test
 checks that the client's event registry equals the schema's and that emitted
 batches validate against it.
 
-| Record | Fields |
-|---|---|
-| `pv` page view | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp` |
-| `vitals` | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides. Our own observers; INP is the web-vitals p98 estimate (the worst interaction, skipping one per 50), over at most 1,000 interactions |
-| `health` | per page view: asset load failures by kind, failed and slow API requests by endpoint template (every identifier becomes `[id]`, as in `/drops/[id]`), WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind |
-| `ev` product event | a registry event name plus at most six enum or boolean properties |
+| Record             | Fields                                                                                                                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pv` page view     | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp`            |
+| `vitals`           | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides. Our own observers; INP is the web-vitals p98 estimate (the worst interaction, skipping one per 50), over at most 1,000 interactions            |
+| `health`           | per page view: asset load failures by kind, failed and slow API requests by endpoint template (every identifier becomes `[id]`, as in `/drops/[id]`), WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind |
+| `ev` product event | a registry event name plus at most six enum or boolean properties                                                                                                                                                                      |
 
 Route templates come from `useParams()`: each segment that holds a dynamic
 param becomes its name. A page that renders the shared 404 component is sent as
@@ -62,14 +62,45 @@ Wave feed and Wave feature pilot events behind the four Mixpanel reports. A
 property must be on that event's allowlist and must be a boolean or a short
 enum token; anything else is dropped. The backend checks the exact enums.
 
+## Flight recorder (R14 §4.2)
+
+`services/diagnostics/flightRecorder.ts` keeps the last 5 minutes of app
+events on the device, capped at about 200 KB, for a diagnostics bundle the
+person chooses to send. It is off unless `NEXT_PUBLIC_FEATURE_DIAGNOSTICS` is
+`"true"` (staging builds set it). It records:
+
+- navigation, as route templates;
+- API requests: method, endpoint template, status, duration and the
+  backend's `X-Request-Id`;
+- WebSocket state changes;
+- action-lifecycle transitions (kinds and event types only, through
+  `recordActionTransition`);
+- errors: kind, error name, a scrubbed message and the first `/_next/` stack
+  frame;
+- long tasks over 200 ms, asset failures by kind, visibility changes;
+- with each snapshot: app version, platform, device class, browser family and
+  major version, and the names of the enabled feature flags.
+
+Error messages pass through `scrubDiagnosticText`, which replaces URLs,
+emails, tokens, wallet addresses, UUIDs, quoted text, @handles, paths and any
+word with a digit. Entries stay as objects in memory. A JSON copy goes to
+`sessionStorage` (`6529:flight-recorder`) only when the page hides or an
+error happens, so a reload after a crash still has it. The copy is deleted an
+hour after it was written, and a copy older than an hour is ignored. Nothing
+is sent from the recorder itself.
+
 ## Flag and rollout
 
-- `NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY="true"` turns it on. Staging
-  builds set it; production builds leave it unset until the overlap starts.
+- `NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY="true"` turns the collector on,
+  and `NEXT_PUBLIC_FEATURE_DIAGNOSTICS="true"` the flight recorder. Staging
+  builds set both; production builds leave them unset until the orchestrator
+  enables them.
 - The edge `/e` behavior must exist on an environment before the flag is on
   there.
-- Budget: 4.9 KB brotli measured, including the vitals observers. The Jest test
-  `collectorBundleSize` fails above 5 KB.
+- Budget: the collector is 5.1 KB brotli measured, including the vitals
+  observers and the product-event registry; `collectorBundleSize` fails above
+  5.5 KB. The flight recorder adds 2.1 KB brotli; `flightRecorderBundleSize`
+  fails above 2.5 KB.
 
 ## Testing
 
