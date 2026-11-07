@@ -10,6 +10,7 @@ fallback dictionaries.
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | [About contents/navigation](about-contents-navigation.md)           | The About route, contents dropdown, Tech reports, and wallet-auth page still resolve with `DEFAULT_LOCALE`                    |
 | [About The Memes](about-memes.md)                                   | `AboutMemes` still resolves `about.memes.*` through `DEFAULT_LOCALE`                                                          |
+| [About Cookie Policy](about-cookie-policy.md) | Table labels and the RUM rows use `about.cookiePolicy.*` messages with `en-US` fallback; the rest of the page is hard-coded English |
 | [About minting](about-minting.md)                                   | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |
 | [Artist artwork alerts](artist-artwork-alerts.md) | Profile menu states, feedback, notification rows and filter copy fall back to `en-US` outside the source locale |
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
