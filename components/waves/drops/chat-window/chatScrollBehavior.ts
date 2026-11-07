@@ -1,5 +1,8 @@
-/** Scrolls the windowed chat to its newest message. */
-export type ChatEndScroller = (behavior: ScrollBehavior) => void;
+/** What the windowed chat list exposes to the chat around it. */
+export interface ChatListHandle {
+  /** Scrolls to the newest message. */
+  readonly scrollToEnd: (behavior: ScrollBehavior) => void;
+}
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 

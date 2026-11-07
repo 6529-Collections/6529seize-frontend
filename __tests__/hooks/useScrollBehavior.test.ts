@@ -595,7 +595,7 @@ describe("useScrollBehavior", () => {
       result.current.scrollContainerRef.current = createMockScrollContainer({
         scrollTop: 0,
       });
-      result.current.endScrollerRef.current = endScroller;
+      result.current.chatListRef.current = { scrollToEnd: endScroller };
 
       act(() => {
         result.current.forcePinToBottom("auto");

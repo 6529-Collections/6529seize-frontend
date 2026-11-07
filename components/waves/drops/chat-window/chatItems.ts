@@ -212,7 +212,10 @@ const estimateFullDropHeight = (drop: ExtendedDrop) => {
 };
 
 export function estimateChatItemSize(item: ChatItem | undefined): number {
-  switch (item?.kind) {
+  if (item === undefined) {
+    return FULL_DROP_BASE_PX;
+  }
+  switch (item.kind) {
     case "drop":
       return item.drop.type === DropSize.FULL
         ? estimateFullDropHeight(item.drop)
@@ -223,7 +226,5 @@ export function estimateChatItemSize(item: ChatItem | undefined): number {
       return UNREAD_ITEM_PX;
     case "boost":
       return item.compact ? BOOST_COMPACT_PX : BOOST_CARD_PX;
-    default:
-      return FULL_DROP_BASE_PX;
   }
 }

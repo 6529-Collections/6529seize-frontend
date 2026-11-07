@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   resolveChatScrollBehavior,
-  type ChatEndScroller,
+  type ChatListHandle,
 } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 
 type ScrollIntent = "pinned" | "reading" | "auto";
@@ -160,7 +160,7 @@ const useScrollIntentState = () => {
 interface ScrollBehaviorOptions {
   /**
    * The windowed chat: a normal-order list anchored to the newest message,
-   * instead of a column-reverse box. Its list registers `endScrollerRef`.
+   * instead of a column-reverse box. The list takes `chatListRef`.
    */
   readonly endAnchored?: boolean | undefined;
 }
@@ -170,7 +170,7 @@ export const useScrollBehavior = ({
 }: ScrollBehaviorOptions = {}) => {
   const { scrollContainerRef, scrollContainerEl, syncScrollContainerRef } =
     useScrollContainer();
-  const endScrollerRef = useRef<ChatEndScroller | null>(null);
+  const chatListRef = useRef<ChatListHandle | null>(null);
   const { bottomAnchorRef, bottomAnchorEl, syncBottomAnchorRef } =
     useBottomAnchor();
   const { scrollIntent, setScrollIntentSafely } = useScrollIntentState();
@@ -189,9 +189,9 @@ export const useScrollBehavior = ({
       if (endAnchored) {
         // The windowed list scrolls to its end through the virtualizer, which
         // keeps the end as rows above it are measured.
-        const endScroller = endScrollerRef.current;
-        if (endScroller) {
-          endScroller(behavior);
+        const chatList = chatListRef.current;
+        if (chatList) {
+          chatList.scrollToEnd(behavior);
         } else {
           container.scrollTo({
             top: container.scrollHeight,
@@ -240,7 +240,7 @@ export const useScrollBehavior = ({
         behavior: endAnchored ? resolveChatScrollBehavior("smooth") : "smooth",
       });
     }
-  }, [endAnchored]);
+  }, [endAnchored, scrollContainerRef]);
 
   // Robust scroll detection with intent-based pinning
   const handleScroll = useCallback(() => {
@@ -340,7 +340,7 @@ export const useScrollBehavior = ({
     isAtTop,
     shouldPinToBottom,
     scrollIntent,
-    endScrollerRef,
+    chatListRef,
     scrollToVisualBottom,
     forcePinToBottom,
     scrollToVisualTop,

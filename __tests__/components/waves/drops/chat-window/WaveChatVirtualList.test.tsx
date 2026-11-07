@@ -1,5 +1,5 @@
 import { WaveChatVirtualList } from "@/components/waves/drops/chat-window/WaveChatVirtualList";
-import type { ChatEndScroller } from "@/components/waves/drops/chat-window/chatScrollBehavior";
+import type { ChatListHandle } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
 import { DropSize, type Drop } from "@/helpers/waves/drop.helpers";
 import {
@@ -9,7 +9,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import type { ComponentProps } from "react";
+import { createRef, type ComponentProps } from "react";
 
 jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
   __esModule: true,
@@ -123,15 +123,13 @@ const makeDrops = (count: number, newest = count) =>
 type ListProps = ComponentProps<typeof WaveChatVirtualList>;
 
 const renderList = (overrides: Partial<ListProps> = {}) => {
-  const endScrollerRef: { current: ChatEndScroller | null } = {
-    current: null,
-  };
+  const endScrollerRef = createRef<ChatListHandle>();
   const props: ListProps = {
     drops: makeDrops(2000),
     waveId: "wave-1",
     scrollContainerRef: { current: null },
     bottomAnchorRef: { current: null },
-    endScrollerRef,
+    ref: endScrollerRef,
     isFetchingOlder: false,
     showOlderLoader: false,
     onTopIntersection: jest.fn(),
@@ -316,7 +314,7 @@ describe("WaveChatVirtualList", () => {
   it("registers a scroller for the newest message", () => {
     const { endScrollerRef, unmount } = renderList({ drops: makeDrops(8) });
 
-    expect(endScrollerRef.current).toEqual(expect.any(Function));
+    expect(endScrollerRef.current?.scrollToEnd).toEqual(expect.any(Function));
     unmount();
     expect(endScrollerRef.current).toBeNull();
   });

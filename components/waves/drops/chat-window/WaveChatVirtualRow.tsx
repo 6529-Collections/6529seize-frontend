@@ -19,10 +19,10 @@ import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { memo, useEffect, useState } from "react";
 
-export type VideoPlaybackMemories = Map<
-  string,
-  Map<string, VideoPlaybackSnapshot>
->;
+/** The list's video memory for a row, created on first use. */
+export type GetVideoPlaybackMemory = (
+  rowKey: string
+) => Map<string, VideoPlaybackSnapshot>;
 
 interface WaveChatVirtualRowProps {
   readonly drop: Drop;
@@ -31,7 +31,7 @@ interface WaveChatVirtualRowProps {
   readonly itemData: DropsListItemData;
   readonly signatureGroup: readonly ExtendedDrop[] | undefined;
   readonly suspendLightDropHydration: boolean;
-  readonly videoPlaybackMemories: VideoPlaybackMemories;
+  readonly getVideoPlaybackMemory: GetVideoPlaybackMemory;
 }
 
 /**
@@ -40,72 +40,73 @@ interface WaveChatVirtualRowProps {
  * per-row observers tracked: the drop counts as near the viewport, and a
  * light placeholder asks for its full drop.
  */
-export const WaveChatVirtualRow = memo(function WaveChatVirtualRow({
-  drop,
-  previousDrop,
-  nextDrop,
-  itemData,
-  signatureGroup,
-  suspendLightDropHydration,
-  videoPlaybackMemories,
-}: WaveChatVirtualRowProps) {
-  const { fetchAroundSerialNo } = useMyStreamActions();
-  const isTarget = itemData.serialNo === drop.serial_no;
-  const waveId = drop.type === DropSize.FULL ? drop.wave.id : drop.waveId;
-  // Video position and sound settings outlive the row's unmount, as they did
-  // when offscreen rows were kept as placeholders.
-  const [videoMemory] = useState(
-    () =>
-      videoPlaybackMemories.get(drop.stableKey) ??
-      new Map<string, VideoPlaybackSnapshot>()
-  );
-
-  useEffect(() => {
-    videoPlaybackMemories.set(drop.stableKey, videoMemory);
-  }, [drop.stableKey, videoMemory, videoPlaybackMemories]);
-
-  useEffect(() => {
-    setWaveDropNearViewport({ waveId, dropId: drop.id, isNearViewport: true });
-    return () => {
-      clearWaveDropNearViewport(waveId, drop.id);
-    };
-  }, [drop.id, waveId]);
-
-  useEffect(() => {
-    if (drop.type === DropSize.LIGHT && !suspendLightDropHydration) {
-      fetchAroundSerialNo(waveId, drop.serial_no);
-    }
-  }, [
-    drop.serial_no,
-    drop.type,
-    fetchAroundSerialNo,
+export const WaveChatVirtualRow = memo(
+  ({
+    drop,
+    previousDrop,
+    nextDrop,
+    itemData,
+    signatureGroup,
     suspendLightDropHydration,
-    waveId,
-  ]);
+    getVideoPlaybackMemory,
+  }: WaveChatVirtualRowProps) => {
+    const { fetchAroundSerialNo } = useMyStreamActions();
+    const isTarget = itemData.serialNo === drop.serial_no;
+    const waveId = drop.type === DropSize.FULL ? drop.wave.id : drop.waveId;
+    // Video position and sound settings outlive the row's unmount, as they did
+    // when offscreen rows were kept as placeholders.
+    const [videoMemory] = useState(() =>
+      getVideoPlaybackMemory(drop.stableKey)
+    );
 
-  return (
-    <HighlightDropWrapper
-      id={`drop-${drop.serial_no}`}
-      serialNo={drop.serial_no}
-      waveDropId={drop.type === DropSize.FULL ? drop.stableHash : undefined}
-      ref={isTarget ? itemData.targetDropRef : null}
-      active={isTarget}
-      // Read when the row renders; the active row re-renders when it becomes
-      // active, which is when the highlight observer uses this root.
-      scrollContainer={itemData.scrollContainerRef.current ?? null}
-      className={isTarget ? "tw-scroll-mt-20" : ""}
-    >
-      <VideoPlaybackMemoryContext.Provider value={videoMemory}>
-        {renderDropsListDropContent({
-          drop,
-          previousDrop,
-          nextDrop,
-          itemData,
-          location: DropLocation.WAVE,
-          moderationPresentation: "default",
-          signatureGroup,
-        })}
-      </VideoPlaybackMemoryContext.Provider>
-    </HighlightDropWrapper>
-  );
-});
+    useEffect(() => {
+      setWaveDropNearViewport({
+        waveId,
+        dropId: drop.id,
+        isNearViewport: true,
+      });
+      return () => {
+        clearWaveDropNearViewport(waveId, drop.id);
+      };
+    }, [drop.id, waveId]);
+
+    useEffect(() => {
+      if (drop.type === DropSize.LIGHT && !suspendLightDropHydration) {
+        fetchAroundSerialNo(waveId, drop.serial_no);
+      }
+    }, [
+      drop.serial_no,
+      drop.type,
+      fetchAroundSerialNo,
+      suspendLightDropHydration,
+      waveId,
+    ]);
+
+    return (
+      <HighlightDropWrapper
+        id={`drop-${drop.serial_no}`}
+        serialNo={drop.serial_no}
+        waveDropId={drop.type === DropSize.FULL ? drop.stableHash : undefined}
+        ref={isTarget ? itemData.targetDropRef : null}
+        active={isTarget}
+        // Read when the row renders; the active row re-renders when it becomes
+        // active, which is when the highlight observer uses this root.
+        scrollContainer={itemData.scrollContainerRef.current ?? null}
+        className={isTarget ? "tw-scroll-mt-20" : ""}
+      >
+        <VideoPlaybackMemoryContext.Provider value={videoMemory}>
+          {renderDropsListDropContent({
+            drop,
+            previousDrop,
+            nextDrop,
+            itemData,
+            location: DropLocation.WAVE,
+            moderationPresentation: "default",
+            signatureGroup,
+          })}
+        </VideoPlaybackMemoryContext.Provider>
+      </HighlightDropWrapper>
+    );
+  }
+);
+WaveChatVirtualRow.displayName = "WaveChatVirtualRow";

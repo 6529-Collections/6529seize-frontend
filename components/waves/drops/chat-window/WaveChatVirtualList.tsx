@@ -21,9 +21,9 @@ import { t } from "@/i18n/messages";
 import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
-import type { Range } from "@tanstack/react-virtual";
-import type { MutableRefObject, Ref, RefObject } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Range, Virtualizer } from "@tanstack/react-virtual";
+import type { Ref, RefObject } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   buildChatItems,
   estimateChatItemSize,
@@ -31,10 +31,10 @@ import {
   mergePinnedIndices,
   type ChatItem,
 } from "./chatItems";
-import type { ChatEndScroller } from "./chatScrollBehavior";
+import type { ChatListHandle } from "./chatScrollBehavior";
 import {
   WaveChatVirtualRow,
-  type VideoPlaybackMemories,
+  type GetVideoPlaybackMemory,
 } from "./WaveChatVirtualRow";
 import {
   CHAT_END_THRESHOLD_PX,
@@ -57,7 +57,7 @@ interface WaveChatVirtualListProps {
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly bottomAnchorRef: Ref<HTMLDivElement>;
-  readonly endScrollerRef: MutableRefObject<ChatEndScroller | null>;
+  readonly ref?: Ref<ChatListHandle> | undefined;
   readonly isFetchingOlder: boolean;
   readonly showOlderLoader: boolean;
   readonly onTopIntersection: () => void;
@@ -85,7 +85,7 @@ const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
   if (typeof ref === "function") {
     ref(value);
   } else if (ref) {
-    (ref as MutableRefObject<T | null>).current = value;
+    ref.current = value;
   }
 };
 
@@ -108,7 +108,7 @@ export function WaveChatVirtualList({
   scrollContainerRef,
   scrollContainerCallbackRef,
   bottomAnchorRef,
-  endScrollerRef,
+  ref,
   isFetchingOlder,
   showOlderLoader,
   onTopIntersection,
@@ -240,6 +240,30 @@ export function WaveChatVirtualList({
     [scrollContainerRef]
   );
 
+  // Older history loads as the rendered range nears the top: once per list
+  // length and loader, like the reversed list's top sentinel.
+  const topTriggerRef = useRef<{
+    readonly count: number;
+    readonly load: () => void;
+  } | null>(null);
+  const handleRangeChange = useCallback(
+    (instance: Virtualizer<HTMLDivElement, HTMLDivElement>) => {
+      const startIndex = instance.range?.startIndex;
+      if (startIndex === undefined || startIndex > TOP_PREFETCH_ITEMS) {
+        topTriggerRef.current = null;
+        return;
+      }
+      const count = instance.options.count;
+      const last = topTriggerRef.current;
+      if (last?.count === count && last.load === onTopIntersection) {
+        return;
+      }
+      topTriggerRef.current = { count, load: onTopIntersection };
+      onTopIntersection();
+    },
+    [onTopIntersection]
+  );
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
     count: itemCount,
@@ -258,6 +282,7 @@ export function WaveChatVirtualList({
     // Scroll-only updates move rows without a React render.
     directDomUpdates: true,
     directDomUpdatesMode: "position",
+    onChange: handleRangeChange,
   });
 
   useWindowedChatEnd({
@@ -266,19 +291,8 @@ export function WaveChatVirtualList({
     itemCount,
     newestKey,
     serialNo,
-    endScrollerRef,
+    ref,
   });
-
-  // Older history loads as the rendered range nears the top.
-  const firstRenderedIndex = virtualizer.range?.startIndex ?? null;
-  useEffect(() => {
-    if (
-      firstRenderedIndex !== null &&
-      firstRenderedIndex <= TOP_PREFETCH_ITEMS
-    ) {
-      onTopIntersection();
-    }
-  }, [firstRenderedIndex, onTopIntersection]);
 
   // One polite live region: missed-history progress and new messages.
   const { message: announcement, announce } = useChatAnnouncements({
@@ -288,8 +302,20 @@ export function WaveChatVirtualList({
     locale,
   });
 
-  const [videoPlaybackMemories] = useState<VideoPlaybackMemories>(
-    () => new Map()
+  // Video position and sound settings per row outlive the row's unmount.
+  const [videoPlaybackMemories] = useState(
+    () => new Map<string, ReturnType<GetVideoPlaybackMemory>>()
+  );
+  const getVideoPlaybackMemory = useCallback<GetVideoPlaybackMemory>(
+    (rowKey) => {
+      let memory = videoPlaybackMemories.get(rowKey);
+      if (!memory) {
+        memory = new Map();
+        videoPlaybackMemories.set(rowKey, memory);
+      }
+      return memory;
+    },
+    [videoPlaybackMemories]
   );
 
   const renderItem = (item: ChatItem) => {
@@ -304,7 +330,7 @@ export function WaveChatVirtualList({
             itemData={itemData}
             signatureGroup={signatureGroups.get(drop.id)}
             suspendLightDropHydration={suspendLightDropHydration}
-            videoPlaybackMemories={videoPlaybackMemories}
+            getVideoPlaybackMemory={getVideoPlaybackMemory}
           />
         );
       }

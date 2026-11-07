@@ -131,7 +131,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const isWindowed = isChatWindowingEnabled();
   const scrollBehavior = useScrollBehavior({ endAnchored: isWindowed });
   const {
-    endScrollerRef,
+    chatListRef,
     scrollContainerRef,
     scrollContainerCallbackRef,
     bottomAnchorRef,
@@ -321,7 +321,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
         scrollContainerCallbackRef={scrollContainerCallbackRef}
-        chatEndScrollerRef={endScrollerRef}
+        chatListRef={chatListRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
         paginationThreshold={virtualizedDropsPageSize}

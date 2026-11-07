@@ -2,7 +2,7 @@ import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/
 import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrollControls";
-import type { ChatEndScroller } from "@/components/waves/drops/chat-window/chatScrollBehavior";
+import type { ChatListHandle } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 import { isChatWindowingEnabled } from "@/components/waves/drops/chat-window/chatWindowingFlag";
 import { WaveChatVirtualList } from "@/components/waves/drops/chat-window/WaveChatVirtualList";
 import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
@@ -15,7 +15,7 @@ import {
   type BoostedDropsDisplayPreference,
 } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useRef, type MutableRefObject, type RefObject, type Ref } from "react";
+import type { RefObject, Ref } from "react";
 
 type WaveMessagesResult = ReturnType<
   typeof useVirtualizedWaveDrops
@@ -26,9 +26,7 @@ interface WaveDropsMessageListSectionProps {
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
-  readonly chatEndScrollerRef?:
-    | MutableRefObject<ChatEndScroller | null>
-    | undefined;
+  readonly chatListRef?: Ref<ChatListHandle> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly paginationThreshold: number;
@@ -75,7 +73,7 @@ export const WaveDropsMessageListSection: React.FC<
   dropId,
   scrollContainerRef,
   scrollContainerCallbackRef,
-  chatEndScrollerRef,
+  chatListRef,
   bottomAnchorRef,
   bottomAnchorCallbackRef,
   paginationThreshold,
@@ -112,7 +110,6 @@ export const WaveDropsMessageListSection: React.FC<
 
   const containerRef = scrollContainerCallbackRef ?? scrollContainerRef;
   const anchorRef = bottomAnchorCallbackRef ?? bottomAnchorRef;
-  const fallbackEndScrollerRef = useRef<ChatEndScroller | null>(null);
 
   const scrollControls = onScrollToUnread && (
     <WaveDropsScrollControls
@@ -146,7 +143,7 @@ export const WaveDropsMessageListSection: React.FC<
               scrollContainerRef={scrollContainerRef}
               scrollContainerCallbackRef={scrollContainerCallbackRef}
               bottomAnchorRef={anchorRef}
-              endScrollerRef={chatEndScrollerRef ?? fallbackEndScrollerRef}
+              ref={chatListRef}
               isFetchingOlder={!!waveMessages?.isLoadingNextPage}
               showOlderLoader={hasNextPage}
               onTopIntersection={onTopIntersection}

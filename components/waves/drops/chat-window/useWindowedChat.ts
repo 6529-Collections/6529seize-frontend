@@ -5,17 +5,18 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { selectPluralCategory } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { Virtualizer } from "@tanstack/react-virtual";
-import type { MutableRefObject } from "react";
+import type { Ref } from "react";
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import {
   resolveChatScrollBehavior,
-  type ChatEndScroller,
+  type ChatListHandle,
 } from "./chatScrollBehavior";
 
 // Within this many pixels of the end the list counts as at the live end.
@@ -59,7 +60,7 @@ export function useFocusedChatItemKey(
  * Keeps the windowed chat at its newest message: it opens there, follows
  * appended messages while the reader is at the live end (never while a jump
  * owns the position), stays there when the scroller resizes, and gives
- * "scroll to latest" to the rest of the chat through `endScrollerRef`.
+ * "scroll to latest" to the rest of the chat through `ref`.
  */
 export function useWindowedChatEnd({
   virtualizer,
@@ -67,14 +68,14 @@ export function useWindowedChatEnd({
   itemCount,
   newestKey,
   serialNo,
-  endScrollerRef,
+  ref,
 }: {
   readonly virtualizer: Virtualizer<HTMLDivElement, HTMLDivElement>;
   readonly scrollElement: HTMLDivElement | null;
   readonly itemCount: number;
   readonly newestKey: string | null;
   readonly serialNo: number | null;
-  readonly endScrollerRef: MutableRefObject<ChatEndScroller | null>;
+  readonly ref: Ref<ChatListHandle> | undefined;
 }): void {
   const didOpenAtEndRef = useRef(false);
   useLayoutEffect(() => {
@@ -85,16 +86,17 @@ export function useWindowedChatEnd({
     virtualizer.scrollToEnd();
   }, [itemCount, scrollElement, virtualizer]);
 
-  useEffect(() => {
-    endScrollerRef.current = (behavior) => {
-      virtualizer.scrollToEnd({
-        behavior: resolveChatScrollBehavior(behavior),
-      });
-    };
-    return () => {
-      endScrollerRef.current = null;
-    };
-  }, [endScrollerRef, virtualizer]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToEnd: (behavior) => {
+        virtualizer.scrollToEnd({
+          behavior: resolveChatScrollBehavior(behavior),
+        });
+      },
+    }),
+    [virtualizer]
+  );
 
   // Whether the reader is at the live end, from the element itself. The
   // virtualizer reads its offset back from scroll events, so during a burst
