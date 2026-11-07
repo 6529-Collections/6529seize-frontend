@@ -263,7 +263,7 @@
     "__tests__/components/home/explore-waves/ExploreWaveCard.test.tsx": 2,
     "__tests__/components/home/HomeNewcomerIntro.test.tsx": 4,
     "__tests__/components/home/LatestDropNextMintSection.test.tsx": 1,
-    "__tests__/components/ipfs/IPFSContext.test.tsx": 2,
+    "__tests__/components/ipfs/IPFSContext.test.tsx": 1,
     "__tests__/components/layout/sidebar/nav/WebSidebarSubmenu.test.tsx": 1,
     "__tests__/components/layout/sidebar/WebSidebarNav.test.tsx": 1,
     "__tests__/components/layout/SmallScreenLayout.test.tsx": 1,

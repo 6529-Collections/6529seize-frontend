@@ -88,7 +88,7 @@ jest.mock("@/services/api/competitions-api", () => ({
   invalidateCompetition: jest.fn(),
 }));
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves/wave/competitions/competition",
+  usePathname: () => "/waves/wave/decisions/competition",
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: mockPush, replace: jest.fn() }),
 }));

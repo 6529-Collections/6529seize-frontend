@@ -5,12 +5,12 @@
 Wave pages can expose a tab strip that switches the main content panel between
 wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
-collection of posts from the wave. The selected competition shares this row with Chat and renders directly below
-it. Published competitions use the same row whether selected by default or an
-explicit link. The order is **Chat**, competition views, **Settings**, then
-**Competitions** when available, then named curations. **Settings** is the last
-competition tab. **Votes** contains **My Votes**, **All votes**, and **Activity**,
-all tied to the selected competition. See [Competitions](../competitions/feature-competitions.md)
+collection of posts from the wave. The selected decision shares this row with Chat and renders directly below
+it. Published decisions use the same row whether selected by default or an
+explicit link. The order is **Chat**, decision views, **Settings**, then
+**Decisions** when available, then named curations. **Settings** is the last
+decision tab. **Votes** contains **My Votes**, **All votes**, and **Activity**,
+all tied to the selected decision. See [Decisions](../competitions/feature-competitions.md)
 for default selection and switching.
 
 **About** and wave **Configuration** are available in the information panel.
@@ -21,11 +21,11 @@ In the `My Votes` tab, non-image drops use a preview image from drop metadata wh
 Each wave remembers its last selected valid tab in this browser or app. Ordinary
 wave navigation restores that choice, including after a reload or reopening the
 app. Main Stage can remember Leaderboard while Maybes Bar independently remembers
-Chat. A wave with no valid remembered choice opens Chat. Background competition
+Chat. A wave with no valid remembered choice opens Chat. Background decision
 loading does not change a deliberate selection.
 The wave list stays in place when switching waves. The remembered section opens
 directly; pending data uses that section's loading state without opening Chat or
-Competitions first.
+Decisions first.
 After switching from Leaderboard back to Chat, selecting another wave opens that
 wave's conversation and its own draft. Returning to the wave list closes the
 previous conversation.
@@ -33,7 +33,7 @@ When a wave needs to load, its name and picture from the wave list appear
 immediately above a quiet loading state. A shared link whose name is not yet
 available shows `Loading wave…`. Recently opened waves use available content
 without a forced loading screen. If loading fails, the wave identity stays visible
-and **Try again** retries the request; competition views keep their own recovery
+and **Try again** retries the request; decision views keep their own recovery
 controls.
 
 On an initial Chat visit, the header, tab area and composer space use one quiet
@@ -44,7 +44,7 @@ an empty collection. Public post text and links remain available in the server
 HTML; browsers with JavaScript disabled retain the readable public preview.
 Images can continue loading inside their own media frames after chat appears.
 
-Explicit tab, competition, curation and message links retain their destinations.
+Explicit tab, decision, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.
 
@@ -70,7 +70,7 @@ when it is still available, ahead of the wave's latest remembered choice.
   highlighting an action; keyboard opening and arrow keys highlight options
   for selection. Each action has a short description. Subwave creation
   is available only on eligible root waves outside direct messages.
-- In `Competitions`, the separate `+ Competition` action sits beside the
+- In `Decisions`, the separate `+ Decision` action sits beside the
   collection filter pills and opens setup directly when you have creation
   permission. It is absent from other wave tabs.
 
@@ -84,27 +84,27 @@ when it is still available, ahead of the wave's latest remembered choice.
    active tab:
    - An ordinary wave visit restores its last selected valid tab. A first visit,
      or a visit without a valid saved choice, opens `Chat`, including Memes and
-     completed competition waves on web and in the native app.
-   - Loading or refreshing the default competition does not change deliberate
-     Chat selections. A remembered competition view keeps its section selected
+     completed decision waves on web and in the native app.
+   - Loading or refreshing the default decision does not change deliberate
+     Chat selections. A remembered decision view keeps its section selected
      while its identity and availability are checked.
-   - Explicit tab and competition links open their requested section. Native
+   - Explicit tab and decision links open their requested section. Native
      app Back restores the section from that visit when it is still available.
 4. Select a tab to switch sections. The tab row stays visually steady while
    the destination opens, and screen readers announce loading when needed.
    Fast switches do not require a loading screen or a minimum waiting time.
-5. The main content panel updates. Competition views retain their competition
+5. The main content panel updates. Decision views retain their decision
    ID and selected tab in the URL so reload and Back/Forward restore the view.
-   When switching to a competition route, its controls appear after navigation
+   When switching to a decision route, its controls appear after navigation
    completes, so a newly opened sort sheet or form stays in that view.
-   Switching between Leaderboard and Chat for the selected competition reuses
+   Switching between Leaderboard and Chat for the selected decision reuses
    the open wave. Previously loaded Chat messages appear immediately while new
    messages refresh in the background. The primary text draft is kept when
    switching tabs or using Back/Forward. A first Chat load still waits for its
    messages; repeated tab choices reuse that request. A section can still show
    its own loading state when its data is not available yet.
    App tabs and their content use the same availability rules. An unavailable
-   legacy competition section opens `Leaderboard`, or `Submissions` after
+   legacy decision section opens `Leaderboard`, or `Submissions` after
    voting has ended, and selects that visible tab.
 6. When open polls still need the signed-in user's answer and the user can
    respond, the `Polls` tab shows an unread-style count badge.
@@ -124,7 +124,7 @@ when it is still available, ahead of the wave's latest remembered choice.
 ## Common Scenarios
 
 - Switch between `Chat` and `Leaderboard` while a wave is active.
-- Open `Winners` once the first decision has passed.
+- Open `Winners` once the first result has passed.
 - In memes waves, move between `Leaderboard`, `Votes`, `FAQ`, and other
   available tabs.
 - In curation waves, move between `Chat`, `Leaderboard`, `Sales`, `Winners`,
@@ -167,13 +167,13 @@ when it is still available, ahead of the wave's latest remembered choice.
 - `Leaderboard` can disappear after voting has ended for a wave.
 - Each wave's remembered choice survives background loading, reloads and app
   restarts in the same browser or app. Clearing local browser/app data removes it.
-- A remembered competition view is scoped to the competition where it was
-  selected. If another competition has become the default, an ordinary wave
-  visit falls back to Chat. Explicit links to the earlier competition still
+- A remembered decision view is scoped to the decision where it was
+  selected. If another decision has become the default, an ordinary wave
+  visit falls back to Chat. Explicit links to the earlier decision still
   retain their destination.
-- `Winners` is shown only after the first decision has passed.
+- `Winners` is shown only after the first result has passed.
 - `Sales` appears in curation waves only.
-- `Votes` appears when a competition is available; its personal view requires a connected profile. `FAQ` appears in memes waves only.
+- `Votes` appears when a decision is available; its personal view requires a connected profile. `FAQ` appears in memes waves only.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
 - Mobile tab-scroll controls have direction-specific accessible names, remain
@@ -200,7 +200,7 @@ when it is still available, ahead of the wave's latest remembered choice.
 - If a saved or active `Sales` tab is revisited in a non-curation context, the
   UI falls back to that wave's first available tab.
 - If an unavailable tab is requested, tab state falls back to that wave’s first
-  available tab: Chat for a wave, or Leaderboard/Submissions for competition detail.
+  available tab: Chat for a wave, or Leaderboard/Submissions for decision detail.
 - If a wave becomes chat-only with no curations or other available sections,
   the web tab strip can be hidden and the chat panel remains available.
 - If a linked curation was deleted or does not belong to this wave, the wave returns
@@ -221,7 +221,7 @@ when it is still available, ahead of the wave's latest remembered choice.
   devices. Named curation selection is encoded in the wave URL as
   `?curation={curationId}`.
 - Available tabs depend on wave type, curation settings, voting state, and
-  first-decision status.
+  first-result status.
 - The app and web layouts present the tab row differently, but eligible root
   wave admins receive the same curation and subwave create actions.
 
@@ -231,7 +231,7 @@ when it is still available, ahead of the wave's latest remembered choice.
 - [Waves Index](../README.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)
-- [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](../leaderboard/feature-decision-timeline.md)
 - [Wave Sales Tab](../leaderboard/feature-sales-tab.md)
 - [Wave Winners Tab](../leaderboard/feature-winners-tab.md)
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)

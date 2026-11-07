@@ -80,7 +80,7 @@ HD highlights when the original is selected. Choose
   including inside single-drop views.
 - Touch devices show a static loading placeholder for attachment images.
 - Non-touch devices show an animated pulse placeholder for attachment images.
-- Competition-style artwork panels center image content in the frame.
+- Decision-style artwork panels center image content in the frame.
 
 ## Edge Cases
 

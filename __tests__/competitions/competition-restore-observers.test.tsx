@@ -49,7 +49,7 @@ const mockCompetition = {
 } as ApiCompetition;
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves/wave/competitions/alpha",
+  usePathname: () => "/waves/wave/decisions/alpha",
   useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => {
     const React = jest.requireActual("react");
@@ -184,7 +184,7 @@ beforeEach(() => {
       customMetadata: { preserved: true },
     },
     "",
-    `/waves/wave/competitions/alpha?${mockSearch}`
+    `/waves/wave/decisions/alpha?${mockSearch}`
   );
   // Model the installed Next history integration: internal-state writes bypass
   // URL-hook synchronization; external URL writes sync and retain router state.

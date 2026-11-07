@@ -337,7 +337,7 @@ describe("WaveSubmissionAccessDetails", () => {
       expected: "&competition=beta",
     },
     {
-      pathname: "/waves/wave-1/competitions/beta",
+      pathname: "/waves/wave-1/decisions/beta",
       query: "competition=alpha",
       expected: "&competition=beta",
     },
