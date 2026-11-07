@@ -619,32 +619,33 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
 
   // Refresh all sources (main, pinned, announcements, subwaves): forced, or
   // stale-only for reconnect and tab-resume resyncs.
-  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
-    shouldLoadMainWaves,
-    isJoinedMode,
-    highlyRated: {
-      refetch: highlyRatedWavesRefetch,
-      refetchIfStale: highlyRatedWavesRefetchIfStale,
-    },
-    allActivity: {
-      refetch: allActivityWavesRefetch,
-      refetchIfStale: allActivityWavesRefetchIfStale,
-    },
-    followedActivity: {
-      refetch: followedActivityWavesRefetch,
-      refetchIfStale: followedActivityWavesRefetchIfStale,
-    },
-    pinned: {
-      refetch: refetchPinnedWaves,
-      refetchIfStale: refetchPinnedWavesIfStale,
-    },
-    refetchSubwaves,
-    loadedSubwaveParentIds,
-    viewerIdentityKey,
-    announcementWaveId: shouldFetchAnnouncementWave
-      ? announcementsWaveId
-      : null,
-  });
+  const { refetchAllWaves, refreshActivityList, refreshStaleWaves } =
+    useWavesListRefetch({
+      shouldLoadMainWaves,
+      isJoinedMode,
+      highlyRated: {
+        refetch: highlyRatedWavesRefetch,
+        refetchIfStale: highlyRatedWavesRefetchIfStale,
+      },
+      allActivity: {
+        refetch: allActivityWavesRefetch,
+        refetchIfStale: allActivityWavesRefetchIfStale,
+      },
+      followedActivity: {
+        refetch: followedActivityWavesRefetch,
+        refetchIfStale: followedActivityWavesRefetchIfStale,
+      },
+      pinned: {
+        refetch: refetchPinnedWaves,
+        refetchIfStale: refetchPinnedWavesIfStale,
+      },
+      refetchSubwaves,
+      loadedSubwaveParentIds,
+      viewerIdentityKey,
+      announcementWaveId: shouldFetchAnnouncementWave
+        ? announcementsWaveId
+        : null,
+    });
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -751,6 +752,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
       // Refetch all waves including main and pinned
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
@@ -786,6 +788,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
