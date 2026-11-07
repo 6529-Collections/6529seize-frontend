@@ -1103,6 +1103,22 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
   };
 }
 
+/**
+ * Hides the tab as if the reader stepped away: a return resyncs only after
+ * the tab was hidden 30 s or more, so the page's clock moves 31 s ahead.
+ */
+async function hideTabForAWhile(page: Page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+    const now = Date.now.bind(Date);
+    Date.now = () => now() + 31_000;
+  });
+}
+
 test("resume shows the latest page before missed history and preserves the composer", async ({
   page,
   baseURL,
@@ -1132,13 +1148,7 @@ test("resume shows the latest page before missed history and preserves the compo
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   const composer = page.getByRole("textbox", { name: "Write a message" });
   await composer.fill("Keep this unsent draft");
-  await page.evaluate(() => {
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
+  await hideTabForAWhile(page);
   fixture.missMessages(1000);
   try {
     await page.evaluate(() => {
@@ -1280,13 +1290,7 @@ test("resume preserves an older reading position while loading the latest page",
   await expect(
     page.getByRole("button", { name: "Scroll to bottom", exact: true })
   ).toBeVisible();
-  await page.evaluate(() => {
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
+  await hideTabForAWhile(page);
   fixture.missMessages(1000);
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
