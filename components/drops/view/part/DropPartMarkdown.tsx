@@ -412,8 +412,12 @@ function DropPartMarkdown({
   // Drop rows re-render often; the parse cache gives a part whose content
   // has not changed its finished tree without parsing it again. Each plugin
   // set has its own namespace.
-  const parseCache = dropMarkdownParseCache.plugins(
-    collapsedPreview ? "collapsed-preview" : "full"
+  const parseCache = useMemo(
+    () =>
+      dropMarkdownParseCache.plugins(
+        collapsedPreview ? "collapsed-preview" : "full"
+      ),
+    [collapsedPreview]
   );
 
   const rehypePlugins = useMemo<PluggableList>(

@@ -93,6 +93,58 @@ describe("markdown parse cache", () => {
     expect(MARKDOWN_PARSE_CACHE_MAX_ENTRIES).toBe(2_000);
   });
 
+  it.each([
+    ["a trailing newline", "Line one\n"],
+    ["Windows line endings", "Line one\r\nLine two\r\n\r\n- item"],
+    ["surrounding whitespace", "  padded *text*  \n\n"],
+  ])("hits the cache for content with %s", (_label, content) => {
+    // The parser's input and the stored key must be the same string, or the
+    // cache would never hit (or hit the wrong entry).
+    const cache = createMarkdownParseCache();
+
+    const first = renderWithCache(cache, content);
+    const second = renderWithCache(cache, content);
+
+    expect(second.parsedNodeCounts).toEqual([0]);
+    expect(second.html).toBe(first.html);
+    expect(cache.size()).toBe(1);
+  });
+
+  it("renders the same cached content in several instances independently", () => {
+    const cache = createMarkdownParseCache();
+    const plugins = cache.plugins("full");
+    const markdown = (key: string) => (
+      <div key={key} data-testid={key}>
+        <Markdown
+          remarkPlugins={[plugins.remark, remarkGfm]}
+          rehypePlugins={[rehypeSanitize, plugins.rehype]}
+        >
+          {CONTENT}
+        </Markdown>
+      </div>
+    );
+    const { getByTestId, rerender } = render(
+      <>
+        {markdown("one")}
+        {markdown("two")}
+      </>
+    );
+    const expected = getByTestId("one").innerHTML;
+    expect(getByTestId("two").innerHTML).toBe(expected);
+
+    rerender(<>{markdown("two")}</>);
+    rerender(
+      <>
+        {markdown("two")}
+        {markdown("three")}
+      </>
+    );
+
+    expect(getByTestId("two").innerHTML).toBe(expected);
+    expect(getByTestId("three").innerHTML).toBe(expected);
+    expect(cache.size()).toBe(1);
+  });
+
   it("re-renders a cached tree with the same markup", () => {
     const cache = createMarkdownParseCache();
     const plugins = cache.plugins("full");
