@@ -341,6 +341,45 @@ describe("DropsList", () => {
     expect(highlightProps).toHaveLength(2);
   });
 
+  it("gives a memoized row the target ref when it becomes the serial target", () => {
+    const drops = Array.from(
+      { length: 5 },
+      (_, index) =>
+        ({
+          id: `drop-${index}`,
+          stableKey: `drop-${index}`,
+          stableHash: `drop-${index}`,
+          serial_no: index + 1,
+          type: DropSize.FULL,
+          wave: { id: "w" },
+        }) as ExtendedDrop
+    );
+    const targetDropRef = { current: null };
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    highlightProps = [];
+    rerender(<DropsList {...props} serialNo={3} />);
+    const target = highlightProps.filter((item) => item.serialNo === 3).at(-1);
+    expect(target).toEqual(
+      expect.objectContaining({ active: true, ref: targetDropRef })
+    );
+    expect(
+      highlightProps.filter((item) => item.serialNo !== 3 && item.active)
+    ).toEqual([]);
+  });
+
   it("only re-renders the old and new reply or quote targets", () => {
     const drops = Array.from(
       { length: 50 },

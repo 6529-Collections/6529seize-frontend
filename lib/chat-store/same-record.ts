@@ -2,7 +2,10 @@
  * Whether an incoming copy carries nothing new. Feeds, newest-drops syncs
  * and socket frames often re-deliver drops the wave already holds; keeping
  * the stored object then keeps every memoized row that shows it from
- * re-rendering. Row identity fields are the store's own and are ignored.
+ * re-rendering. Row identity fields are the store's own and are ignored;
+ * the store adds them at the top level only, so nested objects (reply and
+ * quote targets) compare in full. A missing key and an `undefined` one are
+ * treated alike.
  */
 const IDENTITY_FIELDS: ReadonlySet<string> = new Set([
   "stableKey",
@@ -42,27 +45,28 @@ function sameValue(a: unknown, b: unknown): boolean {
   );
 }
 
+/** Keys holding a value: a missing key and an `undefined` one are alike. */
+function definedKeys(
+  record: Readonly<Record<string, unknown>>,
+  ignored: ReadonlySet<string> | null
+): string[] {
+  return Object.keys(record).filter(
+    (key) => record[key] !== undefined && ignored?.has(key) !== true
+  );
+}
+
+/** The same set of defined keys, each with the same value. */
 function sameFields(
   a: Readonly<Record<string, unknown>>,
   b: Readonly<Record<string, unknown>>,
   ignored: ReadonlySet<string> | null
 ): boolean {
-  let count = 0;
-  for (const key of Object.keys(a)) {
-    if (ignored?.has(key) === true || a[key] === undefined) {
-      continue;
-    }
-    count++;
-    if (!Object.hasOwn(b, key) || !sameValue(a[key], b[key])) {
-      return false;
-    }
+  const keysA = definedKeys(a, ignored);
+  const keysB = new Set(definedKeys(b, ignored));
+  if (keysA.length !== keysB.size) {
+    return false;
   }
-  for (const key of Object.keys(b)) {
-    if (ignored?.has(key) !== true && b[key] !== undefined) {
-      count--;
-    }
-  }
-  return count === 0;
+  return keysA.every((key) => keysB.has(key) && sameValue(a[key], b[key]));
 }
 
 /** Deep equality of two copies of a record, ignoring row identity. */

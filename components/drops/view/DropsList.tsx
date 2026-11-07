@@ -185,6 +185,7 @@ const DropsListRow = memo(
   }
 );
 DropsListRow.displayName = "DropsListRow";
+
 const DropsList = memo(
   ({
     scrollContainerRef,
