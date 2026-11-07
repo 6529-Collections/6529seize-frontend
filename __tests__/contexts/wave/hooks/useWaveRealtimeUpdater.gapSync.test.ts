@@ -789,7 +789,11 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
       expect(readPosts()).toHaveLength(1);
     });
 
-    it("drops a leaving read that cannot be sent at once", async () => {
+    // A leaving read for an ordinary wave marks the whole wave read when the
+    // server gets it, so it may wait only briefly (2 s) for auth or for an
+    // earlier read; later it would also cover messages that arrived after
+    // the reader left.
+    it("sends a leaving read once auth is ready within the grace", async () => {
       (getAuthJwt as jest.Mock).mockReturnValue(null);
       const { props, rerender } = setup();
 
@@ -799,10 +803,62 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
       rerender({ ...props, activeWaveId: "wave-2" });
       await advance(WAVE_READ_DEBOUNCE_MS);
 
-      // Sent later, an ordinary-wave read would also mark messages that
-      // arrived after the reader left.
+      expect(readPosts()).toHaveLength(1);
+    });
+
+    it("drops a leaving read that waits past the grace", async () => {
+      (getAuthJwt as jest.Mock).mockReturnValue(null);
+      const { props, rerender } = setup();
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      rerender({ ...props, activeWaveId: "wave-2" });
+      await advance(2_500);
+      (getAuthJwt as jest.Mock).mockReturnValue("test-jwt");
+      rerender({ ...props, activeWaveId: "wave-2" });
+      await advance(WAVE_READ_DEBOUNCE_MS);
+
       expect(readPosts()).toHaveLength(0);
     });
+
+    it.each([
+      { settlesAfterMs: 1_000, leavingReadSent: true },
+      { settlesAfterMs: 2_500, leavingReadSent: false },
+    ])(
+      "sends a leaving read after an earlier read that settles in $settlesAfterMs ms: $leavingReadSent",
+      async ({ settlesAfterMs, leavingReadSent }) => {
+        let settleEarlierRead: () => void = () => undefined;
+        (
+          commonApiPostWithoutBodyAndResponse as jest.Mock
+        ).mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              settleEarlierRead = resolve;
+            })
+        );
+        const { props, rerender } = setup();
+
+        // The batched read goes out and is still on its way when the
+        // reader sees one more post and leaves.
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+        await advance(WAVE_READ_DEBOUNCE_MS);
+        expect(readPosts()).toHaveLength(1);
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(12));
+        rerender({ ...props, activeWaveId: "wave-2" });
+        await advance(0);
+        expect(readPosts()).toHaveLength(1);
+
+        await advance(settlesAfterMs);
+        await act(async () => {
+          settleEarlierRead();
+          await Promise.resolve();
+        });
+        await advance(0);
+
+        // At most one request at a time: the leaving read rides on the
+        // earlier read's trailing send, or is dropped.
+        expect(readPosts()).toHaveLength(leavingReadSent ? 2 : 1);
+      }
+    );
 
     it("does not queue reads while the tab is hidden", async () => {
       setup();
