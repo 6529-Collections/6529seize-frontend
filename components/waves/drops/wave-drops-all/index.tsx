@@ -34,6 +34,25 @@ import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 const EMPTY_DROPS: Drop[] = [];
+
+type WaveMin = ReturnType<typeof toApiWaveMin>;
+
+// A row's drop keeps its object while neither the stored drop nor the wave
+// changed, so memoized rows skip a re-render when another message arrives.
+const withFullWaveCache = new WeakMap<
+  ExtendedDrop,
+  { readonly wave: WaveMin; readonly drop: ExtendedDrop }
+>();
+
+const withFullWave = (drop: ExtendedDrop, wave: WaveMin): ExtendedDrop => {
+  const cached = withFullWaveCache.get(drop);
+  if (cached?.wave === wave) {
+    return cached.drop;
+  }
+  const next = { ...drop, wave };
+  withFullWaveCache.set(drop, { wave, drop: next });
+  return next;
+};
 const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
 const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
 const DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN = "1200px 0px";
@@ -157,22 +176,22 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     shouldPinToBottom,
   });
 
+  const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
   const renderedWaveMessagesWithFullWave = useMemo(() => {
-    if (!renderedWaveMessages || !wave) {
+    if (!renderedWaveMessages || !waveMin) {
       return renderedWaveMessages;
     }
 
-    const waveMin = toApiWaveMin(wave);
     return {
       ...renderedWaveMessages,
       drops: renderedWaveMessages.drops.map(
         (drop: Drop): Drop =>
-          drop.type === DropSize.FULL && drop.wave.id === wave.id
-            ? { ...drop, wave: waveMin }
+          drop.type === DropSize.FULL && drop.wave.id === waveMin.id
+            ? withFullWave(drop, waveMin)
             : drop
       ),
     };
-  }, [renderedWaveMessages, wave]);
+  }, [renderedWaveMessages, waveMin]);
   const hasVisibleDrops =
     (renderedWaveMessagesWithFullWave?.drops.length ?? 0) > 0;
   const firstVisibleDropsPainted = useFirstVisibleDropsPainted(hasVisibleDrops);

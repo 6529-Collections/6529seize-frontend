@@ -296,6 +296,90 @@ describe("DropsList", () => {
     expect(wrapperProps[0].suspendLightDropHydration).toBe(false);
   });
 
+  it("re-renders only the new row and its neighbour when a message arrives", () => {
+    const makeDrop = (index: number) =>
+      ({
+        id: `drop-${index}`,
+        stableKey: `drop-${index}`,
+        stableHash: `drop-${index}`,
+        serial_no: index + 1,
+        type: DropSize.FULL,
+        wave: { id: "w" },
+      }) as ExtendedDrop;
+    // Newest first, as the wave store hands them over.
+    const drops = Array.from({ length: 40 }, (_, index) =>
+      makeDrop(39 - index)
+    );
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef: null,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    expect(dropProps).toHaveLength(40);
+
+    dropProps = [];
+    wrapperProps = [];
+    highlightProps = [];
+    const incoming = makeDrop(40);
+    rerender(<DropsList {...props} drops={[incoming, ...drops]} />);
+
+    // The new row, and the previous newest row whose next neighbour changed.
+    expect(dropProps.map((item) => item.drop.id).sort()).toEqual([
+      "drop-39",
+      "drop-40",
+    ]);
+    expect(wrapperProps).toHaveLength(2);
+    expect(highlightProps).toHaveLength(2);
+  });
+
+  it("gives a memoized row the target ref when it becomes the serial target", () => {
+    const drops = Array.from(
+      { length: 5 },
+      (_, index) =>
+        ({
+          id: `drop-${index}`,
+          stableKey: `drop-${index}`,
+          stableHash: `drop-${index}`,
+          serial_no: index + 1,
+          type: DropSize.FULL,
+          wave: { id: "w" },
+        }) as ExtendedDrop
+    );
+    const targetDropRef = { current: null };
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    highlightProps = [];
+    rerender(<DropsList {...props} serialNo={3} />);
+    const target = highlightProps.filter((item) => item.serialNo === 3).at(-1);
+    expect(target).toEqual(
+      expect.objectContaining({ active: true, ref: targetDropRef })
+    );
+    expect(
+      highlightProps.filter((item) => item.serialNo !== 3 && item.active)
+    ).toEqual([]);
+  });
+
   it("only re-renders the old and new reply or quote targets", () => {
     const drops = Array.from(
       { length: 50 },
