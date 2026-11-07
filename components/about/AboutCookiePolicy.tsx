@@ -5,6 +5,11 @@ import {
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { formatDate } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useState } from "react";
 import Toggle from "react-toggle";
 import {
@@ -24,11 +29,96 @@ const COOKIE_POLICY_TABLE_CLASS = [
   "[&_td]:tw-border-0 [&_td]:tw-border-t [&_td]:tw-border-solid [&_td]:tw-border-white/[0.07] [&_td]:tw-p-3 [&_td]:tw-align-top",
 ].join(" ");
 
-export default function AboutCookiePolicy() {
-  const { showCookieConsent, consent, reject } = useCookieConsent();
+const COOKIE_POLICY_LAST_UPDATED = "2026-11-06";
 
-  const [isPerformanceCookiesEnabled, setIsPerformanceCookiesEnabled] =
-    useState(getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE));
+type CookiePolicyMessageKey = Extract<
+  MessageKey,
+  `about.cookiePolicy.${string}`
+>;
+
+interface AwsRumCookie {
+  readonly name: string;
+  readonly purposeKey: CookiePolicyMessageKey;
+  readonly lifespanKey: CookiePolicyMessageKey;
+}
+
+// aws-rum-web (`allowCookies: true`) writes these with `Domain=<hostname>`,
+// so on 6529.io they are `.6529.io` domain cookies.
+const AWS_RUM_USER_ID_COOKIE = "cwr_u";
+const AWS_RUM_SESSION_COOKIE = "cwr_s";
+
+const AWS_RUM_COOKIES: readonly AwsRumCookie[] = [
+  {
+    name: AWS_RUM_USER_ID_COOKIE,
+    purposeKey: "about.cookiePolicy.awsRum.userId.purpose",
+    lifespanKey: "about.cookiePolicy.awsRum.userId.lifespan",
+  },
+  {
+    name: AWS_RUM_SESSION_COOKIE,
+    purposeKey: "about.cookiePolicy.awsRum.session.purpose",
+    lifespanKey: "about.cookiePolicy.awsRum.session.lifespan",
+  },
+];
+
+function CookieTableHead({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <thead>
+      <tr>
+        <th>{t(locale, "about.cookiePolicy.table.domain")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.cookies")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.cookiesUsed")}</th>
+        <th>{t(locale, "about.cookiePolicy.table.lifespan")}</th>
+      </tr>
+    </thead>
+  );
+}
+
+function AwsRumCookieRows({
+  locale,
+  firstPartyLabel,
+}: {
+  readonly locale: SupportedLocale;
+  readonly firstPartyLabel: string;
+}) {
+  return (
+    <>
+      {AWS_RUM_COOKIES.map((cookie) => (
+        <tr key={cookie.name}>
+          <td>.6529.io</td>
+          <td>
+            {t(locale, "about.cookiePolicy.cookieWithProvider", {
+              cookie: cookie.name,
+              provider: t(locale, "about.cookiePolicy.awsRum.provider"),
+            })}
+            <span className="tw-block tw-text-iron-400">
+              {t(locale, cookie.purposeKey)}
+            </span>
+          </td>
+          <td>{firstPartyLabel}</td>
+          <td>{t(locale, cookie.lifespanKey)}</td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
+export default function AboutCookiePolicy() {
+  const locale = useBrowserLocale();
+  const { showCookieConsent, consent, reject } = useCookieConsent();
+  const firstPartyLabel = t(locale, "about.cookiePolicy.firstParty");
+  const sevenDaysLabel = t(locale, "about.cookiePolicy.lifespan.sevenDays");
+  const oneYearLabel = t(locale, "about.cookiePolicy.lifespan.oneYear");
+
+  // Server HTML cannot read the consent cookie, so the server render and its
+  // hydration render show "Disabled"; the stored choice applies afterwards.
+  const hasHydrated = useHasHydrated();
+  const [toggledPerformanceCookies, setToggledPerformanceCookies] = useState<
+    boolean | null
+  >(null);
+  const isPerformanceCookiesEnabled =
+    hasHydrated &&
+    (toggledPerformanceCookies ??
+      getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE) === true);
 
   const togglePerformanceCookies = () => {
     if (isPerformanceCookiesEnabled) {
@@ -36,7 +126,7 @@ export default function AboutCookiePolicy() {
     } else {
       consent();
     }
-    setIsPerformanceCookiesEnabled(!isPerformanceCookiesEnabled);
+    setToggledPerformanceCookies(!isPerformanceCookiesEnabled);
   };
 
   return (
@@ -48,7 +138,13 @@ export default function AboutCookiePolicy() {
       </Row>
       <Row>
         <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
-          Last Updated: June 04, 2024
+          {t(locale, "about.cookiePolicy.lastUpdated", {
+            date: formatDate(locale, COOKIE_POLICY_LAST_UPDATED, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+          })}
         </Col>
       </Row>
       <Row>
@@ -103,14 +199,7 @@ export default function AboutCookiePolicy() {
                 className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
               >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
-                  <thead>
-                    <tr>
-                      <th>Domain</th>
-                      <th>Cookies</th>
-                      <th>Cookies used</th>
-                      <th>Lifespan</th>
-                    </tr>
-                  </thead>
+                  <CookieTableHead locale={locale} />
                   <tbody>
                     <tr>
                       <td>6529.io</td>
@@ -124,8 +213,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Amazon Web Services)
                       </td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
@@ -139,26 +228,26 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Amazon Web Services)
                       </td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>wallet-auth (JWT Authentication)</td>
-                      <td>First Party</td>
-                      <td>7 days</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{sevenDaysLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_ESSENTIAL_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_EULA_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                   </tbody>
                 </Table>
@@ -216,20 +305,13 @@ export default function AboutCookiePolicy() {
                 className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
               >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
-                  <thead>
-                    <tr>
-                      <th>Domain</th>
-                      <th>Cookies</th>
-                      <th>Cookies used</th>
-                      <th>Lifespan</th>
-                    </tr>
-                  </thead>
+                  <CookieTableHead locale={locale} />
                   <tbody>
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_PERFORMANCE_COOKIE}</td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -243,8 +325,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -258,8 +340,8 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
                     <tr>
                       <td>.6529.io</td>
@@ -273,11 +355,23 @@ export default function AboutCookiePolicy() {
                         </a>{" "}
                         (Google Analytics)
                       </td>
-                      <td>First Party</td>
-                      <td>1 year</td>
+                      <td>{firstPartyLabel}</td>
+                      <td>{oneYearLabel}</td>
                     </tr>
+                    <AwsRumCookieRows
+                      locale={locale}
+                      firstPartyLabel={firstPartyLabel}
+                    />
                   </tbody>
                 </Table>
+              </Col>
+            </Row>
+            <Row className="tw-pt-3">
+              <Col>
+                {t(locale, "about.cookiePolicy.awsRum.sampling", {
+                  userIdCookie: AWS_RUM_USER_ID_COOKIE,
+                  sessionCookie: AWS_RUM_SESSION_COOKIE,
+                })}
               </Col>
             </Row>
             <Row className="tw-pt-2">
