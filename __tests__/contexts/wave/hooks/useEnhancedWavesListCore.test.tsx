@@ -145,6 +145,28 @@ describe("useEnhancedWavesListCore", () => {
     );
   });
 
+  it("refreshes only the activity list for unknown-wave drops when the source can", () => {
+    const refetchAllWaves = jest.fn();
+    const refreshActivityList = jest.fn();
+    const wavesData = {
+      ...createWavesData({ mainWavesRefetch: jest.fn(), refetchAllWaves }),
+      refreshActivityList,
+    };
+
+    renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      [],
+      refreshActivityList,
+      expect.any(Object)
+    );
+  });
+
   it("passes disabled state to the new-drop counter and suppresses returned list work", () => {
     const refetchAllWaves = jest.fn();
     const fetchNextPage = jest.fn();

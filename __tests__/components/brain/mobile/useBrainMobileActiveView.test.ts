@@ -82,7 +82,7 @@ describe("useBrainMobileActiveView", () => {
 
   it("opens competition deep links in Competitions even when Chat was restored", () => {
     const props = createProps({
-      pathname: "/waves/wave-1/competitions/first",
+      pathname: "/waves/wave-1/decisions/first",
       restoredView: BrainView.DEFAULT,
       isCompleted: false,
     });

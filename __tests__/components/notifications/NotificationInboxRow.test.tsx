@@ -165,7 +165,7 @@ it.each(["wave.png", undefined])(
     }
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/waves/wave/competitions/competition"
+      "/waves/wave/decisions/competition"
     );
   }
 );

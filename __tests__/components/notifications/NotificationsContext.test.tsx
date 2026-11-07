@@ -1530,7 +1530,7 @@ describe("push notification action handling", () => {
     });
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith(
-        "/waves/wave/competitions/competition?entry=entry"
+        "/waves/wave/decisions/competition?entry=entry"
       )
     );
 
@@ -1553,7 +1553,7 @@ describe("push notification action handling", () => {
     });
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith(
-        "/waves/wave/competitions/competition?drop=artwork"
+        "/waves/wave/decisions/competition?drop=artwork"
       )
     );
 

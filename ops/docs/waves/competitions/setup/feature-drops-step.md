@@ -1,8 +1,8 @@
-# Competition Setup Drop Settings
+# Decision Setup Drop Settings
 
 ## Overview
 
-Use `Drops` in `Rank` and `Approve` competition setup to define submission
+Use `Drops` in `Rank` and `Approve` decision setup to define submission
 requirements:
 
 - one required media type
@@ -16,7 +16,7 @@ The section is always visible and has no expand/collapse control.
 
 ## Location in the Site
 
-- Competition setup: `/waves/{waveId}/competitions/new`
+- Decision setup: `/waves/{waveId}/decisions/new`
 - Step label: `Drops`
 - User-reachable in `Rank` and `Approve` creation
 
@@ -90,13 +90,13 @@ edit them later from Configuration.
 
 ## Related Pages
 
-- [Competition Setup Index](../../create/README.md)
+- [Decision Setup Index](../../create/README.md)
 - [Waves Index](../../README.md)
 - [Wave Create Modal Entry Points](../../create/feature-modal-entry-points.md)
-- [Competition Setup Setup Step](../../create/feature-overview-step.md)
-- [Competition Setup Group Access and Permissions](../../create/feature-groups-step.md)
-- [Competition Setup Schedule](feature-dates-step.md)
-- [Competition Setup Guidelines Step](../../create/feature-rules-step.md)
-- [Competition Setup Voting Configuration](feature-voting-step.md)
+- [Decision Setup Setup Step](../../create/feature-overview-step.md)
+- [Decision Setup Group Access and Permissions](../../create/feature-groups-step.md)
+- [Decision Setup Schedule](feature-dates-step.md)
+- [Decision Setup Guidelines Step](../../create/feature-rules-step.md)
+- [Decision Setup Voting Configuration](feature-voting-step.md)
 - [Wave Drop Composer Metadata Submissions](../../composer/feature-metadata-submissions.md)
 - [Docs Home](../../../README.md)

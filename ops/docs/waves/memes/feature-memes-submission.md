@@ -211,7 +211,7 @@ reached), select the header restriction control to see the reason, then use
 
 ## Collaborator invitations
 
-Invitations are available only on The Memes Main Stage, including its designated native competition. Only the submitter needs to satisfy submission eligibility and allowance requirements. Collaborators need a profile and must accept personally.
+Invitations are available only on The Memes Main Stage, including its designated native decision. Only the submitter needs to satisfy submission eligibility and allowance requirements. Collaborators need a profile and must accept personally.
 
 In Basic Information, expand **Add collaborators**, then use **Invite a collaborating artist** to select up to 5
 other profiles. Selected artists appear as avatar chips with a remove control. The section can be folded without clearing selections; its heading shows the selected count. Opening the section alone does not mark the artwork as a collaboration. Selected profiles receive an invitation when the artwork is

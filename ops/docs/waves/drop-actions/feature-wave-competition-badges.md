@@ -1,8 +1,8 @@
-# Wave Competition Participant and Winner Badges
+# Wave Decision Participant and Winner Badges
 
 ## Overview
 
-Drop author rows can show two competition badges that belong to the current wave:
+Drop author rows can show two decision badges that belong to the current wave:
 
 - a circular violet flag when the author has one or more active participatory
   entries in that wave
@@ -17,7 +17,7 @@ existing palette and trophy badges.
 
 - Chat, participatory, and winner drop author rows on `/waves/{waveId}`.
 - Chat, participatory, and winner drop author rows on `/messages/{waveId}` when the thread has
-  competition entries.
+  decision entries.
 - Single-drop overlays for chat messages opened with `drop={dropId}` in the
   current thread route.
 
@@ -32,9 +32,9 @@ existing palette and trophy badges.
 
 ## User Journey
 
-1. Open a wave chat containing a competition.
+1. Open a wave chat containing a decision.
 2. Find a chat message from a participant or winner.
-3. Select a competition badge beside the author's handle.
+3. Select a decision badge beside the author's handle.
 4. Review that author's entries in the current wave.
 5. When the author has both active and winning entries, switch between `Active
    entries` and `Winning entries`.
@@ -63,7 +63,7 @@ existing palette and trophy badges.
 ## Edge Cases
 
 - The API supplies only participant and winner booleans scoped to the wave of
-  each returned drop; it does not send competition entry IDs eagerly.
+  each returned drop; it does not send decision entry IDs eagerly.
 - The badges are hidden in The Memes Main Stage even if entry metadata is
   present.
 - Tabs are hidden when the author has only active entries or only winning
@@ -84,7 +84,7 @@ existing palette and trophy badges.
 
 ## Limitations / Notes
 
-- The badges describe competition status only in the wave containing the chat
+- The badges describe decision status only in the wave containing the chat
   message; they do not summarize participation across all waves.
 - The viewer is read-only except for the existing vote controls on open active
   entries.

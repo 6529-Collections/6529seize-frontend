@@ -205,7 +205,7 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
   read, or a grant signed on another chain). An ordinary wallet whose
   signature does not match reads **The signature could not be verified**.
 - **Not signed by its author** for drops sent without a device signature.
-  Drops whose content moderation hides from you and anonymous competition
+  Drops whose content moderation hides from you and anonymous decision
   entries also read this way: their signed events are not shared.
 - **The signature could not be verified** when stored signatures do not
   match, or when the wallet signed the grant anywhere but the 6529 app
@@ -233,7 +233,7 @@ signature itself; the seal only reflects what 6529.io reports.
   links and serial-number links, quoted drops, and leaderboard, winner,
   Memes and quick-vote cards. Activating it there opens the dialog without
   opening the linked or quoted drop.
-- Message search results and competition entry cards are single buttons, so
+- Message search results and decision entry cards are single buttons, so
   they show a static seal and add ", signed by its author" to the button's
   name.
 - Reply-to lines and the composer's reply or quote preview show no

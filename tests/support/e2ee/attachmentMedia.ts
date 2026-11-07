@@ -1,5 +1,11 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Download, Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+
+/**
+ * Gallery clicks and downloads fail within this time, with a description of
+ * the button, instead of hanging until the test's own (long) timeout.
+ */
+const GALLERY_ACTION_TIMEOUT_MS = 30_000;
 
 export async function dropEncryptedAttachment(
   page: Page,
@@ -43,6 +49,90 @@ export async function dropEncryptedAttachment(
   }
 }
 
+/**
+ * The button's state and the topmost element at its centre, for a click that
+ * did not land or a download that did not start (no trace in staging packs).
+ */
+async function describeButton(button: Locator): Promise<string> {
+  return await button
+    .evaluate(
+      (element) => {
+        const describe = (node: Element | null) =>
+          node === null
+            ? "nothing"
+            : `<${node.tagName.toLowerCase()}${node.getAttribute("aria-label") ? ` aria-label="${node.getAttribute("aria-label")}"` : ""} class="${(node.getAttribute("class") ?? "").slice(0, 160)}">`;
+        const rect = element.getBoundingClientRect();
+        const topmost = document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2
+        );
+        const covered =
+          topmost !== null && topmost !== element && !element.contains(topmost);
+        return `${describe(element)} disabled=${String((element as HTMLButtonElement).disabled)} at ${Math.round(rect.x)},${Math.round(rect.y)} ${Math.round(rect.width)}x${Math.round(rect.height)}; topmost at its centre: ${covered ? describe(topmost) : "the button itself"}`;
+      },
+      null,
+      { timeout: 5_000 }
+    )
+    .catch(
+      (error: unknown) => `could not inspect the button (${String(error)})`
+    );
+}
+
+async function clickGalleryButton(button: Locator, label: string) {
+  try {
+    await button.click({ timeout: GALLERY_ACTION_TIMEOUT_MS });
+  } catch (error) {
+    throw new Error(
+      `${label}: the click did not land. Button: ${await describeButton(button)}. ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+/** The next download from any page of the context, popups included. */
+function nextDownload(page: Page): Promise<Download | null> {
+  const context = page.context();
+  return new Promise((resolve) => {
+    const watched = new Set<Page>();
+    const finish = (download: Download | null) => {
+      clearTimeout(timer);
+      context.off("page", watch);
+      for (const watchedPage of watched) {
+        watchedPage.off("download", finish);
+      }
+      resolve(download);
+    };
+    const watch = (candidate: Page) => {
+      if (watched.has(candidate)) return;
+      watched.add(candidate);
+      candidate.on("download", finish);
+    };
+    const timer = setTimeout(() => finish(null), GALLERY_ACTION_TIMEOUT_MS);
+    context.pages().forEach(watch);
+    context.on("page", watch);
+  });
+}
+
+/** Clicks the preview's download button and checks the file that comes out. */
+async function downloadFromPreview(
+  preview: Locator,
+  page: Page,
+  filename: string
+) {
+  const button = preview.getByRole("button", {
+    name: "Download media",
+    exact: true,
+  });
+  const download = nextDownload(page);
+  await clickGalleryButton(button, `Downloading ${filename}`);
+  const started = await download;
+  if (!started) {
+    throw new Error(
+      `Downloading ${filename}: no page in the context started a download within ${GALLERY_ACTION_TIMEOUT_MS} ms of the click. Button: ${await describeButton(button)}`
+    );
+  }
+  expect(started.suggestedFilename()).toBe(filename);
+}
+
 /** Runs in desktop and mobile-browser packs; the native save path has separate unit coverage. */
 export async function checkEncryptedImageActions(
   page: Page,
@@ -55,7 +145,7 @@ export async function checkEncryptedImageActions(
     name: `Open image preview: ${filename}`,
     exact: true,
   });
-  await trigger.click();
+  await clickGalleryButton(trigger, `Opening ${filename}`);
   const preview = page.getByRole("dialog", { name: "Expanded image preview" });
   await expect(preview.getByRole("img")).toBeVisible();
   await expect(preview.getByRole("img")).toHaveAttribute("src", /^blob:/u);
@@ -66,34 +156,28 @@ export async function checkEncryptedImageActions(
       exact: true,
     });
     await expect(next).toBeEnabled();
-    await next.click();
+    await clickGalleryButton(next, `Going to ${nextFilename}`);
     await expect(preview.getByRole("img")).not.toHaveAttribute(
       "src",
       firstSource ?? ""
     );
-    const nextDownload = page.waitForEvent("download");
-    await preview
-      .getByRole("button", { name: "Download media", exact: true })
-      .click();
-    expect((await nextDownload).suggestedFilename()).toBe(nextFilename);
-    await preview
-      .getByRole("button", { name: "Previous image", exact: true })
-      .click();
+    await downloadFromPreview(preview, page, nextFilename);
+    await clickGalleryButton(
+      preview.getByRole("button", { name: "Previous image", exact: true }),
+      `Going back to ${filename}`
+    );
     await expect(preview.getByRole("img")).toHaveAttribute(
       "src",
       firstSource ?? ""
     );
   }
-  const download = page.waitForEvent("download");
-  await preview
-    .getByRole("button", { name: "Download media", exact: true })
-    .click();
-  expect((await download).suggestedFilename()).toBe(filename);
-  await preview
-    .getByRole("button", { name: "Close media", exact: true })
-    .click();
+  await downloadFromPreview(preview, page, filename);
+  await clickGalleryButton(
+    preview.getByRole("button", { name: "Close media", exact: true }),
+    `Closing ${filename}`
+  );
   await expect(preview).toHaveCount(0);
-  await trigger.click();
+  await clickGalleryButton(trigger, `Reopening ${filename}`);
   await page.keyboard.press("Escape");
   await expect(preview).toHaveCount(0);
   await expect(trigger).toBeFocused();

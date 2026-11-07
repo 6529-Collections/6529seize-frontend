@@ -110,9 +110,9 @@ it.each([null, "competition"])(
     mockLegacyPrimary = primary;
     setup(<CompetitionOverview />);
     fireEvent.click(
-      screen.getByRole("button", { name: "Edit competition details" })
+      screen.getByRole("button", { name: "Edit decision details" })
     );
-    fireEvent.change(screen.getByLabelText("Competition name"), {
+    fireEvent.change(screen.getByLabelText("Decision name"), {
       target: { value: "New name" },
     });
     fireEvent.change(screen.getByLabelText("Description"), {
@@ -142,7 +142,7 @@ it.each([null, "competition"])(
     );
     await waitFor(() =>
       expect(
-        screen.queryByLabelText("Competition name")
+        screen.queryByLabelText("Decision name")
       ).not.toBeInTheDocument()
     );
   }
@@ -150,9 +150,9 @@ it.each([null, "competition"])(
 it("requires a non-blank title and cancels without saving", () => {
   setup(<CompetitionOverview />);
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
+    screen.getByRole("button", { name: "Edit decision details" })
   );
-  fireEvent.change(screen.getByLabelText("Competition name"), {
+  fireEvent.change(screen.getByLabelText("Decision name"), {
     target: { value: "   " },
   });
   expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
@@ -177,14 +177,14 @@ it("preserves an uncertain request and entered text for retry", async () => {
   jest.mocked(updateCompetition).mockRejectedValueOnce(new Error("Network"));
   setup(<CompetitionOverview />);
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
+    screen.getByRole("button", { name: "Edit decision details" })
   );
-  fireEvent.change(screen.getByLabelText("Competition name"), {
+  fireEvent.change(screen.getByLabelText("Decision name"), {
     target: { value: "New name" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await screen.findByRole("alert");
-  expect(screen.getByLabelText("Competition name")).toHaveValue("New name");
+  expect(screen.getByLabelText("Decision name")).toHaveValue("New name");
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await waitFor(() => expect(updateCompetition).toHaveBeenCalledTimes(2));
   expect(jest.mocked(updateCompetition).mock.calls[0]).toEqual(
@@ -195,7 +195,7 @@ it("blocks stale saves until the inline editor is reopened", async () => {
   jest.mocked(updateCompetition).mockRejectedValueOnce({ status: 409 });
   setup(<CompetitionOverview />);
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
+    screen.getByRole("button", { name: "Edit decision details" })
   );
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await screen.findByRole("alert");
@@ -203,7 +203,7 @@ it("blocks stale saves until the inline editor is reopened", async () => {
   mockCompetition.config_version = 5;
   fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
+    screen.getByRole("button", { name: "Edit decision details" })
   );
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await waitFor(() =>
@@ -339,7 +339,7 @@ it("keeps approval thresholds invalid when fractional or longer than the approva
   expect(
     screen.getByLabelText("Threshold hold (seconds)")
   ).toHaveAccessibleDescription(
-    /The hold cannot exceed the competition’s approval window/
+    /The hold cannot exceed the decision’s approval window/
   );
   fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
     target: { value: "" },

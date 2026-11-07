@@ -123,7 +123,7 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
       expect(competition.capabilities).toContain("MAIN_STAGE");
       await expect(page).toHaveURL(
         (url) =>
-          url.pathname === `/waves/${waveId}/competitions/${competition.id}`,
+          url.pathname === `/waves/${waveId}/decisions/${competition.id}`,
         { timeout: RESPONSE_TIMEOUT_MS }
       );
       // Initial Main Stage RANK maps to native rating with no cursor. A later

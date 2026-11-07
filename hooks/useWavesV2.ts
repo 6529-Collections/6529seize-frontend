@@ -23,6 +23,9 @@ export { mapApiWaveToSidebarWave } from "@/services/api/waves-v2-api";
 
 const RETRY_FAILURE_COOLDOWN_MS = 30000;
 
+const isFiniteInterval = (interval: number | false): interval is number =>
+  typeof interval === "number" && Number.isFinite(interval) && interval > 0;
+
 interface UseWavesV2Props {
   readonly joinedSnapshot?: boolean | undefined;
   readonly overviewType: ApiWavesOverviewType;
@@ -167,6 +170,11 @@ export const useWavesV2 = ({
     },
     refetchInterval,
     refetchIntervalInBackground,
+    // A list polled every N ms stays fresh for N ms, so a focus or resume
+    // refresh does not refetch what the interval just loaded.
+    ...(isFiniteInterval(refetchInterval)
+      ? { staleTime: refetchInterval }
+      : {}),
     enabled,
     ...getDefaultQueryRetry(handleRetryFailure),
   });

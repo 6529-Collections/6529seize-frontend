@@ -126,19 +126,19 @@ Browser realtime notification delivery remains connected while the tab is hidden
 
 ## Row and Action Behavior
 
-- Competition result notifications show a trophy beside “Results are in for”
-  and the linked competition name, followed by a timestamp. The row wraps long
-  names on mobile and desktop. The name opens the relevant competition or entry.
+- Decision result notifications show a trophy beside “Results are in for”
+  and the linked decision name, followed by a timestamp. The row wraps long
+  names on mobile and desktop. The name opens the relevant decision or entry.
 
-- Returned voting credit notifications name the submission and competition and
+- Returned voting credit notifications name the submission and decision and
   show the amount released when a submission wins or its author permanently
-  deletes it. They apply to competitions with a shared (`WAVE`) credit budget.
-  Credits are reusable immediately in the same competition; notifications can
+  deletes it. They apply to decisions with a shared (`WAVE`) credit budget.
+  Credits are reusable immediately in the same decision; notifications can
   arrive shortly afterward. The amount is the current allocation when released,
   including the absolute value of negative votes, rather than a time-weighted
   winning score or the sum of historical votes.
-- A winning submission title opens its competition entry. After author deletion,
-  the saved title stays visible as text and the competition name remains linked.
+- A winning submission title opens its decision entry. After author deletion,
+  the saved title stays visible as text and the decision name remains linked.
   Removing an already-winning entry does not return credits or notify a second
   time. Zero votes, submission edits, admin deletion and system cleanup do not
   create returned-credit notifications. Existing vote notification preferences

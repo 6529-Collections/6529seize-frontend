@@ -173,7 +173,7 @@ it("keeps failed personal entry reads recoverable without claiming an empty resu
   fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
   expect(
     screen.queryByText(
-      "You haven’t submitted an entry to this competition yet."
+      "You haven’t submitted an entry to this decision yet."
     )
   ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Retry" }));

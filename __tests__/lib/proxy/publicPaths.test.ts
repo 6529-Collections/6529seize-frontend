@@ -10,6 +10,7 @@ import {
   isUnservableDotPath,
   PUBLIC_IMAGE_DIRECTORIES,
   ROOT_PUBLIC_FILES,
+  ROUTE_GATED_PUBLIC_DIRECTORIES,
   SERVED_WELL_KNOWN_PATHS,
 } from "@/lib/proxy/publicPaths";
 
@@ -66,9 +67,37 @@ describe("public path contract", () => {
     const unclassified = rootDirectories.filter(
       (directory) =>
         !PUBLIC_IMAGE_DIRECTORIES.has(directory) &&
-        !GENERATED_PUBLIC_DIRECTORIES.has(directory)
+        !GENERATED_PUBLIC_DIRECTORIES.has(directory) &&
+        !ROUTE_GATED_PUBLIC_DIRECTORIES.has(directory)
     );
     expect(unclassified).toEqual([]);
+  });
+
+  it("puts each public directory in one class only", () => {
+    const routeGatedImages = [...ROUTE_GATED_PUBLIC_DIRECTORIES].filter(
+      (directory) =>
+        PUBLIC_IMAGE_DIRECTORIES.has(directory) ||
+        GENERATED_PUBLIC_DIRECTORIES.has(directory)
+    );
+    expect(routeGatedImages).toEqual([]);
+  });
+
+  it("lists only route-gated directories that exist", () => {
+    const missing = [...ROUTE_GATED_PUBLIC_DIRECTORIES].filter(
+      (directory) => !rootDirectories.includes(directory)
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("keeps every file in a route-gated directory behind its route's gate", () => {
+    const passing = [...ROUTE_GATED_PUBLIC_DIRECTORIES]
+      .flatMap((directory) => listFiles(path.join(PUBLIC_DIR, directory)))
+      .map((file) => `/${file}`)
+      .filter((file) => isStaticAssetPath(file));
+    expect(passing).toEqual([]);
+    // The validator's screenshots stay with the /validator pages' gates.
+    expect(isStaticAssetPath("/validator/app-today.webp")).toBe(false);
+    expect(isStaticAssetPath("/validator/windows-uac.svg")).toBe(false);
   });
 
   it("lets the encrypted-chat WebAssembly module past the gate", () => {

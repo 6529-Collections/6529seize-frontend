@@ -4,14 +4,14 @@
 
 Wave details `Configuration` lets users inspect access groups. Editors can also
 manage them in place from the same consolidated view.
-Wave Configuration changes shared wave access and chat settings. Competition
+Wave Configuration changes shared wave access and chat settings. Decision
 entry rules, voting rules, schedules, and awards are managed in the selected
-competition’s Settings and remain unchanged when the wave is edited.
+decision’s Settings and remain unchanged when the wave is edited.
 
 Users can:
 
-- review `Visibility`, `Chat access`, and `Admins` scopes; competition entry
-  and voting access are managed in competition Settings
+- review `Visibility`, `Chat access`, and `Admins` scopes; decision entry
+  and voting access are managed in decision Settings
 - follow visible `1 user` or `X users` counts to inspect both criteria and
   current members
 - open a prefilled group editor from a `Visibility`, `Chat access`, or `Admins` gear
@@ -70,11 +70,11 @@ Users can:
    confirmation.
 10. When Visibility and Chat access are both public, assigning a Visibility
     group assigns that same group to Chat access in the same save. Admins and
-    competition Drop and Vote groups stay unchanged.
+    decision Drop and Vote groups stay unchanged.
 11. `Chat access` offers `Use visibility criteria` when its effective criteria
     differ from Visibility. Confirmation changes Chat to the Visibility group;
     when Visibility is public, Chat becomes public too. `Admins` does not offer
-    this shortcut. Drop and Vote access are managed in competition Settings.
+    this shortcut. Drop and Vote access are managed in decision Settings.
 12. Authenticate when prompted.
 13. Saving edited criteria creates a separate group and assigns that copy only
     to the access row whose gear was opened. The original group, other access
@@ -94,7 +94,7 @@ Users can:
 
 ## Common Scenarios
 
-- Use competition Settings to inspect or change entry and voting groups.
+- Use decision Settings to inspect or change entry and voting groups.
 - Restrict a public wave and public Chat by assigning one Visibility group in
   one save.
 - Make Visibility public with confirmation.
@@ -112,7 +112,7 @@ Users can:
 - Parent visibility can change while subwaves exist. Opening a subwave always
   requires access to both waves.
 - Configuration shows only `Visibility`, `Chat access`, and `Admins` for every
-  wave. Competition access rows are omitted.
+  wave. Decision access rows are omitted.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.
 - Chat waves require chat to stay enabled, so Configuration does not show a
@@ -138,7 +138,7 @@ Users can:
   identities instead of adding the editor automatically.
 - Visibility also assigns Chat only when both are public before the change.
   If either is already restricted, editing Visibility changes only Visibility
-  and normal shared-access containment validation applies. Competition groups
+  and normal shared-access containment validation applies. Decision groups
   do not affect this behavior and are never reassigned by a wave edit.
 - Curation management is entirely hidden from viewers who cannot edit the wave.
 - Curation rows show an unavailable-group label when full group data is missing.
@@ -178,7 +178,7 @@ unavailable` without exposing the group id or treating the scope as public.
   - include list max: `10,000`
   - exclude list max: `1,000`
 - Wave edits validate shared access scopes: every member who can chat or
-  administer must also be able to view the wave. Competition Settings manage
+  administer must also be able to view the wave. Decision Settings manage
   entry and voting access. Curation groups have separate rules.
 
 ## Related Pages

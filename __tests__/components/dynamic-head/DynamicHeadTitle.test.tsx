@@ -304,7 +304,7 @@ describe("DynamicHeadTitle", () => {
     }
   });
 
-  it.each(["/network", "/waves/wave-1/competitions/competition-1"])(
+  it.each(["/network", "/waves/wave-1/decisions/competition-1"])(
     "keeps explicit title ownership outside wave metadata routes (%s)",
     (pathname) => {
       mockPathname = pathname;
