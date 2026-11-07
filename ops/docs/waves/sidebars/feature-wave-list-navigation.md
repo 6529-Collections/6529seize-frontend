@@ -85,7 +85,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   once browser preferences load; saved closed sections stay closed from the
   first render when reopening or refreshing the page.
 - Active Votes has a scrollable window three compact rows tall, with named
-  TDH votes and their voting end or next decision. Scroll to browse the list;
+  TDH votes and their voting end or next result. Scroll to browse the list;
   more pages load near the bottom, with a `Load more` button as a fallback.
   A thin scrollbar and bottom fade indicate more content below. The count stays
   visible when collapsed. The description and view-all link stay outside the list.

@@ -989,7 +989,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       await expect(
         voteCards
           .first()
-          .getByText(/^(Next decision |Voting ends |Voting open$)/)
+          .getByText(/^(Next result |Voting ends |Voting open$)/)
       ).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);

@@ -71,12 +71,12 @@ availability. Submission availability is exposed through the Chat tab
   [Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md).
 - Following `View submission rules` and returning to Chat preserves an ordinary
   text draft in the same browser tab. This does not save attachments or media.
-- If Chat was opened from a competition, the rules link retains that competition,
+- If Chat was opened from a decision, the rules link retains that decision,
   including when copied or opened in a new tab.
-- Group and signing details describe the selected competition, or the current
+- Group and signing details describe the selected decision, or the current
   default when none was selected. The card
   loads these details on demand. An unavailable lookup keeps the rules link
-  available and does not substitute another competition's access settings.
+  available and does not substitute another decision's access settings.
 - Use Enter or Space to open locked submission details, Tab to reach its links,
   and Escape to close it and return focus to the action. Shift+Tab from the card
   or its first link returns to the action; Tab after the final link closes the

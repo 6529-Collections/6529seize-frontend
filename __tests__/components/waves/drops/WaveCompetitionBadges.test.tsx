@@ -32,10 +32,10 @@ describe("WaveCompetitionBadges", () => {
     );
 
     const participant = screen.getByRole("button", {
-      name: "View this participant’s competition entries in Cool Comp",
+      name: "View this participant’s decision entries in Cool Comp",
     });
     const winner = screen.getByRole("button", {
-      name: "View this winner’s competition entries in Cool Comp",
+      name: "View this winner’s decision entries in Cool Comp",
     });
 
     expect(participant).toHaveClass("tw-rounded-full", "tw-size-5");
@@ -59,10 +59,10 @@ describe("WaveCompetitionBadges", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: /participant’s competition/i })
+      screen.queryByRole("button", { name: /participant’s decision/i })
     ).toBeNull();
     expect(
-      screen.getByRole("button", { name: /winner’s competition entries/i })
+      screen.getByRole("button", { name: /winner’s decision entries/i })
     ).toBeInTheDocument();
   });
 });
