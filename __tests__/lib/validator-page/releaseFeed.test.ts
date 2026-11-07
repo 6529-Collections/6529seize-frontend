@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import {
+  getDownloadableReleases,
   getOfferedRelease,
   parseFeedSupport,
   parseReleaseFeed,
@@ -13,6 +14,7 @@ import {
   SAME_DAY_FEED,
   TEST_FEED,
   TEST_RELEASE_ENTRY,
+  TWO_CHANNEL_FEED,
 } from "./fixtures";
 
 const versionsOf = (json: unknown) =>
@@ -299,5 +301,38 @@ describe("the feed's urgent and unsafe fields", () => {
     });
     expect(getOfferedRelease(unsafeNewest)).toBeUndefined();
     expect(getOfferedRelease([])).toBeUndefined();
+  });
+});
+
+describe("the releases the site hands out", () => {
+  const versions = (json: unknown) =>
+    getDownloadableReleases(parseReleaseFeed(json)).map(
+      (release) => release.version
+    );
+
+  it("hands out what a test build and a stable build are each offered", () => {
+    expect(versions(TWO_CHANNEL_FEED)).toEqual(["0.1.1-rc.1", "0.1.0"]);
+    // A test build hears of stable releases too: once 0.1.0 is out, its
+    // last candidate is offered to nobody.
+    expect(versions(SAME_DAY_FEED)).toEqual(["0.1.0"]);
+    expect(versions(RC9_FEED)).toEqual(["0.1.0-rc.9"]);
+  });
+
+  it("applies the unsafe list to each channel on its own", () => {
+    const unsafe = (version: string) => ({
+      ...TWO_CHANNEL_FEED,
+      unsafe_versions: [{ version, reason: "Made up for a test." }],
+    });
+    expect(versions(unsafe("0.1.0"))).toEqual(["0.1.1-rc.1"]);
+    expect(versions(unsafe("0.1.1-rc.1"))).toEqual(["0.1.0"]);
+    expect(
+      getOfferedRelease(parseReleaseFeed(unsafe("0.1.1-rc.1")))?.version
+    ).toBe("0.1.0");
+  });
+
+  it("hands out nothing on a channel no build knows", () => {
+    expect(
+      versions({ releases: [feedEntry("0.2.0", "nightly", "2026-12-01")] })
+    ).toEqual([]);
   });
 });

@@ -130,3 +130,17 @@ export const RC9_FEED = {
     feedEntry("0.1.0-rc.7", "test", "2026-11-05"),
   ],
 };
+
+/**
+ * A stable release and a newer candidate of the next one, with an older
+ * candidate below, newest first. A test build is offered 0.1.1-rc.1, a
+ * stable build 0.1.0.
+ */
+export const TWO_CHANNEL_FEED = {
+  format: 1,
+  releases: [
+    feedEntry("0.1.1-rc.1", "test", "2026-11-25"),
+    feedEntry("0.1.0", "stable", "2026-11-20"),
+    feedEntry("0.1.0-rc.9", "test", "2026-11-06"),
+  ],
+};

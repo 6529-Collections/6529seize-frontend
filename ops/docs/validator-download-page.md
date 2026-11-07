@@ -4,19 +4,22 @@ Parent: [Documentation](README.md)
 
 ## Overview
 
-`/validator` is where testers download the 6529 validator. A password
-protects every page under it, except the signed release feed, which
-validators fetch to find updates.
+`/validator` is where testers download the 6529 validator. Since
+6 November 2026 every page is open to everyone: production sets
+`VALIDATOR_PAGE_PUBLIC=true` (see "Open the pages to everyone" below). The
+password gate stays in the code. With the variable unset and a password
+set, every page under `/validator` asks for the password again, except the
+signed release feed, which validators fetch to find updates.
 
-| Route | What it serves | Access |
+| Route | What it serves | With the gate on |
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
 | `/validator/guide` | The tester guide | Password |
 | `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
-| `/validator/releases` | Every release, newest first, with its files' SHA-256; only the newest has download buttons, and an unsafe release none | Password |
-| `/validator/download/<version>/<file>` | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes | Password |
-| `/validator/download/<file>` | The same, for the newest release | Password |
+| `/validator/releases` | Every release, newest first, with its files' SHA-256; download buttons only on the releases the site hands out (below) | Password |
+| `/validator/download/<version>/<file>` | For a release the site hands out, a 302 to an https presigned S3 URL that works for 5 minutes. Never change this shape: from rc.10 the in-app update builds this path from the feed and follows the redirect | Password |
+| `/validator/download/<file>` | The same, for the release the pages offer | Password |
 | `/validator/releases.json` | The signed release feed, byte for byte | Public |
 | `/validator/releases.json.sig` | The feed's signature, byte for byte | Public |
 | `/validator/authorize` | A phone signs a validator's authorization from its link (see [Authorize from a phone](#authorize-from-a-phone)) | Public |
@@ -105,12 +108,15 @@ Peer addresses never go on the pages or in this public repository. From
 
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, so the signature
-verifies against what validators download. Only the newest release's files
-can be downloaded: an older release stays in the feed and on the history
-page, with its SHA-256, and its files answer 404 (the owner: rc.1 to rc.4
-never, and rc.5 not once rc.6 is out). Newest is by version, as the
-validator orders its signed list (Semantic Versioning: `0.1.0-rc.7` <
-`0.1.0-rc.10` < `0.1.0` < `0.1.1-rc.1`); dates play no part.
+verifies against what validators download. The site hands out only the
+release each channel is offered: the newest release, which a test build
+hears of, and the newest stable release, which is all a stable build hears
+of (`getDownloadableReleases`). So a stable build can still download 0.1.0
+while 0.1.1-rc.1 is listed. Every other release stays in the feed and on
+the history page, with its SHA-256, and its files answer 404 (the owner:
+rc.1 to rc.4 never, and rc.5 not once rc.6 is out). Newest is by version,
+as the validator orders its signed list (Semantic Versioning: `0.1.0-rc.7`
+< `0.1.0-rc.10` < `0.1.0` < `0.1.1-rc.1`); dates play no part.
 
 ### Add a release
 
@@ -152,7 +158,7 @@ with a control character.
 | --- | --- |
 | `severity`, `reason` (per release) | When the offered release is `urgent`, or has a severity the site doesn't know, the download page shows its reason above the download. Absent or `normal`: no notice. |
 | `min_supported`, `deadline`, `deadline_reason` | Shown in that notice: "If you run a release before `min_supported`, update by `deadline`", then `deadline_reason`. A `deadline` counts only in the form `YYYY-MM-DDTHH:MM:SSZ` and with a valid `min_supported`, as in the validator. |
-| `unsafe_versions: [{version, reason}]` | The releases page marks each listed release Unsafe, with its reason, and never as Latest. If the newest release is listed, no release is offered: the download page says why, and its files answer 404. |
+| `unsafe_versions: [{version, reason}]` | The releases page marks each listed release Unsafe, with its reason, and never as Latest. A listed release is never handed out: if it is the one a channel is offered, that channel gets none, and its files answer 404. If no release is left to offer, the download page says why. |
 
 ## Text
 

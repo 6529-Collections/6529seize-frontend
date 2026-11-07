@@ -1,4 +1,5 @@
 import {
+  getDownloadableReleases,
   getOfferedRelease,
   getReleaseFeedSnapshot,
   type ValidatorRelease,
@@ -31,39 +32,49 @@ function decodeSegment(segment: string | undefined): string | null {
 }
 
 /**
- * Only the newest release can be downloaded (the owner, 2026-11-01 and
- * 2026-11-04): an older test release stays in the feed and on the history
- * page, with its SHA-256, but its files are not handed out. A newest
- * release the feed lists as unsafe hands out none.
+ * Only the newest release of each channel can be downloaded (the owner,
+ * 2026-11-01 and 2026-11-04; per channel from 2026-11-06): an older release
+ * stays in the feed and on the history page, with its SHA-256, but its files
+ * are not handed out. A channel whose newest release the feed lists as
+ * unsafe hands out none. /validator/download/<file> names no version and
+ * gets the release the pages offer.
  */
 function findRelease(
   releases: readonly ValidatorRelease[],
   segments: readonly string[]
 ): { release: ValidatorRelease; fileName: string } | null {
-  const newest = getOfferedRelease(releases);
-  if (!newest) {
-    return null;
-  }
-  const listed = (fileName: string | null): fileName is string =>
-    fileName !== null && newest.files.some((file) => file.name === fileName);
+  const lists = (
+    release: ValidatorRelease,
+    fileName: string | null
+  ): fileName is string =>
+    fileName !== null && release.files.some((file) => file.name === fileName);
   if (segments.length === 1) {
+    const offered = getOfferedRelease(releases);
     const fileName = decodeSegment(segments[0]);
-    return listed(fileName) ? { release: newest, fileName } : null;
+    return offered && lists(offered, fileName)
+      ? { release: offered, fileName }
+      : null;
   }
   if (segments.length === 2) {
     const version = decodeSegment(segments[0]);
     const fileName = decodeSegment(segments[1]);
-    return version === newest.version && listed(fileName)
-      ? { release: newest, fileName }
-      : null;
+    const release = getDownloadableReleases(releases).find(
+      (entry) => entry.version === version
+    );
+    return release && lists(release, fileName) ? { release, fileName } : null;
   }
   return null;
 }
 
 /**
- * Finds a file of the newest release in the feed and presigns it. A file
- * the newest release does not list is never fetched, so the path cannot
- * reach other objects or an older release.
+ * Finds a file of a release the site hands out and presigns it. A file that
+ * release does not list is never fetched, so the path cannot reach other
+ * objects or an older release.
+ *
+ * Keep the shape: GET /validator/download/<version>/<file> answers 302 with
+ * an https presigned URL. From rc.10 the validator's in-app update builds
+ * that path from the signed feed's version folder and file name and follows
+ * the redirect, so releases already installed depend on it.
  */
 export async function resolveReleaseDownload(
   segments: readonly string[]
