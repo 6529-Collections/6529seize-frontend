@@ -622,6 +622,64 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
         );
       }
     );
+
+    // A fetch returns at most 1,000 drops (20 pages of 50) per call.
+    const PAGE_CAP = 1_000;
+    const cappedServer = (serverDrops: readonly ApiDrop[]) =>
+      jest.fn(async (_waveId: string, since: number) => {
+        const newer = serverDrops.filter((drop) => drop.serial_no > since);
+        const drops = newer
+          .slice(0, PAGE_CAP)
+          .map((drop) => ({ ...drop, wave: viewerWave }) as ApiDrop);
+        return {
+          drops,
+          highestSerialNo: drops.at(-1)?.serial_no ?? since,
+          reachedPageLimit: newer.length > PAGE_CAP,
+        };
+      });
+
+    it("pages past the fetch cap until a drop lost in a large backlog is repaired", async () => {
+      const serverDrops = Array.from({ length: 2_500 }, (_, index) =>
+        frameDrop(11 + index)
+      );
+      const lostSerial = 2_400;
+      const { props, store } = setup();
+      props.syncNewestMessages.mockImplementation(cappedServer(serverDrops));
+
+      // Every drop arrives by socket except one past the first two pages.
+      for (const drop of serverDrops) {
+        if (drop.serial_no === lostSerial) continue;
+        await emit(WsMessageType.DROP_UPDATE, drop);
+      }
+      await advance(CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS * 2);
+
+      expect(
+        props.syncNewestMessages.mock.calls.map(([, since]) => since)
+      ).toEqual([10, 1_010, 2_010]);
+      expect(
+        store[WAVE]!.drops.some((drop) => drop.serial_no === lostSerial)
+      ).toBe(true);
+      expect(store[WAVE]!.latestFetchedSerialNo).toBe(2_510);
+    });
+
+    it("keeps one page per fetch on the per-message path when the flag is off", async () => {
+      mockGapSyncEnabled = false;
+      const serverDrops = Array.from({ length: 1_500 }, (_, index) =>
+        frameDrop(11 + index)
+      );
+      const { props } = setup();
+      props.syncNewestMessages.mockImplementation(cappedServer(serverDrops));
+
+      await emit(WsMessageType.DROP_UPDATE, serverDrops.at(-1)!);
+      await advance(1_000);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(1);
+      expect(props.syncNewestMessages).toHaveBeenCalledWith(
+        WAVE,
+        10,
+        expect.any(AbortSignal)
+      );
+    });
   });
 
   describe("viewer context of socket drops", () => {

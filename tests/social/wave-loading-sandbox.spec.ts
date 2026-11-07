@@ -1182,9 +1182,14 @@ test("live posts arrive without a request each and a lost one is repaired after 
     process.env["NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC"] === "false",
     "Gap-only chat sync is off in this run."
   );
+  // The app's timing rules: a check 5 s after the last frame (at least
+  // every 15 s in a continuous stream), and one read per 3 s window.
+  const TRAILING_CHECK_MS = 5_000;
+  const TRAILING_CHECK_MAX_WAIT_MS = 15_000;
+  const READ_WINDOW_MS = 3_000;
   const fixture = await sharedPostFixture(page, baseURL);
-  const newestFetches: string[] = [];
-  const readMarkers: string[] = [];
+  const newestFetches: { readonly search: string; readonly at: number }[] = [];
+  const readMarkers: number[] = [];
   let counting = false;
   page.on("request", (request) => {
     const url = new URL(request.url());
@@ -1193,46 +1198,67 @@ test("live posts arrive without a request each and a lost one is repaired after 
       url.pathname.endsWith(`/api/v2/waves/${WAVE}/drops`) &&
       url.searchParams.get("search_strategy") === "FIND_NEWER"
     ) {
-      newestFetches.push(url.search);
+      newestFetches.push({ search: url.search, at: Date.now() });
     }
     if (
       request.method() === "POST" &&
       url.pathname.endsWith(`/notifications/wave/${WAVE}/read`)
     ) {
-      readMarkers.push(url.pathname);
+      readMarkers.push(Date.now());
     }
   });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   counting = true;
 
-  // Ten posts arrive one after another; the frame for post 157 is lost.
+  // Ten posts arrive back to back; the frame for post 157 is lost. The
+  // expected counts below follow from the measured burst, so a slow runner
+  // changes the numbers they allow, not what they prove.
   fixture.missMessages(10);
+  const burstStartedAt = Date.now();
   for (let serial = 152; serial <= 161; serial++) {
     if (serial === 157) continue;
     await fixture.frame(serial);
+  }
+  const burstEndedAt = Date.now();
+  const burstMs = burstEndedAt - burstStartedAt;
+  for (let serial = 152; serial <= 161; serial++) {
+    if (serial === 157) continue;
     await expect(fixture.post(serial)).toBeAttached();
   }
-  // The socket is trusted: no post triggered a fetch of the newest posts.
-  expect(newestFetches).toHaveLength(0);
-  await expect(fixture.post(157)).toHaveCount(0);
+
+  // The socket is trusted: no post fetches the newest posts. Back-to-back
+  // frames leave no idle gap, so only the max-wait rule can check during
+  // the burst, and the trailing check waits for the last frame.
+  const checksDuringBurst = Math.floor(burstMs / TRAILING_CHECK_MAX_WAIT_MS);
+  const trailingCheckAt = burstEndedAt + TRAILING_CHECK_MS - 1_000;
+  const fetchesBeforeTrailingCheck = () =>
+    newestFetches.filter((fetch) => fetch.at < trailingCheckAt).length;
+  expect(fetchesBeforeTrailingCheck()).toBe(checksDuringBurst);
 
   // One trailing check after the burst fetches everything since the last
   // verified post and repairs the lost frame.
-  await expect(fixture.post(157)).toBeAttached({ timeout: 15000 });
-  expect(newestFetches).toHaveLength(1);
-  expect(newestFetches[0]).toContain("serial_no_limit=151");
-  // Nine received posts are marked read in batches (one per 3 s window), not
-  // one by one.
+  await expect(fixture.post(157)).toBeAttached({
+    timeout: TRAILING_CHECK_MAX_WAIT_MS,
+  });
+  expect(fetchesBeforeTrailingCheck()).toBe(checksDuringBurst);
+  expect(newestFetches).toHaveLength(checksDuringBurst + 1);
+  expect(newestFetches[0]!.search).toContain("serial_no_limit=151");
+
+  // The received posts are marked read once per window, not one by one:
+  // windows opened during the burst, plus one for the repaired post.
+  const maxReadMarkers = Math.floor(burstMs / READ_WINDOW_MS) + 2;
   await expect
     .poll(() => readMarkers.length, { timeout: 10000 })
     .toBeGreaterThan(0);
-  expect(readMarkers.length).toBeLessThanOrEqual(2);
+  expect(readMarkers.length).toBeLessThanOrEqual(maxReadMarkers);
   await testInfo.attach("gap-sync-requests", {
     body: JSON.stringify({
       received: 9,
+      burstMs,
       newestFetches: newestFetches.length,
       readMarkers: readMarkers.length,
+      maxReadMarkers,
     }),
     contentType: "application/json",
   });

@@ -60,8 +60,9 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
-- In builds with gap-only chat sync (currently staging), a post that arrives
-  live in an open wave appears without a further request. About 5 seconds
+- When gap-only chat sync is enabled
+  (`NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC`), a post that arrives live in an
+  open wave appears without a further request. About 5 seconds
   after a burst of posts (at least every 15 seconds in a continuous stream),
   the wave checks once for posts the connection missed; a server request to
   recover missed updates checks at once. Posts read in an open wave are marked
