@@ -33,6 +33,7 @@ import {
 
 const COLLECTOR_ENDPOINT = "/e";
 const FLUSH_DELAY_MS = 1500;
+const COUNTRY_WAIT_MS = 5000;
 const SLOW_API_MS = 3000;
 const LONG_TASK_MS = 200;
 const MAX_QUEUE = 200;
@@ -63,22 +64,22 @@ function listen<K extends keyof WindowEventMap>(
   listeners.push(() => removeEventListener(type, handler, capture));
 }
 
-const state = {
-  started: false,
-  page: null as PageContext | null,
-  pagePath: null as string | null,
-  notFoundPath: null as string | null,
-  entryPage: null as PageContext | null,
-  prevRoute: "entry",
-  queue: [] as WireEvent[],
-  early: [] as PendingEvent[],
-  health: {} as HealthCounts,
-  vitals: {} as Partial<Record<VitalName, number>>,
-  vitalsSent: false,
-  country: "",
-  countryPending: true,
-  timer: undefined as ReturnType<typeof setTimeout> | undefined,
-};
+// Page-load state, in memory only.
+let started = false;
+let currentPage: PageContext | null = null;
+let currentPath: string | null = null;
+let notFoundPath: string | null = null;
+let entryPage: PageContext | null = null;
+let prevRoute = "entry";
+let queue: WireEvent[] = [];
+let early: PendingEvent[] = [];
+let healthCounts: HealthCounts = {};
+let vitalValues: Partial<Record<VitalName, number>> = {};
+let vitalsSent = false;
+let knownCountry = "";
+let countryPending = true;
+let flushTimer: ReturnType<typeof setTimeout> | undefined;
+let heldSince = 0;
 
 const isFirstPartyTelemetryEnabled = (): boolean =>
   publicEnv.NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY === "true" &&
@@ -104,56 +105,65 @@ function send(body: string): void {
 }
 
 function enqueue(event: WireEvent): void {
-  if (state.queue.length < MAX_QUEUE) state.queue.push(event);
+  if (queue.length < MAX_QUEUE) queue.push(event);
 }
 
 function pushHealth(): void {
-  const counts = toHealthCounts(state.health);
-  state.health = {};
-  if (counts && state.page)
-    enqueue({ v: 1, t: "health", ...state.page, c: counts });
+  const counts = toHealthCounts(healthCounts);
+  healthCounts = {};
+  if (counts && currentPage)
+    enqueue({ v: 1, t: "health", ...currentPage, c: counts });
 }
 
 function pushVitals(): void {
-  if (state.vitalsSent || !state.entryPage) return;
+  if (vitalsSent || !entryPage) return;
   flushVitals();
-  if (Object.keys(state.vitals).length === 0) return;
-  state.vitalsSent = true;
-  enqueue({ v: 1, t: "vitals", ...state.entryPage, ...state.vitals });
+  if (Object.keys(vitalValues).length === 0) return;
+  vitalsSent = true;
+  enqueue({ v: 1, t: "vitals", ...entryPage, ...vitalValues });
 }
 
-/** Sends queued events. Before the page hides, a page view waits for the country. */
+/**
+ * Sends queued events. Before the page hides, a page view waits up to 5 s for
+ * the country (the lookup's own timeout) and then goes without `fp`.
+ */
 export function flushTelemetry(final = false): void {
-  clearTimeout(state.timer);
-  state.timer = undefined;
+  clearTimeout(flushTimer);
+  flushTimer = undefined;
   if (final) {
     pushHealth();
     pushVitals();
-  } else if (state.countryPending && state.queue.some((e) => e.t === "pv")) {
-    return;
+  } else if (countryPending && queue.some((e) => e.t === "pv")) {
+    heldSince ||= Date.now();
+    const wait = COUNTRY_WAIT_MS - (Date.now() - heldSince);
+    if (wait > 0) {
+      flushTimer = setTimeout(() => flushTelemetry(), wait);
+      return;
+    }
   }
-  if (state.queue.length === 0) return;
+  heldSince = 0;
+  if (queue.length === 0) return;
   const fp =
-    !state.countryPending &&
-    isFingerprintAllowed(state.country) &&
-    state.queue.some((e) => e.t === "pv")
+    !countryPending &&
+    isFingerprintAllowed(knownCountry) &&
+    queue.some((e) => e.t === "pv")
       ? computeFingerprint(readFingerprintTraits(detectDevice()))
       : undefined;
-  const events = state.queue
+  const events = queue
     .splice(0)
     .map((e) => (e.t === "pv" && fp ? { ...e, fp } : e));
   for (const body of encodeBatches(events)) send(body);
 }
 
 function scheduleFlush(): void {
-  state.timer ??= setTimeout(() => flushTelemetry(), FLUSH_DELAY_MS);
+  flushTimer ??= setTimeout(() => flushTelemetry(), FLUSH_DELAY_MS);
 }
 
 function bump(key: DimensionKey, dimension: string): void;
 function bump(key: ScalarKey): void;
 function bump(key: DimensionKey | ScalarKey, dimension?: string): void {
   if (!isFirstPartyTelemetryEnabled()) return;
-  const health = state.health as Record<
+  const health = healthCounts as Record<
     string,
     number | Record<string, number>
   >;
@@ -201,8 +211,8 @@ function classifyAsset(target: Element): AssetKind {
 
 /** Installs the page-lifetime listeners once. Safe to call repeatedly. */
 export function startFirstPartyTelemetry(): void {
-  if (state.started || !isFirstPartyTelemetryEnabled()) return;
-  state.started = true;
+  if (started || !isFirstPartyTelemetryEnabled()) return;
+  started = true;
   listen(
     "error",
     (event) => {
@@ -244,9 +254,9 @@ export function startFirstPartyTelemetry(): void {
 }
 
 export function setTelemetryCountry(country: string, pending: boolean): void {
-  state.country = country;
-  state.countryPending = pending;
-  if (!pending && state.queue.length > 0) scheduleFlush();
+  knownCountry = country;
+  countryPending = pending;
+  if (!pending && queue.length > 0) scheduleFlush();
 }
 
 export function recordPageView(input: {
@@ -258,12 +268,12 @@ export function recordPageView(input: {
 }): void {
   if (!isFirstPartyTelemetryEnabled()) return;
   startFirstPartyTelemetry();
-  if (state.page) pushHealth();
-  const notFound = state.notFoundPath === normalizePath(input.pathname);
-  state.notFoundPath = null;
-  state.pagePath = normalizePath(input.pathname);
+  if (currentPage) pushHealth();
+  const notFound = notFoundPath === normalizePath(input.pathname);
+  notFoundPath = null;
+  currentPath = normalizePath(input.pathname);
   const route = notFound ? NOT_FOUND_ROUTE : guardRoute(input.route);
-  const isEntry = state.page === null;
+  const isEntry = currentPage === null;
   const page: PageContext = {
     route,
     device: detectDevice(),
@@ -279,15 +289,16 @@ export function recordPageView(input: {
     page_group: /^[a-z0-9_-]{1,32}$/.test(input.pageGroup)
       ? input.pageGroup
       : "other",
-    prev_route: state.prevRoute,
+    prev_route: prevRoute,
     ...(referrer ? { referrer_domain: referrer } : {}),
     browser: detectBrowser(navigator.userAgent).browser,
     signed_in: input.signedIn,
   });
-  state.page = page;
-  state.entryPage ??= page;
-  state.prevRoute = route;
-  for (const event of state.early.splice(0))
+  currentPage = page;
+  heldSince ||= Date.now();
+  entryPage ??= page;
+  prevRoute = route;
+  for (const event of early.splice(0))
     enqueue({ v: 1, t: "ev", ...page, ...event });
   scheduleFlush();
 }
@@ -298,20 +309,20 @@ export function recordPageView(input: {
  * to `/[other]`.
  */
 export function markPageNotFound(pathname: string): void {
-  const page = state.page;
+  const page = currentPage;
   // The 404 page can commit before the page view of its own path is recorded.
-  if (!page || state.pagePath !== normalizePath(pathname)) {
-    state.notFoundPath = normalizePath(pathname);
+  if (!page || currentPath !== normalizePath(pathname)) {
+    notFoundPath = normalizePath(pathname);
     return;
   }
   if (page.route === NOT_FOUND_ROUTE) return;
   const unknown: PageContext = { ...page, route: NOT_FOUND_ROUTE };
-  state.queue = state.queue.map((event) =>
+  queue = queue.map((event) =>
     event.route === page.route ? { ...event, route: NOT_FOUND_ROUTE } : event
   );
-  if (state.entryPage === page) state.entryPage = unknown;
-  state.page = unknown;
-  state.prevRoute = NOT_FOUND_ROUTE;
+  if (entryPage === page) entryPage = unknown;
+  currentPage = unknown;
+  prevRoute = NOT_FOUND_ROUTE;
 }
 
 /** Fan-out target for `trackAnalyticsEvent`: registry events only. */
@@ -322,16 +333,15 @@ export function recordProductEvent(
   if (!isFirstPartyTelemetryEnabled()) return;
   const event = toProductEvent(name, properties);
   if (!event) return;
-  if (state.page) enqueue({ v: 1, t: "ev", ...state.page, ...event });
-  else if (state.early.length < 40) state.early.push(event);
+  if (currentPage) enqueue({ v: 1, t: "ev", ...currentPage, ...event });
+  else if (early.length < 40) early.push(event);
 }
 
 export function recordVital(name: string, value: number): void {
   const key = name.toLowerCase() as VitalName;
-  if (state.vitalsSent || !["lcp", "inp", "cls", "ttfb", "fcp"].includes(key))
-    return;
+  if (vitalsSent || !["lcp", "inp", "cls", "ttfb", "fcp"].includes(key)) return;
   if (!Number.isFinite(value) || value < 0) return;
-  state.vitals[key] =
+  vitalValues[key] =
     key === "cls"
       ? Math.min(100, Math.round(value * 10000) / 10000)
       : Math.min(300000, Math.round(value));
@@ -348,7 +358,9 @@ export function countApiRequest(input: {
   const template = guardRoute(
     sanitizeEndpointGroup(input.endpoint)
       .replace(/^\/api(?=\/|$)/, "")
-      .replaceAll(/:(\w+)/g, "[$1]")
+      // One placeholder kind, so /profiles/:handle and /profiles/:wallet
+      // count as the same endpoint.
+      .replaceAll(/:\w+/g, "[id]")
   );
   const failed =
     status === "network_error" ||
@@ -365,23 +377,22 @@ export const countBoundaryError = (): void => bump("error", "boundary");
 
 /** Test-only: forget all page-load state. */
 export function resetTelemetryForTests(): void {
-  clearTimeout(state.timer);
+  clearTimeout(flushTimer);
   for (const remove of listeners.splice(0)) remove();
   flushVitals = () => undefined;
-  Object.assign(state, {
-    started: false,
-    page: null,
-    pagePath: null,
-    notFoundPath: null,
-    entryPage: null,
-    prevRoute: "entry",
-    queue: [],
-    early: [],
-    health: {},
-    vitals: {},
-    vitalsSent: false,
-    country: "",
-    countryPending: true,
-    timer: undefined,
-  });
+  started = false;
+  currentPage = null;
+  currentPath = null;
+  notFoundPath = null;
+  entryPage = null;
+  prevRoute = "entry";
+  queue = [];
+  early = [];
+  healthCounts = {};
+  vitalValues = {};
+  vitalsSent = false;
+  knownCountry = "";
+  countryPending = true;
+  flushTimer = undefined;
+  heldSince = 0;
 }

@@ -22,8 +22,8 @@ batches validate against it.
 | Record | Fields |
 |---|---|
 | `pv` page view | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp` |
-| `vitals` | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides |
-| `health` | per page view: asset load failures by kind, failed and slow API requests by endpoint template, WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind |
+| `vitals` | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides. Our own observers; INP is the web-vitals p98 estimate (the worst interaction, skipping one per 50), over at most 1,000 interactions |
+| `health` | per page view: asset load failures by kind, failed and slow API requests by endpoint template (every identifier becomes `[id]`, as in `/drops/[id]`), WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind |
 | `ev` product event | a registry event name plus at most six enum or boolean properties |
 
 Route templates come from `useParams()`: each segment that holds a dynamic

@@ -271,8 +271,8 @@ describe("first-party collector", () => {
       route: "/waves/[wave]",
       c: {
         asset_fail: { script: 2, media: 1 },
-        api_fail: { "/drops/[uuid]": 1 },
-        api_slow: { "/drops/[uuid]": 1 },
+        api_fail: { "/drops/[id]": 1 },
+        api_slow: { "/drops/[id]": 1 },
         ws_drop: 1,
         ws_reconnect: 1,
         error: { chunk_load: 1, boundary: 1 },
@@ -303,12 +303,24 @@ describe("first-party collector", () => {
     expect(vitals[0]).not.toHaveProperty("fid");
   });
 
-  it("holds the page-view batch until the country is known, and sends it on hide without fp", () => {
+  it("holds the page-view batch for the country, and sends it on hide without fp", () => {
     viewPage("/", "/", "home");
-    jest.advanceTimersByTime(10_000);
+    jest.advanceTimersByTime(4_000);
     expect(sendBeacon).not.toHaveBeenCalled();
     hidePage();
     expect(sentEvents()[0]).toMatchObject({ t: "pv" });
+    expect(sentEvents()[0]).not.toHaveProperty("fp");
+  });
+
+  it("stops waiting for a stuck country lookup after 5 s and sends without fp", () => {
+    viewPage("/", "/", "home");
+    collector.recordProductEvent("Homepage section seen", {
+      section: "Introduction",
+    });
+    jest.advanceTimersByTime(4_900);
+    expect(sendBeacon).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(200);
+    expect(sentEvents().map((e) => e["t"])).toEqual(["pv", "ev"]);
     expect(sentEvents()[0]).not.toHaveProperty("fp");
   });
 
