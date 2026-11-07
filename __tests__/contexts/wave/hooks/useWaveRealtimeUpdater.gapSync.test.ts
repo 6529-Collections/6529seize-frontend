@@ -6,6 +6,10 @@ import {
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync";
 import { hydrateRealtimeChatDrop } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import { WAVE_READ_DEBOUNCE_MS } from "@/hooks/useMarkWaveNotificationsRead.debounce";
+import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { SidebarWave } from "@/types/waves.types";
+import { createElement, type ReactNode } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -15,7 +19,7 @@ import type { WaveMessagesUpdate } from "@/contexts/wave/hooks/types";
 let mockGapSyncEnabled = true;
 const mockWebSocketCallbacks = new Map<
   WsMessageType,
-  (messageData: unknown) => void
+  Set<(messageData: unknown) => void>
 >();
 
 jest.mock("@/contexts/wave/hooks/useWaveRealtimeUpdater.flags", () => ({
@@ -27,7 +31,9 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
     messageType: WsMessageType,
     callback: (messageData: unknown) => void
   ) => {
-    mockWebSocketCallbacks.set(messageType, callback);
+    const callbacks = mockWebSocketCallbacks.get(messageType) ?? new Set();
+    callbacks.add(callback);
+    mockWebSocketCallbacks.set(messageType, callbacks);
     return { isConnected: true };
   },
 }));
@@ -186,10 +192,10 @@ const makeProps = (store: Store) => ({
 });
 
 const emit = async (type: WsMessageType, data: unknown) => {
-  const callback = mockWebSocketCallbacks.get(type);
-  if (!callback) throw new Error(`No callback for ${type}`);
+  const callbacks = mockWebSocketCallbacks.get(type);
+  if (!callbacks?.size) throw new Error(`No callback for ${type}`);
   await act(async () => {
-    callback(data);
+    callbacks.forEach((callback) => callback(data));
     await Promise.resolve();
   });
 };
@@ -748,6 +754,58 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
   });
 
   describe("read markers", () => {
+    it.each([false, true])(
+      "never refetches the wave lists for reads of the open wave, while another wave's badge still counts (gap sync %s)",
+      async (gapSync) => {
+        mockGapSyncEnabled = gapSync;
+        const invalidateNotifications = jest.fn();
+        const store: Store = {
+          [WAVE]: { drops: [storedDrop(10)], latestFetchedSerialNo: 10 },
+        };
+        const props = makeProps(store);
+        const sidebarWaves = [{ id: WAVE }, { id: "wave-2" }] as SidebarWave[];
+        const { result } = renderHook(
+          (current: ReturnType<typeof makeProps>) => {
+            useWaveRealtimeUpdater(current);
+            return useNewDropCounter(WAVE, sidebarWaves, jest.fn());
+          },
+          {
+            initialProps: props,
+            wrapper: ({ children }: { readonly children: ReactNode }) =>
+              createElement(
+                ReactQueryWrapperContext.Provider,
+                { value: { invalidateNotifications } as never },
+                children
+              ),
+          }
+        );
+
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+        await emit(
+          WsMessageType.DROP_UPDATE,
+          frameDrop(12, {
+            id: "frame-other",
+            wave: { id: "wave-2", is_direct_message: false },
+            author: { id: "author-b", handle: "author-b" },
+            created_at: 1_000,
+          })
+        );
+        await advance(WAVE_READ_DEBOUNCE_MS);
+
+        // The open wave is read, the other wave is not.
+        expect(readPosts().length).toBeGreaterThan(0);
+        for (const [request] of readPosts()) {
+          expect(request.endpoint).toBe(`notifications/wave/${WAVE}/read`);
+        }
+        expect(invalidateNotifications).toHaveBeenCalled();
+        for (const [options] of invalidateNotifications.mock.calls) {
+          expect(options).toEqual({ refreshWaveLists: false });
+        }
+        // The other wave's unread badge still updates from the socket.
+        expect(result.current.newDropsCounts["wave-2"]?.count).toBe(1);
+      }
+    );
+
     it("sends one read per window for a burst", async () => {
       setup();
 
