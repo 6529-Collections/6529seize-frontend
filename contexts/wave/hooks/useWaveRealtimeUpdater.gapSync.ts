@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   type RefObject,
 } from "react";
@@ -229,7 +230,11 @@ export function useWaveGapSync({
   }, []);
   useGapSyncLifecycle({ clearAll, latestRef });
 
-  return { requestGapSync, noteRealtimeFrame, requestResync };
+  // A stable object keeps the updater's processIncomingDrop stable too.
+  return useMemo(
+    () => ({ requestGapSync, noteRealtimeFrame, requestResync }),
+    [noteRealtimeFrame, requestGapSync, requestResync]
+  );
 }
 
 /**
