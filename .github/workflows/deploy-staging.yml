@@ -49,6 +49,11 @@ jobs:
       NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
       # App device grants use the same approved wording in staging and production.
       NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"
+      # First-party collector (R14 §4.1, #4705) and the flight recorder / Send
+      # diagnostics (R14 §4.2-4.4, #4709, #4710): staging only until the
+      # orchestrator enables production. Unread until those PRs merge.
+      NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: "true"
+      NEXT_PUBLIC_FEATURE_DIAGNOSTICS: "true"
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
