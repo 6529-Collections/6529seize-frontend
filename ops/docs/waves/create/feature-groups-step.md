@@ -5,8 +5,8 @@
 Use `Access` to choose who can open a wave and, when needed, give different
 groups permission to chat or administer it. Standalone `Chat`
 waves show these controls inside `Optional settings` on the first screen.
-Subwaves use a separate `Access` step. Competition submission and voting groups
-are configured separately in [competition setup](../competitions/feature-manage-competitions.md).
+Subwaves use a separate `Access` step. Decision submission and voting groups
+are configured separately in [decision setup](../competitions/feature-manage-competitions.md).
 
 ## Location in the Site
 
@@ -44,9 +44,9 @@ are configured separately in [competition setup](../competitions/feature-manage-
   wave access while submissions remain limited to their own group. The same
   summary appears in Review or Overview before creation. When chat is disabled,
   it still explains whether submissions are public or limited to their group.
-- When creating or reviewing a competition inside an existing Wave, the summary
-  uses that parent Wave's current chat group and enabled state. Competition
-  submission groups are separate; competition draft settings do not change chat.
+- When creating or reviewing a decision inside an existing Wave, the summary
+  uses that parent Wave's current chat group and enabled state. Decision
+  submission groups are separate; decision draft settings do not change chat.
   A private parent chat remains group-restricted when its group ID or name is
   withheld. Without the ID, the summary does not claim the groups match or differ.
 - This summary describes group access. Sign-in, profile, submission timing,

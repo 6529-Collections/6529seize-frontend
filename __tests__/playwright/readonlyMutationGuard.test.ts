@@ -650,6 +650,36 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("aborts only the first-party collector's same-origin POST /e beacon", () => {
+    // tests/social/search-waves-readonly.spec.ts "late-loading vote scores
+    // cannot obstruct closing an empty wave search" failed on staging when
+    // the collector's beacon was treated as a mutation.
+    const decide = (method: string, url: string) =>
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method,
+        readonly: true,
+        url,
+      });
+
+    expect(decide("POST", "https://staging.6529.io/e")).toEqual({
+      action: "abort",
+      reason: "ignored-first-party-telemetry",
+    });
+    for (const [method, url] of [
+      ["PUT", "https://staging.6529.io/e"],
+      ["DELETE", "https://staging.6529.io/e"],
+      ["POST", "https://staging.6529.io/e/"],
+      ["POST", "https://staging.6529.io/e/write"],
+      ["POST", "https://staging.6529.io/e?write=1"],
+      ["POST", "https://staging.6529.io/events"],
+      ["POST", "https://example.com/e"],
+      ["POST", "https://6529.io/e"],
+    ] as const) {
+      expect(decide(method, url)).toMatchObject({ action: "block" });
+    }
+  });
+
   it("blocks non-allowlisted external POSTs", () => {
     expect(
       decideReadonlyRequest({

@@ -180,7 +180,8 @@ describe("effective App PR CI plan", () => {
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
-    "app/waves/[wave]/competitions/[competition]/page.tsx",
+    "app/waves/[wave]/decisions/page.tsx",
+    "app/waves/[wave]/decisions/[decision]/page.tsx",
     "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
     "generated/models/ApiCompetition.ts",
     "contexts/CompetitionContext.tsx",
@@ -293,6 +294,21 @@ describe("effective App PR CI plan", () => {
   );
 
   it.each([
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.flags.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "hooks/useMarkWaveNotificationsRead.debounce.ts",
+    "__tests__/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.test.ts",
+    "__tests__/useWaveRealtimeUpdater.test.ts",
+  ])("selects the live chat browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
     "contexts/wave/hooks/useNewDropCounter.ts",
     "contexts/wave/hooks/useEnhancedWavesListCore.ts",
     "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
@@ -314,6 +330,7 @@ describe("effective App PR CI plan", () => {
     "tests/support/chatPerf.ts",
     "tests/support/chatPerfFixture.ts",
     "tests/social/chat-render-budget-sandbox.spec.ts",
+    "tests/social/wave-live-unread-sandbox.spec.ts",
   ])("selects the chat render budget for chat hot path %s", (file) => {
     expect(
       executePlan([file]).checks.playwright_native_competition.required

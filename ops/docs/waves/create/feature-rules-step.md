@@ -5,7 +5,7 @@
 Use `Guidelines` to add optional chat guidelines. For standalone Chat, expand
 `Optional settings` on the first screen to show the textbox. In guided creation,
 the textbox is visible on the `Guidelines` step. Signing rules are configured separately
-in competition `Drops` under `Submission requirements`. The read-only
+in decision `Drops` under `Submission requirements`. The read-only
 configuration summary is in the final [Overview step](feature-final-overview-step.md).
 
 ## Location in the Site
@@ -57,13 +57,13 @@ For guided creation:
 - Before their first chat message, profiles with no earlier chat messages or
   participation drops in the wave review its guidelines. See
   [First Message Guidelines](../composer/feature-first-message-guidelines.md).
-- Competition terms are shown with that competition and accepted when submitting
+- Decision terms are shown with that decision and accepted when submitting
   an entry. They are separate from shared chat guidelines.
 
 ## Settings
 
 Wave admins can edit chat guidelines later from wave settings. Chat guidelines
-are saved as wave metadata. Competition terms are managed in each competition’s
+are saved as wave metadata. Decision terms are managed in each decision’s
 [Settings](../competitions/feature-manage-competitions.md).
 
 ## Edge Cases

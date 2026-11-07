@@ -60,16 +60,20 @@ describe("the steps for the app", () => {
     );
   });
 
-  it("shows the upgrade from rc.8 in the open, with an id a link can name", () => {
+  it("shows the upgrade from rc.9 in the open, with an id a link can name", () => {
     const upgrade = renderToStaticMarkup(
-      <ValidatorUpgrade newest="0.1.0-rc.9" />
+      <ValidatorUpgrade newest="0.1.0-rc.10" />
     );
     expect(upgrade).toMatch(
       /^<section id="upgrading" aria-labelledby="upgrading-title"/
     );
-    expect(upgrade).toContain(">Upgrading from rc.8</h2>");
-    // The Mac steps, numbered, with the command to copy.
-    expect(upgrade.match(/<li/g)).toHaveLength(4);
+    expect(upgrade).toContain(">Upgrading from rc.9</h2>");
+    // The Mac steps from rc.9 and from rc.8, numbered, with the command to
+    // copy.
+    expect(upgrade.match(/<li/g)).toHaveLength(6);
+    expect(upgrade).toContain(
+      ">If you&#x27;re upgrading from rc.8 or older</h3>"
+    );
     expect(upgrade).toContain(
       "launchctl bootout gui/$(id -u)/io.6529.validator.agent</code>"
     );
@@ -79,20 +83,18 @@ describe("the steps for the app", () => {
 
   it("shows Sunday's switch in the open, with an id a link can name", () => {
     const sunday = renderToStaticMarkup(
-      <ValidatorSwitch newest="0.1.0-rc.9" />
+      <ValidatorSwitch newest="0.1.0-rc.10" />
     );
     expect(sunday).toMatch(
-      /^<section id="update-before-sunday" aria-labelledby="update-before-sunday-title"/
+      /^<section id="sundays-switch" aria-labelledby="sundays-switch-title"/
     );
-    expect(sunday).toContain(
-      ">Update before Sunday 8 November, 00:00 UTC</h2>"
-    );
+    expect(sunday).toContain(">Sunday&#x27;s switch</h2>");
   });
 
-  // Merged before the signed list offers rc.9, or left after rc.10 is out,
+  // Merged before the signed list offers rc.10, or left after rc.11 is out,
   // a note would describe a release the page doesn't offer.
-  it.each([["0.1.0-rc.8"], ["0.1.0-rc.10"], [undefined]])(
-    "shows no rc.9 note while the offered release is %s",
+  it.each([["0.1.0-rc.9"], ["0.1.0-rc.11"], [undefined]])(
+    "shows no rc.10 note while the offered release is %s",
     (newest) => {
       expect(renderToStaticMarkup(<ValidatorUpgrade newest={newest} />)).toBe(
         ""

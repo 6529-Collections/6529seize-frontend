@@ -439,12 +439,12 @@ export const getDecisionRows = (
   return [
     {
       id: "first-decision",
-      label: "First decision",
+      label: "First result",
       value: formatDateTime(decisionsStrategy.first_decision_time) ?? "Not set",
     },
     {
       id: "decision-cadence",
-      label: "Decision cadence",
+      label: "Result cadence",
       value: cadenceLabel,
     },
   ];
@@ -458,7 +458,7 @@ const getDecisionCadenceLabel = ({
   readonly isRolling: boolean;
 }): string => {
   if (subsequentDecisions.length === 0) {
-    return "Single decision";
+    return "Single result";
   }
 
   if (isRolling) {

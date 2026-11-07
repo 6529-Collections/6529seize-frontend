@@ -56,7 +56,7 @@ describe("DropVoteProgressing", () => {
     expect(tooltip.parentElement).toBe(document.body);
     expect(tooltip.style.zIndex).toBe("1000002");
     expect(tooltip).toHaveTextContent(
-      "Projected vote count at decision time: 2"
+      "Projected vote count at result time: 2"
     );
   });
 
