@@ -9,6 +9,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
+import { getDropCurationsQueryKey } from "@/hooks/drops/useDropCurations";
 
 // Mock the API module
 jest.mock("@/services/api/common-api", () => ({
@@ -87,6 +88,7 @@ interface TestHookResult {
   mockSetToast: jest.Mock;
   mockInvalidateDrops: jest.Mock;
   mockProcessIncomingDrop: jest.Mock;
+  queryClient: QueryClient;
 }
 
 const setupTestHook = (): TestHookResult => {
@@ -126,7 +128,13 @@ const setupTestHook = (): TestHookResult => {
     wrapper: createWrapper(),
   });
 
-  return { result, mockSetToast, mockInvalidateDrops, mockProcessIncomingDrop };
+  return {
+    result,
+    mockSetToast,
+    mockInvalidateDrops,
+    mockProcessIncomingDrop,
+    queryClient,
+  };
 };
 
 const executeMutation = async (
@@ -199,6 +207,26 @@ describe("useDropUpdateMutation", () => {
       });
     });
 
+    it("invalidates the edited drop's curations after a successful update", async () => {
+      const { result, queryClient } = setupTestHook();
+      const curationsKey = getDropCurationsQueryKey("drop-123");
+      const otherCurationsKey = getDropCurationsQueryKey("drop-456");
+      queryClient.setQueryData(curationsKey, [
+        { id: "c1", drop_included: true },
+      ]);
+      queryClient.setQueryData(otherCurationsKey, []);
+
+      await executeMutation(result);
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+      expect(queryClient.getQueryState(curationsKey)?.isInvalidated).toBe(true);
+      expect(queryClient.getQueryState(otherCurationsKey)?.isInvalidated).toBe(
+        false
+      );
+    });
+
     it("should invalidate drops queries after successful update", async () => {
       const { result, mockInvalidateDrops } = setupTestHook();
       const { mockDrop } = await executeMutation(result);
@@ -211,6 +239,24 @@ describe("useDropUpdateMutation", () => {
   });
 
   describe("Error handling", () => {
+    it("keeps the drop's curations when the update fails", async () => {
+      const { result, queryClient } = setupTestHook();
+      const curationsKey = getDropCurationsQueryKey("drop-123");
+      queryClient.setQueryData(curationsKey, [
+        { id: "c1", drop_included: true },
+      ]);
+      mockedCommonApiPost.mockRejectedValue(new Error("API Error"));
+
+      await executeMutation(result);
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+      expect(queryClient.getQueryState(curationsKey)?.isInvalidated).toBe(
+        false
+      );
+    });
+
     const testErrorScenario = async (
       error: any,
       expectedMessage = "Couldn't update this drop. Please try again."
