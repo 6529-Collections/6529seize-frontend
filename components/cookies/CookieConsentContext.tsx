@@ -4,11 +4,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
-import {
-  commonApiDelete,
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import Cookies from "js-cookie";
 import type { ReactNode } from "react";
 import React, {
@@ -24,6 +20,7 @@ import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 import { scheduleGoogleAnalytics } from "./googleAnalytics";
 import { rememberCountryHint } from "./usCountryHint";
+import { fetchViewerCountry, type ViewerCountry } from "./viewerCountry";
 
 type CookieConsent = boolean | undefined;
 
@@ -37,12 +34,6 @@ type CookieConsentContextType = {
   consent: () => void;
   reject: () => void;
 };
-
-interface CookieConsentResponse {
-  is_eu: boolean;
-  is_consent: boolean;
-  country: string;
-}
 
 const CookieConsentContext = createContext<
   CookieConsentContextType | undefined
@@ -92,17 +83,14 @@ const rejectWhenAborted = (signal: AbortSignal): Promise<never> =>
 
 const fetchCountryCheck = async (
   unmountSignal: AbortSignal | undefined
-): Promise<CookieConsentResponse> => {
+): Promise<ViewerCountry | null> => {
   const lookup = new AbortController();
   const abortLookup = () => lookup.abort();
   unmountSignal?.addEventListener("abort", abortLookup, { once: true });
   const timeoutId = setTimeout(abortLookup, COUNTRY_CHECK_TIMEOUT_MS);
   try {
     return await Promise.race([
-      commonApiFetch<CookieConsentResponse>({
-        endpoint: `policies/country-check`,
-        signal: lookup.signal,
-      }),
+      fetchViewerCountry(lookup.signal),
       rejectWhenAborted(lookup.signal),
     ]);
   } finally {
@@ -174,7 +162,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         }
 
         const response = await fetchCountryCheck(unmountSignal);
-        if (unmountSignal?.aborted) {
+        // null: no edge route here (local builds); stays unknown, like a failure.
+        if (unmountSignal?.aborted || response === null) {
           return;
         }
         setCountry(response.country);

@@ -22,7 +22,7 @@ type ShellRuntime = {
   readonly userAgentHasElectron: boolean;
 };
 
-const COUNTRY_CHECK_PATTERN = "**/api/policies/country-check";
+const COUNTRY_CHECK_PATTERN = "**/e/country";
 const PUBLIC_WAVE_PATH =
   process.env["TARGET_WAVE_PATH"] ??
   (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1"
@@ -43,7 +43,6 @@ async function mockCountryCheck(page: Page, country: string) {
     await route.fulfill({
       body: JSON.stringify({
         country,
-        is_consent: false,
         is_eu: country !== "US",
       }),
       contentType: "application/json",
@@ -56,14 +55,12 @@ async function waitForCountryCheck(page: Page) {
   // Call without awaiting before navigation so the listener observes route load requests.
   try {
     return await page.waitForResponse(
-      (response) => response.url().includes("/api/policies/country-check"),
+      (response) => new URL(response.url()).pathname === "/e/country",
       { timeout: 10_000 }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Expected /api/policies/country-check while loading /open-data: ${message}`
-    );
+    throw new Error(`Expected /e/country while loading /open-data: ${message}`);
   }
 }
 
@@ -298,7 +295,10 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
       await expect(
-        page.getByRole("navigation", { name: "Primary navigation", exact: true })
+        page.getByRole("navigation", {
+          name: "Primary navigation",
+          exact: true,
+        })
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Back", exact: true })

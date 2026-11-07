@@ -7,6 +7,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
+import * as viewerCountry from "@/components/cookies/viewerCountry";
 import * as api from "@/services/api/common-api";
 import {
   act,
@@ -34,9 +35,12 @@ jest.mock("js-cookie", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(),
 }));
 
 jest.mock("@/components/auth/Auth", () => {
@@ -102,9 +106,8 @@ const renderPageLoad = () =>
   );
 
 const mockCountry = (isEu: boolean, country: string) => {
-  (api.commonApiFetch as jest.Mock).mockResolvedValue({
+  (viewerCountry.fetchViewerCountry as jest.Mock).mockResolvedValue({
     is_eu: isEu,
-    is_consent: false,
     country,
   });
 };
@@ -155,7 +158,7 @@ describe("CookieConsentProvider stored consent choice", () => {
 
     it("stores the 7-day default and starts analytics on a first visit", async () => {
       const lookup: { resolve?: (value: unknown) => void } = {};
-      (api.commonApiFetch as jest.Mock).mockReturnValue(
+      (viewerCountry.fetchViewerCountry as jest.Mock).mockReturnValue(
         new Promise((resolve) => {
           lookup.resolve = resolve;
         })
@@ -170,7 +173,7 @@ describe("CookieConsentProvider stored consent choice", () => {
       expect(Cookies.set).not.toHaveBeenCalled();
 
       await act(async () => {
-        lookup.resolve?.({ is_eu: false, is_consent: false, country: "US" });
+        lookup.resolve?.({ is_eu: false, country: "US" });
       });
 
       expect(
@@ -201,7 +204,7 @@ describe("CookieConsentProvider stored consent choice", () => {
         }
         await waitForCountryCheck();
 
-        expect(api.commonApiFetch).toHaveBeenCalledTimes(1);
+        expect(viewerCountry.fetchViewerCountry).toHaveBeenCalledTimes(1);
         expect(Cookies.set).not.toHaveBeenCalled();
         expect(mockCookieJar.get(CONSENT_PERFORMANCE_COOKIE)).toBe("false");
         expect(screen.getByText("Banner: false")).toBeInTheDocument();

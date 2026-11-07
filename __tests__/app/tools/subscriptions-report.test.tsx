@@ -43,6 +43,12 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   getUpcomingMintsAcrossSeasons: jest.fn(() => []),
 }));
 
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(() =>
+    Promise.resolve({ is_eu: false, country: "US" })
+  ),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn((opts) => {
     if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
@@ -70,6 +76,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 const { commonApiFetch } = require("@/services/api/common-api");
+const { fetchViewerCountry } = require("@/components/cookies/viewerCountry");
 const {
   getCardsRemainingUntilEndOf,
   getMintTimelineDetails,
@@ -254,11 +261,8 @@ describe("Subscriptions report page", () => {
     expect(container.querySelector("main")).toBeInTheDocument();
     await waitFor(() => {
       expect(getCardsRemainingUntilEndOf).toHaveBeenCalledWith("szn");
-      expect(commonApiFetch).toHaveBeenCalledTimes(4);
-      expect(commonApiFetch).toHaveBeenCalledWith({
-        endpoint: "policies/country-check",
-        signal: expect.any(AbortSignal),
-      });
+      expect(commonApiFetch).toHaveBeenCalledTimes(3);
+      expect(fetchViewerCountry).toHaveBeenCalledWith(expect.any(AbortSignal));
       expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current");
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "subscriptions/upcoming-memes-counts?card_count=2",

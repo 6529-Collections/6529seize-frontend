@@ -35,8 +35,9 @@ performance-tracking behavior tied to that choice.
 
 1. The app reads `essential-cookies-consent` and
    `performance-cookies-consent`.
-2. On first load, the app checks the visitor country through
-   `policies/country-check`.
+2. On first load, the app reads the visitor country from the 6529.io edge at
+   `/e/country` (CloudFront's viewer country; no outside lookup service). If
+   the edge cannot tell, the country is unknown and treated as EU.
 3. If the visitor is in the EU and both consent cookies are still missing, the
    banner stays visible until the user picks an option.
 4. If the visitor is outside the EU, the banner is skipped. When no

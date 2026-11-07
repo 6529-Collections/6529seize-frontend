@@ -13,12 +13,12 @@ export async function installLocalCountryCheck(
     return;
   }
 
+  // The lookup is same-origin: GET /e/country on the app under test.
+  const appOrigin = new URL(baseURL ?? "").origin;
   await page.route(
     (url) =>
-      ["https://api.6529.io", "https://api.staging.6529.io"].includes(
-        url.origin
-      ) &&
-      url.pathname === "/api/policies/country-check" &&
+      url.origin === appOrigin &&
+      url.pathname === "/e/country" &&
       !url.username &&
       !url.password,
     async (route) => {

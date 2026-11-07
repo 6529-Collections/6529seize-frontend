@@ -80,26 +80,22 @@ describe("local Museum country lookup fixture", () => {
     return { matches: registration[0], handle: registration[1] };
   }
 
-  it("matches only the exact hosted HTTPS country-check endpoints", async () => {
+  it("matches only the same-origin edge country endpoint", async () => {
     const { matches } = await fixtureRegistration();
-    expect(
-      matches(new URL("https://api.6529.io/api/policies/country-check"))
-    ).toBe(true);
-    expect(
-      matches(new URL("https://api.staging.6529.io/api/policies/country-check"))
-    ).toBe(true);
+    expect(matches(new URL("http://localhost:3001/e/country"))).toBe(true);
     for (const url of [
-      "http://api.6529.io/api/policies/country-check",
-      "https://api.6529.io:444/api/policies/country-check",
-      "https://api.6529.io.example.com/api/policies/country-check",
-      "https://api.6529.io/api/policies/country-check/other",
-      "https://api.6529.io/api/policies/country-check/",
-      "https://api.6529.io/api/policies/cookies-consent",
-      "https://api.6529.io/api/settings",
-      "https://api.6529.io/api/waves",
+      "https://api.6529.io/api/policies/country-check",
+      "https://api.staging.6529.io/api/policies/country-check",
+      "http://localhost:3001/e",
+      "http://localhost:3001/e/diag",
+      "http://localhost:3001/e/country/",
+      "http://localhost:3001/e/country/other",
+      "http://localhost:3002/e/country",
+      "https://localhost:3001/e/country",
+      "https://6529.io/e/country",
+      "https://staging.6529.io/e/country",
+      "http://fixture:password@localhost:3001/e/country",
       "https://artblocks-mainnet.s3.amazonaws.com/164000308.png",
-      "http://localhost:3001/api/policies/country-check",
-      "https://fixture:password@api.6529.io/api/policies/country-check",
     ]) {
       expect(matches(new URL(url))).toBe(false);
     }

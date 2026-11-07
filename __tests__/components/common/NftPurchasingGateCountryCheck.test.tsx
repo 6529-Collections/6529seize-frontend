@@ -1,31 +1,34 @@
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchViewerCountry } from "@/components/cookies/viewerCountry";
 import { act, render, screen, waitFor } from "@testing-library/react";
 
 let mockIsIos = true;
+let mockIsAndroid = false;
 const mockReplace = jest.fn();
 const mockMount = jest.fn();
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: mockIsIos }),
+  default: () => ({ isIos: mockIsIos, isAndroid: mockIsAndroid }),
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 jest.mock("js-cookie", () => ({ get: jest.fn(), set: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: jest.fn() }),
 }));
 jest.mock("@/components/cookies/CookiesBanner", () => () => null);
 
-const fetchMock = jest.mocked(commonApiFetch);
+const fetchMock = jest.mocked(fetchViewerCountry);
 
 function PurchasingContent() {
   mockMount();
@@ -49,22 +52,22 @@ function deferCountryCheck() {
       lookup.resolve = resolve;
     })
   );
-  return (country: string) => lookup.resolve?.({ is_eu: true, country });
+  return (country: string) =>
+    lookup.resolve?.({ is_eu: country !== "US", country });
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockIsIos = true;
+  mockIsAndroid = false;
 });
 
-describe("NftPurchasingGate with the country check", () => {
+describe("NftPurchasingGate with the edge country lookup", () => {
   it("keeps a US iOS cold deep link until the check returns US", async () => {
     const resolveCountry = deferCountryCheck();
     renderDeepLink();
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "policies/country-check" })
-    );
+    expect(fetchMock).toHaveBeenCalledWith(expect.any(AbortSignal));
     expect(mockMount).not.toHaveBeenCalled();
     expect(mockReplace).not.toHaveBeenCalled();
 
@@ -125,13 +128,36 @@ describe("NftPurchasingGate with the country check", () => {
     }
   });
 
-  it("does not make web wait for the country check", () => {
+  it("redirects iOS when this host has no edge country route", async () => {
+    fetchMock.mockResolvedValue(null);
+    renderDeepLink();
+
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/the-memes"));
+    expect(mockMount).not.toHaveBeenCalled();
+  });
+
+  it("redirects iOS when the edge cannot tell the country", async () => {
+    const resolveCountry = deferCountryCheck();
+    renderDeepLink();
+
+    resolveCountry("");
+
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/the-memes"));
+    expect(mockMount).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["web", false],
+    ["Android", true],
+  ])("does not make %s wait for the country lookup", (_platform, isAndroid) => {
     mockIsIos = false;
-    deferCountryCheck();
+    mockIsAndroid = isAndroid;
+    const resolveCountry = deferCountryCheck();
 
     renderDeepLink();
 
     expect(screen.getByRole("button", { name: "Mint" })).toBeInTheDocument();
+    resolveCountry("FR");
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });

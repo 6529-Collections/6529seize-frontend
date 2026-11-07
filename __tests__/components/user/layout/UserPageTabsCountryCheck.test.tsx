@@ -3,7 +3,7 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchViewerCountry } from "@/components/cookies/viewerCountry";
 import { render, screen, waitFor } from "@testing-library/react";
 
 let mockIsIos = true;
@@ -21,6 +21,9 @@ jest.mock("next/navigation", () => ({
   useParams: () => ({ user: "testuser" }),
 }));
 jest.mock("js-cookie", () => ({ get: jest.fn(), set: jest.fn() }));
+jest.mock("@/components/cookies/viewerCountry", () => ({
+  fetchViewerCountry: jest.fn(),
+}));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
@@ -59,7 +62,7 @@ jest.mock("@/components/user/layout/UserPageTab", () => ({
   ),
 }));
 
-const fetchMock = jest.mocked(commonApiFetch);
+const fetchMock = jest.mocked(fetchViewerCountry);
 const initialProfile = Object.assign(new ApiIdentity(), {
   profile_wave_id: null,
 });
@@ -89,7 +92,8 @@ function deferCountryCheck() {
       lookup.resolve = resolve;
     })
   );
-  return (country: string) => lookup.resolve?.({ is_eu: true, country });
+  return (country: string) =>
+    lookup.resolve?.({ is_eu: country !== "US", country });
 }
 
 const getTabIds = () =>
