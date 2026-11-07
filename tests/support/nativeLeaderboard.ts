@@ -50,23 +50,17 @@ export async function expectNativeLeaderboardReady(
 }
 
 /**
- * Bodies of observed reads, captured when each response arrives. Chromium
- * may discard a response body once the page moves on (CDP
- * `Network.getResponseBody`: "No data found"), so a body read later can
- * fail even though the page received it.
+ * Bodies of observed reads, captured as each response arrives. Chromium
+ * keeps no body for a read the page cancelled (a superseded query) and may
+ * drop one once the page moves on (CDP `Network.getResponseBody`: "No data
+ * found"); reading bodies lazily failed on such reads.
  */
-const capturedBodies = new WeakMap<Response, Promise<unknown>>();
-
-function captureBody(response: Response): void {
-  const body = response.json();
-  // A rejection surfaces when a test awaits the body; it is never unhandled.
-  body.catch(() => undefined);
-  capturedBodies.set(response, body);
-}
+const capturedBodies = new WeakMap<Response, Promise<Buffer>>();
 
 /** The body captured on arrival (read now only if it was never observed). */
 async function bodyOf<T>(response: Response): Promise<T> {
-  return (await (capturedBodies.get(response) ?? response.json())) as T;
+  const body = await (capturedBodies.get(response) ?? response.body());
+  return JSON.parse(body.toString("utf8")) as T;
 }
 
 /** Observe the UI's own reads; never issue extra API requests or retain auth data. */
@@ -83,8 +77,14 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
           new URL(response.url()).searchParams.has("ids")) ||
         /^\/api\/v2\/drops\/[^/]+$/.test(path))
     ) {
-      captureBody(response);
-      reads.push(response);
+      const body = response.body();
+      capturedBodies.set(response, body);
+      // Only completed reads count: a read the page cancelled has no body
+      // and is not what the UI rendered.
+      body.then(
+        () => reads.push(response),
+        () => undefined
+      );
     }
   };
   page.on("response", observe);
