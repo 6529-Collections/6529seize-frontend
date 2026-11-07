@@ -125,6 +125,9 @@ export const publicEnvSchema = z.object({
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: z.string().optional(),
   NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: z.string().optional(),
+  // First-party collector at same-origin /e (R14). On only when exactly
+  // "true"; staging builds set it, production builds leave it unset for now.
+  NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: z.string().optional(),
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),

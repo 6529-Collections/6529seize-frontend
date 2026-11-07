@@ -41,6 +41,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
 import EULAConsentStartup from "./EULAConsentStartup";
+import FirstPartyTelemetry from "./FirstPartyTelemetry";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
@@ -120,6 +121,9 @@ export default function Providers({
                               <MixpanelSetup />
                               <AwsRumProvider />
                               <AppWebSocketProvider>
+                                <FirstPartyTelemetry
+                                  consentEnabled={enableCookieConsent}
+                                />
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
                                   {enableWalletAuthentication && (

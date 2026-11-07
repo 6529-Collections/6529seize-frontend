@@ -48,3 +48,65 @@ export function reportIllegalTransition(
     // Reporting must never break the caller.
   }
 }
+
+/**
+ * One lifecycle step, for telemetry. Kinds and types only: no payloads,
+ * transaction IDs, error strings, reasons or record IDs leave the machine.
+ * Illegal attempts are observed too, with `to === from` and `legal: false`.
+ */
+export interface ActionTransition {
+  readonly from: ActionStateKind;
+  readonly event: ActionEventType;
+  readonly to: ActionStateKind;
+  readonly mode: ActionMode;
+  readonly legal: boolean;
+}
+
+export type TransitionObserver = (transition: ActionTransition) => void;
+
+/** One entry per registration, so the same function can be added twice. */
+const observers = new Set<{ readonly observe: TransitionObserver }>();
+
+/**
+ * Observes every `transition()` call, app-wide. Returns a function that
+ * removes this registration; calling it again does nothing.
+ */
+export function addTransitionObserver(observe: TransitionObserver): () => void {
+  const entry = { observe };
+  observers.add(entry);
+  return () => {
+    observers.delete(entry);
+  };
+}
+
+function safelyObserve(
+  observe: TransitionObserver,
+  transition: ActionTransition
+): void {
+  try {
+    observe(transition);
+  } catch {
+    // One failing observer must not break the caller or the others.
+  }
+}
+
+/** Tells the app-wide observers and, when given, a scoped one. */
+export function notifyTransitionObservers(
+  transition: ActionTransition,
+  scoped?: TransitionObserver | null
+): void {
+  if (scoped !== undefined && scoped !== null) {
+    safelyObserve(scoped, transition);
+  }
+  // A snapshot: observers may unsubscribe while being told.
+  for (const { observe } of [...observers]) {
+    safelyObserve(observe, transition);
+  }
+}
+
+/** True when a transition would reach anyone; lets callers skip the object. */
+export function hasTransitionObservers(
+  scoped?: TransitionObserver | null
+): boolean {
+  return observers.size > 0 || (scoped !== undefined && scoped !== null);
+}

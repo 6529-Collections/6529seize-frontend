@@ -1,4 +1,7 @@
-import { classifyPageView } from "@/services/analytics/pageClassification";
+import {
+  classifyPageView,
+  toRouteTemplate,
+} from "@/services/analytics/pageClassification";
 
 describe("classifyPageView", () => {
   it("classifies the waves index page", () => {
@@ -129,5 +132,53 @@ describe("classifyPageView", () => {
       routePattern: "/:handle/:subpage",
       trackingKey: "/alice/followers",
     });
+  });
+});
+
+describe("toRouteTemplate", () => {
+  it.each([
+    ["/", {}, "/"],
+    ["/about/mission", { section: "mission" }, "/about/[section]"],
+    [
+      "/waves/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      { wave: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
+      "/waves/[wave]",
+    ],
+    ["/punk6529/collected", { user: "punk6529" }, "/[user]/collected"],
+    [
+      "/punk6529/site/a/b",
+      { user: "punk6529", cmsPath: ["site", "a", "b"] },
+      "/[user]/[...cmsPath]",
+    ],
+    ["/nextgen", { view: undefined }, "/nextgen"],
+    [
+      "/nextgen/collection/pebbles/art",
+      { collection: "pebbles" },
+      "/nextgen/collection/[collection]/art",
+    ],
+    [
+      "/rememes/0xabc/12",
+      { contract: "0xabc", id: "12" },
+      "/rememes/[contract]/[id]",
+    ],
+    ["/waves/waves", { wave: "waves" }, "/waves/[wave]"],
+    [
+      "/messages/encrypted/caf%C3%A9",
+      { group: "café" },
+      "/messages/encrypted/[group]",
+    ],
+    ["/waves/abc?drop=xyz#top", { wave: "abc" }, "/waves/[wave]"],
+    ["/tools/app-wallets", {}, "/tools/app-wallets"],
+  ])("%p with %p -> %p", (pathname, params, expected) => {
+    expect(toRouteTemplate(pathname, params)).toBe(expected);
+  });
+
+  it("keeps a dynamic value that matches a static segment in its own slot", () => {
+    expect(
+      toRouteTemplate("/waves/abc/competitions/abc", {
+        wave: "abc",
+        competition: "abc",
+      })
+    ).toBe("/waves/[wave]/competitions/[competition]");
   });
 });

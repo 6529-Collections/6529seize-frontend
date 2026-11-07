@@ -23,6 +23,7 @@
       "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
       "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
       "ops/scripts/sync-cloudfront-origin-facing.mjs", // documented CloudFront range refresh CLI
+      "ops/scripts/sync-telemetry-schema.cjs", // documented collector schema sync CLI
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
