@@ -50,6 +50,8 @@ jobs:
       # App device grants use the same approved wording in staging and production.
       NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
+      # Gap-only chat sync (WAVES-PLAN 0.7/0.8): on in staging, off in production.
+      NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
 
