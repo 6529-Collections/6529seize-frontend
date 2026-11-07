@@ -19,12 +19,12 @@ import type { Plugin } from "unified";
  * handling) gives the same result when applied to it again, and the drop
  * renderers do not modify the nodes they receive.
  */
-export interface MarkdownParseCachePlugins {
+interface MarkdownParseCachePlugins {
   readonly remark: Plugin<[]>;
   readonly rehype: Plugin<[]>;
 }
 
-export interface MarkdownParseCache {
+interface MarkdownParseCache {
   /** The plugin pair for one namespace; the same objects on every call. */
   readonly plugins: (namespace: string) => MarkdownParseCachePlugins;
   readonly size: () => number;
@@ -41,11 +41,13 @@ interface ParserHolder {
   parser?: Parser | undefined;
 }
 
+/** @api The default size, checked by the cache tests. */
 export const MARKDOWN_PARSE_CACHE_MAX_ENTRIES = 2_000;
 
 const cacheKey = (namespace: string, content: string) =>
   `${namespace}\u0000${content}`;
 
+/** @api A separate cache; the app uses `dropMarkdownParseCache`. */
 export function createMarkdownParseCache(
   maxEntries: number = MARKDOWN_PARSE_CACHE_MAX_ENTRIES
 ): MarkdownParseCache {

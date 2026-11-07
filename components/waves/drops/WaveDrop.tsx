@@ -16,9 +16,8 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
-import WaveDropActionsSentinel, {
-  type WaveDropActionsInitialFocus,
-} from "./WaveDropActionsSentinel";
+import WaveDropActionsSentinel from "./WaveDropActionsSentinel";
+import { useLazyWaveDropActions } from "./useLazyWaveDropActions";
 import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
@@ -148,33 +147,16 @@ const WaveDropInner = ({
   // containment check) rather than enter/leave so child crossings are cheap
   // no-op state writes and jsdom can exercise the path.
   const [isRowPointerHovered, setIsRowPointerHovered] = useState(false);
-  // The hover toolbar is about ten components per row. It mounts the first
-  // time the row is hovered or takes focus, and then stays; until then a
-  // sentinel keeps it reachable from the keyboard.
-  const [hasDesktopActions, setHasDesktopActions] = useState(false);
-  const [desktopActionsInitialFocus, setDesktopActionsInitialFocus] =
-    useState<WaveDropActionsInitialFocus | null>(null);
-  const showDesktopActions = useCallback(() => {
-    setHasDesktopActions(true);
-  }, []);
-  const showDesktopActionsWithFocus = useCallback(
-    (initialFocus: WaveDropActionsInitialFocus) => {
-      setDesktopActionsInitialFocus(initialFocus);
-      setHasDesktopActions(true);
-    },
-    []
-  );
-  const clearDesktopActionsInitialFocus = useCallback(() => {
-    setDesktopActionsInitialFocus(null);
-  }, []);
+  const lazyToolbar = useLazyWaveDropActions();
+  const mountDesktopActions = lazyToolbar.mount;
   const handleRowPointerOver = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      setHasDesktopActions(true);
+      mountDesktopActions();
       if (getPointerType(event) === "mouse" && canUseDesktopHoverActions) {
         setIsRowPointerHovered(true);
       }
     },
-    [canUseDesktopHoverActions]
+    [canUseDesktopHoverActions, mountDesktopActions]
   );
   const handleRowPointerOut = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -751,7 +733,7 @@ const WaveDropInner = ({
         onPointerCancel={handlePointerEnd}
         onPointerOver={handleRowPointerOver}
         onPointerOut={handleRowPointerOut}
-        onFocus={showDesktopActions}
+        onFocus={mountDesktopActions}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
@@ -777,7 +759,7 @@ const WaveDropInner = ({
             showReplyAndQuote &&
             !showStandaloneActionsButton &&
             !isEditing &&
-            (hasDesktopActions ? (
+            (lazyToolbar.isMounted ? (
               <WaveDropActions
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -786,12 +768,12 @@ const WaveDropInner = ({
                 suppressed={hasActiveLinkCardActions}
                 forceVisible={isRowPointerHovered}
                 style={getGroupedTimestampActionStyle(timestampSwipeOffset)}
-                initialFocus={desktopActionsInitialFocus}
-                onInitialFocusApplied={clearDesktopActionsInitialFocus}
+                initialFocus={lazyToolbar.initialFocus}
+                onInitialFocusApplied={lazyToolbar.clearInitialFocus}
               />
             ) : (
               <WaveDropActionsSentinel
-                onActivate={showDesktopActionsWithFocus}
+                onActivate={lazyToolbar.mountWithFocus}
               />
             ))}
           {reactionsRow}
