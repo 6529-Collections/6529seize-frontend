@@ -30,6 +30,11 @@ export const ES_ES_MESSAGES = {
   "waves.historyGap.loaded": "Mensajes pendientes cargados",
   "waves.historyGap.loading": "Cargando mensajes pendientes…",
   "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
+  "waves.chat.messagesRegion": "Mensajes",
+  "waves.chat.newMessages.one": "{count} mensaje nuevo",
+  "waves.chat.newMessages.other": "{count} mensajes nuevos",
+  "waves.scrollControls.scrollToBottom": "Desplazarse hasta abajo",
+  "waves.scrollControls.revealNewMessages": "Mostrar mensajes nuevos",
 
   "waves.myVotes.sort": "Ordenar por",
   "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",

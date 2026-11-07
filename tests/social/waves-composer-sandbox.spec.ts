@@ -19,6 +19,12 @@ import {
   resetSandboxRequests,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import {
+  CHAT_WINDOWING,
+  chatDistanceFromNewest,
+  expectChatAtNewest,
+  revealChatRow,
+} from "../support/chatWindowing";
 
 const SANDBOX_WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const SANDBOX_WALLET = "0x0000000000000000000000000000000000000529";
@@ -487,9 +493,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .getByRole("main")
       .locator("[data-wave-drops-scroll-container]")
       .first();
-    await expect
-      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
-      .toBe(0);
+    await expectChatAtNewest(scrollContainer);
 
     await showMore.focus();
     await expect(showMore).toBeFocused();
@@ -500,9 +504,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(showLess).toHaveAttribute("aria-expanded", "true");
     await expect(showLess).toBeFocused();
     await expect(showLess).toBeInViewport({ ratio: 1 });
-    await expect
-      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
-      .toBe(0);
+    await expectChatAtNewest(scrollContainer);
 
     await showLess.press("Enter");
     await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
@@ -544,6 +546,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .locator("[data-wave-drops-scroll-container]")
       .first();
     const showMore = longDrop.getByRole("button", { name: "Show more" });
+    // With windowing, the long post mounts only once the chat scrolls near it.
+    if (CHAT_WINDOWING) {
+      await expect(
+        page.getByText("Surrounding history message 40.", { exact: true })
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await revealChatRow(page.getByRole("main"), showMore, "older");
+    }
     await showMore.scrollIntoViewIfNeeded();
     await showMore.focus();
     await showMore.evaluate((button) => {
@@ -555,9 +564,15 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         container.getBoundingClientRect().top + container.clientHeight / 2;
       container.scrollTop += button.getBoundingClientRect().top - desiredTop;
     });
-    await expect
-      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
-      .toBeLessThan(-100);
+    if (CHAT_WINDOWING) {
+      await expect
+        .poll(() => chatDistanceFromNewest(scrollContainer))
+        .toBeGreaterThan(100);
+    } else {
+      await expect
+        .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+        .toBeLessThan(-100);
+    }
     const buttonTop = await showMore.evaluate(
       (button) => button.getBoundingClientRect().top
     );

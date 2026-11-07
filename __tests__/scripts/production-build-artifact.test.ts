@@ -149,6 +149,11 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC");
   });
 
+  it("leaves chat windowing off in production builds", () => {
+    // Production flips need the owner (WAVES-PLAN 0.11, C44).
+    expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_WINDOWING");
+  });
+
   it("generates the production sitemap under the fail-closed policy", () => {
     const buildStep = build.jobs["build-production-artifact"].steps.find(
       (step: { name?: string }) => step.name === "Build exact production bytes"

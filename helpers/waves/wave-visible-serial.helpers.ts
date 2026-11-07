@@ -12,13 +12,19 @@
  */
 
 /**
- * Marks the wave chat's scroll container (WaveDropsReverseContainer). The
- * attribute is a contract: the element that carries it is a column-reverse
- * feed, so scrollTop is 0 at the bottom (newest message) and negative when
- * the reader scrolls up into history.
+ * Marks the wave chat's scroll container. The attribute is a contract about
+ * its scroll direction:
+ * - "true" (WaveDropsReverseContainer): a column-reverse feed, so scrollTop
+ *   is 0 at the bottom (newest message) and negative when the reader scrolls
+ *   up into history;
+ * - WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER (the windowed chat): normal
+ *   order, so scrollTop is 0 at the oldest loaded message and largest at the
+ *   newest.
  */
 export const WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE =
   "data-wave-drops-scroll-container";
+
+export const WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER = "end-anchored";
 
 /** Set on each drop row by HighlightDropWrapper via DropsList. */
 export const DROP_SERIAL_ATTRIBUTE = "data-drop-serial-no";
@@ -71,9 +77,13 @@ export const captureVisibleWaveDropSerial = (): number | null => {
   if (!container) {
     return null;
   }
-  // Column-reverse contract (see the container attribute doc): |scrollTop|
-  // is the distance scrolled up from the newest message.
-  if (Math.abs(container.scrollTop) <= AT_BOTTOM_EPSILON_PX) {
+  // See the container attribute doc for the scroll direction contract.
+  const distanceFromNewest =
+    container.getAttribute(WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE) ===
+    WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER
+      ? container.scrollHeight - container.clientHeight - container.scrollTop
+      : Math.abs(container.scrollTop);
+  if (distanceFromNewest <= AT_BOTTOM_EPSILON_PX) {
     return null;
   }
 
@@ -82,9 +92,7 @@ export const captureVisibleWaveDropSerial = (): number | null => {
 
   let bestSerial: number | null = null;
   let bestDistance = Number.POSITIVE_INFINITY;
-  for (const row of container.querySelectorAll(
-    `[${DROP_SERIAL_ATTRIBUTE}]`
-  )) {
+  for (const row of container.querySelectorAll(`[${DROP_SERIAL_ATTRIBUTE}]`)) {
     const serial = parseRowSerial(row);
     if (serial === null) {
       continue;

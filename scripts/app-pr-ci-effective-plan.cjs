@@ -153,6 +153,11 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater|__tests__\/hooks\/useMarkWaveNotificationsRead)/u.test(
         file
       ) ||
+      // The windowed chat (WAVES-PLAN 0.11); this pack runs its
+      // wave-loading-sandbox.spec.ts cases and the chat render budget.
+      /^(?:components\/waves\/drops\/chat-window\/|__tests__\/components\/waves\/drops\/chat-window\/|components\/drops\/view\/dropsListShared\.tsx$|components\/waves\/drops\/wave-drops-all\/subcomponents\/WaveDropsMessageListSection\.tsx$|hooks\/useScrollBehavior\.ts$|tests\/support\/chatWindowing\.ts$)/u.test(
+        file
+      ) ||
       // The chat hot path: this pack's chat render budget
       // (chat-render-budget-sandbox.spec.ts) measures renders and requests
       // per received message for each of these.
