@@ -14,6 +14,11 @@ const COOKIE_OPTIONS = {
   path: "/",
 };
 
+const LEGACY_PLAIN_HTTP_COOKIE_OPTIONS = {
+  sameSite: "strict" as const,
+  path: "/",
+};
+
 // `getAuthJwt()` runs often, so remember the last subject check: a token's
 // subject never changes, so the answer only depends on the token and address.
 let lastSubjectCheck: {
@@ -69,7 +74,11 @@ export const getWalletAuthCookieFor = (address: string): string | null => {
  * before the prefix. Returns the value the cookie now holds.
  */
 export const writeWalletAuthCookie = (jwt: string | null): string | null => {
+  // The old cookie was written with Path=/ and no Domain: Secure on https,
+  // without Secure over plain http by the agent-login tools. Chromium and
+  // Firefox ignore a Secure write on a plain-http host, so expire it both ways.
   Cookies.remove(LEGACY_WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+  Cookies.remove(LEGACY_WALLET_AUTH_COOKIE, LEGACY_PLAIN_HTTP_COOKIE_OPTIONS);
 
   const expiresInDays = jwt ? getCookieExpiresInDays(jwt) : null;
   if (!jwt || expiresInDays === null) {
