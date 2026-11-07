@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Locator } from "@playwright/test";
 import { expect } from "../testHelpers";
 
 /**
@@ -15,21 +15,19 @@ import { expect } from "../testHelpers";
 export const CHAT_WINDOWING =
   process.env["NEXT_PUBLIC_FEATURE_CHAT_WINDOWING"] !== "false";
 
-const CHAT_SCROLLER = "[data-wave-drops-scroll-container]";
-
 /**
- * With windowing on, scrolls `chat`'s scroller toward older or newer rows
- * until `target` is in the DOM. Does nothing with windowing off, where every
+ * With windowing on, scrolls the chat's scroller (the element carrying
+ * `data-wave-drops-scroll-container`) toward older or newer rows until
+ * `target` is in the DOM. Does nothing with windowing off, where every
  * loaded row is mounted, or when the row already is.
  */
 export async function revealChatRow(
-  chat: Locator,
+  scroller: Locator,
   target: Locator,
   direction: "older" | "newer",
   { timeout = 15000 }: { readonly timeout?: number } = {}
 ): Promise<void> {
   if (!CHAT_WINDOWING) return;
-  const scroller = chat.locator(CHAT_SCROLLER).first();
   let older = direction === "older";
   await expect(async () => {
     if ((await target.count()) > 0) return;
@@ -73,8 +71,8 @@ export async function expectChatAtNewest(scroller: Locator): Promise<void> {
 }
 
 /** Drop rows mounted in the chat right now. */
-export function countMountedChatRows(page: Page): Promise<number> {
-  return page
-    .locator(`${CHAT_SCROLLER} [data-drop-serial-no]`)
-    .evaluateAll((rows) => rows.length);
+export function countMountedChatRows(scroller: Locator): Promise<number> {
+  return scroller.evaluate(
+    (element) => element.querySelectorAll("[data-drop-serial-no]").length
+  );
 }
