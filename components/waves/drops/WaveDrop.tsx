@@ -16,6 +16,9 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
+import WaveDropActionsSentinel, {
+  type WaveDropActionsInitialFocus,
+} from "./WaveDropActionsSentinel";
 import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
@@ -145,8 +148,28 @@ const WaveDropInner = ({
   // containment check) rather than enter/leave so child crossings are cheap
   // no-op state writes and jsdom can exercise the path.
   const [isRowPointerHovered, setIsRowPointerHovered] = useState(false);
+  // The hover toolbar is about ten components per row. It mounts the first
+  // time the row is hovered or takes focus, and then stays; until then a
+  // sentinel keeps it reachable from the keyboard.
+  const [hasDesktopActions, setHasDesktopActions] = useState(false);
+  const [desktopActionsInitialFocus, setDesktopActionsInitialFocus] =
+    useState<WaveDropActionsInitialFocus | null>(null);
+  const showDesktopActions = useCallback(() => {
+    setHasDesktopActions(true);
+  }, []);
+  const showDesktopActionsWithFocus = useCallback(
+    (initialFocus: WaveDropActionsInitialFocus) => {
+      setDesktopActionsInitialFocus(initialFocus);
+      setHasDesktopActions(true);
+    },
+    []
+  );
+  const clearDesktopActionsInitialFocus = useCallback(() => {
+    setDesktopActionsInitialFocus(null);
+  }, []);
   const handleRowPointerOver = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      setHasDesktopActions(true);
       if (getPointerType(event) === "mouse" && canUseDesktopHoverActions) {
         setIsRowPointerHovered(true);
       }
@@ -728,6 +751,7 @@ const WaveDropInner = ({
         onPointerCancel={handlePointerEnd}
         onPointerOver={handleRowPointerOver}
         onPointerOut={handleRowPointerOut}
+        onFocus={showDesktopActions}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
@@ -752,7 +776,8 @@ const WaveDropInner = ({
             effectiveShowInteractions &&
             showReplyAndQuote &&
             !showStandaloneActionsButton &&
-            !isEditing && (
+            !isEditing &&
+            (hasDesktopActions ? (
               <WaveDropActions
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -761,8 +786,14 @@ const WaveDropInner = ({
                 suppressed={hasActiveLinkCardActions}
                 forceVisible={isRowPointerHovered}
                 style={getGroupedTimestampActionStyle(timestampSwipeOffset)}
+                initialFocus={desktopActionsInitialFocus}
+                onInitialFocusApplied={clearDesktopActionsInitialFocus}
               />
-            )}
+            ) : (
+              <WaveDropActionsSentinel
+                onActivate={showDesktopActionsWithFocus}
+              />
+            ))}
           {reactionsRow}
           {footerRow}
         </div>

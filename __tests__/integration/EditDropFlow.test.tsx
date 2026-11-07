@@ -281,6 +281,10 @@ const createCustomEditHandlers = (
 const setupEditTest = (user: any) => {
   return {
     async startEdit() {
+      // The row's desktop toolbar mounts on its first hover, as for a mouse user.
+      const row = document.querySelector<HTMLElement>("[data-wave-drop-id]");
+      if (!row) throw new Error("The drop row is not rendered.");
+      await user.hover(row);
       const editButton = screen.getByTestId("edit-button");
       await user.click(editButton);
       await waitFor(() => {

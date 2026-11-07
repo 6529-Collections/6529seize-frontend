@@ -216,6 +216,15 @@ const drop: any = {
   stableHash: "",
 };
 
+/** The row's first hover mounts its desktop toolbar. */
+const hoverDropRow = () => {
+  const dropRoot = screen
+    .getByTestId("content")
+    .closest("[data-wave-drop-id]")!;
+  fireEvent.pointerOver(dropRoot, { pointerType: "mouse" });
+  return dropRoot;
+};
+
 describe("WaveDrop", () => {
   beforeEach(() => {
     mockWaveDropActions.mockClear();
@@ -293,6 +302,7 @@ describe("WaveDrop", () => {
         onQuoteClick={jest.fn()}
       />
     );
+    hoverDropRow();
     expect(getByTestId("actions")).toBeInTheDocument();
   });
 
@@ -358,6 +368,7 @@ describe("WaveDrop", () => {
       />
     );
 
+    hoverDropRow();
     expect(screen.getByTestId("actions")).toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: false })
@@ -434,6 +445,7 @@ describe("WaveDrop", () => {
       />
     );
 
+    hoverDropRow();
     expect(screen.getByTestId("actions")).toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: false })
@@ -964,6 +976,7 @@ describe("WaveDrop", () => {
       />
     );
 
+    hoverDropRow();
     fireEvent.click(screen.getByTestId("content"));
 
     expect(getLastMockProps(mockWaveDropActions)).toEqual(
@@ -997,15 +1010,11 @@ describe("WaveDrop", () => {
       />
     );
 
-    expect(getLastMockProps(mockWaveDropActions)).toEqual(
-      expect.objectContaining({ forceVisible: false })
-    );
+    // The toolbar mounts on the first hover.
+    expect(mockWaveDropActions).not.toHaveBeenCalled();
 
-    const dropRoot = screen
-      .getByTestId("content")
-      .closest("[data-wave-drop-id]")!;
     // React synthesizes onPointerEnter/Leave from pointerover/pointerout.
-    fireEvent.pointerOver(dropRoot, { pointerType: "mouse" });
+    const dropRoot = hoverDropRow();
     expect(getLastMockProps(mockWaveDropActions)).toEqual(
       expect.objectContaining({ forceVisible: true })
     );
@@ -1026,6 +1035,86 @@ describe("WaveDrop", () => {
     expect(getLastMockProps(mockWaveDropActions)).toEqual(
       expect.objectContaining({ forceVisible: false })
     );
+  });
+
+  describe("desktop toolbar mounting", () => {
+    const renderDesktopDrop = () => {
+      isMobileMock.mockReturnValue(false);
+      setHoverSupport(true);
+      setViewportWidth(1440);
+      return renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+    };
+    const sentinel = () => screen.getByRole("button", { name: "Drop actions" });
+
+    it("keeps the toolbar unmounted until the row is hovered, then keeps it", () => {
+      renderDesktopDrop();
+
+      expect(screen.queryByTestId("actions")).toBeNull();
+      expect(sentinel()).toBeInTheDocument();
+
+      const dropRoot = hoverDropRow();
+      expect(screen.getByTestId("actions")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Drop actions" })).toBeNull();
+
+      fireEvent.pointerOut(dropRoot, {
+        pointerType: "mouse",
+        relatedTarget: document.body,
+      });
+      expect(screen.getByTestId("actions")).toBeInTheDocument();
+    });
+
+    it("mounts the toolbar when focus enters the row", () => {
+      renderDesktopDrop();
+
+      fireEvent.focusIn(screen.getByTestId("content"));
+
+      expect(screen.getByTestId("actions")).toBeInTheDocument();
+      expect(getLastMockProps(mockWaveDropActions)).toEqual(
+        expect.objectContaining({ initialFocus: null })
+      );
+    });
+
+    it("moves keyboard focus from the sentinel into the toolbar", () => {
+      renderDesktopDrop();
+
+      fireEvent.focusIn(sentinel(), { relatedTarget: null });
+
+      const props = getLastMockProps(mockWaveDropActions);
+      expect(props).toEqual(expect.objectContaining({ initialFocus: "first" }));
+      act(() => {
+        props.onInitialFocusApplied();
+      });
+      expect(getLastMockProps(mockWaveDropActions)).toEqual(
+        expect.objectContaining({ initialFocus: null })
+      );
+    });
+
+    it("focuses the toolbar's last action when tabbing backwards onto the sentinel", () => {
+      renderDesktopDrop();
+      const later = document.createElement("button");
+      document.body.appendChild(later);
+
+      fireEvent.focusIn(sentinel(), { relatedTarget: later });
+
+      expect(getLastMockProps(mockWaveDropActions)).toEqual(
+        expect.objectContaining({ initialFocus: "last" })
+      );
+      later.remove();
+    });
   });
 
   it("omits group mention metadata from edit update requests", () => {
