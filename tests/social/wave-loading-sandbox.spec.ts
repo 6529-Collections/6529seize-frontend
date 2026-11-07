@@ -1234,35 +1234,54 @@ test("live posts arrive without a request each and a lost one is repaired after 
     await expect(fixture.post(serial)).toBeAttached();
   }
 
-  // The socket is trusted: no post fetches the newest posts. Back-to-back
-  // frames leave no idle gap, so only the max-wait rule (and any long
-  // runner pause) can check during the burst, and the trailing check waits
-  // for the last frame. Without long pauses the count is exact.
-  const minChecksDuringBurst = Math.floor(burstMs / TRAILING_CHECK_MAX_WAIT_MS);
-  const maxChecksDuringBurst = minChecksDuringBurst + longGaps;
-  const expectChecksDuringBurst = (count: number) => {
-    expect(count).toBeGreaterThanOrEqual(minChecksDuringBurst);
-    expect(count).toBeLessThanOrEqual(maxChecksDuringBurst);
+  // The socket is trusted: no post fetches the newest posts. The product
+  // checks at min(last frame + trailing delay, window start + max wait),
+  // where a window starts at the first frame after the previous check.
+  // Back-to-back frames leave no idle gap, so a check before the last frame
+  // can only come from the max-wait rule or a long runner pause. Without
+  // long pauses the mid-burst count is exact.
+  const minChecksDuringBurst = Math.floor(
+    Math.max(0, burstMs - 1_000) / TRAILING_CHECK_MAX_WAIT_MS
+  );
+  const maxChecksDuringBurst =
+    Math.floor(burstMs / TRAILING_CHECK_MAX_WAIT_MS) + longGaps;
+  const midBurstFetches = () =>
+    newestFetches.filter((fetch) => fetch.at < burstEndedAt);
+  const expectChecksDuringBurst = () => {
+    expect(midBurstFetches().length).toBeGreaterThanOrEqual(
+      minChecksDuringBurst
+    );
+    expect(midBurstFetches().length).toBeLessThanOrEqual(maxChecksDuringBurst);
   };
-  const trailingCheckAt = burstEndedAt + TRAILING_CHECK_MS - 1_000;
-  const fetchesBeforeTrailingCheck = () =>
-    newestFetches.filter((fetch) => fetch.at < trailingCheckAt).length;
-  expectChecksDuringBurst(fetchesBeforeTrailingCheck());
+  expectChecksDuringBurst();
 
-  // One trailing check after the burst fetches everything since the last
-  // verified post and repairs the lost frame.
+  // Exactly one check follows the last frame, whichever timer fires it, and
+  // it fetches everything since the last verified post, repairing the lost
+  // frame. A check during a long pause can repair it first.
   await expect(fixture.post(157)).toBeAttached({
     timeout: TRAILING_CHECK_MAX_WAIT_MS,
   });
-  // A check during a long pause can repair it first; wait for the trailing
-  // one either way. Exactly one check follows the burst.
+  const trailingFetches = () =>
+    newestFetches.filter((fetch) => fetch.at >= burstEndedAt);
   await expect
-    .poll(
-      () => newestFetches.filter((fetch) => fetch.at >= trailingCheckAt).length,
-      { timeout: TRAILING_CHECK_MAX_WAIT_MS }
-    )
+    .poll(() => trailingFetches().length, {
+      timeout: TRAILING_CHECK_MAX_WAIT_MS,
+    })
     .toBe(1);
-  expectChecksDuringBurst(fetchesBeforeTrailingCheck());
+  expectChecksDuringBurst();
+  // It is a timer's check, not a fetch for the last frame: it comes no
+  // earlier than the schedule allows (less 1 s for delivery and clocks).
+  const lastMidBurstAt = midBurstFetches().at(-1)?.at;
+  const windowStartedAt =
+    lastMidBurstAt === undefined
+      ? burstStartedAt
+      : (sentAt.find((at) => at > lastMidBurstAt) ?? burstEndedAt);
+  const earliestTrailingAt =
+    Math.min(
+      burstEndedAt + TRAILING_CHECK_MS,
+      windowStartedAt + TRAILING_CHECK_MAX_WAIT_MS
+    ) - 1_000;
+  expect(trailingFetches()[0]!.at).toBeGreaterThanOrEqual(earliestTrailingAt);
   expect(newestFetches[0]!.search).toContain("serial_no_limit=151");
 
   // The received posts are marked read once per window, not one by one:
