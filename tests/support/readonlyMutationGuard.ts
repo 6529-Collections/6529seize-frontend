@@ -233,10 +233,23 @@ function isSameOrigin(url: URL, baseURL?: string) {
   return base?.origin === url.origin;
 }
 
-function isFirstPartyTelemetryEndpoint(url: URL, baseURL?: string) {
+// The first-party collector (services/analytics/telemetry/collector.ts)
+// sends page views and health counters as one same-origin `POST /e` beacon.
+// Only that exact method and path count; anything else on /e stays blocked.
+function isFirstPartyCollectorBeacon(method: string, url: URL) {
+  return method === "POST" && url.pathname === "/e" && url.search === "";
+}
+
+function isFirstPartyTelemetryEndpoint(
+  method: string,
+  url: URL,
+  baseURL?: string
+) {
   return (
     isSameOrigin(url, baseURL) &&
-    (url.pathname === "/monitoring" || url.pathname.startsWith("/monitoring/"))
+    (url.pathname === "/monitoring" ||
+      url.pathname.startsWith("/monitoring/") ||
+      isFirstPartyCollectorBeacon(method, url))
   );
 }
 
@@ -423,7 +436,7 @@ export function decideReadonlyRequest({
     };
   }
 
-  if (isFirstPartyTelemetryEndpoint(parsed, baseURL)) {
+  if (isFirstPartyTelemetryEndpoint(upperMethod, parsed, baseURL)) {
     return { action: "abort", reason: "ignored-first-party-telemetry" };
   }
 
