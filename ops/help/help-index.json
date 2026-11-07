@@ -1390,8 +1390,8 @@
       ],
       "facts": [
         "The Terms of Service page lives at /about/terms-of-service.",
-        "The page defines the terms for using the 6529 platform and was last updated February 23, 2023.",
-        "The terms cover platform access, 6529 NFTs, incorporated about pages, privacy, copyright, delegation and consolidation, wallet responsibility, phishing, CC0, disclaimers, liability limits, arbitration, and related legal topics.",
+        "The page defines the terms for using the 6529 platform and was last updated November 6, 2026.",
+        "The terms cover platform access, 6529 NFTs, incorporated about pages, privacy, copyright, delegation and consolidation, sanctions, wallet responsibility, phishing, CC0, disclaimers, liability limits, arbitration, and related legal topics.",
         "Use this page when users ask where the 6529 Terms of Service live or ask about the public legal terms for using 6529.io."
       ],
       "canonical_path": "/about/terms-of-service",
@@ -1405,6 +1405,48 @@
       "source_refs": [
         "components/about/AboutTermsOfService.tsx",
         "components/footer/Footer.tsx"
+      ]
+    },
+    {
+      "id": "about.cookie-policy",
+      "kind": "route",
+      "title": "Cookie Policy",
+      "aliases": [
+        "cookie policy",
+        "cookies",
+        "6529 cookies",
+        "cookie list",
+        "what cookies does 6529 use",
+        "performance cookies",
+        "cookie settings",
+        "cookie preferences"
+      ],
+      "keywords": [
+        "cookies",
+        "cookie",
+        "consent",
+        "performance",
+        "analytics",
+        "google analytics",
+        "cloudwatch",
+        "rum",
+        "privacy",
+        "gdpr"
+      ],
+      "facts": [
+        "The Cookie Policy page lives at /about/cookie-policy. The cookie banner Learn more link opens it.",
+        "Strictly Necessary Cookies lists AWSALBTGCORS and AWSALBTG (Amazon Web Services, 7 days), wallet-auth (JWT authentication, 7 days), essential-cookies-consent (1 year) and eula-consent (1 year). These cannot be switched off.",
+        "Performance Cookies lists performance-cookies-consent (1 year), the Google Analytics cookies _ga, _ga_<id> and _gid, and the Amazon CloudWatch RUM cookies cwr_u and cwr_s.",
+        "Amazon CloudWatch RUM (Amazon Web Services) measures page load speed, browser errors and failed requests on a sample of visits. cwr_u is a random visitor ID kept for 30 days; cwr_s is the visit session ID, kept for 30 minutes after the last activity. These two cookies are currently set whether or not performance cookies are accepted.",
+        "The Performance Cookies toggle on the page uses the same accept and reject choice as the cookie banner, and it is disabled while the banner is still waiting for a first choice."
+      ],
+      "canonical_path": "/about/cookie-policy",
+      "related_paths": ["/about/privacy-policy", "/about/terms-of-service"],
+      "tags": ["about", "cookies", "legal", "privacy"],
+      "source_refs": [
+        "components/about/AboutCookiePolicy.tsx",
+        "components/cookies/CookiesBanner.tsx",
+        "components/monitoring/AwsRumProvider.tsx"
       ]
     },
     {
