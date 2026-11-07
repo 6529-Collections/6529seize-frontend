@@ -6,9 +6,9 @@ export const CHAT_RESIDENT_CAP = 500;
 /** Trimming waits until the wave holds this many more than the cap. */
 export const CHAT_RESIDENT_SLACK = 50;
 /** The newest drops always stay, so the live end never reloads. */
-export const CHAT_LIVE_KEEP = 50;
+const CHAT_LIVE_KEEP = 50;
 
-export interface ChatTrimLimits {
+interface ChatTrimLimits {
   readonly cap: number;
   readonly slack: number;
   readonly liveKeep: number;

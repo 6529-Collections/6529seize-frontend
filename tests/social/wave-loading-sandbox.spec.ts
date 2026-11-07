@@ -1642,7 +1642,7 @@ test("windowed chat releases far history while reading and loads it again", asyn
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(2001)).toBeInViewport({ timeout: 30000 });
   const chat = waveChat(page);
-  const scroller = chat.locator("[data-wave-drops-scroll-container]").first();
+  const scroller = waveChatScroller(page);
 
   // Read all the way back to the first post.
   await expect(async () => {
@@ -1667,7 +1667,7 @@ test("windowed chat releases far history while reading and loads it again", asyn
   await expect(fixture.post(2001)).toBeInViewport();
 
   // Released posts load again as the reader scrolls back to them.
-  await revealChatRow(chat, chat.locator("#drop-1900"), "older", {
+  await revealChatRow(scroller, waveChatRow(page, 1900), "older", {
     timeout: 60000,
   });
   await expect(fixture.post(1900)).toBeAttached({ timeout: 15000 });
