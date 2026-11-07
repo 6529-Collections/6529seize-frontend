@@ -829,22 +829,26 @@ const PACKS = [
     )
   ),
   // Opt-in and stateful: throwaway QA wallets sign in, create test-only
-  // profiles and exchange encrypted messages (D109). Manual trigger only, so
+  // profiles and exchange encrypted messages (D109), or create a wave and post
+  // in it to check live unread badges. Manual trigger only, so
   // the post-deploy `all` selection never runs it; dispatch it by alias.
   {
     scriptKey: "test:e2e:staging:e2ee",
     alias: "e2ee-staging",
     description:
-      "Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).",
+      "Encrypted DMs, device revocation and live wave unread badges for throwaway users (writes QA data).",
     safety: "stateful",
     environments: ["staging"],
     triggers: ["manual"],
     env: { ...STAGING_STATEFUL_ENV, PLAYWRIGHT_E2EE_STAGING: "1" },
-    specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+    specs: [
+      "tests/staging-e2ee/encrypted-dm-staging.spec.ts",
+      "tests/staging-e2ee/wave-unread-staging.spec.ts",
+    ],
     projects: [DESKTOP],
     workers: 1,
     traceOff: true,
-    timeoutMinutes: 60,
+    timeoutMinutes: 75,
   },
 
   productionPack(
