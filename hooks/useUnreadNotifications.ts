@@ -14,7 +14,9 @@ import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint"
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import {
   getUnreadNotificationsRefetchInterval,
+  getUnreadNotificationsStaleTimeOption,
   isProfileCoveredByNotificationSocket,
+  shouldPollUnreadNotificationsInBackground,
 } from "@/services/notifications/unread-notifications-polling";
 
 interface UseUnreadNotificationsOptions {
@@ -85,6 +87,7 @@ export function useUnreadNotifications(
       });
     },
     enabled: isEnabled,
+    ...getUnreadNotificationsStaleTimeOption(isRealtimeCovered),
     refetchInterval: (query) =>
       getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
     refetchOnWindowFocus: (query) =>
@@ -93,7 +96,10 @@ export function useUnreadNotifications(
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchOnReconnect: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
-    refetchIntervalInBackground: !isMobileEnvironment,
+    refetchIntervalInBackground: shouldPollUnreadNotificationsInBackground({
+      isMobileEnvironment,
+      isRealtimeCovered,
+    }),
     retry: (failureCount: number, retryError: unknown) =>
       !isTerminalNotificationAuthQueryError(retryError) &&
       shouldRetryQuery(failureCount, retryError),

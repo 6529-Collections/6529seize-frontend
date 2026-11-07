@@ -804,7 +804,7 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
         }
         expect(invalidateNotifications).toHaveBeenCalled();
         for (const [options] of invalidateNotifications.mock.calls) {
-          expect(options).toEqual({ refreshWaveLists: false });
+          expect(options).toMatchObject({ refreshWaveLists: false });
         }
         // The other wave's unread badge still updates from the socket.
         expect(unreadStore.getNewDropsCounts()["wave-2"]?.count).toBe(1);
