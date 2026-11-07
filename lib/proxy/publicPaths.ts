@@ -179,6 +179,18 @@ export const PUBLIC_IMAGE_DIRECTORIES: ReadonlySet<string> = new Set([
   "profile-cms",
 ]);
 
+/**
+ * Top-level `public/` directories that stay behind their route's own gate,
+ * so `isStaticAssetPath` never matches them. `/validator` is the owner's
+ * validator surface: its screenshots and drawings are gated with the
+ * `/validator` pages (the password gate when it is on, and the staging access
+ * gate), and those pages render them `unoptimized`, so the browser fetches
+ * them with the visitor's cookies rather than through next/image.
+ */
+export const ROUTE_GATED_PUBLIC_DIRECTORIES: ReadonlySet<string> = new Set([
+  "validator",
+]);
+
 const PUBLIC_IMAGE_EXTENSIONS = [
   ".jpg",
   ".jpeg",
