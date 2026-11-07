@@ -5,6 +5,8 @@ import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrol
 import type { ChatEndScroller } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 import { isChatWindowingEnabled } from "@/components/waves/drops/chat-window/chatWindowingFlag";
 import { WaveChatVirtualList } from "@/components/waves/drops/chat-window/WaveChatVirtualList";
+import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
+import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
@@ -127,43 +129,53 @@ export const WaveDropsMessageListSection: React.FC<
   );
 
   if (isChatWindowingEnabled()) {
+    // The providers sit above the list: the virtualizer re-renders the list
+    // as rows are measured and scrolled, and the providers need not follow.
+    // The expansion state also outlives a long drop's unmount.
     return (
-      <>
-        <WaveChatVirtualList
-          drops={waveMessages?.drops ?? []}
-          historyGaps={waveMessages?.historyGaps}
-          waveId={waveMessages?.id}
-          scrollContainerRef={scrollContainerRef}
-          scrollContainerCallbackRef={scrollContainerCallbackRef}
-          bottomAnchorRef={anchorRef}
-          endScrollerRef={chatEndScrollerRef ?? fallbackEndScrollerRef}
-          isFetchingOlder={!!waveMessages?.isLoadingNextPage}
-          showOlderLoader={hasNextPage}
-          onTopIntersection={onTopIntersection}
-          bottomPaddingClassName={bottomPaddingClassName}
-          onReply={onReply}
-          onReplyClick={queueSerialTarget}
-          onQuoteClick={onQuoteClick}
-          onDropContentClick={onDropContentClick}
-          activeDrop={activeDrop}
-          serialNo={serialTarget}
-          targetDropRef={targetDropRef}
-          dropViewDropId={dropId}
-          unreadDividerSerialNo={unreadDividerSerialNo}
-          boostedDrops={boostedDrops}
-          boostedDropsDisplayPreference={
-            boostedDropsDisplayPreference ??
-            DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE
-          }
-          onBoostedDropClick={onBoostedDropClick}
-          suspendLightDropHydration={suspendLightDropHydration}
-          winningThreshold={winningThreshold}
-          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-        />
+      <ChatVideoPlaybackProvider>
+        <WaveDropMobileMenuProvider>
+          <WaveDropContentExpansionProvider
+            enabled={dropId === null}
+            scrollContainerRef={scrollContainerRef}
+          >
+            <WaveChatVirtualList
+              drops={waveMessages?.drops ?? []}
+              historyGaps={waveMessages?.historyGaps}
+              waveId={waveMessages?.id}
+              scrollContainerRef={scrollContainerRef}
+              scrollContainerCallbackRef={scrollContainerCallbackRef}
+              bottomAnchorRef={anchorRef}
+              endScrollerRef={chatEndScrollerRef ?? fallbackEndScrollerRef}
+              isFetchingOlder={!!waveMessages?.isLoadingNextPage}
+              showOlderLoader={hasNextPage}
+              onTopIntersection={onTopIntersection}
+              bottomPaddingClassName={bottomPaddingClassName}
+              onReply={onReply}
+              onReplyClick={queueSerialTarget}
+              onQuoteClick={onQuoteClick}
+              onDropContentClick={onDropContentClick}
+              activeDrop={activeDrop}
+              serialNo={serialTarget}
+              targetDropRef={targetDropRef}
+              dropViewDropId={dropId}
+              unreadDividerSerialNo={unreadDividerSerialNo}
+              boostedDrops={boostedDrops}
+              boostedDropsDisplayPreference={
+                boostedDropsDisplayPreference ??
+                DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE
+              }
+              onBoostedDropClick={onBoostedDropClick}
+              suspendLightDropHydration={suspendLightDropHydration}
+              winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+            />
+          </WaveDropContentExpansionProvider>
+        </WaveDropMobileMenuProvider>
         {scrollControls}
-      </>
+      </ChatVideoPlaybackProvider>
     );
   }
 

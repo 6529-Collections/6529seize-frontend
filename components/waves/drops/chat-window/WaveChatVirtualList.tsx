@@ -7,10 +7,7 @@ import {
   type DropActionHandler,
 } from "@/components/drops/view/dropsListShared";
 import UnreadDivider from "@/components/drops/view/UnreadDivider";
-import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/media/ChatVideoPlayback";
 import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
-import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
-import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import { WaveHistoryGap } from "@/components/waves/drops/WaveHistoryGap";
 import type { WaveHistoryGap as HistoryGap } from "@/contexts/wave/hooks/types";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -120,9 +117,8 @@ const countAppendedDrops = (
   if (index === -1) {
     return 0;
   }
-  return orderedDrops
-    .slice(index + 1)
-    .filter((drop) => !isTemporaryDrop(drop)).length;
+  return orderedDrops.slice(index + 1).filter((drop) => !isTemporaryDrop(drop))
+    .length;
 };
 
 /**
@@ -280,7 +276,11 @@ export function WaveChatVirtualList({
   const itemCount = items.length;
   const rangeExtractor = useCallback(
     (range: Range) =>
-      mergePinnedIndices(defaultRangeExtractor(range), pinnedIndices, itemCount),
+      mergePinnedIndices(
+        defaultRangeExtractor(range),
+        pinnedIndices,
+        itemCount
+      ),
     [pinnedIndices, itemCount]
   );
   const getItemKey = useCallback(
@@ -396,7 +396,10 @@ export function WaveChatVirtualList({
   // Older history loads as the rendered range nears the top.
   const firstRenderedIndex = virtualizer.range?.startIndex ?? null;
   useEffect(() => {
-    if (firstRenderedIndex !== null && firstRenderedIndex <= TOP_PREFETCH_ITEMS) {
+    if (
+      firstRenderedIndex !== null &&
+      firstRenderedIndex <= TOP_PREFETCH_ITEMS
+    ) {
       onTopIntersection();
     }
   }, [firstRenderedIndex, onTopIntersection]);
@@ -518,7 +521,7 @@ export function WaveChatVirtualList({
         tabIndex={0}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-[overflow-anchor:none] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 lg:tw-scrollbar-thin`}
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-[overflow-anchor:none] tw-flex tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:tw-pr-2 lg:tw-scrollbar-thin`}
       >
         {showOlderLoader && isFetchingOlder && (
           // Zero height, so loading never moves the rows.
@@ -528,38 +531,29 @@ export function WaveChatVirtualList({
             </div>
           </div>
         )}
-        <ChatVideoPlaybackProvider>
-          <WaveDropMobileMenuProvider>
-            <WaveDropContentExpansionProvider
-              enabled={dropViewDropId === null}
-              scrollContainerRef={scrollContainerRef}
-            >
+        <div
+          ref={virtualizer.containerRef}
+          // Short chats sit at the bottom, above the composer.
+          className="tw-relative tw-mt-auto tw-w-full tw-flex-shrink-0"
+        >
+          {virtualItems.map((virtualItem) => {
+            const item = items[virtualItem.index];
+            if (!item) {
+              return null;
+            }
+            return (
               <div
-                ref={virtualizer.containerRef}
-                // Short chats sit at the bottom, above the composer.
-                className="tw-relative tw-mt-auto tw-w-full tw-flex-shrink-0"
+                key={virtualItem.key}
+                ref={virtualizer.measureElement}
+                data-index={virtualItem.index}
+                data-chat-item-key={item.key}
+                className="tw-absolute tw-left-0 tw-w-full"
               >
-                {virtualItems.map((virtualItem) => {
-                  const item = items[virtualItem.index];
-                  if (!item) {
-                    return null;
-                  }
-                  return (
-                    <div
-                      key={virtualItem.key}
-                      ref={virtualizer.measureElement}
-                      data-index={virtualItem.index}
-                      data-chat-item-key={item.key}
-                      className="tw-absolute tw-left-0 tw-w-full"
-                    >
-                      {renderItem(item)}
-                    </div>
-                  );
-                })}
+                {renderItem(item)}
               </div>
-            </WaveDropContentExpansionProvider>
-          </WaveDropMobileMenuProvider>
-        </ChatVideoPlaybackProvider>
+            );
+          })}
+        </div>
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />
       </div>
       <span className="tw-sr-only" role="status" aria-live="polite">
