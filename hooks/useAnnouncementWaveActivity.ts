@@ -5,10 +5,20 @@ import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import {
+  useWebSocketMessage,
+  useWebsocketStatus,
+} from "@/services/websocket/useWebSocketMessage";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import type { SidebarWave } from "@/types/waves.types";
+
+// A connected socket reports each new top-level announcement (the frames
+// below), so the feed is re-read only then. Without one (signed out, or
+// reconnecting) the row falls back to a slow poll, which React Query runs
+// only while the tab is visible.
+const ANNOUNCEMENT_FALLBACK_POLL_MS = 5 * 60 * 1000;
 
 // Wave metrics include replies. The main feed excludes collapsed replies and
 // supplies the correct timestamp even after a reload or deletion.
@@ -22,6 +32,7 @@ function useAnnouncementWaveTimestamp({
   readonly viewerIdentityKey: string | null;
 }): number | null {
   const queryClient = useQueryClient();
+  const isSocketConnected = useWebsocketStatus() === WebSocketStatus.CONNECTED;
   const queryKey = useMemo(
     () => [QueryKey.ANNOUNCEMENT_LATEST_DROP, { waveId, viewerIdentityKey }],
     [waveId, viewerIdentityKey]
@@ -39,8 +50,9 @@ function useAnnouncementWaveTimestamp({
       return feed.drops[0]?.created_at ?? null;
     },
     enabled: enabled && waveId !== null,
-    staleTime: 30000,
-    refetchInterval: 30000,
+    staleTime: ANNOUNCEMENT_FALLBACK_POLL_MS,
+    refetchInterval: isSocketConnected ? false : ANNOUNCEMENT_FALLBACK_POLL_MS,
+    refetchIntervalInBackground: false,
   });
   const refresh = useCallback(() => {
     if (enabled && waveId) {
