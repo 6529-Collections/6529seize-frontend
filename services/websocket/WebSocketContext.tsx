@@ -3,6 +3,7 @@
 import { createContext } from "react";
 import type {
   SubscribeFn,
+  WebSocketConnectionInfo,
   WebSocketStatus,
   WebSocketConfig,
 } from "./WebSocketTypes";
@@ -15,10 +16,22 @@ import type { WsMessageType } from "@/helpers/Types";
 export interface WebSocketContextValue {
   // Connection state
   status: WebSocketStatus;
+  /** The current authenticated session; null before the first one. */
+  connection: WebSocketConnectionInfo | null;
 
   // Connection methods
   connect: (token?: string) => void;
   disconnect: () => void;
+  /**
+   * Sends a rotated token for the same identity on the open socket. Any
+   * other case (another identity, no open session) replaces the socket.
+   */
+  reauthenticate: (token: string) => void;
+  /**
+   * Keeps an open session whose socket delivered a frame since `since`, and
+   * replaces it otherwise.
+   */
+  ensureLive: (since: number) => void;
 
   // Subscription methods
   subscribe: SubscribeFn;
