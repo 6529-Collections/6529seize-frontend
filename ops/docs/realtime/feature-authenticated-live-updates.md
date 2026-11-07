@@ -60,6 +60,10 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
+- When you follow or unfollow a wave, or someone adds you to one, on any
+  device, your wave lists and that wave refresh in every open tab once the
+  server announces the change. Changes for another connected account are left
+  until you switch to it.
 
 ## Edge Cases
 
