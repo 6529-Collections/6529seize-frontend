@@ -25,6 +25,11 @@ export const EN_GB_MESSAGES = {
   "waves.historyGap.loaded": "Missed messages loaded",
   "waves.historyGap.loading": "Loading missed messages…",
   "waves.historyGap.retry": "Could not load missed messages. Try again",
+  "waves.chat.messagesRegion": "Messages",
+  "waves.chat.newMessages.one": "{count} new message",
+  "waves.chat.newMessages.other": "{count} new messages",
+  "waves.scrollControls.scrollToBottom": "Scroll to bottom",
+  "waves.scrollControls.revealNewMessages": "Reveal new messages",
 
   "waves.myVotes.sort": "Sort by",
   "waves.myVotes.sort.voteAmount": "Your vote amount",

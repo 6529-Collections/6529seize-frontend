@@ -33,6 +33,11 @@ export const FR_FR_MESSAGES = {
   "waves.historyGap.loading": "Chargement des messages manqués…",
   "waves.historyGap.retry":
     "Impossible de charger les messages manqués. Réessayer",
+  "waves.chat.messagesRegion": "Messages",
+  "waves.chat.newMessages.one": "{count} nouveau message",
+  "waves.chat.newMessages.other": "{count} nouveaux messages",
+  "waves.scrollControls.scrollToBottom": "Défiler vers le bas",
+  "waves.scrollControls.revealNewMessages": "Afficher les nouveaux messages",
 
   "waves.myVotes.sort": "Trier par",
   "waves.myVotes.sort.voteAmount": "Votre nombre de votes",

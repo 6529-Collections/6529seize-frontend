@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { formatCountLabel } from "./wave-drops-scroll-controls.utils";
 
 interface WaveDropsScrollControlsBottomButtonProps {
@@ -21,6 +23,7 @@ export function WaveDropsScrollControlsBottomButton({
   onRevealNewMessages,
   scrollToBottom,
 }: WaveDropsScrollControlsBottomButtonProps) {
+  const locale = useBrowserLocale();
   const bottomArrowIcon = (
     <svg
       className="tw-size-4 tw-flex-shrink-0"
@@ -61,7 +64,12 @@ export function WaveDropsScrollControlsBottomButton({
     <button
       onClick={handleBottomClick}
       className={`tw-flex tw-h-10 tw-min-w-[2.75rem] tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 tw-px-4 tw-text-iron-300 tw-transition-all tw-duration-300 hover:tw-border-iron-650 hover:tw-bg-iron-650 lg:tw-h-8 ${roundedClassName} ${isCombined ? combinedWidthClassName : ""}`}
-      aria-label={hasPending ? "Reveal new messages" : "Scroll to bottom"}
+      aria-label={t(
+        locale,
+        hasPending
+          ? "waves.scrollControls.revealNewMessages"
+          : "waves.scrollControls.scrollToBottom"
+      )}
     >
       {bottomContent}
     </button>

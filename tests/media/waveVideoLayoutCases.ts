@@ -7,6 +7,10 @@ import {
   installLinkedDropVideoSandbox,
   installVideoArtworkSandbox,
 } from "../support/videoArtworkSandbox";
+import { CHAT_WINDOWING, revealChatRow } from "../support/chatWindowing";
+
+// Enough newer posts to put the video drop outside the windowed rows.
+const WINDOWED_NEWER_POSTS = 60;
 
 // Registered inside the composer sandbox suite, which supplies its local-only guard.
 export function defineWaveVideoLayoutTests() {
@@ -121,11 +125,34 @@ export function defineWaveVideoLayoutTests() {
     page,
     baseURL,
   }) => {
-    const fixturePath = await installLinkedDropVideoSandbox(page, baseURL);
+    // The windowed chat unmounts a drop only when it is far from the viewport,
+    // so its run adds newer posts to scroll the video drop away.
+    const fixturePath = await installLinkedDropVideoSandbox(
+      page,
+      baseURL,
+      false,
+      () => true,
+      "generated",
+      CHAT_WINDOWING ? WINDOWED_NEWER_POSTS : 0
+    );
     await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
+    const chatScroller = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .first();
     const video = page.getByLabel("Video player", { exact: true }).first();
+    if (CHAT_WINDOWING) {
+      await expect(
+        page
+          .getByText(`Video fixture newer post ${WINDOWED_NEWER_POSTS}`, {
+            exact: true,
+          })
+          .first()
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await revealChatRow(chatScroller, video, "older");
+    }
     await video.scrollIntoViewIfNeeded();
     await expect(video).not.toHaveAttribute("src", /.+/);
     expect(
@@ -166,17 +193,32 @@ export function defineWaveVideoLayoutTests() {
     if (!dropId)
       throw new Error("Video fixture is missing its virtualized chat drop");
     const anchor = page.getByRole("main").locator(`[id="${dropId}"]`);
-    const previousStyle = await anchor.getAttribute("style");
-    await anchor.evaluate((element: HTMLElement) => {
-      element.style.transform = "translateY(20000px)";
-    });
-    await expect(
-      anchor.getByLabel("Video player", { exact: true })
-    ).toHaveCount(0);
-    await anchor.evaluate((element, style) => {
-      if (style === null) element.removeAttribute("style");
-      else element.setAttribute("style", style);
-    }, previousStyle);
+    if (CHAT_WINDOWING) {
+      // The windowed chat unmounts the whole drop once the reader scrolls far
+      // from it, and mounts it again on the way back. A drop holding focus
+      // stays mounted, so move focus off the video controls first.
+      await page.evaluate(() => {
+        (document.activeElement as HTMLElement | null)?.blur();
+      });
+      await chatScroller.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      await expect(anchor).toHaveCount(0);
+      await revealChatRow(chatScroller, anchor, "older");
+      await anchor.scrollIntoViewIfNeeded();
+    } else {
+      const previousStyle = await anchor.getAttribute("style");
+      await anchor.evaluate((element: HTMLElement) => {
+        element.style.transform = "translateY(20000px)";
+      });
+      await expect(
+        anchor.getByLabel("Video player", { exact: true })
+      ).toHaveCount(0);
+      await anchor.evaluate((element, style) => {
+        if (style === null) element.removeAttribute("style");
+        else element.setAttribute("style", style);
+      }, previousStyle);
+    }
     const restored = anchor.getByLabel("Video player", { exact: true });
     await expect(restored).toBeVisible();
     await expect(restored).not.toHaveAttribute("src", /.+/);

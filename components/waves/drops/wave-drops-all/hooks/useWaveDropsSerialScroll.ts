@@ -103,6 +103,10 @@ interface UseWaveDropsSerialScrollParams {
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly shouldPinToBottom: boolean;
   readonly scrollToVisualBottom: () => void;
+  /** Adjusts jump scrolls, such as for reduced motion in the windowed chat. */
+  readonly resolveScrollBehavior?:
+    | ((behavior: ScrollBehavior) => ScrollBehavior)
+    | undefined;
 }
 
 interface UseWaveDropsSerialScrollResult {
@@ -123,6 +127,7 @@ export const useWaveDropsSerialScroll = ({
   scrollContainerRef,
   shouldPinToBottom,
   scrollToVisualBottom,
+  resolveScrollBehavior,
 }: UseWaveDropsSerialScrollParams): UseWaveDropsSerialScrollResult => {
   const [serialTarget, setSerialTarget] = useState<number | null>(initialDrop);
   const [previousInitialDrop, setPreviousInitialDrop] = useState(initialDrop);
@@ -298,7 +303,9 @@ export const useWaveDropsSerialScroll = ({
   ]);
 
   const scrollToSerialNo = useCallback(
-    (behavior: ScrollBehavior, targetSerialNo?: number) => {
+    (requestedBehavior: ScrollBehavior, targetSerialNo?: number) => {
+      const behavior =
+        resolveScrollBehavior?.(requestedBehavior) ?? requestedBehavior;
       const container = scrollContainerRef.current;
       const resolveTarget = (targetContainer: HTMLDivElement | null) => {
         if (targetSerialNo === undefined) {
@@ -370,7 +377,7 @@ export const useWaveDropsSerialScroll = ({
       }
       return false;
     },
-    [scrollContainerRef, holdScrollTarget]
+    [scrollContainerRef, holdScrollTarget, resolveScrollBehavior]
   );
 
   const smoothScrollWithRetries = useCallback(

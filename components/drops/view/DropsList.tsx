@@ -1,7 +1,6 @@
 "use client";
 
-import Drop, { DropLocation } from "@/components/waves/drops/Drop";
-import LightDrop from "@/components/waves/drops/LightDrop";
+import { DropLocation } from "@/components/waves/drops/Drop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
 import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -13,9 +12,6 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
 import { memo, useCallback, useMemo, useState } from "react";
-import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
-import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
-import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
 import UnreadDivider from "./UnreadDivider";
@@ -25,17 +21,16 @@ import {
   DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
   type BoostedDropsDisplayPreference,
 } from "@/types/boosted-drops.types";
-
-// Logarithmic positions for boost cards (visual positions, 1-indexed)
-const BOOST_CARD_POSITIONS = [5, 10, 20, 40, 80, 160];
-
-type DropActionHandler = ({
-  drop,
-  partId,
-}: {
-  drop: ApiDrop;
-  partId: number;
-}) => void;
+import {
+  findHistoryGapBefore,
+  getBoostCardKey,
+  renderBoostCardElement,
+  renderDropsListDropContent,
+  useBoostCardIndex,
+  useDropsListItemData,
+  type DropActionHandler,
+  type DropsListItemData,
+} from "./dropsListShared";
 
 interface DropsListProps {
   readonly historyGaps?: readonly HistoryGap[] | undefined;
@@ -72,28 +67,6 @@ interface DropsListProps {
 const NO_SIGNATURE_GROUPS: ReturnType<typeof getDropSignatureGroups> =
   new Map();
 
-const MemoizedDrop = memo(Drop);
-const MemoizedLightDrop = memo(LightDrop);
-
-interface DropsListItemData {
-  readonly showWaveInfo: boolean;
-  readonly activeDrop: ActiveDropState | null;
-  readonly handleReply: DropActionHandler;
-  readonly showReplyAndQuote: boolean;
-  readonly serialNo: number | null;
-  readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
-  readonly handleReplyClick: (serialNo: number) => void;
-  readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
-  readonly dropViewDropId: string | null;
-  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-  readonly winningThreshold?: number | null | undefined;
-  readonly winningThresholdMinDurationMs?: number | null | undefined;
-  readonly isVotingClosed: boolean;
-  readonly isVotingControlsLocked: boolean;
-}
-
 interface DropsListRowProps {
   readonly drop: DropType;
   readonly previousDrop: DropType | null;
@@ -123,36 +96,15 @@ const DropsListRow = memo(
     virtualScrollRootMargin,
   }: DropsListRowProps) => {
     const isTarget = itemData.serialNo === drop.serial_no;
-    const dropContent =
-      drop.type === DropSize.FULL ? (
-        <MemoizedDrop
-          dropViewDropId={itemData.dropViewDropId}
-          onReplyClick={itemData.handleReplyClick}
-          drop={drop}
-          previousDrop={previousDrop}
-          nextDrop={nextDrop}
-          showWaveInfo={itemData.showWaveInfo}
-          activeDrop={
-            itemData.activeDrop?.drop.id === drop.id
-              ? itemData.activeDrop
-              : null
-          }
-          onReply={itemData.handleReply}
-          location={location}
-          showReplyAndQuote={itemData.showReplyAndQuote}
-          onQuoteClick={itemData.onQuoteClick}
-          parentContainerRef={itemData.parentContainerRef}
-          onDropContentClick={itemData.onDropContentClick}
-          winningThreshold={itemData.winningThreshold}
-          winningThresholdMinDurationMs={itemData.winningThresholdMinDurationMs}
-          isVotingClosed={itemData.isVotingClosed}
-          isVotingControlsLocked={itemData.isVotingControlsLocked}
-          moderationPresentation={moderationPresentation}
-          signatureGroup={signatureGroup}
-        />
-      ) : (
-        <MemoizedLightDrop drop={drop} />
-      );
+    const dropContent = renderDropsListDropContent({
+      drop,
+      previousDrop,
+      nextDrop,
+      itemData,
+      location,
+      moderationPresentation,
+      signatureGroup,
+    });
 
     return (
       <HighlightDropWrapper
@@ -255,26 +207,7 @@ const DropsList = memo(
     );
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
-    const getItemData = useMemo((): DropsListItemData => {
-      return {
-        showWaveInfo,
-        activeDrop,
-        handleReply,
-        showReplyAndQuote,
-        serialNo,
-        targetDropRef,
-        handleReplyClick,
-        onQuoteClick,
-        parentContainerRef,
-        dropViewDropId,
-        onDropContentClick,
-        scrollContainerRef,
-        winningThreshold,
-        winningThresholdMinDurationMs,
-        isVotingClosed,
-        isVotingControlsLocked,
-      };
-    }, [
+    const getItemData = useDropsListItemData({
       showWaveInfo,
       activeDrop,
       handleReply,
@@ -291,73 +224,17 @@ const DropsList = memo(
       winningThresholdMinDurationMs,
       isVotingClosed,
       isVotingControlsLocked,
-    ]);
+    });
 
-    // Store the serial_no of drops that boosted cards should appear BEFORE
-    // Set once when boosted drops first arrive, then stays fixed
-    // This makes boosted cards scroll away with new drops, but stay anchored when loading history
-    const [boostAnchors, setBoostAnchors] = useState<number[] | null>(null);
+    // Boosted cards appear BEFORE fixed anchor drops: they scroll away with new
+    // drops, but stay anchored when loading history.
     const shouldInsertBoostCards = boostedDropsDisplayPreference !== "hidden";
-
-    // Adjust state during render (React-recommended pattern for derived state)
-    // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-    if (
-      boostAnchors === null &&
-      shouldInsertBoostCards &&
-      boostedDrops &&
-      boostedDrops.length > 0 &&
-      orderedDrops.length > 0
-    ) {
-      // Calculate anchor serial_nos based on current positions from bottom
-      const anchors: number[] = [];
-      for (
-        let b = 0;
-        b < boostedDrops.length && b < BOOST_CARD_POSITIONS.length;
-        b++
-      ) {
-        const posFromBottom = BOOST_CARD_POSITIONS[b] ?? 0;
-        const index = orderedDrops.length - posFromBottom;
-        if (index >= 0 && index < orderedDrops.length) {
-          anchors.push(orderedDrops[index]!.serial_no);
-        }
-      }
-      setBoostAnchors(anchors);
-    }
-
-    // Pre-compute boost card positions by finding anchor drops
-    // orderedDrops[0] = oldest (top), orderedDrops[last] = newest (bottom)
-    const boostCardAtIndex = useMemo(() => {
-      const map = new Map<number, number>();
-      if (
-        !shouldInsertBoostCards ||
-        !boostedDrops ||
-        boostedDrops.length === 0 ||
-        !onBoostedDropClick
-      ) {
-        return map;
-      }
-      if (!boostAnchors) {
-        return map; // Not initialized yet
-      }
-
-      // Find each anchor's current index and map it
-      for (let b = 0; b < boostAnchors.length; b++) {
-        const anchorSerialNo = boostAnchors[b];
-        const index = orderedDrops.findIndex(
-          (d) => d.serial_no === anchorSerialNo
-        );
-        if (index >= 0) {
-          map.set(index, b);
-        }
-      }
-      return map;
-    }, [
-      boostedDrops,
-      onBoostedDropClick,
-      boostAnchors,
+    const boostCardAtIndex = useBoostCardIndex({
       orderedDrops,
+      boostedDrops,
       shouldInsertBoostCards,
-    ]);
+      onBoostedDropClick,
+    });
 
     const renderBoostCard = useCallback(
       (index: number): React.ReactNode => {
@@ -366,34 +243,17 @@ const DropsList = memo(
         if (boostedIndex === undefined) return null;
         const boostedDrop = boostedDrops[boostedIndex];
         if (!boostedDrop) return null;
-        const onClick = () => onBoostedDropClick(boostedDrop.serial_no);
-        const isCompact = boostedDropsDisplayPreference === "compact";
-        return (
-          <div
-            key={`boost-card-${boostedIndex}-${boostedDrop.id}-${boostedDropsDisplayPreference}`}
-            className={
-              isCompact
-                ? "tw-px-3 tw-py-1.5 sm:tw-px-4"
-                : "tw-px-3 tw-py-3 sm:tw-px-4"
-            }
-          >
-            <ContentModerationDropGate drop={boostedDrop} compact>
-              {isCompact ? (
-                <BoostedDropCompactChatItem
-                  drop={boostedDrop}
-                  onClick={onClick}
-                />
-              ) : (
-                <BoostedDropCardHome
-                  drop={boostedDrop}
-                  variant="chat"
-                  rank={boostedIndex + 1}
-                  onClick={onClick}
-                />
-              )}
-            </ContentModerationDropGate>
-          </div>
-        );
+        return renderBoostCardElement({
+          key: getBoostCardKey(
+            boostedIndex,
+            boostedDrop,
+            boostedDropsDisplayPreference
+          ),
+          boostedDrop,
+          boostedIndex,
+          displayPreference: boostedDropsDisplayPreference,
+          onBoostedDropClick,
+        });
       },
       [
         boostCardAtIndex,
@@ -437,11 +297,7 @@ const DropsList = memo(
           />
         );
 
-        const gap = historyGaps?.find(
-          (item) =>
-            drop.serial_no >= item.olderThan &&
-            (!previousDrop || previousDrop.serial_no < item.olderThan)
-        );
+        const gap = findHistoryGapBefore(historyGaps, drop, previousDrop);
         const historyGap =
           gap && waveId ? (
             <WaveHistoryGap

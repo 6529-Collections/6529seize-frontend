@@ -2,6 +2,7 @@ import {
   captureVisibleWaveDropSerial,
   DROP_SERIAL_ATTRIBUTE,
   preserveWaveScrollPositionForReload,
+  WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER,
   WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE,
   WAVE_SERIAL_QUERY_PARAM,
 } from "@/helpers/waves/wave-visible-serial.helpers";
@@ -18,6 +19,8 @@ interface ContainerSpec {
   readonly width?: number;
   readonly scrollTop?: number;
   readonly rows?: readonly RowSpec[];
+  /** The windowed chat: normal order, scrollTop largest at the newest. */
+  readonly endAnchoredScrollHeight?: number;
 }
 
 const CONTAINER_HEIGHT = 600;
@@ -28,10 +31,20 @@ function buildContainer({
   width = 800,
   scrollTop = -500, // column-reverse: negative = scrolled up from the bottom
   rows = [],
+  endAnchoredScrollHeight,
 }: ContainerSpec): HTMLDivElement {
   const container = document.createElement("div");
-  container.setAttribute(WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE, "true");
+  container.setAttribute(
+    WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE,
+    endAnchoredScrollHeight === undefined
+      ? "true"
+      : WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER
+  );
   Object.defineProperties(container, {
+    scrollHeight: {
+      configurable: true,
+      value: endAnchoredScrollHeight ?? height,
+    },
     clientHeight: { configurable: true, value: height },
     clientWidth: { configurable: true, value: width },
     scrollTop: { configurable: true, value: scrollTop, writable: true },
@@ -94,6 +107,19 @@ describe("captureVisibleWaveDropSerial", () => {
       rows: [{ serial: "100", top: 250, bottom: 350 }],
     });
     expect(captureVisibleWaveDropSerial()).toBeNull();
+  });
+
+  it("measures the windowed chat from its end, where scrollTop is largest", () => {
+    const rows = [{ serial: "100", top: 250, bottom: 350 }];
+    // 5,000px of content in a 600px viewport: the newest message is at 4,400.
+    buildContainer({ scrollTop: 4400, endAnchoredScrollHeight: 5000, rows });
+    expect(captureVisibleWaveDropSerial()).toBeNull();
+    document.body.innerHTML = "";
+    buildContainer({ scrollTop: 4370, endAnchoredScrollHeight: 5000, rows });
+    expect(captureVisibleWaveDropSerial()).toBeNull();
+    document.body.innerHTML = "";
+    buildContainer({ scrollTop: 3900, endAnchoredScrollHeight: 5000, rows });
+    expect(captureVisibleWaveDropSerial()).toBe(100);
   });
 
   it("returns the serial of the row nearest the container center", () => {

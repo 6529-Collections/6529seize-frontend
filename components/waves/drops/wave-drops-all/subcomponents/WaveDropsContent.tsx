@@ -8,6 +8,7 @@ import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
+import type { ChatListHandle } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -22,6 +23,7 @@ interface WaveDropsContentProps {
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
+  readonly chatListRef?: Ref<ChatListHandle> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly paginationThreshold: number;
@@ -65,6 +67,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   dropId,
   scrollContainerRef,
   scrollContainerCallbackRef,
+  chatListRef,
   bottomAnchorRef,
   bottomAnchorCallbackRef,
   paginationThreshold,
@@ -153,6 +156,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
         scrollContainerCallbackRef={scrollContainerCallbackRef}
+        chatListRef={chatListRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
         paginationThreshold={paginationThreshold}

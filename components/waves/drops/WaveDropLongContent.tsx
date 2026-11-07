@@ -6,8 +6,27 @@ import { t } from "@/i18n/messages";
 import type { MouseEvent, ReactNode } from "react";
 import { useId, useLayoutEffect, useMemo, useRef } from "react";
 import { useWaveDropContentExpansion } from "./WaveDropContentExpansionContext";
+import {
+  WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER,
+  WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE,
+} from "@/helpers/waves/wave-visible-serial.helpers";
 
 const BOTTOM_SCROLL_THRESHOLD_PX = 50;
+
+// The windowed chat scrolls in normal order: its newest message is at the
+// largest scrollTop. The reversed chat's newest message is at scrollTop 0.
+const isEndAnchored = (container: HTMLElement) =>
+  container.getAttribute(WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE) ===
+  WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER;
+
+const getMaxScrollTop = (container: HTMLElement) =>
+  Math.max(0, container.scrollHeight - container.clientHeight);
+
+const isAtNewest = (container: HTMLElement) =>
+  isEndAnchored(container)
+    ? getMaxScrollTop(container) - container.scrollTop <=
+      BOTTOM_SCROLL_THRESHOLD_PX
+    : Math.abs(container.scrollTop) <= BOTTOM_SCROLL_THRESHOLD_PX;
 
 interface PendingAnchor {
   readonly buttonTop: number;
@@ -56,13 +75,21 @@ export default function WaveDropLongContent({
     }
 
     const container = pendingAnchor.scrollContainer;
+    const endAnchored = isEndAnchored(container);
     const correctPosition = () => {
       if (pendingAnchor.wasAtBottom) {
-        container.scrollTop = 0;
+        container.scrollTop = endAnchored ? getMaxScrollTop(container) : 0;
         return;
       }
       const buttonTopDelta =
         button.getBoundingClientRect().top - pendingAnchor.buttonTop;
+      if (endAnchored) {
+        container.scrollTop = Math.min(
+          getMaxScrollTop(container),
+          Math.max(0, container.scrollTop + buttonTopDelta)
+        );
+        return;
+      }
       const minimumScrollTop = Math.min(
         0,
         container.clientHeight - container.scrollHeight
@@ -115,8 +142,7 @@ export default function WaveDropLongContent({
       pendingAnchorRef.current = {
         buttonTop: button.getBoundingClientRect().top,
         scrollContainer,
-        wasAtBottom:
-          Math.abs(scrollContainer.scrollTop) <= BOTTOM_SCROLL_THRESHOLD_PX,
+        wasAtBottom: isAtNewest(scrollContainer),
       };
     }
     setExpanded(expansionKey, !isExpanded);

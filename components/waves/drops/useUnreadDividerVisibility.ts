@@ -2,6 +2,10 @@
 
 import type { RefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER,
+  WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE,
+} from "@/helpers/waves/wave-visible-serial.helpers";
 
 type UnreadPosition = "hidden" | "above" | "below";
 
@@ -108,7 +112,16 @@ export function useUnreadDividerVisibility({
     });
     observer.observe(scrollContainer, { childList: true, subtree: true });
 
-    scrollContainer.dispatchEvent(new Event("scroll"));
+    if (
+      scrollContainer.getAttribute(WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE) ===
+      WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER
+    ) {
+      // The windowed chat's virtualizer listens for scroll events and would
+      // flush a render from inside this effect; check directly instead.
+      checkUnreadVisibility();
+    } else {
+      scrollContainer.dispatchEvent(new Event("scroll"));
+    }
 
     return () => {
       scrollContainer.removeEventListener("scroll", handleScroll);

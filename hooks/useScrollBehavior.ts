@@ -1,14 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  resolveChatScrollBehavior,
+  type ChatListHandle,
+} from "@/components/waves/drops/chat-window/chatScrollBehavior";
 
 type ScrollIntent = "pinned" | "reading" | "auto";
 
 const BOTTOM_THRESHOLD_PX = 50;
 const SCROLL_INTENT_DELTA_PX = 20;
 
-const getScrollPosition = (container: HTMLDivElement) => {
+const getScrollPosition = (container: HTMLDivElement, endAnchored: boolean) => {
   const { scrollTop, scrollHeight, clientHeight } = container;
+
+  if (endAnchored) {
+    // Normal order: the newest message is at the largest scrollTop.
+    const distanceFromBottom = scrollHeight - clientHeight - scrollTop;
+    return {
+      scrollTop,
+      isAtBottom: distanceFromBottom < BOTTOM_THRESHOLD_PX,
+      isAtTop: scrollTop < BOTTOM_THRESHOLD_PX,
+    };
+  }
 
   const distanceFromBottom = Math.abs(scrollTop);
   const isAtBottom = distanceFromBottom < BOTTOM_THRESHOLD_PX;
@@ -143,9 +157,20 @@ const useScrollIntentState = () => {
   return { scrollIntent, setScrollIntentSafely };
 };
 
-export const useScrollBehavior = () => {
+interface ScrollBehaviorOptions {
+  /**
+   * The windowed chat: a normal-order list anchored to the newest message,
+   * instead of a column-reverse box. The list takes `chatListRef`.
+   */
+  readonly endAnchored?: boolean | undefined;
+}
+
+export const useScrollBehavior = ({
+  endAnchored = false,
+}: ScrollBehaviorOptions = {}) => {
   const { scrollContainerRef, scrollContainerEl, syncScrollContainerRef } =
     useScrollContainer();
+  const chatListRef = useRef<ChatListHandle | null>(null);
   const { bottomAnchorRef, bottomAnchorEl, syncBottomAnchorRef } =
     useBottomAnchor();
   const { scrollIntent, setScrollIntentSafely } = useScrollIntentState();
@@ -161,6 +186,25 @@ export const useScrollBehavior = () => {
         return;
       }
 
+      if (endAnchored) {
+        // The windowed list scrolls to its end through the virtualizer, which
+        // keeps the end as rows above it are measured.
+        const chatList = chatListRef.current;
+        if (chatList) {
+          chatList.scrollToEnd(behavior);
+        } else {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: resolveChatScrollBehavior(behavior),
+          });
+        }
+        setScrollIntentSafely("pinned");
+        setIsAtBottom(true);
+        lastScrollTopRef.current =
+          container.scrollHeight - container.clientHeight;
+        return;
+      }
+
       // For a flex-col-reverse container, new messages (bottom) are at scrollTop = 0
       container.scrollTo({
         top: 0,
@@ -172,12 +216,14 @@ export const useScrollBehavior = () => {
       setIsAtBottom(true);
       lastScrollTopRef.current = 0;
     },
-    [scrollContainerRef, setScrollIntentSafely]
+    [endAnchored, scrollContainerRef, setScrollIntentSafely]
   );
 
   const scrollToVisualBottom = useCallback(() => {
-    forcePinToBottom("smooth");
-  }, [forcePinToBottom]);
+    // The windowed list jumps: a smooth scroll in flight would keep it from
+    // following messages that arrive meanwhile.
+    forcePinToBottom(endAnchored ? "auto" : "smooth");
+  }, [endAnchored, forcePinToBottom]);
 
   // scrollToVisualTop scrolls to the oldest messages (visually at the top)
   const scrollToVisualTop = useCallback(() => {
@@ -190,11 +236,11 @@ export const useScrollBehavior = () => {
 
       // Set scroll position directly
       container.scrollTo({
-        top: -maxScrollPosition,
-        behavior: "smooth",
+        top: endAnchored ? 0 : -maxScrollPosition,
+        behavior: endAnchored ? resolveChatScrollBehavior("smooth") : "smooth",
       });
     }
-  }, []);
+  }, [endAnchored, scrollContainerRef]);
 
   // Robust scroll detection with intent-based pinning
   const handleScroll = useCallback(() => {
@@ -205,7 +251,7 @@ export const useScrollBehavior = () => {
       scrollTop,
       isAtBottom: newIsAtBottom,
       isAtTop: newIsAtTop,
-    } = getScrollPosition(container);
+    } = getScrollPosition(container, endAnchored);
 
     setIsAtBottom(newIsAtBottom);
     setIsAtTop(newIsAtTop);
@@ -228,29 +274,29 @@ export const useScrollBehavior = () => {
     }
 
     lastScrollTopRef.current = scrollTop;
-  }, [scrollContainerRef, setScrollIntentSafely]);
+  }, [endAnchored, scrollContainerRef, setScrollIntentSafely]);
 
   const recomputeScrollMetrics = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { isAtBottom: newIsAtBottom, isAtTop: newIsAtTop } =
-      getScrollPosition(container);
+      getScrollPosition(container, endAnchored);
 
     setIsAtBottom(newIsAtBottom);
     setIsAtTop(newIsAtTop);
-  }, [scrollContainerRef]);
+  }, [endAnchored, scrollContainerRef]);
 
   const recomputePinState = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { isAtBottom: newIsAtBottom, isAtTop: newIsAtTop } =
-      getScrollPosition(container);
+      getScrollPosition(container, endAnchored);
 
     setIsAtBottom(newIsAtBottom);
     setIsAtTop(newIsAtTop);
-  }, [scrollContainerRef]);
+  }, [endAnchored, scrollContainerRef]);
 
   // Intersection Observer for robust bottom detection
   useBottomAnchorObserver({
@@ -294,6 +340,7 @@ export const useScrollBehavior = () => {
     isAtTop,
     shouldPinToBottom,
     scrollIntent,
+    chatListRef,
     scrollToVisualBottom,
     forcePinToBottom,
     scrollToVisualTop,

@@ -2,10 +2,18 @@ import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/
 import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrollControls";
+import type { ChatListHandle } from "@/components/waves/drops/chat-window/chatScrollBehavior";
+import { isChatWindowingEnabled } from "@/components/waves/drops/chat-window/chatWindowingFlag";
+import { WaveChatVirtualList } from "@/components/waves/drops/chat-window/WaveChatVirtualList";
+import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
+import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
-import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
+import {
+  DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
+  type BoostedDropsDisplayPreference,
+} from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
 
@@ -18,6 +26,7 @@ interface WaveDropsMessageListSectionProps {
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
+  readonly chatListRef?: Ref<ChatListHandle> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly paginationThreshold: number;
@@ -64,6 +73,7 @@ export const WaveDropsMessageListSection: React.FC<
   dropId,
   scrollContainerRef,
   scrollContainerCallbackRef,
+  chatListRef,
   bottomAnchorRef,
   bottomAnchorCallbackRef,
   paginationThreshold,
@@ -100,6 +110,71 @@ export const WaveDropsMessageListSection: React.FC<
 
   const containerRef = scrollContainerCallbackRef ?? scrollContainerRef;
   const anchorRef = bottomAnchorCallbackRef ?? bottomAnchorRef;
+
+  const scrollControls = onScrollToUnread && (
+    <WaveDropsScrollControls
+      unreadDividerSerialNo={unreadDividerSerialNo ?? null}
+      unreadCount={unreadCount}
+      scrollContainerRef={scrollContainerRef}
+      onScrollToUnread={onScrollToUnread}
+      onDismissUnread={onDismissUnread}
+      isAtBottom={isAtBottom}
+      scrollToBottom={scrollToBottom}
+      newMessagesCount={pendingCount}
+      onRevealNewMessages={onRevealPending}
+    />
+  );
+
+  if (isChatWindowingEnabled()) {
+    // The providers sit above the list: the virtualizer re-renders the list
+    // as rows are measured and scrolled, and the providers need not follow.
+    // The expansion state also outlives a long drop's unmount.
+    return (
+      <ChatVideoPlaybackProvider>
+        <WaveDropMobileMenuProvider>
+          <WaveDropContentExpansionProvider
+            enabled={dropId === null}
+            scrollContainerRef={scrollContainerRef}
+          >
+            <WaveChatVirtualList
+              drops={waveMessages?.drops ?? []}
+              historyGaps={waveMessages?.historyGaps}
+              waveId={waveMessages?.id}
+              scrollContainerRef={scrollContainerRef}
+              scrollContainerCallbackRef={scrollContainerCallbackRef}
+              bottomAnchorRef={anchorRef}
+              ref={chatListRef}
+              isFetchingOlder={!!waveMessages?.isLoadingNextPage}
+              showOlderLoader={hasNextPage}
+              onTopIntersection={onTopIntersection}
+              bottomPaddingClassName={bottomPaddingClassName}
+              onReply={onReply}
+              onReplyClick={queueSerialTarget}
+              onQuoteClick={onQuoteClick}
+              onDropContentClick={onDropContentClick}
+              activeDrop={activeDrop}
+              serialNo={serialTarget}
+              targetDropRef={targetDropRef}
+              dropViewDropId={dropId}
+              unreadDividerSerialNo={unreadDividerSerialNo}
+              boostedDrops={boostedDrops}
+              boostedDropsDisplayPreference={
+                boostedDropsDisplayPreference ??
+                DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE
+              }
+              onBoostedDropClick={onBoostedDropClick}
+              suspendLightDropHydration={suspendLightDropHydration}
+              winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+            />
+          </WaveDropContentExpansionProvider>
+        </WaveDropMobileMenuProvider>
+        {scrollControls}
+      </ChatVideoPlaybackProvider>
+    );
+  }
 
   return (
     <>
@@ -142,19 +217,7 @@ export const WaveDropsMessageListSection: React.FC<
         </ChatVideoPlaybackProvider>
         <div ref={anchorRef} style={{ height: "1px" }} />
       </WaveDropsReverseContainer>
-      {onScrollToUnread && (
-        <WaveDropsScrollControls
-          unreadDividerSerialNo={unreadDividerSerialNo ?? null}
-          unreadCount={unreadCount}
-          scrollContainerRef={scrollContainerRef}
-          onScrollToUnread={onScrollToUnread}
-          onDismissUnread={onDismissUnread}
-          isAtBottom={isAtBottom}
-          scrollToBottom={scrollToBottom}
-          newMessagesCount={pendingCount}
-          onRevealNewMessages={onRevealPending}
-        />
-      )}
+      {scrollControls}
     </>
   );
 };

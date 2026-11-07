@@ -65,13 +65,18 @@ export async function installVideoArtworkSandbox(
   return installArtworkSandbox(page, baseURL);
 }
 
-/** Render a chat message that embeds the sandbox submission as a linked drop. */
+/**
+ * Render a chat message that embeds the sandbox submission as a linked drop.
+ * `newerChatDrops` adds plain chat posts after it, so the windowed chat can
+ * scroll the linked drop out of its rendered rows.
+ */
 export async function installLinkedDropVideoSandbox(
   page: Page,
   baseURL: string | undefined,
   withPoster = false,
   isPosterReady: () => boolean = () => true,
-  posterSource: "generated" | "device" = "generated"
+  posterSource: "generated" | "device" = "generated",
+  newerChatDrops = 0
 ): Promise<string> {
   const { apiOrigin, feed, source } = await loadSandboxSeed(
     page,
@@ -127,6 +132,16 @@ export async function installLinkedDropVideoSandbox(
     media: [],
     wave: feed.wave,
   };
+  const newerDrops: ApiDropV2[] = Array.from(
+    { length: newerChatDrops },
+    (_, index) => ({
+      ...linkingDrop,
+      id: `00000000-0000-4000-8000-${String(7000 + index).padStart(12, "0")}`,
+      serial_no: linkingDrop.serial_no + index + 1,
+      title: `Video fixture newer post ${index + 1}`,
+      content: `Video fixture newer post ${index + 1}`,
+    })
+  ).reverse();
   const headers = { "access-control-allow-origin": "*" };
 
   await installMemesWaveSettings(page, apiOrigin);
@@ -142,7 +157,10 @@ export async function installLinkedDropVideoSandbox(
     });
   });
   await page.route(`${apiOrigin}/api/v2/waves/${WAVE_ID}/drops*`, (route) =>
-    route.fulfill({ headers, json: { ...feed, drops: [linkingDrop] } })
+    route.fulfill({
+      headers,
+      json: { ...feed, drops: [...newerDrops, linkingDrop] },
+    })
   );
   await page.route(videoUrl, (route) =>
     route.fulfill({
