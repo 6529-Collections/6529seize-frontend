@@ -111,9 +111,9 @@ describe("BackButton", () => {
   });
 
   it.each([
-    "/waves/w1/competitions",
-    "/waves/w1/competitions/alpha",
-    "/waves/w1/competitions/new",
+    "/waves/w1/decisions",
+    "/waves/w1/decisions/alpha",
+    "/waves/w1/decisions/new",
   ])("keeps a missing competition recoverable on %s", (pathname) => {
     const { replace, setActiveWave } = setup({}, { pathname });
     const options = useWaveData.mock.calls.at(-1)[0];
@@ -146,7 +146,7 @@ describe("BackButton", () => {
   );
 
   it.each([
-    "/waves/w1/competitions/alpha?tab=leaderboard",
+    "/waves/w1/decisions/alpha?tab=leaderboard",
     "/waves/w2?tab=chat",
     "/network?wave=w1",
   ])(
@@ -164,7 +164,7 @@ describe("BackButton", () => {
   it("still lets the user explicitly leave a competition", async () => {
     const { setActiveWave } = setup(
       {},
-      { pathname: "/waves/w1/competitions/alpha", activeWaveId: "w1" }
+      { pathname: "/waves/w1/decisions/alpha", activeWaveId: "w1" }
     );
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(mockClearLastVisited).toHaveBeenCalledWith("wave");

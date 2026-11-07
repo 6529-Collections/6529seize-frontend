@@ -15,7 +15,7 @@ import { publicEnv } from "@/config/env";
  *
  * Deliberately outside this list:
  * - `ALLOWLIST_API_ENDPOINT`: a separate service with its own API and auth.
- * - `IPFS_API_ENDPOINT` and `IPFS_GATEWAY_ENDPOINT`: content-addressed media.
+ * - `IPFS_GATEWAY_ENDPOINT`: content-addressed media.
  *   Any gateway can serve a CID and the client can verify it, so gateways
  *   need their own list and trust model.
  * - `BASE_ENDPOINT`: this app's own origin for same-origin route handlers.

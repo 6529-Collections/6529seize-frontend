@@ -178,6 +178,28 @@ describe("useEnhancedWavesListCore", () => {
     );
   });
 
+  it("refreshes only the activity list for unknown-wave drops when the source can", () => {
+    const refetchAllWaves = jest.fn();
+    const refreshActivityList = jest.fn();
+    const wavesData = {
+      ...createWavesData({ mainWavesRefetch: jest.fn(), refetchAllWaves }),
+      refreshActivityList,
+    };
+
+    renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      [],
+      refreshActivityList,
+      expect.any(Object)
+    );
+  });
+
   it("passes disabled state to the new-drop counter and suppresses returned list work", () => {
     const refetchAllWaves = jest.fn();
     const fetchNextPage = jest.fn();
@@ -411,6 +433,40 @@ describe("useEnhancedWavesListCore", () => {
     });
     // Resolving again with the same entry returns the same object.
     expect(liveWave(result.current, 1)).toBe(liveWave(result.current, 1));
+  });
+
+  it("leaves waves of other lists to their own unread values", () => {
+    // MyStreamWaveContent resolves both main-list and direct-message waves
+    // through the main list's source; a DM wave carries the server's DM
+    // unread state and must come back unchanged, even with an entry.
+    mockedUseNewDropCounter.mockImplementation(() => ({
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    }));
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(
+        null,
+        createWavesData({
+          mainWavesRefetch: jest.fn(),
+          refetchAllWaves: jest.fn(),
+          waves: [createSidebarWave({ id: "wave-1" })],
+        }),
+        { supportsPinning: true }
+      )
+    );
+    const directMessage = {
+      ...result.current.waves[0]!,
+      id: "dm-1",
+      unreadDropsCount: 3,
+    };
+
+    const resolved = result.current.unreadSource.resolve(directMessage, {
+      newDrops: { count: 5, latestDropTimestamp: 400, firstUnreadSerialNo: 9 },
+      cleared: true,
+      forcedCount: 7,
+    });
+
+    expect(resolved).toBe(directMessage);
   });
 
   it("applies local read and mark-unread through the store", () => {

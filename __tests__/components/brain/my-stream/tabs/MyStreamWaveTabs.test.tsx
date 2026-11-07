@@ -233,7 +233,7 @@ describe("MyStreamWaveTabs", () => {
     );
     const { rerender } = render(tabs(false));
     fireEvent.click(screen.getByRole("button", { name: "Search messages" }));
-    mockPathname = "/waves/w2/competitions/current";
+    mockPathname = "/waves/w2/decisions/current";
     mockSearchParams = "curation=current&divider=latest";
     rerender(tabs(true));
     fireEvent.click(screen.getByRole("button", { name: "Result" }));

@@ -28,7 +28,7 @@ type CompetitionFixture = {
 
 let mockViewer: string | null = "member";
 let mockSearch = "";
-let mockPathname = "/waves/wave/competitions/alpha";
+let mockPathname = "/waves/wave/decisions/alpha";
 let mockWaveQuery: QueryState<{ id: string }>;
 let mockHubQuery: QueryState<{
   id: string;
@@ -138,7 +138,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockViewer = "member";
   mockSearch = "";
-  mockPathname = "/waves/wave/competitions/alpha";
+  mockPathname = "/waves/wave/decisions/alpha";
   mockWaveQuery = query({ id: "wave" });
   mockHubQuery = query({ id: "wave", legacy_primary_competition_id: null });
   mockCompetitionQuery = query({
@@ -313,7 +313,7 @@ it("does not reuse cached selected data when the wave or competition changes", (
   const shell = screen.getByTestId("persistent-shell");
   const input = screen.getByLabelText("Entry text");
   fireEvent.change(input, { target: { value: "Previous wave submission" } });
-  mockPathname = "/waves/other-wave/competitions/beta";
+  mockPathname = "/waves/other-wave/decisions/beta";
   rerender(routeTree("beta", "other-wave"));
   expect(screen.getByTestId("persistent-shell")).toBe(shell);
   expect(shell).toHaveAttribute("data-ready", "false");
@@ -353,7 +353,7 @@ it("preserves draft presentation after publication until leaving the visit", () 
   rerender(routeTree(null));
   expect(screen.getByTestId("persistent-shell")).toBe(shell);
   expect(shell).toHaveAttribute("data-ready", "false");
-  mockPathname = "/waves/wave/competitions/alpha";
+  mockPathname = "/waves/wave/decisions/alpha";
   mockSearch = "";
   rerender(routeTree());
   expect(screen.getByTestId("native")).toBeVisible();
@@ -364,7 +364,7 @@ it.each([
   "/waves",
   "/waves/wave",
   "/waves/create",
-  "/waves/wave/competitions/new",
+  "/waves/wave/decisions/new",
 ])("does not fetch a selected competition on %s", (pathname) => {
   mockPathname = pathname;
   render(routeTree(null));

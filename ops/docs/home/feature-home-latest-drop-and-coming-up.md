@@ -109,14 +109,14 @@ artwork frame. Keyboard users can tab through the links to
 bring each card into view.
 
 The Coming up subtitle keeps “Next in queue and current vote leaders.” and
-adds the next scheduled decision when available. Times use the viewer's device
-time zone, including daylight-saving changes, in 24-hour format. Decisions on
-the viewer's current day say “Next decision today at …”; the following day uses
-“tomorrow.” Decisions two to six calendar days away show the weekday; decisions
+adds the next scheduled result when available. Times use the viewer's device
+time zone, including daylight-saving changes, in 24-hour format. Results on
+the viewer's current day say “Next result today at …”; the following day uses
+“tomorrow.” Results two to six calendar days away show the weekday; results
 seven or more days away show the short month and day, without a year. The full
 local date, time, and timezone remain available on hover. The time appears after the page loads and is omitted when the
-schedule is missing or the decision time has passed, until updated wave data
-provides another future decision. It describes the voting decision, not minting.
+schedule is missing or the result time has passed, until updated wave data
+provides another future result. It describes the voting result, not minting.
 
 ## Common Scenarios
 

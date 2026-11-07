@@ -9,6 +9,7 @@ import {
   type ConnectedWalletAccount,
   getWalletAddress,
   PROFILE_SWITCHED_EVENT,
+  syncWalletAuthCookie,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { SecurityEventType } from "@/types/security";
@@ -354,6 +355,12 @@ export function useSeizeConnectProviderEffects({
       clearConnectIntentHandoffTimeout();
     };
   }, [clearConnectIntentHandoffTimeout, isMountedRef, retryConnectTimeoutRef]);
+
+  // Write the session cookie the server reads from the stored session once per
+  // load, so a session saved before a cookie change keeps working server-side.
+  useEffect(() => {
+    syncWalletAuthCookie();
+  }, []);
 
   useEffect(() => {
     refreshStoredConnectedAccounts();

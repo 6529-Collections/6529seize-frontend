@@ -456,7 +456,7 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
           .find((part) => part.startsWith(`${name}=`));
         return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;
       };
-      let token = cookie("wallet-auth");
+      let token = cookie("__Host-wallet-auth");
       if (!token) {
         const accounts = JSON.parse(
           globalThis.localStorage.getItem("6529-wallet-accounts") ?? "[]"

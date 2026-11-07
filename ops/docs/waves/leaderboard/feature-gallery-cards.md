@@ -102,7 +102,7 @@ works from the card.
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Top Voters Lists](feature-top-voters-lists.md)
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md)
 - [Drop Actions: Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Docs Home](../../README.md)

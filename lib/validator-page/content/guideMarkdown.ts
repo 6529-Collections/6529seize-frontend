@@ -1,10 +1,10 @@
 // The tester guide's closed sections at /validator/guide, as Markdown. Built
 // from the tester package: the sections under "More" in TESTERS.md, its
-// note for testers upgrading from the last release, and rc.9's section on
+// note for testers upgrading from the last release, and its section on
 // Sunday's switch.
 //
-// Release facts still to fill have the form {{RC9_...}} (fill-rc9.sh); the
-// page tests allow only the ones they name as still to fill.
+// Release facts still to fill have the form {{RC10_...}} (fill-rc10.sh);
+// the page tests allow only the ones they name as still to fill.
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
 
@@ -20,42 +20,53 @@ export type ValidatorReleaseNote = ValidatorGuideFold & {
 };
 
 /**
- * For a tester who runs the last release: what to do differently. The Mac
- * steps are the ones the Mac lane tested on 6 November.
+ * For a tester who runs the last release: what to do differently. From
+ * rc.9, the Mac's Quit for an update; from rc.8 or older, the steps the Mac
+ * lane tested on 6 November.
  */
 export const VALIDATOR_UPGRADE: ValidatorReleaseNote = {
-  forVersion: "0.1.0-rc.9",
+  forVersion: "0.1.0-rc.10",
   id: "upgrading",
-  title: "Upgrading from rc.8",
+  title: "Upgrading from rc.9",
   markdown: joinMarkdown([
-    "On Windows and Linux, install rc.9 over rc.8 the same way. There is nothing to uninstall first, and your key, your authorization and your records stay. A validator you stopped stays stopped.",
+    "On Windows and Linux, install rc.10 over rc.9 the same way. There is nothing to uninstall first, and your key, your authorization and your records stay. A validator you stopped stays stopped.",
     "",
-    "On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.9. If it shows \"Files in use\" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself. Close any `validator` command you left running in a terminal first. When it's done, open the app from the Start menu, or press **Launch** on Setup's last page.",
+    "On Windows, Setup.exe stops the validator and closes the app before it writes, then starts the validator on rc.10. If it shows \"Files in use\" naming the 6529 Validator service, press **Ignore**: Setup stops the service itself. Close any `validator` command you left running in a terminal first. When it's done, open the app from the Start menu, or press **Launch** on Setup's last page.",
     "",
     "On a Mac:",
     "",
+    "1. Choose **Quit for an update** in the menu-bar logo's menu or the app's menu at the top of the screen.",
+    "2. Open the rc.10 download and drag the app to Applications, choosing **Replace**.",
+    '3. Open 6529 Validator. It starts the validator on rc.10 by itself. If the window says "The validator service is not running.", press **Start the validator service**.',
+    "",
+    "From rc.10 on, **Update now** on the Update page installs the next release for you.",
+    "",
+    "### If you're upgrading from rc.8 or older",
+    "",
+    "Update before Sunday 8 November, 00:00 UTC. On Windows and Linux, it works as from rc.9. On a Mac, rc.8 has no Quit for an update:",
+    "",
     "1. In Terminal, run `launchctl bootout gui/$(id -u)/io.6529.validator.agent`. This stops the validator, so Finder can replace the app.",
     "2. Quit 6529 Validator: **Quit app** in the logo's menu, or Force Quit (Option-Command-Esc). Cmd-Q doesn't work in rc.8.",
-    "3. Open the rc.9 download and drag the app to Applications, choosing **Replace**.",
-    '4. Open 6529 Validator. It starts the validator on rc.9 by itself. If the window says "The validator service is not running.", press **Start the validator service**.',
-    "",
-    "From rc.9 on, steps 1 and 2 are one menu item: **Quit for an update**, in the menu-bar logo's menu or the app's menu at the top of the screen.",
+    "3. Open the rc.10 download, drag the app to Applications, choosing **Replace**, and open it.",
   ]),
 };
 
 /**
- * rc.9's switch to the new chain on Sunday 8 November, at the top of the
- * guide: TESTERS.md's section, and the release notes' line for a tester who
+ * Sunday's switch to the new chain, 8 November, above the upgrade note:
+ * TESTERS.md's section, and the release notes' line for a tester who
  * updates on Sunday.
  */
 export const VALIDATOR_SWITCH: ValidatorReleaseNote = {
-  forVersion: "0.1.0-rc.9",
-  id: "update-before-sunday",
-  title: "Update before Sunday 8 November, 00:00 UTC",
+  forVersion: "0.1.0-rc.10",
+  id: "sundays-switch",
+  title: "Sunday's switch",
   markdown: joinMarkdown([
-    "From then, signed TDH counts only on the new chain that rc.9 runs. rc.9 moves to it by itself at 00:00 UTC; until then it works as rc.8 does.",
+    "rc.10 runs Sunday's switch exactly as rc.9 does. From Sunday 8 November, 00:00 UTC, signed TDH counts only on the new chain, and both releases move to it by themselves.",
     "",
-    "Sunday counts as agreed once accounts holding more than 2/3 of validating TDH run rc.9 and have signed. Accounts still on rc.8 keep counting toward that total for seven days after their last vote, so please update on Saturday. If the line isn't reached on Sunday, the day ends final but not agreed, and the first agreed day comes when it is. Nobody is penalized either way.",
+    "- If you run rc.9, you don't need to update before Sunday.",
+    "- If you run rc.8 or older, update before Sunday 8 November, 00:00 UTC, to rc.9 or rc.10.",
+    "",
+    "Sunday counts as agreed once accounts holding more than 2/3 of validating TDH run rc.9 or rc.10 and have signed. Accounts still on rc.8 keep counting toward that total for seven days after their last vote, so if you run rc.8 or older, please update on Saturday. If the line isn't reached on Sunday, the day ends final but not agreed, and the first agreed day comes when it is. Nobody is penalized either way.",
     "",
     "If you update on Sunday, do it before 18:00 UTC to sign that day. Later than that, your key starts on Monday, and Sunday never shows as missed.",
   ]),
@@ -80,9 +91,9 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "how-long-it-takes-to-be-ready",
     title: "How long it takes to be ready",
     markdown: joinMarkdown([
-      "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 5 November.",
+      "You add no peers. The validator finds 6529's sentries by itself and downloads the TDH history from the network. It accepts that history only if it matches the checkpoint built into this release, from 6 November.",
       "",
-      "In 6529's tests of rc.9 on 6 November, a new install was ready in about 22 minutes through Tor, and in about 14 with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
+      "In 6529's tests of rc.10 on 7 November, a new install was ready in about 21 minutes through Tor, and in about 16 with Tor off. The validator reads every Ethereum block since the release's checkpoint, so a join takes a little longer each day. Leave the validator running until the app says it is ready.",
     ]),
   },
   {
@@ -107,7 +118,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
       "| `.deb` | `validator --version` |",
       "| AppImage | `./6529-Validator-0.1.0-x86_64.AppImage --version` |",
       "",
-      "It prints `validator 0.1.0-rc.9 (d5457d6, TDH v1.4)`. If it shows another commit, tell us.",
+      "It prints `validator 0.1.0-rc.10 (f0a3440, TDH v1.4)`. If it shows another commit, tell us.",
     ]),
   },
   {
@@ -135,7 +146,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "updates",
     title: "Updates",
     markdown: joinMarkdown([
-      "Once an hour the validator reads 6529's signed list of releases. When a newer one is out, the top bar says so. It never installs anything by itself. To update, install the new release over this one (on a Mac, quit the app first).",
+      "Once an hour the validator reads 6529's signed list of releases. When a newer one is out, the top bar says so, and the Update page offers **Update now**. It downloads this computer's file and checks it against the signed list. The app installs it only when you press **Install**, and never by itself. On Linux the page shows the `apt` command to run.",
     ]),
   },
   {
@@ -175,7 +186,7 @@ export const VALIDATOR_GUIDE_FOLDS: readonly ValidatorGuideFold[] = [
     id: "known-issues",
     title: "Known issues",
     markdown: joinMarkdown([
-      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-22 03:30 UTC, and 0.1.0 stops signing on 1 December.",
+      "The [known issues](/validator/known-issues) list each one with its workaround. A new install must start before about 2026-11-23 03:30 UTC, and 0.1.0 stops signing on 1 December.",
     ]),
   },
 ];
