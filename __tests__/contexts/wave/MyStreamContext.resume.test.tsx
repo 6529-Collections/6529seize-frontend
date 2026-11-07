@@ -817,4 +817,86 @@ describe("MyStreamProvider resume sync", () => {
     expect(mainRefreshStale).not.toHaveBeenCalled();
     expect(dmRefreshStale).not.toHaveBeenCalled();
   });
+
+  describe("focus and visibility resync", () => {
+    let now = 1_000_000;
+    let nowSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      now = 1_000_000;
+      nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    });
+
+    afterEach(() => {
+      nowSpy.mockRestore();
+    });
+
+    const renderRequested = () => {
+      const rendered = renderWithContext();
+      act(() => {
+        rendered.getContext().requestMainWavesList();
+      });
+      mainRefreshStale.mockClear();
+      mockRegisterWave.mockClear();
+      return rendered;
+    };
+
+    const focus = () =>
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
+      });
+
+    const changeVisibility = (state: DocumentVisibilityState) => {
+      setDocumentVisibilityState(state);
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+    };
+
+    it("ignores window focus within a minute of loading or the last resync", () => {
+      renderRequested();
+      for (let index = 0; index < 10; index++) {
+        now += 5_000;
+        focus();
+      }
+      expect(mainRefreshStale).not.toHaveBeenCalled();
+      expect(mockRegisterWave).not.toHaveBeenCalled();
+    });
+
+    it("resyncs on focus once the last resync is a minute old, then waits again", () => {
+      renderRequested();
+      now += 60_000;
+      focus();
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+      expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true, {
+        skipInitialBackfill: undefined,
+      });
+
+      now += 30_000;
+      focus();
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
+
+    it("resyncs on return after the tab was hidden 30 seconds", () => {
+      renderRequested();
+      changeVisibility("hidden");
+      now += 29_000;
+      changeVisibility("visible");
+      expect(mainRefreshStale).not.toHaveBeenCalled();
+
+      changeVisibility("hidden");
+      now += 30_000;
+      changeVisibility("visible");
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
+
+    it("always resyncs when the browser comes back online", () => {
+      renderRequested();
+      now += 1_000;
+      act(() => {
+        window.dispatchEvent(new Event("online"));
+      });
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
+  });
 });
