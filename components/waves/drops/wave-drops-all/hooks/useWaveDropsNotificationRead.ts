@@ -94,10 +94,10 @@ export const useWaveDropsNotificationRead = ({
 
   useLayoutEffect(() => {
     latestSerialNoRef.current = latestSerialNo;
-    if (document.visibilityState === "visible") {
+    if (enabled && document.visibilityState === "visible") {
       readSerialNoRef.current = latestSerialNo;
     }
-  }, [latestSerialNo]);
+  }, [enabled, latestSerialNo]);
 
   const { markWaveNotificationsRead, identityKey, proxyRoleIdentityKey } =
     useWaveNotificationsReadMarkerState();
