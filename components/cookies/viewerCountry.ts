@@ -34,12 +34,19 @@ export async function fetchViewerCountry(
   const isJson = (response.headers.get("content-type") ?? "").includes(
     "application/json"
   );
-  // An app page answering instead of the edge route: not available here.
-  if (response.status === 404 || (response.ok && !isJson)) return null;
+  // An app page (HTML 200 or 404) answering instead of the edge route: not
+  // available on this host. A JSON error from the edge still throws below.
+  if (!isJson && (response.ok || response.status === 404)) return null;
   if (!response.ok) {
     throw new Error(`Country lookup failed with status ${response.status}`);
   }
-  const body = (await response.json()) as Partial<ApiTelemetryCountry> | null;
+  let body: Partial<ApiTelemetryCountry> | null;
+  try {
+    body = (await response.json()) as Partial<ApiTelemetryCountry> | null;
+  } catch {
+    // A malformed body counts as no answer, like a missing route.
+    return null;
+  }
   const country = typeof body?.country === "string" ? body.country : "";
   // Anything but an explicit false counts as EU, like an unknown country.
   return { country, is_eu: body?.is_eu !== false };

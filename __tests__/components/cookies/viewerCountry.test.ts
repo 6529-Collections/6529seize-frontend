@@ -80,6 +80,30 @@ describe("fetchViewerCountry", () => {
     }
   );
 
+  it("throws for a JSON 404 from the edge itself", async () => {
+    globalThis.fetch = respond(404, {
+      message: "not found",
+    }) as unknown as typeof fetch;
+    await expect(
+      fetchViewerCountry(new AbortController().signal)
+    ).rejects.toThrow("404");
+  });
+
+  it("resolves null for a malformed JSON body", async () => {
+    globalThis.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: { get: () => "application/json" },
+        json: () =>
+          Promise.reject(new SyntaxError("Unexpected end of JSON input")),
+      })
+    ) as unknown as typeof fetch;
+    await expect(
+      fetchViewerCountry(new AbortController().signal)
+    ).resolves.toBeNull();
+  });
+
   it("fails on an error status, so callers keep the unknown country", async () => {
     globalThis.fetch = respond(503, {}) as unknown as typeof fetch;
     await expect(
