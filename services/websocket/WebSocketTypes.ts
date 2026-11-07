@@ -7,23 +7,8 @@ export type WebSocketMessage<T = {}> = {
   type: WsMessageType;
 } & T;
 
-/**
- * Per-frame fields the server sends next to `type` and `data` (all optional;
- * older servers omit them).
- */
-export interface WebSocketMessageMetadata {
+interface WebSocketMessageMetadata {
   readonly reason?: string | undefined;
-  /** Epoch ms when the API received the request behind the frame. */
-  readonly serverReceivedAt?: number | undefined;
-  /** Epoch ms when the server handed the frame to the socket gateway. */
-  readonly sentAt?: number | undefined;
-  /** Epoch ms when this client started handling the frame. */
-  readonly receivedAt?: number | undefined;
-  /**
-   * The wave's previous surviving drop serial (WAVES-PLAN 1.5): null when the
-   * drop is the wave's first, undefined when the server sent no gap marker.
-   */
-  readonly prevSerialNo?: number | null | undefined;
 }
 
 const messageMetadataByPayload = new WeakMap<
@@ -43,15 +28,6 @@ export function setWebSocketMessageMetadata(
   }
 
   messageMetadataByPayload.set(payload, metadata);
-}
-
-/** The metadata the socket recorded for a frame's `data` object, if any. */
-export function getWebSocketMessageMetadata(
-  payload: unknown
-): WebSocketMessageMetadata | undefined {
-  return isObjectPayload(payload)
-    ? messageMetadataByPayload.get(payload)
-    : undefined;
 }
 
 export function getWebSocketMessageReason(payload: unknown): string | null {
@@ -91,7 +67,39 @@ export const WEBSOCKET_RECOVERY_CAPABILITY = "resync_v1";
 /**
  * Callback type for message subscribers
  */
-export type MessageCallback<T = unknown> = (data: T) => void;
+/**
+ * Per-frame fields the server sends next to `type` and `data`. Every field is
+ * optional: older servers omit them.
+ */
+interface WebSocketFrameMetadata {
+  readonly reason?: string | undefined;
+  /** Epoch ms when the API received the request behind the frame. */
+  readonly serverReceivedAt?: number | undefined;
+  /** Epoch ms when the server handed the frame to the socket gateway. */
+  readonly sentAt?: number | undefined;
+  /** Epoch ms when this client started handling the frame. */
+  readonly receivedAt: number;
+  /**
+   * The wave's previous surviving drop serial (WAVES-PLAN 1.5): null when the
+   * drop is the wave's first, undefined when the server sent no gap marker.
+   */
+  readonly prevSerialNo?: number | null | undefined;
+}
+
+/**
+ * A subscriber gets each frame's data. One that subscribes with
+ * `{ withMetadata: true }` also gets that frame's own metadata as a second
+ * argument, which works for absent or primitive data too (unlike
+ * `getWebSocketMessageReason`). Others get the data alone, as before.
+ */
+export type MessageCallback<T = unknown> = (
+  data: T,
+  metadata: WebSocketFrameMetadata
+) => void;
+
+export interface SubscribeOptions {
+  readonly withMetadata?: boolean | undefined;
+}
 
 /**
  * Map of message types to their callback sets

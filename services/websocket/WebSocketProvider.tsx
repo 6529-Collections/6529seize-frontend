@@ -8,6 +8,7 @@ import type {
 import { WebSocketContext } from "./WebSocketContext";
 import type {
   MessageCallback,
+  SubscribeOptions,
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
@@ -116,12 +117,15 @@ const normalizeIncomingMessage = (
  * The inner frames of a `BATCH` frame, in server order. A batch never holds
  * auth or sync frames, so those inner types are dropped rather than trusted.
  */
+// A batch stays under 28 KiB, so far fewer frames than this fit in one.
+const MAX_BATCHED_FRAMES = 500;
+
 const getBatchedMessages = (data: unknown): NormalizedIncomingMessage[] => {
-  const messages = asWebSocketMessagePayload(data) as
-    | { readonly messages?: unknown }
-    | undefined;
-  if (!Array.isArray(messages?.messages)) return [];
-  return messages.messages.flatMap((inner: unknown) => {
+  const batch = asWebSocketMessagePayload(data);
+  const messages: unknown =
+    batch === undefined ? undefined : Reflect.get(batch, "messages");
+  if (!Array.isArray(messages)) return [];
+  return messages.slice(0, MAX_BATCHED_FRAMES).flatMap((inner: unknown) => {
     const message = normalizeIncomingMessage(inner);
     return message &&
       message.type !== WEBSOCKET_BATCH &&
@@ -147,6 +151,7 @@ const createCredentialMarker = (credential: string): string => {
 
 const dispatchMessage = (
   subscriberMap: SubscriberMap,
+  metadataSubscribers: WeakSet<MessageCallback>,
   message: NormalizedIncomingMessage,
   receivedAt: number
 ): void => {
@@ -155,7 +160,8 @@ const dispatchMessage = (
     return;
   }
 
-  setWebSocketMessageMetadata(message.data, {
+  setWebSocketMessageMetadata(message.data, { reason: message.reason });
+  const metadata = {
     reason: message.reason,
     serverReceivedAt: message.serverReceivedAt,
     sentAt: message.sentAt,
@@ -163,10 +169,14 @@ const dispatchMessage = (
     ...(message.prevSerialNo === undefined
       ? {}
       : { prevSerialNo: message.prevSerialNo }),
-  });
+  };
   for (const subscriber of subscribers) {
     try {
-      subscriber(message.data);
+      if (metadataSubscribers.has(subscriber)) {
+        subscriber(message.data, metadata);
+      } else {
+        (subscriber as (data: unknown) => void)(message.data);
+      }
     } catch {
       // Keep one subscriber failure from blocking the remaining handlers.
     }
@@ -207,6 +217,8 @@ export function WebSocketProvider({
 
   // Subscriber map for message routing
   const subscribersRef = useRef<SubscriberMap>(new Map());
+  // Subscribers that asked for each frame's metadata as a second argument
+  const metadataSubscribersRef = useRef(new WeakSet<MessageCallback>());
 
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
@@ -274,7 +286,12 @@ export function WebSocketProvider({
           ? getBatchedMessages(message.data)
           : [message];
       for (const routed of messages) {
-        dispatchMessage(subscribersRef.current, routed, receivedAt);
+        dispatchMessage(
+          subscribersRef.current,
+          metadataSubscribersRef.current,
+          routed,
+          receivedAt
+        );
       }
     },
     [clearAuthenticationTimer]
@@ -512,7 +529,14 @@ export function WebSocketProvider({
    * Subscribe to a specific message type
    */
   const subscribe = useCallback(
-    <T,>(messageType: string, subscriber: MessageCallback<T>) => {
+    <T,>(
+      messageType: string,
+      subscriber: MessageCallback<T>,
+      options?: SubscribeOptions
+    ) => {
+      if (options?.withMetadata) {
+        metadataSubscribersRef.current.add(subscriber as MessageCallback);
+      }
       // Get or create subscriber set for this message type
       if (!subscribersRef.current.has(messageType)) {
         subscribersRef.current.set(messageType, new Set());

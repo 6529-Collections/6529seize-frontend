@@ -5,9 +5,9 @@ import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { WebSocketContext } from "@/services/websocket/WebSocketContext";
 import type { WebSocketConfig } from "@/services/websocket/WebSocketTypes";
 import {
-  getWebSocketMessageMetadata,
   getWebSocketMessageReason,
   WebSocketStatus,
+  type MessageCallback,
 } from "@/services/websocket/WebSocketTypes";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
@@ -541,18 +541,29 @@ describe("WebSocketProvider", () => {
         ws.triggerOpen();
       });
       const received: { type: WsMessageType; data: unknown }[] = [];
+      const metadata: Parameters<MessageCallback>[1][] = [];
       act(() => {
         for (const type of types) {
-          result.current.subscribe(type, (data: unknown) => {
-            received.push({ type, data });
-          });
+          result.current.subscribe(
+            type,
+            (data: unknown, frame) => {
+              received.push({ type, data });
+              metadata.push(frame);
+            },
+            { withMetadata: true }
+          );
         }
       });
-      return { ws, received };
+      return {
+        ws,
+        received,
+        metadata,
+        subscribe: result.current.subscribe,
+      };
     };
 
     it("records frame timings and the gap marker for subscribers", () => {
-      const { ws, received } = openSubscribedSocket([
+      const { ws, metadata } = openSubscribedSocket([
         WsMessageType.DROP_UPDATE,
       ]);
       const before = Date.now();
@@ -583,15 +594,14 @@ describe("WebSocketProvider", () => {
         });
       });
 
-      const [withFields, firstInWave, oldServer, malformed] = received.map(
-        ({ data }) => getWebSocketMessageMetadata(data)
-      );
+      const [withFields, firstInWave, oldServer, malformed] = metadata;
       expect(withFields).toMatchObject({
         serverReceivedAt: 1_700_000_000_000,
         sentAt: 1_700_000_000_050,
         prevSerialNo: 41,
       });
       expect(withFields?.receivedAt).toBeGreaterThanOrEqual(before);
+      expect(oldServer?.receivedAt).toBeGreaterThanOrEqual(before);
       expect(firstInWave?.prevSerialNo).toBeNull();
       // Old servers send no gap marker: absent, not null.
       expect(oldServer).not.toHaveProperty("prevSerialNo");
@@ -601,8 +611,57 @@ describe("WebSocketProvider", () => {
       expect(malformed).not.toHaveProperty("prevSerialNo");
     });
 
+    it("passes frame metadata only to subscribers that ask for it", () => {
+      const { ws, received, subscribe } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+      const plain = jest.fn();
+      act(() => {
+        subscribe(WsMessageType.DROP_UPDATE, plain);
+      });
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: 1 },
+          sent_at: 1_700_000_000_000,
+        });
+      });
+
+      expect(received).toHaveLength(1);
+      // Existing subscribers keep receiving the data alone.
+      expect(plain.mock.calls).toEqual([[{ id: 1 }]]);
+    });
+
+    it("gives frames with absent or primitive data their own fields", () => {
+      const { ws, received, metadata } = openSubscribedSocket([
+        WsMessageType.RESYNC_REQUIRED,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.RESYNC_REQUIRED,
+          sent_at: 1_700_000_000_010,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.RESYNC_REQUIRED,
+          data: 7,
+          sent_at: 1_700_000_000_020,
+          prev_serial_no: 3,
+        });
+      });
+
+      expect(received.map(({ data }) => data)).toEqual([undefined, 7]);
+      expect(metadata[0]).toMatchObject({ sentAt: 1_700_000_000_010 });
+      expect(metadata[0]).not.toHaveProperty("prevSerialNo");
+      expect(metadata[1]).toMatchObject({
+        sentAt: 1_700_000_000_020,
+        prevSerialNo: 3,
+      });
+    });
+
     it("dispatches the frames of a batch in order, each with its own fields", () => {
-      const { ws, received } = openSubscribedSocket([
+      const { ws, received, metadata } = openSubscribedSocket([
         WsMessageType.DROP_UPDATE,
         WsMessageType.DROP_DELETE,
       ]);
@@ -633,13 +692,60 @@ describe("WebSocketProvider", () => {
         { type: WsMessageType.DROP_DELETE, data: { drop_id: "b" } },
         { type: WsMessageType.DROP_UPDATE, data: { id: "c" } },
       ]);
-      expect(getWebSocketMessageMetadata(received[0]!.data)).toMatchObject({
+      expect(metadata[0]).toMatchObject({
         prevSerialNo: 1,
         sentAt: 1_700_000_000_001,
       });
-      expect(getWebSocketMessageMetadata(received[2]!.data)).not.toHaveProperty(
-        "prevSerialNo"
-      );
+      expect(metadata[2]).not.toHaveProperty("prevSerialNo");
+    });
+
+    it("keeps each batched frame's fields apart when their data are equal", () => {
+      const { ws, received, metadata } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: [
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "same" },
+                prev_serial_no: 4,
+              },
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "same" },
+                prev_serial_no: 9,
+              },
+            ],
+          },
+        });
+      });
+
+      expect(received).toHaveLength(2);
+      expect(metadata.map((frame) => frame.prevSerialNo)).toEqual([4, 9]);
+    });
+
+    it("dispatches at most 500 frames of one batch", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: Array.from({ length: 600 }, (_, index) => ({
+              type: WsMessageType.DROP_UPDATE,
+              data: { id: index },
+            })),
+          },
+        });
+      });
+
+      expect(received).toHaveLength(500);
     });
 
     it("ignores a batch without a message list", () => {

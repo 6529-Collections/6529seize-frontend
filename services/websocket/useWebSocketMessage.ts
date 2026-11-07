@@ -2,7 +2,11 @@
 
 import { useEffect, useEffectEvent } from "react";
 import { useWebSocket } from "./useWebSocket";
-import { WebSocketStatus } from "./WebSocketTypes";
+import {
+  WebSocketStatus,
+  type MessageCallback,
+  type SubscribeOptions,
+} from "./WebSocketTypes";
 import type { WsMessageType } from "@/helpers/Types";
 
 /**
@@ -11,12 +15,14 @@ import type { WsMessageType } from "@/helpers/Types";
  * @template T - Type of the message data
  * @param messageType - The type of message to subscribe to
  * @param callback - Function to call when a message of this type is received
+ * @param options - `withMetadata` also passes each frame's own metadata
  * @returns
  *   - isConnected: Whether the WebSocket is connected
  */
 export function useWebSocketMessage<T = any>(
   messageType: WsMessageType,
-  callback: (messageData: T) => void
+  callback: MessageCallback<T>,
+  options?: SubscribeOptions
 ) {
   // Get WebSocket context
   const { subscribe, status } = useWebSocket();
@@ -26,9 +32,12 @@ export function useWebSocketMessage<T = any>(
   // Is the WebSocket connected?
   const isConnected = status === WebSocketStatus.CONNECTED;
 
+  const withMetadata = options?.withMetadata === true;
   useEffect(() => {
-    return subscribe<T>(messageType, onMessage);
-  }, [messageType, subscribe]);
+    return withMetadata
+      ? subscribe<T>(messageType, onMessage, { withMetadata })
+      : subscribe<T>(messageType, onMessage);
+  }, [messageType, subscribe, withMetadata]);
 
   return {
     isConnected,

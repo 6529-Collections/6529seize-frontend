@@ -3,6 +3,7 @@
 import { createContext } from "react";
 import type {
   MessageCallback,
+  SubscribeOptions,
   WebSocketStatus,
   WebSocketConfig,
 } from "./WebSocketTypes";
@@ -23,7 +24,8 @@ export interface WebSocketContextValue {
   // Subscription methods
   subscribe: <T>(
     messageType: WsMessageType,
-    callback: MessageCallback<T>
+    callback: MessageCallback<T>,
+    options?: SubscribeOptions
   ) => () => void;
 
   // Send method for dispatching messages

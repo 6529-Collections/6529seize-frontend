@@ -21,6 +21,24 @@ describe('useWebSocketMessage', () => {
     expect(unsubscribe).toHaveBeenCalled();
   });
 
+  it('asks for frame metadata only when the caller opts in, and forwards it', () => {
+    const subscribe = jest.fn().mockReturnValue(jest.fn());
+    useWebSocket.mockReturnValue({ subscribe, status: WebSocketStatus.CONNECTED });
+    const callback = jest.fn();
+    renderHook(() =>
+      useWebSocketMessage('TYPE' as any, callback, { withMetadata: true })
+    );
+    expect(subscribe).toHaveBeenCalledWith('TYPE', expect.any(Function), {
+      withMetadata: true,
+    });
+    const listener = subscribe.mock.calls[0][1];
+    listener({ id: 1 }, { receivedAt: 5, prevSerialNo: 4 });
+    expect(callback).toHaveBeenCalledWith(
+      { id: 1 },
+      { receivedAt: 5, prevSerialNo: 4 }
+    );
+  });
+
   it('keeps the listener registered while disconnected', () => {
     const subscribe = jest.fn();
     useWebSocket.mockReturnValue({ subscribe, status: WebSocketStatus.DISCONNECTED });
