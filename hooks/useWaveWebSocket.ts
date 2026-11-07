@@ -48,6 +48,25 @@ function subscribeToAuthChanges(onChange: () => void): () => void {
 
 const getServerToken = (): null => null;
 
+/**
+ * The typing socket declares its purpose (WAVES-PLAN 0.12), so the server
+ * leaves it out of drop fan-out and sends it typing events only. Servers that
+ * do not know the parameter ignore it.
+ */
+const TYPING_SOCKET_PURPOSE = "typing";
+
+export const getTypingSocketUrl = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("purpose", TYPING_SOCKET_PURPOSE);
+    return parsed.toString();
+  } catch (error) {
+    // Without the purpose the server sends this socket every drop again.
+    console.warn("[useWaveWebSocket] typing socket URL kept as is", error);
+    return url;
+  }
+};
+
 function messageType(event: MessageEvent<unknown>): string | null {
   if (typeof event.data !== "string") return null;
   try {
@@ -103,7 +122,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     let reconnectAttempts = 0;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let authenticationTimeout: ReturnType<typeof setTimeout> | null = null;
-    const url = getWebSocketUrl();
+    const url = getTypingSocketUrl(getWebSocketUrl());
 
     const clearAuthenticationTimeout = () => {
       if (authenticationTimeout !== null) {

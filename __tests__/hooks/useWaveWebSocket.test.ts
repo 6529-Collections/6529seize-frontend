@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
+import { getTypingSocketUrl, useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 import { AUTH_TOKEN_CHANGED_EVENT } from "@/services/auth/auth.utils";
 
 let mockAppActive = true;
@@ -83,6 +83,16 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
+it("declares the typing purpose and keeps other URL parts", () => {
+  expect(getTypingSocketUrl("wss://ws.example/prod?region=eu")).toBe(
+    "wss://ws.example/prod?region=eu&purpose=typing"
+  );
+  expect(getTypingSocketUrl("wss://ws.example/?purpose=app")).toBe(
+    "wss://ws.example/?purpose=typing"
+  );
+  expect(getTypingSocketUrl("not a url")).toBe("not a url");
+});
+
 it("preserves anonymous public-wave subscriptions", () => {
   const { result } = renderHook(() => useWaveWebSocket("wave"));
   act(() => socket().open());
@@ -96,7 +106,8 @@ it("authenticates in a frame before subscribing, without putting credentials in 
   mockToken = "sender-token";
   const { result } = renderHook(() => useWaveWebSocket("private-wave"));
   act(() => socket().open());
-  expect(socket().url).toBe("wss://waves.example");
+  // The typing socket declares its purpose; no credentials ride in the URL.
+  expect(socket().url).toBe("wss://waves.example/?purpose=typing");
   expect(socket().send.mock.calls).toEqual([
     [JSON.stringify({ type: "AUTHENTICATE", access_token: "sender-token" })],
   ]);
