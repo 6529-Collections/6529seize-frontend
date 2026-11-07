@@ -21,6 +21,7 @@ import {
   type ActionEvent,
   type ActionState,
   type IllegalTransitionReporter,
+  type TransitionObserver,
 } from "@/lib/action-lifecycle";
 import {
   DropSize,
@@ -73,6 +74,8 @@ export interface ChatStoreOptions {
   readonly keyOf?: ((drop: Drop) => string) | undefined;
   /** Receives illegal pending-send transitions; default: the lifecycle's. */
   readonly lifecycleReporter?: IllegalTransitionReporter | null | undefined;
+  /** Also observes pending-send transitions, besides app-wide observers. */
+  readonly transitionObserver?: TransitionObserver | null | undefined;
 }
 
 /** The create request's client ID, echoed on its response and creation frame. */
@@ -156,6 +159,7 @@ export class ChatStore {
     | IllegalTransitionReporter
     | null
     | undefined;
+  private readonly transitionObserver: TransitionObserver | null | undefined;
   /** Settled client IDs, oldest first. */
   private readonly settled = new Set<string>();
   /** Source of wave versions; never repeats, even after a wave is deleted. */
@@ -164,6 +168,7 @@ export class ChatStore {
   constructor(options: ChatStoreOptions = {}) {
     this.keyOf = options.keyOf ?? ((drop) => drop.id);
     this.lifecycleReporter = options.lifecycleReporter;
+    this.transitionObserver = options.transitionObserver;
   }
 
   // Reads -------------------------------------------------------------------
@@ -429,7 +434,10 @@ export class ChatStore {
   }
 
   private transition(state: ActionState, event: ActionEvent): ActionState {
-    return transition(state, event, { reporter: this.lifecycleReporter });
+    return transition(state, event, {
+      reporter: this.lifecycleReporter,
+      observer: this.transitionObserver,
+    });
   }
 
   private isPendingKey(key: string): boolean {

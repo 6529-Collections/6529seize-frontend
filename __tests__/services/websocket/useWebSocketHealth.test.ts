@@ -19,7 +19,7 @@ jest.mock("@/services/websocket/useWebSocket");
 jest.mock("@/services/auth/auth.utils", () => ({
   AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   getAuthJwt: jest.fn(),
-  WALLET_AUTH_COOKIE: "wallet-auth",
+  WALLET_AUTH_COOKIE: "__Host-wallet-auth",
 }));
 
 type CookieChangeEvent = {

@@ -1,24 +1,24 @@
-# Competition Setup Schedule
+# Decision Setup Schedule
 
 ## Overview
 
-The `Schedule` step sets timing for `Rank` and `Approve` competitions.
-`Rank` competitions set submission, voting, and winner announcement timing.
-`Approve` competitions set when the wave opens and an optional end date.
+The `Schedule` step sets timing for `Rank` and `Approve` decisions.
+`Rank` decisions set submission, voting, and winner announcement timing.
+`Approve` decisions set when the wave opens and an optional end date.
 
-The default view keeps the schedule decisions needed for the selected wave type
+The default view keeps the schedule settings needed for the selected wave type
 visible. Less common schedule expansion and optional end controls are grouped
 in expandable sections named for those controls.
 
 ## Location in the Site
 
-- Competition setup: `/waves/{waveId}/competitions/new`
+- Decision setup: `/waves/{waveId}/decisions/new`
 - Step label: `Schedule`
-- User-reachable in `Rank` and `Approve` competition setup
+- User-reachable in `Rank` and `Approve` decision setup
 
 ## Entry Points
 
-- Open **Competitions**, then **+ Competition**, and choose Rank or Approve and continue
+- Open **Decisions**, then **+ Decision**, and choose Rank or Approve and continue
   `Setup -> Access -> Schedule`.
 - Use `Back` from `Drops`, `Guidelines`, `Voting`, `Outcomes`, or `Description`.
 - On large screens, use the step rail to return to `Schedule` after you have
@@ -26,7 +26,7 @@ in expandable sections named for those controls.
 
 ## User Journey
 
-For scheduled `Rank` competitions:
+For scheduled `Rank` decisions:
 
 1. Set `Submissions Open`.
 2. Set `Voting Opens` (must be at or after submission start).
@@ -49,7 +49,7 @@ For `Perpetual Ranking` waves:
 3. Continue to `Drops`. There are no winner announcements or end date. No
    optional-settings section is shown, including an empty one.
 
-For `Approve` competitions:
+For `Approve` decisions:
 
 1. Set `Wave Start` in the visible calendar.
 2. To limit the duration, open `Wave end` and optionally set
@@ -108,12 +108,12 @@ For `Approve` competitions:
 
 ## Related Pages
 
-- [Competition Setup Index](../../create/README.md)
+- [Decision Setup Index](../../create/README.md)
 - [Waves Index](../../README.md)
 - [Wave Create Modal Entry Points](../../create/feature-modal-entry-points.md)
-- [Competition Setup Setup Step](../../create/feature-overview-step.md)
-- [Competition Setup Group Access and Permissions](../../create/feature-groups-step.md)
-- [Competition Setup Drop Settings](feature-drops-step.md)
-- [Competition Setup Guidelines Step](../../create/feature-rules-step.md)
-- [Wave Leaderboard Decision Timeline](../../leaderboard/feature-decision-timeline.md)
+- [Decision Setup Setup Step](../../create/feature-overview-step.md)
+- [Decision Setup Group Access and Permissions](../../create/feature-groups-step.md)
+- [Decision Setup Drop Settings](feature-drops-step.md)
+- [Decision Setup Guidelines Step](../../create/feature-rules-step.md)
+- [Wave Leaderboard Results Timeline](../../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../../README.md)

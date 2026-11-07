@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   type RefObject,
 } from "react";
@@ -20,7 +21,8 @@ export const CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS = 15_000;
 
 type FetchNewestSince = (
   waveId: string,
-  sinceSerialNo: number
+  sinceSerialNo: number,
+  untilCaughtUp: boolean
 ) => Promise<void>;
 
 interface TrailingCheck {
@@ -69,7 +71,7 @@ export function useWaveGapSync({
   /** A server-rendered feed is still being applied to the wave. */
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly isWaveInUse: (waveId: string) => boolean;
-  /** Fetches every drop past a verified serial. */
+  /** Fetches every drop past a verified serial, page after page. */
   readonly fetchNewestSince: FetchNewestSince;
   /**
    * Fetches the wave's newest page and records any missed history between it
@@ -112,7 +114,7 @@ export function useWaveGapSync({
       }
       void (async () => {
         try {
-          await fetchNewestSince(waveId, sinceSerialNo);
+          await fetchNewestSince(waveId, sinceSerialNo, true);
         } catch (error) {
           reportBackgroundTaskError(
             "Failed to sync newest wave messages:",
@@ -229,7 +231,11 @@ export function useWaveGapSync({
   }, []);
   useGapSyncLifecycle({ clearAll, latestRef });
 
-  return { requestGapSync, noteRealtimeFrame, requestResync };
+  // A stable object keeps the updater's processIncomingDrop stable too.
+  return useMemo(
+    () => ({ requestGapSync, noteRealtimeFrame, requestResync }),
+    [noteRealtimeFrame, requestGapSync, requestResync]
+  );
 }
 
 /**

@@ -24,7 +24,6 @@ import VersionReloadScreen, {
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
-import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import {
@@ -177,12 +176,10 @@ export default function RootLayout({
         <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
-        <AwsRumProvider>
-          <Providers>
-            <DynamicHeadTitle />
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </Providers>
-        </AwsRumProvider>
+        <Providers>
+          <DynamicHeadTitle />
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </Providers>
       </body>
     </html>
   );

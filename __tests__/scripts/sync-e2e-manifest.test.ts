@@ -385,7 +385,10 @@ describe("E2E pack manifest", () => {
         alias: "e2ee-staging",
         environments: ["staging"],
         triggers: ["manual"],
-        specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+        specs: [
+          "tests/staging-e2ee/encrypted-dm-staging.spec.ts",
+          "tests/staging-e2ee/wave-unread-staging.spec.ts",
+        ],
         projects: ["web-desktop-chromium"],
         workers: 1,
         env: {

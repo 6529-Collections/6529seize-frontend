@@ -547,9 +547,9 @@ describe("BrainMobile", () => {
   });
 
   it.each([
-    "/waves/1/competitions",
-    "/waves/1/competitions/alpha",
-    "/waves/1/competitions/new",
+    "/waves/1/decisions",
+    "/waves/1/decisions/alpha",
+    "/waves/1/decisions/new",
   ])(
     "preserves the selected competition route on a missing wave (%s)",
     (pathname) => {
@@ -584,7 +584,7 @@ describe("BrainMobile", () => {
   );
 
   it.each([
-    "/waves/1/competitions/alpha?tab=leaderboard",
+    "/waves/1/decisions/alpha?tab=leaderboard",
     "/waves/2?tab=chat",
     "/network?wave=1",
   ])(

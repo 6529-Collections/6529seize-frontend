@@ -3298,8 +3298,6 @@ function buildPublicRuntime() {
     ALLOWLIST_API_ENDPOINT: mockApiOrigin,
     API_ENDPOINT: mockApiOrigin,
     BASE_ENDPOINT: frontendBaseUrl,
-    IPFS_API_ENDPOINT:
-      process.env.IPFS_API_ENDPOINT || "https://ipfs.6529.io/api/v0",
     IPFS_GATEWAY_ENDPOINT:
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:

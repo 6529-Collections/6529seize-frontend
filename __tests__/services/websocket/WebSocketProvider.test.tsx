@@ -7,6 +7,7 @@ import type { WebSocketConfig } from "@/services/websocket/WebSocketTypes";
 import {
   getWebSocketMessageReason,
   WebSocketStatus,
+  type FrameMetadataCallback,
 } from "@/services/websocket/WebSocketTypes";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
@@ -175,6 +176,35 @@ describe("WebSocketProvider", () => {
 
       expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
       expect(result.current.config).toEqual({ url: "ws://test" });
+    });
+
+    it("reports the page's build as client_version, and nothing that is not one", () => {
+      const { publicEnv } = require("@/config/env");
+      const previousVersion = publicEnv.VERSION;
+      try {
+        publicEnv.VERSION = "0123456789ABCDEF0123456789abcdef01234567";
+        const wrapper = createWrapper({ url: "ws://test" });
+        const { result } = renderHook(
+          () => React.useContext(WebSocketContext)!,
+          { wrapper }
+        );
+        act(() => {
+          result.current.connect("test-token");
+        });
+        expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+          "ws://test/?recovery_capability=resync_v1&client_version=0123456789abcdef0123456789abcdef01234567"
+        );
+
+        publicEnv.VERSION = "local build";
+        act(() => {
+          result.current.connect("test-token");
+        });
+        expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+          "ws://test/?recovery_capability=resync_v1"
+        );
+      } finally {
+        publicEnv.VERSION = previousVersion;
+      }
     });
 
     it("connects and transitions status correctly", () => {
@@ -524,6 +554,261 @@ describe("WebSocketProvider", () => {
 
       expect(callback).toHaveBeenCalledWith({ id: 1 });
       expect(receivedReason).toBe(WS_DROP_UPDATE_REASON_POLL_RESPONSE);
+    });
+
+    const openSubscribedSocket = (types: readonly WsMessageType[]) => {
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      act(() => {
+        result.current.connect("token");
+      });
+      const ws = (globalThis.WebSocket as unknown as jest.Mock).mock.results[0]
+        ?.value as MockWebSocket;
+      act(() => {
+        ws.triggerOpen();
+      });
+      const received: { type: WsMessageType; data: unknown }[] = [];
+      const metadata: Parameters<FrameMetadataCallback>[1][] = [];
+      act(() => {
+        for (const type of types) {
+          result.current.subscribe(
+            type,
+            (data: unknown, frame) => {
+              received.push({ type, data });
+              metadata.push(frame);
+            },
+            { withMetadata: true }
+          );
+        }
+      });
+      return {
+        ws,
+        received,
+        metadata,
+        subscribe: result.current.subscribe,
+      };
+    };
+
+    it("records frame timings and the gap marker for subscribers", () => {
+      const { ws, metadata } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+      const before = Date.now();
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "with-fields" },
+          server_received_at: 1_700_000_000_000,
+          sent_at: 1_700_000_000_050,
+          prev_serial_no: 41,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "first-in-wave" },
+          prev_serial_no: null,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "old-server" },
+        });
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: "malformed" },
+          server_received_at: "soon",
+          sent_at: -1,
+          prev_serial_no: 1.5,
+        });
+      });
+
+      const [withFields, firstInWave, oldServer, malformed] = metadata;
+      expect(withFields).toMatchObject({
+        serverReceivedAt: 1_700_000_000_000,
+        sentAt: 1_700_000_000_050,
+        prevSerialNo: 41,
+      });
+      expect(withFields?.receivedAt).toBeGreaterThanOrEqual(before);
+      expect(oldServer?.receivedAt).toBeGreaterThanOrEqual(before);
+      expect(firstInWave?.prevSerialNo).toBeNull();
+      // Old servers send no gap marker: absent, not null.
+      expect(oldServer).not.toHaveProperty("prevSerialNo");
+      expect(oldServer?.serverReceivedAt).toBeUndefined();
+      expect(malformed?.serverReceivedAt).toBeUndefined();
+      expect(malformed?.sentAt).toBeUndefined();
+      expect(malformed).not.toHaveProperty("prevSerialNo");
+    });
+
+    it("passes frame metadata only to subscribers that ask for it", () => {
+      const { ws, received, subscribe } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+      const plain = jest.fn();
+      act(() => {
+        subscribe(WsMessageType.DROP_UPDATE, plain);
+      });
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: 1 },
+          sent_at: 1_700_000_000_000,
+        });
+      });
+
+      expect(received).toHaveLength(1);
+      // Existing subscribers keep receiving the data alone.
+      expect(plain.mock.calls).toEqual([[{ id: 1 }]]);
+    });
+
+    it("types the metadata argument only for registrations that ask for it", () => {
+      const { subscribe } = openSubscribedSocket([]);
+      const unsubscribers = [
+        subscribe<{ id: number }>(WsMessageType.DROP_UPDATE, (data) => {
+          expect(data).toBeDefined();
+        }),
+        subscribe<{ id: number }>(
+          WsMessageType.DROP_UPDATE,
+          (_data, frame) => {
+            expect(frame.receivedAt).toEqual(expect.any(Number));
+          },
+          { withMetadata: true }
+        ),
+        // @ts-expect-error A plain registration gets no metadata argument.
+        subscribe(WsMessageType.DROP_UPDATE, (_data: unknown, frame: object) =>
+          expect(frame).toBeDefined()
+        ),
+      ];
+      for (const unsubscribe of unsubscribers) unsubscribe();
+    });
+
+    it("gives frames with absent or primitive data their own fields", () => {
+      const { ws, received, metadata } = openSubscribedSocket([
+        WsMessageType.RESYNC_REQUIRED,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.RESYNC_REQUIRED,
+          sent_at: 1_700_000_000_010,
+        });
+        ws.triggerMessage({
+          type: WsMessageType.RESYNC_REQUIRED,
+          data: 7,
+          sent_at: 1_700_000_000_020,
+          prev_serial_no: 3,
+        });
+      });
+
+      expect(received.map(({ data }) => data)).toEqual([undefined, 7]);
+      expect(metadata[0]).toMatchObject({ sentAt: 1_700_000_000_010 });
+      expect(metadata[0]).not.toHaveProperty("prevSerialNo");
+      expect(metadata[1]).toMatchObject({
+        sentAt: 1_700_000_000_020,
+        prevSerialNo: 3,
+      });
+    });
+
+    it("dispatches the frames of a batch in order, each with its own fields", () => {
+      const { ws, received, metadata } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+        WsMessageType.DROP_DELETE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: [
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "a" },
+                prev_serial_no: 1,
+                sent_at: 1_700_000_000_001,
+              },
+              { type: WsMessageType.DROP_DELETE, data: { drop_id: "b" } },
+              { type: WsMessageType.DROP_UPDATE, data: { id: "c" } },
+              "not a frame",
+              { type: "AUTHENTICATED" },
+              { type: "BATCH", data: { messages: [] } },
+            ],
+          },
+        });
+      });
+
+      expect(received).toEqual([
+        { type: WsMessageType.DROP_UPDATE, data: { id: "a" } },
+        { type: WsMessageType.DROP_DELETE, data: { drop_id: "b" } },
+        { type: WsMessageType.DROP_UPDATE, data: { id: "c" } },
+      ]);
+      expect(metadata[0]).toMatchObject({
+        prevSerialNo: 1,
+        sentAt: 1_700_000_000_001,
+      });
+      expect(metadata[2]).not.toHaveProperty("prevSerialNo");
+    });
+
+    it("keeps each batched frame's fields apart when their data are equal", () => {
+      const { ws, received, metadata } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: [
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "same" },
+                prev_serial_no: 4,
+              },
+              {
+                type: WsMessageType.DROP_UPDATE,
+                data: { id: "same" },
+                prev_serial_no: 9,
+              },
+            ],
+          },
+        });
+      });
+
+      expect(received).toHaveLength(2);
+      expect(metadata.map((frame) => frame.prevSerialNo)).toEqual([4, 9]);
+    });
+
+    it("dispatches at most 500 frames of one batch", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({
+          type: "BATCH",
+          data: {
+            messages: Array.from({ length: 600 }, (_, index) => ({
+              type: WsMessageType.DROP_UPDATE,
+              data: { id: index },
+            })),
+          },
+        });
+      });
+
+      expect(received).toHaveLength(500);
+    });
+
+    it("ignores a batch without a message list", () => {
+      const { ws, received } = openSubscribedSocket([
+        WsMessageType.DROP_UPDATE,
+      ]);
+
+      act(() => {
+        ws.triggerMessage({ type: "BATCH", data: { messages: "nope" } });
+        ws.triggerMessage({ type: "BATCH" });
+      });
+
+      expect(received).toEqual([]);
     });
 
     it("handles wrapped payload messages and routes nested data", () => {

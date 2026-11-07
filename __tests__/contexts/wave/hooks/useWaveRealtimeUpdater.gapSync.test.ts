@@ -6,6 +6,10 @@ import {
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync";
 import { hydrateRealtimeChatDrop } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import { WAVE_READ_DEBOUNCE_MS } from "@/hooks/useMarkWaveNotificationsRead.debounce";
+import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { SidebarWave } from "@/types/waves.types";
+import { createElement, type ReactNode } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -15,7 +19,7 @@ import type { WaveMessagesUpdate } from "@/contexts/wave/hooks/types";
 let mockGapSyncEnabled = true;
 const mockWebSocketCallbacks = new Map<
   WsMessageType,
-  (messageData: unknown) => void
+  Set<(messageData: unknown) => void>
 >();
 
 jest.mock("@/contexts/wave/hooks/useWaveRealtimeUpdater.flags", () => ({
@@ -27,7 +31,9 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
     messageType: WsMessageType,
     callback: (messageData: unknown) => void
   ) => {
-    mockWebSocketCallbacks.set(messageType, callback);
+    const callbacks = mockWebSocketCallbacks.get(messageType) ?? new Set();
+    callbacks.add(callback);
+    mockWebSocketCallbacks.set(messageType, callbacks);
     return { isConnected: true };
   },
 }));
@@ -186,10 +192,10 @@ const makeProps = (store: Store) => ({
 });
 
 const emit = async (type: WsMessageType, data: unknown) => {
-  const callback = mockWebSocketCallbacks.get(type);
-  if (!callback) throw new Error(`No callback for ${type}`);
+  const callbacks = mockWebSocketCallbacks.get(type);
+  if (!callbacks?.size) throw new Error(`No callback for ${type}`);
   await act(async () => {
-    callback(data);
+    callbacks.forEach((callback) => callback(data));
     await Promise.resolve();
   });
 };
@@ -622,6 +628,64 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
         );
       }
     );
+
+    // A fetch returns at most 1,000 drops (20 pages of 50) per call.
+    const PAGE_CAP = 1_000;
+    const cappedServer = (serverDrops: readonly ApiDrop[]) =>
+      jest.fn(async (_waveId: string, since: number) => {
+        const newer = serverDrops.filter((drop) => drop.serial_no > since);
+        const drops = newer
+          .slice(0, PAGE_CAP)
+          .map((drop) => ({ ...drop, wave: viewerWave }) as ApiDrop);
+        return {
+          drops,
+          highestSerialNo: drops.at(-1)?.serial_no ?? since,
+          reachedPageLimit: newer.length > PAGE_CAP,
+        };
+      });
+
+    it("pages past the fetch cap until a drop lost in a large backlog is repaired", async () => {
+      const serverDrops = Array.from({ length: 2_500 }, (_, index) =>
+        frameDrop(11 + index)
+      );
+      const lostSerial = 2_400;
+      const { props, store } = setup();
+      props.syncNewestMessages.mockImplementation(cappedServer(serverDrops));
+
+      // Every drop arrives by socket except one past the first two pages.
+      for (const drop of serverDrops) {
+        if (drop.serial_no === lostSerial) continue;
+        await emit(WsMessageType.DROP_UPDATE, drop);
+      }
+      await advance(CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS * 2);
+
+      expect(
+        props.syncNewestMessages.mock.calls.map(([, since]) => since)
+      ).toEqual([10, 1_010, 2_010]);
+      expect(
+        store[WAVE]!.drops.some((drop) => drop.serial_no === lostSerial)
+      ).toBe(true);
+      expect(store[WAVE]!.latestFetchedSerialNo).toBe(2_510);
+    });
+
+    it("keeps one page per fetch on the per-message path when the flag is off", async () => {
+      mockGapSyncEnabled = false;
+      const serverDrops = Array.from({ length: 1_500 }, (_, index) =>
+        frameDrop(11 + index)
+      );
+      const { props } = setup();
+      props.syncNewestMessages.mockImplementation(cappedServer(serverDrops));
+
+      await emit(WsMessageType.DROP_UPDATE, serverDrops.at(-1)!);
+      await advance(1_000);
+
+      expect(props.syncNewestMessages).toHaveBeenCalledTimes(1);
+      expect(props.syncNewestMessages).toHaveBeenCalledWith(
+        WAVE,
+        10,
+        expect.any(AbortSignal)
+      );
+    });
   });
 
   describe("viewer context of socket drops", () => {
@@ -690,6 +754,58 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
   });
 
   describe("read markers", () => {
+    it.each([false, true])(
+      "never refetches the wave lists for reads of the open wave, while another wave's badge still counts (gap sync %s)",
+      async (gapSync) => {
+        mockGapSyncEnabled = gapSync;
+        const invalidateNotifications = jest.fn();
+        const store: Store = {
+          [WAVE]: { drops: [storedDrop(10)], latestFetchedSerialNo: 10 },
+        };
+        const props = makeProps(store);
+        const sidebarWaves = [{ id: WAVE }, { id: "wave-2" }] as SidebarWave[];
+        const { result } = renderHook(
+          (current: ReturnType<typeof makeProps>) => {
+            useWaveRealtimeUpdater(current);
+            return useNewDropCounter(WAVE, sidebarWaves, jest.fn());
+          },
+          {
+            initialProps: props,
+            wrapper: ({ children }: { readonly children: ReactNode }) =>
+              createElement(
+                ReactQueryWrapperContext.Provider,
+                { value: { invalidateNotifications } as never },
+                children
+              ),
+          }
+        );
+
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+        await emit(
+          WsMessageType.DROP_UPDATE,
+          frameDrop(12, {
+            id: "frame-other",
+            wave: { id: "wave-2", is_direct_message: false },
+            author: { id: "author-b", handle: "author-b" },
+            created_at: 1_000,
+          })
+        );
+        await advance(WAVE_READ_DEBOUNCE_MS);
+
+        // The open wave is read, the other wave is not.
+        expect(readPosts().length).toBeGreaterThan(0);
+        for (const [request] of readPosts()) {
+          expect(request.endpoint).toBe(`notifications/wave/${WAVE}/read`);
+        }
+        expect(invalidateNotifications).toHaveBeenCalled();
+        for (const [options] of invalidateNotifications.mock.calls) {
+          expect(options).toEqual({ refreshWaveLists: false });
+        }
+        // The other wave's unread badge still updates from the socket.
+        expect(result.current.newDropsCounts["wave-2"]?.count).toBe(1);
+      }
+    );
+
     it("sends one read per window for a burst", async () => {
       setup();
 
@@ -731,7 +847,11 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
       expect(readPosts()).toHaveLength(1);
     });
 
-    it("drops a leaving read that cannot be sent at once", async () => {
+    // A leaving read for an ordinary wave marks the whole wave read when the
+    // server gets it, so it may wait only briefly (2 s) for auth or for an
+    // earlier read; later it would also cover messages that arrived after
+    // the reader left.
+    it("sends a leaving read once auth is ready within the grace", async () => {
       (getAuthJwt as jest.Mock).mockReturnValue(null);
       const { props, rerender } = setup();
 
@@ -741,10 +861,62 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
       rerender({ ...props, activeWaveId: "wave-2" });
       await advance(WAVE_READ_DEBOUNCE_MS);
 
-      // Sent later, an ordinary-wave read would also mark messages that
-      // arrived after the reader left.
+      expect(readPosts()).toHaveLength(1);
+    });
+
+    it("drops a leaving read that waits past the grace", async () => {
+      (getAuthJwt as jest.Mock).mockReturnValue(null);
+      const { props, rerender } = setup();
+
+      await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+      rerender({ ...props, activeWaveId: "wave-2" });
+      await advance(2_500);
+      (getAuthJwt as jest.Mock).mockReturnValue("test-jwt");
+      rerender({ ...props, activeWaveId: "wave-2" });
+      await advance(WAVE_READ_DEBOUNCE_MS);
+
       expect(readPosts()).toHaveLength(0);
     });
+
+    it.each([
+      { settlesAfterMs: 1_000, leavingReadSent: true },
+      { settlesAfterMs: 2_500, leavingReadSent: false },
+    ])(
+      "sends a leaving read after an earlier read that settles in $settlesAfterMs ms: $leavingReadSent",
+      async ({ settlesAfterMs, leavingReadSent }) => {
+        let settleEarlierRead: () => void = () => undefined;
+        (
+          commonApiPostWithoutBodyAndResponse as jest.Mock
+        ).mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              settleEarlierRead = resolve;
+            })
+        );
+        const { props, rerender } = setup();
+
+        // The batched read goes out and is still on its way when the
+        // reader sees one more post and leaves.
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+        await advance(WAVE_READ_DEBOUNCE_MS);
+        expect(readPosts()).toHaveLength(1);
+        await emit(WsMessageType.DROP_UPDATE, frameDrop(12));
+        rerender({ ...props, activeWaveId: "wave-2" });
+        await advance(0);
+        expect(readPosts()).toHaveLength(1);
+
+        await advance(settlesAfterMs);
+        await act(async () => {
+          settleEarlierRead();
+          await Promise.resolve();
+        });
+        await advance(0);
+
+        // At most one request at a time: the leaving read rides on the
+        // earlier read's trailing send, or is dropped.
+        expect(readPosts()).toHaveLength(leavingReadSent ? 2 : 1);
+      }
+    );
 
     it("does not queue reads while the tab is hidden", async () => {
       setup();

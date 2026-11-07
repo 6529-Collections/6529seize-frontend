@@ -103,6 +103,10 @@ keep the individual picture editor.
 - The editor supports one source at a time (meme or uploaded file).
 - The modal does not include crop or transform controls.
 - Maximum upload size is 2MB.
+- Uploaded files go to the 6529 API, which checks the file's contents and
+  pins the image on IPFS. A file whose contents are not a PNG, JPEG, GIF or
+  WebP image is rejected whatever its name, and the editor shows the server's
+  message.
 
 ## Related Pages
 

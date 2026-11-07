@@ -392,7 +392,7 @@ describe("MyStreamWave registration", () => {
 
   it.each([
     { pathname: "/waves/wave-1", visible: true },
-    { pathname: "/waves/wave-1/competitions/alpha", visible: false },
+    { pathname: "/waves/wave-1/decisions/alpha", visible: false },
   ])(
     "scopes the shared Chat gallery action on $pathname with a native submission target",
     ({ pathname, visible }) => {
@@ -413,9 +413,9 @@ describe("MyStreamWave registration", () => {
   );
 
   it.each([
-    "/waves/wave-1/competitions",
-    "/waves/wave-1/competitions/alpha",
-    "/waves/wave-1/competitions/new",
+    "/waves/wave-1/decisions",
+    "/waves/wave-1/decisions/alpha",
+    "/waves/wave-1/decisions/new",
   ])(
     "keeps the competition error route available on a missing wave (%s)",
     (pathname) => {
@@ -429,7 +429,7 @@ describe("MyStreamWave registration", () => {
   );
 
   it("renders the competition error and Retry without wave metadata", () => {
-    mockPathname = "/waves/wave-1/competitions/alpha";
+    mockPathname = "/waves/wave-1/decisions/alpha";
     mockResolvedWave = undefined;
     const retry = jest.fn();
     render(
@@ -441,7 +441,7 @@ describe("MyStreamWave registration", () => {
       </HeaderProvider>
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "This competition could not be loaded"
+      "This decision could not be loaded"
     );
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
@@ -483,7 +483,7 @@ describe("MyStreamWave registration", () => {
   );
 
   it.each([
-    "/waves/wave-1/competitions/alpha?tab=leaderboard",
+    "/waves/wave-1/decisions/alpha?tab=leaderboard",
     "/waves/wave-2?tab=chat",
     "/network?wave=wave-1",
   ])(

@@ -430,7 +430,7 @@ describe("CreateCurationDropContent supported URLs", () => {
       })
     );
     const checkbox = screen.getByRole("checkbox", {
-      name: "I agree to this competition’s terms.",
+      name: "I agree to this decision’s terms.",
     });
     expect(checkbox).toHaveAccessibleDescription(terms);
     expect(checkbox).not.toBeChecked();

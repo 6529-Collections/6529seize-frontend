@@ -216,10 +216,10 @@ it.each([
     };
     render(<CompetitionDraftEditor wave={parent} onClose={jest.fn()} />);
     // Switching type resets form defaults; review must still read the parent chat.
-    fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "Decision type" }));
     fireEvent.click(screen.getByRole("option", { name: "Approve" }));
     fireEvent.change(
-      screen.getByRole("textbox", { name: "Competition name" }),
+      screen.getByRole("textbox", { name: "Decision name" }),
       {
         target: { value: "Review chat access" },
       }
@@ -256,7 +256,7 @@ it("defaults anonymous submissions off and saves the creator's explicit choice",
   expect(anonymity).not.toBeChecked();
   fireEvent.click(anonymity);
   expect(anonymity).toBeChecked();
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Anonymous art" },
   });
   await waitFor(() =>
@@ -331,7 +331,7 @@ it.each([false, true])(
       />
     );
     expect(
-      screen.getByRole("combobox", { name: "Competition type" })
+      screen.getByRole("combobox", { name: "Decision type" })
     ).toBeDisabled();
     for (let step = 0; step < 2; step++)
       fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -427,9 +427,9 @@ it("saves a published original through review without publishing again", async (
 it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
   jest.useFakeTimers();
   render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
-  fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+  fireEvent.click(screen.getByRole("combobox", { name: "Decision type" }));
   fireEvent.click(screen.getByRole("option", { name: "Approve" }));
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Approve test" },
   });
   await act(async () => {
@@ -462,7 +462,7 @@ it("keeps an incomplete Approve draft locally and validates the threshold before
 
 it("continues to save Rank drafts without an approval threshold", async () => {
   render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Rank test" },
   });
   await waitFor(() => expect(createCompetition).toHaveBeenCalledTimes(1), {
@@ -539,7 +539,7 @@ it("does not autosave an empty threshold and resumes autosaving after it is corr
 it("flushes the latest edit when closing without publishing", async () => {
   const onClose = jest.fn();
   render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Quick close" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
@@ -551,20 +551,20 @@ it("flushes the latest edit when closing without publishing", async () => {
 it("restores incomplete edits after closing and reopening", async () => {
   const onClose = jest.fn();
   const view = render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+  fireEvent.click(screen.getByRole("combobox", { name: "Decision type" }));
   fireEvent.click(screen.getByRole("option", { name: "Approve" }));
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Incomplete Approve" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
   await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   view.unmount();
   render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  expect(screen.getByRole("textbox", { name: "Competition name" })).toHaveValue(
+  expect(screen.getByRole("textbox", { name: "Decision name" })).toHaveValue(
     "Incomplete Approve"
   );
   expect(
-    screen.getByRole("combobox", { name: "Competition type" })
+    screen.getByRole("combobox", { name: "Decision type" })
   ).toHaveTextContent("Approve");
   expect(createCompetition).not.toHaveBeenCalled();
 });
@@ -580,7 +580,7 @@ it("saves edits made during creation using the returned draft version before clo
   );
   const onClose = jest.fn();
   render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "First name" },
   });
   await act(async () => {
@@ -588,9 +588,9 @@ it("saves edits made during creation using the returned draft version before clo
   });
   expect(createCompetition).toHaveBeenCalledTimes(1);
   expect(
-    screen.getByRole("textbox", { name: "Competition name" })
+    screen.getByRole("textbox", { name: "Decision name" })
   ).toBeEnabled();
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Latest name" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
@@ -617,7 +617,7 @@ it("replays an uncertain create before saving newer edits after reopening", asyn
   const view = render(
     <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
   );
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Original name" },
   });
   await act(async () => {
@@ -628,7 +628,7 @@ it("replays an uncertain create before saving newer edits after reopening", asyn
   view.unmount();
   const onClose = jest.fn();
   render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Recovered name" },
   });
   await act(async () => {
@@ -651,7 +651,7 @@ it("resolves a lost update response before reverting to the last saved values", 
   const view = render(
     <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
   );
-  const name = screen.getByRole("textbox", { name: "Competition name" });
+  const name = screen.getByRole("textbox", { name: "Decision name" });
   fireEvent.change(name, { target: { value: "Saved name" } });
   await act(async () => {
     jest.advanceTimersByTime(1000);
@@ -733,7 +733,7 @@ it("offers Close editor, Previous and Publish on review and publishes the saved 
       config: expect.objectContaining({ description: "Latest description" }),
     })
   );
-  expect(mockReplace).toHaveBeenCalledWith("/waves/wave/competitions/draft");
+  expect(mockReplace).toHaveBeenCalledWith("/waves/wave/decisions/draft");
 });
 
 it.each([false, true])(
@@ -749,11 +749,11 @@ it.each([false, true])(
         <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
       );
       fireEvent.click(
-        screen.getByRole("combobox", { name: "Competition type" })
+        screen.getByRole("combobox", { name: "Decision type" })
       );
       fireEvent.click(screen.getByRole("option", { name: "Approve" }));
       fireEvent.change(
-        screen.getByRole("textbox", { name: "Competition name" }),
+        screen.getByRole("textbox", { name: "Decision name" }),
         { target: { value: "Unfinished approve draft" } }
       );
       const leaving = new Event("beforeunload", { cancelable: true });

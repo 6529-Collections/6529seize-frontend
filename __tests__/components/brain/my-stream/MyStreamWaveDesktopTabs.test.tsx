@@ -211,7 +211,7 @@ describe("MyStreamWaveDesktopTabs", () => {
       mockWaveInfo.isChatWave = true;
       mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.MY_VOTES];
       if (source === "pathname") {
-        mockPathname = "/waves/wave-1/competitions/older";
+        mockPathname = "/waves/wave-1/decisions/older";
       } else {
         searchParamsGet.mockImplementation((key) =>
           key === "competition" ? "older" : null
@@ -254,7 +254,7 @@ describe("MyStreamWaveDesktopTabs", () => {
         "Leaderboard",
         "Votes",
         "Settings",
-        "Competitions",
+        "Decisions",
         "Curators' choice",
       ]);
     }
