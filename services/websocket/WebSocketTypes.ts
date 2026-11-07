@@ -64,6 +64,17 @@ export const WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS = 3_000;
 
 export const WEBSOCKET_RECOVERY_CAPABILITY = "resync_v1";
 
+/** How the socket's current authenticated session came about. */
+export interface WebSocketConnectionInfo {
+  /** Changes every time the socket authenticates, in place or not. */
+  readonly revision: number;
+  /**
+   * `initial`: the tab's first connection. `reconnect`: a new socket after
+   * an earlier one. `reauthenticated`: a rotated token on the open socket.
+   */
+  readonly kind: "initial" | "reconnect" | "reauthenticated";
+}
+
 /**
  * Callback type for message subscribers
  */

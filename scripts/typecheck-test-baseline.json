@@ -769,7 +769,7 @@
     "__tests__/services/auth/immediate-validation.utils.test.ts": 2,
     "__tests__/services/auth/session-v2.utils.test.ts": 5,
     "__tests__/services/wallet-signatures/structured-wallet-signatures.test.ts": 1,
-    "__tests__/services/websocket/useWebSocketHealth.test.ts": 21,
+    "__tests__/services/websocket/useWebSocketHealth.test.ts": 9,
     "__tests__/services/websocket/WebSocketProvider.test.tsx": 39,
     "__tests__/standalone/StandaloneTheMemesMintPageClient.test.tsx": 1,
     "__tests__/useWaveRealtimeUpdater.test.ts": 1,

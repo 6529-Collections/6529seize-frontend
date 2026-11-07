@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { getTypingSocketUrl, useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 import { AUTH_TOKEN_CHANGED_EVENT } from "@/services/auth/auth.utils";
+import { fakeJwt } from "../helpers/fakeJwt";
 
 let mockAppActive = true;
 jest.mock("@/hooks/useMobileAppActivity", () => ({
@@ -286,4 +287,97 @@ it("retains manual disconnect across activity changes and permits a new wave", (
   expect(socket().send).toHaveBeenLastCalledWith(
     JSON.stringify({ type: "SUBSCRIBE_TO_WAVE", wave_id: "second" })
   );
+});
+
+describe("token rotation for the same identity", () => {
+  const ALICE = fakeJwt({ id: "1", sub: "0xalice" });
+  const ALICE_ROTATED = fakeJwt({ id: "2", sub: "0xalice" });
+  const ALICE_ROTATED_AGAIN = fakeJwt({ id: "3", sub: "0xalice" });
+  const BOB = fakeJwt({ id: "4", sub: "0xbob" });
+  const authenticateFrame = (token: string) =>
+    JSON.stringify({ type: "AUTHENTICATE", access_token: token });
+  const subscribeFrame = JSON.stringify({
+    type: "SUBSCRIBE_TO_WAVE",
+    wave_id: "wave",
+  });
+
+  it("re-authenticates the open socket in place and keeps its subscription", () => {
+    mockToken = ALICE;
+    const { result } = renderHook(() => useWaveWebSocket("wave"));
+    act(() => {
+      socket().open();
+      socket().message({ type: "AUTHENTICATED" });
+    });
+
+    act(() => changeToken(ALICE_ROTATED));
+
+    expect(sockets).toHaveLength(1);
+    expect(socket().close).not.toHaveBeenCalled();
+    expect(result.current.socket).toBe(socket());
+    expect(socket().send.mock.calls.map(([frame]) => frame)).toEqual([
+      authenticateFrame(ALICE),
+      subscribeFrame,
+      authenticateFrame(ALICE_ROTATED),
+    ]);
+    act(() => socket().message({ type: "AUTHENTICATED" }));
+    expect(socket().send).toHaveBeenCalledTimes(3);
+    expect(result.current.socket).toBe(socket());
+  });
+
+  it("sends a token that rotated during the handshake once the first is accepted", () => {
+    mockToken = ALICE;
+    renderHook(() => useWaveWebSocket("wave"));
+    act(() => socket().open());
+    act(() => changeToken(ALICE_ROTATED));
+    expect(socket().send).toHaveBeenCalledTimes(1);
+
+    act(() => socket().message({ type: "AUTHENTICATED" }));
+
+    expect(socket().send.mock.calls.map(([frame]) => frame)).toEqual([
+      authenticateFrame(ALICE),
+      subscribeFrame,
+      authenticateFrame(ALICE_ROTATED),
+    ]);
+    expect(sockets).toHaveLength(1);
+  });
+
+  it("closes on a rejected rotation and retries with a newer token", () => {
+    mockToken = ALICE;
+    const { result } = renderHook(() => useWaveWebSocket("wave"));
+    act(() => {
+      socket().open();
+      socket().message({ type: "AUTHENTICATED" });
+    });
+    act(() => changeToken(ALICE_ROTATED));
+    act(() => socket().message({ type: "AUTHENTICATION_FAILED" }));
+
+    expect(socket().close).toHaveBeenCalledWith(4008, "Authentication failed");
+    expect(result.current.socket).toBeNull();
+    act(() => jest.advanceTimersByTime(60000));
+    expect(sockets).toHaveLength(1);
+
+    act(() => changeToken(ALICE_ROTATED_AGAIN));
+    expect(sockets).toHaveLength(2);
+    act(() => socket().open());
+    expect(socket().send).toHaveBeenLastCalledWith(
+      authenticateFrame(ALICE_ROTATED_AGAIN)
+    );
+  });
+
+  it("replaces the socket when the identity changes", () => {
+    mockToken = ALICE;
+    renderHook(() => useWaveWebSocket("wave"));
+    const first = socket();
+    act(() => {
+      first.open();
+      first.message({ type: "AUTHENTICATED" });
+    });
+
+    act(() => changeToken(BOB));
+
+    expect(first.close).toHaveBeenCalledTimes(1);
+    expect(sockets).toHaveLength(2);
+    act(() => socket().open());
+    expect(socket().send).toHaveBeenLastCalledWith(authenticateFrame(BOB));
+  });
 });

@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useWebSocketHealth } from "@/services/websocket/useWebSocketHealth";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocket } from "@/services/websocket/useWebSocket";
+import type { WebSocketContextValue } from "@/services/websocket/WebSocketContext";
 import { Capacitor } from "@capacitor/core";
 
 let mockAppActive = true;
@@ -74,9 +75,15 @@ class MockBroadcastChannel {
 const mockUseWebSocket = useWebSocket as jest.MockedFunction<
   typeof useWebSocket
 >;
+// Each test sets only the socket fields the hook reads.
+const socketState = (
+  state: Partial<WebSocketContextValue>
+): WebSocketContextValue => state as WebSocketContextValue;
 const mockGetAuthJwt = getAuthJwt as jest.Mock;
 const mockConnect = jest.fn();
 const mockDisconnect = jest.fn();
+const mockReauthenticate = jest.fn();
+const mockEnsureLive = jest.fn();
 
 let setIntervalSpy: jest.SpyInstance;
 let clearIntervalSpy: jest.SpyInstance;
@@ -152,11 +159,15 @@ describe("useWebSocketHealth", () => {
     mockAppActive = true;
     jest.clearAllMocks();
     jest.clearAllTimers();
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.DISCONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.DISCONNECTED,
+      })
+    );
     mockGetAuthJwt.mockReturnValue(null);
     delete (window as any).cookieStore;
     delete (window as any).BroadcastChannel;
@@ -213,12 +224,16 @@ describe("useWebSocketHealth", () => {
       send: jest.fn(),
       config: { url: "ws://localhost" },
     };
-    mockUseWebSocket.mockReturnValue({
-      ...socketMethods,
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        ...socketMethods,
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
     const { rerender } = renderHook(useWebSocketHealth);
     mockAppActive = false;
     rerender();
@@ -231,12 +246,16 @@ describe("useWebSocketHealth", () => {
     act(() => window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT)));
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
     mockGetAuthJwt.mockReturnValue("return-token");
-    mockUseWebSocket.mockReturnValue({
-      ...socketMethods,
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.DISCONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        ...socketMethods,
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.DISCONNECTED,
+      })
+    );
     mockAppActive = true;
     rerender();
     expect(mockConnect).toHaveBeenCalledWith("return-token");
@@ -245,11 +264,15 @@ describe("useWebSocketHealth", () => {
 
   it("disconnects when no token is present but the socket is connected", () => {
     mockGetAuthJwt.mockReturnValue(null);
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
 
@@ -275,11 +298,15 @@ describe("useWebSocketHealth", () => {
     const { cookieStoreMock, trigger } = setupCookieStoreWithAddEventListener();
 
     mockGetAuthJwt.mockReturnValue("token-a");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
 
@@ -297,7 +324,8 @@ describe("useWebSocketHealth", () => {
       });
     });
 
-    expect(mockConnect).toHaveBeenCalledWith("token-b");
+    // A connected socket takes the new token through the provider.
+    expect(mockReauthenticate).toHaveBeenCalledWith("token-b");
 
     mockDisconnect.mockClear();
     mockGetAuthJwt.mockReturnValue(null);
@@ -330,11 +358,15 @@ describe("useWebSocketHealth", () => {
     const { trigger } = setupCookieStoreWithAddEventListener();
 
     mockGetAuthJwt.mockReturnValue("token-a");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
 
@@ -382,11 +414,15 @@ describe("useWebSocketHealth", () => {
       MockBroadcastChannel as unknown as typeof BroadcastChannel;
 
     mockGetAuthJwt.mockReturnValue("token-1");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.DISCONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.DISCONNECTED,
+      })
+    );
 
     const { unmount } = renderHook(() => useWebSocketHealth());
 
@@ -421,11 +457,15 @@ describe("useWebSocketHealth", () => {
   });
   it("responds to same-tab auth token change events", () => {
     mockGetAuthJwt.mockReturnValue("token-a");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
 
@@ -436,7 +476,9 @@ describe("useWebSocketHealth", () => {
       window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT));
     });
 
-    expect(mockConnect).toHaveBeenCalledWith("token-b");
+    // The provider keeps the socket for the same identity, replaces it otherwise.
+    expect(mockReauthenticate).toHaveBeenCalledWith("token-b");
+    expect(mockConnect).not.toHaveBeenCalled();
   });
 
   it("broadcasts token changes to other listeners when detected", () => {
@@ -464,14 +506,19 @@ describe("useWebSocketHealth", () => {
   it("does not reconnect an already connected socket when the tab resumes", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       setDocumentVisibilityState("hidden");
@@ -486,14 +533,19 @@ describe("useWebSocketHealth", () => {
   it("reconnects a disconnected socket once when focus follows a visibility resume", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.DISCONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.DISCONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       setDocumentVisibilityState("hidden");
@@ -510,14 +562,19 @@ describe("useWebSocketHealth", () => {
   it("does not keep a stale hidden timestamp when a resume is deduped", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       window.dispatchEvent(new Event("focus"));
@@ -540,17 +597,22 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).not.toHaveBeenCalled();
   });
 
-  it("reconnects only once when the token changes during a long-hidden resume", () => {
+  it("re-authenticates once, without a liveness check, when the token changes during a long-hidden resume", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("token-a");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       setDocumentVisibilityState("hidden");
@@ -564,21 +626,96 @@ describe("useWebSocketHealth", () => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
 
-    expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockConnect).toHaveBeenCalledWith("token-b");
+    // An unanswered re-authentication replaces the socket on its own.
+    expect(mockReauthenticate).toHaveBeenCalledTimes(1);
+    expect(mockReauthenticate).toHaveBeenCalledWith("token-b");
+    expect(mockEnsureLive).not.toHaveBeenCalled();
+    expect(mockConnect).not.toHaveBeenCalled();
+  });
+
+  it("checks a connected socket's liveness after a long-hidden resume instead of reconnecting it", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+    mockReauthenticate.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:01:01.000Z"));
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    // The provider keeps it if a frame arrived while hidden.
+    expect(mockEnsureLive).toHaveBeenCalledTimes(1);
+    expect(mockEnsureLive).toHaveBeenCalledWith(
+      new Date("2026-04-07T10:00:00.000Z").getTime()
+    );
+    expect(mockConnect).not.toHaveBeenCalled();
+    expect(mockReauthenticate).not.toHaveBeenCalled();
+  });
+
+  it("leaves a connected socket alone after a short hidden period", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTED,
+      })
+    );
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:00:59.000Z"));
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(mockEnsureLive).not.toHaveBeenCalled();
+    expect(mockConnect).toHaveBeenCalledTimes(0);
   });
 
   it("reconnects a connecting socket after a long-hidden resume", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTING,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.CONNECTING,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       setDocumentVisibilityState("hidden");
@@ -598,14 +735,19 @@ describe("useWebSocketHealth", () => {
   it("reconnects an authenticating socket after a long-hidden resume", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.AUTHENTICATING,
-    });
+    mockUseWebSocket.mockReturnValue(
+      socketState({
+        connect: mockConnect,
+        disconnect: mockDisconnect,
+        reauthenticate: mockReauthenticate,
+        ensureLive: mockEnsureLive,
+        status: WebSocketStatus.AUTHENTICATING,
+      })
+    );
 
     renderHook(() => useWebSocketHealth());
     mockConnect.mockClear();
+    mockReauthenticate.mockClear();
 
     act(() => {
       setDocumentVisibilityState("hidden");
