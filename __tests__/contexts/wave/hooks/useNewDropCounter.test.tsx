@@ -291,6 +291,14 @@ describe("useNewDropCounter", () => {
 
   it("resolves an unknown-wave compact ref before counting it", async () => {
     jest.useFakeTimers();
+    try {
+      await resolvesUnknownWaveCompactRef();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  const resolvesUnknownWaveCompactRef = async () => {
     fetchDropByIdBatched.mockResolvedValue({
       wave: { id: "unknown-wave" },
       author: { handle: "other" },
@@ -327,8 +335,7 @@ describe("useNewDropCounter", () => {
       await jest.advanceTimersByTimeAsync(MAX_REFRESH_DELAY_MS);
     });
     expect(refetch).toHaveBeenCalledTimes(1);
-    jest.useRealTimers();
-  });
+  };
 
   it("does not count the connected profile's compact content ref", () => {
     const refetch = jest.fn();
@@ -505,6 +512,11 @@ describe("useNewDropCounter", () => {
       });
     });
 
+    afterAll(() => {
+      // Back to jsdom's own getter on the prototype.
+      Reflect.deleteProperty(document, "visibilityState");
+    });
+
     beforeEach(() => {
       jest.useFakeTimers();
       visibility = "visible";
@@ -543,6 +555,17 @@ describe("useNewDropCounter", () => {
       expect(early).toHaveBeenCalledTimes(1);
     });
 
+    it("never waits longer than 20 seconds for the first refresh", async () => {
+      randomUnit.mockRestore();
+      randomUnit = mockRandomUnit(0.999_999_9);
+      const late = renderCounter();
+      emitDropUpdate({ waveId: "unknown-late" });
+      await advance(19_000);
+      expect(late).not.toHaveBeenCalled();
+      await advance(1_000);
+      expect(late).toHaveBeenCalledTimes(1);
+    });
+
     it("gives drops after a refresh one trailing refresh after the minimum gap", async () => {
       const refetch = renderCounter();
       emitDropUpdate({ waveId: "unknown-1" });
@@ -575,6 +598,32 @@ describe("useNewDropCounter", () => {
       });
       await advance(11_000);
       expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("defers a refresh that comes due in a hidden tab, then keeps the gap", async () => {
+      const refetch = renderCounter();
+      emitDropUpdate({ waveId: "unknown-1" });
+      visibility = "hidden";
+      await advance(5 * 60_000);
+      expect(refetch).not.toHaveBeenCalled();
+
+      // Showing the tab schedules a fresh jittered refresh, not an instant
+      // one, so tabs shown together still spread out.
+      visibility = "visible";
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      await advance(11_000 - 1);
+      expect(refetch).not.toHaveBeenCalled();
+      await advance(1);
+      expect(refetch).toHaveBeenCalledTimes(1);
+
+      // The refresh counts: the next drop waits out the 30 s gap.
+      emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
+      await advance(30_000 + 11_000 - 1);
+      expect(refetch).toHaveBeenCalledTimes(1);
+      await advance(1);
+      expect(refetch).toHaveBeenCalledTimes(2);
     });
 
     it("cancels a pending refresh on unmount", async () => {
