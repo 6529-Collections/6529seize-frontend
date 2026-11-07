@@ -12,12 +12,18 @@ import "@/styles/wave-navigation-transition.css";
 import "@/styles/animations.css";
 import "@/styles/globals.css";
 
+import LegacyBrowserNotice from "@/components/legacy-browser/LegacyBrowserNotice";
+import {
+  LEGACY_BROWSER_FLAG_SCRIPT,
+  LEGACY_BROWSER_NOTICE_SCRIPT,
+  LEGACY_BROWSER_STYLES,
+  LEGACY_BROWSER_SYNTAX_SCRIPT,
+} from "@/components/legacy-browser/legacyBrowserGate";
 import VersionReloadScreen, {
   VERSION_RELOAD_STYLES,
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
-import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import {
@@ -41,7 +47,6 @@ import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
 import localFont from "next/font/local";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
-import { connection } from "next/server";
 
 // Any route that fetches while rendering stays request-time, so its data is
 // never frozen at build. Routes that fetch nothing are unaffected. Pages move
@@ -71,7 +76,7 @@ export const viewport: Viewport = {
   maximumScale: 10,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
@@ -79,14 +84,10 @@ export default async function RootLayout({
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
   // The shell reads nothing from the request: every visitor gets the same
   // HTML, and the browser decides native iOS, the EULA gate and NFT
-  // purchasing. connection() is the deliberate opt-out that keeps routes
-  // rendering per request by default. It cannot be removed yet: shell
-  // components call useSearchParams() outside a Suspense boundary, which
-  // fails the build for any route Next tries to prerender. A page that
-  // exports `dynamic = "force-static"` skips it and is prerendered. See
-  // "Static Rendering Readiness" in
+  // purchasing. A route that reads no request data and fetches nothing while
+  // it renders is prerendered. Wave and chat routes stay request-time in
+  // their own segments. See "Static Rendering Readiness" in
   // ops/docs/developer/next-config-runtime-rationale.md.
-  await connection();
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
@@ -101,6 +102,18 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* First, before any bundle: browsers that cannot run the site (iOS
+            before 16.4) get a notice instead of a dead page. */}
+        <style dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_STYLES }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_FLAG_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_SYNTAX_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_NOTICE_SCRIPT }}
+        />
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
         <script
@@ -159,15 +172,14 @@ export default async function RootLayout({
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
+        <LegacyBrowserNotice baseEndpoint={publicEnv.BASE_ENDPOINT} />
         <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
-        <AwsRumProvider>
-          <Providers>
-            <DynamicHeadTitle />
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </Providers>
-        </AwsRumProvider>
+        <Providers>
+          <DynamicHeadTitle />
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </Providers>
       </body>
     </html>
   );

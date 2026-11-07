@@ -19,7 +19,7 @@ updates. When auth is missing, the session disconnects and push updates pause.
 
 ## Entry Points
 
-- Open the app while signed in (`wallet-auth` cookie present).
+- Open the app while signed in (`__Host-wallet-auth` cookie present).
 - Sign in, sign out, or re-authenticate in the current tab.
 - Change auth state in another open tab.
 - Lose websocket transport while auth is still valid.
@@ -60,6 +60,10 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
+- When you follow or unfollow a wave, or someone adds you to one, on any
+  device, your wave lists and that wave refresh in every open tab once the
+  server announces the change. Changes for another connected account are left
+  until you switch to it.
 
 ## Edge Cases
 

@@ -92,6 +92,20 @@ describe("E2E pack manifest", () => {
     );
   });
 
+  it("registers the wave-preview desktop/mobile pack for PR CI", () => {
+    expect(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:wave-link-preview-sandbox"
+      )
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/social/wave-link-preview-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+    });
+  });
+
   it("runs native competitions on both web shells in a dedicated PR sandbox lane", () => {
     const native = packs.find(
       (pack) => pack.scriptKey === "test:e2e:native-competition-sandbox"
@@ -105,6 +119,7 @@ describe("E2E pack manifest", () => {
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/chat-render-budget-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {

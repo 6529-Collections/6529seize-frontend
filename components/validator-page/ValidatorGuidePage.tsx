@@ -6,7 +6,12 @@ import ValidatorFold from "./ValidatorFold";
 import ValidatorFoldOpener from "./ValidatorFoldOpener";
 import ValidatorMarkdown from "./ValidatorMarkdown";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
-import { ValidatorFeedback, ValidatorNeeds } from "./ValidatorSections";
+import {
+  ValidatorFeedback,
+  ValidatorNeeds,
+  ValidatorSwitch,
+  ValidatorUpgrade,
+} from "./ValidatorSections";
 import ValidatorSteps, { type ValidatorDebs } from "./ValidatorSteps";
 import { LINK, SECTION_HEADING } from "./validatorStyles";
 
@@ -17,9 +22,12 @@ import { LINK, SECTION_HEADING } from "./validatorStyles";
 export default function ValidatorGuidePage({
   platform,
   debs,
+  newest,
 }: {
   readonly platform: VisitorPlatform;
   readonly debs: ValidatorDebs;
+  /** The offered release's version, for the notes on it. */
+  readonly newest: string | undefined;
 }) {
   return (
     <ValidatorPageFrame current="guide">
@@ -36,6 +44,9 @@ export default function ValidatorGuidePage({
           . The app walks you through the rest.
         </p>
       </ValidatorPageHeader>
+
+      <ValidatorSwitch newest={newest} />
+      <ValidatorUpgrade newest={newest} />
 
       <section aria-labelledby="steps">
         <h2 id="steps" className="tw-sr-only">

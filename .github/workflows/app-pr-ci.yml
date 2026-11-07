@@ -40,6 +40,7 @@ jobs:
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
       app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
       core_playwright_required: ${{ steps.plan_outputs.outputs.core_playwright_required }}
+      all_mention_confirmation_required: ${{ steps.plan_outputs.outputs.all_mention_confirmation_required }}
       core_playwright_matrix: ${{ steps.plan_outputs.outputs.core_playwright_matrix }}
 
     steps:
@@ -219,6 +220,10 @@ jobs:
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
           const corePlaywrightLanes = [];
+          const allMentionBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/CreateDrop\.tsx$|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+          );
+          write("all_mention_confirmation_required", String(allMentionBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/collect\/|components\/collect\/|components\/nft-market-depth\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
@@ -227,7 +232,7 @@ jobs:
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
-          if (plan.checks.playwright_smoke.required || collectBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
+          if (plan.checks.playwright_smoke.required || collectBrowserRequired || allMentionBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
@@ -238,11 +243,17 @@ jobs:
           if (plan.checks.playwright_submission_artwork?.required) {
             corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
           }
+          if (plan.checks.playwright_profile_nic?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-profile-nic", label: "Profile NIC activity", runner: defaultRunner });
+          }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
           }
           if (plan.checks.playwright_wave_feature_usage?.required) {
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
+          }
+          if (plan.checks.playwright_drop_reactions?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-drop-reactions", label: "Live drop reaction details", runner: defaultRunner });
           }
           const bookmarksBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|i18n\/messages\/bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks|package\.json$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
@@ -255,6 +266,12 @@ jobs:
           );
           if (notificationsInboxRequired) {
             corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
+          }
+          const waveLinkPreviewRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|tests\/social\/wave-link-preview-sandbox\.spec\.ts$)/.test(file)
+          );
+          if (waveLinkPreviewRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-wave-link-preview", label: "Wave link previews desktop and mobile", runner: defaultRunner });
           }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
@@ -361,8 +378,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    # The complete native pack needs room for its dev-server bootstrap and tests.
-    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
+    # Allow full native and profile coverage to finish after dev-server bootstrap.
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell') && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -442,6 +459,14 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
+      - name: Run all mention confirmation browser checks
+        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.all_mention_confirmation_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention'
+
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
         env:
@@ -493,6 +518,10 @@ jobs:
         if: matrix.lane == 'playwright-notifications-inbox'
         run: ./bin/6529 run test:e2e:notifications-inbox-sandbox
 
+      - name: Run wave link preview browser pack
+        if: matrix.lane == 'playwright-wave-link-preview'
+        run: ./bin/6529 run test:e2e:wave-link-preview-sandbox
+
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
         env:
@@ -506,6 +535,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/wave-creation"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-creation"
         run: ./bin/6529 run test:e2e:wave-creation-sandbox
+
+      - name: Run drop reaction browser regression pack
+        if: matrix.lane == 'playwright-drop-reactions'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-reactions"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-reactions"
+        run: ./bin/6529 run test:e2e:reaction-sandbox
 
       - name: Run drop editing browser regression pack
         if: matrix.lane == 'playwright-drop-editing'
@@ -554,6 +590,13 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
         run: ./bin/6529 run test:e2e:profile-following-sandbox
 
+      - name: Run profile NIC activity browser regression pack
+        if: matrix.lane == 'playwright-profile-nic'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-nic"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-nic"
+        run: ./bin/6529 run test:e2e:profile-nic-sandbox
+
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.
       - name: Report browser lane memory pressure
@@ -591,7 +634,8 @@ jobs:
       contents: read
       issues: read
     strategy:
-      fail-fast: true
+      # Finish build and quality evidence even when independent browser checks fail.
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:

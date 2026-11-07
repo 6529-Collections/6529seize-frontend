@@ -1,8 +1,8 @@
-# Signed Messages
+# Signed Posts
 
 ## Overview
 
-Signed messages let a browser sign your drops so anyone can check that a post,
+Signed Posts let a browser or supported app sign your drops so anyone can check that a post,
 edit, delete, or reaction came from your wallet, without trusting 6529.io.
 A contract wallet's sign-in signature is checked on Ethereum by the reader's
 browser; when that check cannot run, the drop is not shown as signed. Your
@@ -16,7 +16,11 @@ instead of going out unsigned (see
 Signed messages are on for the website in production and staging. They
 are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
 build with the flag off shows none of the controls below and leaves writes
-unchanged.
+unchanged. In 6529 Mobile and 6529 Desktop they also need the
+`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag and a compatible released app.
+The website currently disables secure Desktop connection sharing with **Coming
+soon**, while retaining **Connect only** (see
+[In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 
 ## Location in the Site
 
@@ -30,7 +34,7 @@ unchanged.
   the seal by the timestamp.
 - Any page with a pending signed write: the **Couldn't sign this ...**
   prompt.
-- Preferences: `/preferences?tab=devices` (the **Devices** tab).
+- Preferences: `/preferences?tab=devices` (the **Device Permissions** tab).
 
 ## Entry Points
 
@@ -46,7 +50,7 @@ unchanged.
   date; the exact expiry time is only in the device-grant resource line. If
   the wallet declines or cannot sign that message, or the sign-in fails, the
   next sign-in on the same page uses the ordinary message without a grant.
-- **Sign in with encrypted messages (staging).** Where encrypted messages are
+- **Combined web sign-in.** Where encrypted messages are
   on, the same signature can also turn them on for this browser: the
   message then grants a second key (the browser's encrypted-messages key)
   with the same expiry, adds "It will also encrypt (send) and decrypt (read)
@@ -57,13 +61,29 @@ unchanged.
   server does not offer the combined message, or the browser cannot prepare
   the second key within two seconds, the sign-in grants signed messages only
   and encrypted messages keep their own one-signature prompt. Revoking the
-  device here also turns off encrypted messages for it.
-- **Turn on signed messages (one signature).** A logged-in user without a
-  grant in this browser sees this notice above the composer while the
-  composer is empty. **Turn on** asks for one wallet signature. The notice
-  can be dismissed for 30 days per wallet.
-- **Devices tab.** Preferences > Devices offers **Turn on signed messages in
-  this browser** when this browser can hold a key and has no grant.
+  combined grant here also turns off its encrypted messages. Separate grants
+  retain separate revocation.
+- **Turn on signed posts (one signature).** A signed-in user without a grant
+  sees the notice above an empty composer. **Turn on** opens the shared
+  permission dialog before any wallet request. Dismissing the setup notice
+  hides it for 30 days per wallet; it does not revoke anything.
+- **Account menu and Device Permissions.** When both permissions are missing,
+  **Post Signing & DM Encryption** opens a dialog with Signed Posts first and
+  the full Encrypted DMs explanation second. If only one is missing, it shows
+  **Enable Signed Posts** or **Enable Encrypted DMs**. The **Sign** button
+  explicitly names both or the remaining permission. The action is absent when
+  both are on. `/messages/encrypted` uses the same consent content inline.
+  No device-setup popup opens automatically after sign-in.
+- **Connection sharing.** Supported receiving apps can sign in and enroll from
+  one browser-approved secure link, without connecting a wallet in the app.
+  Connect-only sharing does not enable permissions. See
+  [Connect Device](../../navigation/feature-share-modal.md#connect-device).
+
+Combined setup uses distinct signing and encryption keys with one authorization.
+Explicit signing-only and encryption-only setup remain supported. If combined
+setup cannot complete, the user sees the result and explicit fallback choices;
+there is no silent switch to another requested permission. If signing succeeds
+but encryption registration fails, signing remains on while encryption is retried.
 
 ## What Happens
 
@@ -85,8 +105,8 @@ unchanged.
 
 ## When a Write Cannot Be Signed
 
-This applies only when this browser holds an active grant for the signed-in
-wallet. Without a grant, and in the apps, proxy sessions and browsers without
+This applies only when this browser (or app) holds an active grant for the
+signed-in wallet. Without a grant, and in proxy sessions and browsers without
 Ed25519, writes are sent unsigned exactly as before.
 
 - A write waits up to 10 seconds for its signature. The pending drop stays
@@ -124,24 +144,38 @@ Ed25519, writes are sent unsigned exactly as before.
 
 ## Renewal and Expiry
 
-- In a grant's last 14 days the composer notice reads **Signed messages end
-  on {date}** with **Renew** (one signature).
-- Grants are not used in their last minute. After expiry the browser has no
-  usable grant, so writes go unsigned as without a grant, and the notice
-  offers renewal.
+- Grants normally last 180 days. During the last 14 days the avatar status names
+  the permission's expiry and renewal reminders appear in the relevant area:
+  signing-only in Waves, encryption-only in Messages, and combined grants in both.
+  Messages includes the inbox and selected chats, with the reminder above the input.
+- Renewal requires another wallet signature. Renewing an existing encryption
+  device preserves its keys and history; expiry alone does not erase local history.
+- Signing grants are not used in their last minute. After they become unusable,
+  writes go unsigned as without a grant until renewed. The status identifies the
+  permission as expired once its expiry is reached.
+- `?showRenewal=true` previews reminder layout only in Waves or Messages. When
+  no permission is due, preview copy and disabled renewal actions make that clear.
 
-## Devices Tab
+## Device Permissions
 
-**Devices that can post as you** lists the grants of the profile's wallets,
-newest first. It shows at most the 100 newest grants, including expired and
-revoked ones, so an older grant can be missing from a long list. Each row
-shows the device label (for example "Chrome on macOS"), a **This device**
-marker, scopes, wallet, when it was added, when it expires (or expired or was
-revoked), when it was last used, and its status (**Active**, **Expired**,
-**Revoked**). **Revoke** asks for confirmation; earlier signatures stay
-verifiable. The tab shows loading, empty (**No device can post as you yet.**)
-and error (**Couldn't load your devices.** with **Try again**) states.
-Proxies see **Switch to your own profile to manage devices.**
+Preferences → **Device Permissions** lists **Authorized devices** with signing,
+encryption or combined permissions. It shows device names, **This device**,
+wallets, added/expiry/last-used dates and **Active**, **Expired** or **Revoked**
+status. Signing history includes at most the newest 100 grants, so older grants
+can be absent from a long list. Proxies cannot manage devices.
+
+Rename any unrevoked device you own from an authenticated browser or app. This
+updates the existing server name, reflected on other devices when their lists
+refresh; linked signing and encryption entries share it. It is not a local nickname.
+Generating a secure connection QR alone creates no active device entry: the
+receiving app must accept and register it.
+
+**Revoke** confirms exactly which permissions will stop. A combined grant revokes
+both Signed Posts and Encrypted DMs; a separate grant revokes only its permission.
+You cannot revoke half of a combined grant. Earlier post signatures remain
+verifiable. Revoking this encryption device clears its local encrypted keys and
+history, unlike renewal. Re-enabling does not restore deleted history without an
+encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-and-revocation).
 
 ## New-Device Alert
 
@@ -150,8 +184,7 @@ The browser checks the profile's grants when a wave opens and at most every
 browser has not seen and that is not one of its own keys, the composer notice
 shows **{label} can now post as you. Not you?** with **Revoke** and a dismiss
 control. The first list a browser sees for a wallet is its baseline, so a
-grant that already exists then never raises the alert; review the **Devices**
-tab for existing grants.
+grant that already exists then never raises the alert; review **Device Permissions** for existing grants.
 
 ## Checking a Drop's Signature
 
@@ -172,7 +205,7 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
   read, or a grant signed on another chain). An ordinary wallet whose
   signature does not match reads **The signature could not be verified**.
 - **Not signed by its author** for drops sent without a device signature.
-  Drops whose content moderation hides from you and anonymous competition
+  Drops whose content moderation hides from you and anonymous decision
   entries also read this way: their signed events are not shared.
 - **The signature could not be verified** when stored signatures do not
   match, or when the wallet signed the grant anywhere but the 6529 app
@@ -192,15 +225,15 @@ or Space, opens the same **Signature** dialog, so the browser checks the
 signature itself; the seal only reflects what 6529.io reports.
 
 - The seal is positive only. Unsigned drops show nothing: posts from the
-  native and desktop apps, older posts, and any drop edited without a
-  signature look exactly as before.
+  apps without an active signing grant, older posts, and any drop edited
+  without a signature look exactly as before.
 - It appears in the drop header of chat rows, feed cards, participation
   drops (including ended ones), the minimal identity row and the single-drop
   view, and by the timestamp of embedded drops: link previews of 6529 drop
   links and serial-number links, quoted drops, and leaderboard, winner,
   Memes and quick-vote cards. Activating it there opens the dialog without
   opening the linked or quoted drop.
-- Message search results and competition entry cards are single buttons, so
+- Message search results and decision entry cards are single buttons, so
   they show a static seal and add ", signed by its author" to the button's
   name.
 - Reply-to lines and the composer's reply or quote preview show no
@@ -208,7 +241,9 @@ signature itself; the seal only reflects what 6529.io reports.
 - On grouped chat rows, which have no header, a static seal appears beside
   the timestamp revealed on hover or swipe; use the drop menu's
   **Signature** item there.
-- A signed edit keeps the seal; an unsigned edit or a delete removes it.
+- A signed edit keeps the seal; an unsigned edit or a delete removes it. Live
+  edits update the recipient's author-signature status along with the content,
+  without requiring a reload.
 - The seal is hidden while the signed messages flag is off, for drops still
   being sent, and when the content is hidden by moderation or the author is
   anonymous.
@@ -238,9 +273,50 @@ chat's usual grouping), the header's seal stands for the whole group:
   unsigned edit updates it.
 - A header with no grouped posts behaves like any single drop.
 
+## In 6529 Mobile and 6529 Desktop
+
+Ordinary app sign-in uses its own session message, not the website's
+Sign-In with Ethereum message, and does not itself enable Signed Posts. A secure
+connection-sharing link can sign in and enroll a compatible app together. Direct
+setup and renewal can request one app grant instead: an EIP-712 typed-data signature (domain "6529 Device Grant")
+that the wallet shows as structured fields with this statement:
+
+- "Turn on signed messages on this device until 29 Apr 2027. This device will
+  sign your posts, edits, deletes and reactions so anyone can verify they
+  came from your wallet. It can't move funds, change your handle, add devices
+  or act as an admin. No transaction, no gas, no token approvals. (Device key
+  65942d9f...d8128d49)"
+- When encrypted messages are on and the wallet has a profile, the same
+  signature also turns them on for the app: the statement adds "It will also
+  encrypt (send) and decrypt (read) your end-to-end encrypted messages, which
+  6529.io cannot read." and ends "(Device key ..., encrypted messages key
+  ...)". The encrypted-messages key then registers in the background without
+  another prompt.
+
+The existing wallet wording is retained for this rollout. The grant's origin is
+"6529 Desktop" in the desktop app and the site host (6529.io) in the phone
+app. App grants last 180 days, appear under **Device Permissions**
+like any other grant (labelled, for example, "6529 Mobile on iPhone"), sign
+writes exactly as above, and anyone can verify them: the drop's
+**Signature** dialog checks the wallet's typed-data signature, or a contract
+wallet's EIP-1271 check on Ethereum. Revoking a combined app grant turns off both permissions. A separate grant
+revokes only its own permission.
+
+App wallets sign the grant inside the app. WalletConnect wallets receive an
+`eth_signTypedData_v4` request, so the wallet app must support typed-data
+signing (most do).
+
+Signed messages need WebCrypto Ed25519 keys: iOS 17 or later in 6529 Mobile
+(earlier iOS versions send writes unsigned exactly as before), or sufficiently recent Android WebView support. A pending Desktop
+implementation is not evidence that a released app supports it. Encrypted messages in 6529 Mobile need iOS
+16.4 or later.
+
 ## Availability and Edge Cases
 
-- Web only. 6529 Mobile and 6529 Desktop sign in exactly as before.
+- On the website, signing in turns signed messages on (see
+  [Entry Points](#entry-points)); in the apps, **Turn on signed messages**
+  asks for an app grant (see
+  [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 - Turning signed messages on never blocks sign-in: a wallet that declines or
   cannot sign the grant message can sign in again with the ordinary message.
 - Proxy sessions never sign and never request a grant.
@@ -250,8 +326,10 @@ chat's usual grouping), the header's seal stands for the whole group:
 
 ## Turning On When the Wallet Is Not Ready
 
-**Turn on**, **Renew** and **Turn on signed messages in this browser** run the
-same steps from one click and show a status line under the button.
+**Turn on** and the Device Permissions setup action first open the consent
+dialog. After you choose its **Sign** button, setup connects the matching wallet
+if needed and continues automatically to signing. **Renew** also uses that wallet
+connection/signing flow. Progress appears below the relevant action.
 
 - **No live wallet connection.** A locked browser wallet, an expired
   WalletConnect session or a wallet that did not reconnect after a reload
@@ -296,25 +374,25 @@ same steps from one click and show a status line under the button.
 
 ### Wallet-signed grant statement
 
-| Field                     | Current exception                                                                                                                                                                     |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `renderLegacyDeviceGrantStatement`, `buildDeviceGrantUrn`) |
-| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and turn on signed messages on this device until ...", or the earlier "let this device post as you" wording) and the resource line   |
-| Current fallback behavior | Always English, with a fixed UTC date in the form `29 Apr 2027` (earlier wording: `2027-04-29 00:30 UTC`), in every locale                                                            |
-| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                     |
-| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system      |
-| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one           |
+| Field                     | Current exception                                                                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `renderLegacyDeviceGrantStatement`, `buildDeviceGrantUrn`); the app grant statement in `lib/device-signing/app-grant.ts` |
+| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and turn on signed messages on this device until ...", or the earlier "let this device post as you" wording) and the resource line                                                                 |
+| Current fallback behavior | Always English, with a fixed UTC date in the form `29 Apr 2027` (earlier wording: `2027-04-29 00:30 UTC`), in every locale                                                                                                                          |
+| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                                                                                   |
+| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system                                                                    |
+| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one                                                                         |
 
 ### Signed messages UI
 
-| Field                     | Current exception                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, `components/device-signing/SignedWriteDecisionHost.tsx`, Preferences Devices tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropGroupSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
-| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Devices tab, signature dialogs, signed-by-author seals, "Couldn't sign" prompts); plural forms use `.one` and `.other` keys                                                                                                                                                                             |
-| Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                                                                                                                                                                                                                       |
-| User impact               | Users of other locales see English copy for this feature                                                                                                                                                                                                                                                                                                        |
-| Owner or follow-up        | Frontend localization maintainers; translations are outstanding now that the feature is on in production                                                                                                                                                                                                                                                        |
-| Expected remediation      | Add en-GB, fr-FR, es-ES and de-DE entries for the `signedMessages.*` and `preferences.tabs.devices` keys with fallback tests                                                                                                                                                                                                                                    |
+| Field                     | Current exception                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, `components/device-signing/SignedWriteDecisionHost.tsx`, Preferences Device Permissions tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropGroupSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
+| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Device Permissions tab, signature dialogs, signed-by-author seals, "Couldn't sign" prompts); plural forms use `.one` and `.other` keys                                                                                                                                                                             |
+| Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                                                                                                                                                                                                                                  |
+| User impact               | Users of other locales see English copy for this feature                                                                                                                                                                                                                                                                                                                   |
+| Owner or follow-up        | Frontend localization maintainers; translations are outstanding now that the feature is on in production                                                                                                                                                                                                                                                                   |
+| Expected remediation      | Add en-GB, fr-FR, es-ES and de-DE entries for the `signedMessages.*` and `preferences.tabs.devices` keys with fallback tests                                                                                                                                                                                                                                               |
 
 ## Related Pages
 
@@ -322,3 +400,33 @@ same steps from one click and show a status line under the button.
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)
+
+## Connection sharing and status
+
+The Connect Device modal offers source-browser approval for receiving-app signing
+and encryption keys. Its **6529 Desktop** secure option is visible but disabled
+with **Coming soon**; there is no automatic release-version check. Connect-only
+Desktop handoff remains available. The compatible Mobile flow uses one QR for
+sign-in and setup, with no receiving-wallet connection. Working receiver keys and
+history are preserved; source history is not copied. See
+[Encrypted messages](../../encrypted-messages.md#setup-through-connection-sharing).
+
+The avatar shield describes this device's two permissions independently of wallet
+connection. Its shared desktop tooltip includes connection status and Signed Posts /
+Encrypted DMs states; mobile prints the same information in the sidepanel. See
+[Device Status](../../navigation/feature-wallet-account-controls.md#device-status).
+
+The sign-in dialog retains **Cancel** and Escape without a top-right close button
+or SIWE/auth-version explanation. Backdrop clicks do not dismiss it. Canceling an
+unsigned second account during Add Account preserves the first account's session.
+
+The legacy DM warning keeps **Export history** and **Start encrypted chat** as
+buttons. Its deletion deadline applies to unencrypted DM history, not to Signed
+Posts. See [Unencrypted direct messages](../../encrypted-messages.md#unencrypted-direct-messages).
+
+### Edit availability
+
+Ordinary message Edit actions disappear five minutes after the message was
+last updated (or created, if never edited), matching the API deadline. This
+also updates while the action remains mounted. Wave description drops retain
+the API’s exception to that deadline.

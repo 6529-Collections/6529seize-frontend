@@ -8,7 +8,7 @@ test.describe("BUIDL Page", () => {
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("BUIDL");
 
-    const heading = page.locator("h1");
+    const heading = page.getByRole("main").getByRole("heading", { level: 1 });
     await expect(heading).toContainText("We are going to BUIDL together");
     await expect(heading).toBeVisible();
   });

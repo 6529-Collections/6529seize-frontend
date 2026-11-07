@@ -4,7 +4,10 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -147,6 +150,49 @@ it("loads only the count until opening the list, then requests its first full pa
       params: { page: "1", page_size: "100" },
     })
   );
+});
+
+it("hydrates before mounting the restored owner's private count query", async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const tree = (isOwner: boolean) => (
+    <QueryClientProvider client={client}>
+      <AuthContext.Provider
+        value={
+          {
+            ...auth,
+            connectedProfile: isOwner ? owner : null,
+            isAuthenticated: isOwner,
+          } as AuthContextType
+        }
+      >
+        <UserPageFollowing profileId="owner" />
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  );
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(tree(false));
+  document.body.append(container);
+  expect(container).toBeEmptyDOMElement();
+  expect(commonApiFetch).not.toHaveBeenCalled();
+
+  const onRecoverableError = jest.fn();
+  let root: Root | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(container, tree(true), { onRecoverableError });
+    });
+    await within(container).findByRole("button", {
+      name: "Open your following list: 105",
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  } finally {
+    act(() => root?.unmount());
+    client.clear();
+    container.remove();
+  }
 });
 
 it("loads the next page with the button when intersection loading is unavailable", async () => {

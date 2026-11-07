@@ -54,6 +54,25 @@ describe("sentry-sanitizer", () => {
     expect(JSON.stringify(event)).not.toContain(SYNTHETIC_WAVE_ID);
   });
 
+  it("redacts credential request headers, including the origin verify header", () => {
+    const event = sanitizeSentryEvent({
+      request: {
+        headers: {
+          authorization: "Bearer synthetic-token",
+          "X-Origin-Verify": "synthetic-origin-secret",
+          "user-agent": "synthetic-agent",
+        },
+      },
+    });
+
+    expect(event.request?.headers).toEqual({
+      authorization: "[Filtered]",
+      "X-Origin-Verify": "[Filtered]",
+      "user-agent": "synthetic-agent",
+    });
+    expect(JSON.stringify(event)).not.toContain("synthetic-origin-secret");
+  });
+
   it("drops click and input breadcrumbs on encrypted-chat pages", () => {
     const click = {
       category: "ui.click",

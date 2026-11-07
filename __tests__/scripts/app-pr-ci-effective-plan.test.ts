@@ -15,7 +15,9 @@ type EffectivePlan = {
     playwright_native_competition: { required: boolean };
     playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
+    playwright_drop_reactions: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
+    playwright_profile_nic: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -84,6 +86,25 @@ it("keeps the Wave tracking browser lane out of unrelated changes", () => {
   ).toBe(false);
 });
 
+it.each([
+  "helpers/profile-logs.helpers.ts",
+  "components/profile-activity/ProfileNicActivityLogs.tsx",
+  "components/user/rep/MobileNicTabContent.tsx",
+  "tests/social/profile-nic-activity-sandbox.spec.ts",
+  "tests/packs.manifest.cjs",
+  "tests/support/composerSandboxServer.cjs",
+  "scripts/app-pr-ci-effective-plan.cjs",
+  ".github/workflows/app-pr-ci.yml",
+])("selects the profile NIC browser contract for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_profile_nic.required).toBe(true);
+});
+
+it("does not select the NIC pack for unrelated code", () => {
+  expect(
+    executePlan(["helpers/unrelated.ts"]).checks.playwright_profile_nic.required
+  ).toBe(false);
+});
+
 describe("effective App PR CI plan", () => {
   it.each([
     "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
@@ -91,6 +112,14 @@ describe("effective App PR CI plan", () => {
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "hooks/useRepAllocation.ts",
     "tests/social/profile-rep-edit-sandbox.spec.ts",
+    "tests/social/profile-about-sandbox.spec.ts",
+    "components/user/user-page-header/about/UserPageHeaderAbout.tsx",
+    "components/user/user-page-header/UserPageHeaderClient.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfile.tsx",
+    "components/user/user-page-header/UserPageHeaderEditProfileDesktop.tsx",
+    "components/user/user-page-header/UserPageHeaderProfileEditor.tsx",
+    "components/user/user-page-header/useProfileEditor.ts",
+    "components/user/settings/UserSettingsBackground.tsx",
   ])("selects the profile dialog browser pack for %s", (file) => {
     const input = plan([file]);
     input.checks.playwright_critical_shell = {
@@ -151,7 +180,8 @@ describe("effective App PR CI plan", () => {
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
-    "app/waves/[wave]/competitions/[competition]/page.tsx",
+    "app/waves/[wave]/decisions/page.tsx",
+    "app/waves/[wave]/decisions/[decision]/page.tsx",
     "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
     "generated/models/ApiCompetition.ts",
     "contexts/CompetitionContext.tsx",
@@ -262,6 +292,49 @@ describe("effective App PR CI plan", () => {
       ).toBe(true);
     }
   );
+
+  it.each([
+    "contexts/wave/hooks/useNewDropCounter.ts",
+    "contexts/wave/hooks/useEnhancedWavesListCore.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+    "contexts/wave/hooks/useWaveMessagesStore.ts",
+    "contexts/wave/hooks/useWaveDataManager.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "contexts/wave/utils/wave-messages-utils.ts",
+    "lib/chat-store/store.ts",
+    "hooks/useWaveWebSocket.ts",
+    "hooks/useWaveIsTyping.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "helpers/waves/drop.helpers.ts",
+    "components/waves/drops/WaveDrop.tsx",
+    "components/drops/view/DropsList.tsx",
+    "components/drops/view/part/DropPartMarkdown.tsx",
+    "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
+    "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
+    "tests/support/chatPerf.ts",
+    "tests/support/chatPerfFixture.ts",
+    "tests/social/chat-render-budget-sandbox.spec.ts",
+  ])("selects the chat render budget for chat hot path %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
+    "components/waves/drops/WaveDropActions.tsx",
+    "components/drops/view/part/DropPartMarkdownImage.tsx",
+    "contexts/wave/hooks/useActiveWaveManager.ts",
+    // Sibling paths of the hot-path files stay out.
+    "helpers/waves/drop-signature.helpers.ts",
+    "components/waves/drops/WaveDropTime.tsx",
+    "components/drops/view/DropsListItem.tsx",
+    "tests/support/composerSandboxConstants.json",
+  ])("keeps chat-adjacent path %s out of the render budget lane", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(false);
+  });
 
   it("selects the shared surface browser lane in a mixed change set", () => {
     expect(
@@ -551,6 +624,56 @@ function runWorkflowScript(
   }
 }
 
+describe("Wave link-preview browser lane selection", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([
+    ["components/waves/list/WaveItemWide.tsx", true],
+    ["components/waves/list/WaveItemChat.tsx", true],
+    ["components/waves/list/WaveItemFollow.tsx", true],
+    ["tests/social/wave-link-preview-sandbox.spec.ts", true],
+    ["README.md", false],
+  ] as const)("selects the preview lane for %s: %s", (file, selected) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "wave-preview-plan-"));
+    const planDir = path.join(root, "test-results/app-pr-ci");
+    try {
+      fs.mkdirSync(planDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(planDir, "ci-plan.json"),
+        JSON.stringify({ ...executePlan([file]), risk: { computed_floor: 2 } })
+      );
+      const result = runWorkflowScript(publish.run, root, {
+        DEFAULT_CI_RUNNER: "ubuntu-latest",
+        BUILD_CI_RUNNER: "ubuntu-latest",
+      });
+      expect(result.status).toBe(0);
+      const matrixLine = result.output
+        .split("\n")
+        .find((line) => line.startsWith("core_playwright_matrix="));
+      expect(matrixLine).toBeDefined();
+      const matrix = JSON.parse(
+        matrixLine!.slice("core_playwright_matrix=".length)
+      ) as {
+        include: { lane: string }[];
+      };
+      expect(
+        matrix.include.some(
+          ({ lane }) => lane === "playwright-wave-link-preview"
+        )
+      ).toBe(selected);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("App PR CI merge-tree base", () => {
   const workflowPath = path.join(
     process.cwd(),
@@ -609,6 +732,21 @@ describe("App PR CI merge-tree base", () => {
       expect(step.env?.["BASE_SHA"]).toBe(mergeTreeBase);
       expect(planSteps.indexOf(step)).toBeGreaterThan(resolveIndex);
     }
+  });
+
+  it("finishes independent app checks while retaining the aggregate failure gate", () => {
+    expect(appChecks.strategy["fail-fast"]).toBe(false);
+    const aggregate = workflow.jobs["installed-checks"];
+    expect(aggregate.needs).toEqual([
+      "plan",
+      "app-checks",
+      "core-playwright-checks",
+    ]);
+    const gate = aggregate.steps.find(
+      ({ name }: WorkflowStep) =>
+        name === "Require successful parallel app checks"
+    );
+    expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });
 
   it("feeds every app-check diff, selection and evidence base from the plan", () => {
@@ -762,4 +900,24 @@ describe("App PR CI merge-tree base", () => {
       }
     });
   });
+});
+
+it.each([
+  "components/waves/drops/WaveDropReactions.tsx",
+  "components/waves/drops/WaveDropReaction.tsx",
+  "components/waves/drops/WaveDropReactionsDetailDialog.tsx",
+  "hooks/drops/useDropReaction.ts",
+  "services/api/wave-drop-reactions-v2-api.ts",
+  "tests/social/wave-reaction-sandbox.spec.ts",
+  "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+])("selects the live reaction browser lane for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_drop_reactions.required).toBe(
+    true
+  );
+});
+
+it("does not select the live reaction browser lane for unrelated changes", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_drop_reactions.required
+  ).toBe(false);
 });

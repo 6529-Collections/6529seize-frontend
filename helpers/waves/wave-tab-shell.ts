@@ -1,3 +1,5 @@
+import { isCompetitionCollectionSegment } from "@/helpers/competition.helpers";
+
 // Only the URL-driven wave shell can own transitions across the two page routes.
 // A token keeps overlapping mounts/cleanup from unregistering another owner.
 const mountedShells = new Map<symbol, string>();
@@ -16,7 +18,7 @@ function getTabRoute(url: URL) {
   const isWave = segments.length === 3;
   const isCompetition =
     segments.length === 5 &&
-    collection === "competitions" &&
+    isCompetitionCollectionSegment(collection) &&
     selectedId !== "new";
   if (section !== "waves" || !waveId || (!isWave && !isCompetition))
     return null;

@@ -4,12 +4,16 @@
 // Component a Server Component renders becomes its own client reference in the
 // RSC payload, and each reference repeats the root layout's full chunk list in
 // the inline flight data of every HTML page.
+import { usePathname } from "next/navigation";
+
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
+import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
 import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
@@ -31,6 +35,7 @@ import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+import { isValidatorAuthorizePath } from "@/lib/validator-page/authorize/paths";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
@@ -38,6 +43,7 @@ import CapacitorSetup from "./CapacitorSetup";
 import EULAConsentStartup from "./EULAConsentStartup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
@@ -46,7 +52,7 @@ import DocumentLanguage from "./DocumentLanguage";
 export default function Providers({
   children,
   enableVersionCheck = true,
-  enableWalletAuthentication = true,
+  enableWalletAuthentication: walletAuthenticationProp = true,
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
@@ -58,6 +64,12 @@ export default function Providers({
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
 }) {
+  // A phone authorizing a validator connects a wallet only to sign the
+  // validator's grant; it doesn't sign in to 6529.io.
+  const pathname = usePathname();
+  const enableWalletAuthentication =
+    walletAuthenticationProp && !isValidatorAuthorizePath(pathname);
+
   const sharedProviders = (
     <TitleProvider>
       <HeaderProvider>
@@ -86,9 +98,7 @@ export default function Providers({
                   <EmojiProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={
-                          enableWalletAuthentication
-                        }
+                        enableWalletAuthentication={enableWalletAuthentication}
                       >
                         <AuthLaunchTimingReporter
                           enableWalletAuthentication={
@@ -108,18 +118,24 @@ export default function Providers({
                               disabled={!enableCookieConsent}
                             >
                               <MixpanelSetup />
+                              <AwsRumProvider />
                               <AppWebSocketProvider>
                                 {/* Encrypted chats (D109): inert unless the flag is on. */}
                                 <E2eeProvider>
+                                  {enableWalletAuthentication && (
+                                    <DeviceSetupHost />
+                                  )}
                                   <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
+                                    <ShellSearchParamsProvider>
+                                      {enableMyStream ? (
+                                        <MyStreamProvider>
+                                          {sharedProviders}
+                                          <QuickDirectMessagesGate />
+                                        </MyStreamProvider>
+                                      ) : (
+                                        sharedProviders
+                                      )}
+                                    </ShellSearchParamsProvider>
                                   </LayoutProvider>
                                 </E2eeProvider>
                                 {enableVersionCheck && <NewVersionToast />}

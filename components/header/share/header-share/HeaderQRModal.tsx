@@ -20,6 +20,7 @@ import {
   Mode,
 } from "./constants";
 import type { PageShareTarget, SubMode } from "./constants";
+import { useConnectionShareUpgrade } from "./useConnectionShareUpgrade";
 import { HeaderShareModalView } from "./HeaderShareModalView";
 import {
   getSavedPageShareTarget,
@@ -86,7 +87,13 @@ function HeaderQRModal({
 
   const { address: contextWalletAddress, hasValidWalletAuth } =
     useSeizeConnectContext();
-  const { ensureActiveSessionV2WebSession, requestSessionUpgrade } = useAuth();
+  const {
+    ensureActiveSessionV2WebSession,
+    requestSessionUpgrade,
+    connectedProfile,
+    activeProfileProxy,
+  } = useAuth();
+  const updateAuthentication = useConnectionShareUpgrade(requestSessionUpgrade);
   const activeWalletAddress = contextWalletAddress ?? getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
@@ -722,12 +729,20 @@ function HeaderQRModal({
 
   return (
     <HeaderShareModalView
-      key={show ? "open" : "closed"}
+      open={show}
       shouldRender={shouldRender}
       isVisible={isVisible}
       onClose={closeModal}
       dialogRef={dialogRef}
       mode={mode}
+      account={{
+        address: activeWalletAddress ?? "",
+        handle: connectedProfile?.handle,
+        pfp: connectedProfile?.pfp,
+        canSetUp: Boolean(
+          contextWalletAddress && connectedProfile?.id && !activeProfileProxy
+        ),
+      }}
       activeSubTab={displayActiveSubTab}
       setActiveSubTab={setActiveSubTab}
       navigateBrowserSrc={displayState.navigateBrowserSrc}
@@ -746,7 +761,7 @@ function HeaderQRModal({
       mobileConnectionShareStatus={displayState.mobileConnectionShareStatus}
       desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
-      requestSessionUpgrade={requestSessionUpgrade}
+      updateAuthentication={updateAuthentication}
       refreshConnectionShare={refreshConnectionShare}
       isConnectionShareLoading={isConnectionShareLoading}
       urlCopied={urlCopied}

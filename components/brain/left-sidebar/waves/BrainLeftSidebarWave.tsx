@@ -11,7 +11,7 @@ import { formatWaveName } from "@/helpers/waves/wave-name.helpers";
 import { useHoverIntent } from "@/hooks/useHoverIntent";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Link from "next/link";
 import React, { useCallback, useMemo } from "react";
 import {
@@ -311,7 +311,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             )}
             {wave.isMuted && (
               <div className={MUTED_BADGE_CLASSES}>
-                <FontAwesomeIcon
+                <FontAwesomeSvgIcon
                   icon={faBellSlash}
                   className={MUTED_ICON_CLASSES}
                 />

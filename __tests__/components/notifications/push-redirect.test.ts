@@ -14,9 +14,9 @@ const e2eeWake = {
 };
 
 describe("resolvePushRedirectUrl for encrypted chat wakes", () => {
-  it("opens the encrypted chats list when encrypted chats are enabled", () => {
+  it("opens the encrypted chats list, marked as a wake, when encrypted chats are enabled", () => {
     isE2eeEnabledMock.mockReturnValue(true);
-    expect(resolvePushRedirectUrl(e2eeWake)).toBe("/messages/encrypted");
+    expect(resolvePushRedirectUrl(e2eeWake)).toBe("/messages/encrypted?wake=1");
   });
 
   it("falls back to the messages list when the build has them off", () => {
@@ -28,7 +28,7 @@ describe("resolvePushRedirectUrl for encrypted chat wakes", () => {
     isE2eeEnabledMock.mockReturnValue(true);
     expect(
       resolvePushRedirectUrl({ ...e2eeWake, wave_id: "w", drop_id: "d" })
-    ).toBe("/messages/encrypted");
+    ).toBe("/messages/encrypted?wake=1");
   });
 
   it("keeps wave redirects unchanged", () => {
@@ -55,14 +55,14 @@ const creditReturn: DevicePushData = {
 
 it("opens the surviving competition for deleted-entry credit-return pushes without a drop id", () => {
   expect(resolvePushRedirectUrl(creditReturn)).toBe(
-    "/waves/wave/competitions/competition"
+    "/waves/wave/decisions/competition"
   );
 });
 
 it("opens the winning entry when the push includes its competition entry id", () => {
   expect(
     resolvePushRedirectUrl({ ...creditReturn, competition_entry_id: "entry" })
-  ).toBe("/waves/wave/competitions/competition?entry=entry");
+  ).toBe("/waves/wave/decisions/competition?entry=entry");
 });
 
 it("opens the single artwork view when a competition push includes its drop id", () => {
@@ -72,7 +72,7 @@ it("opens the single artwork view when a competition push includes its drop id",
       competition_entry_id: "entry",
       competition_drop_id: "artwork",
     })
-  ).toBe("/waves/wave/competitions/competition?drop=artwork");
+  ).toBe("/waves/wave/decisions/competition?drop=artwork");
 });
 
 it("preserves entry navigation when older competition pushes carry a legacy drop serial", () => {
@@ -82,5 +82,5 @@ it("preserves entry navigation when older competition pushes carry a legacy drop
       competition_entry_id: "entry",
       drop_id: "12345",
     })
-  ).toBe("/waves/wave/competitions/competition?entry=entry");
+  ).toBe("/waves/wave/decisions/competition?entry=entry");
 });

@@ -101,9 +101,17 @@ function WebSidebarExpandable({
         ariaExpanded={expanded}
         ariaControls={collapsed ? flyoutId : panelId}
         data-section={dataSection}
+        compactIndicator={
+          <ChevronRightIcon
+            aria-hidden="true"
+            data-sidebar-submenu-indicator="true"
+            className="tw-pointer-events-none tw-absolute tw-left-full tw-top-1/2 tw-ml-1 tw-size-3.5 -tw-translate-y-1/2"
+          />
+        }
         rightSlot={
           !collapsed && (
             <ChevronRightIcon
+              aria-hidden="true"
               className={`tw-ml-auto tw-mr-2 tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
                 expanded ? "tw-rotate-90" : ""
               }`}

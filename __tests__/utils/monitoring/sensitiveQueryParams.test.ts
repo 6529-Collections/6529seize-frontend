@@ -51,3 +51,13 @@ describe("redactSensitiveQueryParams", () => {
     expect(redactSensitiveQueryParams(once)).toBe(once);
   });
 });
+
+it("redacts device setup unlock keys in URL fragments", () => {
+  expect(
+    redactSensitiveQueryParams(
+      "mobile6529://share-connection?connection_share_code=private#device_setup_key=private-key"
+    )
+  ).toBe(
+    "mobile6529://share-connection?connection_share_code=[Filtered]#device_setup_key=[Filtered]"
+  );
+});

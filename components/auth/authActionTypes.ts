@@ -1,5 +1,6 @@
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { SignAppGrant } from "./authAppSignedMessagesGrant";
 import type { RequestSignedMessagesGrant } from "./authSignedMessagesGrant";
 import type {
   AuthLoadingState,
@@ -45,6 +46,10 @@ export interface CreateAuthRequestActionsParams {
   ) => SessionUpgradePromptStatus;
   readonly signMessage: SignMessage;
   readonly signModalReason: SignModalReason;
+  /** The signed-in wallet's own profile (not a proxy's), or null. */
+  readonly ownProfileId: string | null;
+  /** EIP-712 signing for app grants (6529 Mobile and Desktop). */
+  readonly signAppGrant: SignAppGrant;
 }
 
 export interface AuthRequestActions {

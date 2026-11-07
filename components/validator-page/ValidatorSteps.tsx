@@ -76,12 +76,13 @@ const TODAY: Picture = {
   drawing: false,
 };
 
+// Step 2, from TESTERS.md; from rc.10 a wallet on a phone signs from a code.
 const SIGN_ONCE =
-  "It makes this computer's key and asks your wallet to sign once. That sends no transaction and costs nothing.";
+  "It makes this computer's key and asks your wallet to sign once. That sends no transaction and costs nothing. If your wallet is in another browser, press Copy sign-in link and open the link there. If it's on your phone, choose Your phone (Use your phone in the app's window), paste the wallet's address and scan the code.";
 
-// The app's Starting screen (rc.7, crates/app pages.rs).
+// The app's Starting screen and its stuck step (rc.8, crates/app pages.rs).
 const WHILE_IT_STARTS =
-  "While the validator service starts, the app shows each step. If one takes too long, the app says which, with Restart the validator service.";
+  "While the validator service starts, the app shows each step and what it is doing now. If one takes too long, the app says which, with Restart the validator service and Show the log.";
 
 const LEAVE_IT_RUNNING: Step = {
   title: "Leave it running",
@@ -93,7 +94,7 @@ const STEPS: Record<SystemKey, readonly Step[]> = {
   mac: [
     {
       title: "Open it",
-      text: "Drag 6529 Validator to Applications and open it. When macOS asks if you're sure, press Open.",
+      text: "Drag 6529 Validator to Applications, then open it from Applications, never from the disk image. When macOS asks if you're sure, press Open.",
       picture: OPEN_ON_MAC,
     },
     { title: "Follow the app", text: SIGN_ONCE, picture: AUTHORIZE },

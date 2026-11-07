@@ -390,6 +390,82 @@ function discoveryRegion(page: Page) {
     .filter({ visible: true });
 }
 
+test("saved discovery sections stay closed before hydration on reload", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  const names = ["Worth Checking Out", "Active Votes"];
+  const discovery = discoveryRegion(page);
+  for (const name of names) {
+    await discovery
+      .getByRole("button", { name: `Collapse ${name}`, exact: true })
+      .click();
+    await expect(
+      discovery.getByRole("button", { name: `Expand ${name}`, exact: true })
+    ).toHaveAttribute("aria-expanded", "false");
+  }
+
+  // Hold application JavaScript so the first visible server HTML cannot
+  // be corrected by hydration before we assert its collapsed layout.
+  const hydration = gate();
+  let heldScripts = 0;
+  await page.route("**/_next/static/**/*.js", async (route) => {
+    heldScripts += 1;
+    await hydration.ready;
+    await route.continue();
+  });
+  try {
+    await page.reload({ waitUntil: "commit" });
+    await expect.poll(() => heldScripts).toBeGreaterThan(0);
+    for (const name of names) {
+      const toggle = discovery.getByRole("button", {
+        name: `Expand ${name}`,
+        exact: true,
+      });
+      await expect(toggle).toBeVisible();
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      const panel = page
+        .getByRole("region", { name, exact: true })
+        .locator(`[id="${await toggle.getAttribute("aria-controls")}"]`);
+      await expect(panel).toHaveAttribute("inert", "");
+      await expect(panel).toHaveAttribute("aria-hidden", "true");
+      await expect(panel).toBeHidden();
+      expect((await panel.boundingBox())?.height ?? 0).toBe(0);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("discovery-before-hydration.png"),
+    });
+  } finally {
+    hydration.release();
+  }
+  await expect(
+    page.getByRole("button", { name: "Find a wave…", exact: true })
+  ).toBeEnabled({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+  for (const name of names) {
+    await expect(
+      discovery.getByRole("button", { name: `Expand ${name}`, exact: true })
+    ).toHaveAttribute("aria-expanded", "false");
+  }
+  await page.screenshot({
+    path: testInfo.outputPath("discovery-restored-closed.png"),
+  });
+  await discovery
+    .getByRole("button", { name: "Expand Active Votes", exact: true })
+    .click();
+  await expect(
+    discovery.getByRole("button", {
+      name: "Collapse Active Votes",
+      exact: true,
+    })
+  ).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    discovery.getByRole("button", {
+      name: "Expand Worth Checking Out",
+      exact: true,
+    })
+  ).toHaveAttribute("aria-expanded", "false");
+});
+
 test("discovery reserves space while loading and retains its controls", async ({
   page,
   baseURL,
@@ -990,7 +1066,7 @@ test("resume shows the latest page before missed history and preserves the compo
   });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
-  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  const composer = page.getByRole("textbox", { name: "Write a message" });
   await composer.fill("Keep this unsent draft");
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
@@ -1142,7 +1218,7 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     await page.waitForTimeout(1000);
     await expect(post(20)).toBeInViewport();
   }
-  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  const composer = page.getByRole("textbox", { name: "Write a message" });
   if (SHARED_POST_GUEST) {
     await expect(composer).toBeHidden();
   } else {
@@ -1260,7 +1336,7 @@ for (const surface of [
     await page.goto(surface.path, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await expect(composer).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,

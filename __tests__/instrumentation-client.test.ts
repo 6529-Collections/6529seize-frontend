@@ -1147,6 +1147,25 @@ describe("instrumentation-client", () => {
     mockCaptureRouterTransitionStart.mockReset();
   });
 
+  it("reports the runtime VERSION as the release", () => {
+    const previousRuntime = process.env["PUBLIC_RUNTIME"];
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+      ...JSON.parse(previousRuntime ?? "{}"),
+      VERSION: "0123456789abcdef0123456789abcdef01234567",
+    });
+    try {
+      expect(loadSentryConfig().release).toBe(
+        "0123456789abcdef0123456789abcdef01234567"
+      );
+    } finally {
+      if (previousRuntime === undefined) {
+        delete process.env["PUBLIC_RUNTIME"];
+      } else {
+        process.env["PUBLIC_RUNTIME"] = previousRuntime;
+      }
+    }
+  });
+
   it("configures filtering for exclusively third-party frames", () => {
     const config = loadSentryConfig();
     const defaultIntegrations = [{ name: "default" }];
@@ -2712,16 +2731,16 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops exact MetaMask Mobile cyclic JSON timer noise", () => {
+  it("keeps ambiguous MetaMask Mobile cyclic JSON timer errors", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
-  it("drops exact MetaMask Mobile cyclic JSON timer noise with a Sentry browser helper frame", () => {
+  it("keeps ambiguous MetaMask Mobile cyclic JSON timer errors with a Sentry browser helper frame", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
       [sentryBrowserHelperFrame, nativeJsonStringifyFrame],
@@ -2736,7 +2755,7 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {

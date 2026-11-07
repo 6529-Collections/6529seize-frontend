@@ -57,7 +57,6 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   // REQUIRED
-  IPFS_API_ENDPOINT: z.string().url("IPFS_API_ENDPOINT must be a valid URL"),
   IPFS_GATEWAY_ENDPOINT: z
     .string()
     .url("IPFS_GATEWAY_ENDPOINT must be a valid URL"),
@@ -70,7 +69,6 @@ export const publicEnvSchema = z.object({
     })
     .optional()
     .default("https://media.6529.io"),
-  IPFS_MFS_PATH: z.string().optional(),
 
   /**
    * ────────────────
@@ -124,6 +122,7 @@ export const publicEnvSchema = z.object({
     .optional(),
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: z.string().optional(),
+  NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: z.string().optional(),
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),

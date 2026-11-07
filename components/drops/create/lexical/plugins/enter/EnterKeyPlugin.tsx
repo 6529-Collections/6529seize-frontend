@@ -83,6 +83,8 @@ export default function EnterKeyPlugin({
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
+        // Let the native IME confirm text without submitting or inserting a paragraph.
+        if (editor.isComposing() || event?.isComposing) return true;
         if (disabledRef.current || !canSubmitWithEnterRef.current()) {
           // Let the mention plugin handle the Enter key
           return false; // Allows the mention plugin to process the Enter key

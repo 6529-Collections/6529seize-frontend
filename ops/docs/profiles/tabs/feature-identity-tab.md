@@ -18,11 +18,13 @@ It combines `Rep` and `NIC` on one route.
 - Unsupported legacy route: /{user}/rep (not found)
 
 Desktop (`>= lg`):
+
 - Left: Rep direction toggle, summary, categories, received-only grant/edit
   actions, activity log
 - Right: NIC summary, ID statements, and `Rate NIC` entry point
 
 Mobile (`< lg`):
+
 - Top segmented control: direction-aware `Total Rep`, `NIC`, and
   `ID Statements`
 - `Total Rep` subview: contributor summary, rep direction toggle, categories,
@@ -159,6 +161,8 @@ Statement ownership in this tab:
 
 ## Activity Log Behavior
 
+- The NIC log shows NIC rating edits and identity changes. REP and wave REP
+  rating edits are excluded. The log-type and direction filters still apply.
 - Desktop combined log includes:
   - matter tabs: `All`, `REP`, `NIC`
   - direction tabs: `All`, `Incoming`, `Outgoing`
@@ -167,7 +171,13 @@ Statement ownership in this tab:
   - `Total Rep` subview uses REP log with direction tabs
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Loading uses three compact row placeholders before the activity entries appear.
+- Changing the window between mobile and desktop layouts may briefly show the
+  activity loading placeholders. While you stay on the same profile, each
+  layout keeps its selected filters and current page when you return to it.
 - Empty results show `No Activity Log`.
+- If the first NIC activity page cannot load, `Unable to load activity log.`
+  replaces the placeholders. Use `Retry` to try again. A failed later page
+  keeps the current entries and paging controls available.
 
 ## Permissions and Visibility Rules
 
@@ -216,6 +226,9 @@ Statement ownership in this tab:
 
 ## Limitations / Notes
 
+- The NIC activity loading-error message and `Retry` use `en-US` fallback copy
+  where translations are unavailable; frontend localization maintainers can
+  translate those message keys without changing this flow.
 - This page documents the combined default profile tab only; other profile tabs
   have separate route and behavior rules.
 - Action availability still depends on wallet, profile-handle, and proxy

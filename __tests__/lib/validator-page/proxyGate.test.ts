@@ -60,6 +60,17 @@ describe("handleValidatorPageGate", () => {
     ).toBe(path);
   });
 
+  it("keeps the pages' screenshots in public/validator behind the password", () => {
+    const path = "/validator/app-today.webp";
+    expect(rewriteTarget(handleValidatorPageGate(request(path), path))).toBe(
+      "https://6529.io/validator/locked"
+    );
+    const valid = createAccessCookieValue(PASSWORD);
+    expect(
+      handleValidatorPageGate(request(path, { cookie: valid }), path)
+    ).toBeUndefined();
+  });
+
   it("lets a valid cookie through and refuses a forged one", () => {
     const valid = createAccessCookieValue(PASSWORD);
     expect(
@@ -83,8 +94,20 @@ describe("handleValidatorPageGate", () => {
     "/validator/releases.json",
     "/validator/releases.json.sig",
     "/validator/unlock",
+    "/validator/authorize",
   ])("keeps %s open without a cookie", (path) => {
     expect(handleValidatorPageGate(request(path), path)).toBeUndefined();
+  });
+
+  it("locks a path below the authorize page", () => {
+    expect(
+      rewriteTarget(
+        handleValidatorPageGate(
+          request("/validator/authorize/more"),
+          "/validator/authorize/more"
+        )
+      )
+    ).toBe("https://6529.io/validator/locked");
   });
 
   it("opens everything when the page is public or has no password", () => {

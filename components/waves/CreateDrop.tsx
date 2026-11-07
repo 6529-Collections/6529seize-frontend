@@ -43,7 +43,8 @@ import { t } from "@/i18n/messages";
 import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
 import { PROFILE_SUSPENDED_ERROR_CODE } from "@/services/api/content-moderation-api";
 import { PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
-import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
+import CreateDropSubmissionDialogs from "./create-drop-content/CreateDropSubmissionDialogs";
+import { useAllMentionConfirmation } from "./create-drop-content/useAllMentionConfirmation";
 import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
 import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
 import type {
@@ -93,7 +94,9 @@ export default function CreateDrop({
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
-  useKeyPressEvent("Escape", () => onCancelReplyQuote());
+  useKeyPressEvent("Escape", (event) => {
+    if (!event.defaultPrevented) onCancelReplyQuote();
+  });
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
   const [dropModeOverride, setDropModeOverride] = useState<{
@@ -113,16 +116,11 @@ export default function CreateDrop({
     processDropRemoved,
     waveId: wave.id,
   });
-  const {
-    agreeToGuidelines,
-    declineGuidelines,
-    dialogGuidelines,
-    markChatSubmitted,
-    requestGuidelinesAgreement,
-  } = useWaveGuidelinesAgreement({
+  const guidelinesAgreement = useWaveGuidelinesAgreement({
     profileId: connectedProfile?.id ?? null,
     wave,
   });
+  const { markChatSubmitted, requestGuidelinesAgreement } = guidelinesAgreement;
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const nativeCompetition = presentationCompetition(wave);
   const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
@@ -660,11 +658,18 @@ export default function CreateDrop({
     ]
   );
 
-  const submitDrop = useWaveGuidelinesSubmission({
+  const submitWithGuidelines = useWaveGuidelinesSubmission({
     enqueueDrop,
     requestGuidelinesAgreement,
     setToast,
   });
+
+  const allMention = useAllMentionConfirmation({
+    submitDrop: submitWithGuidelines,
+    waveId: wave.id,
+    profileId: connectedProfile?.id ?? null,
+  });
+  const { submitDrop } = allMention;
 
   const createDropContentProps = useMemo(() => {
     const hasExitFixedDropMode = onExitFixedDropMode !== undefined;
@@ -778,10 +783,9 @@ export default function CreateDrop({
   return (
     <>
       {dropComposerContent}
-      <WaveGuidelinesAgreementDialog
-        guidelines={dialogGuidelines}
-        onAgree={agreeToGuidelines}
-        onDecline={declineGuidelines}
+      <CreateDropSubmissionDialogs
+        allMention={allMention}
+        guidelinesAgreement={guidelinesAgreement}
       />
     </>
   );

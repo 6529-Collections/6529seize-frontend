@@ -129,12 +129,14 @@ function SafetyMenuItems({
 }
 
 export function E2eeMessageActionsMenu({
+  canAct = true,
   message,
   isOwn,
   selfProfileId,
   senderName,
   actions,
 }: {
+  readonly canAct?: boolean;
   readonly message: E2eeMessage;
   readonly isOwn: boolean;
   readonly selfProfileId: string | null;
@@ -147,7 +149,7 @@ export function E2eeMessageActionsMenu({
   return (
     <>
       <E2eeEmojiPicker
-        open={emojiOpen}
+        open={canAct && emojiOpen}
         onClose={() => setEmojiOpen(false)}
         onSelect={(reaction) =>
           actions.onReact(
@@ -171,45 +173,56 @@ export function E2eeMessageActionsMenu({
           anchor="bottom end"
           className="tailwind-scope tw-z-[1001] tw-mt-1 tw-w-56 tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none"
         >
-          <div className="tw-flex tw-justify-between tw-gap-1 tw-px-1 tw-pb-1">
-            {QUICK_REACTIONS.map((reaction) => {
-              const mine =
-                selfProfileId !== null &&
-                (message.reactions[reaction] ?? []).includes(selfProfileId);
-              return (
-                <MenuItem key={reaction}>
-                  <button
-                    type="button"
-                    onClick={() => actions.onReact(message, reaction, !mine)}
-                    aria-pressed={mine}
-                    aria-label={t(locale, "e2ee.message.reactWith", {
-                      reaction,
-                    })}
-                    className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-base data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
-                      mine ? "tw-ring-1 tw-ring-iron-700" : ""
-                    }`}
-                  >
-                    <span aria-hidden="true">{reaction}</span>
-                  </button>
-                </MenuItem>
-              );
-            })}
-          </div>
-          <ActionMenuItem
-            onClick={() => setEmojiOpen(true)}
-            icon={<FaceSmileIcon aria-hidden="true" className={iconClass} />}
-          >
-            {t(locale, "e2ee.emoji.react")}
-          </ActionMenuItem>
-          <ActionMenuItem
-            onClick={() => actions.onReply(message)}
-            icon={
-              <ArrowUturnLeftIcon aria-hidden="true" className={iconClass} />
-            }
-          >
-            {t(locale, "e2ee.message.reply")}
-          </ActionMenuItem>
-          {isOwn ? (
+          {canAct && (
+            <>
+              <div className="tw-flex tw-justify-between tw-gap-1 tw-px-1 tw-pb-1">
+                {QUICK_REACTIONS.map((reaction) => {
+                  const mine =
+                    selfProfileId !== null &&
+                    (message.reactions[reaction] ?? []).includes(selfProfileId);
+                  return (
+                    <MenuItem key={reaction}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          actions.onReact(message, reaction, !mine)
+                        }
+                        aria-pressed={mine}
+                        aria-label={t(locale, "e2ee.message.reactWith", {
+                          reaction,
+                        })}
+                        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-base data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
+                          mine ? "tw-ring-1 tw-ring-iron-700" : ""
+                        }`}
+                      >
+                        <span aria-hidden="true">{reaction}</span>
+                      </button>
+                    </MenuItem>
+                  );
+                })}
+              </div>
+              <ActionMenuItem
+                onClick={() => setEmojiOpen(true)}
+                icon={
+                  <FaceSmileIcon aria-hidden="true" className={iconClass} />
+                }
+              >
+                {t(locale, "e2ee.emoji.react")}
+              </ActionMenuItem>
+              <ActionMenuItem
+                onClick={() => actions.onReply(message)}
+                icon={
+                  <ArrowUturnLeftIcon
+                    aria-hidden="true"
+                    className={iconClass}
+                  />
+                }
+              >
+                {t(locale, "e2ee.message.reply")}
+              </ActionMenuItem>
+            </>
+          )}
+          {isOwn && canAct ? (
             <>
               <ActionMenuItem
                 onClick={() => actions.onEdit(message)}
@@ -227,7 +240,8 @@ export function E2eeMessageActionsMenu({
                 {t(locale, "e2ee.message.delete")}
               </ActionMenuItem>
             </>
-          ) : (
+          ) : null}
+          {!isOwn && (
             <SafetyMenuItems
               message={message}
               senderName={senderName}

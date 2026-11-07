@@ -265,7 +265,7 @@ test.describe("Coming up local decision time", () => {
       .getByRole("region", { name: "Coming up", exact: true })
       .locator("time");
     await expect(decisionLabel).toHaveText(
-      "Next decision tomorrow at 00:00."
+      "Next result tomorrow at 00:00."
     );
     await expect(decisionLabel).toHaveAttribute(
       "datetime",
@@ -2135,6 +2135,38 @@ test("mobile web starts with its header and full-width content before hydration 
   }
 });
 
+test("prerendered home hydrates cleanly with shell query links @smoke @medium @large", async ({
+  page,
+}) => {
+  // `/` is prerendered without its query. Shell readers of `?view=`, `?drop=`
+  // and `?serialNo=` render after hydration or inside their own boundaries,
+  // so a URL carrying them must not produce a hydration mismatch.
+  const hydrationErrors: string[] = [];
+  const isHydrationError = (text: string) =>
+    /hydrat|#418|#423|#425|did not match/i.test(text);
+  page.on("console", (message) => {
+    if (message.type() === "error" && isHydrationError(message.text())) {
+      hydrationErrors.push(message.text());
+    }
+  });
+  page.on("pageerror", (error) => {
+    if (isHydrationError(error.message)) hydrationErrors.push(error.message);
+  });
+
+  for (const search of [
+    "?view=messages",
+    "?view=waves",
+    "?drop=00000000-0000-4000-8000-000000000001",
+    "?serialNo=5",
+  ]) {
+    await page.goto(`/${search}`, { waitUntil: "load" });
+    await waitForRouteReady(page);
+    await expect(page.getByRole("main").first()).toBeVisible();
+  }
+
+  expect(hydrationErrors).toEqual([]);
+});
+
 test("homepage tracking follows nested scrolling and loaded sections @smoke @medium @large", async ({
   page,
 }) => {
@@ -2266,6 +2298,11 @@ test("desktop account updates do not move utilities, including in short expanded
     // Hovering a distant menu control reveals the header toggle too.
     await search.hover();
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    await search.focus();
+    await page.mouse.move(1000, 400);
+    await expect(search).toBeFocused();
+    await expect(sidebarToggle).toHaveCSS("opacity", "0");
+    await search.hover();
     const railBox = await sidebar.boundingBox();
     const toggleBox = await sidebarToggle.boundingBox();
     expect(railBox).not.toBeNull();
@@ -2279,6 +2316,36 @@ test("desktop account updates do not move utilities, including in short expanded
       0
     );
     const about = sidebar.getByRole("button", { name: "About", exact: true });
+    for (const name of ["NFTs", "About"]) {
+      const item = sidebar.getByRole("button", { name, exact: true });
+      const indicator = sidebar
+        .getByRole("button", { name, exact: true })
+        .locator("[data-sidebar-submenu-indicator]");
+      await expect(indicator).toBeVisible();
+      const icon = sidebar
+        .getByRole("button", { name, exact: true })
+        .locator("svg")
+        .first();
+      const iconBounds = await icon.boundingBox();
+      const indicatorBounds = await indicator.boundingBox();
+      expect(iconBounds).not.toBeNull();
+      expect(indicatorBounds).not.toBeNull();
+      expect(indicatorBounds!.y + indicatorBounds!.height / 2).toBeCloseTo(
+        iconBounds!.y + iconBounds!.height / 2,
+        0
+      );
+      expect(
+        indicatorBounds!.x - (iconBounds!.x + iconBounds!.width)
+      ).toBeCloseTo(4, 0);
+      await expect(indicator).toHaveCSS(
+        "color",
+        await icon.evaluate((element) => getComputedStyle(element).color)
+      );
+      await item.hover();
+      await expect(indicator).toHaveCSS("color", "rgb(255, 255, 255)");
+      await page.keyboard.press("Escape");
+      await page.mouse.move(1000, 400);
+    }
     await about.hover();
     await expect(
       page.getByRole("navigation", { name: "About sub-navigation" })

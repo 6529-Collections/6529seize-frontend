@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 import { AuthContext } from "@/components/auth/Auth";
+import { mockRandomUnit } from "../../../helpers/mockRandomUnit";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
   WsMessageType,
@@ -19,6 +20,9 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 const {
   useWebSocketMessage,
 } = require("@/services/websocket/useWebSocketMessage");
+
+// Unknown-wave list refreshes wait a uniform 2-20 s.
+const MAX_REFRESH_DELAY_MS = 20_000;
 
 const waves = [
   { id: "wave1", metrics: { latest_drop_timestamp: 10 } },
@@ -151,18 +155,22 @@ describe("useNewDropCounter", () => {
         serial_no: 12,
         update_type: WsMessageType.DROP_UPDATE,
       });
-      await waitFor(() =>
-        expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact")
-      );
+      // The ref requests the canonical drop synchronously. Resolve it inside
+      // act. Yielding first, as waitFor does, applies the state update outside
+      // act on React's scheduler, which can land after the assertions.
+      expect(fetchDropByIdBatched).toHaveBeenCalledWith("compact");
       await act(async () => {
         await fetchDropByIdBatched.mock.results[0].value;
       });
-      expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
-        isReply ? 0 : 1
-      );
-      expect(
-        result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
-      ).toBe(isReply ? null : 40);
+      // Fetch completion can precede the hook's committed state update.
+      await waitFor(() => {
+        expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(
+          isReply ? 0 : 1
+        );
+        expect(
+          result.current.newDropsCounts["wave2"]?.latestDropTimestamp ?? null
+        ).toBe(isReply ? null : 40);
+      });
     }
   );
 
@@ -282,6 +290,15 @@ describe("useNewDropCounter", () => {
   });
 
   it("resolves an unknown-wave compact ref before counting it", async () => {
+    jest.useFakeTimers();
+    try {
+      await resolvesUnknownWaveCompactRef();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  const resolvesUnknownWaveCompactRef = async () => {
     fetchDropByIdBatched.mockResolvedValue({
       wave: { id: "unknown-wave" },
       author: { handle: "other" },
@@ -312,8 +329,13 @@ describe("useNewDropCounter", () => {
         firstUnreadSerialNo: 23,
       })
     );
+    // The list refresh follows later, coalesced and jittered.
+    expect(refetch).not.toHaveBeenCalled();
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(MAX_REFRESH_DELAY_MS);
+    });
     expect(refetch).toHaveBeenCalledTimes(1);
-  });
+  };
 
   it("does not count the connected profile's compact content ref", () => {
     const refetch = jest.fn();
@@ -462,29 +484,161 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it("throttles unknown-wave refetches within cooldown window", () => {
-    const refetch = jest.fn();
-    const nowSpy = jest.spyOn(Date, "now");
-    nowSpy.mockReturnValue(1000);
+  describe("list refreshes for drops in unknown waves", () => {
+    const advance = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+    let visibility: DocumentVisibilityState = "visible";
+    let randomUnit: jest.SpyInstance;
 
-    renderHook(
-      () =>
-        useNewDropCounter(null, waves, refetch, {
-          otherListWaveIds: new Set(),
-          unknownWaveRefetchCooldownMs: 3000,
-        }),
-      { wrapper }
-    );
+    const renderCounter = () => {
+      const refetch = jest.fn();
+      renderHook(
+        () =>
+          useNewDropCounter(null, waves, refetch, {
+            otherListWaveIds: new Set(),
+          }),
+        { wrapper }
+      );
+      return refetch;
+    };
 
-    emitDropUpdate({ waveId: "unknown-1" });
-    expect(refetch).toHaveBeenCalledTimes(1);
+    beforeAll(() => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => visibility,
+      });
+    });
 
-    nowSpy.mockReturnValue(2000);
-    emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
-    expect(refetch).toHaveBeenCalledTimes(1);
+    afterAll(() => {
+      // Back to jsdom's own getter on the prototype.
+      Reflect.deleteProperty(document, "visibilityState");
+    });
 
-    nowSpy.mockReturnValue(4501);
-    emitDropUpdate({ createdAt: 32, waveId: "unknown-3" });
-    expect(refetch).toHaveBeenCalledTimes(2);
+    beforeEach(() => {
+      jest.useFakeTimers();
+      visibility = "visible";
+      // A neutral jitter sample: every refresh waits the 11 s midpoint.
+      randomUnit = mockRandomUnit(0.5);
+    });
+
+    afterEach(() => {
+      randomUnit.mockRestore();
+      jest.useRealTimers();
+    });
+
+    it("turns ten drops in ten seconds into one jittered refresh", async () => {
+      const refetch = renderCounter();
+
+      for (let index = 0; index < 10; index++) {
+        emitDropUpdate({ createdAt: 40 + index, waveId: `unknown-${index}` });
+        // Replies count too: they still need the wave in the list.
+        emitDropUpdate({ isReply: true, waveId: `unknown-reply-${index}` });
+        await advance(1_000);
+      }
+      expect(refetch).not.toHaveBeenCalled();
+
+      await advance(MAX_REFRESH_DELAY_MS);
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("spreads the first refresh between 2 and 20 seconds", async () => {
+      randomUnit.mockRestore();
+      randomUnit = mockRandomUnit(0);
+      const early = renderCounter();
+      emitDropUpdate({ waveId: "unknown-early" });
+      await advance(1_999);
+      expect(early).not.toHaveBeenCalled();
+      await advance(1);
+      expect(early).toHaveBeenCalledTimes(1);
+    });
+
+    it("never waits longer than 20 seconds for the first refresh", async () => {
+      randomUnit.mockRestore();
+      randomUnit = mockRandomUnit(0.999_999_9);
+      const late = renderCounter();
+      emitDropUpdate({ waveId: "unknown-late" });
+      await advance(19_000);
+      expect(late).not.toHaveBeenCalled();
+      await advance(1_000);
+      expect(late).toHaveBeenCalledTimes(1);
+    });
+
+    it("gives drops after a refresh one trailing refresh after the minimum gap", async () => {
+      const refetch = renderCounter();
+      emitDropUpdate({ waveId: "unknown-1" });
+      await advance(11_000);
+      expect(refetch).toHaveBeenCalledTimes(1);
+
+      emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
+      await advance(1_000);
+      emitDropUpdate({ createdAt: 32, waveId: "unknown-3" });
+      // 30 s after the refresh, plus the 11 s jitter, from the first drop.
+      await advance(30_000 + 11_000 - 1_000 - 1);
+      expect(refetch).toHaveBeenCalledTimes(1);
+      await advance(1);
+      expect(refetch).toHaveBeenCalledTimes(2);
+
+      await advance(5 * 60_000);
+      expect(refetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("waits for a hidden tab to show before refreshing", async () => {
+      const refetch = renderCounter();
+      visibility = "hidden";
+      emitDropUpdate({ waveId: "unknown-hidden" });
+      await advance(5 * 60_000);
+      expect(refetch).not.toHaveBeenCalled();
+
+      visibility = "visible";
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      await advance(11_000);
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("defers a refresh that comes due in a hidden tab, then keeps the gap", async () => {
+      const refetch = renderCounter();
+      emitDropUpdate({ waveId: "unknown-1" });
+      visibility = "hidden";
+      await advance(5 * 60_000);
+      expect(refetch).not.toHaveBeenCalled();
+
+      // Showing the tab schedules a fresh jittered refresh, not an instant
+      // one, so tabs shown together still spread out.
+      visibility = "visible";
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      await advance(11_000 - 1);
+      expect(refetch).not.toHaveBeenCalled();
+      await advance(1);
+      expect(refetch).toHaveBeenCalledTimes(1);
+
+      // The refresh counts: the next drop waits out the 30 s gap.
+      emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
+      await advance(30_000 + 11_000 - 1);
+      expect(refetch).toHaveBeenCalledTimes(1);
+      await advance(1);
+      expect(refetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("cancels a pending refresh on unmount", async () => {
+      const refetch = jest.fn();
+      const { unmount } = renderHook(
+        () =>
+          useNewDropCounter(null, waves, refetch, {
+            otherListWaveIds: new Set(),
+          }),
+        { wrapper }
+      );
+      emitDropUpdate({ waveId: "unknown-gone" });
+      unmount();
+      await advance(MAX_REFRESH_DELAY_MS);
+      expect(refetch).not.toHaveBeenCalled();
+    });
   });
 });

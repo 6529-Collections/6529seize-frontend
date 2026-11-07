@@ -1,13 +1,69 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
+import {
+  VALIDATOR_SWITCH,
+  VALIDATOR_UPGRADE,
+  type ValidatorReleaseNote,
+} from "@/lib/validator-page/content/guideMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
   VALIDATOR_FEEDBACK_WAVE,
   VALIDATOR_FEEDBACK_WAVE_HREF,
 } from "@/lib/validator-page/content/pageText";
 import CopyChecksumButton from "./CopyChecksumButton";
+import ValidatorMarkdown from "./ValidatorMarkdown";
 import { BODY, LINK, SECTION_HEADING } from "./validatorStyles";
+
+type NewestProps = {
+  /** The offered release's version, or undefined while there is none. */
+  readonly newest: string | undefined;
+};
+
+/**
+ * A note for one release, shown only while the signed list offers it, so it
+ * never describes a release the page doesn't offer.
+ */
+function ReleaseNote({
+  note,
+  newest,
+}: NewestProps & { readonly note: ValidatorReleaseNote }) {
+  if (newest !== note.forVersion) {
+    return null;
+  }
+  const headingId = `${note.id}-title`;
+  return (
+    <section
+      id={note.id}
+      aria-labelledby={headingId}
+      className={`${ABOUT_INSET_CLASS_NAME} tw-mb-12 tw-scroll-mt-24 tw-p-5 sm:tw-p-6`}
+    >
+      <h2
+        id={headingId}
+        className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
+      >
+        {note.title}
+      </h2>
+      <div className="tw-mt-3 [&>div>*:last-child]:tw-mb-0">
+        <ValidatorMarkdown markdown={note.markdown} />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * What a tester who runs the last release does differently, right under the
+ * download, where an upgrading tester looks first.
+ */
+export function ValidatorUpgrade({ newest }: NewestProps) {
+  return <ReleaseNote note={VALIDATOR_UPGRADE} newest={newest} />;
+}
+
+/** Sunday's switch, above the upgrade note on the download page and the guide. */
+export function ValidatorSwitch({ newest }: NewestProps) {
+  return <ReleaseNote note={VALIDATOR_SWITCH} newest={newest} />;
+}
 
 /** What a tester needs, in two lines, and the full hardware guide. */
 export function ValidatorNeeds() {
@@ -63,8 +119,10 @@ export function ValidatorFeedback() {
         />
       </div>
       <p className={`tw-mb-0 tw-mt-4 ${BODY}`}>
-        Don&apos;t post logs or status files: they show your keys and your
-        account.
+        In the app, Report a problem (in 6529&apos;s logo menu) makes a cleaned
+        report with a box for your words, for you to paste there. It leaves out
+        your account, addresses and names. Don&apos;t post raw logs or status
+        files: they show your keys and your account.
       </p>
       <p className={`tw-mb-0 tw-mt-3 ${BODY}`}>
         6529 never starts a DM with you or asks for a seed phrase.

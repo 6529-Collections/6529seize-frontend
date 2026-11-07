@@ -86,7 +86,7 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     });
     await expect(artwork).toHaveAttribute(
       "href",
-      /\/competitions\/10000000-0000-4000-8000-000000000001\?drop=00000000-0000-4000-8000-000000000560$/
+      /\/decisions\/10000000-0000-4000-8000-000000000001\?drop=00000000-0000-4000-8000-000000000560$/
     );
     const trigger = page.getByRole("button", {
       name: /^Filter notifications:/,

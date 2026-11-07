@@ -107,9 +107,10 @@ export default function UserPageHeaderEditClassification({
   const form = (
     <form
       onSubmit={onSubmit}
-      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-5 sm:tw-px-6"
     >
       <UserSettingsClassification
+        compact
         selected={classification}
         onSelect={setClassification}
         inlineOptions
@@ -118,7 +119,7 @@ export default function UserPageHeaderEditClassification({
       <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
         <Button
           type="submit"
-          variant="action"
+          variant="primary"
           size="lg"
           loading={mutating}
           disabled={!haveChanges}
@@ -128,7 +129,7 @@ export default function UserPageHeaderEditClassification({
           Save
         </Button>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
           disabled={mutating}
           onClick={onClose}
@@ -156,7 +157,9 @@ export default function UserPageHeaderEditClassification({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      showHeaderDivider
+      headerVariant="minimal"
+      headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
+      titleClassName="!tw-text-base !tw-font-medium"
       maxWidthClass="md:tw-max-w-xl"
     >
       {form}

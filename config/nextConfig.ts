@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
+import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import {
   versionReloadImageHeaders,
@@ -131,6 +132,16 @@ export function sharedConfig(
       maximumResponseBody: IMAGE_MAXIMUM_RESPONSE_BODY_BYTES,
     },
     poweredByHeader: false,
+    // The free-solid barrel defines every icon inline, so bundles keep far
+    // more icons than a page draws. Rewriting each named import to its
+    // single-icon module (`@fortawesome/free-solid-svg-icons/faPlus`) ships
+    // only the icons in use, with no barrel copy beside them.
+    modularizeImports: {
+      "@fortawesome/free-solid-svg-icons": {
+        transform: "@fortawesome/free-solid-svg-icons/{{member}}",
+        skipDefaultConversion: true,
+      },
+    },
     redirects() {
       return Promise.resolve([
         {
@@ -156,6 +167,13 @@ export function sharedConfig(
         {
           source: "/about/nft-delegation",
           destination: "/safe-collecting",
+          permanent: true,
+        },
+        // Competitions are now called decisions. `:path*` also matches the
+        // bare collection route, and query strings carry over.
+        {
+          source: "/waves/:wave/competitions/:path*",
+          destination: "/waves/:wave/decisions/:path*",
           permanent: true,
         },
         // The 6529 Stream public contract review was removed; its section is
@@ -212,6 +230,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        profileCmsAssetProxyHeaders,
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
@@ -240,6 +259,11 @@ export function sharedConfig(
         // server rendering keeps every locale synchronous.
         "@/i18n/localeDictionaries": {
           browser: "./i18n/localeDictionaries.browser.ts",
+        },
+        // Browser bundles register only the root en-US dictionary and the
+        // feature namespaces a page imports; server rendering registers all.
+        "@/i18n/sourceMessages": {
+          browser: "./i18n/sourceMessages.browser.ts",
         },
         // Browser bundles read the build-validated public env without zod;
         // server rendering keeps validating it.

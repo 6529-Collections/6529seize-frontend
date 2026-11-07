@@ -58,6 +58,12 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The reaction sandbox covers live count and profile-list updates, desktop tooltip
+and dialog overflow, recoverable detail-read failures, and mobile long press.
+It uses synthetic local data and checks that hidden lists do not refetch.
+App PR CI selects it when reaction components, hooks, API helpers, or its browser
+contract change.
+
 The native competition sandbox pack exercises Additional Action through the real
 Main Stage submission modal on desktop and phone. It checks the optional plan,
 length limit, checkbox draft preservation, review/preview and back navigation,
@@ -120,6 +126,56 @@ with its own server/build output. Shared image and artwork-renderer changes sele
 this pack in addition to existing competition coverage. The artwork scenarios do
 not extend the competition job's test list or timeout budget.
 
+### Chat render budget
+
+`tests/social/chat-render-budget-sandbox.spec.ts` runs in the native
+competition pack. It measures the chat hot path per received message:
+components re-rendered and mounted, React commits, API requests,
+receive-to-row time, long tasks during a 50-message burst and own
+send-to-render time. Each test attaches `chat-perf-<scenario>.json` and logs
+one `chat-perf` line. `tests/support/chatPerf.ts` installs the probe (a React
+DevTools commit hook, socket receive marks, row and submit marks, a long-task
+observer) as an init script; nothing ships to users.
+`tests/support/chatPerfFixture.ts` supplies 30 followed waves and an open
+wave with 40 messages, then sends full `DROP_UPDATE` frames to the sockets
+the backend would use.
+
+PR CI asserts the render and request budgets (`BUDGETS` in the spec) on the
+development sandbox and reports long tasks and latency only. Lower a budget in
+the same PR that lowers the measured number. The scripted planner selects the
+pack for chat hot-path files (`scripts/app-pr-ci-effective-plan.cjs`).
+
+PR before/after numbers come from a production build. Start the loopback API
+alone, build with the fixture origins and dev auth off, serve the build, then
+run the spec against it. The spec signs in through the stored-account path,
+which works in both builds:
+
+    $env:PORT = "3297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT = "4297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_ONLY = "1"
+    $env:USE_DEV_AUTH = "false"
+    seize exec node tests/support/composerSandboxServer.cjs
+
+    $env:API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:ALLOWLIST_API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:WS_ENDPOINT = "ws://127.0.0.1:4297"
+    $env:BASE_ENDPOINT = "http://localhost:3297"
+    $env:USE_DEV_AUTH = "false"
+    $env:ASSETS_FROM_S3 = "false"
+    seize run build:ci
+    seize exec next start --port 3297 --hostname localhost
+
+    $env:PLAYWRIGHT_SKIP_WEB_SERVER = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_PRODUCTION_SANDBOX = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_REPORT_ONLY = "1"
+    seize run test:e2e:native-competition-sandbox --grep "Chat render budget"
+
+As with the artwork documentation pack, the production-sandbox flag bypasses
+CSP in this spec's browser contexts only, so the production bundle can reach
+the plain-HTTP fixture API. It does not validate CSP. Component names are
+minified in production builds; arm the probe with `names: true` on a
+development server to see which components render.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
@@ -165,11 +221,14 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:wave-link-preview-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Embedded wave preview readability in the sidebar and responsive chat.                                 |
 | `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
-| `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following, artist artwork alerts and REP editing dialogs, permissions and recovery.           |
+| `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
+| `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
 | `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
+| `test:e2e:metamask-bridge`                          | —                             | sandbox  | local       | manual                    | 15m     | Isolated WebKit MetaMask bridge attribution and application-error boundaries.                         |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
 | `test:e2e:browser-diversity`                        | —                             | local    | local       | pr-ci, manual             | 15m     | Engine-diversity pass on Firefox and WebKit.                                                          |
@@ -275,16 +334,16 @@ Opt-in stateful staging packs:
   wallet (announced through EIP-6963 and as `window.ethereum`) that answers in
   the test process, so the private keys never enter the page, logs or
   artifacts. Each user signs in through the real wallet modal, gets a
-  test-only `e2eeqa_*` profile and turns on encrypted messages with one
-  combined sign-in grant (NC8): a returning user's sign-in grants it, and a
-  new user (who signs in before the profile exists) gets it from the
-  enrollment button with one more sign-in signature, which also revokes the
-  earlier signing-only grant. No device signs an EIP-712 `MlsDeviceGrant` on
-  the website. The spec covers a DM in both directions, an image
-  attachment through the blob store, a group with a third user and a revoked
-  second device that can no longer read new messages. It also checks sender
-  profile links and levels, plus DM header profile links. Its privacy checks ensure no
-  request URL, body or sent WebSocket frame contains any plaintext (raw, hex
+  test-only `e2eeqa_*` profile, and enables encryption. A returning user's
+  sign-in grants both permissions (NC8). A new user who already has a
+  Signed Posts grant signs one EIP-712 `MlsDeviceGrant` from the enrollment
+  card and keeps their existing Signed Posts grant. The spec covers a DM in
+  both directions, file-picked and dropped images through the blob store,
+  image popup dismissal, downloads and focus return, a group with a
+  third user and a revoked second device that can no longer read new messages.
+  It also checks sender profile links and levels, plus DM header profile
+  links. Its privacy checks ensure no request URL, body or sent WebSocket
+  frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
   engine logs no errors. A route guard drops writes aimed at production 6529
@@ -595,6 +654,15 @@ Surface matrix:
 
 Large-pack ownership:
 
+- `test:e2e:input-detection-readonly` keeps the Windows touch/mouse latch
+  assertions on a single hydrated message selected by serial number. Its
+  self-contained browser harness also covers row replacement during scrolling,
+  delayed replacement insertion, messages arriving during a touch gesture,
+  and avoiding author links when tapping the row wrapper. Trusted taps must
+  stay on the wave route; a row without safe padding fails explicitly. A tap is
+  bound to the hit-tested node, so a later replacement cannot reuse its offset.
+  The harness needs no application server; run it with
+  `PLAYWRIGHT_SKIP_WEB_SERVER=1 6529 exec playwright test tests/input/win8-touch-latch-readonly.spec.ts --project=web-desktop-chromium --grep 'Touch target harness'`.
 - `test:e2e`, `test:e2e:smoke`, and targeted single-route specs are ordinary
   PR-owner checks.
 - `test:e2e:surface-matrix` is owned by the PR owner for user-facing route,
