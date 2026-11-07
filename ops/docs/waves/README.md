@@ -15,7 +15,7 @@ Use this area for wave and direct-message tasks:
 - Discovery route: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
-- Competitions: `/waves/{waveId}/competitions`
+- Decisions: `/waves/{waveId}/decisions`
 - Messages list: `/messages`
 - Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
@@ -80,7 +80,7 @@ Use this area for wave and direct-message tasks:
 
 ## Features
 
-- [Competitions](competitions/README.md): parallel Rank/Approve competitions,
+- [Decisions](competitions/README.md): parallel Rank/Approve decisions,
   independent votes and credits, administration and shared chat.
 
 - [Discovery](discovery/README.md): dedicated `/discover` route, card behavior,

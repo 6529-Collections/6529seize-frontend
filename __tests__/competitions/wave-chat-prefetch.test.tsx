@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 import type { QueryFilters } from "@tanstack/react-query";
 
-let mockPathname = "/waves/wave/competitions/competition";
+let mockPathname = "/waves/wave/decisions/competition";
 const mockPrefetch = jest.fn();
 const mockIsFetching = jest.fn((_filters?: QueryFilters) => 0);
 const mockRouter = { prefetch: mockPrefetch };
@@ -17,7 +17,7 @@ jest.mock("@tanstack/react-query", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockPathname = "/waves/wave/competitions/competition";
+  mockPathname = "/waves/wave/decisions/competition";
   mockIsFetching.mockReturnValue(0);
 });
 
@@ -36,7 +36,7 @@ it("does no speculative work on mount and gives foreground loading priority", ()
 
 it("prefetches the current competition's shared Chat destination", () => {
   const { result, rerender } = renderHook(useWaveChatPrefetch);
-  mockPathname = "/waves/wave/competitions/another";
+  mockPathname = "/waves/wave/decisions/another";
   rerender();
   act(() => result.current());
   expect(mockPrefetch).toHaveBeenCalledWith(

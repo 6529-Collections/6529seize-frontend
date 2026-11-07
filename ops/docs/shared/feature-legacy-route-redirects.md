@@ -14,6 +14,8 @@ This page covers:
 - middleware desktop `/my-stream*` compatibility redirects (`301`)
 - route-level legacy aliases (`307`)
 - `/waves?wave=<id>` normalization to `/waves/<id>` (`307`)
+- former competition routes `/waves/<id>/competitions*` to
+  `/waves/<id>/decisions*` (`308`)
 
 Profile-only legacy aliases are documented in
 [Legacy Profile Route Redirects](../profiles/navigation/feature-legacy-profile-route-redirects.md).
@@ -21,14 +23,16 @@ Profile-only legacy aliases are documented in
 ## User Journey
 
 1. Request starts at a legacy URL.
-2. Middleware exact-path map runs first.
-3. Wave links whose id is not a wave id get the not-found page with a `404`
+2. Config redirects run before middleware, including former competition
+   routes ([Former Competition Routes](#former-competition-routes-308)).
+3. Middleware exact-path map runs next.
+4. Wave links whose id is not a wave id get the not-found page with a `404`
    status ([Malformed Wave Ids](#malformed-wave-ids-404)).
-4. Desktop-only `/my-stream*` middleware compatibility runs next.
-5. On staging deployments only, access control runs (`401 -> /access`,
+5. Desktop-only `/my-stream*` middleware compatibility runs next.
+6. On staging deployments only, access control runs (`401 -> /access`,
    `403 -> /restricted`). Production and local development skip it.
-6. Route-level redirects run (including `/waves?wave=<id>` normalization).
-7. Canonical destination route loads.
+7. Route-level redirects run (including `/waves?wave=<id>` normalization).
+8. Canonical destination route loads.
 
 ## Redirect Families
 
@@ -38,6 +42,7 @@ Profile-only legacy aliases are documented in
 | Middleware `/my-stream` + `/my-stream/notifications` (desktop OS only) | `301` | computed route (`/`, `/waves`, `/waves/<id>`, `/messages`, `/messages/<id>`, `/notifications`) | reads only `view`, `wave`, `drop`, `serialNo`; ignores all other keys |
 | Route-level legacy aliases | `307` | fixed route/asset target | source query not forwarded |
 | `/waves?wave=<id>` | `307` | `/waves/<id>` | keeps all keys except `wave` |
+| `/waves/<id>/competitions` and `/waves/<id>/competitions/<path>` | `308` | `/waves/<id>/decisions` and `/waves/<id>/decisions/<path>` | source query preserved |
 
 ## Middleware Exact-Path Legacy Map (`301`)
 
@@ -117,6 +122,24 @@ Rules:
 - If `wave` is repeated, use the first value.
 - Preserve repeated values for non-`wave` keys.
 
+## Former Competition Routes (`308`)
+
+Competitions are now called decisions, and their pages moved with the name.
+Links in posts, notifications and push payloads that still use the former
+routes keep working through a permanent redirect:
+
+- `/waves/<id>/competitions` -> `/waves/<id>/decisions`
+- `/waves/<id>/competitions/<decision>` -> `/waves/<id>/decisions/<decision>`
+- `/waves/<id>/competitions/new` -> `/waves/<id>/decisions/new`
+
+Rules:
+
+- The redirect is permanent (`308`) and keeps the full source query, such as
+  `entry`, `drop`, `tab` and `voteTab`.
+- The `<id>` segment is not checked here; the destination is then checked like
+  any other decision route ([Malformed Wave Ids](#malformed-wave-ids-404)).
+- An app tab that still shows a former route keeps working until it reloads.
+
 ## Malformed Wave Ids (`404`)
 
 A wave id is a UUID (for example `5f207393-5418-4a75-8738-e40edb44a94d`, upper
@@ -126,7 +149,8 @@ standard not-found page (`404 | PAGE NOT FOUND`) and a real `404` status. The
 address bar keeps the original URL:
 
 - `/waves/<id>` and `/messages/<id>`
-- `/waves/<id>/competitions` and `/waves/<id>/competitions/<competition>`
+- `/waves/<id>/decisions` and `/waves/<id>/decisions/<decision>` (former
+  `/competitions` links are redirected there first)
 - the legacy `/waves?wave=<id>` and `/messages?wave=<id>` links
 
 Rules:
@@ -136,10 +160,10 @@ Rules:
 - `/waves` and `/messages` without a `wave` value, or with an empty one, load
   normally. A repeated `wave` uses its first value.
 - Only the wave id is checked. `drop`, `serialNo`, `divider` and the
-  competition segment are not, and neither is `/my-stream` (its redirect target
+  decision segment are not, and neither is `/my-stream` (its redirect target
   is checked instead).
 - A UUID-shaped id is never answered here. Waves, direct messages and
-  competitions that do not exist, or that the signed-in account cannot see,
+  decisions that do not exist, or that the signed-in account cannot see,
   still open the app shell and resolve on the page.
 
 ## Edge Cases

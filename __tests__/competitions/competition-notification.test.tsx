@@ -33,10 +33,10 @@ it("links the results sentence to the competition entry with a decorative trophy
   expect(container).toHaveTextContent(
     "Results are in for Community competition"
   );
-  expect(screen.queryByText("Competition updated")).toBeNull();
+  expect(screen.queryByText("Decision updated")).toBeNull();
   expect(
     screen.getByRole("link", { name: "Community competition" })
-  ).toHaveAttribute("href", "/waves/wave/competitions/competition?entry=entry");
+  ).toHaveAttribute("href", "/waves/wave/decisions/competition?entry=entry");
   expect(screen.getAllByRole("link")).toHaveLength(1);
   expect(container.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
   expect(container.querySelector("time")).toBeInTheDocument();
@@ -76,7 +76,7 @@ it("preserves a long competition title and opens the competition when there is n
   );
   expect(screen.getByRole("link", { name: title })).toHaveAttribute(
     "href",
-    "/waves/wave/competitions/competition"
+    "/waves/wave/decisions/competition"
   );
   expect(container).toHaveTextContent(title);
 });

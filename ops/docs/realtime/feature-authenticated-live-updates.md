@@ -70,6 +70,10 @@ updates. When auth is missing, the session disconnects and push updates pause.
   for up to 3 seconds. Leaving the wave, switching windows or hiding the tab
   sends the pending read at once. Legacy direct messages still refresh and
   mark read after every post.
+- When you follow or unfollow a wave, or someone adds you to one, on any
+  device, your wave lists and that wave refresh in every open tab once the
+  server announces the change. Changes for another connected account are left
+  until you switch to it.
 
 ## Edge Cases
 

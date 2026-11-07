@@ -1,4 +1,4 @@
-const PROFILE_CMS_ASSET_PROXY_PATH = "/api/profile-cms/assets";
+export const PROFILE_CMS_ASSET_PROXY_PATH = "/api/profile-cms/assets";
 
 export const PROFILE_CMS_ASSET_PROXY_ALLOWED_HOSTS = [
   "d3lqz0a4bldqgf.cloudfront.net",
