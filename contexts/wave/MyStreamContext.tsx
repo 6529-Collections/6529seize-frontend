@@ -539,6 +539,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processIncomingDrop: stableProcessIncomingDrop,
       processDropRemoved,
       processDropsRemoved: waveMessagesStore.removeDrops,
+      trimWaveDrops: waveMessagesStore.trimDrops,
       refreshWaveMessages,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     }),
@@ -560,6 +561,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       stableProcessIncomingDrop,
       processDropRemoved,
       waveMessagesStore.removeDrops,
+      waveMessagesStore.trimDrops,
       refreshWaveMessages,
       waveMessagesStore.optimisticUpdateDrop,
     ]
