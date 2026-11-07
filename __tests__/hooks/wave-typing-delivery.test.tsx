@@ -1,4 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import { useCreateDropTyping } from "@/components/waves/create-drop-content/useCreateDropTyping";
 import { WsMessageType } from "@/helpers/Types";
@@ -55,6 +57,15 @@ class WaveSocket extends EventTarget {
     this.dispatchEvent(event);
   }
 }
+
+// Production mounts the hook under the app WebSocketProvider (Providers.tsx),
+// which delivers drops to the typing listener. The provider opens no socket
+// until something connects it, so the wave sockets below are the only ones.
+const withAppSocket = ({ children }: { readonly children: ReactNode }) => (
+  <WebSocketProvider config={{ url: "wss://waves.example" }}>
+    {children}
+  </WebSocketProvider>
+);
 
 let sockets: WaveSocket[];
 const originalWebSocket = globalThis.WebSocket;
@@ -133,7 +144,7 @@ it.each([false, true])(
         useCreateDropTyping({ markdown, waveId: wave });
         return useWaveIsTyping(wave, "alice");
       },
-      { initialProps: { markdown: "" } }
+      { initialProps: { markdown: "" }, wrapper: withAppSocket }
     );
     act(() => socket().open());
     expect(socket().connection.wave).toBeNull();
@@ -166,7 +177,10 @@ it.each([false, true])(
 );
 
 it("clears private typing on logout and ignores the closed account's messages", () => {
-  const { result } = renderHook(() => useWaveIsTyping("private-wave", "alice"));
+  const { result } = renderHook(
+    () => useWaveIsTyping("private-wave", "alice"),
+    { wrapper: withAppSocket }
+  );
   const previous = socket();
   act(() => {
     previous.open();

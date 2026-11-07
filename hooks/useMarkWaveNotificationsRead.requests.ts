@@ -145,6 +145,7 @@ const createWaveReadSendIntent = ({
   retryContext,
   readThroughSerialNo,
   onReadResponse,
+  refreshWaveLists,
 }: {
   readonly shouldSend: WaveReadShouldSend;
   readonly retryContext: WaveReadSendRetryContext | undefined;
@@ -152,11 +153,13 @@ const createWaveReadSendIntent = ({
   readonly onReadResponse?:
     | ((response: ApiMarkWaveReadResponse) => void)
     | undefined;
+  readonly refreshWaveLists?: boolean | undefined;
 }): WaveReadSendIntent => ({
   shouldSend,
   retryContext,
   readThroughSerialNo,
   onReadResponse,
+  refreshWaveLists,
 });
 
 const requeueExpiredWaveReadIntents = (
@@ -183,6 +186,7 @@ const requeueExpiredWaveReadIntents = (
         shouldSend: sendIntent.shouldSend,
         readThroughSerialNo: sendIntent.readThroughSerialNo,
         onReadResponse: sendIntent.onReadResponse,
+        refreshWaveLists: sendIntent.refreshWaveLists,
         queueIfBlocked: true,
       });
     });
@@ -266,7 +270,14 @@ const sendWaveReadRequest = async (
     });
     sendableIntents.forEach((intent) => intent.onReadResponse?.(response));
   }
-  invalidateNotificationsRef.current();
+  // Only a live read of the open wave opts out of the wave-list refetch; any
+  // other read (undefined: the default) can change list unread counts. A
+  // merged batch refreshes the lists when any of its reads needs it.
+  invalidateNotificationsRef.current({
+    refreshWaveLists: sendableIntents.some(
+      (intent) => intent.refreshWaveLists !== false
+    ),
+  });
   return "sent";
 };
 
@@ -432,6 +443,7 @@ export function enqueuePendingWaveReadRequest({
   shouldSend,
   readThroughSerialNo,
   onReadResponse,
+  refreshWaveLists,
   queueIfBlocked,
 }: {
   readonly addressKey: string;
@@ -447,6 +459,7 @@ export function enqueuePendingWaveReadRequest({
   readonly onReadResponse?:
     | ((response: ApiMarkWaveReadResponse) => void)
     | undefined;
+  readonly refreshWaveLists?: boolean | undefined;
   readonly queueIfBlocked: boolean;
 }): Promise<MarkWaveNotificationsReadResult> {
   const staleAddressEpochResult = getStaleAddressEpochWaveReadResult({
@@ -477,6 +490,7 @@ export function enqueuePendingWaveReadRequest({
     retryContext,
     readThroughSerialNo,
     onReadResponse,
+    refreshWaveLists,
   });
 
   const existingState = pendingWaveReadRequests.get(requestKey);
@@ -575,6 +589,7 @@ const flushQueuedWaveReadRequests = ({
           retryContext: getRetryContext(queuedRequest, requestKey),
           readThroughSerialNo: sendIntent.readThroughSerialNo,
           onReadResponse: sendIntent.onReadResponse,
+          refreshWaveLists: sendIntent.refreshWaveLists,
         })
       )
     );

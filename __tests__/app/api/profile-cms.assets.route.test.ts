@@ -168,6 +168,9 @@ describe("profile CMS asset route", () => {
       "public, max-age=86400, s-maxage=86400"
     );
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("content-security-policy")).toBe(
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    );
     expect(await response.text()).toBe("image-bytes");
     expect(mockFetchPublicUrl).toHaveBeenCalledWith(
       new URL(ALLOWED_IMAGE_URL),
@@ -202,7 +205,58 @@ describe("profile CMS asset route", () => {
       "public, max-age=300, s-maxage=300"
     );
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("content-security-policy")).toBe(
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    );
     await expect(response.json()).resolves.toEqual(["6529white"]);
+  });
+
+  it.each([
+    ["image/WEBP", "image/webp"],
+    ["image/GIF", "image/gif"],
+    ["image/jpeg", "image/jpeg"],
+    ["image/png; charset=binary", "image/png"],
+    ["application/json; charset=utf-8", "application/json"],
+  ])(
+    "serves upstream %s as the normalized type %s",
+    async (upstream, served) => {
+      mockFetchPublicUrl.mockResolvedValueOnce(
+        createUpstreamResponse("bytes", {
+          headers: { "content-length": "5", "content-type": upstream },
+          status: 200,
+        })
+      );
+
+      const response = await GET(createRequest(ALLOWED_IMAGE_URL));
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe(served);
+    }
+  );
+
+  it.each([
+    "image/svg+xml",
+    "IMAGE/SVG+XML; charset=utf-8",
+    "image/x-icon",
+    "text/html",
+    "text/xml",
+    "application/xhtml+xml",
+    "application/octet-stream",
+  ])("refuses upstream content type %s", async (upstream) => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createUpstreamResponse("<svg></svg>", {
+        headers: { "content-length": "11", "content-type": upstream },
+        status: 200,
+      })
+    );
+
+    await expectJsonError(
+      `https://6529.io/api/profile-cms/assets?url=${encodeURIComponent(
+        ALLOWED_IMAGE_URL
+      )}`,
+      415,
+      "Unsupported CMS asset content type"
+    );
   });
 
   it("rejects oversized or unsupported upstream responses", async () => {

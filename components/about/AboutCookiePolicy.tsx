@@ -6,16 +6,11 @@ import {
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useState } from "react";
 import Toggle from "react-toggle";
-import {
-  getCookieConsentByName,
-  useCookieConsent,
-} from "../cookies/CookieConsentContext";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -104,21 +99,17 @@ function AwsRumCookieRows({
 
 export default function AboutCookiePolicy() {
   const locale = useBrowserLocale();
-  const { showCookieConsent, consent, reject } = useCookieConsent();
+  const { showCookieConsent, consent, reject, performanceConsent } =
+    useCookieConsent();
   const firstPartyLabel = t(locale, "about.cookiePolicy.firstParty");
   const sevenDaysLabel = t(locale, "about.cookiePolicy.lifespan.sevenDays");
   const oneYearLabel = t(locale, "about.cookiePolicy.lifespan.oneYear");
 
-  // Server HTML cannot read the consent cookie, so the server render and its
-  // hydration render show "Disabled"; the stored choice applies afterwards.
-  const hasHydrated = useHasHydrated();
-  const [toggledPerformanceCookies, setToggledPerformanceCookies] = useState<
-    boolean | null
-  >(null);
-  const isPerformanceCookiesEnabled =
-    hasHydrated &&
-    (toggledPerformanceCookies ??
-      getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE) === true);
+  // The toggle shows the consent provider's choice, so a change made in the
+  // banner (or a failed save) is reflected here. The provider reads the
+  // consent cookie after mounting, so server HTML and the hydration render
+  // show "Disabled" until then.
+  const isPerformanceCookiesEnabled = performanceConsent === true;
 
   const togglePerformanceCookies = () => {
     if (isPerformanceCookiesEnabled) {
@@ -126,7 +117,6 @@ export default function AboutCookiePolicy() {
     } else {
       consent();
     }
-    setToggledPerformanceCookies(!isPerformanceCookiesEnabled);
   };
 
   return (
