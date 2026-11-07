@@ -82,9 +82,9 @@
       "lib/chain/gateway/**": ["files", "exports", "types"],
       "lib/chain/mock/**": ["files", "exports", "types"],
       "lib/chain/status-ladder.ts": ["files", "exports", "types"],
-      // Waves Phase 0 lane C1: the chat store core and the action lifecycle
-      // land before C2 wires them into the wave message store; their Jest
-      // suites are the only consumers until then. C2 removes these.
+      // Waves Phase 0 lane C: the wave message store uses the chat store
+      // (C2), but its pending-send and lifecycle API waits for lane A's
+      // optimistic send (A3), whose PR removes these.
       "lib/chat-store/**": ["files", "exports", "types"],
       "lib/action-lifecycle/**": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally

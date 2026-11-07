@@ -34,11 +34,12 @@ import {
   e2eeConsoleProblems,
   ENCRYPTED_ROUTE,
   expectEnrollmentCard,
+  configureStagingJourney,
   gotoStaging,
-  hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
   stagingE2eeOptInProblem,
+  startStagingJourneySetup,
   type StagingE2eeSession,
   type StagingE2eeUser,
   SYNC_TIMEOUT_MS,
@@ -186,24 +187,19 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   // In order in one worker (the config is fullyParallel): tests share the
   // users set up once. A failed test restarts the worker with fresh users;
   // nothing is retried, since a retry would only add more staging data.
-  test.describe.configure({
+  configureStagingJourney(test, {
     mode: "default",
-    retries: 0,
-    timeout: TEST_TIMEOUT_MS,
+    testTimeoutMs: TEST_TIMEOUT_MS,
+    optInProblem: OPT_IN_PROBLEM,
   });
-  test.skip(OPT_IN_PROBLEM !== null, OPT_IN_PROBLEM ?? "");
 
   test.beforeAll(async ({ browser }, testInfo) => {
-    test.setTimeout(SETUP_TIMEOUT_MS);
-    test.skip(
-      testInfo.project.name !== DESKTOP_PROJECT,
-      `The staging E2EE journey runs on ${DESKTOP_PROJECT} only.`
-    );
-    if (!hasStagingAccessCode()) {
-      throw new Error(
-        "The staging E2EE pack needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH."
-      );
-    }
+    startStagingJourneySetup(testInfo, {
+      setupTimeoutMs: SETUP_TIMEOUT_MS,
+      project: DESKTOP_PROJECT,
+      journey: "The staging E2EE journey",
+      pack: "The staging E2EE pack",
+    });
     const probe = await probeEncryptedRoute(browser, testInfo);
     test.skip(
       !probe.available,
