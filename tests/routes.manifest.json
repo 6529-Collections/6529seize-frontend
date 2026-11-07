@@ -136,6 +136,10 @@
         "production": "/about/the-memes"
       }
     },
+    "/about/diagnostics": {
+      "classification": "exempt",
+      "exemptReason": "Behind NEXT_PUBLIC_FEATURE_DIAGNOSTICS: a 404 until an environment turns the flag on; its preview is local device state, covered by Jest."
+    },
     "/about/media": {
       "classification": "crawlable",
       "family": "content-archive",

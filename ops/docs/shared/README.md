@@ -53,6 +53,8 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 - [Native iOS EULA Consent](feature-ios-eula-consent.md): mandatory versioned
   agreement checks, device restoration, and fail-closed recovery in the native
   iOS app.
+- [Send Diagnostics](feature-send-diagnostics.md): `/about/diagnostics`, the
+  preview of a problem report, the optional screenshot and the support code.
 
 ### App Delivery
 

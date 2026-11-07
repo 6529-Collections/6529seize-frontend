@@ -1,3 +1,4 @@
+import { publicEnv } from "@/config/env";
 import { type MessageKey, t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AboutSection } from "@/types/enums";
@@ -16,6 +17,7 @@ type AboutContentsAboutNavItem = {
   readonly descriptionKey: MessageKey;
   readonly requiresVisibleSubscriptions?: true | undefined;
   readonly requiresAppWalletsSupported?: never;
+  readonly requiresDiagnostics?: never;
 };
 
 type AboutContentsExternalNavItem = {
@@ -26,6 +28,8 @@ type AboutContentsExternalNavItem = {
   readonly activePathPrefixes?: readonly string[] | undefined;
   readonly requiresVisibleSubscriptions?: true | undefined;
   readonly requiresAppWalletsSupported?: true | undefined;
+  /** Shown only while NEXT_PUBLIC_FEATURE_DIAGNOSTICS is on. */
+  readonly requiresDiagnostics?: true | undefined;
 };
 
 type AboutContentsNavItem =
@@ -51,6 +55,7 @@ type AboutSectionItemOptions = {
 type AboutRouteItemOptions = AboutSectionItemOptions & {
   readonly activePathPrefixes?: readonly string[] | undefined;
   readonly requiresAppWalletsSupported?: true | undefined;
+  readonly requiresDiagnostics?: true | undefined;
 };
 
 function aboutGroup(
@@ -99,6 +104,7 @@ function aboutRouteItem(
     activePathPrefixes: options.activePathPrefixes,
     requiresVisibleSubscriptions: options.requiresVisibleSubscriptions,
     requiresAppWalletsSupported: options.requiresAppWalletsSupported,
+    requiresDiagnostics: options.requiresDiagnostics,
   };
 }
 
@@ -118,6 +124,14 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutSectionItem(AboutSection.NAKAMOTO_THRESHOLD, "nakamotoThreshold"),
     aboutSectionItem(AboutSection.APPLY, "apply"),
     aboutSectionItem(AboutSection.CONTACT_US, "contactUs"),
+    aboutRouteItem(
+      "send-diagnostics",
+      "/about/diagnostics",
+      "sendDiagnostics",
+      {
+        requiresDiagnostics: true,
+      }
+    ),
   ]),
   aboutGroup("collectionsMinting", [
     aboutSectionItem(AboutSection.MEMES, "aboutTheMemes"),
@@ -298,6 +312,13 @@ function isAboutNavItemVisible(
   if (
     item.requiresAppWalletsSupported === true &&
     !options.appWalletsSupported
+  ) {
+    return false;
+  }
+
+  if (
+    item.requiresDiagnostics === true &&
+    publicEnv.NEXT_PUBLIC_FEATURE_DIAGNOSTICS !== "true"
   ) {
     return false;
   }
