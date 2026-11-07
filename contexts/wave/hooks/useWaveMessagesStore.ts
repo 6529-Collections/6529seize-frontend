@@ -1,14 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import {
-  formatWaveMessages,
-  maxOrNull,
-  mergeDrops,
-} from "../utils/wave-messages-utils";
+import { formatWaveMessages, maxOrNull } from "../utils/wave-messages-utils";
 import type { ServerWaveFeedSeedResult } from "../server-wave-feed-seed";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
+import { ChatStore } from "@/lib/chat-store";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
 import {
@@ -24,18 +21,6 @@ import {
 } from "./waveMessagesEviction";
 
 const MAX_UNCACHED_TOMBSTONE_WAVES = 50;
-
-function mergeWaveDrops(
-  current: Drop[],
-  incoming: Drop[],
-  mergePolicy: "standard" | "preserve-existing",
-  deleted: Set<string> | undefined
-): Drop[] {
-  const available = incoming.filter((drop) => !deleted?.has(drop.id));
-  return mergePolicy === "preserve-existing"
-    ? mergeDrops(available, current)
-    : mergeDrops(current, available);
-}
 
 export type Listener = (data: WaveMessages | undefined) => void;
 type EvictionListener = (waveId: string) => void;
@@ -56,6 +41,14 @@ type PendingServerFeedSeed = {
 
 function useWaveMessagesStore() {
   const [, forceRender] = useReducer((version: number) => version + 1, 0);
+  // Drops live in the normalized chat store: records by key, a sorted index
+  // per wave, tombstones and pending sends. Wave objects add loading and
+  // pagination state around its drops array.
+  const chatStoreRef = useRef<ChatStore | null>(null);
+  const getChatStore = useCallback((): ChatStore => {
+    chatStoreRef.current ??= new ChatStore();
+    return chatStoreRef.current;
+  }, []);
   const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
   // Resident wave ids, least recently used first.
   const residentWaveIdsRef = useRef<Set<string>>(new Set());
@@ -67,7 +60,6 @@ function useWaveMessagesStore() {
   const listenersRef = useRef<KeyListeners>({});
   const dirtyWaveIdsRef = useRef(new Set<string>());
   const notificationFrameRef = useRef<number | null>(null);
-  const deletedDropIdsRef = useRef(new Map<string, Set<string>>());
   const pendingServerFeedSeedsRef = useRef<Map<string, PendingServerFeedSeed>>(
     new Map()
   );
@@ -90,7 +82,8 @@ function useWaveMessagesStore() {
     const dirtyWaveIds = [...dirtyWaveIdsRef.current];
     dirtyWaveIdsRef.current.clear();
     if (dirtyWaveIds.length === 0) return;
-    forceRender();
+    // Subscribers of each changed wave are told; the provider does not
+    // re-render, so components that do not read the wave stay put.
     for (const waveId of dirtyWaveIds) {
       const value = waveMessagesRef.current[waveId];
       listenersRef.current[waveId]?.forEach((listener) => listener(value));
@@ -154,7 +147,7 @@ function useWaveMessagesStore() {
       committedServerFeedSeedsRef.current.clear();
       serverFeedSeedReadyCallbacksRef.current.clear();
       dirtyWaveIdsRef.current.clear();
-      deletedDropIdsRef.current.clear();
+      getChatStore().clear();
       authoritativePaginationWaveIdsRef.current.clear();
       residentWaveIdsRef.current.clear();
       evictedWaveIdsRef.current.clear();
@@ -185,7 +178,7 @@ function useWaveMessagesStore() {
         resetProfileScopedState
       );
     };
-  }, []);
+  }, [getChatStore]);
 
   // Moves a resident wave to the most recently used end.
   const touchWave = useCallback((waveId: string): void => {
@@ -224,19 +217,24 @@ function useWaveMessagesStore() {
     []
   );
 
-  const releaseWaveState = useCallback((waveId: string): void => {
-    pendingServerFeedSeedsRef.current.delete(waveId);
-    activeServerFeedSeedsRef.current.delete(waveId);
-    activeServerFeedSeedGatePromisesRef.current.delete(waveId);
-    appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
-    completedInitialRegistrationsRef.current.delete(waveId);
-    committedServerFeedSeedsRef.current.delete(waveId);
-    serverFeedSeedReadyCallbacksRef.current.delete(waveId);
-    authoritativePaginationWaveIdsRef.current.delete(waveId);
-    residentWaveIdsRef.current.delete(waveId);
-    dirtyWaveIdsRef.current.delete(waveId);
-    deletedDropIdsRef.current.delete(waveId);
-  }, []);
+  const releaseWaveState = useCallback(
+    (waveId: string): void => {
+      pendingServerFeedSeedsRef.current.delete(waveId);
+      activeServerFeedSeedsRef.current.delete(waveId);
+      activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+      appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
+      completedInitialRegistrationsRef.current.delete(waveId);
+      committedServerFeedSeedsRef.current.delete(waveId);
+      serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+      authoritativePaginationWaveIdsRef.current.delete(waveId);
+      residentWaveIdsRef.current.delete(waveId);
+      dirtyWaveIdsRef.current.delete(waveId);
+      const chatStore = getChatStore();
+      chatStore.deleteWave(waveId);
+      chatStore.forgetTombstones(waveId);
+    },
+    [getChatStore]
+  );
 
   const evictLeastRecentlyUsedWaves = useCallback(
     (insertedWaveId: string): void => {
@@ -363,12 +361,11 @@ function useWaveMessagesStore() {
         updatedWaveMessages.hasNextPage = update.hasNextPage;
       }
       if (update.drops !== undefined) {
-        updatedWaveMessages.drops = mergeWaveDrops(
-          updatedWaveMessages.drops,
-          update.drops,
-          mergePolicy,
-          deletedDropIdsRef.current.get(update.key)
-        );
+        const chatStore = getChatStore();
+        chatStore.merge(update.key, update.drops, mergePolicy);
+        updatedWaveMessages.drops = chatStore.hasWave(update.key)
+          ? chatStore.getDrops(update.key)
+          : [];
       }
 
       if (update.historyGaps !== undefined) {
@@ -401,7 +398,7 @@ function useWaveMessagesStore() {
       scheduleNotification(update.key);
       onApplied?.();
     },
-    [scheduleNotification]
+    [getChatStore, scheduleNotification]
   );
 
   // Commit immediately; rendering never blocks subsequent writes.
@@ -588,7 +585,7 @@ function useWaveMessagesStore() {
         return null;
       }
 
-      const existingDrop = wave.drops.find((drop) => drop.id === dropId);
+      const existingDrop = getChatStore().get(waveId, dropId);
       if (!existingDrop) {
         return null;
       }
@@ -613,7 +610,7 @@ function useWaveMessagesStore() {
           return;
         }
 
-        const latestDrop = latestWave.drops.find((drop) => drop.id === dropId);
+        const latestDrop = getChatStore().get(waveId, dropId);
         if (!latestDrop) {
           return;
         }
@@ -661,29 +658,32 @@ function useWaveMessagesStore() {
 
       return { rollback };
     },
-    [updateData]
+    [getChatStore, updateData]
   );
 
   // Bind destructive cache callbacks to the rendered profile generation so a
   // caller holding an old callback cannot mutate a newly populated profile.
   const pruneUncachedTombstones = useCallback(() => {
-    const uncached = [...deletedDropIdsRef.current.keys()].filter(
-      (waveId) =>
-        !waveMessagesRef.current[waveId] &&
-        !isWaveInUse(waveId) &&
-        !hasServerFeedSeed(waveId)
-    );
+    const chatStore = getChatStore();
+    const uncached = chatStore
+      .tombstonedWaveIds()
+      .filter(
+        (waveId) =>
+          !waveMessagesRef.current[waveId] &&
+          !isWaveInUse(waveId) &&
+          !hasServerFeedSeed(waveId)
+      );
     const expired = uncached.slice(
       0,
       Math.max(0, uncached.length - MAX_UNCACHED_TOMBSTONE_WAVES)
     );
     for (const waveId of expired) {
-      deletedDropIdsRef.current.delete(waveId);
+      chatStore.forgetTombstones(waveId);
       // Pruning metadata also invalidates late writes, until a fresh load begins.
       rememberEvictedWave(evictedWaveIdsRef.current, waveId);
       evictionListenersRef.current.forEach((listener) => listener(waveId));
     }
-  }, [hasServerFeedSeed, isWaveInUse]);
+  }, [getChatStore, hasServerFeedSeed, isWaveInUse]);
 
   const removeDrops = useCallback(
     (waveId: string, dropIds: readonly string[]) => {
@@ -693,19 +693,17 @@ function useWaveMessagesStore() {
       )
         return;
       const currentWave = waveMessagesRef.current[waveId];
-      // Deletes can precede the first cached message or an in-flight feed.
-      const deleted =
-        deletedDropIdsRef.current.get(waveId) ?? new Set<string>();
-      dropIds.forEach((id) => deleted.add(id));
-      // Touch before pruning: insertion order keeps this wave most recent.
-      deletedDropIdsRef.current.delete(waveId);
-      deletedDropIdsRef.current.set(waveId, deleted);
+      // Deletes can precede the first cached message or an in-flight feed:
+      // the store keeps tombstones, and touching them before pruning keeps
+      // this wave the most recent.
+      const chatStore = getChatStore();
+      const changed = chatStore.remove(waveId, dropIds);
       pruneUncachedTombstones();
-      if (!currentWave) return;
-      const removed = new Set(dropIds);
-      const drops = currentWave.drops.filter((drop) => !removed.has(drop.id));
-      if (drops.length === currentWave.drops.length) return;
-      const updatedWave = { ...currentWave, drops };
+      if (!currentWave || !changed) return;
+      const updatedWave = {
+        ...currentWave,
+        drops: chatStore.getDrops(waveId),
+      };
       waveMessagesRef.current = {
         ...waveMessagesRef.current,
         [waveId]: updatedWave,
@@ -713,7 +711,7 @@ function useWaveMessagesStore() {
       dirtyWaveIdsRef.current.add(waveId);
       flushNotifications();
     },
-    [flushNotifications, pruneUncachedTombstones, storeGeneration]
+    [flushNotifications, getChatStore, pruneUncachedTombstones, storeGeneration]
   );
 
   const removeDrop = useCallback(
