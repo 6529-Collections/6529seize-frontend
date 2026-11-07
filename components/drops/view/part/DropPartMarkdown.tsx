@@ -50,6 +50,7 @@ import {
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
 import { rehypeDropPreview } from "./dropPartMarkdown/preview";
 import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
+import { dropMarkdownParseCache } from "./dropPartMarkdown/parseCache";
 
 /**
  * Complete sanitize policy for drop markdown.
@@ -408,6 +409,17 @@ function DropPartMarkdown({
     [processContent, partContent]
   );
 
+  // Drop rows re-render often; the parse cache gives a part whose content
+  // has not changed its finished tree without parsing it again. Each plugin
+  // set has its own namespace.
+  const parseCache = useMemo(
+    () =>
+      dropMarkdownParseCache.plugins(
+        collapsedPreview ? "collapsed-preview" : "full"
+      ),
+    [collapsedPreview]
+  );
+
   const rehypePlugins = useMemo<PluggableList>(
     () => [
       [
@@ -422,11 +434,15 @@ function DropPartMarkdown({
       // This trusted plugin only adds one static renderer-owned class.
       rehypePreserveOrderedListDelimiter,
       ...(collapsedPreview ? [rehypeDropPreview] : []),
+      parseCache.rehype,
     ],
-    [collapsedPreview]
+    [collapsedPreview, parseCache]
   );
 
-  const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
+  const remarkPlugins = useMemo<PluggableList>(
+    () => [parseCache.remark, remarkGfm],
+    [parseCache]
+  );
 
   const markdownComponents = useMemo<Components>(
     () =>

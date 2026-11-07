@@ -5,7 +5,7 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
@@ -15,6 +15,10 @@ import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
+import type { WaveDropActionsInitialFocus } from "./WaveDropActionsSentinel";
+
+const FOCUSABLE_ACTIONS_SELECTOR =
+  'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -32,6 +36,13 @@ interface WaveDropActionsProps {
    */
   readonly forceVisible?: boolean | undefined;
   readonly style?: CSSProperties | undefined;
+  /**
+   * Set when keyboard focus mounted the toolbar: focus moves to its first
+   * (or, when tabbing backwards, last) action, then `onInitialFocusApplied`
+   * runs so a later remount does not take focus again.
+   */
+  readonly initialFocus?: WaveDropActionsInitialFocus | null | undefined;
+  readonly onInitialFocusApplied?: (() => void) | undefined;
 }
 
 export default function WaveDropActions({
@@ -43,6 +54,8 @@ export default function WaveDropActions({
   suppressed = false,
   forceVisible = false,
   style,
+  initialFocus = null,
+  onInitialFocusApplied,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
   const { connectedProfile } = useAuth();
@@ -50,6 +63,20 @@ export default function WaveDropActions({
   const { desktopActionsZIndexClassName } = useWaveDropLayers();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const showGuestCopyOnly = !connectedProfile?.handle;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (initialFocus === null) {
+      return;
+    }
+    const actions = containerRef.current?.querySelectorAll<HTMLElement>(
+      FOCUSABLE_ACTIONS_SELECTOR
+    );
+    const target =
+      initialFocus === "first" ? actions?.[0] : actions?.[actions.length - 1];
+    target?.focus();
+    onInitialFocusApplied?.();
+  }, [initialFocus, onInitialFocusApplied]);
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -70,6 +97,7 @@ export default function WaveDropActions({
 
   return (
     <div
+      ref={containerRef}
       style={style}
       className={`tw-absolute tw-right-2 ${desktopActionsZIndexClassName} ${
         compact ? "-tw-top-4" : "-tw-top-9"

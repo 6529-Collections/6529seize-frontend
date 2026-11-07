@@ -32,6 +32,31 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     "Reaction sandbox requires the local mock API runner."
   );
 
+  test("reaches the drop toolbar from the keyboard before any hover", async ({
+    hasTouch,
+    page,
+  }) => {
+    test.skip(hasTouch, "Touch layouts open drop actions in a sheet.");
+    await gotoSandboxWave(page);
+
+    // The toolbar mounts on first hover or focus; until then a hidden
+    // "Drop actions" button keeps it in the tab order.
+    const drop = page.getByRole("main").locator('[data-serial-no="1"]').first();
+    const placeholder = drop.getByRole("button", {
+      name: "Drop actions",
+      exact: true,
+    });
+    await expect(placeholder).toHaveCount(1);
+    await placeholder.focus();
+
+    const quickReactButton = drop
+      .getByRole("button", { name: "React with Thumbs up" })
+      .first();
+    await expect(quickReactButton).toBeFocused();
+    await expect(quickReactButton).toBeVisible();
+    await expect(placeholder).toHaveCount(0);
+  });
+
   test("adds and removes a quick reaction through exact sandbox mutations", async ({
     baseURL,
     page,

@@ -44,7 +44,9 @@ jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
 
 jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => ({
   __esModule: true,
-  default: () => <div data-testid="quick-react" />,
+  default: () => (
+    <button type="button" aria-label="Quick react" data-testid="quick-react" />
+  ),
 }));
 
 jest.mock("@/components/waves/drops/WaveDropActionsRate", () => ({
@@ -180,5 +182,46 @@ describe("WaveDropActions", () => {
       screen.queryByRole("button", { name: "Open more actions" })
     ).toBeNull();
     expect(screen.queryByTestId("rate")).toBeNull();
+  });
+
+  it.each([
+    ["first", "Quick react"],
+    ["last", "Open more actions"],
+  ] as const)(
+    "moves keyboard focus to its %s action once when mounted from the keyboard",
+    (initialFocus, expectedName) => {
+      const onInitialFocusApplied = jest.fn();
+      const { rerender } = render(
+        <WaveDropActions
+          drop={baseDrop}
+          activePartIndex={0}
+          onReply={() => {}}
+          initialFocus={initialFocus}
+          onInitialFocusApplied={onInitialFocusApplied}
+        />
+      );
+
+      expect(screen.getByRole("button", { name: expectedName })).toHaveFocus();
+      expect(onInitialFocusApplied).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <WaveDropActions
+          drop={baseDrop}
+          activePartIndex={0}
+          onReply={() => {}}
+          initialFocus={null}
+          onInitialFocusApplied={onInitialFocusApplied}
+        />
+      );
+      expect(onInitialFocusApplied).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("leaves focus alone when mounted by hover", () => {
+    render(
+      <WaveDropActions drop={baseDrop} activePartIndex={0} onReply={() => {}} />
+    );
+
+    expect(document.body).toHaveFocus();
   });
 });

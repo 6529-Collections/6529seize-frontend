@@ -16,6 +16,8 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
+import WaveDropActionsSentinel from "./WaveDropActionsSentinel";
+import { useLazyWaveDropActions } from "./useLazyWaveDropActions";
 import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
@@ -145,13 +147,16 @@ const WaveDropInner = ({
   // containment check) rather than enter/leave so child crossings are cheap
   // no-op state writes and jsdom can exercise the path.
   const [isRowPointerHovered, setIsRowPointerHovered] = useState(false);
+  const lazyToolbar = useLazyWaveDropActions();
+  const mountDesktopActions = lazyToolbar.mount;
   const handleRowPointerOver = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      mountDesktopActions();
       if (getPointerType(event) === "mouse" && canUseDesktopHoverActions) {
         setIsRowPointerHovered(true);
       }
     },
-    [canUseDesktopHoverActions]
+    [canUseDesktopHoverActions, mountDesktopActions]
   );
   const handleRowPointerOut = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -728,6 +733,7 @@ const WaveDropInner = ({
         onPointerCancel={handlePointerEnd}
         onPointerOver={handleRowPointerOver}
         onPointerOut={handleRowPointerOut}
+        onFocus={mountDesktopActions}
         onClickCapture={handleClickCapture}
       >
         {showGroupedTimestamp && (
@@ -752,7 +758,8 @@ const WaveDropInner = ({
             effectiveShowInteractions &&
             showReplyAndQuote &&
             !showStandaloneActionsButton &&
-            !isEditing && (
+            !isEditing &&
+            (lazyToolbar.isMounted ? (
               <WaveDropActions
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -761,8 +768,14 @@ const WaveDropInner = ({
                 suppressed={hasActiveLinkCardActions}
                 forceVisible={isRowPointerHovered}
                 style={getGroupedTimestampActionStyle(timestampSwipeOffset)}
+                initialFocus={lazyToolbar.initialFocus}
+                onInitialFocusApplied={lazyToolbar.clearInitialFocus}
               />
-            )}
+            ) : (
+              <WaveDropActionsSentinel
+                onActivate={lazyToolbar.mountWithFocus}
+              />
+            ))}
           {reactionsRow}
           {footerRow}
         </div>
