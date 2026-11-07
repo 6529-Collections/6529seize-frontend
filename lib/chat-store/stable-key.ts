@@ -26,8 +26,8 @@ export function stableIdentity(
   readonly stableHash: string;
 } {
   try {
-    const { key, hash } = getStableDropKey(drop);
-    return { stableKey: key, stableHash: hash };
+    const identity = getStableDropKey(drop);
+    return { stableKey: identity.key, stableHash: identity.hash };
   } catch {
     return {
       stableKey: drop.stableKey || drop.id || key,
