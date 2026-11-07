@@ -30,12 +30,18 @@ export async function revealChatRow(
 ): Promise<void> {
   if (!CHAT_WINDOWING) return;
   const scroller = chat.locator(CHAT_SCROLLER).first();
+  let older = direction === "older";
   await expect(async () => {
     if ((await target.count()) > 0) return;
     // The windowed chat is in normal order: a smaller scrollTop is older.
-    await scroller.evaluate((element, older) => {
-      element.scrollTop += (older ? -0.8 : 0.8) * element.clientHeight;
-    }, direction === "older");
+    const moved = await scroller.evaluate((element, towardOlder) => {
+      const before = element.scrollTop;
+      element.scrollTop += (towardOlder ? -0.8 : 0.8) * element.clientHeight;
+      return element.scrollTop !== before;
+    }, older);
+    // History can load on the other side of the reader (a gap filling in
+    // below the oldest loaded post): turn around at either end.
+    if (!moved) older = !older;
     throw new Error("The chat row is not mounted yet.");
   }).toPass({ timeout, intervals: [150] });
 }

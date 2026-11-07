@@ -1641,19 +1641,24 @@ test("windowed chat keeps the focused post and scrolls by keyboard", async ({
 
   // A focused post stays mounted, and focused, while the reader scrolls far
   // away from it. Touch rows have no keyboard controls; their actions open
-  // from a long press.
+  // from a long press. Row 30 may still be a placeholder when it mounts, so
+  // look for the row rather than its text.
   const row = chat.locator("#drop-151");
   const keyboardRows = !testInfo.project.use.hasTouch;
   if (keyboardRows) {
     const control = row.locator("a[href], button").first();
     await control.focus();
     await expect(control).toBeFocused();
-    await revealChatRow(chat, fixture.post(30), "older", { timeout: 30000 });
+    await revealChatRow(chat, chat.locator("#drop-30"), "older", {
+      timeout: 30000,
+    });
     await expect(row).toBeAttached();
     await expect(control).toBeFocused();
     await expect(row).not.toBeInViewport();
   } else {
-    await revealChatRow(chat, fixture.post(30), "older", { timeout: 30000 });
+    await revealChatRow(chat, chat.locator("#drop-30"), "older", {
+      timeout: 30000,
+    });
   }
 
   // The message list is one tab stop that scrolls with the keyboard.

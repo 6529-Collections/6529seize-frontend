@@ -621,7 +621,7 @@ describe("useScrollBehavior", () => {
 
       expect(mockScrollTo).toHaveBeenCalledWith({
         top: 1000,
-        behavior: "smooth",
+        behavior: "auto",
       });
     });
 

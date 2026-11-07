@@ -219,8 +219,10 @@ export const useScrollBehavior = ({
   );
 
   const scrollToVisualBottom = useCallback(() => {
-    forcePinToBottom("smooth");
-  }, [forcePinToBottom]);
+    // The windowed list jumps: a smooth scroll in flight would keep it from
+    // following messages that arrive meanwhile.
+    forcePinToBottom(endAnchored ? "auto" : "smooth");
+  }, [endAnchored, forcePinToBottom]);
 
   // scrollToVisualTop scrolls to the oldest messages (visually at the top)
   const scrollToVisualTop = useCallback(() => {

@@ -180,6 +180,7 @@ export function WaveChatVirtualList({
   );
 
   const orderedDrops = useMemo(() => [...drops].reverse(), [drops]);
+  const newestKey = orderedDrops.at(-1)?.stableKey ?? null;
   const signatureGroups = useMemo(
     () => getDropSignatureGroups(orderedDrops),
     [orderedDrops]
@@ -305,7 +306,7 @@ export function WaveChatVirtualList({
     overscan: OVERSCAN,
     anchorTo: "end",
     // Follow appended messages only at the live end, and never while a jump
-    // owns the scroll position.
+    // owns the scroll position (see also the follow below).
     followOnAppend: serialNo === null ? "auto" : false,
     scrollEndThreshold: END_THRESHOLD_PX,
     // Start at the newest messages.
@@ -336,9 +337,27 @@ export function WaveChatVirtualList({
     };
   }, [endScrollerRef, virtualizer]);
 
+  // Whether the reader is at the live end, from the element itself. The
+  // virtualizer reads its offset back from scroll events, so during a burst
+  // its own check can still see the position before the last follow and
+  // stop following; the element already has the written position.
+  const wasAtEndRef = useRef(true);
+
+  // Follow appended messages while at the live end, and never while a jump
+  // owns the scroll position.
+  const followedNewestKeyRef = useRef(newestKey);
+  useLayoutEffect(() => {
+    if (followedNewestKeyRef.current === newestKey) {
+      return;
+    }
+    followedNewestKeyRef.current = newestKey;
+    if (wasAtEndRef.current && serialNo === null && didOpenAtEndRef.current) {
+      virtualizer.scrollToEnd();
+    }
+  }, [newestKey, serialNo, virtualizer]);
+
   // The composer, the keyboard or the bottom navigation can resize the
   // scroller. A reader at the live end stays there.
-  const wasAtEndRef = useRef(true);
   useEffect(() => {
     if (!scrollElement) {
       return;
@@ -391,7 +410,6 @@ export function WaveChatVirtualList({
     (message: string) => setAnnouncement({ waveId, message }),
     [waveId]
   );
-  const newestKey = orderedDrops.at(-1)?.stableKey ?? null;
   const previousNewestKeyRef = useRef<string | null>(newestKey);
   const pendingArrivalsRef = useRef(0);
   const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
