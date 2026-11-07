@@ -7,6 +7,7 @@ import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { usePathname } from "next/navigation";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { shouldResyncOnResume } from "@/helpers/resumeSync.helpers";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ReactNode } from "react";
@@ -47,7 +48,6 @@ interface MyStreamProviderProps {
   readonly children: ReactNode;
 }
 
-const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_DELAY_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_TIMEOUT_MS = 2500;
 
@@ -173,7 +173,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  // When the lists and active wave last resynced (from any trigger), and
+  // when the browser tab was hidden, for the resume rule.
   const lastBrowserResumeSyncAtRef = useRef(0);
+  const hiddenSinceRef = useRef<number | null>(null);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const markDirectMessageRead = useCallback(
     (waveId: string, readThroughSerialNo?: number) => {
@@ -353,6 +356,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // flags only pre-filter: each hook's own load guard (auth and profile
   // readiness) stays the source of truth and no-ops while it is not ready.
   const syncActiveWaveAndRefreshStaleLists = useEffectEvent(() => {
+    lastBrowserResumeSyncAtRef.current = Date.now();
     syncActiveWave();
     if (isMainWavesListEnabled) {
       refreshStaleMainWaves();
@@ -362,19 +366,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
   });
 
-  const runBrowserResumeSync = useEffectEvent(() => {
+  // Every visible tab reacts to focus and visibility, so a resync runs only
+  // after the tab was hidden 30 s or more, or 60 s after the last one. Coming
+  // back online follows a real connectivity gap and always resyncs.
+  const runBrowserResumeSync = useEffectEvent((afterOffline: boolean) => {
     if (document.visibilityState !== "visible") {
       return;
     }
 
-    const now = Date.now();
-    const sinceLastBrowserResumeSyncMs =
-      now - lastBrowserResumeSyncAtRef.current;
-    if (sinceLastBrowserResumeSyncMs < BROWSER_RESUME_SYNC_COOLDOWN_MS) {
+    const hiddenSince = hiddenSinceRef.current;
+    hiddenSinceRef.current = null;
+    if (
+      !afterOffline &&
+      !shouldResyncOnResume({
+        now: Date.now(),
+        hiddenSince,
+        lastSyncAt: lastBrowserResumeSyncAtRef.current,
+      })
+    ) {
       return;
     }
 
-    lastBrowserResumeSyncAtRef.current = now;
     syncActiveWaveAndRefreshStaleLists();
   });
 
@@ -465,20 +477,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       return;
     }
 
+    // The page loaded fresh data; the first focus has nothing to catch up.
+    lastBrowserResumeSyncAtRef.current = Date.now();
+    if (document.visibilityState !== "visible") {
+      hiddenSinceRef.current = Date.now();
+    }
+
     const handleVisibilityChange = () => {
       if (document.visibilityState !== "visible") {
+        hiddenSinceRef.current ??= Date.now();
         return;
       }
 
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleFocus = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleOnline = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(true);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

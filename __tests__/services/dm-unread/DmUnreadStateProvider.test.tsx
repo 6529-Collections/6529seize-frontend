@@ -294,6 +294,10 @@ describe("DmUnreadStateProvider", () => {
       await act(async () => {
         await jest.advanceTimersByTimeAsync(0);
       });
+      // A focus resyncs once the last snapshot is a minute old.
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(60_000);
+      });
       act(() => window.dispatchEvent(new Event("focus")));
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
 
@@ -582,10 +586,94 @@ describe("DmUnreadStateProvider", () => {
     });
     expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
 
+    // Switching windows soon after a snapshot does not resync.
     nowSpy.mockReturnValue(11_501);
+    act(() => window.dispatchEvent(new Event("focus")));
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+    nowSpy.mockReturnValue(70_001);
     act(() => window.dispatchEvent(new Event("focus")));
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
     nowSpy.mockRestore();
+  });
+
+  describe("focus and visibility resync", () => {
+    const advance = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+    let visibility: DocumentVisibilityState = "visible";
+    const setVisibility = (next: DocumentVisibilityState) => {
+      visibility = next;
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+    };
+    const snapshotRequests = () =>
+      commonApiFetchMock.mock.calls.filter(
+        ([request]) => request?.endpoint === "dm-drops/unread/snapshot"
+      ).length;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      visibility = "visible";
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => visibility,
+      });
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(document, "visibilityState");
+      jest.useRealTimers();
+    });
+
+    const renderLoaded = async () => {
+      const rendered = render(
+        <DmUnreadStateProvider>
+          <Capture />
+        </DmUnreadStateProvider>
+      );
+      await advance(0);
+      expect(snapshotRequests()).toBe(1);
+      return rendered;
+    };
+
+    it("ignores window focus within a minute of the last snapshot", async () => {
+      const rendered = await renderLoaded();
+      for (let index = 0; index < 10; index++) {
+        act(() => window.dispatchEvent(new Event("focus")));
+        await advance(5_000);
+      }
+      expect(snapshotRequests()).toBe(1);
+      rendered.unmount();
+    });
+
+    it("resyncs on focus once the last snapshot is a minute old", async () => {
+      const rendered = await renderLoaded();
+      await advance(60_000);
+      act(() => window.dispatchEvent(new Event("focus")));
+      await advance(0);
+      expect(snapshotRequests()).toBe(2);
+      rendered.unmount();
+    });
+
+    it("resyncs on return after the tab was hidden 30 seconds", async () => {
+      const rendered = await renderLoaded();
+      setVisibility("hidden");
+      await advance(29_000);
+      setVisibility("visible");
+      await advance(0);
+      expect(snapshotRequests()).toBe(1);
+
+      setVisibility("hidden");
+      await advance(30_000);
+      setVisibility("visible");
+      await advance(0);
+      expect(snapshotRequests()).toBe(2);
+      rendered.unmount();
+    });
   });
 
   describe("reconnect resync stagger", () => {

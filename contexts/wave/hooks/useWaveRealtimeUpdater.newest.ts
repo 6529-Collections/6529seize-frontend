@@ -10,12 +10,16 @@ import {
 
 type InitiateFetchNewestCycleFn = (
   waveId: string,
-  sinceSerialNo: number
+  sinceSerialNo: number,
+  untilCaughtUp?: boolean
 ) => Promise<void>;
 
 /**
  * Fetches the drops newer than a serial, one fetch per wave at a time; a
  * request during a fetch runs once more from the newest fetched serial.
+ * With `untilCaughtUp`, a fetch that stops at its page cap continues from
+ * the newest fetched serial until no newer drops remain, so a gap check
+ * also repairs a drop lost past the cap.
  */
 export const useNewestMessagesSync = ({
   getData,
@@ -27,6 +31,7 @@ export const useNewestMessagesSync = ({
 >): InitiateFetchNewestCycleFn => {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
+  const untilCaughtUpRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
 
   const cleanupController = useCallback((waveId: string) => {
@@ -36,7 +41,8 @@ export const useNewestMessagesSync = ({
   }, []);
 
   const initiateFetchNewestCycle = useCallback(
-    async (waveId: string, sinceSerialNo: number) => {
+    async (waveId: string, sinceSerialNo: number, untilCaughtUp = false) => {
+      if (untilCaughtUp) untilCaughtUpRef.current[waveId] = true;
       if (isFetchingNewestRef.current[waveId]) {
         needsRefetchAfterCurrentRef.current[waveId] = true;
         return;
@@ -47,8 +53,19 @@ export const useNewestMessagesSync = ({
       abortControllersRef.current[waveId] = controller;
 
       try {
-        const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
-          await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
+        const {
+          drops: fetchedDrops,
+          highestSerialNo: fetchedHighestSerial,
+          reachedPageLimit,
+        } = await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
+        if (
+          reachedPageLimit === true &&
+          untilCaughtUpRef.current[waveId] === true &&
+          fetchedHighestSerial !== null &&
+          fetchedHighestSerial > sinceSerialNo
+        ) {
+          needsRefetchAfterCurrentRef.current[waveId] = true;
+        }
 
         if (fetchedDrops) {
           const currentData = getData(waveId);
@@ -76,12 +93,18 @@ export const useNewestMessagesSync = ({
         cleanupController(waveId);
         delete isFetchingNewestRef.current[waveId];
 
+        const continueUntilCaughtUp = untilCaughtUpRef.current[waveId];
+        delete untilCaughtUpRef.current[waveId];
         if (needsRefetchAfterCurrentRef.current[waveId]) {
           delete needsRefetchAfterCurrentRef.current[waveId];
           const latestFetchedSerialNo =
             getData(waveId)?.latestFetchedSerialNo ?? null;
           if (latestFetchedSerialNo !== null) {
-            await initiateFetchNewestCycle(waveId, latestFetchedSerialNo);
+            await initiateFetchNewestCycle(
+              waveId,
+              latestFetchedSerialNo,
+              continueUntilCaughtUp
+            );
           }
         }
       }
@@ -97,6 +120,7 @@ export const useNewestMessagesSync = ({
       abortControllersRef.current = {};
       isFetchingNewestRef.current = {};
       needsRefetchAfterCurrentRef.current = {};
+      untilCaughtUpRef.current = {};
     };
   }, []);
 

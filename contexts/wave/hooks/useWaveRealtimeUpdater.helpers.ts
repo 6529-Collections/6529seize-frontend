@@ -42,7 +42,12 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
     waveId: string,
     sinceSerialNo: number,
     signal: AbortSignal
-  ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
+  ) => Promise<{
+    drops: ApiDrop[] | null;
+    highestSerialNo: number | null;
+    /** The fetch stopped at its page cap; newer drops may remain. */
+    reachedPageLimit?: boolean | undefined;
+  }>;
   readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
   readonly isWaveMuted: (waveId: string) => boolean;
 }

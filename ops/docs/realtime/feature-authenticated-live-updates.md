@@ -60,15 +60,20 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
-- In builds with gap-only chat sync (currently staging), a post that arrives
-  live in an open wave appears without a further request. About 5 seconds
+- When gap-only chat sync is enabled
+  (`NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC`), a post that arrives live in an
+  open wave appears without a further request. About 5 seconds
   after a burst of posts (at least every 15 seconds in a continuous stream),
   the wave checks once for posts the connection missed; a server request to
   recover missed updates checks at once. Posts read in an open wave are marked
-  read at most once every 3 seconds, so another device can show them as unread
-  for up to 3 seconds. Leaving the wave, switching windows or hiding the tab
-  sends the pending read at once. Legacy direct messages still refresh and
-  mark read after every post.
+  read at most once every 3 seconds, so another device usually shows them as
+  unread for up to 3 seconds. Leaving the wave, switching windows or hiding the
+  tab sends the pending read at once. If an earlier read of that wave is still
+  on its way, or sign-in is not ready, the pending read waits up to 2 seconds
+  and is then dropped, because a later read would also mark posts that
+  arrived after you left. In that case the last few seconds of posts can stay
+  unread on other devices until you next read the wave. Legacy direct
+  messages still refresh and mark read after every post.
 - When you follow or unfollow a wave, or someone adds you to one, on any
   device, your wave lists and that wave refresh in every open tab once the
   server announces the change. Changes for another connected account are left
