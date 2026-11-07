@@ -330,6 +330,7 @@ describe("effective App PR CI plan", () => {
     "tests/support/chatPerf.ts",
     "tests/support/chatPerfFixture.ts",
     "tests/social/chat-render-budget-sandbox.spec.ts",
+    "tests/social/wave-live-unread-sandbox.spec.ts",
   ])("selects the chat render budget for chat hot path %s", (file) => {
     expect(
       executePlan([file]).checks.playwright_native_competition.required
