@@ -25,8 +25,14 @@ export default function NotFound({
     setTitle(titleLabel);
   }, [titleLabel, setTitle]);
 
+  // A page that shows this only until its own validation effect runs (the
+  // distribution page's first frame) unmounts it before the timer fires, so
+  // only a 404 that stays on screen marks the page view.
   useEffect(() => {
-    markPageNotFound(globalThis.location.pathname);
+    const timer = setTimeout(() =>
+      markPageNotFound(globalThis.location.pathname)
+    );
+    return () => clearTimeout(timer);
   }, []);
 
   return (

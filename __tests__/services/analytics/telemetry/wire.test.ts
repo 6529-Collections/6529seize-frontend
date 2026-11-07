@@ -130,6 +130,12 @@ describe("toReferrerDomain", () => {
     ["http://192.168.0.1/x", undefined],
     ["https://[::1]/", undefined],
     ["https://localhost/", undefined],
+    // The schema allows 100 characters: omit longer hosts, never truncate.
+    [
+      `https://${"a".repeat(60)}.${"b".repeat(35)}.com/`,
+      `${"a".repeat(60)}.${"b".repeat(35)}.com`,
+    ],
+    [`https://${"a".repeat(60)}.${"b".repeat(36)}.com/`, undefined],
   ])("%p -> %p", (referrer, expected) => {
     expect(toReferrerDomain(referrer, "6529.io")).toBe(expected);
   });
