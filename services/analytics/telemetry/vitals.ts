@@ -25,17 +25,19 @@ export function observeWebVitals(report: Report): {
     type: string,
     onEntries: (entries: PerformanceEntry[]) => void,
     options: Record<string, unknown> = {}
-  ) => {
+  ): boolean => {
     try {
-      if (!PerformanceObserver.supportedEntryTypes.includes(type)) return;
+      if (!PerformanceObserver.supportedEntryTypes.includes(type)) return false;
       const observer = new PerformanceObserver((list) =>
         onEntries(list.getEntries())
       );
       observer.observe({ type, buffered: true, ...options });
       stops.push(() => observer.disconnect());
       flushes.push(() => onEntries(observer.takeRecords()));
+      return true;
     } catch {
       /* Not observable in this browser. */
+      return false;
     }
   };
   let navigation:
@@ -87,7 +89,7 @@ export function observeWebVitals(report: Report): {
   let session = 0;
   let sessionStart = 0;
   let previous = 0;
-  observe("layout-shift", (entries) => {
+  const clsObserved = observe("layout-shift", (entries) => {
     for (const entry of entries as ShiftEntry[]) {
       if (entry.hadRecentInput) continue;
       const joins =
@@ -103,6 +105,9 @@ export function observeWebVitals(report: Report): {
       }
     }
   });
+  // A page with no layout shift has CLS 0, as web-vitals reports it; leaving
+  // it out would skew the per-route percentiles upwards.
+  if (clsObserved && cls === 0) report("cls", 0);
 
   const interactions = new Map<number, number>();
   const onEvents = (entries: PerformanceEntry[]) => {

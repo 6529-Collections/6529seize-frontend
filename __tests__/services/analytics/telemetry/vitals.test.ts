@@ -83,6 +83,11 @@ describe("observeWebVitals", () => {
     expect(last("cls")).toBeCloseTo(0.1);
   });
 
+  it("reports CLS 0 for a page without layout shifts", () => {
+    start();
+    expect(last("cls")).toBe(0);
+  });
+
   it("estimates INP as the 98th-percentile interaction", () => {
     start();
     emit("event", [
