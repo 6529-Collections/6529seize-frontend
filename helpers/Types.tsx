@@ -364,6 +364,8 @@ export enum WsMessageType {
   NOTIFICATION_IDENTITIES_SYNCED = "NOTIFICATION_IDENTITIES_SYNCED",
   IDENTITY_NOTIFICATIONS_CHANGED = "IDENTITY_NOTIFICATIONS_CHANGED",
   DM_UNREAD_STATE_CHANGED = "DM_UNREAD_STATE_CHANGED",
+  // The active profile's wave lists changed (followed, unfollowed, added).
+  WAVES_CHANGED = "WAVES_CHANGED",
   // End-to-end encrypted chats (D109). Content-free wake hints; clients
   // re-sync over REST.
   E2EE_GROUP_EVENT = "E2EE_GROUP_EVENT",
