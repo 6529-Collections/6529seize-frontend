@@ -10,7 +10,7 @@ import { ExpandedWave } from "./subcomponents/ExpandedWave";
 import { useWaveNavigation } from "./hooks/useWaveNavigation";
 import { useWaveNameTruncation } from "./hooks/useWaveNameTruncation";
 import { formatWaveName } from "./utils/formatWaveName";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface WebBrainLeftSidebarWaveProps {
@@ -46,7 +46,7 @@ const WebBrainLeftSidebarWave = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: WebBrainLeftSidebarWaveProps) => {
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();

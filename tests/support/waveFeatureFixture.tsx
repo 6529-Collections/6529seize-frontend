@@ -100,9 +100,11 @@ export const useActiveWaveVotes = () => ({
   hasNextPage: false,
   isFetchingNextPage: false,
 });
-export const useMyStream = () => ({
-  activeWave: { id: null, set: () => undefined },
-});
+const activeWave = { id: null, parentWaveId: null, set: () => undefined };
+export const useMyStream = () => ({ activeWave });
+// The open wave has its own context; sidebar controls read it from there.
+export const useActiveWave = () => activeWave;
+export const useActiveWaveOptional = () => activeWave;
 export const useWaveDiscoveryViewer = () => ({ canUseCollections: false });
 const ContentTabsContext = createContext(tabs);
 export const useContentTab = () => ({

@@ -35,12 +35,15 @@ import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { WaveUnreadProvider } from "./WaveUnreadContext";
+import { ActiveWaveProvider } from "./ActiveWaveContext";
+import { createStreamListsStore } from "./streamListsStore";
 
 import type {
   ActiveWaveContextData,
   ActiveWaveSetOptions,
   MyStreamActionsContextType,
   MyStreamContextType,
+  StreamListsSnapshot,
   WavesContextData,
 } from "./MyStreamContext.types";
 
@@ -515,6 +518,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // value keeps its identity when drops arrive or wave lists change. The
   // destructive store callbacks still rebind on a profile switch, so a caller
   // holding an old one cannot change the new profile's cache.
+  const [streamListsStore] = useState(createStreamListsStore);
   const actionsValue = useMemo<MyStreamActionsContextType>(
     () => ({
       // Prepare the store data for the context (only read/subscribe parts)
@@ -522,6 +526,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         getData: waveMessagesStore.getData,
         subscribe: waveMessagesStore.subscribe,
         unsubscribe: waveMessagesStore.unsubscribe,
+      },
+      streamLists: {
+        get: streamListsStore.get,
+        subscribe: streamListsStore.subscribe,
       },
       requestMainWavesList,
       requestDirectMessagesList,
@@ -547,6 +555,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       waveMessagesStore.getData,
       waveMessagesStore.subscribe,
       waveMessagesStore.unsubscribe,
+      streamListsStore,
       requestMainWavesList,
       requestDirectMessagesList,
       registerWave,
@@ -566,13 +575,23 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     ]
   );
 
+  const activeWaveParentId =
+    resolvedActiveWaveData?.id === activeWaveId
+      ? (resolvedActiveWaveData.parent_wave?.id ?? null)
+      : null;
+  // The open wave changes only when the user opens another wave; it has its
+  // own context so readers of it skip list refreshes.
+  const activeWave = useMemo<ActiveWaveContextData>(
+    () => ({
+      id: activeWaveId,
+      parentWaveId: activeWaveParentId,
+      set: setActiveWaveAndRegister,
+    }),
+    [activeWaveId, activeWaveParentId, setActiveWaveAndRegister]
+  );
+
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
-    const activeWaveParentId =
-      resolvedActiveWaveData?.id === activeWaveId
-        ? (resolvedActiveWaveData.parent_wave?.id ?? null)
-        : null;
-
     const waves: WavesContextData = {
       recommendationsStatus: mainWavesData.recommendationsStatus,
       retryRecommendations: mainWavesData.retryRecommendations,
@@ -609,12 +628,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       loadingSubwaveParentIds: dmWavesHookData.loadingSubwaveParentIds,
       markWaveRead: markDirectMessageRead,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
-    };
-
-    const activeWave: ActiveWaveContextData = {
-      id: activeWaveId,
-      parentWaveId: activeWaveParentId,
-      set: setActiveWaveAndRegister,
     };
 
     return {
@@ -656,20 +669,29 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.loadingSubwaveParentIds,
     dmWavesHookData.restoreWaveUnreadCount,
     markDirectMessageRead,
-    activeWaveId,
-    resolvedActiveWaveData,
-    setActiveWaveAndRegister,
+    activeWave,
   ]);
+
+  // Readers of the lists outside render (event handlers, selectors) see the
+  // value this render committed.
+  useLayoutEffect(() => {
+    streamListsStore.set({
+      waves: contextValue.waves,
+      directMessages: contextValue.directMessages,
+    });
+  }, [contextValue.directMessages, contextValue.waves, streamListsStore]);
 
   // Live unread values for the main list. Direct messages use the server's
   // canonical unread state, which the list itself carries.
   return (
     <MyStreamActionsContext.Provider value={actionsValue}>
-      <WaveUnreadProvider value={wavesHookData.unreadSource}>
-        <MyStreamContext.Provider value={contextValue}>
-          {children}
-        </MyStreamContext.Provider>
-      </WaveUnreadProvider>
+      <ActiveWaveProvider value={activeWave}>
+        <WaveUnreadProvider value={wavesHookData.unreadSource}>
+          <MyStreamContext.Provider value={contextValue}>
+            {children}
+          </MyStreamContext.Provider>
+        </WaveUnreadProvider>
+      </ActiveWaveProvider>
     </MyStreamActionsContext.Provider>
   );
 };
@@ -681,10 +703,6 @@ export const useMyStream = () => {
     throw new Error("useMyStream must be used within a MyStreamProvider");
   }
   return context;
-};
-
-export const useMyStreamOptional = (): MyStreamContextType | null => {
-  return useContext(MyStreamContext);
 };
 
 // Prefer these over useMyStream when a component only calls stream actions:
@@ -734,4 +752,43 @@ export function useMyStreamWaveMessages(
   );
 
   return useSyncExternalStore(subscribeToWave, getSnapshot, getSnapshot);
+}
+
+const EMPTY_SUBSCRIBE = () => () => {};
+const NO_LISTS = (): StreamListsSnapshot | null => null;
+
+/**
+ * Renders from a narrow part of the wave lists: the component re-renders only
+ * when the selected value changes (by `isEqual`), not on every list refresh.
+ */
+export function useMyStreamSelector<T>(
+  selector: (lists: StreamListsSnapshot | null) => T,
+  isEqual: (left: T, right: T) => boolean = Object.is
+): T {
+  const actions = useMyStreamActionsOptional();
+  const store = actions?.streamLists;
+  const cacheRef = useRef<{
+    readonly lists: StreamListsSnapshot | null;
+    readonly selector: (lists: StreamListsSnapshot | null) => T;
+    readonly value: T;
+  } | null>(null);
+  const getSnapshot = useCallback(() => {
+    const lists = (store?.get ?? NO_LISTS)();
+    const cached = cacheRef.current;
+    if (cached?.lists === lists && cached.selector === selector) {
+      return cached.value;
+    }
+    const selected = selector(lists);
+    const value =
+      cached !== null && isEqual(cached.value, selected)
+        ? cached.value
+        : selected;
+    cacheRef.current = { lists, selector, value };
+    return value;
+  }, [isEqual, selector, store]);
+  return useSyncExternalStore(
+    store?.subscribe ?? EMPTY_SUBSCRIBE,
+    getSnapshot,
+    getSnapshot
+  );
 }

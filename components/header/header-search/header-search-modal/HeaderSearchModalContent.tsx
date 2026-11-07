@@ -23,7 +23,7 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useAuth } from "@/components/auth/Auth";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -234,7 +234,7 @@ function ScopedHeaderSearchModal({
   useBodyScrollLock({ reserveScrollbarGap: true });
   const pathname = usePathname();
   const router = useRouter();
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const initialPathnameRef = useRef(pathname);
   const sessionQueryStorageKey = getScopedStorageKey(
     HEADER_SEARCH_SESSION_QUERY_KEY,
@@ -698,8 +698,8 @@ function ScopedHeaderSearchModal({
                         const isDirectMessage =
                           "is_dm_wave" in drop.wave &&
                           drop.wave.is_dm_wave === true;
-                        if (myStream) {
-                          myStream.activeWave.set(drop.wave.id, {
+                        if (activeWave) {
+                          activeWave.set(drop.wave.id, {
                             isDirectMessage,
                             serialNo: drop.serial_no,
                           });

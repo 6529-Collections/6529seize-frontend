@@ -5,7 +5,7 @@ import {
   hasWaveTrustSummaryScore,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { formatWaveName } from "@/helpers/waves/wave-name.helpers";
 import { useHoverIntent } from "@/hooks/useHoverIntent";
@@ -114,7 +114,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }) => {
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const { id: activeWaveId, set: setActiveWave } = activeWave;
   const prefetchWaveData = usePrefetchWaveData();
   const { isApp, hasTouchScreen } = useDeviceInfo();

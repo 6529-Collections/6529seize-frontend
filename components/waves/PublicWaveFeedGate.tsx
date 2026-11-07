@@ -3,7 +3,7 @@
 import { type ReactNode, useCallback, useState } from "react";
 import clsx from "clsx";
 
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { MyStreamWaveTab } from "@/types/waves.types";
@@ -22,14 +22,14 @@ export default function PublicWaveFeedGate({
   readonly waveId: string;
   readonly waveName?: string | undefined;
 }) {
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const { activeContentTab } = useContentTab();
   const hydrated = useHasHydrated();
   const [readiness, setReadiness] = useState<{
     waveId: string;
     token: symbol;
   } | null>(null);
-  const activeWaveId = myStream?.activeWave.id ?? null;
+  const activeWaveId = activeWave?.id ?? null;
   const markReady = useCallback(() => {
     if (activeWaveId !== waveId) return;
     const token = Symbol();

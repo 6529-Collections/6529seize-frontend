@@ -22,6 +22,18 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamActions: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamActionsOptional: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamSelector: (selector: (lists: unknown) => unknown) =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamSelector(selector),
   useMyStream: () => ({
     activeWave: {
       id: mockActiveWaveId,
@@ -29,6 +41,12 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
     },
   }),
 }));
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: mockAddress }),

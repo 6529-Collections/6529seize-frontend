@@ -64,7 +64,8 @@ import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal"
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useExitActiveWave } from "@/components/navigation/useExitActiveWave";
 import { useAuth } from "@/components/auth/Auth";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
@@ -137,8 +138,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     () => true,
     () => false
   );
-  const myStream = useMyStreamOptional();
-  const requestMainWavesList = myStream?.requestMainWavesList;
+  const activeWave = useActiveWaveOptional();
+  const requestMainWavesList =
+    useMyStreamActionsOptional()?.requestMainWavesList;
   const exitActiveWave = useExitActiveWave();
 
   const dropId = searchParams.get("drop") ?? undefined;
@@ -164,7 +166,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
   const waveId =
-    myStream?.activeWave.id ??
+    activeWave?.id ??
     getActiveWaveIdFromUrl({ pathname, searchParams }) ??
     null;
   const { data: wave } = useWaveData({

@@ -9,7 +9,6 @@ import type { NavItem } from "@/components/navigation/navTypes";
 import { useRouter } from "next/navigation";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   createTestQueryClient,
@@ -27,8 +26,26 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamActions: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamActionsOptional: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamSelector: (selector: (lists: unknown) => unknown) =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamSelector(selector),
   useMyStreamOptional: jest.fn(),
 }));
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -37,7 +54,10 @@ jest.mock("@/services/api/common-api", () => ({
 const push = jest.fn();
 const prefetch = jest.fn();
 const useRouterMock = useRouter as jest.Mock;
-const useMyStreamOptionalMock = useMyStreamOptional as jest.Mock;
+// The mocked stream module's hook; the bridge mock reads the open wave from it.
+const useMyStreamOptionalMock = jest.requireMock(
+  "@/contexts/wave/MyStreamContext"
+).useMyStreamOptional as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 const useDeviceInfoMock = useDeviceInfo as jest.Mock;
 let activeWaveId: string | null = null;

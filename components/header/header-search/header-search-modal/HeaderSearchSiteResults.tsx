@@ -18,7 +18,7 @@ import {
 
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import Button from "@/components/utils/button/Button";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -142,7 +142,7 @@ export function HeaderSearchSiteResults({
   const router = useRouter();
   const pathname = usePathname();
   const locale = useBrowserLocale();
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const { isApp } = useDeviceInfo();
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const activeElementRef = useRef<HTMLDivElement>(null);
@@ -286,13 +286,13 @@ export function HeaderSearchSiteResults({
       rememberCurrentSearch();
       onClose();
       const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
-      if (myStream) {
-        myStream.activeWave.set(wave.id, { isDirectMessage });
+      if (activeWave) {
+        activeWave.set(wave.id, { isDirectMessage });
       } else {
         router.push(getHeaderSearchWavePath({ wave, isApp }));
       }
     },
-    [isApp, myStream, onClose, rememberCurrentSearch, router]
+    [isApp, activeWave, onClose, rememberCurrentSearch, router]
   );
 
   const openItem = useCallback(

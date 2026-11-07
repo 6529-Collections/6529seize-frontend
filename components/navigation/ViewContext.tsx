@@ -16,7 +16,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import { getWaveQueryKey } from "@/services/api/wave-query";
 import {
   getHomeRoute,
@@ -66,9 +66,9 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const { isApp } = useDeviceInfo();
-  const currentWaveId = myStream?.activeWave.id ?? null;
+  const currentWaveId = activeWave?.id ?? null;
   const lastVisitedWaveRef = useRef<string | null>(null);
   const lastVisitedDmRef = useRef<string | null>(null);
   const lastFetchedWaveIdRef = useRef<string | null>(null);

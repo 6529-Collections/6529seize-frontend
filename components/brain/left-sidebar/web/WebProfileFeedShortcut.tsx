@@ -1,6 +1,6 @@
 "use client";
 
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useActiveWave } from "@/contexts/wave/ActiveWaveContext";
 import { SidebarIconTile } from "../waves/SidebarIconTile";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -67,7 +67,7 @@ export function WebProfileFeedShortcut({
   readonly isCollapsed: boolean;
   readonly mobile?: boolean;
 }) {
-  const { activeWave } = useMyStream();
+  const activeWave = useActiveWave();
   const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();

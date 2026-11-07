@@ -155,8 +155,26 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => useDropForgePermissionsMock(),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamActions: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamActionsOptional: () =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamActions(),
+  useMyStreamSelector: (selector: (lists: unknown) => unknown) =>
+    jest
+      .requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .mockedStreamSelector(selector),
   useMyStreamOptional: () => mockUseMyStreamOptional(),
 }));
+jest.mock(
+  "@/contexts/wave/ActiveWaveContext",
+  () =>
+    jest.requireActual("@/__tests__/utils/streamContextBridgeMock")
+      .activeWaveContextMock
+);
 jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   const MockHeaderSearchModalItem = (props: HeaderSearchModalItemProps) =>
     mockHeaderSearchModalItem(props);

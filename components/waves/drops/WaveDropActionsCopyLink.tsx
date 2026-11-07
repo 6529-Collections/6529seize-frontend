@@ -6,7 +6,7 @@ import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import React, { useState } from "react";
 import DropActionTooltip from "./DropActionTooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
@@ -23,8 +23,8 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const { isMemesWave, isQuorumWave } = useSeizeSettings();
-  const myStream = useMyStreamOptional();
-  const directMessageWaves = myStream?.directMessages.list ?? [];
+  // Read on copy, not on render: rows must not re-render when lists refresh.
+  const streamLists = useMyStreamActionsOptional()?.streamLists;
 
   const isTemporaryDrop = (targetDrop: ApiDrop): boolean => {
     return targetDrop.id.startsWith("temp-");
@@ -49,7 +49,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
     const isDirectMessage = isWaveDirectMessage(
       drop.wave.id,
       waveDetails,
-      directMessageWaves
+      streamLists?.get()?.directMessages.list ?? []
     );
     const dropLink = getCopiedDropLink({
       drop,

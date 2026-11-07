@@ -2,7 +2,7 @@
 
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import Button from "@/components/utils/button/Button";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useActiveWaveOptional } from "@/contexts/wave/ActiveWaveContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -39,7 +39,7 @@ export default function WaveDropsSearchModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const locale = useBrowserLocale();
   const router = useRouter();
-  const myStream = useMyStreamOptional();
+  const activeWave = useActiveWaveOptional();
   const [query, setQuery] = useState("");
   const search = useMessageSearch({
     query,
@@ -64,8 +64,8 @@ export default function WaveDropsSearchModal({
   const selectDropResult = (drop: ExtendedDrop) => {
     // The callback scrolls the originating page, even after changing the search scope.
     if (drop.wave.id === wave.id) onSelectSerialNo(drop.serial_no);
-    else if (myStream) {
-      myStream.activeWave.set(drop.wave.id, {
+    else if (activeWave) {
+      activeWave.set(drop.wave.id, {
         isDirectMessage:
           "is_dm_wave" in drop.wave && drop.wave.is_dm_wave === true,
         serialNo: drop.serial_no,
