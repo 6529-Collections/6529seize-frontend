@@ -1,0 +1,219 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "0fd7ba1d15bf4e38bcbfd825574e2289c40277b4",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/about-1440x1000-04.png",
+        "evidence/about-1440x1000-05.png",
+        "evidence/about-820x1000-06.png",
+        "evidence/about-390x844-08.png"
+      ],
+      "findings": ["V-002", "V-005"],
+      "note": "Museum sub-nav with About active, a sensible sequence (intro, art, collection, scholarship, public access CTA, institutional record) and one 'Explore the Collection' label; held at 8 because 'The next stage' reads as neither a peer nor a subsection, and the page end repeats the same documents under three link groups, including a disclosure that reveals only duplicates."
+    },
+    "J03": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/about-1440x1000-03.png",
+        "evidence/about-1440x1000-04.png",
+        "evidence/about-390x844-07.png"
+      ],
+      "findings": ["V-002"],
+      "note": "H1, the art row, and the single primary button lead clearly and supporting links recede; one peer section ('The next stage') breaks the heading scale (30px against 36px for every other peer H2; 24px against 30px at 390) and the split grid."
+    },
+    "J04": {
+      "score": 9.0,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/contact-sheet-1440x1000.png"
+      ],
+      "findings": [],
+      "note": "Restrained black/iron surface, primary-300 underlined text links, one rounded-lg primary button with an outlined secondary, real works shown whole with title and artist captions, and no crypto or SaaS ornament; native beside /museum/network, whose section and public-record patterns it shares."
+    },
+    "J05": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/about-820x1000-02.png",
+        "evidence/about-1440x1000-03.png",
+        "evidence/about-820x1000-04.png"
+      ],
+      "findings": ["V-001", "V-002"],
+      "note": "Editorial spacing (112px section gap plus 40px padding) suits a publication page; two grids leave empty cells: the third work alone beside a ~334x435 void at 820, and 'Rights education' alone beside an empty cell at 1440 and 820."
+    },
+    "J06": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-390x844-02.png",
+        "evidence/about-390x844-03.png",
+        "evidence/about-1440x1000-01.png"
+      ],
+      "findings": ["V-003", "V-004", "V-006", "V-007", "V-008"],
+      "note": "Consistent type roles, eyebrows, link styling, and line heights; held at 8 by misaligned work captions (single-line titles sit ~10px lower than the two-line title, with an uneven title-to-artist gap) and overlong measure (~110 characters per line in the hero's second paragraph at 1440, ~95 in body copy)."
+    },
+    "J10": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/about-820x1000-01.png",
+        "evidence/about-820x1000-02.png",
+        "evidence/contact-sheet-820x1000.png",
+        "evidence/about-390x844-02.png"
+      ],
+      "findings": ["V-001"],
+      "note": "No horizontal overflow at any width; the nav, split sections, card grids, and buttons adapt cleanly at 390. At 820 the three-work art row breaks into two plus an orphan, so the page's principal visual section loses its composition at the tablet size."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J10", "J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 820x1000 · en-US",
+      "evidence": "evidence/about-820x1000-02.png",
+      "observation": "At 820x1000 'Works held and studied' lays its three works in a two-column grid: CENTURY #31 and the Seymour photograph share row one, and CENTURY #724 sits alone on row two beside an empty cell of about 334x435px (x 462-796, y 1192-1627). The section grows to 1018px tall against 586px at 1440.",
+      "consequence": "The page's only art section, which is its principal visual content, reads as an unfinished grid at tablet width. The three-work set breaks apart, and a large black void lands in the middle of the page.",
+      "change": "Keep the three works in one row from the md breakpoint (768px) up, at about 215px per column at 820 with captions wrapping. Alternatively, use any tablet arrangement that leaves no empty grid cell. Keep object-contain and the current 1440 and 390 layouts.",
+      "acceptance_check": "At 820x1000 all three works sit in one balanced arrangement with no empty grid cell beside a work. Images keep their aspect ratios, captions are unclipped, and the 1440x1000 and 390x844 captures are unchanged.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J03", "J02", "J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-04.png",
+      "observation": "'How the Museum works' and 'The next stage' are adjacent sections with identical peer dividers (1px top rule, 112px gap), but they are built differently. 'How the Museum works' has an eyebrow, a 36px H2 in the left column, and three cards in a two-column grid inside the right column, so 'Rights education' sits alone beside an empty cell at 1440 and 820. 'The next stage' has no eyebrow, a 30px H2 (24px at 390, where its peers are 30px), a full-width stacked heading, and a full-width three-up row starting at x=170, not x=653. 'How the Museum works' also takes 56px top padding where its siblings take 40px at 768px and up.",
+      "consequence": "Readers cannot tell whether 'The next stage' is a peer topic or a continuation of 'How the Museum works'. The two parallel three-item groups do not line up, and the empty cell beside 'Rights education' reads as a missing item. The institutional half of the page looks assembled rather than designed.",
+      "change": "Decide the relationship and express it once. (a) As a peer, give 'The next stage' the same H2 size and heading-left split as its siblings. (b) As a subsection, nest it inside 'How the Museum works' without the peer divider and 112px gap, with a clearly subordinate heading. Either way, lay out both three-item groups on one grid, either three columns or a single stacked column within the right column, with no empty cell. Use the sibling 40px top padding.",
+      "acceptance_check": "At 1440, 820, and 390, every peer section H2 renders at one size, or 'The next stage' visibly sits inside 'How the Museum works' with no peer divider. At 1440 the two three-item groups share one left edge and column count, and no grid cell beside 'Rights education' is empty at 1440 or 820.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Each work title is an inline-flex link with a 44px minimum height and vertically centered text (tw-min-h-11 tw-items-center). One-line titles (CENTURY #31, CENTURY #724) therefore sit about 10px lower than the first line of the two-line 'Patrolling the border between the Negev Desert and Jordan' (text tops at y≈1084 and y≈1074 at 1440). The title-to-artist gap is about 14px under a one-line title but 4px under the two-line title. The artist lines (y 1122 and 1126) and the bottom rules (y 1158 and 1162) step by 4px across the row. At 390 the stacked captions visibly use two different title-to-artist spacings.",
+      "consequence": "The caption row, the most museum-specific typographic element on the page, looks unaligned, and identical caption roles get different spacing depending on title length.",
+      "change": "Keep the 44px target but top-align the title text, for example with tw-items-start, or by moving the minimum height to a padded block or hit-area pseudo-element, so every title's first line starts at the caption top. Keep a constant 4px gap from a title's last line to the artist line.",
+      "acceptance_check": "At 1440 the first-line tops of the three titles match within 1px. At every viewport, each artist line sits the same distance below its title's last line in all three captions.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": ["J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000 · en-US",
+      "evidence": "evidence/about-1440x1000-01.png",
+      "observation": "At 1440 the hero's lead paragraph runs about 95 characters per line (896px wide at 20px), and its second paragraph about 110 ('The Collection is held for long-term stewardship, research, interpretation, and public access. Accessioned works'). Right-column body copy at 16px runs about 90-95 characters (698px). At 820, single-column body copy and the grey 'The next stage' card text run about 95 characters across 692px.",
+      "consequence": "Long lines slow reading and make return sweeps error-prone in the passages that explain what the Museum is, the core of this page's task.",
+      "change": "Cap reading paragraphs at about 65-75ch, for example with tw-max-w-prose or tw-max-w-[68ch] on hero and section paragraphs, or a hero text max width of about 720px. Leave headings and link rows as they are.",
+      "acceptance_check": "At 1440x1000 and 820x1000 no reading paragraph on the route exceeds about 80 characters per line, measured from the captures. 390x844 is unchanged.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": ["J02"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-05.png",
+      "observation": "The page ends with three link groups. 'Institutional sources' lists Founding record, Open Museum statement, On-chain transition, Museum Safe, and View the public record. Next come the 'Source and contribute' links. Last is a 12px grey disclosure, 'Related works and context', and when opened in the running build it reveals only 'On-chain transition' and 'Founding principles'. Both are already linked about 150px above: 'Founding principles' has the same URL as 'Founding record', and 'On-chain transition' is identical. At 1440 the disclosure opens right-aligned beneath the contribute links. Note for the coordinator: run.json pins J08 N/A because the route has 'no disclosures', but this details/summary disclosure is present.",
+      "consequence": "Visitors spend a click to find nothing new, and the same document under two labels ('Founding record' and 'Founding principles') suggests two different records, which blurs where the authoritative source lives.",
+      "change": "On this route, drop the related-context items that already appear in 'Institutional sources', and do not render the disclosure when nothing remains. Alternatively, list only genuinely related works or pages that are not linked elsewhere on the page.",
+      "acceptance_check": "At all three widths, each document URL at the page end appears once in 'Institutional sources' (apart from the page's own 'Read the source' link), and no disclosure on the route expands to only links already shown on the page.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-006",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-390x844-02.png",
+      "observation": "The portrait Seymour photograph is centered in its square object-contain frame, but its caption is flush left. The image's left edge sits 64px (1440), 56px (820), or 60px (390) right of the caption's left edge, while the square works align flush with their captions.",
+      "consequence": "A minor edge misalignment in the art row; optional polish.",
+      "change": "Anchor contained images to the caption edge (for example object-left-bottom), or align the caption to the rendered image box.",
+      "acceptance_check": "The Seymour image's left edge and its caption's left edge match within 1px at all three viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-007",
+      "targets": ["J06", "J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-390x844-09.png",
+      "observation": "The shared site footer wraps with dangling separators: 'API |' ends a line at 820; at 390, '@6529Collections |' ends a line, and lines begin with '| Cookie Policy' and '| Contact Us'. This is shared chrome outside the release intent.",
+      "consequence": "A small unfinished detail at the bottom of every page at tablet and phone widths; optional for this run.",
+      "change": "Render separators so they never start or end a wrapped line, for example with gap-based spacing or separators hidden at line edges.",
+      "acceptance_check": "At 820 and 390 no footer line begins or ends with '|'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-008",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/about-1440x1000-05.png",
+      "observation": "The shared site footer element carries a right border (tw-border-r, iron-900). At 1440 it draws a faint vertical rule at x≈1381 that starts at the footer and runs to the page end, with no matching rule beside the page content above it.",
+      "consequence": "A faint accidental border visible only in the footer region; optional polish in shared chrome.",
+      "change": "Remove the footer's right border, or match it to the content column's edge treatment.",
+      "acceptance_check": "At 1440 no vertical rule appears beside the footer unless the same edge continues beside the page content.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The art row directly after the intro: real works shown whole with object-contain at their native aspect ratios (square CENTURY works, portrait Seymour photograph), each with a linked title and artist caption.",
+    "One consistent 1px top divider on every peer section, including Collection care, which now matches its siblings.",
+    "A single label, 'Explore the Collection', for both in-page Collection links (the text link in the art header and the primary button), alongside the 'Collection' nav item.",
+    "A restrained token palette: black and iron surfaces, primary-300 underlined text links, one rounded-lg primary button with an outlined secondary, and no decorative gradients or chrome competing with the art.",
+    "The Museum sub-nav with an active 'About' underline, which moves from a right-aligned row at 1440 to a row under the title at 820 and 390 without overflow.",
+    "The phone layout: clean single-column collapse, 44px link targets, stacked action buttons, and no horizontal overflow.",
+    "The eyebrow system: primary-colored eyebrows for content sections and a grey eyebrow for the source list, as on /museum/network."
+  ]
+}

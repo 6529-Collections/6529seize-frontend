@@ -1,0 +1,128 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "0fd7ba1d15bf4e38bcbfd825574e2289c40277b4",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-1440x1000-03.png",
+        "evidence/about-390x844-04.png"
+      ],
+      "findings": ["C-001"],
+      "note": "The 'how it works' and 'where to go next' parts of the task are complete: each mechanism links to a page you can inspect. But 'what the Museum holds' names only two of the three accessioned gifts and gives no sense of the Collection's size."
+    },
+    "J14": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-820x1000-02.png",
+        "evidence/about-390x844-02.png",
+        "evidence/about-390x844-03.png",
+        "evidence/contact-sheet-1440x1000.png"
+      ],
+      "findings": ["C-002", "C-003"],
+      "note": "This reads as a credible institutional publication: sources are pinned to a commit, the page keeps accessioned works separate from acquisitions in progress, and the next stage is written in the future tense. But the only art on the page carries title and artist with no credit line, date, gift or licence, and two of its three slots go to the same CENTURY series while one accessioned gift is left out."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "fail",
+    "M3": "fail",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M3", "J01"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Under 'Collection and acquisition' the page reads: 'The permanent Collection contains works that have been formally accessioned by the Museum. Casey Reas and Magnum Photos are represented by completed gifts.' (The same text appears in evidence/about-820x1000-02.png and evidence/about-390x844-04.png.) The same production build's /museum/network/collection, /museum/network/acquisitions and /museum/network/acquisition-programs record 13 works from three accessioned gifts: The System in Seven States (Casey Reas, 7 works), Conflict at Its Edges (five Magnum photographers, 5 works) and A Gift of Themes and Variations #210 (Vera Molnár, in collaboration with Martin Grasser). The About page leaves out the Molnár gift. It also names the agency (Magnum Photos) where the record names the photographers.",
+      "consequence": "On the page meant to explain what the Museum holds, a visitor is told the Collection comes from two sources when the record lists three accessioned gifts. The page also contradicts the Collection route, which is one click away.",
+      "change": "Rewrite museum.network.proposition.collection.body so it matches the record, for example: 'The permanent Collection contains works formally accessioned by the Museum. Gifts of work by Casey Reas, five Magnum photographers, and Vera Molnár, in collaboration with Martin Grasser, are in the permanent Collection.' This reuses the existing sibling phrasing in museum.network.acquisitions.description. If the copy states a work count, derive it from the publication, as the Collection route does, rather than hard-coding it.",
+      "acceptance_check": "At 1440, 820 and 390 px, 'Collection and acquisition' names every accessioned gift that /museum/network/collection lists (Casey Reas; five Magnum photographers; Vera Molnár, in collaboration with Martin Grasser). Any count it states equals the Collection route's 'In the Collection' count.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["M2", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Each figure under 'Works held and studied' shows only a title and the artist's name, e.g. 'Patrolling the border between the Negev Desert and Jordan / David Seymour' and 'CENTURY #31 / Casey Reas' (also evidence/about-820x1000-02.png, evidence/about-390x844-02.png, evidence/about-390x844-03.png). The /museum/network/collection route of the same build prints each record's credit line under these same works: 'David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.' and 'Gift of punk6529; Casey REAS; CENTURY #31; 6529 Network Museum, 6529NM.2026.001.01. Licensed CC BY-NC 4.0.' The Seymour photograph is All Rights Reserved. Its work record says the Museum's public presentation 'is limited to the credited accession context'. The Museum's rights note covers only 'credited institutional display'.",
+      "consequence": "The About page reproduces an All Rights Reserved photograph with no copyright credit, which goes against the Museum's own recorded rights position. None of the featured works shows a date, gift or licence, so their captions fall below those on the Collection route next door.",
+      "change": "Render each featured work's record credit line beneath the byline, as the Collection route does, using media.credit.creditLine for retained media or presentationMedia.credit.creditLine for presentation media. MuseumPublicMediaFigure already has a status/qualifier caption slot that can carry it.",
+      "acceptance_check": "At all three viewports, each About figure shows the same credit line that /museum/network/collection shows for that work. The Seymour figure shows '© David Seymour/Magnum Photos 2022' in its caption next to the image.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/contact-sheet-1440x1000.png",
+      "observation": "'Works held and studied' is the page's only art. It shows CENTURY #31, the Seymour photograph and CENTURY #724, so two of its three slots hold circular compositions from the same Casey Reas series (evidence/about-1440x1000-01.png, evidence/about-820x1000-02.png, evidence/about-390x844-02.png, evidence/about-390x844-03.png). The accessioned Vera Molnár gift, Themes and Variations #210, does not appear. The selection takes one Reas work, then one Magnum work, then fills the last slot with the next Collection work, which is another CENTURY.",
+      "consequence": "The art section understates the range of the holdings: across the three viewports it reads as one series plus one photograph rather than three gifts. This works against the page's job of showing what the Museum holds.",
+      "change": "Choose one principal work from each accessioned gift (Reas, Magnum, Molnár), e.g. CENTURY #31, Patrolling the border between the Negev Desert and Jordan, and Themes and Variations #210. Order them by accession, and caption each per C-002.",
+      "acceptance_check": "At 1440, 820 and 390 px the art section shows three works from three different accessioned gifts, no two from the same series, and each linked to its object record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["M3"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "The page says: 'Keys and Gates is the first Meme Card-funded acquisition program. Its selected photographs are current acquisition work and remain separate from the permanent Collection while acquisition and accession proceed.' This is accurate but less specific than the record. The Collection and Acquisitions routes state that the twenty-three selected photographs are unminted, and that minting, acquisition, custody and accession remain in progress.",
+      "consequence": "Optional: a visitor cannot tell from the About page that these works do not exist on-chain yet.",
+      "change": "Optionally name the stage: 'Keys and Gates is the first Meme Card-funded acquisition program. Its twenty-three selected photographs are not yet minted; they remain outside the permanent Collection while minting, acquisition, and accession proceed.'",
+      "acceptance_check": "The Keys and Gates sentence states the unminted status that the Collection route shows.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Each featured work is shown whole at its correct aspect ratio with object-fit contain: the 2400x2400 CENTURY stills and the 1280x1927 Seymour photograph. Nothing obstructs them and no fallback panel appears at any viewport. Each links to its object record.",
+    "Accessioned works in the permanent Collection are kept clearly separate from Keys and Gates acquisition work.",
+    "'The next stage' is written in the future tense and kept separate from the mechanisms that operate today.",
+    "In 'How the Museum works', each claim leads to a destination you can inspect: Museum decisions, the repository, and the rights handbook.",
+    "'Institutional sources' links to the founding, Open Museum and on-chain transition documents pinned to a commit, and to the Museum Safe on Etherscan.",
+    "The release intent is met: both Collection links read 'Explore the Collection', and Collection care now uses the same top hairline divider as its sibling sections."
+  ]
+}

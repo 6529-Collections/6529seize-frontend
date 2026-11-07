@@ -88,14 +88,12 @@ export type MuseumRelatedPageSourceLabel =
   | "accessionRegister"
   | "applicationProfile"
   | "collectionEssay"
-  | "foundingPrinciples"
   | "giftNarrative"
   | "keysAndGates"
   | "machineRecord"
   | "institutionalStudy"
   | "implementationAudit"
   | "machineSchedule"
-  | "onchainTransition"
   | "primarySourceRegister"
   | "projectEssay"
   | "programRecord"
@@ -408,8 +406,6 @@ export function buildMuseumPageSourceCatalog(
     );
 
   const openMuseum = firstDocument(publication, "open_museum_statement");
-  const transition = firstDocument(publication, "onchain_transition");
-  const founding = firstDocument(publication, "founding_principles");
   const collectionEssay = firstDocument(publication, "collection_essay");
   const artistProfile = firstDocument(publication, "artist_practice");
   const sourceMatrix = firstDocument(publication, "source_chronology_matrix");
@@ -606,10 +602,8 @@ export function buildMuseumPageSourceCatalog(
       ]
     );
   }
-  add(`${MUSEUM_ROOT}/about`, openMuseum?.sourcePath, [
-    { path: transition?.sourcePath, label: "onchainTransition" },
-    { path: founding?.sourcePath, label: "foundingPrinciples" },
-  ]);
+  // The About page lists its founding and transition sources in the page body.
+  add(`${MUSEUM_ROOT}/about`, openMuseum?.sourcePath);
   addRightsPageSources(publication, add);
   add(`${MUSEUM_ROOT}/about/governance`, GOVERNANCE_REGISTER_PATH);
 
