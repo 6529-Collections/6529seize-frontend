@@ -49,6 +49,26 @@ export async function expectNativeLeaderboardReady(
   }
 }
 
+/**
+ * Bodies of observed reads, captured when each response arrives. Chromium
+ * may discard a response body once the page moves on (CDP
+ * `Network.getResponseBody`: "No data found"), so a body read later can
+ * fail even though the page received it.
+ */
+const capturedBodies = new WeakMap<Response, Promise<unknown>>();
+
+function captureBody(response: Response): void {
+  const body = response.json();
+  // A rejection surfaces when a test awaits the body; it is never unhandled.
+  body.catch(() => undefined);
+  capturedBodies.set(response, body);
+}
+
+/** The body captured on arrival (read now only if it was never observed). */
+async function bodyOf<T>(response: Response): Promise<T> {
+  return (await (capturedBodies.get(response) ?? response.json())) as T;
+}
+
 /** Observe the UI's own reads; never issue extra API requests or retain auth data. */
 export function observeNativeLeaderboard(page: Page, waveId: string) {
   const reads: Response[] = [];
@@ -62,8 +82,10 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
         (path === "/api/v2/drops" &&
           new URL(response.url()).searchParams.has("ids")) ||
         /^\/api\/v2\/drops\/[^/]+$/.test(path))
-    )
+    ) {
+      captureBody(response);
       reads.push(response);
+    }
   };
   page.on("response", observe);
   return {
@@ -87,15 +109,15 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
         );
         return response;
       };
-      const hub: ApiWaveV3 = await (
+      const hub = await bodyOf<ApiWaveV3>(
         await read((url) => url.pathname === wavePath)
-      ).json();
+      );
       expect(hub.id).toBe(waveId);
       expect(hub.legacy_primary_competition_id).toBeTruthy();
       const competitionPath = `${wavePath}/competitions/${hub.legacy_primary_competition_id}`;
-      const competition: ApiCompetition = await (
+      const competition = await bodyOf<ApiCompetition>(
         await read((url) => url.pathname === competitionPath)
-      ).json();
+      );
       expect(competition.id).toBe(hub.legacy_primary_competition_id);
       expect(competition.wave_id).toBe(waveId);
       expect(competition.capabilities).toContain("MAIN_STAGE");
@@ -112,7 +134,7 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
           url.searchParams.get("sort") === "rating" &&
           !url.searchParams.has("cursor")
       );
-      const data: ApiCompetitionLeaderboardPage = await response.json();
+      const data = await bodyOf<ApiCompetitionLeaderboardPage>(response);
       expect(Array.isArray(data.data)).toBe(true);
       for (const entry of data.data) {
         expect(entry.competition_id).toBe(competition.id);
@@ -202,7 +224,7 @@ export async function expectNativeLeaderboardArtwork(
           );
           let drop: ApiDropAndWave;
           if (new URL(response.url()).pathname === "/api/v2/drops") {
-            const batch: ApiDropV2PageWithoutCount = await response.json();
+            const batch = await bodyOf<ApiDropV2PageWithoutCount>(response);
             const rich = batch.data.find((item) => item.id === dropId);
             expect(
               rich,
@@ -213,7 +235,7 @@ export async function expectNativeLeaderboardArtwork(
             if (!rich?.wave) return false;
             drop = { drop: rich, wave: rich.wave };
           } else {
-            drop = await response.json();
+            drop = await bodyOf<ApiDropAndWave>(response);
           }
           expect(drop.wave.id).toBe(competition.wave_id);
           expect(drop.drop.id).toBe(entry.drop_id);
