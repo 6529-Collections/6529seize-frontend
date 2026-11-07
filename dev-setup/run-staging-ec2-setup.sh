@@ -476,7 +476,6 @@ create_env_file() {
   local env_file="$REPO_ROOT/.env"
   local base_endpoint="$DEV_DOMAIN_URL"
   local core_scheme="core6529"
-  local ipfs_api_endpoint="https://api-ipfs.6529.io"
   local ipfs_gateway_endpoint="https://ipfs.6529.io"
 
   color yellow "Creating/replacing $env_file …"
@@ -509,7 +508,6 @@ MOBILE_APP_SCHEME=$MOBILE_APP_SCHEME
 CORE_SCHEME=$core_scheme
 
 # IPFS ENDPOINTS
-IPFS_API_ENDPOINT=$ipfs_api_endpoint
 IPFS_GATEWAY_ENDPOINT=$ipfs_gateway_endpoint
 EOF
   color green "Wrote $env_file"
