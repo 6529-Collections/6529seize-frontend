@@ -1,4 +1,5 @@
 import QueryClientSetup from "@/components/providers/QueryClientSetup";
+import { useAnnouncementsWave } from "@/hooks/useAnnouncementsWave";
 import { useWaveById } from "@/hooks/useWaveById";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -18,6 +19,8 @@ const WAVE_ID = "announcements";
 const TEN_MINUTES = 10 * 60 * 1000;
 const START = 1_700_000_000_000;
 
+type Reader = "announcements" | "default";
+
 let now = START;
 let client: QueryClient | undefined;
 
@@ -26,41 +29,52 @@ function CaptureClient() {
   return null;
 }
 
-function WaveName({ staleTime }: { readonly staleTime?: number }) {
-  const { wave } = useWaveById(WAVE_ID, {
-    ...(staleTime === undefined ? {} : { staleTime }),
-  });
+function AnnouncementsWaveName() {
+  const { wave } = useAnnouncementsWave(WAVE_ID, true);
   return <span>{wave?.name ?? "loading"}</span>;
 }
 
-function renderWave({
-  shown,
-  staleTime,
-}: {
-  readonly shown: boolean;
-  readonly staleTime?: number;
-}) {
+function DefaultWaveName() {
+  const { wave } = useWaveById(WAVE_ID);
+  return <span>{wave?.name ?? "loading"}</span>;
+}
+
+// The app's QueryClient, with or without one observer of the wave.
+function renderWave(reader: Reader, shown: boolean) {
+  let observer = null;
+  if (shown) {
+    observer =
+      reader === "announcements" ? (
+        <AnnouncementsWaveName />
+      ) : (
+        <DefaultWaveName />
+      );
+  }
   return (
     <QueryClientSetup>
       <CaptureClient />
-      {shown ? (
-        <WaveName {...(staleTime === undefined ? {} : { staleTime })} />
-      ) : null}
+      {observer}
     </QueryClientSetup>
   );
 }
 
-// The app's QueryClient, with a sidebar observer mounted and loaded once.
-async function mountLoadedWave(staleTime?: number) {
-  const view = render(
-    renderWave({
-      shown: true,
-      ...(staleTime === undefined ? {} : { staleTime }),
-    })
-  );
+async function mountLoadedWave(reader: Reader) {
+  const view = render(renderWave(reader, true));
   await screen.findByText("Announcements");
   expect(fetchMock).toHaveBeenCalledTimes(1);
   return view;
+}
+
+function remount(view: ReturnType<typeof render>, reader: Reader) {
+  view.rerender(renderWave(reader, false));
+  view.rerender(renderWave(reader, true));
+}
+
+function refocusWindow() {
+  act(() => {
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+  });
 }
 
 beforeEach(() => {
@@ -77,44 +91,37 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe("useWaveById stale window", () => {
-  it("reuses the cached wave on remount and focus inside the window", async () => {
-    const view = await mountLoadedWave(TEN_MINUTES);
+describe("useAnnouncementsWave", () => {
+  it("reuses the cached wave on remount and focus for ten minutes", async () => {
+    const view = await mountLoadedWave("announcements");
 
     now = START + TEN_MINUTES - 1000;
-    view.rerender(renderWave({ shown: false, staleTime: TEN_MINUTES }));
-    view.rerender(renderWave({ shown: true, staleTime: TEN_MINUTES }));
-    act(() => {
-      focusManager.setFocused(false);
-      focusManager.setFocused(true);
-    });
+    remount(view, "announcements");
+    refocusWindow();
 
     expect(screen.getByText("Announcements")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: `waves/${WAVE_ID}` })
+    );
   });
 
-  it("refetches on remount, not on focus, once the window has passed", async () => {
-    const view = await mountLoadedWave(TEN_MINUTES);
+  it("refetches on remount, not on focus, after ten minutes", async () => {
+    const view = await mountLoadedWave("announcements");
 
     now = START + TEN_MINUTES + 1000;
-    act(() => {
-      focusManager.setFocused(false);
-      focusManager.setFocused(true);
-    });
+    refocusWindow();
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    view.rerender(renderWave({ shown: false, staleTime: TEN_MINUTES }));
-    view.rerender(renderWave({ shown: true, staleTime: TEN_MINUTES }));
-
+    remount(view, "announcements");
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
-  it("keeps the one-minute default for other callers", async () => {
-    const view = await mountLoadedWave();
+  it("leaves other wave readers on the one-minute default", async () => {
+    const view = await mountLoadedWave("default");
 
     now = START + 2 * 60 * 1000;
-    view.rerender(renderWave({ shown: false }));
-    view.rerender(renderWave({ shown: true }));
+    remount(view, "default");
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });

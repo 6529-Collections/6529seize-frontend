@@ -16,7 +16,7 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveById } from "./useWaveById";
+import { useAnnouncementsWave } from "./useAnnouncementsWave";
 import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
@@ -58,10 +58,6 @@ type EnhancedWave = SidebarWave & {
 };
 
 const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
-// Every tab that shows the sidebar observes the announcement wave. Its row
-// takes new drops from live updates, and its name and image rarely change,
-// so remounts and re-enables within ten minutes reuse the cached wave.
-const ANNOUNCEMENT_WAVE_STALE_TIME_MS = 10 * 60 * 1000;
 
 // V2 overview, pinned, and announcement wave sources are root-wave
 // sources. This guard is defensive against stale or malformed cached data; it is
@@ -318,10 +314,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: rawAnnouncementQueryLoading,
     error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
-  } = useWaveById(announcementsWaveId, {
-    enabled: shouldFetchAnnouncementWave,
-    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
-  });
+  } = useAnnouncementsWave(announcementsWaveId, shouldFetchAnnouncementWave);
   const announcementQueryLoading =
     shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
   const announcementQueryError = shouldFetchAnnouncementWave
