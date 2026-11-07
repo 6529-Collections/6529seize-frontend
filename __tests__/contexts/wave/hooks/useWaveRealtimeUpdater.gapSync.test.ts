@@ -7,6 +7,7 @@ import {
 import { hydrateRealtimeChatDrop } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import { WAVE_READ_DEBOUNCE_MS } from "@/hooks/useMarkWaveNotificationsRead.debounce";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
+import { createWaveUnreadStore } from "@/contexts/wave/hooks/waveUnreadStore";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { SidebarWave } from "@/types/waves.types";
 import { createElement, type ReactNode } from "react";
@@ -764,10 +765,14 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
         };
         const props = makeProps(store);
         const sidebarWaves = [{ id: WAVE }, { id: "wave-2" }] as SidebarWave[];
-        const { result } = renderHook(
+        // The counter writes live counts into a store its caller owns.
+        const unreadStore = createWaveUnreadStore();
+        renderHook(
           (current: ReturnType<typeof makeProps>) => {
             useWaveRealtimeUpdater(current);
-            return useNewDropCounter(WAVE, sidebarWaves, jest.fn());
+            return useNewDropCounter(WAVE, sidebarWaves, jest.fn(), {
+              store: unreadStore,
+            });
           },
           {
             initialProps: props,
@@ -802,7 +807,7 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
           expect(options).toEqual({ refreshWaveLists: false });
         }
         // The other wave's unread badge still updates from the socket.
-        expect(result.current.newDropsCounts["wave-2"]?.count).toBe(1);
+        expect(unreadStore.getNewDropsCounts()["wave-2"]?.count).toBe(1);
       }
     );
 
