@@ -35,6 +35,7 @@ import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProv
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { WaveUnreadProvider } from "./WaveUnreadContext";
 import { ActiveWaveProvider } from "./ActiveWaveContext";
+import { createStreamListsStore } from "./streamListsStore";
 
 import type {
   ActiveWaveContextData,
@@ -42,7 +43,6 @@ import type {
   MyStreamActionsContextType,
   MyStreamContextType,
   StreamListsSnapshot,
-  StreamListsStore,
   WavesContextData,
 } from "./MyStreamContext.types";
 
@@ -97,29 +97,6 @@ const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
       const idleWindow = globalThis as unknown as BrowserIdleScheduler;
       idleWindow.cancelIdleCallback?.(idleHandle);
     }
-  };
-};
-
-type WritableStreamListsStore = StreamListsStore & {
-  readonly set: (snapshot: StreamListsSnapshot) => void;
-};
-
-const createStreamListsStore = (): WritableStreamListsStore => {
-  let snapshot: StreamListsSnapshot | null = null;
-  const listeners = new Set<() => void>();
-  return {
-    get: () => snapshot,
-    set: (next) => {
-      if (next === snapshot) return;
-      snapshot = next;
-      listeners.forEach((listener) => listener());
-    },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
   };
 };
 
@@ -707,10 +684,6 @@ export const useMyStream = () => {
     throw new Error("useMyStream must be used within a MyStreamProvider");
   }
   return context;
-};
-
-export const useMyStreamOptional = (): MyStreamContextType | null => {
-  return useContext(MyStreamContext);
 };
 
 // Prefer these over useMyStream when a component only calls stream actions:
