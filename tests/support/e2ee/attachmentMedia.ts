@@ -88,28 +88,48 @@ async function clickGalleryButton(button: Locator, label: string) {
   }
 }
 
-/** The next download from any page of the context, popups included. */
-function nextDownload(page: Page): Promise<Download | null> {
+interface DownloadWatch {
+  /** Starts the wait budget; call once the click has landed. */
+  readonly arm: () => Promise<Download | null>;
+  /** Stops watching, for a click that failed. */
+  readonly cancel: () => void;
+}
+
+/**
+ * Watches every page of the context, popups included, for the next download.
+ * Listening starts at once so no event is missed; the time budget starts at
+ * `arm`, after the click, so a slow click does not use it up.
+ */
+function watchNextDownload(page: Page): DownloadWatch {
   const context = page.context();
-  return new Promise((resolve) => {
-    const watched = new Set<Page>();
-    const finish = (download: Download | null) => {
-      clearTimeout(timer);
-      context.off("page", watch);
-      for (const watchedPage of watched) {
-        watchedPage.off("download", finish);
-      }
-      resolve(download);
-    };
-    const watch = (candidate: Page) => {
-      if (watched.has(candidate)) return;
-      watched.add(candidate);
-      candidate.on("download", finish);
-    };
-    const timer = setTimeout(() => finish(null), GALLERY_ACTION_TIMEOUT_MS);
-    context.pages().forEach(watch);
-    context.on("page", watch);
+  const watched = new Set<Page>();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let settle: (download: Download | null) => void = () => undefined;
+  const result = new Promise<Download | null>((resolve) => {
+    settle = resolve;
   });
+  const finish = (download: Download | null) => {
+    clearTimeout(timer);
+    context.off("page", watch);
+    for (const watchedPage of watched) {
+      watchedPage.off("download", finish);
+    }
+    settle(download);
+  };
+  function watch(candidate: Page) {
+    if (watched.has(candidate)) return;
+    watched.add(candidate);
+    candidate.on("download", finish);
+  }
+  context.pages().forEach(watch);
+  context.on("page", watch);
+  return {
+    arm: () => {
+      timer = setTimeout(() => finish(null), GALLERY_ACTION_TIMEOUT_MS);
+      return result;
+    },
+    cancel: () => finish(null),
+  };
 }
 
 /** Clicks the preview's download button and checks the file that comes out. */
@@ -122,9 +142,14 @@ async function downloadFromPreview(
     name: "Download media",
     exact: true,
   });
-  const download = nextDownload(page);
-  await clickGalleryButton(button, `Downloading ${filename}`);
-  const started = await download;
+  const download = watchNextDownload(page);
+  try {
+    await clickGalleryButton(button, `Downloading ${filename}`);
+  } catch (error) {
+    download.cancel();
+    throw error;
+  }
+  const started = await download.arm();
   if (!started) {
     throw new Error(
       `Downloading ${filename}: no page in the context started a download within ${GALLERY_ACTION_TIMEOUT_MS} ms of the click. Button: ${await describeButton(button)}`
