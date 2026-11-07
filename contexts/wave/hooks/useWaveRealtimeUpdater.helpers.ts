@@ -37,7 +37,7 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   /** Whether the wave is active or has a mounted message subscriber. */
   readonly isWaveInUse: (waveId: string) => boolean;
-  readonly registerWave: (waveId: string) => void;
+  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
   readonly syncNewestMessages: (
     waveId: string,
     sinceSerialNo: number,

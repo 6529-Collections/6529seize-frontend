@@ -3,7 +3,13 @@
 import { scheduleStaggered } from "@/helpers/jitter.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS } from "@/services/websocket/WebSocketTypes";
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from "react";
 import type { WaveMessages } from "./types";
 import { reportBackgroundTaskError } from "./useWaveRealtimeUpdater.helpers";
 
@@ -173,18 +179,11 @@ export function useWaveGapSync({
       const previous = trailingChecksRef.current.get(waveId);
       if (previous !== undefined) clearTimeout(previous.timer);
       const firstFrameAt = previous?.firstFrameAt ?? now;
-      const delay = Math.max(
-        0,
-        Math.min(
-          CHAT_GAP_TRAILING_CHECK_MS,
-          firstFrameAt + CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS - now
-        )
-      );
       trailingChecksRef.current.set(waveId, {
         firstFrameAt,
         timer: setTimeout(
           () => latestRef.current.runTrailingCheck(waveId),
-          delay
+          getTrailingCheckDelay(firstFrameAt, now)
         ),
       });
     },
@@ -214,20 +213,37 @@ export function useWaveGapSync({
   // A wave whose check waited for use checks once it becomes active.
   useEffect(() => {
     if (activeWaveId !== null && deferredRef.current.has(activeWaveId)) {
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-ref-to-parent -- The ref is this hook's own state; nothing is passed to or from a parent.
       requestGapSync(activeWaveId);
     }
   }, [activeWaveId, requestGapSync]);
 
+  const clearAll = useCallback(() => {
+    for (const check of trailingChecksRef.current.values()) {
+      clearTimeout(check.timer);
+    }
+    trailingChecksRef.current.clear();
+    deferredRef.current.clear();
+    cancelResyncRef.current?.();
+    cancelResyncRef.current = null;
+  }, []);
+  useGapSyncLifecycle({ clearAll, latestRef });
+
+  return { requestGapSync, noteRealtimeFrame, requestResync };
+}
+
+/**
+ * Deferred checks run when the window shows again. A profile switch or
+ * unmount drops every scheduled check: the next profile's store syncs itself.
+ */
+function useGapSyncLifecycle({
+  clearAll,
+  latestRef,
+}: {
+  readonly clearAll: () => void;
+  readonly latestRef: RefObject<{ readonly runDeferredChecks: () => void }>;
+}): void {
   useEffect(() => {
-    const trailingChecks = trailingChecksRef.current;
-    const deferred = deferredRef.current;
-    const clearAll = () => {
-      for (const check of trailingChecks.values()) clearTimeout(check.timer);
-      trailingChecks.clear();
-      deferred.clear();
-      cancelResyncRef.current?.();
-      cancelResyncRef.current = null;
-    };
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         latestRef.current.runDeferredChecks();
@@ -240,7 +256,15 @@ export function useWaveGapSync({
       globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, clearAll);
       clearAll();
     };
-  }, []);
-
-  return { requestGapSync, noteRealtimeFrame, requestResync };
+  }, [clearAll, latestRef]);
 }
+
+/** When a wave's trailing check runs, given its burst's first frame. */
+const getTrailingCheckDelay = (firstFrameAt: number, now: number): number =>
+  Math.max(
+    0,
+    Math.min(
+      CHAT_GAP_TRAILING_CHECK_MS,
+      firstFrameAt + CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS - now
+    )
+  );
