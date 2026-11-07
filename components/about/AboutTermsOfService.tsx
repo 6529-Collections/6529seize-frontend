@@ -459,7 +459,9 @@ export default function AboutTermsOfService() {
               published by the United States and other governments. If a wallet
               linked to your profile appears on one of these lists, your profile
               cannot sign in or take actions on Our Platform. If you think we
-              made a mistake, contact us and we will review it.
+              made a mistake, contact us at{" "}
+              <a href="mailto:support@6529.io">support&#64;6529.io</a> and we
+              will review it.
               <br />
               <br />
               If you are a Sanctioned Party, please do not: a&#41; mint a 6529
