@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -140,4 +140,6 @@ const WebBrainLeftSidebarWave = ({
   );
 };
 
-export default WebBrainLeftSidebarWave;
+// Rows re-render only when their own wave object or props change; live unread
+// values give the receiving wave a new object and leave the others alone.
+export default memo(WebBrainLeftSidebarWave);

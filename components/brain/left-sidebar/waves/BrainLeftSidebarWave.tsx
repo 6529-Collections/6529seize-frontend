@@ -13,7 +13,7 @@ import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Link from "next/link";
-import React, { useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -388,4 +388,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   );
 };
 
-export default BrainLeftSidebarWave;
+// Rows re-render only when their own wave object or props change; live unread
+// values give the receiving wave a new object and leave the others alone.
+export default memo(BrainLeftSidebarWave);

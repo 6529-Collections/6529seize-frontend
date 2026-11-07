@@ -10,16 +10,11 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 import { useUnknownWaveRefresh } from "./useUnknownWaveRefresh";
+import type { WaveUnreadStore } from "./waveUnreadStore";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -33,10 +28,11 @@ export interface MinimalWaveNewDropsCount {
 interface UseNewDropCounterOptions {
   readonly enabled?: boolean | undefined;
   readonly otherListWaveIds?: ReadonlySet<string> | undefined;
+  /** Where the live counts go; owned by the caller. */
+  readonly store: WaveUnreadStore;
 }
 
 const DEFAULT_OTHER_LIST_WAVE_IDS: ReadonlySet<string> = new Set<string>();
-const EMPTY_NEW_DROPS_COUNTS: Record<string, MinimalWaveNewDropsCount> = {};
 
 export function getNewestTimestamp(
   cached: number | null | undefined = null,
@@ -139,23 +135,28 @@ const addUnreadDropCount = ({
  * @param waves - List of waves for which to track new drops
  * @param refetchWaves - Refreshes the list a newly active wave can join;
  *   called coalesced and jittered for drops in waves the list doesn't have
- * @returns Object containing newDropsCounts and reset function
+ * @returns Reset functions; the live counts go to `options.store`
+ *
+ * Counts go to a store, not React state: a received message updates only the
+ * store's subscribers instead of re-rendering the provider that owns it.
  */
 function useNewDropCounter(
   activeWaveId: string | null,
   waves: SidebarWave[],
   refetchWaves: () => void,
-  options: UseNewDropCounterOptions = {}
+  options: UseNewDropCounterOptions
 ) {
   const { connectedProfile } = useAuth();
-  const { enabled = true, otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS } =
-    options;
+  const {
+    enabled = true,
+    otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
+    store,
+  } = options;
   const requestWaveListRefresh = useUnknownWaveRefresh(refetchWaves, enabled);
 
   // Keep track of new drop counts
-  const [newDropsCounts, setNewDropsCounts] = useState<
-    Record<string, MinimalWaveNewDropsCount>
-  >({});
+  const setNewDropsCounts = store.updateNewDropsCounts;
+  const clearNewDropsCounts = store.clearNewDropsCounts;
   const wavesRef = useRef(waves);
   const wasEnabledRef = useRef(enabled);
 
@@ -170,11 +171,11 @@ function useNewDropCounter(
 
   useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
-      setNewDropsCounts({});
+      clearNewDropsCounts();
     }
 
     wasEnabledRef.current = enabled;
-  }, [enabled]);
+  }, [enabled, clearNewDropsCounts]);
 
   // Reset counts for a specific wave
   const resetWaveNewDropsCount = useCallback(
@@ -209,7 +210,7 @@ function useNewDropCounter(
         };
       });
     },
-    [enabled]
+    [enabled, setNewDropsCounts]
   );
 
   // Reset counts for all waves
@@ -252,7 +253,7 @@ function useNewDropCounter(
 
       return changed ? newCounts : prev;
     });
-  }, [enabled]);
+  }, [enabled, setNewDropsCounts]);
 
   // Handle visibility changes for active wave
   useEffect(() => {
@@ -315,7 +316,7 @@ function useNewDropCounter(
       );
       return true;
     },
-    [activeWaveId]
+    [activeWaveId, setNewDropsCounts]
   );
 
   const recordFullDrop = useCallback(
@@ -429,7 +430,6 @@ function useNewDropCounter(
   );
 
   return {
-    newDropsCounts: enabled ? newDropsCounts : EMPTY_NEW_DROPS_COUNTS,
     resetWaveNewDropsCount,
     // Reset counts for all tracked waves
     resetAllWavesNewDropsCount,

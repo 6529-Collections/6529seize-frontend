@@ -34,6 +34,7 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { WaveUnreadProvider } from "./WaveUnreadContext";
 
 import type {
   ActiveWaveContextData,
@@ -662,11 +663,15 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     setActiveWaveAndRegister,
   ]);
 
+  // Live unread values for the main list. Direct messages use the server's
+  // canonical unread state, which the list itself carries.
   return (
     <MyStreamActionsContext.Provider value={actionsValue}>
-      <MyStreamContext.Provider value={contextValue}>
-        {children}
-      </MyStreamContext.Provider>
+      <WaveUnreadProvider value={wavesHookData.unreadSource}>
+        <MyStreamContext.Provider value={contextValue}>
+          {children}
+        </MyStreamContext.Provider>
+      </WaveUnreadProvider>
     </MyStreamActionsContext.Provider>
   );
 };
