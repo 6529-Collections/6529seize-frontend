@@ -18,7 +18,10 @@ const MATCH_WINDOW_MS = 10_000;
  * one without an author) keeps the identity it came with rather than
  * breaking the merge.
  */
-export function stableIdentity(drop: ExtendedDrop): {
+export function stableIdentity(
+  drop: ExtendedDrop,
+  key: string
+): {
   readonly stableKey: string;
   readonly stableHash: string;
 } {
@@ -27,8 +30,8 @@ export function stableIdentity(drop: ExtendedDrop): {
     return { stableKey: key, stableHash: hash };
   } catch {
     return {
-      stableKey: drop.stableKey || drop.id,
-      stableHash: drop.stableHash || drop.id,
+      stableKey: drop.stableKey || drop.id || key,
+      stableHash: drop.stableHash || drop.id || key,
     };
   }
 }

@@ -585,7 +585,7 @@ export class ChatStore {
       this.insertFull(
         wave,
         key,
-        withIdentity(drop, stableIdentity(drop)),
+        withIdentity(drop, stableIdentity(drop, key)),
         true
       );
       context.changed = true;
@@ -601,7 +601,7 @@ export class ChatStore {
       this.insertFull(
         wave,
         key,
-        withIdentity(drop, stableIdentity(drop)),
+        withIdentity(drop, stableIdentity(drop, key)),
         false
       );
     } else {
@@ -687,7 +687,7 @@ export class ChatStore {
     // Hash again only when hashed content changed (an edit); otherwise keep
     // the row identity, including one inherited from a pending send.
     const record = stableInputsChanged(existing, drop)
-      ? withIdentity(drop, stableIdentity(drop))
+      ? withIdentity(drop, stableIdentity(drop, key))
       : withIdentity(drop, existing);
     wave.records.set(key, record);
     const entry = wave.entries.get(key);

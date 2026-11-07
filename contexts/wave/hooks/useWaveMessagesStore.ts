@@ -363,9 +363,12 @@ function useWaveMessagesStore() {
       if (update.drops !== undefined) {
         const chatStore = getChatStore();
         chatStore.merge(update.key, update.drops, mergePolicy);
+        // The store holds every drop the wave shows; without a store wave
+        // (nothing merged yet, or every copy tombstoned) the wave keeps
+        // what it has, as the old merge did for an empty batch.
         updatedWaveMessages.drops = chatStore.hasWave(update.key)
           ? chatStore.getDrops(update.key)
-          : [];
+          : updatedWaveMessages.drops;
       }
 
       if (update.historyGaps !== undefined) {
