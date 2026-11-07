@@ -167,12 +167,17 @@ function buildAppKitConfig(
       "--w3m-z-index": 10000,
     },
     enableWalletGuide: false,
+    // On web the Base Account (Coinbase) connector comes from
+    // AppKitAdapterManager with SDK telemetry off; AppKit reuses it.
     enableCoinbase: !isCapacitor,
     ...(isCapacitor ? { excludeWalletIds: [COINBASE_WALLET_ID] } : undefined),
     featuredWalletIds: ["metamask", "walletConnect"],
     allWallets: "SHOW" as const,
     features: {
-      analytics: true,
+      // Optional Reown modal analytics stay off. AppKit 1.8.19 still sends
+      // its mandatory INITIALIZE/CONNECT_SUCCESS events and wallet-list
+      // impressions to pulse.walletconnect.org; no option disables those.
+      analytics: false,
       email: false,
       socials: [],
       onramp: false,

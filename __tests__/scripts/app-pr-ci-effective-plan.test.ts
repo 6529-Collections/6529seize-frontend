@@ -293,6 +293,49 @@ describe("effective App PR CI plan", () => {
     }
   );
 
+  it.each([
+    "contexts/wave/hooks/useNewDropCounter.ts",
+    "contexts/wave/hooks/useEnhancedWavesListCore.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+    "contexts/wave/hooks/useWaveMessagesStore.ts",
+    "contexts/wave/hooks/useWaveDataManager.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "contexts/wave/utils/wave-messages-utils.ts",
+    "lib/chat-store/store.ts",
+    "hooks/useWaveWebSocket.ts",
+    "hooks/useWaveIsTyping.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "helpers/waves/drop.helpers.ts",
+    "components/waves/drops/WaveDrop.tsx",
+    "components/drops/view/DropsList.tsx",
+    "components/drops/view/part/DropPartMarkdown.tsx",
+    "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
+    "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
+    "tests/support/chatPerf.ts",
+    "tests/support/chatPerfFixture.ts",
+    "tests/social/chat-render-budget-sandbox.spec.ts",
+  ])("selects the chat render budget for chat hot path %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
+    "components/waves/drops/WaveDropActions.tsx",
+    "components/drops/view/part/DropPartMarkdownImage.tsx",
+    "contexts/wave/hooks/useActiveWaveManager.ts",
+    // Sibling paths of the hot-path files stay out.
+    "helpers/waves/drop-signature.helpers.ts",
+    "components/waves/drops/WaveDropTime.tsx",
+    "components/drops/view/DropsListItem.tsx",
+    "tests/support/composerSandboxConstants.json",
+  ])("keeps chat-adjacent path %s out of the render budget lane", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(false);
+  });
+
   it("selects the shared surface browser lane in a mixed change set", () => {
     expect(
       executePlan([
@@ -700,7 +743,8 @@ describe("App PR CI merge-tree base", () => {
       "core-playwright-checks",
     ]);
     const gate = aggregate.steps.find(
-      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+      ({ name }: WorkflowStep) =>
+        name === "Require successful parallel app checks"
     );
     expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });

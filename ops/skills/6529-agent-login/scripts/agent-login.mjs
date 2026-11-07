@@ -24,7 +24,8 @@ const STORAGE_KEYS = {
   legacyRefreshToken: "6529-wallet-refresh-token",
   legacyRole: "6529-wallet-role",
   agentLoginActiveAddress: "6529-agent-login-active-address",
-  authCookie: "wallet-auth",
+  // Browsers accept this `__Host-` cookie only with Secure and Path=/.
+  authCookie: "__Host-wallet-auth",
 };
 const FETCH_TIMEOUT_MS = 15_000;
 
@@ -530,7 +531,7 @@ function buildLoginBrowserScript(payload) {
     localStorage.removeItem(${JSON.stringify(STORAGE_KEYS.legacyRole)});
     localStorage.removeItem("auth-role-" + account.address.toLowerCase());
   }
-  document.cookie = ${JSON.stringify(STORAGE_KEYS.authCookie)} + "=" + encodeURIComponent(account.jwt) + "; path=/; SameSite=Strict";
+  document.cookie = ${JSON.stringify(STORAGE_KEYS.authCookie)} + "=" + encodeURIComponent(account.jwt) + "; path=/; SameSite=Strict; Secure";
   window.dispatchEvent(new CustomEvent("6529-wallet-accounts-updated"));
   window.dispatchEvent(new CustomEvent("6529-auth-token-changed"));
   window.dispatchEvent(new CustomEvent("6529-profile-switched"));
@@ -615,7 +616,7 @@ function buildPlaywrightStorageState(payload, baseUrl) {
         path: "/",
         expires: getCookieExpires(payload),
         httpOnly: false,
-        secure: url.protocol === "https:",
+        secure: true,
         sameSite: "Strict",
       },
     ],
@@ -635,7 +636,7 @@ function buildLogoutBrowserScript() {
   for (const key of Object.keys(localStorage)) {
     if (key.startsWith("auth-role-")) localStorage.removeItem(key);
   }
-  document.cookie = ${JSON.stringify(STORAGE_KEYS.authCookie)} + "=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+  document.cookie = ${JSON.stringify(STORAGE_KEYS.authCookie)} + "=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
   window.dispatchEvent(new CustomEvent("6529-wallet-accounts-updated"));
   window.dispatchEvent(new CustomEvent("6529-auth-token-changed"));
   window.dispatchEvent(new CustomEvent("6529-profile-switched"));
