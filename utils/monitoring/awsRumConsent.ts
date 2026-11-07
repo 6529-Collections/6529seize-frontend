@@ -8,14 +8,20 @@ const AWS_RUM_COOKIE_NAMES = ["cwr_u", "cwr_s"] as const;
 
 /**
  * AWS RUM is a performance cookie: it runs only when the performance consent
- * is accepted. The consent provider reads its cookie after mounting, so until
- * it reports a choice the stored cookie decides.
+ * is accepted. Outside a cookie consent provider it never runs (fail closed).
+ * The provider reads its cookie after mounting, so until it reports a choice
+ * the stored cookie decides.
  */
 export function hasAwsRumPerformanceConsent(
-  performanceConsent: boolean | undefined
+  cookieConsent:
+    | { readonly performanceConsent: boolean | undefined }
+    | undefined
 ): boolean {
+  if (cookieConsent === undefined) {
+    return false;
+  }
   return (
-    (performanceConsent ??
+    (cookieConsent.performanceConsent ??
       getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE)) === true
   );
 }

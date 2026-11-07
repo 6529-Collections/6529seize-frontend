@@ -10,14 +10,13 @@ jest.mock('react-toggle', () => (props: any) => (
 
 jest.mock('@/components/cookies/CookieConsentContext', () => ({
   useCookieConsent: jest.fn(),
-  getCookieConsentByName: jest.fn(),
 }));
 
 jest.mock('@/hooks/useBrowserLocale', () => ({
   useBrowserLocale: jest.fn(() => 'en-US'),
 }));
 
-const { useCookieConsent, getCookieConsentByName } = jest.requireMock(
+const { useCookieConsent } = jest.requireMock(
   '../../../components/cookies/CookieConsentContext'
 );
 const { useBrowserLocale } = jest.requireMock('@/hooks/useBrowserLocale');
@@ -26,14 +25,20 @@ describe('AboutCookiePolicy', () => {
   const consent = jest.fn();
   const reject = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  // The consent provider's reported choice: undefined until it has read the
+  // consent cookie after mounting.
+  const setReportedConsent = (performanceConsent: boolean | undefined) => {
     (useCookieConsent as jest.Mock).mockReturnValue({
       showCookieConsent: false,
       consent,
       reject,
+      performanceConsent,
     });
-    (getCookieConsentByName as jest.Mock).mockReturnValue(false);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setReportedConsent(false);
     (useBrowserLocale as jest.Mock).mockReturnValue('en-US');
   });
 
@@ -112,29 +117,53 @@ describe('AboutCookiePolicy', () => {
     expect(screen.getByText(expected)).toBeInTheDocument();
   });
 
-  it('enables performance cookies when toggled on', async () => {
+  it('accepts performance cookies and shows the saved choice', async () => {
     const user = userEvent.setup();
-    render(<AboutCookiePolicy />);
+    const { rerender } = render(<AboutCookiePolicy />);
     const checkbox = screen.getByRole('checkbox');
     expect(checkbox).not.toBeChecked();
+
     await user.click(checkbox);
     expect(consent).toHaveBeenCalled();
+    // The toggle follows the provider, so it changes once the save is reported.
+    expect(checkbox).not.toBeChecked();
+
+    setReportedConsent(true);
+    rerender(<AboutCookiePolicy />);
     expect(checkbox).toBeChecked();
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
   });
 
-  it('disables performance cookies when toggled off', async () => {
+  it('rejects performance cookies and shows the saved choice', async () => {
     const user = userEvent.setup();
-    (getCookieConsentByName as jest.Mock).mockReturnValue(true);
-    render(<AboutCookiePolicy />);
+    setReportedConsent(true);
+    const { rerender } = render(<AboutCookiePolicy />);
     const checkbox = screen.getByRole('checkbox');
     expect(checkbox).toBeChecked();
+
     await user.click(checkbox);
     expect(reject).toHaveBeenCalled();
+
+    setReportedConsent(false);
+    rerender(<AboutCookiePolicy />);
     expect(checkbox).not.toBeChecked();
   });
 
-  it('hydrates server markup without a mismatch when consent is stored', async () => {
-    (getCookieConsentByName as jest.Mock).mockReturnValue(true);
+  it('reflects a choice made elsewhere, such as the cookie banner', () => {
+    const { rerender } = render(<AboutCookiePolicy />);
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+
+    setReportedConsent(true);
+    rerender(<AboutCookiePolicy />);
+    expect(screen.getByRole('checkbox')).toBeChecked();
+
+    setReportedConsent(false);
+    rerender(<AboutCookiePolicy />);
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+  });
+
+  it('hydrates server markup without a mismatch, then shows the stored choice', async () => {
+    setReportedConsent(undefined);
     const recoverableErrors: unknown[] = [];
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -151,10 +180,15 @@ describe('AboutCookiePolicy', () => {
           },
         });
       });
+      expect(recoverableErrors).toEqual([]);
 
+      // The provider then reads the stored acceptance.
+      setReportedConsent(true);
+      await act(async () => {
+        root?.render(<AboutCookiePolicy />);
+      });
       expect(screen.getByRole('checkbox')).toBeChecked();
       expect(screen.getByText('Enabled')).toBeInTheDocument();
-      expect(recoverableErrors).toEqual([]);
     } finally {
       await act(async () => {
         root?.unmount();

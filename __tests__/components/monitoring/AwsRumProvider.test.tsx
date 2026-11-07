@@ -11,6 +11,7 @@ const MEDIA_URL = `https://media.example.cloudfront.net/renditions/drops/author_
 let mockPathname = `/waves/${WAVE_ID}`;
 let mockPerformanceConsent: boolean | undefined = true;
 let mockStoredPerformanceConsent: boolean | undefined = undefined;
+let mockHasConsentProvider = true;
 
 type MockPluginContext = {
   record: (eventType: string, eventData: object) => void;
@@ -22,9 +23,10 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useOptionalCookieConsent: () => ({
-    performanceConsent: mockPerformanceConsent,
-  }),
+  useOptionalCookieConsent: () =>
+    mockHasConsentProvider
+      ? { performanceConsent: mockPerformanceConsent }
+      : undefined,
   getCookieConsentByName: () => mockStoredPerformanceConsent,
 }));
 
@@ -85,10 +87,22 @@ jest.mock("aws-rum-web", () => {
         _region: string,
         config: MockPluginConfig
       ) => {
+        let cookiesAllowed = true;
         const instance = {
+          allowCookies: jest.fn((allow: boolean) => {
+            cookiesAllowed = allow;
+          }),
           disable: jest.fn(),
           recordEvent: jest.fn(),
           recordPageView: jest.fn(),
+          // Models a late SDK callback (for example a web-vitals candidate)
+          // whose session lookup rewrites the RUM cookies when allowed.
+          simulateLateSessionWrite: () => {
+            if (cookiesAllowed) {
+              document.cookie = "cwr_u=late-user; path=/";
+              document.cookie = "cwr_s=late-session; path=/";
+            }
+          },
         };
         const pluginContext: MockPluginContext = {
           record: instance.recordEvent,
@@ -121,6 +135,8 @@ type AwsRumHttpPluginConfig = {
 };
 
 type MockAwsRumInstance = {
+  readonly allowCookies: jest.Mock;
+  readonly simulateLateSessionWrite: () => void;
   readonly disable: jest.Mock;
   readonly recordEvent: jest.Mock;
   readonly recordPageView: jest.Mock;
@@ -160,6 +176,7 @@ describe("AwsRumProvider", () => {
     mockPathname = `/waves/${WAVE_ID}`;
     mockPerformanceConsent = true;
     mockStoredPerformanceConsent = undefined;
+    mockHasConsentProvider = true;
     mockAwsRum.mockClear();
     mockFetchPlugin.mockClear();
     mockXhrPlugin.mockClear();
@@ -634,6 +651,21 @@ describe("AwsRumProvider", () => {
       expect(getMockAwsRumInstance().disable).not.toHaveBeenCalled();
     });
 
+    it("fails closed outside a cookie consent provider, even with a stored acceptance", async () => {
+      mockHasConsentProvider = false;
+      mockStoredPerformanceConsent = true;
+      setRumCookies();
+
+      render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+    });
+
     it("stops AWS RUM and deletes its cookies after a later rejection", async () => {
       mockPerformanceConsent = true;
       const { rerender } = render(<AwsRumProvider />);
@@ -644,8 +676,18 @@ describe("AwsRumProvider", () => {
       mockPerformanceConsent = false;
       rerender(<AwsRumProvider />);
 
+      expect(awsRumInstance.allowCookies).toHaveBeenCalledWith(false);
       expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
+      expect(
+        awsRumInstance.allowCookies.mock.invocationCallOrder[0]
+      ).toBeLessThan(awsRumInstance.disable.mock.invocationCallOrder[0] ?? 0);
       expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+
+      // A callback the SDK still runs after the rejection cannot bring the
+      // cookies back.
+      awsRumInstance.simulateLateSessionWrite();
       expect(hasCookie("cwr_u")).toBe(false);
       expect(hasCookie("cwr_s")).toBe(false);
 
