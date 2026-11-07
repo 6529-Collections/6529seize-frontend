@@ -189,6 +189,13 @@ export function sharedConfig(
           destination: "/network/tdh/historic-boosts",
           permanent: true,
         },
+        // Competitions are now called decisions. `:path*` also matches the
+        // bare collection route, and query strings carry over.
+        {
+          source: "/waves/:wave/competitions/:path*",
+          destination: "/waves/:wave/decisions/:path*",
+          permanent: true,
+        },
         // The 6529 Stream public contract review was removed; its section is
         // being rebuilt at /stream.
         {

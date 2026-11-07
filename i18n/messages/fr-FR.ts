@@ -1183,13 +1183,13 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.grid.voteSummary.standard":
     "Vote actuel : {current} {unit}. Projection : {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
-    "Afficher ou masquer la chronologie des décisions",
-  "waves.leaderboard.timeline.decisionTimeline": "Chronologie des décisions",
+    "Afficher ou masquer la chronologie des résultats",
+  "waves.leaderboard.timeline.decisionTimeline": "Chronologie des résultats",
   "waves.leaderboard.timeline.announcementHistory": "Historique des annonces",
   "waves.leaderboard.timeline.paused": "En pause",
   "waves.leaderboard.timeline.nextDecisionAfter":
-    "Prochaine décision après le {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled": "Aucune décision planifiée",
+    "Prochain résultat après le {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled": "Aucun résultat planifié",
   "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
   "waves.leaderboard.phase.nextWinnersIn": "Prochains gagnants annoncés dans",
   "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",

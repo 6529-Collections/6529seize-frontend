@@ -106,7 +106,7 @@ describe("useWaveContentTabRegistration", () => {
     "registers Configuration for a flat legacy app rules route (%s)",
     (waveType) => {
       mockFlat = true;
-      mockPathname = "/waves/wave-1/competitions/legacy";
+      mockPathname = "/waves/wave-1/decisions/legacy";
       mockSearch.set("tab", "rules");
       mockWaveInfo[waveType] = true;
 
@@ -123,7 +123,7 @@ describe("useWaveContentTabRegistration", () => {
   );
 
   it("retains a directly selected competition while default data is unavailable", () => {
-    mockPathname = "/waves/wave-1/competitions/older";
+    mockPathname = "/waves/wave-1/decisions/older";
     mockWaveInfo.isChatWave = true;
     mockSearch.set("competition", "stale");
 

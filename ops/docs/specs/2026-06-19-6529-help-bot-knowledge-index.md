@@ -92,8 +92,8 @@ browsing/community description without those links. The record includes the
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations. It also explains the optional next
-voting-decision time in the visitor's local time zone, including daylight-saving
-adjustments, and omission when no future scheduled decision is available. The
+voting-result time in the visitor's local time zone, including daylight-saving
+adjustments, and omission when no future scheduled result is available. The
 label uses today, tomorrow, a weekday for two to six days ahead, or a short
 month/day for later dates. Its hover title retains the full local timestamp.
 
@@ -124,20 +124,27 @@ The `about.6529-apps` record includes a concise `brief_answer` naming both
 page. The companion backend uses it for short availability/download requests
 such as "is there an app", "6529 app", and contextual "link?" replies.
 
-The `waves.native-competitions` record covers competition collections and links,
+The `waves.native-competitions` record covers decision collections and links,
 shared chat, independent credits, native entry content, draft/publication and
 terminal lifecycle rules. It qualifies availability rather than promising
 controls in every deployment, and retains the original-wave experience in its
 navigation guidance. Backend runtime continues consuming the published corpus.
-Its setup guidance identifies the Competition type desktop dropdown and
+Its setup guidance identifies the Decision type desktop dropdown and
 small-screen bottom sheet, including selection and dismissal behavior, and
 keyboard-aware name and description fields in the app's setup editor.
 Its navigation guidance distinguishes the app's compact collection and Votes
-pills from web tabs and the shared published-competition wave row. The collection
+pills from web tabs and the shared published-decision wave row. The collection
 uses More for its remaining choices.
 
+Competitions are now called decisions, and the scheduled winner-selection
+moments formerly called decisions are now called results. Help records use
+the new terms in titles and facts, keep `competition` and `competitions` as
+aliases and keywords so questions using the former name still match, and keep
+their existing record ids. Decision links use `/waves/{waveId}/decisions`;
+former `/competitions` links redirect permanently.
+
 The `waves.content-tabs` record describes steady tab rows with screen-reader
-loading announcements, section-specific loading, and destination-bound competition
+loading announcements, section-specific loading, and destination-bound decision
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 

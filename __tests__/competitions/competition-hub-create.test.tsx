@@ -36,10 +36,10 @@ it.each([
     mockCanCreate = canCreate;
     render(<CompetitionHub waveId="wave" embedded />);
     const action = screen.queryByRole("link", {
-      name: "Competition",
+      name: "Decision",
     });
     if (visible) {
-      expect(action).toHaveAttribute("href", "/waves/wave/competitions/new");
+      expect(action).toHaveAttribute("href", "/waves/wave/decisions/new");
       expect(screen.queryByRole("tab", { name: "Drafts" })).toBeNull();
     } else {
       expect(action).toBeNull();

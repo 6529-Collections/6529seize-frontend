@@ -1172,14 +1172,14 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.grid.voteSummary.standard":
     "Aktueller Stand: {current} {unit}. Prognose: {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
-    "Entscheidungszeitplan ein- oder ausblenden",
-  "waves.leaderboard.timeline.decisionTimeline": "Entscheidungszeitplan",
+    "Ergebniszeitplan ein- oder ausblenden",
+  "waves.leaderboard.timeline.decisionTimeline": "Ergebniszeitplan",
   "waves.leaderboard.timeline.announcementHistory": "Ankündigungsverlauf",
   "waves.leaderboard.timeline.paused": "Pausiert",
   "waves.leaderboard.timeline.nextDecisionAfter":
-    "Nächste Entscheidung nach dem {date}",
+    "Nächstes Ergebnis nach dem {date}",
   "waves.leaderboard.timeline.noDecisionScheduled":
-    "Keine Entscheidung geplant",
+    "Kein Ergebnis geplant",
   "waves.leaderboard.timeline.noUpcomingEvents":
     "Keine bevorstehenden Ereignisse",
   "waves.leaderboard.phase.nextWinnersIn":

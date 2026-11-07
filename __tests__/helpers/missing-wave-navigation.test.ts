@@ -17,9 +17,9 @@ it.each([
 });
 
 it.each([
-  "/waves/wave-1/competitions",
-  "/waves/wave-1/competitions/alpha?tab=leaderboard",
-  "/waves/wave-1/competitions/new",
+  "/waves/wave-1/decisions",
+  "/waves/wave-1/decisions/alpha?tab=leaderboard",
+  "/waves/wave-1/decisions/new",
   "/waves/wave-2?wave=wave-1",
   "/messages/wave-2?wave=wave-1",
   "/waves/create?wave=wave-1",
