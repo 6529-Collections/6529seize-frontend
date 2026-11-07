@@ -170,7 +170,11 @@ const makeProps = (store: Store) => ({
   isWaveInUse: jest.fn((waveId: string) => waveId === WAVE),
   registerWave: jest.fn(),
   syncNewestMessages: jest.fn(
-    async (): Promise<{
+    async (
+      _waveId: string,
+      _sinceSerialNo: number,
+      _signal: AbortSignal
+    ): Promise<{
       drops: ApiDrop[] | null;
       highestSerialNo: number | null;
     }> => ({ drops: [], highestSerialNo: null })
@@ -570,15 +574,20 @@ describe("useWaveRealtimeUpdater with gap-only sync", () => {
           frameDrop(11 + index)
         );
         const { props, store } = setup();
-        props.syncNewestMessages.mockImplementation(async (_waveId, since) => {
-          const drops = serverDrops
-            .filter((drop) => drop.serial_no > since)
-            .map((drop) => ({ ...drop, wave: viewerWave }) as ApiDrop);
-          return {
-            drops,
-            highestSerialNo: Math.max(since, ...drops.map((d) => d.serial_no)),
-          };
-        });
+        props.syncNewestMessages.mockImplementation(
+          async (_waveId: string, since: number) => {
+            const drops = serverDrops
+              .filter((drop) => drop.serial_no > since)
+              .map((drop) => ({ ...drop, wave: viewerWave }) as ApiDrop);
+            return {
+              drops,
+              highestSerialNo: Math.max(
+                since,
+                ...drops.map((d) => d.serial_no)
+              ),
+            };
+          }
+        );
 
         // Lose about 20%, duplicate about 15%, then swap neighbours.
         const deliveries: ApiDrop[] = [];
