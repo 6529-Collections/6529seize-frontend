@@ -12,6 +12,7 @@ generated
 *.generated.*
 native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
+lib/sanctions/snapshot/*.json
 coverage
 content/delegation
 public/delegation-content

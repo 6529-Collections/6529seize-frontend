@@ -40,6 +40,8 @@ March 19, 2026.
   [Notifications](notifications/README.md)
 - Flag, hide, or reveal a post; block a profile; understand posting checks or
   suspension; or review reported content: [Content Moderation](content-moderation.md)
+- Understand where 6529.io is unavailable and which sanctioned wallet
+  addresses are checked: [Sanctions](sanctions.md)
 - Follow live NFT activity and socket behavior: [Realtime](realtime/README.md)
 - Check metrics, scores, and TDH/xTDH behavior: [Network](network/README.md)
 - Create groups inline and manage scoped network views:
