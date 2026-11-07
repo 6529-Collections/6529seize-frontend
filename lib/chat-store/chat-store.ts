@@ -36,6 +36,7 @@ import {
   type PlaceholderEntry,
 } from "./order";
 import { isOlderRevision } from "./revision";
+import { isSameRecord } from "./same-record";
 import { SortedIndex } from "./sorted-index";
 import {
   findPendingMatch,
@@ -563,8 +564,12 @@ export class ChatStore {
         context.stale++;
         return;
       }
-      this.replaceFull(wave, key, existing, drop);
-      context.changed = true;
+      // A copy with nothing new keeps the stored object, so rows showing
+      // it stay memoized.
+      if (!isSameRecord(existing, drop)) {
+        this.replaceFull(wave, key, existing, drop);
+        context.changed = true;
+      }
       // A creation frame can follow a feed copy of the same drop.
       const creator =
         wave.pending.size === 0 ? null : this.pendingSendFor(waveId, drop);

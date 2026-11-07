@@ -74,6 +74,117 @@ const NO_SIGNATURE_GROUPS: ReturnType<typeof getDropSignatureGroups> =
 
 const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
+
+interface DropsListItemData {
+  readonly showWaveInfo: boolean;
+  readonly activeDrop: ActiveDropState | null;
+  readonly handleReply: DropActionHandler;
+  readonly showReplyAndQuote: boolean;
+  readonly serialNo: number | null;
+  readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
+  readonly handleReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly dropViewDropId: string | null;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
+  readonly isVotingClosed: boolean;
+  readonly isVotingControlsLocked: boolean;
+}
+
+interface DropsListRowProps {
+  readonly drop: DropType;
+  readonly previousDrop: DropType | null;
+  readonly nextDrop: DropType | null;
+  readonly itemData: DropsListItemData;
+  readonly location: DropLocation;
+  readonly moderationPresentation: "default" | "profile-activity";
+  readonly signatureGroup: readonly ExtendedDrop[] | undefined;
+  readonly suspendLightDropHydration: boolean;
+  readonly virtualScrollRootMargin: string | undefined;
+}
+
+/**
+ * One chat row. Memoized as a whole: a new message re-renders only the rows
+ * whose drop, neighbours or group changed, not every row in the list.
+ */
+const DropsListRow = memo(
+  ({
+    drop,
+    previousDrop,
+    nextDrop,
+    itemData,
+    location,
+    moderationPresentation,
+    signatureGroup,
+    suspendLightDropHydration,
+    virtualScrollRootMargin,
+  }: DropsListRowProps) => {
+    const isTarget = itemData.serialNo === drop.serial_no;
+    const dropContent =
+      drop.type === DropSize.FULL ? (
+        <MemoizedDrop
+          dropViewDropId={itemData.dropViewDropId}
+          onReplyClick={itemData.handleReplyClick}
+          drop={drop}
+          previousDrop={previousDrop}
+          nextDrop={nextDrop}
+          showWaveInfo={itemData.showWaveInfo}
+          activeDrop={
+            itemData.activeDrop?.drop.id === drop.id
+              ? itemData.activeDrop
+              : null
+          }
+          onReply={itemData.handleReply}
+          location={location}
+          showReplyAndQuote={itemData.showReplyAndQuote}
+          onQuoteClick={itemData.onQuoteClick}
+          parentContainerRef={itemData.parentContainerRef}
+          onDropContentClick={itemData.onDropContentClick}
+          winningThreshold={itemData.winningThreshold}
+          winningThresholdMinDurationMs={itemData.winningThresholdMinDurationMs}
+          isVotingClosed={itemData.isVotingClosed}
+          isVotingControlsLocked={itemData.isVotingControlsLocked}
+          moderationPresentation={moderationPresentation}
+          signatureGroup={signatureGroup}
+        />
+      ) : (
+        <MemoizedLightDrop drop={drop} />
+      );
+
+    return (
+      <HighlightDropWrapper
+        id={`drop-${drop.serial_no}`}
+        serialNo={drop.serial_no}
+        waveDropId={drop.type === DropSize.FULL ? drop.stableHash : undefined}
+        ref={isTarget ? itemData.targetDropRef : null}
+        active={isTarget}
+        // Read when the row renders; the active row re-renders when it becomes
+        // active, which is when the highlight observer uses this root.
+        scrollContainer={itemData.scrollContainerRef.current ?? null}
+        className={isTarget ? "tw-scroll-mt-20" : ""}
+      >
+        <VirtualScrollWrapper
+          scrollContainerRef={itemData.scrollContainerRef}
+          dropId={drop.id}
+          dropSerialNo={drop.serial_no}
+          waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
+          type={drop.type}
+          suspendLightDropHydration={suspendLightDropHydration}
+          rootMargin={virtualScrollRootMargin}
+          enableLongContentCollapse={
+            location === DropLocation.WAVE && itemData.dropViewDropId === null
+          }
+        >
+          {dropContent}
+        </VirtualScrollWrapper>
+      </HighlightDropWrapper>
+    );
+  }
+);
+DropsListRow.displayName = "DropsListRow";
 const DropsList = memo(
   ({
     scrollContainerRef,
@@ -143,7 +254,7 @@ const DropsList = memo(
     );
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
-    const getItemData = useMemo(() => {
+    const getItemData = useMemo((): DropsListItemData => {
       return {
         showWaveInfo,
         activeDrop,
@@ -310,74 +421,19 @@ const DropsList = memo(
         const boostCard = renderBoostCard(i);
         const unreadDivider = renderUnreadDivider(drop.serial_no);
 
-        const dropContent =
-          drop.type === DropSize.FULL ? (
-            <MemoizedDrop
-              dropViewDropId={getItemData.dropViewDropId}
-              onReplyClick={getItemData.handleReplyClick}
-              drop={drop}
-              previousDrop={previousDrop}
-              nextDrop={nextDrop}
-              showWaveInfo={getItemData.showWaveInfo}
-              activeDrop={
-                getItemData.activeDrop?.drop.id === drop.id
-                  ? getItemData.activeDrop
-                  : null
-              }
-              onReply={getItemData.handleReply}
-              location={location}
-              showReplyAndQuote={getItemData.showReplyAndQuote}
-              onQuoteClick={getItemData.onQuoteClick}
-              parentContainerRef={getItemData.parentContainerRef}
-              onDropContentClick={getItemData.onDropContentClick}
-              winningThreshold={getItemData.winningThreshold}
-              winningThresholdMinDurationMs={
-                getItemData.winningThresholdMinDurationMs
-              }
-              isVotingClosed={getItemData.isVotingClosed}
-              isVotingControlsLocked={getItemData.isVotingControlsLocked}
-              moderationPresentation={moderationPresentation}
-              signatureGroup={signatureGroups.get(drop.id)}
-            />
-          ) : (
-            <MemoizedLightDrop drop={drop} />
-          );
-
         const dropElement = (
-          <HighlightDropWrapper
+          <DropsListRow
             key={drop.stableKey}
-            id={`drop-${drop.serial_no}`}
-            serialNo={drop.serial_no}
-            waveDropId={
-              drop.type === DropSize.FULL ? drop.stableHash : undefined
-            }
-            ref={
-              getItemData.serialNo === drop.serial_no
-                ? getItemData.targetDropRef
-                : null
-            }
-            active={getItemData.serialNo === drop.serial_no}
-            scrollContainer={getItemData.scrollContainerRef.current ?? null}
-            className={
-              getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
-            }
-          >
-            <VirtualScrollWrapper
-              scrollContainerRef={getItemData.scrollContainerRef}
-              dropId={drop.id}
-              dropSerialNo={drop.serial_no}
-              waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
-              type={drop.type}
-              suspendLightDropHydration={suspendLightDropHydration}
-              rootMargin={virtualScrollRootMargin}
-              enableLongContentCollapse={
-                location === DropLocation.WAVE &&
-                getItemData.dropViewDropId === null
-              }
-            >
-              {dropContent}
-            </VirtualScrollWrapper>
-          </HighlightDropWrapper>
+            drop={drop}
+            previousDrop={previousDrop}
+            nextDrop={nextDrop}
+            itemData={getItemData}
+            location={location}
+            moderationPresentation={moderationPresentation}
+            signatureGroup={signatureGroups.get(drop.id)}
+            suspendLightDropHydration={suspendLightDropHydration}
+            virtualScrollRootMargin={virtualScrollRootMargin}
+          />
         );
 
         const gap = historyGaps?.find(
