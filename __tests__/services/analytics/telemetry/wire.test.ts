@@ -22,6 +22,15 @@ describe("guardRoute", () => {
     ["/Punk6529", "/[x]"],
     ["/a/b/c/d/e/f/g/h/i/j", "/a/b/c/d/e/f/g/h"],
     ["/eyJhbGciOiJIUzI1NiJ9abcdefghij", "/[x]"],
+    [
+      "/tools/app-wallets/[app-wallet-address]",
+      "/tools/app-wallets/[app_wallet_address]",
+    ],
+    ["/about/mission.md", "/about/[x]"],
+    ["/[user]/[...cmsPath", "/[user]/[x]"],
+    ["/[[...view]", "/[x]"],
+    [":handle/collected", "/:handle/collected"],
+    ["/" + "a".repeat(41) + "/b/c/d", "/[x]/b/c/d"],
   ])("guards %p", (route, expected) => {
     expect(guardRoute(route)).toBe(expected);
   });
@@ -118,6 +127,9 @@ describe("toReferrerDomain", () => {
     ["android-app://com.google/", undefined],
     ["", undefined],
     ["not a url", undefined],
+    ["http://192.168.0.1/x", undefined],
+    ["https://[::1]/", undefined],
+    ["https://localhost/", undefined],
   ])("%p -> %p", (referrer, expected) => {
     expect(toReferrerDomain(referrer, "6529.io")).toBe(expected);
   });

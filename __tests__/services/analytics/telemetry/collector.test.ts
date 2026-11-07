@@ -13,7 +13,7 @@ const MESSAGE = "gm frens this is my private message";
 const TITLE = "The Memes - Main Stage | punk6529";
 
 const sendBeacon = jest.fn<boolean, [string, string]>(() => true);
-const fetchMock = jest.fn(() => Promise.resolve(new Response(null)));
+const fetchMock = jest.fn(() => Promise.resolve({ ok: true }));
 
 const sentBodies = (): string[] => [
   ...sendBeacon.mock.calls.map(([, body]) => body),

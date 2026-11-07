@@ -47,6 +47,7 @@
         "route": {
           "type": "string",
           "maxLength": 96,
+          "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
           "description": "Route template such as `/waves/[wave]` or `/[user]/collected`. Static segments are lowercase; ids and names must be placeholders (`[name]`, `[...name]`, `[[...name]]` or `:name`). Unknown first segments and id-looking segments are recorded as `/[other]`."
         },
         "device": {
@@ -76,6 +77,7 @@
             {
               "type": "string",
               "maxLength": 96,
+              "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
               "description": "Route template such as `/waves/[wave]` or `/[user]/collected`. Static segments are lowercase; ids and names must be placeholders (`[name]`, `[...name]`, `[[...name]]` or `:name`). Unknown first segments and id-looking segments are recorded as `/[other]`."
             }
           ]
@@ -83,6 +85,7 @@
         "referrer_domain": {
           "type": "string",
           "maxLength": 100,
+          "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
           "description": "External hostname only, sent only when prev_route is `entry`."
         },
         "browser": {
@@ -215,6 +218,7 @@
               "propertyNames": {
                 "type": "string",
                 "maxLength": 96,
+                "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
                 "description": "API endpoint template without `/api`, e.g. `/drops/[id]`."
               },
               "additionalProperties": {
@@ -229,6 +233,7 @@
               "propertyNames": {
                 "type": "string",
                 "maxLength": 96,
+                "pattern": "^/(?:(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})(?:/(?:[a-z0-9][a-z0-9_-]{0,39}|\\[(?:\\.\\.\\.)?[A-Za-z]\\w{0,23}\\]|\\[\\[\\.\\.\\.[A-Za-z]\\w{0,23}\\]\\]|:[A-Za-z]\\w{0,23})){0,7})?$",
                 "description": "API endpoint template without `/api`, e.g. `/drops/[id]`."
               },
               "additionalProperties": {

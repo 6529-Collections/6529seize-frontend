@@ -91,17 +91,14 @@ function send(body: string): void {
   } catch {
     /* Fall back to fetch. */
   }
-  try {
-    void fetch(COLLECTOR_ENDPOINT, {
-      method: "POST",
-      body,
-      keepalive: true,
-      credentials: "omit",
-      headers: { "content-type": "text/plain;charset=UTF-8" },
-    }).catch(() => undefined);
-  } catch {
-    /* Telemetry never interrupts the page. */
-  }
+  // fetch reports failures as a rejected promise; telemetry never interrupts the page.
+  void fetch(COLLECTOR_ENDPOINT, {
+    method: "POST",
+    body,
+    keepalive: true,
+    credentials: "omit",
+    headers: { "content-type": "text/plain;charset=UTF-8" },
+  }).catch(() => undefined);
 }
 
 function enqueue(event: WireEvent): void {
@@ -171,7 +168,8 @@ function bump(key: DimensionKey | ScalarKey, dimension?: string): void {
     health[key] = ((health[key] as number | undefined) ?? 0) + 1;
     return;
   }
-  const map = (health[key] ??= {}) as Record<string, number>;
+  health[key] ??= {};
+  const map = health[key] as Record<string, number>;
   if (map[dimension] === undefined && Object.keys(map).length >= 16) return;
   map[dimension] = (map[dimension] ?? 0) + 1;
 }

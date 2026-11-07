@@ -1,6 +1,10 @@
 import schema from "@/ops/telemetry/telemetry-collector.v1.schema.json";
 import * as collector from "@/services/analytics/telemetry/collector";
-import { PRODUCT_EVENT_PROPS } from "@/services/analytics/telemetry/wire";
+import {
+  guardRoute,
+  PRODUCT_EVENT_PROPS,
+} from "@/services/analytics/telemetry/wire";
+import routesManifest from "@/tests/routes.manifest.json";
 
 jest.mock("@/config/env", () => ({
   publicEnv: { NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: "true" },
@@ -241,6 +245,29 @@ describe("wire format v1 matches the vendored backend schema", () => {
         expect(validate(schema as Schema, body)).toEqual([]);
     } finally {
       collector.resetTelemetryForTests();
+    }
+  });
+
+  it("keeps every App Router page template intact and valid for the schema", () => {
+    const routePattern = new RegExp(
+      ((eventSchema["properties"] as Record<string, Schema>)["route"]![
+        "pattern"
+      ] as string) ?? ""
+    );
+    for (const template of Object.keys(routesManifest.routes)) {
+      const guarded = guardRoute(template);
+      expect([template, routePattern.test(guarded)]).toEqual([template, true]);
+      // Only hyphens in param names change (app-wallet-address ->
+      // app_wallet_address); a static segment with capitals (/om/OM) has no
+      // schema form and becomes [x].
+      const expected = template
+        .split("/")
+        .map((segment) => {
+          if (segment.startsWith("[")) return segment.replaceAll("-", "_");
+          return /[A-Z]/.test(segment) ? "[x]" : segment;
+        })
+        .join("/");
+      expect(guarded).toBe(expected);
     }
   });
 
