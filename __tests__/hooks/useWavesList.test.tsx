@@ -1906,6 +1906,46 @@ test("forces the lists but refreshes the announcement wave only once stale", () 
   );
 });
 
+test("refreshes only the activity list for drops in unknown waves", () => {
+  const sources = mockStaleRefreshSources();
+  const subwaveRefetch = jest.fn();
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: subwaveRefetch,
+  });
+  const allActivityRefetch = jest.fn();
+  const otherRefetch = jest.fn();
+  useWavesV2Mock.mockImplementation(({ following, overviewType }) => ({
+    waves: [mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo && !following
+        ? allActivityRefetch
+        : otherRefetch,
+    refetchIfStale: jest.fn(),
+  }));
+  const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+  act(() => {
+    result.current.refreshActivityList();
+  });
+
+  expect(allActivityRefetch).toHaveBeenCalledTimes(1);
+  // Not highly rated, pinned, subwaves or the announcement wave.
+  expect(otherRefetch).not.toHaveBeenCalled();
+  expect(sources.forcedRefetch).not.toHaveBeenCalled();
+  expect(subwaveRefetch).not.toHaveBeenCalled();
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).not.toHaveBeenCalled();
+});
+
 test("does not refresh any sidebar source while the list is disabled", () => {
   const sources = mockStaleRefreshSources();
   const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
