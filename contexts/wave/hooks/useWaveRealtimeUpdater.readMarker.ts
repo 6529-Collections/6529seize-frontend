@@ -35,6 +35,10 @@ export type MarkActiveWaveAsRead = (
  * Marks the open wave read for drops that arrive while it is visible. With
  * `batchReads`, the reads join a short window (see useDebouncedWaveReads);
  * otherwise, and for legacy direct messages, each one is sent at once.
+ *
+ * None of these reads refetch the wave lists: the open wave already shows its
+ * drops as read, and other waves' unread state does not depend on it. A
+ * refetch here ran every list query for every reader on every drop.
  */
 export const useActiveWaveReadMarker = ({
   activeWaveId,
@@ -150,7 +154,8 @@ export const useActiveWaveReadMarker = ({
 
       pendingReadNotificationsRef.current = markNotificationsRead(
         waveId,
-        readThroughSerialNo
+        readThroughSerialNo,
+        { refreshWaveLists: false }
       );
     },
     [activeWaveIdRef, batchReads, enqueueBatchedRead, markNotificationsRead]
