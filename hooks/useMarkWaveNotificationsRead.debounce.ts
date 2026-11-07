@@ -96,7 +96,7 @@ export function useDebouncedWaveReads({
 
   const flushAll = useCallback(
     (reason: WaveReadFlushReason) => {
-      for (const waveId of [...pendingRef.current.keys()]) {
+      for (const waveId of pendingRef.current.keys()) {
         flushOne(waveId, reason);
       }
     },
@@ -105,7 +105,7 @@ export function useDebouncedWaveReads({
 
   // Leaving a wave sends its pending read.
   useEffect(() => {
-    for (const waveId of [...pendingRef.current.keys()]) {
+    for (const waveId of pendingRef.current.keys()) {
       // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-ref-to-parent -- The pending reads are this hook's own state; nothing is passed to or from a parent.
       if (waveId !== activeWaveId) flushOne(waveId, "leave");
     }

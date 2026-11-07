@@ -3,7 +3,13 @@
 import { scheduleStaggered } from "@/helpers/jitter.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS } from "@/services/websocket/WebSocketTypes";
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from "react";
 import type { WaveMessages } from "./types";
 import { reportBackgroundTaskError } from "./useWaveRealtimeUpdater.helpers";
 
@@ -25,31 +31,14 @@ interface TrailingCheck {
 export interface WaveGapSync {
   /** Fetches every drop newer than the wave's verified watermark now. */
   readonly requestGapSync: (waveId: string) => void;
-  /** Records a new drop that arrived by socket, for the trailing check. */
-  readonly noteRealtimeInsert: (waveId: string) => void;
+  /**
+   * Records a socket frame that changed a stored wave, for the trailing
+   * check. Every such frame counts, whatever kind of update it carried.
+   */
+  readonly noteRealtimeFrame: (waveId: string) => void;
   /** The server asked for a resync: every wave with unverified drops checks. */
   readonly requestResync: () => void;
 }
-
-/**
- * The serial number up to which the store is known to match the server: the
- * highest serial an HTTP fetch returned. Drops that arrived by socket after it
- * are unverified until the next newest-drops fetch.
- */
-const getVerifiedSerialNo = (waveMessages: WaveMessages): number | null => {
-  if (waveMessages.latestFetchedSerialNo !== null) {
-    return waveMessages.latestFetchedSerialNo;
-  }
-  let highest: number | null = null;
-  for (const drop of waveMessages.drops) {
-    if (drop.id.startsWith("temp-") || !Number.isFinite(drop.serial_no)) {
-      continue;
-    }
-    highest =
-      highest === null ? drop.serial_no : Math.max(highest, drop.serial_no);
-  }
-  return highest;
-};
 
 /**
  * Gap-only newest sync (WAVES-PLAN 0.7). A connected socket is trusted: a
@@ -70,13 +59,23 @@ const getVerifiedSerialNo = (waveMessages: WaveMessages): number | null => {
 export function useWaveGapSync({
   activeWaveId,
   getData,
+  hasServerFeedSeed,
   isWaveInUse,
   fetchNewestSince,
+  syncNewestPage,
 }: {
   readonly activeWaveId: string | null;
   readonly getData: (waveId: string) => WaveMessages | undefined;
+  /** A server-rendered feed is still being applied to the wave. */
+  readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly isWaveInUse: (waveId: string) => boolean;
+  /** Fetches every drop past a verified serial. */
   readonly fetchNewestSince: FetchNewestSince;
+  /**
+   * Fetches the wave's newest page and records any missed history between it
+   * and the stored drops, for a wave that has no verified serial yet.
+   */
+  readonly syncNewestPage: (waveId: string) => void;
 }): WaveGapSync {
   const trailingChecksRef = useRef(new Map<string, TrailingCheck>());
   // Waves with unverified drops whose check waits for visibility or use.
@@ -91,14 +90,26 @@ export function useWaveGapSync({
     trailingChecksRef.current.delete(waveId);
   }, []);
 
+  // Waves whose check found no stored messages while a server feed was being
+  // applied; they check again once it lands.
+  const scheduleCheckRef = useRef<(waveId: string) => void>(() => undefined);
+
   const requestGapSync = useCallback(
     (waveId: string) => {
       cancelTrailingCheck(waveId);
       deferredRef.current.delete(waveId);
       const waveMessages = getData(waveId);
-      if (waveMessages === undefined) return;
-      const sinceSerialNo = getVerifiedSerialNo(waveMessages);
-      if (sinceSerialNo === null) return;
+      if (waveMessages === undefined) {
+        if (hasServerFeedSeed(waveId)) scheduleCheckRef.current(waveId);
+        return;
+      }
+      // Only an HTTP fetch verifies a serial. Socket drops never move this
+      // watermark, so a check past it also covers a frame lost among them.
+      const sinceSerialNo = waveMessages.latestFetchedSerialNo;
+      if (sinceSerialNo === null) {
+        syncNewestPage(waveId);
+        return;
+      }
       void (async () => {
         try {
           await fetchNewestSince(waveId, sinceSerialNo);
@@ -110,7 +121,13 @@ export function useWaveGapSync({
         }
       })();
     },
-    [cancelTrailingCheck, fetchNewestSince, getData]
+    [
+      cancelTrailingCheck,
+      fetchNewestSince,
+      getData,
+      hasServerFeedSeed,
+      syncNewestPage,
+    ]
   );
 
   const isCheckable = useCallback(
@@ -133,7 +150,7 @@ export function useWaveGapSync({
   );
 
   const runDeferredChecks = useCallback(() => {
-    for (const waveId of [...deferredRef.current]) {
+    for (const waveId of deferredRef.current) {
       if (getData(waveId) === undefined) {
         deferredRef.current.delete(waveId);
       } else if (isCheckable(waveId)) {
@@ -143,13 +160,15 @@ export function useWaveGapSync({
   }, [getData, isCheckable, requestGapSync]);
 
   // Timers and listeners outlive a render; they call the latest callbacks.
+  // This layout effect runs after every render, before any passive effect,
+  // timer or listener of that render can read the ref.
   const latestRef = useRef({ runTrailingCheck, runDeferredChecks });
   useLayoutEffect(() => {
     activeWaveIdRef.current = activeWaveId;
     latestRef.current = { runTrailingCheck, runDeferredChecks };
   });
 
-  const noteRealtimeInsert = useCallback(
+  const noteRealtimeFrame = useCallback(
     (waveId: string) => {
       if (!isCheckable(waveId)) {
         cancelTrailingCheck(waveId);
@@ -160,23 +179,19 @@ export function useWaveGapSync({
       const previous = trailingChecksRef.current.get(waveId);
       if (previous !== undefined) clearTimeout(previous.timer);
       const firstFrameAt = previous?.firstFrameAt ?? now;
-      const delay = Math.max(
-        0,
-        Math.min(
-          CHAT_GAP_TRAILING_CHECK_MS,
-          firstFrameAt + CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS - now
-        )
-      );
       trailingChecksRef.current.set(waveId, {
         firstFrameAt,
         timer: setTimeout(
           () => latestRef.current.runTrailingCheck(waveId),
-          delay
+          getTrailingCheckDelay(firstFrameAt, now)
         ),
       });
     },
     [cancelTrailingCheck, isCheckable]
   );
+  useLayoutEffect(() => {
+    scheduleCheckRef.current = noteRealtimeFrame;
+  }, [noteRealtimeFrame]);
 
   const requestResync = useCallback(() => {
     const waveIds = new Set(trailingChecksRef.current.keys());
@@ -203,16 +218,32 @@ export function useWaveGapSync({
     }
   }, [activeWaveId, requestGapSync]);
 
+  const clearAll = useCallback(() => {
+    for (const check of trailingChecksRef.current.values()) {
+      clearTimeout(check.timer);
+    }
+    trailingChecksRef.current.clear();
+    deferredRef.current.clear();
+    cancelResyncRef.current?.();
+    cancelResyncRef.current = null;
+  }, []);
+  useGapSyncLifecycle({ clearAll, latestRef });
+
+  return { requestGapSync, noteRealtimeFrame, requestResync };
+}
+
+/**
+ * Deferred checks run when the window shows again. A profile switch or
+ * unmount drops every scheduled check: the next profile's store syncs itself.
+ */
+function useGapSyncLifecycle({
+  clearAll,
+  latestRef,
+}: {
+  readonly clearAll: () => void;
+  readonly latestRef: RefObject<{ readonly runDeferredChecks: () => void }>;
+}): void {
   useEffect(() => {
-    const trailingChecks = trailingChecksRef.current;
-    const deferred = deferredRef.current;
-    const clearAll = () => {
-      for (const check of trailingChecks.values()) clearTimeout(check.timer);
-      trailingChecks.clear();
-      deferred.clear();
-      cancelResyncRef.current?.();
-      cancelResyncRef.current = null;
-    };
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         latestRef.current.runDeferredChecks();
@@ -225,7 +256,15 @@ export function useWaveGapSync({
       globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, clearAll);
       clearAll();
     };
-  }, []);
-
-  return { requestGapSync, noteRealtimeInsert, requestResync };
+  }, [clearAll, latestRef]);
 }
+
+/** When a wave's trailing check runs, given its burst's first frame. */
+const getTrailingCheckDelay = (firstFrameAt: number, now: number): number =>
+  Math.max(
+    0,
+    Math.min(
+      CHAT_GAP_TRAILING_CHECK_MS,
+      firstFrameAt + CHAT_GAP_TRAILING_CHECK_MAX_WAIT_MS - now
+    )
+  );

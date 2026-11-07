@@ -42,6 +42,10 @@ import {
 } from "./useWaveRealtimeUpdater.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
+import {
+  useNewestMessagesAfterDropUpdate,
+  useNewestMessagesSync,
+} from "./useWaveRealtimeUpdater.newest";
 import type { WaveMessages } from "./types";
 import { isChatGapSyncEnabled } from "./useWaveRealtimeUpdater.flags";
 import {
@@ -54,97 +58,6 @@ import {
 } from "./useWaveRealtimeUpdater.gapSync";
 
 export { ProcessIncomingDropType } from "./useWaveRealtimeUpdater.helpers";
-
-type InitiateFetchNewestCycleFn = (
-  waveId: string,
-  sinceSerialNo: number
-) => Promise<void>;
-
-const useNewestMessagesSync = ({
-  getData,
-  updateData,
-  syncNewestMessages,
-}: Pick<
-  UseWaveRealtimeUpdaterProps,
-  "getData" | "updateData" | "syncNewestMessages"
->): InitiateFetchNewestCycleFn => {
-  const isFetchingNewestRef = useRef<Record<string, boolean>>({});
-  const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
-  const abortControllersRef = useRef<Record<string, AbortController>>({});
-
-  const cleanupController = useCallback((waveId: string) => {
-    if (abortControllersRef.current[waveId]) {
-      delete abortControllersRef.current[waveId];
-    }
-  }, []);
-
-  const initiateFetchNewestCycle = useCallback(
-    async (waveId: string, sinceSerialNo: number) => {
-      if (isFetchingNewestRef.current[waveId]) {
-        needsRefetchAfterCurrentRef.current[waveId] = true;
-        return;
-      }
-
-      isFetchingNewestRef.current[waveId] = true;
-      const controller = new AbortController();
-      abortControllersRef.current[waveId] = controller;
-
-      try {
-        const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
-          await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
-
-        if (fetchedDrops) {
-          const currentData = getData(waveId);
-          if (currentData) {
-            const newDrops: ExtendedDrop[] = fetchedDrops.map((drop) => ({
-              ...drop,
-              type: DropSize.FULL,
-              stableKey: drop.id,
-              stableHash: drop.id,
-            }));
-
-            updateData({
-              key: waveId,
-              drops: newDrops,
-              latestFetchedSerialNo: fetchedHighestSerial ?? null,
-            });
-          }
-        }
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        console.error("Error fetching newest messages:", error);
-      } finally {
-        cleanupController(waveId);
-        delete isFetchingNewestRef.current[waveId];
-
-        if (needsRefetchAfterCurrentRef.current[waveId]) {
-          delete needsRefetchAfterCurrentRef.current[waveId];
-          const latestFetchedSerialNo =
-            getData(waveId)?.latestFetchedSerialNo ?? null;
-          if (latestFetchedSerialNo !== null) {
-            await initiateFetchNewestCycle(waveId, latestFetchedSerialNo);
-          }
-        }
-      }
-    },
-    [getData, updateData, syncNewestMessages, cleanupController]
-  );
-
-  useEffect(() => {
-    return () => {
-      Object.values(abortControllersRef.current).forEach((controller) =>
-        controller.abort()
-      );
-      abortControllersRef.current = {};
-      isFetchingNewestRef.current = {};
-      needsRefetchAfterCurrentRef.current = {};
-    };
-  }, []);
-
-  return initiateFetchNewestCycle;
-};
 
 const useLatestActiveWaveIdRef = (
   activeWaveId: string | null
@@ -235,35 +148,6 @@ const useCanonicalDropUpdateForExistingDrop = ({
     [queryClient, updateData]
   );
 
-const useNewestMessagesAfterDropUpdate = (
-  initiateFetchNewestCycle: InitiateFetchNewestCycleFn
-): ((
-  waveId: string,
-  serialNoForFetch: number | null,
-  optimisticDropId: string
-) => Promise<void>) =>
-  useCallback(
-    async (
-      waveId: string,
-      serialNoForFetch: number | null,
-      optimisticDropId: string
-    ) => {
-      if (serialNoForFetch === null || optimisticDropId.startsWith("temp-")) {
-        return;
-      }
-
-      try {
-        await initiateFetchNewestCycle(waveId, serialNoForFetch);
-      } catch (error) {
-        reportBackgroundTaskError(
-          "Failed to sync newest wave messages:",
-          error
-        );
-      }
-    },
-    [initiateFetchNewestCycle]
-  );
-
 interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
   | "activeWaveId"
@@ -284,6 +168,13 @@ interface UseProcessIncomingDropParams extends Pick<
 const isLegacyDirectMessageDrop = (drop: ApiDrop): boolean =>
   drop.wave.is_direct_message === true;
 
+/**
+ * What a realtime message asks of gap sync: nothing (it changed no stored
+ * wave, or the legacy per-message path handled it), a trailing check, or a
+ * fetch now.
+ */
+type GapSignal = "none" | "frame" | "sync-now";
+
 interface ApplyIncomingInsertParams {
   readonly drop: ApiDrop;
   readonly existingDrop: ExtendedDrop | null;
@@ -294,23 +185,21 @@ interface ApplyIncomingInsertParams {
 
 /**
  * Stores an inserted or updated drop for a wave whose messages are cached,
- * then decides whether the newest drops must be fetched.
+ * then says whether the newest drops must be fetched now.
  */
 const useApplyIncomingInsert = ({
-  gapSync,
   gapSyncEnabled,
   markActiveWaveAsRead,
   syncNewestMessagesAfterDropUpdate,
   updateData,
 }: {
-  readonly gapSync: WaveGapSync;
   readonly gapSyncEnabled: boolean;
   readonly markActiveWaveAsRead: MarkActiveWaveAsRead;
   readonly syncNewestMessagesAfterDropUpdate: ReturnType<
     typeof useNewestMessagesAfterDropUpdate
   >;
   readonly updateData: UseWaveRealtimeUpdaterProps["updateData"];
-}): ((params: ApplyIncomingInsertParams) => Promise<void>) =>
+}): ((params: ApplyIncomingInsertParams) => Promise<GapSignal>) =>
   useCallback(
     async ({
       drop,
@@ -318,7 +207,7 @@ const useApplyIncomingInsert = ({
       waveId,
       currentData,
       options,
-    }: ApplyIncomingInsertParams) => {
+    }: ApplyIncomingInsertParams): Promise<GapSignal> => {
       const optimisticDrop = buildOptimisticDrop({
         drop,
         existingDrop,
@@ -332,7 +221,7 @@ const useApplyIncomingInsert = ({
           optimisticDrop.id
         );
         markActiveWaveAsRead(waveId, drop.serial_no, { immediate: true });
-        return;
+        return "none";
       }
 
       // A new drop from a socket frame lacks the viewer's own context. It is
@@ -343,17 +232,13 @@ const useApplyIncomingInsert = ({
         ? hydrateRealtimeChatDrop(optimisticDrop, currentData.drops)
         : optimisticDrop;
       updateData({ key: waveId, drops: [hydratedDrop ?? optimisticDrop] });
-
-      if (options.realtimeSource === "compact-ref" || hydratedDrop === null) {
-        gapSync.requestGapSync(waveId);
-      } else if (isNewFrameDrop) {
-        gapSync.noteRealtimeInsert(waveId);
-      }
-
       markActiveWaveAsRead(waveId, drop.serial_no);
+
+      return options.realtimeSource === "compact-ref" || hydratedDrop === null
+        ? "sync-now"
+        : "frame";
     },
     [
-      gapSync,
       gapSyncEnabled,
       markActiveWaveAsRead,
       syncNewestMessagesAfterDropUpdate,
@@ -390,11 +275,17 @@ const useProcessIncomingDrop = ({
     batchReads: gapSyncEnabled,
     removeWaveDeliveredNotifications,
   });
+  const syncNewestPage = useCallback(
+    (waveId: string) => registerWave(waveId, true),
+    [registerWave]
+  );
   const gapSync = useWaveGapSync({
     activeWaveId,
     getData,
+    hasServerFeedSeed,
     isWaveInUse,
     fetchNewestSince: initiateFetchNewestCycle,
+    syncNewestPage,
   });
   const refreshEligibilityAfterVisibilityChange =
     useVisibilityEligibilityRefresh();
@@ -404,26 +295,19 @@ const useProcessIncomingDrop = ({
     initiateFetchNewestCycle
   );
   const applyIncomingInsert = useApplyIncomingInsert({
-    gapSync,
     gapSyncEnabled,
     markActiveWaveAsRead,
     syncNewestMessagesAfterDropUpdate,
     updateData,
   });
 
-  const processIncomingDrop = useCallback(
+  const applyIncomingDrop = useCallback(
     async (
-      dropData: ApiDrop,
+      drop: ApiDrop,
+      waveId: string,
       type: ProcessIncomingDropType,
-      options: ProcessIncomingDropOptions = {}
-    ) => {
-      const drop = normalizeRealtimeDrop(dropData);
-      const waveId = getIncomingWaveId(drop);
-
-      if (waveId === null) {
-        return;
-      }
-
+      options: ProcessIncomingDropOptions
+    ): Promise<GapSignal> => {
       updateCachedDrop({ drop, options, queryClient, type });
 
       const shouldSkipMutedWave = () =>
@@ -431,13 +315,13 @@ const useProcessIncomingDrop = ({
 
       // Mute suppresses inactive-Wave processing, not live content in the open Wave.
       if (shouldSkipMutedWave()) {
-        return;
+        return "none";
       }
 
       await refreshEligibilityAfterVisibilityChange(waveId);
 
       if (shouldSkipMutedWave()) {
-        return;
+        return "none";
       }
 
       const currentData = getData(waveId);
@@ -459,7 +343,7 @@ const useProcessIncomingDrop = ({
           markActiveWaveAsRead(waveId, drop.serial_no, {
             immediate: isLegacyDirectMessageDrop(drop),
           });
-          return;
+          return "frame";
         }
         // Waves without cached messages keep only list metadata, such as
         // unread counts, which the wave lists track themselves. They load
@@ -467,56 +351,57 @@ const useProcessIncomingDrop = ({
         if (isWaveInUse(waveId)) {
           registerWave(waveId);
         }
-        return;
+        return "none";
       }
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
       if (existingDrop?.type === DropSize.LIGHT) {
-        return;
+        return "frame";
       }
 
       const existingFullDrop = existingDrop ?? null;
-      if (isCanonicalDropUpdate(type)) {
-        if (existingFullDrop === null) {
-          return;
-        }
-        await applyCanonicalDropUpdateForExistingDrop({
-          dropId: drop.id,
+      if (!isCanonicalDropUpdate(type)) {
+        return applyIncomingInsert({
+          drop,
           existingDrop: existingFullDrop,
           waveId,
-          type,
+          currentData,
           options,
         });
-        if (
-          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
-          isHelpBotFinalReactionUpdate(drop)
-        ) {
-          const newestKnownSerialNo = getNewestKnownSerialNo(currentData);
-          await syncNewestMessagesAfterDropUpdate(
-            waveId,
-            newestKnownSerialNo,
-            drop.id
-          );
-        }
-        if (
-          type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
-          isWaveDropNearViewport(waveId, drop.id)
-        ) {
-          markActiveWaveAsRead(waveId, drop.serial_no, {
-            immediate: isLegacyDirectMessageDrop(drop),
-          });
-        }
-        return;
       }
-
-      await applyIncomingInsert({
-        drop,
+      // An update for a drop the store lacks may follow a lost frame; the
+      // trailing check fetches that drop if it is past the verified serial.
+      if (existingFullDrop === null) {
+        return "frame";
+      }
+      await applyCanonicalDropUpdateForExistingDrop({
+        dropId: drop.id,
         existingDrop: existingFullDrop,
         waveId,
-        currentData,
+        type,
         options,
       });
+      if (
+        type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+        isHelpBotFinalReactionUpdate(drop)
+      ) {
+        const newestKnownSerialNo = getNewestKnownSerialNo(currentData);
+        await syncNewestMessagesAfterDropUpdate(
+          waveId,
+          newestKnownSerialNo,
+          drop.id
+        );
+      }
+      if (
+        type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+        isWaveDropNearViewport(waveId, drop.id)
+      ) {
+        markActiveWaveAsRead(waveId, drop.serial_no, {
+          immediate: isLegacyDirectMessageDrop(drop),
+        });
+      }
+      return "frame";
     },
     [
       activeWaveIdRef,
@@ -533,6 +418,41 @@ const useProcessIncomingDrop = ({
       queryClient,
       syncNewestMessagesAfterDropUpdate,
     ]
+  );
+
+  const processIncomingDrop = useCallback(
+    async (
+      dropData: ApiDrop,
+      type: ProcessIncomingDropType,
+      options: ProcessIncomingDropOptions = {}
+    ) => {
+      const drop = normalizeRealtimeDrop(dropData);
+      const waveId = getIncomingWaveId(drop);
+
+      if (waveId === null) {
+        return;
+      }
+
+      const signal = await applyIncomingDrop(drop, waveId, type, options);
+
+      // One rule for every socket message that changed a stored wave,
+      // whichever branch handled it: a trailing check, or a fetch now. Drops
+      // from the app's own requests come back from the server, so they are
+      // verified already.
+      if (
+        !gapSyncEnabled ||
+        options.realtimeSource === undefined ||
+        isLegacyDirectMessageDrop(drop)
+      ) {
+        return;
+      }
+      if (signal === "sync-now") {
+        gapSync.requestGapSync(waveId);
+      } else if (signal === "frame") {
+        gapSync.noteRealtimeFrame(waveId);
+      }
+    },
+    [applyIncomingDrop, gapSync, gapSyncEnabled]
   );
 
   const processDropUpdateRef = useDropUpdateRefMessages({
@@ -618,7 +538,7 @@ const useDropUpdateMessages = (
       pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_RATING_UPDATE,
-        { preferExistingPollVote: true }
+        { preferExistingPollVote: true, realtimeSource: "frame" }
       );
     }
   );
@@ -629,7 +549,7 @@ const useDropUpdateMessages = (
       pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_REACTION_UPDATE,
-        { preferExistingPollVote: true }
+        { preferExistingPollVote: true, realtimeSource: "frame" }
       );
     }
   );

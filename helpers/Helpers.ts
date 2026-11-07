@@ -236,14 +236,24 @@ export const enterArtFullScreen = async (
     return false;
   }
 
-  const element = globalThis.document.getElementById(
-    elementId
-  ) as FullscreenRequestElement | null;
+  const element = globalThis.document.getElementById(elementId);
 
   if (!element) {
     console.error(`Element with ID '${elementId}' not found.`);
     return false;
   }
+
+  return requestElementFullScreen(element);
+};
+
+/**
+ * Asks the browser to show `target` full screen, using a vendor-prefixed API
+ * when the standard one is missing. Failures are logged and resolve to false.
+ */
+export const requestElementFullScreen = async (
+  target: HTMLElement
+): Promise<boolean> => {
+  const element = target as FullscreenRequestElement;
 
   try {
     if (element.requestFullscreen !== undefined) {

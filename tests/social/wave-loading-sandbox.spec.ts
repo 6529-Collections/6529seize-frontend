@@ -1175,6 +1175,9 @@ test("live posts arrive without a request each and a lost one is repaired after 
   page,
   baseURL,
 }, testInfo) => {
+  // Sandbox packs run the staging configuration, where this flag is on. A
+  // local run of the production configuration sets it to "false", and this
+  // case has nothing to check there.
   test.skip(
     process.env["NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC"] === "false",
     "Gap-only chat sync is off in this run."
@@ -1182,8 +1185,10 @@ test("live posts arrive without a request each and a lost one is repaired after 
   const fixture = await sharedPostFixture(page, baseURL);
   const newestFetches: string[] = [];
   const readMarkers: string[] = [];
+  let counting = false;
   page.on("request", (request) => {
     const url = new URL(request.url());
+    if (!counting) return;
     if (
       url.pathname.endsWith(`/api/v2/waves/${WAVE}/drops`) &&
       url.searchParams.get("search_strategy") === "FIND_NEWER"
@@ -1199,36 +1204,35 @@ test("live posts arrive without a request each and a lost one is repaired after 
   });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
-  const before = { newest: newestFetches.length, reads: readMarkers.length };
+  counting = true;
 
-  // Ten posts arrive 200 ms apart; the frame for post 157 is lost.
+  // Ten posts arrive one after another; the frame for post 157 is lost.
   fixture.missMessages(10);
   for (let serial = 152; serial <= 161; serial++) {
-    if (serial !== 157) await fixture.frame(serial);
-    await page.waitForTimeout(200);
-  }
-  for (const serial of [152, 156, 158, 161]) {
+    if (serial === 157) continue;
+    await fixture.frame(serial);
     await expect(fixture.post(serial)).toBeAttached();
   }
   // The socket is trusted: no post triggered a fetch of the newest posts.
-  expect(newestFetches.length).toBe(before.newest);
+  expect(newestFetches).toHaveLength(0);
   await expect(fixture.post(157)).toHaveCount(0);
 
   // One trailing check after the burst fetches everything since the last
   // verified post and repairs the lost frame.
   await expect(fixture.post(157)).toBeAttached({ timeout: 15000 });
-  expect(newestFetches.length).toBe(before.newest + 1);
-  expect(newestFetches.at(-1)).toContain("serial_no_limit=151");
-  // Nine received posts are marked read in batches, not one by one.
+  expect(newestFetches).toHaveLength(1);
+  expect(newestFetches[0]).toContain("serial_no_limit=151");
+  // Nine received posts are marked read in batches (one per 3 s window), not
+  // one by one.
   await expect
-    .poll(() => readMarkers.length - before.reads, { timeout: 10000 })
+    .poll(() => readMarkers.length, { timeout: 10000 })
     .toBeGreaterThan(0);
-  expect(readMarkers.length - before.reads).toBeLessThanOrEqual(2);
+  expect(readMarkers.length).toBeLessThanOrEqual(2);
   await testInfo.attach("gap-sync-requests", {
     body: JSON.stringify({
       received: 9,
-      newestFetches: newestFetches.length - before.newest,
-      readMarkers: readMarkers.length - before.reads,
+      newestFetches: newestFetches.length,
+      readMarkers: readMarkers.length,
     }),
     contentType: "application/json",
   });
