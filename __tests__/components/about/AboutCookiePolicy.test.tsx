@@ -87,6 +87,22 @@ describe('AboutCookiePolicy', () => {
     expect(albRow).toHaveTextContent('7 days');
   });
 
+  it('lists the host-only session cookie as strictly necessary', () => {
+    render(<AboutCookiePolicy />);
+    const necessaryTable = screen.getByRole('region', {
+      name: /Strictly Necessary Cookies/i,
+    });
+    const sessionRow = within(necessaryTable)
+      .getByText('__Host-wallet-auth (JWT Authentication)')
+      .closest('tr');
+    expect(sessionRow).toHaveTextContent('6529.io');
+    expect(sessionRow).toHaveTextContent('First Party');
+    expect(sessionRow).toHaveTextContent('7 days');
+    expect(
+      within(necessaryTable).queryByText(/^wallet-auth\b/)
+    ).not.toBeInTheDocument();
+  });
+
   it.each([
     ['en-US', 'Last Updated: November 6, 2026'],
     ['de-DE', 'Last Updated: 6. November 2026'],

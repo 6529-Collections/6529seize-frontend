@@ -28,7 +28,9 @@ it("cancels inactive wave prefetches before auth invalidation", async () => {
 
   expect(wasAborted).toBe(true);
   expect(client.getQueryData(waveKey)).toBeUndefined();
-  expect(client.getQueryData([QueryKey.GLOBAL_TDH_STATS])).toEqual({ total: 1 });
+  expect(client.getQueryData([QueryKey.GLOBAL_TDH_STATS])).toEqual({
+    total: 1,
+  });
 
   await client.prefetchQuery({
     queryKey: waveKey,
@@ -62,5 +64,27 @@ it("refetches active wave queries after cancelling the previous viewer's request
   expect(queryFn).toHaveBeenCalledTimes(2);
   expect(client.getQueryData(waveKey)).toEqual(currentViewer);
   unsubscribe();
+  client.clear();
+});
+
+it("refreshes notifications without the wave lists when asked", () => {
+  const client = new QueryClient();
+  const invalidateQueries = jest
+    .spyOn(client, "invalidateQueries")
+    .mockResolvedValue(undefined);
+  const invalidateWavesV2 = jest.fn();
+  const { invalidateNotifications } = createGeneralQueryHandlers(
+    client,
+    invalidateWavesV2
+  );
+
+  invalidateNotifications({ refreshWaveLists: false });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+  });
+  expect(invalidateWavesV2).not.toHaveBeenCalled();
+
+  invalidateNotifications();
+  expect(invalidateWavesV2).toHaveBeenCalledTimes(1);
   client.clear();
 });

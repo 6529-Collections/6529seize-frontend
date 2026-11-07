@@ -1006,6 +1006,73 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
           name: "Wave chat file upload area",
         })
         .getByText(`Shared link fixture post ${serial}`, { exact: true }),
+    /**
+     * Sends a stored post as a full socket frame. Like the server, the frame
+     * carries none of the viewer's own context.
+     */
+    async frame(serial: number) {
+      const drop = drops.find((candidate) => candidate.serial_no === serial);
+      if (!drop) throw new Error(`Missing fixture post ${serial}`);
+      await expect.poll(() => sockets.length).toBeGreaterThan(0);
+      // Socket frames carry the v1 drop shape.
+      const frame = {
+        id: drop.id,
+        serial_no: drop.serial_no,
+        drop_type: "CHAT",
+        wave: { id: WAVE, name: feed.wave.name, picture: null },
+        author: {
+          id: drop.author.id,
+          handle: drop.author.handle ?? null,
+          pfp: drop.author.pfp ?? null,
+          level: drop.author.level,
+          classification: drop.author.classification,
+          primary_address: drop.author.primary_address,
+          banner1_color: null,
+          banner2_color: null,
+          cic: 0,
+          rep: 0,
+          tdh: 0,
+          archived: false,
+          active_main_stage_submission_ids: [],
+          winner_main_stage_drop_ids: [],
+          artist_of_prevote_cards: [],
+          profile_wave_id: null,
+          is_wave_creator: false,
+        },
+        created_at: drop.created_at,
+        updated_at: null,
+        title: null,
+        parts: [
+          {
+            part_id: 1,
+            content: drop.content,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+          },
+        ],
+        parts_count: 1,
+        referenced_nfts: [],
+        mentioned_users: [],
+        mentioned_groups: [],
+        mentioned_waves: [],
+        metadata: [],
+        rating: 0,
+        realtime_rating: 0,
+        rating_prediction: 0,
+        top_raters: [],
+        raters_count: 0,
+        is_signed: false,
+        reactions: [],
+        boosts: 0,
+        hide_link_preview: false,
+        nft_links: [],
+        viewer_context: { author_blocked: false, drop_hidden: false },
+        ...(drop.moderation ? { moderation: drop.moderation } : {}),
+      };
+      for (const socket of sockets)
+        socket.send(JSON.stringify({ type: "DROP_UPDATE", data: frame }));
+    },
     async incoming() {
       const drop = {
         ...drops[0]!,
@@ -1102,6 +1169,73 @@ test("resume shows the latest page before missed history and preserves the compo
   } finally {
     history.release();
   }
+});
+
+test("live posts arrive without a request each and a lost one is repaired after the burst", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  // Sandbox packs run the staging configuration, where this flag is on. A
+  // local run of the production configuration sets it to "false", and this
+  // case has nothing to check there.
+  test.skip(
+    process.env["NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC"] === "false",
+    "Gap-only chat sync is off in this run."
+  );
+  const fixture = await sharedPostFixture(page, baseURL);
+  const newestFetches: string[] = [];
+  const readMarkers: string[] = [];
+  let counting = false;
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (!counting) return;
+    if (
+      url.pathname.endsWith(`/api/v2/waves/${WAVE}/drops`) &&
+      url.searchParams.get("search_strategy") === "FIND_NEWER"
+    ) {
+      newestFetches.push(url.search);
+    }
+    if (
+      request.method() === "POST" &&
+      url.pathname.endsWith(`/notifications/wave/${WAVE}/read`)
+    ) {
+      readMarkers.push(url.pathname);
+    }
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  counting = true;
+
+  // Ten posts arrive one after another; the frame for post 157 is lost.
+  fixture.missMessages(10);
+  for (let serial = 152; serial <= 161; serial++) {
+    if (serial === 157) continue;
+    await fixture.frame(serial);
+    await expect(fixture.post(serial)).toBeAttached();
+  }
+  // The socket is trusted: no post triggered a fetch of the newest posts.
+  expect(newestFetches).toHaveLength(0);
+  await expect(fixture.post(157)).toHaveCount(0);
+
+  // One trailing check after the burst fetches everything since the last
+  // verified post and repairs the lost frame.
+  await expect(fixture.post(157)).toBeAttached({ timeout: 15000 });
+  expect(newestFetches).toHaveLength(1);
+  expect(newestFetches[0]).toContain("serial_no_limit=151");
+  // Nine received posts are marked read in batches (one per 3 s window), not
+  // one by one.
+  await expect
+    .poll(() => readMarkers.length, { timeout: 10000 })
+    .toBeGreaterThan(0);
+  expect(readMarkers.length).toBeLessThanOrEqual(2);
+  await testInfo.attach("gap-sync-requests", {
+    body: JSON.stringify({
+      received: 9,
+      newestFetches: newestFetches.length,
+      readMarkers: readMarkers.length,
+    }),
+    contentType: "application/json",
+  });
 });
 
 test("resume preserves an older reading position while loading the latest page", async ({

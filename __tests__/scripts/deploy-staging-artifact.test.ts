@@ -1001,6 +1001,8 @@ describe("staging immutable artifact deployment", () => {
     );
     // Encrypted DMs (D109) are a staging-only build flag.
     expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
+    // Gap-only chat sync (WAVES-PLAN 0.7/0.8) is on in staging only.
+    expect(build.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC).toBe("true");
     expect(buildSource).not.toContain("secrets.");
     expect(buildSource).not.toContain("11155111");
     expect(buildStep.run).toContain("./bin/6529 run base-build");

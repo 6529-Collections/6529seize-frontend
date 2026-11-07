@@ -8,6 +8,7 @@ import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 
 import type { WaveDataStoreUpdater, WaveMessages } from "./types";
@@ -36,7 +37,7 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   /** Whether the wave is active or has a mounted message subscriber. */
   readonly isWaveInUse: (waveId: string) => boolean;
-  readonly registerWave: (waveId: string) => void;
+  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
   readonly syncNewestMessages: (
     waveId: string,
     sinceSerialNo: number,
@@ -62,6 +63,11 @@ export interface ProcessIncomingDropOptions {
   readonly preferExistingPollVote?: boolean;
   /** Exact canonical payload already fetched for a compact WebSocket ref. */
   readonly canonicalDrop?: ApiDrop;
+  /**
+   * The socket message that delivered the drop: a full frame, or a compact
+   * ref resolved over HTTP. Unset for drops from the app's own requests.
+   */
+  readonly realtimeSource?: "frame" | "compact-ref";
 }
 
 function replaceAttachmentInPart(
@@ -418,6 +424,83 @@ const buildOptimisticDrop = ({
   };
 };
 
+const VIEWER_WAVE_FLAGS = [
+  "authenticated_user_eligible_to_vote",
+  "authenticated_user_eligible_to_participate",
+  "authenticated_user_eligible_to_chat",
+  "authenticated_user_eligible_to_reply",
+  "authenticated_user_can_delete_replies",
+  "authenticated_user_admin",
+] as const;
+
+type ViewerWaveFlags = Partial<
+  Pick<ApiDrop["wave"], (typeof VIEWER_WAVE_FLAGS)[number]>
+>;
+
+// Drops stored from a socket frame carry no viewer flags at runtime, although
+// the type says they do.
+const hasViewerWaveFlags = (wave: ApiDrop["wave"]): boolean =>
+  (wave as Partial<ApiDrop["wave"]>).authenticated_user_eligible_to_chat !==
+  undefined;
+
+const isViewerContextTemplate = (
+  drop: Drop,
+  dropId: string
+): drop is ExtendedDrop =>
+  drop.type === DropSize.FULL &&
+  drop.id !== dropId &&
+  !drop.id.startsWith("temp-") &&
+  hasViewerWaveFlags(drop.wave);
+
+const pickViewerWaveFlags = (wave: ApiDrop["wave"]): ViewerWaveFlags => {
+  const flags: Record<string, boolean> = {};
+  for (const flag of VIEWER_WAVE_FLAGS) {
+    const value = wave[flag];
+    if (value !== undefined) flags[flag] = value;
+  }
+  return flags as ViewerWaveFlags;
+};
+
+/**
+ * A socket frame carries no viewer context: the server clears the viewer's
+ * wave flags and `context_profile_context` from every frame. The newest-drops
+ * fetch after each frame used to fill them in. With gap-only sync, a new chat
+ * drop takes them from a stored drop of the same wave instead: the flags and
+ * `curatable` are the same for every drop in a wave, and the rest of the
+ * context is fixed for a drop nobody can have rated, reacted to, boosted,
+ * bookmarked or curated yet (chat drops always have a zero rating range).
+ *
+ * Returns null for other drop types, or when no stored drop has the context;
+ * the caller then fetches the newest drops, as before.
+ */
+const hydrateRealtimeChatDrop = (
+  drop: ExtendedDrop,
+  storedDrops: readonly Drop[]
+): ExtendedDrop | null => {
+  if (drop.drop_type !== ApiDropType.Chat) return null;
+  const template = storedDrops.find((stored) =>
+    isViewerContextTemplate(stored, drop.id)
+  );
+  if (template === undefined) return null;
+  const templateContext = template.context_profile_context;
+  return {
+    ...drop,
+    wave: { ...drop.wave, ...pickViewerWaveFlags(template.wave) },
+    context_profile_context: !templateContext
+      ? null
+      : {
+          rating: 0,
+          min_rating: 0,
+          max_rating: 0,
+          reaction: null,
+          boosted: false,
+          bookmarked: false,
+          curatable: templateContext.curatable,
+          curated: false,
+        },
+  };
+};
+
 function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
   if (drop.type !== DropSize.FULL) {
     return drop;
@@ -448,6 +531,7 @@ export {
   buildOptimisticDrop,
   getIncomingWaveId,
   getNewestKnownSerialNo,
+  hydrateRealtimeChatDrop,
   isCanonicalDropUpdate,
   isHelpBotFinalReactionUpdate,
   normalizeRealtimeDrop,
