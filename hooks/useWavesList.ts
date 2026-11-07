@@ -618,8 +618,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   );
 
   // Refresh all sources (main, pinned, announcements, subwaves): forced, or
-  // stale-only for reconnect and tab-resume resyncs.
-  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
+  // stale-only on resync; or just the activity list for unknown-wave drops.
+  const refresh = useWavesListRefetch({
     shouldLoadMainWaves,
     isJoinedMode,
     highlyRated: {
@@ -645,6 +645,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       ? announcementsWaveId
       : null,
   });
+  const { refetchAllWaves, refreshActivityList, refreshStaleWaves } = refresh;
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -749,8 +750,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWaves,
       missingPinnedIds,
       mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
-      // Refetch all waves including main and pinned
+      // Refetch all waves including main and pinned, or just the activity list
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
@@ -786,6 +788,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,

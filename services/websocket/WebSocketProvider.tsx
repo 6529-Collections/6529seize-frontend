@@ -19,7 +19,9 @@ import {
   WebSocketStatus,
   WEBSOCKET_RECOVERY_CAPABILITY,
 } from "./WebSocketTypes";
+import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
+import { getClientBuildId } from "@/lib/version/versionPoll";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { ensureActiveSession } from "../auth/session-readiness";
 import { getAuthJwt, isAuthJwtUsable } from "../auth/auth.utils";
@@ -414,6 +416,11 @@ export function WebSocketProvider({
         );
         if (token && !useMessageAuth) {
           url.searchParams.set("token", token);
+        }
+        // Adoption telemetry: the page's build, as reported to /api/version.
+        const clientVersion = getClientBuildId(publicEnv.VERSION);
+        if (clientVersion) {
+          url.searchParams.set("client_version", clientVersion);
         }
         // Create new WebSocket connection
         const ws = new WebSocket(url.toString());

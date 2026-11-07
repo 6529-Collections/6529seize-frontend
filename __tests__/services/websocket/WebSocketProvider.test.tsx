@@ -178,6 +178,35 @@ describe("WebSocketProvider", () => {
       expect(result.current.config).toEqual({ url: "ws://test" });
     });
 
+    it("reports the page's build as client_version, and nothing that is not one", () => {
+      const { publicEnv } = require("@/config/env");
+      const previousVersion = publicEnv.VERSION;
+      try {
+        publicEnv.VERSION = "0123456789ABCDEF0123456789abcdef01234567";
+        const wrapper = createWrapper({ url: "ws://test" });
+        const { result } = renderHook(
+          () => React.useContext(WebSocketContext)!,
+          { wrapper }
+        );
+        act(() => {
+          result.current.connect("test-token");
+        });
+        expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+          "ws://test/?recovery_capability=resync_v1&client_version=0123456789abcdef0123456789abcdef01234567"
+        );
+
+        publicEnv.VERSION = "local build";
+        act(() => {
+          result.current.connect("test-token");
+        });
+        expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+          "ws://test/?recovery_capability=resync_v1"
+        );
+      } finally {
+        publicEnv.VERSION = previousVersion;
+      }
+    });
+
     it("connects and transitions status correctly", () => {
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {

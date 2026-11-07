@@ -197,6 +197,12 @@ export class DmUnreadStore {
     return this.serverUpdateSequence;
   }
 
+  hasConversation(profileId: string, waveId: string): boolean {
+    return (
+      this.snapshot.profiles[profileId]?.conversations[waveId] !== undefined
+    );
+  }
+
   needsIncomingDropRecovery(
     profileId: string,
     waveId: string,

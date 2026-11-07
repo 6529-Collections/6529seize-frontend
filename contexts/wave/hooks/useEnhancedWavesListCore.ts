@@ -56,6 +56,8 @@ interface WavesDataSource {
   fetchNextPage: () => void;
   mainWavesRefetch: () => void;
   refetchAllWaves: () => void;
+  /** Refreshes only the list a newly active wave can join. */
+  refreshActivityList?: (() => void) | undefined;
   loadSubwavesForParent: (parentWaveId: string) => void;
   prefetchSubwavesForParent: (parentWaveId: string) => void;
   loadingSubwaveParentIds?: readonly string[];
@@ -67,7 +69,6 @@ interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
   enabled?: boolean | undefined;
   otherListWaveIds?: ReadonlySet<string> | undefined;
-  unknownWaveRefetchCooldownMs?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
   sortMutedLast?: boolean | undefined;
   canonicalUnreadByWaveId?:
@@ -97,15 +98,20 @@ function useEnhancedWavesListCore(
     loadingSubwaveParentIds,
     prefetchSubwavesForParent: prefetchSubwavesForParentFromData,
     refetchAllWaves: refetchAllWavesFromData,
+    refreshActivityList,
     removePinnedWave: removePinnedWaveFromData,
     waves,
   } = wavesData;
   const { newDropsCounts, resetAllWavesNewDropsCount, resetWaveNewDropsCount } =
-    useNewDropCounter(activeWaveId, waves, refetchAllWavesFromData, {
-      enabled: isEnabled && !usesCanonicalUnread,
-      otherListWaveIds: options.otherListWaveIds,
-      unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
-    });
+    useNewDropCounter(
+      activeWaveId,
+      waves,
+      refreshActivityList ?? refetchAllWavesFromData,
+      {
+        enabled: isEnabled && !usesCanonicalUnread,
+        otherListWaveIds: options.otherListWaveIds,
+      }
+    );
 
   const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(
     new Set()

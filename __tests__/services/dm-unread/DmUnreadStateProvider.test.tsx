@@ -1,4 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   DmUnreadStateProvider,
   useDmUnreadConversation,
@@ -93,18 +95,21 @@ const snapshot = (
   conversations,
 });
 
+// Full socket frames carry the wave's direct-message flag.
 const dropUpdate = ({
   authorId = "profile-2",
   serialNo = 11,
   waveId = "wave-1",
+  isDirectMessage = true,
 }: {
   authorId?: string;
   serialNo?: number;
   waveId?: string;
+  isDirectMessage?: boolean;
 } = {}) => ({
   author: { id: authorId },
   serial_no: serialNo,
-  wave: { id: waveId },
+  wave: { id: waveId, is_direct_message: isDirectMessage },
 });
 
 const dropUpdateRef = ({
@@ -899,5 +904,134 @@ describe("DmUnreadStateProvider", () => {
     );
 
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  describe("drops in waves that may not be direct messages", () => {
+    const snapshotRequests = () =>
+      commonApiFetchMock.mock.calls.filter(
+        ([request]) => request?.endpoint === "dm-drops/unread/snapshot"
+      ).length;
+
+    const renderProvider = (wrap: (node: ReactNode) => ReactNode = (n) => n) =>
+      render(
+        wrap(
+          <DmUnreadStateProvider>
+            <Capture />
+          </DmUnreadStateProvider>
+        )
+      );
+
+    const advance = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("never requests a snapshot for drops in waves that are not direct messages", async () => {
+      const rendered = renderProvider();
+      await advance(0);
+      expect(snapshotRequests()).toBe(1);
+
+      // Ten drops in ten seconds, in waves the snapshot doesn't know.
+      for (let index = 0; index < 10; index++) {
+        act(() => {
+          websocketHandlers.get("DROP_UPDATE")?.(
+            dropUpdate({
+              waveId: `public-${index}`,
+              serialNo: 100 + index,
+              isDirectMessage: false,
+            })
+          );
+        });
+        await advance(1_000);
+      }
+      await advance(60_000);
+
+      expect(snapshotRequests()).toBe(1);
+      rendered.unmount();
+    });
+
+    it("skips compact references to waves known not to be direct messages", async () => {
+      const queryClient = new QueryClient();
+      queryClient.setQueryData(["WAVES_V2", { list: "all" }], {
+        pages: [{ waves: [{ id: "listed", isDirectMessage: false }] }],
+        pageParams: [1],
+      });
+      const rendered = renderProvider((node) => (
+        <QueryClientProvider client={queryClient}>{node}</QueryClientProvider>
+      ));
+      await advance(0);
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(
+          dropUpdate({ waveId: "seen", isDirectMessage: false })
+        );
+        websocketHandlers.get("DROP_UPDATE_REF")?.(
+          dropUpdateRef({ waveId: "seen", serialNo: 12 })
+        );
+        websocketHandlers.get("DROP_UPDATE_REF")?.(
+          dropUpdateRef({ waveId: "listed", serialNo: 13 })
+        );
+      });
+      await advance(60_000);
+
+      expect(snapshotRequests()).toBe(1);
+      rendered.unmount();
+      queryClient.clear();
+    });
+
+    it("checks compact references to unknown waves once, late and jittered", async () => {
+      const randomUnit = mockRandomUnit(0.5);
+      try {
+        const rendered = renderProvider();
+        await advance(0);
+
+        for (let index = 0; index < 10; index++) {
+          act(() => {
+            websocketHandlers.get("DROP_UPDATE_REF")?.(
+              dropUpdateRef({
+                waveId: `unknown-${index}`,
+                serialNo: 100 + index,
+              })
+            );
+          });
+          await advance(500);
+        }
+        // The earliest possible check is 7.5 s after the first reference.
+        await advance(7_500 - 5_000 - 1);
+        expect(snapshotRequests()).toBe(1);
+        await advance(30_000);
+        expect(snapshotRequests()).toBe(2);
+        rendered.unmount();
+      } finally {
+        randomUnit.mockRestore();
+      }
+    });
+
+    it("lets a direct message pull a pending late check forward", async () => {
+      const rendered = renderProvider();
+      await advance(0);
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE_REF")?.(
+          dropUpdateRef({ waveId: "unknown", serialNo: 20 })
+        );
+        websocketHandlers.get("DROP_UPDATE")?.(
+          dropUpdate({ waveId: "new-dm", serialNo: 21 })
+        );
+      });
+      await advance(1_500);
+
+      expect(snapshotRequests()).toBe(2);
+      rendered.unmount();
+    });
   });
 });
