@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStructuredApiErrorCode } from "@/services/api/common-api";
 import { postDropUpdate } from "@/services/api/signed-drop-writes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -12,6 +12,7 @@ import { useContext } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { getDropCurationsQueryKey } from "./useDropCurations";
 
 interface DropUpdateMutationParams {
   dropId: string;
@@ -24,6 +25,7 @@ export const useDropUpdateMutation = () => {
   const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const myStreamContext = useMyStreamActions();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({
@@ -34,7 +36,7 @@ export const useDropUpdateMutation = () => {
       await postDropUpdate({ dropId, waveId: currentDrop.wave.id }, request, {
         errorMode: "structured",
       }),
-    onSuccess: (updatedDrop) => {
+    onSuccess: (updatedDrop, { dropId }) => {
       setToast({
         message: "Drop updated.",
         type: "success",
@@ -50,6 +52,11 @@ export const useDropUpdateMutation = () => {
 
       // Invalidate drops queries to ensure fresh data
       invalidateDrops();
+      // An edit removes the drop from its curations (backend #2314); the
+      // curation menus must not keep showing it as included.
+      void queryClient.invalidateQueries({
+        queryKey: getDropCurationsQueryKey(dropId),
+      });
     },
     onError: (error) => {
       if (getStructuredApiErrorCode(error) === "MODERATION_PERMIT_CONSUMED") {
