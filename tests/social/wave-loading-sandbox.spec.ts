@@ -19,6 +19,10 @@ import {
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
+  GAP_SYNC_TIMING,
+  simulateGapSyncBurst,
+} from "../support/gapSyncSchedule";
+import {
   installWaveListScrollFixture,
   scrollWaveId,
   sidebarScrollMetrics,
@@ -1183,8 +1187,8 @@ test("live posts arrive without a request each and a lost one is repaired after 
     "Gap-only chat sync is off in this run."
   );
   const fixture = await sharedPostFixture(page, baseURL);
-  const newestFetches: string[] = [];
-  const readMarkers: string[] = [];
+  const newestFetches: { readonly search: string; readonly at: number }[] = [];
+  const readMarkers: number[] = [];
   let counting = false;
   page.on("request", (request) => {
     const url = new URL(request.url());
@@ -1193,45 +1197,65 @@ test("live posts arrive without a request each and a lost one is repaired after 
       url.pathname.endsWith(`/api/v2/waves/${WAVE}/drops`) &&
       url.searchParams.get("search_strategy") === "FIND_NEWER"
     ) {
-      newestFetches.push(url.search);
+      newestFetches.push({ search: url.search, at: Date.now() });
     }
     if (
       request.method() === "POST" &&
       url.pathname.endsWith(`/notifications/wave/${WAVE}/read`)
     ) {
-      readMarkers.push(url.pathname);
+      readMarkers.push(Date.now());
     }
   });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   counting = true;
 
-  // Ten posts arrive one after another; the frame for post 157 is lost.
+  // Ten posts arrive back to back; the frame for post 157 is lost. The
+  // product's timers are replayed over the recorded send times, so a slow
+  // runner changes what the schedule allows, not what the test proves.
   fixture.missMessages(10);
+  const sentAt: number[] = [];
   for (let serial = 152; serial <= 161; serial++) {
     if (serial === 157) continue;
     await fixture.frame(serial);
+    sentAt.push(Date.now());
+  }
+  for (let serial = 152; serial <= 161; serial++) {
+    if (serial === 157) continue;
     await expect(fixture.post(serial)).toBeAttached();
   }
-  // The socket is trusted: no post triggered a fetch of the newest posts.
-  expect(newestFetches).toHaveLength(0);
-  await expect(fixture.post(157)).toHaveCount(0);
+  const schedule = simulateGapSyncBurst(sentAt);
+  const { maxWaitMs, toleranceMs } = GAP_SYNC_TIMING;
 
-  // One trailing check after the burst fetches everything since the last
-  // verified post and repairs the lost frame.
-  await expect(fixture.post(157)).toBeAttached({ timeout: 15000 });
-  expect(newestFetches).toHaveLength(1);
-  expect(newestFetches[0]).toContain("serial_no_limit=151");
-  // Nine received posts are marked read in batches (one per 3 s window), not
-  // one by one.
+  // The socket is trusted: no post fetches the newest posts. Every check is
+  // a timer's, as many as the schedule allows, and the last one runs after
+  // the last frame, no earlier than scheduled (less delivery tolerance). It
+  // fetches everything since the last verified post and repairs the lost
+  // frame. For back-to-back frames that is one check, 5 s after the last.
+  await expect(fixture.post(157)).toBeAttached({ timeout: maxWaitMs });
+  const earliestTrailingAt = schedule.trailingCheckAt.min - toleranceMs;
+  await expect
+    .poll(() => newestFetches.at(-1)?.at ?? 0, { timeout: maxWaitMs })
+    .toBeGreaterThanOrEqual(earliestTrailingAt);
+  expect(newestFetches.length).toBeGreaterThanOrEqual(schedule.checks.min);
+  expect(newestFetches.length).toBeLessThanOrEqual(schedule.checks.max);
+  expect(newestFetches[0]!.search).toContain("serial_no_limit=151");
+
+  // The received posts are marked read once per window, not one by one,
+  // plus at most one for the repaired post.
   await expect
     .poll(() => readMarkers.length, { timeout: 10000 })
-    .toBeGreaterThan(0);
-  expect(readMarkers.length).toBeLessThanOrEqual(2);
+    .toBeGreaterThanOrEqual(schedule.readWindows.min);
+  expect(readMarkers.length).toBeLessThanOrEqual(schedule.readWindows.max + 1);
+  const burstStartedAt = sentAt[0] ?? 0;
   await testInfo.attach("gap-sync-requests", {
     body: JSON.stringify({
       received: 9,
-      newestFetches: newestFetches.length,
+      sentAtMs: sentAt.map((at) => at - burstStartedAt),
+      schedule,
+      newestFetchesAtMs: newestFetches.map(
+        (fetch) => fetch.at - burstStartedAt
+      ),
       readMarkers: readMarkers.length,
     }),
     contentType: "application/json",

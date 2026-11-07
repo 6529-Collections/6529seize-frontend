@@ -80,26 +80,27 @@ describe("hasMalformedWaveId", () => {
     });
   });
 
-  describe("competition routes", () => {
+  // Decision routes, plus the legacy `competitions` segment they replaced.
+  describe.each(["decisions", "competitions"])("%s routes", (segment) => {
     it.each([
-      "/waves/not-a-real-id/competitions",
-      "/waves/not-a-real-id/competitions/new",
-      "/waves/not-a-real-id/competitions/alpha",
+      `/waves/not-a-real-id/${segment}`,
+      `/waves/not-a-real-id/${segment}/new`,
+      `/waves/not-a-real-id/${segment}/alpha`,
       // `create` is only exempt on the thread route itself.
-      "/waves/create/competitions",
-      "/waves/create/competitions/alpha",
-      `/waves/${WAVE_ID}%2F/competitions`,
+      `/waves/create/${segment}`,
+      `/waves/create/${segment}/alpha`,
+      `/waves/${WAVE_ID}%2F/${segment}`,
     ])("answers %s", (pathname) => {
       expect(malformed(pathname)).toBe(true);
     });
 
     it.each([
-      `/waves/${WAVE_ID}/competitions`,
-      `/waves/${WAVE_ID}/competitions/new`,
-      `/waves/${WAVE_ID}/competitions/${WAVE_ID}`,
-      // Competition ids are resolved client-side and opaque to proxy: the
+      `/waves/${WAVE_ID}/${segment}`,
+      `/waves/${WAVE_ID}/${segment}/new`,
+      `/waves/${WAVE_ID}/${segment}/${WAVE_ID}`,
+      // Decision ids are resolved client-side and opaque to proxy: the
       // E2E sandbox serves ids such as `alpha`.
-      `/waves/${WAVE_ID}/competitions/alpha`,
+      `/waves/${WAVE_ID}/${segment}/alpha`,
     ])("leaves %s to the app", (pathname) => {
       expect(malformed(pathname)).toBe(false);
     });
@@ -146,6 +147,7 @@ describe("hasMalformedWaveId", () => {
       ["/api/og-metadata/waves/not-a-real-id", ""],
       ["/waves/not-a-real-id/members", ""],
       ["/messages/not-a-real-id/extra", ""],
+      ["/waves//decisions", ""],
       ["/waves//competitions", ""],
       ["/waves//not-a-real-id", ""],
       ["/wavesx/not-a-real-id", ""],
@@ -172,12 +174,12 @@ describe("wave route tree", () => {
   });
 
   it("has only the routes the wave-id policy knows below [wave]", () => {
-    expect(childDirectories("waves", "[wave]")).toEqual(["competitions"]);
-    expect(childDirectories("waves", "[wave]", "competitions")).toEqual([
-      "[competition]",
+    expect(childDirectories("waves", "[wave]")).toEqual(["decisions"]);
+    expect(childDirectories("waves", "[wave]", "decisions")).toEqual([
+      "[decision]",
     ]);
     expect(
-      childDirectories("waves", "[wave]", "competitions", "[competition]")
+      childDirectories("waves", "[wave]", "decisions", "[decision]")
     ).toEqual([]);
     expect(childDirectories("messages", "[wave]")).toEqual([]);
   });

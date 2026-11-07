@@ -4,13 +4,20 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { getWaveQueryKey } from "@/services/api/wave-query";
 import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 
+const DEFAULT_WAVE_STALE_TIME_MS = 60_000;
+
 interface UseWaveByIdOptions {
   readonly enabled?: boolean | undefined;
+  /** How long a mount or an enable can reuse the cached wave. */
+  readonly staleTime?: number | undefined;
 }
 
 export function useWaveById(
   waveId: string | null,
-  { enabled = true }: UseWaveByIdOptions = {}
+  {
+    enabled = true,
+    staleTime = DEFAULT_WAVE_STALE_TIME_MS,
+  }: UseWaveByIdOptions = {}
 ) {
   const {
     data: wave,
@@ -32,7 +39,7 @@ export function useWaveById(
       });
     },
     enabled: Boolean(enabled && waveId),
-    staleTime: 60000,
+    staleTime,
     placeholderData: (prev) => prev,
     retry: (failureCount, queryError) =>
       !isCompetitionAccessError(queryError) && failureCount < 3,

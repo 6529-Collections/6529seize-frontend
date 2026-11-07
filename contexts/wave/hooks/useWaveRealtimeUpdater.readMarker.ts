@@ -11,6 +11,10 @@ import {
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
 
+// How long a leaving read may wait for an earlier read of the same wave (or
+// for auth) before it is dropped.
+const LEAVING_READ_GRACE_MS = 2_000;
+
 interface ActiveWaveReadOptions {
   /** Sends at once instead of joining the batched read (legacy DMs). */
   readonly immediate?: boolean;
@@ -109,17 +113,17 @@ export const useActiveWaveReadMarker = ({
         return;
       }
       // The reader saw this batch, but is leaving, hiding the window or
-      // unmounting. The read goes now or not at all: a read for an ordinary
-      // wave marks the whole wave read when the server gets it, so it must not
-      // wait for auth or an earlier read and then cover messages that arrived
-      // after the reader left.
-      let isFlushing = true;
+      // unmounting. A read for an ordinary wave marks the whole wave read when
+      // the server gets it, so a late read would also cover messages that
+      // arrived after the reader left. It goes now, or within a short grace
+      // when it has to wait for an earlier read of this wave or for auth (it
+      // then rides on that request's trailing send); after that it is dropped.
+      const sendBy = Date.now() + LEAVING_READ_GRACE_MS;
       pendingReadNotificationsRef.current = markNotificationsRead(
         waveId,
         readThroughSerialNo,
-        { shouldSend: () => isFlushing, refreshWaveLists: false }
+        { shouldSend: () => Date.now() <= sendBy, refreshWaveLists: false }
       );
-      isFlushing = false;
     },
     [markNotificationsRead]
   );

@@ -265,7 +265,7 @@ test.describe("Coming up local decision time", () => {
       .getByRole("region", { name: "Coming up", exact: true })
       .locator("time");
     await expect(decisionLabel).toHaveText(
-      "Next decision tomorrow at 00:00."
+      "Next result tomorrow at 00:00."
     );
     await expect(decisionLabel).toHaveAttribute(
       "datetime",

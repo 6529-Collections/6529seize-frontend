@@ -1,11 +1,13 @@
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { VERSION_POLL_HEADERS } from "@/lib/version/versionPoll";
+import { logVersionPoll } from "@/lib/version/versionPollLog.server";
 import { NextResponse } from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
 const ANNOUNCED_VERSION_TIMEOUT_MS = 5_000;
 const ANNOUNCED_VERSION_CACHE_TTL_MS = 5_000;
-const CLIENT_VERSION_HEADER = "x-6529-client-version";
+const CLIENT_VERSION_HEADER = VERSION_POLL_HEADERS.version;
 const ANNOUNCED_VERSION_ALLOWED_HOSTS = new Set([
   "dnclu2fna0b2b.cloudfront.net",
 ]);
@@ -214,27 +216,33 @@ const shouldRefreshClient = ({
 const versionResponse = ({
   announcedVersion,
   clientVersion,
+  request,
   useAnnouncementGate,
   version,
 }: {
   readonly announcedVersion: string | null;
   readonly clientVersion: string | null;
+  readonly request: Request | undefined;
   readonly useAnnouncementGate: boolean;
   readonly version: string;
-}) =>
-  NextResponse.json(
+}) => {
+  const stale = shouldRefreshClient({
+    announcedVersion,
+    clientVersion,
+    useAnnouncementGate,
+    version,
+  });
+  // Adoption telemetry: sampled, and only about the tab's build.
+  logVersionPoll(request?.headers, stale);
+  return NextResponse.json(
     {
       announced_version: announcedVersion,
-      stale: shouldRefreshClient({
-        announcedVersion,
-        clientVersion,
-        useAnnouncementGate,
-        version,
-      }),
+      stale,
       version,
     },
     { headers: NO_STORE_HEADERS }
   );
+};
 
 export async function GET(request?: Request) {
   const version = getCurrentVersion();
@@ -266,6 +274,7 @@ export async function GET(request?: Request) {
         return versionResponse({
           announcedVersion: announcedVersion.version,
           clientVersion,
+          request,
           useAnnouncementGate,
           version,
         });
@@ -281,6 +290,7 @@ export async function GET(request?: Request) {
   return versionResponse({
     announcedVersion: null,
     clientVersion,
+    request,
     useAnnouncementGate,
     version,
   });
