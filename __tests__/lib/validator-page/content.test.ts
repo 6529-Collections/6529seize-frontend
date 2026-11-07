@@ -26,9 +26,9 @@ const FRESH_INSTALL_UNTIL = "2026-11-23 03:30 UTC";
 const LIGHT_CLIENT_CHECKPOINT = "2026-11-07 11:02 UTC";
 // rc.10's join tests: the day, and the minutes to ready through Tor and with
 // Tor off. fill-rc10.sh fills them, here and on the pages.
-const JOIN_DATE = "{{RC10_JOIN_DATE}}";
-const JOIN_TOR = "{{RC10_JOIN_TOR_MINUTES}}";
-const JOIN_TOR_OFF = "{{RC10_JOIN_TOR_OFF_MINUTES}}";
+const JOIN_DATE = "7 November";
+const JOIN_TOR = "21";
+const JOIN_TOR_OFF = "16";
 // The facts above that are still placeholders. The pages may hold these and
 // no other placeholder; once they are filled, none at all.
 const STILL_TO_FILL = [JOIN_DATE, JOIN_TOR, JOIN_TOR_OFF].filter((fact) =>

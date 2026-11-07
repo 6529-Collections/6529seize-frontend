@@ -147,7 +147,7 @@ export const PARTS: readonly {
     key: "first-start",
     part: "First start",
     answer: "Leave it on until the app says it is ready, about half an hour.",
-    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.10 on {{RC10_JOIN_DATE}} this took about {{RC10_JOIN_TOR_MINUTES}} minutes through Tor, and {{RC10_JOIN_TOR_OFF_MINUTES}} with Tor off.",
+    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.10 on 7 November this took about 21 minutes through Tor, and 16 with Tor off.",
   },
 ];
 
@@ -315,7 +315,7 @@ export const QUESTIONS: readonly {
 /** Where the page's numbers come from. */
 export const SOURCES: readonly string[] = [
   `Memory and disk: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
-  "The first start: 6529's join tests of the test release (0.1.0-rc.10, commit f0a3440) on {{RC10_JOIN_DATE}} 2026, fresh installs with the default settings, through Tor and with Tor off.",
+  "The first start: 6529's join tests of the test release (0.1.0-rc.10, commit f0a3440) on 7 November 2026, fresh installs with the default settings, through Tor and with Tor off.",
   "Internet: 6529's estimate of a month of Ethereum data, in the validator's specification.",
   `Prices: store and provider pages, read on ${PRICES_READ_ON}. Power at 18.16 cents a kWh, the US average for August 2026 (EIA).`,
 ];
