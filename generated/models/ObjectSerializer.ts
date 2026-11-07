@@ -798,6 +798,23 @@ export * from '../models/ApiTdhSeasonOnePartialKey';
 export * from '../models/ApiTdhSeasonOnePartialRule';
 export * from '../models/ApiTdhSeasonScheduleRule';
 export * from '../models/ApiTdhSeasonSetRule';
+export * from '../models/ApiTelemetryBatch';
+export * from '../models/ApiTelemetryCell';
+export * from '../models/ApiTelemetryCountry';
+export * from '../models/ApiTelemetryDailyTotals';
+export * from '../models/ApiTelemetryDashboard';
+export * from '../models/ApiTelemetryDiagnosticsBundle';
+export * from '../models/ApiTelemetryDiagnosticsPage';
+export * from '../models/ApiTelemetryDiagnosticsReceipt';
+export * from '../models/ApiTelemetryDiagnosticsSummary';
+export * from '../models/ApiTelemetryDiagnosticsUpload';
+export * from '../models/ApiTelemetryEvent';
+export * from '../models/ApiTelemetryHealthCounters';
+export * from '../models/ApiTelemetryPeriod';
+export * from '../models/ApiTelemetryPublicStats';
+export * from '../models/ApiTelemetryRatio';
+export * from '../models/ApiTelemetryReports';
+export * from '../models/ApiTelemetryVitalsSummary';
 export * from '../models/ApiToggleHideLinkPreviewRequest';
 export * from '../models/ApiTokenTdh';
 export * from '../models/ApiTokenTdhRank';
@@ -1785,6 +1802,23 @@ import { ApiTdhSeasonOnePartialKey } from '../models/ApiTdhSeasonOnePartialKey';
 import { ApiTdhSeasonOnePartialRule    } from '../models/ApiTdhSeasonOnePartialRule';
 import { ApiTdhSeasonScheduleRule } from '../models/ApiTdhSeasonScheduleRule';
 import { ApiTdhSeasonSetRule } from '../models/ApiTdhSeasonSetRule';
+import { ApiTelemetryBatch, ApiTelemetryBatchVEnum    } from '../models/ApiTelemetryBatch';
+import { ApiTelemetryCell } from '../models/ApiTelemetryCell';
+import { ApiTelemetryCountry } from '../models/ApiTelemetryCountry';
+import { ApiTelemetryDailyTotals } from '../models/ApiTelemetryDailyTotals';
+import { ApiTelemetryDashboard } from '../models/ApiTelemetryDashboard';
+import { ApiTelemetryDiagnosticsBundle } from '../models/ApiTelemetryDiagnosticsBundle';
+import { ApiTelemetryDiagnosticsPage } from '../models/ApiTelemetryDiagnosticsPage';
+import { ApiTelemetryDiagnosticsReceipt } from '../models/ApiTelemetryDiagnosticsReceipt';
+import { ApiTelemetryDiagnosticsSummary } from '../models/ApiTelemetryDiagnosticsSummary';
+import { ApiTelemetryDiagnosticsUpload, ApiTelemetryDiagnosticsUploadVEnum  , ApiTelemetryDiagnosticsUploadEncodingEnum    } from '../models/ApiTelemetryDiagnosticsUpload';
+import { ApiTelemetryEvent, ApiTelemetryEventVEnum  , ApiTelemetryEventTEnum   , ApiTelemetryEventDeviceEnum  , ApiTelemetryEventPlatformEnum     , ApiTelemetryEventBrowserEnum              } from '../models/ApiTelemetryEvent';
+import { ApiTelemetryHealthCounters } from '../models/ApiTelemetryHealthCounters';
+import { ApiTelemetryPeriod, ApiTelemetryPeriodTypeEnum     } from '../models/ApiTelemetryPeriod';
+import { ApiTelemetryPublicStats } from '../models/ApiTelemetryPublicStats';
+import { ApiTelemetryRatio } from '../models/ApiTelemetryRatio';
+import { ApiTelemetryReports } from '../models/ApiTelemetryReports';
+import { ApiTelemetryVitalsSummary } from '../models/ApiTelemetryVitalsSummary';
 import { ApiToggleHideLinkPreviewRequest } from '../models/ApiToggleHideLinkPreviewRequest';
 import { ApiTokenTdh } from '../models/ApiTokenTdh';
 import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
@@ -2242,6 +2276,15 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
     "ApiTdhSeasonOnePartialKey",
+    "ApiTelemetryBatchVEnum",
+    "ApiTelemetryDiagnosticsUploadVEnum",
+    "ApiTelemetryDiagnosticsUploadEncodingEnum",
+    "ApiTelemetryEventVEnum",
+    "ApiTelemetryEventTEnum",
+    "ApiTelemetryEventDeviceEnum",
+    "ApiTelemetryEventPlatformEnum",
+    "ApiTelemetryEventBrowserEnum",
+    "ApiTelemetryPeriodTypeEnum",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
     "ApiUpdateProfilePreferencesNotificationLevelEnum",
@@ -3008,6 +3051,23 @@ let typeMap: {[index: string]: any} = {
     "ApiTdhSeasonOnePartialRule": ApiTdhSeasonOnePartialRule,
     "ApiTdhSeasonScheduleRule": ApiTdhSeasonScheduleRule,
     "ApiTdhSeasonSetRule": ApiTdhSeasonSetRule,
+    "ApiTelemetryBatch": ApiTelemetryBatch,
+    "ApiTelemetryCell": ApiTelemetryCell,
+    "ApiTelemetryCountry": ApiTelemetryCountry,
+    "ApiTelemetryDailyTotals": ApiTelemetryDailyTotals,
+    "ApiTelemetryDashboard": ApiTelemetryDashboard,
+    "ApiTelemetryDiagnosticsBundle": ApiTelemetryDiagnosticsBundle,
+    "ApiTelemetryDiagnosticsPage": ApiTelemetryDiagnosticsPage,
+    "ApiTelemetryDiagnosticsReceipt": ApiTelemetryDiagnosticsReceipt,
+    "ApiTelemetryDiagnosticsSummary": ApiTelemetryDiagnosticsSummary,
+    "ApiTelemetryDiagnosticsUpload": ApiTelemetryDiagnosticsUpload,
+    "ApiTelemetryEvent": ApiTelemetryEvent,
+    "ApiTelemetryHealthCounters": ApiTelemetryHealthCounters,
+    "ApiTelemetryPeriod": ApiTelemetryPeriod,
+    "ApiTelemetryPublicStats": ApiTelemetryPublicStats,
+    "ApiTelemetryRatio": ApiTelemetryRatio,
+    "ApiTelemetryReports": ApiTelemetryReports,
+    "ApiTelemetryVitalsSummary": ApiTelemetryVitalsSummary,
     "ApiToggleHideLinkPreviewRequest": ApiToggleHideLinkPreviewRequest,
     "ApiTokenTdh": ApiTokenTdh,
     "ApiTokenTdhRank": ApiTokenTdhRank,
