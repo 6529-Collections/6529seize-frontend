@@ -162,15 +162,15 @@ dialogs, and screenshots of the release's app. The guide's closed sections
 and the known issues are Markdown in `lib/validator-page/content/`, built
 from the tester package's TESTERS.md (its "More" sections) and
 KNOWN-ISSUES.md. The note for testers on the last release ("Upgrading
-from rc.8", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
-download button and at the top of the guide, and rc.9's section on
-Sunday's switch (`VALIDATOR_SWITCH`) above it on the guide. Each shows only
+from rc.9", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
+download button and at the top of the guide, with the section on Sunday's
+switch (`VALIDATOR_SWITCH`) above it on both. Each shows only
 while the release the pages offer is the one it names (`forVersion`). The hardware page's text and
 numbers are in `hardwareText.ts` there, each checked against the release it
 names.
 
 A release fact that is not known when the text is written, such as the
-day of a release's join tests, is written `{{RC9_JOIN_DATE}}` and the like.
+day of a release's join tests, is written `{{RC10_JOIN_DATE}}` and the like.
 The page tests allow only the placeholders `STILL_TO_FILL` in
 `content.test.ts` names, so fill each one, everywhere it appears (the tests
 too), before merging. Testers

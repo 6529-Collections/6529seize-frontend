@@ -86,7 +86,7 @@ it("keeps the original URL and mounted state through open, close and browser Bac
   window.history.replaceState(
     {},
     "",
-    "/waves/wave/competitions/alpha?tab=votes&voteTab=activity&curation=art"
+    "/waves/wave/decisions/alpha?tab=votes&voteTab=activity&curation=art"
   );
   const url = window.location.href;
   render(
@@ -217,7 +217,7 @@ it("does not reopen a stale information request when returning to its original r
 });
 it("uses one navigation entry when leaving information and preserves Back and Forward", async () => {
   const originalUrl =
-    "/waves/wave/competitions/alpha?tab=votes&voteTab=activity";
+    "/waves/wave/decisions/alpha?tab=votes&voteTab=activity";
   window.history.replaceState({ original: "kept" }, "", originalUrl);
   const { rerender } = render(
     <WaveInformationProvider>

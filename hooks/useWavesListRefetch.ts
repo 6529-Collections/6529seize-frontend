@@ -23,14 +23,17 @@ interface UseWavesListRefetchOptions {
   readonly viewerIdentityKey: string | null;
   /** Set only while the announcement wave is fetched outside the lists. */
   readonly announcementWaveId: string | null;
-  readonly refetchAnnouncementWave: () => unknown;
 }
 
 /**
  * Refresh actions for the main sidebar sources. `refetchAllWaves` forces every
- * source. `refreshStaleWaves` is the resync variant for reconnects and tab
+ * list. `refreshStaleWaves` is the resync variant for reconnects and tab
  * resumes: only sources past their staleTime refetch, and in-flight requests
  * are reused rather than restarted.
+ *
+ * Both refresh the announcement wave only once it is stale.
+ * `refetchAllWaves` also runs on live drops for waves missing from the
+ * lists, so forcing that wave there made every open tab re-request it.
  */
 export function useWavesListRefetch({
   shouldLoadMainWaves,
@@ -43,7 +46,6 @@ export function useWavesListRefetch({
   loadedSubwaveParentIds,
   viewerIdentityKey,
   announcementWaveId,
-  refetchAnnouncementWave,
 }: UseWavesListRefetchOptions) {
   const queryClient = useQueryClient();
   const {
@@ -75,13 +77,13 @@ export function useWavesListRefetch({
     void refetchPinned();
     refetchSubwaves();
     if (announcementWaveId) {
-      void refetchAnnouncementWave();
+      refetchQueryIfStale(queryClient, getWaveQueryKey(announcementWaveId));
     }
   }, [
     announcementWaveId,
     isJoinedMode,
+    queryClient,
     refetchAllActivity,
-    refetchAnnouncementWave,
     refetchFollowedActivity,
     refetchHighlyRated,
     refetchPinned,

@@ -237,6 +237,7 @@ const announcementWave = createSidebarWave({
   latestDropTimestamp: 300,
 });
 const legacyAnnouncementWave = createLegacyApiWave("4", 300);
+const ANNOUNCEMENT_WAVE_STALE_TIME_MS = 10 * 60 * 1000;
 let announcementRefetchMock: jest.Mock;
 
 beforeEach(() => {
@@ -322,7 +323,10 @@ test("pauses all main wave sources when explicitly disabled", () => {
   expect(
     useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
   ).toBe(true);
-  expect(useWaveByIdMock).toHaveBeenCalledWith(null, { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith(null, {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
   expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
     parentWaveIds: [],
     viewerIdentityKey: null,
@@ -1875,6 +1879,33 @@ test("refreshes only stale sidebar sources on resync without forcing refetches",
   );
 });
 
+test("forces the lists but refreshes the announcement wave only once stale", () => {
+  const sources = mockStaleRefreshSources();
+  const refetchQueriesSpy = jest
+    .spyOn(queryClient, "refetchQueries")
+    .mockResolvedValue(undefined);
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  act(() => {
+    result.current.refetchAllWaves();
+  });
+
+  // All activity, highly rated and pinned.
+  expect(sources.forcedRefetch).toHaveBeenCalledTimes(3);
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).toHaveBeenCalledTimes(1);
+  expect(refetchQueriesSpy).toHaveBeenCalledWith(
+    {
+      queryKey: ["WAVE", { wave_id: "4" }],
+      exact: true,
+      type: "active",
+      stale: true,
+    },
+    { cancelRefetch: false }
+  );
+});
+
 test("does not refresh any sidebar source while the list is disabled", () => {
   const sources = mockStaleRefreshSources();
   const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
@@ -1937,7 +1968,10 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     )
   ).toBe(false);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("preserves pin state for a legacy pinned announcement wave", () => {
@@ -1971,7 +2005,10 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("reuses an overview announcement wave without enabling the fallback fetch", () => {
@@ -2015,7 +2052,10 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
   expect(result.current.announcementQueryLoading).toBe(false);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query loading state when unresolved", () => {
@@ -2046,7 +2086,10 @@ test("exposes fallback announcement query loading state when unresolved", () => 
   expect(result.current.isAnnouncementsLoading).toBe(true);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(loadingAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query error when unresolved", () => {
@@ -2078,7 +2121,10 @@ test("exposes fallback announcement query error when unresolved", () => {
   expect(result.current.announcementQueryError).toBe(announcementQueryError);
   expect(result.current.isAnnouncementsLoading).toBe(false);
   expect(result.current.announcementRefetch).toBe(failedAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("indicates loading when pinned wave is still loading", () => {

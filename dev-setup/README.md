@@ -83,7 +83,6 @@ bash dev-setup/run-staging-ec2-setup.sh
 - **MOBILE_APP_SCHEME** → staging or production
 - Fixed values written automatically:
   - `CORE_SCHEME=core6529`
-  - `IPFS_API_ENDPOINT=https://api-ipfs.6529.io`
   - `IPFS_GATEWAY_ENDPOINT=https://ipfs.6529.io`
   - `BASE_ENDPOINT=https://<slug>staging.6529.io`
 

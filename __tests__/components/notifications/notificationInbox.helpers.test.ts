@@ -60,7 +60,7 @@ it("names artwork alerts and opens their single submission view", () => {
     "alice submitted Open skies to The Memes Main Stage."
   );
   expect(getInboxDestination(artwork, "viewer")).toBe(
-    "/waves/public-wave/competitions/competition?drop=original"
+    "/waves/public-wave/decisions/competition?drop=original"
   );
 });
 
@@ -237,7 +237,7 @@ it("keeps missing-context priority summaries readable", () => {
 
 it("links deleted entries to their surviving competition and formats returned credits", () => {
   expect(getInboxDestination(credits, "viewer")).toBe(
-    "/waves/wave/competitions/competition?entry=entry"
+    "/waves/wave/decisions/competition?entry=entry"
   );
   expect(
     getInboxDestination(
@@ -250,7 +250,7 @@ it("links deleted entries to their surviving competition and formats returned cr
       },
       "viewer"
     )
-  ).toBe("/waves/wave/competitions/competition");
+  ).toBe("/waves/wave/decisions/competition");
   expect(getInboxSummary(credits, "en-US")).toBe(
     "1,500 voting credits returned in Art competition"
   );

@@ -90,7 +90,7 @@ node ops/skills/6529-agent-login/scripts/agent-login.mjs login \
 
 Use that file as a Playwright browser context storage state. It writes:
 
-- `wallet-auth` cookie
+- `__Host-wallet-auth` cookie (Secure, `Path=/`, no Domain)
 - `6529-wallet-accounts`
 - `6529-wallet-active-address`
 - `6529-wallet-address`

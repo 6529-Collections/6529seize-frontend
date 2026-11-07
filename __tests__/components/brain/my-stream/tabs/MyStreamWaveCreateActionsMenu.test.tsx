@@ -119,7 +119,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /^New competition/ })
+      screen.queryByRole("button", { name: /^New decision/ })
     ).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 

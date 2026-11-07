@@ -16,7 +16,7 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveById } from "./useWaveById";
+import { useAnnouncementsWave } from "./useAnnouncementsWave";
 import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
@@ -314,9 +314,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: rawAnnouncementQueryLoading,
     error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
-  } = useWaveById(announcementsWaveId, {
-    enabled: shouldFetchAnnouncementWave,
-  });
+  } = useAnnouncementsWave(announcementsWaveId, shouldFetchAnnouncementWave);
   const announcementQueryLoading =
     shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
   const announcementQueryError = shouldFetchAnnouncementWave
@@ -646,7 +644,6 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     announcementWaveId: shouldFetchAnnouncementWave
       ? announcementsWaveId
       : null,
-    refetchAnnouncementWave: announcementRefetch,
   });
 
   const topSectionWaveIds = useMemo(() => {

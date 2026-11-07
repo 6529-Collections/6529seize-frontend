@@ -11,7 +11,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ seizeConnectFresh: mockConnect }),
 }));
 jest.mock("next/navigation", () => ({
-  usePathname: () => `/waves/wave/competitions/${mockId}`,
+  usePathname: () => `/waves/wave/decisions/${mockId}`,
   useSearchParams: () => new URLSearchParams(mockSearch),
   useRouter: () => ({ replace: mockReplace }),
 }));
@@ -80,7 +80,7 @@ it("groups all three views under Votes and preserves the chosen competition and 
   ]);
   fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
   expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?tab=votes&curation=kept&voteTab=activity",
+    "/waves/wave/decisions/alpha?tab=votes&curation=kept&voteTab=activity",
     { scroll: false }
   );
 });

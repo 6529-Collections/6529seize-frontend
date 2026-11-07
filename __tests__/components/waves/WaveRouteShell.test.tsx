@@ -4,7 +4,7 @@ import WaveRouteShell from "@/components/waves/WaveRouteShell";
 import { canNavigateInWaveTabShell } from "@/helpers/waves/wave-tab-shell";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
-let mockPathname = "/waves/wave/competitions/alpha";
+let mockPathname = "/waves/wave/decisions/alpha";
 let mockViewer: string | null = "profile-a:self";
 let mockTab = MyStreamWaveTab.LEADERBOARD;
 const mockRegister = jest.fn();
@@ -46,12 +46,12 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockViewer = "profile-a:self";
   mockTab = MyStreamWaveTab.LEADERBOARD;
-  mockPathname = "/waves/wave/competitions/alpha";
+  mockPathname = "/waves/wave/decisions/alpha";
 });
 
 it("owns both paths, back/forward presentation, and registration until it unmounts", () => {
   const from = new URL(
-    "https://6529.io/waves/wave/competitions/alpha?tab=leaderboard"
+    "https://6529.io/waves/wave/decisions/alpha?tab=leaderboard"
   );
   const to = new URL("https://6529.io/waves/wave?tab=chat&competition=alpha");
   const { rerender, unmount } = render(<WaveRouteShell waveId="wave" />);
