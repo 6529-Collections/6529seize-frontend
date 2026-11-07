@@ -32,6 +32,8 @@ import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+import { isChatWindowingEnabled } from "@/components/waves/drops/chat-window/chatWindowingFlag";
+import { resolveChatScrollBehavior } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -126,8 +128,10 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     ? DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN
     : undefined;
 
-  const scrollBehavior = useScrollBehavior();
+  const isWindowed = isChatWindowingEnabled();
+  const scrollBehavior = useScrollBehavior({ endAnchored: isWindowed });
   const {
+    endScrollerRef,
     scrollContainerRef,
     scrollContainerCallbackRef,
     bottomAnchorRef,
@@ -229,6 +233,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     scrollContainerRef,
     shouldPinToBottom,
     scrollToVisualBottom,
+    resolveScrollBehavior: isWindowed ? resolveChatScrollBehavior : undefined,
   });
 
   const scrollToBottom = useCallback(() => {
@@ -316,6 +321,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
         scrollContainerCallbackRef={scrollContainerCallbackRef}
+        chatEndScrollerRef={endScrollerRef}
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
         paginationThreshold={virtualizedDropsPageSize}

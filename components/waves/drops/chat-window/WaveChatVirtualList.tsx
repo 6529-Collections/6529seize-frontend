@@ -1,0 +1,552 @@
+"use client";
+
+import {
+  renderBoostCardElement,
+  useBoostCardIndex,
+  useDropsListItemData,
+  type DropActionHandler,
+} from "@/components/drops/view/dropsListShared";
+import UnreadDivider from "@/components/drops/view/UnreadDivider";
+import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/media/ChatVideoPlayback";
+import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
+import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
+import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
+import { WaveHistoryGap } from "@/components/waves/drops/WaveHistoryGap";
+import type { WaveHistoryGap as HistoryGap } from "@/contexts/wave/hooks/types";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import {
+  WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER,
+  WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE,
+} from "@/helpers/waves/wave-visible-serial.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { selectPluralCategory } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
+import type { Range } from "@tanstack/react-virtual";
+import type { MutableRefObject, Ref, RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  buildChatItems,
+  estimateChatItemSize,
+  getPinnedChatItemIndices,
+  mergePinnedIndices,
+  type ChatItem,
+} from "./chatItems";
+import {
+  resolveChatScrollBehavior,
+  type ChatEndScroller,
+} from "./chatScrollBehavior";
+import {
+  WaveChatVirtualRow,
+  type VideoPlaybackMemories,
+} from "./WaveChatVirtualRow";
+
+// Rows rendered beyond each edge of the viewport. With typical rows this
+// keeps about 50 rows mounted on a desktop viewport.
+const OVERSCAN = 15;
+// Load older history once the rendered range reaches this close to the top.
+const TOP_PREFETCH_ITEMS = 10;
+// Within this many pixels of the end the list counts as at the live end.
+const END_THRESHOLD_PX = 4;
+// New messages are announced together after this quiet period.
+const ANNOUNCE_DELAY_MS = 1500;
+
+interface WaveChatVirtualListProps {
+  /** Newest first, as the wave store keeps them. */
+  readonly drops: Drop[];
+  readonly historyGaps?: readonly HistoryGap[] | undefined;
+  readonly waveId?: string | undefined;
+  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
+  readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
+  readonly bottomAnchorRef: Ref<HTMLDivElement>;
+  readonly endScrollerRef: MutableRefObject<ChatEndScroller | null>;
+  readonly isFetchingOlder: boolean;
+  readonly showOlderLoader: boolean;
+  readonly onTopIntersection: () => void;
+  readonly bottomPaddingClassName?: string | undefined;
+  readonly onReply: DropActionHandler;
+  readonly onReplyClick: (serialNo: number) => void;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly activeDrop: ActiveDropState | null;
+  readonly serialNo: number | null;
+  readonly targetDropRef: RefObject<HTMLDivElement | null>;
+  readonly dropViewDropId: string | null;
+  readonly unreadDividerSerialNo?: number | null | undefined;
+  readonly boostedDrops?: ApiDrop[] | undefined;
+  readonly boostedDropsDisplayPreference: BoostedDropsDisplayPreference;
+  readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
+  readonly suspendLightDropHydration: boolean;
+  readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
+  readonly isVotingClosed: boolean;
+  readonly isVotingControlsLocked: boolean;
+}
+
+const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
+  if (typeof ref === "function") {
+    ref(value);
+  } else if (ref) {
+    (ref as MutableRefObject<T | null>).current = value;
+  }
+};
+
+const isTemporaryDrop = (drop: Drop) => drop.id.startsWith("temp-");
+
+/**
+ * How many drops after the previous newest one were appended at the end,
+ * leaving out the reader's own pending sends.
+ */
+const countAppendedDrops = (
+  orderedDrops: readonly Drop[],
+  previousNewestKey: string | null
+): number => {
+  if (previousNewestKey === null) {
+    return 0;
+  }
+  const index = orderedDrops.findIndex(
+    (drop) => drop.stableKey === previousNewestKey
+  );
+  if (index === -1) {
+    return 0;
+  }
+  return orderedDrops
+    .slice(index + 1)
+    .filter((drop) => !isTemporaryDrop(drop)).length;
+};
+
+/**
+ * The wave chat with only the rows near the viewport mounted (WAVES-PLAN
+ * 0.11, behind NEXT_PUBLIC_FEATURE_CHAT_WINDOWING).
+ *
+ * - Normal order, oldest at the top, anchored to the end: the list follows
+ *   new messages only while the reader is at the live end, and keeps the
+ *   reader's row in place when older history loads above it.
+ * - Rows are keyed by the drop's stable key and measured as they render.
+ * - The jump target, unread divider, history gaps and the focused row stay
+ *   mounted wherever they are.
+ * - The history loader sits outside the rows, so the list never anchors on it.
+ */
+export function WaveChatVirtualList({
+  drops,
+  historyGaps,
+  waveId,
+  scrollContainerRef,
+  scrollContainerCallbackRef,
+  bottomAnchorRef,
+  endScrollerRef,
+  isFetchingOlder,
+  showOlderLoader,
+  onTopIntersection,
+  bottomPaddingClassName,
+  onReply,
+  onReplyClick,
+  onQuoteClick,
+  onDropContentClick,
+  activeDrop,
+  serialNo,
+  targetDropRef,
+  dropViewDropId,
+  unreadDividerSerialNo,
+  boostedDrops,
+  boostedDropsDisplayPreference,
+  onBoostedDropClick,
+  suspendLightDropHydration,
+  winningThreshold,
+  winningThresholdMinDurationMs,
+  isVotingClosed,
+  isVotingControlsLocked,
+}: WaveChatVirtualListProps) {
+  const locale = useBrowserLocale();
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(
+    null
+  );
+  const handleScrollElement = useCallback(
+    (node: HTMLDivElement | null) => {
+      setScrollElement((current) => (current === node ? current : node));
+      assignRef(scrollContainerCallbackRef ?? scrollContainerRef, node);
+    },
+    [scrollContainerCallbackRef, scrollContainerRef]
+  );
+
+  const orderedDrops = useMemo(() => [...drops].reverse(), [drops]);
+  const signatureGroups = useMemo(
+    () => getDropSignatureGroups(orderedDrops),
+    [orderedDrops]
+  );
+  const handleReply = useCallback<DropActionHandler>(
+    ({ drop, partId }) => onReply({ drop, partId }),
+    [onReply]
+  );
+  const handleReplyClick = useCallback(
+    (dropSerialNo: number) => onReplyClick(dropSerialNo),
+    [onReplyClick]
+  );
+  const itemData = useDropsListItemData({
+    showWaveInfo: false,
+    activeDrop,
+    handleReply,
+    showReplyAndQuote: true,
+    serialNo,
+    targetDropRef,
+    handleReplyClick,
+    onQuoteClick,
+    parentContainerRef: scrollContainerRef,
+    dropViewDropId,
+    onDropContentClick,
+    scrollContainerRef,
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  });
+
+  const boostCardAtIndex = useBoostCardIndex({
+    orderedDrops,
+    boostedDrops,
+    shouldInsertBoostCards: boostedDropsDisplayPreference !== "hidden",
+    onBoostedDropClick,
+  });
+
+  const items = useMemo(
+    () =>
+      buildChatItems({
+        orderedDrops,
+        historyGaps,
+        includeHistoryGaps: waveId !== undefined,
+        boostCardAtIndex,
+        boostedDrops,
+        boostedDropsDisplayPreference,
+        unreadDividerSerialNo,
+      }),
+    [
+      orderedDrops,
+      historyGaps,
+      waveId,
+      boostCardAtIndex,
+      boostedDrops,
+      boostedDropsDisplayPreference,
+      unreadDividerSerialNo,
+    ]
+  );
+
+  // Keyboard focus pins its row, so tabbing never loses focus to an unmount.
+  const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  useEffect(() => {
+    if (!scrollElement) {
+      return;
+    }
+    const handleFocusIn = (event: FocusEvent) => {
+      const row =
+        event.target instanceof Element
+          ? event.target.closest("[data-chat-item-key]")
+          : null;
+      setFocusedKey(row?.getAttribute("data-chat-item-key") ?? null);
+    };
+    const handleFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget;
+      if (!(next instanceof Node) || !scrollElement.contains(next)) {
+        setFocusedKey(null);
+      }
+    };
+    scrollElement.addEventListener("focusin", handleFocusIn);
+    scrollElement.addEventListener("focusout", handleFocusOut);
+    return () => {
+      scrollElement.removeEventListener("focusin", handleFocusIn);
+      scrollElement.removeEventListener("focusout", handleFocusOut);
+    };
+  }, [scrollElement]);
+
+  const pinnedIndices = useMemo(
+    () =>
+      getPinnedChatItemIndices(items, {
+        targetSerialNo: serialNo,
+        unreadDividerSerialNo,
+        focusedKey,
+      }),
+    [items, serialNo, unreadDividerSerialNo, focusedKey]
+  );
+  const itemCount = items.length;
+  const rangeExtractor = useCallback(
+    (range: Range) =>
+      mergePinnedIndices(defaultRangeExtractor(range), pinnedIndices, itemCount),
+    [pinnedIndices, itemCount]
+  );
+  const getItemKey = useCallback(
+    (index: number) => items[index]?.key ?? index,
+    [items]
+  );
+  const estimateSize = useCallback(
+    (index: number) => estimateChatItemSize(items[index]),
+    [items]
+  );
+  const getScrollElement = useCallback(
+    () => scrollContainerRef.current,
+    [scrollContainerRef]
+  );
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
+    count: itemCount,
+    getScrollElement,
+    estimateSize,
+    getItemKey,
+    rangeExtractor,
+    overscan: OVERSCAN,
+    anchorTo: "end",
+    // Follow appended messages only at the live end, and never while a jump
+    // owns the scroll position.
+    followOnAppend: serialNo === null ? "auto" : false,
+    scrollEndThreshold: END_THRESHOLD_PX,
+    // Start at the newest messages.
+    initialOffset: () => Number.MAX_SAFE_INTEGER,
+    // Scroll-only updates move rows without a React render.
+    directDomUpdates: true,
+    directDomUpdatesMode: "position",
+  });
+
+  // The list opens at the newest message.
+  const didOpenAtEndRef = useRef(false);
+  useLayoutEffect(() => {
+    if (didOpenAtEndRef.current || itemCount === 0 || !scrollElement) {
+      return;
+    }
+    didOpenAtEndRef.current = true;
+    virtualizer.scrollToEnd();
+  }, [itemCount, scrollElement, virtualizer]);
+
+  useEffect(() => {
+    endScrollerRef.current = (behavior) => {
+      virtualizer.scrollToEnd({
+        behavior: resolveChatScrollBehavior(behavior),
+      });
+    };
+    return () => {
+      endScrollerRef.current = null;
+    };
+  }, [endScrollerRef, virtualizer]);
+
+  // The composer, the keyboard or the bottom navigation can resize the
+  // scroller. A reader at the live end stays there.
+  const wasAtEndRef = useRef(true);
+  useEffect(() => {
+    if (!scrollElement) {
+      return;
+    }
+    let observedHeight = scrollElement.clientHeight;
+    const recordEnd = () => {
+      // The browser can report a scroll caused by the resize itself before
+      // the resize observer runs; the observer decides with the old height.
+      if (scrollElement.clientHeight !== observedHeight) {
+        return;
+      }
+      wasAtEndRef.current =
+        scrollElement.scrollHeight -
+          scrollElement.clientHeight -
+          scrollElement.scrollTop <=
+        END_THRESHOLD_PX;
+    };
+    scrollElement.addEventListener("scroll", recordEnd, { passive: true });
+    if (typeof ResizeObserver === "undefined") {
+      return () => scrollElement.removeEventListener("scroll", recordEnd);
+    }
+    const observer = new ResizeObserver(() => {
+      const resized = scrollElement.clientHeight !== observedHeight;
+      observedHeight = scrollElement.clientHeight;
+      if (resized && wasAtEndRef.current) {
+        virtualizer.scrollToEnd();
+      }
+    });
+    observer.observe(scrollElement);
+    return () => {
+      scrollElement.removeEventListener("scroll", recordEnd);
+      observer.disconnect();
+    };
+  }, [scrollElement, virtualizer]);
+
+  // Older history loads as the rendered range nears the top.
+  const firstRenderedIndex = virtualizer.range?.startIndex ?? null;
+  useEffect(() => {
+    if (firstRenderedIndex !== null && firstRenderedIndex <= TOP_PREFETCH_ITEMS) {
+      onTopIntersection();
+    }
+  }, [firstRenderedIndex, onTopIntersection]);
+
+  // One polite live region: missed-history progress and new messages.
+  const [announcement, setAnnouncement] = useState<{
+    readonly waveId: string | undefined;
+    readonly message: string;
+  } | null>(null);
+  const announce = useCallback(
+    (message: string) => setAnnouncement({ waveId, message }),
+    [waveId]
+  );
+  const newestKey = orderedDrops.at(-1)?.stableKey ?? null;
+  const previousNewestKeyRef = useRef<string | null>(newestKey);
+  const pendingArrivalsRef = useRef(0);
+  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const announceArrivalsRef = useRef<(count: number) => void>(() => undefined);
+  useEffect(() => {
+    announceArrivalsRef.current = (count) =>
+      announce(
+        t(
+          locale,
+          selectPluralCategory(locale, count) === "one"
+            ? "waves.chat.newMessages.one"
+            : "waves.chat.newMessages.other",
+          { count }
+        )
+      );
+  }, [announce, locale]);
+  useEffect(() => {
+    const appended = countAppendedDrops(
+      orderedDrops,
+      previousNewestKeyRef.current
+    );
+    previousNewestKeyRef.current = newestKey;
+    if (appended === 0) {
+      return;
+    }
+    pendingArrivalsRef.current += appended;
+    // Arrivals are counted together; a busy wave is announced at most once
+    // per period instead of once per message.
+    announceTimerRef.current ??= setTimeout(() => {
+      announceTimerRef.current = null;
+      const count = pendingArrivalsRef.current;
+      pendingArrivalsRef.current = 0;
+      if (count > 0) {
+        announceArrivalsRef.current(count);
+      }
+    }, ANNOUNCE_DELAY_MS);
+  }, [orderedDrops, newestKey]);
+  useEffect(
+    () => () => {
+      if (announceTimerRef.current !== null) {
+        clearTimeout(announceTimerRef.current);
+      }
+    },
+    []
+  );
+
+  const [videoPlaybackMemories] = useState<VideoPlaybackMemories>(
+    () => new Map()
+  );
+
+  const renderItem = (item: ChatItem) => {
+    switch (item.kind) {
+      case "drop": {
+        const { drop, dropIndex } = item;
+        return (
+          <WaveChatVirtualRow
+            drop={drop}
+            previousDrop={orderedDrops[dropIndex - 1] ?? null}
+            nextDrop={orderedDrops[dropIndex + 1] ?? null}
+            itemData={itemData}
+            signatureGroup={signatureGroups.get(drop.id)}
+            suspendLightDropHydration={suspendLightDropHydration}
+            videoPlaybackMemories={videoPlaybackMemories}
+          />
+        );
+      }
+      case "gap":
+        return waveId ? (
+          <WaveHistoryGap
+            waveId={waveId}
+            gap={item.gap}
+            scrollContainerRef={scrollContainerRef}
+            onAnnounce={announce}
+          />
+        ) : null;
+      case "boost":
+        return onBoostedDropClick
+          ? renderBoostCardElement({
+              key: item.key,
+              boostedDrop: item.boostedDrop,
+              boostedIndex: item.boostedIndex,
+              displayPreference: boostedDropsDisplayPreference,
+              onBoostedDropClick,
+            })
+          : null;
+      case "unread":
+        return <UnreadDivider />;
+    }
+  };
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <>
+      <div
+        ref={handleScrollElement}
+        data-mobile-bottom-nav-scroll-target="true"
+        {...{
+          [WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE]:
+            WAVE_DROPS_END_ANCHORED_SCROLL_CONTAINER,
+        }}
+        role="region"
+        aria-label={t(locale, "waves.chat.messagesRegion")}
+        // A keyboard user can scroll history with the arrow keys; rows that
+        // come into view become reachable with Tab.
+        tabIndex={0}
+        className={`tw-min-h-0 tw-flex-1 ${
+          bottomPaddingClassName ?? "tw-pb-6"
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-[overflow-anchor:none] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 lg:tw-scrollbar-thin`}
+      >
+        {showOlderLoader && isFetchingOlder && (
+          // Zero height, so loading never moves the rows.
+          <div className="tw-sticky tw-top-0 tw-z-10 tw-h-0">
+            <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
+              <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400"></div>
+            </div>
+          </div>
+        )}
+        <ChatVideoPlaybackProvider>
+          <WaveDropMobileMenuProvider>
+            <WaveDropContentExpansionProvider
+              enabled={dropViewDropId === null}
+              scrollContainerRef={scrollContainerRef}
+            >
+              <div
+                ref={virtualizer.containerRef}
+                // Short chats sit at the bottom, above the composer.
+                className="tw-relative tw-mt-auto tw-w-full tw-flex-shrink-0"
+              >
+                {virtualItems.map((virtualItem) => {
+                  const item = items[virtualItem.index];
+                  if (!item) {
+                    return null;
+                  }
+                  return (
+                    <div
+                      key={virtualItem.key}
+                      ref={virtualizer.measureElement}
+                      data-index={virtualItem.index}
+                      data-chat-item-key={item.key}
+                      className="tw-absolute tw-left-0 tw-w-full"
+                    >
+                      {renderItem(item)}
+                    </div>
+                  );
+                })}
+              </div>
+            </WaveDropContentExpansionProvider>
+          </WaveDropMobileMenuProvider>
+        </ChatVideoPlaybackProvider>
+        <div ref={bottomAnchorRef} style={{ height: "1px" }} />
+      </div>
+      <span className="tw-sr-only" role="status" aria-live="polite">
+        {announcement?.waveId === waveId ? announcement?.message : ""}
+      </span>
+    </>
+  );
+}

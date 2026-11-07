@@ -77,6 +77,31 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - If pending/new-message controls appear out of sync, return to bottom and retry.
 - If scroll state feels stale after unrelated major layout changes, refresh the thread.
 
+## Windowed Chat (Staged)
+
+Builds with `NEXT_PUBLIC_FEATURE_CHAT_WINDOWING=true` render the wave chat
+windowed. Production builds leave it off. Sandbox test packs turn it on.
+With it on:
+
+- Only the drops near the visible part of the thread are rendered, so a long
+  history stays fast to scroll. Drops further away render again as you scroll
+  back to them.
+- The thread follows new drops only while you are at the latest one. Reading
+  history keeps your place as new drops or older pages arrive.
+- A screen reader hears one polite announcement such as `3 new messages` for
+  drops that arrive together, and the missed-history progress messages.
+- The message list is one keyboard tab stop named `Messages`. Arrow and page
+  keys scroll it. A drop that holds keyboard focus stays rendered while you
+  scroll away from it.
+- A linked or jumped-to drop, the unread divider and the missed-history
+  buttons stay rendered wherever they are in the thread.
+- Expanded long drops and video positions are kept while a drop is not
+  rendered.
+- When the composer or keyboard changes the thread's height, a thread at the
+  latest drop stays there.
+- Jumps scroll instantly instead of smoothly when the system asks for reduced
+  motion.
+
 ## Limitations / Notes
 
 - Pending queue/reveal behavior is Apple-mobile-only.

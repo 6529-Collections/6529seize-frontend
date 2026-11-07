@@ -19,6 +19,12 @@ import {
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
+  CHAT_WINDOWING,
+  chatDistanceFromNewest,
+  countMountedChatRows,
+  revealChatRow,
+} from "../support/chatWindowing";
+import {
   installWaveListScrollFixture,
   scrollWaveId,
   sidebarScrollMetrics,
@@ -906,7 +912,18 @@ for (const width of [375, 390, 768, 1024, 1440]) {
   });
 }
 
-async function sharedPostFixture(page: Page, baseURL: string | undefined) {
+function waveChat(page: Page) {
+  return page.getByRole("region", {
+    name: "Wave chat file upload area",
+    exact: true,
+  });
+}
+
+async function sharedPostFixture(
+  page: Page,
+  baseURL: string | undefined,
+  { count = 150 }: { readonly count?: number } = {}
+) {
   // Keep the copied tab as isolated from telemetry as the original fixture.
   await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
     route.fulfill({ contentType: "application/javascript", body: "" })
@@ -922,7 +939,7 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
   const feed = (await response.json()) as ApiWaveDropsFeedV2;
   const template = feed.drops[0];
   if (!template) throw new Error("Missing sandbox drop fixture");
-  const drops = Array.from({ length: 150 }, (_, index) => {
+  const drops = Array.from({ length: count }, (_, index) => {
     const serial = index + 2;
     return {
       ...template,
@@ -990,7 +1007,7 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
   return {
     missMessages(count: number) {
       for (let index = 0; index < count; index++) {
-        const serial = (drops[0]?.serial_no ?? 151) + 1;
+        const serial = (drops[0]?.serial_no ?? count + 1) + 1;
         drops.unshift({
           ...template,
           id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
@@ -1160,6 +1177,14 @@ test("resume shows the latest page before missed history and preserves the compo
       "Could not load missed messages. Try again"
     );
     await gap.click();
+    if (CHAT_WINDOWING) {
+      // Only rows near the reader are mounted. The loaded posts go in below
+      // the gap the reader is looking at, so scroll down to the oldest one.
+      await expect(
+        page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+      ).toBeAttached();
+      await revealChatRow(waveChat(page), fixture.post(1101), "newer");
+    }
     await expect(fixture.post(1101)).toBeAttached();
     await expect(
       page.getByRole("status").filter({ hasText: "Missed messages loaded" })
@@ -1247,6 +1272,8 @@ test("resume preserves an older reading position while loading the latest page",
     waitUntil: "domcontentloaded",
   });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  // With windowing, post 120 mounts only once the chat scrolls near it.
+  await revealChatRow(waveChat(page), fixture.post(120), "older");
   // Offscreen placeholders hydrate as they enter view and replace the text
   // node, so reacquire the locator until the reader's position has settled.
   await expect(async () => {
@@ -1271,7 +1298,15 @@ test("resume preserves an older reading position while loading the latest page",
     });
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  if (CHAT_WINDOWING) {
+    // The latest page lands far below the reader, outside the mounted rows;
+    // the chat announces it instead.
+    await expect(
+      page.getByRole("status").filter({ hasText: /^\d+ new messages?$/ })
+    ).toBeAttached({ timeout: 10000 });
+  } else {
+    await expect(fixture.post(1151)).toBeAttached({ timeout: 10000 });
+  }
   await expect(fixture.post(120)).toBeInViewport();
   await page
     .getByRole("button", { name: "Scroll to bottom", exact: true })
@@ -1353,7 +1388,14 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     await incoming();
     // Live updates require the authenticated subscription. Check delivery before
     // asserting position, so a missing event cannot make this test pass.
-    await expect(post(152)).toBeAttached();
+    if (CHAT_WINDOWING) {
+      // Post 152 lands far below the reader, outside the mounted rows.
+      await expect(
+        page.getByRole("status").filter({ hasText: "1 new message" })
+      ).toBeAttached();
+    } else {
+      await expect(post(152)).toBeAttached();
+    }
   }
   await expect(post(20)).toBeInViewport();
   await expectNoHorizontalOverflow(page);
@@ -1442,6 +1484,216 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
     await opened.close();
   }
 });
+// Chat windowing (WAVES-PLAN 0.11): only the rows near the viewport are
+// mounted. The 2,000-post case also runs without the flag, where every loaded
+// row stays mounted, to record the numbers windowing is compared against.
+const WINDOWED_ROW_LIMIT = 100;
+
+test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.setTimeout(300000);
+  const fixture = await sharedPostFixture(page, baseURL, { count: 2000 });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(2001)).toBeInViewport({ timeout: 30000 });
+  const chat = waveChat(page);
+  const scroller = chat.locator("[data-wave-drops-scroll-container]").first();
+
+  // Load the whole history: jump to the oldest loaded post until post 2 (the
+  // first) is in. A smaller scrollTop is older in both layouts.
+  const loadStartedAt = Date.now();
+  await expect(async () => {
+    if ((await fixture.post(2).count()) > 0) return;
+    await scroller.evaluate((element) => {
+      element.scrollTop = -element.scrollHeight;
+    });
+    throw new Error("History is still loading.");
+  }).toPass({ timeout: 240000, intervals: [250] });
+  const loadMs = Date.now() - loadStartedAt;
+  const rowsAtOldest = await countMountedChatRows(page);
+
+  // A scripted fling back down through all 2,000 posts, 300px a frame.
+  const fling = await scroller.evaluate(async (element) => {
+    const longTasks: number[] = [];
+    let observer: PerformanceObserver | null = null;
+    try {
+      observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) longTasks.push(entry.duration);
+      });
+      observer.observe({ type: "longtask" });
+    } catch {
+      // Long-task timing is Chromium-only.
+    }
+    const frameMs: number[] = [];
+    let maxRows = 0;
+    const startedAt = performance.now();
+    await new Promise<void>((resolve) => {
+      let last = startedAt;
+      const step = (now: number) => {
+        frameMs.push(now - last);
+        last = now;
+        maxRows = Math.max(
+          maxRows,
+          element.querySelectorAll("[data-drop-serial-no]").length
+        );
+        const before = element.scrollTop;
+        element.scrollTop = before + 300;
+        if (element.scrollTop === before || frameMs.length > 3000) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    observer?.disconnect();
+    const budget = 1000 / 60;
+    return {
+      frames: frameMs.length,
+      durationMs: Math.round(performance.now() - startedAt),
+      droppedFrames: frameMs.reduce(
+        (sum, ms) => sum + Math.max(0, Math.round(ms / budget) - 1),
+        0
+      ),
+      slowFrames: frameMs.filter((ms) => ms > 50).length,
+      longTasks: longTasks.length,
+      longTaskMs: Math.round(longTasks.reduce((sum, ms) => sum + ms, 0)),
+      maxRows,
+    };
+  });
+  const rowsAtNewest = await countMountedChatRows(page);
+  const numbers = {
+    windowing: CHAT_WINDOWING,
+    posts: 2000,
+    historyLoadMs: loadMs,
+    rowsAtOldest,
+    rowsAtNewest,
+    fling,
+  };
+  console.log(
+    `chat-windowing ${testInfo.project.name} ${JSON.stringify(numbers)}`
+  );
+  await testInfo.attach("chat-windowing-2000.json", {
+    body: JSON.stringify(numbers, null, 2),
+    contentType: "application/json",
+  });
+  await expect(fixture.post(2001)).toBeInViewport();
+  if (CHAT_WINDOWING) {
+    expect(rowsAtOldest).toBeLessThanOrEqual(WINDOWED_ROW_LIMIT);
+    expect(rowsAtNewest).toBeLessThanOrEqual(WINDOWED_ROW_LIMIT);
+    expect(fling.maxRows).toBeLessThanOrEqual(WINDOWED_ROW_LIMIT);
+  } else {
+    expect(rowsAtNewest).toBeGreaterThanOrEqual(2000);
+  }
+});
+
+test("windowed chat follows new posts only at the newest and announces them", async ({
+  page,
+  baseURL,
+}) => {
+  test.skip(!CHAT_WINDOWING, "Chat windowing is off in this run.");
+  test.skip(SHARED_POST_GUEST, "Live updates need the signed-in sandbox.");
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const chat = waveChat(page);
+  const scroller = chat.locator("[data-wave-drops-scroll-container]").first();
+  const status = page.getByRole("status");
+  fixture.missMessages(3);
+
+  // At the newest post the chat follows a new one.
+  await fixture.frame(152);
+  await expect(fixture.post(152)).toBeInViewport();
+  await expect
+    .poll(() => chatDistanceFromNewest(scroller))
+    .toBeLessThanOrEqual(4);
+  await expect(status.filter({ hasText: "1 new message" })).toBeAttached();
+
+  // A reader in history keeps their place; arrivals are announced together.
+  await revealChatRow(chat, fixture.post(120), "older");
+  await fixture.post(120).scrollIntoViewIfNeeded();
+  await expect(fixture.post(120)).toBeInViewport();
+  await fixture.frame(153);
+  await fixture.frame(154);
+  await expect(status.filter({ hasText: "2 new messages" })).toBeAttached();
+  await expect(fixture.post(120)).toBeInViewport();
+  await expect(fixture.post(154)).not.toBeInViewport();
+
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(fixture.post(154)).toBeInViewport();
+  expect(await countMountedChatRows(page)).toBeLessThanOrEqual(
+    WINDOWED_ROW_LIMIT
+  );
+});
+
+test("windowed chat keeps the focused post and scrolls by keyboard", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  test.skip(!CHAT_WINDOWING, "Chat windowing is off in this run.");
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const chat = waveChat(page);
+
+  // A focused post stays mounted, and focused, while the reader scrolls far
+  // away from it. Touch rows have no keyboard controls; their actions open
+  // from a long press.
+  const row = chat.locator("#drop-151");
+  const keyboardRows = !testInfo.project.use.hasTouch;
+  if (keyboardRows) {
+    const control = row.locator("a[href], button").first();
+    await control.focus();
+    await expect(control).toBeFocused();
+    await revealChatRow(chat, fixture.post(30), "older", { timeout: 30000 });
+    await expect(row).toBeAttached();
+    await expect(control).toBeFocused();
+    await expect(row).not.toBeInViewport();
+  } else {
+    await revealChatRow(chat, fixture.post(30), "older", { timeout: 30000 });
+  }
+
+  // The message list is one tab stop that scrolls with the keyboard.
+  const scroller = chat.getByRole("region", { name: "Messages", exact: true });
+  await scroller.focus();
+  await expect(scroller).toBeFocused();
+  const before = await scroller.evaluate((element) => element.scrollTop);
+  await page.keyboard.press("PageDown");
+  await expect
+    .poll(() => scroller.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(before);
+  // Focus left the post, so it is no longer held in the DOM.
+  await expect(row).toHaveCount(0);
+});
+
+test("chat stays at the newest post when the viewport shrinks", async ({
+  page,
+  baseURL,
+}) => {
+  const fixture = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  const scroller = waveChat(page)
+    .locator("[data-wave-drops-scroll-container]")
+    .first();
+  const size = page.viewportSize();
+  if (!size) throw new Error("Missing viewport size");
+  // A software keyboard or a growing composer shrinks the message list.
+  await page.setViewportSize({
+    width: size.width,
+    height: Math.round(size.height * 0.6),
+  });
+  await expect(fixture.post(151)).toBeInViewport();
+  await expect
+    .poll(() => chatDistanceFromNewest(scroller))
+    .toBeLessThanOrEqual(4);
+  await page.setViewportSize(size);
+  await expect(fixture.post(151)).toBeInViewport();
+});
+
 for (const surface of [
   { name: "wave", path: `/waves/${WAVE}` },
   { name: "DM", path: "/messages/00000000-0000-4000-8000-000000000532" },

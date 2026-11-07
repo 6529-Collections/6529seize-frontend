@@ -3311,6 +3311,12 @@ function buildPublicRuntime() {
       process.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC === "false"
         ? "false"
         : "true",
+    // Chat windowing (WAVES-PLAN 0.11) is on in sandbox packs; set the
+    // variable to "false" to run the reversed, fully mounted chat.
+    NEXT_PUBLIC_FEATURE_CHAT_WINDOWING:
+      process.env.NEXT_PUBLIC_FEATURE_CHAT_WINDOWING === "false"
+        ? "false"
+        : "true",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

@@ -559,4 +559,89 @@ describe("useScrollBehavior", () => {
       expect(mockIntersectionObserver).not.toHaveBeenCalled();
     });
   });
+
+  describe("end-anchored (windowed chat)", () => {
+    it("measures the newest message at the end of the scroll range", () => {
+      const { result } = renderHook(() =>
+        useScrollBehavior({ endAnchored: true })
+      );
+      const mockContainer = createMockScrollContainer({
+        scrollTop: 480,
+        scrollHeight: 1000,
+        clientHeight: 500,
+      });
+      result.current.scrollContainerRef.current = mockContainer;
+
+      act(() => {
+        result.current.handleScroll();
+      });
+      expect(result.current.isAtBottom).toBe(true);
+      expect(result.current.isAtTop).toBe(false);
+
+      mockContainer.scrollTop = 10;
+      act(() => {
+        result.current.handleScroll();
+      });
+      expect(result.current.isAtBottom).toBe(false);
+      expect(result.current.isAtTop).toBe(true);
+      expect(result.current.scrollIntent).toBe("reading");
+    });
+
+    it("pins to the newest message through the list's end scroller", () => {
+      const { result } = renderHook(() =>
+        useScrollBehavior({ endAnchored: true })
+      );
+      const endScroller = jest.fn();
+      result.current.scrollContainerRef.current = createMockScrollContainer({
+        scrollTop: 0,
+      });
+      result.current.endScrollerRef.current = endScroller;
+
+      act(() => {
+        result.current.forcePinToBottom("auto");
+      });
+
+      expect(endScroller).toHaveBeenCalledWith("auto");
+      expect(mockScrollTo).not.toHaveBeenCalled();
+      expect(result.current.scrollIntent).toBe("pinned");
+      expect(result.current.isAtBottom).toBe(true);
+    });
+
+    it("scrolls the element to its end before the list registers", () => {
+      const { result } = renderHook(() =>
+        useScrollBehavior({ endAnchored: true })
+      );
+      result.current.scrollContainerRef.current = createMockScrollContainer({
+        scrollHeight: 1000,
+      });
+
+      act(() => {
+        result.current.scrollToVisualBottom();
+      });
+
+      expect(mockScrollTo).toHaveBeenCalledWith({
+        top: 1000,
+        behavior: "smooth",
+      });
+    });
+
+    it("jumps instead of animating for readers who prefer reduced motion", () => {
+      const matchMedia = window.matchMedia;
+      window.matchMedia = jest.fn().mockReturnValue({ matches: true });
+      try {
+        const { result } = renderHook(() =>
+          useScrollBehavior({ endAnchored: true })
+        );
+        result.current.scrollContainerRef.current = createMockScrollContainer();
+
+        act(() => {
+          result.current.scrollToVisualTop();
+        });
+
+        expect(mockScrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+      } finally {
+        window.matchMedia = matchMedia;
+      }
+    });
+  });
 });
