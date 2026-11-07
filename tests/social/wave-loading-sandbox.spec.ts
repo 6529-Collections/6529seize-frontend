@@ -923,6 +923,21 @@ function waveChat(page: Page) {
   });
 }
 
+/** The wave chat's scroll container, in either chat layout. */
+function waveChatScroller(page: Page) {
+  return page
+    .getByRole("region", { name: "Wave chat file upload area", exact: true })
+    .locator("[data-wave-drops-scroll-container]")
+    .first();
+}
+
+/** A drop row of the wave chat, by serial. */
+function waveChatRow(page: Page, serial: number) {
+  return page
+    .getByRole("region", { name: "Wave chat file upload area", exact: true })
+    .locator(`#drop-${serial}`);
+}
+
 async function sharedPostFixture(
   page: Page,
   baseURL: string | undefined,
@@ -1197,7 +1212,7 @@ test("resume shows the latest page before missed history and preserves the compo
       await expect(
         page.getByRole("status").filter({ hasText: "Missed messages loaded" })
       ).toBeAttached();
-      await revealChatRow(waveChat(page), fixture.post(1101), "newer");
+      await revealChatRow(waveChatScroller(page), fixture.post(1101), "newer");
     }
     await expect(fixture.post(1101)).toBeAttached();
     await expect(
@@ -1307,7 +1322,7 @@ test("resume preserves an older reading position while loading the latest page",
   });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   // With windowing, post 120 mounts only once the chat scrolls near it.
-  await revealChatRow(waveChat(page), fixture.post(120), "older");
+  await revealChatRow(waveChatScroller(page), fixture.post(120), "older");
   // Offscreen placeholders hydrate as they enter view and replace the text
   // node, so reacquire the locator until the reader's position has settled.
   await expect(async () => {
@@ -1525,8 +1540,7 @@ test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
   const fixture = await sharedPostFixture(page, baseURL, { count: 2000 });
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(2001)).toBeInViewport({ timeout: 30000 });
-  const chat = waveChat(page);
-  const scroller = chat.locator("[data-wave-drops-scroll-container]").first();
+  const scroller = waveChatScroller(page);
 
   // Load the whole history: jump to the oldest loaded post until post 2 (the
   // first) is in. A smaller scrollTop is older in both layouts.
@@ -1539,7 +1553,7 @@ test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
     throw new Error("History is still loading.");
   }).toPass({ timeout: 240000, intervals: [250] });
   const loadMs = Date.now() - loadStartedAt;
-  const rowsAtOldest = await countMountedChatRows(page);
+  const rowsAtOldest = await countMountedChatRows(scroller);
 
   // A scripted fling back down through the loaded history, 300px a frame.
   // With the resident cap, that is the posts kept around the reader, the
@@ -1592,7 +1606,7 @@ test("windowed chat keeps a bounded number of rows over 2,000 posts", async ({
       maxRows,
     };
   });
-  const rowsAtNewest = await countMountedChatRows(page);
+  const rowsAtNewest = await countMountedChatRows(scroller);
   const numbers = {
     windowing: CHAT_WINDOWING,
     posts: 2000,
@@ -1668,8 +1682,7 @@ test("windowed chat follows new posts only at the newest and announces them", as
   const fixture = await sharedPostFixture(page, baseURL);
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
-  const chat = waveChat(page);
-  const scroller = chat.locator("[data-wave-drops-scroll-container]").first();
+  const scroller = waveChatScroller(page);
   const status = page.getByRole("status");
   fixture.missMessages(3);
 
@@ -1682,7 +1695,7 @@ test("windowed chat follows new posts only at the newest and announces them", as
   await expect(status.filter({ hasText: "1 new message" })).toBeAttached();
 
   // A reader in history keeps their place; arrivals are announced together.
-  await revealChatRow(chat, fixture.post(120), "older");
+  await revealChatRow(scroller, fixture.post(120), "older");
   await fixture.post(120).scrollIntoViewIfNeeded();
   await expect(fixture.post(120)).toBeInViewport();
   await fixture.frame(153);
@@ -1695,7 +1708,7 @@ test("windowed chat follows new posts only at the newest and announces them", as
     .getByRole("button", { name: "Scroll to bottom", exact: true })
     .click();
   await expect(fixture.post(154)).toBeInViewport();
-  expect(await countMountedChatRows(page)).toBeLessThanOrEqual(
+  expect(await countMountedChatRows(scroller)).toBeLessThanOrEqual(
     WINDOWED_ROW_LIMIT
   );
 });
@@ -1709,25 +1722,30 @@ test("windowed chat keeps the focused post and scrolls by keyboard", async ({
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   const chat = waveChat(page);
+  const chatScroller = waveChatScroller(page);
 
   // A focused post stays mounted, and focused, while the reader scrolls far
   // away from it. Touch rows have no keyboard controls; their actions open
   // from a long press. Row 30 may still be a placeholder when it mounts, so
   // look for the row rather than its text.
-  const row = chat.locator("#drop-151");
+  const row = waveChatRow(page, 151);
   const keyboardRows = !testInfo.project.use.hasTouch;
   if (keyboardRows) {
-    const control = row.locator("a[href], button").first();
+    const control = page
+      .getByRole("region", { name: "Wave chat file upload area", exact: true })
+      .locator("#drop-151")
+      .locator("a[href], button")
+      .first();
     await control.focus();
     await expect(control).toBeFocused();
-    await revealChatRow(chat, chat.locator("#drop-30"), "older", {
+    await revealChatRow(chatScroller, waveChatRow(page, 30), "older", {
       timeout: 30000,
     });
     await expect(row).toBeAttached();
     await expect(control).toBeFocused();
     await expect(row).not.toBeInViewport();
   } else {
-    await revealChatRow(chat, chat.locator("#drop-30"), "older", {
+    await revealChatRow(chatScroller, waveChatRow(page, 30), "older", {
       timeout: 30000,
     });
   }
@@ -1752,9 +1770,7 @@ test("chat stays at the newest post when the viewport shrinks", async ({
   const fixture = await sharedPostFixture(page, baseURL);
   await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
-  const scroller = waveChat(page)
-    .locator("[data-wave-drops-scroll-container]")
-    .first();
+  const scroller = waveChatScroller(page);
   const size = page.viewportSize();
   if (!size) throw new Error("Missing viewport size");
   // A software keyboard or a growing composer shrinks the message list.

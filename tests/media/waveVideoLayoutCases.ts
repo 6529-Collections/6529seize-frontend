@@ -138,7 +138,10 @@ export function defineWaveVideoLayoutTests() {
     await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
-    const main = page.getByRole("main");
+    const chatScroller = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .first();
     const video = page.getByLabel("Video player", { exact: true }).first();
     if (CHAT_WINDOWING) {
       await expect(
@@ -148,7 +151,7 @@ export function defineWaveVideoLayoutTests() {
           })
           .first()
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-      await revealChatRow(main, video, "older");
+      await revealChatRow(chatScroller, video, "older");
     }
     await video.scrollIntoViewIfNeeded();
     await expect(video).not.toHaveAttribute("src", /.+/);
@@ -197,14 +200,11 @@ export function defineWaveVideoLayoutTests() {
       await page.evaluate(() => {
         (document.activeElement as HTMLElement | null)?.blur();
       });
-      await main
-        .locator("[data-wave-drops-scroll-container]")
-        .first()
-        .evaluate((element) => {
-          element.scrollTop = element.scrollHeight;
-        });
+      await chatScroller.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
       await expect(anchor).toHaveCount(0);
-      await revealChatRow(main, anchor, "older");
+      await revealChatRow(chatScroller, anchor, "older");
       await anchor.scrollIntoViewIfNeeded();
     } else {
       const previousStyle = await anchor.getAttribute("style");

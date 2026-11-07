@@ -551,7 +551,14 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByText("Surrounding history message 40.", { exact: true })
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-      await revealChatRow(page.getByRole("main"), showMore, "older");
+      await revealChatRow(
+        page
+          .getByRole("main")
+          .locator("[data-wave-drops-scroll-container]")
+          .first(),
+        showMore,
+        "older"
+      );
     }
     await showMore.scrollIntoViewIfNeeded();
     await showMore.focus();

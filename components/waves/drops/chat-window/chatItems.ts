@@ -35,10 +35,10 @@ export type ChatItem =
       readonly serialNo: number;
     };
 
-export const getChatGapKey = (gap: HistoryGap): string =>
+const getChatGapKey = (gap: HistoryGap): string =>
   `gap-${gap.newerThan}`;
 
-export const getChatUnreadKey = (serialNo: number): string =>
+const getChatUnreadKey = (serialNo: number): string =>
   `unread-divider-${serialNo}`;
 
 export function buildChatItems({
