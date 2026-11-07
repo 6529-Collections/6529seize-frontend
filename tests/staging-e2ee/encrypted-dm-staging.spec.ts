@@ -297,13 +297,18 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await expectDecrypted(b, hello);
 
     await gotoStaging(b.page, "/notifications");
+    // The message link reads "New encrypted message" (visually hidden) and
+    // then the decrypted preview.
+    const noticeLinkName = `New encrypted message ${hello}`;
     const notice = b.page.getByRole("article").filter({
-      has: b.page.getByRole("link", { name: hello, exact: true }),
+      has: b.page.getByRole("link", { name: noticeLinkName, exact: true }),
     });
     await expect(
       notice.getByRole("link", { name: a.user.handle, exact: true })
     ).toHaveAttribute("href", `/${a.user.handle}`, { timeout: UI_TIMEOUT_MS });
-    await notice.getByRole("link", { name: hello, exact: true }).click();
+    await notice
+      .getByRole("link", { name: noticeLinkName, exact: true })
+      .click();
     await expectDecrypted(b, hello);
 
     await sendEncrypted(b, reply);
