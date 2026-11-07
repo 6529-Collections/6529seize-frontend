@@ -491,6 +491,7 @@ jobs:
       - name: Run native competition browser regression pack
         if: matrix.lane == 'playwright-native-competition'
         env:
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
           NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
