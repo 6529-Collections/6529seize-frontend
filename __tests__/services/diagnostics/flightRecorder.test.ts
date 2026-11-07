@@ -1,4 +1,15 @@
-type Recorder = typeof import("@/services/diagnostics/flightRecorder");
+import { publicEnv } from "@/config/env";
+import * as lifecycle from "@/lib/action-lifecycle";
+import * as recorder from "@/services/diagnostics/flightRecorder";
+
+jest.mock("@/config/env", () => ({
+  publicEnv: {
+    NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+    NEXT_PUBLIC_E2EE_DM_ENABLED: "false",
+    VERSION: "4.99.0",
+  },
+}));
+const mockEnv = publicEnv as Record<string, string | undefined>;
 
 const HANDLE = "punk6529";
 const WALLET = "0x1234567890abcdef1234567890abcdef12345678";
@@ -6,27 +17,12 @@ const WAVE_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
 const SECRET = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ4In0.c2lnbmF0dXJl";
 const MESSAGE = "gm frens this is my private message";
 
-const loadRecorder = (flag: string | undefined): Recorder => {
-  jest.resetModules();
-  jest.doMock("@/config/env", () => ({
-    publicEnv: {
-      NEXT_PUBLIC_FEATURE_DIAGNOSTICS: flag,
-      NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
-      NEXT_PUBLIC_E2EE_DM_ENABLED: "false",
-      VERSION: "4.99.0",
-    },
-  }));
-  return jest.requireActual<Recorder>("@/services/diagnostics/flightRecorder");
-};
-
 const network = {
   fetch: jest.fn(),
   sendBeacon: jest.fn(),
   xhrOpen: jest.fn(),
   webSocket: jest.fn(),
 };
-
-let recorder: Recorder;
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -47,7 +43,7 @@ beforeEach(() => {
     configurable: true,
     value: "visible",
   });
-  recorder = loadRecorder("true");
+  mockEnv["NEXT_PUBLIC_FEATURE_DIAGNOSTICS"] = "true";
   recorder.startFlightRecorder();
 });
 
@@ -68,7 +64,7 @@ const hide = () => {
 describe("flight recorder", () => {
   it("records nothing and stores nothing with the flag off", () => {
     recorder.resetFlightRecorderForTests();
-    recorder = loadRecorder(undefined);
+    mockEnv["NEXT_PUBLIC_FEATURE_DIAGNOSTICS"] = undefined;
     recorder.startFlightRecorder();
     recorder.recordFlightNavigation("/waves/[wave]");
     recorder.recordFlightError("boundary", new Error("boom"));
@@ -130,7 +126,7 @@ describe("flight recorder", () => {
     expect(snapshot.entries[0]).toMatchObject({ route: "/waves/[x]" });
     expect(snapshot.entries[2]).toMatchObject({
       method: "POST",
-      endpoint: "/drops/[uuid]/reaction",
+      endpoint: "/drops/[id]/reaction",
       status: 502,
       ms: 812,
       request_id: "a1b2c3d4-e5f6-4711-8899-aabbccddeeff",
@@ -158,9 +154,6 @@ describe("flight recorder", () => {
   });
 
   it("records real action-lifecycle transitions with nothing else attached", () => {
-    const lifecycle = jest.requireActual<
-      typeof import("@/lib/action-lifecycle")
-    >("@/lib/action-lifecycle");
     const restoreReporter = lifecycle.setIllegalTransitionReporter(null);
     try {
       let state = lifecycle.createActionState("server");
@@ -266,7 +259,6 @@ describe("flight recorder", () => {
     // Reload: a new page load reads the copy as "previous".
     recorder.resetFlightRecorderForTests();
     jest.advanceTimersByTime(10 * 60 * 1000);
-    recorder = loadRecorder("true");
     recorder.startFlightRecorder();
     expect(recorder.getFlightSnapshot().previous?.entries).toHaveLength(2);
 
@@ -281,7 +273,6 @@ describe("flight recorder", () => {
       JSON.stringify({ saved_at: Date.now() - 61 * 60 * 1000, entries: [] })
     );
     recorder.resetFlightRecorderForTests();
-    recorder = loadRecorder("true");
     recorder.startFlightRecorder();
     expect(recorder.getFlightSnapshot().previous).toBeNull();
     expect(sessionStorage.getItem("6529:flight-recorder")).toBeNull();

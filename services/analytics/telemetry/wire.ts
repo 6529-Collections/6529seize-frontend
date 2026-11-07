@@ -11,11 +11,11 @@
  * booleans.
  */
 
-export const WIRE_VERSION = 1;
-export const MAX_BATCH_EVENTS = 40;
-export const MAX_BATCH_BYTES = 8192;
-export const MAX_EVENT_PROPS = 6;
-export const MAX_DIMENSION_KEYS = 16;
+const WIRE_VERSION = 1;
+const MAX_BATCH_EVENTS = 40;
+const MAX_BATCH_BYTES = 8192;
+const MAX_EVENT_PROPS = 6;
+const MAX_DIMENSION_KEYS = 16;
 
 export type Device = "mobile" | "tablet" | "desktop";
 export type Platform = "web" | "ios" | "android" | "desktop";
@@ -158,7 +158,7 @@ const RENAMED_PROPS: Readonly<Record<string, string>> = { platform: "client" };
 // Enum tokens only: at most 32 characters and 4 words, no URL or ID shape.
 // The server holds the exact enums; call sites pass constants.
 const ENUM_WORD = /^[\w.+-]+$/;
-const ID_LIKE = /\d{5,}|^0x|[0-9a-f]{8}-[0-9a-f]{4}|[A-Za-z0-9-]{24,}/i;
+const ID_LIKE = /\d{5,}|^0x|[0-9a-f]{8}-[0-9a-f]{4}|[a-z0-9-]{24,}/i;
 
 export const isEnumValue = (value: unknown): value is string => {
   if (typeof value !== "string" || value.length > 32) return false;
@@ -194,11 +194,30 @@ export function toProductEvent(
   return { name, p };
 }
 
-const PLACEHOLDER =
-  /^(\[{1,2}(\.\.\.)?[a-zA-Z][\w-]{0,31}\]{1,2}|:[a-zA-Z]\w{0,31})$/;
-const STATIC_SEGMENT = /^[a-z0-9][a-z0-9._-]{0,47}$/;
-const ID_SEGMENT =
-  /^\d+$|^0x|[0-9a-f]{8}-[0-9a-f]{4}|^[a-f0-9]{16,}$|^[\w-]{24,}$/i;
+// The schema's segment rules: lowercase static segments of [a-z0-9_-] up to
+// 40 characters, or placeholders `[name]`, `[...name]`, `[[...name]]`,
+// `:name` whose name is a letter then up to 23 word characters.
+const PLACEHOLDER = /^(\[\[\.\.\.|\[\.\.\.|\[|:)([A-Za-z][\w-]*)(\]\]|\])?$/;
+const CLOSING: Readonly<Record<string, string>> = {
+  "[[...": "]]",
+  "[...": "]",
+  "[": "]",
+  ":": "",
+};
+const STATIC_SEGMENT = /^[a-z0-9][a-z0-9_-]{0,39}$/;
+// Hyphenated slugs (6529-gradient-collector-curated) are routes; numbers,
+// addresses, UUIDs and 16+ unbroken letters or digits are identifiers.
+const ID_SEGMENT = /^\d+$|^0x|[0-9a-f]{8}-[0-9a-f]{4}|[a-z0-9]{16,}/i;
+
+function guardSegment(segment: string): string {
+  if (STATIC_SEGMENT.test(segment) && !ID_SEGMENT.test(segment)) return segment;
+  const match = PLACEHOLDER.exec(segment);
+  const open = match?.[1] ?? "";
+  if (!match || (match[3] ?? "") !== CLOSING[open]) return "[x]";
+  // App Router names such as `app-wallet-address` keep their meaning.
+  const name = (match[2] ?? "x").replaceAll("-", "_").slice(0, 24);
+  return `${open}${name}${CLOSING[open]}`;
+}
 
 /**
  * Last guard before a route leaves the page: keeps placeholders and lowercase
@@ -206,15 +225,18 @@ const ID_SEGMENT =
  * 8 segments / 96 characters.
  */
 export function guardRoute(route: string): string {
-  const segments = route.split("?")[0]!.split("/").filter(Boolean).slice(0, 8);
-  const safe = segments.map((segment) =>
-    PLACEHOLDER.test(segment) ||
-    (STATIC_SEGMENT.test(segment) && !ID_SEGMENT.test(segment))
-      ? segment
-      : "[x]"
-  );
-  return `/${safe.join("/")}`.slice(0, 96);
+  const segments = route
+    .split("?")[0]!
+    .split("/")
+    .filter(Boolean)
+    .slice(0, 8)
+    .map(guardSegment);
+  // Drop whole segments, never part of one, to stay within 96 characters.
+  while (segments.join("/").length > 95) segments.pop();
+  return `/${segments.join("/")}`;
 }
+
+const HOST_LABEL = /^[a-z0-9-]{1,63}$/;
 
 /** Hostname only, without "www.", and only for an external referrer. */
 export function toReferrerDomain(
@@ -228,7 +250,14 @@ export function toReferrerDomain(
     const own = ownHost.toLowerCase().replace(/^www\./, "");
     if (host === own || host === "6529.io" || host.endsWith(".6529.io"))
       return undefined;
-    return host.slice(0, 253);
+    // DNS names only (the schema allows 100 characters): no IP literals.
+    const labels = host.split(".");
+    const valid =
+      host.length <= 100 &&
+      labels.length > 1 &&
+      labels.every((label) => HOST_LABEL.test(label) && !/^-|-$/.test(label)) &&
+      !/^\d+$/.test(labels.at(-1) ?? "");
+    return valid ? host : undefined;
   } catch {
     return undefined;
   }

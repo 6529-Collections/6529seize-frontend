@@ -25,15 +25,15 @@ import { scrubDiagnosticText } from "./scrub";
  * leaves the device unless the person sends a diagnostics bundle.
  */
 
-export const RECORDER_WINDOW_MS = 5 * 60 * 1000;
+const RECORDER_WINDOW_MS = 5 * 60 * 1000;
 export const RECORDER_MAX_BYTES = 200 * 1024;
-export const LOCAL_COPY_TTL_MS = 60 * 60 * 1000;
+const LOCAL_COPY_TTL_MS = 60 * 60 * 1000;
 export const LOCAL_COPY_KEY = "6529:flight-recorder";
 const LONG_TASK_MS = 200;
 const PERSIST_THROTTLE_MS = 2000;
 
 /** Kinds and types only: the shape `addTransitionObserver` delivers. */
-export type ActionTransition = {
+type ActionTransition = {
   readonly from: string;
   readonly event: string;
   readonly to: string;
@@ -41,7 +41,7 @@ export type ActionTransition = {
   readonly legal: boolean;
 };
 
-export type FlightEntry = { readonly at: number } & (
+type FlightEntry = { readonly at: number } & (
   | { readonly k: "nav"; readonly route: string }
   | {
       readonly k: "api";
@@ -65,7 +65,7 @@ export type FlightEntry = { readonly at: number } & (
   | { readonly k: "visibility"; readonly state: string }
 );
 
-export type FlightLog = {
+type FlightLog = {
   readonly saved_at: number;
   readonly entries: readonly FlightEntry[];
 };
@@ -93,7 +93,7 @@ let lastPersist = 0;
 let deletionTimer: ReturnType<typeof setTimeout> | undefined;
 const stops: Array<() => void> = [];
 
-export const isFlightRecorderEnabled = (): boolean =>
+const isFlightRecorderEnabled = (): boolean =>
   publicEnv.NEXT_PUBLIC_FEATURE_DIAGNOSTICS === "true" &&
   typeof window !== "undefined";
 
@@ -147,7 +147,7 @@ function readLocalCopy(now: number): FlightLog | null {
 }
 
 /** Removes the local copy now. */
-export function deleteLocalCopy(): void {
+function deleteLocalCopy(): void {
   try {
     sessionStorage.removeItem(LOCAL_COPY_KEY);
   } catch {
@@ -164,7 +164,7 @@ function scheduleLocalCopyDeletion(savedAt: number): void {
 }
 
 /** Writes the local copy (on page hide or an error), at most every 2 s. */
-export function persistLocalCopy(force = false): void {
+function persistLocalCopy(force = false): void {
   if (!isFlightRecorderEnabled()) return;
   const now = Date.now();
   if (!force && now - lastPersist < PERSIST_THROTTLE_MS) return;
@@ -230,7 +230,7 @@ export function recordFlightApi(input: {
     endpoint: guardRoute(
       sanitizeEndpointGroup(input.endpoint)
         .replace(/^\/api(?=\/|$)/, "")
-        .replaceAll(/:(\w+)/g, "[$1]")
+        .replaceAll(/:\w+/g, "[id]")
     ),
     status: input.status,
     ms: Math.round(input.durationMs),

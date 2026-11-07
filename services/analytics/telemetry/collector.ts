@@ -31,8 +31,9 @@ import {
  * in memory for the current page load.
  */
 
-export const COLLECTOR_ENDPOINT = "/e";
+const COLLECTOR_ENDPOINT = "/e";
 const FLUSH_DELAY_MS = 1500;
+const COUNTRY_WAIT_MS = 5000;
 const SLOW_API_MS = 3000;
 const LONG_TASK_MS = 200;
 const MAX_QUEUE = 200;
@@ -78,8 +79,9 @@ let vitalsSent = false;
 let knownCountry = "";
 let countryPending = true;
 let flushTimer: ReturnType<typeof setTimeout> | undefined;
+let heldSince = 0;
 
-export const isFirstPartyTelemetryEnabled = (): boolean =>
+const isFirstPartyTelemetryEnabled = (): boolean =>
   publicEnv.NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY === "true" &&
   typeof window !== "undefined";
 
@@ -89,17 +91,14 @@ function send(body: string): void {
   } catch {
     /* Fall back to fetch. */
   }
-  try {
-    void fetch(COLLECTOR_ENDPOINT, {
-      method: "POST",
-      body,
-      keepalive: true,
-      credentials: "omit",
-      headers: { "content-type": "text/plain;charset=UTF-8" },
-    }).catch(() => undefined);
-  } catch {
-    /* Telemetry never interrupts the page. */
-  }
+  // fetch reports failures as a rejected promise; telemetry never interrupts the page.
+  void fetch(COLLECTOR_ENDPOINT, {
+    method: "POST",
+    body,
+    keepalive: true,
+    credentials: "omit",
+    headers: { "content-type": "text/plain;charset=UTF-8" },
+  }).catch(() => undefined);
 }
 
 function enqueue(event: WireEvent): void {
@@ -121,7 +120,10 @@ function pushVitals(): void {
   enqueue({ v: 1, t: "vitals", ...entryPage, ...vitalValues });
 }
 
-/** Sends queued events. Before the page hides, a page view waits for the country. */
+/**
+ * Sends queued events. Before the page hides, a page view waits up to 5 s for
+ * the country (the lookup's own timeout) and then goes without `fp`.
+ */
 export function flushTelemetry(final = false): void {
   clearTimeout(flushTimer);
   flushTimer = undefined;
@@ -129,8 +131,14 @@ export function flushTelemetry(final = false): void {
     pushHealth();
     pushVitals();
   } else if (countryPending && queue.some((e) => e.t === "pv")) {
-    return;
+    heldSince ||= Date.now();
+    const wait = COUNTRY_WAIT_MS - (Date.now() - heldSince);
+    if (wait > 0) {
+      flushTimer = setTimeout(() => flushTelemetry(), wait);
+      return;
+    }
   }
+  heldSince = 0;
   if (queue.length === 0) return;
   const fp =
     !countryPending &&
@@ -160,7 +168,8 @@ function bump(key: DimensionKey | ScalarKey, dimension?: string): void {
     health[key] = ((health[key] as number | undefined) ?? 0) + 1;
     return;
   }
-  const map = (health[key] ??= {}) as Record<string, number>;
+  health[key] ??= {};
+  const map = health[key] as Record<string, number>;
   if (map[dimension] === undefined && Object.keys(map).length >= 16) return;
   map[dimension] = (map[dimension] ?? 0) + 1;
 }
@@ -284,6 +293,7 @@ export function recordPageView(input: {
     signed_in: input.signedIn,
   });
   currentPage = page;
+  heldSince ||= Date.now();
   entryPage ??= page;
   prevRoute = route;
   for (const event of early.splice(0))
@@ -346,7 +356,9 @@ export function countApiRequest(input: {
   const template = guardRoute(
     sanitizeEndpointGroup(input.endpoint)
       .replace(/^\/api(?=\/|$)/, "")
-      .replaceAll(/:(\w+)/g, "[$1]")
+      // One placeholder kind, so /profiles/:handle and /profiles/:wallet
+      // count as the same endpoint.
+      .replaceAll(/:\w+/g, "[id]")
   );
   const failed =
     status === "network_error" ||
@@ -380,4 +392,5 @@ export function resetTelemetryForTests(): void {
   knownCountry = "";
   countryPending = true;
   flushTimer = undefined;
+  heldSince = 0;
 }

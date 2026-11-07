@@ -19,12 +19,12 @@ from the backend and `--update` refreshes it. The `wireContract` Jest test
 checks that the client's event registry equals the schema's and that emitted
 batches validate against it.
 
-| Record             | Fields                                                                                                                                                                                                                      |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pv` page view     | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp` |
-| `vitals`           | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides                                                                                                                                      |
-| `health`           | per page view: asset load failures by kind, failed and slow API requests by endpoint template, WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind                                             |
-| `ev` product event | a registry event name plus at most six enum or boolean properties                                                                                                                                                           |
+| Record             | Fields                                                                                                                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pv` page view     | App Router route template (for example `/waves/[wave]`), page group, previous route template or `entry`, external referrer hostname on entry only, device class, platform, browser family, signed-in boolean, optional `fp`            |
+| `vitals`           | LCP, INP, CLS, TTFB and FCP for the landing route, sent once when the page first hides. Our own observers; INP is the web-vitals p98 estimate (the worst interaction, skipping one per 50), over at most 1,000 interactions            |
+| `health`           | per page view: asset load failures by kind, failed and slow API requests by endpoint template (every identifier becomes `[id]`, as in `/drops/[id]`), WebSocket drops and reconnects, long tasks over 200 ms, unhandled errors by kind |
+| `ev` product event | a registry event name plus at most six enum or boolean properties                                                                                                                                                                      |
 
 Route templates come from `useParams()`: each segment that holds a dynamic
 param becomes its name. A page that renders the shared 404 component is sent as
@@ -96,8 +96,10 @@ is sent from the recorder itself.
   enables them.
 - The edge `/e` behavior must exist on an environment before the flag is on
   there.
-- Budget: 4.9 KB brotli measured, including the vitals observers. The Jest test
-  `collectorBundleSize` fails above 5 KB.
+- Budget: the collector is 5.1 KB brotli measured, including the vitals
+  observers and the product-event registry; `collectorBundleSize` fails above
+  5.5 KB. The flight recorder adds 2.1 KB brotli; `flightRecorderBundleSize`
+  fails above 2.5 KB.
 
 ## Testing
 

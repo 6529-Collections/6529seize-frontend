@@ -1,4 +1,8 @@
-type Collector = typeof import("@/services/analytics/telemetry/collector");
+import { publicEnv } from "@/config/env";
+import * as collector from "@/services/analytics/telemetry/collector";
+
+jest.mock("@/config/env", () => ({ publicEnv: {} }));
+const mockEnv = publicEnv as Record<string, string | undefined>;
 
 const HANDLE = "punk6529";
 const WALLET = "0x1234567890abcdef1234567890abcdef12345678";
@@ -9,17 +13,7 @@ const MESSAGE = "gm frens this is my private message";
 const TITLE = "The Memes - Main Stage | punk6529";
 
 const sendBeacon = jest.fn<boolean, [string, string]>(() => true);
-const fetchMock = jest.fn(() => Promise.resolve(new Response(null)));
-
-const loadCollector = (flag: string | undefined): Collector => {
-  jest.resetModules();
-  jest.doMock("@/config/env", () => ({
-    publicEnv: { NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY: flag },
-  }));
-  return jest.requireActual<Collector>(
-    "@/services/analytics/telemetry/collector"
-  );
-};
+const fetchMock = jest.fn(() => Promise.resolve({ ok: true }));
 
 const sentBodies = (): string[] => [
   ...sendBeacon.mock.calls.map(([, body]) => body),
@@ -39,8 +33,6 @@ const hidePage = () => {
   });
   globalThis.dispatchEvent(new Event("visibilitychange"));
 };
-
-let collector: Collector;
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -62,7 +54,7 @@ beforeEach(() => {
   });
   document.title = TITLE;
   window.history.replaceState(null, "", "/");
-  collector = loadCollector("true");
+  mockEnv["NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY"] = "true";
 });
 
 afterEach(() => {
@@ -77,7 +69,7 @@ const viewPage = (pathname: string, route: string, pageGroup = "waves") => {
 
 describe("first-party collector", () => {
   it("sends nothing when the flag is off", () => {
-    collector = loadCollector(undefined);
+    mockEnv["NEXT_PUBLIC_FEATURE_FIRST_PARTY_TELEMETRY"] = undefined;
     collector.setTelemetryCountry("US", false);
     viewPage("/waves/x", "/waves/[wave]");
     collector.recordProductEvent("Homepage section seen", {
@@ -279,8 +271,8 @@ describe("first-party collector", () => {
       route: "/waves/[wave]",
       c: {
         asset_fail: { script: 2, media: 1 },
-        api_fail: { "/drops/[uuid]": 1 },
-        api_slow: { "/drops/[uuid]": 1 },
+        api_fail: { "/drops/[id]": 1 },
+        api_slow: { "/drops/[id]": 1 },
         ws_drop: 1,
         ws_reconnect: 1,
         error: { chunk_load: 1, boundary: 1 },
@@ -311,12 +303,24 @@ describe("first-party collector", () => {
     expect(vitals[0]).not.toHaveProperty("fid");
   });
 
-  it("holds the page-view batch until the country is known, and sends it on hide without fp", () => {
+  it("holds the page-view batch for the country, and sends it on hide without fp", () => {
     viewPage("/", "/", "home");
-    jest.advanceTimersByTime(10_000);
+    jest.advanceTimersByTime(4_000);
     expect(sendBeacon).not.toHaveBeenCalled();
     hidePage();
     expect(sentEvents()[0]).toMatchObject({ t: "pv" });
+    expect(sentEvents()[0]).not.toHaveProperty("fp");
+  });
+
+  it("stops waiting for a stuck country lookup after 5 s and sends without fp", () => {
+    viewPage("/", "/", "home");
+    collector.recordProductEvent("Homepage section seen", {
+      section: "Introduction",
+    });
+    jest.advanceTimersByTime(4_900);
+    expect(sendBeacon).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(200);
+    expect(sentEvents().map((e) => e["t"])).toEqual(["pv", "ev"]);
     expect(sentEvents()[0]).not.toHaveProperty("fp");
   });
 
