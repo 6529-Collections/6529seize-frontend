@@ -19,6 +19,7 @@ import {
 } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
+import { useUnknownWaveRefresh } from "./useUnknownWaveRefresh";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -32,10 +33,8 @@ export interface MinimalWaveNewDropsCount {
 interface UseNewDropCounterOptions {
   readonly enabled?: boolean | undefined;
   readonly otherListWaveIds?: ReadonlySet<string> | undefined;
-  readonly unknownWaveRefetchCooldownMs?: number | undefined;
 }
 
-const DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS = 3000;
 const DEFAULT_OTHER_LIST_WAVE_IDS: ReadonlySet<string> = new Set<string>();
 const EMPTY_NEW_DROPS_COUNTS: Record<string, MinimalWaveNewDropsCount> = {};
 
@@ -138,7 +137,8 @@ const addUnreadDropCount = ({
  *
  * @param activeWaveId - The ID of the currently active wave
  * @param waves - List of waves for which to track new drops
- * @param refetchWaves - Function to refetch waves data when needed
+ * @param refetchWaves - Refreshes the list a newly active wave can join;
+ *   called coalesced and jittered for drops in waves the list doesn't have
  * @returns Object containing newDropsCounts and reset function
  */
 function useNewDropCounter(
@@ -148,18 +148,15 @@ function useNewDropCounter(
   options: UseNewDropCounterOptions = {}
 ) {
   const { connectedProfile } = useAuth();
-  const {
-    enabled = true,
-    otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
-    unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
-  } = options;
+  const { enabled = true, otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS } =
+    options;
+  const requestWaveListRefresh = useUnknownWaveRefresh(refetchWaves, enabled);
 
   // Keep track of new drop counts
   const [newDropsCounts, setNewDropsCounts] = useState<
     Record<string, MinimalWaveNewDropsCount>
   >({});
   const wavesRef = useRef(waves);
-  const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
   const wasEnabledRef = useRef(enabled);
 
   useEffect(() => {
@@ -173,7 +170,6 @@ function useNewDropCounter(
 
   useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
-      lastUnknownWaveRefetchAtRef.current = null;
       setNewDropsCounts({});
     }
 
@@ -345,21 +341,11 @@ function useNewDropCounter(
         const addedUnread = recordFullDrop(message);
         if (!addedUnread) return;
       }
-      const now = Date.now();
-      if (
-        lastUnknownWaveRefetchAtRef.current !== null &&
-        now - lastUnknownWaveRefetchAtRef.current < unknownWaveRefetchCooldownMs
-      )
-        return;
-      lastUnknownWaveRefetchAtRef.current = now;
-      refetchWaves();
+      // Every online tab gets this drop at once; refresh the list later,
+      // jittered and coalesced, so the wave can join it.
+      requestWaveListRefresh();
     },
-    [
-      otherListWaveIds,
-      recordFullDrop,
-      refetchWaves,
-      unknownWaveRefetchCooldownMs,
-    ]
+    [otherListWaveIds, recordFullDrop, requestWaveListRefresh]
   );
 
   const handleDropUpdate = useCallback(

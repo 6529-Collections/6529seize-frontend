@@ -31,7 +31,10 @@ interface UseWavesListRefetchOptions {
  * resumes: only sources past their staleTime refetch, and in-flight requests
  * are reused rather than restarted.
  *
- * Both refresh the announcement wave only once it is stale.
+ * `refreshActivityList` refetches only the activity list a newly active
+ * wave can join, for drops in waves the lists don't have.
+ *
+ * The first two refresh the announcement wave only once it is stale.
  * `refetchAllWaves` also runs on live drops for waves missing from the
  * lists, so forcing that wave there made every open tab re-request it.
  */
@@ -91,6 +94,23 @@ export function useWavesListRefetch({
     shouldLoadMainWaves,
   ]);
 
+  const refreshActivityList = useCallback(() => {
+    if (!shouldLoadMainWaves) {
+      return;
+    }
+
+    if (isJoinedMode) {
+      refetchFollowedActivity();
+    } else {
+      refetchAllActivity();
+    }
+  }, [
+    isJoinedMode,
+    refetchAllActivity,
+    refetchFollowedActivity,
+    shouldLoadMainWaves,
+  ]);
+
   const refreshStaleWaves = useCallback(() => {
     if (!shouldLoadMainWaves) {
       return;
@@ -125,5 +145,5 @@ export function useWavesListRefetch({
     viewerIdentityKey,
   ]);
 
-  return { refetchAllWaves, refreshStaleWaves };
+  return { refetchAllWaves, refreshActivityList, refreshStaleWaves };
 }
