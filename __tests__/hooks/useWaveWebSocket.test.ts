@@ -352,6 +352,10 @@ describe("token rotation for the same identity", () => {
     act(() => socket().message({ type: "AUTHENTICATION_FAILED" }));
 
     expect(socket().close).toHaveBeenCalledWith(4008, "Authentication failed");
+    // A late acceptance on the rejected socket subscribes nothing.
+    const sentBeforeLateFrame = socket().send.mock.calls.length;
+    act(() => socket().message({ type: "AUTHENTICATED" }));
+    expect(socket().send).toHaveBeenCalledTimes(sentBeforeLateFrame);
     expect(result.current.socket).toBeNull();
     act(() => jest.advanceTimersByTime(60000));
     expect(sockets).toHaveLength(1);

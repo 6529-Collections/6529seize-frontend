@@ -320,16 +320,16 @@ describe("useWebSocket", () => {
       const { result } = renderHook(() => useWebSocket(), { wrapper });
 
       // Verify context object is complete and immutable reference
-      expect(Object.keys(result.current)).toEqual([
-        "status",
-        "connection",
-        "connect",
-        "disconnect",
-        "reauthenticate",
-        "ensureLive",
-        "subscribe",
-        "send",
+      expect(Object.keys(result.current).sort()).toEqual([
         "config",
+        "connect",
+        "connection",
+        "disconnect",
+        "ensureLive",
+        "reauthenticate",
+        "send",
+        "status",
+        "subscribe",
       ]);
 
       // Verify functions are callable

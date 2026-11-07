@@ -222,6 +222,12 @@ describe("WebSocketProvider sessions", () => {
 
     expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
     expect(ws.close).toHaveBeenCalledWith(4008, "Authentication failed");
+    // The close it started does not reconnect with the rejected token.
+    act(() => {
+      ws.onclose?.(new CloseEvent("close", { code: 4008, wasClean: true }));
+      jest.advanceTimersByTime(60_000);
+    });
+    expect(sockets).toHaveLength(1);
     act(() => {
       result.current.connect(ALICE_ROTATED);
     });

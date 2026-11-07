@@ -224,6 +224,8 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
         }
         if (type === "AUTHENTICATION_FAILED") {
           rejectedToken = sentToken;
+          // Frames that still arrive on the closing socket are ignored.
+          sentToken = null;
           shouldReconnect = false;
           clearAuthenticationTimeout();
           publish(null, WebSocket.CLOSED);
