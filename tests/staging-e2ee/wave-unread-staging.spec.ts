@@ -1,17 +1,17 @@
-import type { Browser, Locator, Page, TestInfo } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
 import { newRunId } from "../support/staging-e2ee/fixtures";
 import {
   attachSessionEvidence,
   closeSessions,
-  createThrowawayProfile,
   createThrowawayUser,
   gotoStaging,
   hasStagingAccessCode,
-  openStagingSession,
-  signInThroughWalletModal,
-  STAGING_ORIGIN,
+  prepareProfileSession,
+  stagingApiError,
+  stagingApiRequest,
+  stagingJourneyOptInProblem,
   type StagingE2eeSession,
   SYNC_TIMEOUT_MS,
   UI_TIMEOUT_MS,
@@ -33,92 +33,14 @@ import {
  * post that arrives while the wave is open leaves no count behind.
  */
 
-const STAGING_API_ORIGIN = "https://api.staging.6529.io";
 const SETUP_TIMEOUT_MS = 10 * 60_000;
 const TEST_TIMEOUT_MS = 10 * 60_000;
 const DESKTOP_PROJECT = "web-desktop-chromium";
 
-function optInProblem(baseURL: string | undefined): string | null {
-  if (process.env["PLAYWRIGHT_E2EE_STAGING"] !== "1") {
-    return "The staging wave unread journey is opt-in: run the e2ee-staging pack (PLAYWRIGHT_E2EE_STAGING=1).";
-  }
-  if (baseURL !== STAGING_ORIGIN) {
-    return `The staging wave unread journey runs only against ${STAGING_ORIGIN}, not ${baseURL ?? "an unset base URL"}.`;
-  }
-  return null;
-}
-
-interface StagingApiResult {
-  readonly ok: boolean;
-  readonly status: number;
-  readonly id: string | null;
-  readonly error: string | null;
-}
-
-/**
- * One API request with the browser's own session, run in the page so the
- * access token and the staging access code never reach the test process.
- */
-async function stagingApi(
-  session: StagingE2eeSession,
-  method: "POST",
-  endpoint: string,
-  body: object
-): Promise<StagingApiResult> {
-  return await session.page.evaluate(
-    async ({ api, method: verb, endpoint: path, body: payload, address }) => {
-      const cookie = (name: string) => {
-        const entry = document.cookie
-          .split("; ")
-          .find((part) => part.startsWith(`${name}=`));
-        return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;
-      };
-      let token = cookie("__Host-wallet-auth");
-      if (!token) {
-        const accounts = JSON.parse(
-          globalThis.localStorage.getItem("6529-wallet-accounts") ?? "[]"
-        ) as { address?: string; jwt?: string | null }[];
-        token =
-          accounts.find(
-            (account) =>
-              account.address?.toLowerCase() === address.toLowerCase()
-          )?.jwt ?? null;
-      }
-      if (!token) {
-        return { ok: false, status: 0, id: null, error: "no session token" };
-      }
-      const staging = cookie("x-6529-auth");
-      const response = await fetch(`${api}/api/${path}`, {
-        method: verb,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          ...(staging ? { "x-6529-auth": staging } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-      const json = (await response.json().catch(() => null)) as {
-        id?: unknown;
-        error?: unknown;
-        message?: unknown;
-      } | null;
-      const error = json?.error ?? json?.message ?? null;
-      return {
-        ok: response.ok,
-        status: response.status,
-        id: typeof json?.id === "string" ? json.id : null,
-        error: typeof error === "string" ? error.slice(0, 300) : null,
-      };
-    },
-    {
-      api: STAGING_API_ORIGIN,
-      method,
-      endpoint,
-      body,
-      address: session.wallet.address,
-    }
-  );
-}
+const OPT_IN_PROBLEM = stagingJourneyOptInProblem(
+  "The staging wave unread journey",
+  process.env["PLAYWRIGHT_BASE_URL"]
+);
 
 /** A public chat wave anyone can view and chat in, as the create form sends. */
 function chatWaveRequest(name: string, description: string) {
@@ -174,56 +96,33 @@ async function createChatWave(
   session: StagingE2eeSession,
   name: string
 ): Promise<string> {
-  const result = await stagingApi(
+  const result = await stagingApiRequest(
     session,
     "POST",
     "waves",
     chatWaveRequest(name, `Throwaway QA wave for the unread journey (${name}).`)
   );
+  const id = (result.json as { id?: unknown } | null)?.id;
+  const error = stagingApiError(result.json);
   expect(
-    result.ok && result.id !== null,
-    `${session.label}: staging refused to create a chat wave for a new profile (HTTP ${result.status}${result.error ? `: ${result.error}` : ""})`
+    result.ok && typeof id === "string",
+    `${session.label}: staging refused to create a chat wave for a new profile (HTTP ${result.status}${error ? `: ${error.slice(0, 300)}` : ""})`
   ).toBe(true);
-  return result.id ?? "";
+  return typeof id === "string" ? id : "";
 }
 
 async function followWave(session: StagingE2eeSession, waveId: string) {
-  const result = await stagingApi(
+  const result = await stagingApiRequest(
     session,
     "POST",
     `waves/${waveId}/subscriptions`,
     { actions: ["DROP_CREATED"] }
   );
+  const error = stagingApiError(result.json);
   expect(
     result.ok,
-    `${session.label}: staging refused to let a new profile follow the wave (HTTP ${result.status}${result.error ? `: ${result.error}` : ""})`
+    `${session.label}: staging refused to let a new profile follow the wave (HTTP ${result.status}${error ? `: ${error.slice(0, 300)}` : ""})`
   ).toBe(true);
-}
-
-/** Signs in a fresh throwaway user and gives it a profile, as a returning user. */
-async function prepareSession(
-  browser: Browser,
-  testInfo: TestInfo,
-  label: string
-): Promise<StagingE2eeSession> {
-  const user = createThrowawayUser(label);
-  let session = await openStagingSession(browser, testInfo, user, label);
-  try {
-    await signInThroughWalletModal(session);
-    await createThrowawayProfile(session);
-    expect(
-      session.productionWrites,
-      `${label}: writes aimed at production hosts before the second sign-in`
-    ).toEqual([]);
-    await session.close();
-    session = await openStagingSession(browser, testInfo, user, label);
-    await signInThroughWalletModal(session);
-    return session;
-  } catch (error) {
-    await attachSessionEvidence(testInfo, [session]);
-    await session.close();
-    throw error;
-  }
 }
 
 function chatComposer(page: Page): Locator {
@@ -324,10 +223,7 @@ test.describe("Live wave unread state between real users on staging @large", () 
     retries: 0,
     timeout: TEST_TIMEOUT_MS,
   });
-  test.skip(
-    optInProblem(process.env["PLAYWRIGHT_BASE_URL"]) !== null,
-    optInProblem(process.env["PLAYWRIGHT_BASE_URL"]) ?? ""
-  );
+  test.skip(OPT_IN_PROBLEM !== null, OPT_IN_PROBLEM ?? "");
 
   test.beforeAll(async ({ browser }, testInfo) => {
     test.setTimeout(SETUP_TIMEOUT_MS);
@@ -341,9 +237,23 @@ test.describe("Live wave unread state between real users on staging @large", () 
       );
     }
     const runId = newRunId();
-    const a = await prepareSession(browser, testInfo, "A");
+    // Both sign in again once the profile exists, as returning users do.
+    const again = { signInAgainWithProfile: true };
+    const a = await prepareProfileSession(
+      browser,
+      testInfo,
+      createThrowawayUser("A"),
+      "A",
+      again
+    );
     try {
-      const b = await prepareSession(browser, testInfo, "B");
+      const b = await prepareProfileSession(
+        browser,
+        testInfo,
+        createThrowawayUser("B"),
+        "B",
+        again
+      );
       try {
         const watchedName = `unreadqa ${runId} watched`;
         const otherName = `unreadqa ${runId} other`;
