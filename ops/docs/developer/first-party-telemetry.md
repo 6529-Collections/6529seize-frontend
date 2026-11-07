@@ -14,8 +14,9 @@ and desktop apps send the same JSON to the same path. Wire format v1 lives in
 schema.
 
 The backend owns the schema. `ops/telemetry/telemetry-collector.v1.schema.json`
-is a vendored copy: `node ops/scripts/sync-telemetry-schema.cjs` reports drift
-from the backend and `--update` refreshes it. The `wireContract` Jest test
+is a vendored copy: `GH_TOKEN=$(gh auth token) node ops/scripts/sync-telemetry-schema.cjs`
+reports drift from the backend, and `--print` prints the backend copy to
+redirect over it. The `wireContract` Jest test
 checks that the client's event registry equals the schema's and that emitted
 batches validate against it.
 
