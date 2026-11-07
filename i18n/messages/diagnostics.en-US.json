@@ -62,5 +62,9 @@
   "diagnostics.assetKind.image": "image",
   "diagnostics.assetKind.media": "audio or video",
   "diagnostics.assetKind.other": "other file",
-  "diagnostics.sent.copyFailed": "Copying didn’t work. The code is selected, so you can copy it yourself."
+  "diagnostics.sent.copyFailed": "Copying didn’t work. The code is selected, so you can copy it yourself.",
+  "diagnostics.crash.heading": "Send the team a report?",
+  "diagnostics.crash.text": "You can send the 6529 team a report of what the app did just before this happened. You see exactly what it contains first, and nothing is sent unless you choose Send.",
+  "diagnostics.crash.review": "Review the report",
+  "diagnostics.crash.hide": "Hide the report"
 }

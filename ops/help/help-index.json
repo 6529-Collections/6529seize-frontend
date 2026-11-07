@@ -704,7 +704,8 @@
         "The report never includes messages the person wrote, what they typed, wallet addresses, handles, full page addresses or sign-in tokens.",
         "A screenshot is optional and off by default; on the web the browser asks which tab, window or screen to capture. 6529 Mobile and 6529 Desktop do not offer it.",
         "After sending, the page shows a short code such as D-7K3Q-9XW2 to give to the 6529 team; the team keeps the report encrypted for 14 days.",
-        "After a crash and reload, activity from before the reload is included for up to an hour."
+        "After a crash and reload, activity from before the reload is included for up to an hour.",
+        "When a page crashes, the error screen offers Send the team a report?, which opens the same preview; nothing is sent without choosing Send."
       ],
       "canonical_path": "/about/diagnostics",
       "link_label": "Send Diagnostics",

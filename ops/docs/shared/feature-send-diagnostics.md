@@ -32,6 +32,12 @@ is sent until the person chooses Send. They then get a short code, such as
 
 - About menu > 6529 > Send Diagnostics.
 - A support link to `/about/diagnostics`.
+- The crash prompt. When a page crashes into the error screen, a **Send the
+  team a report?** card offers **Review the report**, which opens the same
+  preview and Send button in place. If the whole app shell fails (the global
+  error screen), a **Send the team a report** link opens
+  `/about/diagnostics` with a full reload; the report includes the crash from
+  the recorder's saved copy. Nothing is sent without Send.
 
 ## User Journey
 

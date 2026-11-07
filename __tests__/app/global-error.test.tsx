@@ -376,3 +376,26 @@ describe("GlobalError", () => {
     }
   });
 });
+
+describe("GlobalError crash report link", () => {
+  const env = publicEnv as Record<string, unknown>;
+
+  afterEach(() => {
+    delete env["NEXT_PUBLIC_FEATURE_DIAGNOSTICS"];
+  });
+
+  it("is absent while the diagnostics flag is off", () => {
+    renderGlobalError();
+    expect(
+      screen.queryByRole("link", { name: "Send the team a report" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens Send diagnostics with a full document load when the flag is on", () => {
+    env["NEXT_PUBLIC_FEATURE_DIAGNOSTICS"] = "true";
+    renderGlobalError();
+    expect(
+      screen.getByRole("link", { name: "Send the team a report" })
+    ).toHaveAttribute("href", "/about/diagnostics");
+  });
+});

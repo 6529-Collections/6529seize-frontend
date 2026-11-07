@@ -10,19 +10,22 @@ import {
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 type ErrorComponentProps = {
   readonly stackTrace?: string | null | undefined;
   readonly digest?: string | null | undefined;
   readonly onReset?: (() => void) | undefined;
+  /** Shown under the retry button, e.g. the crash report prompt. */
+  readonly children?: ReactNode;
 };
 
 export default function ErrorComponent({
   stackTrace,
   digest,
   onReset,
+  children,
 }: ErrorComponentProps = {}) {
   const { setTitle } = useTitle();
   const searchParams = useSearchParams();
@@ -98,6 +101,8 @@ export default function ErrorComponent({
             Try Again
           </Button>
         )}
+
+        {children}
 
         {(hasStackTrace || digest) && (
           <div className="tw-mt-4 tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-4">
