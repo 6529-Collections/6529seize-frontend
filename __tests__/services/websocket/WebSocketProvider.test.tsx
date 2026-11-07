@@ -893,6 +893,33 @@ describe("WebSocketProvider", () => {
       );
     });
 
+    it("sends the open wave in the shape the backend expects", () => {
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      act(() => {
+        result.current.connect("token");
+      });
+      const ws = (globalThis.WebSocket as unknown as jest.Mock).mock.results[0]
+        ?.value as MockWebSocket;
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      act(() => {
+        result.current.send(WsMessageType.SET_OPEN_WAVE, { wave_id: "wave-1" });
+        result.current.send(WsMessageType.SET_OPEN_WAVE, { wave_id: null });
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        '{"type":"SET_OPEN_WAVE","wave_id":"wave-1"}'
+      );
+      expect(ws.send).toHaveBeenCalledWith(
+        '{"type":"SET_OPEN_WAVE","wave_id":null}'
+      );
+    });
+
     it("handles malformed messages gracefully", () => {
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {

@@ -78,6 +78,10 @@ updates. When auth is missing, the session disconnects and push updates pause.
   device, your wave lists and that wave refresh in every open tab once the
   server announces the change. Changes for another connected account are left
   until you switch to it.
+- The live connection tells the server which wave the tab has open, so a
+  server that limits live posts to followers and viewers still sends you the
+  wave you are reading. It is told again after every reconnect, and cleared
+  when you leave the wave view or hide the tab.
 
 ## Edge Cases
 

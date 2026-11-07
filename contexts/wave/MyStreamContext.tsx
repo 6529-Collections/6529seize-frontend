@@ -7,6 +7,7 @@ import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { usePathname } from "next/navigation";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { useOpenWaveSocketSync } from "@/services/websocket/useOpenWaveSocketSync";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ReactNode } from "react";
@@ -171,6 +172,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
+  // The server's view of this tab's open wave (WAVES-PLAN 1.3).
+  useOpenWaveSocketSync(activeWaveId);
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
