@@ -16,6 +16,11 @@ export interface WavesContextData {
   readonly hasLoadingError?: boolean | undefined;
   readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
+  /**
+   * The waves with the server's unread values. They keep their identity while
+   * messages arrive; read live unread counts, dividers and activity order with
+   * useWavesWithUnread or useWaveUnread (WaveUnreadContext).
+   */
   readonly list: MinimalWave[];
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
