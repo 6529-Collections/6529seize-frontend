@@ -233,7 +233,7 @@ export default function AboutCookiePolicy() {
                     </tr>
                     <tr>
                       <td>6529.io</td>
-                      <td>wallet-auth (JWT Authentication)</td>
+                      <td>__Host-wallet-auth (JWT Authentication)</td>
                       <td>{firstPartyLabel}</td>
                       <td>{sevenDaysLabel}</td>
                     </tr>
