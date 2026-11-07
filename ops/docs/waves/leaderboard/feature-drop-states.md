@@ -35,7 +35,7 @@ This page covers:
 
 - Completed submission cards retain their score and voter summary. Select the
   voter count to inspect voters or the vote log; voting remains closed.
-- Cards appear with each competition leaderboard page. Background score
+- Cards appear with each decision leaderboard page. Background score
   refreshes keep loaded artwork visible; opening a card loads its full drop.
 - List first load shows `Loading drops...`.
 - Grid first load shows skeleton cards.
@@ -54,7 +54,7 @@ This page covers:
   after loading completes with zero rows.
 - List and sidebar pagination auto-loads on scroll and shows a thin loading bar.
 - Grid and gallery pagination uses `Load more drops` and `Loading more...`.
-- Live competition updates refresh scores and ranks while keeping the visible
+- Live decision updates refresh scores and ranks while keeping the visible
   artwork in place in full list, grid, and Memes gallery views.
 - During touch or momentum scrolling, scores keep updating and card reordering
   waits until scrolling settles. Loaded pages stay available.
@@ -77,7 +77,7 @@ This page covers:
   messaging instead of keeping a loading spinner.
 - If first-page requests fail repeatedly, full list, grid and gallery views show
   **Couldn’t load submissions** and **Retry**. A failed request does not mean
-  that the competition has no entries.
+  that the decision has no entries.
 - If refreshing fails after entries have loaded, full views retain those entries
   and show **Couldn’t refresh submissions** with **Retry**.
 - The compact sidebar has separate failure presentation.
@@ -103,7 +103,7 @@ This page covers:
 - [Waves Index](../README.md)
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Pagination Controls](../../shared/feature-pagination-controls.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)

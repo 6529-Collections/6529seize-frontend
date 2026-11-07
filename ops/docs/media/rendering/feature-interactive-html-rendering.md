@@ -40,8 +40,16 @@
    interaction, it renders that static preview image instead of mounting the
    live iframe.
 4. Otherwise, if accepted, the surface renders:
-   - host banner (`Untrusted interactive content` + host link)
-   - iframe with `sandbox="allow-scripts"`, empty `allow`,
+   - host banner (`Untrusted interactive content` + the source host as plain
+     text; the host is not a link, so the artwork never opens outside its
+     sandboxed frame)
+   - in the Memes submission preview, a banner `Full screen` button that
+     expands the sandboxed frame itself (hidden in the native app and where
+     the browser cannot show an element full screen); drop media keep their
+     own `Full screen` media action instead
+   - iframe with `sandbox="allow-scripts"` only, `allow="fullscreen"` (the
+     single permission-policy feature it grants, so the frame can be shown
+     full screen),
      `referrerPolicy="no-referrer"`, and `credentialless`.
 5. Shared renderer iframes mount only after the surface enters the viewport.
    Until the frame finishes loading, a `Loading interactive media` status
@@ -80,7 +88,8 @@
   respects reduced-motion preferences.
 - Shared wave/drop cards without a preview-image override render the host
   banner plus a borderless sandboxed iframe. The banner keeps its uppercase
-  untrusted-content label at 11px and a separate source link.
+  untrusted-content label at 11px and shows the source host as plain text;
+  the host is never linked.
 - Gallery, leaderboard, and other card surfaces that already have preview
   artwork can show a static preview image for HTML media instead of a live
   iframe.
@@ -133,8 +142,10 @@
 - Interactive iframe handling applies only to `text/html` media.
 - Some shared card surfaces intentionally prefer a static preview image over
   live HTML when preview artwork is available.
-- The shared sandboxed renderer allows scripts but intentionally does not grant
-  same-origin, popup, or broader permission-policy capabilities.
+- The shared sandboxed renderer's sandbox is `allow-scripts` only: it does not
+  grant same-origin, popup, top-level navigation, or other sandbox
+  capabilities. Its one permission-policy feature is `fullscreen`, the single
+  intentional exception, which lets the frame be expanded in place.
 - NFT animation iframes (Memes cards and other NFT HTML) allow scripts,
   downloads, and new-tab links (the new tab opens as a normal page, outside the
   sandbox). They do not allow same-origin access, top-level navigation, forms,

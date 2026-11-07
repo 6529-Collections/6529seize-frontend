@@ -30,7 +30,7 @@ describe("WaveDropMobileMenuOpen", () => {
       id: "entry-art",
       drop_type: ApiDropType.Participatory,
     } as ExtendedDrop;
-    (usePathname as jest.Mock).mockReturnValue("/waves/w/competitions/alpha");
+    (usePathname as jest.Mock).mockReturnValue("/waves/w/decisions/alpha");
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams("tab=leaderboard&default=1")
     );
@@ -45,7 +45,7 @@ describe("WaveDropMobileMenuOpen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open drop" }));
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith(
-      "/waves/w/competitions/alpha?tab=leaderboard&drop=entry-art",
+      "/waves/w/decisions/alpha?tab=leaderboard&drop=entry-art",
       { scroll: false }
     );
     expect(onOpenChange).toHaveBeenCalledTimes(1);

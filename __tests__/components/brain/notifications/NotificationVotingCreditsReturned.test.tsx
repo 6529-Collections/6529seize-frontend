@@ -43,10 +43,10 @@ it("renders the amount and both destinations without needing a live related drop
   );
   expect(
     screen.getByRole("link", { name: "Freedom To Transcend" })
-  ).toHaveAttribute("href", "/waves/wave/competitions/competition?entry=entry");
+  ).toHaveAttribute("href", "/waves/wave/decisions/competition?entry=entry");
   expect(
     screen.getByRole("link", { name: "The Memes - Main Stage" })
-  ).toHaveAttribute("href", "/waves/wave/competitions/competition");
+  ).toHaveAttribute("href", "/waves/wave/decisions/competition");
 });
 
 it("keeps a deleted submission title as text and links only to the surviving competition", () => {

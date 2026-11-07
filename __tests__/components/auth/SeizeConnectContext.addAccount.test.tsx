@@ -100,6 +100,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
     },
   ]),
   getWalletAddress: jest.fn(() => ACTIVE_ADDRESS),
+  syncWalletAuthCookie: jest.fn(),
   isAuthAddressAuthorized: jest.fn(
     ({
       address,

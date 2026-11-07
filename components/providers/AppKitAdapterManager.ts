@@ -1,6 +1,6 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "viem/chains";
-import { coinbaseWallet } from "wagmi/connectors";
+import { baseAccount, coinbaseWallet } from "wagmi/connectors";
 import { CW_PROJECT_ID } from "@/constants/constants";
 import {
   AdapterCacheError,
@@ -18,6 +18,21 @@ import type { Chain } from "viem";
 import type { CreateConnectorFn } from "wagmi";
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
+
+/**
+ * AppKit's `enableCoinbase` adds this same Base Account (Coinbase) connector
+ * with the SDK's default telemetry on, which loads Coinbase's analytics
+ * script and reports page performance and wallet requests to Coinbase.
+ * Registering the connector ourselves keeps the identical wallet option
+ * (AppKit skips its own when a `baseAccount` connector already exists) with
+ * the SDK's documented `preference.telemetry` switch turned off.
+ * That reuse was verified on @reown/appkit-adapter-wagmi 1.8.19 (the pinned
+ * version; a test fails when the pin changes): a production build has exactly
+ * one `baseAccount` connector and never loads Coinbase's analytics script.
+ */
+function buildBaseAccountWallet(): CreateConnectorFn {
+  return baseAccount({ preference: { telemetry: false } });
+}
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null;
@@ -93,6 +108,8 @@ export class AppKitAdapterManager {
     if (isCapacitor) {
       // For Capacitor, we need to add the Coinbase mobile wallet connector v3
       connectors.push(this.buildCoinbaseV3MobileWallet());
+    } else {
+      connectors.push(buildBaseAccountWallet());
     }
 
     // Create adapter with all connectors

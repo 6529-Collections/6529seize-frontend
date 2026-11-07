@@ -335,8 +335,8 @@ describe("proxy", () => {
       "/waves/not-a-real-id",
       "/waves/not-a-real-id/",
       "/waves/5f207393-5418-4a75-8738-e40edb44a94",
-      "/waves/not-a-real-id/competitions",
-      "/waves/not-a-real-id/competitions/alpha",
+      "/waves/not-a-real-id/decisions",
+      "/waves/not-a-real-id/decisions/alpha",
       "/messages/not-a-real-id",
     ])(
       "rewrites %s to the not-found route before the staging gate",
@@ -394,7 +394,7 @@ describe("proxy", () => {
     it.each([
       `/waves/${WAVE_ID}`,
       `/waves/${WAVE_ID.toUpperCase()}`,
-      `/waves/${WAVE_ID}/competitions/alpha`,
+      `/waves/${WAVE_ID}/decisions/alpha`,
       `/messages/${WAVE_ID}`,
       "/waves/create",
       "/messages/create",
