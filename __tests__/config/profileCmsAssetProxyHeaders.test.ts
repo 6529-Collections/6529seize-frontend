@@ -34,6 +34,26 @@ describe("profile CMS asset proxy headers", () => {
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
   });
 
+  it("allows only inline styles, for the browser's own image viewer", () => {
+    const directives = new Map(
+      PROFILE_CMS_ASSET_CONTENT_SECURITY_POLICY.split(";").map((directive) => {
+        const [name = "", ...values] = directive.trim().split(/\s+/);
+        return [name, values] as const;
+      })
+    );
+
+    // Chromium and WebKit style an image opened as a page with inline styles.
+    expect(directives.get("style-src")).toEqual(["'unsafe-inline'"]);
+    // Everything else stays blocked, and a bare `sandbox` keeps scripts off.
+    expect(directives.get("default-src")).toEqual(["'none'"]);
+    expect(directives.get("sandbox")).toEqual([]);
+    expect([...directives.keys()].sort((a, b) => a.localeCompare(b))).toEqual([
+      "default-src",
+      "sandbox",
+      "style-src",
+    ]);
+  });
+
   it("leaves the site policy on other routes", async () => {
     const response = await getResponse("/api/profile-cms/other");
 
