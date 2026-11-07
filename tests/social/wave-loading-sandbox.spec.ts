@@ -19,6 +19,10 @@ import {
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
+  GAP_SYNC_TIMING,
+  simulateGapSyncBurst,
+} from "../support/gapSyncSchedule";
+import {
   installWaveListScrollFixture,
   scrollWaveId,
   sidebarScrollMetrics,
@@ -1182,11 +1186,6 @@ test("live posts arrive without a request each and a lost one is repaired after 
     process.env["NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC"] === "false",
     "Gap-only chat sync is off in this run."
   );
-  // The app's timing rules: a check 5 s after the last frame (at least
-  // every 15 s in a continuous stream), and one read per 3 s window.
-  const TRAILING_CHECK_MS = 5_000;
-  const TRAILING_CHECK_MAX_WAIT_MS = 15_000;
-  const READ_WINDOW_MS = 3_000;
   const fixture = await sharedPostFixture(page, baseURL);
   const newestFetches: { readonly search: string; readonly at: number }[] = [];
   const readMarkers: number[] = [];
@@ -1212,94 +1211,52 @@ test("live posts arrive without a request each and a lost one is repaired after 
   counting = true;
 
   // Ten posts arrive back to back; the frame for post 157 is lost. The
-  // expected counts below follow from the measured burst, so a slow runner
-  // changes the numbers they allow, not what they prove.
+  // product's timers are replayed over the recorded send times, so a slow
+  // runner changes what the schedule allows, not what the test proves.
   fixture.missMessages(10);
-  const burstStartedAt = Date.now();
   const sentAt: number[] = [];
   for (let serial = 152; serial <= 161; serial++) {
     if (serial === 157) continue;
     await fixture.frame(serial);
     sentAt.push(Date.now());
   }
-  const burstEndedAt = Date.now();
-  const burstMs = burstEndedAt - burstStartedAt;
-  // A runner pause of at least the trailing delay between two frames can
-  // let a check (and a read window) close mid-burst; allow one per pause.
-  const longGaps = sentAt
-    .slice(1)
-    .filter((at, index) => at - sentAt[index]! >= TRAILING_CHECK_MS).length;
   for (let serial = 152; serial <= 161; serial++) {
     if (serial === 157) continue;
     await expect(fixture.post(serial)).toBeAttached();
   }
+  const schedule = simulateGapSyncBurst(sentAt);
+  const { maxWaitMs, toleranceMs } = GAP_SYNC_TIMING;
 
-  // The socket is trusted: no post fetches the newest posts. The product
-  // checks at min(last frame + trailing delay, window start + max wait),
-  // where a window starts at the first frame after the previous check.
-  // Back-to-back frames leave no idle gap, so a check before the last frame
-  // can only come from the max-wait rule or a long runner pause. Without
-  // long pauses the mid-burst count is exact.
-  const minChecksDuringBurst = Math.floor(
-    Math.max(0, burstMs - 1_000) / TRAILING_CHECK_MAX_WAIT_MS
-  );
-  const maxChecksDuringBurst =
-    Math.floor(burstMs / TRAILING_CHECK_MAX_WAIT_MS) + longGaps;
-  const midBurstFetches = () =>
-    newestFetches.filter((fetch) => fetch.at < burstEndedAt);
-  const expectChecksDuringBurst = () => {
-    expect(midBurstFetches().length).toBeGreaterThanOrEqual(
-      minChecksDuringBurst
-    );
-    expect(midBurstFetches().length).toBeLessThanOrEqual(maxChecksDuringBurst);
-  };
-  expectChecksDuringBurst();
-
-  // Exactly one check follows the last frame, whichever timer fires it, and
-  // it fetches everything since the last verified post, repairing the lost
-  // frame. A check during a long pause can repair it first.
-  await expect(fixture.post(157)).toBeAttached({
-    timeout: TRAILING_CHECK_MAX_WAIT_MS,
-  });
-  const trailingFetches = () =>
-    newestFetches.filter((fetch) => fetch.at >= burstEndedAt);
+  // The socket is trusted: no post fetches the newest posts. Every check is
+  // a timer's, as many as the schedule allows, and the last one runs after
+  // the last frame, no earlier than scheduled (less delivery tolerance). It
+  // fetches everything since the last verified post and repairs the lost
+  // frame. For back-to-back frames that is one check, 5 s after the last.
+  await expect(fixture.post(157)).toBeAttached({ timeout: maxWaitMs });
+  const earliestTrailingAt = schedule.trailingCheckAt.min - toleranceMs;
   await expect
-    .poll(() => trailingFetches().length, {
-      timeout: TRAILING_CHECK_MAX_WAIT_MS,
-    })
-    .toBe(1);
-  expectChecksDuringBurst();
-  // It is a timer's check, not a fetch for the last frame: it comes no
-  // earlier than the schedule allows (less 1 s for delivery and clocks).
-  const lastMidBurstAt = midBurstFetches().at(-1)?.at;
-  const windowStartedAt =
-    lastMidBurstAt === undefined
-      ? burstStartedAt
-      : (sentAt.find((at) => at > lastMidBurstAt) ?? burstEndedAt);
-  const earliestTrailingAt =
-    Math.min(
-      burstEndedAt + TRAILING_CHECK_MS,
-      windowStartedAt + TRAILING_CHECK_MAX_WAIT_MS
-    ) - 1_000;
-  expect(trailingFetches()[0]!.at).toBeGreaterThanOrEqual(earliestTrailingAt);
+    .poll(() => newestFetches.at(-1)?.at ?? 0, { timeout: maxWaitMs })
+    .toBeGreaterThanOrEqual(earliestTrailingAt);
+  expect(newestFetches.length).toBeGreaterThanOrEqual(schedule.checks.min);
+  expect(newestFetches.length).toBeLessThanOrEqual(schedule.checks.max);
   expect(newestFetches[0]!.search).toContain("serial_no_limit=151");
 
-  // The received posts are marked read once per window, not one by one:
-  // windows opened during the burst, one per long pause, plus one for the
-  // repaired post.
-  const maxReadMarkers = Math.floor(burstMs / READ_WINDOW_MS) + 2 + longGaps;
+  // The received posts are marked read once per window, not one by one,
+  // plus at most one for the repaired post.
   await expect
     .poll(() => readMarkers.length, { timeout: 10000 })
-    .toBeGreaterThan(0);
-  expect(readMarkers.length).toBeLessThanOrEqual(maxReadMarkers);
+    .toBeGreaterThanOrEqual(schedule.readWindows.min);
+  expect(readMarkers.length).toBeLessThanOrEqual(schedule.readWindows.max + 1);
+  const burstStartedAt = sentAt[0] ?? 0;
   await testInfo.attach("gap-sync-requests", {
     body: JSON.stringify({
       received: 9,
-      burstMs,
-      longGaps,
-      newestFetches: newestFetches.length,
+      sentAtMs: sentAt.map((at) => at - burstStartedAt),
+      schedule,
+      newestFetchesAtMs: newestFetches.map(
+        (fetch) => fetch.at - burstStartedAt
+      ),
       readMarkers: readMarkers.length,
-      maxReadMarkers,
     }),
     contentType: "application/json",
   });
