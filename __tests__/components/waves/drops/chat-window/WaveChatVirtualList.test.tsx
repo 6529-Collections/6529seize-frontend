@@ -2,7 +2,13 @@ import { WaveChatVirtualList } from "@/components/waves/drops/chat-window/WaveCh
 import type { ChatEndScroller } from "@/components/waves/drops/chat-window/chatScrollBehavior";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
 import { DropSize, type Drop } from "@/helpers/waves/drop.helpers";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ComponentProps } from "react";
 
 jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
@@ -197,7 +203,9 @@ describe("WaveChatVirtualList", () => {
   });
 
   it("keeps the focused row mounted after the window moves", async () => {
-    const { container, rerender, props } = renderList({ drops: makeDrops(200) });
+    const { container, rerender, props } = renderList({
+      drops: makeDrops(200),
+    });
 
     await waitFor(() => expect(mountedSerials(container)).toContain(200));
     const reply = screen.getByRole("button", { name: "Reply to 200" });
@@ -239,10 +247,7 @@ describe("WaveChatVirtualList", () => {
       stableKey: "temp-1",
     } as Drop;
     rerender(
-      <WaveChatVirtualList
-        {...props}
-        drops={[pending, ...makeDrops(30, 40)]}
-      />
+      <WaveChatVirtualList {...props} drops={[pending, ...makeDrops(30, 40)]} />
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1800));

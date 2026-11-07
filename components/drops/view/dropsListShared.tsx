@@ -260,7 +260,9 @@ export function renderBoostCardElement({
     <div
       key={key}
       className={
-        isCompact ? "tw-px-3 tw-py-1.5 sm:tw-px-4" : "tw-px-3 tw-py-3 sm:tw-px-4"
+        isCompact
+          ? "tw-px-3 tw-py-1.5 sm:tw-px-4"
+          : "tw-px-3 tw-py-3 sm:tw-px-4"
       }
     >
       <ContentModerationDropGate drop={boostedDrop} compact>

@@ -17,21 +17,13 @@ import {
 } from "@/helpers/waves/wave-visible-serial.helpers";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { selectPluralCategory } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
 import type { MutableRefObject, Ref, RefObject } from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   buildChatItems,
   estimateChatItemSize,
@@ -39,24 +31,23 @@ import {
   mergePinnedIndices,
   type ChatItem,
 } from "./chatItems";
-import {
-  resolveChatScrollBehavior,
-  type ChatEndScroller,
-} from "./chatScrollBehavior";
+import type { ChatEndScroller } from "./chatScrollBehavior";
 import {
   WaveChatVirtualRow,
   type VideoPlaybackMemories,
 } from "./WaveChatVirtualRow";
+import {
+  CHAT_END_THRESHOLD_PX,
+  useChatAnnouncements,
+  useFocusedChatItemKey,
+  useWindowedChatEnd,
+} from "./useWindowedChat";
 
 // Rows rendered beyond each edge of the viewport. With typical rows this
 // keeps about 50 rows mounted on a desktop viewport.
 const OVERSCAN = 15;
 // Load older history once the rendered range reaches this close to the top.
 const TOP_PREFETCH_ITEMS = 10;
-// Within this many pixels of the end the list counts as at the live end.
-const END_THRESHOLD_PX = 4;
-// New messages are announced together after this quiet period.
-const ANNOUNCE_DELAY_MS = 1500;
 
 interface WaveChatVirtualListProps {
   /** Newest first, as the wave store keeps them. */
@@ -96,29 +87,6 @@ const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
   } else if (ref) {
     (ref as MutableRefObject<T | null>).current = value;
   }
-};
-
-const isTemporaryDrop = (drop: Drop) => drop.id.startsWith("temp-");
-
-/**
- * How many drops after the previous newest one were appended at the end,
- * leaving out the reader's own pending sends.
- */
-const countAppendedDrops = (
-  orderedDrops: readonly Drop[],
-  previousNewestKey: string | null
-): number => {
-  if (previousNewestKey === null) {
-    return 0;
-  }
-  const index = orderedDrops.findIndex(
-    (drop) => drop.stableKey === previousNewestKey
-  );
-  if (index === -1) {
-    return 0;
-  }
-  return orderedDrops.slice(index + 1).filter((drop) => !isTemporaryDrop(drop))
-    .length;
 };
 
 /**
@@ -238,31 +206,7 @@ export function WaveChatVirtualList({
   );
 
   // Keyboard focus pins its row, so tabbing never loses focus to an unmount.
-  const [focusedKey, setFocusedKey] = useState<string | null>(null);
-  useEffect(() => {
-    if (!scrollElement) {
-      return;
-    }
-    const handleFocusIn = (event: FocusEvent) => {
-      const row =
-        event.target instanceof Element
-          ? event.target.closest("[data-chat-item-key]")
-          : null;
-      setFocusedKey(row?.getAttribute("data-chat-item-key") ?? null);
-    };
-    const handleFocusOut = (event: FocusEvent) => {
-      const next = event.relatedTarget;
-      if (!(next instanceof Node) || !scrollElement.contains(next)) {
-        setFocusedKey(null);
-      }
-    };
-    scrollElement.addEventListener("focusin", handleFocusIn);
-    scrollElement.addEventListener("focusout", handleFocusOut);
-    return () => {
-      scrollElement.removeEventListener("focusin", handleFocusIn);
-      scrollElement.removeEventListener("focusout", handleFocusOut);
-    };
-  }, [scrollElement]);
+  const focusedKey = useFocusedChatItemKey(scrollElement);
 
   const pinnedIndices = useMemo(
     () =>
@@ -308,7 +252,7 @@ export function WaveChatVirtualList({
     // Follow appended messages only at the live end, and never while a jump
     // owns the scroll position (see also the follow below).
     followOnAppend: serialNo === null ? "auto" : false,
-    scrollEndThreshold: END_THRESHOLD_PX,
+    scrollEndThreshold: CHAT_END_THRESHOLD_PX,
     // Start at the newest messages.
     initialOffset: () => Number.MAX_SAFE_INTEGER,
     // Scroll-only updates move rows without a React render.
@@ -316,82 +260,14 @@ export function WaveChatVirtualList({
     directDomUpdatesMode: "position",
   });
 
-  // The list opens at the newest message.
-  const didOpenAtEndRef = useRef(false);
-  useLayoutEffect(() => {
-    if (didOpenAtEndRef.current || itemCount === 0 || !scrollElement) {
-      return;
-    }
-    didOpenAtEndRef.current = true;
-    virtualizer.scrollToEnd();
-  }, [itemCount, scrollElement, virtualizer]);
-
-  useEffect(() => {
-    endScrollerRef.current = (behavior) => {
-      virtualizer.scrollToEnd({
-        behavior: resolveChatScrollBehavior(behavior),
-      });
-    };
-    return () => {
-      endScrollerRef.current = null;
-    };
-  }, [endScrollerRef, virtualizer]);
-
-  // Whether the reader is at the live end, from the element itself. The
-  // virtualizer reads its offset back from scroll events, so during a burst
-  // its own check can still see the position before the last follow and
-  // stop following; the element already has the written position.
-  const wasAtEndRef = useRef(true);
-
-  // Follow appended messages while at the live end, and never while a jump
-  // owns the scroll position.
-  const followedNewestKeyRef = useRef(newestKey);
-  useLayoutEffect(() => {
-    if (followedNewestKeyRef.current === newestKey) {
-      return;
-    }
-    followedNewestKeyRef.current = newestKey;
-    if (wasAtEndRef.current && serialNo === null && didOpenAtEndRef.current) {
-      virtualizer.scrollToEnd();
-    }
-  }, [newestKey, serialNo, virtualizer]);
-
-  // The composer, the keyboard or the bottom navigation can resize the
-  // scroller. A reader at the live end stays there.
-  useEffect(() => {
-    if (!scrollElement) {
-      return;
-    }
-    let observedHeight = scrollElement.clientHeight;
-    const recordEnd = () => {
-      // The browser can report a scroll caused by the resize itself before
-      // the resize observer runs; the observer decides with the old height.
-      if (scrollElement.clientHeight !== observedHeight) {
-        return;
-      }
-      wasAtEndRef.current =
-        scrollElement.scrollHeight -
-          scrollElement.clientHeight -
-          scrollElement.scrollTop <=
-        END_THRESHOLD_PX;
-    };
-    scrollElement.addEventListener("scroll", recordEnd, { passive: true });
-    if (typeof ResizeObserver === "undefined") {
-      return () => scrollElement.removeEventListener("scroll", recordEnd);
-    }
-    const observer = new ResizeObserver(() => {
-      const resized = scrollElement.clientHeight !== observedHeight;
-      observedHeight = scrollElement.clientHeight;
-      if (resized && wasAtEndRef.current) {
-        virtualizer.scrollToEnd();
-      }
-    });
-    observer.observe(scrollElement);
-    return () => {
-      scrollElement.removeEventListener("scroll", recordEnd);
-      observer.disconnect();
-    };
-  }, [scrollElement, virtualizer]);
+  useWindowedChatEnd({
+    virtualizer,
+    scrollElement,
+    itemCount,
+    newestKey,
+    serialNo,
+    endScrollerRef,
+  });
 
   // Older history loads as the rendered range nears the top.
   const firstRenderedIndex = virtualizer.range?.startIndex ?? null;
@@ -405,59 +281,12 @@ export function WaveChatVirtualList({
   }, [firstRenderedIndex, onTopIntersection]);
 
   // One polite live region: missed-history progress and new messages.
-  const [announcement, setAnnouncement] = useState<{
-    readonly waveId: string | undefined;
-    readonly message: string;
-  } | null>(null);
-  const announce = useCallback(
-    (message: string) => setAnnouncement({ waveId, message }),
-    [waveId]
-  );
-  const previousNewestKeyRef = useRef<string | null>(newestKey);
-  const pendingArrivalsRef = useRef(0);
-  const announceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const announceArrivalsRef = useRef<(count: number) => void>(() => undefined);
-  useEffect(() => {
-    announceArrivalsRef.current = (count) =>
-      announce(
-        t(
-          locale,
-          selectPluralCategory(locale, count) === "one"
-            ? "waves.chat.newMessages.one"
-            : "waves.chat.newMessages.other",
-          { count }
-        )
-      );
-  }, [announce, locale]);
-  useEffect(() => {
-    const appended = countAppendedDrops(
-      orderedDrops,
-      previousNewestKeyRef.current
-    );
-    previousNewestKeyRef.current = newestKey;
-    if (appended === 0) {
-      return;
-    }
-    pendingArrivalsRef.current += appended;
-    // Arrivals are counted together; a busy wave is announced at most once
-    // per period instead of once per message.
-    announceTimerRef.current ??= setTimeout(() => {
-      announceTimerRef.current = null;
-      const count = pendingArrivalsRef.current;
-      pendingArrivalsRef.current = 0;
-      if (count > 0) {
-        announceArrivalsRef.current(count);
-      }
-    }, ANNOUNCE_DELAY_MS);
-  }, [orderedDrops, newestKey]);
-  useEffect(
-    () => () => {
-      if (announceTimerRef.current !== null) {
-        clearTimeout(announceTimerRef.current);
-      }
-    },
-    []
-  );
+  const { message: announcement, announce } = useChatAnnouncements({
+    orderedDrops,
+    newestKey,
+    waveId,
+    locale,
+  });
 
   const [videoPlaybackMemories] = useState<VideoPlaybackMemories>(
     () => new Map()
@@ -557,7 +386,7 @@ export function WaveChatVirtualList({
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />
       </div>
       <span className="tw-sr-only" role="status" aria-live="polite">
-        {announcement?.waveId === waveId ? announcement?.message : ""}
+        {announcement}
       </span>
     </>
   );

@@ -29,7 +29,11 @@ export type ChatItem =
       readonly boostedIndex: number;
       readonly compact: boolean;
     }
-  | { readonly kind: "unread"; readonly key: string; readonly serialNo: number };
+  | {
+      readonly kind: "unread";
+      readonly key: string;
+      readonly serialNo: number;
+    };
 
 export const getChatGapKey = (gap: HistoryGap): string =>
   `gap-${gap.newerThan}`;
@@ -115,7 +119,11 @@ export function getPinnedChatItemIndices(
 ): number[] {
   const pinned: number[] = [];
   items.forEach((item, index) => {
-    if (item.key === focusedKey || item.kind === "gap" || item.kind === "unread") {
+    if (
+      item.key === focusedKey ||
+      item.kind === "gap" ||
+      item.kind === "unread"
+    ) {
       pinned.push(index);
       return;
     }

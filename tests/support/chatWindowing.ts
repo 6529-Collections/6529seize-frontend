@@ -49,8 +49,7 @@ export async function revealChatRow(
 /** Distance in pixels between the chat's viewport and its newest message. */
 export function chatDistanceFromNewest(scroller: Locator): Promise<number> {
   return scroller.evaluate((element) =>
-    element.getAttribute("data-wave-drops-scroll-container") ===
-    "end-anchored"
+    element.getAttribute("data-wave-drops-scroll-container") === "end-anchored"
       ? Math.max(
           0,
           element.scrollHeight - element.clientHeight - element.scrollTop

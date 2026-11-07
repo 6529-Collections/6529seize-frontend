@@ -200,7 +200,8 @@ export const useScrollBehavior = ({
         }
         setScrollIntentSafely("pinned");
         setIsAtBottom(true);
-        lastScrollTopRef.current = container.scrollHeight - container.clientHeight;
+        lastScrollTopRef.current =
+          container.scrollHeight - container.clientHeight;
         return;
       }
 

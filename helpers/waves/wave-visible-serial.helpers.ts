@@ -92,9 +92,7 @@ export const captureVisibleWaveDropSerial = (): number | null => {
 
   let bestSerial: number | null = null;
   let bestDistance = Number.POSITIVE_INFINITY;
-  for (const row of container.querySelectorAll(
-    `[${DROP_SERIAL_ATTRIBUTE}]`
-  )) {
+  for (const row of container.querySelectorAll(`[${DROP_SERIAL_ATTRIBUTE}]`)) {
     const serial = parseRowSerial(row);
     if (serial === null) {
       continue;
