@@ -41,7 +41,7 @@ type ActionTransition = {
   readonly legal: boolean;
 };
 
-type FlightEntry = { readonly at: number } & (
+export type FlightEntry = { readonly at: number } & (
   | { readonly k: "nav"; readonly route: string }
   | {
       readonly k: "api";
@@ -70,7 +70,7 @@ type FlightLog = {
   readonly entries: readonly FlightEntry[];
 };
 
-type FlightSnapshot = {
+export type FlightSnapshot = {
   readonly v: 1;
   readonly captured_at: number;
   readonly app_version: string;
