@@ -6,12 +6,13 @@ import {
   attachSessionEvidence,
   closeSessions,
   createThrowawayUser,
+  configureStagingJourney,
   gotoStaging,
-  hasStagingAccessCode,
   prepareProfileSession,
   stagingApiError,
   stagingApiRequest,
   stagingJourneyOptInProblem,
+  startStagingJourneySetup,
   type StagingE2eeSession,
   SYNC_TIMEOUT_MS,
   UI_TIMEOUT_MS,
@@ -216,26 +217,20 @@ function requireWorld(): World {
 }
 
 test.describe("Live wave unread state between real users on staging @large", () => {
-  // The steps build on each other in one worker; nothing is retried, since a
-  // retry would only add more staging data.
-  test.describe.configure({
+  // The steps build on each other.
+  configureStagingJourney(test, {
     mode: "serial",
-    retries: 0,
-    timeout: TEST_TIMEOUT_MS,
+    testTimeoutMs: TEST_TIMEOUT_MS,
+    optInProblem: OPT_IN_PROBLEM,
   });
-  test.skip(OPT_IN_PROBLEM !== null, OPT_IN_PROBLEM ?? "");
 
   test.beforeAll(async ({ browser }, testInfo) => {
-    test.setTimeout(SETUP_TIMEOUT_MS);
-    test.skip(
-      testInfo.project.name !== DESKTOP_PROJECT,
-      `The staging unread journey runs on ${DESKTOP_PROJECT} only.`
-    );
-    if (!hasStagingAccessCode()) {
-      throw new Error(
-        "The staging unread journey needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH."
-      );
-    }
+    startStagingJourneySetup(testInfo, {
+      setupTimeoutMs: SETUP_TIMEOUT_MS,
+      project: DESKTOP_PROJECT,
+      journey: "The staging unread journey",
+      pack: "The staging unread journey",
+    });
     const runId = newRunId();
     // Both sign in again once the profile exists, as returning users do.
     const again = { signInAgainWithProfile: true };

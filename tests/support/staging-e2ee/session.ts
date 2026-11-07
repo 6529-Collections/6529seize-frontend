@@ -76,6 +76,66 @@ export function hasStagingAccessCode(): boolean {
   );
 }
 
+/** The parts of the spec's `test` object a staging journey configures. */
+interface StagingJourneyTest {
+  readonly describe: {
+    configure(options: {
+      mode: "default" | "serial";
+      retries: number;
+      timeout: number;
+    }): void;
+  };
+  skip(condition: boolean, description: string): void;
+}
+
+/**
+ * Describe-level set-up shared by the staging journeys: one worker in order,
+ * nothing retried (a retry would only add more staging data), and skipped
+ * unless the pack opted in.
+ */
+export function configureStagingJourney(
+  journeyTest: StagingJourneyTest,
+  options: {
+    readonly mode: "default" | "serial";
+    readonly testTimeoutMs: number;
+    readonly optInProblem: string | null;
+  }
+): void {
+  journeyTest.describe.configure({
+    mode: options.mode,
+    retries: 0,
+    timeout: options.testTimeoutMs,
+  });
+  journeyTest.skip(options.optInProblem !== null, options.optInProblem ?? "");
+}
+
+/**
+ * The start of a staging journey's `beforeAll`: its set-up timeout, the one
+ * project it runs on, and the staging access code it needs.
+ */
+export function startStagingJourneySetup(
+  testInfo: TestInfo,
+  options: {
+    readonly setupTimeoutMs: number;
+    readonly project: string;
+    /** "The staging E2EE journey", for the skip reason. */
+    readonly journey: string;
+    /** "The staging E2EE pack", for the missing access code error. */
+    readonly pack: string;
+  }
+): void {
+  testInfo.setTimeout(options.setupTimeoutMs);
+  testInfo.skip(
+    testInfo.project.name !== options.project,
+    `${options.journey} runs on ${options.project} only.`
+  );
+  if (!hasStagingAccessCode()) {
+    throw new Error(
+      `${options.pack} needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH.`
+    );
+  }
+}
+
 export interface StagingE2eeUser {
   readonly label: string;
   readonly key: ScriptedWalletKey;
