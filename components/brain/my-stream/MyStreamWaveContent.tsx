@@ -201,6 +201,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   }, [updateEligibility, wave]);
 
   // The list row's live unread values (socket counts on top of the server's).
+  // Direct messages come back unchanged: they use the server's DM unread state.
   const waveFromList = useMemo(
     () =>
       waves.list.find((w) => w.id === waveId) ??
@@ -208,12 +209,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     [waves.list, directMessages.list, waveId]
   );
   const liveWaveFromList = useWaveUnread(waveFromList);
-  const enhancedData = {
-    newDropsCount: liveWaveFromList?.newDropsCount.count ?? 0,
-    firstUnreadSerialNo: liveWaveFromList?.firstUnreadDropSerialNo ?? null,
-  };
-
-  const newDropsCount = enhancedData.newDropsCount;
+  const newDropsCount = liveWaveFromList?.newDropsCount.count ?? 0;
   const currentWaveId = wave?.id ?? null;
   const currentWaveName = wave?.name ?? null;
 
@@ -672,7 +668,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
         wave={submissionWave ?? wave}
-        firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
+        firstUnreadSerialNo={liveWaveFromList?.firstUnreadDropSerialNo ?? null}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
         chatSubmitDrop={activeChatSubmitDropState}
