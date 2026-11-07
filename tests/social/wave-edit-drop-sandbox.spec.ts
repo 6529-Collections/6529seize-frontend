@@ -277,8 +277,8 @@ async function installC10DropResponses(page: Page) {
     return route.fulfill({ response, json: endorsed });
   });
   // The edit returns it as the backend does: no reactions and no poll (the
-  // API omits `poll` when the drop has none).
-  await page.route("**/api/drops/*", async (route) => {
+  // API omits `poll` when the drop has none). Only the edit request matches.
+  await page.route(`**${SANDBOX_EDIT_PATH}`, async (route) => {
     if (route.request().method() !== "POST") return route.fallback();
     const response = await route.fetch();
     const { poll: _poll, ...drop } = (await response.json()) as ApiDrop;
