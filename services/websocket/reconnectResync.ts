@@ -11,6 +11,18 @@ export class ReconnectResyncSchedule {
   private wasConnected = false;
   private hasConnected = false;
   private cancelPending: (() => void) | null = null;
+  private readonly onNextConnect = new Set<() => void>();
+
+  /**
+   * Runs `task` when the socket next connects, before that connection's own
+   * resync, so the resync can join what it starts. Returns a cancel.
+   */
+  runOnNextConnect(task: () => void): () => void {
+    this.onNextConnect.add(task);
+    return () => {
+      this.onNextConnect.delete(task);
+    };
+  }
 
   /** Call with the socket's state whenever it may have changed. */
   update(connected: boolean, resync: () => unknown): void {
@@ -23,6 +35,9 @@ export class ReconnectResyncSchedule {
     if (wasConnected) {
       return;
     }
+    const tasks = [...this.onNextConnect];
+    this.onNextConnect.clear();
+    for (const task of tasks) task();
     const isReconnect = this.hasConnected;
     this.hasConnected = true;
     if (isReconnect) {
