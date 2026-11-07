@@ -47,6 +47,34 @@ describe("useDmWavesList", () => {
     });
   });
 
+  it("keeps the result and callbacks across renders with equal inputs", () => {
+    const waves = [
+      { id: "older", latestDropTimestamp: 100 },
+      { id: "newer", latestDropTimestamp: 200 },
+    ];
+    // The query hook returns equal data with new functions on every render.
+    useWavesV2Mock.mockImplementation(() => ({
+      waves,
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      refetchIfStale: jest.fn(),
+    }));
+    const { result, rerender } = renderHook(() => useDmWavesList());
+    const first = result.current;
+
+    rerender();
+
+    expect(result.current).toBe(first);
+    expect(result.current.waves).toBe(first.waves);
+    expect(result.current.fetchNextPage).toBe(first.fetchNextPage);
+    expect(result.current.refetchAllWaves).toBe(first.refetchAllWaves);
+    expect(result.current.refreshStaleWaves).toBe(first.refreshStaleWaves);
+  });
+
   it("sorts DMs by latest drop without configuring recurring polling", () => {
     const { result } = renderHook(() => useDmWavesList());
 

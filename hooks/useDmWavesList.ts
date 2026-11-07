@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesV2 } from "./useWavesV2";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { useStableCallback, useStableList } from "./useStableIdentity";
 
 const noopWaveAction = () => {};
+const NO_WAVES: readonly never[] = [];
+const NO_WAVE_IDS: readonly string[] = [];
 
 interface UseDmWavesListOptions {
   readonly enabled?: boolean | undefined;
@@ -82,61 +85,67 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     );
   }, [mainWaves, shouldFetchDmWaves]);
 
-  const fetchNextPageStable = useCallback(() => {
+  // The query hook hands back new functions on every render; keep these
+  // identities stable so a re-render alone never changes the stream context.
+  const fetchNextPageStable = useStableCallback(() => {
     if (!shouldFetchDmWaves) {
       return;
     }
 
     fetchNextPage();
-  }, [fetchNextPage, shouldFetchDmWaves]);
+  });
 
-  const refetchStable = useCallback(() => {
+  const refetchStable = useStableCallback(() => {
     if (!shouldFetchDmWaves) {
       return;
     }
 
     refetch();
-  }, [refetch, shouldFetchDmWaves]);
+  });
 
-  const refreshStaleWaves = useCallback(() => {
+  const refreshStaleWaves = useStableCallback(() => {
     if (!shouldFetchDmWaves) {
       return;
     }
 
     refetchIfStale();
-  }, [refetchIfStale, shouldFetchDmWaves]);
+  });
+  const stableSorted = useStableList(sorted);
+  const stableMainWaves = useStableList(
+    shouldFetchDmWaves ? mainWaves : NO_WAVES
+  );
 
   return useMemo(
     () => ({
       viewerIdentityKey,
-      waves: sorted,
+      waves: stableSorted,
       isFetching: shouldFetchDmWaves ? isFetching : false,
       isFetchingNextPage: shouldFetchDmWaves ? isFetchingNextPage : false,
       hasNextPage: shouldFetchDmWaves ? hasNextPage : false,
       fetchNextPage: fetchNextPageStable,
       status: shouldFetchDmWaves ? status : "pending",
-      pinnedWaves: [],
+      pinnedWaves: NO_WAVES,
       isPinnedWavesLoading: false,
       hasPinnedWavesError: false,
       addPinnedWave: noopWaveAction,
       removePinnedWave: noopWaveAction,
       loadSubwavesForParent: noopWaveAction,
       prefetchSubwavesForParent: noopWaveAction,
-      mainWaves: shouldFetchDmWaves ? mainWaves : [],
-      missingPinnedIds: [],
+      mainWaves: stableMainWaves,
+      missingPinnedIds: NO_WAVE_IDS,
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
       refreshStaleWaves,
     }),
     [
-      sorted,
+      stableSorted,
       viewerIdentityKey,
       isFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPageStable,
       status,
-      mainWaves,
+      stableMainWaves,
       refetchStable,
       refreshStaleWaves,
       shouldFetchDmWaves,

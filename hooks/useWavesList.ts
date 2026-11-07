@@ -3,6 +3,8 @@
 /* eslint max-lines-per-function: "off" */
 
 import { useMemo, useCallback, useState } from "react";
+import { useStableList } from "./useStableIdentity";
+import { useStableWavesListActions } from "./useStableWavesListActions";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -64,9 +66,6 @@ const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 // not intended to hide user-visible subwaves.
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
-
-const noopWaveAction = (_waveId: string) => {};
-const noopListAction = () => {};
 
 /**
  * Hook for managing and fetching waves list including pinned waves
@@ -699,41 +698,58 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     ? hasPinnedWavesErrorServer
     : false;
 
-  // Memoize the fetchNextPage function to ensure it doesn't change on every render
-  const fetchNextPageStable = useCallback(() => {
-    fetchNextMainWavesPage();
-  }, [fetchNextMainWavesPage]);
+  // Query results and the hooks built on them hand back new functions and
+  // arrays on every render, even when nothing changed. Consumers (the stream
+  // context and everything reading it) only see a new value when the data or
+  // the behaviour actually changes.
+  const stableWaves = useStableList(allWaves);
+  const stableMainWaves = useStableList(mainWaves);
+  const stablePinnedWaves = useStableList(allPinnedWaves);
+  const stableLoadingSubwaveParentIds = useStableList(loadingSubwaveParentIds);
+  const actions = useStableWavesListActions({
+    fetchNextPage: () => {
+      fetchNextMainWavesPage();
+    },
+    retryLoading: retryFollowedActivityWaves,
+    retryRecommendations,
+    addPinnedWave: (waveId) =>
+      shouldLoadMainWaves ? pinWave(waveId) : undefined,
+    removePinnedWave: (waveId) =>
+      shouldLoadMainWaves ? unpinWave(waveId) : undefined,
+    mainWavesRefetch,
+    refetchAllWaves,
+    refreshActivityList,
+    refreshStaleWaves,
+    loadSubwavesForParent,
+    prefetchSubwavesForParent,
+  });
+  const isAnnouncementsLoading =
+    (!settingsLoaded && !settingsError) ||
+    Boolean(
+      announcementsWaveId &&
+      !announcementWave &&
+      (!shouldLoadMainWaves || announcementQueryLoading)
+    );
 
-  // Memoize the entire return object to prevent unnecessary re-renders in consumer components
-  // Components using this hook will only re-render when the values they use actually change
   return useMemo(
     () => ({
       // Main data - derived from combined waves, with enhanced type
-      waves: allWaves,
+      waves: stableWaves,
 
       // Original waves pagination and loading
       isFetching: isMainWavesFetching,
       isFetchingNextPage: isMainWavesFetchingNextPage,
       hasNextPage: hasMainWavesNextPage,
-      fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
       hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
-      retryLoading: retryFollowedActivityWaves,
 
       recommendationsStatus: shouldLoadMainWaves
         ? recommendationsStatus
         : ("pending" as const),
-      retryRecommendations,
-      isAnnouncementsLoading:
-        (!settingsLoaded && !settingsError) ||
-        Boolean(
-          announcementsWaveId &&
-          !announcementWave &&
-          (!shouldLoadMainWaves || announcementQueryLoading)
-        ),
+      isAnnouncementsLoading,
 
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
-      pinnedWaves: allPinnedWaves,
+      pinnedWaves: stablePinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
       trackedAnnouncementWave,
@@ -742,39 +758,26 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       announcementQueryError,
       announcementRefetch,
 
-      // Pinned waves management functions
-      addPinnedWave: shouldLoadMainWaves ? pinWave : noopWaveAction,
-      removePinnedWave: shouldLoadMainWaves ? unpinWave : noopWaveAction,
-
       // Additional data that might be useful
-      mainWaves,
+      mainWaves: stableMainWaves,
       missingPinnedIds,
-      mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
-      // Refetch all waves including main and pinned, or just the activity list
-      refetchAllWaves,
-      refreshActivityList,
-      refreshStaleWaves,
-      loadSubwavesForParent,
-      prefetchSubwavesForParent,
-      loadingSubwaveParentIds,
+      loadingSubwaveParentIds: stableLoadingSubwaveParentIds,
+      // Pagination, retries, pinning, and refetching all waves (main and
+      // pinned) or just the activity list
+      ...actions,
     }),
     [
-      allWaves,
-      recommendationsStatus,
-      retryRecommendations,
-      settingsLoaded,
-      settingsError,
-      announcementsWaveId,
+      stableWaves,
       isMainWavesFetching,
       isMainWavesFetchingNextPage,
       hasMainWavesNextPage,
-      fetchNextPageStable,
       mainWavesStatus,
       isJoinedMode,
       hasFollowedActivityWavesError,
-      retryFollowedActivityWaves,
-      mainWaves,
-      allPinnedWaves,
+      shouldLoadMainWaves,
+      recommendationsStatus,
+      isAnnouncementsLoading,
+      stablePinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
       trackedAnnouncementWave,
@@ -782,17 +785,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       announcementQueryLoading,
       announcementQueryError,
       announcementRefetch,
-      pinWave,
-      unpinWave,
-      shouldLoadMainWaves,
+      stableMainWaves,
       missingPinnedIds,
-      mainWavesRefetch,
-      refetchAllWaves,
-      refreshActivityList,
-      refreshStaleWaves,
-      loadSubwavesForParent,
-      prefetchSubwavesForParent,
-      loadingSubwaveParentIds,
+      stableLoadingSubwaveParentIds,
+      actions,
     ]
   );
 };
