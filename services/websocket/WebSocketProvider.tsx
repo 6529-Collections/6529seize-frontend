@@ -7,7 +7,9 @@ import type {
 } from "./WebSocketContext";
 import { WebSocketContext } from "./WebSocketContext";
 import type {
+  FrameMetadataCallback,
   MessageCallback,
+  SubscribeFn,
   SubscribeOptions,
   SubscriberMap,
   WebSocketMessage,
@@ -149,9 +151,11 @@ const createCredentialMarker = (credential: string): string => {
   return `${credential.length}:${primary}:${secondary}`;
 };
 
+type AnySubscriber = MessageCallback | FrameMetadataCallback;
+
 const dispatchMessage = (
   subscriberMap: SubscriberMap,
-  metadataSubscribers: WeakSet<MessageCallback>,
+  metadataSubscribers: WeakSet<AnySubscriber>,
   message: NormalizedIncomingMessage,
   receivedAt: number
 ): void => {
@@ -173,9 +177,9 @@ const dispatchMessage = (
   for (const subscriber of subscribers) {
     try {
       if (metadataSubscribers.has(subscriber)) {
-        subscriber(message.data, metadata);
+        (subscriber as FrameMetadataCallback)(message.data, metadata);
       } else {
-        (subscriber as (data: unknown) => void)(message.data);
+        (subscriber as MessageCallback)(message.data);
       }
     } catch {
       // Keep one subscriber failure from blocking the remaining handlers.
@@ -218,7 +222,7 @@ export function WebSocketProvider({
   // Subscriber map for message routing
   const subscribersRef = useRef<SubscriberMap>(new Map());
   // Subscribers that asked for each frame's metadata as a second argument
-  const metadataSubscribersRef = useRef(new WeakSet<MessageCallback>());
+  const metadataSubscribersRef = useRef(new WeakSet<AnySubscriber>());
 
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
@@ -528,14 +532,15 @@ export function WebSocketProvider({
   /**
    * Subscribe to a specific message type
    */
-  const subscribe = useCallback(
+  const subscribe = useCallback<SubscribeFn>(
     <T,>(
       messageType: string,
-      subscriber: MessageCallback<T>,
+      subscriber: MessageCallback<T> | FrameMetadataCallback<T>,
       options?: SubscribeOptions
     ) => {
+      const registered = subscriber as AnySubscriber;
       if (options?.withMetadata) {
-        metadataSubscribersRef.current.add(subscriber as MessageCallback);
+        metadataSubscribersRef.current.add(registered);
       }
       // Get or create subscriber set for this message type
       if (!subscribersRef.current.has(messageType)) {
@@ -544,11 +549,11 @@ export function WebSocketProvider({
 
       // Add the subscriber handler
       const subscribers = subscribersRef.current.get(messageType)!;
-      subscribers.add(subscriber as MessageCallback);
+      subscribers.add(registered);
 
       // Return unsubscribe function
       return () => {
-        subscribers.delete(subscriber as MessageCallback);
+        subscribers.delete(registered);
 
         // Clean up empty subscriber sets
         if (subscribers.size === 0) {

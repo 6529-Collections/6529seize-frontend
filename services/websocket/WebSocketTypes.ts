@@ -86,13 +86,15 @@ interface WebSocketFrameMetadata {
   readonly prevSerialNo?: number | null | undefined;
 }
 
+/** A subscriber gets each frame's data, and nothing else. */
+export type MessageCallback<T = unknown> = (data: T) => void;
+
 /**
- * A subscriber gets each frame's data. One that subscribes with
- * `{ withMetadata: true }` also gets that frame's own metadata as a second
- * argument, which works for absent or primitive data too (unlike
- * `getWebSocketMessageReason`). Others get the data alone, as before.
+ * A subscriber registered with `{ withMetadata: true }` also gets that
+ * frame's own metadata as a second argument, which works for absent or
+ * primitive data too (unlike `getWebSocketMessageReason`).
  */
-export type MessageCallback<T = unknown> = (
+export type FrameMetadataCallback<T = unknown> = (
   data: T,
   metadata: WebSocketFrameMetadata
 ) => void;
@@ -102,9 +104,26 @@ export interface SubscribeOptions {
 }
 
 /**
+ * Registers a subscriber for one message type and returns its unsubscribe.
+ * Only a `{ withMetadata: true }` registration may take the metadata
+ * argument, so the callback type matches what the provider passes.
+ */
+export interface SubscribeFn {
+  <T>(messageType: WsMessageType, callback: MessageCallback<T>): () => void;
+  <T>(
+    messageType: WsMessageType,
+    callback: FrameMetadataCallback<T>,
+    options: { readonly withMetadata: true }
+  ): () => void;
+}
+
+/**
  * Map of message types to their callback sets
  */
-export type SubscriberMap = Map<string, Set<MessageCallback>>;
+export type SubscriberMap = Map<
+  string,
+  Set<MessageCallback | FrameMetadataCallback>
+>;
 
 /**
  * Config options for WebSocket connection

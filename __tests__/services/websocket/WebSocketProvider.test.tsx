@@ -7,7 +7,7 @@ import type { WebSocketConfig } from "@/services/websocket/WebSocketTypes";
 import {
   getWebSocketMessageReason,
   WebSocketStatus,
-  type MessageCallback,
+  type FrameMetadataCallback,
 } from "@/services/websocket/WebSocketTypes";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
@@ -535,13 +535,13 @@ describe("WebSocketProvider", () => {
       act(() => {
         result.current.connect("token");
       });
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
-        .mock.results[0]?.value as MockWebSocket;
+      const ws = (globalThis.WebSocket as unknown as jest.Mock).mock.results[0]
+        ?.value as MockWebSocket;
       act(() => {
         ws.triggerOpen();
       });
       const received: { type: WsMessageType; data: unknown }[] = [];
-      const metadata: Parameters<MessageCallback>[1][] = [];
+      const metadata: Parameters<FrameMetadataCallback>[1][] = [];
       act(() => {
         for (const type of types) {
           result.current.subscribe(
@@ -631,6 +631,27 @@ describe("WebSocketProvider", () => {
       expect(received).toHaveLength(1);
       // Existing subscribers keep receiving the data alone.
       expect(plain.mock.calls).toEqual([[{ id: 1 }]]);
+    });
+
+    it("types the metadata argument only for registrations that ask for it", () => {
+      const { subscribe } = openSubscribedSocket([]);
+      const unsubscribers = [
+        subscribe<{ id: number }>(WsMessageType.DROP_UPDATE, (data) => {
+          expect(data).toBeDefined();
+        }),
+        subscribe<{ id: number }>(
+          WsMessageType.DROP_UPDATE,
+          (_data, frame) => {
+            expect(frame.receivedAt).toEqual(expect.any(Number));
+          },
+          { withMetadata: true }
+        ),
+        // @ts-expect-error A plain registration gets no metadata argument.
+        subscribe(WsMessageType.DROP_UPDATE, (_data: unknown, frame: object) =>
+          expect(frame).toBeDefined()
+        ),
+      ];
+      for (const unsubscribe of unsubscribers) unsubscribe();
     });
 
     it("gives frames with absent or primitive data their own fields", () => {
