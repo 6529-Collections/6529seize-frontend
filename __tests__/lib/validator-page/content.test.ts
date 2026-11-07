@@ -185,12 +185,12 @@ describe("validator page text", () => {
     );
   });
 
-  it("shows rc.10's 23 known issues in order", () => {
+  it("shows rc.10's 24 known issues in order", () => {
     const numbers = VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n")
       .map((line) => /^(\d+)\. /.exec(line)?.[1])
       .filter((value): value is string => value !== undefined)
       .map(Number);
-    expect(numbers).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
+    expect(numbers).toEqual(Array.from({ length: 24 }, (_, i) => i + 1));
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       `in ${RELEASE} of the 6529 validator (commit \`${COMMIT}\`)`
     );
@@ -204,7 +204,7 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).toContain(
       "Windows 10 on ARM can't run it."
     );
-    expect(knownIssue(21)).toMatch(/^21\. The app's Log view reads/);
+    expect(knownIssue(22)).toMatch(/^22\. The app's Log view reads/);
   });
 
   it("says a new install on Sunday waits for the evening's checkpoint", () => {
@@ -217,9 +217,9 @@ describe("validator page text", () => {
     expect(knownIssue(7)).toMatch(
       /^7\. On Windows, running rc\.10's Setup\.exe after rc\.10's `\.msi` shows two/
     );
-    const back = knownIssue(10);
+    const back = knownIssue(11);
     expect(back).toMatch(
-      /^10\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
+      /^11\. Going back to rc\.8 or older doesn't help from Sunday 8 November, 00:00 UTC: their signatures don't count on the new chain\./
     );
     expect(back).toContain(
       "Going back to rc.7 or earlier also starts a validator you stopped"
@@ -244,10 +244,16 @@ describe("validator page text", () => {
     );
   });
 
+  it("says a Windows update held by security software waits for a restart (the coordinator's words)", () => {
+    expect(knownIssue(10)).toBe(
+      "10. On Windows, if security software holds the validator's program during an update, Setup asks for a restart. Until Windows restarts, the release before keeps running, and Update now says so."
+    );
+  });
+
   it("gives rc.10's Mac update: Update now, or Quit for an update by hand", () => {
-    const mac = knownIssue(12);
+    const mac = knownIssue(13);
     expect(mac).toMatch(
-      /^12\. On a Mac, dragging the new app over one that is running leaves the old release running\. Workaround: from rc\.10 on, use \*\*Update now\*\* on the Update page/
+      /^13\. On a Mac, dragging the new app over one that is running leaves the old release running\. Workaround: from rc\.10 on, use \*\*Update now\*\* on the Update page/
     );
     expect(mac).toContain(
       "first choose **Quit for an update** in the menu-bar logo's menu or the app's menu"
@@ -297,10 +303,10 @@ describe("validator page text", () => {
     expect(fold("known-issues")).toContain(
       `A new install must start before about ${FRESH_INSTALL_UNTIL}, and 0.1.0 stops signing on 1 December.`
     );
-    expect(knownIssue(22)).toContain(
-      `22. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
+    expect(knownIssue(23)).toContain(
+      `23. A new install must start before about ${FRESH_INSTALL_UNTIL}.`
     );
-    expect(knownIssue(22)).toContain(
+    expect(knownIssue(23)).toContain(
       `a checkpoint built into the release (${LIGHT_CLIENT_CHECKPOINT})`
     );
     // rc.7's, rc.8's and rc.9's dates.
