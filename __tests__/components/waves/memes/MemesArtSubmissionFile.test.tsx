@@ -5,6 +5,11 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { MemesArtSubmissionFileProps } from "@/components/waves/memes/file-upload/reducers/types";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
 
+let mockFullScreenSupported = false;
+jest.mock("@/hooks/useFullScreenSupported", () => ({
+  useFullScreenSupported: () => mockFullScreenSupported,
+}));
+
 // Mock framer-motion to avoid AbortSignal compatibility issues
 jest.mock("framer-motion", () => {
   const MotionDivMock = React.forwardRef<HTMLDivElement, any>(
@@ -610,6 +615,23 @@ describe("MemesArtSubmissionFile", () => {
         "src",
         `https://${VALID_ARWEAVE_SUBDOMAIN}.arweave.net/`
       );
+    });
+
+    it("offers in-frame full screen for the interactive preview", () => {
+      mockFullScreenSupported = true;
+      try {
+        renderInteractivePreview();
+
+        expect(
+          screen.getByRole("button", { name: "Full screen" })
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: "media.6529.io" })
+        ).not.toBeInTheDocument();
+        expect(screen.getByText("media.6529.io")).toBeInTheDocument();
+      } finally {
+        mockFullScreenSupported = false;
+      }
     });
 
     it("blocks previews from unapproved domains", () => {

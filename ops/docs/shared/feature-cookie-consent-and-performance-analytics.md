@@ -9,8 +9,12 @@ performance-tracking behavior tied to that choice.
 
 - Essential cookies stay enabled so the app can keep core session and policy
   state.
-- Performance consent controls whether the site enables non-essential analytics
-  tracking.
+- Performance consent controls the consent-gated analytics: Google Analytics
+  and Mixpanel.
+- Amazon CloudWatch RUM performance monitoring is the exception: it does not
+  read this choice today. A sampled session can set its `cwr_u` and `cwr_s`
+  cookies before a choice is made and after a rejection (see Performance
+  Monitoring Cookies below).
 - The same preference also controls the toggle on `/about/cookie-policy`.
 
 ## Location in the Site
@@ -62,18 +66,20 @@ performance-tracking behavior tied to that choice.
 
 ## Common Scenarios
 
-- First EU visit: the banner is shown and no non-essential analytics start
-  until the user accepts.
+- First EU visit: the banner is shown and Google Analytics and Mixpanel do
+  not start until the user accepts. A RUM-sampled session still sets the RUM
+  cookies.
 - First non-EU visit: the banner is skipped and performance analytics are
   enabled automatically.
 - Returning visitor with `performance-cookies-consent=false`, in or outside
-  the EU: the banner stays hidden, the rejection is kept, and performance
-  analytics stay disabled.
+  the EU: the banner stays hidden, the rejection is kept, and Google Analytics
+  and Mixpanel stay disabled. RUM is not affected by the rejection.
 - Returning non-EU visitor with a stored acceptance: the acceptance is kept
   with its original expiry. The 7-day default is not extended by later visits;
   once it expires, the next non-EU visit applies it again.
 - `/about/cookie-policy` reuses the same accept/reject flows to enable or
-  disable performance cookies after the initial choice.
+  disable the consent-gated analytics after the initial choice. The toggle
+  does not stop RUM or remove its cookies.
 - A connected user who has granted performance consent can be tracked across
   page changes with the current pathname and connected-profile presence.
 - If that same user disconnects without revoking performance consent, later
@@ -160,6 +166,31 @@ performance consent choice. Measured on `@reown/appkit` 1.8.19 and
   as soon as it arrives.
 - This page covers performance-consent behavior only. Other country-based UI
   rules that reuse the consent country are documented by their owning features.
+
+## Performance Monitoring Cookies (Amazon CloudWatch RUM)
+
+- Production deployments that have an AWS RUM app monitor configured load
+  Amazon CloudWatch RUM for a sample of browser sessions. It measures page
+  load speed, browser errors and failed requests and sends them to the 6529
+  Amazon Web Services account.
+- The sample rate is the public `AWS_RUM_SAMPLE_RATE` setting
+  (`config/env.schema.ts`), which the production build workflows fill from
+  the `AWS_RUM_SAMPLE_RATE` GitHub Actions secret. When it is unset or invalid,
+  `DEFAULT_SAMPLE_RATE` (0.2, so 20% of sessions) in
+  `components/monitoring/AwsRumProvider.tsx` applies. The decision is made
+  once per browser tab session, before the RUM code downloads.
+- Sampled sessions set two first-party cookies on `.6529.io`:
+  - `cwr_u`: a random visitor ID kept for 30 days.
+  - `cwr_s`: the current session, kept for 30 minutes after the last
+    activity.
+- `/about/cookie-policy` lists both cookies in the Performance Cookies table,
+  with their purpose, provider and lifespan. The note below the table explains
+  the sampling and states that these cookies are currently set whether or not
+  performance cookies are accepted.
+- Current behavior: RUM does not read the performance consent choice. A
+  sampled session sets `cwr_u` and `cwr_s` whether performance consent is
+  accepted, rejected or not yet decided, and the Performance Cookies toggle
+  does not change that.
 
 ## Related Pages
 

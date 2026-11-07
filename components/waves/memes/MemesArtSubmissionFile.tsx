@@ -492,6 +492,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                     title="Interactive artwork preview"
                     className="tw-bg-transparent"
                     containerClassName="tw-flex-1 tw-flex tw-flex-col"
+                    showFullscreenControl
                     fallback={renderPreviewMessage(
                       "Preview unavailable for unapproved domains or file types.",
                       "Only approved IPFS or Arweave gateway HTML documents can be embedded."
