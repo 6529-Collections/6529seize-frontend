@@ -1,5 +1,6 @@
 "use client";
 
+import CrashReportPrompt from "@/components/diagnostics/CrashReportPrompt";
 import ErrorComponent from "@/components/error/Error";
 import styles from "@/styles/Home.module.css";
 import { extractErrorDetails } from "@/utils/error-extractor";
@@ -30,7 +31,9 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
         stackTrace={errorDetails}
         digest={error.digest}
         onReset={reset}
-      />
+      >
+        <CrashReportPrompt />
+      </ErrorComponent>
     </main>
   );
 }

@@ -118,6 +118,18 @@ export default function GlobalError({
               >
                 {t(locale, "globalError.home")}
               </a>
+              {/* The crash prompt (R14 §4.4). A full load opens Send
+                  diagnostics, which includes this crash from the flight
+                  recorder's local copy; nothing is sent until Send. */}
+              {publicEnv.NEXT_PUBLIC_FEATURE_DIAGNOSTICS === "true" && (
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a // react-doctor-disable-line react-doctor/nextjs-no-a-element deliberate full document load
+                  className="global-error__link"
+                  href="/about/diagnostics"
+                >
+                  {t(locale, "globalError.sendReport")}
+                </a>
+              )}
             </div>
             {hasDetails && (
               <details className="global-error__details">

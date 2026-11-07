@@ -44,5 +44,9 @@
   "diagnostics.error.rate_limited": "Too many reports were sent from this connection. Try again in an hour.",
   "diagnostics.error.unavailable": "Reports can't be received right now. Try again later.",
   "diagnostics.error.offline": "You seem to be offline. Check your connection and try again.",
-  "diagnostics.error.failed": "The report couldn't be sent. Try again."
+  "diagnostics.error.failed": "The report couldn't be sent. Try again.",
+  "diagnostics.crash.heading": "Send the team a report?",
+  "diagnostics.crash.text": "You can send the 6529 team a report of what the app did just before this happened. You see exactly what it contains first, and nothing is sent unless you choose Send.",
+  "diagnostics.crash.review": "Review the report",
+  "diagnostics.crash.hide": "Hide the report"
 }

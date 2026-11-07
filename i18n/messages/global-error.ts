@@ -13,6 +13,7 @@ export const GLOBAL_ERROR_MESSAGES = {
   "globalError.home": "Go to the 6529 home page",
   "globalError.detailsSummary": "Error details",
   "globalError.errorId": "Error ID: {digest}",
+  "globalError.sendReport": "Send the team a report",
 } as const;
 
 type GlobalErrorMessageKey = keyof typeof GLOBAL_ERROR_MESSAGES;
@@ -26,6 +27,7 @@ export const FR_FR_GLOBAL_ERROR_MESSAGES = {
   "globalError.home": "Aller à la page d’accueil de 6529",
   "globalError.detailsSummary": "Détails de l’erreur",
   "globalError.errorId": "ID de l’erreur : {digest}",
+  "globalError.sendReport": "Envoyer un rapport à l’équipe",
 } as const satisfies Record<GlobalErrorMessageKey, string>;
 
 export const ES_ES_GLOBAL_ERROR_MESSAGES = {
@@ -38,6 +40,7 @@ export const ES_ES_GLOBAL_ERROR_MESSAGES = {
   "globalError.home": "Ir a la página de inicio de 6529",
   "globalError.detailsSummary": "Detalles del error",
   "globalError.errorId": "ID del error: {digest}",
+  "globalError.sendReport": "Enviar un informe al equipo",
 } as const satisfies Record<GlobalErrorMessageKey, string>;
 
 export const DE_DE_GLOBAL_ERROR_MESSAGES = {
@@ -49,4 +52,5 @@ export const DE_DE_GLOBAL_ERROR_MESSAGES = {
   "globalError.home": "Zur 6529-Startseite",
   "globalError.detailsSummary": "Fehlerdetails",
   "globalError.errorId": "Fehler-ID: {digest}",
+  "globalError.sendReport": "Dem Team einen Bericht senden",
 } as const satisfies Record<GlobalErrorMessageKey, string>;
