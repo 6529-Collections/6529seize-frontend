@@ -27,6 +27,33 @@ const TIME_FORMAT: Intl.DateTimeFormatOptions = {
   second: "2-digit",
 };
 
+const WS_KEYS = {
+  connected: "diagnostics.entry.wsConnected",
+  connecting: "diagnostics.entry.wsConnecting",
+  authenticating: "diagnostics.entry.wsAuthenticating",
+  disconnected: "diagnostics.entry.wsDisconnected",
+} as const;
+
+const ERROR_KIND_KEYS = {
+  unhandled_error: "diagnostics.errorKind.unhandled_error",
+  unhandled_rejection: "diagnostics.errorKind.unhandled_rejection",
+  chunk_load: "diagnostics.errorKind.chunk_load",
+  boundary: "diagnostics.errorKind.boundary",
+  resource: "diagnostics.errorKind.resource",
+  other: "diagnostics.errorKind.other",
+} as const;
+
+const ASSET_KIND_KEYS = {
+  script: "diagnostics.assetKind.script",
+  style: "diagnostics.assetKind.style",
+  font: "diagnostics.assetKind.font",
+  image: "diagnostics.assetKind.image",
+  media: "diagnostics.assetKind.media",
+  other: "diagnostics.assetKind.other",
+} as const;
+
+// Routes, endpoints, error names and messages, and action-lifecycle kinds are
+// technical identifiers from the app itself; they stay as recorded.
 function describeEntry(locale: SupportedLocale, entry: FlightEntry): string {
   switch (entry.k) {
     case "nav":
@@ -39,7 +66,12 @@ function describeEntry(locale: SupportedLocale, entry: FlightEntry): string {
         ms: formatInteger(locale, entry.ms),
       });
     case "ws":
-      return t(locale, "diagnostics.entry.ws", { state: entry.state });
+      return t(
+        locale,
+        Object.hasOwn(WS_KEYS, entry.state)
+          ? WS_KEYS[entry.state as keyof typeof WS_KEYS]
+          : "diagnostics.entry.wsOther"
+      );
     case "action":
       return entry.legal
         ? t(locale, "diagnostics.entry.action", {
@@ -53,7 +85,7 @@ function describeEntry(locale: SupportedLocale, entry: FlightEntry): string {
           });
     case "error":
       return t(locale, "diagnostics.entry.error", {
-        kind: entry.kind,
+        kind: t(locale, ERROR_KIND_KEYS[entry.kind]),
         name: entry.name,
         message: entry.message,
       }).trim();
@@ -62,9 +94,16 @@ function describeEntry(locale: SupportedLocale, entry: FlightEntry): string {
         ms: formatInteger(locale, entry.ms),
       });
     case "asset":
-      return t(locale, "diagnostics.entry.asset", { kind: entry.kind });
+      return t(locale, "diagnostics.entry.asset", {
+        kind: t(locale, ASSET_KIND_KEYS[entry.kind]),
+      });
     case "visibility":
-      return t(locale, "diagnostics.entry.visibility", { state: entry.state });
+      return t(
+        locale,
+        entry.state === "hidden"
+          ? "diagnostics.entry.pageHidden"
+          : "diagnostics.entry.pageVisible"
+      );
   }
 }
 
@@ -141,14 +180,16 @@ export default function DiagnosticsPanel({
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [screenshotFailed, setScreenshotFailed] = useState(false);
   const [phase, setPhase] = useState<Phase>({ kind: "preview" });
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle"
+  );
   const codeRef = useRef<HTMLElement>(null);
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const SubHeading = headingLevel === 2 ? "h3" : "h4";
 
-  // Moves focus to the code when it appears, so it is announced and in reach.
-  const focusCode = useCallback((node: HTMLElement | null) => {
-    codeRef.current = node;
+  // Moves focus to "Report sent" when it appears: screen readers announce the
+  // heading, then read the code and instructions that follow.
+  const focusHeading = useCallback((node: HTMLElement | null) => {
     node?.focus();
   }, []);
 
@@ -175,12 +216,13 @@ export default function DiagnosticsPanel({
     if (phase.kind !== "sent") return;
     try {
       await navigator.clipboard.writeText(phase.code);
-      setCopied(true);
+      setCopyState("copied");
     } catch {
       const selection = globalThis.getSelection();
       if (codeRef.current && selection) {
         selection.selectAllChildren(codeRef.current);
       }
+      setCopyState("failed");
     }
   };
 
@@ -189,7 +231,9 @@ export default function DiagnosticsPanel({
       <section aria-labelledby={`${id}-sent`} className="tw-space-y-3">
         <Heading
           id={`${id}-sent`}
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+          ref={focusHeading}
+          tabIndex={-1}
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {t(locale, "diagnostics.sent.heading")}
         </Heading>
@@ -197,9 +241,8 @@ export default function DiagnosticsPanel({
           {t(locale, "diagnostics.sent.codeLabel")}
         </p>
         <code
-          ref={focusCode}
-          tabIndex={-1}
-          className="tw-inline-block tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-mono tw-text-2xl tw-tracking-wider tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          ref={codeRef}
+          className="tw-inline-block tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-mono tw-text-2xl tw-tracking-wider tw-text-iron-50"
         >
           {phase.code}
         </code>
@@ -213,7 +256,10 @@ export default function DiagnosticsPanel({
           role="status"
           className="tw-m-0 tw-min-h-5 tw-text-sm tw-text-iron-300"
         >
-          {copied ? t(locale, "diagnostics.sent.copied") : ""}
+          {copyState === "copied" ? t(locale, "diagnostics.sent.copied") : ""}
+          {copyState === "failed"
+            ? t(locale, "diagnostics.sent.copyFailed")
+            : ""}
         </p>
       </section>
     );

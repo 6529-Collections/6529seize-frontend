@@ -81,6 +81,12 @@ is sent until the person chooses Send. They then get a short code, such as
 
 ## Limitations / Notes
 
+- Localization: the page and crash prompt copy lives in the `diagnostics`
+  message namespace in en-US only; en-GB, fr-FR, es-ES and de-DE fall back to
+  en-US until translated (tracked fallback debt). Routes, API endpoints,
+  error names and messages, and action-lifecycle steps are technical
+  identifiers and stay as recorded.
+
 - Error messages are scrubbed of URLs, emails, tokens, wallet addresses,
   identifiers, quoted text, @handles, paths and words with digits. Plain words
   remain, which is why the person sees the full report before sending.

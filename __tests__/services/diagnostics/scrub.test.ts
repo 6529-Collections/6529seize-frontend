@@ -20,6 +20,8 @@ describe("scrubDiagnosticText", () => {
     ["reading 'secret'", "reading [text]"],
     ["mention @alice failed", "mention [handle] failed"],
     ["GET /api/drops/abc/reactions failed", "GET [path] failed"],
+    ["read and/or write", "read and/or write"],
+    ["a // b", "a [path] b"],
     ["profile punk6529 not found", "profile [x] not found"],
     ["status 404", "status [x]"],
     ["key abcdefghijklmnopqrstuvwxyz0123", "key [token]"],

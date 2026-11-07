@@ -86,6 +86,11 @@ describe("DiagnosticsPanel", () => {
       screen.getByRole("heading", { name: "Before the last reload" })
     ).toBeInTheDocument();
     expect(screen.getByText("Show the exact data")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Error (page crash): TypeError Cannot read properties of undefined"
+      )
+    ).toBeInTheDocument();
     expect(mockSend).not.toHaveBeenCalled();
   });
 
@@ -101,11 +106,9 @@ describe("DiagnosticsPanel", () => {
       await screen.findByRole("button", { name: "Send diagnostics" })
     );
     expect(mockSend).toHaveBeenCalledWith(snapshot);
-    const code = await screen.findByText("D-7K3Q-9XW2");
-    await waitFor(() => expect(code).toHaveFocus());
-    expect(
-      screen.getByRole("heading", { name: "Report sent" })
-    ).toBeInTheDocument();
+    expect(await screen.findByText("D-7K3Q-9XW2")).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { name: "Report sent" });
+    await waitFor(() => expect(heading).toHaveFocus());
   });
 
   it("copies the code and announces it", async () => {
@@ -124,6 +127,27 @@ describe("DiagnosticsPanel", () => {
     await user.click(await screen.findByRole("button", { name: "Copy code" }));
     expect(writeText).toHaveBeenCalledWith("D-7K3Q-9XW2");
     expect(screen.getByRole("status")).toHaveTextContent("Code copied");
+  });
+
+  it("announces a failed copy and leaves the code selected", async () => {
+    mockSend.mockResolvedValue({
+      ok: true,
+      code: "D-7K3Q-9XW2",
+      expiresAt: "",
+    });
+    const user = userEvent.setup();
+    jest
+      .spyOn(navigator.clipboard, "writeText")
+      .mockRejectedValue(new Error("denied"));
+    render(<DiagnosticsPanel />);
+    await user.click(
+      await screen.findByRole("button", { name: "Send diagnostics" })
+    );
+    await user.click(await screen.findByRole("button", { name: "Copy code" }));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Copying didn’t work. The code is selected, so you can copy it yourself."
+    );
+    expect(globalThis.getSelection()?.toString()).toBe("D-7K3Q-9XW2");
   });
 
   it.each([
