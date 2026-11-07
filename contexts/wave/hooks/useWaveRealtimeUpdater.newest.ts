@@ -8,7 +8,7 @@ import {
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
 
-export type InitiateFetchNewestCycleFn = (
+type InitiateFetchNewestCycleFn = (
   waveId: string,
   sinceSerialNo: number
 ) => Promise<void>;
