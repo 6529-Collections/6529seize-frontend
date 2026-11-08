@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
@@ -92,6 +92,9 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
+  // The typing socket is shared by the tab: release it and let it close.
+  cleanup();
+  act(() => jest.advanceTimersByTime(30_001));
   Object.defineProperty(globalThis, "WebSocket", {
     configurable: true,
     value: originalWebSocket,
@@ -146,6 +149,8 @@ it.each([false, true])(
       },
       { initialProps: { markdown: "" }, wrapper: withAppSocket }
     );
+    // The typing socket opens once the tab has been visible for 2 s.
+    act(() => jest.advanceTimersByTime(2000));
     act(() => socket().open());
     expect(socket().connection.wave).toBeNull();
     rerender({ markdown: "before authentication" });
@@ -181,6 +186,7 @@ it("clears private typing on logout and ignores the closed account's messages", 
     () => useWaveIsTyping("private-wave", "alice"),
     { wrapper: withAppSocket }
   );
+  act(() => jest.advanceTimersByTime(2000));
   const previous = socket();
   act(() => {
     previous.open();
