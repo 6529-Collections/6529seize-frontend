@@ -2,7 +2,7 @@
 
 import type { ComponentProps, FC, ReactNode } from "react";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
@@ -34,10 +34,10 @@ interface EmojiPickerControlProps extends CreateDropEmojiPickerProps {
   readonly onClosedAfterSelect?: (() => void) | undefined;
 }
 
-/** Shared composer control: anchored on desktop and a slide panel on mobile. */
 /** The desktop picker keeps this gap from the window's edges. */
 const PICKER_VIEWPORT_MARGIN = 8;
 
+/** Shared composer control: anchored on desktop and a slide panel on mobile. */
 export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   disabled = false,
   top = "tw-top-2",
@@ -106,8 +106,8 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
 
   /**
    * The mobile panel hands focus back to its trigger after its exit
-   * animation, after any focus the composer set on selection. When that
-   * happens (or the window passes), tell the composer to restore its caret.
+   * animation. When that happens (or the window passes), tell the composer
+   * to restore its caret, unless the user has moved on to something else.
    */
   const returnFocusAfterPanel = () => {
     const button = buttonRef.current;
@@ -121,11 +121,11 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
     };
     const finish = () => {
       stopWaiting();
-      // Never pull focus back from something the user moved on to.
-      const active = document.activeElement;
-      if (active && active !== button && active !== document.body) return;
       const frame = requestAnimationFrame(() => {
         pending.cancel = null;
+        // Never pull focus back from something the user moved on to.
+        const active = document.activeElement;
+        if (active && active !== button && active !== document.body) return;
         onClosedAfterSelect();
       });
       pending.cancel = () => {
@@ -184,7 +184,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   // The desktop picker opens to the left of its trigger at a fixed offset.
   // Near a window edge, slide it inside so it never widens the page. The
   // observer reports the first size before paint and again once the lazy
-  // picker has loaded.
+  // picker has loaded; flushSync commits the move before that paint.
   useLayoutEffect(() => {
     const dialog = pickerRef.current;
     if (isMobile || !isPickerOpen || !dialog) return;
@@ -195,10 +195,12 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
         document.documentElement.clientWidth -
         dialog.offsetWidth -
         PICKER_VIEWPORT_MARGIN;
-      setPickerPosition((position) => {
-        const left = Math.max(minLeft, Math.min(position.left, maxLeft));
-        return left === position.left ? position : { ...position, left };
-      });
+      flushSync(() =>
+        setPickerPosition((position) => {
+          const left = Math.max(minLeft, Math.min(position.left, maxLeft));
+          return left === position.left ? position : { ...position, left };
+        })
+      );
     });
     observer.observe(dialog);
     return () => observer.disconnect();
@@ -305,20 +307,24 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
 
 const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = (props) => {
   const [editor] = useLexicalComposerContext();
+  // Also runs once the mobile panel, after closing, has handed its trigger
+  // focus (onClosedAfterSelect), so the editor gets it back.
+  const focusEditor = () => {
+    editor.focus();
+    editor.update(() => {});
+  };
   const addEmoji = (emoji: EmojiPickerSelection) => {
     const text = emoji.native ?? (emoji.id ? `:${emoji.id}:` : null);
     if (!text) return;
     editor.update(() => $insertNodes([$createTextNode(text)]));
-    requestAnimationFrame(() => {
-      editor.focus();
-      editor.update(() => {});
-    });
+    requestAnimationFrame(focusEditor);
   };
   return (
     <EmojiPickerControl
       key={props.disabled ? "disabled" : "enabled"}
       {...props}
       onEmojiSelect={addEmoji}
+      onClosedAfterSelect={focusEditor}
     />
   );
 };

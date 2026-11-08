@@ -175,8 +175,8 @@ export const E2eeComposerEditor = forwardRef<
     );
   };
 
-  // The mobile panel restores its trigger's focus only after its exit
-  // animation, after the frames above: restore the caret again then.
+  // The mobile panel hands focus back to its trigger after its exit
+  // animation: restore the caret then.
   const restoreCaretAfterPanel = () => {
     const editor = editorRef.current;
     if (!editor) return;

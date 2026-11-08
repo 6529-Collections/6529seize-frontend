@@ -154,7 +154,10 @@ describe("CreateDropEmojiPicker", () => {
         this.callback = callback;
       }
       observe() {
-        this.callback([], this as unknown as ResizeObserver);
+        // Like the browser: reported outside React's commit.
+        queueMicrotask(() =>
+          this.callback([], this as unknown as ResizeObserver)
+        );
       }
       unobserve() {}
       disconnect() {}
@@ -260,6 +263,46 @@ describe("CreateDropEmojiPicker", () => {
     }
   });
 
+  it("does not take focus back from where the user went", async () => {
+    jest.useFakeTimers();
+    try {
+      mockUseIsMobile.mockReturnValue(true);
+      const onClosedAfterSelect = jest.fn();
+      render(
+        <>
+          <input aria-label="Other field" />
+          <EmojiPickerControl
+            onEmojiSelect={jest.fn()}
+            onClosedAfterSelect={onClosedAfterSelect}
+          />
+        </>
+      );
+      const trigger = screen.getByRole("button", { name: "Open emoji picker" });
+      const other = screen.getByRole("textbox", { name: "Other field" });
+      const select = async () => {
+        fireEvent.click(trigger);
+        fireEvent.click(await screen.findByTestId("picker"));
+      };
+
+      // The user moves on before the fallback.
+      await select();
+      act(() => other.focus());
+      act(() => jest.advanceTimersByTime(1050));
+
+      // The panel hands focus to the trigger, then the user moves on before
+      // the restore's frame: the check runs at the restore itself.
+      other.blur();
+      await select();
+      act(() => trigger.focus());
+      act(() => other.focus());
+      act(() => jest.advanceTimersByTime(1050));
+
+      expect(onClosedAfterSelect).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("labels the trigger by what it will do", async () => {
     render(<EmojiPickerControl onEmojiSelect={jest.fn()} />);
     const trigger = screen.getByRole("button", { name: "Open emoji picker" });
@@ -355,6 +398,26 @@ describe("CreateDropEmojiPicker", () => {
     expect(fakeEditor.update).toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.queryByTestId("mobile-dialog")).toBeNull()
+    );
+  });
+
+  it("focuses the Waves editor again once the mobile panel hands focus back", async () => {
+    mockUseIsMobile.mockReturnValue(true);
+    render(<CreateDropEmojiPicker />);
+    const trigger = screen.getByRole("button", { name: "Open emoji picker" });
+    fireEvent.click(trigger);
+    fireEvent.click(await screen.findByTestId("picker"));
+    await waitFor(() =>
+      expect(screen.queryByTestId("mobile-dialog")).toBeNull()
+    );
+    await waitFor(() => expect(fakeEditor.focus).toHaveBeenCalled());
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const focusedBefore = fakeEditor.focus.mock.calls.length;
+
+    // The panel's exit gives its trigger focus; the editor takes it back.
+    act(() => trigger.focus());
+    await waitFor(() =>
+      expect(fakeEditor.focus).toHaveBeenCalledTimes(focusedBefore + 1)
     );
   });
 
