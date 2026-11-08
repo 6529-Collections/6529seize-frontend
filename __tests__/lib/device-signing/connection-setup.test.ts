@@ -92,6 +92,14 @@ it("transfers a new MLS identity and non-extractable signing key without touchin
   });
   expect(prepared).not.toBeNull();
   expect(signing).toHaveBeenCalledTimes(1);
+  // D172: the phone signs an app grant v2 for {0x004E} (uint16[] suites).
+  const signed = signing.mock.calls[0]![0];
+  expect(signed.domain.version).toBe("2");
+  expect(signed.types.DeviceGrant).toContainEqual({
+    name: "ciphersuites",
+    type: "uint16[]",
+  });
+  expect(signed.message).toMatchObject({ ciphersuites: [0x004e] });
   expect(mockRegister).not.toHaveBeenCalled();
   expect(mockRecord).toBeNull();
   expect(await mockStorage.getDevice(profileId)).toBeNull();
@@ -103,6 +111,12 @@ it("transfers a new MLS identity and non-extractable signing key without touchin
     target: "native",
   });
   expect(mockRegister).toHaveBeenCalledTimes(1);
+  // The receiving device registers exactly the v2 terms that were signed.
+  expect(mockRegister.mock.calls[0]![0].body.grant).toMatchObject({
+    version: 2,
+    ciphersuite: 0x004e,
+    ciphersuites: [0x004e],
+  });
   const record = mockRecord as StoredDeviceKey | null;
   expect(record?.keyPair.privateKey.extractable).toBe(false);
   const challenge = new Uint8Array([1, 2, 3]);

@@ -27,6 +27,25 @@ const bundle: ConnectionSetupBundle = {
   },
 };
 
+it("round trips a v2 grant's suite set (D172)", async () => {
+  const v2: ConnectionSetupBundle = {
+    ...bundle,
+    request: {
+      ...bundle.request,
+      grant: {
+        ...bundle.request.grant,
+        version: 2,
+        ciphersuite: 78,
+        ciphersuites: [78],
+      },
+    },
+  };
+  const sealed = await sealConnectionSetup(v2, "desktop");
+  expect(
+    await openConnectionSetup(sealed.envelope, sealed.secret, wallet, "desktop")
+  ).toEqual(v2);
+});
+
 it.each(["native", "desktop"] as const)(
   "round trips encrypted setup for %s without exposing keys to the API",
   async (target) => {

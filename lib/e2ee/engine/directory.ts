@@ -1,4 +1,5 @@
 import { asE2eeApiError } from "../api-errors";
+import { E2EE_CIPHERSUITE } from "../grant";
 import type { E2eeApiClient } from "../api";
 import type { ApiE2eeDevice } from "../api-types";
 import { digestBytes, revokeDigest } from "../digests";
@@ -163,7 +164,10 @@ export class DeviceDirectory {
       return cached.devices;
     }
     try {
-      const devices = await this.deps.api.getProfileDevices(profileId);
+      const devices = await this.deps.api.getProfileDevices(
+        profileId,
+        E2EE_CIPHERSUITE
+      );
       this.seed(devices);
       this.profiles.set(profileId, { devices, fetchedAt: now });
       return devices;

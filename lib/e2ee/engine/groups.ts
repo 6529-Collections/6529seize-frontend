@@ -42,6 +42,7 @@ export function newGroupRecord(input: {
   return {
     g: summary.g.toLowerCase(),
     status: "active",
+    ciphersuite: summary.ciphersuite,
     metadata: summary.metadata,
     cursor: 0,
     epoch: summary.epoch,

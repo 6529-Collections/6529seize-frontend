@@ -1,4 +1,5 @@
 import { asE2eeApiError } from "../api-errors";
+import { grantCoversSuite } from "../grant";
 import type {
   ApiE2eeGroup,
   ApiE2eeLogItem,
@@ -11,6 +12,7 @@ import {
   checkpoint,
   isActive,
   ownDeviceKey,
+  requireDevice,
   requireMls,
   rollback,
   type EngineContext,
@@ -309,7 +311,10 @@ async function handleWelcome(
   }
   try {
     const metadataOk =
-      isValidMetadata(staged.metadata) && staged.metadata.g.toLowerCase() === g;
+      isValidMetadata(staged.metadata) &&
+      staged.metadata.g.toLowerCase() === g &&
+      // A group of a suite this device's grant does not cover (D172).
+      grantCoversSuite(requireDevice(ctx).grant, staged.ciphersuite);
     const checks = await checkWelcomeMembers(ctx, staged);
     const senderProfileId = await profileOfLeaf(ctx, staged.sender.device_key);
     const refused =

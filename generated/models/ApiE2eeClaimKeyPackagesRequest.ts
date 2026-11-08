@@ -21,6 +21,10 @@ export class ApiE2eeClaimKeyPackagesRequest {
     */
     'group'?: string;
     'claimer_device_key': string;
+    /**
+    * The ciphersuite of the group the KeyPackages are for: 79 (0x004F) or 78 (0x004E). Omitted, it is the claimer device\'s grant suite; clients that support 0x004E should still pass it explicitly. Only target devices that can join groups of this suite are returned, and the claimer device must be able to join it too (else 400).
+    */
+    'ciphersuite'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -43,6 +47,12 @@ export class ApiE2eeClaimKeyPackagesRequest {
             "name": "claimer_device_key",
             "baseName": "claimer_device_key",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "ciphersuite",
+            "baseName": "ciphersuite",
+            "type": "number",
             "format": ""
         }    ];
 

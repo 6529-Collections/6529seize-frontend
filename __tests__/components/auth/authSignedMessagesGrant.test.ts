@@ -39,14 +39,14 @@ jest.mock("@/lib/device-signing/login-grant", () => ({
 
 const E2EE_DEVICE = {
   deviceKeyHex: `0x${"3d".repeat(32)}`,
-  ciphersuite: 1,
+  ciphersuites: [0x004e],
   adopt: jest.fn(async () => true),
   dispose: jest.fn(),
 };
 let mockPreparedE2ee: typeof E2EE_DEVICE | null = null;
 jest.mock("@/lib/device-signing/login-e2ee", () => ({
   prepareLoginE2eeDevice: async () => mockPreparedE2ee,
-  toE2eeNonceParams: () => ({ mls_device_key: "0x3d", mls_ciphersuite: "1" }),
+  toE2eeNonceParams: () => ({ mls_device_key: "0x3d", mls_ciphersuites: "78" }),
 }));
 const mockAdopt = jest.fn(async (_params: unknown) => true);
 jest.mock("@/components/auth/authLoginE2eeDevice", () => ({
