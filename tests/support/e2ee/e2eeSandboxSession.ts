@@ -12,6 +12,7 @@ import {
   type PrivateKeyAccount,
 } from "viem/accounts";
 
+import { grantTypedData } from "./fakeDeliveryService.cjs";
 import {
   assertLocalSandboxBaseURL,
   dismissNextDevTools,
@@ -159,11 +160,21 @@ export const e2eeSandboxControls = {
       foundInReports: string[];
     }>(baseURL, "plaintext-scan", { needles }),
   /**
-   * D172: the server half of an earlier-suite device. Every registered
-   * device of `user` gets a v1 grant for 0x004F and loses its KeyPackages.
+   * D172: the server half of an earlier-suite device. The registered device
+   * gets `grant` (v1, 0x004F, same key) after the server verifies its
+   * wallet signature, and loses its KeyPackages. Returns the grant id.
    */
-  legacySuiteDevices: (baseURL: string | undefined, user: E2eeUserKey) =>
-    control<{ devices: number }>(baseURL, "legacy-suite-devices", { user }),
+  legacySuiteDevice: (
+    baseURL: string | undefined,
+    user: E2eeUserKey,
+    grant: LegacyGrant,
+    walletSignature: string
+  ) =>
+    control<{ grant_id: string }>(baseURL, "legacy-suite-device", {
+      user,
+      grant,
+      wallet_signature: walletSignature,
+    }),
   /** D172: closes (false) or reopens the v1-grant transition window. */
   suiteWindow: (baseURL: string | undefined, open: boolean) =>
     control(baseURL, "suite-window", { open }),
@@ -307,27 +318,36 @@ export async function closeE2eeUsers(
 /** IndexedDB names of the engine's storage (lib/e2ee/storage.ts). */
 const E2EE_DB = { name: "6529-e2ee", devices: "devices" } as const;
 
+/** A grant as signed before grant v2 (D172): one suite, 0x004F. */
+interface LegacyGrant {
+  readonly wallet: string;
+  readonly device_key: string;
+  readonly ciphersuite: number;
+  readonly issued_at: number;
+  readonly expires_at: number;
+  readonly origin: string;
+}
+
+interface StoredDeviceFields {
+  readonly deviceKey: string;
+  readonly grant: { readonly wallet: string; readonly origin: string };
+}
+
 /**
- * D172 seed: makes this browser's enrolled device one from before grant v2,
- * on the server and in IndexedDB, then reloads. On start the engine retires
- * it: its conversations turn read-only ("superseded"), `getUpgrade()` counts
- * them and the device needs one signature. Call it after the user enrolled,
- * with no other tab of this browser open.
+ * Reads this browser's stored device; with `change`, rewrites it to the v1
+ * device in the same IndexedDB transaction.
  */
-export async function seedLegacySuiteBrowser(
-  session: E2eeUserSession,
-  baseURL: string | undefined
-): Promise<void> {
-  const { devices } = await e2eeSandboxControls.legacySuiteDevices(
-    baseURL,
-    session.user.key
-  );
-  expect(
-    devices,
-    `${session.label}: registered devices to mark`
-  ).toBeGreaterThan(0);
-  const rewritten = await session.page.evaluate(
-    async ({ db: names, profileId }) => {
+async function updateStoredDevice(
+  page: Page,
+  profileId: string,
+  change: {
+    grant: LegacyGrant;
+    grantId: string;
+    walletSignature: string;
+  } | null
+): Promise<StoredDeviceFields | null> {
+  return page.evaluate(
+    async ({ db: names, profileId: id, change: update }) => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open(names.name);
         request.onsuccess = () => resolve(request.result);
@@ -335,41 +355,108 @@ export async function seedLegacySuiteBrowser(
           reject(new Error(`IndexedDB open: ${String(request.error)}`));
       });
       try {
-        return await new Promise<boolean>((resolve, reject) => {
-          const tx = db.transaction(names.devices, "readwrite");
-          const store = tx.objectStore(names.devices);
-          const read = store.get(profileId);
-          let found = false;
-          read.onsuccess = () => {
-            const device = read.result as
-              | { grant: Record<string, unknown> }
-              | undefined;
-            if (!device) {
-              return;
-            }
-            // The v1 shape: no version or suite set, ciphersuite 0x004F.
-            const grant: Record<string, unknown> = {
-              ...device.grant,
-              ciphersuite: 0x004f,
+        return await new Promise<StoredDeviceFields | null>(
+          (resolve, reject) => {
+            const tx = db.transaction(
+              names.devices,
+              update ? "readwrite" : "readonly"
+            );
+            const store = tx.objectStore(names.devices);
+            const read = store.get(id);
+            let found: StoredDeviceFields | null = null;
+            read.onsuccess = () => {
+              const device = read.result as
+                | (StoredDeviceFields & Record<string, unknown>)
+                | undefined;
+              if (!device) {
+                return;
+              }
+              found = device;
+              if (update) {
+                // The v1 device: its grant, grant id and signature; no
+                // combined sign-in grant id.
+                const { loginGrantId: _login, ...rest } = device;
+                store.put({
+                  ...rest,
+                  grant: update.grant,
+                  grantId: update.grantId,
+                  walletSignature: update.walletSignature,
+                });
+              }
             };
-            delete grant["version"];
-            delete grant["ciphersuites"];
-            store.put({ ...device, grant });
-            found = true;
-          };
-          tx.oncomplete = () => resolve(found);
-          tx.onerror = () =>
-            reject(new Error(`IndexedDB write: ${String(tx.error)}`));
-        });
+            tx.oncomplete = () => resolve(found);
+            tx.onerror = () =>
+              reject(new Error(`IndexedDB write: ${String(tx.error)}`));
+          }
+        );
       } finally {
         db.close();
       }
     },
-    { db: E2EE_DB, profileId: session.user.profileId }
+    { db: E2EE_DB, profileId, change }
   );
-  expect(rewritten, `${session.label}: stored encrypted-messages device`).toBe(
-    true
+}
+
+/**
+ * D172 seed: makes this browser's enrolled device one from before grant v2,
+ * then reloads. The same device key gets a v1 grant for 0x004F signed by the
+ * user's wallet (outside the browser, so no prompt is counted); the server
+ * verifies it, and the stored device gets the same grant, grant id and
+ * signature. On start the engine retires it: its conversations turn
+ * read-only ("superseded"), `getUpgrade()` counts them and the device needs
+ * one signature. Call it after the user enrolled, with no other tab of this
+ * browser open.
+ *
+ * The browser runs only the current engine. It retires an earlier device at
+ * start and makes groups on 0x004E only, which the server never admits a v1
+ * device to, so a browser cannot enroll a v1 device before its conversations.
+ * Here the conversations come first and their member credentials keep the
+ * v2 grant id; after the move they are only read, never verified again. The
+ * Jest suite (engine.suite-upgrade) enrolls genuine earlier devices on the
+ * earlier engine, with their own 0x004F conversations, and checks those.
+ */
+export async function seedLegacySuiteBrowser(
+  session: E2eeUserSession,
+  baseURL: string | undefined
+): Promise<void> {
+  const stored = await updateStoredDevice(
+    session.page,
+    session.user.profileId,
+    null
   );
+  if (!stored) {
+    throw new Error(`${session.label}: no stored encrypted-messages device`);
+  }
+  // Issued now for 30 days, ending on a whole minute like every grant.
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const grant: LegacyGrant = {
+    wallet: stored.grant.wallet.toLowerCase(),
+    device_key: stored.deviceKey.toLowerCase(),
+    ciphersuite: 0x004f,
+    issued_at: issuedAt,
+    expires_at: (Math.floor(issuedAt / 60) + 30 * 24 * 60) * 60,
+    origin: stored.grant.origin,
+  };
+  const walletSignature = (
+    await session.user.account.signTypedData(
+      grantTypedData(grant) as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+    )
+  ).toLowerCase();
+  const { grant_id: grantId } = await e2eeSandboxControls.legacySuiteDevice(
+    baseURL,
+    session.user.key,
+    grant,
+    walletSignature
+  );
+  const rewritten = await updateStoredDevice(
+    session.page,
+    session.user.profileId,
+    { grant, grantId, walletSignature }
+  );
+  expect(
+    rewritten,
+    `${session.label}: stored encrypted-messages device`
+  ).not.toBeNull();
   await session.page.reload({ waitUntil: "domcontentloaded" });
   await dismissNextDevTools(session.page);
 }

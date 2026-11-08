@@ -224,25 +224,32 @@ The window then ends at 2026-12-02T00:00:00Z.
 1. Add the two keys without disturbing the other variables. The API deploy
    keeps the Lambda's environment. The variables include secrets, so no
    command prints a value: the reads list key names only, and the update
-   shows only status fields.
+   shows only status fields. The copies on disk live in a private (0700)
+   directory that the subshell removes on exit, error, Ctrl-C or TERM.
 
    ```bash
    fn=<prod seizeAPI function name>
-   env_file="$(mktemp)"
-   aws lambda get-function-configuration --region us-east-1 \
-     --function-name "$fn" --query 'Environment.Variables' \
-     --output json > "$env_file"
-   jq -r 'keys[]' "$env_file"   # names only
-   jq '{Variables: (. + {
-     E2EE_SUITE_TRANSITION_START: "2026-11-09T00:00:00Z",
-     E2EE_SUITE_TRANSITION_DAYS: "23"})}' "$env_file" > "$env_file.new"
-   aws lambda update-function-configuration --region us-east-1 \
-     --function-name "$fn" --environment "file://$env_file.new" \
-     --query '{State: State, LastUpdateStatus: LastUpdateStatus}'
-   aws lambda wait function-updated --region us-east-1 --function-name "$fn"
-   aws lambda get-function-configuration --region us-east-1 \
-     --function-name "$fn" --query 'keys(Environment.Variables)'
-   rm -f "$env_file" "$env_file.new"
+   (
+     set -euo pipefail
+     umask 077
+     env_dir="$(mktemp -d)"
+     trap 'rm -rf "$env_dir"' EXIT
+     trap 'exit 130' INT TERM   # exits through the EXIT cleanup
+     aws lambda get-function-configuration --region us-east-1 \
+       --function-name "$fn" --query 'Environment.Variables' \
+       --output json > "$env_dir/current.json"
+     jq -r 'keys[]' "$env_dir/current.json"   # names only
+     jq '{Variables: (. + {
+       E2EE_SUITE_TRANSITION_START: "2026-11-09T00:00:00Z",
+       E2EE_SUITE_TRANSITION_DAYS: "23"})}' \
+       "$env_dir/current.json" > "$env_dir/update.json"
+     aws lambda update-function-configuration --region us-east-1 \
+       --function-name "$fn" --environment "file://$env_dir/update.json" \
+       --query '{State: State, LastUpdateStatus: LastUpdateStatus}'
+     aws lambda wait function-updated --region us-east-1 --function-name "$fn"
+     aws lambda get-function-configuration --region us-east-1 \
+       --function-name "$fn" --query 'keys(Environment.Variables)'
+   )
    ```
 
 2. Confirm that new cold starts log exactly

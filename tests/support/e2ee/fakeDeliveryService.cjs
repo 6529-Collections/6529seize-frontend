@@ -1727,19 +1727,40 @@ function createFakeDeliveryService(options = {}) {
       s.v1GrantsAccepted = accepted;
     },
     /**
-     * D172 seed: turns a registered device into one enrolled before grant v2
-     * (a v1 grant for 0x004F) and drops its KeyPackages, as a device from
-     * before the move. Test-only; the stored signature no longer matches.
+     * D172 sandbox seed: gives a registered device the record of one
+     * enrolled before grant v2, a v1 grant for 0x004F on the same key. The
+     * grant is signed by the device's wallet and verified like a
+     * registration, so grant, grant id and signature stay consistent. Its
+     * KeyPackages are dropped: such a device has none on 0x004E. Jest needs
+     * no seed, as it enrolls earlier devices on the earlier engine.
      */
-    markLegacySuiteDevice(deviceKey) {
+    async markLegacySuiteDevice(deviceKey, signed) {
       const device = s.devices.get(lower(deviceKey));
-      if (!device) {
+      if (!device || device.revoked_at !== null) {
         fail(404, "E2EE_NOT_FOUND");
       }
-      const grant = { ...device.grant, ciphersuite: E2EE_CIPHERSUITE };
-      delete grant.version;
-      delete grant.ciphersuites;
-      device.grant = grant;
+      const grant = signed?.grant;
+      if (
+        !grant ||
+        grant.version !== undefined ||
+        lower(grant.device_key) !== device.device_key
+      ) {
+        fail(400, "E2EE_BAD_GRANT");
+      }
+      const grantId = await verifyGrant(
+        device.profile_id,
+        grant,
+        signed.wallet_signature
+      );
+      device.grant = {
+        ...grant,
+        wallet: lower(grant.wallet),
+        device_key: device.device_key,
+      };
+      device.grant_id = lower(grantId);
+      device.wallet_signature = lower(signed.wallet_signature);
+      device.grant_message = null;
+      device.verified_via = "eoa";
       s.keyPackages.set(device.device_key, newPool());
       return device;
     },
