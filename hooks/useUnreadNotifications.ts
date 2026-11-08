@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
+import type { ApiNotificationsUnreadCountV2 } from "@/generated/models/ApiNotificationsUnreadCountV2";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -54,14 +54,14 @@ export function useUnreadNotifications(
     options.profileId
   );
 
-  const notificationQuery = useQuery<ApiNotificationsResponseV2>({
+  const notificationQuery = useQuery<ApiNotificationsUnreadCountV2>({
     // The token decides whose count this is, so every consumer of the active
     // account shares one cache entry even while its profile handle catches up.
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
       {
         auth: authFingerprint,
-        limit: "1",
+        kind: "unread-count",
         version: "v2",
         includeCompetitions: true,
       },
@@ -72,13 +72,13 @@ export function useUnreadNotifications(
         throw createMissingAuthPollingError();
       }
 
-      return await commonApiFetch<ApiNotificationsResponseV2>({
-        endpoint: `v2/notifications`,
+      // The count alone: the list route also loads and maps notifications.
+      return await commonApiFetch<ApiNotificationsUnreadCountV2>({
+        endpoint: `v2/notifications/unread-count`,
         headers: {
           Authorization: `Bearer ${requestAuthJwt}`,
         },
         params: {
-          limit: "1",
           include_competitions: "true",
         },
         cache: "no-store",
