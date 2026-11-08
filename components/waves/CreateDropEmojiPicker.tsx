@@ -47,7 +47,6 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   onClosedAfterSelect,
 }) => {
   const isMobile = useIsMobileScreen();
-  const selectedBeforeClose = useRef(false);
   const locale = useBrowserLocale();
   const pickerLabel = label ?? t(locale, "emoji.picker.label");
   const { desktopZIndex, mobileZIndexClassName } =
@@ -98,19 +97,31 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
     setShowPicker(true);
   };
 
-  const addEmoji = (emoji: EmojiPickerSelection) => {
-    if (!disabled) onEmojiSelect(emoji);
-    selectedBeforeClose.current = true;
-    setShowPicker(false);
+  /**
+   * The mobile panel hands focus back to its trigger after its exit
+   * animation, after any focus the composer set on selection. When that
+   * happens (or the window passes), tell the composer to restore its caret.
+   */
+  const returnFocusAfterPanel = () => {
+    const button = buttonRef.current;
+    if (!onClosedAfterSelect || !button) return;
+    let done = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      button.removeEventListener("focus", finish);
+      clearTimeout(timer);
+      requestAnimationFrame(() => onClosedAfterSelect());
+    };
+    button.addEventListener("focus", finish);
+    timer = setTimeout(finish, 1000);
   };
 
-  // The panel hands focus back to its trigger once it has left, after any
-  // focus the composer set on selection; give the caret back after that.
-  const handleMobileAfterLeave = () => {
-    if (!selectedBeforeClose.current) return;
-    selectedBeforeClose.current = false;
-    if (!onClosedAfterSelect) return;
-    requestAnimationFrame(() => onClosedAfterSelect());
+  const addEmoji = (emoji: EmojiPickerSelection) => {
+    if (!disabled) onEmojiSelect(emoji);
+    if (isMobile) returnFocusAfterPanel();
+    setShowPicker(false);
   };
 
   useEffect(() => {
@@ -217,7 +228,6 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
           isOpen={isPickerOpen}
           ariaLabel={pickerLabel}
           onClose={() => setShowPicker(false)}
-          onAfterLeave={handleMobileAfterLeave}
           zIndexClassName={mobileZIndexClassName}
           showHeaderCloseButton={false}
           enableDragToClose

@@ -43,17 +43,14 @@ jest.mock("@emoji-mart/react", () => ({
   ),
 }));
 jest.mock("@emoji-mart/data", () => ({ __esModule: true, default: {} }));
-let mockAfterLeave: (() => void) | undefined;
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
-  default: ({ isOpen, children, zIndexClassName, onAfterLeave }: any) => {
-    mockAfterLeave = onAfterLeave;
-    return isOpen ? (
+  default: ({ isOpen, children, zIndexClassName }: any) =>
+    isOpen ? (
       <div data-testid="mobile-dialog" data-z-index-class={zIndexClassName}>
         {children}
       </div>
-    ) : null;
-  },
+    ) : null,
 }));
 
 // 3. Now import under test
@@ -149,7 +146,7 @@ describe("CreateDropEmojiPicker", () => {
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
   });
 
-  it("tells the composer once the mobile panel has left after a selection", async () => {
+  it("tells the composer once the mobile panel returns focus after a selection", async () => {
     mockUseIsMobile.mockReturnValue(true);
     const onClosedAfterSelect = jest.fn();
     render(
@@ -158,19 +155,23 @@ describe("CreateDropEmojiPicker", () => {
         onClosedAfterSelect={onClosedAfterSelect}
       />
     );
-    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    const trigger = screen.getByRole("button", { hidden: true });
+    fireEvent.click(trigger);
     fireEvent.click(await screen.findByTestId("picker"));
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
     expect(onClosedAfterSelect).not.toHaveBeenCalled();
 
-    act(() => mockAfterLeave?.());
+    // The panel hands focus back to its trigger after its exit animation.
+    act(() => trigger.focus());
     await waitFor(() => expect(onClosedAfterSelect).toHaveBeenCalledTimes(1));
 
-    // Closing without a selection does not move the caret.
-    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    // Closing without a selection never moves the caret.
+    trigger.blur();
+    fireEvent.click(trigger);
     await screen.findByTestId("picker");
-    act(() => mockAfterLeave?.());
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    fireEvent.click(trigger);
+    act(() => trigger.focus());
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(onClosedAfterSelect).toHaveBeenCalledTimes(1);
   });
 
