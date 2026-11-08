@@ -35,7 +35,8 @@ export interface GroupRuntime {
   stallSince: number | null;
   /**
    * First failure time of the current run of failed sends, null once a send
-   * step ends any other way. Commit paths keep the stall it owns (8.3).
+   * step ends any other way or the outbox is empty. Commit paths keep the
+   * stall it owns (8.3).
    */
   sendFailingSince: number | null;
 }

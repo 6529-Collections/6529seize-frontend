@@ -464,6 +464,49 @@ describe("E2EE engine: features", () => {
     expect(texts(a.getMessages(g))).toEqual(["held by a failing send"]);
   });
 
+  it("clears the delayed banner when a failing send turns out to have landed", async () => {
+    const { world, a, b, c, g } = await trio();
+    const removeFault = world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      status: 503,
+      times: -1,
+    });
+    await b.send(g, { text: "landed despite the error" });
+    expect(b.getConversation(g)?.delayed).toBe(true);
+    removeFault();
+    // The next send is stored but its reply is lost, so bob only finds it
+    // in the log: the outbox empties outside the send loop.
+    let lostReplies = 1;
+    const handle = world.ds.handle;
+    const spy = jest
+      .spyOn(world.ds, "handle")
+      .mockImplementation(async (method, path, input) => {
+        const response = await handle(method, path, input);
+        if (
+          lostReplies > 0 &&
+          input?.profileId === "bob" &&
+          method === "POST" &&
+          /\/messages$/.test(path) &&
+          response.status < 400
+        ) {
+          lostReplies -= 1;
+          return { status: 503, body: { error: "fault", code: null } };
+        }
+        return response;
+      });
+    try {
+      await settle(world);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(lostReplies).toBe(0);
+    expect(b.getConversation(g)?.delayed).toBe(false);
+    expect(b.getMessages(g).at(-1)).toMatchObject({ pending: false });
+    expect(texts(c.getMessages(g))).toEqual(["landed despite the error"]);
+    expect(texts(a.getMessages(g))).toEqual(["landed despite the error"]);
+  });
+
   it("raises the split-view alarm for a forged epoch_fp", async () => {
     const { world, a, b, g } = await trio();
     world.ds.setTamper((item, context) =>

@@ -231,7 +231,12 @@ export function clearStallFor(
   if (!runtime) {
     return;
   }
-  // A failing send owns its stall: only the send loop (flushOnce) clears it.
+  // A failing send owns its stall while something is left to send: only the
+  // send loop (flushOnce) clears it. An outbox emptied by catch-up (the send
+  // landed after all) releases it here.
+  if (runtime.outbox.size === 0) {
+    runtime.sendFailingSince = null;
+  }
   runtime.stallSince = runtime.sendFailingSince;
   if (runtime.sendFailingSince === null && runtime.record.delayed) {
     runtime.record.delayed = false;
