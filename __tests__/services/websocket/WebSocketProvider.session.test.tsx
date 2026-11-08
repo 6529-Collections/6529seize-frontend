@@ -322,6 +322,7 @@ describe("WebSocketProvider sessions", () => {
 
   describe("with PING enabled", () => {
     const PONG_TIMEOUT_MS = 5_000;
+    const PROBE_TIMEOUT_MS = 3_000;
     const KEEPALIVE_IDLE_MS = 8 * 60_000;
     const sentTypes = (ws: MockWebSocket) => ws.sent.map((frame) => frame.type);
     const lastPingId = (ws: MockWebSocket): unknown =>
@@ -368,23 +369,39 @@ describe("WebSocketProvider sessions", () => {
       expect(result.current.connection?.revision).toBe(revision);
     });
 
-    it("replaces a quiet socket that leaves two PINGs unanswered, with a reconnect resync", () => {
+    it("replaces a quiet socket 3 s after its one resume PING goes unanswered, with a reconnect resync", () => {
       const { result } = renderProvider();
       const ws = quietSince(result, connectAs(result, ALICE));
 
       act(() => {
-        jest.advanceTimersByTime(PONG_TIMEOUT_MS);
+        jest.advanceTimersByTime(PROBE_TIMEOUT_MS - 1);
       });
-      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING", "PING"]);
       expect(sockets).toHaveLength(1);
       act(() => {
-        jest.advanceTimersByTime(PONG_TIMEOUT_MS);
+        jest.advanceTimersByTime(1);
       });
 
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING"]);
       expect(ws.close).toHaveBeenCalled();
       expect(sockets).toHaveLength(2);
       authenticate(latestSocket());
       expect(result.current.connection).toMatchObject({ kind: "reconnect" });
+    });
+
+    it("gives an idle keepalive PING one retry before replacing the socket", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      act(() => {
+        jest.advanceTimersByTime(KEEPALIVE_IDLE_MS + PONG_TIMEOUT_MS);
+      });
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING", "PING"]);
+      expect(sockets).toHaveLength(1);
+
+      act(() => {
+        jest.advanceTimersByTime(PONG_TIMEOUT_MS);
+      });
+
+      expect(sockets).toHaveLength(2);
     });
 
     it("keeps a visible tab's quiet socket alive under the gateway's idle timeout", () => {
