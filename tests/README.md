@@ -559,18 +559,25 @@ Surface matrix:
 - `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)
   in several browser contexts at once, each a different local user (alice,
   bob, carol, dave) or another device of the same user, against one Next dev
-  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` on. The
+  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` and
+  `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` on, so device setup offers the
+  combined grant ("Sign to enable both"). The
   composer sandbox mock API mounts the in-memory fake delivery service
   (`tests/support/e2ee/fakeDeliveryService.cjs`) at `/api/e2ee/*`, acting as
   the profile whose wallet is the synthetic dev JWT's `sub`, and exposes
   loopback-only `/__e2ee-sandbox/*` controls for DM policy, blocks, faults,
   epoch fingerprint tampering, state reads and a plaintext scan of everything
-  the service received. Each context sets its dev wallet and JWT through the
-  localhost-only dev-auth test override (`services/auth/devAuthTestOverride.ts`)
-  and answers the single enrollment signature with a throwaway viem key
-  through the test signer seam (`components/e2ee/e2eeTestSigner.ts`); both
-  are inert unless `USE_DEV_AUTH=true`, the build is development-like and the
-  page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
+  the service received. It also serves the web sign-in with device grants
+  (`tests/support/e2ee/sandboxSignIn.cjs`: `/api/auth/session-nonce`,
+  `/api/auth/session-login`, `/api/device-grants`), so the real combined
+  sign-in, its challenge check and the sign-in grant registration run end to
+  end. Each context sets its dev wallet and JWT through the localhost-only
+  dev-auth test override (`services/auth/devAuthTestOverride.ts`) and answers
+  the one wallet signature with a throwaway viem key through the test signer
+  seams (`components/auth/signedMessagesTestSigner.ts` for the combined
+  sign-in, `components/e2ee/e2eeTestSigner.ts` for a separate encryption
+  grant); all are inert unless `USE_DEV_AUTH=true`, the build is
+  development-like and the page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
   engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
   `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
   desktop only. It must never run against staging or production.
@@ -769,7 +776,9 @@ Large-pack ownership:
   exact sandbox reaction endpoint and body.
 - `test:e2e:e2ee-sandbox` is owned by PR or train owners changing encrypted
   messages (`lib/e2ee`, `components/e2ee`, `hooks/e2ee`,
-  `app/messages/encrypted`, the MLS WebAssembly module), the dev-auth test
+  `app/messages/encrypted`, the MLS WebAssembly module), device signing
+  (`lib/device-signing`, `components/device-signing`,
+  `hooks/device-signing`), the sign-in grant path, the dev-auth test
   override, the composer sandbox mock API or the fake delivery service.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
