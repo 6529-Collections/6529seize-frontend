@@ -49,7 +49,7 @@ describe("useUnreadNotifications", () => {
           QueryKey.IDENTITY_NOTIFICATIONS,
           {
             auth: getAuthTokenFingerprint("valid-jwt"),
-            limit: "1",
+            kind: "unread-count",
             version: "v2",
             includeCompetitions: true,
           },
@@ -177,6 +177,25 @@ describe("useUnreadNotifications", () => {
 
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({ cache: "no-store", signal })
+    );
+  });
+
+  it("asks the count-only route for the badge, including decisions", async () => {
+    commonApiFetchMock.mockResolvedValue({ unread_count: 3 });
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).resolves.toEqual({ unread_count: 3 });
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/notifications/unread-count",
+        params: { include_competitions: "true" },
+        headers: { Authorization: "Bearer valid-jwt" },
+      })
     );
   });
 

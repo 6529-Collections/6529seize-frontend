@@ -8,7 +8,7 @@ import {
   isTerminalNotificationAuthQueryError,
   shouldRetryQuery,
 } from "@/components/react-query-wrapper/utils/query-utils";
-import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
+import type { ApiNotificationsUnreadCountV2 } from "@/generated/models/ApiNotificationsUnreadCountV2";
 import {
   isAuthJwtUsable,
   type ConnectedWalletAccount,
@@ -93,10 +93,9 @@ const fetchUnreadCountForAccount = async (
   }
 
   try {
-    const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
-      endpoint: "v2/notifications",
+    const notifications = await commonApiFetch<ApiNotificationsUnreadCountV2>({
+      endpoint: "v2/notifications/unread-count",
       params: {
-        limit: "1",
         include_competitions: "true",
       },
       headers: {
@@ -147,7 +146,7 @@ export function useConnectedAccountsUnreadNotifications(
       }),
     [accounts, terminalJwtFingerprintByAccount]
   );
-  const responseVersion = "v2-native-competitions";
+  const responseVersion = "v2-unread-count";
 
   const blockAccountUntilNewToken = useCallback(
     (addressKey: string, jwtFingerprint: string) => {

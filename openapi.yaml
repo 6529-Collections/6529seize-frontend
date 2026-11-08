@@ -14846,6 +14846,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiNotificationsResponseV2"
+  /v2/notifications/unread-count:
+    get:
+      tags:
+        - NotificationsV2
+      summary: Get the authenticated user's unread notification count.
+      description: >-
+        Returns only the unread count that GET /v2/notifications reports as
+        unread_count, with the same authentication and capability filter,
+        without loading any notification.
+      operationId: getNotificationsUnreadCountV2
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/notifications/notifications-v2.handlers"
+          name: handleGetNotificationsUnreadCountV2
+      parameters:
+        - name: include_competitions
+          in: query
+          description: >-
+            Count native competition lifecycle notifications too. Defaults to
+            false, matching GET /v2/notifications.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiNotificationsUnreadCountV2"
   /og-metadata/profiles/{identity}:
     get:
       tags:
@@ -38853,6 +38886,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiNotificationV2"
+        unread_count:
+          type: number
+          format: int64
+    ApiNotificationsUnreadCountV2:
+      type: object
+      required:
+        - unread_count
+      properties:
         unread_count:
           type: number
           format: int64

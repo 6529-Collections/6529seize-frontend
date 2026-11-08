@@ -2923,6 +2923,13 @@ function handleNotificationRead(pathname, url, res) {
         : [],
     });
   }
+  if (pathname === "/api/v2/notifications/unread-count") {
+    return writeJsonResponse(res, {
+      unread_count: sandboxNotifications.filter(
+        (notification) => !notification.read_at
+      ).length,
+    });
+  }
   if (pathname !== "/api/v2/notifications") {
     return false;
   }

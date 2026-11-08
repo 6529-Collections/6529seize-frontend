@@ -646,6 +646,7 @@ export * from '../models/ApiNotificationPollVoteOption';
 export * from '../models/ApiNotificationV2';
 export * from '../models/ApiNotificationsResponse';
 export * from '../models/ApiNotificationsResponseV2';
+export * from '../models/ApiNotificationsUnreadCountV2';
 export * from '../models/ApiOgMediaAsset';
 export * from '../models/ApiOgMetadata';
 export * from '../models/ApiOgMetadataDrop';
@@ -1633,6 +1634,7 @@ import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVote
 import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
+import { ApiNotificationsUnreadCountV2 } from '../models/ApiNotificationsUnreadCountV2';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
 import { ApiOgMetadataDrop               } from '../models/ApiOgMetadataDrop';
@@ -2874,6 +2876,7 @@ let typeMap: {[index: string]: any} = {
     "ApiNotificationV2": ApiNotificationV2,
     "ApiNotificationsResponse": ApiNotificationsResponse,
     "ApiNotificationsResponseV2": ApiNotificationsResponseV2,
+    "ApiNotificationsUnreadCountV2": ApiNotificationsUnreadCountV2,
     "ApiOgMediaAsset": ApiOgMediaAsset,
     "ApiOgMetadata": ApiOgMetadata,
     "ApiOgMetadataDrop": ApiOgMetadataDrop,
