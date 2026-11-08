@@ -94,6 +94,10 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "This device will no longer sign your messages. Its earlier signatures stay verifiable.",
   "signedMessages.devices.cancel": "Cancel",
   "signedMessages.devices.empty": "No authorized devices yet.",
+  "signedMessages.devices.localUnreadable":
+    "This browser couldn't read its own keys, so it can't mark which device below is this one. Check a device's name and dates before you revoke it.",
+  "signedMessages.devices.revokeMaybeThisDevice":
+    "This browser couldn't read its own keys, so this may be the permission this browser uses.",
   "signedMessages.devices.loading": "Loading devices",
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",
