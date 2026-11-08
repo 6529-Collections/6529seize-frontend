@@ -4,6 +4,7 @@ import {
   KEEPALIVE_IDLE_MS,
   MAX_MISSED_PONGS,
   PONG_TIMEOUT_MS,
+  PROBE_TIMEOUT_MS,
   SocketPinger,
 } from "@/services/websocket/socketPing";
 import { mockRandomUnit } from "../../helpers/mockRandomUnit";
@@ -175,6 +176,21 @@ describe("liveness", () => {
     expect(sent).toHaveLength(1);
   });
 
+  it("reports a socket dead when a probe's single PING is unanswered for 3 s", () => {
+    const { ws, sent } = fakeSocket();
+    const onDead = jest.fn();
+    const keepalive = pinger(ws, onDead);
+
+    keepalive.probe();
+    jest.advanceTimersByTime(PROBE_TIMEOUT_MS - 1);
+    expect(onDead).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+
+    expect(PROBE_TIMEOUT_MS).toBe(3_000);
+    expect(sent).toHaveLength(1);
+    expect(onDead).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps a probe's own timeout when a frame is sent meanwhile", () => {
     const { ws, sent } = fakeSocket();
     const onDead = jest.fn();
@@ -182,19 +198,35 @@ describe("liveness", () => {
 
     keepalive.probe();
     keepalive.noteSent();
-    jest.advanceTimersByTime(PONG_TIMEOUT_MS * MAX_MISSED_PONGS);
+    jest.advanceTimersByTime(PROBE_TIMEOUT_MS);
 
-    // Only the probe and its one retry: sending proves nothing.
-    expect(sent.map((frame) => frame.type)).toEqual(["PING", "PING"]);
+    // Sending proves nothing: the one probe PING goes unanswered.
+    expect(sent.map((frame) => frame.type)).toEqual(["PING"]);
     expect(onDead).toHaveBeenCalledTimes(1);
   });
 
-  it("reports a socket dead once after two unanswered PINGs", () => {
+  it("probes a tab shown again after a quiet spell", () => {
+    const { ws, sent } = fakeSocket();
+    const onDead = jest.fn();
+    pinger(ws, onDead);
+    setVisibility("hidden");
+    jest.advanceTimersByTime(KEEPALIVE_IDLE_MS * 2);
+
+    setVisibility("visible");
+    expect(sent).toHaveLength(1);
+    jest.advanceTimersByTime(PROBE_TIMEOUT_MS);
+
+    expect(sent).toHaveLength(1);
+    expect(onDead).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives an idle keepalive PING one retry before reporting it dead", () => {
     const { ws, sent } = fakeSocket();
     const onDead = jest.fn();
     const keepalive = pinger(ws, onDead);
 
-    keepalive.probe();
+    jest.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+    expect(sent).toHaveLength(1);
     jest.advanceTimersByTime(PONG_TIMEOUT_MS - 1);
     expect(sent).toHaveLength(1);
     jest.advanceTimersByTime(1);
@@ -206,6 +238,20 @@ describe("liveness", () => {
     expect(onDead).toHaveBeenCalledTimes(1);
     jest.advanceTimersByTime(KEEPALIVE_IDLE_MS * 2);
     keepalive.probe();
+    expect(sent).toHaveLength(2);
+    expect(onDead).toHaveBeenCalledTimes(1);
+  });
+
+  it("switches a keepalive PING in flight to the probe's 3 s rule", () => {
+    const { ws, sent } = fakeSocket();
+    const onDead = jest.fn();
+    const keepalive = pinger(ws, onDead);
+    jest.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+    expect(sent).toHaveLength(1);
+
+    keepalive.probe();
+    jest.advanceTimersByTime(PROBE_TIMEOUT_MS);
+
     expect(sent).toHaveLength(2);
     expect(onDead).toHaveBeenCalledTimes(1);
   });

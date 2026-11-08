@@ -13,9 +13,12 @@ export const isWsPingEnabled = (): boolean =>
 export const KEEPALIVE_IDLE_MS = 8 * 60_000;
 // ±10%, so a visible tab pings 7.2–8.8 minutes into a quiet spell.
 const KEEPALIVE_JITTER_RATIO = 0.1;
+// A keepalive PING is sent again once; two unanswered in a row mean dead.
 export const PONG_TIMEOUT_MS = 5_000;
-// PINGs left unanswered in a row before the socket counts as dead.
 export const MAX_MISSED_PONGS = 2;
+// A probe on resume gets one PING: no answer means dead. The round trip is
+// about 200 ms, and without PING the socket would be replaced at once.
+export const PROBE_TIMEOUT_MS = 3_000;
 
 let pingCount = 0;
 // The API accepts ids matching ^[A-Za-z0-9_.:-]{1,32}$.
@@ -31,21 +34,24 @@ export const isPongFrame = (frame: unknown): boolean =>
 const isTabVisible = (): boolean =>
   typeof document === "undefined" || document.visibilityState === "visible";
 
+type PingKind = "keepalive" | "probe";
+
 /**
- * Keeps one socket alive and checks whether it still answers.
+ * Keeps one socket alive and checks whether it still answers. Any frame
+ * received answers a PING, a PONG or not.
  * - Keepalive: after a quiet spell of about 8 minutes (no frame either way)
  *   in a visible tab, it sends a PING, so the gateway's 10-minute idle close
- *   never ends a visible tab's session. A hidden tab sends nothing; when it
- *   is shown again after such a spell, it pings at once.
- * - `probe()` sends a PING now, for a socket whose liveness is in doubt.
- * Any frame received answers a PING, a PONG or not. A PING unanswered within
- * 5 s is sent again; after two in a row the socket is reported dead through
- * `onDead`, once.
+ *   never ends a visible tab's session. Unanswered within 5 s, it is sent
+ *   again; after two in a row the socket is dead.
+ * - Probe, for a socket whose liveness is in doubt on resume (`probe()`, or a
+ *   hidden tab shown again after such a spell): one PING, and no answer within
+ *   3 s means dead. A probe replaces a keepalive PING in flight.
+ * A dead socket is reported through `onDead`, once.
  */
 export class SocketPinger {
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private pongTimer: ReturnType<typeof setTimeout> | null = null;
-  private pendingId: string | null = null;
+  private pendingKind: PingKind | null = null;
   private missed = 0;
   private lastActivityAt = Date.now();
   // This quiet spell's jittered keepalive delay.
@@ -65,18 +71,18 @@ export class SocketPinger {
   /** Any frame received: the socket is alive. */
   noteReceived(): void {
     this.clearPongTimer();
-    this.pendingId = null;
+    this.pendingKind = null;
     this.missed = 0;
     this.noteActivity();
   }
 
   /** Any frame sent. */
   noteSent(): void {
-    if (this.pendingId === null) this.noteActivity();
+    if (this.pendingKind === null) this.noteActivity();
   }
 
   probe(): void {
-    if (!this.stopped && this.pendingId === null) this.ping();
+    if (!this.stopped && this.pendingKind !== "probe") this.ping("probe");
   }
 
   stop(): void {
@@ -95,9 +101,13 @@ export class SocketPinger {
     if (this.idleTimer === null) this.armKeepalive();
   }
 
+  // Shown again after a quiet spell, the tab probes; otherwise the keepalive
+  // waits out the rest of the spell.
   private readonly onVisibilityChange = (): void => {
-    if (this.stopped || this.pendingId !== null || !isTabVisible()) return;
-    this.onKeepaliveDue();
+    if (this.stopped || this.pendingKind !== null || !isTabVisible()) return;
+    const remainingMs = this.keepaliveRemainingMs();
+    if (remainingMs > 0) this.scheduleKeepalive(remainingMs);
+    else this.probe();
   };
 
   private armKeepalive(): void {
@@ -113,37 +123,39 @@ export class SocketPinger {
     this.clearIdleTimer();
     this.idleTimer = setTimeout(() => {
       this.idleTimer = null;
-      this.onKeepaliveDue();
+      if (this.stopped || this.pendingKind !== null) return;
+      const remainingMs = this.keepaliveRemainingMs();
+      if (remainingMs > 0) this.scheduleKeepalive(remainingMs);
+      else if (isTabVisible()) this.ping("keepalive");
+      // A hidden tab sends nothing; showing it again checks the quiet spell.
     }, delayMs);
   }
 
-  private onKeepaliveDue(): void {
-    if (this.stopped || this.pendingId !== null) return;
-    const remainingMs =
-      this.keepaliveAfterMs - (Date.now() - this.lastActivityAt);
-    if (remainingMs > 0) this.scheduleKeepalive(remainingMs);
-    else if (isTabVisible()) this.ping();
-    // A hidden tab sends nothing; showing it again checks the quiet spell.
+  private keepaliveRemainingMs(): number {
+    return this.keepaliveAfterMs - (Date.now() - this.lastActivityAt);
   }
 
-  private ping(): void {
+  private ping(kind: PingKind): void {
     if (this.ws.readyState !== WebSocket.OPEN) return;
     this.clearIdleTimer();
+    this.clearPongTimer();
     const id = nextPingId();
-    this.pendingId = id;
+    this.pendingKind = kind;
     this.ws.send(JSON.stringify({ type: "PING", id }));
-    this.pongTimer = setTimeout(() => {
-      this.pongTimer = null;
-      if (this.pendingId !== id) return;
-      this.pendingId = null;
-      this.missed += 1;
-      if (this.missed < MAX_MISSED_PONGS) {
-        this.ping();
-        return;
-      }
-      this.stop();
-      this.onDead();
-    }, PONG_TIMEOUT_MS);
+    this.pongTimer = setTimeout(
+      () => {
+        this.pongTimer = null;
+        this.pendingKind = null;
+        this.missed += 1;
+        if (kind === "keepalive" && this.missed < MAX_MISSED_PONGS) {
+          this.ping("keepalive");
+          return;
+        }
+        this.stop();
+        this.onDead();
+      },
+      kind === "probe" ? PROBE_TIMEOUT_MS : PONG_TIMEOUT_MS
+    );
   }
 
   private clearIdleTimer(): void {
