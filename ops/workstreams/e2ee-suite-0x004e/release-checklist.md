@@ -8,7 +8,7 @@ captain executes from this file.
 - Frontend engine: 6529-Collections/6529seize-frontend#4748.
 - Frontend UI: 6529-Collections/6529seize-frontend#4749, stacked on #4748.
 - Native: 6529-Collections/6529-client (the 0x004E switch) and 6529-core
-  (pull-web). Merge these only once the web is live.
+  (pull-web). Merge these within 1 day of web live, not before.
 
 Live code, the PRs, current GitHub state and
 [`ops/skills/deploy-6529/SKILL.md`](../../skills/deploy-6529/SKILL.md) override
@@ -38,12 +38,22 @@ deadline.
   - on the backend, in `src/e2ee/e2ee-suite-policy.ts`, plus `<final>` in
     `E2EE_CIPHERSUITES`;
   - on the frontend, in `lib/e2ee/grant.ts`.
-- **Desktop and native clients must ship well before December 1.** After the
-  deadline, a client still on the 0x004F build can no longer start or join
-  new encrypted chats.
-  - The 6529-core pull-web (the Desktop renderer) is a must-do. It must not
-    slip past about 20 November.
-  - So is the 6529-client 0x004E switch.
+- **Desktop and native clients follow the web within 1 day of web live.**
+  There is no multi-week gap. After the deadline, a client still on the 0x004F
+  build can no longer start or join new encrypted chats.
+  - 6529-client #47 (the 0x004E switch) merges the same day the web C+ is
+    live, once its CI is green.
+  - **Desktop:** the app's messaging flags are off today, and its wallet
+    connectors cannot approve EIP-712 device grants. So no Desktop device is on
+    0x004F, there is nothing to upgrade, and Desktop is not at risk from the
+    deadline.
+    - Desktop ships the 6529-core pull-web (C+), with prxt's Core #286 on top.
+      #286 turns encrypted DMs on, so Desktop launches directly on 0x004E with
+      no upgrade step.
+    - prxt runs QA and the release, within about 1 day of web live.
+  - The phone app loads 6529.io, so it is live with the web. Phone QA (app
+    signing, Connect-device QR, WalletConnect) runs on staging and prod the
+    same day, through prxt.
 - **Still open:** when 0x004F leaves the accepted set entirely. That is one line
   plus a cleanup.
 
@@ -68,8 +78,8 @@ messages.
       The only failures allowed are the four known product ones on `main`.
 - [ ] Staging passes every step below.
 
-The native and Desktop releases are not a gate. They follow once the web is
-live, with a deadline of about 20 November (section 2.3).
+The native and Desktop releases are not a gate. They follow within 1 day of
+web live (section 2.3).
 
 ## 1. Staging
 
@@ -150,16 +160,28 @@ Frontend smoke, with a browser that already had a 0x004F device on staging:
    separately.
 4. Run the frontend smoke from 1.2 on 6529.io with a team device.
 
-### 2.3 Native and Desktop (after the web; deadline about 20 November)
+### 2.3 Native, Desktop and phone (within 1 day of web live)
 
-These are not gates for the web release. They follow once the web is live, and
-must be released well before 1 December.
+These are not gates for the web release. They follow within 1 day of web live.
 
-- 6529-client: merge the 0x004E switch, 6529-Collections/6529-client#47 (draft).
-- 6529-core: the pull-web PR, built from a `main` commit that contains both
-  #4748 and #4749 (the engine and its UI), never #4748 alone.
-- The native client follows the same policy and re-vendors the WASM module from
-  #4748's merge commit.
+- **6529-client:** merge the 0x004E switch, 6529-Collections/6529-client#47,
+  the same day the web C+ is live, once its CI is green. The native client
+  re-vendors the WASM module from #4748's merge commit.
+- **Desktop: the 6529-core pull-web (C+) first, then Core #286 on top.**
+  Desktop launches encrypted DMs directly on 0x004E. No Desktop device is on
+  0x004F today: its messaging flags are off.
+  - Build the pull-web from the `main` commit that contains both #4748 and
+    #4749, never #4748 alone, immediately after #4749 merges, and open the PR
+    the same hour. A branch prepared against #4749's head only needs a refresh.
+  - Core #286 (prxt) goes on top of it. It merges main and handles the v2
+    grant typed data (see the signing-path table below).
+  - Shipping #286 on the old renderer would start Desktop users on 0x004F and
+    force an immediate upgrade, so don't.
+  - prxt runs QA and the release of both together, within about 1 day of web
+    live.
+- **Phone:** the 6529 app loads 6529.io, so it is live with the web. Phone QA
+  runs on staging and prod the same day, through prxt: app signing,
+  Connect-device QR and WalletConnect.
 
 ## 3. The alarm (release step, owner-authorized)
 
@@ -261,7 +283,8 @@ and the evidence.
 | 6529 Desktop, seed wallet and browser connector (Core #286)             | EIP-712 typed data through `parseTypedDataRequest`, then ethers `signTypedData` | Verified (code), pending pull-web + device QA | `renderer/wagmiConfig/typedDataRequest.ts` copies field types verbatim (so `uint16[]` passes), passes the message unchanged and only normalizes `chainId` (the grant domain has none). The root type check accepts `MlsDeviceGrant` and `DeviceGrant`. Suggestion for #286: add a v2 `uint16[]` case to `electron-src/typed-data-request.test.ts`. The Desktop gets v2 only through the pull-web of #4748 + #4749 (the engine, the UI and the WASM module `mls-wasm-530b38d27f820745.wasm`). Core's flags and CSP from #286 are unchanged. |
 | Safe and other contract wallets (EIP-1271)                              | the same v2 typed data, or SIWE text                                            | Verified (code) + device QA                   | Both sides compute the grant id from the version-aware typed data: frontend `verifyGrant` → `hashTypedData` of v2, and the backend `buildE2eeGrantTypedData` and `computeAppDeviceGrantId` are version-aware. EIP-1271 checks that digest, so labels are unchanged (`contract-verified`, or server-verified without an RPC). Device QA: Safe{Wallet} off-chain typed-data signing with `uint16[]`.                                                                                                                                         |
 
-Device QA list for prxt (staging, before the Desktop and app releases):
+Device QA list for prxt (staging and prod, the same day as the web; Desktop
+after its pull-web):
 
 - Extensions: MetaMask, Rabby and Coinbase sign the separate-prompt v2 grant.
 - WalletConnect QR: MetaMask Mobile, Rainbow, Trust, Coinbase and Ledger Live
