@@ -7,6 +7,12 @@ import {
   useOptionalDmUnreadActions,
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
+import {
+  WebSocketContext,
+  type WebSocketContextValue,
+} from "@/services/websocket/WebSocketContext";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { fakeJwt } from "../../helpers/fakeJwt";
 import { mockRandomUnit } from "../../helpers/mockRandomUnit";
 
 const commonApiFetchMock = jest.fn();
@@ -796,6 +802,112 @@ describe("DmUnreadStateProvider", () => {
       });
 
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("first snapshot and the socket", () => {
+    let socketStatus: WebSocketStatus | undefined;
+    // A fresh element per call so rerender() re-reads the socket state.
+    const providerUi = () => (
+      <WebSocketContext.Provider
+        value={{ status: socketStatus } as unknown as WebSocketContextValue}
+      >
+        <DmUnreadStateProvider>
+          <Capture />
+        </DmUnreadStateProvider>
+      </WebSocketContext.Provider>
+    );
+    const flush = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      socketStatus = WebSocketStatus.CONNECTING;
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it.each([WebSocketStatus.CONNECTING, WebSocketStatus.AUTHENTICATING])(
+      "waits while the socket is %s and takes one snapshot when it connects",
+      async (status) => {
+        socketStatus = status;
+        const rendered = render(providerUi());
+        await flush(1_000);
+        expect(commonApiFetchMock).not.toHaveBeenCalled();
+
+        socketStatus = WebSocketStatus.CONNECTED;
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await flush(5_000);
+
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+        rendered.unmount();
+      }
+    );
+
+    it("retries with the rotated token when the old one is rejected mid-request", async () => {
+      socketStatus = undefined;
+      jwt = fakeJwt({ id: "first", sub: "0xprofile1" });
+      const rotated = fakeJwt({ id: "rotated", sub: "0xprofile1" });
+      commonApiFetchMock.mockImplementationOnce(async () => {
+        jwt = rotated;
+        throw Object.assign(new Error("Unauthorized"), { status: 401 });
+      });
+      const rendered = render(providerUi());
+      await flush(0);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      await flush(10_000);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(commonApiFetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          headers: { Authorization: `Bearer ${rotated}` },
+        })
+      );
+      rendered.unmount();
+    });
+
+    it("takes the snapshot after 3 s when the socket does not connect", async () => {
+      const rendered = render(providerUi());
+      await flush(2_999);
+      expect(commonApiFetchMock).not.toHaveBeenCalled();
+
+      await flush(1);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
+    });
+
+    it("takes the snapshot at once without a connecting socket", async () => {
+      socketStatus = WebSocketStatus.DISCONNECTED;
+      const rendered = render(providerUi());
+      await flush(0);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
+    });
+
+    it("keeps the snapshot loop through a same-identity token rotation", async () => {
+      socketStatus = undefined;
+      jwt = fakeJwt({ id: "first", sub: "0xprofile1" });
+      const rendered = render(providerUi());
+      await flush(0);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      jwt = fakeJwt({ id: "rotated", sub: "0xprofile1" });
+      act(() => {
+        window.dispatchEvent(new Event("auth-token-changed"));
+      });
+      rendered.rerender(providerUi());
+      await flush(10_000);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
     });
   });
 
