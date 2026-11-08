@@ -4,7 +4,21 @@ export interface SerialScrollAnchor {
   readonly release: () => void;
 }
 
-/** Follow the serial row across LIGHT/FULL React key changes until reader input. */
+// A scroll counts as settled once no scroll event has arrived for this long.
+const SCROLL_SETTLE_MS = 120;
+const READER_INPUT_EVENTS = ["wheel", "touchstart", "pointerdown", "keydown"];
+
+/**
+ * Keeps the serial row in view until reader input, following it across
+ * LIGHT/FULL React key changes.
+ *
+ * The IntersectionObserver reports the row crossing the view's edge. A layout
+ * change can also carry the row from one side of the view to the other within
+ * one frame, for example when placeholder rows hydrate to a smaller height
+ * while a jump is still scrolling; the row is out of view before and after,
+ * so no crossing is reported. The anchor therefore re-checks the row whenever
+ * the list content resizes and whenever a scroll settles.
+ */
 export const observeSerialScrollTarget = ({
   container,
   target,
@@ -20,6 +34,7 @@ export const observeSerialScrollTarget = ({
   const controls = container.parentElement ?? container;
   let currentTarget = target;
   let active = true;
+  let settleTimer: ReturnType<typeof setTimeout> | null = null;
 
   const restoreTarget = () => {
     if (!active) return;
@@ -42,29 +57,55 @@ export const observeSerialScrollTarget = ({
           root: container,
           threshold: [0, 1],
         });
+  // The list content grows and shrinks as rows hydrate and media loads; the
+  // scroll container itself keeps its size.
+  const contentObserver =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(restoreTarget);
+  const observeContent = () => {
+    for (const child of Array.from(container.children)) {
+      contentObserver?.observe(child);
+    }
+  };
   // IntersectionObserver follows a DOM node, not its ID. Rebind after hydration
   // replaces that node, including when removal and insertion happen separately.
   const replacementObserver =
-    targetId && typeof MutationObserver !== "undefined"
-      ? new MutationObserver(() => {
-          if (!container.contains(currentTarget)) restoreTarget();
-        })
-      : null;
+    typeof MutationObserver === "undefined"
+      ? null
+      : new MutationObserver(() => {
+          observeContent();
+          if (targetId && !container.contains(currentTarget)) restoreTarget();
+        });
+
+  const onScroll = () => {
+    if (settleTimer !== null) clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      settleTimer = null;
+      restoreTarget();
+    }, SCROLL_SETTLE_MS);
+  };
 
   function release() {
     if (!active) return;
     active = false;
     visibilityObserver?.disconnect();
+    contentObserver?.disconnect();
     replacementObserver?.disconnect();
-    for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
+    container.removeEventListener("scroll", onScroll);
+    if (settleTimer !== null) clearTimeout(settleTimer);
+    settleTimer = null;
+    for (const event of READER_INPUT_EVENTS) {
       controls.removeEventListener(event, release, true);
     }
     onRelease();
   }
 
   visibilityObserver?.observe(currentTarget);
+  observeContent();
   replacementObserver?.observe(container, { childList: true, subtree: true });
-  for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
+  container.addEventListener("scroll", onScroll, { passive: true });
+  for (const event of READER_INPUT_EVENTS) {
     controls.addEventListener(event, release, { capture: true, passive: true });
   }
 
