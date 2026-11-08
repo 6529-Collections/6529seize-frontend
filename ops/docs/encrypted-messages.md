@@ -130,7 +130,15 @@ setup page was already open. Signing and encryption still use separate keys.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
-be retried separately.
+be retried separately. If encryption registration is still running after about
+20 seconds, the card says signed posts are on and encrypted DMs are still
+finishing setup; it closes once encryption is on and reports a failure only if
+registration actually fails.
+
+After a signing permission or an encryption device is stored, the site asks the
+browser to keep its storage persistent. Some browsers decide this silently;
+others ask. Browsers can otherwise remove site storage when space runs low,
+which removes this browser's keys and its encrypted history.
 
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
 the card says so on Safari.
