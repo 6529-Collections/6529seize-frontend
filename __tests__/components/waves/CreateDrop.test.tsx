@@ -245,7 +245,7 @@ const useWaveMock = useWave as jest.MockedFunction<typeof useWave>;
 const commonApiPostMock = commonApiPost as jest.Mock;
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-// A send whose response was lost is retried after 1 s.
+// How long to wait for a send that is retried after the 1 s retry delay.
 const RETRY_WAIT_MS = 3_000;
 const sentClientDropIds = (): Array<string | undefined> =>
   commonApiPostMock.mock.calls.map(
@@ -633,6 +633,45 @@ describe("CreateDrop", () => {
         title: "Your drop was posted.",
       })
     );
+    expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
+  });
+
+  it("counts a saved drop as sent and still reports all drops added", async () => {
+    const posts = mockPendingPosts();
+    const onAllDropsAdded = jest.fn();
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            onAllDropsAdded={onAllDropsAdded}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={DropMode.CHAT}
+            privileges={{ chatRestriction: null, submissionRestriction: null }}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    // Two drops queue up; the first is saved but not read back.
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    posts[0]?.reject({
+      status: 409,
+      response: { body: { code: "DROP_SAVED_REFRESH" } },
+    });
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(onAllDropsAdded).not.toHaveBeenCalled();
+    posts[1]?.resolve({ id: "server-drop", wave_id: "1" });
+
+    await waitFor(() => expect(onAllDropsAdded).toHaveBeenCalledTimes(1));
+    expect(mockRefreshWaveMessages).toHaveBeenCalledWith("1");
     expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
   });
 

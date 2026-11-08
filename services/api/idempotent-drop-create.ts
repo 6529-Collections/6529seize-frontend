@@ -3,6 +3,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { postDrop } from "@/services/api/signed-drop-writes";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import { DropHasher } from "@/utils/drop-hasher";
 
 /**
@@ -22,16 +23,25 @@ const RETRY_DELAY_MS = 1_000;
 // A longer Retry-After leaves the retry to the user.
 const MAX_RETRY_DELAY_MS = 10_000;
 
-/** Content fingerprint -> client_drop_id of a send whose outcome is unknown. */
+/**
+ * Signed-in identity and content fingerprint -> client_drop_id of a send whose
+ * outcome is unknown. Another identity never reuses a kept id.
+ */
 const unsettledSends = new Map<string, string>();
+
+/** Forgets every kept id, for a sign-out or a profile switch. */
+export function clearClientDropIds(): void {
+  unsettledSends.clear();
+}
 
 function fingerprintOf(request: ApiCreateDropRequest): string {
   const content: Record<string, unknown> = { ...request };
   for (const field of PROOF_FIELDS) delete content[field];
-  return new DropHasher().hash({
+  const identity = `${getWalletAddress()?.toLowerCase() ?? ""}:${getWalletRole() ?? ""}`;
+  return `${identity}|${new DropHasher().hash({
     drop: content as unknown as ApiCreateDropRequest,
     termsOfService: null,
-  });
+  })}`;
 }
 
 /**

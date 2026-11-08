@@ -1,6 +1,7 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
+  clearClientDropIds,
   postIdempotentDrop,
   withClientDropId,
   withoutClientDropId,
@@ -9,6 +10,12 @@ import { postDrop } from "@/services/api/signed-drop-writes";
 
 jest.mock("@/services/api/signed-drop-writes", () => ({
   postDrop: jest.fn(),
+}));
+let mockWalletAddress: string | null = "0xAuthor";
+let mockWalletRole: string | null = null;
+jest.mock("@/services/auth/auth.utils", () => ({
+  getWalletAddress: () => mockWalletAddress,
+  getWalletRole: () => mockWalletRole,
 }));
 jest.mock("@/services/api/common-api", () => ({
   getStructuredApiErrorStatus: (error: unknown) =>
@@ -73,6 +80,8 @@ function sentIds(): Array<string | undefined> {
 beforeEach(() => {
   jest.useFakeTimers();
   postDropMock.mockReset();
+  mockWalletAddress = "0xAuthor";
+  mockWalletRole = null;
 });
 afterEach(() => {
   jest.useRealTimers();
@@ -134,6 +143,25 @@ it("retries an unconfirmed commit once after 1 s with the same id", async () => 
   expect(second).toBe(first);
 });
 
+it("reads an HTTP-date Retry-After", async () => {
+  const at = (ms: number) => new Date(Date.now() + ms).toUTCString();
+  postDropMock
+    .mockRejectedValueOnce(busy(at(3_000)))
+    .mockResolvedValueOnce(serverDrop);
+  const sent = postIdempotentDrop(request());
+  await jest.advanceTimersByTimeAsync(2_000);
+  expect(postDropMock).toHaveBeenCalledTimes(1);
+  await expect(settle(sent, 1_000)).resolves.toBe(serverDrop);
+
+  // A date already past waits the minimum 1 s.
+  postDropMock.mockReset();
+  postDropMock
+    .mockRejectedValueOnce(busy(at(-60_000)))
+    .mockResolvedValueOnce(serverDrop);
+  await expect(settle(postIdempotentDrop(request()))).resolves.toBe(serverDrop);
+  expect(postDropMock).toHaveBeenCalledTimes(2);
+});
+
 it("leaves a long Retry-After to the user and keeps the id", async () => {
   const content = request();
   const longBusy = busy("60");
@@ -175,6 +203,25 @@ it("keeps the id for a resend of the same content until a send settles", async (
 
   // Once it settles, the same text again is a new message.
   expect(withClientDropId(content).client_drop_id).not.toBe(failedId);
+});
+
+it("keeps ids per signed-in identity", async () => {
+  const content = request();
+  postDropMock.mockRejectedValue(timeout);
+  await expect(settle(postIdempotentDrop(content))).rejects.toBe(timeout);
+  const [keptId] = sentIds();
+
+  mockWalletAddress = "0xOtherAuthor";
+  expect(withClientDropId(content).client_drop_id).not.toBe(keptId);
+  mockWalletAddress = "0xAuthor";
+  mockWalletRole = "proxy-profile";
+  expect(withClientDropId(content).client_drop_id).not.toBe(keptId);
+  mockWalletRole = null;
+  expect(withClientDropId(content).client_drop_id).toBe(keptId);
+
+  // A sign-out or profile switch forgets every kept id.
+  clearClientDropIds();
+  expect(withClientDropId(content).client_drop_id).not.toBe(keptId);
 });
 
 it.each([

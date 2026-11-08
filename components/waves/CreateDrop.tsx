@@ -112,7 +112,7 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
     useMyStreamActions();
-  const recoverSavedDrop = useSavedDropRecovery(wave);
+  const savedDrop = useSavedDropRecovery(wave);
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -479,7 +479,7 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
-      if (recoverSavedDrop(error, body)) {
+      if (savedDrop.recover(error, body)) {
         startLocalSlowModeCooldown(body);
         return;
       }
@@ -579,6 +579,7 @@ export default function CreateDrop({
         const serverDrop = await addDropMutation.mutateAsync(dropRequest);
         await handleServerDropCreated(serverDrop);
       } catch (error) {
+        if (savedDrop.isSaved(error)) continue;
         hasBatchErrorsRef.current = true;
         console.error("Error processing drop:", error);
       }
@@ -599,6 +600,7 @@ export default function CreateDrop({
     addDropMutation,
     handleServerDropCreated,
     onAllDropsAdded,
+    savedDrop,
     waitAndInvalidateDrops,
   ]);
 
