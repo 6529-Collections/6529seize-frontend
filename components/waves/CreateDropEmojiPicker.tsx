@@ -58,6 +58,10 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerRef = useRef<HTMLDialogElement | null>(null);
+  // Cancels a pending caret return: its focus listener, timer or frame.
+  const focusReturn = useRef<{ cancel: (() => void) | null }>({
+    cancel: null,
+  });
   const [pickerPosition, setPickerPosition] = useState<{
     top: number;
     left: number;
@@ -108,20 +112,37 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   const returnFocusAfterPanel = () => {
     const button = buttonRef.current;
     if (!onClosedAfterSelect || !button) return;
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
+    const pending = focusReturn.current;
+    pending.cancel?.();
+    const stopWaiting = () => {
       button.removeEventListener("focus", finish);
       clearTimeout(timer);
+      pending.cancel = null;
+    };
+    const finish = () => {
+      stopWaiting();
       // Never pull focus back from something the user moved on to.
       const active = document.activeElement;
       if (active && active !== button && active !== document.body) return;
-      requestAnimationFrame(() => onClosedAfterSelect());
+      const frame = requestAnimationFrame(() => {
+        pending.cancel = null;
+        onClosedAfterSelect();
+      });
+      pending.cancel = () => {
+        cancelAnimationFrame(frame);
+        pending.cancel = null;
+      };
     };
     button.addEventListener("focus", finish);
     const timer = setTimeout(finish, 1000);
+    pending.cancel = stopWaiting;
   };
+
+  // Nothing reaches the composer after this control has unmounted.
+  useEffect(() => {
+    const pending = focusReturn.current;
+    return () => pending.cancel?.();
+  }, []);
 
   const addEmoji = (emoji: EmojiPickerSelection) => {
     if (!disabled) onEmojiSelect(emoji);
@@ -204,7 +225,12 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
             type="button"
             aria-label={
               label ??
-              (isPickerOpen ? "Close emoji picker" : "Open emoji picker")
+              t(
+                locale,
+                isPickerOpen
+                  ? "emoji.picker.closeLabel"
+                  : "emoji.picker.openLabel"
+              )
             }
             aria-expanded={isPickerOpen}
           >

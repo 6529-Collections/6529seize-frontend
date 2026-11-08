@@ -218,6 +218,56 @@ describe("CreateDropEmojiPicker", () => {
     expect(onClosedAfterSelect).toHaveBeenCalledTimes(1);
   });
 
+  it("falls back after a second and does nothing once the control unmounts", async () => {
+    jest.useFakeTimers();
+    try {
+      mockUseIsMobile.mockReturnValue(true);
+      const onClosedAfterSelect = jest.fn();
+      const select = async () => {
+        const view = render(
+          <EmojiPickerControl
+            onEmojiSelect={jest.fn()}
+            onClosedAfterSelect={onClosedAfterSelect}
+          />
+        );
+        fireEvent.click(view.getByRole("button", { hidden: true }));
+        fireEvent.click(await view.findByTestId("picker"));
+        return view;
+      };
+
+      // Focus never comes back: the caret returns after a second.
+      const first = await select();
+      act(() => jest.advanceTimersByTime(999));
+      expect(onClosedAfterSelect).not.toHaveBeenCalled();
+      act(() => jest.advanceTimersByTime(50));
+      expect(onClosedAfterSelect).toHaveBeenCalledTimes(1);
+      first.unmount();
+
+      // Unmounted while waiting for focus.
+      const second = await select();
+      second.unmount();
+      act(() => jest.advanceTimersByTime(2000));
+
+      // Unmounted between the fallback and its frame.
+      const third = await select();
+      act(() => jest.advanceTimersByTime(1000));
+      third.unmount();
+      act(() => jest.advanceTimersByTime(100));
+
+      expect(onClosedAfterSelect).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("labels the trigger by what it will do", async () => {
+    render(<EmojiPickerControl onEmojiSelect={jest.fn()} />);
+    const trigger = screen.getByRole("button", { name: "Open emoji picker" });
+    fireEvent.click(trigger);
+    await screen.findByTestId("picker");
+    expect(trigger).toHaveAccessibleName("Close emoji picker");
+  });
+
   it("closes picker when clicking outside", async () => {
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });
