@@ -54,10 +54,8 @@ const redirectConfig = {
       isApp: false,
     });
   },
-  // Content-free encrypted-chat wake: open the encrypted list; once the
-  // engine has synced it opens the chat when only one has new messages
-  // (useOpenWakeChat). Builds without encrypted chats fall back to the
-  // plaintext messages list.
+  // Open and refresh the encrypted list. Builds without encrypted chats
+  // fall back to the plaintext messages list.
   e2ee: () =>
     isE2eeEnabled()
       ? getEncryptedMessagesWakeRoute()

@@ -433,11 +433,8 @@ encrypted copy of your message history so you can restore it on a new device.
   **Open 6529 Mobile to view** in production or **Open 6529 Staging to view**
   on staging. Invitation pushes say that you were added to an encrypted chat.
   Pushes carry no sender, chat name or message text, and open
-  `/messages/encrypted`. The phone attempts a sync, then checks its local
-  chats even if that sync fails. It opens exactly one active, unmuted chat
-  with unread messages; otherwise the list stays open and shows which chats
-  changed. Leaving the wake visit cancels pending navigation. The phone
-  decides this itself.
+  `/messages/encrypted`. The phone refreshes the encrypted chat list and
+  stays there so the recipient can choose which chat to open.
 - 6529 Desktop shows a local notification, "New encrypted message", when a
   chat gets a message from someone else, unless the chat is muted or open in
   the focused window. Like phone push it names no sender, chat or text.
