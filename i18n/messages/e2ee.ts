@@ -130,6 +130,8 @@ export const E2EE_MESSAGES = {
     "Your wallet signs once. This device then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "e2ee.enroll.combinedPartial":
     "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.",
+  "e2ee.enroll.combinedFinishing":
+    "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.",
   "e2ee.enroll.combinedUnavailable":
     "Combined setup could not complete. You can try again or set up one permission at a time.",
   "e2ee.enroll.unavailable":

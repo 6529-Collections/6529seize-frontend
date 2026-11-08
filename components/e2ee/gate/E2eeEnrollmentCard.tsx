@@ -9,7 +9,9 @@ import {
 import {
   type ReactNode,
   useCallback,
+  useEffect,
   useId,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -187,6 +189,41 @@ export function E2eeEnrollmentCard({
   const { address } = useSeizeConnectContext();
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const [noticeKey, setNoticeKey] = useState<MessageKey | null>(null);
+  // Set while encryption keeps registering after a combined sign-in.
+  const finishingWatch = useRef<(() => void) | null>(null);
+  useEffect(() => () => finishingWatch.current?.(), []);
+  const showPartial = useCallback(() => {
+    setAlternateScope("dms");
+    onScopeChange?.("dms");
+    setErrorKey("e2ee.enroll.combinedPartial");
+  }, [onScopeChange]);
+  /**
+   * Signed posts are on and encryption is still registering in the
+   * background: say so, then close once it is on, or explain it only if it
+   * actually fails.
+   */
+  const watchFinishing = useCallback(
+    (target: E2eeEngine) => {
+      finishingWatch.current?.();
+      const check = () => {
+        const status = target.getStatus();
+        if (status === "enrolling") return;
+        finishingWatch.current?.();
+        finishingWatch.current = null;
+        setNoticeKey(null);
+        if (status === "ready" || status === "device-limit") {
+          onClose?.();
+          return;
+        }
+        showPartial();
+      };
+      setNoticeKey("e2ee.enroll.combinedFinishing");
+      finishingWatch.current = target.subscribe(check);
+      check();
+    },
+    [onClose, showPartial]
+  );
   const isSafari = useSyncExternalStore(
     subscribeNever,
     isSafariBrowser,
@@ -205,6 +242,9 @@ export function E2eeEnrollmentCard({
       if (!engine) return { success: false, reason: "unavailable" };
       setPending(true);
       setErrorKey(null);
+      setNoticeKey(null);
+      finishingWatch.current?.();
+      finishingWatch.current = null;
       try {
         if (selectedScope === "dms") {
           await engine.enroll();
@@ -227,10 +267,12 @@ export function E2eeEnrollmentCard({
             return { success: false, reason: "rejected" };
           case "stopped":
             return { success: false, reason: "context-changed" };
+          case "pending":
+            // The signing grant is saved; encryption is not refused.
+            watchFinishing(engine);
+            return { success: true };
           case "partial":
-            setAlternateScope("dms");
-            onScopeChange?.("dms");
-            setErrorKey("e2ee.enroll.combinedPartial");
+            showPartial();
             return { success: false, reason: "unavailable" };
           case "fallback":
             setOfferSeparateSetup(true);
@@ -251,9 +293,19 @@ export function E2eeEnrollmentCard({
         setPending(false);
       }
     },
-    [address, engine, onScopeChange, requestSignedMessagesGrant, selectedScope]
+    [
+      address,
+      engine,
+      requestSignedMessagesGrant,
+      selectedScope,
+      showPartial,
+      watchFinishing,
+    ]
   );
-  const onEnabled = useCallback(() => onClose?.(), [onClose]);
+  const onEnabled = useCallback(() => {
+    // While encryption is still finishing, the watcher closes the card.
+    if (finishingWatch.current === null) onClose?.();
+  }, [onClose]);
   const flow = useEnableSignedMessages({
     requestGrant: requestEnrollment,
     onEnabled,
@@ -365,6 +417,7 @@ export function E2eeEnrollmentCard({
           )}
           <EnrollmentFeedback
             errorKey={errorKey}
+            noticeKey={noticeKey}
             engineError={engineError}
             waiting={waiting}
             flow={flow}
@@ -377,11 +430,14 @@ export function E2eeEnrollmentCard({
 
 function EnrollmentFeedback({
   errorKey,
+  noticeKey,
   engineError,
   waiting,
   flow,
 }: {
   readonly errorKey: MessageKey | null;
+  /** A neutral status, such as encryption still finishing setup. */
+  readonly noticeKey: MessageKey | null;
   readonly engineError: string | null;
   readonly waiting: boolean;
   readonly flow: Pick<
@@ -399,6 +455,7 @@ function EnrollmentFeedback({
   const failureKey = declined ? null : visibleErrorKey;
   let statusKey: MessageKey | null = null;
   if (declined) statusKey = ENROLL_REJECTED_KEY;
+  else if (noticeKey) statusKey = noticeKey;
   else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
 
   return (
