@@ -6,6 +6,7 @@ import type { BrowserContext } from "@playwright/test";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import { hideNextDevOverlay } from "../support/localSandbox";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -87,6 +88,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     sessions.push(alice);
     const groupId = `0x${"1".repeat(64)}`;
     await alice.page.route("**/api/v2/notifications?*", async (route) => {
+      // One page: older pages (id_less_than) are empty, as the API answers.
+      if (new URL(route.request().url()).searchParams.has("id_less_than")) {
+        await route.fulfill({ json: { unread_count: 0, notifications: [] } });
+        return;
+      }
       const notifications: ApiNotificationsResponseV2 = {
         unread_count: 0,
         notifications: [
@@ -146,6 +152,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       const account = alice.page.getByRole("button", {
         name: "Open account and profiles menu",
       });
+      await hideNextDevOverlay(alice.page);
       await account.hover();
       const tooltip = alice.page
         .getByRole("tooltip")
@@ -189,7 +196,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       );
     }
     await alice.page.setViewportSize({ width: 834, height: 1194 });
-    await enroll(alice);
+    await enroll(alice, { app: true });
     await enroll(bob);
     await startChat(alice, ["bob"]);
     const chatUrl = alice.page.url();
@@ -487,7 +494,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(
       alice.page
         .getByRole("list", { name: "Attachments" })
-        .getByText("pixel.png")
+        .getByText("pixel.png", { exact: true })
     ).toBeVisible();
     await sendMessage(alice.page, caption);
     for (const filename of [pickedName, "pixel.png"]) {

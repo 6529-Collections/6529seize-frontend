@@ -58,6 +58,19 @@ export async function dismissNextDevTools(page: Page) {
   }
 }
 
+/**
+ * Hides the `next dev` overlay (indicator and issue toasts), which sits over
+ * the bottom-left sidebar controls on short viewports. It is not app UI;
+ * page errors are still asserted through the page diagnostics.
+ */
+export async function hideNextDevOverlay(page: Page) {
+  await page.evaluate(() => {
+    for (const portal of document.querySelectorAll("nextjs-portal")) {
+      (portal as HTMLElement).style.setProperty("display", "none", "important");
+    }
+  });
+}
+
 export function useLocalSandboxMutationGuard(
   localTest: LocalSandboxTestApi,
   sandboxFlag: "PLAYWRIGHT_AUTH_SANDBOX" | "PLAYWRIGHT_COMPOSER_SANDBOX",
