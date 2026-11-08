@@ -23,6 +23,30 @@ export const isProfileCoveredByNotificationSocket = (
   !!profileId &&
   coverage.syncedProfileIds.includes(profileId);
 
+/**
+ * While the socket covers a profile, its count changes only through socket
+ * invalidations, so a window focus or another badge mounting need not refetch
+ * it. Without coverage the app's default stale time applies, as before.
+ */
+export const getUnreadNotificationsStaleTimeOption = (
+  isRealtimeCovered: boolean
+): { readonly staleTime?: number } =>
+  isRealtimeCovered
+    ? { staleTime: UNREAD_NOTIFICATIONS_RECONCILIATION_INTERVAL_MS }
+    : {};
+
+/**
+ * A hidden tab polls only while the socket does not cover the profile; a
+ * covered tab still gets the socket's invalidations in the background.
+ */
+export const shouldPollUnreadNotificationsInBackground = ({
+  isMobileEnvironment,
+  isRealtimeCovered,
+}: {
+  readonly isMobileEnvironment: boolean;
+  readonly isRealtimeCovered: boolean;
+}): boolean => !isMobileEnvironment && !isRealtimeCovered;
+
 export const getUnreadNotificationsRefetchInterval = (
   query: { readonly state: { readonly error: unknown } },
   isRealtimeCovered: boolean

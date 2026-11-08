@@ -49,6 +49,10 @@ export const setNotificationRealtimeState = (
   emit();
 };
 
+/** The current snapshot, for code that decides outside React rendering. */
+export const getNotificationRealtimeState = (): NotificationRealtimeState =>
+  state;
+
 export const useNotificationRealtimeState = (): NotificationRealtimeState =>
   useSyncExternalStore(
     subscribe,
