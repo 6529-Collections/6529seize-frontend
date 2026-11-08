@@ -115,6 +115,8 @@ export interface FakeEngineState {
   conversations: E2eeConversation[];
   messages: Record<string, E2eeMessage[]>;
   attachmentsEnabled: boolean;
+  /** getUpgrade(): non-null after a ciphersuite move, before re-enrolling. */
+  upgrade: { superseded: number } | null;
 }
 
 export type FakeE2eeEngine = E2eeEngine & {
@@ -136,6 +138,7 @@ export function createFakeE2eeEngine(
     conversations: [],
     messages: {},
     attachmentsEnabled: true,
+    upgrade: null,
     ...initial,
   };
   const notify = () => {
@@ -151,6 +154,7 @@ export function createFakeE2eeEngine(
     },
     getStatus: () => state.status,
     getError: () => state.error,
+    getUpgrade: () => state.upgrade,
     getThisDevice: () => state.thisDevice,
     getDevices: () => state.devices,
     getAttachmentsEnabled: () => state.attachmentsEnabled,
