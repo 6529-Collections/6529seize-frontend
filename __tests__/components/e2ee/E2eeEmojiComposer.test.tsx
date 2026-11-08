@@ -185,27 +185,57 @@ it.each(["gm", "gm-wave"])(
   }
 );
 
-it("replaces the whole message when it is selected by the browser's Select All", () => {
-  const { input } = setup();
+/** A recalled message ends with the custom emoji itself, no trailing text. */
+function setRecalledMessage(input: HTMLElement) {
   const editor = getNearestEditorFromDOMNode(input)!;
-  // A recalled message ends with the custom emoji itself, no trailing text.
   act(() =>
     editor.update(
       () => $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
       { discrete: true }
     )
   );
-  expect(
-    editor.getEditorState().toJSON().root.children[0]
-  ).toMatchObject({ children: [{ text: "Hello " }, { type: "emoji" }] });
+  expect(editor.getEditorState().toJSON().root.children[0]).toMatchObject({
+    children: [{ text: "Hello " }, { type: "emoji" }],
+  });
+}
+
+/** Selects the editor's contents by its own boundaries, as Select All does. */
+function selectAllContents(input: HTMLElement) {
+  input.focus();
+  const range = document.createRange();
+  range.selectNodeContents(input);
+  const selection = getSelection()!;
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+it("replaces the whole message when it is selected by the browser's Select All", () => {
+  const { input } = setup();
+  setRecalledMessage(input);
   act(() => {
-    input.focus();
-    const range = document.createRange();
-    range.selectNodeContents(input);
-    const selection = getSelection()!;
-    selection.removeAllRanges();
-    selection.addRange(range);
+    selectAllContents(input);
     document.dispatchEvent(new Event("selectionchange"));
+  });
+  typeAtComposerSelection(input, "Bye");
+  expect(composerText(input)).toBe("Bye");
+});
+
+it("replaces the whole message when typing arrives before the selection change", () => {
+  const { input } = setup();
+  setRecalledMessage(input);
+  act(() => {
+    selectAllContents(input);
+    // No selectionchange yet: the plugin re-selects as typing starts, before
+    // Lexical reads the selection for it. (jsdom has no native insertion, so
+    // the text goes in at the editor's selection below.)
+    input.dispatchEvent(
+      new InputEvent("beforeinput", {
+        inputType: "insertText",
+        data: "Bye",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
   });
   typeAtComposerSelection(input, "Bye");
   expect(composerText(input)).toBe("Bye");
