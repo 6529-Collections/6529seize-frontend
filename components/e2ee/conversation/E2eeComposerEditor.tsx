@@ -54,7 +54,8 @@ function restoreEmojiCaret(
   editor.focus(() =>
     editor.update(
       () => {
-        if (isSelectionAttached(caret)) $setSelection(caret);
+        // A selection is frozen once committed: set a fresh copy each time.
+        if (caret && isSelectionAttached(caret)) $setSelection(caret.clone());
       },
       { discrete: true }
     )
