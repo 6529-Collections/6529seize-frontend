@@ -59,15 +59,22 @@ export async function dismissNextDevTools(page: Page) {
 }
 
 /**
- * Hides the `next dev` overlay (indicator and issue toasts), which sits over
- * the bottom-left sidebar controls on short viewports. It is not app UI;
- * page errors are still asserted through the page diagnostics.
+ * Hides the `next dev` overlay (indicator and issue toasts) in every page of
+ * a context. It sits over bottom-left controls, such as the sidebar account
+ * button and the phone composer's attach button, and intercepts their
+ * clicks. It is not app UI; page errors are still asserted through the page
+ * diagnostics.
  */
-export async function hideNextDevOverlay(page: Page) {
-  await page.evaluate(() => {
-    for (const portal of document.querySelectorAll("nextjs-portal")) {
-      (portal as HTMLElement).style.setProperty("display", "none", "important");
-    }
+export async function hideNextDevOverlay(context: BrowserContext) {
+  await context.addInitScript(() => {
+    const hide = (node: Node) => {
+      if (node instanceof HTMLElement && node.localName === "nextjs-portal") {
+        node.style.setProperty("display", "none", "important");
+      }
+    };
+    new MutationObserver((records) => {
+      for (const record of records) record.addedNodes.forEach(hide);
+    }).observe(document, { childList: true, subtree: true });
   });
 }
 
