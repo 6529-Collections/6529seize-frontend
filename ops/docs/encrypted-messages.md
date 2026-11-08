@@ -224,7 +224,9 @@ appear.
   asks for one wallet signature. If Signed Posts are also off, the card keeps
   **Sign to enable both**, and a combined sign-in can carry the upgrade
   without another prompt. The card shows "Couldn’t upgrade encrypted messages.
-  Try again." if the upgrade fails.
+  Try again." if the upgrade fails. The setup dialog, the account-menu entry
+  and the Preferences → **Device Permissions** button also read **Upgrade
+  encrypted messages** while the upgrade is pending.
 - **Earlier conversations.** Chats started before the move are read-only:
   their messages stay readable and searchable, but you can’t send, edit, react,
   rename, change members or leave them. The list labels them **Read-only**,
