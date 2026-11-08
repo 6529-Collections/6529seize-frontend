@@ -571,6 +571,81 @@ describe("E2eeConversationView", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps today's blocked composer for a stalled group change", () => {
+    renderView(conversation({ delayed: true, delayedReason: "commit" }));
+    expect(
+      screen.getByText(
+        "Group changes are delayed. Messages will send once the change goes through."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Sending is paused until the group change goes through.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Encrypted message" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the composer usable with neutral copy when sends keep failing", () => {
+    renderView(conversation({ delayed: true, delayedReason: "send" }));
+    expect(
+      screen.getByText(
+        "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/group change/u)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Encrypted message" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeEnabled();
+  });
+
+  it("keeps the draft and focus when a send stall starts while typing", () => {
+    const convo = conversation();
+    const engine = renderView(convo);
+    const input = screen.getByRole("textbox", { name: "Encrypted message" });
+    act(() => input.focus());
+    setComposerText(input, "still typing");
+    expect(input).toHaveFocus();
+
+    act(() => engine.setDelayed(convo.g, "send"));
+
+    expect(
+      screen.getByText(
+        "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing."
+      )
+    ).toBeInTheDocument();
+    const after = screen.getByRole("textbox", { name: "Encrypted message" });
+    expect(after).toBe(input);
+    expect(after).toHaveFocus();
+    expect(composerText(after)).toBe("still typing");
+  });
+
+  it("follows the delay reason: a stuck group change blocks, recovery restores", () => {
+    const convo = conversation();
+    const engine = renderView(convo);
+    const box = () =>
+      screen.queryByRole("textbox", { name: "Encrypted message" });
+
+    act(() => engine.setDelayed(convo.g, "send"));
+    expect(box()).toBeInTheDocument();
+
+    // A stuck commit wins when both apply.
+    act(() => engine.setDelayed(convo.g, "commit"));
+    expect(
+      screen.getByText(
+        "Group changes are delayed. Messages will send once the change goes through."
+      )
+    ).toBeInTheDocument();
+    expect(box()).not.toBeInTheDocument();
+
+    act(() => engine.setDelayed(convo.g, null));
+    expect(box()).toBeInTheDocument();
+    expect(
+      screen.queryByText(/delayed|aren’t sending/u)
+    ).not.toBeInTheDocument();
+  });
+
   it("alerts on a possible split view and opens safety codes", async () => {
     renderView(conversation({ splitView: true }));
     expect(screen.getByText(SPLIT_VIEW_BANNER)).toBeInTheDocument();

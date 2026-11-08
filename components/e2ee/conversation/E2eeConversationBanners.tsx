@@ -87,7 +87,12 @@ export function E2eeConversationBanners({
   if (conversation.delayed && conversation.status === "active") {
     banners.push(
       <E2eeBanner key="delayed" tone="warning">
-        {t(locale, "e2ee.banner.delayed")}
+        {t(
+          locale,
+          conversation.delayedReason === "send"
+            ? "e2ee.banner.sendDelayed"
+            : "e2ee.banner.delayed"
+        )}
       </E2eeBanner>
     );
   }
