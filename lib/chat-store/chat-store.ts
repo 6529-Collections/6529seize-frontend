@@ -37,6 +37,7 @@ import {
   type PlaceholderEntry,
 } from "./order";
 import { isOlderRevision } from "./revision";
+import { isSameRecord } from "./same-record";
 import { SortedIndex } from "./sorted-index";
 import {
   findPendingMatch,
@@ -561,32 +562,56 @@ export class ChatStore {
     key: string,
     drop: ExtendedDrop
   ): void {
-    const { wave, waveId } = context;
+    const { wave } = context;
     const existing = wave.records.get(key);
     if (context.preserveExisting && existing !== undefined) {
       return;
     }
     if (existing?.type === DropSize.FULL) {
-      if (isOlderRevision(drop, existing)) {
-        context.stale++;
-        return;
-      }
-      this.replaceFull(wave, key, existing, drop);
-      context.changed = true;
-      // A creation frame can follow a feed copy of the same drop.
-      const creator =
-        wave.pending.size === 0 ? null : this.pendingSendFor(waveId, drop);
-      if (creator !== null) {
-        this.settlePending(waveId, creator, key);
-        context.reconciled++;
-      }
+      this.updateFull(context, key, existing, drop);
       return;
     }
     if (existing !== undefined) {
       // A placeholder is hydrated: the full record takes its place.
       this.removeRecord(wave, key);
     }
+    this.insertNewFull(context, key, drop);
+  }
 
+  /** A copy of a stored full record: stale, unchanged, or an update. */
+  private updateFull(
+    context: MergeContext,
+    key: string,
+    existing: ExtendedDrop,
+    drop: ExtendedDrop
+  ): void {
+    const { wave, waveId } = context;
+    if (isOlderRevision(drop, existing)) {
+      context.stale++;
+      return;
+    }
+    // A copy with nothing new keeps the stored object, so rows showing it
+    // stay memoized.
+    if (!isSameRecord(existing, drop)) {
+      this.replaceFull(wave, key, existing, drop);
+      context.changed = true;
+    }
+    // A creation frame can follow a feed copy of the same drop.
+    const creator =
+      wave.pending.size === 0 ? null : this.pendingSendFor(waveId, drop);
+    if (creator !== null) {
+      this.settlePending(waveId, creator, key);
+      context.reconciled++;
+    }
+  }
+
+  /** A full record for a key the wave does not hold yet. */
+  private insertNewFull(
+    context: MergeContext,
+    key: string,
+    drop: ExtendedDrop
+  ): void {
+    const { wave, waveId } = context;
     if (this.isPendingKey(key)) {
       this.registerPendingSend(waveId, key, clientDropIdOf(drop));
       wave.pending.add(key);
