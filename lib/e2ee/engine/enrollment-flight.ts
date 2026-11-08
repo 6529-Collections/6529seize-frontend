@@ -7,7 +7,7 @@ import { loadGroups, setStatus } from "./setup";
 export const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 
 /** What enrollment needs from the engine around the device registration. */
-export interface EnrollmentHooks {
+interface EnrollmentHooks {
   /** 8.8: renews an enrolled device's grant when due (one prompt). */
   renew: () => Promise<void>;
   /** device-limit: lists the profile's devices for the limit screen. */
