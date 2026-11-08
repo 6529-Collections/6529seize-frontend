@@ -20,7 +20,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { performance } from "node:perf_hooks";
 import { gzipSync } from "node:zlib";
-import { parseSuiteArg } from "./suite-arg.cjs";
+import { parseSuiteOption } from "./suite-arg.cjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..", "..");
@@ -37,7 +37,7 @@ const sizes = args
   )
   .map(Number);
 const reps = Math.max(1, Number(option("--reps") ?? 3));
-const suite = parseSuiteArg(option("--suite"));
+const suite = parseSuiteOption(args);
 const manifest = readFileSync(
   join(repo, "lib", "e2ee", "wasm", "manifest.ts"),
   "utf8"

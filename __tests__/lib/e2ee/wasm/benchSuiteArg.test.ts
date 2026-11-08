@@ -1,7 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { parseSuiteArg } =
+const { parseSuiteArg, parseSuiteOption } =
   require("../../../../native/mls-wasm/bench/suite-arg.cjs") as {
     parseSuiteArg: (value: string | undefined) => number | undefined;
+    parseSuiteOption: (args: readonly string[]) => number | undefined;
   };
 
 describe("mls-wasm benchmark --suite", () => {
@@ -27,5 +28,17 @@ describe("mls-wasm benchmark --suite", () => {
     ]) {
       expect(() => parseSuiteArg(bad)).toThrow(/--suite must be/);
     }
+  });
+
+  it("reads --suite from the arguments and refuses it without a value", () => {
+    expect(parseSuiteOption(["2", "256"])).toBeUndefined();
+    expect(parseSuiteOption(["2", "--suite", "0x004e"])).toBe(78);
+    expect(parseSuiteOption(["--suite", "78", "--reps", "5"])).toBe(78);
+    expect(() => parseSuiteOption(["2", "--suite"])).toThrow(
+      /--suite needs a value/
+    );
+    expect(() => parseSuiteOption(["--suite", "--reps", "5"])).toThrow(
+      /--suite needs a value/
+    );
   });
 });

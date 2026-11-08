@@ -127,6 +127,8 @@ fn staged_welcome_reports_the_suite_before_accepting() {
         assert_eq!(staged["ciphersuite"], u16::from(suite));
         bob.dev.reject_welcome(&g).unwrap();
         assert!(!bob.dev.has_group(&g));
+        // The staged join is gone: nothing is left to accept.
+        assert!(bob.dev.accept_welcome(&g).is_err());
     }
 }
 
