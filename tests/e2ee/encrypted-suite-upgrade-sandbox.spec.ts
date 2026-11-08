@@ -20,6 +20,7 @@ import {
   sendMessage,
   startChat,
 } from "../support/e2ee/e2eeUi";
+import { isMobileWebProject } from "../support/surfaceSimulation";
 
 const UPGRADE_INTRO = E2EE_MESSAGES["e2ee.upgrade.intro"];
 const READ_ONLY_BODY = E2EE_MESSAGES["e2ee.superseded.body"];
@@ -62,11 +63,17 @@ async function upgrade(session: E2eeUserSession) {
  */
 test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only @e2ee", () => {
   test.describe.configure({ timeout: 300_000 });
-  test.skip(
-    process.env["PLAYWRIGHT_E2EE_SANDBOX"] !== "1" ||
-      process.env["PLAYWRIGHT_ENV"] !== "local",
-    "Encrypted messages sandbox requires the local E2EE mock API runner."
-  );
+  test.beforeEach(({}, testInfo) => {
+    testInfo.skip(
+      process.env["PLAYWRIGHT_E2EE_SANDBOX"] !== "1" ||
+        process.env["PLAYWRIGHT_ENV"] !== "local",
+      "Encrypted messages sandbox requires the local E2EE mock API runner."
+    );
+    testInfo.skip(
+      isMobileWebProject(testInfo.project.name),
+      "Desktop covers the suite upgrade; nothing in it differs on mobile web, and the DM spec is the mobile representative."
+    );
+  });
 
   let sessions: E2eeUserSession[] = [];
 
