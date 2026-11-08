@@ -57,6 +57,19 @@ const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
 const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
 const DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN = "1200px 0px";
 
+const getLatestSerialNo = (drops: readonly Drop[]): number | null => {
+  let latest: number | null = null;
+  for (const drop of drops) {
+    if (
+      Number.isFinite(drop.serial_no) &&
+      (latest === null || drop.serial_no > latest)
+    ) {
+      latest = drop.serial_no;
+    }
+  }
+  return latest;
+};
+
 const getVirtualizedDropsPageSize = (isMobileAllDropsView: boolean): number =>
   isMobileAllDropsView
     ? MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE
@@ -138,17 +151,22 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     forcePinToBottom,
   } = scrollBehavior;
 
-  useWaveDropsNotificationRead({
-    waveId,
-    enabled: Boolean(connectedProfile?.handle),
-    isDirectMessage: isWaveDirectMessage(waveId, wave),
-    removeWaveDeliveredNotifications,
-  });
-
   const dropsForClipboard = useMemo(
     () => waveMessages?.drops ?? EMPTY_DROPS,
     [waveMessages?.drops]
   );
+  const latestSerialNo = useMemo(
+    () => getLatestSerialNo(dropsForClipboard),
+    [dropsForClipboard]
+  );
+
+  useWaveDropsNotificationRead({
+    waveId,
+    enabled: Boolean(connectedProfile?.handle),
+    isDirectMessage: isWaveDirectMessage(waveId, wave),
+    latestSerialNo,
+    removeWaveDeliveredNotifications,
+  });
 
   useWaveDropsClipboard({
     containerRef,

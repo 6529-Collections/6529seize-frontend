@@ -19,7 +19,9 @@ import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import {
   getUnreadNotificationsRefetchInterval,
+  getUnreadNotificationsStaleTimeOption,
   isProfileCoveredByNotificationSocket,
+  shouldPollUnreadNotificationsInBackground,
 } from "@/services/notifications/unread-notifications-polling";
 
 type ConnectedAccountUnreadCounts = Readonly<Record<string, number>>;
@@ -189,13 +191,17 @@ export function useConnectedAccountsUnreadNotifications(
         ],
         queryFn: ({ signal }: { readonly signal: AbortSignal }) =>
           fetchUnreadCountForAccount(jwt, signal),
+        ...getUnreadNotificationsStaleTimeOption(isRealtimeCovered),
         refetchInterval: (query: {
           readonly state: { readonly error: unknown };
         }) => getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
         refetchOnWindowFocus: true,
         refetchOnMount: true,
         refetchOnReconnect: true,
-        refetchIntervalInBackground: !isMobileEnvironment,
+        refetchIntervalInBackground: shouldPollUnreadNotificationsInBackground({
+          isMobileEnvironment,
+          isRealtimeCovered,
+        }),
         retry: (failureCount: number, error: unknown) => {
           const terminalJwtFingerprint = getTerminalJwtFingerprint(error);
           if (terminalJwtFingerprint !== null) {

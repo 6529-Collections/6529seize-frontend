@@ -10,6 +10,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
+  SIDEBAR_HIGHLY_RATED_WAVES_PARAMS,
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
   WAVE_SCORE_DISCOVERY_PARAMS,
@@ -56,8 +57,6 @@ type EnhancedWave = SidebarWave & {
   readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
-
-const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 
 // V2 overview, pinned, and announcement wave sources are root-wave
 // sources. This guard is defensive against stale or malformed cached data; it is
@@ -157,14 +156,14 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-    pageSize: HIGHLY_RATED_QUERY_PAGE_SIZE,
+    pageSize: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.pageSize,
     following: false,
     directMessage: false,
     excludeFollowed: isConnectedIdentity ? true : undefined,
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.refetchIntervalMs,
     refetchIntervalInBackground: false,
     enabled: shouldLoadMainWaves,
   });

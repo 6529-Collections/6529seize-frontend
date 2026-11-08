@@ -25,6 +25,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { jwtDecode } from "jwt-decode";
 import type { ReactNode } from "react";
@@ -590,6 +591,7 @@ describe("useMarkWaveNotificationsRead", () => {
     await expect(result.current("wave-1")).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenLastCalledWith({
       refreshWaveLists: true,
+      refreshNotifications: true,
     });
 
     await expect(
@@ -597,7 +599,63 @@ describe("useMarkWaveNotificationsRead", () => {
     ).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenLastCalledWith({
       refreshWaveLists: false,
+      refreshNotifications: true,
     });
+  });
+
+  describe("notification counts after a read", () => {
+    afterEach(() => {
+      setNotificationRealtimeState(false);
+    });
+
+    it("leaves the counts to the socket when it covers the reader", async () => {
+      const invalidateNotifications = jest.fn();
+      setActiveIdentity({
+        address: "0xAAA",
+        jwt: "jwt-a",
+        connectedProfileId: "profile-1",
+      });
+      setNotificationRealtimeState(true, ["profile-1"]);
+      const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      await expect(
+        result.current("wave-1", { refreshWaveLists: false })
+      ).resolves.toBe("sent");
+
+      // The server's IDENTITY_NOTIFICATIONS_CHANGED refreshes them instead.
+      expect(invalidateNotifications).toHaveBeenLastCalledWith({
+        refreshWaveLists: false,
+        refreshNotifications: false,
+      });
+    });
+
+    it.each([
+      ["the socket is down", false, ["profile-1"]],
+      ["the socket covers another profile only", true, ["profile-2"]],
+    ])(
+      "refreshes the counts itself when %s",
+      async (_label, connected, profileIds) => {
+        const invalidateNotifications = jest.fn();
+        setActiveIdentity({
+          address: "0xAAA",
+          jwt: "jwt-a",
+          connectedProfileId: "profile-1",
+        });
+        setNotificationRealtimeState(connected, profileIds);
+        const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+          wrapper: createWrapper(invalidateNotifications),
+        });
+
+        await expect(result.current("wave-1")).resolves.toBe("sent");
+
+        expect(invalidateNotifications).toHaveBeenLastCalledWith({
+          refreshWaveLists: true,
+          refreshNotifications: true,
+        });
+      }
+    );
   });
 
   it("refreshes the wave lists when any merged read asks for it", async () => {
@@ -621,8 +679,8 @@ describe("useMarkWaveNotificationsRead", () => {
     await expect(third).resolves.toBe("sent");
 
     expect(invalidateNotifications.mock.calls).toEqual([
-      [{ refreshWaveLists: false }],
-      [{ refreshWaveLists: true }],
+      [{ refreshWaveLists: false, refreshNotifications: true }],
+      [{ refreshWaveLists: true, refreshNotifications: true }],
     ]);
   });
 
