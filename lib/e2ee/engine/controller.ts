@@ -356,6 +356,15 @@ export class EngineController {
     while (this.isReady()) {
       const runtime = this.ctx.store.groups.get(g);
       if (!isActive(runtime) || runtime.outbox.size === 0) {
+        // Catch-up can empty the outbox while this loop sleeps: the failing
+        // send no longer holds the stall (a stuck commit still does).
+        if (
+          runtime?.outbox.size === 0 &&
+          runtime.sendFailingSince !== null &&
+          !runtime.commitFailing
+        ) {
+          clearStallFor(this.ctx, runtime);
+        }
         return;
       }
       const commit = await runGroupCommit(

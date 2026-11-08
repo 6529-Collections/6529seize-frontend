@@ -43,6 +43,7 @@ function setup() {
   } as StoredGroup);
   runtime.outbox.set("m1", { id: "m1", g: "g" } as StoredOutboxItem);
   const arm = jest.fn();
+  const sleepHooks: (() => void)[] = [];
   const ctx = {
     disposed: false,
     mls: {},
@@ -59,6 +60,7 @@ function setup() {
     scheduler: {
       setTimeout: (fire: () => void, ms: number) => {
         now += ms;
+        sleepHooks.shift()?.();
         setImmediate(fire);
         return { id: 0 };
       },
@@ -81,7 +83,19 @@ function setup() {
     onOwnRevoked: async () => undefined,
     afterSync: async () => undefined,
   });
-  return { controller, runtime, commits, arm, start, now: () => now };
+  return {
+    controller,
+    runtime,
+    commits,
+    arm,
+    start,
+    now: () => now,
+    advance: (ms: number) => {
+      now += ms;
+    },
+    /** Runs `hook` while the flush sleeps in its next backoff. */
+    onNextSleep: (hook: () => void) => sleepHooks.push(hook),
+  };
 }
 
 describe("E2EE engine: send stall clocks", () => {
@@ -137,6 +151,39 @@ describe("E2EE engine: send stall clocks", () => {
       sendFailingSince: start,
       delayed: true,
     });
+    expect(clocksOf(runtime)).toEqual({
+      stallSince: null,
+      sendFailingSince: null,
+      delayed: false,
+    });
+  });
+
+  it("releases the send clock when catch-up empties the outbox during a backoff", async () => {
+    const { controller, runtime, commits, arm, advance, onNextSleep } = setup();
+    jest.mocked(sendNext).mockResolvedValueOnce("failed");
+    // The send landed after all: catch-up finds it while the loop sleeps.
+    onNextSleep(() => runtime.outbox.delete("m1"));
+    await controller.flush("g");
+    expect(clocksOf(runtime)).toEqual({
+      stallSince: null,
+      sendFailingSince: null,
+      delayed: false,
+    });
+
+    // An hour later, a new message's first transient failure starts a fresh
+    // clock instead of tripping the 20 s rule at once.
+    advance(60 * 60_000);
+    runtime.outbox.set("m2", { id: "m2", g: "g" } as StoredOutboxItem);
+    jest
+      .mocked(sendNext)
+      .mockResolvedValueOnce("failed")
+      .mockImplementationOnce(async (_ctx, current) => {
+        current.outbox.clear();
+        return "sent";
+      });
+    await controller.flush("g");
+    expect(commits.map((c) => c.delayed)).not.toContain(true);
+    expect(arm).not.toHaveBeenCalled();
     expect(clocksOf(runtime)).toEqual({
       stallSince: null,
       sendFailingSince: null,
