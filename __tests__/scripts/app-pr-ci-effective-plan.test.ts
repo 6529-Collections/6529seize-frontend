@@ -712,6 +712,13 @@ describe("Encrypted messages browser lane selection", () => {
     ["tests/e2ee/encrypted-dm-sandbox.spec.ts", true],
     ["tests/support/e2ee/sandboxSignIn.cjs", true],
     ["components/auth/authSignedMessagesGrant.ts", true],
+    // The shared editor the encrypted composer is built on.
+    ["components/composer/ComposerEditor.tsx", true],
+    ["components/drops/create/lexical/plugins/SelectAllContentsPlugin.tsx", true],
+    ["components/waves/CreateDropEmojiPicker.tsx", true],
+    ["components/waves/LazyEmojiPicker.tsx", true],
+    ["components/drops/create/lexical/nodes/EmojiNode.tsx", true],
+    ["components/drops/create/utils/CreateDropContent.tsx", false],
     ["components/auth/Auth.tsx", false],
     ["components/waves/drops/WaveDrop.tsx", false],
     ["README.md", false],

@@ -581,8 +581,9 @@ Surface matrix:
   engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
   `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
   desktop only. App PR CI runs it (lane `playwright-e2ee`) for changes to
-  encrypted messages, device signing, the sign-in grant path or these
-  fixtures. It must never run against staging or production.
+  encrypted messages, device signing, the sign-in grant path, the shared
+  composer editor the encrypted composer is built on, or these fixtures. It
+  must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.

@@ -287,10 +287,7 @@ jobs:
           if (dropEditingBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
           }
-          const e2eeBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:(?:lib|components|hooks)\/(?:e2ee|device-signing)\/|native\/mls-wasm\/|app\/messages\/encrypted\/|tests\/(?:support\/)?e2ee\/|i18n\/messages\/e2ee\.ts$|components\/auth\/(?:authActions|authRequestSignIn|authSignedMessagesGrant|authLoginE2eeDevice|signedMessagesTestSigner)\.ts$|services\/auth\/devAuthTestOverride\.ts$|tests\/support\/composerSandboxServer\.cjs$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
-          );
-          if (e2eeBrowserRequired) {
+          if (plan.checks.playwright_e2ee?.required) {
             corePlaywrightLanes.push({ lane: "playwright-e2ee", label: "Encrypted messages desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {

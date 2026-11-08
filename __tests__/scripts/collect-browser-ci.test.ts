@@ -160,6 +160,13 @@ it("selects every core browser lane when their shared workflow changes", () => {
         label: "Drop editing desktop and mobile",
         runner: "ubuntu-latest",
       },
+    ],
+  });
+});
+it("runs the encrypted messages lane when the plan requires it", () => {
+  const outputs = select([], { playwright_e2ee: { required: true } });
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
       {
         lane: "playwright-e2ee",
         label: "Encrypted messages desktop and mobile",
