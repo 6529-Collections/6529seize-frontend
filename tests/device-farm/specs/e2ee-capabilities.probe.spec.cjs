@@ -42,11 +42,11 @@ const PROBE_TIMEOUT_MS = 150000;
 // lib/e2ee/wasm/manifest.ts at the time of writing. Override when the module
 // is rebuilt: the probe only needs a URL the target serves.
 const MLS_WASM = {
-  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-c5dc4d96a05d6406.wasm",
+  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-4060c854d16a99c6.wasm",
   sha256:
     process.env.E2EE_WASM_SHA256 ||
-    "c5dc4d96a05d6406b85dfa8c6a5836a0727da067c437216502a93c783595f5c8",
-  bytes: Number(process.env.E2EE_WASM_BYTES || 1804916),
+    "4060c854d16a99c61e6697bb602712716bcd81ea523fc82c815806ff0b2c9f55",
+  bytes: Number(process.env.E2EE_WASM_BYTES || 1806345),
 };
 
 /**

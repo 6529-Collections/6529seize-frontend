@@ -1,5 +1,56 @@
 # Benchmarks (contract section 11, P35 S3 gate)
 
+## 0x004E against 0x004F (recorded 2026-11-08)
+
+The module supports 0x004E (`MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519`:
+the same X-Wing key exchange and Ed25519 signatures, with AES-256-GCM and
+SHA-384) next to the default 0x004F. Both suites were measured with the
+committed module `public/e2ee/mls-wasm-4060c854d16a99c6.wasm`, back to back in
+one session: wasm, Node 24 (V8), single thread, median of 5 runs, same
+scenario as below. Commands:
+
+```sh
+node native/mls-wasm/bench/bench.mjs 2 256 --reps 5 --suite 0x004f
+node native/mls-wasm/bench/bench.mjs 2 256 --reps 5 --suite 0x004e
+```
+
+The machine was shared with other build jobs. An earlier session on a quieter
+machine (same source) measured every time below about 1.6 times faster, with
+the same relation between the suites. Read the times as relative only; the
+byte counts are exact.
+
+| Measure                                           | N=2 0x004F | N=2 0x004E | N=256 0x004F | N=256 0x004E |
+| ------------------------------------------------- | ---------: | ---------: | -----------: | -----------: |
+| KeyPackage bytes                                  |      2,767 |      2,767 |        2,767 |        2,767 |
+| Create commit adding N-1 members (one commit), ms |        8.6 |        5.4 |        1,435 |        1,224 |
+| Add commit, MLS bytes (unpadded)                  |      2,966 |      2,982 |      706,550 |      706,566 |
+| Add commit, entry bytes (padded bucket)           |      8,192 |      8,192 |    1,048,576 |    1,048,576 |
+| Welcome bytes (ratchet tree inline)               |      4,598 |      4,679 |      687,360 |      695,823 |
+| Join from Welcome (stage + accept), ms            |        5.9 |        7.7 |          165 |          168 |
+| Remove 1 member: create commit, ms                |        n/a |        n/a |          451 |          396 |
+| Remove 1 member: entry bytes                      |        n/a |        n/a |      524,288 |      524,288 |
+| Self-update: create commit, ms                    |        9.8 |        6.4 |          448 |          421 |
+| Self-update: entry bytes                          |      8,192 |      8,192 |      524,288 |      524,288 |
+| Message (200-byte body): wrapped bytes            |        512 |        512 |          512 |          512 |
+| Message encrypt, ms (mean of 50)                  |       0.75 |       0.64 |         0.78 |         0.61 |
+| Message decrypt + verify, ms (mean of 50)         |       0.86 |       0.68 |         1.07 |         0.80 |
+| Creator exportState() bytes                       |     51,592 |     53,665 |    4,034,465 |    4,037,557 |
+
+Observations:
+
+- KeyPackages, messages and padded entries are the same size on both suites.
+  A KeyPackage carries no hash-sized field, and AES-256-GCM has the same
+  nonce and tag lengths as AES-128-GCM.
+- Welcomes grow by 81 B at N=2 (+1.8%) and by 8.5 KB at N=256 (+1.2%).
+  SHA-384 makes KeyPackage references, tree hashes and tags 48 bytes instead
+  of 32. Unpadded commits grow by 16 B.
+- Times differ by less than the noise of this machine in either direction.
+- The module grew by 1,429 B raw (522 B gzip) against the 0x004F-only build:
+  1,806,345 B raw and 565,122 B gzip -9. The SHA-384 and AES-256-GCM code was
+  already linked (the 6529 wraps use AES-256-GCM).
+
+## 0x004F launch build (recorded 2026-10-31)
+
 Recorded 2026-10-31 with the committed module
 `public/e2ee/mls-wasm-c5dc4d96a05d6406.wasm`, ciphersuite 0x004F
 (`MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519`: X-Wing hybrid ML-KEM-768 +

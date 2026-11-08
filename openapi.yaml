@@ -3286,11 +3286,12 @@ paths:
           description: >-
             Web only, with device_key and mls_ciphersuite. The device's MLS
             Ed25519 signature public key (0x + 64 lowercase hex), different from
-            device_key. When encrypted messages are on and mls_ciphersuite is
-            the server's ciphersuite, the SIWE message is a combined grant: it
-            also grants this key for end-to-end encrypted messages with the same
-            expiry (a second urn:6529:mls-device-grant:v1 resource and a
-            combined statement). Otherwise the challenge grants device_key only.
+            device_key. When encrypted messages are on and mls_ciphersuite is a
+            ciphersuite the server accepts (79 or 78), the SIWE message is a
+            combined grant: it also grants this key for end-to-end encrypted
+            messages with the same expiry (a second urn:6529:mls-device-grant:v1
+            resource and a combined statement). Otherwise the challenge grants
+            device_key only.
         - name: mls_ciphersuite
           in: query
           required: false
@@ -10504,7 +10505,7 @@ paths:
         Registers the MLS device key that a combined sign-in grant (NC8) also
         granted, without a separate wallet signature. The grant must be one this
         server stored at a Sign-In with Ethereum login (carrying an
-        urn:6529:mls-device-grant:v1 resource for the current ciphersuite) or an
+        urn:6529:mls-device-grant:v1 resource for an accepted ciphersuite) or an
         app device grant (POST /device-grants) with an mls_device_key, unrevoked
         and unexpired, and its wallet must belong to the caller's profile. Same
         device limit and renewal rules as POST /e2ee/devices. Requires a
@@ -10550,11 +10551,12 @@ paths:
       summary: Look up encrypted-messaging devices in bulk
       description: >-
         Returns the devices of the given profiles (active, and revoked or
-        expired within 90 days) and the records of the given device keys, so a
-        client can verify every member's grants in one request. At most 200
-        profile ids and 500 device keys; at least one of the two. Requires a
-        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
-        is off.
+        expired within 90 days, limited to those that can join groups of the
+        request's ciphersuite) and the records of the given device keys
+        (whatever their suite), so a client can verify every member's grants in
+        one request. At most 200 profile ids and 500 device keys; at least one
+        of the two. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
       operationId: e2eeLookupDevices
       security:
         - bearerAuth: []
@@ -11000,7 +11002,8 @@ paths:
         - Encrypted Messages
       summary: List a profile's encrypted-messaging devices
       description: >-
-        Active devices and devices revoked or expired within 90 days. Requires a
+        Active devices and devices revoked or expired within 90 days, limited to
+        those that can join groups of the ciphersuite parameter. Requires a
         profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
         is off.
       operationId: e2eeGetProfileDevices
@@ -11019,6 +11022,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: ciphersuite
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: >-
+            Only devices that can join groups of this MLS ciphersuite: 79
+            (0x004F) or 78 (0x004E). Default 79, the suite of clients that name
+            none.
       responses:
         "200":
           description: successful operation
@@ -11059,9 +11071,10 @@ paths:
       description: >-
         Applies each target's DM policy and blocks unless the target already
         shares the given group with the claimer device. Pops one unexpired
-        one-time KeyPackage per device (FIFO), else returns the last-resort
-        KeyPackage. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
-        while the feature flag is off.
+        one-time KeyPackage per device that can join groups of the request's
+        ciphersuite (FIFO), else returns the last-resort KeyPackage. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
       operationId: e2eeClaimKeyPackages
       security:
         - bearerAuth: []
@@ -33607,6 +33620,13 @@ components:
             when the claimer device is in it too
         claimer_device_key:
           type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The ciphersuite of the group the KeyPackages are for: 79 (0x004F) or
+            78 (0x004E). Default the claimer device's grant suite. Only target
+            devices that can join groups of this suite are returned, and the
+            claimer device must be able to join it too (else 400).
     ApiE2eeClaimKeyPackagesResponse:
       type: object
       required:
@@ -33799,8 +33819,9 @@ components:
         ciphersuite:
           type: integer
           description: >-
-            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft
-            code point)
+            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519) or 78
+            (0x004E, MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519), both
+            draft code points. The device joins only groups of this suite.
         issued_at:
           type: integer
           format: int64
@@ -33849,6 +33870,13 @@ components:
           maxItems: 500
           items:
             type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
+            (0x004E). Default 79, the suite of clients that name none. Limits
+            the devices found by profile_ids; device_keys are returned whatever
+            their suite.
     ApiE2eeDeviceLookupResponse:
       type: object
       required:
@@ -33917,6 +33945,13 @@ components:
           maxItems: 100
           items:
             type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
+            (0x004E). Default 79, the suite of clients that name none.
+            active_devices and NO_DEVICES count only devices that can join
+            groups of this suite.
     ApiE2eeEligibilityResponse:
       type: object
       required:
@@ -33993,7 +34028,10 @@ components:
       properties:
         data:
           type: string
-          description: Standard base64 TLS-serialized KeyPackage (at most 4 KiB)
+          description: >-
+            Standard base64 TLS-serialized MLS 1.0 KeyPackage (at most 8 KiB).
+            Its cipher_suite must be one the device's grant admits (today the
+            grant's own suite), else 400.
         last_resort:
           type: boolean
         expires_at:

@@ -9,12 +9,15 @@ export interface MlsDeviceHandle {
   setCredential(identity: string): void;
   credentialIdentity(): string | undefined;
   signDigest(digest32: Uint8Array): string;
+  /** `ciphersuite`: a supported code point (0x004F or 0x004E); default 0x004F. */
   createKeyPackages(
     count: number,
     lastResort: boolean,
-    lifetimeSecs: number
+    lifetimeSecs: number,
+    ciphersuite?: number
   ): string;
-  createGroup(g: string, metadataJson: string): string;
+  /** `ciphersuite`: a supported code point (0x004F or 0x004E); default 0x004F. */
+  createGroup(g: string, metadataJson: string, ciphersuite?: number): string;
   groupSummary(g: string): string;
   hasGroup(g: string): boolean;
   deleteGroup(g: string): void;
@@ -96,6 +99,8 @@ export interface WasmPendingProposal {
 
 export interface WasmGroupSummary {
   g: string;
+  /** The group's MLS ciphersuite (79 = 0x004F, 78 = 0x004E); never changes. */
+  ciphersuite: number;
   epoch: number;
   /** Null once this device is no longer an active member. */
   epoch_fp: string;

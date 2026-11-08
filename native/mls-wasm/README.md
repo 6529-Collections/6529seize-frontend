@@ -17,15 +17,27 @@ All cryptography comes from libraries: OpenMLS 0.9.1 with
 `openmls_rust_crypto` 0.6.0 for MLS, `ed25519-dalek` (K_n and inner message
 signatures), `aes-gcm` (wraps) and `sha3` (keccak256).
 
-The only ciphersuite is 0x004F,
+The default ciphersuite is 0x004F,
 `MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519` (`device::CIPHERSUITE`):
 X-Wing hybrid post-quantum key exchange (ML-KEM-768 with X25519) through the
 OpenMLS cargo feature `draft-ietf-mls-pq-ciphersuites`, AES-128-GCM, SHA-256
 and Ed25519 signatures. It must equal `E2EE_CIPHERSUITE` in
-`lib/e2ee/grant.ts` (the grant signs it) and the backend's pinned value.
-0x004F is a draft code point: if it changes, every device re-enrolls and every
-group is re-created; the engine drops a stored device whose grant names
-another suite.
+`lib/e2ee/grant.ts` (the grant signs it). The module also supports 0x004E,
+`MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519`
+(`device::CIPHERSUITE_AES256`): the same X-Wing key exchange and Ed25519 device
+key with AES-256-GCM and SHA-384. Under 0x004F the epoch secrets travel in
+HPKE sealed with AES-128-GCM (GroupSecrets in Welcomes, path secrets in
+UpdatePaths), so the floor is the AES-128 / SHA-256 level; 0x004E raises it.
+
+`createKeyPackages(count, lastResort, lifetimeSecs, ciphersuite?)` and
+`createGroup(g, metadataJson, ciphersuite?)` take an optional suite (default
+0x004F); `groupSummary` reports each group's `ciphersuite`. A group never
+changes suite: adds must use KeyPackages of the group's suite, and a Welcome
+is accepted on either supported suite. Leaf capabilities list both suites.
+Which suite a device may use is decided by its grant (contract 2), not here.
+Both are draft code points (draft-ietf-mls-pq-ciphersuites TBD1 and TBD2);
+the engine drops a stored device whose grant names a suite other than
+`E2EE_CIPHERSUITE`.
 
 ## Build
 

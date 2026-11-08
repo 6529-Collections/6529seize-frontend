@@ -3,9 +3,10 @@
  * Contract section 11 benchmark for the wasm build, same scenario as
  * `cargo run --release --bin bench` (src/bin/bench.rs).
  *
- *   node native/mls-wasm/bench/bench.mjs [sizes...] [--reps N] [--wasm FILE] [--glue FILE]
+ *   node native/mls-wasm/bench/bench.mjs [sizes...] [--reps N] [--suite S] [--wasm FILE] [--glue FILE]
  *
- * Defaults: sizes 2 87 174 1024, the hashed module named in
+ * Defaults: sizes 2 87 174 1024, the module's default suite (0x004F; pass
+ * --suite 0x004e for 0x004E), the hashed module named in
  * lib/e2ee/wasm/manifest.ts and the glue in lib/e2ee/wasm/generated/.
  * Each size runs N times (default 3); every numeric field is the median.
  * Prints JSON on stdout and one line per size on stderr.
@@ -28,10 +29,16 @@ const option = (name) => {
 const sizes = args
   .filter(
     (a, i) =>
-      /^\d+$/.test(a) && !["--wasm", "--glue", "--reps"].includes(args[i - 1])
+      /^\d+$/.test(a) &&
+      !["--wasm", "--glue", "--reps", "--suite"].includes(args[i - 1])
   )
   .map(Number);
 const reps = Math.max(1, Number(option("--reps") ?? 3));
+const suiteArg = option("--suite");
+const suite = suiteArg === undefined ? undefined : Number(suiteArg);
+if (suite !== undefined && !Number.isInteger(suite)) {
+  throw new Error(`--suite must be a code point, got ${suiteArg}`);
+}
 const manifest = readFileSync(
   join(repo, "lib", "e2ee", "wasm", "manifest.ts"),
   "utf8"
@@ -66,7 +73,7 @@ function device(name) {
   return d;
 }
 const keyPackage = (d) =>
-  JSON.parse(d.createKeyPackages(1, false, 30 * DAY))[0].data;
+  JSON.parse(d.createKeyPackages(1, false, 30 * DAY, suite))[0].data;
 const metadata = (g) =>
   JSON.stringify({
     v: 1,
@@ -84,7 +91,8 @@ function run(n, seed) {
   const creator = device("creator");
   const members = Array.from({ length: n - 1 }, (_, i) => device(`m${i + 1}`));
   const kps = members.map(keyPackage);
-  creator.createGroup(g, metadata(g));
+  const created = JSON.parse(creator.createGroup(g, metadata(g), suite));
+  const keyPackageBytes = b64Len(kps[0] ?? keyPackage(creator));
 
   let t = now();
   const res = JSON.parse(
@@ -174,7 +182,7 @@ function run(n, seed) {
   const creator2 = device("creator2");
   const members2 = Array.from({ length: n - 1 }, (_, i) => device(`s${i + 1}`));
   const kps2 = members2.map(keyPackage);
-  creator2.createGroup(g2, metadata(g2));
+  creator2.createGroup(g2, metadata(g2), suite);
   let splitMs = 0;
   let splitMaxEntry = 0;
   let splitMaxWelcome = 0;
@@ -197,7 +205,9 @@ function run(n, seed) {
   const state = creator.exportState().length;
   for (const d of [creator, creator2, ...members, ...members2]) d.free();
   return {
+    ciphersuite: created.ciphersuite,
     leaves: n,
+    key_package_bytes: keyPackageBytes,
     add_all_commit_ms: addAllMs,
     add_all_merge_ms: mergeMs,
     add_all_entry_bytes: res.entry.padded_len,
