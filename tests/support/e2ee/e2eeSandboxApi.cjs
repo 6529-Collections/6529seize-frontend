@@ -383,6 +383,21 @@ function createE2eeSandboxApi({ corsHeaders }) {
       return { ok: true };
     },
     "plaintext-scan": (body) => plaintextScan(body),
+    // D172: makes a user's registered devices look enrolled before grant v2
+    // (v1 grant for 0x004F, no KeyPackages). The browser's own stored
+    // device must be marked to match for the upgrade path to start.
+    "legacy-suite-devices": (body) => {
+      const profileId = requireUser(body.user).profileId;
+      const marked = ds
+        .devicesOf(profileId)
+        .map((device) => ds.markLegacySuiteDevice(device.device_key));
+      return { ok: true, devices: marked.length };
+    },
+    // D172: closes (open: false) or reopens the v1-grant transition window.
+    "suite-window": (body) => {
+      ds.setV1GrantsAccepted(body.open !== false);
+      return { ok: true };
+    },
   };
 
   function handleControl(method, pathname, body, res) {

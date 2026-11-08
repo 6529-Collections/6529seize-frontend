@@ -24,7 +24,10 @@ describe("E2EE engine: lifecycle", () => {
     const key = alice.primary.engine.getThisDevice()!.deviceKey;
     const pool = () => world.ds.state["keyPackages"].get(key);
     expect(pool().oneTime).toHaveLength(30);
-    const firstLastResort = pool().lastResort.data;
+    // One last-resort package per suite (D172); devices use 0x004E.
+    const lastResort = () => pool().lastResort.get(0x004e)?.data;
+    const firstLastResort = lastResort();
+    expect(firstLastResort).toBeDefined();
 
     // Claims drain the pool below 10; the next refresh refills it to 30.
     for (let index = 0; index < 25; index += 1) {
@@ -45,7 +48,8 @@ describe("E2EE engine: lifecycle", () => {
     world.clock.advance(31 * DAY);
     await settle(world);
     expect(uploads()).toBeGreaterThanOrEqual(before + 2);
-    expect(pool().lastResort.data).not.toBe(firstLastResort);
+    expect(lastResort()).toBeDefined();
+    expect(lastResort()).not.toBe(firstLastResort);
   });
 
   it("stops at the device limit and resumes without a second prompt", async () => {
@@ -67,7 +71,7 @@ describe("E2EE engine: lifecycle", () => {
     expect(eleventh.signCalls).toBe(1);
   });
 
-  it("drops a device stored under another ciphersuite and enrolls again", async () => {
+  it("retires a device stored under another ciphersuite, keeping its history, and enrolls again", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
     await addUser(world, "bob");
@@ -80,9 +84,10 @@ describe("E2EE engine: lifecycle", () => {
     const stored = (await storage.getDevice("alice"))!;
     expect(await storage.listGroups("alice")).toHaveLength(1);
     alice.primary.engine.dispose();
-    // As left behind by the classical 0x0001 build.
+    // As left behind by the classical 0x0001 build (a v1 grant).
+    const { version: _v, ciphersuites: _s, ...v1 } = stored.grant;
     await storage.writeBatch("alice", {
-      device: { ...stored, grant: { ...stored.grant, ciphersuite: 1 } },
+      device: { ...stored, grant: { ...v1, ciphersuite: 1 } },
     });
 
     const restarted = await startDevice(world, "alice", alice.account, {
@@ -90,16 +95,28 @@ describe("E2EE engine: lifecycle", () => {
       enroll: false,
     });
     expect(restarted.engine.getStatus()).toBe("needs-enrollment");
-    expect(await storage.getDevice("alice")).toBeNull();
-    expect(await storage.listGroups("alice")).toEqual([]);
+    // D172: the device is kept only as a retired marker, its group read-only.
+    expect(await storage.getDevice("alice")).toMatchObject({
+      deviceKey: stored.deviceKey,
+      retired: true,
+      registered: false,
+    });
+    const groups = await storage.listGroups("alice");
+    expect(groups.map((group) => group.status)).toEqual(["superseded"]);
     expect(await storage.getWasmState("alice")).toBeNull();
+    expect(restarted.engine.getUpgrade()).toEqual({ superseded: 1 });
 
     await restarted.engine.enroll();
     expect(restarted.engine.getStatus()).toBe("ready");
     expect(restarted.signCalls).toBe(1);
     const fresh = (await storage.getDevice("alice"))!;
-    expect(fresh.grant.ciphersuite).toBe(0x004f);
+    expect(fresh.grant).toMatchObject({
+      version: 2,
+      ciphersuite: 0x004e,
+      ciphersuites: [0x004e],
+    });
     expect(fresh.deviceKey).not.toBe(stored.deviceKey);
+    expect(restarted.engine.getUpgrade()).toBeNull();
     restarted.engine.dispose();
   });
 

@@ -3284,14 +3284,24 @@ paths:
             type: string
             pattern: ^0x[0-9a-f]{64}$
           description: >-
-            Web only, with device_key and mls_ciphersuite. The device's MLS
-            Ed25519 signature public key (0x + 64 lowercase hex), different from
-            device_key. When encrypted messages are on and mls_ciphersuite is a
-            ciphersuite the server accepts (79 or 78), the SIWE message is a
+            Web only, with device_key and mls_ciphersuites (or the v1
+            mls_ciphersuite). The device's MLS Ed25519 signature public key (0x
+            + 64 lowercase hex), different from device_key. When encrypted
+            messages are on and the suites are acceptable, the SIWE message is a
             combined grant: it also grants this key for end-to-end encrypted
-            messages with the same expiry (a second urn:6529:mls-device-grant:v1
-            resource and a combined statement). Otherwise the challenge grants
-            device_key only.
+            messages with the same expiry (a second urn:6529:mls-device-grant:v2
+            resource, or v1 for mls_ciphersuite, and a combined statement).
+            Otherwise the challenge grants device_key only.
+        - name: mls_ciphersuites
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^\d{1,5}(\.\d{1,5}){0,3}$
+          description: >-
+            Grant v2 (D172): the MLS suites of mls_device_key, decimal code
+            points in strictly ascending order joined by "." (for example "78");
+            1 to 4 entries, at least one accepted by the server (79 or 78).
         - name: mls_ciphersuite
           in: query
           required: false
@@ -3299,7 +3309,9 @@ paths:
             type: integer
             minimum: 1
             maximum: 65535
-          description: The MLS ciphersuite of mls_device_key; required with it.
+          description: >-
+            Grant v1: the one MLS suite of mls_device_key. Honoured only for 79
+            (0x004F) while v1 grants are accepted; use mls_ciphersuites.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -23064,7 +23076,8 @@ components:
       additionalProperties: false
       description: >-
         The fields of an EIP-712 DeviceGrant (domain "6529 Device Grant",
-        version 1, the 6529 pre-genesis salt). The statement is not sent: the
+        version 1, or version 2 with `uint16[] ciphersuites` in place of `uint16
+        ciphersuite`; the 6529 pre-genesis salt). The statement is not sent: the
         server renders it from these fields.
       required:
         - wallet
@@ -23097,8 +23110,22 @@ components:
           type: integer
           nullable: true
           description: >-
-            The MLS ciphersuite of mls_device_key; null or absent without one (0
-            is rejected).
+            v1: the MLS ciphersuite of mls_device_key (79 only, while v1 grants
+            are accepted); null or absent without one (0 is rejected). v2: the
+            lowest entry of ciphersuites, or null without an MLS key.
+        version:
+          type: integer
+          description: >-
+            1 (or absent): domain version "1" with `uint16 ciphersuite`. 2:
+            domain version "2" with `uint16[] ciphersuites` (D172).
+        ciphersuites:
+          type: array
+          items:
+            type: integer
+          description: >-
+            v2: the MLS suites of mls_device_key, 1 to 4 code points in strictly
+            ascending order with at least one accepted (79 or 78); [] for a
+            signing-only grant.
         issued_at:
           type: integer
           format: int64
@@ -33817,12 +33844,29 @@ components:
         device_key:
           type: string
           description: 0x + 64 hex
+        version:
+          type: integer
+          description: >-
+            The grant version (D172). 1 (or absent): MlsDeviceGrant domain
+            version "1" with one `uint16 ciphersuite`, honoured only for 79
+            (0x004F) while v1 grants are accepted. 2: domain version "2" with
+            `uint16[] ciphersuites`.
         ciphersuite:
           type: integer
           description: >-
-            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519) or 78
-            (0x004E, MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519), both
-            draft code points. The device joins only groups of this suite.
+            v1: the signed suite, 79 (0x004F,
+            MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519). v2: the lowest
+            entry of ciphersuites.
+        ciphersuites:
+          type: array
+          items:
+            type: integer
+          description: >-
+            v2: the signed suites, 1 to 4 code points in strictly ascending
+            order, at least one accepted by the server (79 or 78, 0x004E is
+            MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519). The device may
+            join groups of the accepted ones. Responses give v1 grants as their
+            one suite.
         issued_at:
           type: integer
           format: int64
@@ -41891,7 +41935,15 @@ components:
           type: integer
           minimum: 1
           maximum: 65535
-          description: Required when mls_device_key is present.
+          description: >-
+            Grant v1: the one suite of mls_device_key (79 only, while v1 grants
+            are accepted). Give this or mls_ciphersuites with mls_device_key.
+        mls_ciphersuites:
+          type: string
+          pattern: ^\d{1,5}(\.\d{1,5}){0,3}$
+          description: >-
+            Grant v2: the suites of mls_device_key, ascending, joined by "."
+            (for example "78").
     ApiSessionNonceResponse:
       type: object
       required:

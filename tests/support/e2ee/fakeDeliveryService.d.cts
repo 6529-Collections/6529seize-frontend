@@ -84,10 +84,17 @@ export interface FakeDeliveryService {
   setTamper(fn: ((item: any, context: FakeLogItemContext) => any) | null): void;
   group(g: string): any;
   devicesOf(profileId: string): any[];
+  /** D172: closes (false) or reopens the v1-grant transition window. */
+  setV1GrantsAccepted(accepted: boolean): void;
+  /** D172 seed: a v1 (0x004F) grant on a registered device, no KeyPackages. */
+  markLegacySuiteDevice(deviceKey: string): any;
 }
 
 export function createFakeDeliveryService(options?: {
   now?: () => number;
+  attachmentsEnabled?: boolean;
+  /** D172: false starts with the v1-grant transition window closed. */
+  v1GrantsAccepted?: boolean;
 }): FakeDeliveryService;
 export function createFakeApiClient(
   ds: FakeDeliveryService,

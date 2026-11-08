@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 import { encodeAbiParameters, keccak256, toBytes } from "viem";
 
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { E2EE_CIPHERSUITE, E2EE_LEGACY_CIPHERSUITE } from "@/lib/e2ee/grant";
 import type { MsgPayload } from "@/lib/e2ee/payload";
 import type {
   GroupMetadata,
@@ -229,7 +229,12 @@ class Client {
     return result;
   }
 
-  join(ds: DeliveryService, g: string, welcomeB64: string): GroupSummary {
+  join(
+    ds: DeliveryService,
+    g: string,
+    welcomeB64: string,
+    ciphersuite = 0x004f
+  ): GroupSummary {
     const staged = parse<WasmWelcomeSummary>(
       this.device.joinWelcome(g, b64ToBytes(welcomeB64))
     );
@@ -237,8 +242,8 @@ class Client {
     const summary = parse<GroupSummary>(this.device.acceptWelcome(g));
     expect(summary.commit_key).toBe(staged.commit_key);
     // The suite is known before accepting, and is the group's.
-    expect([0x004f, 0x004e]).toContain(staged.ciphersuite);
-    expect(summary.ciphersuite).toBe(staged.ciphersuite);
+    expect(staged.ciphersuite).toBe(ciphersuite);
+    expect(summary.ciphersuite).toBe(ciphersuite);
     this.cursor.set(g, ds.length(g));
     return summary;
   }
@@ -297,11 +302,12 @@ describe("mls wasm module", () => {
     expect(typeof asEngineModule.MlsDevice.create).toBe("function");
     const info = parse<ModuleInfo>(mls.moduleInfo());
     expect(info.openmls).toBe("0.9.1");
-    // The module's default suite is the grant's (0x004F, X-Wing); it also
-    // supports 0x004E (AES-256-GCM, SHA-384) on the same device key.
-    expect(info.ciphersuite).toBe(E2EE_CIPHERSUITE);
+    // The module's default suite (no suite argument) stays 0x004F, what v1
+    // grants name; the engine passes 0x004E (AES-256-GCM, SHA-384, D172)
+    // explicitly. Both run on the same device key.
+    expect(info.ciphersuite).toBe(E2EE_LEGACY_CIPHERSUITE);
     expect(info.ciphersuite).toBe(0x004f);
-    expect(info.ciphersuites).toEqual([0x004f, 0x004e]);
+    expect(info.ciphersuites).toEqual([0x004f, E2EE_CIPHERSUITE]);
     expect(info.metadata_extension).toBe(0xf529);
   });
 
@@ -425,7 +431,7 @@ describe("mls wasm module", () => {
       add_key_packages: [bob.keyPackage(0x004e)],
     });
     expect(
-      bob.join(ds, g, defined(result.welcome, "welcome")).ciphersuite
+      bob.join(ds, g, defined(result.welcome, "welcome"), 0x004e).ciphersuite
     ).toBe(0x004e);
     alice.send(ds, g, "hello on 0x004e");
     const fromAlice = asMessage(bob.sync(ds, g)[0]);

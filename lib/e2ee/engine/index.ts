@@ -24,6 +24,7 @@ import {
   type EngineContext,
 } from "./context";
 import { ConversationCreator } from "./conversation-creation";
+import { ConversationRestarter } from "./conversation-restart";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
@@ -44,7 +45,6 @@ import {
   leave,
   removeMember,
   rename,
-  restartTargets,
   setAdmin,
 } from "./membership";
 import { searchHistory } from "./history-search";
@@ -72,6 +72,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
   private readonly conversationCreator: ConversationCreator;
+  private readonly restarter: ConversationRestarter;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -86,6 +87,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       () => this.requireReady(),
       this.onDelayed
     );
+    this.restarter = new ConversationRestarter(ctx, this.conversationCreator);
   }
 
   async init(): Promise<void> {
@@ -338,6 +340,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
         return;
       }
       await loadGroups(this.ctx);
+      this.ctx.store.upgrade = null;
       setStatus(this.ctx, "ready");
       try {
         await this.refreshMe();
@@ -605,12 +608,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async restart(g: string): Promise<string> {
     this.requireReady();
-    const runtime = requireGroup(this.ctx, g);
-    return this.createConversation({
-      profileIds: restartTargets(this.ctx, runtime),
-      kind: runtime.record.metadata.kind,
-      name: runtime.record.metadata.name,
-    });
+    return this.restarter.restart(g);
   }
 
   async report(
