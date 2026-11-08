@@ -13,6 +13,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { E2eeComposer } from "@/components/e2ee/conversation/E2eeComposer";
+import { E2EE_COMPOSER_TRANSFORMERS } from "@/components/e2ee/conversation/e2eeComposerTransformers";
+import { $convertFromMarkdownString } from "@lexical/markdown";
+import { getNearestEditorFromDOMNode } from "lexical";
 import {
   conversation,
   contextFor,
@@ -181,6 +184,32 @@ it.each(["gm", "gm-wave"])(
     );
   }
 );
+
+it("replaces the whole message when it is selected by the browser's Select All", () => {
+  const { input } = setup();
+  const editor = getNearestEditorFromDOMNode(input)!;
+  // A recalled message ends with the custom emoji itself, no trailing text.
+  act(() =>
+    editor.update(
+      () => $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
+      { discrete: true }
+    )
+  );
+  expect(
+    editor.getEditorState().toJSON().root.children[0]
+  ).toMatchObject({ children: [{ text: "Hello " }, { type: "emoji" }] });
+  act(() => {
+    input.focus();
+    const range = document.createRange();
+    range.selectNodeContents(input);
+    const selection = getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+  });
+  typeAtComposerSelection(input, "Bye");
+  expect(composerText(input)).toBe("Bye");
+});
 
 it("does not submit Enter while an IME composition is active", () => {
   const { engine, input } = setup();
