@@ -24,13 +24,21 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: ADDRESS }),
 }));
 
-const mockRecord: { grant: ApiDeviceGrant | null } = { grant: null };
+const mockRecord: { grant: ApiDeviceGrant | null; readFails: boolean } = {
+  grant: null,
+  readFails: false,
+};
 let mockChangeListener: (() => void) | null = null;
 jest.mock("@/lib/device-signing/device-key-store", () => ({
-  readDeviceKey: async () => ({
-    publicKeyHex: `0x${"aa".repeat(32)}`,
-    grant: mockRecord.grant,
-  }),
+  readDeviceKey: async () => {
+    if (mockRecord.readFails) {
+      throw new DOMException("IndexedDB unavailable", "UnknownError");
+    }
+    return {
+      publicKeyHex: `0x${"aa".repeat(32)}`,
+      grant: mockRecord.grant,
+    };
+  },
   listLocalDevicePublicKeys: async () => [`0x${"aa".repeat(32)}`],
   subscribeToDeviceGrantChanges: (listener: () => void) => {
     mockChangeListener = listener;
@@ -46,6 +54,7 @@ describe("device signing hooks", () => {
     mockSupported = true;
     mockAuth = { activeProfileProxy: null, isAuthenticated: true };
     mockRecord.grant = null;
+    mockRecord.readFails = false;
   });
 
   it("returns the lowercase wallet only when signed messages apply", async () => {
@@ -75,6 +84,7 @@ describe("device signing hooks", () => {
     const { result } = renderHook(() => useLocalDeviceKeys(ADDRESS));
     expect(result.current.loaded).toBe(false);
     await waitFor(() => expect(result.current.loaded).toBe(true));
+    expect(result.current.failed).toBe(false);
     expect(result.current.grant).toBeNull();
     expect(result.current.publicKeys).toEqual([`0x${"aa".repeat(32)}`]);
 
@@ -83,10 +93,28 @@ describe("device signing hooks", () => {
     await waitFor(() => expect(result.current.grant).toEqual({ id: "grant" }));
   });
 
+  it("reports an unreadable key store as unknown, not as holding no keys", async () => {
+    mockRecord.readFails = true;
+    const { result } = renderHook(() => useLocalDeviceKeys(ADDRESS));
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    expect(result.current).toEqual({
+      loaded: true,
+      failed: true,
+      grant: null,
+      publicKeys: [],
+    });
+
+    mockRecord.readFails = false;
+    act(() => mockChangeListener?.());
+    await waitFor(() => expect(result.current.failed).toBe(false));
+    expect(result.current.publicKeys).toEqual([`0x${"aa".repeat(32)}`]);
+  });
+
   it("reports nothing loaded without a wallet", () => {
     const { result } = renderHook(() => useLocalDeviceKeys(null));
     expect(result.current).toEqual({
       loaded: false,
+      failed: false,
       grant: null,
       publicKeys: [],
     });

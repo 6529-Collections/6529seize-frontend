@@ -1,4 +1,5 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import { generateDeviceKeyPair } from "./ed25519";
 import { deviceKeyStorage, type StoredDeviceKey } from "./device-key-storage";
 import { writeDeviceGrantHint } from "./grant-hint";
@@ -151,6 +152,8 @@ export async function saveDeviceGrant(
   });
   if (saved) {
     notifyDeviceGrantChanged(normalized);
+    // The key exists only here: keep IndexedDB from being evicted.
+    void requestPersistentStorage();
   }
   return saved;
 }
@@ -228,4 +231,5 @@ export async function installSharedDeviceKey(
     writeDeviceGrantHint(address, record.grant, record.ownProfileId);
   });
   notifyDeviceGrantChanged(address);
+  void requestPersistentStorage();
 }
