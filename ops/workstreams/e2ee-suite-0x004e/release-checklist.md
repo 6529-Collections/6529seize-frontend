@@ -43,12 +43,25 @@ messages.
    `mls_ciphersuites` and the `ciphersuite` parameters.
 4. **Native clients** (6529-client#38) follow the same policy and re-vendor the
    WASM module from #4748's merge commit.
-5. **Start the window** only with owner sign-off. Set
+5. **Precondition before anyone sets `E2EE_SUITE_TRANSITION_START`:** a
+   CloudWatch alarm on `6529/E2EE` `SuiteWindowConfigInvalid` must exist. A
+   malformed value does not fail the start; it is reported and treated as
+   "not started", so only this alarm makes a typo visible. Creating the alarm
+   is a new AWS resource and sits on the owner list.
+6. **Start the window** only with owner sign-off. Set
    `E2EE_SUITE_TRANSITION_START` to an ISO 8601 date-time with a zone, or to
    unix milliseconds:
-   - Never use seconds. The API refuses to start on a malformed value.
+   - Never use seconds. Anything before 2026-11-08 (the D172 decision),
+     malformed, or not a real calendar date is refused: logged as an ERROR,
+     counted in `SuiteWindowConfigInvalid`, and treated as "not started".
    - `E2EE_SUITE_TRANSITION_DAYS` defaults to 14.
    - The start-up log shows the effective start and end.
+   - After the window the server accepts only 0x004E: v1 grants and v2 sets
+     without 0x004E no longer register, list, claim or upload KeyPackages,
+     and `POST /device-grants` refuses such an encryption key.
+   - A roster repair re-adding a 0x004F-only device to an old group gets 400
+     after the window. That is consistent with old-suite groups becoming
+     read-only.
 
 ## What users see
 
