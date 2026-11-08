@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentProps, FC, ReactNode } from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
@@ -35,6 +35,9 @@ interface EmojiPickerControlProps extends CreateDropEmojiPickerProps {
 }
 
 /** Shared composer control: anchored on desktop and a slide panel on mobile. */
+/** The desktop picker keeps this gap from the window's edges. */
+const PICKER_VIEWPORT_MARGIN = 8;
+
 export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   disabled = false,
   top = "tw-top-2",
@@ -156,6 +159,29 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isPickerOpen]);
+
+  // The desktop picker opens to the left of its trigger at a fixed offset.
+  // Near a window edge, slide it inside so it never widens the page. The
+  // observer reports the first size before paint and again once the lazy
+  // picker has loaded.
+  useLayoutEffect(() => {
+    const dialog = pickerRef.current;
+    if (isMobile || !isPickerOpen || !dialog) return;
+    const observer = new ResizeObserver(() => {
+      const minLeft = globalThis.scrollX + PICKER_VIEWPORT_MARGIN;
+      const maxLeft =
+        globalThis.scrollX +
+        document.documentElement.clientWidth -
+        dialog.offsetWidth -
+        PICKER_VIEWPORT_MARGIN;
+      setPickerPosition((position) => {
+        const left = Math.max(minLeft, Math.min(position.left, maxLeft));
+        return left === position.left ? position : { ...position, left };
+      });
+    });
+    observer.observe(dialog);
+    return () => observer.disconnect();
+  }, [isMobile, isPickerOpen]);
 
   return (
     <>

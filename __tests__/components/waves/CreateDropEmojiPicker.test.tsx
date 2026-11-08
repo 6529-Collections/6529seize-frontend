@@ -146,6 +146,49 @@ describe("CreateDropEmojiPicker", () => {
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
   });
 
+  it("keeps the desktop picker inside the window near its right edge", async () => {
+    const OriginalResizeObserver = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      private readonly callback: ResizeObserverCallback;
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+      }
+      observe() {
+        this.callback([], this as unknown as ResizeObserver);
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      configurable: true,
+      value: 1280,
+    });
+    const width = jest
+      .spyOn(HTMLElement.prototype, "offsetWidth", "get")
+      .mockReturnValue(354);
+    try {
+      render(<CreateDropEmojiPicker />);
+      const toggleButton = screen.getByRole("button", { hidden: true });
+      jest.spyOn(toggleButton, "getBoundingClientRect").mockReturnValue({
+        top: 600,
+        left: 1180,
+        width: 31,
+        height: 31,
+        right: 1211,
+        bottom: 631,
+      } as DOMRect);
+      fireEvent.click(toggleButton);
+      const wrapper = (await screen.findByTestId("picker")).parentElement!;
+      // At 1180 - 250 = 930 it would end 4px past the window: 1280 - 354 - 8.
+      await waitFor(() => expect(wrapper.style.left).toBe("918px"));
+      expect(wrapper.style.top).toBe("180px");
+    } finally {
+      width.mockRestore();
+      Reflect.deleteProperty(document.documentElement, "clientWidth");
+      globalThis.ResizeObserver = OriginalResizeObserver;
+    }
+  });
+
   it("tells the composer once the mobile panel returns focus after a selection", async () => {
     mockUseIsMobile.mockReturnValue(true);
     const onClosedAfterSelect = jest.fn();
