@@ -337,7 +337,7 @@ interface StoredDeviceFields {
  * Reads this browser's stored device; with `change`, rewrites it to the v1
  * device in the same IndexedDB transaction.
  */
-async function updateStoredDevice(
+function updateStoredDevice(
   page: Page,
   profileId: string,
   change: {

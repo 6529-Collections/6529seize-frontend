@@ -95,7 +95,7 @@ export interface FakeDeliveryService {
   markLegacySuiteDevice(
     deviceKey: string,
     signed: { grant: unknown; wallet_signature: string }
-  ): Promise<any>;
+  ): Promise<{ device_key: string; grant_id: string }>;
 }
 
 export function createFakeDeliveryService(options?: {

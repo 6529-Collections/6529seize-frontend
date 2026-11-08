@@ -1736,7 +1736,8 @@ function createFakeDeliveryService(options = {}) {
      */
     async markLegacySuiteDevice(deviceKey, signed) {
       const device = s.devices.get(lower(deviceKey));
-      if (!device || device.revoked_at !== null) {
+      // Unknown (undefined) or revoked.
+      if (device?.revoked_at !== null) {
         fail(404, "E2EE_NOT_FOUND");
       }
       const grant = signed?.grant;
