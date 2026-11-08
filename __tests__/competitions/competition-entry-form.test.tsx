@@ -197,19 +197,25 @@ it("preserves wave and group mentions in the competition submission command and 
 });
 
 it("uploads the entry's media as a decision entry, which keeps the original file", async () => {
+  // Mocks are not cleared between tests in this file, so only calls made by
+  // this test count.
+  mockDropEditorProps.mockClear();
+  jest.mocked(getCreateWaveDropRequest).mockClear();
   render(<CompetitionEntryForm onClose={jest.fn()} />);
   expect(mockDropEditorProps).toHaveBeenLastCalledWith(
     expect.objectContaining({
       mediaUploadPurpose: ApiMediaUploadPurpose.DecisionEntry,
     })
   );
+  expect(getCreateWaveDropRequest).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
   await waitFor(() =>
-    expect(getCreateWaveDropRequest).toHaveBeenCalledWith(
-      mockSnapshot,
-      ApiMediaUploadPurpose.DecisionEntry
-    )
+    expect(getCreateWaveDropRequest).toHaveBeenCalledTimes(1)
   );
+  expect(jest.mocked(getCreateWaveDropRequest).mock.lastCall).toEqual([
+    mockSnapshot,
+    ApiMediaUploadPurpose.DecisionEntry,
+  ]);
 });
 
 afterEach(() => {

@@ -328,7 +328,13 @@ export const getReplyTo = (activeDrop: ActiveDropState | null) => {
   return undefined;
 };
 
-/** The purpose of media added to the composer in its current mode. */
+/**
+ * The purpose of media added to the composer in its current mode. It is fixed
+ * when a file is prepared (drop mode, reply or not), while submission works
+ * the purpose out again from the final drop request. If the user switches
+ * between drop mode and a reply after adding a file, the prepared upload no
+ * longer matches and is deliberately uploaded again with the right purpose.
+ */
 export const getComposerMediaUploadPurpose = (
   isDropMode: boolean,
   activeDrop: ActiveDropState | null
