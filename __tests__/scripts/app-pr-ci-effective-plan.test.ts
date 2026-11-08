@@ -552,6 +552,7 @@ it("does not select PDF coverage for unrelated content", () => {
 type WorkflowStep = {
   env?: Record<string, string>;
   id?: string;
+  if?: string;
   name?: string;
   run?: string;
   with?: Record<string, unknown>;
