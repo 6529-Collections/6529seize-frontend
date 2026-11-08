@@ -104,6 +104,7 @@ const useScrollContainer = () => {
     if (scrollContainerRef.current === node) {
       return;
     }
+    console.warn(`[serialdbg] scroll container ${node ? "set" : "cleared"} replaced=${Boolean(scrollContainerRef.current && node)} t=${Math.round(performance.now())}`);
     scrollContainerRef.current = node;
     setScrollContainerEl(node);
   }, []);
@@ -157,6 +158,7 @@ export const useScrollBehavior = () => {
   const forcePinToBottom = useCallback(
     (behavior: ScrollBehavior = "smooth") => {
       const container = scrollContainerRef.current;
+      console.warn(`[serialdbg] forcePinToBottom behavior=${behavior} t=${Math.round(performance.now())} stack=${(new Error().stack ?? "").split(String.fromCharCode(10)).slice(2, 7).map((l) => l.trim()).join(" <- ")}`);
       if (!container) {
         return;
       }

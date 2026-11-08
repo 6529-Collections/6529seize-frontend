@@ -160,6 +160,7 @@ export const useWaveDropsSerialScroll = ({
           }
         },
         onRelease: () => {
+          console.warn(`[serialdbg] anchor onRelease current=${scrollAnchorRef.current === anchor}`);
           if (scrollAnchorRef.current === anchor)
             scrollAnchorRef.current = null;
         },
@@ -181,6 +182,7 @@ export const useWaveDropsSerialScroll = ({
   const [init, setInit] = useState(false);
 
   const cancelSerialScroll = useCallback(() => {
+    console.warn(`[serialdbg] cancelSerialScroll t=${Math.round(performance.now())} stack=${(new Error().stack ?? "").split(String.fromCharCode(10)).slice(2, 7).map((l) => l.trim()).join(" <- ")}`);
     scrollAnchorRef.current?.release();
     scrollOperationAbortController.current?.abort();
     scrollOperationLockRef.current = false;
@@ -280,6 +282,7 @@ export const useWaveDropsSerialScroll = ({
       if (shouldAutoPinNewestDrop) {
         // A cancelled timer must leave this key eligible for the next render.
         const timeoutId = setTimeout(() => {
+          console.warn(`[serialdbg] auto-pin bottom prev=${previousNewestDropKey} next=${newestDropKey} t=${Math.round(performance.now())}`);
           lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
           scrollToVisualBottom();
         }, 100);
@@ -316,6 +319,7 @@ export const useWaveDropsSerialScroll = ({
       const target = resolveTarget(container);
 
       if (target && container) {
+        console.warn(`[serialdbg] scrollToSerialNo target=${target.id} behavior=${behavior} t=${Math.round(performance.now())}`);
         const anchor = holdScrollTarget(container, target);
         scrollElementIntoContainerCenter({
           behavior,
@@ -458,6 +462,7 @@ export const useWaveDropsSerialScroll = ({
       }
 
       const success = await smoothScrollWithRetries(activeSerialTarget, signal);
+      console.warn(`[serialdbg] fetchAndScroll target=${activeSerialTarget} didReveal=${didReveal} success=${success} aborted=${signal.aborted} t=${Math.round(performance.now())}`);
       didSucceed = success;
 
       if (!signal.aborted) {
@@ -497,6 +502,10 @@ export const useWaveDropsSerialScroll = ({
     smoothScrollWithRetries,
     clearSerialTargetIfCurrent,
   ]);
+
+  useEffect(() => {
+    console.warn(`[serialdbg] serialTarget=${serialTarget} init=${init} isScrolling=${isScrolling} smallest=${smallestSerialNo.current} last=${lastScrolledToSerialRef.current} t=${Math.round(performance.now())}`);
+  }, [serialTarget, init, isScrolling]);
 
   useEffect(() => {
     let settleTimeoutId: ReturnType<typeof setTimeout> | null = null;

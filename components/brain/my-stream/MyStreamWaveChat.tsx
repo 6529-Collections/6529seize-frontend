@@ -324,6 +324,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }
 
   useEffect(() => {
+    console.warn(`[serialdbg] chat render key=${replyThreadTarget ? `thread-${replyThreadTarget.parentSerialNo}` : "wave"} scrollTarget=${scrollTarget} viewMode=${viewMode} t=${Math.round(performance.now())}`);
+  }, [replyThreadTarget, scrollTarget, viewMode]);
+
+  useEffect(() => {
     if (!initialDropState || viewMode === "gallery") {
       return;
     }
@@ -354,6 +358,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     // This is one-time URL cleanup, not navigation. A router replacement
     // removes the document-only feed wrappers and remounts the chat at latest.
     const previousState: unknown = globalThis.history.state;
+    console.warn(`[serialdbg] url cleanup serial=${initialDropState.serialNo} t=${Math.round(performance.now())}`);
     globalThis.history.replaceState(null, "", href + globalThis.location.hash);
     // Preserve visit-specific tab metadata, keeping Next's updated state.
     const currentState: unknown = globalThis.history.state;

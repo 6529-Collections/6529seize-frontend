@@ -486,6 +486,8 @@ const PACKS = [
       },
       [DESKTOP, MOBILE]
     ),
+    // DEBUG (draft PR, not for merge): keep the first-retry trace.
+    traceOff: false,
     triggers: ["pr-ci", "manual"],
   },
   {

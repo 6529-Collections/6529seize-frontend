@@ -22,6 +22,7 @@ export const observeSerialScrollTarget = ({
   let active = true;
 
   const restoreTarget = () => {
+    console.warn(`[serialdbg] anchor restore active=${active} containerConnected=${container.isConnected} targetConnected=${currentTarget.isConnected}`);
     if (!active) return;
     if (!container.contains(currentTarget)) {
       const replacement = targetId
@@ -51,8 +52,9 @@ export const observeSerialScrollTarget = ({
         })
       : null;
 
-  function release() {
+  function release(event?: Event) {
     if (!active) return;
+    console.warn(`[serialdbg] anchor release cause=${event?.type ?? "call"} t=${Math.round(performance.now())} stack=${event ? "" : (new Error().stack ?? "").split(String.fromCharCode(10)).slice(2, 6).map((l) => l.trim()).join(" <- ")}`);
     active = false;
     visibilityObserver?.disconnect();
     replacementObserver?.disconnect();
@@ -64,6 +66,18 @@ export const observeSerialScrollTarget = ({
 
   visibilityObserver?.observe(currentTarget);
   replacementObserver?.observe(container, { childList: true, subtree: true });
+  // DEBUG: sample the anchor's view of the world for 12 s.
+  let samples = 0;
+  const sampler = setInterval(() => {
+    samples += 1;
+    const live = container.ownerDocument.getElementById(targetId);
+    const containerRect = container.getBoundingClientRect();
+    const liveRect = live?.getBoundingClientRect();
+    console.warn(
+      `[serialdbg] anchor sample#${samples} active=${active} containerConnected=${container.isConnected} targetConnected=${currentTarget.isConnected} liveInContainer=${Boolean(live && container.contains(live))} scrollTop=${Math.round(container.scrollTop)} cTop=${Math.round(containerRect.top)} cH=${Math.round(containerRect.height)} liveTop=${liveRect ? Math.round(liveRect.top) : "none"} liveH=${liveRect ? Math.round(liveRect.height) : "none"}`
+    );
+    if (samples >= 12) clearInterval(sampler);
+  }, 1000);
   for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
     controls.addEventListener(event, release, { capture: true, passive: true });
   }

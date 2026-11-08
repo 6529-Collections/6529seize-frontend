@@ -117,6 +117,11 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   isVotingControlsLocked = false,
 }) => {
   const router = useRouter();
+  useEffect(() => {
+    console.warn(`[serialdbg] WaveDropsAllInner mount wave=${waveId} initialDrop=${initialDrop} t=${Math.round(performance.now())}`);
+    return () => console.warn(`[serialdbg] WaveDropsAllInner unmount wave=${waveId} t=${Math.round(performance.now())}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
   const { isAppleMobile, isMobileDevice } = useDeviceInfo();
