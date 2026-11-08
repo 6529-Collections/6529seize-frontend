@@ -67,6 +67,7 @@ jest.mock("@/hooks/device-signing/useMinuteClock", () => ({
 
 let mockLocal: {
   loaded: boolean;
+  failed?: boolean;
   grant: ApiDeviceGrant | null;
   publicKeys: string[];
 };
@@ -502,6 +503,20 @@ describe("SignedMessagesNotice", () => {
         screen.getByText("Safari on iPhone can now post as you. Not you?")
       ).toBeVisible();
       expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+    });
+
+    it("neither alerts nor offers to turn on when this browser's keys could not be read", () => {
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      // This browser's own grant, granted after the baseline: with its keys
+      // unreadable it must not look like another device, or like none.
+      mockLocal = { loaded: true, failed: true, grant: null, publicKeys: [] };
+      mockGrants = [grant({ id: `0x${"6".repeat(64)}` })];
+      rerender(<SignedMessagesNotice composerEmpty />);
+
+      expect(screen.queryByTestId("signed-messages-notice")).toBeNull();
+      expect(screen.queryByText(/can now post as you/)).toBeNull();
+      expect(screen.queryByRole("button", { name: "Turn on" })).toBeNull();
     });
 
     it("never alerts for this browser's own keys, revoked or expired grants", () => {

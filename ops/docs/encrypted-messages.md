@@ -130,7 +130,15 @@ setup page was already open. Signing and encryption still use separate keys.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
-be retried separately.
+be retried separately. If encryption registration is still running after about
+20 seconds, the card says signed posts are on and encrypted DMs are still
+finishing setup; it closes once encryption is on and reports a failure only if
+registration actually fails.
+
+After a signing permission or an encryption device is stored, the site asks the
+browser to keep its storage persistent. Some browsers decide this silently;
+others ask. Browsers can otherwise remove site storage when space runs low,
+which removes this browser's keys and its encrypted history.
 
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
 the card says so on Safari.
@@ -328,7 +336,14 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
-  been accepted yet. Sending resumes on its own.
+  been accepted yet. The composer reads "Sending is paused until the group
+  change goes through." Sending resumes on its own.
+- **Messages aren’t sending right now. We’ll keep retrying, and you can keep
+  writing.** Sending has failed for about 20 seconds while the chat itself is
+  fine (for example the delivery service is overloaded). The composer stays
+  available, and what you type is kept. New messages stay pending (see
+  [Message states](#message-states)) and go out in order once a retry
+  succeeds; retries continue every few seconds.
 - **Security check needed: this device may not see the same chat as everyone
   else.** Members may be seeing different versions of the chat. Compare
   safety codes before sharing anything sensitive.

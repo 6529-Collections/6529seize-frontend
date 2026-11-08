@@ -1433,7 +1433,13 @@ function createFakeDeliveryService(options = {}) {
       };
     }
     if (s.gate && method === "POST" && s.gate.path.test(path)) {
-      await new Promise((resolve) => s.gate.waiters.push(resolve));
+      const gate = s.gate;
+      await new Promise((resolve) => {
+        gate.waiters.push(resolve);
+        for (const notify of gate.arrivals.splice(0)) {
+          notify();
+        }
+      });
     }
     const fault = takeFault(method, path);
     if (fault) {
@@ -1546,10 +1552,15 @@ function createFakeDeliveryService(options = {}) {
      * commits for the same epoch.
      */
     hold(path) {
-      const gate = { path, waiters: [] };
+      const gate = { path, waiters: [], arrivals: [] };
       s.gate = gate;
       return {
         waiting: () => gate.waiters.length,
+        /** Resolves once a matching POST is being held. */
+        arrived: () =>
+          gate.waiters.length > 0
+            ? Promise.resolve()
+            : new Promise((resolve) => gate.arrivals.push(resolve)),
         release() {
           if (s.gate === gate) {
             s.gate = null;

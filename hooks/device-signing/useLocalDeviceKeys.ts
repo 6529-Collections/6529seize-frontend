@@ -10,6 +10,12 @@ import { useEffect, useState } from "react";
 
 interface LocalDeviceKeys {
   readonly loaded: boolean;
+  /**
+   * IndexedDB could not be read: whether this browser holds a key or grant is
+   * unknown, so nothing may treat it as holding none (no turn-on offer, and
+   * no grant shown as another device's).
+   */
+  readonly failed: boolean;
   /** This browser's grant for the wallet, if it holds one. */
   readonly grant: ApiDeviceGrant | null;
   /** Public keys of every device key this browser holds (lowercase hex). */
@@ -18,6 +24,7 @@ interface LocalDeviceKeys {
 
 const NOT_LOADED: LocalDeviceKeys = {
   loaded: false,
+  failed: false,
   grant: null,
   publicKeys: [],
 };
@@ -41,9 +48,14 @@ export function useLocalDeviceKeys(address: string | null): LocalDeviceKeys {
           readDeviceKey(address),
           listLocalDevicePublicKeys(),
         ]);
-        next = { loaded: true, grant: record?.grant ?? null, publicKeys };
+        next = {
+          loaded: true,
+          failed: false,
+          grant: record?.grant ?? null,
+          publicKeys,
+        };
       } catch {
-        next = { loaded: true, grant: null, publicKeys: [] };
+        next = { loaded: true, failed: true, grant: null, publicKeys: [] };
       }
       if (active) {
         setState({ address, keys: next });
