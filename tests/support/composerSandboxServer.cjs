@@ -1285,10 +1285,21 @@ function isExpectedChatDropSignerAddress(signerAddress) {
   return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
 }
 
+// The web sends a plain lowercase UUID with every drop create (API #2318).
+function isExpectedClientDropId(clientDropId) {
+  return (
+    typeof clientDropId === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      clientDropId
+    )
+  );
+}
+
 function isExpectedChatDropBody(body) {
   const hasPoll = isPlainObject(body?.poll);
   if (
     !hasOnlyKeys(body, [
+      "client_drop_id",
       "drop_type",
       "is_safe_signature",
       "mentioned_groups",
@@ -1309,6 +1320,7 @@ function isExpectedChatDropBody(body) {
 
   return (
     body.wave_id === SANDBOX_WAVE_ID &&
+    isExpectedClientDropId(body.client_drop_id) &&
     body.drop_type === "CHAT" &&
     body.title === null &&
     body.signature === null &&
@@ -2457,6 +2469,8 @@ function loggedRequestBody(pathname, body) {
     const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
     return {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      client_drop_id:
+        typeof body.client_drop_id === "string" ? body.client_drop_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
       poll: isPlainObject(body.poll)
