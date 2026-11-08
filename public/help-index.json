@@ -3635,7 +3635,11 @@
         "desktop encrypted message notification",
         "paste image in encrypted chat",
         "emoji board in encrypted chat",
-        "custom emojis in encrypted messages"
+        "custom emojis in encrypted messages",
+        "upgrade encrypted messages",
+        "stronger encryption",
+        "read-only encrypted chat",
+        "continue the conversation"
       ],
       "keywords": [
         "encrypted",
@@ -3652,9 +3656,13 @@
         "paste",
         "emoji",
         "custom emojis",
-        "reactions"
+        "reactions",
+        "upgrade",
+        "read-only",
+        "ciphersuite"
       ],
       "facts": [
+        "Encrypted chats are moving from MLS ciphersuite 0x004F (AES-128-GCM) to 0x004E (AES-256-GCM). A device that used the earlier encryption shows Upgrade encrypted messages instead of first-time setup and asks for one wallet signature (Sign to upgrade Encrypted DMs, or Sign to enable both when Signed Posts are also off); decrypted history stays on the device. Earlier chats become read-only and are labelled Read-only in the list: messages stay readable, but sending, editing, reactions, renaming and member changes are off. In a direct message, Continue the conversation opens or starts a session on the new encryption in the same list entry, with Chat history switching between sessions. In a group, Start again with the same members creates the new group once (then Open the new conversation); members who have not confirmed the upgrade are named and left out, to be added later from Chat info. If nobody can be reached yet, the page says they will be reachable once they open 6529.io and confirm the upgrade. The new conversation opens with This conversation moved to stronger encryption and View earlier messages.",
         "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself. The 6529 Desktop secure option is currently visible but disabled with a Coming soon tooltip. Connect only remains available. This is a release gate, not an automatic version check. Working receiver keys/history are preserved; source history is not copied.",
         "The Encrypted DMs composer keeps attachments to the left and the emoji button inside the message input. The emoji picker opens beside its button on desktop and in the regular mobile slide panel. Emoji selections preserve the draft and caret and do not update ordinary reaction history. Desktop Enter sends and Shift+Enter adds a line. On mobile web and in the app, Return does not submit; use Send. Arrow Up from an empty composer with no reply, edit or attachment in progress edits your latest eligible message. On mobile web and in the app, an accepted send removes input focus and dismisses the keyboard. A failed send restores the draft without deliberately dismissing the keyboard, and a delayed send leaves a newly started draft alone. Dismissing the native keyboard also removes input focus.",
         "Encrypted messages appear in the bell inbox and All notifications feed even without local keys. Known senders use the normal clickable avatar, handle, level and badges; older entries without sender details use a lock and New encrypted message. The server stores sender identity and opaque chat/message references, never plaintext. A ready device previews only the exact referenced message readable in its local history, with a lock indicator. Missing history or old entries without a sequence stay generic. Without setup the action is Set up Encrypted DMs; otherwise Open encrypted chat. Direct messages and wave activity preferences apply. In-app creation has no 60-second cooldown; pushes are separate. Missing historical notifications are not backfilled.",
@@ -3695,7 +3703,8 @@
         "components/e2ee/conversation/E2eeComposer.tsx",
         "components/e2ee/conversation/E2eeReportDialog.tsx",
         "components/e2ee/backup/E2eeBackupPanel.tsx",
-        "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx"
+        "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx",
+        "components/e2ee/conversation/E2eeSupersededComposer.tsx"
       ]
     },
     {
