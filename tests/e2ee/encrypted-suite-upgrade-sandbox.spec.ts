@@ -124,6 +124,7 @@ test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only 
     await expect(composer(alice.page)).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,
     });
+    const newPath = new URL(alice.page.url()).pathname;
     await expect(alice.page.getByText(CONTINUED_NOTICE)).toBeVisible();
     await expect(
       alice.page.getByRole("link", { name: EARLIER_LINK })
@@ -131,8 +132,19 @@ test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only 
     await sendMessage(alice.page, "Sent after the upgrade");
     expect(alice.signatureCount()).toBe(signatures);
 
-    // Bob gets it in the same thread; both histories stay selectable.
-    await openConversationFromList(bob.page, "alice");
+    // Bob gets it in the same thread; both histories stay selectable. Until
+    // his device processes the new Welcome, the "alice" entry still opens
+    // the read-only session, so wait for it to point at the new one.
+    await gotoPath(bob.page, ENCRYPTED_ROUTE);
+    const bobRow = conversationListRow(bob.page, "alice");
+    await expect(bobRow).toHaveAttribute("href", newPath, {
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
+    await expect(bobRow).toHaveCount(1);
+    await bobRow.click();
+    await expect(bob.page).toHaveURL(new RegExp(`${newPath}$`, "u"), {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
     await expectMessage(bob.page, "Sent after the upgrade");
     await expect(composer(bob.page)).toBeVisible();
     await expect(bob.page.getByText(CONTINUED_NOTICE)).toBeVisible();
@@ -141,8 +153,6 @@ test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only 
         .getByRole("combobox", { name: "Chat history", exact: true })
         .getByRole("option")
     ).toHaveCount(2);
-    await gotoPath(bob.page, ENCRYPTED_ROUTE);
-    await expect(conversationListRow(bob.page, "alice")).toHaveCount(1);
 
     expect(
       await alice.page.evaluate(
