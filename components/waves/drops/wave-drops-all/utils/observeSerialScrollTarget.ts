@@ -51,8 +51,9 @@ export const observeSerialScrollTarget = ({
         })
       : null;
 
-  function release() {
+  function release(event?: Event) {
     if (!active) return;
+    console.warn(`[serialdbg] anchor release cause=${event?.type ?? "call"} t=${Math.round(performance.now())} stack=${event ? "" : (new Error().stack ?? "").split(String.fromCharCode(10)).slice(2, 6).map((l) => l.trim()).join(" <- ")}`);
     active = false;
     visibilityObserver?.disconnect();
     replacementObserver?.disconnect();
