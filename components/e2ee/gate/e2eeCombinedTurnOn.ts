@@ -28,6 +28,11 @@ interface CombinedTurnOnInput {
   readonly address: string | undefined;
   /** "Turn on signed messages", undefined outside the auth provider. */
   readonly requestGrant: RequestSignedMessagesGrant | undefined;
+  /**
+   * The wallet has signed and the signing grant is stored; only the
+   * encryption key's registration remains, with no wallet involved.
+   */
+  readonly onRegistering?: (() => void) | undefined;
 }
 
 const SETTLED_STATUSES: readonly E2eeEngineStatus[] = ["ready", "device-limit"];
@@ -145,6 +150,7 @@ export async function turnOnWithCombinedSignIn({
   engine,
   address,
   requestGrant,
+  onRegistering,
 }: CombinedTurnOnInput): Promise<CombinedTurnOnOutcome> {
   if (
     !address ||
@@ -170,6 +176,7 @@ export async function turnOnWithCombinedSignIn({
     return "fallback";
   }
   const revoked = revokeReplacedGrant(replacedGrantId, e2ee);
+  if (e2ee.adopted && e2ee.grantSaved) onRegistering?.();
   const status = e2ee.adopted ? await enrollGrantedDevice(engine) : null;
   await revoked;
   if (status !== null && SETTLED_STATUSES.includes(status)) return "done";

@@ -3,7 +3,9 @@ type StorageManagerLike = Partial<Pick<StorageManager, "persist" | "persisted">>
 const loadHelper = (): typeof import("@/lib/storage/persistent-storage") => {
   let helper: typeof import("@/lib/storage/persistent-storage") | undefined;
   jest.isolateModules(() => {
-    helper = jest.requireActual("@/lib/storage/persistent-storage");
+    helper = jest.requireActual<
+      typeof import("@/lib/storage/persistent-storage")
+    >("@/lib/storage/persistent-storage");
   });
   return helper!;
 };

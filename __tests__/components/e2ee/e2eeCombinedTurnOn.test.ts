@@ -78,7 +78,7 @@ const createRegisteringEngine = () => {
       if (status !== "needs-enrollment") return status;
       // The engine first re-reads the stored device on its serial queue.
       await Promise.resolve();
-      if (status === "enrolling") return status;
+      if (engine.getStatus() === "enrolling") return "enrolling";
       setStatus("enrolling");
       engine.registrations += 1;
       await new Promise<void>((resolve) => {
@@ -162,6 +162,29 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(1);
     expect(engine.enroll).not.toHaveBeenCalled();
     expect(mockRevoke).toHaveBeenCalledWith(OLD_GRANT_ID);
+  });
+
+  it("says when only the encryption registration remains, and only then", async () => {
+    const { engine, asEngine } = createEngine();
+    const onRegistering = jest.fn(() => {
+      expect(engine.enrollWithLoginGrant).not.toHaveBeenCalled();
+    });
+    const turnOn = (result: SignedMessagesGrantResult) =>
+      turnOnWithCombinedSignIn({
+        engine: asEngine,
+        address: ADDRESS,
+        requestGrant: async () => result,
+        onRegistering,
+      });
+
+    await expect(turnOn(combined())).resolves.toBe("done");
+    expect(onRegistering).toHaveBeenCalledTimes(1);
+
+    onRegistering.mockClear();
+    await turnOn({ success: false, reason: "rejected" });
+    await turnOn(combined({ grantSaved: false }));
+    await turnOn(combined({ adopted: false }));
+    expect(onRegistering).not.toHaveBeenCalled();
   });
 
   it("is done at the device limit too, which the gate then shows", async () => {

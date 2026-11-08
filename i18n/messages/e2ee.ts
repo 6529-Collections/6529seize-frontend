@@ -131,6 +131,8 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.combinedPartial":
     "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.",
   "e2ee.enroll.combinedFinishing":
+    "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves.",
+  "e2ee.enroll.combinedFinishingDialog":
     "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.",
   "e2ee.enroll.combinedUnavailable":
     "Combined setup could not complete. You can try again or set up one permission at a time.",
