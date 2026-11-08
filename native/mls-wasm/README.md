@@ -77,6 +77,14 @@ The hash depends on the toolchain, the dependency lock and the host path
 separator (remapped registry paths keep `\` on Windows), so rebuild on the
 same kind of host to reproduce a committed binary byte for byte.
 
+Everything under `lib/e2ee/wasm/generated/`, the binary and `manifest.ts` is
+build output: never edit it by hand; `6529 run build:mls-wasm` reproduces it.
+Its conventions come from wasm-bindgen, for example an omitted optional
+`ciphersuite` crosses into Rust as `Option<u16>`'s `None` sentinel
+(`0xFFFFFF`, outside the `u16` range). After a rebuild, also update the
+module defaults in `tests/device-farm/specs/e2ee-capabilities.probe.spec.cjs`
+(a Jest test checks them against `manifest.ts`).
+
 ## Tests
 
 ```sh
@@ -97,8 +105,12 @@ Jest loads the built `.wasm` in Node (from the repository root):
 cd native/mls-wasm
 cargo run --release --bin bench -- [sizes...] [--reps N]           # release (opt-level z)
 cargo run --profile bench-native --bin bench -- [sizes...] [--reps N]  # opt-level 3
-node bench/bench.mjs [sizes...] [--reps N]                       # the committed wasm
+node bench/bench.mjs [sizes...] [--reps N] [--suite S]          # the committed wasm
 ```
+
+`--suite` takes a code point in decimal or 0x hex (`--suite 78` and
+`--suite 0x004e` both select 0x004E); the default is 0x004F. The native
+`bench` binary measures the default suite only.
 
 ## Behaviour notes for the engine
 

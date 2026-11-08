@@ -5,9 +5,11 @@
  *
  *   node native/mls-wasm/bench/bench.mjs [sizes...] [--reps N] [--suite S] [--wasm FILE] [--glue FILE]
  *
- * Defaults: sizes 2 87 174 1024, the module's default suite (0x004F; pass
- * --suite 0x004e for 0x004E), the hashed module named in
- * lib/e2ee/wasm/manifest.ts and the glue in lib/e2ee/wasm/generated/.
+ * Defaults: sizes 2 87 174 1024, the module's default suite (0x004F), the
+ * hashed module named in lib/e2ee/wasm/manifest.ts and the glue in
+ * lib/e2ee/wasm/generated/. --suite takes a code point in decimal or 0x hex:
+ * `--suite 78` and `--suite 0x004e` both select 0x004E (suite-arg.cjs). Every
+ * result records the suite the module actually used.
  * Each size runs N times (default 3); every numeric field is the median.
  * Prints JSON on stdout and one line per size on stderr.
  */
@@ -18,6 +20,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { performance } from "node:perf_hooks";
 import { gzipSync } from "node:zlib";
+import { parseSuiteArg } from "./suite-arg.cjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..", "..");
@@ -34,11 +37,7 @@ const sizes = args
   )
   .map(Number);
 const reps = Math.max(1, Number(option("--reps") ?? 3));
-const suiteArg = option("--suite");
-const suite = suiteArg === undefined ? undefined : Number(suiteArg);
-if (suite !== undefined && !Number.isInteger(suite)) {
-  throw new Error(`--suite must be a code point, got ${suiteArg}`);
-}
+const suite = parseSuiteArg(option("--suite"));
 const manifest = readFileSync(
   join(repo, "lib", "e2ee", "wasm", "manifest.ts"),
   "utf8"
@@ -92,6 +91,9 @@ function run(n, seed) {
   const members = Array.from({ length: n - 1 }, (_, i) => device(`m${i + 1}`));
   const kps = members.map(keyPackage);
   const created = JSON.parse(creator.createGroup(g, metadata(g), suite));
+  if (created.ciphersuite !== (suite ?? 0x004f)) {
+    throw new Error(`asked for suite ${suite}, got ${created.ciphersuite}`);
+  }
   const keyPackageBytes = b64Len(kps[0] ?? keyPackage(creator));
 
   let t = now();

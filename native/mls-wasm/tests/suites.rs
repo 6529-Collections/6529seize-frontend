@@ -4,6 +4,7 @@
 mod common;
 
 use common::*;
+use mls_wasm::codec;
 use mls_wasm::device::{supported_ciphersuite, CIPHERSUITE, CIPHERSUITE_AES256};
 use mls_wasm::{Code, Device};
 use openmls::prelude::Ciphersuite;
@@ -105,6 +106,28 @@ fn one_device_holds_groups_of_both_suites_across_reload() {
     alice.send(&mut ds, &new, "on 4e");
     assert_eq!(body_text(&bob.sync(&ds, &old)[0]), "on 4f");
     assert_eq!(body_text(&bob.sync(&ds, &new)[0]), "on 4e");
+}
+
+#[test]
+fn staged_welcome_reports_the_suite_before_accepting() {
+    for (i, suite) in SUITES.into_iter().enumerate() {
+        let mut ds = Ds::default();
+        let (mut alice, mut bob) = (Client::new("alice"), Client::new("bob"));
+        let g = new_g(160 + i as u8);
+        alice.create_group_on(&mut ds, &g, "dm", suite);
+        let res = alice
+            .commit(
+                &mut ds,
+                &g,
+                json!({ "add_key_packages": [bob.key_package_on(suite)] }),
+            )
+            .unwrap();
+        let welcome = codec::unb64(res["welcome"].as_str().unwrap(), "welcome").unwrap();
+        let staged = parse(&bob.dev.join_welcome(&g, &welcome, None).unwrap());
+        assert_eq!(staged["ciphersuite"], u16::from(suite));
+        bob.dev.reject_welcome(&g).unwrap();
+        assert!(!bob.dev.has_group(&g));
+    }
 }
 
 #[test]

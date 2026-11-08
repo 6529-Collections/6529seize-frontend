@@ -1841,8 +1841,11 @@ impl Device {
             .into_group(&scratch)
             .map_err(|e| MlsError::new(Code::BadWelcome, format!("{e:?}")))?;
         let k = commit_signing_key(&scratch, &mls, &gb)?;
+        // The suite is reported before accepting, so the caller can refuse a
+        // group whose suite its device's grant does not cover.
         let summary = json!({
             "g": g,
+            "ciphersuite": u16::from(mls.ciphersuite()),
             "epoch": mls.epoch().as_u64(),
             "epoch_fp": codec::fp(mls.epoch_authenticator().as_slice()),
             "metadata": metadata,

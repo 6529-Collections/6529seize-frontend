@@ -5,8 +5,9 @@
 The module supports 0x004E (`MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519`:
 the same X-Wing key exchange and Ed25519 signatures, with AES-256-GCM and
 SHA-384) next to the default 0x004F. Both suites were measured with the
-committed module `public/e2ee/mls-wasm-4060c854d16a99c6.wasm`, back to back in
-one session: wasm, Node 24 (V8), single thread, median of 5 runs, same
+multi-suite module (build `4060c854d16a99c6`; the committed build differs
+only in that a staged Welcome's summary also reports its suite), back to back
+in one session: wasm, Node 24 (V8), single thread, median of 5 runs, same
 scenario as below. Commands:
 
 ```sh
@@ -45,8 +46,8 @@ Observations:
   SHA-384 makes KeyPackage references, tree hashes and tags 48 bytes instead
   of 32. Unpadded commits grow by 16 B.
 - Times differ by less than the noise of this machine in either direction.
-- The module grew by 1,429 B raw (522 B gzip) against the 0x004F-only build:
-  1,806,345 B raw and 565,122 B gzip -9. The SHA-384 and AES-256-GCM code was
+- The module grew by 1,522 B raw (550 B gzip) against the 0x004F-only build:
+  `mls-wasm-530b38d27f820745.wasm` is 1,806,438 B raw and 565,150 B gzip -9. The SHA-384 and AES-256-GCM code was
   already linked (the 6529 wraps use AES-256-GCM).
 
 ## 0x004F launch build (recorded 2026-10-31)

@@ -236,6 +236,9 @@ class Client {
     expect(staged.g).toBe(g);
     const summary = parse<GroupSummary>(this.device.acceptWelcome(g));
     expect(summary.commit_key).toBe(staged.commit_key);
+    // The suite is known before accepting, and is the group's.
+    expect([0x004f, 0x004e]).toContain(staged.ciphersuite);
+    expect(summary.ciphersuite).toBe(staged.ciphersuite);
     this.cursor.set(g, ds.length(g));
     return summary;
   }
@@ -434,6 +437,16 @@ describe("mls wasm module", () => {
     expect(() => alice.device.createGroup(handle("x"), "{}", 0x0052)).toThrow(
       /^E2EE_WASM:BAD_INPUT:.*unsupported ciphersuite/
     );
+
+    // One device holds groups of both suites, and each keeps its suite
+    // across export and reload.
+    const state = alice.device.exportState();
+    alice.device.free();
+    alice.device = mls.MlsDevice.load(state);
+    expect(alice.summary(g).ciphersuite).toBe(0x004e);
+    expect(alice.summary(old).ciphersuite).toBe(0x004f);
+    alice.send(ds, g, "after reload");
+    expect(text(asMessage(bob.sync(ds, g)[0]))).toBe("after reload");
   });
 
   it("runs a three-person group with a removal and survives a reload", () => {

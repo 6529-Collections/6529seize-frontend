@@ -180,6 +180,12 @@ export type WasmProcessResult =
 
 export interface WasmWelcomeSummary {
   g: string;
+  /**
+   * The group's MLS ciphersuite (79 = 0x004F, 78 = 0x004E), known before
+   * accepting so a join on a suite the device's grant does not cover can be
+   * refused.
+   */
+  ciphersuite: number;
   epoch: number;
   epoch_fp: string;
   metadata: GroupMetadata;

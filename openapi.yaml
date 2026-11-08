@@ -11029,8 +11029,8 @@ paths:
             type: integer
           description: >-
             Only devices that can join groups of this MLS ciphersuite: 79
-            (0x004F) or 78 (0x004E). Default 79, the suite of clients that name
-            none.
+            (0x004F) or 78 (0x004E). Omitting ciphersuite means 0x004F; clients
+            that support 0x004E must pass it explicitly.
       responses:
         "200":
           description: successful operation
@@ -33624,9 +33624,10 @@ components:
           type: integer
           description: >-
             The ciphersuite of the group the KeyPackages are for: 79 (0x004F) or
-            78 (0x004E). Default the claimer device's grant suite. Only target
-            devices that can join groups of this suite are returned, and the
-            claimer device must be able to join it too (else 400).
+            78 (0x004E). Omitted, it is the claimer device's grant suite;
+            clients that support 0x004E should still pass it explicitly. Only
+            target devices that can join groups of this suite are returned, and
+            the claimer device must be able to join it too (else 400).
     ApiE2eeClaimKeyPackagesResponse:
       type: object
       required:
@@ -33874,9 +33875,9 @@ components:
           type: integer
           description: >-
             The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
-            (0x004E). Default 79, the suite of clients that name none. Limits
-            the devices found by profile_ids; device_keys are returned whatever
-            their suite.
+            (0x004E). Omitting ciphersuite means 0x004F; clients that support
+            0x004E must pass it explicitly. Limits the devices found by
+            profile_ids; device_keys are returned whatever their suite.
     ApiE2eeDeviceLookupResponse:
       type: object
       required:
@@ -33949,9 +33950,9 @@ components:
           type: integer
           description: >-
             The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
-            (0x004E). Default 79, the suite of clients that name none.
-            active_devices and NO_DEVICES count only devices that can join
-            groups of this suite.
+            (0x004E). Omitting ciphersuite means 0x004F; clients that support
+            0x004E must pass it explicitly. active_devices and NO_DEVICES count
+            only devices that can join groups of this suite.
     ApiE2eeEligibilityResponse:
       type: object
       required:

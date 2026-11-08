@@ -17,7 +17,7 @@ export class ApiE2eeDeviceLookupRequest {
     'profile_ids'?: Array<string>;
     'device_keys'?: Array<string>;
     /**
-    * The MLS group ciphersuite the caller works in: 79 (0x004F) or 78 (0x004E). Default 79, the suite of clients that name none. Limits the devices found by profile_ids; device_keys are returned whatever their suite.
+    * The MLS group ciphersuite the caller works in: 79 (0x004F) or 78 (0x004E). Omitting ciphersuite means 0x004F; clients that support 0x004E must pass it explicitly. Limits the devices found by profile_ids; device_keys are returned whatever their suite.
     */
     'ciphersuite'?: number;
 
