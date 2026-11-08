@@ -15,15 +15,16 @@ Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app. Keys are agreed with a hybrid post-quantum
 method, X-Wing, which combines ML-KEM-768 with X25519. Recorded messages stay
 confidential as long as either part holds, so a future quantum computer that
-breaks X25519 alone cannot read them. New chats use the MLS ciphersuite
-0x004E: messages use AES-256-GCM and hashes use SHA-384. Chats started earlier
-used 0x004F (AES-128-GCM, SHA-256); they stay readable but read-only, and each
-can be continued (see
+breaks X25519 alone cannot read them. Chats have used the MLS ciphersuite
+0x004F, with AES-128-GCM messages and SHA-256 hashes. They are moving to
+0x004E (AES-256-GCM, SHA-384). Once a device has confirmed the upgrade, the
+chats it starts use 0x004E, and chats started before stay readable but
+read-only; each can be continued (see
 [Moving to stronger encryption](#moving-to-stronger-encryption)). Device
 signatures use Ed25519, which is not post-quantum; they protect who sent a
-message, not its secrecy. 0x004E is a draft code point; if it changes before
-it is final, each device sets up encrypted messages again (one more wallet
-signature).
+message, not its secrecy. Both suites are draft code points; if the one in
+use changes before it is final, each device sets up encrypted messages again
+(one more wallet signature).
 
 Existing direct messages are not end-to-end encrypted, and 6529 deletes
 them from its servers, backups included, on **1 December 2026**, except
@@ -210,8 +211,10 @@ the same people already chosen. Earlier messages are not copied.
 ## Moving to stronger encryption
 
 Encrypted chats are moving from the MLS ciphersuite 0x004F (AES-128-GCM) to
-0x004E (AES-256-GCM). Each device confirms the move once; your decrypted
-history, attachments and chat threads stay on the device.
+0x004E (AES-256-GCM). When the move reaches 6529.io, each device confirms it
+once; your decrypted history, attachments and chat threads stay on the
+device. Until then, chats keep using 0x004F and none of the steps below
+appear.
 
 - **Confirming on a device.** A device that used the earlier encryption shows
   **Upgrade encrypted messages** in place of the first-time setup card:
