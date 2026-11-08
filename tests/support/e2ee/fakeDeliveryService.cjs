@@ -744,6 +744,10 @@ function createFakeDeliveryService(options = {}) {
     };
   }
 
+  /** A profile already in the group skips admission; only devices count. */
+  const rosterStatus = (targetProfileId, suite) =>
+    joinableDevicesOf(targetProfileId, suite).length > 0 ? "OK" : "NO_DEVICES";
+
   function policy(callerProfileId, targetProfileId, suite) {
     return decide(callerProfileId, targetProfileId, suite).status;
   }
@@ -784,9 +788,7 @@ function createFakeDeliveryService(options = {}) {
           (entry) => entry.profile_id === target.profile_id
         );
       const status = inRoster
-        ? joinableDevicesOf(target.profile_id, suite).length > 0
-          ? "OK"
-          : "NO_DEVICES"
+        ? rosterStatus(target.profile_id, suite)
         : policy(profileId, target.profile_id, suite);
       if (status !== "OK") {
         return { profile_id: target.profile_id, status, key_packages: [] };
@@ -1713,12 +1715,10 @@ function createFakeDeliveryService(options = {}) {
       if (!device) {
         fail(404, "E2EE_NOT_FOUND");
       }
-      const {
-        version: _version,
-        ciphersuites: _ciphersuites,
-        ...rest
-      } = device.grant;
-      device.grant = { ...rest, ciphersuite: E2EE_CIPHERSUITE };
+      const grant = { ...device.grant, ciphersuite: E2EE_CIPHERSUITE };
+      delete grant.version;
+      delete grant.ciphersuites;
+      device.grant = grant;
       s.keyPackages.set(device.device_key, newPool());
       return device;
     },

@@ -66,10 +66,7 @@ export function isStrictRemoval(
   return status.revoked || status.badGrant || expired;
 }
 
-function isIdle(
-  activity: LeafActivity | undefined,
-  now: number
-): boolean {
+function isIdle(activity: LeafActivity | undefined, now: number): boolean {
   return activity !== undefined && now - activity.at > T_IDLE_MS;
 }
 

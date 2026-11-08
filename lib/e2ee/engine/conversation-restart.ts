@@ -32,18 +32,20 @@ export class ConversationRestarter {
     if (runtime.record.status !== "superseded") {
       return this.creator.create(input);
     }
-    // A stored successor that is still active is returned; one that is gone
-    // or no longer active (left, removed, invalid) is replaced. Concurrent
-    // calls share one creation; a failed one is forgotten so a retry can
-    // create, and a failed creation never leaves its link behind.
-    const known = this.activeSuccessor(runtime);
-    if (known) {
-      return Promise.resolve(known);
-    }
+    // Concurrent calls share one creation, checked first: the successor is
+    // in the store before its members are added, and a failed creation
+    // discards it. A failed one is forgotten so a retry can create, and it
+    // never leaves its link behind. Otherwise a stored successor that was
+    // fully set up and is still active is returned; one that is gone, no
+    // longer active (left, removed, invalid) or never finished is replaced.
     const key = runtime.record.g;
     const pending = this.inFlight.get(key);
     if (pending) {
       return pending;
+    }
+    const known = this.readySuccessor(runtime);
+    if (known) {
+      return Promise.resolve(known);
     }
     const run = this.continueSuperseded(key, input).finally(() => {
       this.inFlight.delete(key);
@@ -52,9 +54,12 @@ export class ConversationRestarter {
     return run;
   }
 
-  private activeSuccessor(runtime: GroupRuntime): string | null {
+  private readySuccessor(runtime: GroupRuntime): string | null {
     const g = runtime.record.successor ?? null;
-    const successor = g === null ? undefined : this.ctx.store.groups.get(g);
+    if (g === null || runtime.record.successorPending === true) {
+      return null;
+    }
+    const successor = this.ctx.store.groups.get(g);
     return successor?.record.status === "active" ? g : null;
   }
 
@@ -63,11 +68,9 @@ export class ConversationRestarter {
     input: ConversationInput
   ): Promise<string> {
     const next = (await this.creator.create(input, g)).toLowerCase();
-    const runtime = requireGroup(this.ctx, g);
-    if (runtime.record.successor !== next) {
-      // An existing DM with the peer was returned: link it now.
-      await this.linkSuccessor(runtime, next);
-    }
+    // Confirms the link stored with the new group, or links an existing DM
+    // with the peer that was returned instead.
+    await this.linkSuccessor(requireGroup(this.ctx, g), next);
     return next;
   }
 
@@ -77,6 +80,7 @@ export class ConversationRestarter {
   ): Promise<void> {
     const successor = this.ctx.store.groups.get(successorG);
     runtime.record.successor = successorG;
+    delete runtime.record.successorPending;
     if (successor) {
       successor.record.predecessor = runtime.record.g;
     }

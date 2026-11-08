@@ -413,7 +413,8 @@ export class EngineStore {
       safetyCode: safetyCodeFromFp(record.epochFp),
       status: record.status,
       ciphersuite: record.ciphersuite ?? E2EE_LEGACY_CIPHERSUITE,
-      successor: record.successor ?? null,
+      // A successor still being set up is not shown yet (D172).
+      successor: record.successorPending ? null : (record.successor ?? null),
       predecessor: record.predecessor ?? null,
       delayed: record.delayed,
       splitView: record.splitView,

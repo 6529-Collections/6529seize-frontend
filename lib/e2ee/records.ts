@@ -131,6 +131,12 @@ export interface StoredGroup {
   ciphersuite?: number;
   /** The conversation that continues this superseded one (this device). */
   successor?: string | null;
+  /**
+   * True while that successor is still being set up (members not added
+   * yet): it is stored with the new group, but not reused or shown until
+   * the creation finished.
+   */
+  successorPending?: boolean;
   /** The superseded conversation this one continues (this device). */
   predecessor?: string | null;
 }
