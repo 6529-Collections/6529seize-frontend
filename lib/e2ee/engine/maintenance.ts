@@ -244,6 +244,24 @@ export function clearStallFor(
   }
 }
 
+/**
+ * The send loop found nothing to send: catch-up can empty the outbox while
+ * it sleeps, so a failing send no longer holds the stall (a stuck commit
+ * still does).
+ */
+export function releaseSendStallIfIdle(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined
+): void {
+  if (
+    runtime?.outbox.size === 0 &&
+    runtime.sendFailingSince !== null &&
+    !runtime.commitFailing
+  ) {
+    clearStallFor(ctx, runtime);
+  }
+}
+
 /** Tracks whether commits are failing; refreshes a delayed reason it moves. */
 function setCommitFailing(
   ctx: EngineContext,
