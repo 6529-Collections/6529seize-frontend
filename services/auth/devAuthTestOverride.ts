@@ -28,6 +28,11 @@ const browserWindow = (): Window | null =>
 
 /** True only for dev auth in a development-like build on a local host. */
 export function isLocalDevAuthTestSeamEnabled(): boolean {
+  // A build-time constant: production bundles compile every test seam out.
+  // eslint-disable-next-line no-restricted-syntax -- inlined by the bundler
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
   if (publicEnv.USE_DEV_AUTH !== "true") {
     return false;
   }

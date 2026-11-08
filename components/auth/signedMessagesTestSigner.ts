@@ -18,6 +18,11 @@ export const SIGNED_MESSAGES_TEST_SIGNER_GLOBAL =
  * the real wallet signs.
  */
 export function getSignedMessagesTestSigner(): SignedMessagesTestSigner | null {
+  // Compiled out of production bundles, global name included.
+  // eslint-disable-next-line no-restricted-syntax -- inlined by the bundler
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
   const signer = getLocalTestSeamFunction(SIGNED_MESSAGES_TEST_SIGNER_GLOBAL);
   if (!signer) {
     return null;

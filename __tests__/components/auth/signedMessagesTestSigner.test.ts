@@ -74,6 +74,19 @@ describe("signed-messages test signer seam", () => {
     );
   });
 
+  it("is compiled out of production bundles, whatever the runtime env says", () => {
+    const original = process.env.NODE_ENV;
+    try {
+      Object.assign(process.env, { NODE_ENV: "production" });
+      Reflect.set(globalThis, E2EE_TEST_SIGNER_GLOBAL, testSigner);
+      expect(getSignedMessagesTestSigner()).toBeNull();
+      expect(getE2eeTestSigner()).toBeNull();
+    } finally {
+      Object.assign(process.env, { NODE_ENV: original });
+    }
+    expect(getSignedMessagesTestSigner()).not.toBeNull();
+  });
+
   it("is a separate seam from the E2EE typed-data signer", () => {
     expect(SIGNED_MESSAGES_TEST_SIGNER_GLOBAL).not.toBe(
       E2EE_TEST_SIGNER_GLOBAL
@@ -89,6 +102,10 @@ describe("signed-messages test signer seam", () => {
     ["deployed host", () => setHostname("6529.io")],
     ["staging host", () => setHostname("staging.6529.io")],
     ["LAN host", () => setHostname("192.168.1.20")],
+    // Exact hosts only: a suffix, prefix or range match must not pass.
+    ["a localhost subdomain", () => setHostname("foo.localhost")],
+    ["a host that starts with localhost", () => setHostname("localhost.6529.io")],
+    ["another loopback address", () => setHostname("127.0.0.2")],
     ["no window", () => Reflect.deleteProperty(globalThis, "window")],
     [
       "a global that is not a function",

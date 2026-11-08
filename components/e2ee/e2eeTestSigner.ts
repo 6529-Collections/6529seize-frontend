@@ -21,6 +21,11 @@ export const E2EE_TEST_SIGNER_GLOBAL = "__e2eeTestSignTypedData";
  * the real wallet signs.
  */
 export function getE2eeTestSigner(): E2eeTestSigner | null {
+  // Compiled out of production bundles, global name included.
+  // eslint-disable-next-line no-restricted-syntax -- inlined by the bundler
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
   const signer = getLocalTestSeamFunction(E2EE_TEST_SIGNER_GLOBAL);
   if (!signer) {
     return null;
