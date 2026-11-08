@@ -19,7 +19,7 @@ import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessag
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
-  DEVICE_SETUP_TITLE,
+  getDeviceSetupTitleKey,
   type DeviceSetupScope,
 } from "@/components/device-signing/deviceSetup";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
@@ -81,14 +81,6 @@ const getEnrollErrorKey = (error: unknown, upgrading: boolean): MessageKey => {
 };
 
 /** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
-const getTitleKey = (
-  scope: DeviceSetupScope,
-  upgrading: boolean
-): MessageKey =>
-  upgrading && scope === "dms"
-    ? "e2ee.upgrade.title"
-    : DEVICE_SETUP_TITLE[scope];
-
 const getSignLabelKey = (
   scope: DeviceSetupScope,
   upgrading: boolean
@@ -345,7 +337,7 @@ export function E2eeEnrollmentCard({
             id={headingId}
             className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
           >
-            {t(locale, getTitleKey(selectedScope, upgrading))}
+            {t(locale, getDeviceSetupTitleKey(selectedScope, upgrading))}
           </h2>
         )}
         <div
