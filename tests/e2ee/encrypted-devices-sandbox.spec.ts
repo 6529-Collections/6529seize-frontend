@@ -25,7 +25,7 @@ import {
   sendMessage,
   startChat,
 } from "../support/e2ee/e2eeUi";
-import { NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
+import { e2eeMessage, NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
 
 /** Other members add a new device after a random 5-30 s delay (8.4). */
@@ -120,10 +120,16 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     const phoneRow = active.filter({ hasNot: thisDeviceBadge });
     const revokePhone = phoneRow.getByRole("button", { name: /^Revoke /u });
     const revokeLabel = await revokePhone.getAttribute("aria-label");
-    expect(revokeLabel).toBeTruthy();
+    const phoneLabel = revokeLabel?.replace(/^Revoke /u, "") ?? "";
+    expect(phoneLabel).toBeTruthy();
     await revokePhone.click();
-    await confirmDialog(bobLaptop.page, `${revokeLabel}?`)
-      .getByRole("button", { name: "Revoke device" })
+    // The combined sign-in granted the phone both permissions, so revoking
+    // it ends both.
+    await confirmDialog(
+      bobLaptop.page,
+      e2eeMessage("e2ee.devices.revokeCombinedTitle", { label: phoneLabel })
+    )
+      .getByRole("button", { name: e2eeMessage("e2ee.devices.revokeConfirm") })
       .click();
     await expect(activeDeviceRows(bobLaptop.page)).toHaveCount(1, {
       timeout: E2EE_UI_TIMEOUT_MS,

@@ -12,12 +12,16 @@
  * - the plaintext DM fixture's access group, so "Start encrypted chat" can
  *   resolve the same people;
  * - `/__e2ee-sandbox/*` test controls (reset, DM policy, blocks, follows,
- *   faults, tampering) and state reads for ciphertext-only assertions.
+ *   faults, tampering) and state reads for ciphertext-only assertions;
+ * - the web sign-in with device grants (`/api/auth/session-nonce`,
+ *   `/api/auth/session-login`, `/api/device-grants`), so "Sign to enable
+ *   both" runs the real combined sign-in (see sandboxSignIn.cjs).
  *
  * Loopback only: the composer sandbox binds this API to 127.0.0.1.
  */
 
 const { createFakeDeliveryService } = require("./fakeDeliveryService.cjs");
+const { createSandboxSignIn } = require("./sandboxSignIn.cjs");
 
 const MAX_E2EE_BODY_BYTES = 8 * 1024 * 1024;
 const CONTROL_PREFIX = "/__e2ee-sandbox/";
@@ -80,7 +84,7 @@ function parseJson(raw) {
 }
 
 function decodeJwtSubject(authorization) {
-  const match = /^Bearer\s+(.+)$/iu.exec(authorization || "");
+  const match = /^Bearer\s+(\S+)$/iu.exec(authorization || "");
   if (!match) {
     return null;
   }
@@ -146,6 +150,11 @@ function createE2eeSandboxApi({ corsHeaders }) {
 
   const userByWallet = (wallet) =>
     registeredUsers().find((user) => wallets.get(user.key) === wallet) ?? null;
+
+  const signIn = createSandboxSignIn({
+    walletUser: (wallet) => userByWallet(String(wallet || "").toLowerCase()),
+    getDeliveryService: () => ds,
+  });
 
   const userByIdentityKey = (rawKey) => {
     const key = decodeURIComponent(rawKey).toLowerCase();
@@ -213,6 +222,7 @@ function createE2eeSandboxApi({ corsHeaders }) {
 
   function reset(body) {
     ds = createFakeDeliveryService();
+    signIn.reset();
     wallets = new Map();
     faults = [];
     tamper = null;
@@ -540,6 +550,27 @@ function createE2eeSandboxApi({ corsHeaders }) {
     return false;
   }
 
+  /** Web sign-in with device grants; true when the request was answered. */
+  async function handleSignIn(req, res, { method, url, pathname }) {
+    let result = null;
+    if (method === "GET" && pathname === "/api/auth/session-nonce") {
+      const origin = req.headers.origin;
+      result =
+        typeof origin === "string" && origin.length > 0
+          ? signIn.issueNonce(Object.fromEntries(url.searchParams), origin)
+          : { status: 400, body: { error: "Missing Origin." } };
+    } else if (method === "POST" && pathname === "/api/auth/session-login") {
+      result = await signIn.login(parseJson(await readBody(req)));
+    } else if (method === "GET" && pathname === "/api/device-grants") {
+      result = signIn.listGrants(decodeJwtSubject(req.headers.authorization));
+    }
+    if (result === null) {
+      return false;
+    }
+    reply(res, result.status, result.body);
+    return true;
+  }
+
   /**
    * Handles the request when it belongs to the E2EE layer. Must run before
    * the composer sandbox reads the body (E2EE bodies exceed its 16 KiB cap).
@@ -548,6 +579,9 @@ function createE2eeSandboxApi({ corsHeaders }) {
     if (pathname.startsWith(CONTROL_PREFIX)) {
       const raw = method === "GET" ? "" : await readBody(req);
       handleControl(method, pathname, parseJson(raw), res);
+      return true;
+    }
+    if (await handleSignIn(req, res, { method, url, pathname })) {
       return true;
     }
     if (pathname === "/api/e2ee" || pathname.startsWith("/api/e2ee/")) {

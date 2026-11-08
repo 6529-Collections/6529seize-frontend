@@ -163,13 +163,16 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      // Escape during IME composition cancels the composition, not the picker.
+      if (event.key === "Escape" && !event.isComposing) {
         setShowPicker(false);
         buttonRef.current?.focus();
       }
     };
+    // Capture phase: the picker's focused search field stops every key
+    // event it handles, Escape included, so a bubbling listener never runs.
     if (isPickerOpen) {
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown, true);
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -177,7 +180,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [isPickerOpen]);
 
