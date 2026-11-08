@@ -199,6 +199,8 @@ function linkPredecessor(
   }
   runtime.record.predecessor = predecessor.record.g;
   predecessor.record.successor = runtime.record.g;
+  // Confirmed by the caller once the members are added (D172).
+  predecessor.record.successorPending = true;
   return [runtime, predecessor];
 }
 
@@ -211,6 +213,7 @@ function unlinkSuccessor(ctx: EngineContext, g: string): GroupRuntime[] {
   for (const runtime of ctx.store.groups.values()) {
     if (runtime.record.successor === g) {
       runtime.record.successor = null;
+      delete runtime.record.successorPending;
       unlinked.push(runtime);
     }
   }

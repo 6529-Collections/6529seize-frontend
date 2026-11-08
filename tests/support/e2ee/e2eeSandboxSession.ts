@@ -318,7 +318,8 @@ export async function seedLegacySuiteBrowser(
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open(names.name);
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () =>
+          reject(new Error(`IndexedDB open: ${String(request.error)}`));
       });
       try {
         return await new Promise<boolean>((resolve, reject) => {
@@ -334,12 +335,18 @@ export async function seedLegacySuiteBrowser(
               return;
             }
             // The v1 shape: no version or suite set, ciphersuite 0x004F.
-            const { version: _v, ciphersuites: _s, ...grant } = device.grant;
-            store.put({ ...device, grant: { ...grant, ciphersuite: 0x004f } });
+            const grant: Record<string, unknown> = {
+              ...device.grant,
+              ciphersuite: 0x004f,
+            };
+            delete grant["version"];
+            delete grant["ciphersuites"];
+            store.put({ ...device, grant });
             found = true;
           };
           tx.oncomplete = () => resolve(found);
-          tx.onerror = () => reject(tx.error);
+          tx.onerror = () =>
+            reject(new Error(`IndexedDB write: ${String(tx.error)}`));
         });
       } finally {
         db.close();

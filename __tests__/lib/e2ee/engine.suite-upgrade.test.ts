@@ -12,6 +12,7 @@ import {
   addUser,
   createWorld,
   seedLegacySuiteDevice,
+  realSleep,
   settle,
   startDevice,
   stopDevice,
@@ -152,6 +153,7 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     // The link is stored with the new group: a restarted engine keeps it.
     const groups = await alice.primary.storage.listGroups("alice");
     expect(groups.find((g) => g.g === old)?.successor).toBe(fresh);
+    expect(groups.find((g) => g.g === old)?.successorPending).toBeUndefined();
     expect(groups.find((g) => g.g === fresh)?.predecessor).toBe(old);
 
     await settle(world);
@@ -225,6 +227,76 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     await expect(a.restart(old)).resolves.toBe(fresh);
     expect(ids(alice.primary)).toEqual([fresh, old].sort());
     expect(a.getConversation(old)?.successor).toBe(fresh);
+  });
+
+  it("never hands a second caller a successor whose setup then fails", async () => {
+    const { alice, bob, old } = await legacyDm(world);
+    await upgrade(world, alice);
+    await upgrade(world, bob);
+    const a = alice.primary.engine;
+    const entries = /^e2ee\/groups\/0x[0-9a-f]+\/entries$/;
+
+    // Pause the commit that adds Bob: the successor is stored, not set up.
+    const gate = world.ds.hold(entries);
+    const first = a.restart(old);
+    first.catch(() => undefined);
+    for (let tries = 0; gate.waiting() === 0 && tries < 2_000; tries += 1) {
+      await realSleep(5);
+    }
+    expect(gate.waiting()).toBe(1);
+    expect(a.getConversations()).toHaveLength(2);
+    expect(a.getConversation(old)?.successor).toBeNull();
+    const second = a.restart(old);
+    second.catch(() => undefined);
+
+    // The paused addition is then refused: the successor is discarded.
+    world.ds.addFault({
+      method: "POST",
+      path: entries,
+      status: 403,
+      code: "E2EE_POLICY",
+    });
+    gate.release();
+    await expect(first).rejects.toMatchObject({ code: "E2EE_POLICY" });
+    await expect(second).rejects.toMatchObject({ code: "E2EE_POLICY" });
+    expect(ids(alice.primary)).toEqual([old]);
+    expect(a.getConversation(old)?.successor).toBeNull();
+    const stored = await alice.primary.storage.listGroups("alice");
+    expect(stored.map((g) => g.g)).toEqual([old]);
+    expect(stored[0]?.successor ?? null).toBeNull();
+    expect(stored[0]?.successorPending).toBeUndefined();
+
+    const fresh = await a.restart(old);
+    await expect(a.restart(old)).resolves.toBe(fresh);
+    expect(ids(alice.primary)).toEqual([fresh, old].sort());
+    expect(a.getConversation(old)?.successor).toBe(fresh);
+  });
+
+  it("confirms a successor left unconfirmed by a stop, without a duplicate DM", async () => {
+    const { alice, bob, old } = await legacyDm(world);
+    await upgrade(world, alice);
+    await upgrade(world, bob);
+    const fresh = await alice.primary.engine.restart(old);
+    const device = alice.primary;
+    await device.engine.idle();
+    stopDevice(world, device);
+    // As if the engine stopped after storing the group, before confirming.
+    const record = (await device.storage.listGroups("alice")).find(
+      (g) => g.g === old
+    )!;
+    await device.storage.writeBatch("alice", {
+      expectedVersion: await device.storage.getStateVersion("alice"),
+      groups: [{ ...record, successorPending: true }],
+    });
+    const again = await startDevice(world, "alice", alice.account, {
+      storage: device.storage,
+      enroll: false,
+    });
+    expect(again.engine.getConversation(old)?.successor).toBeNull();
+    // Not reused as is; the DM with Bob is found and the link confirmed.
+    await expect(again.engine.restart(old)).resolves.toBe(fresh);
+    expect(again.engine.getConversation(old)?.successor).toBe(fresh);
+    expect(ids(again)).toEqual([fresh, old].sort());
   });
 
   it("refuses to start again until the other person has moved too", async () => {

@@ -31,6 +31,7 @@ import { DEFAULT_DEVICE_SCOPES } from "./grant-message";
 import {
   openConnectionSetup,
   sealConnectionSetup,
+  type ConnectionSetupBundle,
   type ConnectionSetupTarget,
 } from "./connection-setup-envelope";
 
@@ -148,6 +149,28 @@ async function importSigningPair(
   }
 }
 
+/** The app grant id of the setup's terms (v1 or v2, D172). */
+function setupGrantId(
+  terms: ConnectionSetupBundle["request"]["grant"]
+): string {
+  const v2 = terms.version === 2;
+  return computeAppGrantId(
+    buildAppGrantTypedData({
+      wallet: terms.wallet,
+      deviceKeyHex: terms.device_key,
+      scopes: terms.scopes,
+      ...(v2 ? {} : { version: 1 as const }),
+      mls: {
+        deviceKeyHex: terms.mls_device_key,
+        ciphersuites: v2 ? (terms.ciphersuites ?? []) : [terms.ciphersuite],
+      },
+      issuedAtSeconds: terms.issued_at,
+      expiresAtSeconds: terms.expires_at,
+      origin: terms.origin,
+    }).message
+  );
+}
+
 /** Imports target-bound keys and registers the grant from the receiving app. */
 export async function acceptConnectionDeviceSetup(input: {
   readonly envelope: string;
@@ -176,24 +199,7 @@ export async function acceptConnectionDeviceSetup(input: {
   const pair = (await isEd25519Supported())
     ? await importSigningPair(bundle.privateKey, terms.device_key)
     : null;
-  const grantId = computeAppGrantId(
-    buildAppGrantTypedData({
-      wallet: terms.wallet,
-      deviceKeyHex: terms.device_key,
-      scopes: terms.scopes,
-      ...(terms.version === 2 ? {} : { version: 1 as const }),
-      mls: {
-        deviceKeyHex: terms.mls_device_key,
-        ciphersuites:
-          terms.version === 2
-            ? (terms.ciphersuites ?? [])
-            : [terms.ciphersuite],
-      },
-      issuedAtSeconds: terms.issued_at,
-      expiresAtSeconds: terms.expires_at,
-      origin: terms.origin,
-    }).message
-  );
+  const grantId = setupGrantId(terms);
   const state = base64ToBytes(bundle.mlsState);
   const device = await createLoginE2eeDevice({ state });
   state.fill(0);
